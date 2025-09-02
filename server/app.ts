@@ -22,7 +22,9 @@ import clientsRouter from './routes/clients.js';
 import projectsRouter from './routes/projects.js';
 import adminRouter from './routes/admin.js';
 import messagesRouter from './routes/messages.js';
-import { setupSwagger } from './config/swagger.js';
+import invoicesRouter from './routes/invoices.js';
+import uploadsRouter from './routes/uploads.js';
+// import { setupSwagger } from './config/swagger.js';
 import { logger } from './middleware/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
@@ -36,17 +38,17 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Initialize Sentry for error tracking
-errorTracker.init({
-  dsn: process.env.SENTRY_DSN,
-  environment: process.env.NODE_ENV || 'development',
-  release: process.env.npm_package_version,
-  enableProfiling: process.env.NODE_ENV === 'production',
-  sampleRate: process.env.NODE_ENV === 'production' ? 1.0 : 0.1,
-  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0
-});
+// errorTracker.init({
+//   dsn: process.env.SENTRY_DSN,
+//   environment: process.env.NODE_ENV || 'development',
+//   release: process.env.npm_package_version,
+//   enableProfiling: process.env.NODE_ENV === 'production',
+//   sampleRate: process.env.NODE_ENV === 'production' ? 1.0 : 0.1,
+//   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0
+// });
 
 // Request logging and error tracking
-app.use(logger);
+// app.use(logger);
 
 // Security middleware
 app.use(helmet({
@@ -81,17 +83,33 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Static file serving
 app.use('/uploads', express.static(resolve(__dirname, '../uploads')));
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    message: 'No Bhad Codes API Server',
+    version: '1.0.0',
+    status: 'running',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      health: '/health',
+      documentation: '/api-docs',
+      invoices: '/api/invoices',
+      uploads: '/api/uploads'
+    }
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'healthy', 
     timestamp: new Date().toISOString(),
-    version: process.env.npm_package_version || '1.0.0'
+    version: '1.0.0'
   });
 });
 
 // Setup API documentation
-setupSwagger(app);
+// setupSwagger(app);
 
 // API routes
 app.use('/api/auth', authRouter);
@@ -99,6 +117,8 @@ app.use('/api/clients', clientsRouter);
 app.use('/api/projects', projectsRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/messages', messagesRouter);
+app.use('/api/invoices', invoicesRouter);
+app.use('/api/uploads', uploadsRouter);
 
 // 404 handler
 app.use('*', (req, res) => {

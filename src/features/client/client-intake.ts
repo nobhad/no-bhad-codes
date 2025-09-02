@@ -458,24 +458,30 @@ export class ClientIntakeModule extends BaseModule {
       const formData = new FormData(this.form);
       const intakeData: Record<string, any> = {};
 
-      // Convert FormData to structured object
+      // Convert FormData to structured object and map fields
       for (const [key, value] of formData.entries()) {
-        if (intakeData[key]) {
-          if (Array.isArray(intakeData[key])) {
-            intakeData[key].push(value);
+        // Map frontend field names to backend field names
+        let mappedKey = key;
+        if (key === 'projectDescription') {
+          mappedKey = 'description';
+        }
+        
+        if (intakeData[mappedKey]) {
+          if (Array.isArray(intakeData[mappedKey])) {
+            intakeData[mappedKey].push(value);
           } else {
-            intakeData[key] = [intakeData[key], value];
+            intakeData[mappedKey] = [intakeData[mappedKey], value];
           }
         } else {
-          intakeData[key] = value;
+          intakeData[mappedKey] = value;
         }
       }
 
-      // Add submission timestamp
+      // Add submission timestamp (not needed for our backend, but keep for compatibility)
       intakeData.submittedAt = new Date().toISOString();
 
       // Submit to API
-      const response = await fetch('/api/intake', {
+      const response = await fetch('http://localhost:3001/api/intake', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -489,20 +495,23 @@ export class ClientIntakeModule extends BaseModule {
 
       const result = await response.json();
 
-      // Success - clear saved data and redirect
+      // Success - clear saved data and show success message
       localStorage.removeItem('intakeFormData');
 
+      this.log('Form submitted successfully:', result);
+
+      // Show success message instead of redirect for now
       if (this.animationsEnabled) {
         gsap.to(this.container, {
           opacity: 0,
           y: -30,
           duration: 0.5,
           onComplete: () => {
-            window.location.href = `/client/welcome?token=${result.accessToken}`;
+            this.showSuccessMessage(result);
           }
         });
       } else {
-        window.location.href = `/client/welcome?token=${result.accessToken}`;
+        this.showSuccessMessage(result);
       }
 
     } catch (error) {
@@ -546,6 +555,26 @@ export class ClientIntakeModule extends BaseModule {
     setTimeout(() => {
       errorDiv.classList.remove('show');
     }, 5000);
+  }
+
+  private showSuccessMessage(result: any): void {
+    // Replace form content with success message
+    this.container.innerHTML = `
+      <div class="success-container" style="text-align: center; padding: 2rem;">
+        <div class="success-icon" style="font-size: 4rem; color: #22c55e; margin-bottom: 1rem;">✅</div>
+        <h2 style="color: #22c55e; margin-bottom: 1rem;">Thank You!</h2>
+        <p style="font-size: 1.1rem; margin-bottom: 1rem;">
+          Your project intake has been submitted successfully.
+        </p>
+        <p style="color: #6b7280; margin-bottom: 2rem;">
+          Intake ID: ${result.intake?.id || 'N/A'}<br>
+          Project Type: ${result.intake?.projectType || 'N/A'}
+        </p>
+        <p style="color: #374151;">
+          I'll review your submission and get back to you within 24 hours to discuss your project in detail.
+        </p>
+      </div>
+    `;
   }
 
   override async destroy(): Promise<void> {
