@@ -1,0 +1,346 @@
+/* 
+@file css/variables.css
+This CSS file defines global variables and font-face rules for consistent styling across the project.
+
+1. Font Face:
+    - Defines a custom font "PP Neue Corp Tight" with ultrabold weight (700).
+    - Font is loaded from an external URL in OpenType format.
+    - Font-display is set to "swap" for better performance.
+    - Defines Acme font from local assets and Google Fonts fallback.
+
+2. Root Variables:
+    - --size-container: Maximum width for containers.
+    - --container-padding: Padding inside containers.
+    - --gap: Default spacing between elements.
+    - --section-padding: Padding for sections.
+    - --color-neutral-300: Neutral color for light themes.
+    - --color-dark: Default dark color.
+    - --color-primary: Primary brand color.
+    - --color-primary-rgb: RGB values for the primary color.
+    - --color-neutral-100: Lightest neutral color for light themes.
+    - --color-neutral-200: Lighter neutral color for light themes.
+    - --color-neutral-800: Darkest neutral color for light themes.
+    - --color-shadow: Default shadow color with transparency.
+    - --cubic-default: Default cubic-bezier easing function for animations.
+    - --menu-padding: Padding for menu elements.
+    - --transition-fast: Fast transition duration with ease timing.
+    - --transition-medium: Medium transition duration with ease timing.
+    - --transition-slow: Slow transition duration with ease timing.
+    - --z-header: Z-index for header elements.
+    - --z-nav: Z-index for navigation elements.
+    - --z-modal: Z-index for modal elements.
+
+3. Dark Theme Variables:
+    - Overrides specific color variables for dark mode.
+    - --color-neutral-300: Neutral color for dark themes.
+    - --color-dark: Default light color for dark themes.
+    - --color-primary: Primary brand color for dark mode.
+    - --color-neutral-100: Lightest neutral color for dark themes.
+    - --color-neutral-200: Lighter neutral color for dark themes.
+    - --color-neutral-800: Darkest neutral color for dark themes.
+    - --color-shadow: Shadow color with increased transparency for dark mode.
+ */
+
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Acme&display=swap');
+
+/* Custom Font Face Definitions */
+@font-face {
+  font-family: "Acme";
+  src: url("/fonts/Acme/Acme-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: optional; /* Better CLS - font won't cause layout shift */
+}
+
+:root {
+  /* Font Families */
+  --font--acme: "Acme", sans-serif;
+  
+  /* Container and Layout */
+  --size-container: min(1200px, 100vw - 2rem);
+  --container-padding: clamp(1rem, 4vw, 2rem);
+  --gap: clamp(0.75rem, 3vw, 1.5rem);
+  --section-padding: clamp(1rem, 5vw, 2rem);
+  
+  /* Layout Heights */
+  --header-height: 60px;
+  --footer-height: 40px;
+  
+  /* Responsive Typography */
+  --font-size-xs: clamp(0.75rem, 2vw, 0.875rem);
+  --font-size-sm: clamp(0.875rem, 2.5vw, 1rem);
+  --font-size-base: clamp(1rem, 3vw, 1.125rem);
+  --font-size-lg: clamp(1.125rem, 3.5vw, 1.25rem);
+  --font-size-xl: clamp(1.25rem, 4vw, 1.5rem);
+  --font-size-2xl: clamp(1.5rem, 5vw, 2rem);
+  --font-size-3xl: clamp(2rem, 6vw, 3rem);
+  
+  /* Responsive Spacing */
+  --space-xs: clamp(0.25rem, 1vw, 0.5rem);
+  --space-sm: clamp(0.5rem, 2vw, 1rem);
+  --space-md: clamp(1rem, 3vw, 1.5rem);
+  --space-lg: clamp(1.5rem, 4vw, 2rem);
+  --space-xl: clamp(2rem, 5vw, 3rem);
+  --space-2xl: clamp(3rem, 6vw, 4rem);
+  
+  /* Animations and Transitions */
+  --cubic-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --menu-padding: clamp(0.5rem, 2vw, 1rem);
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.3s ease;
+  --transition-slow: 0.6s ease;
+  
+  /* Z-index */
+  --z-header: 10;
+  --z-nav: 100;
+  --z-modal: 1000;
+  
+  /* Responsive Breakpoints */
+  --bp-xs: 320px;
+  --bp-sm: 576px;
+  --bp-md: 768px;
+  --bp-lg: 992px;
+  --bp-xl: 1200px;
+  --bp-2xl: 1400px;
+}
+
+/* Light Theme (Default) */
+:root,
+html[data-theme="light"] {
+  --color-neutral-300: #e0e0e0;
+  --color-dark: #333333;
+  --color-primary: #00ff41;
+  --color-primary-rgb: 0, 255, 65;
+  --color-neutral-100: #f8f9fa;
+  --color-neutral-200: #dee2e6;
+  --color-neutral-800: #343a40;
+  --color-shadow: rgba(0, 0, 0, 0.2);
+  
+  /* Form Variables */
+  --fg: #333333;
+  --form-input-border: #333333;
+  --form-input-placeholder: #666666;
+  --form-btn-bg: #333333;
+  --form-btn-fg: #ffffff;
+  --form-btn-shadow: rgba(0, 0, 0, 0.2);
+}
+
+/* Dark Theme - Updated for menu panels */
+html[data-theme="dark"] {
+  --color-neutral-300: #2a2a2a;
+  --color-dark: #e0e0e0;
+  --color-primary: #00ff41;
+  --color-neutral-100: #3a3a3a;
+  --color-neutral-200: #3a3a3a;
+  --color-neutral-800: #f0f0f0;
+  --color-shadow: rgba(0, 0, 0, 1);
+  
+  /* Form Variables */
+  --fg: #e0e0e0;
+  --form-input-border: #e0e0e0;
+  --form-input-placeholder: #999999;
+  --form-btn-bg: #e0e0e0;
+  --form-btn-fg: #2a2a2a;
+  --form-btn-shadow: rgba(0, 0, 0, 0.3);
+}
+
+/* Base Styles with Improved Responsiveness */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-pp-neue);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-neutral-100);
+  color: var(--color-dark);
+  transition: background-color var(--transition-medium), color var(--transition-medium);
+}
+
+/* Font Utility Classes */
+
+.font-acme {
+  font-family: var(--font-family-acme);
+}
+
+/* Container Utilities */
+.container {
+  width: 100%;
+  max-width: var(--size-container);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+.container-fluid {
+  width: 100%;
+  padding: 0 var(--container-padding);
+}
+
+/* Responsive Grid System */
+.grid {
+  display: grid;
+  gap: var(--gap);
+}
+
+.grid-cols-1 { grid-template-columns: 1fr; }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+/* Responsive Breakpoints */
+@media (max-width: 767px) {
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+  
+  .md\:grid-cols-2 { grid-template-columns: 1fr; }
+  .md\:grid-cols-3 { grid-template-columns: 1fr; }
+  .md\:grid-cols-4 { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 768px) {
+  .md\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .md\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .md\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (min-width: 992px) {
+  .lg\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .lg\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .lg\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Flexible Layout Utilities */
+.flex {
+  display: flex;
+  gap: var(--gap);
+}
+
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+
+/* Responsive Text Utilities */
+.text-xs { font-size: var(--font-size-xs); }
+.text-sm { font-size: var(--font-size-sm); }
+.text-base { font-size: var(--font-size-base); }
+.text-lg { font-size: var(--font-size-lg); }
+.text-xl { font-size: var(--font-size-xl); }
+.text-2xl { font-size: var(--font-size-2xl); }
+.text-3xl { font-size: var(--font-size-3xl); }
+
+.text-uppercase { text-transform: uppercase; }
+
+/* Responsive Spacing Utilities */
+.p-xs { padding: var(--space-xs); }
+.p-sm { padding: var(--space-sm); }
+.p-md { padding: var(--space-md); }
+.p-lg { padding: var(--space-lg); }
+.p-xl { padding: var(--space-xl); }
+
+.m-xs { margin: var(--space-xs); }
+.m-sm { margin: var(--space-sm); }
+.m-md { margin: var(--space-md); }
+.m-lg { margin: var(--space-lg); }
+.m-xl { margin: var(--space-xl); }
+
+/* Responsive Visibility */
+.hidden { display: none; }
+
+@media (max-width: 767px) {
+  .md\:hidden { display: none; }
+  .sm\:block { display: block; }
+}
+
+@media (min-width: 768px) {
+  .md\:block { display: block; }
+  .sm\:hidden { display: none; }
+}
+
+/* Responsive Images */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.img-responsive {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* Responsive Video */
+.video-responsive {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.video-responsive iframe,
+.video-responsive video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Improved Focus States for Accessibility */
+*:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  :root {
+    --color-shadow: rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* Print Styles */
+@media print {
+  * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}

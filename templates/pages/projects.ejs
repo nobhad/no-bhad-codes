@@ -1,0 +1,92 @@
+<!-- Hero Section -->
+<section class="projects-hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="title-line">Featured</span>
+                <span class="title-line accent">Projects</span>
+            </h1>
+            <p class="hero-description">
+                From simple link trees to complex web applications, explore my portfolio of digital solutions.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Filter Section -->
+<section class="projects-filter">
+    <div class="container">
+        <div class="filter-wrapper">
+            <div class="filter-group" role="group" aria-label="Project filters">
+                <button class="filter-btn active" data-filter="all">
+                    All Projects
+                    <span class="filter-count" data-count="all">0</span>
+                </button>
+                <button class="filter-btn" data-filter="websites">
+                    Websites
+                    <span class="filter-count" data-count="websites">0</span>
+                </button>
+                <button class="filter-btn" data-filter="applications">
+                    Applications
+                    <span class="filter-count" data-count="applications">0</span>
+                </button>
+                <button class="filter-btn" data-filter="ecommerce">
+                    E-Commerce
+                    <span class="filter-count" data-count="ecommerce">0</span>
+                </button>
+                <button class="filter-btn" data-filter="extensions">
+                    Extensions
+                    <span class="filter-count" data-count="extensions">0</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Projects Grid -->
+<section class="projects-grid-section">
+    <div class="container">
+        <div class="projects-grid" id="projects-grid">
+            <!-- Projects will be dynamically loaded here -->
+        </div>
+        
+        <!-- Loading indicator -->
+        <div class="projects-loading" id="projects-loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading projects...</p>
+        </div>
+        
+        <!-- No results message -->
+        <div class="no-results" id="no-results" style="display: none;">
+            <p>No projects found matching your criteria.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Project Card Template (hidden, used for cloning) -->
+<template id="project-card-template">
+    <article class="project-card" data-category="">
+        <a href="" class="project-card-link">
+            <div class="project-card-image">
+                <img src="" alt="" loading="lazy">
+                <div class="project-card-overlay">
+                    <span class="view-project">View Project →</span>
+                </div>
+            </div>
+            <div class="project-card-content">
+                <div class="project-card-header">
+                    <h3 class="project-card-title"></h3>
+                    <span class="project-card-category"></span>
+                </div>
+                <p class="project-card-description"></p>
+                <div class="project-card-tech">
+                    <!-- Tech tags will be added here -->
+                </div>
+                <div class="project-card-footer">
+                    <span class="project-card-date"></span>
+                    <span class="project-card-status"></span>
+                </div>
+            </div>
+        </a>
+    </article>
+</template>

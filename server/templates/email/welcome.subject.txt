@@ -1,0 +1,1 @@
+Welcome to {{companyName}} - Your Client Portal is Ready!

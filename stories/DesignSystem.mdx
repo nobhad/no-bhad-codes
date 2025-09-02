@@ -1,0 +1,170 @@
+import { Meta, Canvas, Story } from '@storybook/blocks';
+
+<Meta title="Design System/Overview" />
+
+# No Bhad Codes Design System
+
+## 🎨 Design Philosophy
+
+Our design system embodies the core values of **No Bhad Codes**: technical excellence, clean aesthetics, and exceptional user experience. Every component and token is crafted with precision and purpose.
+
+### Core Principles
+
+**🎯 Consistency**
+- Unified visual language across all touchpoints
+- Predictable interaction patterns
+- Consistent spacing and typography scales
+
+**♿ Accessibility**
+- WCAG 2.1 AA compliance by default
+- Keyboard navigation support
+- Screen reader optimization
+
+**⚡ Performance**
+- Optimized for fast loading and smooth interactions
+- Minimal bundle impact
+- Efficient CSS custom properties
+
+**🔧 Developer Experience**
+- Type-safe component APIs
+- Comprehensive documentation
+- Easy customization and theming
+
+## 🏗️ Architecture
+
+### Design Tokens
+Foundation-level design decisions encoded as variables:
+- **Colors**: Primary palette, semantic colors, and theme variants
+- **Typography**: Font scales, weights, and spacing
+- **Spacing**: Consistent scale for layouts and components
+- **Borders**: Radius values and border styles
+- **Shadows**: Elevation system for depth
+- **Animations**: Timing and easing functions
+
+### Components
+Reusable UI building blocks:
+- **Atoms**: Basic elements (buttons, inputs, icons)
+- **Molecules**: Simple combinations (form fields, cards)
+- **Organisms**: Complex components (navigation, modals)
+
+### Patterns
+Higher-level layout and interaction patterns:
+- **Page layouts**: Common page structures
+- **Navigation patterns**: Menu and routing systems
+- **Form patterns**: Data input and validation
+
+## 🎨 Brand Identity
+
+### Color Palette
+
+**Matrix Green (#00ff41)**
+Our signature color represents digital innovation, growth, and the "matrix" aesthetic that defines our tech-forward brand.
+
+**Usage Guidelines:**
+- Primary actions and CTAs
+- Active states and highlights
+- Brand accents and logos
+
+**Supporting Colors:**
+- **Secondary**: Dark charcoal (#0d1117) for text and backgrounds
+- **Accent**: Coral (#ff6b6b) for warnings and highlights
+- **Semantic**: Success, error, warning, and info states
+
+### Typography
+
+**System Font Stack**
+We use system fonts for optimal performance and native feel:
+```css
+font-family: system-ui, -apple-system, BlinkMacSystemFont, 
+  'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 
+  'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+```
+
+**Scale**: Following a modular scale for consistent hierarchy
+- Headings: 4xl → 2xl for major sections
+- Body: Base (1rem) for most content
+- Small: sm/xs for captions and metadata
+
+## 🌙 Theme Support
+
+### Light Theme (Default)
+- Clean, professional appearance
+- High contrast for readability
+- Optimized for daytime use
+
+### Dark Theme
+- Eye-friendly for low-light environments
+- Reduced blue light emission
+- Maintains brand consistency
+
+### Theme Variables
+```css
+/* Light theme */
+--color-bg-primary: #ffffff;
+--color-text-primary: #24292f;
+
+/* Dark theme */
+--color-bg-primary: #0d1117;
+--color-text-primary: #f0f6fc;
+```
+
+## 📱 Responsive Design
+
+### Breakpoint System
+- **Mobile**: 375px and up (mobile-first)
+- **Tablet**: 768px and up
+- **Desktop**: 1200px and up
+- **Large**: 1920px and up
+
+### Fluid Scaling
+Components scale smoothly between breakpoints using:
+- CSS Grid and Flexbox
+- Relative units (rem, %, vw/vh)
+- Clamp() functions for fluid typography
+
+## 🔧 Technical Implementation
+
+### CSS Custom Properties
+All design tokens are implemented as CSS custom properties for:
+- Runtime theme switching
+- Easy customization
+- Consistent values across components
+
+### TypeScript Integration
+Component props are fully typed for:
+- IntelliSense support
+- Compile-time error checking
+- Better developer experience
+
+### Performance Optimization
+- Minimal CSS output
+- Tree-shakable components
+- Efficient animations with GSAP
+
+## 📚 Usage Guidelines
+
+### Do's
+✅ Use design tokens consistently
+✅ Follow spacing scale for layouts
+✅ Maintain color contrast ratios
+✅ Test components in both themes
+✅ Consider mobile-first design
+
+### Don'ts
+❌ Hard-code colors or spacing values
+❌ Mix spacing scales within components
+❌ Ignore accessibility requirements
+❌ Break the visual hierarchy
+❌ Override core token values
+
+## 🚀 Getting Started
+
+1. **Explore Components**: Browse the component library
+2. **Review Tokens**: Understand the design foundation
+3. **Copy Code**: Use provided code snippets
+4. **Customize**: Apply your own theme values
+5. **Test**: Validate accessibility and responsiveness
+
+---
+
+*This design system is continuously evolving. Your feedback and contributions help make it better for everyone.*

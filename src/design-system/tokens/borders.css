@@ -1,0 +1,112 @@
+/**
+ * ===============================================
+ * BORDER DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/borders.css
+ * 
+ * Border widths, radius, and styles.
+ */
+
+:root {
+  /* ============================================
+   * BORDER WIDTHS
+   * ============================================ */
+  
+  --border-width-0: 0;
+  --border-width-px: 1px;
+  --border-width-2: 2px;
+  --border-width-4: 4px;
+  --border-width-8: 8px;
+  
+  /* ============================================
+   * BORDER RADIUS
+   * ============================================ */
+  
+  --border-radius-none: 0;
+  --border-radius-xs: 0.125rem;    /* 2px */
+  --border-radius-sm: 0.25rem;     /* 4px */
+  --border-radius-md: 0.375rem;    /* 6px */
+  --border-radius-lg: 0.5rem;      /* 8px */
+  --border-radius-xl: 0.75rem;     /* 12px */
+  --border-radius-2xl: 1rem;       /* 16px */
+  --border-radius-3xl: 1.5rem;     /* 24px */
+  --border-radius-full: 9999px;
+  
+  /* ============================================
+   * COMPONENT BORDER RADIUS
+   * ============================================ */
+  
+  --border-radius-button: var(--border-radius-md);
+  --border-radius-input: var(--border-radius-md);
+  --border-radius-card: var(--border-radius-lg);
+  --border-radius-modal: var(--border-radius-xl);
+  --border-radius-badge: var(--border-radius-full);
+  --border-radius-avatar: var(--border-radius-full);
+  
+  /* ============================================
+   * BORDER STYLES
+   * ============================================ */
+  
+  --border-style-solid: solid;
+  --border-style-dashed: dashed;
+  --border-style-dotted: dotted;
+  --border-style-none: none;
+}
+
+/* ============================================
+ * BORDER UTILITY CLASSES
+ * ============================================ */
+
+/* Border Width */
+.border-0 { border-width: var(--border-width-0); }
+.border { border-width: var(--border-width-px); }
+.border-2 { border-width: var(--border-width-2); }
+.border-4 { border-width: var(--border-width-4); }
+.border-8 { border-width: var(--border-width-8); }
+
+/* Border Sides */
+.border-t { border-top-width: var(--border-width-px); }
+.border-r { border-right-width: var(--border-width-px); }
+.border-b { border-bottom-width: var(--border-width-px); }
+.border-l { border-left-width: var(--border-width-px); }
+
+.border-t-0 { border-top-width: var(--border-width-0); }
+.border-r-0 { border-right-width: var(--border-width-0); }
+.border-b-0 { border-bottom-width: var(--border-width-0); }
+.border-l-0 { border-left-width: var(--border-width-0); }
+
+/* Border Radius */
+.rounded-none { border-radius: var(--border-radius-none); }
+.rounded-xs { border-radius: var(--border-radius-xs); }
+.rounded-sm { border-radius: var(--border-radius-sm); }
+.rounded-md { border-radius: var(--border-radius-md); }
+.rounded-lg { border-radius: var(--border-radius-lg); }
+.rounded-xl { border-radius: var(--border-radius-xl); }
+.rounded-2xl { border-radius: var(--border-radius-2xl); }
+.rounded-3xl { border-radius: var(--border-radius-3xl); }
+.rounded-full { border-radius: var(--border-radius-full); }
+
+/* Corner-specific radius */
+.rounded-t-none { border-top-left-radius: var(--border-radius-none); border-top-right-radius: var(--border-radius-none); }
+.rounded-t-sm { border-top-left-radius: var(--border-radius-sm); border-top-right-radius: var(--border-radius-sm); }
+.rounded-t-md { border-top-left-radius: var(--border-radius-md); border-top-right-radius: var(--border-radius-md); }
+.rounded-t-lg { border-top-left-radius: var(--border-radius-lg); border-top-right-radius: var(--border-radius-lg); }
+
+.rounded-b-none { border-bottom-left-radius: var(--border-radius-none); border-bottom-right-radius: var(--border-radius-none); }
+.rounded-b-sm { border-bottom-left-radius: var(--border-radius-sm); border-bottom-right-radius: var(--border-radius-sm); }
+.rounded-b-md { border-bottom-left-radius: var(--border-radius-md); border-bottom-right-radius: var(--border-radius-md); }
+.rounded-b-lg { border-bottom-left-radius: var(--border-radius-lg); border-bottom-right-radius: var(--border-radius-lg); }
+
+/* Border Colors */
+.border-transparent { border-color: transparent; }
+.border-current { border-color: currentColor; }
+.border-primary { border-color: var(--color-border-primary); }
+.border-secondary { border-color: var(--color-border-secondary); }
+.border-focus { border-color: var(--color-border-focus); }
+.border-error { border-color: var(--color-border-error); }
+
+/* Border Styles */
+.border-solid { border-style: var(--border-style-solid); }
+.border-dashed { border-style: var(--border-style-dashed); }
+.border-dotted { border-style: var(--border-style-dotted); }
+.border-none { border-style: var(--border-style-none); }

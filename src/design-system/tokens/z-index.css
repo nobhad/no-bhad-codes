@@ -1,0 +1,239 @@
+/**
+ * ===============================================
+ * Z-INDEX DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/z-index.css
+ * 
+ * Z-index layering system for consistent stacking order.
+ */
+
+:root {
+  /* ============================================
+   * Z-INDEX SCALE
+   * ============================================ */
+  
+  /* Base layer levels */
+  --z-index-0: 0;
+  --z-index-1: 1;
+  --z-index-10: 10;
+  --z-index-20: 20;
+  --z-index-30: 30;
+  --z-index-40: 40;
+  --z-index-50: 50;
+  
+  /* Component layers */
+  --z-index-dropdown: 100;
+  --z-index-sticky: 200;
+  --z-index-fixed: 300;
+  --z-index-modal-backdrop: 400;
+  --z-index-modal: 500;
+  --z-index-popover: 600;
+  --z-index-tooltip: 700;
+  --z-index-toast: 800;
+  --z-index-overlay: 900;
+  --z-index-max: 999;
+  
+  /* Application-specific layers */
+  --z-index-behind: -1;
+  --z-index-base: 0;
+  --z-index-content: 1;
+  --z-index-elevated: 10;
+  
+  /* Navigation layers */
+  --z-index-nav-backdrop: 90;
+  --z-index-nav: 100;
+  --z-index-nav-dropdown: 110;
+  
+  /* Business card layers */
+  --z-index-business-card: 50;
+  --z-index-business-card-overlay: 400;
+  --z-index-business-card-modal: 500;
+  
+  /* Loading and intro layers */
+  --z-index-loading: 999;
+  --z-index-intro: 998;
+  
+  /* Performance dashboard */
+  --z-index-debug: 10000;
+}
+
+/* ============================================
+ * Z-INDEX UTILITY CLASSES
+ * ============================================ */
+
+/* Base z-index utilities */
+.z-0 { z-index: var(--z-index-0); }
+.z-1 { z-index: var(--z-index-1); }
+.z-10 { z-index: var(--z-index-10); }
+.z-20 { z-index: var(--z-index-20); }
+.z-30 { z-index: var(--z-index-30); }
+.z-40 { z-index: var(--z-index-40); }
+.z-50 { z-index: var(--z-index-50); }
+
+/* Component z-index utilities */
+.z-dropdown { z-index: var(--z-index-dropdown); }
+.z-sticky { z-index: var(--z-index-sticky); }
+.z-fixed { z-index: var(--z-index-fixed); }
+.z-modal-backdrop { z-index: var(--z-index-modal-backdrop); }
+.z-modal { z-index: var(--z-index-modal); }
+.z-popover { z-index: var(--z-index-popover); }
+.z-tooltip { z-index: var(--z-index-tooltip); }
+.z-toast { z-index: var(--z-index-toast); }
+.z-overlay { z-index: var(--z-index-overlay); }
+.z-max { z-index: var(--z-index-max); }
+
+/* Special utilities */
+.z-behind { z-index: var(--z-index-behind); }
+.z-auto { z-index: auto; }
+
+/* Navigation utilities */
+.z-nav { z-index: var(--z-index-nav); }
+.z-nav-backdrop { z-index: var(--z-index-nav-backdrop); }
+.z-nav-dropdown { z-index: var(--z-index-nav-dropdown); }
+
+/* Business card utilities */
+.z-business-card { z-index: var(--z-index-business-card); }
+.z-business-card-overlay { z-index: var(--z-index-business-card-overlay); }
+.z-business-card-modal { z-index: var(--z-index-business-card-modal); }
+
+/* Loading and intro utilities */
+.z-loading { z-index: var(--z-index-loading); }
+.z-intro { z-index: var(--z-index-intro); }
+
+/* Debug utilities */
+.z-debug { z-index: var(--z-index-debug); }
+
+/* ============================================
+ * LAYERING GUIDELINES
+ * ============================================ */
+
+/*
+ * Z-Index Stacking Order (lowest to highest):
+ * 
+ * -1:      Behind content (::before/::after decorative elements)
+ * 0:       Normal document flow
+ * 1-49:    Content layers (cards, elevated content)
+ * 50-99:   Component interactions (business card, hover states)
+ * 100-199: Navigation elements (menus, dropdowns)
+ * 200-299: Sticky/Fixed elements (headers, sidebars)
+ * 300-399: Fixed overlays (loading screens)
+ * 400-499: Modal backdrops
+ * 500-599: Modal content
+ * 600-699: Popovers and context menus
+ * 700-799: Tooltips
+ * 800-899: Toast notifications
+ * 900-999: Critical overlays (loading, intro)
+ * 1000+:   Debug/Development tools
+ * 
+ * Application Specific Order:
+ * - Base content: 0-10
+ * - Business card: 50
+ * - Navigation: 100-110
+ * - Business card overlay: 400
+ * - Business card modal: 500
+ * - Intro sequence: 998
+ * - Loading screen: 999
+ * - Debug tools: 10000+
+ */
+
+/* ============================================
+ * COMPONENT-SPECIFIC STACKING CONTEXTS
+ * ============================================ */
+
+/* Create stacking contexts for major components */
+.stacking-context {
+  position: relative;
+  z-index: 0; /* Creates new stacking context */
+}
+
+/* Navigation stacking context */
+.nav-container {
+  position: relative;
+  z-index: var(--z-index-nav);
+}
+
+/* Modal stacking context */
+.modal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-index-modal);
+}
+
+.modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-index-modal-backdrop);
+}
+
+.modal-content {
+  position: relative;
+  z-index: var(--z-index-modal);
+}
+
+/* Business card stacking context */
+.business-card-container {
+  position: relative;
+  z-index: var(--z-index-business-card);
+}
+
+.business-card-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-index-business-card-overlay);
+}
+
+.business-card-modal {
+  position: relative;
+  z-index: var(--z-index-business-card-modal);
+}
+
+/* Loading and intro stacking contexts */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-index-loading);
+}
+
+.intro-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-index-intro);
+}
+
+/* Debug and development tools */
+.debug-panel {
+  position: fixed;
+  z-index: var(--z-index-debug);
+}
+
+/* ============================================
+ * RESPONSIVE Z-INDEX UTILITIES
+ * ============================================ */
+
+/* Mobile-specific z-index adjustments */
+@media (max-width: 767px) {
+  .mobile\:z-nav { z-index: var(--z-index-nav); }
+  .mobile\:z-modal { z-index: var(--z-index-modal); }
+  .mobile\:z-overlay { z-index: var(--z-index-overlay); }
+}
+
+/* Desktop-specific z-index adjustments */
+@media (min-width: 1024px) {
+  .desktop\:z-dropdown { z-index: var(--z-index-dropdown); }
+  .desktop\:z-tooltip { z-index: var(--z-index-tooltip); }
+}

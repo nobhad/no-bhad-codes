@@ -1,0 +1,161 @@
+{
+  "name": "no-bhad-codes",
+  "version": "10.0.0",
+  "description": "Professional portfolio and client management system built with TypeScript, Express, and modern web technologies",
+  "main": "dist/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:server": "tsx server/app.ts",
+    "dev:full": "concurrently --kill-others \"npm run dev\" \"npm run dev:server\"",
+    "dev:quiet": "concurrently --kill-others -r \"npm run dev 2>/dev/null\" \"npm run dev:server\"",
+    "build": "vite build",
+    "build:server": "tsc server/**/*.ts --outDir dist/server --target ES2020 --module ES2020 --moduleResolution node",
+    "preview": "vite preview",
+    "lint": "eslint 'src/**/*.{js,ts}'",
+    "format": "prettier --write \"**/*.{js,ts,json,css,html}\"",
+    "format:check": "prettier --check \"**/*.{js,ts,json,css,html}\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:coverage:watch": "vitest --coverage --watch",
+    "test:coverage:report": "vitest run --coverage && open coverage/index.html",
+    "test:coverage:ci": "vitest run --coverage --reporter=verbose --reporter=json --reporter=html",
+    "test:coverage:threshold": "vitest run --coverage --coverage.thresholds.autoUpdate=true",
+    "coverage:check": "node scripts/coverage-check.js",
+    "coverage:badge": "node scripts/coverage-check.js badge",
+    "build:analyze": "vite build --mode production && vite-bundle-analyzer dist",
+    "build:stats": "vite build --mode production --reporter=verbose",
+    "optimize": "npm run build:stats && npm run lint && npm run typecheck",
+    "prepare": "husky",
+    "migrate": "node scripts/migrate.js migrate",
+    "migrate:rollback": "node scripts/migrate.js rollback",
+    "migrate:status": "node scripts/migrate.js status",
+    "migrate:create": "node scripts/migrate.js create",
+    "db:setup": "npm run migrate",
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build",
+    "storybook:serve": "npx serve storybook-static -l 6007",
+    "storybook:ci": "storybook build --quiet --webpack-stats-json",
+    "docs": "npm run storybook",
+    "docs:build": "npm run storybook:build"
+  },
+  "keywords": [
+    "portfolio",
+    "client-management",
+    "typescript",
+    "express",
+    "gsap",
+    "vite",
+    "business-card",
+    "web-development",
+    "nodejs",
+    "sqlite",
+    "jwt-auth",
+    "progressive-web-app"
+  ],
+  "author": "Noelle Bhaduri <noelle@nobhadcodes.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noellebhaduri/no-bhad-codes.git"
+  },
+  "homepage": "https://github.com/noellebhaduri/no-bhad-codes#readme",
+  "bugs": {
+    "url": "https://github.com/noellebhaduri/no-bhad-codes/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@playwright/test": "^1.55.0",
+    "@sentry/vite-plugin": "^4.2.0",
+    "@storybook/addon-actions": "^9.0.8",
+    "@storybook/addon-backgrounds": "^9.0.8",
+    "@storybook/addon-controls": "^9.0.8",
+    "@storybook/addon-docs": "^9.1.3",
+    "@storybook/addon-measure": "^9.0.8",
+    "@storybook/addon-outline": "^9.0.8",
+    "@storybook/addon-toolbars": "^9.0.8",
+    "@storybook/addon-viewport": "^9.0.8",
+    "@storybook/html-vite": "^9.1.3",
+    "@types/node": "^20.12.0",
+    "@typescript-eslint/eslint-plugin": "^8.41.0",
+    "@typescript-eslint/parser": "^8.41.0",
+    "@vitest/coverage-v8": "^1.6.1",
+    "@vitest/ui": "^1.6.1",
+    "concurrently": "^9.2.1",
+    "ejs": "^3.1.10",
+    "eslint": "^9.34.0",
+    "eslint-plugin-storybook": "^9.1.3",
+    "husky": "^9.1.7",
+    "jsdom": "^24.0.0",
+    "lint-staged": "^16.1.5",
+    "prettier": "^3.6.2",
+    "sqlite": "^5.1.1",
+    "storybook": "^9.1.3",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.4.0",
+    "vite": "^5.0.0",
+    "vite-plugin-ejs": "^1.7.0",
+    "vitest": "^1.6.1"
+  },
+  "dependencies": {
+    "@sentry/browser": "^10.8.0",
+    "@sentry/integrations": "^7.114.0",
+    "@sentry/node": "^10.8.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/ioredis": "^4.28.10",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
+    "@types/nodemailer": "^7.0.1",
+    "@types/redis": "^4.0.10",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "gsap": "^3.12.5",
+    "handlebars": "^4.7.8",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.7.0",
+    "jsonwebtoken": "^9.0.2",
+    "mjml": "^4.15.3",
+    "multer": "^2.0.2",
+    "nodemailer": "^7.0.6",
+    "picocolors": "^1.1.1",
+    "redis": "^5.8.2",
+    "sqlite3": "^5.1.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,html}": [
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ],
+    "src/**/*.{js,ts}": [
+      "npm run test:coverage -- --run --changed"
+    ]
+  },
+  "eslintConfig": {
+    "extends": [
+      "plugin:storybook/recommended"
+    ]
+  }
+}

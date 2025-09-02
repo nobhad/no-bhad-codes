@@ -1,0 +1,18 @@
+/**
+ * ===============================================
+ * DESIGN SYSTEM TOKENS INDEX
+ * ===============================================
+ * @file src/design-system/tokens/index.css
+ * 
+ * Central import file for all design tokens.
+ */
+
+/* Import all token files in order */
+@import './colors.css';
+@import './typography.css';
+@import './spacing.css';
+@import './shadows.css';
+@import './borders.css';
+@import './animations.css';
+@import './breakpoints.css';
+@import './z-index.css';

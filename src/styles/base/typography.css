@@ -1,0 +1,231 @@
+/**
+ * ===============================================
+ * TYPOGRAPHY SYSTEM
+ * ===============================================
+ * @file src/styles/base/typography.css
+ * 
+ * Typography foundation with responsive scaling
+ * and consistent heading hierarchy.
+ */
+
+/* ============================================
+ * FONT IMPORTS
+ * ============================================ */
+
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Acme&display=swap');
+
+/* ============================================
+ * FONT FACE DEFINITIONS
+ * ============================================ */
+
+@font-face {
+  font-family: "Acme";
+  src: url("/fonts/Acme/Acme-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: optional; /* Better CLS - font won't cause layout shift */
+}
+
+/* ============================================
+ * TYPOGRAPHY SCALE
+ * ============================================ */
+
+/* Universal heading styling */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font--acme);
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-shadow: 0 2px 4px var(--color-shadow);
+  margin: 0;
+}
+
+/* Responsive heading sizes */
+h1,
+.h1 {
+  font-size: clamp(2rem, 5vw, 4rem);
+}
+
+h2,
+.h2 {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+}
+
+h3,
+.h3 {
+  font-size: clamp(1.25rem, 3vw, 2rem);
+}
+
+h4,
+.h4 {
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+}
+
+h5,
+.h5 {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+}
+
+h6,
+.h6 {
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+}
+
+/* ============================================
+ * BODY TEXT STYLES
+ * ============================================ */
+
+/* Paragraph styling */
+p {
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Typography utility classes */
+.text-xs {
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+}
+
+.text-sm {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+}
+
+.text-base {
+  font-size: clamp(1rem, 2.5vw, 1.125rem);
+}
+
+.text-lg {
+  font-size: clamp(1.125rem, 3vw, 1.25rem);
+}
+
+.text-xl {
+  font-size: clamp(1.25rem, 3.5vw, 1.5rem);
+}
+
+.text-2xl {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+}
+
+.text-3xl {
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+/* ============================================
+ * TYPOGRAPHY UTILITIES
+ * ============================================ */
+
+/* Text alignment */
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-justify { text-align: justify; }
+
+/* Font weights */
+.font-normal { font-weight: 400; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+
+/* Font styles */
+.italic { font-style: italic; }
+.not-italic { font-style: normal; }
+
+/* Text transformations */
+.uppercase { text-transform: uppercase; }
+.lowercase { text-transform: lowercase; }
+.capitalize { text-transform: capitalize; }
+.normal-case { text-transform: none; }
+
+/* Text overflow */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-ellipsis { text-overflow: ellipsis; }
+.text-clip { text-overflow: clip; }
+
+/* ============================================
+ * SPECIALIZED TYPOGRAPHY CLASSES
+ * ============================================ */
+
+/* Small text with shadow */
+.p-small {
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+  text-shadow: 0 1px 2px var(--color-shadow);
+}
+
+/* Large emphasized text */
+.p-large {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  font-weight: 600;
+}
+
+/* ============================================
+ * LINK STYLES
+ * ============================================ */
+
+.text-link {
+  text-decoration: none;
+  position: relative;
+  color: inherit;
+  transition: color 0.3s ease;
+}
+
+.text-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: currentColor;
+  transition: width 0.3s ease;
+}
+
+.text-link:hover::after {
+  width: 100%;
+}
+
+@media (hover: hover) {
+  .text-link:hover {
+    color: var(--color-primary, #00ff41);
+  }
+}
+
+/* ============================================
+ * RESPONSIVE TYPOGRAPHY
+ * ============================================ */
+
+@media screen and (max-width: 767px) {
+  h1, .h1 {
+    font-size: clamp(1.5rem, 6vw, 2.5rem);
+  }
+  
+  h2, .h2 {
+    font-size: clamp(1.25rem, 5vw, 2rem);
+  }
+  
+  h3, .h3 {
+    font-size: clamp(1.125rem, 4vw, 1.5rem);
+  }
+  
+  .text-base {
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+  }
+}
+
+@media screen and (max-width: 479px) {
+  h1, .h1 {
+    font-size: clamp(1.25rem, 7vw, 2rem);
+  }
+  
+  h2, .h2 {
+    font-size: clamp(1.125rem, 6vw, 1.75rem);
+  }
+  
+  .text-base {
+    font-size: clamp(0.75rem, 3vw, 0.9rem);
+  }
+}

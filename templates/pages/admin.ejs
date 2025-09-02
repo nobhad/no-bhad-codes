@@ -1,0 +1,219 @@
+<!-- Admin Dashboard Header -->
+<nav class="admin-nav">
+  <div class="admin-header">
+    <h1>Admin Dashboard</h1>
+    <div class="admin-actions">
+      <span id="last-updated">Last updated: -</span>
+      <button id="refresh-btn" class="btn-refresh">Refresh Data</button>
+    </div>
+  </div>
+  
+  <div class="nav-tabs">
+    <button class="tab-btn active" data-tab="overview">Overview</button>
+    <button class="tab-btn" data-tab="performance">Performance</button>
+    <button class="tab-btn" data-tab="analytics">Analytics</button>
+    <button class="tab-btn" data-tab="visitors">Visitors</button>
+    <button class="tab-btn" data-tab="system">System</button>
+  </div>
+</nav>
+
+<!-- Tab Content -->
+<div class="admin-content">
+  <!-- Overview Tab -->
+  <div id="overview-tab" class="tab-content active">
+    <div class="overview-grid">
+      <div class="metric-card">
+        <h3>Total Visitors</h3>
+        <div class="metric-value" id="total-visitors">-</div>
+        <div class="metric-change" id="visitors-change">-</div>
+      </div>
+      
+      <div class="metric-card">
+        <h3>Page Views</h3>
+        <div class="metric-value" id="page-views">-</div>
+        <div class="metric-change" id="views-change">-</div>
+      </div>
+      
+      <div class="metric-card">
+        <h3>Avg. Session Duration</h3>
+        <div class="metric-value" id="avg-session">-</div>
+        <div class="metric-change" id="session-change">-</div>
+      </div>
+      
+      <div class="metric-card">
+        <h3>Business Card Interactions</h3>
+        <div class="metric-value" id="card-interactions">-</div>
+        <div class="metric-change" id="interactions-change">-</div>
+      </div>
+    </div>
+    
+    <div class="charts-grid">
+      <div class="chart-container">
+        <h3>Visitors Over Time</h3>
+        <div id="visitors-chart" class="chart"></div>
+      </div>
+      
+      <div class="chart-container">
+        <h3>Traffic Sources</h3>
+        <div id="sources-chart" class="chart"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance Tab -->
+  <div id="performance-tab" class="tab-content">
+    <div class="performance-metrics">
+      <div class="metric-group">
+        <h3>Core Web Vitals</h3>
+        <div class="vitals-grid">
+          <div class="vital-card">
+            <h4>LCP</h4>
+            <div class="vital-value" id="lcp-value">-</div>
+            <div class="vital-status" id="lcp-status">-</div>
+          </div>
+          
+          <div class="vital-card">
+            <h4>FID</h4>
+            <div class="vital-value" id="fid-value">-</div>
+            <div class="vital-status" id="fid-status">-</div>
+          </div>
+          
+          <div class="vital-card">
+            <h4>CLS</h4>
+            <div class="vital-value" id="cls-value">-</div>
+            <div class="vital-status" id="cls-status">-</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="metric-group">
+        <h3>Bundle Analysis</h3>
+        <div id="bundle-analysis" class="bundle-info">
+          <div class="bundle-item">
+            <span>Total Bundle Size</span>
+            <span id="total-bundle-size">-</span>
+          </div>
+          <div class="bundle-item">
+            <span>JS Bundle Size</span>
+            <span id="js-bundle-size">-</span>
+          </div>
+          <div class="bundle-item">
+            <span>CSS Bundle Size</span>
+            <span id="css-bundle-size">-</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="metric-group">
+        <h3>Performance Timeline</h3>
+        <div id="performance-timeline" class="timeline-chart"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics Tab -->
+  <div id="analytics-tab" class="tab-content">
+    <div class="analytics-container">
+      <div class="analytics-header">
+        <h2>Analytics Overview</h2>
+        <div class="date-range-selector">
+          <select id="date-range">
+            <option value="7">Last 7 days</option>
+            <option value="30" selected>Last 30 days</option>
+            <option value="90">Last 90 days</option>
+          </select>
+        </div>
+      </div>
+      
+      <div id="analytics-dashboard" class="analytics-content">
+        <!-- Analytics content loaded dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Visitors Tab -->
+  <div id="visitors-tab" class="tab-content">
+    <div class="visitors-container">
+      <div class="visitors-header">
+        <h2>Visitor Tracking</h2>
+        <div class="visitor-stats">
+          <span>Active Now: <strong id="active-visitors">0</strong></span>
+          <span>Today: <strong id="today-visitors">0</strong></span>
+        </div>
+      </div>
+      
+      <div class="visitor-details">
+        <h3>Recent Visitors</h3>
+        <div id="visitor-list" class="visitor-list">
+          <!-- Visitor entries loaded dynamically -->
+        </div>
+      </div>
+      
+      <div class="visitor-paths">
+        <h3>Popular Paths</h3>
+        <div id="path-analysis" class="path-list">
+          <!-- Path analysis loaded dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Tab -->
+  <div id="system-tab" class="tab-content">
+    <div class="system-container">
+      <div class="system-header">
+        <h2>System Information</h2>
+      </div>
+      
+      <div class="system-info">
+        <div class="info-group">
+          <h3>Build Information</h3>
+          <div class="info-item">
+            <span>Version</span>
+            <span id="app-version">10.0.0</span>
+          </div>
+          <div class="info-item">
+            <span>Build Date</span>
+            <span id="build-date">-</span>
+          </div>
+          <div class="info-item">
+            <span>Environment</span>
+            <span id="environment">production</span>
+          </div>
+        </div>
+        
+        <div class="info-group">
+          <h3>Browser Information</h3>
+          <div class="info-item">
+            <span>User Agent</span>
+            <span id="user-agent">-</span>
+          </div>
+          <div class="info-item">
+            <span>Screen Resolution</span>
+            <span id="screen-res">-</span>
+          </div>
+          <div class="info-item">
+            <span>Viewport Size</span>
+            <span id="viewport-size">-</span>
+          </div>
+        </div>
+        
+        <div class="info-group">
+          <h3>Security</h3>
+          <div class="info-item">
+            <span>HTTPS</span>
+            <span id="https-status">-</span>
+          </div>
+          <div class="info-item">
+            <span>CSP Enabled</span>
+            <span id="csp-status">Yes</span>
+          </div>
+          <div class="info-item">
+            <span>Code Protection</span>
+            <span id="protection-status">Active</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

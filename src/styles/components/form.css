@@ -1,0 +1,292 @@
+/**
+ * ===============================================
+ * FORM COMPONENT SYSTEM
+ * ===============================================
+ * @file src/styles/components/form.css
+ * 
+ * Consolidated form styling system with consistent
+ * visual design and responsive behavior.
+ * 
+ * Features:
+ * - Universal form field styling
+ * - Form container layouts
+ * - Button system integration
+ * - Validation state styling
+ * - Responsive form behaviors
+ * - Accessibility support
+ */
+
+/* ============================================
+ * FORM FIELD STYLING
+ * ============================================ */
+
+/* Honeypot field for bot detection */
+input[name="bot-field"] {
+  display: none !important;
+}
+
+/* Radio button custom styling */
+input[type="radio"] {
+  opacity: 0 !important;
+  position: absolute !important;
+  z-index: -1 !important;
+}
+
+/* Universal form field styling */
+.form-input,
+.form-textarea,
+.form-select,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+textarea,
+select {
+  width: 100%;
+  padding: clamp(6px, 1.5vw, 12px) clamp(8px, 2vw, 14px);
+  border: 2px solid var(--form-input-border);
+  border-radius: clamp(6px, 1.5vw, 12px);
+  font-size: clamp(0.75rem, 2vw, 1rem);
+  background-color: var(--color-neutral-100);
+  color: var(--fg);
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  height: clamp(32px, 8vw, 44px);
+}
+
+textarea {
+  height: auto;
+  min-height: clamp(60px, 15vw, 100px);
+  resize: vertical;
+}
+
+/* Form field focus states */
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ============================================
+ * FORM CONTAINER SYSTEM
+ * ============================================ */
+
+/* Form container styling */
+.form-container,
+.contact-form,
+.login-form {
+  background: var(--color-neutral-300);
+  padding: clamp(8px, 2.5vw, 20px);
+  border-radius: 0;
+  border: 4px solid #000000;
+  box-shadow: 0 4px 8px var(--color-shadow);
+  max-width: min(600px, 95vw);
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 2vw, 16px);
+}
+
+/* Form group spacing */
+.form-group,
+.form-row {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 1vw, 8px);
+}
+
+/* ============================================
+ * FORM LABELS AND TEXT
+ * ============================================ */
+
+/* Form labels */
+.form-group label,
+label {
+  display: block;
+  margin-bottom: 0;
+  font-weight: 600;
+  color: var(--color-dark);
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+}
+
+/* Form intro text */
+.form-intro {
+  margin: 0;
+  color: var(--fg);
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* ============================================
+ * BUTTON SYSTEM
+ * ============================================ */
+
+/* Base button styling */
+.btn,
+.form-button,
+.login-btn,
+.btn-primary,
+.btn-secondary {
+  padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 24px);
+  border: 4px solid #000000;
+  border-radius: 0;
+  font-size: clamp(0.8rem, 2vw, 1rem);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  text-shadow: 0 2px 4px var(--color-shadow);
+  box-shadow: 0 4px 8px var(--color-shadow);
+  transition: background-color 0.3s ease;
+  text-transform: uppercase;
+  box-sizing: border-box;
+}
+
+/* Primary button styling */
+.btn-primary,
+.form-button,
+.login-btn {
+  background-color: var(--color-neutral-300);
+  color: var(--fg);
+}
+
+/* Valid/Active button state */
+.btn-primary.form-valid,
+.form-button.form-valid,
+.login-btn.form-valid {
+  background-color: var(--color-primary);
+  color: var(--color-bg, #000);
+}
+
+/* Secondary button styling */
+.btn-secondary {
+  background-color: var(--color-neutral-100);
+  color: var(--fg);
+}
+
+/* ============================================
+ * VALIDATION STATES
+ * ============================================ */
+
+/* Error messages */
+.error-message,
+.login-error {
+  margin: 0;
+  color: #ef4444;
+  font-size: 0.875rem;
+  display: none;
+}
+
+.error-message.show,
+.login-error.show {
+  display: block;
+}
+
+/* ============================================
+ * FORM FOOTER ELEMENTS
+ * ============================================ */
+
+/* Form footer styling */
+.login-footer,
+.form-footer {
+  margin-top: clamp(8px, 2vw, 16px);
+  padding-top: clamp(8px, 2vw, 16px);
+  border-top: 1px solid var(--color-dark);
+  text-align: center;
+}
+
+.login-footer p,
+.form-footer p {
+  margin: clamp(4px, 1vw, 8px) 0;
+  color: var(--fg);
+  font-size: 0.9rem;
+}
+
+/* ============================================
+ * RESPONSIVE FORM BEHAVIORS
+ * ============================================ */
+
+@media screen and (max-width: 767px) {
+  .form-container,
+  .contact-form,
+  .login-form {
+    max-width: 95vw;
+    padding: clamp(6px, 2vw, 16px);
+    gap: clamp(6px, 1.5vw, 12px);
+  }
+  
+  .form-input,
+  .form-textarea,
+  .form-select,
+  input,
+  textarea,
+  select {
+    font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+    height: clamp(28px, 7vw, 40px);
+  }
+  
+  textarea {
+    min-height: clamp(50px, 12vw, 80px);
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .form-container,
+  .contact-form,
+  .login-form {
+    max-width: 98vw;
+    padding: clamp(4px, 1.5vw, 12px);
+  }
+  
+  .btn,
+  .form-button,
+  .login-btn {
+    padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 20px);
+    font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+  }
+}
+
+/* ============================================
+ * ACCESSIBILITY ENHANCEMENTS
+ * ============================================ */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .form-input,
+  .form-textarea,
+  .form-select,
+  input,
+  textarea,
+  select {
+    border-width: 3px;
+  }
+  
+  .btn,
+  .form-button,
+  .login-btn {
+    border-width: 3px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .form-input,
+  .form-textarea,
+  .form-select,
+  input,
+  textarea,
+  select,
+  .btn,
+  .form-button,
+  .login-btn {
+    transition: none;
+  }
+}

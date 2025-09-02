@@ -1,0 +1,29 @@
+<!-- MOBILE/OVERLAY NAVIGATION -->
+<nav data-nav="closed" class="nav">
+    <div data-menu-toggle="" class="overlay"></div>
+    <div class="menu">
+        <div class="menu-bg">
+            <div class="bg-panel first"></div>
+            <div class="bg-panel second"></div>
+            <div class="bg-panel"></div>
+        </div>
+        <div class="menu-inner">
+            <ul class="menu-list">
+                <% navigation.menuItems.forEach(function(item) { %>
+                <li class="menu-list-item">
+                    <a href="<%= item.disabled ? '#' : item.href %>" class="menu-link<%= item.disabled ? ' disabled' : '' %>">
+                        <p class="menu-link-heading" data-text="<%= item.text %>">
+                            <%= item.text %>
+                        </p>
+                        <p class="eyebrow"><%= item.eyebrow %></p>
+                        <% if (item.comingSoon) { %>
+                        <div class="coming-soon-banner">Coming Soon</div>
+                        <% } %>
+                        <div class="menu-link-bg"></div>
+                    </a>
+                </li>
+                <% }); %>
+            </ul>
+        </div>
+    </div>
+</nav>

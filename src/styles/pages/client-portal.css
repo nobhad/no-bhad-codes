@@ -1,0 +1,165 @@
+/* =====================================================
+   CLIENT PORTAL PAGE STYLES
+   ===================================================== */
+
+/* Client Portal Login Section */
+.client-login {
+    min-height: calc(100vh - var(--header-height) - var(--footer-height));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: clamp(1rem, 4vw, 2rem);
+    box-sizing: border-box;
+}
+
+.client-login .container {
+    max-width: min(500px, 90vw);
+    width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.client-login h1 {
+    font-family: var(--font--acme);
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    text-transform: uppercase;
+    text-align: center;
+    margin: 0;
+    color: var(--color-dark);
+    text-shadow: 0 2px 4px var(--color-shadow);
+}
+
+/* Login Form Styling */
+.login-form {
+    background: var(--color-neutral-300);
+    padding: clamp(1rem, 3vw, 2rem);
+    border-radius: 0;
+    border: 4px solid #000000;
+    box-shadow: 0 4px 8px var(--color-shadow);
+    max-width: 100%;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1rem, 2vw, 1.5rem);
+}
+
+.login-form .form-group {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(4px, 1vw, 8px);
+}
+
+.login-form label {
+    display: block;
+    margin-bottom: 0;
+    font-weight: 600;
+    color: var(--color-dark);
+    font-size: clamp(0.875rem, 2.5vw, 1rem);
+}
+
+.login-form .form-input {
+    width: 100%;
+    padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px);
+    border: 2px solid var(--form-input-border);
+    border-radius: clamp(6px, 1.5vw, 12px);
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    background-color: var(--color-neutral-100);
+    color: var(--fg);
+    font-family: inherit;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    height: clamp(40px, 8vw, 48px);
+}
+
+.login-form .form-input:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.login-form .btn {
+    padding: clamp(10px, 2.5vw, 14px) clamp(20px, 4vw, 28px);
+    border: 4px solid #000000;
+    border-radius: 0;
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    text-shadow: 0 2px 4px var(--color-shadow);
+    box-shadow: 0 4px 8px var(--color-shadow);
+    transition: background-color 0.3s ease;
+    text-transform: uppercase;
+    box-sizing: border-box;
+    background-color: var(--color-neutral-300);
+    color: var(--fg);
+    margin-top: clamp(8px, 2vw, 16px);
+}
+
+.login-form .btn:hover {
+    background-color: var(--color-primary);
+    color: var(--color-dark);
+}
+
+/* Form validation - button changes to accent color when all fields filled */
+.login-form .btn.form-valid {
+    background-color: var(--color-primary) !important;
+    color: var(--color-dark) !important;
+    /* Keep original border color - don't change it */
+}
+
+.login-form .btn.form-valid:hover {
+    background-color: var(--color-primary) !important;
+    color: var(--color-dark) !important;
+}
+
+/* Dark theme adjustments */
+html[data-theme="dark"] .client-login h1 {
+    color: var(--fg);
+}
+
+html[data-theme="dark"] .login-form {
+    background: var(--color-neutral-300);
+    border-color: var(--color-neutral-100);
+}
+
+html[data-theme="dark"] .login-form label {
+    color: var(--color-dark);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 767px) {
+    .client-login {
+        padding: 1rem;
+    }
+    
+    .client-login .container {
+        max-width: 95vw;
+        padding: 0.5rem;
+        gap: 1rem;
+    }
+    
+    .login-form {
+        padding: 1rem;
+        gap: 1rem;
+    }
+}
+
+@media screen and (max-width: 479px) {
+    .client-login .container {
+        max-width: 98vw;
+        padding: 0.25rem;
+    }
+    
+    .login-form {
+        padding: 0.75rem;
+    }
+}

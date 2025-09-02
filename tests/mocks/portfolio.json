@@ -1,0 +1,50 @@
+{
+  "projects": [
+    {
+      "id": "test-project-1",
+      "title": "Test Project",
+      "description": "A test project for unit tests",
+      "technologies": ["TypeScript", "React"],
+      "category": "web",
+      "featured": true
+    }
+  ],
+  "categories": [
+    {
+      "id": "web",
+      "title": "Web Development",
+      "description": "Web development projects"
+    }
+  ],
+  "navigation": {
+    "main": [
+      {
+        "id": "home",
+        "title": "home",
+        "path": "/",
+        "eyebrow": "00"
+      }
+    ]
+  },
+  "profile": {
+    "name": "Test User",
+    "title": "Developer",
+    "location": "Test City",
+    "bio": "Test bio",
+    "techStack": ["TypeScript"],
+    "tagline": "Test tagline",
+    "social": {
+      "email": "test@example.com"
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "intro": "Get in touch",
+    "businessSizes": [
+      { "value": "small", "label": "Small Business" }
+    ],
+    "helpOptions": [
+      { "value": "development", "label": "Development" }
+    ]
+  }
+}

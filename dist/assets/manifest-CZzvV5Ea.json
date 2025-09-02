@@ -1,0 +1,42 @@
+{
+  "name": "NO BHAD CODES",
+  "short_name": "NBC",
+  "description": "Creative portfolio and business ventures - Jack of All Trades",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#ff6b6b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "entertainment", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Art",
+      "url": "/art/",
+      "description": "View creative artwork"
+    },
+    {
+      "name": "Codes",
+      "url": "/codes/",
+      "description": "Explore coding projects"
+    },
+    {
+      "name": "Contact",
+      "url": "/#contact-section",
+      "description": "Get in touch"
+    }
+  ]
+}

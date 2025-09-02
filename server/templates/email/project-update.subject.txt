@@ -1,0 +1,1 @@
+Project Update: {{projectName}} - Status: {{status}}

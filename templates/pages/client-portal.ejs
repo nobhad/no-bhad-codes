@@ -1,0 +1,168 @@
+<!-- Login Section (Default View) -->
+<section class="client-login" id="login-section">
+    <div class="container">
+        <div class="login-wrapper">
+            <div class="login-header">
+                <h1 class="login-title"><a href="/client/landing" style="text-decoration: none; color: inherit;">Client Portal</a></h1>
+                <p class="login-subtitle">Access your project dashboard and updates</p>
+            </div>
+
+            <form class="login-form" id="login-form" novalidate>
+                <div class="form-group">
+                    <label for="client-email">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="client-email" 
+                        name="email"
+                        placeholder="Enter your email address"
+                        required
+                        autocomplete="email"
+                    >
+                    <div class="error-message" id="email-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="client-password">Password</label>
+                    <div class="password-input-wrapper">
+                        <input 
+                            type="password" 
+                            id="client-password" 
+                            name="password"
+                            placeholder="Enter your password"
+                            required
+                            autocomplete="current-password"
+                        >
+                        <button type="button" class="password-toggle" id="password-toggle">
+                            <span class="visually-hidden">Show password</span>
+                            👁️
+                        </button>
+                    </div>
+                    <div class="error-message" id="password-error"></div>
+                </div>
+
+                <button type="submit" class="login-btn" id="login-btn">
+                    <span>Access Dashboard</span>
+                    <div class="btn-loader" style="display: none;"></div>
+                </button>
+
+                <div class="login-error" id="login-error" style="display: none;"></div>
+            </form>
+
+            <div class="login-footer">
+                <p>New client? <a href="/client/intake" class="link-btn">Start a project</a></p>
+                <p class="help-text">Need help? <a href="mailto:hello@nobhadcodes.com">Contact support</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Project Dashboard (Post-Login) -->
+<section class="client-dashboard" id="dashboard-section" style="display: none;">
+    <div class="dashboard-layout">
+        <!-- Left Sidebar - Project List -->
+        <aside class="projects-sidebar">
+            <div class="sidebar-header">
+                <h2>My Projects</h2>
+                <button class="btn-secondary" id="logout-btn">Logout</button>
+            </div>
+            <div class="projects-list" id="projects-list">
+                <!-- Projects will be dynamically loaded -->
+            </div>
+        </aside>
+
+        <!-- Right Panel - Project Details -->
+        <div class="project-details">
+            <!-- Welcome View (Default) -->
+            <div class="welcome-view" id="welcome-view">
+                <div class="welcome-content">
+                    <h1>Welcome to Your Dashboard</h1>
+                    <p>Select a project from the sidebar to view details, updates, and files.</p>
+                </div>
+            </div>
+
+            <!-- Project Detail View -->
+            <div class="project-detail-view" id="project-detail-view" style="display: none;">
+                <div class="project-header">
+                    <div class="project-title-section">
+                        <h1 id="project-title">Project Name</h1>
+                        <span class="project-status" id="project-status">In Progress</span>
+                    </div>
+                    <div class="project-meta">
+                        <span>Started: <time id="start-date">-</time></span>
+                        <span>Last Updated: <time id="last-update">-</time></span>
+                    </div>
+                </div>
+
+                <!-- Project Tabs -->
+                <div class="project-tabs">
+                    <button class="project-tab active" data-tab="overview">Overview</button>
+                    <button class="project-tab" data-tab="updates">Updates</button>
+                    <button class="project-tab" data-tab="files">Files</button>
+                    <button class="project-tab" data-tab="messages">Messages</button>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="project-tab-content">
+                    <!-- Overview Tab -->
+                    <div id="overview-content" class="tab-pane active">
+                        <div class="overview-grid">
+                            <div class="overview-card">
+                                <h3>Project Description</h3>
+                                <p id="project-description">-</p>
+                            </div>
+                            
+                            <div class="overview-card">
+                                <h3>Current Phase</h3>
+                                <p id="current-phase">-</p>
+                            </div>
+                            
+                            <div class="overview-card">
+                                <h3>Next Milestone</h3>
+                                <p id="next-milestone">-</p>
+                            </div>
+                            
+                            <div class="overview-card progress-card">
+                                <h3>Progress</h3>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                                </div>
+                                <span class="progress-text" id="progress-text">0% Complete</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Updates Tab -->
+                    <div id="updates-content" class="tab-pane">
+                        <div class="updates-timeline" id="updates-timeline">
+                            <!-- Updates will be loaded dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Files Tab -->
+                    <div id="files-content" class="tab-pane">
+                        <div class="files-grid" id="files-grid">
+                            <!-- Files will be loaded dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Messages Tab -->
+                    <div id="messages-content" class="tab-pane">
+                        <div class="messages-container">
+                            <div class="messages-list" id="messages-list">
+                                <!-- Messages will be loaded dynamically -->
+                            </div>
+                            <form class="message-form" id="message-form">
+                                <textarea 
+                                    id="message-input" 
+                                    placeholder="Type your message..."
+                                    rows="3"
+                                ></textarea>
+                                <button type="submit" class="send-btn">Send Message</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

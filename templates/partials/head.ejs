@@ -1,0 +1,89 @@
+<!-- Core Meta Tags -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><%= pageData.title %></title>
+
+<!-- SEO Meta Tags -->
+<meta name="description" content="<%= pageData.description %>">
+<meta name="author" content="<%= site.author || 'Noelle Bhaduri' %>">
+<% if (pageData.keywords) { %>
+<meta name="keywords" content="<%= pageData.keywords %>">
+<% } %>
+<% if (pageData.robotsMeta) { %>
+<meta name="robots" content="<%= pageData.robotsMeta %>">
+<% } %>
+
+<!-- Open Graph / Social Media -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="<%= pageData.ogTitle || pageData.title %>">
+<meta property="og:description" content="<%= pageData.ogDescription || pageData.description %>">
+<meta property="og:site_name" content="<%= site.name %>">
+<% if (pageData.ogImage) { %>
+<meta property="og:image" content="<%= pageData.ogImage %>">
+<% } %>
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<%= pageData.title %>">
+<meta name="twitter:description" content="<%= pageData.description %>">
+<% if (pageData.twitterImage) { %>
+<meta name="twitter:image" content="<%= pageData.twitterImage %>">
+<% } %>
+
+<!-- Favicon & Touch Icons -->
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+
+<!-- PWA Support -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="<%= site.themeColor %>">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="<%= site.shortName || 'NBW' %>">
+
+<!-- Security Headers should be set by server, not meta tags -->
+<!-- CSP and security headers configured at server level -->
+
+<!-- Preconnect to External Origins -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<!-- External Libraries (only what's needed globally) -->
+<% if (!pageData.noGSAP) { %>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/CustomEase.min.js"></script>
+<% } %>
+
+<!-- Page-Specific Resources -->
+<% if (pageData.styles) { %>
+  <% pageData.styles.forEach(function(style) { %>
+    <link rel="stylesheet" href="<%= style %>">
+  <% }) %>
+<% } %>
+
+<% if (pageData.preloadScripts) { %>
+  <% pageData.preloadScripts.forEach(function(script) { %>
+    <link rel="modulepreload" href="<%= script %>">
+  <% }) %>
+<% } %>
+
+<!-- Main Application Script -->
+<script type="module" src="<%= pageData.scriptSrc || '/src/main.ts' %>"></script>
+
+<!-- Page-Specific Scripts -->
+<% if (pageData.scripts) { %>
+  <% pageData.scripts.forEach(function(script) { %>
+    <script type="<%= script.type || 'module' %>" src="<%= script.src %>"<%= script.defer ? ' defer' : '' %>><%= script.async ? ' async' : '' %>></script>
+  <% }) %>
+<% } %>
+
+<!-- Inline Critical JavaScript (if needed) -->
+<% if (pageData.inlineScript) { %>
+<script>
+  <%= pageData.inlineScript %>
+</script>
+<% } %>

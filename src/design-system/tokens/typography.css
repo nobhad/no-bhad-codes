@@ -1,0 +1,180 @@
+/**
+ * ===============================================
+ * TYPOGRAPHY DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/typography.css
+ * 
+ * Typography scale, font families, and text styles.
+ */
+
+:root {
+  /* ============================================
+   * FONT FAMILIES
+   * ============================================ */
+  
+  --font-family-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 
+                      Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 
+                      Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  
+  --font-family-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  
+  --font-family-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, 
+                      Consolas, 'DejaVu Sans Mono', monospace;
+  
+  --font-family-display: 'Acme', var(--font-family-sans);
+  
+  /* ============================================
+   * FONT SIZES - FLUID TYPOGRAPHY
+   * ============================================ */
+  
+  /* Base size for calculations */
+  --font-size-base-px: 16;
+  
+  /* Fluid type scale using clamp() */
+  --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);      /* 12px → 14px */
+  --font-size-sm: clamp(0.875rem, 0.825rem + 0.25vw, 1rem);       /* 14px → 16px */
+  --font-size-md: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);        /* 16px → 18px */
+  --font-size-lg: clamp(1.125rem, 1.05rem + 0.375vw, 1.25rem);    /* 18px → 20px */
+  --font-size-xl: clamp(1.25rem, 1.125rem + 0.625vw, 1.5rem);     /* 20px → 24px */
+  --font-size-2xl: clamp(1.5rem, 1.25rem + 1.25vw, 2rem);         /* 24px → 32px */
+  --font-size-3xl: clamp(1.875rem, 1.5rem + 1.875vw, 2.5rem);     /* 30px → 40px */
+  --font-size-4xl: clamp(2.25rem, 1.75rem + 2.5vw, 3rem);         /* 36px → 48px */
+  --font-size-5xl: clamp(3rem, 2rem + 5vw, 4rem);                 /* 48px → 64px */
+  
+  /* ============================================
+   * FONT WEIGHTS
+   * ============================================ */
+  
+  --font-weight-thin: 100;
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+  
+  /* ============================================
+   * LINE HEIGHTS
+   * ============================================ */
+  
+  --line-height-none: 1;
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+  
+  /* ============================================
+   * LETTER SPACING
+   * ============================================ */
+  
+  --letter-spacing-tighter: -0.05em;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
+  
+  /* ============================================
+   * TEXT STYLES - COMPOSED TOKENS
+   * ============================================ */
+  
+  /* Display Styles */
+  --text-display-large: var(--font-weight-bold) var(--font-size-5xl)/var(--line-height-tight) var(--font-family-display);
+  --text-display-medium: var(--font-weight-bold) var(--font-size-4xl)/var(--line-height-tight) var(--font-family-display);
+  --text-display-small: var(--font-weight-bold) var(--font-size-3xl)/var(--line-height-tight) var(--font-family-display);
+  
+  /* Heading Styles */
+  --text-heading-1: var(--font-weight-bold) var(--font-size-3xl)/var(--line-height-tight) var(--font-family-display);
+  --text-heading-2: var(--font-weight-semibold) var(--font-size-2xl)/var(--line-height-tight) var(--font-family-display);
+  --text-heading-3: var(--font-weight-semibold) var(--font-size-xl)/var(--line-height-snug) var(--font-family-display);
+  --text-heading-4: var(--font-weight-medium) var(--font-size-lg)/var(--line-height-snug) var(--font-family-sans);
+  --text-heading-5: var(--font-weight-medium) var(--font-size-md)/var(--line-height-normal) var(--font-family-sans);
+  --text-heading-6: var(--font-weight-medium) var(--font-size-sm)/var(--line-height-normal) var(--font-family-sans);
+  
+  /* Body Styles */
+  --text-body-large: var(--font-weight-regular) var(--font-size-lg)/var(--line-height-relaxed) var(--font-family-sans);
+  --text-body-medium: var(--font-weight-regular) var(--font-size-md)/var(--line-height-normal) var(--font-family-sans);
+  --text-body-small: var(--font-weight-regular) var(--font-size-sm)/var(--line-height-normal) var(--font-family-sans);
+  
+  /* Caption & Label Styles */
+  --text-caption: var(--font-weight-regular) var(--font-size-xs)/var(--line-height-normal) var(--font-family-sans);
+  --text-label: var(--font-weight-medium) var(--font-size-sm)/var(--line-height-normal) var(--font-family-sans);
+  --text-button: var(--font-weight-medium) var(--font-size-md)/var(--line-height-normal) var(--font-family-sans);
+  
+  /* Code Styles */
+  --text-code-inline: var(--font-weight-regular) var(--font-size-sm)/var(--line-height-normal) var(--font-family-mono);
+  --text-code-block: var(--font-weight-regular) var(--font-size-sm)/var(--line-height-relaxed) var(--font-family-mono);
+  
+  /* ============================================
+   * TEXT DECORATION
+   * ============================================ */
+  
+  --text-decoration-underline-offset: 0.125em;
+  --text-decoration-thickness: 0.0625em;
+}
+
+/* ============================================
+ * TYPOGRAPHY UTILITY CLASSES
+ * ============================================ */
+
+/* Display */
+.text-display-lg { font: var(--text-display-large); }
+.text-display-md { font: var(--text-display-medium); }
+.text-display-sm { font: var(--text-display-small); }
+
+/* Headings */
+.text-h1 { font: var(--text-heading-1); }
+.text-h2 { font: var(--text-heading-2); }
+.text-h3 { font: var(--text-heading-3); }
+.text-h4 { font: var(--text-heading-4); }
+.text-h5 { font: var(--text-heading-5); }
+.text-h6 { font: var(--text-heading-6); }
+
+/* Body */
+.text-body-lg { font: var(--text-body-large); }
+.text-body-md { font: var(--text-body-medium); }
+.text-body-sm { font: var(--text-body-small); }
+
+/* Special */
+.text-caption { font: var(--text-caption); }
+.text-label { font: var(--text-label); }
+.text-button { font: var(--text-button); }
+.text-code { font: var(--text-code-inline); }
+
+/* Font Weight Utilities */
+.font-thin { font-weight: var(--font-weight-thin); }
+.font-light { font-weight: var(--font-weight-light); }
+.font-regular { font-weight: var(--font-weight-regular); }
+.font-medium { font-weight: var(--font-weight-medium); }
+.font-semibold { font-weight: var(--font-weight-semibold); }
+.font-bold { font-weight: var(--font-weight-bold); }
+.font-black { font-weight: var(--font-weight-black); }
+
+/* Text Transform */
+.uppercase { text-transform: uppercase; }
+.lowercase { text-transform: lowercase; }
+.capitalize { text-transform: capitalize; }
+.normal-case { text-transform: none; }
+
+/* Letter Spacing */
+.tracking-tighter { letter-spacing: var(--letter-spacing-tighter); }
+.tracking-tight { letter-spacing: var(--letter-spacing-tight); }
+.tracking-normal { letter-spacing: var(--letter-spacing-normal); }
+.tracking-wide { letter-spacing: var(--letter-spacing-wide); }
+.tracking-wider { letter-spacing: var(--letter-spacing-wider); }
+.tracking-widest { letter-spacing: var(--letter-spacing-widest); }
+
+/* Line Height */
+.leading-none { line-height: var(--line-height-none); }
+.leading-tight { line-height: var(--line-height-tight); }
+.leading-snug { line-height: var(--line-height-snug); }
+.leading-normal { line-height: var(--line-height-normal); }
+.leading-relaxed { line-height: var(--line-height-relaxed); }
+.leading-loose { line-height: var(--line-height-loose); }
+
+/* Text Alignment */
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-justify { text-align: justify; }

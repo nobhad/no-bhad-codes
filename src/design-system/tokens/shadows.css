@@ -1,0 +1,152 @@
+/**
+ * ===============================================
+ * SHADOW DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/shadows.css
+ * 
+ * Box shadow and elevation system.
+ */
+
+:root {
+  /* ============================================
+   * ELEVATION SYSTEM
+   * ============================================ */
+  
+  /* Base shadows using semantic color tokens */
+  --shadow-xs: 0 1px 2px 0 var(--color-shadow-sm);
+  --shadow-sm: 0 1px 3px 0 var(--color-shadow-sm), 0 1px 2px -1px var(--color-shadow-sm);
+  --shadow-md: 0 4px 6px -1px var(--color-shadow-md), 0 2px 4px -2px var(--color-shadow-sm);
+  --shadow-lg: 0 10px 15px -3px var(--color-shadow-md), 0 4px 6px -4px var(--color-shadow-sm);
+  --shadow-xl: 0 20px 25px -5px var(--color-shadow-lg), 0 8px 10px -6px var(--color-shadow-sm);
+  --shadow-2xl: 0 25px 50px -12px var(--color-shadow-xl);
+  --shadow-inner: inset 0 2px 4px 0 var(--color-shadow-md);
+  --shadow-none: 0 0 #0000;
+  
+  /* ============================================
+   * COLORED SHADOWS
+   * ============================================ */
+  
+  /* Brand shadows */
+  --shadow-brand-sm: 0 1px 3px 0 rgba(var(--color-brand-primary-rgb), 0.1),
+                     0 1px 2px -1px rgba(var(--color-brand-primary-rgb), 0.1);
+  --shadow-brand-md: 0 4px 6px -1px rgba(var(--color-brand-primary-rgb), 0.1),
+                     0 2px 4px -2px rgba(var(--color-brand-primary-rgb), 0.1);
+  --shadow-brand-lg: 0 10px 15px -3px rgba(var(--color-brand-primary-rgb), 0.1),
+                     0 4px 6px -4px rgba(var(--color-brand-primary-rgb), 0.06);
+  
+  /* State shadows */
+  --shadow-error: 0 1px 3px 0 rgba(239, 68, 68, 0.1),
+                  0 1px 2px -1px rgba(239, 68, 68, 0.1);
+  --shadow-success: 0 1px 3px 0 rgba(16, 185, 129, 0.1),
+                    0 1px 2px -1px rgba(16, 185, 129, 0.1);
+  --shadow-warning: 0 1px 3px 0 rgba(245, 158, 11, 0.1),
+                    0 1px 2px -1px rgba(245, 158, 11, 0.1);
+  
+  /* ============================================
+   * COMPONENT-SPECIFIC SHADOWS
+   * ============================================ */
+  
+  /* Card shadows */
+  --shadow-card-rest: var(--shadow-sm);
+  --shadow-card-hover: var(--shadow-md);
+  --shadow-card-active: var(--shadow-xs);
+  
+  /* Button shadows */
+  --shadow-button-rest: var(--shadow-sm);
+  --shadow-button-hover: var(--shadow-md);
+  --shadow-button-active: var(--shadow-inner);
+  --shadow-button-focus: 0 0 0 3px rgba(var(--color-brand-primary-rgb), 0.2);
+  
+  /* Modal shadows */
+  --shadow-modal: var(--shadow-2xl);
+  --shadow-dropdown: var(--shadow-lg);
+  --shadow-tooltip: var(--shadow-md);
+  
+  /* Navigation shadows */
+  --shadow-nav: var(--shadow-sm);
+  --shadow-nav-mobile: var(--shadow-lg);
+  
+  /* Form element shadows */
+  --shadow-input-rest: var(--shadow-inner);
+  --shadow-input-focus: 0 0 0 3px rgba(var(--color-brand-primary-rgb), 0.1),
+                        var(--shadow-inner);
+  --shadow-input-error: 0 0 0 3px rgba(239, 68, 68, 0.1),
+                        var(--shadow-inner);
+}
+
+/* ============================================
+ * SHADOW UTILITY CLASSES
+ * ============================================ */
+
+.shadow-xs { box-shadow: var(--shadow-xs); }
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-xl { box-shadow: var(--shadow-xl); }
+.shadow-2xl { box-shadow: var(--shadow-2xl); }
+.shadow-inner { box-shadow: var(--shadow-inner); }
+.shadow-none { box-shadow: var(--shadow-none); }
+
+/* Brand shadows */
+.shadow-brand-sm { box-shadow: var(--shadow-brand-sm); }
+.shadow-brand-md { box-shadow: var(--shadow-brand-md); }
+.shadow-brand-lg { box-shadow: var(--shadow-brand-lg); }
+
+/* State shadows */
+.shadow-error { box-shadow: var(--shadow-error); }
+.shadow-success { box-shadow: var(--shadow-success); }
+.shadow-warning { box-shadow: var(--shadow-warning); }
+
+/* Component shadows */
+.shadow-card { box-shadow: var(--shadow-card-rest); }
+.shadow-card:hover { box-shadow: var(--shadow-card-hover); }
+.shadow-card:active { box-shadow: var(--shadow-card-active); }
+
+.shadow-button { box-shadow: var(--shadow-button-rest); }
+.shadow-button:hover { box-shadow: var(--shadow-button-hover); }
+.shadow-button:active { box-shadow: var(--shadow-button-active); }
+.shadow-button:focus { box-shadow: var(--shadow-button-focus); }
+
+.shadow-modal { box-shadow: var(--shadow-modal); }
+.shadow-dropdown { box-shadow: var(--shadow-dropdown); }
+.shadow-tooltip { box-shadow: var(--shadow-tooltip); }
+
+/* Responsive shadows */
+@media (min-width: 640px) {
+  .sm\:shadow-sm { box-shadow: var(--shadow-sm); }
+  .sm\:shadow-md { box-shadow: var(--shadow-md); }
+  .sm\:shadow-lg { box-shadow: var(--shadow-lg); }
+}
+
+@media (min-width: 768px) {
+  .md\:shadow-sm { box-shadow: var(--shadow-sm); }
+  .md\:shadow-md { box-shadow: var(--shadow-md); }
+  .md\:shadow-lg { box-shadow: var(--shadow-lg); }
+}
+
+@media (min-width: 1024px) {
+  .lg\:shadow-sm { box-shadow: var(--shadow-sm); }
+  .lg\:shadow-md { box-shadow: var(--shadow-md); }
+  .lg\:shadow-lg { box-shadow: var(--shadow-lg); }
+  .lg\:shadow-xl { box-shadow: var(--shadow-xl); }
+}
+
+/* ============================================
+ * ACCESSIBILITY CONSIDERATIONS
+ * ============================================ */
+
+/* Reduce shadows for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: box-shadow 0.01ms !important;
+  }
+}
+
+/* High contrast mode considerations */
+@media (prefers-contrast: high) {
+  :root {
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  }
+}

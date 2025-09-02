@@ -1,0 +1,288 @@
+/**
+ * ===============================================
+ * ANIMATION DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/animations.css
+ * 
+ * Animation timing, easing, and duration tokens.
+ */
+
+:root {
+  /* ============================================
+   * DURATION TOKENS
+   * ============================================ */
+  
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --duration-slower: 600ms;
+  --duration-slowest: 800ms;
+
+  /* ============================================
+   * EASING TOKENS
+   * ============================================ */
+  
+  /* Standard easing curves */
+  --easing-linear: linear;
+  --easing-ease: ease;
+  --easing-ease-in: ease-in;
+  --easing-ease-out: ease-out;
+  --easing-ease-in-out: ease-in-out;
+  
+  /* Custom cubic-bezier curves */
+  --easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-sharp: cubic-bezier(0.4, 0, 0.6, 1);
+  --easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --easing-decelerated: cubic-bezier(0, 0, 0.2, 1);
+  --easing-accelerated: cubic-bezier(0.4, 0, 1, 1);
+  --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  
+  /* Spring-like animations */
+  --easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --easing-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* ============================================
+   * COMPONENT-SPECIFIC ANIMATIONS
+   * ============================================ */
+  
+  /* Button animations */
+  --animation-button-hover: --duration-fast var(--easing-smooth);
+  --animation-button-press: --duration-fast var(--easing-sharp);
+  
+  /* Card animations */
+  --animation-card-hover: --duration-normal var(--easing-smooth);
+  --animation-card-enter: --duration-slow var(--easing-decelerated);
+  --animation-card-exit: --duration-normal var(--easing-accelerated);
+  
+  /* Modal animations */
+  --animation-modal-enter: --duration-slow var(--easing-decelerated);
+  --animation-modal-exit: --duration-normal var(--easing-accelerated);
+  --animation-modal-backdrop: --duration-normal var(--easing-smooth);
+  
+  /* Navigation animations */
+  --animation-nav-slide: --duration-slow var(--easing-emphasized);
+  --animation-nav-fade: --duration-normal var(--easing-smooth);
+  
+  /* Form animations */
+  --animation-input-focus: --duration-fast var(--easing-smooth);
+  --animation-input-error: --duration-normal var(--easing-bounce);
+  
+  /* Loading animations */
+  --animation-spinner: 1s var(--easing-linear) infinite;
+  --animation-pulse: 2s var(--easing-smooth) infinite alternate;
+  --animation-fade-in: --duration-slow var(--easing-decelerated);
+  --animation-fade-out: --duration-normal var(--easing-accelerated);
+  
+  /* Business card specific */
+  --animation-card-flip: 0.8s var(--easing-smooth);
+  --animation-card-scale: --duration-normal var(--easing-bounce);
+
+  /* ============================================
+   * KEYFRAME ANIMATIONS
+   * ============================================ */
+  
+  /* Rotation angles */
+  --rotate-0: 0deg;
+  --rotate-45: 45deg;
+  --rotate-90: 90deg;
+  --rotate-180: 180deg;
+  --rotate-270: 270deg;
+  --rotate-360: 360deg;
+  
+  /* Scale values */
+  --scale-0: 0;
+  --scale-50: 0.5;
+  --scale-75: 0.75;
+  --scale-90: 0.9;
+  --scale-95: 0.95;
+  --scale-100: 1;
+  --scale-105: 1.05;
+  --scale-110: 1.1;
+  --scale-125: 1.25;
+  --scale-150: 1.5;
+  
+  /* Opacity values */
+  --opacity-0: 0;
+  --opacity-25: 0.25;
+  --opacity-50: 0.5;
+  --opacity-75: 0.75;
+  --opacity-100: 1;
+}
+
+/* ============================================
+ * KEYFRAME DEFINITIONS
+ * ============================================ */
+
+@keyframes fadeIn {
+  from { opacity: var(--opacity-0); }
+  to { opacity: var(--opacity-100); }
+}
+
+@keyframes fadeOut {
+  from { opacity: var(--opacity-100); }
+  to { opacity: var(--opacity-0); }
+}
+
+@keyframes slideInFromTop {
+  from { 
+    opacity: var(--opacity-0);
+    transform: translateY(-100%);
+  }
+  to { 
+    opacity: var(--opacity-100);
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromBottom {
+  from { 
+    opacity: var(--opacity-0);
+    transform: translateY(100%);
+  }
+  to { 
+    opacity: var(--opacity-100);
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from { 
+    opacity: var(--opacity-0);
+    transform: translateX(-100%);
+  }
+  to { 
+    opacity: var(--opacity-100);
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from { 
+    opacity: var(--opacity-0);
+    transform: translateX(100%);
+  }
+  to { 
+    opacity: var(--opacity-100);
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: var(--opacity-0);
+    transform: scale(var(--scale-0));
+  }
+  to { 
+    opacity: var(--opacity-100);
+    transform: scale(var(--scale-100));
+  }
+}
+
+@keyframes scaleOut {
+  from { 
+    opacity: var(--opacity-100);
+    transform: scale(var(--scale-100));
+  }
+  to { 
+    opacity: var(--opacity-0);
+    transform: scale(var(--scale-0));
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(var(--rotate-0)); }
+  to { transform: rotate(var(--rotate-360)); }
+}
+
+@keyframes pulse {
+  from { opacity: var(--opacity-100); }
+  to { opacity: var(--opacity-50); }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% { transform: translateY(0); }
+  40%, 43% { transform: translateY(-30px); }
+  70% { transform: translateY(-15px); }
+  90% { transform: translateY(-4px); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+  20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+@keyframes flip {
+  0% { transform: rotateY(0); }
+  100% { transform: rotateY(var(--rotate-180)); }
+}
+
+/* ============================================
+ * ANIMATION UTILITY CLASSES
+ * ============================================ */
+
+/* Duration utilities */
+.duration-instant { animation-duration: var(--duration-instant); }
+.duration-fast { animation-duration: var(--duration-fast); }
+.duration-normal { animation-duration: var(--duration-normal); }
+.duration-slow { animation-duration: var(--duration-slow); }
+.duration-slower { animation-duration: var(--duration-slower); }
+.duration-slowest { animation-duration: var(--duration-slowest); }
+
+/* Easing utilities */
+.ease-linear { animation-timing-function: var(--easing-linear); }
+.ease-smooth { animation-timing-function: var(--easing-smooth); }
+.ease-sharp { animation-timing-function: var(--easing-sharp); }
+.ease-bounce { animation-timing-function: var(--easing-bounce); }
+.ease-elastic { animation-timing-function: var(--easing-elastic); }
+
+/* Animation utilities */
+.animate-fade-in { animation: fadeIn var(--duration-slow) var(--easing-decelerated); }
+.animate-fade-out { animation: fadeOut var(--duration-normal) var(--easing-accelerated); }
+.animate-slide-in-top { animation: slideInFromTop var(--duration-slow) var(--easing-decelerated); }
+.animate-slide-in-bottom { animation: slideInFromBottom var(--duration-slow) var(--easing-decelerated); }
+.animate-slide-in-left { animation: slideInFromLeft var(--duration-slow) var(--easing-decelerated); }
+.animate-slide-in-right { animation: slideInFromRight var(--duration-slow) var(--easing-decelerated); }
+.animate-scale-in { animation: scaleIn var(--duration-slow) var(--easing-bounce); }
+.animate-scale-out { animation: scaleOut var(--duration-normal) var(--easing-accelerated); }
+.animate-spin { animation: spin var(--animation-spinner); }
+.animate-pulse { animation: pulse var(--animation-pulse); }
+.animate-bounce { animation: bounce 1s var(--easing-smooth) infinite; }
+.animate-shake { animation: shake 0.5s var(--easing-smooth); }
+.animate-flip { animation: flip var(--animation-card-flip); }
+
+/* Hover animations */
+.hover-scale:hover { transform: scale(var(--scale-105)); transition: transform var(--duration-fast) var(--easing-smooth); }
+.hover-lift:hover { transform: translateY(-2px); transition: transform var(--duration-fast) var(--easing-smooth); }
+.hover-rotate:hover { transform: rotate(var(--rotate-45)); transition: transform var(--duration-normal) var(--easing-smooth); }
+
+/* Transition utilities */
+.transition-none { transition: none; }
+.transition-all { transition: all var(--duration-normal) var(--easing-smooth); }
+.transition-colors { transition: color var(--duration-normal) var(--easing-smooth), background-color var(--duration-normal) var(--easing-smooth), border-color var(--duration-normal) var(--easing-smooth); }
+.transition-opacity { transition: opacity var(--duration-normal) var(--easing-smooth); }
+.transition-shadow { transition: box-shadow var(--duration-normal) var(--easing-smooth); }
+.transition-transform { transition: transform var(--duration-normal) var(--easing-smooth); }
+
+/* ============================================
+ * ACCESSIBILITY CONSIDERATIONS
+ * ============================================ */
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Keep essential animations but make them faster */
+  .animate-fade-in,
+  .animate-fade-out {
+    animation-duration: 0.01ms;
+  }
+}

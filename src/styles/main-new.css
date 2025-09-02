@@ -1,0 +1,239 @@
+/**
+ * ===============================================
+ * MAIN STYLESHEET - NEW ARCHITECTURE
+ * ===============================================
+ * @file src/styles/main-new.css
+ * 
+ * New modular CSS architecture with proper layering:
+ * 1. Design System Tokens
+ * 2. Base Layer (reset, typography, layout) 
+ * 3. Component Layer
+ * 4. Page-specific Layer
+ * 
+ * This replaces the old monolithic main.css with a
+ * maintainable, scalable architecture.
+ */
+
+/* ============================================
+ * 1. DESIGN SYSTEM FOUNDATION
+ * ============================================ */
+
+/* Import design system tokens first */
+@import '../design-system/index.css';
+
+/* ============================================
+ * 2. BASE LAYER
+ * ============================================ */
+
+/* CSS reset and normalize */
+@import './base/reset.css';
+
+/* Typography foundation */
+@import './base/typography.css';
+
+/* Layout primitives */
+@import './base/layout.css';
+
+/* Theme variables (legacy - to be phased out) */
+@import './variables.css';
+
+/* ============================================
+ * 3. COMPONENT LAYER
+ * ============================================ */
+
+/* Form system */
+@import './components/form.css';
+
+/* Navigation system */
+@import './components/navigation.css';
+
+/* Business card component */
+@import './components/business-card.css';
+
+/* Footer component */
+@import './components/footer.css';
+
+/* Loading states */
+@import './components/loading.css';
+
+/* Portfolio carousel */
+@import './components/portfolio-carousel.css';
+
+/* Form validation (specialized) */
+@import './form-validation.css';
+
+/* ============================================
+ * 4. PAGE-SPECIFIC LAYER
+ * ============================================ */
+
+/* Contact page */
+@import './pages/contact.css';
+
+/* Admin dashboard */
+@import './pages/admin.css';
+
+/* Client portal */
+@import './pages/client.css';
+
+/* Client portal login page */
+@import './pages/client-portal.css';
+
+/* Client dashboard */
+@import './pages/client-dashboard.css';
+
+/* Projects page */
+@import './pages/projects.css';
+
+/* Client intake form */
+@import './pages/client-intake.css';
+
+/* ============================================
+ * 5. THEME INTEGRATION
+ * ============================================ */
+
+/* Theme-specific overrides */
+body {
+  background-color: var(--color-neutral-300);
+  color: var(--color-dark);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Footer integration with theme */
+.footer .footer-text {
+  opacity: 1;
+  visibility: visible;
+  color: var(--color-dark);
+  font-size: 0.75rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* ============================================
+ * 6. SMOOTH TRANSITIONS
+ * ============================================ */
+
+* {
+  transition-property: background-color, color, border-color, opacity, transform;
+  transition-duration: 0.2s;
+  transition-timing-function: ease-out;
+}
+
+/* ============================================
+ * 7. SCROLLBAR STYLING
+ * ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-neutral-200, #f1f3f4);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-400, #9aa0a6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-500, #5f6368);
+}
+
+/* ============================================
+ * 8. SPECIALIZED SECTION STYLES
+ * ============================================ */
+
+/* Business card section specific positioning */
+.business-card-section {
+  flex: 1 0 100%;
+  position: relative;
+  z-index: 1;
+  background: var(--color-neutral-300);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: visible;
+  margin-top: 0;
+  scroll-snap-align: start;
+  padding: 1rem;
+}
+
+/* Scroll arrow positioning */
+.business-card-section .scroll-arrow-intro {
+  position: fixed;
+  bottom: calc(var(--footer-height) + 1rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+/* Intro animation container transitions */
+#intro-animation-container {
+  transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+}
+
+/* Show all sections immediately */
+main section:not(.business-card-section) {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* About section specific styling */
+.about-content p {
+  font-size: clamp(0.85rem, 2vw, 1rem);
+  line-height: 1.6;
+  color: var(--fg);
+}
+
+.tech-stack {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 2px solid var(--color-neutral-400);
+}
+
+/* Dark theme tech stack background */
+html[data-theme="dark"] .tech-stack {
+  background-color: #1e1e1e;
+}
+
+.tech-stack h3 {
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  margin-bottom: 0.5rem;
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.tech-list {
+  font-size: clamp(0.8rem, 1.8vw, 0.9rem);
+  line-height: 1.5;
+  color: var(--color-neutral-600);
+}
+
+.closing-statement {
+  font-weight: 600;
+  text-align: left;
+  font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+  color: var(--color-primary, var(--fg));
+}
+
+/* ============================================
+ * 9. RESPONSIVE VIDEO
+ * ============================================ */
+
+.video-responsive {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.video-responsive iframe,
+.video-responsive video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}

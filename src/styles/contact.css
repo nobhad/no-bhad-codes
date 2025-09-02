@@ -1,0 +1,417 @@
+/**
+ * @file contact.css
+ * @description Form styles for Noelle Bhaduri's personal website - GSAP First Approach
+ * @author Noelle Bhaduri
+ * GSAP FIRST: Minimal CSS transitions, let GSAP handle all form animations
+ **/
+
+/* Form Container - Responsive Design */
+.contact-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(6px, 1.5vw, 12px) clamp(8px, 2vw, 16px);
+  padding: clamp(8px, 2.5vw, 20px);
+  max-width: min(600px, 95vw);
+  width: 100%;
+  margin: 0 auto;
+  border: 4px solid #000000;
+  border-radius: 0;
+  background-color: var(--color-neutral-300);
+  align-items: start;
+  box-sizing: border-box;
+  box-shadow: 0 4px 8px var(--color-shadow);
+}
+
+/* Form intro text */
+.form-intro {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  margin: 0 0 clamp(8px, 2vw, 16px) 0;
+  text-align: center;
+  font-size: clamp(0.875rem, 2.5vw, 1.125rem);
+  color: var(--color-dark);
+}
+
+/* Form Elements Base Styles - Responsive */
+.contact-form .form-input,
+.contact-form .form-textarea,
+.contact-form .form-select {
+  width: 100%;
+  padding: clamp(6px, 1.5vw, 12px) clamp(8px, 2vw, 14px);
+  border: 2px solid var(--form-input-border);
+  border-radius: clamp(6px, 1.5vw, 12px);
+  font-size: clamp(0.75rem, 2vw, 1rem);
+  background-color: var(--color-neutral-100);
+  color: var(--fg);
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+/* Responsive heights for single-line inputs */
+.contact-form .form-input {
+  height: clamp(32px, 8vw, 44px);
+}
+
+.contact-form .form-select {
+  height: clamp(32px, 8vw, 44px);
+  line-height: 1.2;
+}
+
+.contact-form .form-input:focus,
+.contact-form .form-textarea:focus,
+.contact-form .form-select:focus {
+  outline: none;
+}
+
+.contact-form .form-input::placeholder,
+.contact-form .form-textarea::placeholder {
+  color: var(--form-input-placeholder);
+  opacity: 1;
+}
+
+/* Grid Layout for Form Elements - Use IDs for precise positioning */
+.contact-form #First-Name {
+  grid-column: 1 / 2;
+  grid-row: 2;
+}
+
+.contact-form #Last-Name {
+  grid-column: 2 / 3;
+  grid-row: 2;
+}
+
+.contact-form #Email {
+  grid-column: 1 / 3;
+  grid-row: 3;
+}
+
+.contact-form #Company-Name {
+  grid-column: 1 / 3;
+  grid-row: 4;
+}
+
+/* Select Element Styling */
+.contact-form .form-select {
+  grid-column: 1 / 3;
+  grid-row: 5;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+  color: var(--fg);
+}
+
+/* Select Arrow Icons */
+.contact-form .form-select {
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%232a2a2a" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+}
+
+body.dark-theme .contact-form .form-select {
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%23e3e3e3" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+}
+
+/* Textarea Specific Styles - Responsive */
+.contact-form .form-textarea {
+  grid-column: 1 / 3;
+  grid-row: 8;
+  min-height: clamp(60px, 15vw, 100px);
+  max-height: clamp(80px, 20vw, 150px);
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* Form Questions and Radio Groups - Responsive */
+.form-question {
+  grid-column: 1 / 3;
+  grid-row: 6;
+  font-size: clamp(0.8rem, 2vw, 1rem);
+  margin-bottom: clamp(2px, 1vw, 6px);
+  margin-top: clamp(1px, 0.5vw, 4px);
+  font-weight: 600;
+  color: var(--fg);
+  align-self: end;
+}
+
+.form-radio-group {
+  grid-column: 1 / 3;
+  grid-row: 7;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Desktop: 2 rows of 4 (4 columns) */
+  gap: clamp(4px, 1vw, 8px) clamp(6px, 1.5vw, 12px);
+  margin-bottom: clamp(2px, 1vw, 6px);
+  align-items: center;
+}
+
+/* Radio Button Styling - GSAP FIRST */
+.form-radio-option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  white-space: nowrap; /* Prevent text wrapping */
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.form-radio-option input[type="radio"] {
+  opacity: 0;
+  position: absolute;
+  z-index: -1;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.radio-button-indicator {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--form-input-border);
+  border-radius: 50%;
+  margin-right: 8px;
+  display: grid;
+  place-content: center;
+  flex-shrink: 0;
+  position: relative;
+  background-color: var(--color-neutral-100);
+}
+
+
+.form-radio-option input[type="radio"]:checked + .radio-button-indicator {
+  background-color: var(--color-primary);
+}
+
+.form-radio-option input[type="radio"]:checked + .radio-button-indicator::after {
+  content: "";
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: block;
+  background-color: var(--color-primary);
+}
+
+.form-radio-label {
+  font-size: 0.8rem;
+  line-height: 1.3;
+  color: var(--fg);
+}
+
+/* Form Actions */
+.form-actions {
+  grid-column: 1 / 3;
+  grid-row: 9;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-top: 4px;
+  margin-top: 2px;
+}
+
+/* Submit Button - GSAP FIRST */
+.form-button {
+  padding: 8px 20px;
+  background-color: var(--color-neutral-300);
+  color: var(--fg);
+  border: 4px solid #000000;
+  border-radius: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px var(--color-shadow);
+  font-family: inherit;
+  text-shadow: 0 2px 4px var(--color-shadow);
+  transition: background-color 0.3s ease;
+}
+
+.form-button.form-valid {
+  background-color: var(--color-primary);
+  color: var(--color-bg);
+}
+
+
+.form-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Form Validation Styles - Controlled by GSAP */
+.field-error {
+  color: #ff4757;
+  font-size: 0.85rem;
+  margin-top: 5px;
+  display: block;
+}
+
+.form-input.error,
+.form-textarea.error,
+.form-select.error {
+  border-color: #ff4757;
+}
+
+/* Form Message Styles */
+.form-message {
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 8px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.form-message--success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.form-message--error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Loading States */
+.form-button.loading {
+  position: relative;
+  color: transparent;
+}
+
+.form-button.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--form-btn-fg);
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+}
+
+/* Mobile-first responsive approach */
+@media screen and (max-width: 768px) {
+  .contact-form {
+    grid-template-columns: 1fr;
+    max-width: min(450px, 98vw);
+    gap: clamp(8px, 2vw, 14px);
+  }
+
+  /* Reset all elements to single column */
+  .form-intro,
+  .contact-form #First-Name,
+  .contact-form #Last-Name,
+  .contact-form #Email,
+  .contact-form #Company-Name,
+  .contact-form .form-select,
+  .contact-form .form-textarea,
+  .form-question,
+  .form-radio-group,
+  .form-actions {
+    grid-column: 1 / 2;
+  }
+
+  /* Adjust grid rows for single column */
+  .form-intro { grid-row: 1; }
+  .contact-form #First-Name { grid-row: 2; }
+  .contact-form #Last-Name { grid-row: 3; }
+  .contact-form #Email { grid-row: 4; }
+  .contact-form #Company-Name { grid-row: 5; }
+  .contact-form .form-select { grid-row: 6; }
+  .form-question { grid-row: 7; }
+  .form-radio-group { grid-row: 8; }
+  .contact-form .form-textarea { grid-row: 9; }
+  .form-actions { grid-row: 10; }
+
+  .form-actions {
+    justify-content: center;
+  }
+
+  .form-radio-group {
+    grid-template-columns: repeat(2, 1fr); /* Mobile: 4 rows of 2 (2 columns) */
+    gap: clamp(6px, 2vw, 10px) clamp(8px, 3vw, 12px);
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .contact-form {
+    max-width: min(380px, 96vw);
+    gap: clamp(6px, 1.5vw, 10px);
+  }
+
+  .form-radio-group {
+    grid-template-columns: repeat(2, 1fr); /* Small screens: 4 rows of 2 (2 columns) */
+    gap: clamp(4px, 1vw, 8px);
+  }
+
+  .form-button {
+    width: 100%;
+    padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 24px);
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+  }
+}
+
+/* Accessibility Improvements */
+.form-radio-option:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .form-input,
+  .form-textarea,
+  .form-select {
+    border-width: 3px;
+  }
+  
+  .radio-button-indicator {
+    border-width: 3px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .form-input,
+  .form-textarea,
+  .form-select,
+  .form-button,
+  .radio-button-indicator {
+    transition: none;
+  }
+}
+
+/* GSAP Performance Classes */
+.form-input,
+.form-textarea,
+.form-select,
+.form-button,
+.radio-button-indicator {
+  will-change: transform, opacity, border-color, background-color;
+  backface-visibility: hidden;
+}
+
+/* Animation States for GSAP */
+.form-element-hidden {
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+}
+
+.form-element-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}

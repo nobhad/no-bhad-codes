@@ -1,0 +1,346 @@
+/**
+ * ===============================================
+ * LAYOUT SYSTEM
+ * ===============================================
+ * @file src/styles/base/layout.css
+ * 
+ * Core layout primitives and responsive containers
+ * for consistent page structure across the application.
+ */
+
+/* ============================================
+ * LAYOUT CONSTANTS
+ * ============================================ */
+
+:root {
+  /* Layout dimensions - Fixed values to prevent CLS */
+  --header-height: 60px;
+  --footer-height: 40px;
+  
+  /* Responsive layout dimensions */
+  --size-container: min(1200px, 100vw - 2rem);
+  --container-padding: clamp(1rem, 4vw, 2rem);
+  --gap: clamp(0.75rem, 3vw, 1.5rem);
+  --section-padding: clamp(1rem, 5vw, 2rem);
+}
+
+/* Responsive header height adjustments */
+@media screen and (max-width: 1024px) {
+  :root {
+    --header-height: 50px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  :root {
+    --header-height: 45px;
+  }
+}
+
+/* ============================================
+ * CORE LAYOUT STRUCTURE
+ * ============================================ */
+
+/* Header positioning */
+.header {
+  height: var(--header-height);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+/* Footer positioning */
+.footer {
+  height: var(--footer-height);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: var(--color-neutral-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Main content area - properly calculated between header and footer */
+main {
+  position: fixed;
+  top: var(--header-height);
+  bottom: var(--footer-height);
+  left: 0;
+  right: 0;
+  width: 100vw;
+  height: calc(100vh - var(--header-height) - var(--footer-height));
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  scroll-snap-type: y mandatory;
+}
+
+/* ============================================
+ * SECTION SYSTEM
+ * ============================================ */
+
+/* Universal section centering - based on main page pattern */
+.business-card-section,
+.about-section,
+.contact-section,
+.hero-section,
+.client-login,
+.page-section,
+main > section {
+  min-height: calc(100vh - var(--header-height) - var(--footer-height));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(1rem, 4vw, 2rem);
+  box-sizing: border-box;
+  flex: 1 0 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* Section base styles - fill main content area */
+section {
+  flex: 1 0 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ============================================
+ * CONTAINER SYSTEM
+ * ============================================ */
+
+/* Universal container - based on main page pattern */
+.container,
+.about-content,
+.section-content,
+.login-wrapper,
+.page-content {
+  max-width: min(1000px, 90vw);
+  width: 100%;
+  margin: 0 auto;
+  padding: 1rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Container variants */
+.container-fluid {
+  width: 100%;
+  padding: 0 var(--container-padding);
+}
+
+/* Content scaling within sections */
+.section-content {
+  max-width: min(1000px, 90vw);
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  gap: 1rem;
+  transform-origin: center center;
+  font-size: clamp(0.875rem, 2vw, 1.125rem);
+}
+
+/* ============================================
+ * FLEXBOX UTILITIES
+ * ============================================ */
+
+.flex { display: flex; gap: var(--gap); }
+.inline-flex { display: inline-flex; }
+.flex-col { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+.justify-center { justify-content: center; }
+.justify-start { justify-content: flex-start; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+.justify-evenly { justify-content: space-evenly; }
+
+/* ============================================
+ * GRID UTILITIES
+ * ============================================ */
+
+.grid { display: grid; gap: var(--gap); }
+.inline-grid { display: inline-grid; }
+.grid-cols-1 { grid-template-columns: 1fr; }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-cols-12 { grid-template-columns: repeat(12, 1fr); }
+
+/* ============================================
+ * POSITION UTILITIES
+ * ============================================ */
+
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.sticky { position: sticky; }
+.static { position: static; }
+
+/* ============================================
+ * DISPLAY UTILITIES
+ * ============================================ */
+
+.block { display: block; }
+.inline { display: inline; }
+.inline-block { display: inline-block; }
+.hidden { display: none; }
+
+/* ============================================
+ * VISIBILITY UTILITIES
+ * ============================================ */
+
+@media (max-width: 767px) {
+  .md\:hidden { display: none; }
+  .sm\:block { display: block; }
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) {
+  .md\:block { display: block; }
+  .sm\:hidden { display: none; }
+}
+
+/* ============================================
+ * CRITICAL CSS - CLS PREVENTION
+ * ============================================ */
+
+/* Prevent layout shifts during font loading */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.4;
+}
+
+/* Fixed main container positioning */
+main {
+  position: fixed;
+  top: var(--header-height);
+  bottom: var(--footer-height);
+  left: 0;
+  right: 0;
+  overflow-y: auto;
+}
+
+/* ============================================
+ * INTRO ANIMATION STATES
+ * ============================================ */
+
+/* Hide main page content during intro animation */
+.intro-loading .header,
+.intro-loading main,
+.intro-loading .footer {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Show content after intro completes */
+.intro-complete .header,
+.intro-complete main,
+.intro-complete .footer {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.5s ease-in-out;
+}
+
+/* ============================================
+ * RESPONSIVE LAYOUT ADJUSTMENTS
+ * ============================================ */
+
+@media screen and (max-width: 1024px) {
+  main {
+    top: var(--header-height);
+    height: calc(100vh - var(--header-height) - var(--footer-height));
+  }
+  
+  section {
+    padding: 1.5rem;
+  }
+  
+  .section-content {
+    max-width: min(900px, 92vw);
+    padding: 0.75rem;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  main {
+    top: var(--header-height);
+    height: calc(100vh - var(--header-height) - var(--footer-height));
+  }
+  
+  section {
+    height: calc(100svh - var(--header-height));
+    padding: 1rem;
+  }
+  
+  .section-content {
+    max-width: 95vw;
+    padding: 0.5rem;
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+  }
+  
+  .about-content {
+    max-width: 95vw;
+    gap: 0.8rem;
+  }
+  
+  .container,
+  .page-content {
+    max-width: 95vw;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  section {
+    padding: 0.75rem;
+  }
+  
+  .section-content {
+    max-width: 98vw;
+    padding: 0.25rem;
+  }
+  
+  .container,
+  .page-content {
+    max-width: 98vw;
+  }
+}

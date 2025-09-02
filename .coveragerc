@@ -1,0 +1,23 @@
+# Coverage configuration
+[run]
+source = src/, server/
+omit = 
+    */tests/*
+    */test_*
+    */node_modules/*
+    */coverage/*
+    */dist/*
+    */build/*
+    */__tests__/*
+    */.*
+    *.config.*
+    *.test.*
+    *.spec.*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
