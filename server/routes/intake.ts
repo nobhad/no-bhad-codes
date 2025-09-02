@@ -11,7 +11,7 @@
 import express, { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { database } from '../database/database.js';
+import { getDatabase } from '../database/init.js';
 import { generateProjectPlan, ProjectPlan } from '../services/project-generator.js';
 import { generateInvoice, Invoice } from '../services/invoice-generator.js';
 import { sendWelcomeEmail, sendNewIntakeNotification } from '../services/email-service.js';
@@ -100,16 +100,16 @@ router.post('/', async (req: Request, res: Response) => {
     const intakeData: IntakeFormData = req.body;
 
     // Start database transaction
-    const db = await database.getDatabase();
+    const db = getDatabase();
     
     try {
       await db.run('BEGIN TRANSACTION');
 
       // Check if client with this email already exists
-      const existingClient = await db.get<ExistingClient>(
+      const existingClient = await db.get(
         'SELECT id, email FROM clients WHERE email = ?',
         [intakeData.email]
-      );
+      ) as ExistingClient | undefined;
 
       let clientId: number;
       let isNewClient = !existingClient;
@@ -272,7 +272,7 @@ router.get('/status/:projectId', async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params;
     
-    const db = await database.getDatabase();
+    const db = getDatabase();
     const project = await db.get(`
       SELECT p.*, c.company_name, c.contact_name, c.email
       FROM projects p
