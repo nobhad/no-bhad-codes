@@ -405,6 +405,34 @@ export class StateManager<T = AppState> {
       }
     }
   }
+
+  /**
+   * Set a computed property
+   */
+  setComputed<U>(name: string, selector: StateSelector<T, U>, dependencies: (keyof T)[]): void {
+    this.createComputed(name, selector, dependencies);
+  }
+
+  /**
+   * Remove a state property
+   */
+  removeState(key: keyof T): void {
+    const newState = { ...this.state };
+    delete newState[key];
+    this.state = newState;
+  }
+
+  /**
+   * Destroy the state manager and clean up
+   */
+  destroy(): void {
+    this.listeners.clear();
+    this.selectors.clear();
+    this.computed.clear();
+    this.reducers.clear();
+    this.middleware = [];
+    this.history = [];
+  }
 }
 
 // Enhanced connection detection

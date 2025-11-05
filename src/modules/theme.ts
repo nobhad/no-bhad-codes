@@ -114,6 +114,51 @@ export class ThemeModule extends BaseModule {
   }
 
   /**
+   * Check if dark theme is active
+   */
+  isDarkTheme(): boolean {
+    return this.getCurrentTheme() === 'dark';
+  }
+
+  /**
+   * Get saved theme preference from localStorage
+   */
+  getSavedPreference(): 'light' | 'dark' | null {
+    try {
+      const saved = localStorage.getItem('theme');
+      return saved as 'light' | 'dark' | null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Clear saved theme preference
+   */
+  clearSavedPreference(): void {
+    try {
+      localStorage.removeItem('theme');
+    } catch {
+      // Ignore errors
+    }
+  }
+
+  /**
+   * Reset to default theme
+   */
+  resetToDefault(): void {
+    this.setTheme('light');
+    this.clearSavedPreference();
+  }
+
+  /**
+   * Alias for init() to support legacy tests
+   */
+  initialize(): Promise<void> {
+    return this.init();
+  }
+
+  /**
    * Cleanup
    */
   protected override onDestroy(): void {
