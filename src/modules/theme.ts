@@ -18,7 +18,7 @@ export class ThemeModule extends BaseModule {
   private unsubscribeState?: () => void;
 
   constructor(options: ModuleOptions = {}) {
-    super('ThemeModule', options);
+    super('theme', options);
   }
 
   protected override async onInit(): Promise<void> {
@@ -149,6 +149,22 @@ export class ThemeModule extends BaseModule {
   resetToDefault(): void {
     this.setTheme('light');
     this.clearSavedPreference();
+  }
+
+  /**
+   * Get system theme preference
+   */
+  getSystemTheme(): 'light' | 'dark' | 'no-preference' {
+    try {
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+        return 'light';
+      }
+      return 'no-preference';
+    } catch {
+      return 'no-preference';
+    }
   }
 
   /**

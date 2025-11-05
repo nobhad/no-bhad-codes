@@ -70,23 +70,39 @@ export class StateManager<T = AppState> {
   private maxHistorySize = 50;
   private isTimeTravel = false;
 
-  constructor(initialState: T) {
-    this.state = { ...initialState };
+  constructor(initialState?: T) {
+    this.state = initialState ? { ...initialState } : {} as T;
   }
 
   /**
-   * Get current state
+   * Get current state or specific key
    */
-  getState(): T {
-    return { ...this.state };
+  getState(): T;
+  getState<K extends keyof T>(key: K): T[K];
+  getState<K extends keyof T>(key: K, defaultValue: T[K]): T[K];
+  getState<K extends keyof T>(key?: K, defaultValue?: T[K]): T | T[K] | undefined {
+    if (key === undefined) {
+      return { ...this.state };
+    }
+    const value = this.state[key];
+    return value !== undefined ? value : defaultValue;
   }
 
   /**
-   * Update state with partial changes
+   * Update state with partial changes or set a specific key
    */
-  setState(updates: Partial<T>): void {
+  setState(updates: Partial<T>): void;
+  setState<K extends keyof T>(key: K, value: T[K]): void;
+  setState<K extends keyof T>(keyOrUpdates: K | Partial<T>, value?: T[K]): void {
     const previousState = { ...this.state };
-    this.state = { ...this.state, ...updates };
+
+    if (typeof keyOrUpdates === 'string' || typeof keyOrUpdates === 'number' || typeof keyOrUpdates === 'symbol') {
+      // Key-value API
+      this.state = { ...this.state, [keyOrUpdates]: value };
+    } else {
+      // Object API
+      this.state = { ...this.state, ...keyOrUpdates };
+    }
 
     // Add to history if not time traveling
     if (!this.isTimeTravel) {
@@ -144,20 +160,53 @@ export class StateManager<T = AppState> {
   /**
    * Subscribe to state changes
    */
-  subscribe(listener: StateListener<T>): () => void {
-    const id = Math.random().toString(36);
-    const listeners = this.listeners.get('global') || [];
-    listeners.push(listener);
-    this.listeners.set('global', listeners);
+  subscribe(listener: StateListener<T>): () => void;
+  subscribe<K extends keyof T>(
+    key: K,
+    listener: (newValue: T[K], oldValue: T[K] | undefined, key: K) => void
+  ): () => void;
+  subscribe<K extends keyof T>(
+    keyOrListener: K | StateListener<T>,
+    listener?: (newValue: T[K], oldValue: T[K] | undefined, key: K) => void
+  ): () => void {
+    if (typeof keyOrListener === 'function') {
+      // Global subscription
+      const globalListener = keyOrListener as StateListener<T>;
+      const listeners = this.listeners.get('global') || [];
+      listeners.push(globalListener);
+      this.listeners.set('global', listeners);
 
-    // Return unsubscribe function
-    return () => {
-      const currentListeners = this.listeners.get('global') || [];
-      const index = currentListeners.indexOf(listener);
-      if (index > -1) {
-        currentListeners.splice(index, 1);
-      }
-    };
+      return () => {
+        const currentListeners = this.listeners.get('global') || [];
+        const index = currentListeners.indexOf(globalListener);
+        if (index > -1) {
+          currentListeners.splice(index, 1);
+        }
+      };
+    } else {
+      // Key-based subscription
+      const key = keyOrListener as K;
+      const keyListener = listener!;
+      const propertyListeners = this.listeners.get(key as string) || [];
+      const wrappedListener: StateListener<T> = (newState, prevState) => {
+        const newValue = newState[key];
+        const oldValue = prevState[key];
+        if (newValue !== oldValue) {
+          keyListener(newValue, oldValue, key);
+        }
+      };
+
+      propertyListeners.push(wrappedListener);
+      this.listeners.set(key as string, propertyListeners);
+
+      return () => {
+        const currentListeners = this.listeners.get(key as string) || [];
+        const index = currentListeners.indexOf(wrappedListener);
+        if (index > -1) {
+          currentListeners.splice(index, 1);
+        }
+      };
+    }
   }
 
   /**
