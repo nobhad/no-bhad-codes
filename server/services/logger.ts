@@ -58,7 +58,7 @@ export interface LoggerConfig {
 /**
  * Centralized Logger Service
  */
-class LoggerService {
+export class LoggerService {
   private config: LoggerConfig;
   private currentLogLevel: number;
 

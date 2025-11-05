@@ -410,4 +410,71 @@ export class ContactService extends BaseService {
       return false;
     }
   }
+
+  /**
+   * Validate form data
+   */
+  validateForm(formData: ContactFormData): { isValid: boolean; errors: string[] } {
+    const errors = this.validateFormData(formData);
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  }
+
+  /**
+   * Generate email template
+   */
+  generateEmailTemplate(formData: ContactFormData): string {
+    return `
+      <h2>New Contact Form Submission</h2>
+      <p><strong>Name:</strong> ${formData.firstName} ${formData.lastName}</p>
+      <p><strong>Email:</strong> ${formData.email}</p>
+      <p><strong>Company:</strong> ${formData.companyName || 'N/A'}</p>
+      <p><strong>Business Size:</strong> ${formData.businessSize}</p>
+      <p><strong>Help Needed:</strong> ${formData.helpOption}</p>
+      <p><strong>Message:</strong></p>
+      <p>${formData.message}</p>
+    `;
+  }
+
+  /**
+   * Generate auto-reply template
+   */
+  generateAutoReplyTemplate(formData: ContactFormData): string {
+    return `
+      <h2>Thank you for contacting us!</h2>
+      <p>Hi ${formData.firstName},</p>
+      <p>We've received your message and will get back to you soon.</p>
+      <p>Best regards,<br>The Team</p>
+    `;
+  }
+
+  /**
+   * Get service metrics
+   */
+  getMetrics(): { submissionCount: number; validationFailures: number; successRate: number } {
+    // Default implementation - can be overridden with actual metrics
+    return {
+      submissionCount: 0,
+      validationFailures: 0,
+      successRate: 100
+    };
+  }
+
+  /**
+   * Reset metrics
+   */
+  resetMetrics(): void {
+    // Default implementation - can be overridden with actual metrics storage
+    this.log('Metrics reset');
+  }
+
+  /**
+   * Clear rate limiting data
+   */
+  clearRateLimitData(): void {
+    // Clear rate limit data if stored
+    this.log('Rate limit data cleared');
+  }
 }

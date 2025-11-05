@@ -121,6 +121,14 @@ export class BaseModule {
   }
 
   /**
+     * Alias for init() to support legacy tests
+     * @returns {Promise<void>}
+     */
+  async initialize(): Promise<void> {
+    return this.init();
+  }
+
+  /**
      * Override this method in child classes for custom initialization logic
      * @returns {Promise<void>}
      */
@@ -322,5 +330,57 @@ export class BaseModule {
       listenerCount: this.eventListeners.size,
       timelineCount: this.timelines.size
     };
+  }
+
+  /**
+   * Emit custom event (alias for dispatchEvent)
+   */
+  emit(eventName: string, detail?: any): void {
+    this.dispatchEvent(eventName, detail);
+  }
+
+  /**
+   * Listen for custom events (alias for addEventListener)
+   */
+  on(eventName: string, callback: EventListener): void {
+    if (typeof document !== 'undefined') {
+      document.addEventListener(eventName, callback);
+    }
+  }
+
+  /**
+   * Find element within cached elements
+   */
+  find(selector: string): Element | null {
+    // Search in cached elements first
+    for (const element of this.elements.values()) {
+      if (element && element.matches(selector)) {
+        return element;
+      }
+    }
+    // Fallback to document query
+    return document.querySelector(selector);
+  }
+
+  /**
+   * Find all elements matching selector
+   */
+  findAll(selector: string): Element[] {
+    return Array.from(document.querySelectorAll(selector));
+  }
+
+  /**
+   * Set module state (placeholder for state management)
+   */
+  setState(state: Record<string, any>): void {
+    // Basic state storage - can be enhanced
+    (this as any).state = { ...(this as any).state, ...state };
+  }
+
+  /**
+   * Teardown method (alias for destroy)
+   */
+  async teardown(): Promise<void> {
+    await this.destroy();
   }
 }
