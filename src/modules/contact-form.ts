@@ -30,7 +30,7 @@ export class ContactFormModule extends BaseModule {
   private contactService: ContactService;
 
   constructor(options: ContactFormModuleOptions = {}) {
-    super('ContactForm', { debug: true, ...options });
+    super('contact-form', { debug: true, ...options });
 
     // Initialize contact service with configuration
     this.contactService = new ContactService({
