@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build outputs
+dist/
+build/
+*.min.js
+*.min.css
+
+# Vendor files
+assets/fonts/
+*.ttf
+*.woff
+*.woff2
+
+# Generated files
+sw.js
+
+# Config files
+.eslintrc.json
+.prettierrc.json
+
+# Version control
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Other
+*.md
+LICENSE

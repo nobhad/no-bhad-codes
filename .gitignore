@@ -192,3 +192,6 @@ logs/
 
 # Claude Code configuration
 CLAUDE.md
+*storybook.log
+storybook-static
+.DS_Store

@@ -1,0 +1,5 @@
+# This file controls how contributors are displayed
+# Format: Proper Name <proper@email.com> <commit@email.com>
+
+# Hide or redirect specific email patterns
+# <noreply@anthropic.com>  # This would hide Claude entries if any existed

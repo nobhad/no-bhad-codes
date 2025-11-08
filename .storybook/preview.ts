@@ -1,8 +1,11 @@
 import type { Preview } from '@storybook/html-vite';
 
-// Import our main CSS variables
-import '../src/styles/variables.css';
-import '../src/styles/main.css';
+// Import ALL CSS files from the site
+import '../src/styles/main-new.css';
+import '../src/styles/pages/client-portal.css';
+import '../src/styles/components/navigation.css';
+import '../src/styles/components/form.css';
+import '../src/styles/admin-dashboard.css';
 
 const preview: Preview = {
   parameters: {
@@ -29,11 +32,11 @@ const preview: Preview = {
       values: [
         {
           name: 'light',
-          value: '#ffffff',
+          value: '#f8f9fa',
         },
         {
           name: 'dark', 
-          value: '#0d1117',
+          value: '#3a3a3a',
         },
         {
           name: 'brand',
@@ -97,9 +100,18 @@ const preview: Preview = {
       const theme = context.globals.theme || 'light';
       
       return `
-        <div data-theme="${theme}" style="padding: 1rem; min-height: 100vh;">
-          ${story()}
-        </div>
+        <html data-theme="${theme}">
+          <body style="
+            margin: 0; 
+            padding: 0; 
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--color-neutral-100);
+            color: var(--color-dark);
+            min-height: 100vh;
+          ">
+            ${story()}
+          </body>
+        </html>
       `;
     },
   ],

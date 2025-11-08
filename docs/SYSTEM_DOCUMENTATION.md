@@ -1,6 +1,7 @@
 # No Bhad Codes - System Documentation
 
 ## Table of Contents
+
 1. [System Overview](#system-overview)
 2. [Architecture](#architecture)
 3. [Invoice Generation System](#invoice-generation-system)
@@ -16,6 +17,7 @@
 The No Bhad Codes system is a comprehensive client management and project tracking platform built for web development services. It features automated invoice generation, secure file uploads, client portal functionality, and project management tools.
 
 ### Key Features
+
 - **Client Intake Management**: Automated client onboarding with form processing
 - **Project Management**: Track projects from intake to completion
 - **Invoice Generation**: Automated invoice creation from client intakes and project data
@@ -24,6 +26,7 @@ The No Bhad Codes system is a comprehensive client management and project tracki
 - **Admin Dashboard**: Comprehensive management tools for business operations
 
 ### Technology Stack
+
 - **Backend**: Node.js with Express.js and TypeScript
 - **Database**: SQLite with custom wrapper for async operations
 - **Authentication**: JWT tokens with role-based access control
@@ -65,6 +68,7 @@ server/
 ```
 
 ### Design Patterns
+
 - **Singleton Pattern**: Services use singleton instances for consistency
 - **Repository Pattern**: Database operations abstracted through service layer
 - **Middleware Pattern**: Express middleware for authentication and validation
@@ -74,9 +78,11 @@ server/
 ## Invoice Generation System
 
 ### Overview
+
 The invoice system provides comprehensive invoice management with automated generation from client intakes, flexible line item management, and payment tracking.
 
 ### Key Features
+
 - **Automated Generation**: Create invoices directly from client intake forms
 - **Flexible Line Items**: Support for multiple services and pricing structures
 - **Payment Tracking**: Monitor payment status and history
@@ -86,6 +92,7 @@ The invoice system provides comprehensive invoice management with automated gene
 ### Invoice Service (`server/services/invoice-service.ts`)
 
 #### Core Methods
+
 ```typescript
 class InvoiceService {
   // Create new invoice
@@ -111,6 +118,7 @@ class InvoiceService {
 ```
 
 #### Invoice Data Structure
+
 ```typescript
 interface Invoice {
   id?: number;
@@ -144,6 +152,7 @@ interface InvoiceLineItem {
 ### API Endpoints
 
 #### Invoice Management
+
 - **POST /api/invoices** - Create new invoice
 - **GET /api/invoices/:id** - Get invoice by ID
 - **GET /api/invoices/number/:invoiceNumber** - Get by invoice number
@@ -151,15 +160,18 @@ interface InvoiceLineItem {
 - **GET /api/invoices/project/:projectId** - Get project invoices
 
 #### Invoice Operations
+
 - **PUT /api/invoices/:id/status** - Update invoice status
 - **POST /api/invoices/:id/send** - Send invoice to client
 - **POST /api/invoices/:id/pay** - Mark invoice as paid
 
 #### Analytics & Automation
+
 - **GET /api/invoices/stats** - Get invoice statistics
 - **POST /api/invoices/generate/intake/:intakeId** - Generate from intake
 
 #### Development/Testing
+
 - **GET /api/invoices/test** - System health check
 
 ### Auto-Generation Logic
@@ -167,6 +179,7 @@ interface InvoiceLineItem {
 The system automatically generates invoices from client intakes based on project type and budget:
 
 #### Project Type Mapping
+
 ```typescript
 // Website/Business Site (70% dev, 20% CMS, 10% SEO)
 'website' | 'business site' → [
@@ -200,6 +213,7 @@ The system automatically generates invoices from client intakes based on project
 ```
 
 #### Budget Parsing
+
 ```typescript
 // Parses budget ranges like "5k-10k", "2500-5000", "10k+"
 const budgetMatch = budgetRange.match(/(\d+)k?-?(\d+)?k?/);
@@ -209,9 +223,11 @@ const baseAmount = calculateAverageFromRange(budgetMatch);
 ## File Upload System
 
 ### Overview
+
 Comprehensive file upload system with security validation, organized storage, and multi-format support for client portal functionality.
 
 ### Key Features
+
 - **Multi-Type Uploads**: Single files, multiple files, avatars, project-specific
 - **Security Validation**: File type filtering, size limits, authentication
 - **Organized Storage**: Automatic directory structure based on file purpose
@@ -220,6 +236,7 @@ Comprehensive file upload system with security validation, organized storage, an
 ### Upload Service Configuration
 
 #### Multer Configuration
+
 ```typescript
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -249,6 +266,7 @@ const storage = multer.diskStorage({
 ```
 
 #### File Type Validation
+
 ```typescript
 const allowedTypes = {
   images: /\.(jpg|jpeg|png|gif|webp)$/i,
@@ -261,6 +279,7 @@ const allowedTypes = {
 ```
 
 #### Security Limits
+
 - **File Size**: 10MB maximum per file
 - **File Count**: 5 files maximum per request
 - **Authentication**: JWT token required for all uploads
@@ -269,15 +288,18 @@ const allowedTypes = {
 ### Upload API Endpoints
 
 #### Core Upload Operations
+
 - **POST /api/uploads/single** - Upload single file
 - **POST /api/uploads/multiple** - Upload multiple files (max 5)
 - **POST /api/uploads/avatar** - Upload user avatar (images only)
 - **POST /api/uploads/project/:projectId** - Upload project-specific files
 
 #### System Management
+
 - **GET /api/uploads/test** - System health and configuration check
 
 ### File Metadata Structure
+
 ```typescript
 interface UploadedFile {
   id: string;                    // Unique identifier
@@ -294,6 +316,7 @@ interface UploadedFile {
 ```
 
 ### Directory Structure
+
 ```
 uploads/
 ├── avatars/          # User profile images
@@ -308,6 +331,7 @@ uploads/
 ### Core Tables
 
 #### invoices
+
 ```sql
 CREATE TABLE invoices (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -334,6 +358,7 @@ CREATE TABLE invoices (
 ```
 
 #### clients
+
 ```sql
 CREATE TABLE clients (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -348,6 +373,7 @@ CREATE TABLE clients (
 ```
 
 #### projects
+
 ```sql
 CREATE TABLE projects (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -366,6 +392,7 @@ CREATE TABLE projects (
 ```
 
 #### client_intakes
+
 ```sql
 CREATE TABLE client_intakes (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -389,6 +416,7 @@ CREATE TABLE client_intakes (
 ### Database Wrapper
 
 Custom async wrapper for SQLite operations:
+
 ```typescript
 class DatabaseWrapper implements Database {
   async get(sql: string, params: any[] = []): Promise<DatabaseRow | undefined>
@@ -401,6 +429,7 @@ class DatabaseWrapper implements Database {
 ## API Endpoints
 
 ### Authentication Endpoints
+
 ```
 POST /api/auth/login          # User login
 POST /api/auth/register       # User registration
@@ -409,6 +438,7 @@ POST /api/auth/logout         # User logout
 ```
 
 ### Client Management
+
 ```
 GET  /api/clients             # List all clients
 POST /api/clients             # Create new client
@@ -418,6 +448,7 @@ DELETE /api/clients/:id       # Delete client
 ```
 
 ### Project Management
+
 ```
 GET  /api/projects            # List all projects
 POST /api/projects            # Create new project
@@ -428,6 +459,7 @@ GET  /api/projects/client/:clientId  # Get client projects
 ```
 
 ### Invoice System
+
 ```
 GET  /api/invoices/test                     # System health check
 POST /api/invoices                          # Create invoice
@@ -443,6 +475,7 @@ POST /api/invoices/generate/intake/:intakeId  # Generate from intake
 ```
 
 ### File Upload System
+
 ```
 GET  /api/uploads/test                    # System health check
 POST /api/uploads/single                  # Upload single file
@@ -452,6 +485,7 @@ POST /api/uploads/project/:projectId      # Upload project file
 ```
 
 ### System Endpoints
+
 ```
 GET  /                       # API information and available endpoints
 GET  /health                 # System health check
@@ -461,12 +495,14 @@ GET  /uploads/:filename      # Static file serving
 ## Authentication & Security
 
 ### JWT Authentication
+
 - **Token-based**: Stateless authentication using JSON Web Tokens
 - **Role-based Access**: Admin and client roles with different permissions
 - **Token Expiration**: Configurable token lifetime with refresh capability
 - **Secure Headers**: Bearer token authentication in Authorization header
 
 ### Security Middleware
+
 ```typescript
 // Authentication middleware
 export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction)
@@ -479,6 +515,7 @@ export const requireClient = (req: AuthenticatedRequest, res: Response, next: Ne
 ```
 
 ### Security Features
+
 - **Helmet.js**: HTTP security headers
 - **CORS**: Cross-origin resource sharing configuration
 - **Input Validation**: Request body validation and sanitization
@@ -486,6 +523,7 @@ export const requireClient = (req: AuthenticatedRequest, res: Response, next: Ne
 - **Error Handling**: Secure error messages without sensitive information exposure
 
 ### Environment Variables
+
 ```bash
 # Required
 JWT_SECRET=your-secret-key
@@ -514,12 +552,14 @@ REDIS_DB=0
 ## Development Setup
 
 ### Prerequisites
+
 - Node.js 18+ with npm
 - TypeScript 5.0+
 - SQLite 3
 - Git for version control
 
 ### Installation
+
 ```bash
 # Clone repository
 git clone <repository-url>
@@ -540,6 +580,7 @@ npm run dev:server
 ```
 
 ### Development Commands
+
 ```bash
 npm run dev:server        # Start server with hot reload
 npm run dev:client        # Start client development server
@@ -551,6 +592,7 @@ npm run format           # Format code with Prettier
 ```
 
 ### Project Structure
+
 ```
 no_bhad_codes/
 ├── server/              # Backend Express application
@@ -569,6 +611,7 @@ no_bhad_codes/
 ## Deployment Guide
 
 ### Production Build
+
 ```bash
 # Build the application
 npm run build
@@ -578,6 +621,7 @@ npm start
 ```
 
 ### Environment Configuration
+
 ```bash
 # Production environment variables
 NODE_ENV=production
@@ -603,6 +647,7 @@ SENTRY_DSN=your-sentry-dsn
 ```
 
 ### Deployment Checklist
+
 - [ ] Environment variables configured
 - [ ] Database migrations run
 - [ ] File upload directories created with proper permissions
@@ -613,6 +658,7 @@ SENTRY_DSN=your-sentry-dsn
 - [ ] Monitoring and logging set up
 
 ### Server Requirements
+
 - **Memory**: 512MB minimum, 1GB recommended
 - **Storage**: 10GB minimum for application and file uploads
 - **CPU**: 1 vCPU minimum, 2 vCPU recommended
@@ -625,7 +671,9 @@ SENTRY_DSN=your-sentry-dsn
 ## Additional Resources
 
 ### API Testing
+
 Use tools like Postman or curl to test API endpoints:
+
 ```bash
 # Test invoice system
 curl -X GET http://localhost:3001/api/invoices/test
@@ -641,6 +689,7 @@ curl -X POST http://localhost:3001/api/invoices \
 ```
 
 ### Troubleshooting
+
 - Check server logs for detailed error information
 - Verify environment variables are set correctly
 - Ensure database file has proper permissions
@@ -648,6 +697,7 @@ curl -X POST http://localhost:3001/api/invoices \
 - Verify JWT secret is configured for authentication
 
 ### Contributing
+
 1. Fork the repository
 2. Create a feature branch
 3. Make changes with proper tests

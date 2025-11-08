@@ -12,6 +12,7 @@
 ## 🌟 Features
 
 ### 🎨 **Portfolio Website**
+
 - **Interactive Business Card**: 3D flip animations with GSAP
 - **Responsive Design**: Mobile-first approach with CSS Grid/Flexbox
 - **Dark/Light Theme**: System preference detection with manual toggle
@@ -20,6 +21,7 @@
 - **SEO Ready**: Meta tags, structured data, sitemap generation
 
 ### 💼 **Client Management System**
+
 - **Client Portal**: Secure dashboard for project tracking
 - **Intake Forms**: Dynamic project requirement collection with automated processing
 - **Project Generator**: Automated project plans and timelines
@@ -34,6 +36,7 @@
   - Admin analytics and message management
 
 ### 🏗️ **Architecture**
+
 - **TypeScript**: Full type safety with strict mode
 - **Dependency Injection**: Container-based DI for testability
 - **Module Pattern**: Consistent lifecycle management
@@ -42,6 +45,7 @@
 - **State Management**: Centralized state with pub-sub pattern
 
 ### 🔒 **Security & Operations**
+
 - **JWT Authentication**: Role-based access control
 - **Rate Limiting**: Configurable request throttling
 - **Input Validation**: Comprehensive data sanitization
@@ -87,6 +91,7 @@ npm run dev:full
 ## 📋 Available Scripts
 
 ### Development
+
 ```bash
 npm run dev              # Start frontend dev server
 npm run dev:server       # Start backend server only
@@ -95,6 +100,7 @@ npm run dev:quiet        # Start with minimal output
 ```
 
 ### Building & Testing
+
 ```bash
 npm run build           # Build for production
 npm run build:server    # Build server only
@@ -105,6 +111,7 @@ npm run test:coverage   # Generate coverage report
 ```
 
 ### Code Quality
+
 ```bash
 npm run lint            # Run ESLint
 npm run format          # Format code with Prettier
@@ -113,6 +120,7 @@ npm run optimize        # Full optimization check
 ```
 
 ### Database
+
 ```bash
 npm run db:setup        # Initialize database
 npm run migrate         # Run migrations
@@ -121,7 +129,7 @@ npm run migrate:status  # Check migration status
 
 ## 📁 Project Structure
 
-```
+```text
 no-bhad-codes/
 ├── 📁 client/                    # Client portal pages
 │   ├── intake.html              # Client intake form
@@ -176,6 +184,7 @@ no-bhad-codes/
 The application uses SQLite with the following main entities:
 
 ### Users
+
 - **id**: Primary key
 - **email**: Unique email address
 - **password**: Bcrypt hashed password
@@ -184,6 +193,7 @@ The application uses SQLite with the following main entities:
 - **createdAt**: Timestamp
 
 ### Clients
+
 - **id**: Primary key
 - **userId**: Foreign key to users
 - **company**: Company name
@@ -193,6 +203,7 @@ The application uses SQLite with the following main entities:
 - **createdAt**: Timestamp
 
 ### Projects
+
 - **id**: Primary key
 - **clientId**: Foreign key to clients
 - **title**: Project title
@@ -203,6 +214,7 @@ The application uses SQLite with the following main entities:
 - **createdAt**: Timestamp
 
 ### IntakeForms
+
 - **id**: Primary key
 - **intake_id**: Unique intake identifier
 - **client_id**: Foreign key to clients
@@ -218,6 +230,7 @@ The application uses SQLite with the following main entities:
 - **created_at**: Timestamp
 
 ### Messages & Communication
+
 - **messages**: Project-specific messages
   - **id**: Primary key
   - **project_id**: Foreign key to projects
@@ -272,6 +285,7 @@ The application uses SQLite with the following main entities:
   - **created_at**: Timestamp
 
 ### Project Management
+
 - **milestones**: Project milestone tracking
   - **id**: Primary key
   - **project_id**: Foreign key to projects
@@ -309,6 +323,7 @@ The application uses SQLite with the following main entities:
 The application uses comprehensive environment configuration. Copy `.env.example` to `.env` and configure:
 
 #### Required Variables
+
 ```env
 NODE_ENV=development|production
 PORT=3001
@@ -318,6 +333,7 @@ ADMIN_PASSWORD=secure-password
 ```
 
 #### Optional Variables
+
 ```env
 # Database
 DATABASE_PATH=./data/client_portal.db
@@ -342,6 +358,7 @@ LOG_FILE=./logs/app.log
 ### TypeScript Configuration
 
 The project uses strict TypeScript configuration with:
+
 - **Target**: ES2020
 - **Module**: ES2020
 - **Strict Mode**: Enabled
@@ -352,9 +369,11 @@ The project uses strict TypeScript configuration with:
 ### Authentication Endpoints
 
 #### POST `/api/auth/login`
+
 Authenticate client credentials and return JWT token.
 
 **Request Body:**
+
 ```json
 {
   "email": "client@example.com",
@@ -363,6 +382,7 @@ Authenticate client credentials and return JWT token.
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Login successful",
@@ -377,9 +397,11 @@ Authenticate client credentials and return JWT token.
 ```
 
 #### POST `/api/intake`
+
 Submit client intake form data.
 
 **Request Body:**
+
 ```json
 {
   "projectType": "business-site",
@@ -398,31 +420,39 @@ Submit client intake form data.
 ### Client Management Endpoints
 
 #### GET `/api/clients`
+
 Get all clients (admin only)
 
 #### GET `/api/clients/:id`
+
 Get specific client details
 
 #### PUT `/api/clients/:id`
+
 Update client information
 
 ### Project Management Endpoints
 
 #### GET `/api/projects`
+
 Get projects for authenticated user
 
 #### POST `/api/projects`
+
 Create new project
 
 #### PUT `/api/projects/:id`
+
 Update project status/details
 
 ### Messaging System Endpoints
 
 #### GET `/api/messages/threads`
+
 Get all message threads for authenticated user.
 
 **Response:**
+
 ```json
 {
   "threads": [
@@ -443,9 +473,11 @@ Get all message threads for authenticated user.
 ```
 
 #### POST `/api/messages/threads`
+
 Create a new message thread.
 
 **Request Body:**
+
 ```json
 {
   "subject": "New Project Discussion",
@@ -456,9 +488,11 @@ Create a new message thread.
 ```
 
 #### GET `/api/messages/threads/:id/messages`
+
 Get all messages in a specific thread.
 
 **Response:**
+
 ```json
 {
   "thread": {
@@ -482,10 +516,12 @@ Get all messages in a specific thread.
 ```
 
 #### POST `/api/messages/threads/:id/messages`
+
 Send a new message in a thread (supports file attachments).
 
 **Request Body (multipart/form-data):**
-```
+
+```text
 message: "Here's my response to your question"
 priority: "normal"
 reply_to: 5
@@ -493,13 +529,16 @@ attachments: [File objects]
 ```
 
 #### PUT `/api/messages/threads/:id/read`
+
 Mark all messages in a thread as read.
 
 #### POST `/api/messages/inquiry`
+
 Send a quick inquiry (creates thread automatically).
 
 **Request Body (multipart/form-data):**
-```
+
+```text
 subject: "New Project Inquiry"
 message: "I'm interested in developing a new website"
 message_type: "inquiry"
@@ -508,12 +547,15 @@ attachments: [File objects]
 ```
 
 #### GET `/api/messages/preferences`
+
 Get client notification preferences.
 
 #### PUT `/api/messages/preferences`
+
 Update client notification preferences.
 
 **Request Body:**
+
 ```json
 {
   "email_notifications": true,
@@ -527,9 +569,11 @@ Update client notification preferences.
 ```
 
 #### GET `/api/messages/analytics` *(Admin Only)*
+
 Get messaging system analytics and statistics.
 
 **Response:**
+
 ```json
 {
   "analytics": {
@@ -599,6 +643,7 @@ StateManager.setState('user', { id: 1, name: 'John' });
 ### Key Frontend Modules
 
 #### Communication & Messaging
+
 - **MessagingModule** (`src/modules/messaging.ts`): Complete messaging system
   - Thread management with project association
   - Real-time message sending and receiving
@@ -608,6 +653,7 @@ StateManager.setState('user', { id: 1, name: 'John' });
   - Responsive design with mobile support
 
 #### Client Portal Features
+
 - **ClientPortalModule** (`src/features/client/client-portal.ts`): Main portal interface
   - Secure authentication and session management
   - Project dashboard with progress tracking
@@ -615,6 +661,7 @@ StateManager.setState('user', { id: 1, name: 'John' });
   - File management and downloads
 
 #### Core UI Components
+
 - **ThemeModule**: Dark/light theme switching with localStorage persistence
 - **IntroAnimationModule**: CLS-safe intro animations using GSAP
 - **BusinessCardRenderer**: Manages business card animations and interactions
@@ -638,6 +685,7 @@ const apiService = container.get<ApiService>('apiService');
 ```
 
 #### Available Services (Singleton Pattern)
+
 - **RouterService**: Client-side routing with smooth scrolling
 - **DataService**: Centralized data management with caching
 - **ContactService**: Form submission handling (Netlify integration)
@@ -649,18 +697,21 @@ const apiService = container.get<ApiService>('apiService');
 ## 🔒 Security Features
 
 ### Authentication & Authorization
+
 - **JWT Tokens**: Secure token-based authentication
 - **Role-Based Access**: Admin and client role separation
 - **Token Refresh**: Automatic token renewal
 - **Session Management**: Secure session handling
 
 ### Input Validation & Sanitization
+
 - **Schema Validation**: Comprehensive input validation
 - **XSS Prevention**: HTML sanitization
 - **SQL Injection Protection**: Parameterized queries
 - **CSRF Protection**: Token-based CSRF prevention
 
 ### Security Headers & Middleware
+
 - **Helmet.js**: Security headers configuration
 - **CORS**: Cross-origin resource sharing
 - **Rate Limiting**: Request throttling
@@ -669,6 +720,7 @@ const apiService = container.get<ApiService>('apiService');
 ## 📊 Monitoring & Logging
 
 ### Centralized Logging
+
 - **Structured Logging**: JSON-formatted log entries
 - **Log Levels**: ERROR, WARN, INFO, DEBUG
 - **Request Correlation**: Unique request IDs
@@ -676,6 +728,7 @@ const apiService = container.get<ApiService>('apiService');
 - **Security Events**: Authentication and authorization logging
 
 ### Error Handling
+
 - **Global Error Handler**: Centralized error processing
 - **Error Categorization**: Structured error codes
 - **Context Preservation**: Full request context in errors
@@ -684,6 +737,7 @@ const apiService = container.get<ApiService>('apiService');
 ## 🧪 Testing
 
 ### Test Structure
+
 ```bash
 tests/
 ├── unit/           # Unit tests
@@ -693,6 +747,7 @@ tests/
 ```
 
 ### Running Tests
+
 ```bash
 # Unit tests
 npm run test
@@ -710,6 +765,7 @@ npx playwright test
 ## 🚀 Deployment
 
 ### Production Build
+
 ```bash
 # Build the application
 npm run build
@@ -722,6 +778,7 @@ NODE_ENV=production node dist/server/app.js
 ```
 
 ### Environment Setup
+
 1. Set `NODE_ENV=production`
 2. Configure production database
 3. Set secure JWT secrets
@@ -730,6 +787,7 @@ NODE_ENV=production node dist/server/app.js
 6. Configure reverse proxy (nginx/apache)
 
 ### Docker Deployment (Optional)
+
 ```dockerfile
 FROM node:18-alpine
 WORKDIR /app
@@ -744,6 +802,7 @@ CMD ["node", "dist/server/app.js"]
 ## 🤝 Contributing
 
 ### Development Workflow
+
 1. **Fork** the repository
 2. **Create** feature branch: `git checkout -b feature/amazing-feature`
 3. **Commit** changes: `git commit -m 'Add amazing feature'`
@@ -751,6 +810,7 @@ CMD ["node", "dist/server/app.js"]
 5. **Open** Pull Request
 
 ### Code Standards
+
 - **TypeScript**: Strict mode with comprehensive typing
 - **ESLint**: Enforced code quality rules
 - **Prettier**: Consistent code formatting
@@ -758,6 +818,7 @@ CMD ["node", "dist/server/app.js"]
 - **Husky**: Pre-commit hooks for quality checks
 
 ### Pull Request Guidelines
+
 - Follow existing code patterns
 - Add tests for new features
 - Update documentation
@@ -769,6 +830,7 @@ CMD ["node", "dist/server/app.js"]
 ### Common Issues
 
 #### Port Already in Use
+
 ```bash
 # Kill processes on ports 3000/3001
 lsof -ti:3000 | xargs kill -9
@@ -776,6 +838,7 @@ lsof -ti:3001 | xargs kill -9
 ```
 
 #### Database Issues
+
 ```bash
 # Reset database
 rm data/client_portal.db
@@ -783,6 +846,7 @@ npm run db:setup
 ```
 
 #### TypeScript Errors
+
 ```bash
 # Clear cache and reinstall
 rm -rf node_modules package-lock.json
@@ -791,6 +855,7 @@ npm run typecheck
 ```
 
 #### Build Issues
+
 ```bash
 # Clear build cache
 rm -rf dist
@@ -798,9 +863,10 @@ npm run build
 ```
 
 ### Getting Help
+
 - **Issues**: [GitHub Issues](https://github.com/noellebhaduri/no-bhad-codes/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/noellebhaduri/no-bhad-codes/discussions)
-- **Email**: noelle@nobhadcodes.com
+- **Email**: <noelle@nobhadcodes.com>
 
 ## 📄 License
 
@@ -808,18 +874,15 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ## 👩‍💻 Author
 
-**Noelle Bhaduri**
+### Noelle Bhaduri
+
 - Website: [nobhadcodes.com](https://nobhadcodes.com)
-- Email: noelle@nobhadcodes.com
+- Email: <noelle@nobhadcodes.com>
 - GitHub: [@noellebhaduri](https://github.com/noellebhaduri)
 - LinkedIn: [Noelle Bhaduri](https://linkedin.com/in/noellebhaduri)
 
 ---
 
-<div align="center">
-  
-**Built with ❤️ using modern web technologies**
+### Built with ❤️ using modern web technologies
 
 [TypeScript](https://www.typescriptlang.org/) • [Node.js](https://nodejs.org/) • [Express](https://expressjs.com/) • [Vite](https://vitejs.dev/) • [GSAP](https://greensock.com/gsap/)
-
-</div>

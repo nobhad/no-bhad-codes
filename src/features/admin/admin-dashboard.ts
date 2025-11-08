@@ -373,7 +373,7 @@ class AdminDashboard {
     try {
       // Initialize the PerformanceDashboard component for admin use
       await this.initializePerformanceDashboard();
-      
+
       // Get actual performance data from the service
       const perfData = await this.getPerformanceMetrics();
 
@@ -795,7 +795,7 @@ class AdminDashboard {
     try {
       // Check if performance dashboard container exists
       let dashboardContainer = document.getElementById('performance-dashboard-container');
-      
+
       if (!dashboardContainer) {
         // Create container for the performance dashboard in the performance tab
         const performanceTab = document.getElementById('performance-tab');

@@ -102,10 +102,10 @@ export class FrontendErrorTrackingService extends BaseService {
 
       this.isInitialized = true;
       this.log(`Error tracking initialized for ${environment} environment`);
-      
+
       // Set initial context
       this.setInitialContext();
-      
+
     } catch (error) {
       this.error('Failed to initialize error tracking:', error);
     }
@@ -303,7 +303,7 @@ export class FrontendErrorTrackingService extends BaseService {
 
   private getEnvironment(): string {
     const metaTag = document.querySelector('meta[name="app-environment"]');
-    return metaTag?.getAttribute('content') || 
+    return metaTag?.getAttribute('content') ||
            (window.location.hostname === 'localhost' ? 'development' : 'production');
   }
 

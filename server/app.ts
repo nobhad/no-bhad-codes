@@ -16,8 +16,7 @@ import dotenv from 'dotenv';
 // import { errorTracker } from './services/error-tracking.js';
 // import { emailService } from './services/email-service.js';
 // import { cacheService } from './services/cache-service.js';
-// import { initializeDatabase } from './database/init.js';
-// TEMPORARILY DISABLED FOR DEBUGGING
+import { initializeDatabase } from './database/init.js';
 // import authRouter from './routes/auth.js';
 // import clientsRouter from './routes/clients.js';
 // import projectsRouter from './routes/projects.js';
@@ -148,9 +147,9 @@ app.use('*', (req, res) => {
  */
 async function startServer() {
   try {
-    // Initialize database - TEMPORARILY DISABLED FOR DEBUGGING
-    // await initializeDatabase();
-    console.log('✅ Database initialization skipped for debugging');
+    // Initialize database
+    await initializeDatabase();
+    console.log('✅ Database initialized successfully');
 
     // Initialize email service
     const emailConfig = {

@@ -40,7 +40,8 @@
     "storybook:serve": "npx serve storybook-static -l 6007",
     "storybook:ci": "storybook build --quiet --webpack-stats-json",
     "docs": "npm run storybook",
-    "docs:build": "npm run storybook:build"
+    "docs:build": "npm run storybook:build",
+    "build-storybook": "storybook build"
   },
   "keywords": [
     "portfolio",

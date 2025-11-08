@@ -37,15 +37,15 @@ export class ClientLandingModule extends BaseModule {
   private setupFormSubmission(form: HTMLFormElement): void {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       const formData = new FormData(form);
       const submitBtn = form.querySelector('input[type="submit"]') as HTMLInputElement;
       const originalText = submitBtn.value;
-      
+
       // Show loading state
       submitBtn.value = 'Submitting...';
       submitBtn.disabled = true;
-      
+
       try {
         // Convert FormData to regular object for JSON submission
         const data: Record<string, string> = {};
@@ -97,7 +97,7 @@ export class ClientLandingModule extends BaseModule {
         <button type="button" class="form-button" onclick="location.reload()" style="margin-top: 1rem;">Close</button>
       </div>
     `;
-    
+
     this.showContent(successContent, 'SUBMISSION SUCCESSFUL');
   }
 
@@ -111,7 +111,7 @@ export class ClientLandingModule extends BaseModule {
         <button type="button" class="form-button" onclick="history.back()" style="margin-top: 1rem;">Try Again</button>
       </div>
     `;
-    
+
     this.showContent(errorContent, 'SUBMISSION ERROR');
   }
 

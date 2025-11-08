@@ -16,6 +16,7 @@ export type Timeline = 'asap' | '1-month' | '2-3-months' | '3-6-months' | 'over-
 export interface ClientProject {
   id: string;
   projectName: string;
+  description?: string;
   clientId: string;
   clientName: string;
   status: ClientProjectStatus;

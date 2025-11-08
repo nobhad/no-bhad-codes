@@ -51,7 +51,7 @@ function getApiConfig(): ApiConfig {
   // Fallback to environment-based detection
   if (!baseUrl) {
     if (isDevelopment) {
-      baseUrl = 'http://localhost:3002';
+      baseUrl = 'http://localhost:3001';
     } else if (isProduction) {
       // In production, assume API is on same domain
       baseUrl = window?.location?.origin || '';

@@ -1,0 +1,15 @@
+{
+  "moderate": true,
+  "high": true,
+  "critical": true,
+  "allowlist": [],
+  "report-type": "important",
+  "package-manager": "npm",
+  "summary-format": "text",
+  "show-found": true,
+  "show-not-found": false,
+  "retry": {
+    "count": 2,
+    "delay": 5000
+  }
+}

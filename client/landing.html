@@ -1,0 +1,23 @@
+<%
+  // Data is injected by ViteEjsPlugin from templates/data.json
+  const pageData = pages.clientLanding;
+%>
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <%- include('../templates/partials/head.ejs') %>
+</head>
+<body<% if (pageData.bodyClass) { %> class="<%= pageData.bodyClass %>"<% } %>>
+    
+    <%- include('../templates/partials/header.ejs') %>
+    
+    <%- include('../templates/partials/navigation.ejs') %>
+    
+    <!-- MAIN SCROLLABLE CONTENT -->
+    <main<% if (pageData.mainClass) { %> class="<%= pageData.mainClass %>"<% } %>>
+        <%- include('../templates/pages/client-landing.ejs') %>
+    </main>
+
+    <%- include('../templates/partials/footer.ejs') %>
+</body>
+</html>

@@ -371,7 +371,22 @@ export class Application {
    * Initialize modules
    */
   private async initializeModules(): Promise<void> {
-    // Core modules that always load
+    // Re-enable client portal module for actual functionality
+    const coreModules = ['ClientPortalModule'];
+
+    for (const moduleName of coreModules) {
+      try {
+        console.log(`[Application] Initializing ${moduleName}...`);
+        const moduleInstance = await container.resolve(moduleName) as any;
+        await moduleInstance.init();
+        this.modules.set(moduleName, moduleInstance);
+        console.log(`[Application] ${moduleName} initialized`);
+      } catch (error) {
+        console.error(`[Application] Failed to initialize ${moduleName}:`, error);
+      }
+    }
+
+    // Core modules that always load (DISABLED TEMPORARILY)
     const baseCoreModules = [
       'ThemeModule',
       'SectionCardRenderer', // Section business card renderer
@@ -384,13 +399,13 @@ export class Application {
     ];
 
     // Only add intro animation on index/home page
-    const coreModules = [...baseCoreModules];
+    const coreModuleList = [...baseCoreModules];
     const currentPath = window.location.pathname;
     if (currentPath === '/' || currentPath === '/index.html') {
-      coreModules.splice(1, 0, 'IntroAnimationModule'); // Insert after ThemeModule
+      coreModuleList.splice(1, 0, 'IntroAnimationModule'); // Insert after ThemeModule
     }
 
-    for (const moduleName of coreModules) {
+    for (const moduleName of coreModuleList) {
       try {
         console.log(`[Application] Initializing ${moduleName}...`);
         const moduleInstance = await container.resolve(moduleName) as any;

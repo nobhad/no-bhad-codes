@@ -10,7 +10,6 @@
 
 import { BaseModule } from './base';
 import { gsap } from 'gsap';
-import { APP_CONSTANTS } from '../config/constants';
 
 export interface MessageThread {
   id: number;
@@ -97,7 +96,7 @@ export class MessagingModule extends BaseModule {
     // Message form submission
     if (this.messageForm) {
       this.messageForm.addEventListener('submit', this.handleSendMessage.bind(this));
-      
+
       // Typing indicator
       const messageInput = this.messageForm.querySelector('textarea[name="message"]') as HTMLTextAreaElement;
       if (messageInput) {
@@ -199,12 +198,12 @@ export class MessagingModule extends BaseModule {
    */
   private async handleSendMessage(event: Event): Promise<void> {
     event.preventDefault();
-    
+
     if (!this.messageForm || !this.currentThreadId) return;
 
     const formData = new FormData(this.messageForm);
     const message = formData.get('message') as string;
-    const files = formData.getAll('attachments') as File[];
+    const files = Array.from(formData.getAll('attachments')) as globalThis.File[];
 
     if (!message.trim() && files.length === 0) {
       this.showError('Please enter a message or attach files.');
@@ -217,7 +216,7 @@ export class MessagingModule extends BaseModule {
       const sendFormData = new FormData();
       sendFormData.append('message', message.trim());
       sendFormData.append('priority', 'normal');
-      
+
       files.forEach(file => {
         sendFormData.append('attachments', file);
       });
@@ -235,15 +234,15 @@ export class MessagingModule extends BaseModule {
       }
 
       const data = await response.json();
-      
+
       // Add new message to current messages
       this.currentMessages.push(data.messageData);
       this.renderMessagesList();
       this.scrollToBottom();
-      
+
       // Clear form
       this.messageForm.reset();
-      
+
       // Update threads list
       await this.loadMessageThreads();
 
@@ -262,7 +261,7 @@ export class MessagingModule extends BaseModule {
    */
   private async handleNewThread(event: Event): Promise<void> {
     event.preventDefault();
-    
+
     if (!this.threadForm) return;
 
     const formData = new FormData(this.threadForm);
@@ -294,14 +293,14 @@ export class MessagingModule extends BaseModule {
       }
 
       const data = await response.json();
-      
+
       // Reload threads and select new thread
       await this.loadMessageThreads();
       await this.selectThread(data.thread.id);
-      
+
       // Clear form
       this.threadForm.reset();
-      
+
       // Hide new thread modal if it exists
       const modal = document.getElementById('new-thread-modal');
       if (modal) {
@@ -435,13 +434,13 @@ export class MessagingModule extends BaseModule {
 
     this.messagesContainer.innerHTML = '';
 
-    this.currentMessages.forEach((message, index) => {
+    this.currentMessages.forEach((message, _index) => {
       const messageElement = document.createElement('div');
       messageElement.className = `message message-${message.sender_type} ${!message.is_read ? 'unread' : ''}`;
       messageElement.dataset.messageId = message.id.toString();
 
       const isReply = message.reply_to && this.currentMessages.find(m => m.id === message.reply_to);
-      const attachmentsHtml = message.attachments.length > 0 
+      const attachmentsHtml = message.attachments.length > 0
         ? this.renderAttachments(message.attachments)
         : '';
 
@@ -521,7 +520,7 @@ export class MessagingModule extends BaseModule {
    */
   private updateUnreadCount(): void {
     this.unreadCount = this.messageThreads.reduce((sum, thread) => sum + thread.unread_count, 0);
-    
+
     if (this.unreadBadge) {
       if (this.unreadCount > 0) {
         this.unreadBadge.textContent = this.unreadCount.toString();
@@ -576,7 +575,7 @@ export class MessagingModule extends BaseModule {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))  } ${  sizes[i]}`;
   }
 
   private formatTime(dateString: string): string {
@@ -586,21 +585,21 @@ export class MessagingModule extends BaseModule {
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
     if (days === 0) {
-      return date.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
         minute: '2-digit',
-        hour12: true 
+        hour12: true
       });
     } else if (days === 1) {
       return 'Yesterday';
     } else if (days < 7) {
       return date.toLocaleDateString('en-US', { weekday: 'short' });
-    } else {
-      return date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
-      });
     }
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    });
+
   }
 
   private formatRelativeTime(dateString: string): string {

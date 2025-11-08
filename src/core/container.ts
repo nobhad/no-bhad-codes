@@ -129,7 +129,7 @@ export class Container {
   }
 
   /**
-   * Check if service is registered  
+   * Check if service is registered
    */
   has(name: string): boolean {
     return this.services.has(name);

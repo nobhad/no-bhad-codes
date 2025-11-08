@@ -1,0 +1,5 @@
+# Run ESLint on staged files with auto-fix and allow warnings
+npm run lint -- --fix --max-warnings=50
+
+# Run type checking
+npm run typecheck

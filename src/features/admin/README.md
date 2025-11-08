@@ -54,7 +54,7 @@ The dashboard is accessible at `/admin.html` and requires authentication.
 - **Security:** Multiple layers of protection
 
 ### File Structure
-```
+```text
 src/admin/
 ├── admin-dashboard.ts    # Main dashboard controller
 ├── admin-security.ts    # Security measures

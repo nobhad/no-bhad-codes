@@ -465,7 +465,7 @@ export class ClientIntakeModule extends BaseModule {
         if (key === 'projectDescription') {
           mappedKey = 'description';
         }
-        
+
         if (intakeData[mappedKey]) {
           if (Array.isArray(intakeData[mappedKey])) {
             intakeData[mappedKey].push(value);

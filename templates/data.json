@@ -1,0 +1,98 @@
+{
+  "site": {
+    "name": "no bhad codes",
+    "title": "No Bhad Codes",
+    "description": "Professional web development services and portfolio",
+    "themeColor": "#ff6b6b",
+    "year": "2025"
+  },
+  "navigation": {
+    "logo": {
+      "text": "no bhad codes",
+      "href": "/",
+      "ariaLabel": "home"
+    },
+    "menuItems": [
+      {
+        "id": "home",
+        "text": "home",
+        "href": "/",
+        "eyebrow": "00"
+      },
+      {
+        "id": "about",
+        "text": "about", 
+        "href": "#about",
+        "eyebrow": "01"
+      },
+      {
+        "id": "contact",
+        "text": "contact",
+        "href": "#contact", 
+        "eyebrow": "02"
+      },
+      {
+        "id": "portfolio",
+        "text": "portfolio",
+        "href": "/projects.html",
+        "eyebrow": "03",
+        "disabled": true,
+        "comingSoon": true
+      },
+      {
+        "id": "client-portal",
+        "text": "client portal",
+        "href": "/client/portal",
+        "eyebrow": "04"
+      }
+    ]
+  },
+  "pages": {
+    "home": {
+      "title": "No Bhad Codes - Professional Web Development",
+      "description": "Professional web development services featuring modern design, TypeScript architecture, and comprehensive solutions for businesses.",
+      "bodyClass": "home-page",
+      "mainClass": "",
+      "scriptSrc": "/src/main.ts"
+    },
+    "projects": {
+      "title": "Portfolio - No Bhad Codes",
+      "description": "Portfolio showcase - Explore my web development projects including websites, applications, e-commerce solutions, and browser extensions",
+      "bodyClass": "projects-page",
+      "mainClass": "projects-main",
+      "scriptSrc": "/src/main.ts"
+    },
+    "clientLanding": {
+      "title": "Client Portal - No Bhad Codes", 
+      "description": "Client portal for project management, updates, and communication",
+      "bodyClass": "client-landing-page",
+      "mainClass": "",
+      "scriptSrc": "/src/main.ts",
+      "robotsMeta": "noindex, nofollow"
+    },
+    "clientPortal": {
+      "title": "Client Portal Dashboard - No Bhad Codes",
+      "description": "Secure client portal for project management and communication",
+      "bodyClass": "client-portal-page", 
+      "mainClass": "client-portal-main",
+      "scriptSrc": "/src/client-portal.ts",
+      "robotsMeta": "noindex, nofollow"
+    },
+    "admin": {
+      "title": "Admin Dashboard - No Bhad Codes",
+      "description": "Administrator dashboard for system management and analytics",
+      "bodyClass": "admin-page",
+      "mainClass": "admin-main", 
+      "scriptSrc": "/src/main.ts",
+      "robotsMeta": "noindex, nofollow"
+    },
+    "clientIntake": {
+      "title": "Project Intake Form - No Bhad Codes",
+      "description": "Start your project with our comprehensive intake form to help us understand your needs",
+      "bodyClass": "client-intake-page",
+      "mainClass": "intake-main",
+      "scriptSrc": "/src/features/client/client-intake.ts",
+      "robotsMeta": "noindex, nofollow"
+    }
+  }
+}

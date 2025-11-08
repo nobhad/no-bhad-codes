@@ -179,15 +179,15 @@ export class DataService extends BaseService {
     return categoryProjects;
   }
 
-/**
+  /**
  * Get navigation data
  */
-getNavigation(): { main: NavigationItem[] } {
-  if (!this.data) {
-    throw new Error('Data not loaded. Call init() first.');
+  getNavigation(): { main: NavigationItem[] } {
+    if (!this.data) {
+      throw new Error('Data not loaded. Call init() first.');
+    }
+    return this.data.navigation;
   }
-  return this.data.navigation;
-}
 
   /**
    * Get profile data
