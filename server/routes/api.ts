@@ -414,7 +414,7 @@ router.get('/status',
 );
 
 // Handle 404 for unmatched API routes
-router.use('*', async (req, res) => {
+router.use(async (req, res) => {
   await logger.error('API route not found');
 
   res.status(404).json({
