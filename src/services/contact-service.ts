@@ -415,10 +415,10 @@ export class ContactService extends BaseService {
    * Validate form data
    */
   validateForm(formData: ContactFormData): { isValid: boolean; errors: string[] } {
-    const errors = this.validateFormData(formData);
+    const validation = this.validateFormData(formData);
     return {
-      isValid: errors.length === 0,
-      errors
+      isValid: validation.valid,
+      errors: validation.errors
     };
   }
 

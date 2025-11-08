@@ -6,7 +6,27 @@
 
 ## 🔴 ACTIVE CONCERNS
 
-### 1. Contact Form Layout Issues
+### 1. Navigation Menu Not Uniform
+**Status:** INVESTIGATING
+**Reported:** Navigation menu styling/layout is inconsistent
+**Priority:** HIGH - Core UI consistency issue
+
+**Issues:**
+- [ ] Nav menu items not uniform (styling inconsistent)
+- [ ] About link in menu doesn't navigate to about section (NEW)
+- [ ] Contact link doesn't navigate to correct section of page (NEW)
+- Need to check: spacing, font sizes, colors, hover states, alignment
+
+**Next Steps:**
+- [x] Find navigation component/HTML
+- [ ] Identify inconsistencies
+- [ ] Fix About link navigation
+- [ ] Fix Contact link navigation
+- [ ] Apply uniform styling to all nav items
+
+---
+
+### 2. Contact Form Layout Issues
 **Status:** NEW - NOT STARTED
 **Reported:** Multiple visual/layout problems with contact form
 **Priority:** HIGH - User-facing form issues
