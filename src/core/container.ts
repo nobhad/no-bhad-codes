@@ -66,14 +66,15 @@ export class Container {
       return service.instance as T;
     }
 
-    // Check for circular dependencies before checking pending
-    if (this.resolving.has(name)) {
-      throw new Error(`Circular dependency detected for service ${name}`);
-    }
-
     // If already pending (concurrent resolution of singleton), wait for it
+    // This must be checked BEFORE circular dependency check to handle concurrent resolutions
     if (this.pending.has(name)) {
       return this.pending.get(name) as Promise<T>;
+    }
+
+    // Check for circular dependencies
+    if (this.resolving.has(name)) {
+      throw new Error(`Circular dependency detected for service ${name}`);
     }
 
     this.resolving.add(name);

@@ -17,7 +17,9 @@ describe('BaseModule', () => {
   let module: TestModule;
 
   beforeEach(() => {
-    document.body.innerHTML = '<div id="test-element">Test</div>';
+    if (document.body) {
+      document.body.innerHTML = '<div id="test-element">Test</div>';
+    }
     module = new TestModule('TestModule', { debug: true });
   });
 
