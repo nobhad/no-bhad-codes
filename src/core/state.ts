@@ -183,30 +183,30 @@ export class StateManager<T = AppState> {
           currentListeners.splice(index, 1);
         }
       };
-    } else {
-      // Key-based subscription
-      const key = keyOrListener as K;
-      const keyListener = listener!;
-      const propertyListeners = this.listeners.get(key as string) || [];
-      const wrappedListener: StateListener<T> = (newState, prevState) => {
-        const newValue = newState[key];
-        const oldValue = prevState[key];
-        if (newValue !== oldValue) {
-          keyListener(newValue, oldValue, key);
-        }
-      };
-
-      propertyListeners.push(wrappedListener);
-      this.listeners.set(key as string, propertyListeners);
-
-      return () => {
-        const currentListeners = this.listeners.get(key as string) || [];
-        const index = currentListeners.indexOf(wrappedListener);
-        if (index > -1) {
-          currentListeners.splice(index, 1);
-        }
-      };
     }
+
+    // Key-based subscription
+    const key = keyOrListener as K;
+    const keyListener = listener!;
+    const propertyListeners = this.listeners.get(key as string) || [];
+    const wrappedListener: StateListener<T> = (newState, prevState) => {
+      const newValue = newState[key];
+      const oldValue = prevState[key];
+      if (newValue !== oldValue) {
+        keyListener(newValue, oldValue, key);
+      }
+    };
+
+    propertyListeners.push(wrappedListener);
+    this.listeners.set(key as string, propertyListeners);
+
+    return () => {
+      const currentListeners = this.listeners.get(key as string) || [];
+      const index = currentListeners.indexOf(wrappedListener);
+      if (index > -1) {
+        currentListeners.splice(index, 1);
+      }
+    };
   }
 
   /**
