@@ -6,7 +6,25 @@
 
 ## 🔴 ACTIVE CONCERNS
 
-### 1. Client Portal Page Routes to Admin Dashboard Instead
+### 1. Contact Form Layout Issues
+**Status:** NEW - NOT STARTED
+**Reported:** Multiple visual/layout problems with contact form
+**Priority:** HIGH - User-facing form issues
+
+**Issues:**
+- [ ] Double buttons appearing on contact form (duplicates)
+- [ ] First name and last name fields too short - should match width of other fields
+- [ ] Company field in wrong position - should be below name fields
+
+**Next Steps:**
+- [ ] Find contact form HTML/component
+- [ ] Remove duplicate buttons
+- [ ] Fix field widths to be consistent
+- [ ] Reorder fields: First Name, Last Name, Company, etc.
+
+---
+
+### 2. Client Portal Page Routes to Admin Dashboard Instead
 **Status:** NEW - NOT STARTED
 **Reported:** When clicking "Client Portal" link, user is sent to admin dashboard instead
 **Priority:** HIGH - Core navigation broken
