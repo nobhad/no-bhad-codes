@@ -42,33 +42,29 @@
 
 ---
 
-### 4. Page Blank on First Load, Works After Refresh
-**Status:** INVESTIGATING - Awaiting user decision
+### 4. Page Blank on First Load - LINKED TO COOKIE BANNER
+**Status:** ROOT CAUSE IDENTIFIED
 **Reported:** User sees content load, then page goes blank (business card collapsed to 0x0)
-**WORKAROUND FOUND:** Refreshing the page (Cmd+R / Ctrl+R) makes it work
+
+**ROOT CAUSE FOUND:**
+🎯 **Cookie/Consent Banner Issue** - After clicking "Accept Cookies" and refreshing, user **cannot recreate** the blank page issue
+- This suggests the blank page happens BEFORE accepting cookies
+- After cookies accepted and stored, page loads fine
+- **The consent banner interaction is causing the timing issue**
 
 **What We Know:**
-- Server starts successfully (no path-to-regexp error anymore)
-- All JavaScript modules initialize without errors
-- On first load: business card element exists but is collapsed (0x0 dimensions)
-- After refresh: page displays correctly
-- **This is a timing/initialization issue** - something isn't ready on first load
+- Blank page only happens on first visit (before cookies accepted)
+- After accepting cookies + refresh: works perfectly
+- Cannot recreate issue after cookies accepted
+- Console shows: `[ConsentBanner] Dispatched event: consent-accepted`
 
-**Possible Causes:**
-- CSS not loading in time on first load
-- JavaScript initialization race condition
-- Intro animation not completing properly
-- GSAP/animation library not ready
+**Next Steps:**
+- [ ] Check if consent banner is blocking page rendering
+- [ ] Review ConsentBanner component initialization
+- [ ] May be low priority since it only affects first-time visitors once
 
-**User Decision:**
-✅ **INVESTIGATE AND FIX** - User wants it to work on first load without refresh
-
-**Investigation Plan:**
-1. Check browser Network tab for slow-loading resources (CSS, fonts, images)
-2. Add console logging to track initialization timing
-3. Check if intro animation is interfering with content display
-4. Look for race conditions in module initialization
-5. Test with cache disabled to rule out caching issues
+**User Decision Needed:**
+- Is this important to fix? (Only affects brand new visitors on their very first load)
 
 ---
 
