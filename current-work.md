@@ -24,9 +24,15 @@
 - Intro animation not completing properly
 - GSAP/animation library not ready
 
-**User Decision Needed:**
-- [ ] Mark as "good enough" and move on (workaround: just refresh)
-- [ ] Investigate further to fix the first-load issue
+**User Decision:**
+✅ **INVESTIGATE AND FIX** - User wants it to work on first load without refresh
+
+**Investigation Plan:**
+1. Check browser Network tab for slow-loading resources (CSS, fonts, images)
+2. Add console logging to track initialization timing
+3. Check if intro animation is interfering with content display
+4. Look for race conditions in module initialization
+5. Test with cache disabled to rule out caching issues
 
 ---
 
