@@ -6,30 +6,27 @@
 
 ## 🔴 ACTIVE CONCERNS
 
-### 1. Blank Page Issue - ENTIRE PAGE Disappears After Loading
-**Status:** IN PROGRESS
-**Reported:** User sees content load, then entire page disappears (including header)
-**UPDATED:** Not just business card - EVERYTHING disappears
+### 1. Page Blank on First Load, Works After Refresh
+**Status:** INVESTIGATING - Awaiting user decision
+**Reported:** User sees content load, then page goes blank (business card collapsed to 0x0)
+**WORKAROUND FOUND:** Refreshing the page (Cmd+R / Ctrl+R) makes it work
 
 **What We Know:**
 - Server starts successfully (no path-to-regexp error anymore)
 - All JavaScript modules initialize without errors
-- Console logs show: "Enabling section card after intro completion"
-- Element exists: `document.querySelector('#business-card')` returns the element
-- Element has correct CSS: opacity: 1, visibility: visible, display: block
+- On first load: business card element exists but is collapsed (0x0 dimensions)
+- After refresh: page displays correctly
+- **This is a timing/initialization issue** - something isn't ready on first load
 
-**ROOT CAUSE FOUND:**
-✅ Element dimensions: Height: 0, Width: 0
-✅ Position: All zeros (x: 0, y: 0, top: 0, left: 0, etc.)
-⚠️ **The element is completely collapsed - no content is rendering inside it**
+**Possible Causes:**
+- CSS not loading in time on first load
+- JavaScript initialization race condition
+- Intro animation not completing properly
+- GSAP/animation library not ready
 
-**User URL:** http://localhost:3000
-
-**Next Steps:**
-- [ ] Inspect the HTML inside #business-card to see if children exist
-- [ ] Check CSS that might be collapsing the container
-- [ ] Check if content is missing or hidden
-- [ ] Look for display:none, height:0, or overflow:hidden on parent/child elements
+**User Decision Needed:**
+- [ ] Mark as "good enough" and move on (workaround: just refresh)
+- [ ] Investigate further to fix the first-load issue
 
 ---
 
