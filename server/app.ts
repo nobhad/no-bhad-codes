@@ -121,7 +121,7 @@ app.get('/health', (req, res) => {
 // app.use('/api/uploads', uploadsRouter);
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use((req, res) => {
   // errorTracker.captureMessage(`404 - Route not found: ${req.method} ${req.originalUrl}`, 'warning', {
   //   request: {
   //     method: req.method,
