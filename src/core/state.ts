@@ -101,7 +101,7 @@ export class StateManager<T = AppState> {
       this.state = { ...this.state, [keyOrUpdates]: value };
     } else {
       // Object API
-      this.state = { ...this.state, ...keyOrUpdates };
+      this.state = { ...this.state, ...(keyOrUpdates as Partial<T>) };
     }
 
     // Add to history if not time traveling
