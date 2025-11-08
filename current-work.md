@@ -6,7 +6,43 @@
 
 ## 🔴 ACTIVE CONCERNS
 
-### 1. Page Blank on First Load, Works After Refresh
+### 1. Client Portal Page Routes to Admin Dashboard Instead
+**Status:** NEW - NOT STARTED
+**Reported:** When clicking "Client Portal" link, user is sent to admin dashboard instead
+**Priority:** HIGH - Core navigation broken
+
+**Next Steps:**
+- [ ] Check routing configuration
+- [ ] Find where client portal link points
+- [ ] Fix route to point to correct client portal page
+
+---
+
+### 2. Portfolio Section Missing from Client Portal Menu
+**Status:** NEW - NOT STARTED
+**Reported:** Portfolio section is missing from the menu on client portal page
+**Priority:** MEDIUM
+
+**Next Steps:**
+- [ ] Locate client portal menu/navigation component
+- [ ] Check if portfolio section exists in code but hidden
+- [ ] Add portfolio section to menu if missing
+
+---
+
+### 3. Admin Dashboard Has Horrible Layout
+**Status:** NEW - NOT STARTED
+**Reported:** Admin dashboard layout needs significant improvement
+**Priority:** MEDIUM - User feedback on visual design
+
+**Next Steps:**
+- [ ] Review current admin dashboard layout
+- [ ] Get specific feedback from user on what's wrong
+- [ ] Propose layout improvements
+
+---
+
+### 4. Page Blank on First Load, Works After Refresh
 **Status:** INVESTIGATING - Awaiting user decision
 **Reported:** User sees content load, then page goes blank (business card collapsed to 0x0)
 **WORKAROUND FOUND:** Refreshing the page (Cmd+R / Ctrl+R) makes it work
