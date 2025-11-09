@@ -1,46 +1,49 @@
 # Current Work & Concerns
 
-**Last Updated:** 2025-11-08 18:30
+**Last Updated:** 2025-11-08 19:45
 
 ---
 
 ## 🔴 ACTIVE CONCERNS
 
 ### 1. Navigation Menu Not Uniform
-**Status:** INVESTIGATING
+**Status:** PARTIALLY FIXED - Link navigation working, styling review pending
 **Reported:** Navigation menu styling/layout is inconsistent
 **Priority:** HIGH - Core UI consistency issue
 
 **Issues:**
-- [ ] Nav menu items not uniform (styling inconsistent)
-- [ ] About link in menu doesn't navigate to about section (NEW)
-- [ ] Contact link doesn't navigate to correct section of page (NEW)
+- [ ] Nav menu items not uniform (styling inconsistent) - PENDING REVIEW
+- [x] About link in menu doesn't navigate to about section - FIXED
+- [x] Contact link doesn't navigate to correct section of page - FIXED
 - Need to check: spacing, font sizes, colors, hover states, alignment
 
-**Next Steps:**
+**Completed:**
 - [x] Find navigation component/HTML
-- [ ] Identify inconsistencies
-- [ ] Fix About link navigation
-- [ ] Fix Contact link navigation
-- [ ] Apply uniform styling to all nav items
+- [x] Fix About link navigation - Uses RouterService with smooth scroll after menu close
+- [x] Fix Contact link navigation - Uses RouterService with smooth scroll after menu close
+
+**Next Steps:**
+- [ ] Review navigation styling for uniformity (spacing, fonts, colors, hover states)
+- [ ] Apply uniform styling to all nav items if needed
 
 ---
 
 ### 2. Contact Form Layout Issues
-**Status:** NEW - NOT STARTED
+**Status:** FIXED ✅
 **Reported:** Multiple visual/layout problems with contact form
 **Priority:** HIGH - User-facing form issues
 
-**Issues:**
-- [ ] Double buttons appearing on contact form (duplicates)
-- [ ] First name and last name fields too short - should match width of other fields
-- [ ] Company field in wrong position - should be below name fields
+**Completed:**
+- [x] Find contact form HTML/component - templates/pages/home.ejs
+- [x] Remove duplicate buttons - Removed duplicate form-actions div and closing form tag
+- [x] Fix field widths to be consistent - Removed "half" class from first/last name, all fields now full width
+- [x] Reorder fields - Now: First Name, Last Name, Company (optional), Email, Inquiry Type, etc.
 
-**Next Steps:**
-- [ ] Find contact form HTML/component
-- [ ] Remove duplicate buttons
-- [ ] Fix field widths to be consistent
-- [ ] Reorder fields: First Name, Last Name, Company, etc.
+**Changes Made:**
+- Removed duplicate submit button section (lines 126-129)
+- Changed first name and last name from half-width to full-width inputs
+- Moved company field from collapsible section to main form, positioned below last name
+- Company field is now optional and clearly marked as such in placeholder
 
 ---
 
