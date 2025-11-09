@@ -54,24 +54,26 @@ All menu items share identical styling:
 ---
 
 ### 3. Client Portal Page Routes to Admin Dashboard Instead
-**Status:** VERIFIED - ROUTING IS CORRECT ✅
+**Status:** FIXED ✅
 **Reported:** When clicking "Client Portal" link, user is sent to admin dashboard instead
 **Priority:** HIGH - Core navigation broken
 
-**Investigation Results:**
-- [x] Checked routing configuration in `templates/data.json`
-- [x] Verified client portal link points to `/client/portal` (line 45)
-- [x] Confirmed `/client/portal.html` exists and loads correct template
-- [x] Confirmed `/admin/index.html` is separate and distinct
+**Root Cause Found:**
+- Hardcoded fallback navigation in `src/modules/navigation.ts` had wrong URL: `/client-portal/` instead of `/client/portal`
+- Build files (build.html, test-nav.html) also had inconsistent URLs
 
-**Conclusion:**
-The routing configuration is CORRECT in the code:
-- Client Portal: `/client/portal` → `/client/portal.html` → `client-portal.ejs` ✓
-- Admin Dashboard: `/admin` → `/admin/index.html` → `admin.ejs` ✓
+**Changes Made:**
+- Updated `src/modules/navigation.ts` line 324: Changed fallback href from `/client-portal/` to `/client/portal`
+- Updated `build.html` line 31: Changed href from `/client-portal/` to `/client/portal`
+- Updated `test-nav.html` line 74: Changed href from `/client-portal/` to `/client/portal`
+- Verified `templates/data.json` has correct URL: `/client/portal` ✓
+- Verified `client/portal.html` loads correct template: `client-portal.ejs` ✓
+- Verified `admin/index.html` loads correct template: `admin.ejs` ✓
 
-**User Action Needed:**
-- Can you test clicking "Client Portal" in the menu and confirm if the issue still exists?
-- If issue persists, please share the URL you're being redirected to
+**Verification:**
+- `/client/portal` → loads client portal dashboard (Profile, Billing, Projects, Messages)
+- `/admin` → loads admin dashboard (Overview, Performance, Analytics, System)
+- Templates are distinct and correct
 
 ---
 
