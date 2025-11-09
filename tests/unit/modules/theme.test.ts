@@ -20,17 +20,22 @@ vi.mock('../../../src/services/logger.js', () => ({
   }
 }));
 
-// Mock state manager
+// Mock state manager with stateful mock
+const mockState = { theme: 'light' as 'light' | 'dark', navOpen: false };
 vi.mock('../../../src/core/state.js', () => ({
   StateManager: vi.fn().mockImplementation(() => ({
-    setState: vi.fn(),
-    getState: vi.fn(() => ({ theme: 'light', navOpen: false })),
+    setState: vi.fn((updates: any) => {
+      Object.assign(mockState, updates);
+    }),
+    getState: vi.fn(() => mockState),
     subscribe: vi.fn(() => () => {}), // Return unsubscribe function
     destroy: vi.fn()
   })),
   appState: {
-    setState: vi.fn(),
-    getState: vi.fn(() => ({ theme: 'light', navOpen: false })),
+    setState: vi.fn((updates: any) => {
+      Object.assign(mockState, updates);
+    }),
+    getState: vi.fn(() => mockState),
     subscribe: vi.fn(() => () => {}),
     destroy: vi.fn()
   }
@@ -41,13 +46,17 @@ describe('ThemeModule', () => {
   let themeModule: ThemeModule;
 
   beforeEach(() => {
+    // Reset mock state
+    mockState.theme = 'light';
+    mockState.navOpen = false;
+
     // Create test container with theme toggle structure
     container = document.createElement('div');
     container.innerHTML = `
       <div class="theme-controls">
-        <button 
-          id="theme-toggle" 
-          class="theme-toggle" 
+        <button
+          id="theme-toggle"
+          class="theme-toggle"
           aria-label="Toggle theme"
           data-theme="light"
         >
@@ -61,7 +70,7 @@ describe('ThemeModule', () => {
 
     document.body.appendChild(container);
     document.documentElement.setAttribute('data-theme', 'light');
-    
+
     themeModule = new ThemeModule(container);
     vi.clearAllMocks();
   });
