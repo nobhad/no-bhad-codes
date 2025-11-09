@@ -31,6 +31,12 @@ interface PerformanceMetricsDisplay {
   ttfb: PerformanceMetricDisplay;
   score: number;
   grade: string;
+  bundleSize?: {
+    total: string;
+    main: string;
+    vendor: string;
+  };
+  alerts?: string[];
 }
 
 interface AnalyticsDataItem {
@@ -90,18 +96,9 @@ interface VisitorInfo {
   device: string;
 }
 
-interface NBWDebugAPI {
-  getPerformanceReport?: () => Promise<PerformanceReport>;
-  getVisitorData?: () => Promise<AnalyticsData>;
-  getStatus?: () => ApplicationStatus;
-  getState?: () => Record<string, unknown>;
-  services?: Record<string, unknown>;
-}
-
 declare global {
-  interface Window {
-    NBW_DEBUG?: NBWDebugAPI;
-    opener?: Window & { NBW_DEBUG?: NBWDebugAPI };
+  interface ImportMeta {
+    env?: Record<string, string | undefined>;
   }
 }
 
@@ -482,9 +479,11 @@ class AdminDashboard {
       this.updateVital('cls', perfData.cls);
 
       // Bundle analysis
-      this.updateElement('total-bundle-size', perfData.bundleSize.total);
-      this.updateElement('js-bundle-size', perfData.bundleSize.js);
-      this.updateElement('css-bundle-size', perfData.bundleSize.css);
+      if (perfData.bundleSize) {
+        this.updateElement('total-bundle-size', perfData.bundleSize.total);
+        this.updateElement('js-bundle-size', perfData.bundleSize.main);
+        this.updateElement('css-bundle-size', perfData.bundleSize.vendor);
+      }
 
       // Performance score and alerts
       if (perfData.score !== undefined) {
@@ -492,7 +491,7 @@ class AdminDashboard {
       }
 
       if (perfData.alerts && perfData.alerts.length > 0) {
-        this.displayPerformanceAlerts(perfData.alerts);
+        this.displayPerformanceAlerts(perfData.alerts.map(msg => ({ type: 'warning' as const, message: msg, metric: '', value: 0, threshold: 0 } as PerformanceAlert)));
       }
 
     } catch (error) {
@@ -506,13 +505,13 @@ class AdminDashboard {
       if (window.opener?.NBW_DEBUG) {
         const debug = window.opener.NBW_DEBUG;
         if (debug.getPerformanceReport) {
-          return await debug.getPerformanceReport();
+          return await debug.getPerformanceReport() as unknown as PerformanceMetricsDisplay;
         }
       }
 
       // Try to get data from current window (if services are available)
       if (window.NBW_DEBUG?.getPerformanceReport) {
-        return await window.NBW_DEBUG.getPerformanceReport();
+        return await window.NBW_DEBUG.getPerformanceReport() as unknown as PerformanceMetricsDisplay;
       }
 
       // Try to access services directly from container
@@ -533,13 +532,18 @@ class AdminDashboard {
             value: report.metrics.cls ? report.metrics.cls.toFixed(3) : 'N/A',
             status: this.getVitalStatus('cls', report.metrics.cls)
           },
+          ttfb: {
+            value: report.metrics.ttfb ? `${Math.round(report.metrics.ttfb)}ms` : 'N/A',
+            status: this.getVitalStatus('ttfb', report.metrics.ttfb)
+          },
           bundleSize: {
             total: report.metrics.bundleSize ? `${Math.round(report.metrics.bundleSize / 1024)} KB` : 'N/A',
-            js: 'N/A',
-            css: 'N/A'
+            main: 'N/A',
+            vendor: 'N/A'
           },
           score: report.score || 0,
-          alerts: report.alerts || []
+          grade: this.getGradeFromScore(report.score || 0),
+          alerts: (report.alerts || []).map(alert => alert.message)
         };
       }
     } catch (error) {
@@ -551,12 +555,14 @@ class AdminDashboard {
       lcp: { value: '1.2s', status: 'good' },
       fid: { value: '45ms', status: 'good' },
       cls: { value: '0.05', status: 'good' },
+      ttfb: { value: '120ms', status: 'good' },
       bundleSize: {
         total: '156 KB',
-        js: '98 KB',
-        css: '58 KB'
+        main: '98 KB',
+        vendor: '58 KB'
       },
       score: 95,
+      grade: 'A',
       alerts: []
     };
   }
@@ -574,6 +580,14 @@ class AdminDashboard {
     default:
       return 'unknown';
     }
+  }
+
+  private getGradeFromScore(score: number): string {
+    if (score >= 90) return 'A';
+    if (score >= 80) return 'B';
+    if (score >= 70) return 'C';
+    if (score >= 60) return 'D';
+    return 'F';
   }
 
   private async loadAnalyticsData(): Promise<void> {
@@ -656,7 +670,7 @@ class AdminDashboard {
 
       // Try to get data from current window
       if (window.NBW_DEBUG?.getVisitorData) {
-        return await window.NBW_DEBUG.getVisitorData();
+        return await window.NBW_DEBUG.getVisitorData() as AnalyticsData;
       }
 
       // Try to access visitor tracking service directly
@@ -791,7 +805,7 @@ class AdminDashboard {
   private async getApplicationStatus(): Promise<ApplicationStatus> {
     try {
       if (window.NBW_DEBUG?.getStatus) {
-        return window.NBW_DEBUG.getStatus();
+        return window.NBW_DEBUG.getStatus() as ApplicationStatus;
       }
     } catch (error) {
       console.error('[AdminDashboard] Error getting app status:', error);
@@ -840,14 +854,14 @@ class AdminDashboard {
     }
   }
 
-  private populateDataList(listId: string, data: Array<{ label: string; value: string }>): void {
+  private populateDataList(listId: string, data: Array<{ label: string; value: string | number }>): void {
     const list = document.getElementById(listId);
     if (!list) return;
 
     list.innerHTML = data.map(item => `
       <div class="data-item">
         <span>${item.label}</span>
-        <span>${item.value}</span>
+        <span>${String(item.value)}</span>
       </div>
     `).join('');
   }

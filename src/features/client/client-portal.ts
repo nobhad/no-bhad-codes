@@ -774,7 +774,7 @@ export class ClientPortalModule extends BaseModule {
         const data = await response.json();
         this.isLoggedIn = true;
         this.currentUser = data.user.email;
-        await this.loadUserProjects(data.user.email);
+        await this.loadMockUserProjects(data.user);
         this.showDashboard();
       } else {
         // Token is invalid, remove it

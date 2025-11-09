@@ -369,7 +369,7 @@ export class CodeProtectionService {
     // Override console methods
     Object.keys(console).forEach(key => {
       if (typeof console[key as keyof Console] === 'function') {
-        console[key as keyof Console] = this.config.level === 'maximum' ? throwError as unknown as typeof console.log : noop as unknown as typeof console.log;
+        (console as any)[key] = this.config.level === 'maximum' ? throwError : noop;
       }
     });
 

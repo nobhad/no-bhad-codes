@@ -238,7 +238,7 @@ export class ComponentUtils {
   ): (...args: Parameters<T>) => void {
     let timeout: NodeJS.Timeout | null = null;
     return (...args: Parameters<T>) => {
-      clearTimeout(timeout);
+      if (timeout) clearTimeout(timeout);
       timeout = setTimeout(() => func.apply(this, args), wait);
     };
   }
@@ -269,7 +269,7 @@ export class ComponentUtils {
     Array.from(element.attributes).forEach(attr => {
       if (attr.name.startsWith(prefix)) {
         const key = attr.name.slice(prefix.length).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-        let { value } = attr;
+        let value: string | boolean | number = attr.value;
 
         // Try to parse as JSON, number, or boolean
         try {
