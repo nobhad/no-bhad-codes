@@ -170,8 +170,8 @@ export class Application {
         type: 'dom',
         factory: async () => {
           const { BusinessCardInteractions } = await import('../modules/business-card-interactions');
-          const renderer = await container.resolve('SectionCardRenderer') as ServiceInstance;
-          return new BusinessCardInteractions(renderer);
+          const renderer = await container.resolve('SectionCardRenderer');
+          return new BusinessCardInteractions(renderer as any);
         },
         dependencies: ['SectionCardRenderer']
       },
@@ -180,12 +180,12 @@ export class Application {
         type: 'dom',
         factory: async () => {
           const { NavigationModule } = await import('../modules/navigation');
-          const routerService = await container.resolve('RouterService') as ServiceInstance;
-          const dataService = await container.resolve('DataService') as ServiceInstance;
+          const routerService = await container.resolve('RouterService');
+          const dataService = await container.resolve('DataService');
           return new NavigationModule({
             debug: this.debug,
-            routerService,
-            dataService
+            routerService: routerService as any,
+            dataService: dataService as any
           });
         },
         dependencies: ['RouterService', 'DataService']
@@ -352,10 +352,10 @@ export class Application {
       // If consent was already accepted, initialize tracking now
       if (typeof window !== 'undefined') {
         const { ConsentBanner } = await import('../components');
-        const consentStatus = ConsentBanner.getConsentStatus();
+        const consentStatus = ConsentBanner.getConsentStatus?.();
         if (consentStatus === 'accepted') {
           const trackingService = await container.resolve('VisitorTrackingService') as ServiceInstance;
-          await trackingService.init();
+          await trackingService.init?.();
         }
       }
 
@@ -370,7 +370,7 @@ export class Application {
       // Enable section card after intro completion
       setTimeout(() => {
         const sectionRenderer = this.getModule('SectionCardRenderer');
-        if (sectionRenderer) {
+        if (sectionRenderer && 'enableAfterIntro' in sectionRenderer && typeof sectionRenderer.enableAfterIntro === 'function') {
           sectionRenderer.enableAfterIntro();
         }
 
@@ -395,7 +395,7 @@ export class Application {
       try {
         console.log(`[Application] Initializing ${serviceName}...`);
         const service = await container.resolve(serviceName) as ServiceInstance;
-        await service.init();
+        await service.init?.();
         this.services.set(serviceName, service);
         console.log(`[Application] ${serviceName} initialized`);
       } catch (error) {
@@ -446,7 +446,7 @@ export class Application {
       try {
         console.log(`[Application] Initializing ${moduleName}...`);
         const moduleInstance = await container.resolve(moduleName) as ModuleInstance;
-        await moduleInstance.init();
+        await moduleInstance.init?.();
         this.modules.set(moduleName, moduleInstance);
         console.log(`[Application] ${moduleName} initialized`);
       } catch (error) {
@@ -535,13 +535,13 @@ export class Application {
       modules: Object.fromEntries(
         Array.from(this.modules.entries()).map(([name, module]) => [
           name,
-          module.getStatus ? module.getStatus() : { loaded: true }
+          (typeof module === 'object' && module && 'getStatus' in module && typeof module.getStatus === 'function') ? module.getStatus() : { loaded: true }
         ])
       ),
       services: Object.fromEntries(
         Array.from(this.services.entries()).map(([name, service]) => [
           name,
-          service.getStatus ? service.getStatus() : { loaded: true }
+          (typeof service === 'object' && service && 'getStatus' in service && typeof service.getStatus === 'function') ? service.getStatus() : { loaded: true }
         ])
       )
     };
@@ -596,11 +596,11 @@ if (typeof window !== 'undefined') {
     getComponentStats: () => ComponentRegistry.getStats(),
     getPerformanceReport: async () => {
       const perfService = await container.resolve('PerformanceService') as ServiceInstance & { generateReport?: () => unknown };
-      return perfService.generateReport();
+      return perfService.generateReport?.();
     },
     getBundleAnalysis: async () => {
-      const bundleService = await container.resolve('BundleAnalyzerService') as ServiceInstance & { analyze?: () => Promise<unknown> };
-      return bundleService.analyzeBundles();
+      const bundleService = await container.resolve('BundleAnalyzerService') as ServiceInstance & { analyzeBundles?: () => Promise<unknown> };
+      return bundleService.analyzeBundles?.();
     },
     getVisitorData: async () => {
       try {
@@ -629,14 +629,14 @@ if (typeof window !== 'undefined') {
 
       console.log('SectionCardRenderer:', {
         exists: !!renderer,
-        status: renderer?.getStatus?.() || 'No status method'
+        status: (renderer && typeof renderer === 'object' && 'getStatus' in renderer && typeof renderer.getStatus === 'function') ? renderer.getStatus() : 'No status method'
       });
       console.log('SectionCardInteractions:', {
         exists: !!interactions,
-        status: interactions?.getStatus?.() || 'No status method'
+        status: (interactions && typeof interactions === 'object' && 'getStatus' in interactions && typeof interactions.getStatus === 'function') ? interactions.getStatus() : 'No status method'
       });
 
-      if (renderer) {
+      if (renderer && 'getCardElements' in renderer && typeof renderer.getCardElements === 'function') {
         console.log('Renderer elements:', renderer.getCardElements());
       }
 

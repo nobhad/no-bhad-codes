@@ -200,7 +200,7 @@ app.post('/api/intake', (req, res) => {
       id: projects.length + 1,
       clientId: newClient.id,
       intakeId: newIntake.id,
-      title: `${projectType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} Project for ${company || name}`,
+      title: `${projectType.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())} Project for ${company || name}`,
       type: projectType,
       status: 'pending' as const,
       budget: budget || '',
@@ -346,7 +346,7 @@ app.get('/api/admin/clients', (req, res) => {
       const clientProjects = projects.filter(p => p.clientId === client.id);
       return {
         ...client,
-        projects: clientsWithProjects
+        projects: clientProjects
       };
     });
     

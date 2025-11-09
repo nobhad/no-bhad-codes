@@ -101,11 +101,17 @@ Object.defineProperty(window, 'performance', {
 });
 
 // Mock PerformanceObserver
-global.PerformanceObserver = vi.fn().mockImplementation((callback) => ({
+const MockPerformanceObserver = vi.fn().mockImplementation((callback) => ({
   observe: vi.fn(),
   disconnect: vi.fn(),
   takeRecords: vi.fn(() => [])
-}));
+})) as any;
+Object.defineProperty(MockPerformanceObserver, 'supportedEntryTypes', {
+  value: ['navigation', 'resource', 'mark', 'measure', 'paint'],
+  writable: false,
+  configurable: true
+});
+global.PerformanceObserver = MockPerformanceObserver;
 
 // Mock IntersectionObserver
 global.IntersectionObserver = vi.fn().mockImplementation((callback) => ({
