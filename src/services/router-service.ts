@@ -138,21 +138,26 @@ export class RouterService extends BaseService {
    * Navigate to a route
    */
   async navigate(path: string, options: { replace?: boolean; smooth?: boolean } = {}): Promise<void> {
+    console.log('[RouterService] navigate() called with path:', path, 'options:', options);
+
     // Allow re-navigation to hash links (for re-scrolling to sections)
     const isHashLink = path.startsWith('#');
 
     if (this.isNavigating) {
+      console.log('[RouterService] Already navigating, skipping');
       return;
     }
 
     // Don't navigate if already on the same route (unless it's a hash link)
     if (!isHashLink && path === this.currentRoute) {
+      console.log('[RouterService] Already on route, skipping');
       return;
     }
 
     this.isNavigating = true;
 
     try {
+      console.log('[RouterService] Navigating to:', path);
       this.log(`Navigating to: ${path}`);
 
       // Update browser history
@@ -163,9 +168,12 @@ export class RouterService extends BaseService {
       }
 
       // Perform navigation
+      console.log('[RouterService] Calling performNavigation...');
       await this.performNavigation(path, options);
+      console.log('[RouterService] Navigation complete');
 
     } catch (error) {
+      console.error('[RouterService] Navigation failed:', error);
       this.error('Navigation failed:', error);
     } finally {
       this.isNavigating = false;
@@ -176,6 +184,8 @@ export class RouterService extends BaseService {
    * Navigate to a section (scroll-based)
    */
   async navigateToSection(sectionId: string, options: { smooth?: boolean } = {}): Promise<void> {
+    console.log('[RouterService] navigateToSection called with sectionId:', sectionId);
+
     // Try multiple selector strategies to find the section
     const section =
       document.getElementById(sectionId) ||
@@ -184,16 +194,25 @@ export class RouterService extends BaseService {
       document.querySelector(`[data-section="${sectionId}"]`);
 
     if (!section) {
+      console.warn('[RouterService] Section not found:', sectionId);
       this.warn(`Section not found: ${sectionId}`);
       return;
     }
 
+    console.log('[RouterService] Found section:', section);
+
     const shouldSmooth = options.smooth ?? this.config.smoothScrolling;
 
+    console.log('[RouterService] Should smooth scroll:', shouldSmooth);
+
     if (shouldSmooth) {
+      console.log('[RouterService] Starting smooth scroll...');
       await this.smoothScrollToSection(section);
+      console.log('[RouterService] Smooth scroll complete');
     } else {
+      console.log('[RouterService] Starting instant scroll...');
       this.scrollToSection(section);
+      console.log('[RouterService] Instant scroll complete');
     }
 
     // Update current route
@@ -235,12 +254,16 @@ export class RouterService extends BaseService {
    * Perform the actual navigation
    */
   private async performNavigation(path: string, options: any = {}): Promise<void> {
+    console.log('[RouterService] performNavigation called with path:', path);
     const route = this.findRoute(path);
 
     if (!route) {
+      console.warn('[RouterService] Route not found:', path);
       this.warn(`Route not found: ${path}`);
       return;
     }
+
+    console.log('[RouterService] Found route:', route);
 
     // Call beforeEnter guard
     if (route.beforeEnter) {
@@ -262,6 +285,7 @@ export class RouterService extends BaseService {
 
     // Navigate to section
     if (route.section) {
+      console.log('[RouterService] Navigating to section:', route.section);
       await this.navigateToSection(route.section, options);
     }
 
@@ -288,22 +312,42 @@ export class RouterService extends BaseService {
    * Find route by path
    */
   private findRoute(path: string): Route | null {
+    console.log('[RouterService] findRoute searching for path:', path);
+
+    // Extract hash from paths like "/#about" -> "#about"
+    let searchPath = path;
+    if (path.includes('#')) {
+      const hashIndex = path.indexOf('#');
+      searchPath = path.substring(hashIndex); // Get everything from # onward
+      console.log('[RouterService] Extracted hash:', searchPath);
+    }
+
     // Direct match
-    if (this.routes.has(path)) {
-      return this.routes.get(path)!;
+    if (this.routes.has(searchPath)) {
+      console.log('[RouterService] Found direct match for:', searchPath);
+      return this.routes.get(searchPath)!;
     }
 
     // Hash-based match
-    if (path.startsWith('#')) {
-      const sectionId = path.substring(1);
+    if (searchPath.startsWith('#')) {
+      const sectionId = searchPath.substring(1);
+      console.log('[RouterService] Searching for section:', sectionId);
       for (const route of this.routes.values()) {
         if (route.section === sectionId) {
+          console.log('[RouterService] Found route by section:', route);
           return route;
         }
       }
     }
 
+    // Try original path for non-hash routes
+    if (this.routes.has(path)) {
+      console.log('[RouterService] Found match for original path:', path);
+      return this.routes.get(path)!;
+    }
+
     // Default route fallback
+    console.log('[RouterService] No match found, using default route');
     return this.routes.get(this.config.defaultRoute) || null;
   }
 

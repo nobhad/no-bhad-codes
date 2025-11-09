@@ -290,6 +290,11 @@ export class IntroAnimationModule extends BaseModule {
     document.documentElement.classList.remove('intro-loading');
     document.documentElement.classList.add('intro-complete');
 
+    // After transition completes, add intro-finished to stop future transitions
+    setTimeout(() => {
+      document.documentElement.classList.add('intro-finished');
+    }, 600); // Wait for intro-complete transition to finish
+
     // Remove overlay from DOM
     if (this.overlay && this.overlay.parentNode) {
       this.overlay.parentNode.removeChild(this.overlay);
