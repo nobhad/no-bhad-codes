@@ -216,9 +216,10 @@ export abstract class BaseQueryBuilder<T = any> {
   }
 
   /**
-   * Pagination helper
+   * Pagination helper (for building queries)
+   * Note: SelectQueryBuilder overrides this to execute and return results
    */
-  paginate(page: number, perPage: number): this {
+  protected paginateBuilder(page: number, perPage: number): this {
     const offset = (page - 1) * perPage;
     return this.limit(perPage).offset(offset);
   }
@@ -488,9 +489,9 @@ export class SelectQueryBuilder<T = any> extends BaseQueryBuilder<T> {
   }
 
   /**
-   * Get paginated results
+   * Execute paginated query (overrides base paginate to return results)
    */
-  async getPaginated(page: number = 1, perPage: number = 15): Promise<{
+  async paginate(page: number, perPage: number): Promise<{
     data: T[];
     pagination: {
       page: number;
@@ -505,8 +506,9 @@ export class SelectQueryBuilder<T = any> extends BaseQueryBuilder<T> {
     const total = await this.count();
     const totalPages = Math.ceil(total / perPage);
 
-    // Get paginated data
-    const result = await this.paginate(page, perPage).get();
+    // Build and execute paginated query using base class logic
+    const offset = (page - 1) * perPage;
+    const result = await this.limit(perPage).offset(offset).get();
 
     return {
       data: result.rows,
@@ -519,6 +521,23 @@ export class SelectQueryBuilder<T = any> extends BaseQueryBuilder<T> {
         hasPrev: page > 1
       }
     };
+  }
+
+  /**
+   * Get paginated results (alias for paginate for backward compatibility)
+   */
+  async getPaginated(page: number = 1, perPage: number = 15): Promise<{
+    data: T[];
+    pagination: {
+      page: number;
+      perPage: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+  }> {
+    return this.paginate(page, perPage);
   }
 }
 
@@ -871,11 +890,11 @@ export class QueryBuilder {
       const executionTime = Date.now() - startTime;
 
       const err = error as Error;
-      await logger.error('Raw SQL query failed', {
+      await logger.error('Database query failed', {
         message: err.message
       });
 
-      throw new Error(`Raw SQL query failed: ${err.message}`);
+      throw new Error(`Database query failed: ${err.message}`);
     }
   }
 

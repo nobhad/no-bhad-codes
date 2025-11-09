@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { ThemeModule } from './theme';
+import { ThemeModule } from '@/modules/theme';
 
 // Mock localStorage
 const mockLocalStorage = {

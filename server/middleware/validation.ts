@@ -140,6 +140,46 @@ export class ApiValidator {
         break;
     }
 
+    // Apply custom validator if present (works for all types, not just 'custom')
+    if (rule.customValidator && errors.length === 0) {
+      try {
+        const result = rule.customValidator(sanitizedValue);
+
+        if (result === false) {
+          errors.push({
+            field,
+            message: `${field} failed custom validation`,
+            code: 'CUSTOM_VALIDATION_FAILED',
+            value
+          });
+        } else if (typeof result === 'string') {
+          errors.push({
+            field,
+            message: result,
+            code: 'CUSTOM_VALIDATION_FAILED',
+            value
+          });
+        }
+      } catch (error) {
+        errors.push({
+          field,
+          message: `${field} custom validation error: ${(error as Error).message}`,
+          code: 'CUSTOM_VALIDATION_ERROR',
+          value
+        });
+      }
+    }
+
+    // Apply custom sanitizer if present
+    if (rule.customSanitizer) {
+      try {
+        sanitizedValue = rule.customSanitizer(sanitizedValue);
+      } catch (error) {
+        // If sanitizer fails, log but don't fail validation
+        console.warn(`Custom sanitizer failed for ${field}:`, error);
+      }
+    }
+
     return {
       isValid: errors.length === 0,
       errors,
