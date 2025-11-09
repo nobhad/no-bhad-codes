@@ -45,12 +45,13 @@
         
         <!-- Honeypot field for bot detection -->
         <input name="bot-field" style="display: none;" />
-        
-        <div class="form-row">
-            <input autocomplete="off" class="form-input half" data-name="First Name" id="First-Name" maxlength="256" name="First-Name" placeholder="First Name" required="" type="text">
-            <input autocomplete="off" class="form-input half" data-name="Last Name" id="Last-Name" maxlength="256" name="Last-Name" placeholder="Last Name" required="" type="text">
-        </div>
-        
+
+        <input autocomplete="off" class="form-input" data-name="First Name" id="First-Name" maxlength="256" name="First-Name" placeholder="First Name" required="" type="text">
+
+        <input autocomplete="off" class="form-input" data-name="Last Name" id="Last-Name" maxlength="256" name="Last-Name" placeholder="Last Name" required="" type="text">
+
+        <input autocomplete="on" class="form-input" data-name="Company Name" id="Company-Name" maxlength="256" name="Company-Name" placeholder="Company/Organization Name (Optional)" type="text">
+
         <input autocomplete="on" class="form-input" data-name="Email" id="Email" maxlength="256" name="Email" placeholder="Email Address" required="" type="email">
         
         <select class="form-select" data-name="Inquiry Type" id="inquiry-type" name="Inquiry-Type" required="">
@@ -99,32 +100,10 @@
         </div>
         
         <textarea autocomplete="off" class="form-textarea" data-name="Project Description" id="project-description" maxlength="1000" name="Project-Description" placeholder="Brief description of your project (What's the main goal? Who's your target audience?)" required=""></textarea>
-        
-        <!-- Optional company info -->
-        <details class="company-details">
-            <summary>+ Company Information (Optional)</summary>
-            <div class="company-fields">
-                <input autocomplete="on" class="form-input" data-name="Company Name" id="Company-Name" maxlength="256" name="Company-Name" placeholder="Company/Organization Name" type="text">
-                
-                <select class="form-select" data-name="Business Size" id="business-size" name="Business-Size">
-                    <option value="">Business Size (Optional)</option>
-                    <option value="Solo">Just me - not a business</option>
-                    <option value="Small">Small Business (2-10 employees)</option>
-                    <option value="Medium">Medium Business (11-50 employees)</option>
-                    <option value="Large">Large Business (50+ employees)</option>
-                    <option value="Startup">Startup</option>
-                    <option value="Non-Profit">Non-Profit</option>
-                </select>
-            </div>
-        </details>
-        
+
         <div class="form-actions">
             <input class="form-button" data-wait="Sending..." type="submit" value="Let's Talk">
             <p class="form-note">Most inquiries will need to fill out the <a href="/intake-form" class="link">Intake Form</a></p>
-        </div>
-    </form>
-        <div class="form-actions">
-            <input class="form-button" data-wait="Please wait..." type="submit" value="Let's Talk">
         </div>
     </form>
 </section>

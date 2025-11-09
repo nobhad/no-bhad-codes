@@ -106,11 +106,24 @@ export class NavigationModule extends BaseModule {
             return;
           }
 
-          // For all other valid links, just close the menu and let browser handle navigation
+          // For all other valid links, handle navigation
           const href = (link as HTMLAnchorElement).getAttribute('href');
           if (href) {
-            // Close menu immediately for better UX
-            this.closeMenu();
+            // Handle hash links (same-page navigation) with router
+            if (href.startsWith('#')) {
+              event.preventDefault();
+              this.closeMenu();
+              // Use router service for smooth scroll after menu closes
+              if (this.routerService) {
+                // Small delay to let menu close animation start
+                setTimeout(() => {
+                  this.routerService!.navigate(href, { smooth: true });
+                }, 100);
+              }
+            } else {
+              // For non-hash links, just close menu and let browser navigate
+              this.closeMenu();
+            }
           }
         });
       });
