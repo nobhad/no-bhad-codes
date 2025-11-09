@@ -69,8 +69,28 @@ export class StateManager<T = AppState> {
   private history: { state: T; action?: StateAction<T>; timestamp: number }[] = [];
   private maxHistorySize = 50;
   private isTimeTravel = false;
+  private persistenceEnabled = false;
+  private persistenceKey = 'app-state';
 
-  constructor(initialState?: T) {
+  constructor(initialState?: T, options?: { enablePersistence?: boolean; persistenceKey?: string }) {
+    // Try to restore from localStorage if persistence is enabled
+    if (options?.enablePersistence) {
+      this.persistenceEnabled = true;
+      if (options.persistenceKey) {
+        this.persistenceKey = options.persistenceKey;
+      }
+
+      try {
+        const stored = localStorage.getItem(this.persistenceKey);
+        if (stored) {
+          this.state = JSON.parse(stored);
+          return;
+        }
+      } catch (error) {
+        console.warn('Failed to restore state from localStorage:', error);
+      }
+    }
+
     this.state = initialState ? { ...initialState } : {} as T;
   }
 
@@ -107,6 +127,15 @@ export class StateManager<T = AppState> {
     // Add to history if not time traveling
     if (!this.isTimeTravel) {
       this.addToHistory(this.state);
+    }
+
+    // Persist to localStorage if enabled
+    if (this.persistenceEnabled) {
+      try {
+        localStorage.setItem(this.persistenceKey, JSON.stringify(this.state));
+      } catch (error) {
+        console.warn('Failed to persist state to localStorage:', error);
+      }
     }
 
     // Notify listeners
@@ -162,11 +191,11 @@ export class StateManager<T = AppState> {
    */
   subscribe(listener: StateListener<T>): () => void;
   subscribe<K extends keyof T>(
-    key: K,
+    key: K | '*',
     listener: (newValue: T[K], oldValue: T[K] | undefined, key: K) => void
   ): () => void;
   subscribe<K extends keyof T>(
-    keyOrListener: K | StateListener<T>,
+    keyOrListener: K | '*' | StateListener<T>,
     listener?: (newValue: T[K], oldValue: T[K] | undefined, key: K) => void
   ): () => void {
     if (typeof keyOrListener === 'function') {
@@ -179,6 +208,32 @@ export class StateManager<T = AppState> {
       return () => {
         const currentListeners = this.listeners.get('global') || [];
         const index = currentListeners.indexOf(globalListener);
+        if (index > -1) {
+          currentListeners.splice(index, 1);
+        }
+      };
+    }
+
+    // Wildcard subscription - subscribe to all property changes
+    if (keyOrListener === '*') {
+      const wildcardListener = listener!;
+      const wrappedListener: StateListener<T> = (newState, prevState) => {
+        // Call listener for any property that changed
+        Object.keys(newState as any).forEach(key => {
+          const k = key as K;
+          if (newState[k] !== prevState[k]) {
+            wildcardListener(newState[k], prevState[k], k);
+          }
+        });
+      };
+
+      const globalListeners = this.listeners.get('global') || [];
+      globalListeners.push(wrappedListener);
+      this.listeners.set('global', globalListeners);
+
+      return () => {
+        const currentListeners = this.listeners.get('global') || [];
+        const index = currentListeners.indexOf(wrappedListener);
         if (index > -1) {
           currentListeners.splice(index, 1);
         }
@@ -472,6 +527,37 @@ export class StateManager<T = AppState> {
   }
 
   /**
+   * Time travel forward (redo)
+   */
+  redo(): boolean {
+    // Redo not implemented in basic version - would need separate redo stack
+    return false;
+  }
+
+  /**
+   * Get computed property value (alias for getComputed)
+   */
+  get<U>(name: string): U | undefined {
+    return this.getComputed<U>(name);
+  }
+
+  /**
+   * Set validator for state changes
+   */
+  private validator?: (state: T, updates: Partial<T>) => boolean | string | Promise<boolean | string>;
+
+  setValidator(validator: (state: T, updates: Partial<T>) => boolean | string | Promise<boolean | string>): void {
+    this.validator = validator;
+  }
+
+  /**
+   * Add middleware (alias for addMiddleware)
+   */
+  use(middleware: StateMiddleware<T>): void {
+    this.addMiddleware(middleware);
+  }
+
+  /**
    * Destroy the state manager and clean up
    */
   destroy(): void {
@@ -481,7 +567,20 @@ export class StateManager<T = AppState> {
     this.reducers.clear();
     this.middleware = [];
     this.history = [];
+    // Clear state as well
+    this.state = {} as T;
   }
+}
+
+/**
+ * Create a new state manager instance
+ */
+export function createStateManager<T = AppState>(initialState?: T, options?: {
+  enableHistory?: boolean;
+  enablePersistence?: boolean;
+  persistenceKey?: string;
+}): StateManager<T> {
+  return new StateManager<T>(initialState, options);
 }
 
 // Enhanced connection detection

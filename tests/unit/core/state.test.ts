@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { StateManager } from '../../../src/core/state.js';
+import { StateManager, createStateManager } from '../../../src/core/state.js';
 
 // Mock logger
 vi.mock('../../../src/services/logger.js', () => ({
