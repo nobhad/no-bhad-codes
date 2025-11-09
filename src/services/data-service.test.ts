@@ -14,77 +14,54 @@ import portfolioData from '../../tests/mocks/portfolio.json';
 // Mock fetch
 global.fetch = vi.fn() as Mock;
 
-const mockVenturesData = {
-  ventures: {
-    codes: {
+const mockPortfolioData = {
+  projects: [
+    {
+      id: 'portfolio',
+      title: 'Portfolio Website',
+      description: 'Custom portfolio',
+      technologies: ['React', 'TypeScript'],
+      featured: true,
+      category: 'codes'
+    },
+    {
+      id: 'ecommerce',
+      title: 'E-commerce Platform',
+      description: 'Online store',
+      technologies: ['Node.js', 'MongoDB'],
+      featured: false,
+      category: 'codes'
+    },
+    {
+      id: 'branding',
+      title: 'Brand Identity',
+      description: 'Logo design',
+      technologies: ['Illustrator', 'Photoshop'],
+      featured: true,
+      category: 'art'
+    }
+  ],
+  categories: [
+    {
       id: 'codes',
       title: 'CODES',
       description: 'Web development',
       fullDescription: 'Full-stack development',
       color: '#00ff41',
-      icon: '💻',
-      projects: [
-        {
-          id: 'portfolio',
-          title: 'Portfolio Website',
-          description: 'Custom portfolio',
-          technologies: ['React', 'TypeScript'],
-          featured: true
-        },
-        {
-          id: 'ecommerce',
-          title: 'E-commerce Platform',
-          description: 'Online store',
-          technologies: ['Node.js', 'MongoDB'],
-          featured: false
-        }
-      ]
+      icon: '💻'
     },
-    art: {
+    {
       id: 'art',
       title: 'ART',
       description: 'Creative design',
       fullDescription: 'Visual artwork',
       color: '#ff6b6b',
-      icon: '🎨',
-      projects: [
-        {
-          id: 'branding',
-          title: 'Brand Identity',
-          description: 'Logo design',
-          technologies: ['Illustrator', 'Photoshop'],
-          featured: true
-        }
-      ]
+      icon: '🎨'
     }
-  },
+  ],
   navigation: {
     main: [
       { id: 'home', title: 'home', path: '/', eyebrow: '00' }
-    ],
-    ventures: [
-      { id: 'codes', title: 'CODES', path: '/ventures/codes', eyebrow: 'C' }
-    ]
-  },
-  profile: {
-    name: 'Test User',
-    title: 'Developer',
-    location: 'Test City',
-    bio: 'Test bio',
-    techStack: ['JavaScript', 'TypeScript'],
-    tagline: 'Test tagline',
-    social: {
-      email: 'test@example.com'
-    }
-  },
-  contact: {
-    title: 'contact',
-    intro: 'Test intro',
-    businessSizes: [
-      { value: 'Small', label: 'Small Business' }
-    ],
-    helpOptions: [
-      { value: 'CODES', label: 'CODES', id: 'codes-section' }
     ]
   }
 };
@@ -99,7 +76,7 @@ describe('DataService', () => {
     // Mock successful fetch response
     (fetch as Mock).mockResolvedValue({
       ok: true,
-      json: vi.fn().mockResolvedValue(mockVenturesData)
+      json: vi.fn().mockResolvedValue(mockPortfolioData)
     });
   });
 
@@ -128,40 +105,40 @@ describe('DataService', () => {
     });
   });
 
-  describe('getVentures', () => {
+  describe('getProjects', () => {
     beforeEach(async () => {
       await dataService.init();
     });
 
-    it('should return all ventures', () => {
-      const ventures = dataService.getVentures();
+    it('should return all projects', () => {
+      const projects = dataService.getProjects();
 
-      expect(ventures).toEqual(mockVenturesData.ventures);
-      expect(Object.keys(ventures)).toHaveLength(2);
+      expect(projects).toEqual(mockPortfolioData.projects);
+      expect(projects).toHaveLength(3);
     });
 
     it('should throw error if data not loaded', () => {
       const uninitializedService = new DataService();
 
-      expect(() => uninitializedService.getVentures()).toThrow('Data not loaded. Call init() first.');
+      expect(() => uninitializedService.getProjects()).toThrow('Data not loaded. Call init() first.');
     });
   });
 
-  describe('getVenture', () => {
+  describe('getProject', () => {
     beforeEach(async () => {
       await dataService.init();
     });
 
-    it('should return specific venture by id', () => {
-      const venture = dataService.getVenture('codes');
+    it('should return specific project by id', () => {
+      const project = dataService.getProject('portfolio');
 
-      expect(venture).toEqual(mockVenturesData.ventures.codes);
+      expect(project).toEqual(mockPortfolioData.projects[0]);
     });
 
-    it('should return null for non-existent venture', () => {
-      const venture = dataService.getVenture('nonexistent');
+    it('should return null for non-existent project', () => {
+      const project = dataService.getProject('nonexistent');
 
-      expect(venture).toBeNull();
+      expect(project).toBeNull();
     });
   });
 
@@ -178,11 +155,11 @@ describe('DataService', () => {
       expect(featured.map(p => p.id)).toEqual(['portfolio', 'branding']);
     });
 
-    it('should include venture information', () => {
+    it('should include category information', () => {
       const featured = dataService.getFeaturedProjects();
 
-      expect(featured[0]).toHaveProperty('ventureId', 'codes');
-      expect(featured[0]).toHaveProperty('ventureName', 'CODES');
+      expect(featured[0]).toHaveProperty('category', 'codes');
+      expect(featured[1]).toHaveProperty('category', 'art');
     });
 
     it('should use cache on subsequent calls', () => {
@@ -201,35 +178,8 @@ describe('DataService', () => {
     it('should return navigation data', () => {
       const navigation = dataService.getNavigation();
 
-      expect(navigation).toEqual(mockVenturesData.navigation);
+      expect(navigation).toEqual(mockPortfolioData.navigation);
       expect(navigation.main).toHaveLength(1);
-      expect(navigation.ventures).toHaveLength(1);
-    });
-  });
-
-  describe('getProfile', () => {
-    beforeEach(async () => {
-      await dataService.init();
-    });
-
-    it('should return profile data', () => {
-      const profile = dataService.getProfile();
-
-      expect(profile).toEqual(mockVenturesData.profile);
-      expect(profile.name).toBe('Test User');
-    });
-  });
-
-  describe('getContactData', () => {
-    beforeEach(async () => {
-      await dataService.init();
-    });
-
-    it('should return contact data', () => {
-      const contact = dataService.getContactData();
-
-      expect(contact).toEqual(mockVenturesData.contact);
-      expect(contact.title).toBe('contact');
     });
   });
 
@@ -350,7 +300,8 @@ describe('DataService', () => {
 
       expect(status.dataLoaded).toBe(false);
       expect(status.cacheSize).toBe(0);
-      expect(status.ventureCount).toBe(0);
+      expect(status.projectCount).toBe(0);
+      expect(status.categoryCount).toBe(0);
     });
 
     it('should return status after initialization', async () => {
@@ -360,7 +311,8 @@ describe('DataService', () => {
 
       expect(status.dataLoaded).toBe(true);
       expect(status.cacheSize).toBe(0);
-      expect(status.ventureCount).toBe(2);
+      expect(status.projectCount).toBe(3);
+      expect(status.categoryCount).toBe(2);
     });
   });
 });

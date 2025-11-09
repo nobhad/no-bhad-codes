@@ -278,7 +278,8 @@ export class ApiValidator {
     }
 
     const email = value.trim().toLowerCase();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Email regex: allows dots, hyphens, plus signs; requires valid TLD
+    const emailRegex = /^[a-z0-9]+([._+-]?[a-z0-9]+)*@[a-z0-9]+([.-]?[a-z0-9]+)*(\.[a-z]{2,})+$/;
 
     if (!emailRegex.test(email)) {
       errors.push({
