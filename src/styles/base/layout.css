@@ -264,29 +264,37 @@ main {
  * INTRO ANIMATION STATES
  * ============================================ */
 
-/* Default: ensure content is visible */
+/* Default: ensure content is visible and prevent unwanted transitions */
 .header,
 main,
 .footer {
-  opacity: 1;
-  visibility: visible;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: none !important; /* Prevent opacity transitions on navigation */
 }
 
 /* Hide main page content during intro animation */
 .intro-loading .header,
 .intro-loading main,
 .intro-loading .footer {
-  opacity: 0;
-  visibility: hidden;
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
-/* Show content after intro completes (explicit for smooth transition) */
+/* Show content after intro completes (with transition only for intro completion) */
 .intro-complete .header,
 .intro-complete main,
 .intro-complete .footer {
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.5s ease-in-out;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: opacity 0.5s ease-in-out !important;
+}
+
+/* After intro completes, remove transition to prevent flicker */
+.intro-complete.intro-finished .header,
+.intro-complete.intro-finished main,
+.intro-complete.intro-finished .footer {
+  transition: none !important;
 }
 
 /* ============================================
