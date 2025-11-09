@@ -207,27 +207,39 @@ body.dark-theme .contact-form .form-select {
   grid-column: 1 / 3;
   grid-row: 9;
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  padding-top: 4px;
-  margin-top: 2px;
+  gap: 12px;
+  padding-top: 8px;
+  margin-top: 8px;
 }
 
 /* Submit Button - GSAP FIRST */
 .form-button {
-  padding: 8px 20px;
+  width: 100%;
+  max-width: 200px;
+  padding: 12px 24px;
   background-color: var(--color-neutral-300);
   color: var(--fg);
   border: 4px solid #000000;
   border-radius: 0;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  flex-shrink: 0;
   box-shadow: 0 4px 8px var(--color-shadow);
   font-family: inherit;
   text-shadow: 0 2px 4px var(--color-shadow);
   transition: background-color 0.3s ease;
+}
+
+.form-note {
+  font-size: 0.75rem;
+  text-align: center;
+  margin: 0;
+  color: var(--fg);
+  opacity: 0.8;
+  line-height: 1.4;
 }
 
 .form-button.form-valid {

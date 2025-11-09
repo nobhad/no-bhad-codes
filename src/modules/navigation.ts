@@ -54,7 +54,9 @@ export class NavigationModule extends BaseModule {
   }
 
   protected override async onInit(): Promise<void> {
+    console.log('[NavigationModule] Starting initialization...');
     await this.cacheElements();
+    console.log('[NavigationModule] Elements cached, RouterService:', !!this.routerService);
     this.setupEventListeners();
     this.setupStateSubscriptions();
     this.setupAnimations();
@@ -64,6 +66,7 @@ export class NavigationModule extends BaseModule {
     // Initialize submenu functionality
     this.submenuModule = new SubmenuModule({ debug: this.options.debug || false });
     await this.submenuModule.init();
+    console.log('[NavigationModule] Initialization complete');
   }
 
   /**
@@ -93,8 +96,12 @@ export class NavigationModule extends BaseModule {
 
     // Menu links - only handle submenu toggles and close menu on valid link clicks
     if (this.menuLinks) {
-      this.menuLinks.forEach(link => {
+      console.log('[NavigationModule] Setting up click handlers for', this.menuLinks.length, 'menu links');
+      this.menuLinks.forEach((link, index) => {
+        const linkHref = (link as HTMLAnchorElement).getAttribute('href');
+        console.log('[NavigationModule] Link', index, 'href:', linkHref);
         this.addEventListener(link as Element, 'click', (event: Event) => {
+          console.log('[NavigationModule] Click handler fired for:', linkHref);
           // Handle submenu toggle links
           if ((link as Element).hasAttribute('data-submenu-toggle')) {
             return; // Let submenu module handle this
@@ -107,7 +114,7 @@ export class NavigationModule extends BaseModule {
           }
 
           // For all other valid links, handle navigation
-          const href = (link as HTMLAnchorElement).getAttribute('href');
+          const href = linkHref;
           if (href) {
             // Handle hash links (same-page navigation) with router
             if (href.startsWith('#')) {
@@ -118,18 +125,24 @@ export class NavigationModule extends BaseModule {
               const currentPath = window.location.pathname;
               const isHomePage = currentPath === '/' || currentPath === '/index.html' || currentPath === '';
 
+              console.log('[NavigationModule] Hash link clicked:', href, 'isHomePage:', isHomePage, 'hasRouter:', !!this.routerService);
+
               if (this.routerService) {
                 // Small delay to let menu close animation start
                 setTimeout(() => {
                   if (isHomePage) {
                     // If already on home page, just scroll to section
+                    console.log('[NavigationModule] Navigating to section:', href);
                     this.routerService!.navigate(href, { smooth: true });
                   } else {
                     // If on another page, navigate to home page with hash
                     // This will load the home page and then scroll to the section
+                    console.log('[NavigationModule] Redirecting to home with hash:', `/${href}`);
                     window.location.href = `/${href}`;
                   }
                 }, 100);
+              } else {
+                console.error('[NavigationModule] RouterService not available!');
               }
             } else {
               // For non-hash links, just close menu and let browser navigate

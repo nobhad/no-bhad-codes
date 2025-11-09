@@ -3,6 +3,51 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><%= pageData.title %></title>
 
+<!-- Prevent theme flash - critical inline styles and script -->
+<style>
+  /* Prevent flash of unstyled content - load theme colors immediately */
+  :root {
+    --bg: #ffffff;
+    --fg: #000000;
+    --color-neutral-300: #e5e5e5;
+    --color-primary: #ff6b6b;
+    --color-shadow: rgba(0, 0, 0, 0.1);
+  }
+
+  [data-theme="dark"] {
+    --bg: #1a1a1a;
+    --fg: #ffffff;
+    --color-neutral-300: #333333;
+    --color-primary: #ff6b6b;
+    --color-shadow: rgba(255, 255, 255, 0.05);
+  }
+
+  html {
+    background-color: var(--bg);
+    color: var(--fg);
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    margin: 0;
+    padding: 0;
+  }
+</style>
+
+<script>
+  (function() {
+    try {
+      const savedTheme = localStorage.getItem('theme');
+      // Set theme immediately to prevent flash
+      document.documentElement.setAttribute('data-theme', savedTheme || 'light');
+    } catch (e) {
+      // localStorage might be blocked - use default
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
+
 <!-- SEO Meta Tags -->
 <meta name="description" content="<%= pageData.description %>">
 <meta name="author" content="<%= site.author || 'Noelle Bhaduri' %>">
