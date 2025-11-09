@@ -75,6 +75,9 @@ export class ContactFormModule extends BaseModule {
   private setupFormValidation(): void {
     if (!this.form || !this.submitButton) return;
 
+    // Disable browser validation in favor of custom validation
+    this.form.noValidate = true;
+
     const validateForm = () => {
       const requiredFields = this.form!.querySelectorAll('input[required], select[required], textarea[required]');
       const isValid = Array.from(requiredFields).every((field) => {
