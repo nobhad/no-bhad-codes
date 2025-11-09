@@ -26,16 +26,39 @@ class ClientPortalApp {
    * Register only essential services for client portal
    */
   private setupMinimalServices(): void {
+    // Register router service (needed for navigation)
+    container.register('RouterService', async () => {
+      const { RouterService } = await import('./services/router-service');
+      return new RouterService({
+        defaultRoute: '/',
+        smoothScrolling: true,
+        scrollOffset: 80,
+        transitionDuration: 600
+      });
+    }, { singleton: true });
+
+    // Register data service (needed for navigation)
+    container.register('DataService', async () => {
+      const { DataService } = await import('./services/data-service');
+      return new DataService();
+    }, { singleton: true });
+
     // Theme module for light/dark mode
     container.register('ThemeModule', async () => {
       const { ThemeModule } = await import('./modules/theme');
       return new ThemeModule();
     }, { singleton: true });
 
-    // Navigation module (for menu functionality)
+    // Navigation module (for menu functionality) - with RouterService and DataService
     container.register('NavigationModule', async () => {
       const { NavigationModule } = await import('./modules/navigation');
-      return new NavigationModule();
+      const routerService = await container.resolve('RouterService');
+      const dataService = await container.resolve('DataService');
+      return new NavigationModule({
+        debug: false,
+        routerService: routerService as any,
+        dataService: dataService as any
+      });
     }, { singleton: true });
   }
 
@@ -46,14 +69,20 @@ class ClientPortalApp {
     if (this.isInitialized) return;
 
     try {
-      // Initialize essential modules only
+      // Initialize services first
+      const routerService = await container.resolve('RouterService') as any;
+      const dataService = await container.resolve('DataService') as any;
+      await routerService?.init?.();
+      await dataService?.init?.();
+
+      // Initialize essential modules
       const themeModule = await container.resolve('ThemeModule') as any;
       const navigationModule = await container.resolve('NavigationModule') as any;
 
       // Initialize theme
       await themeModule?.init?.();
 
-      // Initialize navigation
+      // Initialize navigation (now has RouterService and DataService)
       await navigationModule?.init?.();
 
       // Initialize the full client portal module

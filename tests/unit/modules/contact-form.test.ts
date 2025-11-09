@@ -22,8 +22,11 @@ vi.mock('../../../src/services/logger.js', () => ({
 
 vi.mock('../../../src/services/contact-service.js', () => ({
   ContactService: vi.fn().mockImplementation(() => ({
+    init: vi.fn().mockResolvedValue(undefined),
     submitForm: vi.fn(),
-    validateForm: vi.fn()
+    validateForm: vi.fn(),
+    validateFormData: vi.fn().mockReturnValue({ valid: true, errors: [] }),
+    getConfig: vi.fn().mockReturnValue({ backend: 'netlify' })
   }))
 }));
 
@@ -56,7 +59,7 @@ describe('ContactFormModule', () => {
           <span class="error-message" style="display: none;"></span>
         </div>
         <div class="form-actions">
-          <button type="submit" class="btn-primary" id="submit-btn">
+          <button type="submit" class="form-button" id="submit-btn">
             <span class="btn-text">Send Message</span>
             <span class="btn-loader" style="display: none;">Sending...</span>
           </button>
@@ -69,8 +72,8 @@ describe('ContactFormModule', () => {
     `;
 
     document.body.appendChild(container);
-    contactModule = new ContactFormModule(container);
-    
+    contactModule = new ContactFormModule({ debug: false });
+
     vi.clearAllMocks();
   });
 

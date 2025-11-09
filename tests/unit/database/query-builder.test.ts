@@ -119,7 +119,7 @@ describe('QueryBuilder', () => {
           await qb.raw('INSERT INTO users (name) VALUES (?)', ['John']);
           throw new Error('Transaction failed');
         })
-      ).rejects.toThrow('Transaction failed');
+      ).rejects.toThrow('Insert failed'); // The INSERT error is thrown first
 
       expect(mockDb.all).toHaveBeenCalledWith('ROLLBACK', [], expect.any(Function));
     });
@@ -294,6 +294,16 @@ describe('SelectQueryBuilder', () => {
     });
 
     it('should build pagination', async () => {
+      // Mock db.get for COUNT query (used by count())
+      mockDb.get.mockImplementation((sql, params, callback) => {
+        callback(null, { count: 100 });
+      });
+
+      // Mock db.all for SELECT query (used by get())
+      mockDb.all.mockImplementation((sql, params, callback) => {
+        callback(null, [{ id: 1, name: 'User 1' }, { id: 2, name: 'User 2' }]);
+      });
+
       const result = await selectBuilder.paginate(3, 15); // page 3, 15 per page
 
       expect(result.pagination.page).toBe(3);

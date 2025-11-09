@@ -525,12 +525,9 @@ describe('ValidationSchemas', () => {
       const result = validator.validate(spamData, ValidationSchemas.contact);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain(
-        expect.objectContaining({
-          field: 'message',
-          message: expect.stringContaining('spam')
-        })
-      );
+      // Check that there's at least one error for the message field with spam in the message
+      const messageError = result.errors.find(e => e.field === 'message' && e.message.toLowerCase().includes('spam'));
+      expect(messageError).toBeDefined();
     });
   });
 
@@ -566,12 +563,9 @@ describe('ValidationSchemas', () => {
       const result = validator.validate(invalidData, ValidationSchemas.clientIntake);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain(
-        expect.objectContaining({
-          field: 'projectType',
-          code: 'INVALID_VALUE'
-        })
-      );
+      // Check for error on projectType field with INVALID_VALUE code
+      const projectTypeError = result.errors.find(e => e.field === 'projectType' && e.code === 'INVALID_VALUE');
+      expect(projectTypeError).toBeDefined();
     });
   });
 
@@ -598,11 +592,9 @@ describe('ValidationSchemas', () => {
       const result = validator.validate(userData, ValidationSchemas.user);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain(
-        expect.objectContaining({
-          field: 'password'
-        })
-      );
+      // Check that there's at least one error for the password field
+      const passwordError = result.errors.find(e => e.field === 'password');
+      expect(passwordError).toBeDefined();
     });
   });
 });
