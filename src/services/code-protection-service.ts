@@ -4,8 +4,27 @@
  * ===============================================
  * @file src/services/code-protection-service.ts
  *
- * Multi-layered code protection and obfuscation system.
- * Protects against inspection, reverse engineering, and unauthorized access.
+ * Code protection configuration (disabled by default).
+ *
+ * RECOMMENDED APPROACH:
+ * 1. Build-time protection (vite.config.ts):
+ *    - Minification with terser (enabled)
+ *    - Source maps disabled in production (enabled)
+ *    - Console/debugger statements removed (enabled)
+ *
+ * 2. Server-side security:
+ *    - Keep business logic on backend
+ *    - API authentication & rate limiting
+ *    - Never store secrets in client code
+ *
+ * 3. Legal protection:
+ *    - Copyright notices in code
+ *    - License file (see LICENSE)
+ *    - Terms of service
+ *
+ * This service provides runtime protection features, but most are disabled
+ * by default as they are user-hostile and easily bypassed.
+ * Use build-time obfuscation instead.
  */
 
 export interface CodeProtectionConfig {
@@ -28,7 +47,7 @@ export interface CodeProtectionConfig {
     userAgents?: string[];
     domains?: string[];
   };
-  onViolation?: (type: string, details: any) => void;
+  onViolation?: (type: string, details: unknown) => void;
 }
 
 export interface ProtectionViolation {
@@ -36,7 +55,17 @@ export interface ProtectionViolation {
   timestamp: number;
   userAgent: string;
   ip?: string;
-  details: any;
+  details: unknown;
+}
+
+export interface ProtectionStatus {
+  enabled: boolean;
+  level: string;
+  devToolsDetected: boolean;
+  debuggerDetected: boolean;
+  integrityCompromised: boolean;
+  violationCount: number;
+  features: CodeProtectionConfig['features'];
 }
 
 export class CodeProtectionService {
@@ -44,7 +73,7 @@ export class CodeProtectionService {
   private violations: ProtectionViolation[] = [];
   private isEnabled = false;
   private protectionIntervals: NodeJS.Timeout[] = [];
-  private originalConsole: any;
+  private originalConsole: typeof console;
   private encryptionKey: string;
 
   // Detection states
@@ -53,20 +82,23 @@ export class CodeProtectionService {
   private integrityCompromised = false;
 
   constructor(config: Partial<CodeProtectionConfig> = {}) {
+    // Default to non-hostile protection only
+    // User-hostile features (devtools blocking, keyboard blocking, etc.) are disabled by default
+    // Enable build-time obfuscation instead for better, less intrusive protection
     this.config = {
       enabled: false,
       level: 'standard',
       features: {
-        devToolsBlocking: true,
-        sourceObfuscation: true,
-        rightClickDisable: true,
-        keyboardShortcuts: true,
-        consoleDisabling: true,
-        domMutationProtection: true,
-        antiDebugging: true,
-        networkObfuscation: false,
-        stringEncryption: true,
-        codeIntegrityCheck: true,
+        devToolsBlocking: false,        // Hostile, easily bypassed
+        sourceObfuscation: true,         // Useful: minify at build time
+        rightClickDisable: false,        // Hostile, annoying to users
+        keyboardShortcuts: false,        // Hostile, breaks browser features
+        consoleDisabling: false,         // Hostile, easily bypassed
+        domMutationProtection: false,    // Rarely needed
+        antiDebugging: false,            // Hostile, easily bypassed
+        networkObfuscation: false,       // Rarely needed
+        stringEncryption: true,          // Useful for sensitive strings
+        codeIntegrityCheck: false,       // Can cause false positives
         ...config.features
       },
       ...config
@@ -181,9 +213,6 @@ export class CodeProtectionService {
     };
 
     // Method 2: Window size detection
-    const windowWidth = window.outerWidth;
-    const windowHeight = window.outerHeight;
-
     const checkWindowSize = () => {
       if (Math.abs(window.outerWidth - window.innerWidth) > 200 ||
           Math.abs(window.outerHeight - window.innerHeight) > 200) {
@@ -196,7 +225,8 @@ export class CodeProtectionService {
     // Method 3: Performance timing
     const checkPerformanceTiming = () => {
       const start = performance.now();
-      debugger; // This will pause if devtools is open
+
+      debugger; // Intentional: detects devtools by measuring pause duration
       const end = performance.now();
 
       if (end - start > 100) {
@@ -294,7 +324,14 @@ export class CodeProtectionService {
    * Keyboard shortcuts blocking
    */
   private setupKeyboardBlocking(): void {
-    const blockedKeys = [
+    interface KeyCombo {
+      key: string;
+      ctrl?: boolean;
+      shift?: boolean;
+      alt?: boolean;
+    }
+
+    const blockedKeys: KeyCombo[] = [
       { key: 'F12' },
       { key: 'I', ctrl: true, shift: true }, // Ctrl+Shift+I
       { key: 'J', ctrl: true, shift: true }, // Ctrl+Shift+J
@@ -307,12 +344,10 @@ export class CodeProtectionService {
     ];
 
     document.addEventListener('keydown', (e) => {
-      const blocked = blockedKeys.some(combo => {
-        return e.key === combo.key &&
-               (!(combo as any).ctrl || e.ctrlKey) &&
-               (!(combo as any).shift || e.shiftKey) &&
-               (!(combo as any).alt || e.altKey);
-      });
+      const blocked = blockedKeys.some(combo => e.key === combo.key &&
+               (!combo.ctrl || e.ctrlKey) &&
+               (!combo.shift || e.shiftKey) &&
+               (!combo.alt || e.altKey));
 
       if (blocked) {
         e.preventDefault();
@@ -334,19 +369,23 @@ export class CodeProtectionService {
     // Override console methods
     Object.keys(console).forEach(key => {
       if (typeof console[key as keyof Console] === 'function') {
-        (console as any)[key] = this.config.level === 'maximum' ? throwError : noop;
+        console[key as keyof Console] = this.config.level === 'maximum' ? throwError as unknown as typeof console.log : noop as unknown as typeof console.log;
       }
     });
 
     // Block common console access methods
-    (window as any).console = this.config.level === 'maximum' ? undefined : {
-      log: noop, info: noop, warn: noop, error: noop, debug: noop,
-      trace: noop, table: noop, group: noop, groupEnd: noop, clear: noop
-    };
+    if (this.config.level === 'maximum') {
+      (window as unknown as { console?: Console }).console = undefined;
+    } else {
+      (window as unknown as { console?: Console }).console = {
+        log: noop, info: noop, warn: noop, error: noop, debug: noop,
+        trace: noop, table: noop, group: noop, groupEnd: noop, clear: noop
+      } as unknown as Console;
+    }
 
     // Override eval and Function constructor
-    (window as any).eval = throwError;
-    (window as any).Function = throwError;
+    (window as unknown as { eval?: unknown; Function?: unknown }).eval = throwError;
+    (window as unknown as { eval?: unknown; Function?: unknown }).Function = throwError;
   }
 
   /**
@@ -387,7 +426,8 @@ export class CodeProtectionService {
     const antiDebugger = () => {
       setInterval(() => {
         const start = performance.now();
-        debugger;
+
+        debugger; // Intentional: anti-debugging trap
         const end = performance.now();
 
         if (end - start > 100) {
@@ -422,8 +462,9 @@ export class CodeProtectionService {
       }
 
       // Check for common debugging tools
-      if ((window as any).chrome?.runtime ||
-          (window as any).webkitRequestAnimationFrame?.toString().includes('native') === false) {
+      const windowAny = window as unknown as { chrome?: { runtime?: unknown }; webkitRequestAnimationFrame?: { toString(): string } };
+      if (windowAny.chrome?.runtime ||
+          windowAny.webkitRequestAnimationFrame?.toString().includes('native') === false) {
         this.logViolation('tampering', { type: 'extension-detected' });
       }
     };
@@ -476,9 +517,9 @@ export class CodeProtectionService {
   /**
    * Logging and monitoring
    */
-  private logViolation(type: string, details: any): void {
+  private logViolation(type: string, details: unknown): void {
     const violation: ProtectionViolation = {
-      type: type as any,
+      type: type as ProtectionViolation['type'],
       timestamp: Date.now(),
       userAgent: navigator.userAgent,
       details
@@ -562,7 +603,7 @@ export class CodeProtectionService {
     this.violations = [];
   }
 
-  getStatus(): any {
+  getStatus(): ProtectionStatus {
     return {
       enabled: this.isEnabled,
       level: this.config.level,

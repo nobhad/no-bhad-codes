@@ -13,9 +13,9 @@ import helmet from 'helmet';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import dotenv from 'dotenv';
-// import { errorTracker } from './services/error-tracking.js';
-// import { emailService } from './services/email-service.js';
-// import { cacheService } from './services/cache-service.js';
+import { errorTracker } from './services/error-tracking.js';
+import { emailService } from './services/email-service.js';
+import { cacheService } from './services/cache-service.js';
 import { initializeDatabase } from './database/init.js';
 import authRouter from './routes/auth.js';
 import clientsRouter from './routes/clients.js';
@@ -38,14 +38,14 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Initialize Sentry for error tracking
-// errorTracker.init({
-//   dsn: process.env.SENTRY_DSN,
-//   environment: process.env.NODE_ENV || 'development',
-//   release: process.env.npm_package_version,
-//   enableProfiling: process.env.NODE_ENV === 'production',
-//   sampleRate: process.env.NODE_ENV === 'production' ? 1.0 : 0.1,
-//   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0
-// });
+errorTracker.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV || 'development',
+  release: process.env.npm_package_version,
+  enableProfiling: process.env.NODE_ENV === 'production',
+  sampleRate: process.env.NODE_ENV === 'production' ? 1.0 : 0.1,
+  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0
+});
 
 // Request logging and error tracking
 app.use(logger);
@@ -121,23 +121,24 @@ app.use('/api/invoices', invoicesRouter);
 app.use('/api/uploads', uploadsRouter);
 
 // 404 handler
+// Note: Express 5 doesn't support app.use('*') - use regular middleware instead
 app.use((req, res) => {
-  // errorTracker.captureMessage(`404 - Route not found: ${req.method} ${req.originalUrl}`, 'warning', {
-  //   request: {
-  //     method: req.method,
-  //     url: req.originalUrl,
-  //     headers: req.headers as Record<string, string>
-  //   }
-  // });
-  
-  res.status(404).json({ 
+  errorTracker.captureMessage(`404 - Route not found: ${req.method} ${req.originalUrl}`, 'warning', {
+    request: {
+      method: req.method,
+      url: req.originalUrl,
+      headers: req.headers as Record<string, string>
+    }
+  });
+
+  res.status(404).json({
     error: 'Route not found',
     message: `Cannot ${req.method} ${req.originalUrl}`
   });
 });
 
-// Sentry error handler (must be before other error handlers) - TEMPORARILY DISABLED
-// app.use(errorTracker.errorHandler());
+// Sentry error handler (must be before other error handlers)
+app.use(errorTracker.errorHandler());
 
 // Global error handler
 app.use(errorHandler);
@@ -149,7 +150,7 @@ async function startServer() {
   try {
     // Initialize database
     await initializeDatabase();
-    console.log('✅ Database initialized successfully');
+    console.log('✅ Database initialized');
 
     // Initialize email service
     const emailConfig = {
@@ -164,41 +165,41 @@ async function startServer() {
       replyTo: process.env.SMTP_REPLY_TO
     };
 
-    // try {
-    //   await emailService.init(emailConfig);
-    //   console.log('✅ Email service initialized');
-    // } catch (emailError) {
-    //   console.warn('⚠️  Email service initialization failed:', emailError);
-    //   console.log('📧 Server will continue without email functionality');
-    // }
+    try {
+      await emailService.init(emailConfig);
+      console.log('✅ Email service initialized');
+    } catch (emailError) {
+      console.warn('⚠️  Email service initialization failed:', emailError);
+      console.log('📧 Server will continue without email functionality');
+    }
 
-    // Initialize cache service - TEMPORARILY DISABLED FOR TESTING
-    // const cacheConfig = {
-    //   host: process.env.REDIS_HOST || 'localhost',
-    //   port: parseInt(process.env.REDIS_PORT || '6379'),
-    //   password: process.env.REDIS_PASSWORD,
-    //   db: parseInt(process.env.REDIS_DB || '0'),
-    //   keyPrefix: process.env.REDIS_KEY_PREFIX || 'nbc:',
-    //   lazyConnect: true
-    // };
+    // Initialize cache service
+    const cacheConfig = {
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      password: process.env.REDIS_PASSWORD,
+      db: parseInt(process.env.REDIS_DB || '0'),
+      keyPrefix: process.env.REDIS_KEY_PREFIX || 'nbc:',
+      lazyConnect: true
+    };
 
-    // try {
-    //   await cacheService.init(cacheConfig);
-    //   console.log('✅ Cache service initialized');
-    // } catch (cacheError) {
-    //   console.warn('⚠️  Cache service initialization failed:', cacheError);
-    //   console.log('🚀 Server will continue without caching functionality');
-    // }
+    try {
+      await cacheService.init(cacheConfig);
+      console.log('✅ Cache service initialized');
+    } catch (cacheError) {
+      console.warn('⚠️  Cache service initialization failed:', cacheError);
+      console.log('🚀 Server will continue without caching functionality');
+    }
 
     // Start server
     const server = app.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
       console.log(`📊 Health check: http://localhost:${PORT}/health`);
-      
-      // errorTracker.captureMessage(`Server started on port ${PORT}`, 'info', {
-      //   tags: { component: 'server' },
-      //   extra: { port: PORT, environment: process.env.NODE_ENV }
-      // });
+
+      errorTracker.captureMessage(`Server started on port ${PORT}`, 'info', {
+        tags: { component: 'server' },
+        extra: { port: PORT, environment: process.env.NODE_ENV }
+      });
     });
 
     // Graceful shutdown
@@ -208,16 +209,16 @@ async function startServer() {
       // Close server
       server.close(async () => {
         console.log('✅ HTTP server closed');
-        
-        // Flush Sentry events - TEMPORARILY DISABLED
-        // try {
-        //   await errorTracker.flush(2000);
-        //   await errorTracker.close(1000);
-        //   console.log('✅ Error tracking closed');
-        // } catch (error) {
-        //   console.error('❌ Error closing error tracking:', error);
-        // }
-        
+
+        // Flush Sentry events
+        try {
+          await errorTracker.flush(2000);
+          await errorTracker.close(1000);
+          console.log('✅ Error tracking closed');
+        } catch (error) {
+          console.error('❌ Error closing error tracking:', error);
+        }
+
         console.log('👋 Server shut down complete');
         process.exit(0);
       });
@@ -235,9 +236,9 @@ async function startServer() {
 
   } catch (error) {
     console.error('❌ Failed to start server:', error);
-    // errorTracker.captureException(error as Error, {
-    //   tags: { component: 'server', phase: 'startup' }
-    // });
+    errorTracker.captureException(error as Error, {
+      tags: { component: 'server', phase: 'startup' }
+    });
     process.exit(1);
   }
 }
@@ -245,19 +246,19 @@ async function startServer() {
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
   console.error('❌ Uncaught Exception:', error);
-  // errorTracker.captureException(error, {
-  //   tags: { type: 'uncaughtException' }
-  // });
+  errorTracker.captureException(error, {
+    tags: { type: 'uncaughtException' }
+  });
   process.exit(1);
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
   console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
-  // errorTracker.captureException(new Error(`Unhandled Rejection: ${reason}`), {
-  //   tags: { type: 'unhandledRejection' },
-  //   extra: { promise: promise.toString(), reason }
-  // });
+  errorTracker.captureException(new Error(`Unhandled Rejection: ${reason}`), {
+    tags: { type: 'unhandledRejection' },
+    extra: { promise: promise.toString(), reason }
+  });
   process.exit(1);
 });
 

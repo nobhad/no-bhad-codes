@@ -140,7 +140,7 @@ export class PerformanceService {
 
         lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
         this.observers.push(lcpObserver);
-      } catch (e) {
+      } catch (_e) {
         console.warn('[PerformanceService] LCP monitoring not supported');
       }
 
@@ -158,7 +158,7 @@ export class PerformanceService {
 
         fidObserver.observe({ entryTypes: ['first-input'] });
         this.observers.push(fidObserver);
-      } catch (e) {
+      } catch (_e) {
         console.warn('[PerformanceService] FID monitoring not supported');
       }
 
@@ -180,7 +180,7 @@ export class PerformanceService {
 
         clsObserver.observe({ entryTypes: ['layout-shift'] });
         this.observers.push(clsObserver);
-      } catch (e) {
+      } catch (_e) {
         console.warn('[PerformanceService] CLS monitoring not supported');
       }
     }
@@ -191,7 +191,7 @@ export class PerformanceService {
    */
   private async measureLoadingPerformance(): Promise<void> {
     if (performance.timing) {
-      const timing = performance.timing;
+      const { timing } = performance;
 
       this.metrics.ttfb = timing.responseStart - timing.requestStart;
       this.metrics.domContentLoaded = timing.domContentLoadedEventEnd - timing.navigationStart;
@@ -215,7 +215,7 @@ export class PerformanceService {
 
         paintObserver.observe({ entryTypes: ['paint'] });
         this.observers.push(paintObserver);
-      } catch (e) {
+      } catch (_e) {
         console.warn('[PerformanceService] Paint timing not supported');
       }
     }
@@ -253,7 +253,7 @@ export class PerformanceService {
    */
   private monitorMemoryUsage(): void {
     if ('memory' in performance) {
-      const memory = (performance as any).memory;
+      const { memory } = (performance as any);
 
       this.metrics.memoryUsage = {
         used: memory.usedJSHeapSize,
@@ -284,7 +284,7 @@ export class PerformanceService {
    * Measure network performance
    */
   private measureNetworkPerformance(): void {
-    const connection = (navigator as any).connection;
+    const { connection } = (navigator as any);
     if (connection) {
       this.metrics.connectionType = connection.effectiveType;
       this.metrics.downloadSpeed = connection.downlink;
@@ -332,7 +332,7 @@ export class PerformanceService {
   /**
    * Get optimization suggestions
    */
-  private getSuggestions(metric: string, value: number): string[] {
+  private getSuggestions(metric: string, _value: number): string[] {
     const suggestions: Record<string, string[]> = {
       lcp: [
         'Optimize images with modern formats (WebP, AVIF)',

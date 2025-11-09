@@ -262,7 +262,7 @@ router.post('/avatar',
     res.status(201).json({
       success: true,
       message: 'Avatar uploaded successfully',
-      avatar: avatarInfo
+      avatar: avatarInfo,
     });
   })
 );
@@ -341,7 +341,7 @@ router.post('/project/:projectId',
     res.status(201).json({
       success: true,
       message: 'Project file uploaded successfully',
-      file: projectFile
+      file: projectFile,
     });
   })
 );

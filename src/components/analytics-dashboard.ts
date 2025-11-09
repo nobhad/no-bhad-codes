@@ -7,7 +7,7 @@
  * Visual dashboard for visitor analytics and engagement metrics.
  */
 
-import { BaseComponent, ComponentProps, ComponentState } from './base-component';
+import { BaseComponent, type ComponentProps, type ComponentState } from './base-component';
 import { ComponentUtils } from './component-store';
 import { container } from '../core/container';
 import type { VisitorTrackingService, EngagementMetrics, VisitorSession } from '../services/visitor-tracking';
@@ -35,7 +35,7 @@ export interface AnalyticsDashboardState extends ComponentState {
 
 export class AnalyticsDashboard extends BaseComponent<AnalyticsDashboardProps, AnalyticsDashboardState> {
   private trackingService: VisitorTrackingService | null = null;
-  private updateTimer: NodeJS.Timeout | null = null;
+  private updateTimer: any = null;
 
   constructor(props: AnalyticsDashboardProps) {
     const initialState: AnalyticsDashboardState = {
@@ -110,7 +110,7 @@ export class AnalyticsDashboard extends BaseComponent<AnalyticsDashboardProps, A
   }
 
   private renderTemplate(): string {
-    const { position = 'top-left', showRealTime = true, showCharts = false } = this.props;
+    const { position = 'top-left', showRealTime = true, showCharts: _showCharts = false } = this.props;
     const { isMinimized, isVisible, currentSession, metrics, realtimeData } = this.state;
 
     if (!isVisible) {

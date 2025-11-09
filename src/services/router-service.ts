@@ -28,8 +28,8 @@ export interface RouterConfig {
 
 export class RouterService extends BaseService {
   private routes = new Map<string, Route>();
-  private currentRoute: string = '';
-  private isNavigating: boolean = false;
+  private currentRoute = '';
+  private isNavigating = false;
   private config: RouterConfig;
 
   constructor(config: Partial<RouterConfig> = {}) {
@@ -207,7 +207,7 @@ export class RouterService extends BaseService {
    * Handle hash changes
    */
   private async handleHashChange(): Promise<void> {
-    const hash = window.location.hash;
+    const { hash } = window.location;
     if (hash) {
       await this.navigateToSection(hash.substring(1));
     }

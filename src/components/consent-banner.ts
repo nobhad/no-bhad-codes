@@ -7,7 +7,7 @@
  * Privacy-compliant consent banner for visitor tracking.
  */
 
-import { BaseComponent, ComponentProps, ComponentState } from './base-component';
+import { BaseComponent, type ComponentProps, type ComponentState } from './base-component';
 import { ComponentUtils } from './component-store';
 
 export interface ConsentBannerProps extends ComponentProps {
@@ -30,7 +30,7 @@ export interface ConsentBannerState extends ComponentState {
 }
 
 export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBannerState> {
-  private hideTimer: NodeJS.Timeout | null = null;
+  private hideTimer: any = null;
 
   constructor(props: ConsentBannerProps) {
     const initialState: ConsentBannerState = {

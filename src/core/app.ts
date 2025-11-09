@@ -13,11 +13,24 @@ import { appState } from './state';
 import { componentStore, ComponentRegistry } from '../components';
 import type { ModuleDefinition } from '../types/modules';
 
+// Type definitions
+interface ServiceInstance {
+  init?(): Promise<void> | void;
+  destroy?(): Promise<void> | void;
+  [key: string]: unknown;
+}
+
+interface ModuleInstance {
+  init?(): Promise<void> | void;
+  destroy?(): Promise<void> | void;
+  [key: string]: unknown;
+}
+
 // CSS imports moved to main.ts entry point
 
 export class Application {
-  private modules = new Map<string, any>();
-  private services = new Map<string, any>();
+  private modules = new Map<string, ModuleInstance>();
+  private services = new Map<string, ServiceInstance>();
   private isInitialized = false;
   private debug = false; // Disable debug to prevent flashing in development
 
@@ -157,7 +170,7 @@ export class Application {
         type: 'dom',
         factory: async () => {
           const { BusinessCardInteractions } = await import('../modules/business-card-interactions');
-          const renderer = await container.resolve('SectionCardRenderer') as any;
+          const renderer = await container.resolve('SectionCardRenderer') as ServiceInstance;
           return new BusinessCardInteractions(renderer);
         },
         dependencies: ['SectionCardRenderer']
@@ -167,8 +180,8 @@ export class Application {
         type: 'dom',
         factory: async () => {
           const { NavigationModule } = await import('../modules/navigation');
-          const routerService = await container.resolve('RouterService') as any;
-          const dataService = await container.resolve('DataService') as any;
+          const routerService = await container.resolve('RouterService') as ServiceInstance;
+          const dataService = await container.resolve('DataService') as ServiceInstance;
           return new NavigationModule({
             debug: this.debug,
             routerService,
@@ -243,7 +256,7 @@ export class Application {
           const currentPath = window.location.pathname;
           if (currentPath.includes('/admin')) {
             const { AdminDashboard } = await import('../features/admin/admin-dashboard');
-            const adminDashboard = new AdminDashboard();
+            const _adminDashboard = new AdminDashboard();
             return {
               init: async () => { /* AdminDashboard initializes itself */ },
               destroy: () => { /* AdminDashboard handles its own cleanup */ },
@@ -305,7 +318,7 @@ export class Application {
             companyName: 'No Bhad Codes',
             onAccept: async () => {
               // Initialize visitor tracking when consent is given
-              const trackingService = await container.resolve('VisitorTrackingService') as any;
+              const trackingService = await container.resolve('VisitorTrackingService') as ServiceInstance;
               await trackingService.init();
             },
             onDecline: () => {
@@ -316,8 +329,8 @@ export class Application {
           // If consent already exists, initialize tracking
           const consentStatus = ConsentBanner.getConsentStatus();
           if (consentStatus === 'accepted') {
-            const trackingService = await container.resolve('VisitorTrackingService') as any;
-            await trackingService.init();
+            const trackingService = await container.resolve('VisitorTrackingService') as ServiceInstance;
+            await trackingService.init?.();
           }
         }
       }
@@ -357,7 +370,7 @@ export class Application {
     for (const serviceName of services) {
       try {
         console.log(`[Application] Initializing ${serviceName}...`);
-        const service = await container.resolve(serviceName) as any;
+        const service = await container.resolve(serviceName) as ServiceInstance;
         await service.init();
         this.services.set(serviceName, service);
         console.log(`[Application] ${serviceName} initialized`);
@@ -408,7 +421,7 @@ export class Application {
     for (const moduleName of coreModuleList) {
       try {
         console.log(`[Application] Initializing ${moduleName}...`);
-        const moduleInstance = await container.resolve(moduleName) as any;
+        const moduleInstance = await container.resolve(moduleName) as ModuleInstance;
         await moduleInstance.init();
         this.modules.set(moduleName, moduleInstance);
         console.log(`[Application] ${moduleName} initialized`);
@@ -421,14 +434,14 @@ export class Application {
   /**
    * Get module instance
    */
-  getModule(name: string): any {
+  getModule(name: string): ModuleInstance | undefined {
     return this.modules.get(name);
   }
 
   /**
    * Get service instance
    */
-  getService(name: string): any {
+  getService(name: string): ServiceInstance | undefined {
     return this.services.get(name);
   }
 
@@ -523,12 +536,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+// Type definitions for window globals
+declare global {
+  interface Window {
+    NBW_APP?: Application;
+    NBW_STATE?: typeof appState;
+    NBW_CONTAINER?: typeof container;
+    NBW_DEBUG?: {
+      app: Application;
+      state: typeof appState;
+      container: typeof container;
+      components: typeof componentStore;
+      getStatus(): unknown;
+      getComponentStats(): unknown;
+      getPerformanceReport(): Promise<unknown>;
+      getBundleAnalysis(): Promise<unknown>;
+      getVisitorData(): Promise<unknown>;
+      hotReload(): Promise<void>;
+      testBusinessCard(): void;
+    };
+  }
+}
+
 // Development helpers
 if (typeof window !== 'undefined') {
-  (window as any).NBW_APP = app;
-  (window as any).NBW_STATE = appState;
-  (window as any).NBW_CONTAINER = container;
-  (window as any).NBW_DEBUG = {
+  window.NBW_APP = app;
+  window.NBW_STATE = appState;
+  window.NBW_CONTAINER = container;
+  window.NBW_DEBUG = {
     app,
     state: appState,
     container,
@@ -536,17 +571,17 @@ if (typeof window !== 'undefined') {
     getStatus: () => app.getStatus(),
     getComponentStats: () => ComponentRegistry.getStats(),
     getPerformanceReport: async () => {
-      const perfService = await container.resolve('PerformanceService') as any;
+      const perfService = await container.resolve('PerformanceService') as ServiceInstance & { generateReport?: () => unknown };
       return perfService.generateReport();
     },
     getBundleAnalysis: async () => {
-      const bundleService = await container.resolve('BundleAnalyzerService') as any;
+      const bundleService = await container.resolve('BundleAnalyzerService') as ServiceInstance & { analyze?: () => Promise<unknown> };
       return bundleService.analyzeBundles();
     },
     getVisitorData: async () => {
       try {
-        const trackingService = await container.resolve('VisitorTrackingService') as any;
-        return trackingService.exportData();
+        const trackingService = await container.resolve('VisitorTrackingService') as ServiceInstance & { exportData?: () => Promise<unknown> };
+        return trackingService.exportData ? trackingService.exportData() : { error: 'Export method not available' };
       } catch (_error) {
         return { error: 'Visitor tracking not initialized or consented' };
       }

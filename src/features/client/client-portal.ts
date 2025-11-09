@@ -9,12 +9,7 @@
  */
 
 import { BaseModule } from '../../modules/base';
-import type {
-  ClientProject,
-  ClientProjectStatus,
-  ProjectPriority
-} from '../../types/client';
-import { getPriorityIcon } from '../../types/client';
+import type { ClientProject, ClientProjectStatus } from '../../types/client';
 import { gsap } from 'gsap';
 import { APP_CONSTANTS } from '../../config/constants';
 

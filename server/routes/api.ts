@@ -8,11 +8,58 @@
  */
 
 import { Router } from 'express';
+import bcrypt from 'bcryptjs';
+import jwt, { SignOptions } from 'jsonwebtoken';
+import multer from 'multer';
+import { resolve, extname } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
-import { rateLimit, csrfProtection, requestSizeLimit, suspiciousActivityDetector } from '../middleware/security.js';
+import {
+  rateLimit,
+  csrfProtection,
+  requestSizeLimit,
+  suspiciousActivityDetector,
+} from '../middleware/security.js';
 import { logger } from '../services/logger.js';
+import { getDatabase } from '../database/init.js';
+import { emailService } from '../services/email-service.js';
 
 const router = Router();
+
+// Configure multer for file uploads
+const uploadDir = resolve(process.cwd(), 'uploads', 'general');
+if (!existsSync(uploadDir)) {
+  mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + extname(file.originalname));
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Allow common file types
+    const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|txt|zip|rar/;
+    const extName = allowedTypes.test(extname(file.originalname).toLowerCase());
+    const mimeType = allowedTypes.test(file.mimetype);
+
+    if (extName && mimeType) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only images, PDFs, documents, and archives are allowed.'));
+    }
+  },
+});
 
 // Global API middleware
 router.use(requestSizeLimit({
@@ -58,18 +105,74 @@ router.post('/contact',
       const { name, email, subject, message } = req.body;
       const requestId = req.headers['x-request-id'] as string || 'unknown';
 
-      await logger.info('Contact form submission received');
+      await logger.info(`Contact form submission received - from: ${email}, subject: ${subject}, requestId: ${requestId}`);
 
-      // TODO: Implement actual email sending
-      // For now, just simulate processing
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Send email notification to admin
+      const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-      await logger.info('Contact form processed successfully');
+      try {
+        await emailService.sendEmail({
+          to: process.env.ADMIN_EMAIL || 'admin@nobhadcodes.com',
+          subject: `Contact Form: ${subject}`,
+          text: `
+New contact form submission:
+
+From: ${name} (${email})
+Subject: ${subject}
+Message:
+${message}
+
+---
+Message ID: ${messageId}
+Request ID: ${requestId}
+Received: ${new Date().toISOString()}
+          `.trim(),
+          html: `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+  <h2 style="color: #333;">New Contact Form Submission</h2>
+
+  <table style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td style="padding: 8px; background: #f5f5f5; font-weight: bold;">From:</td>
+      <td style="padding: 8px;">${name}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; background: #f5f5f5; font-weight: bold;">Email:</td>
+      <td style="padding: 8px;"><a href="mailto:${email}">${email}</a></td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; background: #f5f5f5; font-weight: bold;">Subject:</td>
+      <td style="padding: 8px;">${subject}</td>
+    </tr>
+  </table>
+
+  <h3 style="color: #333; margin-top: 20px;">Message:</h3>
+  <div style="padding: 15px; background: #f9f9f9; border-left: 4px solid #0066cc;">
+    ${message.replace(/\n/g, '<br>')}
+  </div>
+
+  <hr style="margin-top: 30px; border: none; border-top: 1px solid #ddd;">
+  <p style="font-size: 12px; color: #999;">
+    Message ID: ${messageId}<br>
+    Request ID: ${requestId}<br>
+    Received: ${new Date().toLocaleString()}
+  </p>
+</div>
+          `.trim()
+        });
+
+        await logger.info(`Contact form email sent to admin - messageId: ${messageId}, from: ${email}`);
+      } catch (emailError) {
+        // Log error but don't fail the request - form submission still recorded
+        await logger.error(`Failed to send contact form email - messageId: ${messageId}, error: ${emailError}`);
+      }
+
+      await logger.info(`Contact form processed successfully - messageId: ${messageId}, from: ${email}`);
 
       res.json({
         success: true,
         message: 'Your message has been sent successfully',
-        messageId: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        messageId
       });
 
     } catch (error) {
@@ -192,26 +295,61 @@ router.post('/intake',
 /**
  * File upload endpoint
  */
-router.post('/upload',
+router.post(
+  '/upload',
   // File upload rate limiting
   rateLimit({
     windowMs: 10 * 60 * 1000, // 10 minutes
     maxRequests: 10,
-    message: 'Too many file uploads'
+    message: 'Too many file uploads',
   }),
 
-  // TODO: Add multer middleware for file handling
-  // validateRequest for file metadata
+  // Add multer middleware for file handling
+  upload.single('file'),
 
   async (req, res) => {
     try {
-      // TODO: Implement file upload handling
-      res.json({
-        success: true,
-        message: 'File upload endpoint - not implemented yet',
-        code: 'UPLOAD_NOT_IMPLEMENTED'
-      });
+      // Implement file upload handling
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          error: 'No file uploaded',
+          code: 'NO_FILE',
+        });
+      }
 
+      const fileInfo = {
+        id: Date.now().toString(),
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        url: `/uploads/general/${req.file.filename}`,
+        uploadedAt: new Date().toISOString(),
+      };
+
+      // Save file metadata to database (optional)
+      const db = getDatabase();
+      let fileId = 0;
+      try {
+        const result = await db.run(
+          `INSERT INTO uploaded_files (filename, original_filename, file_path, file_size, mime_type, created_at)
+           VALUES (?, ?, ?, ?, ?, datetime('now'))`,
+          [fileInfo.filename, fileInfo.originalName, fileInfo.url, fileInfo.size, fileInfo.mimetype]
+        );
+        fileId = result.lastID || 0;
+      } catch (err) {
+        console.error('Failed to save file metadata:', err);
+        // Don't fail - file is already uploaded
+      }
+
+      await logger.info(`File uploaded successfully - filename: ${fileInfo.filename}, fileId: ${fileId}`);
+
+      res.status(201).json({
+        success: true,
+        message: 'File uploaded successfully',
+        file: { ...fileInfo, id: fileId > 0 ? fileId : fileInfo.id },
+      });
     } catch (error) {
       const err = error as Error;
       await logger.error('File upload error');
@@ -287,27 +425,73 @@ router.post('/auth/register',
       const { name, email, password } = req.body;
       const requestId = req.headers['x-request-id'] as string || 'unknown';
 
-      // TODO: Check if user already exists
-      // TODO: Hash password
-      // TODO: Save to database
-      // TODO: Send welcome email
+      await logger.info(`User registration attempt - email: ${email}, requestId: ${requestId}`);
 
-      await logger.info('User registration attempt');
+      // Check if user already exists
+      const db = getDatabase();
+      const existingUser = await db.get('SELECT id, email FROM users WHERE email = ?', [email]);
 
-      res.json({
+      if (existingUser) {
+        await logger.warn(`Registration attempt with existing email - email: ${email}, requestId: ${requestId}`);
+        return res.status(409).json({
+          success: false,
+          error: 'User already exists',
+          code: 'USER_EXISTS',
+        });
+      }
+
+      // Hash password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      // Save to database
+      const result = await db.run(
+        `INSERT INTO users (email, password, name, type, status, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+        [email, hashedPassword, name, 'client', 'active']
+      );
+
+      const userId = result.lastID!;
+
+      // Generate access token for client portal
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        throw new Error('JWT_SECRET not configured');
+      }
+
+      const accessToken = jwt.sign(
+        { id: userId, email, type: 'client' },
+        jwtSecret,
+        { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as SignOptions
+      );
+
+      // Send welcome email
+      try {
+        await emailService.sendWelcomeEmail(email, name, accessToken);
+        await logger.info(`Welcome email sent - email: ${email}, userId: ${userId}, requestId: ${requestId}`);
+      } catch (emailError) {
+        // Log error but don't fail registration
+        await logger.error(
+          `Failed to send welcome email - email: ${email}, userId: ${userId}, error: ${emailError}, requestId: ${requestId}`
+        );
+      }
+
+      await logger.info(`User registration successful - email: ${email}, userId: ${userId}, requestId: ${requestId}`);
+
+      res.status(201).json({
         success: true,
         message: 'Registration successful',
-        userId: `user_${Date.now()}` // TODO: Replace with actual user ID
+        userId,
+        token: accessToken,
       });
-
     } catch (error) {
       const err = error as Error;
-      await logger.error('User registration error');
+      await logger.error(`User registration error - error: ${err.message}`);
 
       res.status(500).json({
         success: false,
         error: 'Registration failed',
-        code: 'REGISTRATION_ERROR'
+        code: 'REGISTRATION_ERROR',
       });
     }
   }
@@ -334,25 +518,62 @@ router.get('/data',
 
       await logger.info('Data query request');
 
-      // TODO: Implement actual data querying
-      const mockData = {
-        data: [],
+      // Implement actual data querying from projects table
+      const db = getDatabase();
+      const pageNum = Number(page);
+      const limitNum = Number(limit);
+      const offset = (pageNum - 1) * limitNum;
+
+      // Build query with search
+      let query = 'SELECT * FROM projects';
+      let countQuery = 'SELECT COUNT(*) as count FROM projects';
+      const params: any[] = [];
+
+      if (search) {
+        query += ' WHERE project_name LIKE ? OR description LIKE ?';
+        countQuery += ' WHERE project_name LIKE ? OR description LIKE ?';
+        const searchPattern = `%${search}%`;
+        params.push(searchPattern, searchPattern);
+      }
+
+      // Add sorting
+      const validSortFields = ['id', 'project_name', 'status', 'created_at', 'updated_at'];
+      const sortField = validSortFields.includes(String(sortBy)) ? sortBy : 'created_at';
+      const order = sortOrder === 'asc' ? 'ASC' : 'DESC';
+      query += ` ORDER BY ${sortField} ${order}`;
+
+      // Add pagination
+      query += ' LIMIT ? OFFSET ?';
+      params.push(limitNum, offset);
+
+      // Get total count
+      const countParams = search ? [`%${search}%`, `%${search}%`] : [];
+      const countRow = await db.get(countQuery, countParams);
+      const total = countRow?.count || 0;
+
+      // Get data
+      const data = await db.all(query, params);
+
+      const totalPages = Math.ceil(total / limitNum);
+
+      const result = {
+        data,
         pagination: {
-          page: Number(page),
-          limit: Number(limit),
-          total: 0,
-          totalPages: 0
+          page: pageNum,
+          limit: limitNum,
+          total,
+          totalPages,
         },
         meta: {
-          sortBy,
-          sortOrder,
-          search: search || null
-        }
+          sortBy: sortField,
+          sortOrder: order,
+          search: search || null,
+        },
       };
 
       res.json({
         success: true,
-        ...mockData
+        ...result,
       });
 
     } catch (error) {
@@ -379,20 +600,55 @@ router.get('/status',
 
   async (req, res) => {
     try {
-      // TODO: Gather actual metrics
+      // Gather actual metrics from database
+      const db = getDatabase();
+
+      let totalUsers = 0, activeUsers = 0, totalProjects = 0, activeProjects = 0, totalInvoices = 0;
+
+      try {
+        const [usersRow, activeUsersRow, projectsRow, activeProjectsRow, invoicesRow] = await Promise.all([
+          db.get('SELECT COUNT(*) as count FROM users'),
+          db.get("SELECT COUNT(*) as count FROM users WHERE status = 'active'"),
+          db.get('SELECT COUNT(*) as count FROM projects'),
+          db.get("SELECT COUNT(*) as count FROM projects WHERE status IN ('in-progress', 'pending')"),
+          db.get('SELECT COUNT(*) as count FROM invoices'),
+        ]);
+
+        totalUsers = usersRow?.count || 0;
+        activeUsers = activeUsersRow?.count || 0;
+        totalProjects = projectsRow?.count || 0;
+        activeProjects = activeProjectsRow?.count || 0;
+        totalInvoices = invoicesRow?.count || 0;
+      } catch (err) {
+        console.error('Failed to gather metrics:', err);
+        // Use default values of 0
+      }
+
       const status = {
         api: 'online',
         version: '1.0.0',
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV,
         uptime: process.uptime(),
+        database: {
+          users: {
+            total: totalUsers,
+            active: activeUsers,
+          },
+          projects: {
+            total: totalProjects,
+            active: activeProjects,
+          },
+          invoices: {
+            total: totalInvoices,
+          },
+        },
         requests: {
-          total: 0, // TODO: Track actual requests
           rateLimit: {
             remaining: res.get('X-RateLimit-Remaining'),
-            reset: res.get('X-RateLimit-Reset')
-          }
-        }
+            reset: res.get('X-RateLimit-Reset'),
+          },
+        },
       };
 
       res.json({

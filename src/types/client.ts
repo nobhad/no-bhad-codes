@@ -181,10 +181,10 @@ export function getStatusColor(status: ClientProjectStatus): string {
 
 export function getPriorityIcon(priority: ProjectPriority): string {
   const icons: Record<ProjectPriority, string> = {
-    'low': '🔵',
-    'medium': '🟡',
-    'high': '🟠',
-    'urgent': '🔴'
+    low: '🔵',
+    medium: '🟡',
+    high: '🟠',
+    urgent: '🔴'
   };
   return icons[priority] || '⚪';
 }

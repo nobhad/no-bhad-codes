@@ -9,6 +9,101 @@
  */
 
 import { AdminSecurity } from './admin-security';
+import type { PerformanceMetrics, PerformanceAlert } from '../../services/performance-service';
+
+// Type definitions
+interface PerformanceReport {
+  score: number;
+  metrics: PerformanceMetrics;
+  alerts: PerformanceAlert[];
+  recommendations: string[];
+}
+
+interface PerformanceMetricDisplay {
+  value: string;
+  status: string;
+}
+
+interface PerformanceMetricsDisplay {
+  lcp: PerformanceMetricDisplay;
+  fid: PerformanceMetricDisplay;
+  cls: PerformanceMetricDisplay;
+  ttfb: PerformanceMetricDisplay;
+  score: number;
+  grade: string;
+}
+
+interface AnalyticsDataItem {
+  label: string;
+  value: string | number;
+}
+
+interface AnalyticsData {
+  popularPages?: AnalyticsDataItem[];
+  deviceBreakdown?: AnalyticsDataItem[];
+  geoDistribution?: AnalyticsDataItem[];
+  engagementEvents?: AnalyticsDataItem[];
+}
+
+interface PageView {
+  url: string;
+  timestamp: number;
+  [key: string]: unknown;
+}
+
+interface Session {
+  id: string;
+  startTime: number;
+  [key: string]: unknown;
+}
+
+interface Interaction {
+  type: string;
+  timestamp: number;
+  [key: string]: unknown;
+}
+
+interface RawVisitorData {
+  sessions?: Session[];
+  pageViews?: PageView[];
+  interactions?: Interaction[];
+  [key: string]: unknown;
+}
+
+interface StatusItem {
+  status: string;
+  [key: string]: unknown;
+}
+
+interface ApplicationStatus {
+  modules: Record<string, StatusItem>;
+  services: Record<string, StatusItem>;
+}
+
+interface VisitorInfo {
+  id: string;
+  firstVisit: string;
+  lastVisit: string;
+  sessions: number;
+  pageViews: number;
+  location: string;
+  device: string;
+}
+
+interface NBWDebugAPI {
+  getPerformanceReport?: () => Promise<PerformanceReport>;
+  getVisitorData?: () => Promise<AnalyticsData>;
+  getStatus?: () => ApplicationStatus;
+  getState?: () => Record<string, unknown>;
+  services?: Record<string, unknown>;
+}
+
+declare global {
+  interface Window {
+    NBW_DEBUG?: NBWDebugAPI;
+    opener?: Window & { NBW_DEBUG?: NBWDebugAPI };
+  }
+}
 
 // Admin authentication and session management
 class AdminAuth {
@@ -164,7 +259,6 @@ class AdminDashboard {
 
   private setupAuthEventListeners(): void {
     const authForm = document.getElementById('auth-form') as HTMLFormElement;
-    const authError = document.getElementById('auth-error');
 
     if (authForm) {
       authForm.addEventListener('submit', async (e) => {
@@ -406,11 +500,11 @@ class AdminDashboard {
     }
   }
 
-  private async getPerformanceMetrics(): Promise<any> {
+  private async getPerformanceMetrics(): Promise<PerformanceMetricsDisplay> {
     try {
       // Try to get data from the main app's services via parent window
-      if (window.opener && (window.opener as any).NBW_DEBUG) {
-        const debug = (window.opener as any).NBW_DEBUG;
+      if (window.opener?.NBW_DEBUG) {
+        const debug = window.opener.NBW_DEBUG;
         if (debug.getPerformanceReport) {
           return await debug.getPerformanceReport();
         }
@@ -423,9 +517,9 @@ class AdminDashboard {
 
       // Try to access services directly from container
       const { container } = await import('../../core/container');
-      const performanceService = await container.resolve('PerformanceService');
-      if (performanceService && (performanceService as any).generateReport) {
-        const report = await (performanceService as any).generateReport();
+      const performanceService = await container.resolve('PerformanceService') as { generateReport?: () => PerformanceReport };
+      if (performanceService?.generateReport) {
+        const report = performanceService.generateReport();
         return {
           lcp: {
             value: report.metrics.lcp ? `${Math.round(report.metrics.lcp)}ms` : 'N/A',
@@ -550,11 +644,11 @@ class AdminDashboard {
     }
   }
 
-  private async getAnalyticsData(): Promise<any> {
+  private async getAnalyticsData(): Promise<AnalyticsData> {
     try {
       // Try to get data from main app via parent window
-      if (window.opener && (window.opener as any).NBW_DEBUG) {
-        const debug = (window.opener as any).NBW_DEBUG;
+      if (window.opener?.NBW_DEBUG) {
+        const debug = window.opener.NBW_DEBUG;
         if (debug.getVisitorData) {
           return await debug.getVisitorData();
         }
@@ -567,9 +661,9 @@ class AdminDashboard {
 
       // Try to access visitor tracking service directly
       const { container } = await import('../../core/container');
-      const visitorService = await container.resolve('VisitorTrackingService');
-      if (visitorService && (visitorService as any).exportData) {
-        const data = await (visitorService as any).exportData();
+      const visitorService = await container.resolve('VisitorTrackingService') as { exportData?: () => Promise<RawVisitorData> };
+      if (visitorService?.exportData) {
+        const data = await visitorService.exportData();
         return this.formatAnalyticsData(data);
       }
     } catch (error) {
@@ -579,7 +673,7 @@ class AdminDashboard {
     return {};
   }
 
-  private formatAnalyticsData(rawData: any): any {
+  private formatAnalyticsData(rawData: RawVisitorData): AnalyticsData {
     // Format raw visitor data into admin dashboard format
     if (!rawData || !rawData.sessions) return {};
 
@@ -589,7 +683,7 @@ class AdminDashboard {
 
     // Calculate popular pages
     const pageViewCounts: Record<string, number> = {};
-    pageViews.forEach((pv: any) => {
+    pageViews.forEach((pv) => {
       pageViewCounts[pv.url] = (pageViewCounts[pv.url] || 0) + 1;
     });
 
@@ -603,9 +697,10 @@ class AdminDashboard {
 
     // Calculate device breakdown
     const deviceCounts: Record<string, number> = {};
-    sessions.forEach((session: any) => {
-      if (session.deviceInfo?.type) {
-        deviceCounts[session.deviceInfo.type] = (deviceCounts[session.deviceInfo.type] || 0) + 1;
+    sessions.forEach((session) => {
+      const deviceType = (session.deviceInfo as { type?: string })?.type;
+      if (deviceType) {
+        deviceCounts[deviceType] = (deviceCounts[deviceType] || 0) + 1;
       }
     });
 
@@ -617,7 +712,7 @@ class AdminDashboard {
 
     // Calculate engagement events
     const interactionCounts: Record<string, number> = {};
-    interactions.forEach((interaction: any) => {
+    interactions.forEach((interaction) => {
       const key = interaction.type || 'Unknown';
       interactionCounts[key] = (interactionCounts[key] || 0) + 1;
     });
@@ -693,7 +788,7 @@ class AdminDashboard {
     this.populateSystemStatus(appStatus);
   }
 
-  private async getApplicationStatus(): Promise<any> {
+  private async getApplicationStatus(): Promise<ApplicationStatus> {
     try {
       if (window.NBW_DEBUG?.getStatus) {
         return window.NBW_DEBUG.getStatus();
@@ -705,14 +800,14 @@ class AdminDashboard {
     // Fallback mock data
     return {
       modules: {
-        'ThemeModule': { status: 'healthy' },
-        'NavigationModule': { status: 'healthy' },
-        'ContactFormModule': { status: 'healthy' }
+        ThemeModule: { status: 'healthy' },
+        NavigationModule: { status: 'healthy' },
+        ContactFormModule: { status: 'healthy' }
       },
       services: {
-        'DataService': { status: 'healthy' },
-        'PerformanceService': { status: 'healthy' },
-        'ContactService': { status: 'warning' }
+        DataService: { status: 'healthy' },
+        PerformanceService: { status: 'healthy' },
+        ContactService: { status: 'warning' }
       }
     };
   }
@@ -757,7 +852,7 @@ class AdminDashboard {
     `).join('');
   }
 
-  private populateVisitorsTable(visitors: any[]): void {
+  private populateVisitorsTable(visitors: VisitorInfo[]): void {
     const tbody = document.querySelector('#visitors-table tbody');
     if (!tbody) return;
 
@@ -779,13 +874,13 @@ class AdminDashboard {
     `).join('');
   }
 
-  private populateSystemStatus(status: any): void {
+  private populateSystemStatus(status: ApplicationStatus): void {
     const container = document.getElementById('app-status');
     if (!container) return;
 
     const allItems = { ...status.modules, ...status.services };
 
-    container.innerHTML = Object.entries(allItems).map(([name, data]: [string, any]) => `
+    container.innerHTML = Object.entries(allItems).map(([name, data]) => `
       <div class="status-item">
         <span>${name}</span>
         <div style="display: flex; align-items: center; gap: 8px;">
@@ -829,7 +924,7 @@ class AdminDashboard {
     }
   }
 
-  private displayPerformanceAlerts(alerts: any[]): void {
+  private displayPerformanceAlerts(alerts: PerformanceAlert[]): void {
     const container = document.getElementById('performance-alerts');
     if (!container || !alerts.length) return;
 
@@ -871,7 +966,7 @@ class AdminDashboard {
 
   private async exportData(type: string): Promise<void> {
     try {
-      let data: any;
+      let data: Record<string, unknown>;
       let filename: string;
 
       switch (type) {
@@ -908,7 +1003,7 @@ class AdminDashboard {
     }
   }
 
-  private async getAnalyticsExport(): Promise<any> {
+  private async getAnalyticsExport(): Promise<Record<string, unknown>> {
     // Get analytics data for export
     return {
       exportDate: new Date().toISOString(),
@@ -918,7 +1013,7 @@ class AdminDashboard {
     };
   }
 
-  private async getVisitorsExport(): Promise<any> {
+  private async getVisitorsExport(): Promise<Record<string, unknown>> {
     // Get visitor data for export
     return {
       exportDate: new Date().toISOString(),
@@ -926,7 +1021,7 @@ class AdminDashboard {
     };
   }
 
-  private async getPerformanceExport(): Promise<any> {
+  private async getPerformanceExport(): Promise<Record<string, unknown>> {
     // Get performance data for export
     return {
       exportDate: new Date().toISOString(),
@@ -971,7 +1066,13 @@ class AdminDashboard {
 }
 
 // Global function for visitor details (called from table)
-(window as any).viewVisitorDetails = (visitorId: string) => {
+declare global {
+  interface Window {
+    viewVisitorDetails?: (visitorId: string) => void;
+  }
+}
+
+window.viewVisitorDetails = (visitorId: string) => {
   alert(`Viewing details for visitor: ${visitorId}`);
 };
 
@@ -979,17 +1080,5 @@ class AdminDashboard {
 document.addEventListener('DOMContentLoaded', () => {
   new AdminDashboard();
 });
-
-// Type definitions for global debug object
-declare global {
-  interface Window {
-    NBW_DEBUG?: {
-      getStatus: () => any;
-      getPerformanceReport: () => Promise<any>;
-      getBundleAnalysis: () => Promise<any>;
-      getVisitorData: () => Promise<any>;
-    };
-  }
-}
 
 export { AdminAuth, AdminDashboard };

@@ -144,8 +144,8 @@ export class ClientIntakeModule extends BaseModule {
     const featureSections = {
       'simple-site': 'simpleSiteFeatures',
       'business-site': 'businessSiteFeatures',
-      'portfolio': 'portfolioFeatures',
-      'ecommerce': 'ecommerceFeatures',
+      portfolio: 'portfolioFeatures',
+      ecommerce: 'ecommerceFeatures',
       'web-app': 'webAppFeatures',
       'browser-extension': 'extensionFeatures'
     };
@@ -164,13 +164,13 @@ export class ClientIntakeModule extends BaseModule {
         { value: '8k-12k', text: '$8,000 - $12,000' },
         { value: 'discuss', text: 'Let\'s discuss' }
       ],
-      'portfolio': [
+      portfolio: [
         { value: '1k-3k', text: '$1,000 - $3,000' },
         { value: '3k-6k', text: '$3,000 - $6,000' },
         { value: '6k-10k', text: '$6,000 - $10,000' },
         { value: 'discuss', text: 'Let\'s discuss' }
       ],
-      'ecommerce': [
+      ecommerce: [
         { value: '5k-10k', text: '$5,000 - $10,000' },
         { value: '10k-20k', text: '$10,000 - $20,000' },
         { value: '20k-35k', text: '$20,000 - $35,000' },
@@ -190,7 +190,7 @@ export class ClientIntakeModule extends BaseModule {
         { value: '15k-25k', text: '$15,000 - $25,000' },
         { value: 'discuss', text: 'Let\'s discuss' }
       ],
-      'other': [
+      other: [
         { value: 'under-5k', text: 'Under $5,000' },
         { value: '5k-15k', text: '$5,000 - $15,000' },
         { value: '15k-35k', text: '$15,000 - $35,000' },

@@ -161,8 +161,7 @@ no-bhad-codes/
 │   │   └── state.ts             # State management
 │   ├── 📁 features/             # Feature modules
 │   │   ├── 📁 admin/            # Admin features
-│   │   ├── 📁 client/           # Client portal features
-│   │   └── 📁 projects/         # Project management
+│   │   └── 📁 client/           # Client portal features
 │   ├── 📁 modules/              # Reusable UI modules
 │   ├── 📁 services/             # Frontend services
 │   ├── 📁 styles/               # CSS architecture
@@ -175,7 +174,7 @@ no-bhad-codes/
 │   └── 📁 partials/             # Reusable template parts
 ├── .env.example                 # Environment configuration template
 ├── tsconfig.json                # TypeScript configuration
-├── vite.config.js               # Vite build configuration
+├── vite.config.ts               # Vite build configuration
 └── package.json                 # Dependencies and scripts
 ```
 

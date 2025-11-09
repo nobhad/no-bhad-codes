@@ -9,8 +9,14 @@
 
 import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
-import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
+import {
+  authenticateToken,
+  requireAdmin,
+  AuthenticatedRequest,
+} from '../middleware/auth.js';
 import { InvoiceService, InvoiceCreateData } from '../services/invoice-service.js';
+import { emailService } from '../services/email-service.js';
+import { getDatabase } from '../database/init.js';
 
 const router = express.Router();
 
@@ -469,13 +475,89 @@ router.post('/:id/send',
 
     try {
       const invoice = await getInvoiceService().sendInvoice(invoiceId);
-      
-      // TODO: Send email notification to client
-      
+
+      // Send email notification to client
+      try {
+        // Get client email from database
+        const db = getDatabase();
+        const clientRow = await db.get(
+          'SELECT u.email, u.name FROM invoices i JOIN users u ON i.client_id = u.id WHERE i.id = ?',
+          [invoiceId]
+        );
+
+        if (!clientRow) {
+          throw new Error('Client not found');
+        }
+
+        const client = { email: clientRow.email, name: clientRow.name };
+
+        const invoiceUrl = `${process.env.CLIENT_PORTAL_URL || 'http://localhost:3000/client/portal'}?invoice=${invoiceId}`;
+
+        // Send invoice email
+        await emailService.sendEmail({
+          to: client.email,
+          subject: `Invoice #${invoice.invoiceNumber} from No Bhad Codes`,
+          text: `
+            Hi ${client.name},
+
+            Your invoice #${invoice.invoiceNumber} is now available.
+
+            Amount Due: $${invoice.amountTotal}
+            Due Date: ${invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'Upon receipt'}
+
+            View and pay your invoice here:
+            ${invoiceUrl}
+
+            If you have any questions, please don't hesitate to contact us.
+
+            Best regards,
+            No Bhad Codes Team
+          `,
+          html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .invoice-header { background: #00ff41; color: #000; padding: 20px; text-align: center; }
+                .invoice-details { background: #f5f5f5; padding: 20px; margin: 20px 0; }
+                .button { display: inline-block; padding: 12px 24px; background: #00ff41; color: #000; text-decoration: none; border-radius: 4px; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="invoice-header">
+                  <h2>Invoice #${invoice.invoiceNumber}</h2>
+                </div>
+                <p>Hi ${client.name},</p>
+                <p>Your invoice is now available for review and payment.</p>
+                <div class="invoice-details">
+                  <p><strong>Amount Due:</strong> $${invoice.amountTotal}</p>
+                  <p><strong>Due Date:</strong> ${invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'Upon receipt'}</p>
+                  <p><strong>Status:</strong> ${invoice.status}</p>
+                </div>
+                <p style="text-align: center; margin: 30px 0;">
+                  <a href="${invoiceUrl}" class="button">View Invoice</a>
+                </p>
+                <p>If you have any questions about this invoice, please don't hesitate to contact us.</p>
+                <p>Best regards,<br>No Bhad Codes Team</p>
+              </div>
+            </body>
+            </html>
+          `,
+        });
+
+        console.log(`Invoice email sent to ${client.email} for invoice #${invoiceId}`);
+      } catch (emailError) {
+        console.error('Failed to send invoice email:', emailError);
+        // Don't fail the request if email fails
+      }
+
       res.json({
         success: true,
         message: 'Invoice sent successfully',
-        invoice
+        invoice,
       });
     } catch (error: any) {
       if (error.message.includes('not found')) {

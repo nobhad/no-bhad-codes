@@ -226,7 +226,7 @@ export class ClientLandingModule extends BaseModule {
     this.showContent(portalContent, 'CLIENT LOGIN');
   }
 
-  private showContent(content: string, title: string): void {
+  private showContent(content: string, _title: string): void {
     if (!this.buttonsContainer) return;
 
     // Remove any existing dynamic content

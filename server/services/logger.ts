@@ -414,6 +414,9 @@ export class LoggerService {
   }
 }
 
+// Export the class for testing
+export { LoggerService };
+
 // Create and export singleton logger instance
 export const logger = new LoggerService();
 export default logger;

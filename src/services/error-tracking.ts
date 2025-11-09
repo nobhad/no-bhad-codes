@@ -217,7 +217,7 @@ export class FrontendErrorTrackingService extends BaseService {
   /**
    * Start a performance transaction
    */
-  startTransaction(name: string, operation: string = 'navigation'): any {
+  startTransaction(name: string, operation = 'navigation'): any {
     if (!this.isInitialized) {
       return undefined;
     }
@@ -226,9 +226,7 @@ export class FrontendErrorTrackingService extends BaseService {
     return Sentry.startSpan({
       name,
       op: operation
-    }, (span) => {
-      return span;
-    });
+    }, (span) => span);
   }
 
   /**
@@ -336,7 +334,7 @@ export class FrontendErrorTrackingService extends BaseService {
   }
 
   private getBrowserName(): string {
-    const userAgent = navigator.userAgent;
+    const { userAgent } = navigator;
     if (userAgent.includes('Chrome')) return 'Chrome';
     if (userAgent.includes('Firefox')) return 'Firefox';
     if (userAgent.includes('Safari')) return 'Safari';
@@ -345,7 +343,7 @@ export class FrontendErrorTrackingService extends BaseService {
   }
 
   private getBrowserVersion(): string {
-    const userAgent = navigator.userAgent;
+    const { userAgent } = navigator;
     const match = userAgent.match(/(Chrome|Firefox|Safari|Edge)\/(\d+)/);
     return match ? match[2] : 'Unknown';
   }

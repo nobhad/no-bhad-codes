@@ -7,7 +7,7 @@
  * Visual dashboard for monitoring Core Web Vitals and performance metrics.
  */
 
-import { BaseComponent, ComponentProps, ComponentState } from './base-component';
+import { BaseComponent, type ComponentProps, type ComponentState } from './base-component';
 import { ComponentUtils } from './component-store';
 import { container } from '../core/container';
 import type { PerformanceService, PerformanceMetrics, PerformanceAlert } from '../services/performance-service';
@@ -91,7 +91,7 @@ export class PerformanceDashboard extends BaseComponent<PerformanceDashboardProp
   }
 
   private renderTemplate(): string {
-    const { position = 'top-right', showAlerts = true, showRecommendations = true } = this.props;
+    const { position = 'top-right', showAlerts = true, showRecommendations: _showRecommendations = true } = this.props;
     const { isMinimized, isVisible, metrics, alerts, score } = this.state;
 
     if (!isVisible) {

@@ -366,7 +366,7 @@ export class VisitorTrackingService {
 
     // Track external links
     if (target.tagName === 'A' && this.config.trackExternalLinks) {
-      const href = (target as HTMLAnchorElement).href;
+      const { href } = (target as HTMLAnchorElement);
       if (href && !href.includes(window.location.hostname)) {
         this.trackInteraction('external_link', elementDescription, { url: href });
       }
@@ -374,7 +374,7 @@ export class VisitorTrackingService {
 
     // Track downloads
     if (this.config.trackDownloads && target.tagName === 'A') {
-      const href = (target as HTMLAnchorElement).href;
+      const { href } = (target as HTMLAnchorElement);
       const downloadExtensions = ['.pdf', '.zip', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx'];
       if (href && downloadExtensions.some(ext => href.includes(ext))) {
         this.trackInteraction('download', elementDescription, { file: href });

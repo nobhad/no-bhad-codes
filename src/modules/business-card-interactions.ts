@@ -16,7 +16,7 @@
  */
 
 import { BaseModule } from './base';
-import { BusinessCardRenderer } from './business-card-renderer';
+import type { BusinessCardRenderer } from './business-card-renderer';
 import { gsap } from 'gsap';
 import type { ModuleOptions } from '../types/modules';
 
@@ -25,18 +25,18 @@ export class BusinessCardInteractions extends BaseModule {
   private renderer: BusinessCardRenderer;
 
   // Interaction state
-  private isFlipped: boolean = false;
-  private isHovering: boolean = false;
-  private isAnimating: boolean = false;
-  private isEnabled: boolean = false;
+  private isFlipped = false;
+  private isHovering = false;
+  private isAnimating = false;
+  private isEnabled = false;
 
   // Animation configuration
-  private cardFlipDuration: number = 0.8;
-  private tiltDuration: number = 0.3;
-  private hoverLiftHeight: number = 10; // pixels to lift on hover
-  private maxTiltAngle: number = 12; // maximum tilt angle in degrees
-  private globalTiltAngle: number = 3; // subtle global mouse following
-  private magneticRange: number = 200; // range for magnetic attraction effect
+  private cardFlipDuration = 0.8;
+  private tiltDuration = 0.3;
+  private hoverLiftHeight = 10; // pixels to lift on hover
+  private maxTiltAngle = 12; // maximum tilt angle in degrees
+  private globalTiltAngle = 3; // subtle global mouse following
+  private magneticRange = 200; // range for magnetic attraction effect
 
   // Cached elements from renderer
   private businessCard: HTMLElement | null = null;

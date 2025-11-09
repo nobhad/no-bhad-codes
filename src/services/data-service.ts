@@ -78,7 +78,7 @@ export class DataService extends BaseService {
   getVentures() {
     throw new Error('Method not implemented.');
   }
-  getVenture(arg0: string) {
+  getVenture(_id: string) {
     throw new Error('Method not implemented.');
   }
   private data: PortfolioData | null = null;

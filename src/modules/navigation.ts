@@ -11,8 +11,8 @@
 
 import { BaseModule } from './base';
 import { appState } from '../core/state';
-import { RouterService } from '../services/router-service';
-import { DataService } from '../services/data-service';
+import type { RouterService } from '../services/router-service';
+import type { DataService } from '../services/data-service';
 import { SubmenuModule } from './submenu';
 import { gsap } from 'gsap';
 import type { ModuleOptions } from '../types/modules';
@@ -308,7 +308,7 @@ export class NavigationModule extends BaseModule {
             try {
               const parsed = JSON.parse(navData);
               navigationItems = parsed.menuItems || [];
-            } catch (e) {
+            } catch (_e) {
               console.warn('Failed to parse navigation data from DOM');
             }
           }

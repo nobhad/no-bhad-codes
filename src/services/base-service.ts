@@ -10,10 +10,10 @@
 
 export abstract class BaseService {
   protected name: string;
-  protected isInitialized: boolean = false;
+  protected isInitialized = false;
   protected debug: boolean;
 
-  constructor(name: string, debug: boolean = false) {
+  constructor(name: string, debug = false) {
     this.name = name;
     this.debug = debug;
   }
