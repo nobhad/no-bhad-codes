@@ -398,10 +398,41 @@ export class Application {
         await service.init?.();
         this.services.set(serviceName, service);
         console.log(`[Application] ${serviceName} initialized`);
+
+        // After RouterService is initialized, register routes for home page sections
+        if (serviceName === 'RouterService') {
+          this.registerHomePageRoutes(service as any);
+        }
       } catch (error) {
         console.error(`[Application] Failed to initialize ${serviceName}:`, error);
       }
     }
+  }
+
+  /**
+   * Register routes for home page sections
+   */
+  private registerHomePageRoutes(routerService: any): void {
+    // Register routes for home page sections
+    routerService.addRoute({
+      path: '#about',
+      section: 'about',
+      title: 'About - No Bhad Codes'
+    });
+
+    routerService.addRoute({
+      path: '#contact',
+      section: 'contact',
+      title: 'Contact - No Bhad Codes'
+    });
+
+    routerService.addRoute({
+      path: '/',
+      section: 'intro',
+      title: 'No Bhad Codes - Professional Web Development'
+    });
+
+    console.log('[Application] Home page routes registered');
   }
 
   /**
