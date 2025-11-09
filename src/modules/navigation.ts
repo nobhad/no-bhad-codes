@@ -113,11 +113,22 @@ export class NavigationModule extends BaseModule {
             if (href.startsWith('#')) {
               event.preventDefault();
               this.closeMenu();
-              // Use router service for smooth scroll after menu closes
+
+              // Check if we're on the home page
+              const currentPath = window.location.pathname;
+              const isHomePage = currentPath === '/' || currentPath === '/index.html' || currentPath === '';
+
               if (this.routerService) {
                 // Small delay to let menu close animation start
                 setTimeout(() => {
-                  this.routerService!.navigate(href, { smooth: true });
+                  if (isHomePage) {
+                    // If already on home page, just scroll to section
+                    this.routerService!.navigate(href, { smooth: true });
+                  } else {
+                    // If on another page, navigate to home page with hash
+                    // This will load the home page and then scroll to the section
+                    window.location.href = `/${href}`;
+                  }
                 }, 100);
               }
             } else {

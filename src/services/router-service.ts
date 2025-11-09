@@ -138,7 +138,15 @@ export class RouterService extends BaseService {
    * Navigate to a route
    */
   async navigate(path: string, options: { replace?: boolean; smooth?: boolean } = {}): Promise<void> {
-    if (this.isNavigating || path === this.currentRoute) {
+    // Allow re-navigation to hash links (for re-scrolling to sections)
+    const isHashLink = path.startsWith('#');
+
+    if (this.isNavigating) {
+      return;
+    }
+
+    // Don't navigate if already on the same route (unless it's a hash link)
+    if (!isHashLink && path === this.currentRoute) {
       return;
     }
 
