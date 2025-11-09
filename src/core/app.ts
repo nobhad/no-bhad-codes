@@ -272,6 +272,46 @@ export class Application {
   }
 
   /**
+   * Initialize consent banner early (before other modules)
+   * This ensures users see the banner immediately without waiting for app initialization
+   */
+  private async initConsentBanner(): Promise<void> {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const { createConsentBanner, ConsentBanner } = await import('../components');
+
+      if (!ConsentBanner.hasExistingConsent()) {
+        // Show consent banner immediately
+        const _consentBanner = await createConsentBanner({
+          position: 'bottom',
+          theme: 'light',
+          showDetailsLink: true,
+          autoHide: false,
+          companyName: 'No Bhad Codes',
+          onAccept: async () => {
+            // Initialize visitor tracking when consent is given
+            try {
+              const trackingService = await container.resolve('VisitorTrackingService') as any;
+              await trackingService.init();
+            } catch (error) {
+              console.error('[Application] Failed to initialize visitor tracking:', error);
+            }
+          },
+          onDecline: () => {
+            console.log('[Application] Visitor tracking declined');
+          }
+        }, document.body);
+      } else {
+        // If consent already exists, we'll initialize tracking later in main init
+        console.log('[Application] Existing consent found, will initialize tracking after services');
+      }
+    } catch (error) {
+      console.error('[Application] Failed to initialize consent banner:', error);
+    }
+  }
+
+  /**
    * Initialize application
    */
   async init(): Promise<void> {
@@ -283,6 +323,10 @@ export class Application {
     console.log('[Application] Starting initialization...');
 
     try {
+      // Initialize consent banner FIRST (non-blocking)
+      // This ensures users see something immediately
+      this.initConsentBanner(); // Don't await - let it load in parallel
+
       // Initialize core services first
       await this.initializeServices();
 
@@ -292,33 +336,13 @@ export class Application {
       // Initialize components from data attributes
       await ComponentRegistry.autoInit();
 
-      // Initialize consent banner (always show if no consent exists)
+      // If consent was already accepted, initialize tracking now
       if (typeof window !== 'undefined') {
-        const { createConsentBanner, ConsentBanner } = await import('../components');
-
-        if (!ConsentBanner.hasExistingConsent()) {
-          const _consentBanner = await createConsentBanner({
-            position: 'bottom',
-            theme: 'light',
-            showDetailsLink: true,
-            autoHide: false,
-            companyName: 'No Bhad Codes',
-            onAccept: async () => {
-              // Initialize visitor tracking when consent is given
-              const trackingService = await container.resolve('VisitorTrackingService') as any;
-              await trackingService.init();
-            },
-            onDecline: () => {
-              console.log('[Application] Visitor tracking declined');
-            }
-          }, document.body);
-        } else {
-          // If consent already exists, initialize tracking
-          const consentStatus = ConsentBanner.getConsentStatus();
-          if (consentStatus === 'accepted') {
-            const trackingService = await container.resolve('VisitorTrackingService') as any;
-            await trackingService.init();
-          }
+        const { ConsentBanner } = await import('../components');
+        const consentStatus = ConsentBanner.getConsentStatus();
+        if (consentStatus === 'accepted') {
+          const trackingService = await container.resolve('VisitorTrackingService') as any;
+          await trackingService.init();
         }
       }
 
