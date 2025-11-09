@@ -384,7 +384,7 @@ export class PortfolioCarouselModule extends BaseModule {
   /**
    * Cleanup
    */
-  protected override onDestroy(): void {
+  protected override async onDestroy(): Promise<void> {
     this.pauseAutoplay();
     this.carousel = null;
     this.track = null;

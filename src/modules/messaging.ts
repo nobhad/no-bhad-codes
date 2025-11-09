@@ -78,7 +78,7 @@ export class MessagingModule extends BaseModule {
     this.setupRealTimeUpdates();
   }
 
-  protected override onDestroy(): void {
+  protected override async onDestroy(): Promise<void> {
     this.clearTimers();
     this.removeEventListeners();
   }

@@ -478,7 +478,7 @@ export class NavigationModule extends BaseModule {
   /**
    * Cleanup on destroy
    */
-  protected override onDestroy(): void {
+  protected override async onDestroy(): Promise<void> {
     if (this.unsubscribeNav) {
       this.unsubscribeNav();
     }
