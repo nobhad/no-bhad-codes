@@ -6,32 +6,49 @@
 
 ## ✅ RECENT PROGRESS (This Session)
 
+### Navigation Route Registration Fix - COMPLETED
+**Status:** Fixed About and Contact navigation links ✅
+**Priority:** CRITICAL - Core navigation broken
+
+**Issue:**
+- About and Contact navigation links didn't scroll to sections
+- Click handlers fired but navigation failed silently
+- RouterService logs showed "Route not found: #about" warnings
+
+**Root Cause:**
+- RouterService was initialized but **no routes were registered**
+- `findRoute(#about)` returned null, causing navigation to fail
+- Navigation code expected routes to exist for hash links
+
+**Changes Made:**
+- **File:** `src/core/app.ts` (lines 402-436)
+  - Added `registerHomePageRoutes()` method
+  - Registers routes after RouterService initialization:
+    - `#about` → section: 'about', title: 'About - No Bhad Codes'
+    - `#contact` → section: 'contact', title: 'Contact - No Bhad Codes'
+    - `/` → section: 'intro', title: 'No Bhad Codes - Professional Web Development'
+  - Called automatically during service initialization
+
+**Result:**
+- ✅ About and Contact links now scroll smoothly to sections
+- ✅ RouterService finds routes for hash navigation
+- ✅ Document title updates when navigating between sections
+- ✅ Browser history tracks section navigation
+
 ### Section Visibility Fix - COMPLETED
 **Status:** Fixed sections disappearing during navigation ✅
 **Priority:** CRITICAL - Core UI visibility issue
 
 **Issue:**
-- About and Contact sections were disappearing after clicking navigation links
-- CSS relied on `.intro-complete` class to make sections visible
-- No default visibility state caused sections to hide when intro animation didn't run
-
-**Root Cause:**
-- Intro animation CSS expected `.intro-loading` class to hide sections initially
-- But this class was never added to HTML - only removed in code
-- Without default visibility, sections had undefined opacity/visibility state
-- Navigation events could trigger CSS changes that hid sections
+- Sections had undefined visibility state without intro animation
+- CSS relied solely on `.intro-complete` class
 
 **Changes Made:**
 - **File:** `src/styles/base/layout.css` (lines 267-273)
-  - Added default visibility styles for header, main, and footer
-  - Set `opacity: 1` and `visibility: visible` as baseline
-  - Ensures sections are always visible regardless of intro animation state
+  - Added default `opacity: 1` and `visibility: visible` for header, main, footer
 
 **Result:**
-- ✅ Sections no longer disappear during navigation
-- ✅ About and Contact links work correctly
-- ✅ Intro animation still works as expected when it runs
-- ✅ Pages without intro animation also display correctly
+- ✅ Sections always visible regardless of intro animation state
 
 ### Navigation & UI Fixes - COMPLETED
 **Status:** All navigation issues resolved ✅
