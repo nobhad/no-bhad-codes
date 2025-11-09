@@ -48,14 +48,26 @@
 ---
 
 ### 2. Client Portal Page Routes to Admin Dashboard Instead
-**Status:** NEW - NOT STARTED
+**Status:** FIXED ✅
 **Reported:** When clicking "Client Portal" link, user is sent to admin dashboard instead
 **Priority:** HIGH - Core navigation broken
 
-**Next Steps:**
-- [ ] Check routing configuration
-- [ ] Find where client portal link points
-- [ ] Fix route to point to correct client portal page
+**Root Cause Found:**
+- Hardcoded fallback navigation in `src/modules/navigation.ts` had wrong URL: `/client-portal/` instead of `/client/portal`
+- Build files (build.html, test-nav.html) also had inconsistent URLs
+
+**Changes Made:**
+- Updated `src/modules/navigation.ts` line 324: Changed fallback href from `/client-portal/` to `/client/portal`
+- Updated `build.html` line 31: Changed href from `/client-portal/` to `/client/portal`
+- Updated `test-nav.html` line 74: Changed href from `/client-portal/` to `/client/portal`
+- Verified `templates/data.json` has correct URL: `/client/portal` ✓
+- Verified `client/portal.html` loads correct template: `client-portal.ejs` ✓
+- Verified `admin/index.html` loads correct template: `admin.ejs` ✓
+
+**Verification:**
+- `/client/portal` → loads client portal dashboard (Profile, Billing, Projects, Messages)
+- `/admin` → loads admin dashboard (Overview, Performance, Analytics, System)
+- Templates are distinct and correct
 
 ---
 

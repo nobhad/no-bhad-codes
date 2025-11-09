@@ -321,7 +321,7 @@ export class NavigationModule extends BaseModule {
           { id: 'home', text: 'home', href: '/', eyebrow: '00' },
           { id: 'about', text: 'about', href: '#about', eyebrow: '01' },
           { id: 'contact', text: 'contact', href: '#contact', eyebrow: '02' },
-          { id: 'client', text: 'client portal', href: '/client-portal/', eyebrow: '04' }
+          { id: 'client-portal', text: 'client portal', href: '/client/portal', eyebrow: '04' }
         ];
       }
 
