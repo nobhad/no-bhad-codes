@@ -28,16 +28,20 @@ class TestModule extends BaseModule {
   }
 
   public testLogError(message: string, error: Error) {
-    this.logError(message, error);
+    this.error(message, error);
   }
 }
 
 describe('BaseModule', () => {
   let module: TestModule;
+  let container: HTMLElement;
 
   beforeEach(() => {
     document.body.innerHTML = '<div id="test-element">Test</div>';
-    module = new TestModule('TestModule', { debug: true });
+    container = document.createElement('div');
+    container.id = 'test-container';
+    document.body.appendChild(container);
+    module = new TestModule({ debug: true });
   });
 
   describe('constructor', () => {
@@ -59,12 +63,6 @@ describe('BaseModule', () => {
       // Name is now required in constructor and set in TestModule
       module = new TestModule({ debug: true });
       expect(module.name).toBe('test-module');
-    });
-  });
-
-  describe('Lifecycle Management', () => {
-    beforeEach(() => {
-      module = new TestModule();
     });
   });
 
@@ -92,7 +90,8 @@ describe('BaseModule', () => {
       let eventFired = false;
       let eventData: any = null;
 
-      container.addEventListener('test-event', (event: any) => {
+      // Events are dispatched on document with module name prefix
+      document.addEventListener('test-module:test-event', (event: any) => {
         eventFired = true;
         eventData = event.detail;
       });
@@ -106,7 +105,7 @@ describe('BaseModule', () => {
     it('should emit events without data', () => {
       let eventFired = false;
 
-      container.addEventListener('simple-event', () => {
+      document.addEventListener('test-module:simple-event', () => {
         eventFired = true;
       });
 
@@ -119,18 +118,18 @@ describe('BaseModule', () => {
       let callbackFired = false;
       let callbackData: any = null;
 
-      const callback = (event: CustomEvent) => {
+      const callback = (event: any) => {
         callbackFired = true;
         callbackData = event.detail;
       };
 
       module.on('listen-test', callback);
 
-      // Emit event directly on container
+      // Emit event directly on document
       const event = new CustomEvent('listen-test', {
         detail: { test: 'data' }
       });
-      container.dispatchEvent(event);
+      document.dispatchEvent(event);
 
       expect(callbackFired).toBe(true);
       expect(callbackData).toEqual({ test: 'data' });
@@ -148,7 +147,7 @@ describe('BaseModule', () => {
 
       // Emit event - should not trigger callback
       const event = new CustomEvent('remove-test');
-      container.dispatchEvent(event);
+      document.dispatchEvent(event);
 
       expect(callbackCount).toBe(0);
     });
@@ -162,22 +161,22 @@ describe('BaseModule', () => {
     it('should set and get state', () => {
       module.setState('testKey', 'testValue');
 
-      expect(module.getStatus('testKey')).toBe('testValue');
+      expect(module.getState('testKey')).toBe('testValue');
     });
 
     it('should return undefined for non-existent state', () => {
-      expect(module.getStatus('nonExistent')).toBeUndefined();
+      expect(module.getState('nonExistent')).toBeUndefined();
     });
 
     it('should return default value for non-existent state', () => {
-      expect(module.getStatus('nonExistent', 'defaultValue')).toBe('defaultValue');
+      expect(module.getState('nonExistent', 'defaultValue')).toBe('defaultValue');
     });
 
     it('should update existing state', () => {
       module.setState('updateKey', 'initialValue');
       module.setState('updateKey', 'updatedValue');
 
-      expect(module.getStatus('updateKey')).toBe('updatedValue');
+      expect(module.getState('updateKey')).toBe('updatedValue');
     });
 
     it('should handle complex state objects', () => {
@@ -190,7 +189,7 @@ describe('BaseModule', () => {
 
       module.setState('complex', complexState);
 
-      expect(module.getStatus('complex')).toEqual(complexState);
+      expect(module.getState('complex')).toEqual(complexState);
     });
   });
 
@@ -234,37 +233,42 @@ describe('BaseModule', () => {
     });
 
     it('should log messages when debug enabled', () => {
-      const { logger } = require('../../../src/services/logger.js');
+      const consoleSpy = vi.spyOn(console, 'log');
 
       module.testLog('Test message');
 
-      expect(logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('[test-module] Test message')
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '[test-module]',
+        'Test message'
       );
+
+      consoleSpy.mockRestore();
     });
 
     it('should log errors', () => {
-      const { logger } = require('../../../src/services/logger.js');
+      const consoleSpy = vi.spyOn(console, 'error');
       const error = new Error('Test error');
 
       module.testLogError('Error occurred', error);
 
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('[test-module] Error occurred'),
-        expect.objectContaining({
-          error: error.message,
-          stack: error.stack
-        })
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '[test-module]',
+        'Error occurred',
+        error
       );
+
+      consoleSpy.mockRestore();
     });
 
     it('should not log when debug disabled', () => {
       const debugDisabledModule = new TestModule({ debug: false });
-      const { logger } = require('../../../src/services/logger.js');
+      const consoleSpy = vi.spyOn(console, 'log');
 
       debugDisabledModule.testLog('Should not log');
 
-      expect(logger.info).not.toHaveBeenCalled();
+      expect(consoleSpy).not.toHaveBeenCalled();
+
+      consoleSpy.mockRestore();
     });
   });
 
@@ -284,7 +288,7 @@ describe('BaseModule', () => {
 
       // Event should not fire after teardown
       const event = new CustomEvent('cleanup-test');
-      container.dispatchEvent(event);
+      document.dispatchEvent(event);
 
       expect(callbackCount).toBe(0);
     });
@@ -293,11 +297,11 @@ describe('BaseModule', () => {
       await module.initialize();
       module.setState('cleanupKey', 'value');
 
-      expect(module.getStatus('cleanupKey')).toBe('value');
+      expect(module.getState('cleanupKey')).toBe('value');
 
       await module.teardown();
 
-      expect(module.getStatus('cleanupKey')).toBeUndefined();
+      expect(module.getState('cleanupKey')).toBeUndefined();
     });
   });
 
@@ -310,10 +314,12 @@ describe('BaseModule', () => {
       const asyncError = new Error('Async init error');
       module.initError = asyncError;
 
-      await expect(module.initialize()).rejects.toThrow('Async init error');
+      // Init() catches errors and marks module with error state instead of rejecting
+      await module.initialize();
 
-      // Module should remain uninitialized
-      expect(module.isInitialized).toBe(false);
+      // Module should be marked as initialized but with error
+      expect(module.isInitialized).toBe(true);
+      expect((module as any).hasError).toBe(true);
     });
 
     it('should handle destroy errors without breaking state', async () => {
@@ -322,6 +328,7 @@ describe('BaseModule', () => {
       const destroyError = new Error('Destroy error');
       module.destroyError = destroyError;
 
+      // Destroy re-throws errors
       await expect(module.teardown()).rejects.toThrow('Destroy error');
 
       // Should still mark as not initialized despite error

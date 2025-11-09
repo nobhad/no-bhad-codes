@@ -266,10 +266,13 @@ export class BaseModule {
       this.timelines.clear();
 
       // Call module-specific onDestroy
-      this.onDestroy();
+      await this.onDestroy();
 
       // Clear element cache
       this.elements.clear();
+
+      // Clear state
+      (this as any).state = {};
 
       this.isDestroyed = true;
       this.isInitialized = false;
@@ -279,6 +282,9 @@ export class BaseModule {
 
     } catch (error) {
       this.error('Destruction failed:', error);
+      // Mark as destroyed even if cleanup failed
+      this.isDestroyed = true;
+      this.isInitialized = false;
       throw error; // Re-throw to propagate the error if necessary
     }
   }
@@ -286,7 +292,7 @@ export class BaseModule {
   /**
      * Override this method in child classes for custom cleanup logic
      */
-  protected onDestroy(): void {
+  protected async onDestroy(): Promise<void> {
     // Child classes should override this method
   }
 
@@ -341,10 +347,34 @@ export class BaseModule {
 
   /**
    * Listen for custom events (alias for addEventListener)
+   * Tracked for automatic cleanup on destroy
    */
   on(eventName: string, callback: EventListener): void {
     if (typeof document !== 'undefined') {
       document.addEventListener(eventName, callback);
+      // Track for cleanup
+      const key = `document-${eventName}-${this.eventListeners.size}`;
+      this.eventListeners.set(key, {
+        element: document as any,
+        event: eventName,
+        handler: callback
+      });
+    }
+  }
+
+  /**
+   * Remove event listener
+   */
+  off(eventName: string, callback: EventListener): void {
+    if (typeof document !== 'undefined') {
+      document.removeEventListener(eventName, callback);
+      // Remove from tracking
+      for (const [key, listener] of this.eventListeners.entries()) {
+        if (listener.event === eventName && listener.handler === callback) {
+          this.eventListeners.delete(key);
+          break;
+        }
+      }
     }
   }
 
@@ -372,9 +402,29 @@ export class BaseModule {
   /**
    * Set module state (placeholder for state management)
    */
-  setState(state: Record<string, any>): void {
-    // Basic state storage - can be enhanced
-    (this as any).state = { ...(this as any).state, ...state };
+  setState(key: string | Record<string, any>, value?: any): void {
+    if (!( this as any).state) {
+      (this as any).state = {};
+    }
+
+    if (typeof key === 'string') {
+      // Single key-value pair
+      (this as any).state[key] = value;
+    } else {
+      // Object with multiple key-value pairs
+      (this as any).state = { ...(this as any).state, ...key };
+    }
+  }
+
+  /**
+   * Get module state value
+   */
+  getState(key: string, defaultValue?: any): any {
+    if (!(this as any).state) {
+      return defaultValue;
+    }
+    const value = (this as any).state[key];
+    return value !== undefined ? value : defaultValue;
   }
 
   /**

@@ -418,8 +418,8 @@ export class ContactFormModule extends BaseModule {
     }
   }
 
-  override onDestroy() {
+  override async onDestroy(): Promise<void> {
     this.isSubmitting = false;
-    super.onDestroy();
+    await super.onDestroy();
   }
 }

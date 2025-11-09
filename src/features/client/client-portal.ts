@@ -49,7 +49,7 @@ export class ClientPortalModule extends BaseModule {
     // await this.checkExistingAuth();
   }
 
-  protected override onDestroy(): void {
+  protected override async onDestroy(): Promise<void> {
     // Cleanup event listeners and animations
     if (this.loginForm) {
       this.loginForm.removeEventListener('submit', this.handleLogin);

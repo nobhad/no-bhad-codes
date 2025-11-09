@@ -177,7 +177,7 @@ export class ThemeModule extends BaseModule {
   /**
    * Cleanup
    */
-  protected override onDestroy(): void {
+  protected override async onDestroy(): Promise<void> {
     if (this.unsubscribeState) {
       this.unsubscribeState();
     }

@@ -30,7 +30,7 @@ export class ClientLandingModule extends BaseModule {
     this.setupTitleHandler();
   }
 
-  protected override onDestroy(): void {
+  protected override async onDestroy(): Promise<void> {
     // Cleanup animations if needed
   }
 
