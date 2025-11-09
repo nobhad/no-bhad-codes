@@ -22,21 +22,47 @@ vi.mock('../../../src/services/logger.js', () => ({
 
 // Mock state manager with stateful mock
 const mockState = { theme: 'light' as 'light' | 'dark', navOpen: false };
+const mockSubscribers: Array<(newValue: any, oldValue: any, key: string) => void> = [];
+
 vi.mock('../../../src/core/state.js', () => ({
   StateManager: vi.fn().mockImplementation(() => ({
     setState: vi.fn((updates: any) => {
+      const oldState = { ...mockState };
       Object.assign(mockState, updates);
+      // Notify subscribers
+      Object.keys(updates).forEach(key => {
+        mockSubscribers.forEach(cb => cb(mockState[key as keyof typeof mockState], oldState[key as keyof typeof oldState], key));
+      });
     }),
     getState: vi.fn(() => mockState),
     subscribe: vi.fn(() => () => {}), // Return unsubscribe function
+    subscribeToProperty: vi.fn((key: string, callback: any) => {
+      mockSubscribers.push(callback);
+      return () => {
+        const index = mockSubscribers.indexOf(callback);
+        if (index > -1) mockSubscribers.splice(index, 1);
+      };
+    }),
     destroy: vi.fn()
   })),
   appState: {
     setState: vi.fn((updates: any) => {
+      const oldState = { ...mockState };
       Object.assign(mockState, updates);
+      // Notify subscribers
+      Object.keys(updates).forEach(key => {
+        mockSubscribers.forEach(cb => cb(mockState[key as keyof typeof mockState], oldState[key as keyof typeof oldState], key));
+      });
     }),
     getState: vi.fn(() => mockState),
     subscribe: vi.fn(() => () => {}),
+    subscribeToProperty: vi.fn((key: string, callback: any) => {
+      mockSubscribers.push(callback);
+      return () => {
+        const index = mockSubscribers.indexOf(callback);
+        if (index > -1) mockSubscribers.splice(index, 1);
+      };
+    }),
     destroy: vi.fn()
   }
 }));
@@ -49,6 +75,7 @@ describe('ThemeModule', () => {
     // Reset mock state
     mockState.theme = 'light';
     mockState.navOpen = false;
+    mockSubscribers.length = 0; // Clear subscribers
 
     // Create test container with theme toggle structure
     container = document.createElement('div');
