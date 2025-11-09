@@ -24,10 +24,16 @@ vi.mock('../../../src/services/logger.js', () => ({
 vi.mock('../../../src/core/state.js', () => ({
   StateManager: vi.fn().mockImplementation(() => ({
     setState: vi.fn(),
-    getState: vi.fn(),
+    getState: vi.fn(() => ({ theme: 'light', navOpen: false })),
     subscribe: vi.fn(() => () => {}), // Return unsubscribe function
     destroy: vi.fn()
-  }))
+  })),
+  appState: {
+    setState: vi.fn(),
+    getState: vi.fn(() => ({ theme: 'light', navOpen: false })),
+    subscribe: vi.fn(() => () => {}),
+    destroy: vi.fn()
+  }
 }));
 
 describe('ThemeModule', () => {
@@ -63,6 +69,21 @@ describe('ThemeModule', () => {
   afterEach(() => {
     document.body.innerHTML = '';
     document.documentElement.removeAttribute('data-theme');
+
+    // Restore matchMedia mock after each test (some tests override it)
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
   });
 
   describe('Initialization', () => {
