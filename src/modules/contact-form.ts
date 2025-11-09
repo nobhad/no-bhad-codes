@@ -116,29 +116,38 @@ export class ContactFormModule extends BaseModule {
     let isValid = true;
     let errorMessage = '';
 
+    // Get the parent form-group
+    const formGroup = field.closest('.form-group');
+
     // Remove existing error styling
+    formGroup?.classList.remove('error');
     field.classList.remove('error');
     this.removeErrorMessage(field);
 
-    switch (inputField.type) {
-    case 'email':
-      if (!this.isValidEmail(value)) {
-        isValid = false;
-        errorMessage = 'Please enter a valid email address';
-      }
-      break;
-    case 'text':
-      if (inputField.required && value.length < 2) {
-        isValid = false;
-        errorMessage = 'This field must be at least 2 characters';
-      }
-      break;
-    case 'textarea':
+    // Validate based on field type
+    if (inputField.tagName === 'TEXTAREA') {
       if (inputField.required && value.length < 10) {
         isValid = false;
         errorMessage = 'Please provide a more detailed message';
       }
-      break;
+    } else {
+      switch (inputField.type) {
+      case 'email':
+        if (value && !this.isValidEmail(value)) {
+          isValid = false;
+          errorMessage = 'Please enter a valid email address';
+        } else if (inputField.required && !value) {
+          isValid = false;
+          errorMessage = 'Email is required';
+        }
+        break;
+      case 'text':
+        if (inputField.required && value.length < 2) {
+          isValid = false;
+          errorMessage = inputField.name === 'name' ? 'Name is required' : 'This field must be at least 2 characters';
+        }
+        break;
+      }
     }
 
     if (!isValid) {
@@ -154,16 +163,39 @@ export class ContactFormModule extends BaseModule {
   }
 
   showFieldError(field: Element, message: string) {
+    // Add error class to form-group parent for better styling control
+    const formGroup = field.closest('.form-group');
+    if (formGroup) {
+      formGroup.classList.add('error');
+    }
+
     field.classList.add('error');
 
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'field-error';
-    errorDiv.textContent = message;
-
-    field.parentNode?.insertBefore(errorDiv, field.nextSibling);
+    // Check if error message container already exists
+    const existingError = formGroup?.querySelector('.error-message') as HTMLElement;
+    if (existingError) {
+      existingError.textContent = message;
+      existingError.style.display = 'block';
+    } else {
+      // Create new error message
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'field-error';
+      errorDiv.textContent = message;
+      field.parentNode?.insertBefore(errorDiv, field.nextSibling);
+    }
   }
 
   removeErrorMessage(field: Element) {
+    const formGroup = field.closest('.form-group');
+
+    // Hide existing error-message span
+    const errorSpan = formGroup?.querySelector('.error-message') as HTMLElement;
+    if (errorSpan) {
+      errorSpan.style.display = 'none';
+      errorSpan.textContent = '';
+    }
+
+    // Remove field-error divs
     const errorDiv = field.parentNode?.querySelector('.field-error');
     if (errorDiv) {
       errorDiv.remove();

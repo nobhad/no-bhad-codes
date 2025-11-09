@@ -301,6 +301,11 @@ export class IntroAnimationModule extends BaseModule {
       this.skipHandler = null;
     }
 
+    // Update app state to indicate intro is complete
+    if (typeof window !== 'undefined' && (window as any).NBW_STATE) {
+      (window as any).NBW_STATE.setState({ introAnimating: false });
+    }
+
     // Intro animation completed and cleaned up
   }
 
