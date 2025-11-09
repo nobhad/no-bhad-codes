@@ -6,6 +6,33 @@
 
 ## ✅ RECENT PROGRESS (This Session)
 
+### Section Visibility Fix - COMPLETED
+**Status:** Fixed sections disappearing during navigation ✅
+**Priority:** CRITICAL - Core UI visibility issue
+
+**Issue:**
+- About and Contact sections were disappearing after clicking navigation links
+- CSS relied on `.intro-complete` class to make sections visible
+- No default visibility state caused sections to hide when intro animation didn't run
+
+**Root Cause:**
+- Intro animation CSS expected `.intro-loading` class to hide sections initially
+- But this class was never added to HTML - only removed in code
+- Without default visibility, sections had undefined opacity/visibility state
+- Navigation events could trigger CSS changes that hid sections
+
+**Changes Made:**
+- **File:** `src/styles/base/layout.css` (lines 267-273)
+  - Added default visibility styles for header, main, and footer
+  - Set `opacity: 1` and `visibility: visible` as baseline
+  - Ensures sections are always visible regardless of intro animation state
+
+**Result:**
+- ✅ Sections no longer disappear during navigation
+- ✅ About and Contact links work correctly
+- ✅ Intro animation still works as expected when it runs
+- ✅ Pages without intro animation also display correctly
+
 ### Navigation & UI Fixes - COMPLETED
 **Status:** All navigation issues resolved ✅
 **Priority:** CRITICAL - Navigation and visual glitches fixed
