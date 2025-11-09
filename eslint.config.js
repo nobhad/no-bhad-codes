@@ -109,7 +109,7 @@ export default [
       'linebreak-style': ['error', 'unix'],
       'quotes': ['error', 'single'],
       'semi': ['error', 'always'],
-      'no-unused-vars': ['warn', { 'argsIgnorePattern': '^_' }],
+      'no-unused-vars': ['warn', { 'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_' }],
       'no-console': ['warn', { 'allow': ['warn', 'error', 'log'] }],
       'prefer-const': 'error',
       'no-var': 'error',
@@ -157,7 +157,12 @@ export default [
       'no-use-before-define': 'off',
       
       // TypeScript-specific rules
-      '@typescript-eslint/no-unused-vars': ['warn', { 'argsIgnorePattern': '^_' }],
+      '@typescript-eslint/no-unused-vars': ['warn', {
+        'argsIgnorePattern': '^_',
+        'varsIgnorePattern': '^_',
+        'destructuredArrayIgnorePattern': '^_',
+        'caughtErrorsIgnorePattern': '^_'
+      }],
       '@typescript-eslint/no-shadow': 'warn',
       '@typescript-eslint/no-use-before-define': ['error', { 'functions': false }],
       

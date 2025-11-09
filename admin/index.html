@@ -5,19 +5,19 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
-    <%- include('../templates/partials/head.ejs') %>
+    <%- include('../templates/partials/head.ejs', { pageData, site, navigation }) %>
 </head>
 <body<% if (pageData.bodyClass) { %> class="<%= pageData.bodyClass %>"<% } %>>
-    
-    <%- include('../templates/partials/header.ejs') %>
-    
-    <%- include('../templates/partials/navigation.ejs') %>
-    
+
+    <%- include('../templates/partials/header.ejs', { pageData, site, navigation }) %>
+
+    <%- include('../templates/partials/navigation.ejs', { pageData, site, navigation }) %>
+
     <!-- MAIN SCROLLABLE CONTENT -->
     <main<% if (pageData.mainClass) { %> class="<%= pageData.mainClass %>"<% } %>>
         <%- include('../templates/pages/admin.ejs') %>
     </main>
 
-    <%- include('../templates/partials/footer.ejs') %>
+    <%- include('../templates/partials/footer.ejs', { pageData, site, navigation }) %>
 </body>
 </html>
