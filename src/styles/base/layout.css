@@ -264,6 +264,14 @@ main {
  * INTRO ANIMATION STATES
  * ============================================ */
 
+/* Default: ensure content is visible */
+.header,
+main,
+.footer {
+  opacity: 1;
+  visibility: visible;
+}
+
 /* Hide main page content during intro animation */
 .intro-loading .header,
 .intro-loading main,
@@ -272,7 +280,7 @@ main {
   visibility: hidden;
 }
 
-/* Show content after intro completes */
+/* Show content after intro completes (explicit for smooth transition) */
 .intro-complete .header,
 .intro-complete main,
 .intro-complete .footer {
