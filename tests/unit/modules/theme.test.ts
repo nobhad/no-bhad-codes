@@ -70,6 +70,7 @@ vi.mock('../../../src/core/state.js', () => ({
 describe('ThemeModule', () => {
   let themeModule: ThemeModule;
   let mockToggleButton: HTMLElement;
+  let container: HTMLElement;
 
   beforeEach(() => {
     // Reset mock state
