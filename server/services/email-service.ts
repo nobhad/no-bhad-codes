@@ -3,10 +3,34 @@
  * EMAIL SERVICE
  * ===============================================
  * @file server/services/email-service.ts
- * 
+ *
  * Handles sending email notifications for client intake
  * and project management.
  */
+
+import nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
+
+// Email transporter (initialized on first use)
+let transporter: Transporter | null = null;
+
+/**
+ * Initialize email transporter with SMTP configuration
+ */
+function getTransporter(): Transporter {
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+  }
+  return transporter;
+}
 
 export interface EmailContent {
   to: string;
@@ -55,12 +79,9 @@ interface EmailServiceStatus {
  */
 export async function sendWelcomeEmail(email: string, name: string, accessToken: string): Promise<EmailResult> {
   console.log('Sending welcome email to:', email);
-  
-  // TODO: Implement actual email sending (SMTP, SendGrid, etc.)
-  // For now, just log the email content
-  
+
   const portalUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/client/portal?token=${accessToken}`;
-  
+
   const emailContent: EmailContent = {
     to: email,
     subject: 'Welcome to No Bhad Codes - Your Project Portal is Ready!',
@@ -69,7 +90,7 @@ export async function sendWelcomeEmail(email: string, name: string, accessToken:
 
       Thank you for choosing No Bhad Codes for your project! We're excited to work with you.
 
-      Your project details have been received and we're already reviewing your requirements. 
+      Your project details have been received and we're already reviewing your requirements.
       You'll receive a detailed proposal within 24-48 hours.
 
       In the meantime, you can access your project portal here:
@@ -89,14 +110,24 @@ export async function sendWelcomeEmail(email: string, name: string, accessToken:
     html: generateWelcomeEmailHTML(name, portalUrl)
   };
 
-  // Log email for development
-  console.log('Welcome Email Content:', emailContent);
-  
-  // In production, replace this with actual email sending
-  // Example with SendGrid:
-  // await sendGrid.send(emailContent);
-  
-  return { success: true, message: 'Welcome email logged for development' };
+  // Send email via Nodemailer
+  try {
+    const transporter = getTransporter();
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM || '"No Bhad Codes" <noreply@nobhadcodes.com>',
+      to: emailContent.to,
+      subject: emailContent.subject,
+      text: emailContent.text,
+      html: emailContent.html,
+    });
+
+    console.log('✅ Welcome email sent successfully to:', email);
+    return { success: true, message: 'Welcome email sent successfully' };
+  } catch (error) {
+    console.error('❌ Failed to send welcome email:', error);
+    // Don't throw - log and continue (non-blocking)
+    return { success: false, message: `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}` };
+  }
 }
 
 /**
@@ -106,9 +137,9 @@ export async function sendWelcomeEmail(email: string, name: string, accessToken:
  */
 export async function sendNewIntakeNotification(intakeData: IntakeData, projectId: number): Promise<EmailResult> {
   console.log('Sending new intake notification for project:', projectId);
-  
+
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@nobhadcodes.com';
-  
+
   const emailContent: EmailContent = {
     to: adminEmail,
     subject: `New Project Intake: ${intakeData.company} - ${intakeData.projectType}`,
@@ -136,10 +167,24 @@ export async function sendNewIntakeNotification(intakeData: IntakeData, projectI
     html: generateIntakeNotificationHTML(intakeData, projectId)
   };
 
-  // Log email for development
-  console.log('Admin Notification Email Content:', emailContent);
-  
-  return { success: true, message: 'Admin notification logged for development' };
+  // Send email via Nodemailer
+  try {
+    const transporter = getTransporter();
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM || '"No Bhad Codes" <noreply@nobhadcodes.com>',
+      to: emailContent.to,
+      subject: emailContent.subject,
+      text: emailContent.text,
+      html: emailContent.html,
+    });
+
+    console.log('✅ Admin notification sent successfully');
+    return { success: true, message: 'Admin notification sent successfully' };
+  } catch (error) {
+    console.error('❌ Failed to send admin notification:', error);
+    // Don't throw - log and continue (non-blocking)
+    return { success: false, message: `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}` };
+  }
 }
 
 function generateWelcomeEmailHTML(name: string, portalUrl: string): string {

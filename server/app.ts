@@ -17,16 +17,16 @@ import dotenv from 'dotenv';
 // import { emailService } from './services/email-service.js';
 // import { cacheService } from './services/cache-service.js';
 import { initializeDatabase } from './database/init.js';
-// import authRouter from './routes/auth.js';
-// import clientsRouter from './routes/clients.js';
-// import projectsRouter from './routes/projects.js';
-// import adminRouter from './routes/admin.js';
-// import messagesRouter from './routes/messages.js';
-// import invoicesRouter from './routes/invoices.js';
-// import uploadsRouter from './routes/uploads.js';
-// import { setupSwagger } from './config/swagger.js';
-// import { logger } from './middleware/logger.js';
-// import { errorHandler } from './middleware/errorHandler.js';
+import authRouter from './routes/auth.js';
+import clientsRouter from './routes/clients.js';
+import projectsRouter from './routes/projects.js';
+import adminRouter from './routes/admin.js';
+import messagesRouter from './routes/messages.js';
+import invoicesRouter from './routes/invoices.js';
+import uploadsRouter from './routes/uploads.js';
+import { setupSwagger } from './config/swagger.js';
+import { logger } from './middleware/logger.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 // Load environment variables
 dotenv.config();
@@ -48,7 +48,7 @@ const PORT = process.env.PORT || 3001;
 // });
 
 // Request logging and error tracking
-// app.use(logger);
+app.use(logger);
 
 // Security middleware
 app.use(helmet({
@@ -109,16 +109,16 @@ app.get('/health', (req, res) => {
 });
 
 // Setup API documentation
-// setupSwagger(app);
+setupSwagger(app);
 
 // API routes
-// app.use('/api/auth', authRouter);
-// app.use('/api/clients', clientsRouter);
-// app.use('/api/projects', projectsRouter);
-// app.use('/api/admin', adminRouter);
-// app.use('/api/messages', messagesRouter);
-// app.use('/api/invoices', invoicesRouter);
-// app.use('/api/uploads', uploadsRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/clients', clientsRouter);
+app.use('/api/projects', projectsRouter);
+app.use('/api/admin', adminRouter);
+app.use('/api/messages', messagesRouter);
+app.use('/api/invoices', invoicesRouter);
+app.use('/api/uploads', uploadsRouter);
 
 // 404 handler
 app.use((req, res) => {
@@ -139,8 +139,8 @@ app.use((req, res) => {
 // Sentry error handler (must be before other error handlers) - TEMPORARILY DISABLED
 // app.use(errorTracker.errorHandler());
 
-// Global error handler - TEMPORARILY DISABLED FOR DEBUGGING
-// app.use(errorHandler);
+// Global error handler
+app.use(errorHandler);
 
 /**
  * Start the server

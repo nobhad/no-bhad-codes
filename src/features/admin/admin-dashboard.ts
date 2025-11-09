@@ -12,7 +12,12 @@ import { AdminSecurity } from './admin-security';
 
 // Admin authentication and session management
 class AdminAuth {
-  private static readonly AUTH_KEY_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; // 'hello' in SHA256
+  // TODO: Replace with backend JWT authentication via /api/admin/login
+  // For now, using environment-configurable password hash
+  // Set VITE_ADMIN_PASSWORD_HASH at build time or use default
+  private static readonly AUTH_KEY_HASH =
+    (import.meta.env && import.meta.env.VITE_ADMIN_PASSWORD_HASH) ||
+    '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'; // Default: 'admin' in SHA256
   private static readonly SESSION_KEY = 'nbw_admin_session';
   private static readonly SESSION_DURATION = 60 * 60 * 1000; // 1 hour
 

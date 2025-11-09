@@ -13,6 +13,7 @@ import { resolve, extname } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
+import { getDatabase } from '../database/init.js';
 
 const router = express.Router();
 
@@ -244,8 +245,20 @@ router.post('/avatar',
       uploadedAt: new Date().toISOString()
     };
 
-    // TODO: Update user avatar URL in database
-    
+    // Update user avatar URL in database
+    if (req.user?.id) {
+      try {
+        const db = await getDatabase();
+        await db.run(
+          'UPDATE users SET avatar_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+          [avatarInfo.url, req.user.id]
+        );
+      } catch (dbError) {
+        console.error('Failed to update avatar in database:', dbError);
+        // Non-blocking - file is already uploaded
+      }
+    }
+
     res.status(201).json({
       success: true,
       message: 'Avatar uploaded successfully',
@@ -312,7 +325,18 @@ router.post('/project/:projectId',
       uploadedAt: new Date().toISOString()
     };
 
-    // TODO: Save project file info to database
+    // Save project file info to database
+    try {
+      const db = await getDatabase();
+      await db.run(
+        `INSERT INTO files (project_id, filename, original_filename, mimetype, size, file_path, uploaded_by, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+        [projectId, req.file.filename, req.file.originalname, req.file.mimetype, req.file.size, projectFile.url, req.user?.id]
+      );
+    } catch (dbError) {
+      console.error('Failed to save file info to database:', dbError);
+      // Non-blocking - file is already uploaded
+    }
 
     res.status(201).json({
       success: true,
