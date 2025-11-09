@@ -45,9 +45,8 @@ export class SanitizationUtils {
   static escapeHtml(input: string): string {
     if (!input || typeof input !== 'string') return '';
 
-    return input.replace(/[&<>"'`=/]/g, (match) => {
-      return SanitizationUtils.HTML_ENTITIES[match] || match;
-    });
+    return input.replace(/[&<>"'`=/]/g, (match) =>
+      SanitizationUtils.HTML_ENTITIES[match] || match);
   }
 
   /**
@@ -221,7 +220,7 @@ export class SanitizationUtils {
    */
   private static submissionAttempts = new Map<string, { count: number; firstAttempt: number }>();
 
-  static checkRateLimit(identifier: string, maxAttempts: number = 5, windowMs: number = 300000): boolean {
+  static checkRateLimit(identifier: string, maxAttempts = 5, windowMs = 300000): boolean {
     const now = Date.now();
     const attempts = SanitizationUtils.submissionAttempts.get(identifier);
 

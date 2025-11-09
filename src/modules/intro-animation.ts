@@ -25,7 +25,7 @@ export class IntroAnimationModule extends BaseModule {
   private frontFace: HTMLElement | null = null;
   private backFace: HTMLElement | null = null;
   private timeline: gsap.core.Timeline | null = null;
-  private isComplete: boolean = false;
+  private isComplete = false;
   private skipHandler: ((event: KeyboardEvent) => void) | null = null;
 
   constructor(options: ModuleOptions = {}) {

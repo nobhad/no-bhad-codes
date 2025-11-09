@@ -26,7 +26,7 @@ export interface ContactFormModuleOptions extends ModuleOptions {
 export class ContactFormModule extends BaseModule {
   private form: HTMLFormElement | null = null;
   private submitButton: HTMLButtonElement | null = null;
-  private isSubmitting: boolean = false;
+  private isSubmitting = false;
   private contactService: ContactService;
 
   constructor(options: ContactFormModuleOptions = {}) {
@@ -364,7 +364,7 @@ export class ContactFormModule extends BaseModule {
    * Check for security issues in real-time input
    */
   checkForSecurityIssues(field: HTMLInputElement) {
-    const value = field.value;
+    const { value } = field;
 
     // Check for XSS patterns
     if (SanitizationUtils.detectXss(value)) {

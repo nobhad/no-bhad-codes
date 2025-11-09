@@ -7,7 +7,7 @@
  * Reusable button component with variants, states, and accessibility.
  */
 
-import { BaseComponent, ComponentProps, ComponentState } from './base-component';
+import { BaseComponent, type ComponentProps, type ComponentState } from './base-component';
 import { ComponentUtils } from './component-store';
 
 export interface ButtonProps extends ComponentProps {

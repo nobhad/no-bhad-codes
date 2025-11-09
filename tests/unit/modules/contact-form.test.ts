@@ -80,14 +80,14 @@ describe('ContactFormModule', () => {
 
   describe('Initialization', () => {
     it('should initialize contact form module', async () => {
-      await contactModule.initialize();
+      await contactModule.init();
 
       expect(contactModule.isInitialized).toBe(true);
       expect(contactModule.name).toBe('contact-form');
     });
 
     it('should find and bind form elements', async () => {
-      await contactModule.initialize();
+      await contactModule.init();
 
       const form = contactModule.find('#contact-form');
       const nameInput = contactModule.find('#contact-name');
@@ -101,7 +101,7 @@ describe('ContactFormModule', () => {
     });
 
     it('should set up form validation', async () => {
-      await contactModule.initialize();
+      await contactModule.init();
 
       const form = contactModule.find('#contact-form') as HTMLFormElement;
       expect(form.noValidate).toBe(true); // Should disable browser validation
@@ -110,7 +110,7 @@ describe('ContactFormModule', () => {
 
   describe('Form Validation', () => {
     beforeEach(async () => {
-      await contactModule.initialize();
+      await contactModule.init();
     });
 
     it('should validate required fields', () => {
@@ -201,7 +201,7 @@ describe('ContactFormModule', () => {
 
   describe('Form Submission', () => {
     beforeEach(async () => {
-      await contactModule.initialize();
+      await contactModule.init();
     });
 
     it('should submit form when valid', async () => {
@@ -335,7 +335,7 @@ describe('ContactFormModule', () => {
 
   describe('Accessibility', () => {
     beforeEach(async () => {
-      await contactModule.initialize();
+      await contactModule.init();
     });
 
     it('should have proper ARIA attributes', () => {
@@ -372,7 +372,7 @@ describe('ContactFormModule', () => {
 
   describe('Rate Limiting', () => {
     beforeEach(async () => {
-      await contactModule.initialize();
+      await contactModule.init();
     });
 
     it('should prevent rapid form submissions', async () => {
@@ -426,7 +426,7 @@ describe('ContactFormModule', () => {
 
   describe('Spam Protection', () => {
     beforeEach(async () => {
-      await contactModule.initialize();
+      await contactModule.init();
     });
 
     it('should detect honeypot field usage', () => {
@@ -470,7 +470,7 @@ describe('ContactFormModule', () => {
 
   describe('Cleanup', () => {
     it('should clean up event listeners on destroy', async () => {
-      await contactModule.initialize();
+      await contactModule.init();
 
       const form = contactModule.find('#contact-form') as HTMLFormElement;
       const submitHandler = vi.fn();
@@ -483,7 +483,7 @@ describe('ContactFormModule', () => {
     });
 
     it('should clear rate limiting timers on destroy', async () => {
-      await contactModule.initialize();
+      await contactModule.init();
 
       const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
 

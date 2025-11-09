@@ -11,27 +11,6 @@
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 
-// Email transporter (initialized on first use)
-let transporter: Transporter | null = null;
-
-/**
- * Initialize email transporter with SMTP configuration
- */
-function getTransporter(): Transporter {
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
-  }
-  return transporter;
-}
-
 export interface EmailContent {
   to: string;
   subject: string;
@@ -71,14 +50,74 @@ interface EmailServiceStatus {
   isProcessingQueue: boolean;
 }
 
+interface EmailConfig {
+  host: string;
+  port: number;
+  secure: boolean;
+  auth: {
+    user: string;
+    pass: string;
+  };
+  from: string;
+  replyTo?: string;
+}
+
+// Nodemailer transporter instance
+let transporter: Transporter | null = null;
+let emailConfig: EmailConfig | null = null;
+
+/**
+ * Send email using configured transporter
+ * @param emailContent - Email content to send
+ * @returns Promise<EmailResult>
+ */
+async function sendEmail(emailContent: EmailContent): Promise<EmailResult> {
+  // If transporter is not initialized, log and return
+  if (!transporter || !emailConfig) {
+    console.log('[EMAIL] Transporter not initialized. Email logged to console:');
+    console.log(`To: ${emailContent.to}`);
+    console.log(`Subject: ${emailContent.subject}`);
+    console.log(`Text: ${emailContent.text}`);
+    return { success: true, message: 'Email logged to console (transporter not configured)' };
+  }
+
+  try {
+    const info = await transporter.sendMail({
+      from: emailConfig.from,
+      to: emailContent.to,
+      subject: emailContent.subject,
+      text: emailContent.text,
+      html: emailContent.html,
+      replyTo: emailConfig.replyTo,
+    });
+
+    console.log('[EMAIL] Message sent successfully:', info.messageId);
+    return { success: true, message: `Email sent: ${info.messageId}` };
+  } catch (error) {
+    console.error('[EMAIL] Failed to send email:', error);
+    // Fall back to logging if send fails
+    console.log('[EMAIL] Email content (send failed):');
+    console.log(`To: ${emailContent.to}`);
+    console.log(`Subject: ${emailContent.subject}`);
+    return {
+      success: false,
+      message: `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    };
+  }
+}
+
 /**
  * Send welcome email to new client
  * @param {string} email - Client email address
  * @param {string} name - Client name
  * @param {string} accessToken - Client portal access token
  */
-export async function sendWelcomeEmail(email: string, name: string, accessToken: string): Promise<EmailResult> {
-  console.log('Sending welcome email to:', email);
+export async function sendWelcomeEmail(
+  email: string,
+  name: string,
+  accessToken: string
+): Promise<EmailResult> {
+  console.log('[EMAIL] Preparing welcome email for:', email);
 
   const portalUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/client/portal?token=${accessToken}`;
 
@@ -107,27 +146,10 @@ export async function sendWelcomeEmail(email: string, name: string, accessToken:
       Best regards,
       No Bhad Codes Team
     `,
-    html: generateWelcomeEmailHTML(name, portalUrl)
+    html: generateWelcomeEmailHTML(name, portalUrl),
   };
 
-  // Send email via Nodemailer
-  try {
-    const transporter = getTransporter();
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM || '"No Bhad Codes" <noreply@nobhadcodes.com>',
-      to: emailContent.to,
-      subject: emailContent.subject,
-      text: emailContent.text,
-      html: emailContent.html,
-    });
-
-    console.log('✅ Welcome email sent successfully to:', email);
-    return { success: true, message: 'Welcome email sent successfully' };
-  } catch (error) {
-    console.error('❌ Failed to send welcome email:', error);
-    // Don't throw - log and continue (non-blocking)
-    return { success: false, message: `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}` };
-  }
+  return sendEmail(emailContent);
 }
 
 /**
@@ -135,8 +157,11 @@ export async function sendWelcomeEmail(email: string, name: string, accessToken:
  * @param {IntakeData} intakeData - Client intake form data
  * @param {number} projectId - Created project ID
  */
-export async function sendNewIntakeNotification(intakeData: IntakeData, projectId: number): Promise<EmailResult> {
-  console.log('Sending new intake notification for project:', projectId);
+export async function sendNewIntakeNotification(
+  intakeData: IntakeData,
+  projectId: number
+): Promise<EmailResult> {
+  console.log('[EMAIL] Preparing intake notification for project:', projectId);
 
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@nobhadcodes.com';
 
@@ -164,27 +189,10 @@ export async function sendNewIntakeNotification(intakeData: IntakeData, projectI
 
       Review the full details in the admin dashboard.
     `,
-    html: generateIntakeNotificationHTML(intakeData, projectId)
+    html: generateIntakeNotificationHTML(intakeData, projectId),
   };
 
-  // Send email via Nodemailer
-  try {
-    const transporter = getTransporter();
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM || '"No Bhad Codes" <noreply@nobhadcodes.com>',
-      to: emailContent.to,
-      subject: emailContent.subject,
-      text: emailContent.text,
-      html: emailContent.html,
-    });
-
-    console.log('✅ Admin notification sent successfully');
-    return { success: true, message: 'Admin notification sent successfully' };
-  } catch (error) {
-    console.error('❌ Failed to send admin notification:', error);
-    // Don't throw - log and continue (non-blocking)
-    return { success: false, message: `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}` };
-  }
+  return sendEmail(emailContent);
 }
 
 function generateWelcomeEmailHTML(name: string, portalUrl: string): string {
@@ -393,20 +401,47 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
 
 // Email service object for backwards compatibility
 export const emailService = {
-  async init(config: any): Promise<void> {
-    // TODO: Initialize email service
-    console.log('Email service initialized with config:', config);
+  async init(config: EmailConfig): Promise<void> {
+    console.log('[EMAIL] Initializing email service...');
+
+    // Store config
+    emailConfig = config;
+
+    // Create nodemailer transporter
+    transporter = nodemailer.createTransport({
+      host: config.host,
+      port: config.port,
+      secure: config.secure,
+      auth: {
+        user: config.auth.user,
+        pass: config.auth.pass,
+      },
+    });
+
+    console.log('[EMAIL] Email service initialized successfully');
   },
-  
+
   async testConnection(): Promise<boolean> {
-    // TODO: Test email service connection
-    console.log('Testing email connection...');
-    return true;
+    console.log('[EMAIL] Testing email connection...');
+
+    if (!transporter) {
+      console.warn('[EMAIL] Transporter not initialized. Skipping connection test.');
+      return false;
+    }
+
+    try {
+      await transporter.verify();
+      console.log('[EMAIL] ✅ Email connection test successful');
+      return true;
+    } catch (error) {
+      console.error('[EMAIL] ❌ Email connection test failed:', error);
+      return false;
+    }
   },
-  
+
   getStatus(): EmailServiceStatus {
     return {
-      initialized: true,
+      initialized: transporter !== null,
       queueSize: 0,
       templatesLoaded: 4,
       isProcessingQueue: false
@@ -428,9 +463,61 @@ export const emailService = {
     return sendNewIntakeNotification(intakeData, projectId);
   },
   
-  async sendPasswordResetEmail(email: string, data: any): Promise<EmailResult> {
-    console.log('Sending password reset email to:', email, data);
-    return { success: true, message: 'Password reset email logged for development' };
+  async sendPasswordResetEmail(email: string, data: { resetToken: string; name?: string }): Promise<EmailResult> {
+    console.log('[EMAIL] Preparing password reset email for:', email);
+
+    const resetUrl = `${process.env.WEBSITE_URL || 'http://localhost:3000'}/reset-password?token=${data.resetToken}`;
+    const name = data.name || 'User';
+
+    const emailContent: EmailContent = {
+      to: email,
+      subject: 'Password Reset Request - No Bhad Codes',
+      text: `
+        Hi ${name},
+
+        We received a request to reset your password for your No Bhad Codes account.
+
+        Click the link below to reset your password:
+        ${resetUrl}
+
+        This link will expire in 1 hour.
+
+        If you didn't request this password reset, please ignore this email or contact support if you have concerns.
+
+        Best regards,
+        No Bhad Codes Team
+      `,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .button { display: inline-block; padding: 12px 24px; background: #00ff41; color: #000; text-decoration: none; border-radius: 4px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2>Password Reset Request</h2>
+            <p>Hi ${name},</p>
+            <p>We received a request to reset your password for your No Bhad Codes account.</p>
+            <p style="text-align: center; margin: 30px 0;">
+              <a href="${resetUrl}" class="button">Reset Password</a>
+            </p>
+            <p>Or copy and paste this link into your browser:</p>
+            <p style="word-break: break-all; background: #f5f5f5; padding: 10px;">${resetUrl}</p>
+            <p><small>This link will expire in 1 hour.</small></p>
+            <p>If you didn't request this password reset, please ignore this email or contact support if you have concerns.</p>
+            <p>Best regards,<br>No Bhad Codes Team</p>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    return sendEmail(emailContent);
   },
   
   async sendAdminNotification(title: string | any, data?: any): Promise<EmailResult> {

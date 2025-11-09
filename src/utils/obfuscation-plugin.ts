@@ -221,6 +221,21 @@ function addHTMLIntegrityChecks(html: string): string {
 
 function generateFakeSourceMap(code: string): any {
   // Generate a fake source map that leads to decoy files
+  // Use actual code to make the fake map more realistic
+  const lineCount = code.split('\n').length;
+  const mappings = Array(Math.min(lineCount, 50)).fill('AAAA').join(';');
+
+  // Extract some variable names from code to make it more believable
+  const varMatches = code.match(/\b(?:const|let|var|function)\s+(\w+)/g) || [];
+  const extractedNames = varMatches
+    .map(match => match.split(/\s+/).pop() || '')
+    .filter(name => name.length > 0)
+    .slice(0, 10);
+
+  const fakeNames = extractedNames.length > 0
+    ? extractedNames
+    : ['authenticate', 'encrypt', 'validate', 'process'];
+
   const fakeMap = {
     version: 3,
     sources: [
@@ -228,8 +243,8 @@ function generateFakeSourceMap(code: string): any {
       'webpack:///src/api/endpoints.js',
       'webpack:///src/utils/encryption.js'
     ],
-    names: ['authenticate', 'encrypt', 'validate', 'process'],
-    mappings: 'AAAA;AACA;AACA;AACA',
+    names: fakeNames,
+    mappings,
     file: 'app.js',
     sourceRoot: '',
     sourcesContent: [

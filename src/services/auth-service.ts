@@ -119,7 +119,7 @@ export class AuthService extends BaseService {
         await fetch(authEndpoints.logout, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${this.token}`
+            Authorization: `Bearer ${this.token}`
           }
         });
       }
@@ -179,7 +179,7 @@ export class AuthService extends BaseService {
       const response = await fetch(authEndpoints.refresh, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.token}`
+          Authorization: `Bearer ${this.token}`
         }
       });
 
@@ -229,7 +229,7 @@ export class AuthService extends BaseService {
       const response = await fetch(authEndpoints.validate, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.token}`
+          Authorization: `Bearer ${this.token}`
         }
       });
 
@@ -258,7 +258,7 @@ export class AuthService extends BaseService {
       const response = await fetch(authEndpoints.profile, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.token}`
+          Authorization: `Bearer ${this.token}`
         }
       });
 

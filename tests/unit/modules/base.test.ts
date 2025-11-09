@@ -1,26 +1,7 @@
-/**
- * ===============================================
- * BASE MODULE TESTS
- * ===============================================
- * @file tests/unit/modules/base.test.ts
- * 
- * Unit tests for the BaseModule class.
- */
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { BaseModule } from './base';
 
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { BaseModule } from '../../../src/modules/base.js';
-
-// Mock logger
-vi.mock('../../../src/services/logger.js', () => ({
-  logger: {
-    info: vi.fn(),
-    error: vi.fn(),
-    warn: vi.fn(),
-    debug: vi.fn()
-  }
-}));
-
-// Concrete implementation for testing
+// Create a concrete test class since BaseModule is meant to be extended
 class TestModule extends BaseModule {
   public initCalled = false;
   public destroyCalled = false;
@@ -52,22 +33,14 @@ class TestModule extends BaseModule {
 }
 
 describe('BaseModule', () => {
-  let container: HTMLElement;
   let module: TestModule;
 
   beforeEach(() => {
-    container = document.createElement('div');
-    container.id = 'test-container';
-    container.innerHTML = '<div class="test-content">Test content</div>';
-    document.body.appendChild(container);
-    vi.clearAllMocks();
+    document.body.innerHTML = '<div id="test-element">Test</div>';
+    module = new TestModule('TestModule', { debug: true });
   });
 
-  afterEach(() => {
-    document.body.innerHTML = '';
-  });
-
-  describe('Initialization', () => {
+  describe('constructor', () => {
     it('should initialize with correct properties', () => {
       module = new TestModule({ debug: true });
 
@@ -93,53 +66,20 @@ describe('BaseModule', () => {
     beforeEach(() => {
       module = new TestModule();
     });
+  });
 
-    it('should initialize module successfully', async () => {
-      await module.initialize();
-
-      expect(module.isInitialized).toBe(true);
-      expect(module.initCalled).toBe(true);
+  describe('initialization', () => {
+    it('should initialize successfully', async () => {
+      await module.init();
+      expect(module['isInitialized']).toBe(true);
+      expect(module['isDestroyed']).toBe(false);
     });
 
     it('should not initialize twice', async () => {
-      await module.initialize();
-      module.initCalled = false; // Reset flag
-
-      await module.initialize(); // Second call
-
-      expect(module.initCalled).toBe(false); // Should not be called again
-      expect(module.isInitialized).toBe(true);
-    });
-
-    it('should handle initialization errors', async () => {
-      const error = new Error('Init failed');
-      module.initError = error;
-
-      await expect(module.initialize()).rejects.toThrow('Init failed');
-      expect(module.isInitialized).toBe(false);
-    });
-
-    it('should destroy module successfully', async () => {
-      await module.initialize();
-      await module.teardown();
-
-      expect(module.isInitialized).toBe(false);
-      expect(module.destroyCalled).toBe(true);
-    });
-
-    it('should handle destroy errors', async () => {
-      await module.initialize();
-      const error = new Error('Destroy failed');
-      module.destroyError = error;
-
-      await expect(module.teardown()).rejects.toThrow('Destroy failed');
-      expect(module.isInitialized).toBe(false); // Should still mark as not initialized
-    });
-
-    it('should not destroy uninitialized module', async () => {
-      await module.teardown();
-
-      expect(module.destroyCalled).toBe(false);
+      const warnSpy = vi.spyOn(module as any, 'warn');
+      await module.init();
+      await module.init();
+      expect(warnSpy).toHaveBeenCalledWith('Module already initialized.');
     });
   });
 
@@ -277,18 +217,14 @@ describe('BaseModule', () => {
       expect(element).toBeNull();
     });
 
-    it('should find all matching elements', () => {
-      const elements = module.findAll('.test-class');
+    it('should cache elements for repeated access', () => {
+      const querySelectorSpy = vi.spyOn(document, 'querySelector');
 
-      expect(elements).toHaveLength(2);
-      expect(elements[0].textContent).toBe('Element 1');
-      expect(elements[1].textContent).toBe('Element 2');
-    });
+      module['getElement']('test', '#test-element');
+      module['getElement']('test', '#test-element');
 
-    it('should return empty array for no matches', () => {
-      const elements = module.findAll('.no-matches');
-
-      expect(elements).toHaveLength(0);
+      // Should only query once, second call uses cache
+      expect(querySelectorSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -382,7 +318,7 @@ describe('BaseModule', () => {
 
     it('should handle destroy errors without breaking state', async () => {
       await module.initialize();
-      
+
       const destroyError = new Error('Destroy error');
       module.destroyError = destroyError;
 

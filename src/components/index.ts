@@ -7,36 +7,30 @@
  * Central registry for all components and component utilities.
  */
 
-export { BaseComponent } from './base-component';
-export type { ComponentProps, ComponentState, ComponentTemplate, ComponentHooks } from './base-component';
+// Import all dependencies needed for both exports and local registration
+import { BaseComponent, type ComponentProps, type ComponentState, type ComponentTemplate, type ComponentHooks } from './base-component';
+import { componentStore, ComponentUtils, type ComponentDefinition, type ComponentInstance } from './component-store';
+import { ButtonComponent, type ButtonProps, type ButtonState } from './button-component';
+import { ModalComponent, type ModalProps, type ModalState } from './modal-component';
+import { PerformanceDashboard, type PerformanceDashboardProps, type PerformanceDashboardState } from './performance-dashboard';
+import { ConsentBanner, type ConsentBannerProps, type ConsentBannerState } from './consent-banner';
+import { AnalyticsDashboard, type AnalyticsDashboardProps, type AnalyticsDashboardState } from './analytics-dashboard';
 
-export { componentStore, ComponentUtils } from './component-store';
-export type { ComponentDefinition, ComponentInstance } from './component-store';
-
-export { ButtonComponent } from './button-component';
-export type { ButtonProps, ButtonState } from './button-component';
-
-export { ModalComponent } from './modal-component';
-export type { ModalProps, ModalState } from './modal-component';
-
-export { PerformanceDashboard } from './performance-dashboard';
-export type { PerformanceDashboardProps, PerformanceDashboardState } from './performance-dashboard';
-
-export { ConsentBanner } from './consent-banner';
-export type { ConsentBannerProps, ConsentBannerState } from './consent-banner';
-
-export { AnalyticsDashboard } from './analytics-dashboard';
-export type { AnalyticsDashboardProps, AnalyticsDashboardState } from './analytics-dashboard';
-
-// Component registration
-import { componentStore, ComponentUtils } from './component-store';
-import { BaseComponent } from './base-component';
-import type { ComponentProps } from './base-component';
-import { ButtonComponent, ButtonProps } from './button-component';
-import { ModalComponent, ModalProps } from './modal-component';
-import { PerformanceDashboard, PerformanceDashboardProps } from './performance-dashboard';
-import { ConsentBanner, ConsentBannerProps } from './consent-banner';
-import { AnalyticsDashboard, AnalyticsDashboardProps } from './analytics-dashboard';
+// Re-export all components, types, and utilities
+export { BaseComponent };
+export type { ComponentProps, ComponentState, ComponentTemplate, ComponentHooks };
+export { componentStore, ComponentUtils };
+export type { ComponentDefinition, ComponentInstance };
+export { ButtonComponent };
+export type { ButtonProps, ButtonState };
+export { ModalComponent };
+export type { ModalProps, ModalState };
+export { PerformanceDashboard };
+export type { PerformanceDashboardProps, PerformanceDashboardState };
+export { ConsentBanner };
+export type { ConsentBannerProps, ConsentBannerState };
+export { AnalyticsDashboard };
+export type { AnalyticsDashboardProps, AnalyticsDashboardState };
 
 // Register built-in components
 componentStore.register({
@@ -75,25 +69,20 @@ componentStore.register({
 });
 
 // Component factory functions for easier usage
-export const createButton = (props: ButtonProps, mountTarget?: string | HTMLElement) => {
-  return componentStore.create<ButtonComponent>('Button', props, mountTarget);
-};
+export const createButton = (props: ButtonProps, mountTarget?: string | HTMLElement) =>
+  componentStore.create<ButtonComponent>('Button', props, mountTarget);
 
-export const createModal = (props: ModalProps, mountTarget?: string | HTMLElement) => {
-  return componentStore.create<ModalComponent>('Modal', props, mountTarget);
-};
+export const createModal = (props: ModalProps, mountTarget?: string | HTMLElement) =>
+  componentStore.create<ModalComponent>('Modal', props, mountTarget);
 
-export const createPerformanceDashboard = (props: PerformanceDashboardProps = {}, mountTarget?: string | HTMLElement) => {
-  return componentStore.create<PerformanceDashboard>('PerformanceDashboard', props, mountTarget);
-};
+export const createPerformanceDashboard = (props: PerformanceDashboardProps = {}, mountTarget?: string | HTMLElement) =>
+  componentStore.create<PerformanceDashboard>('PerformanceDashboard', props, mountTarget);
 
-export const createConsentBanner = (props: ConsentBannerProps = {}, mountTarget?: string | HTMLElement) => {
-  return componentStore.create<ConsentBanner>('ConsentBanner', props, mountTarget);
-};
+export const createConsentBanner = (props: ConsentBannerProps = {}, mountTarget?: string | HTMLElement) =>
+  componentStore.create<ConsentBanner>('ConsentBanner', props, mountTarget);
 
-export const createAnalyticsDashboard = (props: AnalyticsDashboardProps = {}, mountTarget?: string | HTMLElement) => {
-  return componentStore.create<AnalyticsDashboard>('AnalyticsDashboard', props, mountTarget);
-};
+export const createAnalyticsDashboard = (props: AnalyticsDashboardProps = {}, mountTarget?: string | HTMLElement) =>
+  componentStore.create<AnalyticsDashboard>('AnalyticsDashboard', props, mountTarget);
 
 // Utility functions for common operations
 export class ComponentRegistry {

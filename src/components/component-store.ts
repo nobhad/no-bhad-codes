@@ -8,7 +8,7 @@
  * providing lifecycle management and communication.
  */
 
-import { BaseComponent, ComponentProps, ComponentState } from './base-component';
+import type { BaseComponent, ComponentProps } from './base-component';
 import { container } from '../core/container';
 
 export interface ComponentDefinition {
@@ -40,7 +40,7 @@ class ComponentStore {
     // Also register in the main container for consistency
     container.register(
       definition.name,
-      definition.factory as any,
+      definition.factory as (props: ComponentProps) => Promise<unknown>,
       {
         singleton: definition.singleton ?? false,
         dependencies: []
@@ -169,7 +169,7 @@ class ComponentStore {
   /**
    * Component communication via events
    */
-  broadcast(eventName: string, data: any = {}): void {
+  broadcast(eventName: string, data: unknown = {}): void {
     this.components.forEach(instance => {
       const event = new CustomEvent(`component:${eventName}`, {
         detail: { data, sourceId: 'store' }
@@ -186,7 +186,7 @@ class ComponentStore {
   /**
    * Send event to specific component
    */
-  send(componentId: string, eventName: string, data: any = {}): void {
+  send(componentId: string, eventName: string, data: unknown = {}): void {
     const instance = this.components.get(componentId);
     if (instance) {
       const event = new CustomEvent(`component:${eventName}`, {
@@ -207,19 +207,17 @@ export class ComponentUtils {
   /**
    * Create a template literal function for HTML
    */
-  static html(strings: TemplateStringsArray, ...values: any[]): string {
-    return strings.reduce((result, string, i) => {
-      return result + string + (values[i] || '');
-    }, '');
+  static html(strings: TemplateStringsArray, ...values: unknown[]): string {
+    return strings.reduce((result, string, i) =>
+      result + string + (values[i] || ''), '');
   }
 
   /**
    * Create a template literal function for CSS
    */
-  static css(strings: TemplateStringsArray, ...values: any[]): string {
-    return strings.reduce((result, string, i) => {
-      return result + string + (values[i] || '');
-    }, '');
+  static css(strings: TemplateStringsArray, ...values: unknown[]): string {
+    return strings.reduce((result, string, i) =>
+      result + string + (values[i] || ''), '');
   }
 
   /**
@@ -234,11 +232,11 @@ export class ComponentUtils {
   /**
    * Create a debounced function
    */
-  static debounce<T extends(...args: any[]) => any>(
+  static debounce<T extends(...args: never[]) => unknown>(
     func: T,
     wait: number
   ): (...args: Parameters<T>) => void {
-    let timeout: NodeJS.Timeout;
+    let timeout: NodeJS.Timeout | null = null;
     return (...args: Parameters<T>) => {
       clearTimeout(timeout);
       timeout = setTimeout(() => func.apply(this, args), wait);
@@ -248,7 +246,7 @@ export class ComponentUtils {
   /**
    * Create a throttled function
    */
-  static throttle<T extends(...args: any[]) => any>(
+  static throttle<T extends(...args: never[]) => unknown>(
     func: T,
     limit: number
   ): (...args: Parameters<T>) => void {
@@ -265,13 +263,13 @@ export class ComponentUtils {
   /**
    * Parse data attributes from element
    */
-  static parseDataAttributes(element: HTMLElement, prefix = 'data-'): Record<string, any> {
-    const data: Record<string, any> = {};
+  static parseDataAttributes(element: HTMLElement, prefix = 'data-'): Record<string, unknown> {
+    const data: Record<string, unknown> = {};
 
     Array.from(element.attributes).forEach(attr => {
       if (attr.name.startsWith(prefix)) {
         const key = attr.name.slice(prefix.length).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-        let value: any = attr.value;
+        let { value } = attr;
 
         // Try to parse as JSON, number, or boolean
         try {

@@ -469,13 +469,9 @@ router.post('/forgot-password', asyncHandler(async (req: express.Request, res: e
       `, [resetToken, resetTokenExpiry.toISOString(), client.id]);
 
       // Send reset email
-      const resetUrl = `${process.env.CLIENT_PORTAL_URL || 'https://nobhadcodes.com/client/portal.html'}/reset-password?token=${resetToken}`;
-      
       await emailService.sendPasswordResetEmail(client.email, {
         name: client.contact_name || 'Client',
-        resetToken,
-        resetUrl,
-        expirationTime: '1 hour'
+        resetToken
       });
 
       // Send admin notification

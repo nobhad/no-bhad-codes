@@ -233,7 +233,7 @@ export class ContactService extends BaseService {
       message: formData.message
     };
 
-    const response = await (window as any).emailjs.send(
+    const _response = await (window as any).emailjs.send(
       'YOUR_SERVICE_ID',
       'YOUR_TEMPLATE_ID',
       templateParams,
@@ -259,7 +259,7 @@ export class ContactService extends BaseService {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(this.config.apiKey && { 'Authorization': `Bearer ${this.config.apiKey}` })
+        ...(this.config.apiKey && { Authorization: `Bearer ${this.config.apiKey}` })
       },
       body: JSON.stringify(formData)
     });
@@ -390,7 +390,7 @@ export class ContactService extends BaseService {
    * Get current configuration (without sensitive data)
    */
   getConfig(): Omit<ContactServiceConfig, 'apiKey'> {
-    const { apiKey, ...safeConfig } = this.config;
+    const { apiKey: _apiKey, ...safeConfig } = this.config;
     return safeConfig;
   }
 

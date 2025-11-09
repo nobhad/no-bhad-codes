@@ -144,7 +144,7 @@ export class BaseModule {
      * @param {boolean} [required=true] - If true, logs an error if element not found
      * @returns {Element|null} The found element or null
      */
-  protected getElement(name: string, selector: string, required: boolean = true): Element | null {
+  protected getElement(name: string, selector: string, required = true): Element | null {
     let element = this.elements.get(name);
     if (!element) {
       element = document.querySelector(selector);
@@ -167,7 +167,7 @@ export class BaseModule {
      * @param {boolean} [required=true] - If true, logs a warning if no elements found
      * @returns {NodeListOf<Element>|Array<Element>} The found elements or an empty array
      */
-  protected getElements(name: string, selector: string, required: boolean = true): NodeListOf<Element> | null {
+  protected getElements(name: string, selector: string, required = true): NodeListOf<Element> | null {
     let elements = this.elements.get(name) as NodeListOf<Element> | null;
     if (!elements || (elements as NodeListOf<Element>).length === 0) {
       elements = document.querySelectorAll(selector);
@@ -208,7 +208,7 @@ export class BaseModule {
      * @param {Function} handler - The event handler function
      * @param {string} [key] - An optional unique key for the listener (useful for specific removals)
      */
-  protected addEventListener(element: Element, event: string, handler: EventListener, key: string = `${(element as any).id || element.tagName}-${event}-${this.eventListeners.size}`): void {
+  protected addEventListener(element: Element, event: string, handler: EventListener, key = `${(element as any).id || element.tagName}-${event}-${this.eventListeners.size}`): void {
     if (!element || typeof element.addEventListener !== 'function') {
       this.warn(`Cannot add event listener: Invalid element provided for key "${key}".`);
       return;

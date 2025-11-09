@@ -102,8 +102,8 @@ export class AdminSecurity {
   static obfuscateConsole(): void {
     // Obfuscate console output in production
     if (process.env.NODE_ENV === 'production') {
-      const originalLog = console.log;
-      const originalWarn = console.warn;
+      const _originalLog = console.log;
+      const _originalWarn = console.warn;
       const originalError = console.error;
 
       console.log = () => {};
@@ -117,7 +117,7 @@ export class AdminSecurity {
 
   static validateReferrer(): boolean {
     // Check if accessed from expected domain
-    const referrer = document.referrer;
+    const { referrer } = document;
     const currentHost = window.location.host;
 
     // Allow direct access (empty referrer) or same-origin

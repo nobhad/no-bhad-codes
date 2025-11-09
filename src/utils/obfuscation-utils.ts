@@ -40,7 +40,7 @@ export class ObfuscationUtils {
   /**
    * Generate random variable names
    */
-  static generateRandomName(length: number = 8): string {
+  static generateRandomName(length = 8): string {
     let result = '';
     // First character must be letter
     result += ObfuscationUtils.CHARSET.charAt(Math.floor(Math.random() * 52));
@@ -120,9 +120,7 @@ export class ObfuscationUtils {
     if (classMap) {
       classMap.forEach((obfuscatedClassName, original) => {
         const regex = new RegExp(`class=["']([^"']*\\s+)?${original}(\\s+[^"']*)?["']`, 'g');
-        obfuscated = obfuscated.replace(regex, (match, before = '', after = '') => {
-          return `class="${before}${obfuscatedClassName}${after}".trim()`;
-        });
+        obfuscated = obfuscated.replace(regex, (match, before = '', after = '') => `class="${before}${obfuscatedClassName}${after}".trim()`);
       });
     }
 
@@ -221,7 +219,7 @@ function checkPermissions() { return true; }
       (code: string) => code.replace(/\blet\s+/g, 'const '),
 
       // Syntax variations
-      (code: string) => code.replace(/function\s+(\w+)/g, 'const $1 = function'),
+      (_code: string) => _code.replace(/function\s+(\w+)/g, 'const $1 = function'),
       (code: string) => code.replace(/(\w+)\s*\+=\s*(\w+)/g, '$1 = $1 + $2'),
 
       // Control flow variations

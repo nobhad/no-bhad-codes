@@ -38,8 +38,8 @@ export class BusinessCardRenderer extends BaseModule {
   private cardContainer: HTMLElement | null = null;
 
   // Render state
-  private isRendered: boolean = false;
-  private isVisible: boolean = false;
+  private isRendered = false;
+  private isVisible = false;
 
   constructor(config: BusinessCardConfig = {}, options: ModuleOptions = {}) {
     super('BusinessCardRenderer', { debug: true, ...options });

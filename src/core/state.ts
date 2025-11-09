@@ -10,7 +10,7 @@
 
 export type StateListener<T> = (newState: T, previousState: T) => void;
 export type StateSelector<T, U> = (state: T) => U;
-export type StateAction<T> = {
+export type StateAction<_T = unknown> = {
   type: string;
   payload?: any;
   meta?: {
@@ -315,7 +315,7 @@ export class StateManager<T = AppState> {
   }
 
   private notifySelectors(): void {
-    this.selectors.forEach((selectorData, id) => {
+    this.selectors.forEach((selectorData, _id) => {
       const newValue = selectorData.selector(this.state);
       if (newValue !== selectorData.lastValue) {
         selectorData.lastValue = newValue;
@@ -325,7 +325,7 @@ export class StateManager<T = AppState> {
   }
 
   private notifyComputed(previousState: T): void {
-    this.computed.forEach((computedProp, name) => {
+    this.computed.forEach((computedProp, _name) => {
       // Check if any dependency changed
       const hasChanged = computedProp.dependencies.some(
         dep => this.state[dep] !== previousState[dep]
@@ -486,7 +486,7 @@ export class StateManager<T = AppState> {
 
 // Enhanced connection detection
 const getConnectionType = (): 'slow-2g' | '2g' | '3g' | '4g' | 'unknown' => {
-  const connection = (navigator as any).connection;
+  const { connection } = (navigator as any);
   if (connection?.effectiveType) {
     return connection.effectiveType;
   }
@@ -565,7 +565,7 @@ appState.addReducer('SET_CURRENT_SECTION', (state, action) => ({
   currentSection: action.payload
 }));
 
-appState.addReducer('COMPLETE_INTRO', (state) => ({
+appState.addReducer('COMPLETE_INTRO', (_state) => ({
   introComplete: true,
   introAnimating: false
 }));
@@ -574,7 +574,7 @@ appState.addReducer('SET_CONTACT_FORM_VISIBLE', (state, action) => ({
   contactFormVisible: action.payload
 }));
 
-appState.addReducer('CLEAR_ERROR', (state) => ({
+appState.addReducer('CLEAR_ERROR', (_state) => ({
   lastError: null
 }));
 

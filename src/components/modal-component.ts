@@ -7,7 +7,7 @@
  * Accessible modal dialog component with focus management.
  */
 
-import { BaseComponent, ComponentProps, ComponentState } from './base-component';
+import { BaseComponent, type ComponentProps, type ComponentState } from './base-component';
 import { ComponentUtils } from './component-store';
 
 export interface ModalProps extends ComponentProps {
@@ -315,11 +315,9 @@ export class ModalComponent extends BaseComponent<ModalProps, ModalState> {
         event.preventDefault();
         lastFocusable?.focus();
       }
-    } else {
-      if (document.activeElement === lastFocusable) {
-        event.preventDefault();
-        firstFocusable?.focus();
-      }
+    } else if (document.activeElement === lastFocusable) {
+      event.preventDefault();
+      firstFocusable?.focus();
     }
   }
 
