@@ -20,14 +20,51 @@ vi.mock('../../../src/services/logger.js', () => ({
   }
 }));
 
-// Mock state manager
+// Mock state manager with stateful mock
+const mockState = { theme: 'light' as 'light' | 'dark', navOpen: false };
+const mockSubscribers: Array<(newValue: any, oldValue: any, key: string) => void> = [];
+
 vi.mock('../../../src/core/state.js', () => ({
   StateManager: vi.fn().mockImplementation(() => ({
-    setState: vi.fn(),
-    getState: vi.fn(),
+    setState: vi.fn((updates: any) => {
+      const oldState = { ...mockState };
+      Object.assign(mockState, updates);
+      // Notify subscribers
+      Object.keys(updates).forEach(key => {
+        mockSubscribers.forEach(cb => cb(mockState[key as keyof typeof mockState], oldState[key as keyof typeof oldState], key));
+      });
+    }),
+    getState: vi.fn(() => mockState),
     subscribe: vi.fn(() => () => {}), // Return unsubscribe function
+    subscribeToProperty: vi.fn((key: string, callback: any) => {
+      mockSubscribers.push(callback);
+      return () => {
+        const index = mockSubscribers.indexOf(callback);
+        if (index > -1) mockSubscribers.splice(index, 1);
+      };
+    }),
     destroy: vi.fn()
-  }))
+  })),
+  appState: {
+    setState: vi.fn((updates: any) => {
+      const oldState = { ...mockState };
+      Object.assign(mockState, updates);
+      // Notify subscribers
+      Object.keys(updates).forEach(key => {
+        mockSubscribers.forEach(cb => cb(mockState[key as keyof typeof mockState], oldState[key as keyof typeof oldState], key));
+      });
+    }),
+    getState: vi.fn(() => mockState),
+    subscribe: vi.fn(() => () => {}),
+    subscribeToProperty: vi.fn((key: string, callback: any) => {
+      mockSubscribers.push(callback);
+      return () => {
+        const index = mockSubscribers.indexOf(callback);
+        if (index > -1) mockSubscribers.splice(index, 1);
+      };
+    }),
+    destroy: vi.fn()
+  }
 }));
 
 describe('ThemeModule', () => {
@@ -35,13 +72,18 @@ describe('ThemeModule', () => {
   let themeModule: ThemeModule;
 
   beforeEach(() => {
+    // Reset mock state
+    mockState.theme = 'light';
+    mockState.navOpen = false;
+    mockSubscribers.length = 0; // Clear subscribers
+
     // Create test container with theme toggle structure
     container = document.createElement('div');
     container.innerHTML = `
       <div class="theme-controls">
-        <button 
-          id="theme-toggle" 
-          class="theme-toggle" 
+        <button
+          id="theme-toggle"
+          class="theme-toggle"
           aria-label="Toggle theme"
           data-theme="light"
         >
@@ -55,7 +97,7 @@ describe('ThemeModule', () => {
 
     document.body.appendChild(container);
     document.documentElement.setAttribute('data-theme', 'light');
-    
+
     themeModule = new ThemeModule(container);
     vi.clearAllMocks();
   });
@@ -63,6 +105,21 @@ describe('ThemeModule', () => {
   afterEach(() => {
     document.body.innerHTML = '';
     document.documentElement.removeAttribute('data-theme');
+
+    // Restore matchMedia mock after each test (some tests override it)
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
   });
 
   describe('Initialization', () => {

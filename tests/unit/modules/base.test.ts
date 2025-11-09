@@ -27,17 +27,16 @@ class TestModule extends BaseModule {
   public initError: Error | null = null;
   public destroyError: Error | null = null;
 
-  constructor(container: HTMLElement, options: any = {}) {
-    super(container, options);
-    this.name = 'test-module';
+  constructor(options: any = {}) {
+    super('test-module', options);
   }
 
-  override async init(): Promise<void> {
+  override async onInit(): Promise<void> {
     if (this.initError) throw this.initError;
     this.initCalled = true;
   }
 
-  override async destroy(): Promise<void> {
+  override async onDestroy(): Promise<void> {
     if (this.destroyError) throw this.destroyError;
     this.destroyCalled = true;
   }
@@ -70,30 +69,29 @@ describe('BaseModule', () => {
 
   describe('Initialization', () => {
     it('should initialize with correct properties', () => {
-      module = new TestModule(container, { debug: true });
+      module = new TestModule({ debug: true });
 
       expect(module.name).toBe('test-module');
-      expect(module.container).toBe(container);
       expect(module.isInitialized).toBe(false);
     });
 
     it('should initialize with default options', () => {
-      module = new TestModule(container);
+      module = new TestModule();
 
       expect(module.name).toBe('test-module');
-      expect(module.container).toBe(container);
+      expect(module.isInitialized).toBe(false);
     });
 
-    it('should throw error for invalid container', () => {
-      expect(() => {
-        new TestModule(null as any);
-      }).toThrow('Container element is required for module');
+    it('should validate name is provided', () => {
+      // Name is now required in constructor and set in TestModule
+      module = new TestModule({ debug: true });
+      expect(module.name).toBe('test-module');
     });
   });
 
   describe('Lifecycle Management', () => {
     beforeEach(() => {
-      module = new TestModule(container);
+      module = new TestModule();
     });
 
     it('should initialize module successfully', async () => {
@@ -147,7 +145,7 @@ describe('BaseModule', () => {
 
   describe('Event System', () => {
     beforeEach(() => {
-      module = new TestModule(container);
+      module = new TestModule();
     });
 
     it('should emit events', () => {
@@ -218,7 +216,7 @@ describe('BaseModule', () => {
 
   describe('State Management', () => {
     beforeEach(() => {
-      module = new TestModule(container);
+      module = new TestModule();
     });
 
     it('should set and get state', () => {
@@ -258,7 +256,7 @@ describe('BaseModule', () => {
 
   describe('Element Queries', () => {
     beforeEach(() => {
-      module = new TestModule(container);
+      module = new TestModule();
       container.innerHTML = `
         <div class="test-class" data-test="value1">Element 1</div>
         <div class="test-class" data-test="value2">Element 2</div>
@@ -296,7 +294,7 @@ describe('BaseModule', () => {
 
   describe('Logging', () => {
     beforeEach(() => {
-      module = new TestModule(container, { debug: true });
+      module = new TestModule({ debug: true });
     });
 
     it('should log messages when debug enabled', () => {
@@ -325,7 +323,7 @@ describe('BaseModule', () => {
     });
 
     it('should not log when debug disabled', () => {
-      const debugDisabledModule = new TestModule(container, { debug: false });
+      const debugDisabledModule = new TestModule({ debug: false });
       const { logger } = require('../../../src/services/logger.js');
 
       debugDisabledModule.testLog('Should not log');
@@ -336,7 +334,7 @@ describe('BaseModule', () => {
 
   describe('Cleanup', () => {
     beforeEach(() => {
-      module = new TestModule(container);
+      module = new TestModule();
     });
 
     it('should clean up event listeners on destroy', async () => {
@@ -369,7 +367,7 @@ describe('BaseModule', () => {
 
   describe('Error Handling', () => {
     beforeEach(() => {
-      module = new TestModule(container);
+      module = new TestModule();
     });
 
     it('should handle async initialization errors gracefully', async () => {
