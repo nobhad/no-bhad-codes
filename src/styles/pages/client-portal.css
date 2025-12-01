@@ -1128,7 +1128,7 @@ html[data-theme="dark"] .login-form label {
 }
 
 .invoices-list {
-  background: var(--color-neutral-100);
+  background: var(--color-neutral-300);
   border: 4px solid #000000;
   padding: 1.5rem;
   box-shadow: 20px 6px 30px rgba(0, 0, 0, 0.6);
@@ -1392,7 +1392,7 @@ html[data-theme="dark"] .login-form label {
    ===================================================== */
 
 .new-project-form {
-  background: var(--color-neutral-100);
+  background: var(--color-neutral-300);
   border: 4px solid #000000;
   padding: 1.5rem;
   display: flex;
@@ -2538,10 +2538,6 @@ html[data-theme="dark"] .login-form label {
 
 .file-item:last-child {
   border-bottom: none;
-}
-
-.file-item:hover {
-  background-color: var(--color-neutral-200);
 }
 
 .file-icon {

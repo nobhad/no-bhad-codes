@@ -505,22 +505,49 @@ export class Application {
       }
     }
 
-    // Core modules that always load (DISABLED TEMPORARILY)
-    const baseCoreModules = [
+    // Determine current page type
+    const currentPath = window.location.pathname;
+    const isClientPortal = currentPath.includes('/client') && currentPath.includes('/portal');
+    const isAdminPage = currentPath.includes('/admin');
+    const isHomePage = currentPath === '/' || currentPath === '/index.html';
+
+    // Core modules for the main site
+    const mainSiteModules = [
       'ThemeModule',
       'SectionCardRenderer', // Section business card renderer
       'SectionCardInteractions', // Section business card interactions
       'NavigationModule',
       'ContactFormModule',
-      'ClientLandingModule', // Client landing page animations
-      'ClientPortalModule', // Client portal functionality
-      'AdminDashboardModule' // Admin dashboard functionality
+      'ClientLandingModule' // Client landing page animations
     ];
 
-    // Only add intro animation on index/home page
+    // Modules for Client Portal only
+    const clientPortalModules = [
+      'ThemeModule', // Theme still needed for dark mode toggle
+      'ClientPortalModule'
+    ];
+
+    // Modules for Admin Dashboard only
+    const adminModules = [
+      'ThemeModule',
+      'AdminDashboardModule'
+    ];
+
+    // Select appropriate modules based on page type
+    let baseCoreModules: string[];
+    if (isClientPortal) {
+      baseCoreModules = clientPortalModules;
+    } else if (isAdminPage) {
+      baseCoreModules = adminModules;
+    } else {
+      baseCoreModules = mainSiteModules;
+    }
+
+    // Build final module list
     const coreModuleList = [...baseCoreModules];
-    const currentPath = window.location.pathname;
-    if (currentPath === '/' || currentPath === '/index.html') {
+
+    // Only add intro animation on index/home page
+    if (isHomePage) {
       coreModuleList.splice(1, 0, 'IntroAnimationModule'); // Insert after ThemeModule
     }
 

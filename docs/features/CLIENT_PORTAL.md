@@ -1,5 +1,7 @@
 # Client Portal Dashboard
 
+**Last Updated:** December 1, 2025
+
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -9,12 +11,14 @@
 5. [Navigation](#navigation)
 6. [Tab System](#tab-system)
 7. [Login System](#login-system)
-8. [Project Management](#project-management)
-9. [View Management](#view-management)
-10. [Settings & Forms](#settings--forms)
-11. [Styling](#styling)
-12. [File Locations](#file-locations)
-13. [Related Documentation](#related-documentation)
+8. [File Management](#file-management)
+9. [Invoice Management](#invoice-management)
+10. [Project Management](#project-management)
+11. [View Management](#view-management)
+12. [Settings & Forms](#settings--forms)
+13. [Styling](#styling)
+14. [File Locations](#file-locations)
+15. [Related Documentation](#related-documentation)
 
 ---
 
@@ -25,13 +29,19 @@ The Client Portal is a dedicated dashboard for clients to manage their projects,
 **Key Features:**
 
 - Project progress tracking with visual progress bars
-- Real-time messaging with emoji picker
-- File upload and management
+- Real-time messaging with emoji picker (`emoji-picker-element` web component)
+- **File Management System:**
+  - Drag & drop file upload
+  - File list from API with demo fallback
+  - File preview (images/PDFs open in new tab)
+  - File download with original filename
+  - Multi-file upload support (up to 5 files)
 - Invoice history and status tracking
 - Account and billing settings
 - Notification preferences
 - New project request form
 - Live project preview iframe
+- JWT authentication (real login with demo fallback)
 
 **Access:** `/client/portal.html`
 
@@ -54,15 +64,18 @@ The Client Portal is a dedicated dashboard for clients to manage their projects,
 
 ```
 src/features/client/
-├── client-portal.ts      # Main portal module (1457 lines)
+├── client-portal.ts      # Main portal module (~1600 lines)
 ├── client-intake.ts      # Intake form handling
 └── client-landing.ts     # Landing page logic
 
 templates/pages/
-└── client-portal.ejs     # Portal HTML template (423 lines)
+└── client-portal.ejs     # Portal HTML template
 
 src/styles/pages/
-└── client-portal.css     # Portal-specific styles (3050 lines)
+└── client-portal.css     # Portal-specific styles
+
+server/routes/
+└── uploads.ts            # File upload API endpoints
 ```
 
 ---
@@ -415,6 +428,78 @@ if (passwordToggle && passwordInput) {
 
 ---
 
+## File Management
+
+The Client Portal includes a complete file management system. For detailed documentation, see [FILES.md](./FILES.md).
+
+### Key Features
+
+| Feature | Description |
+|---------|-------------|
+| Drag & Drop Upload | Upload files by dragging them to the dropzone |
+| Browse Files | Traditional file picker button |
+| File List from API | Dynamic file list from backend with demo fallback |
+| File Preview | Open images and PDFs in new browser tab |
+| File Download | Download files with original filename |
+| Access Control | Clients can only access their own project files |
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/uploads/client` | GET | Get all files for authenticated client |
+| `/api/uploads/project/:projectId` | GET | Get files for specific project |
+| `/api/uploads/file/:fileId` | GET | Download/preview a file |
+| `/api/uploads/file/:fileId` | DELETE | Delete a file |
+| `/api/uploads/multiple` | POST | Upload multiple files |
+
+### TypeScript Methods
+
+```typescript
+// Key file management methods in client-portal.ts
+loadFiles()                  // Fetch and render file list
+setupFileUploadHandlers()    // Setup drag & drop
+uploadFiles(files: File[])   // Upload files to server
+previewFile(fileId, mime)    // Open file in new tab
+downloadFile(fileId, name)   // Trigger file download
+```
+
+---
+
+## Invoice Management
+
+The Client Portal includes a complete invoice management system. For detailed documentation, see [INVOICES.md](./INVOICES.md).
+
+### Key Features
+
+| Feature | Description |
+|---------|-------------|
+| Summary Cards | Total outstanding and total paid amounts |
+| Invoice List from API | Dynamic list from backend with demo fallback |
+| Status Badges | Visual status indicators (Pending, Paid, Overdue, etc.) |
+| Invoice Preview | Open invoice details in new tab |
+| Invoice Download | Download invoice (PDF generation pending) |
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/invoices/me` | GET | Get all invoices for authenticated client with summary |
+| `/api/invoices/:id` | GET | Get specific invoice details |
+
+### TypeScript Methods
+
+```typescript
+// Key invoice management methods in client-portal.ts
+loadInvoices()              // Fetch and render invoice list
+renderInvoicesList()        // Render invoice items
+formatCurrency()            // Format as USD currency
+previewInvoice(id)          // Open invoice in new tab
+downloadInvoice(id, number) // Trigger invoice download
+```
+
+---
+
 ## Project Management
 
 ### ClientProject Interface
@@ -639,13 +724,14 @@ Settings grid adapts to viewport:
 
 ## File Locations
 
-| File | Lines | Purpose |
-|------|-------|---------|
-| `client/portal.html` | - | Entry point HTML |
-| `templates/pages/client-portal.ejs` | 423 | Main template |
-| `src/features/client/client-portal.ts` | 1457 | TypeScript module |
-| `src/styles/pages/client-portal.css` | 3050 | Styles |
-| `src/client-portal.ts` | - | Entry point script |
+| File | Purpose |
+|------|---------|
+| `client/portal.html` | Entry point HTML |
+| `templates/pages/client-portal.ejs` | Main EJS template |
+| `src/features/client/client-portal.ts` | Main TypeScript module (~1600 lines) |
+| `src/styles/pages/client-portal.css` | Portal-specific styles |
+| `src/client-portal.ts` | Entry point script |
+| `server/routes/uploads.ts` | File upload API endpoints |
 
 ---
 

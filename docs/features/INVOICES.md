@@ -1,16 +1,19 @@
 # Invoice System
 
+**Last Updated:** December 1, 2025
+
 ## Table of Contents
 
 1. [Overview](#overview)
 2. [Features](#features)
-3. [HTML Structure](#html-structure)
-4. [Invoice Summary](#invoice-summary)
-5. [Invoice List](#invoice-list)
-6. [Invoice Status](#invoice-status)
-7. [Backend Integration](#backend-integration)
+3. [Architecture](#architecture)
+4. [Backend API](#backend-api)
+5. [Frontend Implementation](#frontend-implementation)
+6. [HTML Structure](#html-structure)
+7. [Invoice Status](#invoice-status)
 8. [Styling](#styling)
 9. [File Locations](#file-locations)
+10. [Related Documentation](#related-documentation)
 
 ---
 
@@ -24,128 +27,346 @@ The Invoice System provides clients with a complete view of their payment histor
 
 ## Features
 
-| Feature | Description |
-|---------|-------------|
-| Summary Cards | Total outstanding and total paid amounts |
-| Invoice History | Chronological list of all invoices |
-| Status Badges | Visual status indicators (Pending, Paid, Overdue) |
-| Preview | View invoice details in modal |
-| Download | Download invoice as PDF |
-| Project Association | Link invoices to specific projects |
-| Clickable Stat Card | Navigate from dashboard quick stats |
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Summary Cards | Complete | Total outstanding and total paid amounts |
+| Invoice List from API | Complete | Dynamic list from backend with demo fallback |
+| Status Badges | Complete | Visual status indicators (Pending, Paid, Overdue, etc.) |
+| Preview | Complete | View invoice details in new tab |
+| Download | Complete | Download invoice (PDF generation pending) |
+| Project Association | Complete | Link invoices to specific projects |
+| Demo Mode | Complete | Fallback demo data when backend unavailable |
+
+---
+
+## Architecture
+
+### Technology Stack
+
+| Component | Technology |
+|-----------|------------|
+| Backend | Express.js with TypeScript |
+| Database | SQLite with async wrapper |
+| Authentication | JWT tokens |
+| Frontend | Vanilla TypeScript |
+| API Communication | Fetch API |
+
+### Data Flow
+
+```
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│   Client Portal │ ──> │  Invoices API    │ ──> │  Database       │
+│   (TypeScript)  │     │  (Express)       │     │  (SQLite)       │
+└─────────────────┘     └──────────────────┘     └─────────────────┘
+        │                       │
+        v                       v
+┌─────────────────┐     ┌──────────────────┐
+│  Summary Cards  │     │  Email Service   │
+│  Invoice List   │     │  (Notifications) │
+└─────────────────┘     └──────────────────┘
+```
+
+---
+
+## Backend API
+
+### Base URL
+
+```
+/api/invoices
+```
+
+### Endpoints
+
+#### GET `/api/invoices/me`
+
+Get all invoices for the authenticated client with summary statistics.
+
+**Authentication:** Required (JWT Bearer token)
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "invoices": [
+    {
+      "id": 1,
+      "invoice_number": "INV-2025-001",
+      "client_id": 5,
+      "project_id": 1,
+      "amount_total": 2500.00,
+      "amount_paid": 0,
+      "status": "sent",
+      "due_date": "2025-12-30T00:00:00.000Z",
+      "created_at": "2025-11-30T10:00:00.000Z",
+      "project_name": "Website Redesign"
+    }
+  ],
+  "count": 1,
+  "summary": {
+    "totalOutstanding": 2500.00,
+    "totalPaid": 1500.00
+  }
+}
+```
+
+---
+
+#### GET `/api/invoices/:id`
+
+Get a specific invoice by ID.
+
+**Authentication:** Required
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "invoice": {
+    "id": 1,
+    "invoice_number": "INV-2025-001",
+    "line_items": [...],
+    ...
+  }
+}
+```
+
+---
+
+#### GET `/api/invoices/client/:clientId`
+
+Get all invoices for a specific client (admin use).
+
+---
+
+#### GET `/api/invoices/project/:projectId`
+
+Get all invoices for a specific project.
+
+---
+
+#### POST `/api/invoices`
+
+Create a new invoice.
+
+**Authentication:** Required
+**Request:**
+```json
+{
+  "projectId": 1,
+  "clientId": 5,
+  "lineItems": [
+    {
+      "description": "Website Design",
+      "quantity": 1,
+      "rate": 2500,
+      "amount": 2500
+    }
+  ],
+  "notes": "Payment due within 30 days",
+  "terms": "Net 30"
+}
+```
+
+---
+
+#### PUT `/api/invoices/:id/status`
+
+Update invoice status.
+
+**Request:**
+```json
+{
+  "status": "paid",
+  "paymentData": {
+    "amountPaid": 2500,
+    "paymentMethod": "bank_transfer",
+    "paymentReference": "TXN-12345"
+  }
+}
+```
+
+**Valid Statuses:** `draft`, `sent`, `viewed`, `partial`, `paid`, `overdue`, `cancelled`
+
+---
+
+#### POST `/api/invoices/:id/send`
+
+Send invoice to client (triggers email notification).
+
+---
+
+#### POST `/api/invoices/:id/pay`
+
+Mark invoice as paid.
+
+---
+
+## Frontend Implementation
+
+### TypeScript Module
+
+Location: `src/features/client/client-portal.ts`
+
+### API Base URL
+
+```typescript
+private static readonly INVOICES_API_BASE = 'http://localhost:3001/api/invoices';
+```
+
+### Key Methods
+
+#### loadInvoices()
+
+Fetches invoices from the API and renders the list with summary stats.
+
+```typescript
+private async loadInvoices(): Promise<void> {
+  const invoicesContainer = document.querySelector('.invoices-list');
+  const summaryOutstanding = document.querySelector('.summary-card:first-child .summary-value');
+  const summaryPaid = document.querySelector('.summary-card:last-child .summary-value');
+
+  try {
+    const token = localStorage.getItem('client_auth_token');
+
+    if (!token || token.startsWith('demo_token_')) {
+      this.renderDemoInvoices(invoicesContainer as HTMLElement);
+      return;
+    }
+
+    const response = await fetch(`${ClientPortalModule.INVOICES_API_BASE}/me`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const data = await response.json();
+
+    // Update summary cards
+    if (summaryOutstanding && data.summary) {
+      summaryOutstanding.textContent = this.formatCurrency(data.summary.totalOutstanding);
+    }
+    if (summaryPaid && data.summary) {
+      summaryPaid.textContent = this.formatCurrency(data.summary.totalPaid);
+    }
+
+    this.renderInvoicesList(invoicesContainer as HTMLElement, data.invoices || []);
+  } catch (error) {
+    this.renderDemoInvoices(invoicesContainer as HTMLElement);
+  }
+}
+```
+
+#### renderInvoicesList()
+
+Renders invoice items with status badges and action buttons.
+
+```typescript
+private renderInvoicesList(container: HTMLElement, invoices: any[]): void {
+  invoices.forEach((invoice) => {
+    const invoiceElement = document.createElement('div');
+    invoiceElement.className = 'invoice-item';
+
+    const statusClass = this.getInvoiceStatusClass(invoice.status);
+    const statusLabel = this.getInvoiceStatusLabel(invoice.status);
+
+    invoiceElement.innerHTML = `
+      <div class="invoice-info">
+        <span class="invoice-number">${invoice.invoice_number}</span>
+        <span class="invoice-date">${this.formatDate(invoice.created_at)}</span>
+        <span class="invoice-project">${invoice.project_name || 'Project'}</span>
+      </div>
+      <div class="invoice-amount">${this.formatCurrency(invoice.amount_total)}</div>
+      <span class="invoice-status ${statusClass}">${statusLabel}</span>
+      <div class="invoice-actions">
+        <button class="btn btn-outline btn-sm btn-preview-invoice">Preview</button>
+        <button class="btn btn-outline btn-sm btn-download-invoice">Download</button>
+      </div>
+    `;
+
+    container.appendChild(invoiceElement);
+  });
+
+  this.attachInvoiceActionListeners(container);
+}
+```
+
+#### Utility Methods
+
+```typescript
+// Get CSS class for status badge
+private getInvoiceStatusClass(status: string): string {
+  const statusMap: Record<string, string> = {
+    draft: 'status-draft',
+    sent: 'status-pending',
+    viewed: 'status-pending',
+    partial: 'status-partial',
+    paid: 'status-paid',
+    overdue: 'status-overdue',
+    cancelled: 'status-cancelled'
+  };
+  return statusMap[status] || 'status-pending';
+}
+
+// Format currency
+private formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  }).format(amount || 0);
+}
+```
 
 ---
 
 ## HTML Structure
 
-### Complete Invoices Tab
+### Invoices Tab
 
 ```html
-<!-- templates/pages/client-portal.ejs:183-219 -->
+<!-- templates/pages/client-portal.ejs -->
 <div class="tab-content" id="tab-invoices">
-    <div class="page-header">
-        <h2>Invoices</h2>
-    </div>
+  <div class="page-header">
+    <h2>Invoices</h2>
+  </div>
 
-    <!-- Invoice Summary -->
-    <div class="invoice-summary">
-        <div class="summary-card cp-shadow">
-            <span class="summary-label">Total Outstanding</span>
-            <span class="summary-value">$0.00</span>
-        </div>
-        <div class="summary-card cp-shadow">
-            <span class="summary-label">Total Paid</span>
-            <span class="summary-value">$0.00</span>
-        </div>
-    </div>
-
-    <!-- Invoices List -->
-    <div class="invoices-list cp-shadow">
-        <h3>Invoice History</h3>
-        <div class="invoice-item">
-            <!-- Invoice item content -->
-        </div>
-        <p class="no-invoices-message">
-            No invoices yet. Your first invoice will appear here once your project begins.
-        </p>
-    </div>
-</div>
-```
-
----
-
-## Invoice Summary
-
-### Summary Cards
-
-Two summary cards at the top of the invoices section:
-
-```html
-<!-- templates/pages/client-portal.ejs:189-198 -->
-<div class="invoice-summary">
+  <!-- Invoice Summary -->
+  <div class="invoice-summary">
     <div class="summary-card cp-shadow">
-        <span class="summary-label">Total Outstanding</span>
-        <span class="summary-value">$0.00</span>
+      <span class="summary-label">Total Outstanding</span>
+      <span class="summary-value">$0.00</span>
     </div>
     <div class="summary-card cp-shadow">
-        <span class="summary-label">Total Paid</span>
-        <span class="summary-value">$0.00</span>
+      <span class="summary-label">Total Paid</span>
+      <span class="summary-value">$0.00</span>
     </div>
-</div>
-```
+  </div>
 
-### Summary Card Structure
-
-| Element | Class | Purpose |
-|---------|-------|---------|
-| Container | `.summary-card` | Card wrapper with shadow |
-| Label | `.summary-label` | Description text |
-| Value | `.summary-value` | Currency amount |
-
----
-
-## Invoice List
-
-### Invoice List Container
-
-```html
-<!-- templates/pages/client-portal.ejs:200-218 -->
-<div class="invoices-list cp-shadow">
+  <!-- Invoices List -->
+  <div class="invoices-list cp-shadow">
     <h3>Invoice History</h3>
-    <div class="invoice-item">
-        <div class="invoice-info">
-            <span class="invoice-number">INV-2025-001</span>
-            <span class="invoice-date">Nov 30, 2025</span>
-            <span class="invoice-project">Your Website Project</span>
-        </div>
-        <div class="invoice-amount">$2,500.00</div>
-        <span class="invoice-status status-pending">Pending</span>
-        <div class="invoice-actions">
-            <button class="btn btn-outline btn-sm">Preview</button>
-            <button class="btn btn-outline btn-sm">Download</button>
-        </div>
-    </div>
+    <!-- Invoice items rendered dynamically -->
     <p class="no-invoices-message">
-        No invoices yet. Your first invoice will appear here once your project begins.
+      No invoices yet. Your first invoice will appear here once your project begins.
     </p>
+  </div>
 </div>
 ```
 
-### Invoice Item Data
+### Invoice Item (Rendered Dynamically)
 
-| Field | Class | Description |
-|-------|-------|-------------|
-| Invoice Number | `.invoice-number` | Unique identifier (INV-YYYY-XXX) |
-| Invoice Date | `.invoice-date` | Invoice generation date |
-| Project Name | `.invoice-project` | Associated project name |
-| Amount | `.invoice-amount` | Total amount due |
-| Status | `.invoice-status` | Current payment status |
-
-### Invoice Number Format
-
-```
-INV-{YEAR}-{SEQUENCE}
-Example: INV-2025-001
+```html
+<div class="invoice-item" data-invoice-id="1">
+  <div class="invoice-info">
+    <span class="invoice-number">INV-2025-001</span>
+    <span class="invoice-date">Nov 30, 2025</span>
+    <span class="invoice-project">Website Redesign</span>
+  </div>
+  <div class="invoice-amount">$2,500.00</div>
+  <span class="invoice-status status-pending">Pending</span>
+  <div class="invoice-actions">
+    <button class="btn btn-outline btn-sm btn-preview-invoice">Preview</button>
+    <button class="btn btn-outline btn-sm btn-download-invoice">Download</button>
+  </div>
+</div>
 ```
 
 ---
@@ -156,112 +377,19 @@ Example: INV-2025-001
 
 | Status | Class | Color | Description |
 |--------|-------|-------|-------------|
-| Pending | `status-pending` | Yellow (#fef3c7 / #92400e) | Awaiting payment |
-| Paid | `status-paid` | Green (#d1fae5 / #065f46) | Payment received |
-| Overdue | `status-overdue` | Red (#fee2e2 / #991b1b) | Past due date |
-| Draft | `status-draft` | Gray (neutral-200) | Not yet sent |
-
-### Status Badge HTML
-
-```html
-<span class="invoice-status status-pending">Pending</span>
-<span class="invoice-status status-paid">Paid</span>
-<span class="invoice-status status-overdue">Overdue</span>
-<span class="invoice-status status-draft">Draft</span>
-```
-
----
-
-## Backend Integration
-
-### API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/invoices` | GET | List invoices for client |
-| `/api/invoices/:id` | GET | Get invoice details |
-| `/api/invoices/:id/pdf` | GET | Download invoice PDF |
-| `/api/invoices` | POST | Create invoice (admin) |
-| `/api/invoices/:id/status` | PUT | Update status (admin) |
-
-### Database Schema
-
-```sql
-CREATE TABLE invoices (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  invoice_number TEXT UNIQUE NOT NULL,
-  client_id INTEGER NOT NULL,
-  project_id INTEGER,
-  amount DECIMAL(10,2) NOT NULL,
-  status TEXT DEFAULT 'draft',
-  due_date DATE,
-  paid_date DATE,
-  notes TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (client_id) REFERENCES clients(id),
-  FOREIGN KEY (project_id) REFERENCES projects(id)
-);
-
-CREATE TABLE invoice_items (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  invoice_id INTEGER NOT NULL,
-  description TEXT NOT NULL,
-  quantity INTEGER DEFAULT 1,
-  unit_price DECIMAL(10,2) NOT NULL,
-  total DECIMAL(10,2) NOT NULL,
-  FOREIGN KEY (invoice_id) REFERENCES invoices(id)
-);
-```
-
-### Invoice Generator Service
-
-```typescript
-// server/services/invoice-generator.ts
-export class InvoiceGenerator {
-  static async generatePDF(invoiceId: number): Promise<Buffer> {
-    const invoice = await InvoiceService.getById(invoiceId);
-    const items = await InvoiceService.getItems(invoiceId);
-
-    // Generate PDF using template
-    const pdf = await renderTemplate('invoice', {
-      invoice,
-      items,
-      company: getCompanyInfo()
-    });
-
-    return pdf;
-  }
-
-  static generateInvoiceNumber(): string {
-    const year = new Date().getFullYear();
-    const count = await InvoiceService.getCountForYear(year);
-    return `INV-${year}-${String(count + 1).padStart(3, '0')}`;
-  }
-}
-```
-
-### Email Notifications
-
-Invoices trigger email notifications:
-
-```typescript
-// When invoice is created
-await emailService.sendInvoiceNotification(clientEmail, {
-  clientName: 'John Doe',
-  invoiceNumber: 'INV-2025-001',
-  amount: '$2,500.00',
-  dueDate: 'December 15, 2025',
-  projectName: 'Website Redesign',
-  portalUrl: 'https://portal.nobhadcodes.com/invoices'
-});
-```
+| Draft | `status-draft` | Gray | Not yet sent |
+| Pending | `status-pending` | Yellow | Awaiting payment |
+| Viewed | `status-pending` | Yellow | Client viewed invoice |
+| Partial | `status-partial` | Blue | Partially paid |
+| Paid | `status-paid` | Green | Fully paid |
+| Overdue | `status-overdue` | Red | Past due date |
+| Cancelled | `status-cancelled` | Gray | Invoice cancelled |
 
 ---
 
 ## Styling
 
-### Invoice Summary Grid
+### Summary Cards
 
 ```css
 .invoice-summary {
@@ -271,28 +399,11 @@ await emailService.sendInvoiceNotification(clientEmail, {
   margin-bottom: 1.5rem;
 }
 
-@media (max-width: 576px) {
-  .invoice-summary {
-    grid-template-columns: 1fr;
-  }
-}
-```
-
-### Summary Card
-
-```css
 .summary-card {
   background: var(--color-neutral-100);
   border: 4px solid #000000;
   padding: 1.5rem;
   text-align: center;
-}
-
-.summary-label {
-  display: block;
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-  margin-bottom: 0.5rem;
 }
 
 .summary-value {
@@ -302,24 +413,15 @@ await emailService.sendInvoiceNotification(clientEmail, {
 }
 ```
 
-### Invoices List Container
+### Invoice List
 
 ```css
 .invoices-list {
-  background: var(--color-neutral-100);
+  background: var(--color-neutral-300);
   border: 4px solid #000000;
   padding: 1.5rem;
 }
 
-.invoices-list h3 {
-  margin-bottom: 1rem;
-  color: var(--color-dark);
-}
-```
-
-### Invoice Item
-
-```css
 .invoice-item {
   display: grid;
   grid-template-columns: 2fr 1fr auto auto;
@@ -328,51 +430,9 @@ await emailService.sendInvoiceNotification(clientEmail, {
   padding: 1rem;
   border-bottom: 1px solid var(--color-neutral-200);
 }
-
-.invoice-item:last-child {
-  border-bottom: none;
-}
-
-@media (max-width: 768px) {
-  .invoice-item {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-}
 ```
 
-### Invoice Info
-
-```css
-.invoice-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.invoice-number {
-  font-weight: 600;
-  color: var(--color-dark);
-}
-
-.invoice-date,
-.invoice-project {
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-}
-```
-
-### Invoice Amount
-
-```css
-.invoice-amount {
-  font-weight: 700;
-  font-size: 1.125rem;
-  color: var(--color-dark);
-}
-```
-
-### Status Badge Styling
+### Status Badges
 
 ```css
 .invoice-status {
@@ -381,73 +441,31 @@ await emailService.sendInvoiceNotification(clientEmail, {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  display: inline-block;
 }
 
-.status-pending {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.status-paid {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.status-overdue {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.status-draft {
-  background: var(--color-neutral-200);
-  color: var(--color-dark);
-}
-```
-
-### Invoice Actions
-
-```css
-.invoice-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.invoice-actions .btn-sm {
-  padding: 0.25rem 0.75rem;
-  font-size: 0.75rem;
-}
-```
-
-### No Invoices Message
-
-```css
-.no-invoices-message {
-  text-align: center;
-  padding: 2rem;
-  color: var(--color-text-muted);
-  font-style: italic;
-}
+.status-pending { background: #fef3c7; color: #92400e; }
+.status-paid { background: #d1fae5; color: #065f46; }
+.status-overdue { background: #fee2e2; color: #991b1b; }
+.status-draft { background: var(--color-neutral-200); color: var(--color-dark); }
 ```
 
 ---
 
 ## File Locations
 
-| File | Lines | Purpose |
-|------|-------|---------|
-| `templates/pages/client-portal.ejs` | 183-219 | Invoices tab HTML |
-| `src/features/client/client-portal.ts` | - | Invoice event handlers |
-| `src/styles/pages/client-portal.css` | - | Invoice styling |
-| `server/routes/invoices.ts` | - | Invoice API endpoints |
-| `server/services/invoice-service.ts` | - | Invoice business logic |
-| `server/services/invoice-generator.ts` | - | PDF generation |
-| `server/templates/invoice.html` | - | Invoice PDF template |
+| File | Purpose |
+|------|---------|
+| `server/routes/invoices.ts` | Invoice API endpoints |
+| `server/services/invoice-service.ts` | Invoice business logic |
+| `src/features/client/client-portal.ts` | Frontend invoice handling (~200 lines) |
+| `src/styles/pages/client-portal.css` | Invoice styling |
+| `templates/pages/client-portal.ejs` | Invoices tab HTML |
 
 ---
 
 ## Related Documentation
 
 - [Client Portal](./CLIENT_PORTAL.md) - Main portal overview
+- [API Reference](../API_REFERENCE.md) - Complete API documentation
 - [Settings](./SETTINGS.md) - Billing information
 - [CSS Architecture](./CSS_ARCHITECTURE.md) - Styling system
