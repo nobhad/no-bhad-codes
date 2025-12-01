@@ -36,7 +36,7 @@ export function createObfuscationPlugin(options: ObfuscationPluginOptions): Plug
     };
   }
 
-  const encryptionKey = options.encryptionKey || `nbw_protection_key_${  Date.now()}`;
+  const encryptionKey = options.encryptionKey || `nbw_protection_key_${Date.now()}`;
   let classNameMap = new Map<string, string>();
 
   return {
@@ -44,7 +44,7 @@ export function createObfuscationPlugin(options: ObfuscationPluginOptions): Plug
     apply: 'build',
 
     generateBundle(opts, bundle) {
-      Object.keys(bundle).forEach(fileName => {
+      Object.keys(bundle).forEach((fileName) => {
         const chunk = bundle[fileName];
 
         if (chunk && chunk.type === 'chunk' && fileName.endsWith('.js')) {
@@ -93,8 +93,8 @@ export function createObfuscationPlugin(options: ObfuscationPluginOptions): Plug
           features: options.features,
           stats: {
             totalFiles: Object.keys(bundle).length,
-            jsFiles: Object.keys(bundle).filter(f => f.endsWith('.js')).length,
-            cssFiles: Object.keys(bundle).filter(f => f.endsWith('.css')).length,
+            jsFiles: Object.keys(bundle).filter((f) => f.endsWith('.js')).length,
+            cssFiles: Object.keys(bundle).filter((f) => f.endsWith('.css')).length,
             classNamesObfuscated: classNameMap.size
           }
         };
@@ -104,7 +104,7 @@ export function createObfuscationPlugin(options: ObfuscationPluginOptions): Plug
 
       // Remove source files from dist (security measure)
       if (options.level === 'maximum') {
-        Object.keys(bundle).forEach(fileName => {
+        Object.keys(bundle).forEach((fileName) => {
           if (fileName.endsWith('.js.map') || fileName.endsWith('.css.map')) {
             const filePath = path.join(opts.dir!, fileName);
             if (fs.existsSync(filePath)) {
@@ -144,7 +144,10 @@ function obfuscateJavaScript(code: string, options: ObfuscationPluginOptions, ke
   return obfuscated;
 }
 
-function obfuscateCSS(css: string, options: ObfuscationPluginOptions): { css: string; map: Map<string, string> } {
+function obfuscateCSS(
+  css: string,
+  options: ObfuscationPluginOptions
+): { css: string; map: Map<string, string> } {
   if (!options.features.obfuscateCSS) {
     return { css, map: new Map() };
   }
@@ -152,7 +155,11 @@ function obfuscateCSS(css: string, options: ObfuscationPluginOptions): { css: st
   return ObfuscationUtils.obfuscateClassNames(css);
 }
 
-function obfuscateHTML(html: string, options: ObfuscationPluginOptions, classMap: Map<string, string>): string {
+function obfuscateHTML(
+  html: string,
+  options: ObfuscationPluginOptions,
+  classMap: Map<string, string>
+): string {
   if (!options.features.minifyHTML) {
     return html;
   }
@@ -216,7 +223,7 @@ function addHTMLIntegrityChecks(html: string): string {
 </script>
   `;
 
-  return html.replace('</head>', `${integrityScript  }</head>`);
+  return html.replace('</head>', `${integrityScript}</head>`);
 }
 
 function generateFakeSourceMap(code: string): any {
@@ -228,13 +235,12 @@ function generateFakeSourceMap(code: string): any {
   // Extract some variable names from code to make it more believable
   const varMatches = code.match(/\b(?:const|let|var|function)\s+(\w+)/g) || [];
   const extractedNames = varMatches
-    .map(match => match.split(/\s+/).pop() || '')
-    .filter(name => name.length > 0)
+    .map((match) => match.split(/\s+/).pop() || '')
+    .filter((name) => name.length > 0)
     .slice(0, 10);
 
-  const fakeNames = extractedNames.length > 0
-    ? extractedNames
-    : ['authenticate', 'encrypt', 'validate', 'process'];
+  const fakeNames =
+    extractedNames.length > 0 ? extractedNames : ['authenticate', 'encrypt', 'validate', 'process'];
 
   const fakeMap = {
     version: 3,
@@ -258,7 +264,10 @@ function generateFakeSourceMap(code: string): any {
 }
 
 // Export utility function for manual obfuscation
-export function obfuscateCode(code: string, options: Partial<ObfuscationPluginOptions> = {}): string {
+export function obfuscateCode(
+  code: string,
+  options: Partial<ObfuscationPluginOptions> = {}
+): string {
   const defaultOptions: ObfuscationPluginOptions = {
     enabled: true,
     level: 'standard',

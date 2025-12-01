@@ -3,7 +3,7 @@
  * CONTACT FORM MODULE TESTS
  * ===============================================
  * @file tests/unit/modules/contact-form.test.ts
- * 
+ *
  * Unit tests for the contact form module.
  */
 
@@ -215,20 +215,23 @@ describe('ContactFormModule', () => {
       (contactModule.find('#contact-name') as HTMLInputElement).value = 'John Doe';
       (contactModule.find('#contact-email') as HTMLInputElement).value = 'john@example.com';
       (contactModule.find('#contact-subject') as HTMLInputElement).value = 'Test Subject';
-      (contactModule.find('#contact-message') as HTMLTextAreaElement).value = 'This is a test message with sufficient content.';
+      (contactModule.find('#contact-message') as HTMLTextAreaElement).value =
+        'This is a test message with sufficient content.';
 
       const form = contactModule.find('#contact-form') as HTMLFormElement;
       const submitEvent = new Event('submit');
       form.dispatchEvent(submitEvent);
 
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
-      expect(mockSubmit).toHaveBeenCalledWith(expect.objectContaining({
-        name: 'John Doe',
-        email: 'john@example.com',
-        subject: 'Test Subject',
-        message: 'This is a test message with sufficient content.'
-      }));
+      expect(mockSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'John Doe',
+          email: 'john@example.com',
+          subject: 'Test Subject',
+          message: 'This is a test message with sufficient content.'
+        })
+      );
     });
 
     it('should prevent submission when form is invalid', () => {
@@ -243,15 +246,18 @@ describe('ContactFormModule', () => {
     });
 
     it('should show loading state during submission', async () => {
-      const mockSubmit = vi.fn().mockImplementation(() => 
-        new Promise(resolve => setTimeout(() => resolve({ success: true }), 100))
-      );
+      const mockSubmit = vi
+        .fn()
+        .mockImplementation(
+          () => new Promise((resolve) => setTimeout(() => resolve({ success: true }), 100))
+        );
       (contactModule as any).contactService = { submitForm: mockSubmit };
 
       // Fill valid form
       (contactModule.find('#contact-name') as HTMLInputElement).value = 'John Doe';
       (contactModule.find('#contact-email') as HTMLInputElement).value = 'john@example.com';
-      (contactModule.find('#contact-message') as HTMLTextAreaElement).value = 'Test message content.';
+      (contactModule.find('#contact-message') as HTMLTextAreaElement).value =
+        'Test message content.';
 
       const form = contactModule.find('#contact-form') as HTMLFormElement;
       const submitBtn = contactModule.find('#submit-btn') as HTMLButtonElement;
@@ -266,7 +272,7 @@ describe('ContactFormModule', () => {
       expect(btnLoader.style.display).not.toBe('none');
 
       // Wait for completion
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
       expect(submitBtn.disabled).toBe(false);
       expect(btnText.style.display).not.toBe('none');
@@ -285,7 +291,7 @@ describe('ContactFormModule', () => {
       const form = contactModule.find('#contact-form') as HTMLFormElement;
       form.dispatchEvent(new Event('submit'));
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const successMessage = container.querySelector('.success-message') as HTMLElement;
       expect(successMessage.style.display).not.toBe('none');
@@ -304,7 +310,7 @@ describe('ContactFormModule', () => {
       const form = contactModule.find('#contact-form') as HTMLFormElement;
       form.dispatchEvent(new Event('submit'));
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const errorMessage = container.querySelector('.form-messages .error-message') as HTMLElement;
       expect(errorMessage.style.display).not.toBe('none');
@@ -327,7 +333,7 @@ describe('ContactFormModule', () => {
       const form = contactModule.find('#contact-form') as HTMLFormElement;
       form.dispatchEvent(new Event('submit'));
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Form should be reset
       expect(nameInput.value).toBe('');
@@ -344,7 +350,7 @@ describe('ContactFormModule', () => {
     it('should have proper ARIA attributes', () => {
       const nameInput = contactModule.find('#contact-name') as HTMLInputElement;
       const emailInput = contactModule.find('#contact-email') as HTMLInputElement;
-      
+
       // Test required field attributes
       expect(nameInput.getAttribute('aria-required')).toBe('true');
       expect(emailInput.getAttribute('aria-required')).toBe('true');
@@ -352,7 +358,7 @@ describe('ContactFormModule', () => {
 
     it('should associate error messages with inputs', () => {
       const nameInput = contactModule.find('#contact-name') as HTMLInputElement;
-      
+
       nameInput.value = '';
       nameInput.dispatchEvent(new Event('blur'));
 
@@ -393,7 +399,7 @@ describe('ContactFormModule', () => {
       form.dispatchEvent(new Event('submit'));
       form.dispatchEvent(new Event('submit'));
 
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       // Should only submit once
       expect(mockSubmit).toHaveBeenCalledTimes(1);
@@ -413,15 +419,15 @@ describe('ContactFormModule', () => {
       // First submission
       form.dispatchEvent(new Event('submit'));
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Wait for cooldown period (typically a few seconds)
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Second submission should work
       form.dispatchEvent(new Event('submit'));
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       expect(mockSubmit).toHaveBeenCalledTimes(2);
     });
@@ -458,7 +464,7 @@ describe('ContactFormModule', () => {
 
       // Simulate extremely fast form submission (likely bot)
       const form = contactModule.find('#contact-form') as HTMLFormElement;
-      
+
       // Fill and submit immediately (within 1 second of page load)
       (contactModule.find('#contact-name') as HTMLInputElement).value = 'Bot Name';
       (contactModule.find('#contact-email') as HTMLInputElement).value = 'bot@example.com';

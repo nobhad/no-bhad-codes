@@ -3,13 +3,20 @@
  * DATABASE MODEL BASE CLASS
  * ===============================================
  * @file server/database/model.ts
- * 
+ *
  * Base model class providing Active Record pattern functionality
  * with the query builder integration.
  */
 
 import { Database } from 'sqlite3';
-import { QueryBuilder, SelectQueryBuilder, InsertQueryBuilder, UpdateQueryBuilder, DeleteQueryBuilder, QueryResult } from './query-builder.js';
+import {
+  QueryBuilder,
+  SelectQueryBuilder,
+  InsertQueryBuilder,
+  UpdateQueryBuilder,
+  DeleteQueryBuilder,
+  QueryResult
+} from './query-builder.js';
 import { logger } from '../services/logger.js';
 
 // Model configuration interface
@@ -95,8 +102,12 @@ export class BaseModel<T = any> {
   /**
    * Find a record by primary key
    */
-  static async find<M extends BaseModel>(this: typeof BaseModel & (new () => M), id: any): Promise<M | null> {
-    const result = await (this as any).query()
+  static async find<M extends BaseModel>(
+    this: typeof BaseModel & (new () => M),
+    id: any
+  ): Promise<M | null> {
+    const result = await (this as any)
+      .query()
       .where((this as any).getPrimaryKey(), '=', id)
       .first();
 
@@ -112,7 +123,10 @@ export class BaseModel<T = any> {
   /**
    * Find a record by primary key or throw error
    */
-  static async findOrFail<M extends BaseModel>(this: typeof BaseModel & (new () => M), id: any): Promise<M> {
+  static async findOrFail<M extends BaseModel>(
+    this: typeof BaseModel & (new () => M),
+    id: any
+  ): Promise<M> {
     const result = await (this as any).find(id);
     if (!result) {
       throw new Error(`Record with ${(this as any).getPrimaryKey()} ${id} not found`);
@@ -147,7 +161,9 @@ export class BaseModel<T = any> {
   /**
    * Get first record
    */
-  static async first<M extends BaseModel>(this: typeof BaseModel & (new () => M)): Promise<M | null> {
+  static async first<M extends BaseModel>(
+    this: typeof BaseModel & (new () => M)
+  ): Promise<M | null> {
     const result = await (this as any).query().first();
     if (!result) {
       return null;
@@ -178,7 +194,7 @@ export class BaseModel<T = any> {
     updates: Record<string, any>
   ): Promise<number> {
     let query = this.queryBuilder.update(this.getTableName());
-    
+
     // Add WHERE conditions
     Object.entries(conditions).forEach(([column, value]) => {
       query = query.where(column, '=', value);
@@ -198,7 +214,7 @@ export class BaseModel<T = any> {
    */
   static async deleteWhere(conditions: Record<string, any>): Promise<number> {
     let query = this.queryBuilder.delete(this.getTableName());
-    
+
     Object.entries(conditions).forEach(([column, value]) => {
       query = query.where(column, '=', value);
     });
@@ -230,7 +246,7 @@ export class BaseModel<T = any> {
     perPage: number = 15
   ): Promise<PaginationResult<M>> {
     const result = await (this as any).query().getPaginated(page, perPage);
-    
+
     return {
       data: result.data.map((row: any) => {
         const instance = new this() as M;
@@ -260,7 +276,7 @@ export class BaseModel<T = any> {
    */
   fill(attributes: Record<string, any>): this {
     const fillable = (this.constructor as typeof BaseModel).config.fillable || [];
-    
+
     Object.entries(attributes).forEach(([key, value]) => {
       if (fillable.length === 0 || fillable.includes(key)) {
         this.attributes[key] = this.castAttribute(key, value);
@@ -275,7 +291,7 @@ export class BaseModel<T = any> {
    */
   setAttributes(attributes: Record<string, any>, fromDatabase: boolean = false): this {
     this.attributes = { ...attributes };
-    
+
     if (fromDatabase) {
       this.original = { ...attributes };
       this.exists = true;
@@ -304,18 +320,18 @@ export class BaseModel<T = any> {
     }
 
     switch (castType) {
-      case 'string':
-        return String(value);
-      case 'number':
-        return Number(value);
-      case 'boolean':
-        return Boolean(value);
-      case 'date':
-        return value instanceof Date ? value : new Date(value);
-      case 'json':
-        return typeof value === 'string' ? JSON.parse(value) : value;
-      default:
-        return value;
+    case 'string':
+      return String(value);
+    case 'number':
+      return Number(value);
+    case 'boolean':
+      return Boolean(value);
+    case 'date':
+      return value instanceof Date ? value : new Date(value);
+    case 'json':
+      return typeof value === 'string' ? JSON.parse(value) : value;
+    default:
+      return value;
     }
   }
 
@@ -363,7 +379,7 @@ export class BaseModel<T = any> {
    */
   getAttributes(): Record<string, any> {
     const hidden = (this.constructor as typeof BaseModel).config.hidden || [];
-    
+
     if (hidden.length === 0) {
       return { ...this.attributes };
     }
@@ -383,7 +399,7 @@ export class BaseModel<T = any> {
    */
   getDirty(): Record<string, any> {
     const dirty: Record<string, any> = {};
-    
+
     Object.entries(this.attributes).forEach(([key, value]) => {
       if (JSON.stringify(value) !== JSON.stringify(this.original[key])) {
         dirty[key] = value;
@@ -406,11 +422,11 @@ export class BaseModel<T = any> {
   async save(): Promise<boolean> {
     try {
       const config = (this.constructor as typeof BaseModel).config;
-      
+
       if (this.exists) {
         // Update existing record
         const dirty = this.getDirty();
-        
+
         if (Object.keys(dirty).length === 0) {
           return true; // No changes to save
         }
@@ -434,32 +450,30 @@ export class BaseModel<T = any> {
         }
 
         return false;
-
-      } else {
-        // Create new record
-        const insertData = { ...this.attributes };
-
-        // Add timestamps
-        if (config.timestamps) {
-          const now = new Date().toISOString();
-          insertData.created_at = now;
-          insertData.updated_at = now;
-        }
-
-        const result = await (this.constructor as typeof BaseModel).queryBuilder
-          .insert((this.constructor as typeof BaseModel).getTableName())
-          .values(insertData)
-          .execute();
-
-        if (result.insertId) {
-          this.setKey(result.insertId);
-          this.exists = true;
-          this.original = { ...this.attributes };
-          return true;
-        }
-
-        return false;
       }
+      // Create new record
+      const insertData = { ...this.attributes };
+
+      // Add timestamps
+      if (config.timestamps) {
+        const now = new Date().toISOString();
+        insertData.created_at = now;
+        insertData.updated_at = now;
+      }
+
+      const result = await (this.constructor as typeof BaseModel).queryBuilder
+        .insert((this.constructor as typeof BaseModel).getTableName())
+        .values(insertData)
+        .execute();
+
+      if (result.insertId) {
+        this.setKey(result.insertId);
+        this.exists = true;
+        this.original = { ...this.attributes };
+        return true;
+      }
+
+      return false;
 
     } catch (error) {
       const err = error as Error;
@@ -476,7 +490,7 @@ export class BaseModel<T = any> {
     try {
       const config = (this.constructor as typeof BaseModel).config;
       const primaryKey = (this.constructor as typeof BaseModel).getPrimaryKey();
-      
+
       if (!this.exists) {
         return false;
       }
@@ -485,20 +499,19 @@ export class BaseModel<T = any> {
         // Soft delete - just set deleted_at
         this.set('deleted_at', new Date().toISOString());
         return await this.save();
-      } else {
-        // Hard delete
-        const result = await (this.constructor as typeof BaseModel).queryBuilder
-          .delete((this.constructor as typeof BaseModel).getTableName())
-          .where(primaryKey, '=', this.getKey())
-          .execute();
-
-        if (result.changes > 0) {
-          this.exists = false;
-          return true;
-        }
-
-        return false;
       }
+      // Hard delete
+      const result = await (this.constructor as typeof BaseModel).queryBuilder
+        .delete((this.constructor as typeof BaseModel).getTableName())
+        .where(primaryKey, '=', this.getKey())
+        .execute();
+
+      if (result.changes > 0) {
+        this.exists = false;
+        return true;
+      }
+
+      return false;
 
     } catch (error) {
       const err = error as Error;
@@ -517,8 +530,8 @@ export class BaseModel<T = any> {
     }
 
     const primaryKey = (this.constructor as typeof BaseModel).getPrimaryKey();
-    const fresh = await ((this.constructor as any).find(this.getKey()));
-    
+    const fresh = await (this.constructor as any).find(this.getKey());
+
     if (!fresh) {
       throw new Error('Model not found when refreshing');
     }

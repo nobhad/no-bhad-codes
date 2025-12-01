@@ -19,73 +19,73 @@
  * ============================================ */
 
 /* Import design system tokens first */
-@import '../design-system/index.css';
+@import "../design-system/index.css";
 
 /* ============================================
  * 2. BASE LAYER
  * ============================================ */
 
 /* CSS reset and normalize */
-@import './base/reset.css';
+@import "./base/reset.css";
 
 /* Typography foundation */
-@import './base/typography.css';
+@import "./base/typography.css";
 
 /* Layout primitives */
-@import './base/layout.css';
+@import "./base/layout.css";
 
 /* Theme variables (legacy - to be phased out) */
-@import './variables.css';
+@import "./variables.css";
 
 /* ============================================
  * 3. COMPONENT LAYER
  * ============================================ */
 
 /* Form system */
-@import './components/form.css';
+@import "./components/form.css";
 
 /* Navigation system */
-@import './components/navigation.css';
+@import "./components/navigation.css";
 
 /* Business card component */
-@import './components/business-card.css';
+@import "./components/business-card.css";
 
 /* Footer component */
-@import './components/footer.css';
+@import "./components/footer.css";
 
 /* Loading states */
-@import './components/loading.css';
+@import "./components/loading.css";
 
 /* Portfolio carousel */
-@import './components/portfolio-carousel.css';
+@import "./components/portfolio-carousel.css";
 
 /* Form validation (specialized) */
-@import './form-validation.css';
+@import "./form-validation.css";
 
 /* ============================================
  * 4. PAGE-SPECIFIC LAYER
  * ============================================ */
 
 /* Contact page */
-@import './pages/contact.css';
+@import "./pages/contact.css";
 
 /* Admin dashboard */
-@import './pages/admin.css';
+@import "./pages/admin.css";
 
 /* Client portal */
-@import './pages/client.css';
+@import "./pages/client.css";
 
 /* Client portal login page */
-@import './pages/client-portal.css';
+@import "./pages/client-portal.css";
 
 /* Client dashboard */
-@import './pages/client-dashboard.css';
+@import "./pages/client-dashboard.css";
 
 /* Projects page */
-@import './pages/projects.css';
+@import "./pages/projects.css";
 
 /* Client intake form */
-@import './pages/client-intake.css';
+@import "./pages/client-intake.css";
 
 /* ============================================
  * 5. THEME INTEGRATION
@@ -95,7 +95,9 @@
 body {
   background-color: var(--color-neutral-300);
   color: var(--color-dark);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 /* Footer integration with theme */
@@ -170,7 +172,9 @@ body {
 
 /* Intro animation container transitions */
 #intro-animation-container {
-  transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+  transition:
+    opacity 0.8s ease-out,
+    visibility 0.8s ease-out;
 }
 
 /* Show all sections immediately */

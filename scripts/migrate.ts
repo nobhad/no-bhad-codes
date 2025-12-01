@@ -37,7 +37,7 @@ const commands = {
     console.log('🚀 Running database migrations...');
     const db = new Database.Database(DATABASE_PATH);
     const migrator = new MigrationManager(db, MIGRATIONS_DIR);
-    
+
     try {
       await migrator.migrate();
     } catch (error: any) {
@@ -52,7 +52,7 @@ const commands = {
     console.log('⏪ Rolling back last migration...');
     const db = new Database.Database(DATABASE_PATH);
     const migrator = new MigrationManager(db, MIGRATIONS_DIR);
-    
+
     try {
       await migrator.rollback();
     } catch (error: any) {
@@ -67,31 +67,32 @@ const commands = {
     console.log('📋 Migration status...');
     const db = new Database.Database(DATABASE_PATH);
     const migrator = new MigrationManager(db, MIGRATIONS_DIR);
-    
+
     try {
       const status: MigrationStatus = await migrator.getStatus();
-      
+
       console.log(`\nTotal migrations: ${status.total}`);
       console.log(`Executed: ${status.executed.length}`);
       console.log(`Pending: ${status.pending.length}\n`);
-      
+
       if (status.executed.length > 0) {
         console.log('✅ Executed migrations:');
-        status.executed.forEach(migration => {
-          console.log(`  ${migration.id.toString().padStart(3, '0')}: ${migration.name} (${migration.executed_at})`);
+        status.executed.forEach((migration) => {
+          console.log(
+            `  ${migration.id.toString().padStart(3, '0')}: ${migration.name} (${migration.executed_at})`
+          );
         });
         console.log('');
       }
-      
+
       if (status.pending.length > 0) {
         console.log('⏳ Pending migrations:');
-        status.pending.forEach(migration => {
+        status.pending.forEach((migration) => {
           console.log(`  ${migration.id.toString().padStart(3, '0')}: ${migration.name}`);
         });
       } else {
         console.log('✅ All migrations are up to date!');
       }
-      
     } catch (error: any) {
       console.error('❌ Failed to get status:', error.message);
       process.exit(1);
@@ -103,7 +104,9 @@ const commands = {
   async create(): Promise<void> {
     const migrationName = process.argv[3];
     if (!migrationName) {
-      console.error('❌ Please provide a migration name: node scripts/migrate.ts create "migration name"');
+      console.error(
+        '❌ Please provide a migration name: node scripts/migrate.ts create "migration name"'
+      );
       process.exit(1);
     }
 

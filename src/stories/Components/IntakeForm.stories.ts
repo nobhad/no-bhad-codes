@@ -30,14 +30,18 @@ const createIntakeForm = (args: any) => {
 
   return `
     <div style="max-width: 800px; margin: 0 auto;">
-      ${showHeader ? `
+      ${
+  showHeader
+    ? `
         <header class="intake-header">
           <div class="container">
             <h1>NO BHAD CODES</h1>
             <p>Project Intake Form</p>
           </div>
         </header>
-      ` : ''}
+      `
+    : ''
+}
 
       <div class="intake-form-container">
         <h2>Tell us about your project</h2>
@@ -64,7 +68,9 @@ const createIntakeForm = (args: any) => {
               <textarea id="project-description" name="project-description" rows="4" placeholder="Briefly describe your project goals and what you want to achieve..." required></textarea>
             </div>
 
-            ${formStyle !== 'minimal' ? `
+            ${
+  formStyle !== 'minimal'
+    ? `
               <div class="form-row">
                 <div class="form-group">
                   <label for="budget">Budget Range</label>
@@ -92,10 +98,14 @@ const createIntakeForm = (args: any) => {
                   </select>
                 </div>
               </div>
-            ` : ''}
+            `
+    : ''
+}
           </div>
 
-          ${formStyle === 'full' ? `
+          ${
+  formStyle === 'full'
+    ? `
             <div class="form-section">
               <h3>Contact Information</h3>
               
@@ -123,7 +133,9 @@ const createIntakeForm = (args: any) => {
                 </div>
               </div>
             </div>
-          ` : ''}
+          `
+    : ''
+}
 
           <div class="form-actions">
             <button 

@@ -35,7 +35,16 @@ export interface PageView {
 
 export interface InteractionEvent {
   sessionId: string;
-  type: 'click' | 'scroll' | 'hover' | 'form' | 'download' | 'external_link' | 'business_card' | 'navigation' | 'contact';
+  type:
+    | 'click'
+    | 'scroll'
+    | 'hover'
+    | 'form'
+    | 'download'
+    | 'external_link'
+    | 'business_card'
+    | 'navigation'
+    | 'contact';
   element: string;
   timestamp: number;
   data?: Record<string, any>;
@@ -234,7 +243,7 @@ export class VisitorTrackingService {
   private isSessionValid(session: VisitorSession): boolean {
     const now = Date.now();
     const timeoutMs = this.config.sessionTimeout * 60 * 1000;
-    return (now - session.lastActivity) < timeoutMs;
+    return now - session.lastActivity < timeoutMs;
   }
 
   /**
@@ -366,7 +375,7 @@ export class VisitorTrackingService {
 
     // Track external links
     if (target.tagName === 'A' && this.config.trackExternalLinks) {
-      const { href } = (target as HTMLAnchorElement);
+      const { href } = target as HTMLAnchorElement;
       if (href && !href.includes(window.location.hostname)) {
         this.trackInteraction('external_link', elementDescription, { url: href });
       }
@@ -374,9 +383,18 @@ export class VisitorTrackingService {
 
     // Track downloads
     if (this.config.trackDownloads && target.tagName === 'A') {
-      const { href } = (target as HTMLAnchorElement);
-      const downloadExtensions = ['.pdf', '.zip', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx'];
-      if (href && downloadExtensions.some(ext => href.includes(ext))) {
+      const { href } = target as HTMLAnchorElement;
+      const downloadExtensions = [
+        '.pdf',
+        '.zip',
+        '.doc',
+        '.docx',
+        '.xls',
+        '.xlsx',
+        '.ppt',
+        '.pptx'
+      ];
+      if (href && downloadExtensions.some((ext) => href.includes(ext))) {
         this.trackInteraction('download', elementDescription, { file: href });
       }
     }
@@ -400,7 +418,7 @@ export class VisitorTrackingService {
 
       // Track navigation interactions
       const navButtons = document.querySelectorAll('.nav-btn, .navigation button');
-      navButtons.forEach(btn => {
+      navButtons.forEach((btn) => {
         this.addEventListener(btn, 'click', () => {
           const text = btn.textContent?.trim() || 'unknown';
           this.trackInteraction('navigation', `nav_${text.toLowerCase()}`);
@@ -571,20 +589,24 @@ export class VisitorTrackingService {
    */
   getEngagementMetrics(): EngagementMetrics {
     const events = this.getStoredEvents();
-    const pageViews = events.filter(e => 'title' in e) as PageView[];
-    const interactions = events.filter(e => 'type' in e) as InteractionEvent[];
+    const pageViews = events.filter((e) => 'title' in e) as PageView[];
+    const interactions = events.filter((e) => 'type' in e) as InteractionEvent[];
 
     // Calculate metrics
-    const totalSessions = new Set(pageViews.map(pv => pv.sessionId)).size;
+    const totalSessions = new Set(pageViews.map((pv) => pv.sessionId)).size;
     const totalPageViews = pageViews.length;
     const totalTimeOnSite = pageViews.reduce((sum, pv) => sum + (pv.timeOnPage || 0), 0);
 
-    const bounceRate = totalSessions > 0 ?
-      (pageViews.filter(pv => pv.interactions === 0 && (pv.timeOnPage || 0) < 5000).length / totalSessions) * 100 : 0;
+    const bounceRate =
+      totalSessions > 0
+        ? (pageViews.filter((pv) => pv.interactions === 0 && (pv.timeOnPage || 0) < 5000).length /
+            totalSessions) *
+          100
+        : 0;
 
     // Top pages
     const pageStats = new Map<string, { views: number; totalTime: number }>();
-    pageViews.forEach(pv => {
+    pageViews.forEach((pv) => {
       const existing = pageStats.get(pv.url) || { views: 0, totalTime: 0 };
       pageStats.set(pv.url, {
         views: existing.views + 1,
@@ -603,7 +625,7 @@ export class VisitorTrackingService {
 
     // Top interactions
     const interactionStats = new Map<string, number>();
-    interactions.forEach(interaction => {
+    interactions.forEach((interaction) => {
       const key = `${interaction.type}:${interaction.element}`;
       interactionStats.set(key, (interactionStats.get(key) || 0) + 1);
     });

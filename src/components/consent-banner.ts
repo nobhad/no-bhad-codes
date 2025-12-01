@@ -59,7 +59,7 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
    */
   static getConsentStatus(): 'accepted' | 'declined' | null {
     const match = document.cookie.match(/tracking_consent=([^;]+)/);
-    return match ? match[1] as 'accepted' | 'declined' : null;
+    return match ? (match[1] as 'accepted' | 'declined') : null;
   }
 
   override async mounted(): Promise<void> {
@@ -123,7 +123,9 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
               </button>
             </div>
             
-            ${showDetailsLink ? `
+            ${
+  showDetailsLink
+    ? `
               <div class="consent-banner__links">
                 <button 
                   class="consent-banner__link" 
@@ -131,7 +133,9 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
                 >
                   ${showDetails ? 'Hide Details' : 'Learn More'}
                 </button>
-                ${privacyPolicyUrl ? `
+                ${
+  privacyPolicyUrl
+    ? `
                   <a 
                     href="${privacyPolicyUrl}" 
                     class="consent-banner__link"
@@ -140,9 +144,13 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
                   >
                     Privacy Policy
                   </a>
-                ` : ''}
+                `
+    : ''
+}
               </div>
-            ` : ''}
+            `
+    : ''
+}
           </div>
         </div>
       </div>

@@ -119,5 +119,5 @@ export function formatProjectDate(dateString: string): string {
 
 // Helper function to get category info
 export function getCategoryInfo(categoryId: ProjectCategory): ProjectCategoryInfo | undefined {
-  return PROJECT_CATEGORIES.find(cat => cat.id === categoryId);
+  return PROJECT_CATEGORIES.find((cat) => cat.id === categoryId);
 }

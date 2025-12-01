@@ -5,7 +5,8 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Color palette and theme tokens used throughout the No Bhad Codes design system.',
+        component:
+          'Color palette and theme tokens used throughout the No Bhad Codes design system.',
       },
     },
   },

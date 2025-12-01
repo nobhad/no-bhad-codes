@@ -1,75 +1,423 @@
-<!-- Dashboard Header -->
-<header class="dashboard-header">
-    <div class="header-content">
-        <div class="header-left">
-            <h1 class="logo">NO BHAD CODES</h1>
+<!-- Dashboard Layout -->
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <!-- Logo -->
+            <a href="/" class="sidebar-logo">
+                <img src="/images/avatar.svg" alt="No Bhad Codes" class="sidebar-logo-img">
+            </a>
+
+            <!-- Action Buttons -->
+            <div class="sidebar-buttons">
+                <button class="btn btn-secondary active" id="btn-dashboard" data-tab="dashboard">DASHBOARD</button>
+                <button class="btn btn-secondary" id="btn-files" data-tab="files">FILES</button>
+                <button class="btn btn-secondary" id="btn-messages" data-tab="messages">MESSAGES</button>
+                <button class="btn btn-secondary" id="btn-invoices" data-tab="invoices">INVOICES</button>
+                <button class="btn btn-secondary" id="btn-settings" data-tab="settings">SETTINGS</button>
+                <button class="btn btn-secondary" id="btn-new-project" data-tab="new-project">+ NEW PROJECT</button>
+                <button class="btn btn-secondary btn-preview hidden" id="btn-preview" data-tab="preview">PROJECT PREVIEW</button>
+            </div>
         </div>
-        <div class="header-right">
-            <button class="header-btn" id="notifications-btn">🔔</button>
-            <button class="header-btn" id="theme-toggle">🌓</button>
-            <div class="user-menu">
-                <button class="user-avatar" id="user-menu-toggle">👤</button>
+
+        <!-- Sidebar Toggle Button -->
+        <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle Sidebar">
+            <span class="toggle-icon">◀</span>
+        </button>
+    </aside>
+
+    <!-- Content Area -->
+    <div class="dashboard-content" id="dashboard-content">
+        <div class="content-wrapper">
+            <!-- Dashboard View (Default) -->
+            <div class="tab-content active" id="tab-dashboard">
+                <div class="page-header">
+                    <h2>Welcome Back, <span id="client-name">Client</span>!</h2>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="quick-stats">
+                    <button class="stat-card stat-card-clickable cp-shadow" data-tab="dashboard" type="button">
+                        <span class="stat-number">1</span>
+                        <span class="stat-label">Active Projects</span>
+                    </button>
+                    <button class="stat-card stat-card-clickable cp-shadow" data-tab="invoices" type="button">
+                        <span class="stat-number">0</span>
+                        <span class="stat-label">Pending Invoices</span>
+                    </button>
+                    <button class="stat-card stat-card-clickable cp-shadow" data-tab="messages" type="button">
+                        <span class="stat-number">1</span>
+                        <span class="stat-label">Unread Messages</span>
+                    </button>
+                </div>
+
+                <!-- Project Cards -->
+                <div class="cp-project-cards">
+                    <div class="cp-project-card cp-shadow">
+                        <h3>Your Website Project</h3>
+                        <p class="project-status">Status: <span class="status-badge">In Progress</span></p>
+                        <p class="project-progress">Progress: 25%</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 25%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="recent-activity cp-shadow">
+                    <h3>Recent Activity</h3>
+                    <ul class="activity-list">
+                        <li>Project intake received - Nov 30, 2025</li>
+                        <li>Account activated - Nov 28, 2025</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Files View -->
+            <div class="tab-content" id="tab-files">
+                <div class="page-header">
+                    <h2>Files</h2>
+                </div>
+
+                <!-- Upload Section -->
+                <div class="files-upload-section cp-shadow">
+                    <h3>Upload Files</h3>
+                    <div class="upload-dropzone" id="upload-dropzone">
+                        <p>Drag and drop files here or</p>
+                        <button class="btn btn-secondary" id="btn-browse-files">Browse Files</button>
+                        <input type="file" id="file-input" multiple hidden>
+                    </div>
+                </div>
+
+                <!-- Files List -->
+                <div class="files-list-section cp-shadow">
+                    <h3>Project Files</h3>
+                    <div class="files-filter">
+                        <select id="files-project-filter" class="form-select">
+                            <option value="all">All Projects</option>
+                            <option value="project-1">Your Website Project</option>
+                        </select>
+                    </div>
+                    <div class="files-list" id="files-list">
+                        <div class="file-item">
+                            <span class="file-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></span>
+                            <div class="file-info">
+                                <span class="file-name">project-brief.pdf</span>
+                                <span class="file-meta">Uploaded Nov 28, 2025 • 2.4 MB</span>
+                            </div>
+                            <div class="file-actions">
+                                <button class="btn btn-outline btn-sm">Preview</button>
+                                <button class="btn btn-outline btn-sm">Download</button>
+                            </div>
+                        </div>
+                        <div class="file-item">
+                            <span class="file-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></span>
+                            <div class="file-info">
+                                <span class="file-name">logo-v1.png</span>
+                                <span class="file-meta">Uploaded Nov 29, 2025 • 156 KB</span>
+                            </div>
+                            <div class="file-actions">
+                                <button class="btn btn-outline btn-sm">Preview</button>
+                                <button class="btn btn-outline btn-sm">Download</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages View -->
+            <div class="tab-content" id="tab-messages">
+                <div class="page-header">
+                    <h2>Messages</h2>
+                </div>
+
+                <!-- Messages Thread -->
+                <div class="messages-container cp-shadow">
+                    <div class="messages-thread" id="messages-thread">
+                        <div class="message message-received">
+                            <div class="message-avatar">
+                                <img src="/images/avatar.svg" alt="Noelle" class="avatar-img">
+                            </div>
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="message-sender">Noelle</span>
+                                    <span class="message-time">Nov 30, 2025 at 10:30 AM</span>
+                                </div>
+                                <div class="message-body">
+                                    Welcome to your project portal! I'm excited to work with you. I've reviewed your intake form and will begin the planning phase shortly.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="message message-sent">
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="message-sender">You</span>
+                                    <span class="message-time">Nov 30, 2025 at 11:15 AM</span>
+                                </div>
+                                <div class="message-body">
+                                    Thanks! Looking forward to seeing the initial designs.
+                                </div>
+                            </div>
+                            <div class="message-avatar">
+                                <div class="avatar-placeholder">YOU</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Compose Message -->
+                    <div class="message-compose">
+                        <div class="message-input-wrapper">
+                            <textarea id="message-input" class="form-textarea" placeholder="Type your message..."></textarea>
+                            <button type="button" class="emoji-toggle-btn" id="emoji-toggle" aria-label="Open emoji picker">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                            </button>
+                        </div>
+                        <div class="emoji-picker-wrapper hidden" id="emoji-picker-wrapper">
+                            <emoji-picker id="emoji-picker"></emoji-picker>
+                        </div>
+                        <button class="btn btn-secondary" id="btn-send-message">Send Message</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoices View -->
+            <div class="tab-content" id="tab-invoices">
+                <div class="page-header">
+                    <h2>Invoices</h2>
+                </div>
+
+                <!-- Invoice Summary -->
+                <div class="invoice-summary">
+                    <div class="summary-card cp-shadow">
+                        <span class="summary-label">Total Outstanding</span>
+                        <span class="summary-value">$0.00</span>
+                    </div>
+                    <div class="summary-card cp-shadow">
+                        <span class="summary-label">Total Paid</span>
+                        <span class="summary-value">$0.00</span>
+                    </div>
+                </div>
+
+                <!-- Invoices List -->
+                <div class="invoices-list cp-shadow">
+                    <h3>Invoice History</h3>
+                    <div class="invoice-item">
+                        <div class="invoice-info">
+                            <span class="invoice-number">INV-2025-001</span>
+                            <span class="invoice-date">Nov 30, 2025</span>
+                            <span class="invoice-project">Your Website Project</span>
+                        </div>
+                        <div class="invoice-amount">$2,500.00</div>
+                        <span class="invoice-status status-pending">Pending</span>
+                        <div class="invoice-actions">
+                            <button class="btn btn-outline btn-sm">Preview</button>
+                            <button class="btn btn-outline btn-sm">Download</button>
+                        </div>
+                    </div>
+                    <p class="no-invoices-message">No invoices yet. Your first invoice will appear here once your project begins.</p>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div class="tab-content" id="tab-settings">
+                <div class="page-header">
+                    <h2>Settings</h2>
+                </div>
+
+                <div class="settings-grid">
+                <!-- Account Section (Profile + Password) -->
+                <div class="settings-section cp-shadow">
+                    <h3>Account</h3>
+                    <form class="settings-form" id="profile-form">
+                        <div class="form-group">
+                            <label for="settings-name">Full Name</label>
+                            <input type="text" id="settings-name" class="form-input" value="Client Name">
+                        </div>
+                        <div class="form-group">
+                            <label for="settings-email">Email</label>
+                            <input type="email" id="settings-email" class="form-input" value="client@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="settings-company">Company</label>
+                            <input type="text" id="settings-company" class="form-input" placeholder="Your company name">
+                        </div>
+                        <div class="form-group">
+                            <label for="settings-phone">Phone</label>
+                            <input type="tel" id="settings-phone" class="form-input" placeholder="(555) 555-5555">
+                        </div>
+                        <div class="form-group">
+                            <label for="current-password">Current Password</label>
+                            <div class="cp-password-wrapper">
+                                <input type="password" id="current-password" class="form-input" autocomplete="current-password">
+                                <button type="button" class="cp-password-toggle" data-target="current-password" aria-label="Toggle password visibility"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">New Password</label>
+                            <div class="cp-password-wrapper">
+                                <input type="password" id="new-password" class="form-input" autocomplete="new-password">
+                                <button type="button" class="cp-password-toggle" data-target="new-password" aria-label="Toggle password visibility"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password">Confirm New Password</label>
+                            <div class="cp-password-wrapper">
+                                <input type="password" id="confirm-password" class="form-input" autocomplete="new-password">
+                                <button type="button" class="cp-password-toggle" data-target="confirm-password" aria-label="Toggle password visibility"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Save Changes</button>
+                    </form>
+                </div>
+
+                <!-- Notification Preferences -->
+                <div class="settings-section cp-shadow">
+                    <h3>Notification Preferences</h3>
+                    <form class="settings-form" id="notifications-form">
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox" checked>
+                                <span>Email me when I receive a new message</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" checked>
+                                <span>Email me when project status changes</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" checked>
+                                <span>Email me when a new invoice is generated</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox">
+                                <span>Email me weekly project summary</span>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Save Preferences</button>
+                    </form>
+                </div>
+
+                <!-- Billing Info Section -->
+                <div class="settings-section cp-shadow">
+                    <h3>Billing Information</h3>
+                    <form class="settings-form" id="billing-form">
+                        <div class="form-group">
+                            <label for="billing-company">Company Name</label>
+                            <input type="text" id="billing-company" class="form-input" placeholder="Your company name">
+                        </div>
+                        <div class="form-group">
+                            <label for="billing-address">Street Address</label>
+                            <input type="text" id="billing-address" class="form-input" placeholder="123 Main St">
+                        </div>
+                        <div class="form-group">
+                            <label for="billing-address2">Address Line 2</label>
+                            <input type="text" id="billing-address2" class="form-input" placeholder="Apt, Suite, etc.">
+                        </div>
+                        <div class="form-group">
+                            <label for="billing-city">City</label>
+                            <input type="text" id="billing-city" class="form-input" placeholder="City">
+                        </div>
+                        <div class="form-group">
+                            <label for="billing-state">State / Province</label>
+                            <input type="text" id="billing-state" class="form-input" placeholder="State">
+                        </div>
+                        <div class="form-group">
+                            <label for="billing-zip">ZIP / Postal Code</label>
+                            <input type="text" id="billing-zip" class="form-input" placeholder="12345">
+                        </div>
+                        <div class="form-group">
+                            <label for="billing-country">Country</label>
+                            <input type="text" id="billing-country" class="form-input" placeholder="United States">
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Save Billing Info</button>
+                    </form>
+                </div>
+                </div>
+            </div>
+
+            <!-- New Project View -->
+            <div class="tab-content" id="tab-new-project">
+                <div class="page-header">
+                    <h2>Start a New Project</h2>
+                </div>
+
+                <form class="new-project-form" id="new-project-form">
+                    <p class="form-intro">Ready to start something new? Fill out the form below to request a new project.</p>
+                    <div class="form-group">
+                        <label for="project-name">Project Name</label>
+                        <input type="text" id="project-name" class="form-input" placeholder="e.g., Company Website Redesign" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="project-type">Project Type</label>
+                        <select id="project-type" class="form-select" required>
+                            <option value="">Select a project type</option>
+                            <option value="website">New Website</option>
+                            <option value="redesign">Website Redesign</option>
+                            <option value="webapp">Web Application</option>
+                            <option value="ecommerce">E-Commerce Site</option>
+                            <option value="maintenance">Maintenance & Updates</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="project-budget">Estimated Budget</label>
+                        <select id="project-budget" class="form-select" required>
+                            <option value="">Select a budget range</option>
+                            <option value="1k-2.5k">$1,000 - $2,500</option>
+                            <option value="2.5k-5k">$2,500 - $5,000</option>
+                            <option value="5k-10k">$5,000 - $10,000</option>
+                            <option value="10k-25k">$10,000 - $25,000</option>
+                            <option value="25k+">$25,000+</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="project-timeline">Desired Timeline</label>
+                        <select id="project-timeline" class="form-select" required>
+                            <option value="">Select a timeline</option>
+                            <option value="asap">As soon as possible</option>
+                            <option value="1-2months">1-2 months</option>
+                            <option value="3-6months">3-6 months</option>
+                            <option value="flexible">Flexible</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="project-description">Project Description</label>
+                        <textarea id="project-description" class="form-textarea" rows="5" placeholder="Tell me about your project goals, requirements, and any specific features you need..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-secondary">Submit Project Request</button>
+                </form>
+            </div>
+
+            <!-- Project Preview View -->
+            <div class="tab-content" id="tab-preview">
+                <div class="page-header">
+                    <h2>Project Preview</h2>
+                </div>
+
+                <div class="preview-container">
+                    <div class="preview-toolbar">
+                        <div class="preview-url">
+                            <span class="url-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></span>
+                            <span class="url-text" id="preview-url">https://your-project.nobhadcodes.com</span>
+                        </div>
+                        <div class="preview-actions">
+                            <button class="btn btn-secondary btn-sm" id="btn-open-new-tab" title="Open in new tab">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                            </button>
+                            <button class="btn btn-secondary btn-sm" id="btn-refresh-preview" title="Refresh preview">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="preview-frame-wrapper">
+                        <iframe id="preview-iframe" class="preview-frame" src="" title="Project Preview"></iframe>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</header>
-
-<!-- Main Dashboard Layout -->
-<div class="dashboard-container">
-    <!-- Collapsible Sidebar -->
-    <aside class="sidebar" id="sidebar">
-        <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
-        <div class="sidebar-content">
-            <h3>Navigation</h3>
-            <div class="nav-section">
-                <h4>Account</h4>
-                <button class="nav-btn" id="nav-profile">👤 Profile</button>
-                <button class="nav-btn" id="nav-billing">💳 Billing</button>
-                <button class="nav-btn" id="nav-settings">⚙️ Settings</button>
-            </div>
-            <div class="nav-section">
-                <h4>Projects</h4>
-                <button class="nav-btn" id="nav-dashboard">📊 Dashboard</button>
-                <button class="nav-btn" id="nav-projects">📁 My Projects</button>
-                <button class="nav-btn" id="nav-messages">💬 Messages</button>
-            </div>
-            <div class="nav-section">
-                <h4>Resources</h4>
-                <button class="nav-btn" id="nav-portfolio">🎨 Portfolio</button>
-                <button class="nav-btn" id="nav-help">❓ Help & Support</button>
-            </div>
-            <div class="nav-section">
-                <button class="nav-btn logout-btn" id="nav-logout">🚪 Logout</button>
-            </div>
-        </div>
-    </aside>
-    
-    <!-- Main Content Area -->
-    <main class="main-content" id="main-content">
-        <div class="content-area">
-            <div class="page-header">
-                <h1>Dashboard</h1>
-                <p>Welcome to your client dashboard</p>
-            </div>
-            
-            <div class="action-buttons">
-                <button class="btn btn-primary" id="btn-new-project">+ New Project</button>
-                <button class="btn btn-secondary" id="btn-messages">View Messages</button>
-                <button class="btn btn-secondary" id="btn-invoices">View Invoices</button>
-            </div>
-            
-            <div class="content-cards">
-                <div class="card">
-                    <h3>Recent Activity</h3>
-                    <p>Your latest project updates will appear here</p>
-                    <button class="btn btn-outline">View All</button>
-                </div>
-                <div class="card">
-                    <h3>Quick Actions</h3>
-                    <p>Common tasks and shortcuts</p>
-                    <button class="btn btn-outline">Get Started</button>
-                </div>
-            </div>
-        </div>
-    </main>
 </div>

@@ -36,12 +36,16 @@ const createProjectsFilter = (args: any) => {
       <div class="container">
         <div class="filter-wrapper">
           <div class="filter-group" role="group" aria-label="Project filters">
-            ${filters.map(filter => `
+            ${filters
+    .map(
+      (filter) => `
               <button class="filter-btn${activeFilter === filter.key ? ' active' : ''}" data-filter="${filter.key}">
                 ${filter.label}
                 <span class="filter-count" data-count="${filter.key}">${filter.count}</span>
               </button>
-            `).join('')}
+            `
+    )
+    .join('')}
           </div>
         </div>
       </div>

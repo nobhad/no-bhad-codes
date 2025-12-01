@@ -51,7 +51,9 @@ const createContactForm = (args: any) => {
           <option value="Other">Other</option>
         </select>
         
-        ${showProjectDetails ? `
+        ${
+  showProjectDetails
+    ? `
           <div class="project-details" id="project-details">
             <select class="form-select" data-name="Project Type" id="project-type" name="Project-Type">
               <option value="">What type of project?</option>
@@ -85,11 +87,15 @@ const createContactForm = (args: any) => {
               </select>
             </div>
           </div>
-        ` : ''}
+        `
+    : ''
+}
         
         <textarea autocomplete="off" class="form-textarea" data-name="Project Description" id="project-description" maxlength="1000" name="Project-Description" placeholder="Brief description of your project (What's the main goal? Who's your target audience?)" required=""></textarea>
         
-        ${showCompanyInfo ? `
+        ${
+  showCompanyInfo
+    ? `
           <details class="company-details">
             <summary>+ Company Information (Optional)</summary>
             <div class="company-fields">
@@ -106,7 +112,9 @@ const createContactForm = (args: any) => {
               </select>
             </div>
           </details>
-        ` : ''}
+        `
+    : ''
+}
         
         <div class="form-actions">
           <input 

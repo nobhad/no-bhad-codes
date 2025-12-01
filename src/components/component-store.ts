@@ -62,7 +62,7 @@ class ComponentStore {
     }
 
     const id = `${componentName}-${++this.idCounter}`;
-    const component = await definition.factory(props) as T;
+    const component = (await definition.factory(props)) as T;
 
     const instance: ComponentInstance = {
       id,
@@ -87,8 +87,9 @@ class ComponentStore {
    * Find component instances by name
    */
   findByName(componentName: string): ComponentInstance[] {
-    return Array.from(this.components.values())
-      .filter(instance => instance.component.constructor.name.includes(componentName));
+    return Array.from(this.components.values()).filter((instance) =>
+      instance.component.constructor.name.includes(componentName)
+    );
   }
 
   /**
@@ -129,15 +130,14 @@ class ComponentStore {
    */
   async destroyByName(componentName: string): Promise<void> {
     const instances = this.findByName(componentName);
-    await Promise.all(instances.map(instance => this.destroy(instance.id)));
+    await Promise.all(instances.map((instance) => this.destroy(instance.id)));
   }
 
   /**
    * Destroy all components
    */
   async destroyAll(): Promise<void> {
-    const destroyPromises = Array.from(this.components.keys())
-      .map(id => this.destroy(id));
+    const destroyPromises = Array.from(this.components.keys()).map((id) => this.destroy(id));
     await Promise.all(destroyPromises);
   }
 
@@ -155,8 +155,8 @@ class ComponentStore {
     return {
       registeredComponents: Array.from(this.definitions.keys()),
       totalInstances: this.components.size,
-      mountedInstances: Array.from(this.components.values())
-        .filter(instance => instance.mounted).length,
+      mountedInstances: Array.from(this.components.values()).filter((instance) => instance.mounted)
+        .length,
       instances: Array.from(this.components.entries()).map(([id, instance]) => ({
         id,
         name: instance.component.constructor.name,
@@ -170,7 +170,7 @@ class ComponentStore {
    * Component communication via events
    */
   broadcast(eventName: string, data: unknown = {}): void {
-    this.components.forEach(instance => {
+    this.components.forEach((instance) => {
       const event = new CustomEvent(`component:${eventName}`, {
         detail: { data, sourceId: 'store' }
       });
@@ -208,16 +208,14 @@ export class ComponentUtils {
    * Create a template literal function for HTML
    */
   static html(strings: TemplateStringsArray, ...values: unknown[]): string {
-    return strings.reduce((result, string, i) =>
-      result + string + (values[i] || ''), '');
+    return strings.reduce((result, string, i) => result + string + (values[i] || ''), '');
   }
 
   /**
    * Create a template literal function for CSS
    */
   static css(strings: TemplateStringsArray, ...values: unknown[]): string {
-    return strings.reduce((result, string, i) =>
-      result + string + (values[i] || ''), '');
+    return strings.reduce((result, string, i) => result + string + (values[i] || ''), '');
   }
 
   /**
@@ -255,7 +253,7 @@ export class ComponentUtils {
       if (!inThrottle) {
         func.apply(this, args);
         inThrottle = true;
-        setTimeout(() => inThrottle = false, limit);
+        setTimeout(() => (inThrottle = false), limit);
       }
     };
   }
@@ -266,9 +264,11 @@ export class ComponentUtils {
   static parseDataAttributes(element: HTMLElement, prefix = 'data-'): Record<string, unknown> {
     const data: Record<string, unknown> = {};
 
-    Array.from(element.attributes).forEach(attr => {
+    Array.from(element.attributes).forEach((attr) => {
       if (attr.name.startsWith(prefix)) {
-        const key = attr.name.slice(prefix.length).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+        const key = attr.name
+          .slice(prefix.length)
+          .replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
         let value: string | boolean | number = attr.value;
 
         // Try to parse as JSON, number, or boolean

@@ -3,13 +3,17 @@
  * VALIDATION MIDDLEWARE TESTS
  * ===============================================
  * @file tests/unit/middleware/validation.test.ts
- * 
+ *
  * Unit tests for the API validation middleware.
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
-import { ApiValidator, validateRequest, ValidationSchemas } from '../../../server/middleware/validation.js';
+import {
+  ApiValidator,
+  validateRequest,
+  ValidationSchemas
+} from '../../../server/middleware/validation.js';
 
 // Mock logger
 vi.mock('../../../server/services/logger.js', () => ({
@@ -138,7 +142,9 @@ describe('ApiValidator', () => {
       const result = validator.validate(maliciousData, schema);
 
       expect(result.isValid).toBe(true);
-      expect(result.sanitizedData.message).toBe('&lt;script&gt;alert(&quot;xss&quot;)&lt;&#x2F;script&gt;Hello world');
+      expect(result.sanitizedData.message).toBe(
+        '&lt;script&gt;alert(&quot;xss&quot;)&lt;&#x2F;script&gt;Hello world'
+      );
     });
   });
 
@@ -148,13 +154,9 @@ describe('ApiValidator', () => {
         email: { type: 'email' as const }
       };
 
-      const validEmails = [
-        'test@example.com',
-        'user.name@domain.co.uk',
-        'user+tag@example.org'
-      ];
+      const validEmails = ['test@example.com', 'user.name@domain.co.uk', 'user+tag@example.org'];
 
-      validEmails.forEach(email => {
+      validEmails.forEach((email) => {
         const result = validator.validate({ email }, schema);
         expect(result.isValid).toBe(true);
       });
@@ -173,7 +175,7 @@ describe('ApiValidator', () => {
         'user@domain'
       ];
 
-      invalidEmails.forEach(email => {
+      invalidEmails.forEach((email) => {
         const result = validator.validate({ email }, schema);
         expect(result.isValid).toBe(false);
         expect(result.errors[0].code).toBe('INVALID_EMAIL');
@@ -271,13 +273,13 @@ describe('ApiValidator', () => {
       const truthyValues = ['true', 'TRUE', '1'];
       const falsyValues = ['false', 'FALSE', '0'];
 
-      truthyValues.forEach(value => {
+      truthyValues.forEach((value) => {
         const result = validator.validate({ enabled: value }, schema);
         expect(result.isValid).toBe(true);
         expect(result.sanitizedData.enabled).toBe(true);
       });
 
-      falsyValues.forEach(value => {
+      falsyValues.forEach((value) => {
         const result = validator.validate({ enabled: value }, schema);
         expect(result.isValid).toBe(true);
         expect(result.sanitizedData.enabled).toBe(false);
@@ -335,8 +337,10 @@ describe('ApiValidator', () => {
         password: {
           type: 'custom' as const,
           customValidator: (value: string) => {
-            return value.length >= 8 && /[A-Z]/.test(value) && /[0-9]/.test(value)
-              || 'Password must be at least 8 characters with uppercase and number';
+            return (
+              (value.length >= 8 && /[A-Z]/.test(value) && /[0-9]/.test(value)) ||
+              'Password must be at least 8 characters with uppercase and number'
+            );
           }
         }
       };
@@ -370,10 +374,7 @@ describe('ApiValidator', () => {
   describe('Multiple Rules', () => {
     it('should apply multiple validation rules to the same field', () => {
       const schema = {
-        email: [
-          { type: 'required' as const },
-          { type: 'email' as const }
-        ]
+        email: [{ type: 'required' as const }, { type: 'email' as const }]
       };
 
       // Missing field
@@ -526,7 +527,9 @@ describe('ValidationSchemas', () => {
 
       expect(result.isValid).toBe(false);
       // Check that there's at least one error for the message field with spam in the message
-      const messageError = result.errors.find(e => e.field === 'message' && e.message.toLowerCase().includes('spam'));
+      const messageError = result.errors.find(
+        (e) => e.field === 'message' && e.message.toLowerCase().includes('spam')
+      );
       expect(messageError).toBeDefined();
     });
   });
@@ -540,7 +543,8 @@ describe('ValidationSchemas', () => {
         projectType: 'business-site',
         budgetRange: '5k-10k',
         timeline: '1-3-months',
-        description: 'We need a professional business website to showcase our services and attract new customers.',
+        description:
+          'We need a professional business website to showcase our services and attract new customers.',
         features: ['contact-form', 'analytics', 'cms']
       };
 
@@ -564,7 +568,9 @@ describe('ValidationSchemas', () => {
 
       expect(result.isValid).toBe(false);
       // Check for error on projectType field with INVALID_VALUE code
-      const projectTypeError = result.errors.find(e => e.field === 'projectType' && e.code === 'INVALID_VALUE');
+      const projectTypeError = result.errors.find(
+        (e) => e.field === 'projectType' && e.code === 'INVALID_VALUE'
+      );
       expect(projectTypeError).toBeDefined();
     });
   });
@@ -593,7 +599,7 @@ describe('ValidationSchemas', () => {
 
       expect(result.isValid).toBe(false);
       // Check that there's at least one error for the password field
-      const passwordError = result.errors.find(e => e.field === 'password');
+      const passwordError = result.errors.find((e) => e.field === 'password');
       expect(passwordError).toBeDefined();
     });
   });

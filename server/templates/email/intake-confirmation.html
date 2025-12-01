@@ -1,113 +1,135 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Intake Form Confirmation</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f8f9fa;
-        }
-        .container {
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header {
-            text-align: center;
-            border-bottom: 2px solid #00ff41;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #00ff41;
-            margin-bottom: 10px;
-        }
-        .title {
-            font-size: 20px;
-            color: #333;
-            margin: 0;
-        }
-        .content {
-            margin-bottom: 30px;
-        }
-        .highlight {
-            background-color: #f0f9ff;
-            border-left: 4px solid #00ff41;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        .intake-id {
-            font-family: 'Courier New', monospace;
-            font-size: 18px;
-            font-weight: bold;
-            color: #00ff41;
-        }
-        .footer {
-            border-top: 1px solid #e5e7eb;
-            padding-top: 20px;
-            text-align: center;
-            color: #6b7280;
-            font-size: 14px;
-        }
-        .button {
-            display: inline-block;
-            background-color: #00ff41;
-            color: #000;
-            padding: 12px 24px;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: 500;
-            margin: 20px 0;
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+      }
+      .container {
+        background: white;
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        border-bottom: 2px solid #00ff41;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: #00ff41;
+        margin-bottom: 10px;
+      }
+      .title {
+        font-size: 20px;
+        color: #333;
+        margin: 0;
+      }
+      .content {
+        margin-bottom: 30px;
+      }
+      .highlight {
+        background-color: #f0f9ff;
+        border-left: 4px solid #00ff41;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+      .intake-id {
+        font-family: 'Courier New', monospace;
+        font-size: 18px;
+        font-weight: bold;
+        color: #00ff41;
+      }
+      .footer {
+        border-top: 1px solid #e5e7eb;
+        padding-top: 20px;
+        text-align: center;
+        color: #6b7280;
+        font-size: 14px;
+      }
+      .button {
+        display: inline-block;
+        background-color: #00ff41;
+        color: #000;
+        padding: 12px 24px;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 500;
+        margin: 20px 0;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="header">
-            <div class="logo">No Bhad Codes</div>
-            <h1 class="title">Thank You for Your Project Inquiry</h1>
+      <div class="header">
+        <div class="logo">No Bhad Codes</div>
+        <h1 class="title">Thank You for Your Project Inquiry</h1>
+      </div>
+
+      <div class="content">
+        <p>Hi {{clientName}},</p>
+
+        <p>
+          Thank you for submitting your project intake form. We've successfully received your
+          project requirements and are excited about the possibility of working with you.
+        </p>
+
+        <div class="highlight">
+          <strong>Your Intake ID:</strong> <span class="intake-id">{{intakeId}}</span>
+          <br />
+          <strong>Estimated Response Time:</strong> {{estimatedResponseTime}}
         </div>
 
-        <div class="content">
-            <p>Hi {{clientName}},</p>
-            
-            <p>Thank you for submitting your project intake form. We've successfully received your project requirements and are excited about the possibility of working with you.</p>
+        <h3>What happens next?</h3>
+        <ol>
+          <li>
+            <strong>Review & Analysis:</strong> Our team will carefully review your project
+            requirements and assess the scope of work.
+          </li>
+          <li>
+            <strong>Initial Consultation:</strong> We'll reach out to discuss your vision, timeline,
+            and any clarifying questions.
+          </li>
+          <li>
+            <strong>Project Proposal:</strong> You'll receive a detailed proposal with timeline,
+            deliverables, and pricing.
+          </li>
+          <li>
+            <strong>Project Planning:</strong> Once approved, we'll create your client portal and
+            kick off the project.
+          </li>
+        </ol>
 
-            <div class="highlight">
-                <strong>Your Intake ID:</strong> <span class="intake-id">{{intakeId}}</span>
-                <br>
-                <strong>Estimated Response Time:</strong> {{estimatedResponseTime}}
-            </div>
+        <p>
+          We pride ourselves on delivering high-quality web development solutions tailored to your
+          specific needs. Our team has experience across a wide range of technologies and project
+          types.
+        </p>
 
-            <h3>What happens next?</h3>
-            <ol>
-                <li><strong>Review & Analysis:</strong> Our team will carefully review your project requirements and assess the scope of work.</li>
-                <li><strong>Initial Consultation:</strong> We'll reach out to discuss your vision, timeline, and any clarifying questions.</li>
-                <li><strong>Project Proposal:</strong> You'll receive a detailed proposal with timeline, deliverables, and pricing.</li>
-                <li><strong>Project Planning:</strong> Once approved, we'll create your client portal and kick off the project.</li>
-            </ol>
+        <p>
+          <strong>Questions?</strong> Feel free to reply to this email or contact us at
+          <a href="mailto:{{supportEmail}}">{{supportEmail}}</a>
+        </p>
+      </div>
 
-            <p>We pride ourselves on delivering high-quality web development solutions tailored to your specific needs. Our team has experience across a wide range of technologies and project types.</p>
-
-            <p><strong>Questions?</strong> Feel free to reply to this email or contact us at <a href="mailto:{{supportEmail}}">{{supportEmail}}</a></p>
-        </div>
-
-        <div class="footer">
-            <p>This is an automated confirmation email.</p>
-            <p>No Bhad Codes - Professional Web Development Services</p>
-            <p>© 2024 No Bhad Codes. All rights reserved.</p>
-        </div>
+      <div class="footer">
+        <p>This is an automated confirmation email.</p>
+        <p>No Bhad Codes - Professional Web Development Services</p>
+        <p>© 2024 No Bhad Codes. All rights reserved.</p>
+      </div>
     </div>
-</body>
+  </body>
 </html>

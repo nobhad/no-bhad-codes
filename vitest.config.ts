@@ -1,5 +1,5 @@
-import { defineConfig } from 'vitest/config'
-import { resolve } from 'path'
+import { defineConfig } from 'vitest/config';
+import { resolve } from 'path';
 
 export default defineConfig({
   test: {
@@ -11,12 +11,7 @@ export default defineConfig({
       'server/**/*.{test,spec}.{js,ts}',
       'tests/unit/**/*.{test,spec}.{js,ts}'
     ],
-    exclude: [
-      'node_modules/**',
-      'dist/**',
-      'build/**',
-      '**/*.d.ts'
-    ],
+    exclude: ['node_modules/**', 'dist/**', 'build/**', '**/*.d.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'json-summary', 'html', 'lcov', 'text-summary'],
@@ -38,10 +33,7 @@ export default defineConfig({
         '**/*.type.ts',
         '**/*.types.ts'
       ],
-      include: [
-        'src/**/*.{js,ts}',
-        'server/**/*.{js,ts}'
-      ],
+      include: ['src/**/*.{js,ts}', 'server/**/*.{js,ts}'],
       thresholds: {
         global: {
           branches: 70,
@@ -71,12 +63,6 @@ export default defineConfig({
       }
     },
     // Fail tests if coverage thresholds are not met
-    pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: true
-      }
-    },
     testTimeout: 10000,
     hookTimeout: 10000,
     teardownTimeout: 5000,
@@ -95,4 +81,4 @@ export default defineConfig({
       '@tests': resolve(__dirname, 'tests')
     }
   }
-})
+});

@@ -10,7 +10,11 @@
 import { BaseComponent, type ComponentProps, type ComponentState } from './base-component';
 import { ComponentUtils } from './component-store';
 import { container } from '../core/container';
-import type { PerformanceService, PerformanceMetrics, PerformanceAlert } from '../services/performance-service';
+import type {
+  PerformanceService,
+  PerformanceMetrics,
+  PerformanceAlert
+} from '../services/performance-service';
 
 export interface PerformanceDashboardProps extends ComponentProps {
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
@@ -29,7 +33,10 @@ export interface PerformanceDashboardState extends ComponentState {
   isVisible: boolean;
 }
 
-export class PerformanceDashboard extends BaseComponent<PerformanceDashboardProps, PerformanceDashboardState> {
+export class PerformanceDashboard extends BaseComponent<
+  PerformanceDashboardProps,
+  PerformanceDashboardState
+> {
   private performanceService: PerformanceService | null = null;
   private updateTimer: NodeJS.Timeout | null = null;
 
@@ -91,7 +98,11 @@ export class PerformanceDashboard extends BaseComponent<PerformanceDashboardProp
   }
 
   private renderTemplate(): string {
-    const { position = 'top-right', showAlerts = true, showRecommendations: _showRecommendations = true } = this.props;
+    const {
+      position = 'top-right',
+      showAlerts = true,
+      showRecommendations: _showRecommendations = true
+    } = this.props;
     const { isMinimized, isVisible, metrics, alerts, score } = this.state;
 
     if (!isVisible) {
@@ -128,7 +139,9 @@ export class PerformanceDashboard extends BaseComponent<PerformanceDashboardProp
           </div>
         </div>
         
-        ${!isMinimized ? `
+        ${
+  !isMinimized
+    ? `
           <div class="perf-dashboard__content">
             <div class="perf-dashboard__metrics">
               ${this.renderCoreWebVitals(metrics)}
@@ -136,14 +149,23 @@ export class PerformanceDashboard extends BaseComponent<PerformanceDashboardProp
               ${this.renderMemoryMetrics(metrics)}
             </div>
             
-            ${showAlerts && alerts.length > 0 ? `
+            ${
+  showAlerts && alerts.length > 0
+    ? `
               <div class="perf-dashboard__alerts">
                 <h4>Alerts</h4>
-                ${alerts.slice(0, 3).map(alert => this.renderAlert(alert)).join('')}
+                ${alerts
+    .slice(0, 3)
+    .map((alert) => this.renderAlert(alert))
+    .join('')}
               </div>
-            ` : ''}
+            `
+    : ''
+}
           </div>
-        ` : ''}
+        `
+    : ''
+}
       </div>
     `;
   }
@@ -200,8 +222,8 @@ export class PerformanceDashboard extends BaseComponent<PerformanceDashboardProp
     if (value === undefined) return '';
 
     const displayValue = unit === 'ms' ? Math.round(value) : value.toFixed(2);
-    const status = value <= thresholds.good ? 'good' :
-      value <= thresholds.needsWork ? 'needs-work' : 'poor';
+    const status =
+      value <= thresholds.good ? 'good' : value <= thresholds.needsWork ? 'needs-work' : 'poor';
 
     return ComponentUtils.html`
       <div class="perf-metric">

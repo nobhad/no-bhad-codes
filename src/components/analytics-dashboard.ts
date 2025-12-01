@@ -10,7 +10,11 @@
 import { BaseComponent, type ComponentProps, type ComponentState } from './base-component';
 import { ComponentUtils } from './component-store';
 import { container } from '../core/container';
-import type { VisitorTrackingService, EngagementMetrics, VisitorSession } from '../services/visitor-tracking';
+import type {
+  VisitorTrackingService,
+  EngagementMetrics,
+  VisitorSession
+} from '../services/visitor-tracking';
 
 export interface AnalyticsDashboardProps extends ComponentProps {
   position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
@@ -33,7 +37,10 @@ export interface AnalyticsDashboardState extends ComponentState {
   };
 }
 
-export class AnalyticsDashboard extends BaseComponent<AnalyticsDashboardProps, AnalyticsDashboardState> {
+export class AnalyticsDashboard extends BaseComponent<
+  AnalyticsDashboardProps,
+  AnalyticsDashboardState
+> {
   private trackingService: VisitorTrackingService | null = null;
   private updateTimer: any = null;
 
@@ -110,7 +117,11 @@ export class AnalyticsDashboard extends BaseComponent<AnalyticsDashboardProps, A
   }
 
   private renderTemplate(): string {
-    const { position = 'top-left', showRealTime = true, showCharts: _showCharts = false } = this.props;
+    const {
+      position = 'top-left',
+      showRealTime = true,
+      showCharts: _showCharts = false
+    } = this.props;
     const { isMinimized, isVisible, currentSession, metrics, realtimeData } = this.state;
 
     if (!isVisible) {
@@ -145,14 +156,18 @@ export class AnalyticsDashboard extends BaseComponent<AnalyticsDashboardProps, A
           </div>
         </div>
 
-        ${!isMinimized ? `
+        ${
+  !isMinimized
+    ? `
           <div class="analytics-dashboard__content">
             ${showRealTime ? this.renderRealtimeMetrics(realtimeData, currentSession) : ''}
             ${this.renderOverviewMetrics(metrics)}
             ${this.renderTopPages(metrics.topPages)}
             ${this.renderTopInteractions(metrics.topInteractions)}
           </div>
-        ` : ''}
+        `
+    : ''
+}
       </div>
     `;
   }
@@ -227,12 +242,14 @@ export class AnalyticsDashboard extends BaseComponent<AnalyticsDashboardProps, A
       <div class="analytics-section">
         <h4 class="analytics-section__title">Top Pages</h4>
         <div class="analytics-list">
-          ${pages.slice(0, 5).map(page => {
-    const avgTimeMinutes = Math.floor(page.avgTime / 60000);
-    const avgTimeSeconds = Math.floor((page.avgTime % 60000) / 1000);
-    const shortUrl = page.url.split('/').pop() || page.url;
+          ${pages
+    .slice(0, 5)
+    .map((page) => {
+      const avgTimeMinutes = Math.floor(page.avgTime / 60000);
+      const avgTimeSeconds = Math.floor((page.avgTime % 60000) / 1000);
+      const shortUrl = page.url.split('/').pop() || page.url;
 
-    return `
+      return `
               <div class="analytics-list__item">
                 <div class="analytics-list__main">
                   <span class="analytics-list__name">${shortUrl}</span>
@@ -243,7 +260,8 @@ export class AnalyticsDashboard extends BaseComponent<AnalyticsDashboardProps, A
                 </div>
               </div>
             `;
-  }).join('')}
+    })
+    .join('')}
         </div>
       </div>
     `;
@@ -258,7 +276,10 @@ export class AnalyticsDashboard extends BaseComponent<AnalyticsDashboardProps, A
       <div class="analytics-section">
         <h4 class="analytics-section__title">Top Interactions</h4>
         <div class="analytics-list">
-          ${interactions.slice(0, 5).map(interaction => `
+          ${interactions
+    .slice(0, 5)
+    .map(
+      (interaction) => `
             <div class="analytics-list__item">
               <div class="analytics-list__main">
                 <span class="analytics-list__name">${interaction.element}</span>
@@ -268,7 +289,9 @@ export class AnalyticsDashboard extends BaseComponent<AnalyticsDashboardProps, A
                 Type: ${interaction.type}
               </div>
             </div>
-          `).join('')}
+          `
+    )
+    .join('')}
         </div>
       </div>
     `;

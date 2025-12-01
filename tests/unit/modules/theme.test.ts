@@ -37,8 +37,10 @@ vi.mock('../../../src/core/state.js', () => ({
       const oldState = { ...mockState };
       Object.assign(mockState, updates);
       // Notify subscribers
-      Object.keys(updates).forEach(key => {
-        mockSubscribers.forEach(cb => cb(mockState[key as keyof typeof mockState], oldState[key as keyof typeof oldState], key));
+      Object.keys(updates).forEach((key) => {
+        mockSubscribers.forEach((cb) =>
+          cb(mockState[key as keyof typeof mockState], oldState[key as keyof typeof oldState], key)
+        );
       });
     }),
     getState: vi.fn(() => mockState),
@@ -57,8 +59,10 @@ vi.mock('../../../src/core/state.js', () => ({
       const oldState = { ...mockState };
       Object.assign(mockState, updates);
       // Notify subscribers
-      Object.keys(updates).forEach(key => {
-        mockSubscribers.forEach(cb => cb(mockState[key as keyof typeof mockState], oldState[key as keyof typeof oldState], key));
+      Object.keys(updates).forEach((key) => {
+        mockSubscribers.forEach((cb) =>
+          cb(mockState[key as keyof typeof mockState], oldState[key as keyof typeof oldState], key)
+        );
       });
     }),
     getState: vi.fn(() => mockState),
@@ -128,8 +132,8 @@ describe('ThemeModule', () => {
         removeListener: vi.fn(),
         addEventListener: vi.fn(),
         removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-      })),
+        dispatchEvent: vi.fn()
+      }))
     });
   });
 

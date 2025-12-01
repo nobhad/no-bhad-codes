@@ -70,7 +70,7 @@ export class BundleAnalyzerService {
     if ('performance' in window && performance.getEntriesByType) {
       const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
 
-      resources.forEach(resource => {
+      resources.forEach((resource) => {
         if (resource.name.includes('.js') || resource.name.includes('.css')) {
           this.resourceCache.set(resource.name, resource);
         }
@@ -88,7 +88,10 @@ export class BundleAnalyzerService {
 
     const metrics = this.calculateMetrics(bundles);
     const totalSize = bundles.reduce((sum, bundle) => sum + bundle.size, 0);
-    const totalGzipSize = bundles.reduce((sum, bundle) => sum + (bundle.gzipSize || bundle.size * 0.3), 0);
+    const totalGzipSize = bundles.reduce(
+      (sum, bundle) => sum + (bundle.gzipSize || bundle.size * 0.3),
+      0
+    );
 
     return {
       totalSize,
@@ -193,8 +196,9 @@ export class BundleAnalyzerService {
     const suggestions: OptimizationSuggestion[] = [];
 
     // Check main bundle size
-    const mainBundle = bundles.find(b => b.type === 'main');
-    if (mainBundle && mainBundle.size > 150000) { // 150KB threshold
+    const mainBundle = bundles.find((b) => b.type === 'main');
+    if (mainBundle && mainBundle.size > 150000) {
+      // 150KB threshold
       suggestions.push({
         type: 'bundle-split',
         priority: 'high',
@@ -209,9 +213,10 @@ export class BundleAnalyzerService {
     }
 
     // Check for large vendor dependencies
-    const vendorBundles = bundles.filter(b => b.type === 'vendor');
-    vendorBundles.forEach(bundle => {
-      if (bundle.size > 100000) { // 100KB threshold
+    const vendorBundles = bundles.filter((b) => b.type === 'vendor');
+    vendorBundles.forEach((bundle) => {
+      if (bundle.size > 100000) {
+        // 100KB threshold
         suggestions.push({
           type: 'lazy-load',
           priority: 'medium',
@@ -227,7 +232,7 @@ export class BundleAnalyzerService {
     });
 
     // Check GSAP usage
-    const gsapDep = dependencies.find(d => d.name === 'gsap');
+    const gsapDep = dependencies.find((d) => d.name === 'gsap');
     if (gsapDep && gsapDep.unusedExports && gsapDep.unusedExports.length > 0) {
       suggestions.push({
         type: 'tree-shake',
@@ -243,7 +248,7 @@ export class BundleAnalyzerService {
     }
 
     // Check for preloading opportunities
-    const criticalBundles = bundles.filter(b => b.type === 'main' || b.name.includes('core'));
+    const criticalBundles = bundles.filter((b) => b.type === 'main' || b.name.includes('core'));
     if (criticalBundles.length > 0) {
       suggestions.push({
         type: 'preload',
@@ -269,15 +274,15 @@ export class BundleAnalyzerService {
    */
   private calculateMetrics(bundles: BundleInfo[]): BundleAnalysis['metrics'] {
     const mainBundleSize = bundles
-      .filter(b => b.type === 'main')
+      .filter((b) => b.type === 'main')
       .reduce((sum, b) => sum + b.size, 0);
 
     const vendorBundleSize = bundles
-      .filter(b => b.type === 'vendor')
+      .filter((b) => b.type === 'vendor')
       .reduce((sum, b) => sum + b.size, 0);
 
     const asyncChunksSize = bundles
-      .filter(b => b.type === 'chunk')
+      .filter((b) => b.type === 'chunk')
       .reduce((sum, b) => sum + b.size, 0);
 
     return {
@@ -360,8 +365,8 @@ export class BundleAnalyzerService {
   private detectDuplicateModules(bundles: BundleInfo[]): string[] {
     const moduleCount = new Map<string, number>();
 
-    bundles.forEach(bundle => {
-      bundle.modules?.forEach(module => {
+    bundles.forEach((bundle) => {
+      bundle.modules?.forEach((module) => {
         moduleCount.set(module, (moduleCount.get(module) || 0) + 1);
       });
     });
@@ -392,7 +397,7 @@ export class BundleAnalyzerService {
     report += `- Number of Bundles: ${analysis.bundles.length}\n\n`;
 
     report += '## Bundle Breakdown\n';
-    analysis.bundles.forEach(bundle => {
+    analysis.bundles.forEach((bundle) => {
       report += `### ${bundle.name} (${bundle.type})\n`;
       report += `- Size: ${this.formatBytes(bundle.size)}\n`;
       if (bundle.gzipSize) {
@@ -410,7 +415,7 @@ export class BundleAnalyzerService {
         report += `${index + 1}. **${suggestion.description}** (${suggestion.priority} priority)\n`;
         report += `   Estimated Savings: ${this.formatBytes(suggestion.estimatedSavings)}\n`;
         report += '   Implementation:\n';
-        suggestion.implementation.forEach(step => {
+        suggestion.implementation.forEach((step) => {
           report += `   - ${step}\n`;
         });
         report += '\n';
@@ -428,7 +433,7 @@ export class BundleAnalyzerService {
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))  } ${  sizes[i]}`;
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   }
 
   /**

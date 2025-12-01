@@ -3,7 +3,7 @@
  * CENTRALIZED LOGGING SERVICE
  * ===============================================
  * @file server/services/logger.ts
- * 
+ *
  * Centralized error logging and application logging
  * service with multiple transports and formatting.
  */
@@ -113,13 +113,13 @@ export class LoggerService {
    */
   private formatLogEntry(entry: LogEntry): string {
     const { timestamp, level, message, category, metadata, error } = entry;
-    
+
     let formatted = `${timestamp} [${level}]`;
-    
+
     if (category) {
       formatted += ` [${category}]`;
     }
-    
+
     formatted += ` ${message}`;
 
     if (metadata && Object.keys(metadata).length > 0) {
@@ -141,9 +141,9 @@ export class LoggerService {
 
     const colors = {
       ERROR: '\\x1b[31m', // Red
-      WARN: '\\x1b[33m',  // Yellow
-      INFO: '\\x1b[36m',  // Cyan
-      DEBUG: '\\x1b[35m'  // Magenta
+      WARN: '\\x1b[33m', // Yellow
+      INFO: '\\x1b[36m', // Cyan
+      DEBUG: '\\x1b[35m' // Magenta
     };
 
     const reset = '\\x1b[0m';
@@ -157,19 +157,20 @@ export class LoggerService {
     if (!this.config.file) return;
 
     const formatted = this.formatLogEntry(entry);
-    const filePath = entry.level === 'ERROR' && this.config.errorFilePath 
-      ? this.config.errorFilePath 
-      : this.config.filePath;
+    const filePath =
+      entry.level === 'ERROR' && this.config.errorFilePath
+        ? this.config.errorFilePath
+        : this.config.filePath;
 
     if (!filePath) return;
 
     try {
-      await fs.promises.appendFile(filePath, formatted + '\\n');
-      
+      await fs.promises.appendFile(filePath, `${formatted  }\\n`);
+
       // Basic log rotation check (simple file size check)
       const stats = await fs.promises.stat(filePath);
       const maxSize = this.parseFileSize(this.config.maxFileSize || '10m');
-      
+
       if (stats.size > maxSize) {
         await this.rotateLogFile(filePath);
       }
@@ -184,12 +185,12 @@ export class LoggerService {
   private parseFileSize(size: string): number {
     const units = { k: 1024, m: 1024 * 1024, g: 1024 * 1024 * 1024 };
     const match = size.match(/^(\\d+)([kmg])?$/i);
-    
+
     if (!match) return 10 * 1024 * 1024; // Default 10MB
-    
+
     const value = parseInt(match[1]);
     const unit = match[2]?.toLowerCase() as keyof typeof units;
-    
+
     return value * (units[unit] || 1);
   }
 
@@ -203,9 +204,9 @@ export class LoggerService {
       const base = path.basename(filePath, ext);
       const dir = path.dirname(filePath);
       const rotatedFile = path.join(dir, `${base}-${timestamp}${ext}`);
-      
+
       await fs.promises.rename(filePath, rotatedFile);
-      
+
       // Clean up old rotated files based on maxFiles setting
       await this.cleanupOldLogs(dir, base, ext);
     } catch (error) {
@@ -220,8 +221,8 @@ export class LoggerService {
     try {
       const files = await fs.promises.readdir(dir);
       const logFiles = files
-        .filter(file => file.startsWith(`${baseName}-`) && file.endsWith(ext))
-        .map(file => ({
+        .filter((file) => file.startsWith(`${baseName}-`) && file.endsWith(ext))
+        .map((file) => ({
           name: file,
           path: path.join(dir, file),
           stats: fs.statSync(path.join(dir, file))
@@ -273,7 +274,7 @@ export class LoggerService {
     if (this.config.console) {
       const formatted = this.formatLogEntry(entry);
       const colorized = this.colorizeLevel(entry.level, formatted);
-      
+
       if (entry.level === 'ERROR') {
         console.error(colorized);
       } else if (entry.level === 'WARN') {
@@ -334,15 +335,17 @@ export class LoggerService {
     };
 
     const level = res.statusCode >= 400 ? 'WARN' : 'INFO';
-    
-    await this.writeLog(this.createLogEntry(level, message, {
-      category: 'HTTP',
-      metadata,
-      requestId: req.id,
-      userId: req.user?.id,
-      ip: req.ip,
-      userAgent: req.get('user-agent')
-    }));
+
+    await this.writeLog(
+      this.createLogEntry(level, message, {
+        category: 'HTTP',
+        metadata,
+        requestId: req.id,
+        userId: req.user?.id,
+        ip: req.ip,
+        userAgent: req.get('user-agent')
+      })
+    );
   }
 
   /**
@@ -385,7 +388,7 @@ export class LoggerService {
   child(context: Partial<LogEntry>): LoggerService {
     const childLogger = Object.create(this);
     const originalWriteLog = this.writeLog.bind(this);
-    
+
     childLogger.writeLog = async (entry: LogEntry) => {
       const enhancedEntry = {
         ...entry,
@@ -394,7 +397,7 @@ export class LoggerService {
       };
       await originalWriteLog(enhancedEntry);
     };
-    
+
     return childLogger;
   }
 

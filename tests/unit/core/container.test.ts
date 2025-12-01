@@ -13,14 +13,22 @@ import { Container } from '@/core/container';
 // Mock service classes
 class MockService {
   constructor(public name: string = 'MockService') {}
-  init() { return Promise.resolve(); }
-  getStatus() { return { initialized: true }; }
+  init() {
+    return Promise.resolve();
+  }
+  getStatus() {
+    return { initialized: true };
+  }
 }
 
 class MockDependentService {
   constructor(public dependency: MockService) {}
-  init() { return Promise.resolve(); }
-  getStatus() { return { initialized: true }; }
+  init() {
+    return Promise.resolve();
+  }
+  getStatus() {
+    return { initialized: true };
+  }
 }
 
 describe('Container', () => {
@@ -72,9 +80,9 @@ describe('Container', () => {
     });
 
     it('should throw error for unregistered service', async () => {
-      await expect(container.resolve('UnregisteredService'))
-        .rejects
-        .toThrow('Service UnregisteredService not registered');
+      await expect(container.resolve('UnregisteredService')).rejects.toThrow(
+        'Service UnregisteredService not registered'
+      );
     });
   });
 
@@ -83,12 +91,16 @@ describe('Container', () => {
       const mockService = new MockService('DependencyService');
 
       container.register('DependencyService', async () => mockService);
-      container.register('DependentService', async () => {
-        const dependency = await container.resolve('DependencyService');
-        return new MockDependentService(dependency);
-      }, {
-        dependencies: ['DependencyService']
-      });
+      container.register(
+        'DependentService',
+        async () => {
+          const dependency = await container.resolve('DependencyService');
+          return new MockDependentService(dependency);
+        },
+        {
+          dependencies: ['DependencyService']
+        }
+      );
 
       const resolved = await container.resolve('DependentService');
 
@@ -107,9 +119,7 @@ describe('Container', () => {
         return new MockService('ServiceB');
       });
 
-      await expect(container.resolve('ServiceA'))
-        .rejects
-        .toThrow('Circular dependency detected');
+      await expect(container.resolve('ServiceA')).rejects.toThrow('Circular dependency detected');
     });
 
     it('should handle complex dependency chains', async () => {
@@ -117,16 +127,24 @@ describe('Container', () => {
       const serviceB = new MockService('ServiceB');
 
       container.register('ServiceC', async () => serviceC);
-      container.register('ServiceB', async () => {
-        await container.resolve('ServiceC');
-        return serviceB;
-      }, { dependencies: ['ServiceC'] });
+      container.register(
+        'ServiceB',
+        async () => {
+          await container.resolve('ServiceC');
+          return serviceB;
+        },
+        { dependencies: ['ServiceC'] }
+      );
 
-      container.register('ServiceA', async () => {
-        const depB = await container.resolve('ServiceB');
-        const depC = await container.resolve('ServiceC');
-        return new MockService('ServiceA');
-      }, { dependencies: ['ServiceB', 'ServiceC'] });
+      container.register(
+        'ServiceA',
+        async () => {
+          const depB = await container.resolve('ServiceB');
+          const depC = await container.resolve('ServiceC');
+          return new MockService('ServiceA');
+        },
+        { dependencies: ['ServiceB', 'ServiceC'] }
+      );
 
       const resolved = await container.resolve('ServiceA');
 
@@ -187,9 +205,9 @@ describe('Container', () => {
       container.clear();
 
       expect(container.isRegistered('TestService')).toBe(false);
-      await expect(container.resolve('TestService'))
-        .rejects
-        .toThrow('Service TestService not registered');
+      await expect(container.resolve('TestService')).rejects.toThrow(
+        'Service TestService not registered'
+      );
     });
   });
 
@@ -199,9 +217,7 @@ describe('Container', () => {
 
       container.register('FailingService', failingFactory);
 
-      await expect(container.resolve('FailingService'))
-        .rejects
-        .toThrow('Factory failed');
+      await expect(container.resolve('FailingService')).rejects.toThrow('Factory failed');
     });
 
     it('should handle async factory errors', async () => {
@@ -211,9 +227,9 @@ describe('Container', () => {
 
       container.register('AsyncFailingService', asyncFailingFactory);
 
-      await expect(container.resolve('AsyncFailingService'))
-        .rejects
-        .toThrow('Async factory failed');
+      await expect(container.resolve('AsyncFailingService')).rejects.toThrow(
+        'Async factory failed'
+      );
     });
 
     it('should not cache failed singleton instances', async () => {
@@ -228,9 +244,7 @@ describe('Container', () => {
       container.register('ConditionalService', conditionalFactory, { singleton: true });
 
       // First call should fail
-      await expect(container.resolve('ConditionalService'))
-        .rejects
-        .toThrow('Initial failure');
+      await expect(container.resolve('ConditionalService')).rejects.toThrow('Initial failure');
 
       // Second call should succeed after fixing the condition
       shouldFail = false;
@@ -246,7 +260,7 @@ describe('Container', () => {
       let resolveCount = 0;
       const slowFactory = vi.fn().mockImplementation(async () => {
         resolveCount++;
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
         return new MockService(`Service${resolveCount}`);
       });
 

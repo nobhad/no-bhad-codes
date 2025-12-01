@@ -73,7 +73,9 @@ export class ModalComponent extends BaseComponent<ModalProps, ModalState> {
       `modal--${size}`,
       isOpen && 'modal--open',
       isAnimating && 'modal--animating'
-    ].filter(Boolean).join(' ');
+    ]
+      .filter(Boolean)
+      .join(' ');
 
     return ComponentUtils.html`
       <div class="modal-backdrop" style="z-index: ${zIndex}" data-ref="backdrop">
@@ -84,10 +86,14 @@ export class ModalComponent extends BaseComponent<ModalProps, ModalState> {
           aria-labelledby="modal-title"
           data-ref="modal"
         >
-          ${showHeader ? `
+          ${
+  showHeader
+    ? `
             <div class="modal__header" data-ref="header">
               <h2 id="modal-title" class="modal__title">${ComponentUtils.sanitizeHTML(title)}</h2>
-              ${closable ? `
+              ${
+  closable
+    ? `
                 <button 
                   class="modal__close" 
                   aria-label="Close modal"
@@ -97,20 +103,28 @@ export class ModalComponent extends BaseComponent<ModalProps, ModalState> {
                     <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                   </svg>
                 </button>
-              ` : ''}
+              `
+    : ''
+}
               ${headerContent ? `<div class="modal__header-content">${headerContent}</div>` : ''}
             </div>
-          ` : ''}
+          `
+    : ''
+}
           
           <div class="modal__body" data-ref="body">
             ${children}
           </div>
           
-          ${showFooter ? `
+          ${
+  showFooter
+    ? `
             <div class="modal__footer" data-ref="footer">
               ${footerContent}
             </div>
-          ` : ''}
+          `
+    : ''
+}
         </div>
       </div>
     `;
@@ -266,7 +280,9 @@ export class ModalComponent extends BaseComponent<ModalProps, ModalState> {
     const closeButton = this.getElement('closeButton', '[data-ref="closeButton"]', false);
 
     if (backdrop && this.props.closeOnBackdrop) {
-      this.addEventListener(backdrop, 'click', (event: Event) => this.handleBackdropClick(event as MouseEvent));
+      this.addEventListener(backdrop, 'click', (event: Event) =>
+        this.handleBackdropClick(event as MouseEvent)
+      );
     }
 
     if (closeButton) {
@@ -274,7 +290,9 @@ export class ModalComponent extends BaseComponent<ModalProps, ModalState> {
     }
 
     if (this.props.closeOnEscape) {
-      this.addEventListener(document as unknown as Element, 'keydown', (event: Event) => this.handleKeydown(event as KeyboardEvent));
+      this.addEventListener(document as unknown as Element, 'keydown', (event: Event) =>
+        this.handleKeydown(event as KeyboardEvent)
+      );
     }
   }
 

@@ -11,7 +11,7 @@
   /* ============================================
    * Z-INDEX SCALE
    * ============================================ */
-  
+
   /* Base layer levels */
   --z-index-0: 0;
   --z-index-1: 1;
@@ -20,7 +20,7 @@
   --z-index-30: 30;
   --z-index-40: 40;
   --z-index-50: 50;
-  
+
   /* Component layers */
   --z-index-dropdown: 100;
   --z-index-sticky: 200;
@@ -32,27 +32,27 @@
   --z-index-toast: 800;
   --z-index-overlay: 900;
   --z-index-max: 999;
-  
+
   /* Application-specific layers */
   --z-index-behind: -1;
   --z-index-base: 0;
   --z-index-content: 1;
   --z-index-elevated: 10;
-  
+
   /* Navigation layers */
   --z-index-nav-backdrop: 90;
   --z-index-nav: 100;
   --z-index-nav-dropdown: 110;
-  
+
   /* Business card layers */
   --z-index-business-card: 50;
   --z-index-business-card-overlay: 400;
   --z-index-business-card-modal: 500;
-  
+
   /* Loading and intro layers */
   --z-index-loading: 999;
   --z-index-intro: 998;
-  
+
   /* Performance dashboard */
   --z-index-debug: 10000;
 }
@@ -62,46 +62,102 @@
  * ============================================ */
 
 /* Base z-index utilities */
-.z-0 { z-index: var(--z-index-0); }
-.z-1 { z-index: var(--z-index-1); }
-.z-10 { z-index: var(--z-index-10); }
-.z-20 { z-index: var(--z-index-20); }
-.z-30 { z-index: var(--z-index-30); }
-.z-40 { z-index: var(--z-index-40); }
-.z-50 { z-index: var(--z-index-50); }
+.z-0 {
+  z-index: var(--z-index-0);
+}
+.z-1 {
+  z-index: var(--z-index-1);
+}
+.z-10 {
+  z-index: var(--z-index-10);
+}
+.z-20 {
+  z-index: var(--z-index-20);
+}
+.z-30 {
+  z-index: var(--z-index-30);
+}
+.z-40 {
+  z-index: var(--z-index-40);
+}
+.z-50 {
+  z-index: var(--z-index-50);
+}
 
 /* Component z-index utilities */
-.z-dropdown { z-index: var(--z-index-dropdown); }
-.z-sticky { z-index: var(--z-index-sticky); }
-.z-fixed { z-index: var(--z-index-fixed); }
-.z-modal-backdrop { z-index: var(--z-index-modal-backdrop); }
-.z-modal { z-index: var(--z-index-modal); }
-.z-popover { z-index: var(--z-index-popover); }
-.z-tooltip { z-index: var(--z-index-tooltip); }
-.z-toast { z-index: var(--z-index-toast); }
-.z-overlay { z-index: var(--z-index-overlay); }
-.z-max { z-index: var(--z-index-max); }
+.z-dropdown {
+  z-index: var(--z-index-dropdown);
+}
+.z-sticky {
+  z-index: var(--z-index-sticky);
+}
+.z-fixed {
+  z-index: var(--z-index-fixed);
+}
+.z-modal-backdrop {
+  z-index: var(--z-index-modal-backdrop);
+}
+.z-modal {
+  z-index: var(--z-index-modal);
+}
+.z-popover {
+  z-index: var(--z-index-popover);
+}
+.z-tooltip {
+  z-index: var(--z-index-tooltip);
+}
+.z-toast {
+  z-index: var(--z-index-toast);
+}
+.z-overlay {
+  z-index: var(--z-index-overlay);
+}
+.z-max {
+  z-index: var(--z-index-max);
+}
 
 /* Special utilities */
-.z-behind { z-index: var(--z-index-behind); }
-.z-auto { z-index: auto; }
+.z-behind {
+  z-index: var(--z-index-behind);
+}
+.z-auto {
+  z-index: auto;
+}
 
 /* Navigation utilities */
-.z-nav { z-index: var(--z-index-nav); }
-.z-nav-backdrop { z-index: var(--z-index-nav-backdrop); }
-.z-nav-dropdown { z-index: var(--z-index-nav-dropdown); }
+.z-nav {
+  z-index: var(--z-index-nav);
+}
+.z-nav-backdrop {
+  z-index: var(--z-index-nav-backdrop);
+}
+.z-nav-dropdown {
+  z-index: var(--z-index-nav-dropdown);
+}
 
 /* Business card utilities */
-.z-business-card { z-index: var(--z-index-business-card); }
-.z-business-card-overlay { z-index: var(--z-index-business-card-overlay); }
-.z-business-card-modal { z-index: var(--z-index-business-card-modal); }
+.z-business-card {
+  z-index: var(--z-index-business-card);
+}
+.z-business-card-overlay {
+  z-index: var(--z-index-business-card-overlay);
+}
+.z-business-card-modal {
+  z-index: var(--z-index-business-card-modal);
+}
 
 /* Loading and intro utilities */
-.z-loading { z-index: var(--z-index-loading); }
-.z-intro { z-index: var(--z-index-intro); }
+.z-loading {
+  z-index: var(--z-index-loading);
+}
+.z-intro {
+  z-index: var(--z-index-intro);
+}
 
 /* Debug utilities */
-.z-debug { z-index: var(--z-index-debug); }
+.z-debug {
+  z-index: var(--z-index-debug);
+}
 
 /* ============================================
  * LAYERING GUIDELINES
@@ -227,13 +283,23 @@
 
 /* Mobile-specific z-index adjustments */
 @media (max-width: 767px) {
-  .mobile\:z-nav { z-index: var(--z-index-nav); }
-  .mobile\:z-modal { z-index: var(--z-index-modal); }
-  .mobile\:z-overlay { z-index: var(--z-index-overlay); }
+  .mobile\:z-nav {
+    z-index: var(--z-index-nav);
+  }
+  .mobile\:z-modal {
+    z-index: var(--z-index-modal);
+  }
+  .mobile\:z-overlay {
+    z-index: var(--z-index-overlay);
+  }
 }
 
 /* Desktop-specific z-index adjustments */
 @media (min-width: 1024px) {
-  .desktop\:z-dropdown { z-index: var(--z-index-dropdown); }
-  .desktop\:z-tooltip { z-index: var(--z-index-tooltip); }
+  .desktop\:z-dropdown {
+    z-index: var(--z-index-dropdown);
+  }
+  .desktop\:z-tooltip {
+    z-index: var(--z-index-tooltip);
+  }
 }

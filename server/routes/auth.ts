@@ -90,83 +90,86 @@ const router = express.Router();
  *                   type: string
  *                   example: "CONFIG_ERROR"
  */
-router.post('/login', asyncHandler(async (req: express.Request, res: express.Response) => {
-  const { email, password } = req.body;
+router.post(
+  '/login',
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { email, password } = req.body;
 
-  // Validate input
-  if (!email || !password) {
-    return res.status(400).json({
-      error: 'Email and password are required',
-      code: 'MISSING_CREDENTIALS'
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({
+        error: 'Email and password are required',
+        code: 'MISSING_CREDENTIALS'
+      });
+    }
+
+    const db = getDatabase();
+
+    // Find user in database
+    const client = await db.get(
+      'SELECT id, email, password_hash, company_name, contact_name, status FROM clients WHERE email = ?',
+      [email.toLowerCase()]
+    );
+
+    if (!client) {
+      return res.status(401).json({
+        error: 'Invalid credentials',
+        code: 'INVALID_CREDENTIALS'
+      });
+    }
+
+    // Check if client is active
+    if (client.status !== 'active') {
+      return res.status(401).json({
+        error: 'Account is not active. Please contact support.',
+        code: 'ACCOUNT_INACTIVE'
+      });
+    }
+
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, client.password_hash);
+    if (!isValidPassword) {
+      return res.status(401).json({
+        error: 'Invalid credentials',
+        code: 'INVALID_CREDENTIALS'
+      });
+    }
+
+    // Generate JWT token
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      console.error('JWT_SECRET not configured');
+      return res.status(500).json({
+        error: 'Server configuration error',
+        code: 'CONFIG_ERROR'
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: client.id,
+        email: client.email,
+        type: 'client'
+      },
+      secret,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as SignOptions
+    );
+
+    // Return user data (without password) and token
+    res.json({
+      message: 'Login successful',
+      user: {
+        id: client.id,
+        email: client.email,
+        companyName: client.company_name,
+        contactName: client.contact_name,
+        status: client.status
+      },
+      token,
+      expiresIn: process.env.JWT_EXPIRES_IN || '7d'
     });
-  }
-
-  const db = getDatabase();
-
-  // Find user in database
-  const client = await db.get(
-    'SELECT id, email, password_hash, company_name, contact_name, status FROM clients WHERE email = ?',
-    [email.toLowerCase()]
-  );
-
-  if (!client) {
-    return res.status(401).json({
-      error: 'Invalid credentials',
-      code: 'INVALID_CREDENTIALS'
-    });
-  }
-
-  // Check if client is active
-  if (client.status !== 'active') {
-    return res.status(401).json({
-      error: 'Account is not active. Please contact support.',
-      code: 'ACCOUNT_INACTIVE'
-    });
-  }
-
-  // Verify password
-  const isValidPassword = await bcrypt.compare(password, client.password_hash);
-  if (!isValidPassword) {
-    return res.status(401).json({
-      error: 'Invalid credentials',
-      code: 'INVALID_CREDENTIALS'
-    });
-  }
-
-  // Generate JWT token
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    console.error('JWT_SECRET not configured');
-    return res.status(500).json({
-      error: 'Server configuration error',
-      code: 'CONFIG_ERROR'
-    });
-  }
-
-  const token = jwt.sign(
-    { 
-      id: client.id, 
-      email: client.email,
-      type: 'client'
-    },
-    secret,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as SignOptions
-  );
-
-  // Return user data (without password) and token
-  res.json({
-    message: 'Login successful',
-    user: {
-      id: client.id,
-      email: client.email,
-      companyName: client.company_name,
-      contactName: client.contact_name,
-      status: client.status
-    },
-    token,
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d'
-  });
-}));
+  })
+);
 
 /**
  * @swagger
@@ -208,33 +211,37 @@ router.post('/login', asyncHandler(async (req: express.Request, res: express.Res
  *                   type: string
  *                   example: "USER_NOT_FOUND"
  */
-router.get('/profile', authenticateToken, asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-  const db = getDatabase();
-  
-  const client = await db.get(
-    'SELECT id, email, company_name, contact_name, phone, status, created_at FROM clients WHERE id = ?',
-    [req.user!.id]
-  );
+router.get(
+  '/profile',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const db = getDatabase();
 
-  if (!client) {
-    return res.status(404).json({
-      error: 'User not found',
-      code: 'USER_NOT_FOUND'
-    });
-  }
+    const client = await db.get(
+      'SELECT id, email, company_name, contact_name, phone, status, created_at FROM clients WHERE id = ?',
+      [req.user!.id]
+    );
 
-  res.json({
-    user: {
-      id: client.id,
-      email: client.email,
-      companyName: client.company_name,
-      contactName: client.contact_name,
-      phone: client.phone,
-      status: client.status,
-      createdAt: client.created_at
+    if (!client) {
+      return res.status(404).json({
+        error: 'User not found',
+        code: 'USER_NOT_FOUND'
+      });
     }
-  });
-}));
+
+    res.json({
+      user: {
+        id: client.id,
+        email: client.email,
+        companyName: client.company_name,
+        contactName: client.contact_name,
+        phone: client.phone,
+        status: client.status,
+        createdAt: client.created_at
+      }
+    });
+  })
+);
 
 /**
  * @swagger
@@ -281,31 +288,35 @@ router.get('/profile', authenticateToken, asyncHandler(async (req: Authenticated
  *                   type: string
  *                   example: "CONFIG_ERROR"
  */
-router.post('/refresh', authenticateToken, asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    return res.status(500).json({
-      error: 'Server configuration error',
-      code: 'CONFIG_ERROR'
+router.post(
+  '/refresh',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      return res.status(500).json({
+        error: 'Server configuration error',
+        code: 'CONFIG_ERROR'
+      });
+    }
+
+    // Generate new token
+    const newToken = jwt.sign(
+      {
+        id: req.user!.id,
+        email: req.user!.email,
+        type: req.user!.type
+      },
+      secret,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as SignOptions
+    );
+
+    res.json({
+      token: newToken,
+      expiresIn: process.env.JWT_EXPIRES_IN || '7d'
     });
-  }
-
-  // Generate new token
-  const newToken = jwt.sign(
-    { 
-      id: req.user!.id, 
-      email: req.user!.email,
-      type: req.user!.type
-    },
-    secret,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as SignOptions
-  );
-
-  res.json({
-    token: newToken,
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d'
-  });
-}));
+  })
+);
 
 /**
  * @swagger
@@ -436,66 +447,71 @@ router.get('/validate', authenticateToken, (req: AuthenticatedRequest, res) => {
  *                   type: string
  *                   example: "MISSING_EMAIL"
  */
-router.post('/forgot-password', asyncHandler(async (req: express.Request, res: express.Response) => {
-  const { email } = req.body;
+router.post(
+  '/forgot-password',
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { email } = req.body;
 
-  if (!email) {
-    return res.status(400).json({
-      error: 'Email is required',
-      code: 'MISSING_EMAIL'
-    });
-  }
+    if (!email) {
+      return res.status(400).json({
+        error: 'Email is required',
+        code: 'MISSING_EMAIL'
+      });
+    }
 
-  const db = getDatabase();
-  
-  // Find user by email
-  const client = await db.get(
-    'SELECT id, email, contact_name FROM clients WHERE email = ? AND status = "active"',
-    [email.toLowerCase()]
-  );
+    const db = getDatabase();
 
-  // Always return success for security (don't reveal if email exists)
-  if (client) {
-    try {
-      // Generate reset token
-      const resetToken = crypto.randomBytes(32).toString('hex');
-      const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
+    // Find user by email
+    const client = await db.get(
+      'SELECT id, email, contact_name FROM clients WHERE email = ? AND status = "active"',
+      [email.toLowerCase()]
+    );
 
-      // Store reset token in database
-      await db.run(`
+    // Always return success for security (don't reveal if email exists)
+    if (client) {
+      try {
+        // Generate reset token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
+
+        // Store reset token in database
+        await db.run(
+          `
         UPDATE clients 
         SET reset_token = ?, reset_token_expiry = ?
         WHERE id = ?
-      `, [resetToken, resetTokenExpiry.toISOString(), client.id]);
+      `,
+          [resetToken, resetTokenExpiry.toISOString(), client.id]
+        );
 
-      // Send reset email
-      await emailService.sendPasswordResetEmail(client.email, {
-        name: client.contact_name || 'Client',
-        resetToken
-      });
+        // Send reset email
+        await emailService.sendPasswordResetEmail(client.email, {
+          name: client.contact_name || 'Client',
+          resetToken
+        });
 
-      // Send admin notification
-      await emailService.sendAdminNotification('Password Reset Request', {
-        type: 'system-alert',
-        message: `Password reset requested for client: ${client.email}`,
-        details: {
-          clientId: client.id,
-          email: client.email,
-          name: client.contact_name || 'Unknown'
-        },
-        timestamp: new Date()
-      });
-
-    } catch (error) {
-      console.error('Failed to send password reset email:', error);
-      // Still return success to user - don't reveal internal errors
+        // Send admin notification
+        await emailService.sendAdminNotification('Password Reset Request', {
+          type: 'system-alert',
+          message: `Password reset requested for client: ${client.email}`,
+          details: {
+            clientId: client.id,
+            email: client.email,
+            name: client.contact_name || 'Unknown'
+          },
+          timestamp: new Date()
+        });
+      } catch (error) {
+        console.error('Failed to send password reset email:', error);
+        // Still return success to user - don't reveal internal errors
+      }
     }
-  }
 
-  res.json({
-    message: 'If an account with that email exists, a password reset link has been sent.'
-  });
-}));
+    res.json({
+      message: 'If an account with that email exists, a password reset link has been sent.'
+    });
+  })
+);
 
 /**
  * @swagger
@@ -545,82 +561,91 @@ router.post('/forgot-password', asyncHandler(async (req: express.Request, res: e
  *                   type: string
  *                   enum: [MISSING_FIELDS, WEAK_PASSWORD, INVALID_TOKEN, TOKEN_EXPIRED]
  */
-router.post('/reset-password', asyncHandler(async (req: express.Request, res: express.Response) => {
-  const { token, password } = req.body;
+router.post(
+  '/reset-password',
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { token, password } = req.body;
 
-  if (!token || !password) {
-    return res.status(400).json({
-      error: 'Token and password are required',
-      code: 'MISSING_FIELDS'
-    });
-  }
+    if (!token || !password) {
+      return res.status(400).json({
+        error: 'Token and password are required',
+        code: 'MISSING_FIELDS'
+      });
+    }
 
-  // Validate password strength
-  if (password.length < 8) {
-    return res.status(400).json({
-      error: 'Password must be at least 8 characters long',
-      code: 'WEAK_PASSWORD'
-    });
-  }
+    // Validate password strength
+    if (password.length < 8) {
+      return res.status(400).json({
+        error: 'Password must be at least 8 characters long',
+        code: 'WEAK_PASSWORD'
+      });
+    }
 
-  const db = getDatabase();
-  
-  // Find user by reset token
-  const client = await db.get(`
+    const db = getDatabase();
+
+    // Find user by reset token
+    const client = await db.get(
+      `
     SELECT id, email, contact_name, reset_token_expiry 
     FROM clients 
     WHERE reset_token = ? AND status = "active"
-  `, [token]);
+  `,
+      [token]
+    );
 
-  if (!client) {
-    return res.status(400).json({
-      error: 'Invalid or expired reset token',
-      code: 'INVALID_TOKEN'
-    });
-  }
+    if (!client) {
+      return res.status(400).json({
+        error: 'Invalid or expired reset token',
+        code: 'INVALID_TOKEN'
+      });
+    }
 
-  // Check if token is expired
-  const now = new Date();
-  const expiry = new Date(client.reset_token_expiry);
-  
-  if (now > expiry) {
-    return res.status(400).json({
-      error: 'Reset token has expired',
-      code: 'TOKEN_EXPIRED'
-    });
-  }
+    // Check if token is expired
+    const now = new Date();
+    const expiry = new Date(client.reset_token_expiry);
 
-  // Hash new password
-  const saltRounds = 12;
-  const password_hash = await bcrypt.hash(password, saltRounds);
+    if (now > expiry) {
+      return res.status(400).json({
+        error: 'Reset token has expired',
+        code: 'TOKEN_EXPIRED'
+      });
+    }
 
-  // Update password and clear reset token
-  await db.run(`
+    // Hash new password
+    const saltRounds = 12;
+    const password_hash = await bcrypt.hash(password, saltRounds);
+
+    // Update password and clear reset token
+    await db.run(
+      `
     UPDATE clients 
     SET password_hash = ?, reset_token = NULL, reset_token_expiry = NULL
     WHERE id = ?
-  `, [password_hash, client.id]);
+  `,
+      [password_hash, client.id]
+    );
 
-  // Send confirmation email
-  try {
-    await emailService.sendAdminNotification({
-      subject: 'Password Reset Completed',
-      intakeId: client.id.toString(),
-      clientName: client.contact_name || 'Unknown',
-      companyName: client.company_name || 'Unknown Company',
-      projectType: 'Password Reset',
-      budget: 'N/A',
-      timeline: 'Completed'
+    // Send confirmation email
+    try {
+      await emailService.sendAdminNotification({
+        subject: 'Password Reset Completed',
+        intakeId: client.id.toString(),
+        clientName: client.contact_name || 'Unknown',
+        companyName: client.company_name || 'Unknown Company',
+        projectType: 'Password Reset',
+        budget: 'N/A',
+        timeline: 'Completed'
+      });
+    } catch (emailError) {
+      console.error('Failed to send password reset confirmation:', emailError);
+      // Continue - password was reset successfully
+    }
+
+    res.json({
+      message: 'Password reset successfully'
     });
-  } catch (emailError) {
-    console.error('Failed to send password reset confirmation:', emailError);
-    // Continue - password was reset successfully
-  }
-
-  res.json({
-    message: 'Password reset successfully'
-  });
-}));
+  })
+);
 
 export { router as authRouter };
 export default router;

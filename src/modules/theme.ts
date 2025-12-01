@@ -15,6 +15,7 @@ import type { ModuleOptions } from '../types/modules';
 
 export class ThemeModule extends BaseModule {
   private themeButton: HTMLElement | null = null;
+  private dashboardThemeButton: HTMLElement | null = null;
   private unsubscribeState?: () => void;
 
   constructor(options: ModuleOptions = {}) {
@@ -22,11 +23,20 @@ export class ThemeModule extends BaseModule {
   }
 
   protected override async onInit(): Promise<void> {
-    // Get theme toggle button
+    // Get theme toggle button (main site header)
     this.themeButton = this.getElement('themeButton', '#toggle-theme', true) as HTMLElement | null;
+
+    // Get dashboard theme toggle button (client portal dashboard header)
+    this.dashboardThemeButton = document.getElementById(
+      'dashboard-theme-toggle'
+    ) as HTMLElement | null;
 
     if (this.themeButton) {
       this.setupThemeToggle();
+    }
+
+    if (this.dashboardThemeButton) {
+      this.setupDashboardThemeToggle();
     }
 
     // Subscribe to theme state changes
@@ -39,7 +49,7 @@ export class ThemeModule extends BaseModule {
   }
 
   /**
-   * Setup theme toggle button
+   * Setup theme toggle button (main site header)
    */
   private setupThemeToggle(): void {
     if (!this.themeButton) return;
@@ -50,6 +60,20 @@ export class ThemeModule extends BaseModule {
 
     // Update button state
     this.updateThemeButton(appState.getState().theme);
+  }
+
+  /**
+   * Setup dashboard theme toggle button (client portal)
+   */
+  private setupDashboardThemeToggle(): void {
+    if (!this.dashboardThemeButton) return;
+
+    this.addEventListener(this.dashboardThemeButton, 'click', () => {
+      this.toggleTheme();
+    });
+
+    // Update button state
+    this.updateDashboardThemeButton(appState.getState().theme);
   }
 
   /**
@@ -75,14 +99,15 @@ export class ThemeModule extends BaseModule {
     // Store in localStorage
     localStorage.setItem('theme', theme);
 
-    // Update theme button
+    // Update theme buttons
     this.updateThemeButton(theme);
+    this.updateDashboardThemeButton(theme);
 
     this.log(`Applied theme: ${theme}`);
   }
 
   /**
-   * Update theme button appearance
+   * Update theme button appearance (main site header)
    */
   private updateThemeButton(theme: 'light' | 'dark'): void {
     if (!this.themeButton) return;
@@ -97,6 +122,20 @@ export class ThemeModule extends BaseModule {
     // Update aria-label
     const label = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
     this.themeButton.setAttribute('aria-label', label);
+  }
+
+  /**
+   * Update dashboard theme button appearance (client portal)
+   */
+  private updateDashboardThemeButton(theme: 'light' | 'dark'): void {
+    if (!this.dashboardThemeButton) return;
+
+    // Update emoji to reflect current theme
+    this.dashboardThemeButton.textContent = theme === 'dark' ? '☀️' : '🌙';
+
+    // Update aria-label
+    const label = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+    this.dashboardThemeButton.setAttribute('aria-label', label);
   }
 
   /**

@@ -92,9 +92,10 @@ export class InvoiceService {
     const invoiceNumber = this.generateInvoiceNumber();
     const amountTotal = this.calculateTotal(data.lineItems);
     const issuedDate = new Date().toISOString().split('T')[0];
-    
+
     // Default due date to 30 days from now if not provided
-    const dueDate = data.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const dueDate =
+      data.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
     const sql = `
       INSERT INTO invoices (
@@ -179,7 +180,7 @@ export class InvoiceService {
 
     const rows = await this.db.all(sql, [clientId]);
 
-    return rows.map(row => this.mapRowToInvoice(row));
+    return rows.map((row) => this.mapRowToInvoice(row));
   }
 
   /**
@@ -198,18 +199,22 @@ export class InvoiceService {
 
     const rows = await this.db.all(sql, [projectId]);
 
-    return rows.map(row => this.mapRowToInvoice(row));
+    return rows.map((row) => this.mapRowToInvoice(row));
   }
 
   /**
    * Update invoice status
    */
-  async updateInvoiceStatus(id: number, status: Invoice['status'], paymentData?: {
-    amountPaid?: number;
-    paymentMethod?: string;
-    paymentReference?: string;
-    paidDate?: string;
-  }): Promise<Invoice> {
+  async updateInvoiceStatus(
+    id: number,
+    status: Invoice['status'],
+    paymentData?: {
+      amountPaid?: number;
+      paymentMethod?: string;
+      paymentReference?: string;
+      paidDate?: string;
+    }
+  ): Promise<Invoice> {
     let sql = 'UPDATE invoices SET status = ?, updated_at = CURRENT_TIMESTAMP';
     const params: any[] = [status];
 
@@ -250,13 +255,16 @@ export class InvoiceService {
   /**
    * Mark invoice as paid
    */
-  async markInvoiceAsPaid(id: number, paymentData: {
-    amountPaid: number;
-    paymentMethod: string;
-    paymentReference?: string;
-  }): Promise<Invoice> {
+  async markInvoiceAsPaid(
+    id: number,
+    paymentData: {
+      amountPaid: number;
+      paymentMethod: string;
+      paymentReference?: string;
+    }
+  ): Promise<Invoice> {
     const paidDate = new Date().toISOString().split('T')[0];
-    
+
     return this.updateInvoiceStatus(id, 'paid', {
       ...paymentData,
       paidDate
@@ -282,9 +290,9 @@ export class InvoiceService {
         SUM(CASE WHEN status = 'overdue' THEN 1 ELSE 0 END) as overdue
       FROM invoices
     `;
-    
+
     const params: any[] = [];
-    
+
     if (clientId) {
       sql += ' WHERE client_id = ?';
       params.push(clientId);
@@ -351,53 +359,135 @@ export class InvoiceService {
 
     if (budgetMatch) {
       const min = parseInt(budgetMatch[1]) * (budgetMatch[1].length <= 2 ? 1000 : 1);
-      const max = budgetMatch[2] ? parseInt(budgetMatch[2]) * (budgetMatch[2].length <= 2 ? 1000 : 1) : min;
+      const max = budgetMatch[2]
+        ? parseInt(budgetMatch[2]) * (budgetMatch[2].length <= 2 ? 1000 : 1)
+        : min;
       baseAmount = Math.floor((min + max) / 2);
     }
 
     // Generate line items based on project type
     switch (projectType.toLowerCase()) {
-      case 'website':
-      case 'business site':
-        lineItems.push(
-          { description: 'Website Design & Development', quantity: 1, rate: baseAmount * 0.7, amount: baseAmount * 0.7 },
-          { description: 'Content Management System Setup', quantity: 1, rate: baseAmount * 0.2, amount: baseAmount * 0.2 },
-          { description: 'SEO Optimization & Testing', quantity: 1, rate: baseAmount * 0.1, amount: baseAmount * 0.1 }
-        );
-        break;
+    case 'website':
+    case 'business site':
+      lineItems.push(
+        {
+          description: 'Website Design & Development',
+          quantity: 1,
+          rate: baseAmount * 0.7,
+          amount: baseAmount * 0.7
+        },
+        {
+          description: 'Content Management System Setup',
+          quantity: 1,
+          rate: baseAmount * 0.2,
+          amount: baseAmount * 0.2
+        },
+        {
+          description: 'SEO Optimization & Testing',
+          quantity: 1,
+          rate: baseAmount * 0.1,
+          amount: baseAmount * 0.1
+        }
+      );
+      break;
 
-      case 'web app':
-      case 'application':
-        lineItems.push(
-          { description: 'Application Development', quantity: 1, rate: baseAmount * 0.6, amount: baseAmount * 0.6 },
-          { description: 'Database Design & Setup', quantity: 1, rate: baseAmount * 0.2, amount: baseAmount * 0.2 },
-          { description: 'API Development', quantity: 1, rate: baseAmount * 0.1, amount: baseAmount * 0.1 },
-          { description: 'Testing & Deployment', quantity: 1, rate: baseAmount * 0.1, amount: baseAmount * 0.1 }
-        );
-        break;
+    case 'web app':
+    case 'application':
+      lineItems.push(
+        {
+          description: 'Application Development',
+          quantity: 1,
+          rate: baseAmount * 0.6,
+          amount: baseAmount * 0.6
+        },
+        {
+          description: 'Database Design & Setup',
+          quantity: 1,
+          rate: baseAmount * 0.2,
+          amount: baseAmount * 0.2
+        },
+        {
+          description: 'API Development',
+          quantity: 1,
+          rate: baseAmount * 0.1,
+          amount: baseAmount * 0.1
+        },
+        {
+          description: 'Testing & Deployment',
+          quantity: 1,
+          rate: baseAmount * 0.1,
+          amount: baseAmount * 0.1
+        }
+      );
+      break;
 
-      case 'e-commerce':
-        lineItems.push(
-          { description: 'E-commerce Platform Development', quantity: 1, rate: baseAmount * 0.5, amount: baseAmount * 0.5 },
-          { description: 'Payment Integration', quantity: 1, rate: baseAmount * 0.2, amount: baseAmount * 0.2 },
-          { description: 'Product Catalog Setup', quantity: 1, rate: baseAmount * 0.2, amount: baseAmount * 0.2 },
-          { description: 'Security & Testing', quantity: 1, rate: baseAmount * 0.1, amount: baseAmount * 0.1 }
-        );
-        break;
+    case 'e-commerce':
+      lineItems.push(
+        {
+          description: 'E-commerce Platform Development',
+          quantity: 1,
+          rate: baseAmount * 0.5,
+          amount: baseAmount * 0.5
+        },
+        {
+          description: 'Payment Integration',
+          quantity: 1,
+          rate: baseAmount * 0.2,
+          amount: baseAmount * 0.2
+        },
+        {
+          description: 'Product Catalog Setup',
+          quantity: 1,
+          rate: baseAmount * 0.2,
+          amount: baseAmount * 0.2
+        },
+        {
+          description: 'Security & Testing',
+          quantity: 1,
+          rate: baseAmount * 0.1,
+          amount: baseAmount * 0.1
+        }
+      );
+      break;
 
-      case 'browser extension':
-        lineItems.push(
-          { description: 'Browser Extension Development', quantity: 1, rate: baseAmount * 0.8, amount: baseAmount * 0.8 },
-          { description: 'Cross-browser Compatibility', quantity: 1, rate: baseAmount * 0.1, amount: baseAmount * 0.1 },
-          { description: 'Store Submission & Review', quantity: 1, rate: baseAmount * 0.1, amount: baseAmount * 0.1 }
-        );
-        break;
+    case 'browser extension':
+      lineItems.push(
+        {
+          description: 'Browser Extension Development',
+          quantity: 1,
+          rate: baseAmount * 0.8,
+          amount: baseAmount * 0.8
+        },
+        {
+          description: 'Cross-browser Compatibility',
+          quantity: 1,
+          rate: baseAmount * 0.1,
+          amount: baseAmount * 0.1
+        },
+        {
+          description: 'Store Submission & Review',
+          quantity: 1,
+          rate: baseAmount * 0.1,
+          amount: baseAmount * 0.1
+        }
+      );
+      break;
 
-      default:
-        lineItems.push(
-          { description: `${projectType} Development`, quantity: 1, rate: baseAmount * 0.8, amount: baseAmount * 0.8 },
-          { description: 'Testing & Deployment', quantity: 1, rate: baseAmount * 0.2, amount: baseAmount * 0.2 }
-        );
+    default:
+      lineItems.push(
+        {
+          description: `${projectType} Development`,
+          quantity: 1,
+          rate: baseAmount * 0.8,
+          amount: baseAmount * 0.8
+        },
+        {
+          description: 'Testing & Deployment',
+          quantity: 1,
+          rate: baseAmount * 0.2,
+          amount: baseAmount * 0.2
+        }
+      );
     }
 
     return lineItems;

@@ -3,7 +3,7 @@
  * CLIENT INTAKE API ROUTES
  * ===============================================
  * @file server/routes/intake.ts
- * 
+ *
  * Handles client intake form processing, project creation,
  * and client account setup.
  */
@@ -86,9 +86,18 @@ router.post('/', async (req: Request, res: Response) => {
     console.log('Received intake form submission:', req.body);
 
     // Validate required fields
-    const requiredFields = ['name', 'email', 'company', 'phone', 'projectType', 'projectDescription', 'timeline', 'budget'];
-    const missingFields = requiredFields.filter(field => !req.body[field]);
-    
+    const requiredFields = [
+      'name',
+      'email',
+      'company',
+      'phone',
+      'projectType',
+      'projectDescription',
+      'timeline',
+      'budget'
+    ];
+    const missingFields = requiredFields.filter((field) => !req.body[field]);
+
     if (missingFields.length > 0) {
       return res.status(400).json({
         success: false,
@@ -101,18 +110,17 @@ router.post('/', async (req: Request, res: Response) => {
 
     // Start database transaction
     const db = getDatabase();
-    
+
     try {
       await db.run('BEGIN TRANSACTION');
 
       // Check if client with this email already exists
-      const existingClient = await db.get(
-        'SELECT id, email FROM clients WHERE email = ?',
-        [intakeData.email]
-      ) as ExistingClient | undefined;
+      const existingClient = (await db.get('SELECT id, email FROM clients WHERE email = ?', [
+        intakeData.email
+      ])) as ExistingClient | undefined;
 
       let clientId: number;
-      let isNewClient = !existingClient;
+      const isNewClient = !existingClient;
 
       if (existingClient) {
         clientId = existingClient.id;
@@ -120,31 +128,35 @@ router.post('/', async (req: Request, res: Response) => {
       } else {
         // Create new client account
         const hashedPassword = await bcrypt.hash(generateRandomPassword(), 10);
-        
-        const clientResult = await db.run(`
+
+        const clientResult = await db.run(
+          `
           INSERT INTO clients (
             company_name, contact_name, email, phone,
             password_hash, status, created_at, updated_at
           ) VALUES (?, ?, ?, ?, ?, 'pending', datetime('now'), datetime('now'))
-        `, [
-          intakeData.company,
-          intakeData.name,
-          intakeData.email,
-          intakeData.phone,
-          hashedPassword
-        ]);
+        `,
+          [intakeData.company, intakeData.name, intakeData.email, intakeData.phone, hashedPassword]
+        );
 
         clientId = clientResult.lastID!;
         console.log(`New client created: ${clientId}`);
       }
 
       // Process features array
-      const features = Array.isArray(intakeData.features) ? intakeData.features : [intakeData.features].filter(Boolean);
-      const addons = Array.isArray(intakeData.addons) ? intakeData.addons : [intakeData.addons].filter(Boolean);
-      const brandAssets = Array.isArray(intakeData.brandAssets) ? intakeData.brandAssets : [intakeData.brandAssets].filter(Boolean);
+      const features = Array.isArray(intakeData.features)
+        ? intakeData.features
+        : [intakeData.features].filter(Boolean);
+      const addons = Array.isArray(intakeData.addons)
+        ? intakeData.addons
+        : [intakeData.addons].filter(Boolean);
+      const brandAssets = Array.isArray(intakeData.brandAssets)
+        ? intakeData.brandAssets
+        : [intakeData.brandAssets].filter(Boolean);
 
       // Create project record
-      const projectResult = await db.run(`
+      const projectResult = await db.run(
+        `
         INSERT INTO projects (
           client_id, project_name, description, status, priority,
           project_type, budget_range, timeline, features,
@@ -154,54 +166,59 @@ router.post('/', async (req: Request, res: Response) => {
           challenges, additional_info, addons,
           referral_source, created_at, updated_at
         ) VALUES (?, ?, ?, 'pending', 'medium', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-      `, [
-        clientId,
-        generateProjectName(intakeData.projectType, intakeData.company),
-        intakeData.projectDescription,
-        intakeData.projectType,
-        intakeData.budget,
-        intakeData.timeline,
-        features.join(','),
-        intakeData.designLevel,
-        intakeData.contentStatus,
-        intakeData.techComfort,
-        intakeData.hosting,
-        intakeData.pages,
-        intakeData.integrations,
-        brandAssets.join(','),
-        intakeData.inspiration,
-        intakeData.currentSite,
-        intakeData.challenges,
-        intakeData.additionalInfo,
-        addons.join(','),
-        intakeData.wasReferred === 'yes' ? intakeData.referralName : null
-      ]);
+      `,
+        [
+          clientId,
+          generateProjectName(intakeData.projectType, intakeData.company),
+          intakeData.projectDescription,
+          intakeData.projectType,
+          intakeData.budget,
+          intakeData.timeline,
+          features.join(','),
+          intakeData.designLevel,
+          intakeData.contentStatus,
+          intakeData.techComfort,
+          intakeData.hosting,
+          intakeData.pages,
+          intakeData.integrations,
+          brandAssets.join(','),
+          intakeData.inspiration,
+          intakeData.currentSite,
+          intakeData.challenges,
+          intakeData.additionalInfo,
+          addons.join(','),
+          intakeData.wasReferred === 'yes' ? intakeData.referralName : null
+        ]
+      );
 
       const projectId = projectResult.lastID!;
       console.log(`Project created: ${projectId}`);
 
       // Generate project plan based on intake data
       const projectPlan: ProjectPlan = await generateProjectPlan(intakeData, projectId);
-      
+
       // Generate initial invoice
       const invoice: Invoice = await generateInvoice(intakeData, projectId, clientId);
 
       // Create initial project update
-      await db.run(`
+      await db.run(
+        `
         INSERT INTO project_updates (
           project_id, title, description, type, author, created_at
         ) VALUES (?, ?, ?, 'general', 'system', datetime('now'))
-      `, [
-        projectId,
-        'Project Intake Received',
-        `Thank you for submitting your project details! We're reviewing your requirements and will provide a detailed proposal within 24-48 hours.`
-      ]);
+      `,
+        [
+          projectId,
+          'Project Intake Received',
+          'Thank you for submitting your project details! We\'re reviewing your requirements and will provide a detailed proposal within 24-48 hours.'
+        ]
+      );
 
       // Generate access token for client portal
       const accessToken = jwt.sign(
-        { 
-          clientId, 
-          projectId, 
+        {
+          clientId,
+          projectId,
           email: intakeData.email,
           type: 'client_access'
         },
@@ -219,7 +236,7 @@ router.post('/', async (req: Request, res: Response) => {
           if (isNewClient) {
             await sendWelcomeEmail(intakeData.email, intakeData.name, accessToken);
           }
-          
+
           // Send new intake notification to admin
           await sendNewIntakeNotification(intakeData, projectId);
         } catch (emailError) {
@@ -247,13 +264,11 @@ router.post('/', async (req: Request, res: Response) => {
           ]
         }
       });
-
     } catch (dbError) {
       // Rollback transaction on error
       await db.run('ROLLBACK');
       throw dbError;
     }
-
   } catch (error: any) {
     console.error('Intake processing error:', error);
     res.status(500).json({
@@ -271,14 +286,17 @@ router.post('/', async (req: Request, res: Response) => {
 router.get('/status/:projectId', async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params;
-    
+
     const db = getDatabase();
-    const project = await db.get(`
+    const project = await db.get(
+      `
       SELECT p.*, c.company_name, c.contact_name, c.email
       FROM projects p
       JOIN clients c ON p.client_id = c.id
       WHERE p.id = ?
-    `, [projectId]);
+    `,
+      [projectId]
+    );
 
     if (!project) {
       return res.status(404).json({
@@ -288,12 +306,15 @@ router.get('/status/:projectId', async (req: Request, res: Response) => {
     }
 
     // Get latest update
-    const latestUpdate = await db.get(`
+    const latestUpdate = await db.get(
+      `
       SELECT * FROM project_updates 
       WHERE project_id = ? 
       ORDER BY created_at DESC 
       LIMIT 1
-    `, [projectId]);
+    `,
+      [projectId]
+    );
 
     const responseData: ProjectStatusResponse = {
       project: {
@@ -309,19 +330,20 @@ router.get('/status/:projectId', async (req: Request, res: Response) => {
         company: project.company_name,
         email: project.email
       },
-      latestUpdate: latestUpdate ? {
-        title: latestUpdate.title,
-        description: latestUpdate.description,
-        date: latestUpdate.created_at,
-        type: latestUpdate.type
-      } : null
+      latestUpdate: latestUpdate
+        ? {
+          title: latestUpdate.title,
+          description: latestUpdate.description,
+          date: latestUpdate.created_at,
+          type: latestUpdate.type
+        }
+        : null
     };
 
     res.json({
       success: true,
       data: responseData
     });
-
   } catch (error: any) {
     console.error('Status check error:', error);
     res.status(500).json({
@@ -345,11 +367,11 @@ function generateProjectName(projectType: string, companyName: string): string {
   const typeNames: Record<string, string> = {
     'simple-site': 'Simple Website',
     'business-site': 'Business Website',
-    'portfolio': 'Portfolio Website',
-    'ecommerce': 'E-commerce Store',
+    portfolio: 'Portfolio Website',
+    ecommerce: 'E-commerce Store',
     'web-app': 'Web Application',
     'browser-extension': 'Browser Extension',
-    'other': 'Custom Project'
+    other: 'Custom Project'
   };
 
   const typeName = typeNames[projectType] || 'Web Project';

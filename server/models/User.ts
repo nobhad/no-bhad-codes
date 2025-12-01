@@ -3,7 +3,7 @@
  * USER MODEL
  * ===============================================
  * @file server/models/User.ts
- * 
+ *
  * User model for authentication and user management.
  */
 
@@ -30,17 +30,8 @@ export class User extends BaseModel<UserAttributes> {
     primaryKey: 'id',
     timestamps: true,
     softDeletes: false,
-    fillable: [
-      'name',
-      'email',
-      'password',
-      'role',
-      'is_active'
-    ],
-    hidden: [
-      'password',
-      'remember_token'
-    ],
+    fillable: ['name', 'email', 'password', 'role', 'is_active'],
+    hidden: ['password', 'remember_token'],
     casts: {
       id: 'number' as const,
       is_active: 'boolean' as const,
@@ -126,25 +117,21 @@ export class User extends BaseModel<UserAttributes> {
   }
 
   generateRememberToken(): string {
-    const token = Math.random().toString(36).substring(2, 15) + 
-                  Math.random().toString(36).substring(2, 15);
+    const token =
+      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     this.set('remember_token', token);
     return token;
   }
 
   // Query scopes
   static async findByEmail(email: string): Promise<User | null> {
-    return await this.query()
-      .where('email', '=', email.toLowerCase())
-      .first();
+    return await this.query().where('email', '=', email.toLowerCase()).first();
   }
 
   static async findActive(): Promise<User[]> {
-    const result = await this.query()
-      .where('is_active', '=', true)
-      .get();
-    
-    return result.rows.map(row => {
+    const result = await this.query().where('is_active', '=', true).get();
+
+    return result.rows.map((row) => {
       const user = new this();
       user.setAttributes(row as any, true);
       return user;
@@ -156,8 +143,8 @@ export class User extends BaseModel<UserAttributes> {
       .where('role', '=', 'admin')
       .where('is_active', '=', true)
       .get();
-    
-    return result.rows.map(row => {
+
+    return result.rows.map((row) => {
       const user = new this();
       user.setAttributes(row as any, true);
       return user;

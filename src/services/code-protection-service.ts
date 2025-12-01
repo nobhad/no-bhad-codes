@@ -89,16 +89,16 @@ export class CodeProtectionService {
       enabled: false,
       level: 'standard',
       features: {
-        devToolsBlocking: false,        // Hostile, easily bypassed
-        sourceObfuscation: true,         // Useful: minify at build time
-        rightClickDisable: false,        // Hostile, annoying to users
-        keyboardShortcuts: false,        // Hostile, breaks browser features
-        consoleDisabling: false,         // Hostile, easily bypassed
-        domMutationProtection: false,    // Rarely needed
-        antiDebugging: false,            // Hostile, easily bypassed
-        networkObfuscation: false,       // Rarely needed
-        stringEncryption: true,          // Useful for sensitive strings
-        codeIntegrityCheck: false,       // Can cause false positives
+        devToolsBlocking: false, // Hostile, easily bypassed
+        sourceObfuscation: true, // Useful: minify at build time
+        rightClickDisable: false, // Hostile, annoying to users
+        keyboardShortcuts: false, // Hostile, breaks browser features
+        consoleDisabling: false, // Hostile, easily bypassed
+        domMutationProtection: false, // Rarely needed
+        antiDebugging: false, // Hostile, easily bypassed
+        networkObfuscation: false, // Rarely needed
+        stringEncryption: true, // Useful for sensitive strings
+        codeIntegrityCheck: false, // Can cause false positives
         ...config.features
       },
       ...config
@@ -214,8 +214,10 @@ export class CodeProtectionService {
 
     // Method 2: Window size detection
     const checkWindowSize = () => {
-      if (Math.abs(window.outerWidth - window.innerWidth) > 200 ||
-          Math.abs(window.outerHeight - window.innerHeight) > 200) {
+      if (
+        Math.abs(window.outerWidth - window.innerWidth) > 200 ||
+        Math.abs(window.outerHeight - window.innerHeight) > 200
+      ) {
         if (!this.devToolsOpen) {
           this.onDevToolsDetected('window-size');
         }
@@ -273,7 +275,7 @@ export class CodeProtectionService {
     // Remove sourcemaps from scripts
     const removeSourceMaps = () => {
       const scripts = document.querySelectorAll('script');
-      scripts.forEach(script => {
+      scripts.forEach((script) => {
         if (script.src && script.src.includes('.map')) {
           script.remove();
         }
@@ -283,7 +285,7 @@ export class CodeProtectionService {
     // Obfuscate CSS
     const obfuscateCSS = () => {
       const styles = document.querySelectorAll('style, link[rel="stylesheet"]');
-      styles.forEach(style => {
+      styles.forEach((style) => {
         if (style.textContent) {
           style.textContent = style.textContent
             .replace(/\/\*[\s\S]*?\*\//g, '')
@@ -344,10 +346,13 @@ export class CodeProtectionService {
     ];
 
     document.addEventListener('keydown', (e) => {
-      const blocked = blockedKeys.some(combo => e.key === combo.key &&
-               (!combo.ctrl || e.ctrlKey) &&
-               (!combo.shift || e.shiftKey) &&
-               (!combo.alt || e.altKey));
+      const blocked = blockedKeys.some(
+        (combo) =>
+          e.key === combo.key &&
+          (!combo.ctrl || e.ctrlKey) &&
+          (!combo.shift || e.shiftKey) &&
+          (!combo.alt || e.altKey)
+      );
 
       if (blocked) {
         e.preventDefault();
@@ -364,10 +369,12 @@ export class CodeProtectionService {
    */
   private setupConsoleDisabling(): void {
     const noop = () => {};
-    const throwError = () => { throw new Error('Console access denied'); };
+    const throwError = () => {
+      throw new Error('Console access denied');
+    };
 
     // Override console methods
-    Object.keys(console).forEach(key => {
+    Object.keys(console).forEach((key) => {
       if (typeof console[key as keyof Console] === 'function') {
         (console as any)[key] = this.config.level === 'maximum' ? throwError : noop;
       }
@@ -378,8 +385,16 @@ export class CodeProtectionService {
       (window as unknown as { console?: Console }).console = undefined;
     } else {
       (window as unknown as { console?: Console }).console = {
-        log: noop, info: noop, warn: noop, error: noop, debug: noop,
-        trace: noop, table: noop, group: noop, groupEnd: noop, clear: noop
+        log: noop,
+        info: noop,
+        warn: noop,
+        error: noop,
+        debug: noop,
+        trace: noop,
+        table: noop,
+        group: noop,
+        groupEnd: noop,
+        clear: noop
       } as unknown as Console;
     }
 
@@ -400,8 +415,7 @@ export class CodeProtectionService {
             if (node.nodeType === Node.ELEMENT_NODE) {
               const element = node as Element;
               // Check for debugging tools injection
-              if (element.tagName === 'SCRIPT' &&
-                  element.textContent?.includes('debugger')) {
+              if (element.tagName === 'SCRIPT' && element.textContent?.includes('debugger')) {
                 element.remove();
                 this.logViolation('tampering', { type: 'script-injection' });
               }
@@ -455,23 +469,28 @@ export class CodeProtectionService {
   private setupIntegrityChecks(): void {
     const checkIntegrity = () => {
       // Check if critical functions have been modified
-      if (typeof document.createElement !== 'function' ||
-          typeof window.addEventListener !== 'function') {
+      if (
+        typeof document.createElement !== 'function' ||
+        typeof window.addEventListener !== 'function'
+      ) {
         this.integrityCompromised = true;
         this.onIntegrityViolation();
       }
 
       // Check for common debugging tools
-      const windowAny = window as unknown as { chrome?: { runtime?: unknown }; webkitRequestAnimationFrame?: { toString(): string } };
-      if (windowAny.chrome?.runtime ||
-          windowAny.webkitRequestAnimationFrame?.toString().includes('native') === false) {
+      const windowAny = window as unknown as {
+        chrome?: { runtime?: unknown };
+        webkitRequestAnimationFrame?: { toString(): string };
+      };
+      if (
+        windowAny.chrome?.runtime ||
+        windowAny.webkitRequestAnimationFrame?.toString().includes('native') === false
+      ) {
         this.logViolation('tampering', { type: 'extension-detected' });
       }
     };
 
-    this.protectionIntervals.push(
-      setInterval(checkIntegrity, 3000)
-    );
+    this.protectionIntervals.push(setInterval(checkIntegrity, 3000));
   }
 
   /**
@@ -549,16 +568,14 @@ export class CodeProtectionService {
       }
     };
 
-    this.protectionIntervals.push(
-      setInterval(monitor, 5000)
-    );
+    this.protectionIntervals.push(setInterval(monitor, 5000));
   }
 
   /**
    * Stop monitoring
    */
   private stopMonitoring(): void {
-    this.protectionIntervals.forEach(interval => clearInterval(interval));
+    this.protectionIntervals.forEach((interval) => clearInterval(interval));
     this.protectionIntervals = [];
   }
 
@@ -588,8 +605,9 @@ export class CodeProtectionService {
    * Utility methods
    */
   private generateEncryptionKey(): string {
-    return Math.random().toString(36).substring(2, 15) +
-           Math.random().toString(36).substring(2, 15);
+    return (
+      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    );
   }
 
   /**

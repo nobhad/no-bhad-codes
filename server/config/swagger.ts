@@ -122,7 +122,7 @@ const options = {
             }
           }
         },
-        
+
         // Authentication schemas
         LoginRequest: {
           type: 'object',
@@ -165,7 +165,7 @@ const options = {
             }
           }
         },
-        
+
         // User schemas
         User: {
           type: 'object',
@@ -203,7 +203,7 @@ const options = {
             }
           }
         },
-        
+
         // Project schemas
         Project: {
           type: 'object',
@@ -267,7 +267,7 @@ const options = {
             }
           }
         },
-        
+
         ProjectUpdate: {
           type: 'object',
           required: ['id', 'projectId', 'title'],
@@ -303,7 +303,7 @@ const options = {
             }
           }
         },
-        
+
         // File schema
         ProjectFile: {
           type: 'object',
@@ -357,7 +357,7 @@ const options = {
             }
           }
         },
-        
+
         // Message schema
         Message: {
           type: 'object',

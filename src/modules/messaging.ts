@@ -84,12 +84,36 @@ export class MessagingModule extends BaseModule {
   }
 
   private cacheElements(): void {
-    this.threadsContainer = this.getElement('Threads container', `#${this.config.threadsContainerId}`, false) as HTMLElement | null;
-    this.messagesContainer = this.getElement('Messages container', `#${this.config.messagesContainerId}`, false) as HTMLElement | null;
-    this.messageForm = this.getElement('Message form', `#${this.config.messageFormId}`, false) as HTMLFormElement | null;
-    this.threadForm = this.getElement('Thread form', `#${this.config.threadFormId}`, false) as HTMLFormElement | null;
-    this.unreadBadge = this.getElement('Unread badge', `#${this.config.unreadBadgeId}`, false) as HTMLElement | null;
-    this.typingIndicator = this.getElement('Typing indicator', '#typing-indicator', false) as HTMLElement | null;
+    this.threadsContainer = this.getElement(
+      'Threads container',
+      `#${this.config.threadsContainerId}`,
+      false
+    ) as HTMLElement | null;
+    this.messagesContainer = this.getElement(
+      'Messages container',
+      `#${this.config.messagesContainerId}`,
+      false
+    ) as HTMLElement | null;
+    this.messageForm = this.getElement(
+      'Message form',
+      `#${this.config.messageFormId}`,
+      false
+    ) as HTMLFormElement | null;
+    this.threadForm = this.getElement(
+      'Thread form',
+      `#${this.config.threadFormId}`,
+      false
+    ) as HTMLFormElement | null;
+    this.unreadBadge = this.getElement(
+      'Unread badge',
+      `#${this.config.unreadBadgeId}`,
+      false
+    ) as HTMLElement | null;
+    this.typingIndicator = this.getElement(
+      'Typing indicator',
+      '#typing-indicator',
+      false
+    ) as HTMLElement | null;
   }
 
   private setupEventListeners(): void {
@@ -98,7 +122,9 @@ export class MessagingModule extends BaseModule {
       this.messageForm.addEventListener('submit', this.handleSendMessage.bind(this));
 
       // Typing indicator
-      const messageInput = this.messageForm.querySelector('textarea[name="message"]') as HTMLTextAreaElement;
+      const messageInput = this.messageForm.querySelector(
+        'textarea[name="message"]'
+      ) as HTMLTextAreaElement;
       if (messageInput) {
         messageInput.addEventListener('input', this.handleTyping.bind(this));
         messageInput.addEventListener('keydown', this.handleKeyDown.bind(this));
@@ -155,7 +181,6 @@ export class MessagingModule extends BaseModule {
       this.messageThreads = data.threads || [];
       this.updateUnreadCount();
       this.renderThreadsList();
-
     } catch (error) {
       console.error('Failed to load message threads:', error);
       this.showError('Failed to load messages. Please refresh the page.');
@@ -186,7 +211,6 @@ export class MessagingModule extends BaseModule {
 
       // Mark messages as read
       await this.markThreadRead(threadId);
-
     } catch (error) {
       console.error('Failed to load messages:', error);
       this.showError('Failed to load messages for this conversation.');
@@ -217,7 +241,7 @@ export class MessagingModule extends BaseModule {
       sendFormData.append('message', message.trim());
       sendFormData.append('priority', 'normal');
 
-      files.forEach(file => {
+      files.forEach((file) => {
         sendFormData.append('attachments', file);
       });
 
@@ -247,7 +271,6 @@ export class MessagingModule extends BaseModule {
       await this.loadMessageThreads();
 
       this.showSuccess('Message sent successfully!');
-
     } catch (error) {
       console.error('Failed to send message:', error);
       this.showError('Failed to send message. Please try again.');
@@ -266,8 +289,8 @@ export class MessagingModule extends BaseModule {
 
     const formData = new FormData(this.threadForm);
     const subject = formData.get('subject') as string;
-    const threadType = formData.get('thread_type') as string || 'general';
-    const priority = formData.get('priority') as string || 'normal';
+    const threadType = (formData.get('thread_type') as string) || 'general';
+    const priority = (formData.get('priority') as string) || 'normal';
 
     if (!subject.trim()) {
       this.showError('Subject is required.');
@@ -308,7 +331,6 @@ export class MessagingModule extends BaseModule {
       }
 
       this.showSuccess('New conversation started!');
-
     } catch (error) {
       console.error('Failed to create thread:', error);
       this.showError('Failed to start new conversation. Please try again.');
@@ -351,7 +373,7 @@ export class MessagingModule extends BaseModule {
    */
   public async selectThread(threadId: number): Promise<void> {
     // Update active thread UI
-    document.querySelectorAll('.thread-item').forEach(item => {
+    document.querySelectorAll('.thread-item').forEach((item) => {
       item.classList.remove('active');
     });
 
@@ -384,7 +406,7 @@ export class MessagingModule extends BaseModule {
 
     this.threadsContainer.innerHTML = '';
 
-    this.messageThreads.forEach(thread => {
+    this.messageThreads.forEach((thread) => {
       const threadElement = document.createElement('div');
       threadElement.className = `thread-item ${thread.unread_count > 0 ? 'has-unread' : ''}`;
       threadElement.dataset.threadId = thread.id.toString();
@@ -439,10 +461,10 @@ export class MessagingModule extends BaseModule {
       messageElement.className = `message message-${message.sender_type} ${!message.is_read ? 'unread' : ''}`;
       messageElement.dataset.messageId = message.id.toString();
 
-      const isReply = message.reply_to && this.currentMessages.find(m => m.id === message.reply_to);
-      const attachmentsHtml = message.attachments.length > 0
-        ? this.renderAttachments(message.attachments)
-        : '';
+      const isReply =
+        message.reply_to && this.currentMessages.find((m) => m.id === message.reply_to);
+      const attachmentsHtml =
+        message.attachments.length > 0 ? this.renderAttachments(message.attachments) : '';
 
       messageElement.innerHTML = `
         ${isReply ? '<div class="reply-indicator">Reply</div>' : ''}
@@ -465,7 +487,9 @@ export class MessagingModule extends BaseModule {
   private renderAttachments(attachments: Message['attachments']): string {
     if (attachments.length === 0) return '';
 
-    const attachmentsHtml = attachments.map(attachment => `
+    const attachmentsHtml = attachments
+      .map(
+        (attachment) => `
       <div class="message-attachment">
         <span class="attachment-icon">${this.getFileIcon(attachment.mimeType)}</span>
         <div class="attachment-info">
@@ -476,7 +500,9 @@ export class MessagingModule extends BaseModule {
           Download
         </button>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
 
     return `<div class="message-attachments">${attachmentsHtml}</div>`;
   }
@@ -495,13 +521,12 @@ export class MessagingModule extends BaseModule {
       });
 
       // Update local state
-      const thread = this.messageThreads.find(t => t.id === threadId);
+      const thread = this.messageThreads.find((t) => t.id === threadId);
       if (thread) {
         thread.unread_count = 0;
         this.updateUnreadCount();
         this.renderThreadsList();
       }
-
     } catch (error) {
       console.error('Failed to mark thread as read:', error);
     }
@@ -575,7 +600,7 @@ export class MessagingModule extends BaseModule {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))  } ${  sizes[i]}`;
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   }
 
   private formatTime(dateString: string): string {
@@ -599,7 +624,6 @@ export class MessagingModule extends BaseModule {
       month: 'short',
       day: 'numeric'
     });
-
   }
 
   private formatRelativeTime(dateString: string): string {
@@ -674,15 +698,19 @@ export class MessagingModule extends BaseModule {
 
     document.body.appendChild(notification);
 
-    gsap.fromTo(notification, {
-      x: 100,
-      opacity: 0
-    }, {
-      x: 0,
-      opacity: 1,
-      duration: 0.3,
-      ease: 'power2.out'
-    });
+    gsap.fromTo(
+      notification,
+      {
+        x: 100,
+        opacity: 0
+      },
+      {
+        x: 0,
+        opacity: 1,
+        duration: 0.3,
+        ease: 'power2.out'
+      }
+    );
 
     setTimeout(() => {
       gsap.to(notification, {

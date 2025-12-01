@@ -9,11 +9,7 @@
 
 import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
-import {
-  authenticateToken,
-  requireAdmin,
-  AuthenticatedRequest,
-} from '../middleware/auth.js';
+import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { InvoiceService, InvoiceCreateData } from '../services/invoice-service.js';
 import { emailService } from '../services/email-service.js';
 import { getDatabase } from '../database/init.js';
@@ -37,8 +33,8 @@ function getInvoiceService() {
  *         description: Invoice system is working
  */
 router.get('/test', (req: express.Request, res: express.Response) => {
-  res.json({ 
-    success: true, 
+  res.json({
+    success: true,
     message: 'Invoice system is operational',
     timestamp: new Date().toISOString()
   });
@@ -56,7 +52,8 @@ router.get('/test', (req: express.Request, res: express.Response) => {
  *       201:
  *         description: Test invoice created successfully
  */
-router.post('/test-create', 
+router.post(
+  '/test-create',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const testInvoiceData: InvoiceCreateData = {
       projectId: 1,
@@ -81,7 +78,7 @@ router.post('/test-create',
 
     try {
       const invoice = await getInvoiceService().createInvoice(testInvoiceData);
-      
+
       res.status(201).json({
         success: true,
         message: 'Test invoice created successfully',
@@ -111,7 +108,8 @@ router.post('/test-create',
  *         schema:
  *           type: integer
  */
-router.get('/test-get/:id', 
+router.get(
+  '/test-get/:id',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const invoiceId = parseInt(req.params.id);
 
@@ -200,7 +198,8 @@ router.get('/test-get/:id',
  *       401:
  *         description: Authentication required
  */
-router.post('/', 
+router.post(
+  '/',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceData: InvoiceCreateData = req.body;
@@ -215,9 +214,12 @@ router.post('/',
     }
 
     // Validate line items
-    const invalidLineItems = invoiceData.lineItems.filter(item => 
-      !item.description || typeof item.quantity !== 'number' || 
-      typeof item.rate !== 'number' || typeof item.amount !== 'number'
+    const invalidLineItems = invoiceData.lineItems.filter(
+      (item) =>
+        !item.description ||
+        typeof item.quantity !== 'number' ||
+        typeof item.rate !== 'number' ||
+        typeof item.amount !== 'number'
     );
 
     if (invalidLineItems.length > 0) {
@@ -230,7 +232,7 @@ router.post('/',
 
     try {
       const invoice = await getInvoiceService().createInvoice(invoiceData);
-      
+
       res.status(201).json({
         success: true,
         message: 'Invoice created successfully',
@@ -260,7 +262,8 @@ router.post('/',
  *         schema:
  *           type: integer
  */
-router.get('/:id', 
+router.get(
+  '/:id',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id);
@@ -300,7 +303,8 @@ router.get('/:id',
  *       - Invoices
  *     summary: Get invoice by invoice number
  */
-router.get('/number/:invoiceNumber', 
+router.get(
+  '/number/:invoiceNumber',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { invoiceNumber } = req.params;
@@ -333,7 +337,8 @@ router.get('/number/:invoiceNumber',
  *       - Invoices
  *     summary: Get all invoices for a client
  */
-router.get('/client/:clientId', 
+router.get(
+  '/client/:clientId',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.clientId);
@@ -347,10 +352,10 @@ router.get('/client/:clientId',
 
     try {
       const invoices = await getInvoiceService().getClientInvoices(clientId);
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         invoices,
-        count: invoices.length 
+        count: invoices.length
       });
     } catch (error: any) {
       res.status(500).json({
@@ -370,7 +375,8 @@ router.get('/client/:clientId',
  *       - Invoices
  *     summary: Get all invoices for a project
  */
-router.get('/project/:projectId', 
+router.get(
+  '/project/:projectId',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.projectId);
@@ -384,10 +390,10 @@ router.get('/project/:projectId',
 
     try {
       const invoices = await getInvoiceService().getProjectInvoices(projectId);
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         invoices,
-        count: invoices.length 
+        count: invoices.length
       });
     } catch (error: any) {
       res.status(500).json({
@@ -407,7 +413,8 @@ router.get('/project/:projectId',
  *       - Invoices
  *     summary: Update invoice status
  */
-router.put('/:id/status', 
+router.put(
+  '/:id/status',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id);
@@ -461,7 +468,8 @@ router.put('/:id/status',
  *       - Invoices
  *     summary: Send invoice to client
  */
-router.post('/:id/send', 
+router.post(
+  '/:id/send',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id);
@@ -545,7 +553,7 @@ router.post('/:id/send',
               </div>
             </body>
             </html>
-          `,
+          `
         });
 
         console.log(`Invoice email sent to ${client.email} for invoice #${invoiceId}`);
@@ -557,7 +565,7 @@ router.post('/:id/send',
       res.json({
         success: true,
         message: 'Invoice sent successfully',
-        invoice,
+        invoice
       });
     } catch (error: any) {
       if (error.message.includes('not found')) {
@@ -584,7 +592,8 @@ router.post('/:id/send',
  *       - Invoices
  *     summary: Mark invoice as paid
  */
-router.post('/:id/pay', 
+router.post(
+  '/:id/pay',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id);
@@ -642,7 +651,8 @@ router.post('/:id/pay',
  *       - Invoices
  *     summary: Get invoice statistics
  */
-router.get('/stats', 
+router.get(
+  '/stats',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = req.query.clientId ? parseInt(req.query.clientId as string) : undefined;
@@ -671,7 +681,8 @@ router.get('/stats',
  *       - Invoices
  *     summary: Generate invoice from client intake
  */
-router.post('/generate/intake/:intakeId', 
+router.post(
+  '/generate/intake/:intakeId',
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
@@ -686,7 +697,7 @@ router.post('/generate/intake/:intakeId',
 
     try {
       const invoice = await getInvoiceService().generateInvoiceFromIntake(intakeId);
-      
+
       res.status(201).json({
         success: true,
         message: 'Invoice generated from intake successfully',

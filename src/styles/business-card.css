@@ -18,230 +18,240 @@
    BUSINESS CARD ASPECT RATIO VARIABLES
    ========================================== */
 :root {
-    /* Standard business card dimensions: 14.58" x 8.33" */
-    --business-card-width-inches: 14.58;
-    --business-card-height-inches: 8.33;
-    
-    /* Exact aspect ratio: 14.58 ÷ 8.33 = 1.7506 */
-    --business-card-aspect-ratio: 1.7506;
-    
-    /* Responsive base dimensions */
-    --business-card-base-width: 35vw;
-    --business-card-base-height: calc(var(--business-card-base-width) / var(--business-card-aspect-ratio));
-    
-    /* Fixed size dimensions */
-    --business-card-large-width: 525px;
-    --business-card-large-height: calc(var(--business-card-large-width) / var(--business-card-aspect-ratio)); /* 299.7px */
-    
-    --business-card-medium-width: 420px;
-    --business-card-medium-height: calc(var(--business-card-medium-width) / var(--business-card-aspect-ratio)); /* 239.9px */
-    
-    --business-card-small-width: 350px;
-    --business-card-small-height: calc(var(--business-card-small-width) / var(--business-card-aspect-ratio)); /* 199.8px */
-    
-    --business-card-tiny-width: 280px;
-    --business-card-tiny-height: calc(var(--business-card-tiny-width) / var(--business-card-aspect-ratio)); /* 159.9px */
+  /* Standard business card dimensions: 14.58" x 8.33" */
+  --business-card-width-inches: 14.58;
+  --business-card-height-inches: 8.33;
+
+  /* Exact aspect ratio: 14.58 ÷ 8.33 = 1.7506 */
+  --business-card-aspect-ratio: 1.7506;
+
+  /* Responsive base dimensions */
+  --business-card-base-width: 35vw;
+  --business-card-base-height: calc(
+    var(--business-card-base-width) / var(--business-card-aspect-ratio)
+  );
+
+  /* Fixed size dimensions */
+  --business-card-large-width: 525px;
+  --business-card-large-height: calc(
+    var(--business-card-large-width) / var(--business-card-aspect-ratio)
+  ); /* 299.7px */
+
+  --business-card-medium-width: 420px;
+  --business-card-medium-height: calc(
+    var(--business-card-medium-width) / var(--business-card-aspect-ratio)
+  ); /* 239.9px */
+
+  --business-card-small-width: 350px;
+  --business-card-small-height: calc(
+    var(--business-card-small-width) / var(--business-card-aspect-ratio)
+  ); /* 199.8px */
+
+  --business-card-tiny-width: 280px;
+  --business-card-tiny-height: calc(
+    var(--business-card-tiny-width) / var(--business-card-aspect-ratio)
+  ); /* 159.9px */
 }
 
 /* ==========================================
    INTRO ANIMATION CONTAINER - POSITIONING HANDLED BY INTROMODULE
    ========================================== */
 .intro-animation-container {
-    /* Positioning handled by IntroModule via GSAP */
-    /* z-index handled by IntroModule via GSAP */
-    
-    /* Visible immediately */
-    display: flex !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    
-    /* Business card aspect ratio: 14.58:8.33 inches = 1.7506:1 (exact ratio) */
-    /* Fixed dimensions to prevent CLS - maintaining exact aspect ratio */
-    width: 525px;
-    height: 299.7px; /* 525 ÷ 1.7506 = 299.7 */
-    min-width: 525px;
-    min-height: 299.7px;
-    max-width: 525px;
-    max-height: 299.7px;
-    
-    /* Flex layout */
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    
-    /* 3D perspective */
-    perspective: 1000px;
-    
-    /* Transparent wrapper */
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    border-radius: 0;
-    padding: 0;
-    margin: 0;
-    
-    /* Prevent selection */
-    -webkit-user-select: none;
-    user-select: none;
-    
-    /* Cursor indicates interactivity */
-    cursor: pointer;
+  /* Positioning handled by IntroModule via GSAP */
+  /* z-index handled by IntroModule via GSAP */
+
+  /* Visible immediately */
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+
+  /* Business card aspect ratio: 14.58:8.33 inches = 1.7506:1 (exact ratio) */
+  /* Fixed dimensions to prevent CLS - maintaining exact aspect ratio */
+  width: 525px;
+  height: 299.7px; /* 525 ÷ 1.7506 = 299.7 */
+  min-width: 525px;
+  min-height: 299.7px;
+  max-width: 525px;
+  max-height: 299.7px;
+
+  /* Flex layout */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  /* 3D perspective */
+  perspective: 1000px;
+
+  /* Transparent wrapper */
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+
+  /* Prevent selection */
+  -webkit-user-select: none;
+  user-select: none;
+
+  /* Cursor indicates interactivity */
+  cursor: pointer;
 }
 
 /* Intro card element - the actual card inside the container */
 .intro-card-element {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.6s ease-in-out;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    
-    /* Prevent child elements from receiving pointer events during intro */
-    pointer-events: none;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease-in-out;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  /* Prevent child elements from receiving pointer events during intro */
+  pointer-events: none;
 }
 
 /* Intro card flipper - handles the 3D rotation */
 .intro-card-flipper {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.6s ease-in-out;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease-in-out;
 }
 
 /* Intro card faces - front and back */
 .intro-card-face-front,
 .intro-card-face-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    border-radius: 12px;
-    overflow: hidden;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .intro-card-face-front {
-    transform: rotateY(0deg);
+  transform: rotateY(0deg);
 }
 
 .intro-card-face-back {
-    transform: rotateY(180deg);
+  transform: rotateY(180deg);
 }
 
 /* Intro card images */
 .intro-card-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    border-radius: 12px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
 }
 
 /* ==========================================
    BUSINESS CARD CONTAINER - INVISIBLE WRAPPER
    ========================================== */
-   .business-card-container {
-    /* Positioning and layout - NORMAL SECTION POSITIONING */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: static;
-    
-    /* 3D perspective for flip animations */
-    perspective: 1000px;
-    
-    /* Business card aspect ratio: 14.58:8.33 inches = 1.7506:1 (exact ratio) */
-    /* Fixed dimensions to prevent CLS - maintaining exact aspect ratio */
-    width: 525px;
-    height: 299.7px; /* 525 ÷ 1.7506 = 299.7 */
-    min-width: 525px;
-    min-height: 299.7px;
-    max-width: 525px;
-    max-height: 299.7px;
-    
-    /* Disable user selection to prevent blue highlights */
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    
-    /* Cursor indicates interactivity */
-    cursor: pointer;
-    
-    /* COMPLETELY INVISIBLE WRAPPER - NO VISUAL STYLING */
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    border-radius: 0;
-    padding: 0;
-    margin: 0;
+.business-card-container {
+  /* Positioning and layout - NORMAL SECTION POSITIONING */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: static;
+
+  /* 3D perspective for flip animations */
+  perspective: 1000px;
+
+  /* Business card aspect ratio: 14.58:8.33 inches = 1.7506:1 (exact ratio) */
+  /* Fixed dimensions to prevent CLS - maintaining exact aspect ratio */
+  width: 525px;
+  height: 299.7px; /* 525 ÷ 1.7506 = 299.7 */
+  min-width: 525px;
+  min-height: 299.7px;
+  max-width: 525px;
+  max-height: 299.7px;
+
+  /* Disable user selection to prevent blue highlights */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  /* Cursor indicates interactivity */
+  cursor: pointer;
+
+  /* COMPLETELY INVISIBLE WRAPPER - NO VISUAL STYLING */
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
 }
 
 /* Ensure all child elements also prevent selection */
 .business-card-container * {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 /* ==========================================
    BUSINESS CARD - MAIN ELEMENT
    ========================================== */
 .business-card {
-    /* Full size of container */
-    width: 100%;
-    height: 100%;
-    position: relative;
-    
-    /* 3D perspective for inner card */
-    perspective: 1000px;
-    
-    /* Cursor indicates interactivity */
-    cursor: pointer;
-    
-    /* ENSURE VISIBILITY - Important for initial page load */
-    opacity: 1 !important;
-    transform: scale(1) !important;
-    display: block !important;
-    visibility: visible !important;
-    
-    /* CRITICAL: No CSS transitions - GSAP controls all animations */
-    transition: none;
-    
-    /* NO visual styling on the main card element */
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    border-radius: 0;
+  /* Full size of container */
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  /* 3D perspective for inner card */
+  perspective: 1000px;
+
+  /* Cursor indicates interactivity */
+  cursor: pointer;
+
+  /* ENSURE VISIBILITY - Important for initial page load */
+  opacity: 1 !important;
+  transform: scale(1) !important;
+  display: block !important;
+  visibility: visible !important;
+
+  /* CRITICAL: No CSS transitions - GSAP controls all animations */
+  transition: none;
+
+  /* NO visual styling on the main card element */
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
 }
 
 /* ==========================================
    CARD INNER WRAPPER (FLIP CONTAINER)
    ========================================== */
 .business-card-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    
-    /* 3D transform setup */
-    transform-style: preserve-3d;
-    
-    /* Smooth CSS transition for hover effects using variables */
-    transition: transform var(--transition-slow) var(--cubic-default);
-    
-    /* 3D shadow for the flipping card using variables */
-    box-shadow: 0 10px 30px var(--color-shadow);
-    
-    /* NEVER round corners */
-    border-radius: 0;
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  /* 3D transform setup */
+  transform-style: preserve-3d;
+
+  /* Smooth CSS transition for hover effects using variables */
+  transition: transform var(--transition-slow) var(--cubic-default);
+
+  /* 3D shadow for the flipping card using variables */
+  box-shadow: 0 10px 30px var(--color-shadow);
+
+  /* NEVER round corners */
+  border-radius: 0;
 }
 
 /* ==========================================
@@ -249,124 +259,124 @@
    ========================================== */
 .business-card-front,
 .business-card-back {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    
-    /* FORCE VISIBILITY */
-    display: flex !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    
-    /* 3D flip setup - CRITICAL for proper transform inheritance */
-    backface-visibility: hidden;
-    transform-style: preserve-3d;
-    
-    /* CRITICAL: Ensure clicks pass through to parent business card */
-    pointer-events: none;
-    
-    /* Visual styling - ALWAYS WHITE BACKGROUND (light theme colors) */
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    color: #333333;
-    
-    /* Individual card face shadows using variables */
-    box-shadow: 0 5px 15px var(--color-shadow);
-    
-    /* Layout */
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    
-    /* Content styling - allow full SVG to be visible */
-    overflow: visible;
-    padding: 0;
-    box-sizing: border-box;
-    
-    /* Typography using variables */
-    font-family: var(--font--acme, 'Courier New', monospace);
-    
-    /* NEVER round corners */
-    border-radius: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  /* FORCE VISIBILITY */
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+
+  /* 3D flip setup - CRITICAL for proper transform inheritance */
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+
+  /* CRITICAL: Ensure clicks pass through to parent business card */
+  pointer-events: none;
+
+  /* Visual styling - ALWAYS WHITE BACKGROUND (light theme colors) */
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  color: #333333;
+
+  /* Individual card face shadows using variables */
+  box-shadow: 0 5px 15px var(--color-shadow);
+
+  /* Layout */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  /* Content styling - allow full SVG to be visible */
+  overflow: visible;
+  padding: 0;
+  box-sizing: border-box;
+
+  /* Typography using variables */
+  font-family: var(--font--acme, "Courier New", monospace);
+
+  /* NEVER round corners */
+  border-radius: 0;
 }
 
 /* ==========================================
    FRONT FACE STYLING
    ========================================== */
 .business-card-front {
-    /* Front face is visible by default */
-    transform: rotateY(0deg);
-    z-index: 2;
+  /* Front face is visible by default */
+  transform: rotateY(0deg);
+  z-index: 2;
 }
 
 /* ==========================================
    BACK FACE STYLING
    ========================================== */
 .business-card-back {
-    /* Back face is rotated 180 degrees initially */
-    transform: rotateY(180deg);
-    z-index: 1;
+  /* Back face is rotated 180 degrees initially */
+  transform: rotateY(180deg);
+  z-index: 1;
 }
 
 /* ==========================================
    CARD CONTENT STYLING
    ========================================== */
 .card-logo {
-    font-size: var(--font-size-xl);
-    font-weight: bold;
-    margin-bottom: var(--space-xs);
-    letter-spacing: 2px;
-    color: #333333; /* Always dark text for light card */
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  margin-bottom: var(--space-xs);
+  letter-spacing: 2px;
+  color: #333333; /* Always dark text for light card */
 }
 
 .card-tagline {
-    font-size: var(--font-size-sm);
-    opacity: 0.8;
-    margin-bottom: var(--space-sm);
-    color: #333333; /* Always dark text for light card */
+  font-size: var(--font-size-sm);
+  opacity: 0.8;
+  margin-bottom: var(--space-sm);
+  color: #333333; /* Always dark text for light card */
 }
 
 .card-contact {
-    font-size: var(--font-size-xs);
-    line-height: 1.4;
-    color: #333333; /* Always dark text for light card */
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  color: #333333; /* Always dark text for light card */
 }
 
 /* ==========================================
    SVG CONTENT STYLING
    ========================================== */
 .card-svg {
-    /* Responsive SVG scaling */
-    max-width: 100%;
-    max-height: 100%;
-    width: 100%;
-    height: 100%;
-    
-    /* Proper display and scaling */
-    display: block;
-    object-fit: contain;
-    
-    /* No border radius on SVG */
-    border-radius: 0;
-    
-    /* CRITICAL: Disable pointer events on SVG so clicks pass through to parent */
-    pointer-events: none;
-    
-    /* CRITICAL: Ensure SVG inherits 3D transforms from parent */
-    transform-style: preserve-3d;
-    transform-origin: center center;
+  /* Responsive SVG scaling */
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+
+  /* Proper display and scaling */
+  display: block;
+  object-fit: contain;
+
+  /* No border radius on SVG */
+  border-radius: 0;
+
+  /* CRITICAL: Disable pointer events on SVG so clicks pass through to parent */
+  pointer-events: none;
+
+  /* CRITICAL: Ensure SVG inherits 3D transforms from parent */
+  transform-style: preserve-3d;
+  transform-origin: center center;
 }
 
 /* SVGs fit properly within card area without cutting off */
 .business-card-front .card-svg,
 .business-card-back .card-svg {
-    width: 100%;
-    height: 100%;
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain; /* Contain entire SVG without cutting off */
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* Contain entire SVG without cutting off */
 }
 
 /* ==========================================
@@ -374,166 +384,169 @@
    ========================================== */
 .business-card-front:empty::before,
 .business-card-back:empty::before {
-    content: "Business Card - Content Missing";
-    color: #999;
-    font-size: var(--font-size-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    background-color: #ffffff;
-    border: 2px dashed #ccc;
-    border-radius: 0;
+  content: "Business Card - Content Missing";
+  color: #999;
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+  border: 2px dashed #ccc;
+  border-radius: 0;
 }
 
 /* ==========================================
    RESPONSIVE DESIGN
    ========================================== */
 @media (max-width: 768px) {
-    .business-card-container,
-    .intro-animation-container {
-        /* Fixed mobile size to prevent CLS - maintaining exact aspect ratio */
-        width: 420px;
-        height: 239.9px; /* 420 ÷ 1.7506 = 239.9 */
-        min-width: 420px;
-        min-height: 239.9px;
-        max-width: 420px;
-        max-height: 239.9px;
-    }
-    
-    .business-card-front,
-    .business-card-back {
-        padding: 0; /* No padding - SVG fills entire area */
-    }
-    
-    .card-logo {
-        font-size: var(--font-size-lg);
-    }
-    
-    .card-tagline {
-        font-size: var(--font-size-xs);
-    }
-    
-    .card-contact {
-        font-size: var(--font-size-xs);
-    }
+  .business-card-container,
+  .intro-animation-container {
+    /* Fixed mobile size to prevent CLS - maintaining exact aspect ratio */
+    width: 420px;
+    height: 239.9px; /* 420 ÷ 1.7506 = 239.9 */
+    min-width: 420px;
+    min-height: 239.9px;
+    max-width: 420px;
+    max-height: 239.9px;
+  }
+
+  .business-card-front,
+  .business-card-back {
+    padding: 0; /* No padding - SVG fills entire area */
+  }
+
+  .card-logo {
+    font-size: var(--font-size-lg);
+  }
+
+  .card-tagline {
+    font-size: var(--font-size-xs);
+  }
+
+  .card-contact {
+    font-size: var(--font-size-xs);
+  }
 }
 
 @media (max-width: 480px) {
-    .business-card-container,
-    .intro-animation-container {
-        /* Fixed small screen size to prevent CLS - maintaining exact aspect ratio */
-        width: 350px;
-        height: 199.8px; /* 350 ÷ 1.7506 = 199.8 */
-        min-width: 350px;
-        min-height: 199.8px;
-        max-width: 350px;
-        max-height: 199.8px;
-    }
-    
-    .business-card-front,
-    .business-card-back {
-        padding: 0; /* No padding - SVG fills entire area */
-    }
-    
-    .card-logo {
-        font-size: var(--font-size-base);
-    }
-    
-    .card-tagline {
-        font-size: var(--font-size-xs);
-    }
-    
-    .card-contact {
-        font-size: var(--font-size-xs);
-    }
+  .business-card-container,
+  .intro-animation-container {
+    /* Fixed small screen size to prevent CLS - maintaining exact aspect ratio */
+    width: 350px;
+    height: 199.8px; /* 350 ÷ 1.7506 = 199.8 */
+    min-width: 350px;
+    min-height: 199.8px;
+    max-width: 350px;
+    max-height: 199.8px;
+  }
+
+  .business-card-front,
+  .business-card-back {
+    padding: 0; /* No padding - SVG fills entire area */
+  }
+
+  .card-logo {
+    font-size: var(--font-size-base);
+  }
+
+  .card-tagline {
+    font-size: var(--font-size-xs);
+  }
+
+  .card-contact {
+    font-size: var(--font-size-xs);
+  }
 }
 
 /* ==========================================
    ACCESSIBILITY PREFERENCES
    ========================================== */
 @media (prefers-reduced-motion: reduce) {
-    .business-card-inner {
-        /* Disable transitions for users who prefer reduced motion */
-        transition: none !important;
-    }
-    
-    .business-card,
-    .business-card-inner {
-        /* Disable 3D transforms for users who prefer reduced motion */
-        transform: none !important;
-    }
-    
-    .business-card-container {
-        perspective: none;
-    }
+  .business-card-inner {
+    /* Disable transitions for users who prefer reduced motion */
+    transition: none !important;
+  }
+
+  .business-card,
+  .business-card-inner {
+    /* Disable 3D transforms for users who prefer reduced motion */
+    transform: none !important;
+  }
+
+  .business-card-container {
+    perspective: none;
+  }
 }
 
 /* ==========================================
    HIGH CONTRAST MODE SUPPORT
    ========================================== */
 @media (prefers-contrast: high) {
-    .business-card-inner {
-        /* Strong border for high contrast */
-        box-shadow: 0 0 0 2px #000, 0 10px 30px var(--color-shadow);
-    }
-    
-    .business-card-front,
-    .business-card-back {
-        background: #ffffff;
-        color: #000000;
-        box-shadow: 0 0 0 1px #000, 0 5px 15px var(--color-shadow);
-    }
-}
+  .business-card-inner {
+    /* Strong border for high contrast */
+    box-shadow:
+      0 0 0 2px #000,
+      0 10px 30px var(--color-shadow);
+  }
 
+  .business-card-front,
+  .business-card-back {
+    background: #ffffff;
+    color: #000000;
+    box-shadow:
+      0 0 0 1px #000,
+      0 5px 15px var(--color-shadow);
+  }
+}
 
 /* ==========================================
    PRINT STYLES
    ========================================== */
 @media print {
-    .business-card-container {
-        /* Reset to actual business card size for printing */
-        width: 3.5in;
-        height: 2in;
-        perspective: none;
-    }
-    
-    .business-card,
-    .business-card-inner {
-        transform: none !important;
-        box-shadow: none;
-        border: 1pt solid #000;
-        background-color: #ffffff;
-    }
-    
-    .business-card-front,
-    .business-card-back {
-        box-shadow: none;
-        border: none;
-        background: #ffffff;
-        color: #000000;
-    }
-    
-    /* Only show front face when printing */
-    .business-card-back {
-        display: none;
-    }
+  .business-card-container {
+    /* Reset to actual business card size for printing */
+    width: 3.5in;
+    height: 2in;
+    perspective: none;
+  }
+
+  .business-card,
+  .business-card-inner {
+    transform: none !important;
+    box-shadow: none;
+    border: 1pt solid #000;
+    background-color: #ffffff;
+  }
+
+  .business-card-front,
+  .business-card-back {
+    box-shadow: none;
+    border: none;
+    background: #ffffff;
+    color: #000000;
+  }
+
+  /* Only show front face when printing */
+  .business-card-back {
+    display: none;
+  }
 }
 
 /* Dark Mode Enhancements */
 html[data-theme="dark"] .business-card {
-    box-shadow: 
-        0 8px 32px rgba(255, 255, 255, 0.1),
-        0 4px 16px rgba(0, 0, 0, 0.8);
+  box-shadow:
+    0 8px 32px rgba(255, 255, 255, 0.1),
+    0 4px 16px rgba(0, 0, 0, 0.8);
 }
 
 html[data-theme="dark"] .intro-card-element {
-    box-shadow: 
-        0 8px 32px rgba(255, 255, 255, 0.1),
-        0 4px 16px rgba(0, 0, 0, 0.9);
+  box-shadow:
+    0 8px 32px rgba(255, 255, 255, 0.1),
+    0 4px 16px rgba(0, 0, 0, 0.9);
 }
 
 html[data-theme="dark"] .business-card-container {
-    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.02), transparent);
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.02), transparent);
 }

@@ -218,7 +218,8 @@ export const Large: Story = {
   args: {
     size: 'large',
     title: 'Detailed Information',
-    content: 'This is a large modal that can contain more detailed information, forms, or complex content layouts.',
+    content:
+      'This is a large modal that can contain more detailed information, forms, or complex content layouts.',
   },
   render: createModal,
 };

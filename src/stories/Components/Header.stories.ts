@@ -35,7 +35,9 @@ const createHeader = (args: any) => {
             ${logoText}
           </a>
           <div class="nav-row__right">
-            ${showThemeToggle ? `
+            ${
+  showThemeToggle
+    ? `
               <button id="toggle-theme" class="theme-button" aria-label="Toggle dark/light theme">
                 <div class="icon-wrap">
                   <svg class="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -47,7 +49,9 @@ const createHeader = (args: any) => {
                   </svg>
                 </div>
               </button>
-            ` : ''}
+            `
+    : ''
+}
             <button role="button" data-menu-toggle="" class="menu-button">
               <div class="menu-button-text">
                 <p class="p-large">Menu</p>

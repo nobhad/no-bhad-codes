@@ -31,7 +31,9 @@ export class AdminSecurity {
         const timeUntilUnlock = this.LOCKOUT_DURATION - (now - oldestAttempt);
 
         if (timeUntilUnlock > 0) {
-          throw new Error(`Too many failed attempts. Try again in ${Math.ceil(timeUntilUnlock / 60000)} minutes.`);
+          throw new Error(
+            `Too many failed attempts. Try again in ${Math.ceil(timeUntilUnlock / 60000)} minutes.`
+          );
         }
       }
 
@@ -85,8 +87,10 @@ export class AdminSecurity {
 
     const threshold = 160;
     setInterval(() => {
-      if (window.outerHeight - window.innerHeight > threshold ||
-          window.outerWidth - window.innerWidth > threshold) {
+      if (
+        window.outerHeight - window.innerHeight > threshold ||
+        window.outerWidth - window.innerWidth > threshold
+      ) {
         if (!devtools.open) {
           devtools.open = true;
           console.warn('[AdminSecurity] Developer tools detected');
@@ -138,8 +142,7 @@ export class AdminSecurity {
             if (node.nodeType === Node.ELEMENT_NODE) {
               const element = node as Element;
               // Check for suspicious script injections
-              if (element.tagName === 'SCRIPT' ||
-                  element.innerHTML?.includes('<script>')) {
+              if (element.tagName === 'SCRIPT' || element.innerHTML?.includes('<script>')) {
                 console.warn('[AdminSecurity] Suspicious script detected');
                 element.remove();
               }

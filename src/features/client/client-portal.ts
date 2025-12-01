@@ -12,6 +12,7 @@ import { BaseModule } from '../../modules/base';
 import type { ClientProject, ClientProjectStatus } from '../../types/client';
 import { gsap } from 'gsap';
 import { APP_CONSTANTS } from '../../config/constants';
+import 'emoji-picker-element';
 
 export class ClientPortalModule extends BaseModule {
   private isLoggedIn = false;
@@ -57,11 +58,31 @@ export class ClientPortalModule extends BaseModule {
   }
 
   private cacheElements(): void {
-    this.loginSection = this.getElement('Login section', `#${this.config.loginSectionId}`, false) as HTMLElement | null;
-    this.dashboardSection = this.getElement('Dashboard section', `#${this.config.dashboardSectionId}`, false) as HTMLElement | null;
-    this.loginForm = this.getElement('Login form', `#${this.config.loginFormId}`, false) as HTMLFormElement | null;
-    this.projectsList = this.getElement('Projects list', `#${this.config.projectsListId}`, false) as HTMLElement | null;
-    this.projectDetails = this.getElement('Project details', `#${this.config.projectDetailsId}`, false) as HTMLElement | null;
+    this.loginSection = this.getElement(
+      'Login section',
+      `#${this.config.loginSectionId}`,
+      false
+    ) as HTMLElement | null;
+    this.dashboardSection = this.getElement(
+      'Dashboard section',
+      `#${this.config.dashboardSectionId}`,
+      false
+    ) as HTMLElement | null;
+    this.loginForm = this.getElement(
+      'Login form',
+      `#${this.config.loginFormId}`,
+      false
+    ) as HTMLFormElement | null;
+    this.projectsList = this.getElement(
+      'Projects list',
+      `#${this.config.projectsListId}`,
+      false
+    ) as HTMLElement | null;
+    this.projectDetails = this.getElement(
+      'Project details',
+      `#${this.config.projectDetailsId}`,
+      false
+    ) as HTMLElement | null;
   }
 
   private setupEventListeners(): void {
@@ -81,9 +102,12 @@ export class ClientPortalModule extends BaseModule {
       passwordToggle.addEventListener('click', () => {
         const type = passwordInput.type === 'password' ? 'text' : 'password';
         passwordInput.type = type;
-        passwordToggle.innerHTML = type === 'password' ?
-          '<span class="visually-hidden">Show password</span>👁️' :
-          '<span class="visually-hidden">Hide password</span>👁️‍🗨️';
+        const eyeIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+        const eyeOffIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+        passwordToggle.innerHTML =
+          type === 'password'
+            ? `<span class="visually-hidden">Show password</span>${eyeIcon}`
+            : `<span class="visually-hidden">Hide password</span>${eyeOffIcon}`;
       });
     }
   }
@@ -96,148 +120,120 @@ export class ClientPortalModule extends BaseModule {
 
     console.log('Setting up dashboard event listeners...');
 
-    // Logout button
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-      console.log('Logout button found, adding event listener');
-      logoutBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.logout();
-      });
-    } else {
-      console.log('Logout button not found');
-    }
-
-    // Settings form handlers
-    this.setupSettingsForms();
-
-    // Account folder toggle
-    const accountHeader = document.querySelector('.account-header');
-    if (accountHeader) {
-      console.log('Account header found, adding event listener');
-      accountHeader.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.toggleAccountFolder();
-      });
-    } else {
-      console.log('Account header not found');
-    }
-
-    // Account section buttons
-    const contactBtn = document.getElementById('contact-btn');
-    if (contactBtn) {
-      console.log('Contact button found, adding event listener');
-      contactBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.showContactView();
-      });
-    } else {
-      console.log('Contact button not found');
-    }
-
-    const billingBtn = document.getElementById('billing-btn');
-    if (billingBtn) {
-      console.log('Billing button found, adding event listener');
-      billingBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.showBillingView();
-      });
-    } else {
-      console.log('Billing button not found');
-    }
-
-    const notificationsBtn = document.getElementById('notifications-btn');
-    if (notificationsBtn) {
-      console.log('Notifications button found, adding event listener');
-      notificationsBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.showNotificationsView();
-      });
-    } else {
-      console.log('Notifications button not found');
-    }
-
-    // Project sub-item navigation
-    const updatesBtn = document.getElementById('updates-btn');
-    if (updatesBtn) {
-      console.log('Updates button found, adding event listener');
-      updatesBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.showUpdatesView();
-      });
-    } else {
-      console.log('Updates button not found');
-    }
-
-    const filesBtn = document.getElementById('files-btn');
-    if (filesBtn) {
-      console.log('Files button found, adding event listener');
-      filesBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.showFilesView();
-      });
-    } else {
-      console.log('Files button not found');
-    }
-
-    const messagesBtn = document.getElementById('messages-btn');
-    if (messagesBtn) {
-      console.log('Messages button found, adding event listener');
-      messagesBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.showMessagesView();
-      });
-    } else {
-      console.log('Messages button not found');
-    }
-
-    // Project main item navigation
-    const projectMain = document.getElementById('project-main');
-    if (projectMain) {
-      console.log('Project main found, adding event listener');
-      projectMain.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.showProjectDetailView();
-      });
-    } else {
-      console.log('Project main not found');
-    }
-
     // Sidebar toggle
     const sidebarToggle = document.getElementById('sidebar-toggle');
     if (sidebarToggle) {
-      console.log('Sidebar toggle button found, adding event listener');
       sidebarToggle.addEventListener('click', (e) => {
         e.preventDefault();
-        console.log('Toggle button clicked!');
         this.toggleSidebar();
       });
-    } else {
-      console.log('Sidebar toggle button not found');
     }
 
-    // Message form
-    const messageForm = document.getElementById('message-form');
-    if (messageForm) {
-      console.log('Message form found, adding event listener');
-      messageForm.addEventListener('submit', this.sendMessage.bind(this));
+    // Sidebar buttons with data-tab attribute
+    const sidebarButtons = document.querySelectorAll('.sidebar-buttons .btn[data-tab]');
+    if (sidebarButtons.length > 0) {
+      console.log(`Found ${sidebarButtons.length} sidebar buttons with data-tab`);
+      sidebarButtons.forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const tabName = (btn as HTMLElement).dataset.tab;
+          if (tabName) {
+            this.switchTab(tabName);
+            // Update active state on buttons
+            sidebarButtons.forEach((b) => b.classList.remove('active'));
+            btn.classList.add('active');
+          }
+        });
+      });
     }
 
-    // Tab switching
-    const tabs = document.querySelectorAll('.project-tab');
-    if (tabs.length > 0) {
-      console.log(`Found ${tabs.length} tabs, adding event listeners`);
-      tabs.forEach(tab => {
-        tab.addEventListener('click', this.handleTabClick.bind(this));
+    // Clickable stat cards
+    const statCards = document.querySelectorAll('.stat-card-clickable[data-tab]');
+    if (statCards.length > 0) {
+      console.log(`Found ${statCards.length} clickable stat cards`);
+      statCards.forEach((card) => {
+        card.addEventListener('click', (e) => {
+          e.preventDefault();
+          const tabName = (card as HTMLElement).dataset.tab;
+          if (tabName) {
+            this.switchTab(tabName);
+            // Update active state on sidebar buttons
+            sidebarButtons.forEach((b) => {
+              b.classList.remove('active');
+              if ((b as HTMLElement).dataset.tab === tabName) {
+                b.classList.add('active');
+              }
+            });
+          }
+        });
+      });
+    }
+
+    // Password toggle buttons
+    const passwordToggles = document.querySelectorAll('.cp-password-toggle');
+    const eyeIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+    const eyeOffIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+    passwordToggles.forEach((toggle) => {
+      toggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = (toggle as HTMLElement).dataset.target;
+        if (targetId) {
+          const input = document.getElementById(targetId) as HTMLInputElement;
+          if (input) {
+            if (input.type === 'password') {
+              input.type = 'text';
+              toggle.innerHTML = eyeOffIcon;
+            } else {
+              input.type = 'password';
+              toggle.innerHTML = eyeIcon;
+            }
+          }
+        }
+      });
+    });
+
+    // Emoji picker (using emoji-picker-element web component)
+    const emojiToggle = document.getElementById('emoji-toggle');
+    const emojiPickerWrapper = document.getElementById('emoji-picker-wrapper');
+    const emojiPicker = document.getElementById('emoji-picker');
+    const messageInput = document.getElementById('message-input') as HTMLTextAreaElement;
+    const sendButton = document.getElementById('btn-send-message');
+
+    if (emojiToggle && emojiPickerWrapper && emojiPicker) {
+      // Toggle picker visibility
+      emojiToggle.addEventListener('click', () => {
+        emojiPickerWrapper.classList.toggle('hidden');
+      });
+
+      // Handle emoji selection from web component
+      emojiPicker.addEventListener('emoji-click', (event: Event) => {
+        const customEvent = event as CustomEvent;
+        if (messageInput && customEvent.detail?.unicode) {
+          const emoji = customEvent.detail.unicode;
+          const start = messageInput.selectionStart;
+          const end = messageInput.selectionEnd;
+          const text = messageInput.value;
+          messageInput.value = text.substring(0, start) + emoji + text.substring(end);
+          messageInput.focus();
+          messageInput.selectionStart = messageInput.selectionEnd = start + emoji.length;
+        }
+      });
+
+      // Close picker when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!emojiPickerWrapper.contains(e.target as Node) && e.target !== emojiToggle && !emojiToggle.contains(e.target as Node)) {
+          emojiPickerWrapper.classList.add('hidden');
+        }
+      });
+    }
+
+    // Enter key to send message
+    if (messageInput && sendButton) {
+      messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendButton.click();
+        }
       });
     }
 
@@ -252,7 +248,7 @@ export class ClientPortalModule extends BaseModule {
 
   private setupButtonAnimations(): void {
     const buttons = document.querySelectorAll('.client-buttons .btn');
-    buttons.forEach(button => {
+    buttons.forEach((button) => {
       this.animateButton(button as HTMLElement);
     });
   }
@@ -363,11 +359,14 @@ export class ClientPortalModule extends BaseModule {
       if (credentials.email && credentials.password) {
         // Simulate a successful login response
         const mockUserData = {
-          token: `demo_token_${  Date.now()}`,
+          token: `demo_token_${Date.now()}`,
           user: {
             id: 1,
             email: credentials.email,
-            name: credentials.email.split('@')[0].replace(/[^a-zA-Z]/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+            name: credentials.email
+              .split('@')[0]
+              .replace(/[^a-zA-Z]/g, ' ')
+              .replace(/\b\w/g, (l) => l.toUpperCase())
           }
         };
 
@@ -383,7 +382,6 @@ export class ClientPortalModule extends BaseModule {
       } else {
         throw new Error('Please enter both email and password');
       }
-
     } catch (error) {
       console.error('Login error:', error);
       this.showLoginError(error instanceof Error ? error.message : 'Login failed');
@@ -392,7 +390,11 @@ export class ClientPortalModule extends BaseModule {
     }
   }
 
-  private async loadMockUserProjects(user: {id: number, email: string, name: string}): Promise<void> {
+  private async loadMockUserProjects(user: {
+    id: number;
+    email: string;
+    name: string;
+  }): Promise<void> {
     try {
       // Create sample project data based on user
       const sampleProject: ClientProject = {
@@ -405,13 +407,16 @@ export class ClientPortalModule extends BaseModule {
         priority: 'medium',
         progress: 25,
         startDate: new Date().toISOString().split('T')[0],
-        estimatedEndDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        estimatedEndDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0],
         updates: [
           {
             id: 'update-001',
             date: new Date().toISOString().split('T')[0],
             title: 'Project Intake Received',
-            description: 'Your project details have been received and we\'re reviewing your requirements.',
+            description:
+              'Your project details have been received and we\'re reviewing your requirements.',
             author: 'No Bhad Codes Team',
             type: 'general'
           },
@@ -419,7 +424,8 @@ export class ClientPortalModule extends BaseModule {
             id: 'update-002',
             date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             title: 'Account Activated',
-            description: 'Your client account has been activated and you now have access to this portal.',
+            description:
+              'Your client account has been activated and you now have access to this portal.',
             author: 'System',
             type: 'general'
           }
@@ -462,12 +468,12 @@ export class ClientPortalModule extends BaseModule {
       }
 
       this.populateProjectsList([sampleProject]);
-
     } catch (error) {
       console.error('Failed to load projects:', error);
       // Show error message or fallback
       if (this.projectsList) {
-        this.projectsList.innerHTML = '<div class="error-message"><p>Failed to load projects. Please try refreshing the page.</p></div>';
+        this.projectsList.innerHTML =
+          '<div class="error-message"><p>Failed to load projects. Please try refreshing the page.</p></div>';
       }
     }
   }
@@ -482,7 +488,7 @@ export class ClientPortalModule extends BaseModule {
 
     this.projectsList.innerHTML = '';
 
-    projects.forEach(project => {
+    projects.forEach((project) => {
       const projectItem = document.createElement('div');
       projectItem.className = 'project-item';
       projectItem.dataset.projectId = project.id;
@@ -494,7 +500,9 @@ export class ClientPortalModule extends BaseModule {
 
       projectItem.addEventListener('click', () => {
         this.selectProject(project);
-        document.querySelectorAll('.project-item').forEach(item => item.classList.remove('active'));
+        document
+          .querySelectorAll('.project-item')
+          .forEach((item) => item.classList.remove('active'));
         projectItem.classList.add('active');
       });
 
@@ -518,7 +526,7 @@ export class ClientPortalModule extends BaseModule {
     if (projectDetailView) projectDetailView.style.display = 'block';
 
     // Clear active state from navigation items
-    document.querySelectorAll('.account-item').forEach(item => item.classList.remove('active'));
+    document.querySelectorAll('.account-item').forEach((item) => item.classList.remove('active'));
   }
 
   private populateProjectDetails(): void {
@@ -540,23 +548,35 @@ export class ClientPortalModule extends BaseModule {
     // Populate project description
     const descriptionElement = document.getElementById('project-description');
     if (descriptionElement) {
-      descriptionElement.textContent = this.currentProject.description || 'Project details will be updated soon.';
+      descriptionElement.textContent =
+        this.currentProject.description || 'Project details will be updated soon.';
     }
 
     // Populate current phase
     const currentPhaseElement = document.getElementById('current-phase');
     if (currentPhaseElement) {
-      const phase = this.currentProject.status === 'pending' ? 'Initial Review' :
-        this.currentProject.status === 'in-progress' ? 'Development' :
-          this.currentProject.status === 'in-review' ? 'Review' : 'Completed';
+      const phase =
+        this.currentProject.status === 'pending'
+          ? 'Initial Review'
+          : this.currentProject.status === 'in-progress'
+            ? 'Development'
+            : this.currentProject.status === 'in-review'
+              ? 'Review'
+              : 'Completed';
       currentPhaseElement.textContent = phase;
     }
 
     // Populate next milestone
     const nextMilestoneElement = document.getElementById('next-milestone');
-    if (nextMilestoneElement && this.currentProject.milestones && this.currentProject.milestones.length > 0) {
-      const nextMilestone = this.currentProject.milestones.find(m => !m.isCompleted);
-      nextMilestoneElement.textContent = nextMilestone ? nextMilestone.title : 'No upcoming milestones';
+    if (
+      nextMilestoneElement &&
+      this.currentProject.milestones &&
+      this.currentProject.milestones.length > 0
+    ) {
+      const nextMilestone = this.currentProject.milestones.find((m) => !m.isCompleted);
+      nextMilestoneElement.textContent = nextMilestone
+        ? nextMilestone.title
+        : 'No upcoming milestones';
     }
 
     // Populate progress
@@ -575,8 +595,10 @@ export class ClientPortalModule extends BaseModule {
 
     const lastUpdateElement = document.getElementById('last-update');
     if (lastUpdateElement) {
-      const lastUpdate = this.currentProject.updates && this.currentProject.updates.length > 0 ?
-        this.currentProject.updates[0].date : this.currentProject.startDate;
+      const lastUpdate =
+        this.currentProject.updates && this.currentProject.updates.length > 0
+          ? this.currentProject.updates[0].date
+          : this.currentProject.startDate;
       lastUpdateElement.textContent = this.formatDate(lastUpdate);
     }
 
@@ -668,15 +690,19 @@ export class ClientPortalModule extends BaseModule {
   }
 
   private animateDashboard(): void {
-    gsap.fromTo(this.dashboardSection, {
-      opacity: 0,
-      y: 20
-    }, {
-      opacity: 1,
-      y: 0,
-      duration: APP_CONSTANTS.TIMERS.PAGE_TRANSITION / 1000,
-      ease: APP_CONSTANTS.EASING.SMOOTH
-    });
+    gsap.fromTo(
+      this.dashboardSection,
+      {
+        opacity: 0,
+        y: 20
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: APP_CONSTANTS.TIMERS.PAGE_TRANSITION / 1000,
+        ease: APP_CONSTANTS.EASING.SMOOTH
+      }
+    );
   }
 
   private logout(): void {
@@ -711,11 +737,11 @@ export class ClientPortalModule extends BaseModule {
     if (!tabName) return;
 
     // Update tab active states
-    document.querySelectorAll('.project-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.project-tab').forEach((t) => t.classList.remove('active'));
     tab.classList.add('active');
 
     // Update tab content
-    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach((pane) => pane.classList.remove('active'));
     const targetPane = document.getElementById(`${tabName}-content`);
     if (targetPane) {
       targetPane.classList.add('active');
@@ -766,7 +792,7 @@ export class ClientPortalModule extends BaseModule {
     try {
       const response = await fetch('http://localhost:3001/api/auth/profile', {
         headers: {
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         }
       });
 
@@ -796,8 +822,8 @@ export class ClientPortalModule extends BaseModule {
   }
 
   private clearErrors(): void {
-    document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-    document.querySelectorAll('.error-message').forEach(el => {
+    document.querySelectorAll('.error').forEach((el) => el.classList.remove('error'));
+    document.querySelectorAll('.error-message').forEach((el) => {
       (el as HTMLElement).style.display = 'none';
     });
   }
@@ -817,7 +843,9 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // Remove active state from all navigation items
-    document.querySelectorAll('.project-item, .account-item').forEach(item => item.classList.remove('active'));
+    document
+      .querySelectorAll('.project-item, .account-item')
+      .forEach((item) => item.classList.remove('active'));
   }
 
   private showBillingView(): void {
@@ -833,7 +861,9 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // Set active state on billing button
-    document.querySelectorAll('.project-item, .account-item').forEach(item => item.classList.remove('active'));
+    document
+      .querySelectorAll('.project-item, .account-item')
+      .forEach((item) => item.classList.remove('active'));
     const billingBtn = document.getElementById('billing-btn');
     if (billingBtn) billingBtn.classList.add('active');
   }
@@ -859,7 +889,9 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // Set active state on contact button
-    document.querySelectorAll('.project-item, .account-item').forEach(item => item.classList.remove('active'));
+    document
+      .querySelectorAll('.project-item, .account-item')
+      .forEach((item) => item.classList.remove('active'));
     const contactBtn = document.getElementById('contact-btn');
     if (contactBtn) contactBtn.classList.add('active');
   }
@@ -885,7 +917,9 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // Set active state on notifications button
-    document.querySelectorAll('.project-item, .account-item').forEach(item => item.classList.remove('active'));
+    document
+      .querySelectorAll('.project-item, .account-item')
+      .forEach((item) => item.classList.remove('active'));
     const notificationsBtn = document.getElementById('notifications-btn');
     if (notificationsBtn) notificationsBtn.classList.add('active');
   }
@@ -901,7 +935,9 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // Update active states
-    document.querySelectorAll('.project-item, .account-item, .project-subitem').forEach(item => item.classList.remove('active'));
+    document
+      .querySelectorAll('.project-item, .account-item, .project-subitem')
+      .forEach((item) => item.classList.remove('active'));
     const updatesBtn = document.getElementById('updates-btn');
     if (updatesBtn) updatesBtn.classList.add('active');
   }
@@ -917,7 +953,9 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // Update active states
-    document.querySelectorAll('.project-item, .account-item, .project-subitem').forEach(item => item.classList.remove('active'));
+    document
+      .querySelectorAll('.project-item, .account-item, .project-subitem')
+      .forEach((item) => item.classList.remove('active'));
     const filesBtn = document.getElementById('files-btn');
     if (filesBtn) filesBtn.classList.add('active');
   }
@@ -933,7 +971,9 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // Update active states
-    document.querySelectorAll('.project-item, .account-item, .project-subitem').forEach(item => item.classList.remove('active'));
+    document
+      .querySelectorAll('.project-item, .account-item, .project-subitem')
+      .forEach((item) => item.classList.remove('active'));
     const messagesBtn = document.getElementById('messages-btn');
     if (messagesBtn) messagesBtn.classList.add('active');
   }
@@ -949,7 +989,9 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // Update active states
-    document.querySelectorAll('.project-item, .account-item, .project-subitem').forEach(item => item.classList.remove('active'));
+    document
+      .querySelectorAll('.project-item, .account-item, .project-subitem')
+      .forEach((item) => item.classList.remove('active'));
     const contentBtn = document.getElementById('content-btn');
     if (contentBtn) contentBtn.classList.add('active');
   }
@@ -965,7 +1007,9 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // Update active states
-    document.querySelectorAll('.project-item, .account-item, .project-subitem').forEach(item => item.classList.remove('active'));
+    document
+      .querySelectorAll('.project-item, .account-item, .project-subitem')
+      .forEach((item) => item.classList.remove('active'));
     const projectMain = document.getElementById('project-main');
     if (projectMain) projectMain.classList.add('active');
 
@@ -983,14 +1027,16 @@ export class ClientPortalModule extends BaseModule {
       welcomeView.style.display = 'block';
     }
 
-    document.querySelectorAll('.project-item, .account-item, .project-subitem').forEach(item => item.classList.remove('active'));
+    document
+      .querySelectorAll('.project-item, .account-item, .project-subitem')
+      .forEach((item) => item.classList.remove('active'));
 
-    this.updateBreadcrumbs([
-      { label: 'Dashboard', href: false }
-    ]);
+    this.updateBreadcrumbs([{ label: 'Dashboard', href: false }]);
   }
 
-  private updateBreadcrumbs(breadcrumbs: Array<{label: string, href: boolean, onClick?: () => void}>): void {
+  private updateBreadcrumbs(
+    breadcrumbs: Array<{ label: string; href: boolean; onClick?: () => void }>
+  ): void {
     const breadcrumbList = document.getElementById('breadcrumb-list');
     if (!breadcrumbList) return;
 
@@ -1039,7 +1085,7 @@ export class ClientPortalModule extends BaseModule {
       'content-view'
     ];
 
-    views.forEach(viewId => {
+    views.forEach((viewId) => {
       const view = document.getElementById(viewId);
       if (view) {
         view.style.display = 'none';
@@ -1049,24 +1095,37 @@ export class ClientPortalModule extends BaseModule {
 
   private toggleSidebar(): void {
     const sidebar = document.getElementById('sidebar');
-    const toggleBtn = document.getElementById('sidebar-toggle');
 
-    if (!sidebar || !toggleBtn) {
-      console.error('Sidebar elements not found');
+    if (!sidebar) {
+      console.error('Sidebar element not found');
       return;
     }
 
-    const isCollapsed = sidebar.classList.contains('collapsed');
+    sidebar.classList.toggle('collapsed');
+  }
 
-    if (isCollapsed) {
-      // Expand sidebar
-      sidebar.classList.remove('collapsed');
-      toggleBtn.innerHTML = '<span>◀</span>';
-    } else {
-      // Collapse sidebar
-      sidebar.classList.add('collapsed');
-      toggleBtn.innerHTML = '<span>▶</span>';
+  /**
+   * Switch to a specific tab in the dashboard
+   */
+  private switchTab(tabName: string): void {
+    // Hide all tab content
+    const allTabContent = document.querySelectorAll('.tab-content');
+    allTabContent.forEach((tab) => tab.classList.remove('active'));
+
+    // Show the selected tab content
+    const targetTab = document.getElementById(`tab-${tabName}`);
+    if (targetTab) {
+      targetTab.classList.add('active');
     }
+
+    // Update nav button active states
+    const navButtons = document.querySelectorAll('.nav-btn[data-tab]');
+    navButtons.forEach((btn) => {
+      btn.classList.remove('active');
+      if ((btn as HTMLElement).dataset.tab === tabName) {
+        btn.classList.add('active');
+      }
+    });
   }
 
   private toggleAccountFolder(): void {
@@ -1086,7 +1145,7 @@ export class ClientPortalModule extends BaseModule {
       accountList.classList.add('collapsed');
       accountHeader.classList.remove('expanded');
       // Clear any active account items when collapsing
-      document.querySelectorAll('.account-item').forEach(item => item.classList.remove('active'));
+      document.querySelectorAll('.account-item').forEach((item) => item.classList.remove('active'));
 
       // Hide the main content views when collapsing account
       const welcomeView = document.getElementById('welcome-view');
@@ -1100,7 +1159,6 @@ export class ClientPortalModule extends BaseModule {
       }
     }
   }
-
 
   private setupSettingsForms(): void {
     // Contact Info Form
@@ -1171,7 +1229,9 @@ export class ClientPortalModule extends BaseModule {
     const emailInput = document.getElementById('contact-email') as HTMLInputElement;
     const companyInput = document.getElementById('contact-company') as HTMLInputElement;
     const phoneInput = document.getElementById('contact-phone') as HTMLInputElement;
-    const secondaryEmailInput = document.getElementById('contact-secondary-email') as HTMLInputElement;
+    const secondaryEmailInput = document.getElementById(
+      'contact-secondary-email'
+    ) as HTMLInputElement;
 
     if (nameInput) nameInput.value = userData.name;
     if (emailInput) emailInput.value = userData.email;
@@ -1200,19 +1260,23 @@ export class ClientPortalModule extends BaseModule {
     const savedBillingData = localStorage.getItem('client_billing_address');
     const savedTaxData = localStorage.getItem('client_tax_info');
 
-    const billingData = savedBillingData ? JSON.parse(savedBillingData) : {
-      address1: '',
-      address2: '',
-      city: '',
-      state: '',
-      zip: '',
-      country: ''
-    };
+    const billingData = savedBillingData
+      ? JSON.parse(savedBillingData)
+      : {
+        address1: '',
+        address2: '',
+        city: '',
+        state: '',
+        zip: '',
+        country: ''
+      };
 
-    const taxData = savedTaxData ? JSON.parse(savedTaxData) : {
-      taxId: '',
-      businessName: ''
-    };
+    const taxData = savedTaxData
+      ? JSON.parse(savedTaxData)
+      : {
+        taxId: '',
+        businessName: ''
+      };
 
     // Populate billing address form
     const address1Input = document.getElementById('billing-view-address1') as HTMLInputElement;
@@ -1241,20 +1305,24 @@ export class ClientPortalModule extends BaseModule {
     // Load contact data from localStorage or API
     const savedContactData = localStorage.getItem('client_contact_info');
 
-    const contactData = savedContactData ? JSON.parse(savedContactData) : {
-      name: this.currentUser || 'User',
-      email: this.currentUser || '',
-      company: '',
-      phone: '',
-      secondaryEmail: ''
-    };
+    const contactData = savedContactData
+      ? JSON.parse(savedContactData)
+      : {
+        name: this.currentUser || 'User',
+        email: this.currentUser || '',
+        company: '',
+        phone: '',
+        secondaryEmail: ''
+      };
 
     // Populate contact form
     const nameInput = document.getElementById('contact-view-name') as HTMLInputElement;
     const emailInput = document.getElementById('contact-view-email') as HTMLInputElement;
     const companyInput = document.getElementById('contact-view-company') as HTMLInputElement;
     const phoneInput = document.getElementById('contact-view-phone') as HTMLInputElement;
-    const secondaryEmailInput = document.getElementById('contact-view-secondary-email') as HTMLInputElement;
+    const secondaryEmailInput = document.getElementById(
+      'contact-view-secondary-email'
+    ) as HTMLInputElement;
 
     if (nameInput) nameInput.value = contactData.name;
     if (emailInput) emailInput.value = contactData.email;
@@ -1268,19 +1336,23 @@ export class ClientPortalModule extends BaseModule {
     const savedNotifications = localStorage.getItem('client_notification_prefs');
     const savedFrequency = localStorage.getItem('client_notification_frequency');
 
-    const notificationPrefs = savedNotifications ? JSON.parse(savedNotifications) : [
-      'project-updates', 'invoices', 'messages', 'milestones'
-    ];
+    const notificationPrefs = savedNotifications
+      ? JSON.parse(savedNotifications)
+      : ['project-updates', 'invoices', 'messages', 'milestones'];
 
-    const frequencyData = savedFrequency ? JSON.parse(savedFrequency) : {
-      frequency: 'immediate',
-      quietStart: '',
-      quietEnd: ''
-    };
+    const frequencyData = savedFrequency
+      ? JSON.parse(savedFrequency)
+      : {
+        frequency: 'immediate',
+        quietStart: '',
+        quietEnd: ''
+      };
 
     // Set checkbox values
-    const checkboxes = document.querySelectorAll('#email-notifications-form input[type="checkbox"]');
-    checkboxes.forEach(checkbox => {
+    const checkboxes = document.querySelectorAll(
+      '#email-notifications-form input[type="checkbox"]'
+    );
+    checkboxes.forEach((checkbox) => {
       const cb = checkbox as HTMLInputElement;
       cb.checked = notificationPrefs.includes(cb.value);
     });

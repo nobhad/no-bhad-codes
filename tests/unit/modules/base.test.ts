@@ -237,10 +237,7 @@ describe('BaseModule', () => {
 
       module.testLog('Test message');
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '[test-module]',
-        'Test message'
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('[test-module]', 'Test message');
 
       consoleSpy.mockRestore();
     });
@@ -251,11 +248,7 @@ describe('BaseModule', () => {
 
       module.testLogError('Error occurred', error);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '[test-module]',
-        'Error occurred',
-        error
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('[test-module]', 'Error occurred', error);
 
       consoleSpy.mockRestore();
     });

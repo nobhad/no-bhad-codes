@@ -69,8 +69,8 @@ export class PerformanceService {
   constructor(budget?: Partial<PerformanceBudget>) {
     this.budget = {
       lcp: APP_CONSTANTS.PERFORMANCE.FCP_GOOD, // 1.8s
-      fid: 100,  // 100ms
-      cls: 0.1,  // 0.1
+      fid: 100, // 100ms
+      cls: 0.1, // 0.1
       bundleSize: 600 * 1024, // 600KB - Increased to realistic size for TypeScript app
       ttfb: 200, // 200ms
       ...budget
@@ -230,9 +230,9 @@ export class PerformanceService {
       const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
       let totalJSSize = 0;
 
-      resources.forEach(resource => {
+      resources.forEach((resource) => {
         if (resource.name.includes('.js') || resource.name.includes('/src/')) {
-          totalJSSize += (resource.transferSize || resource.decodedBodySize || 0);
+          totalJSSize += resource.transferSize || resource.decodedBodySize || 0;
         }
       });
 
@@ -244,7 +244,7 @@ export class PerformanceService {
 
     // Parse and execution timing
     const parseStart = performance.now();
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     this.metrics.parseTime = performance.now() - parseStart;
   }
 
@@ -253,7 +253,7 @@ export class PerformanceService {
    */
   private monitorMemoryUsage(): void {
     if ('memory' in performance) {
-      const { memory } = (performance as any);
+      const { memory } = performance as any;
 
       this.metrics.memoryUsage = {
         used: memory.usedJSHeapSize,
@@ -284,7 +284,7 @@ export class PerformanceService {
    * Measure network performance
    */
   private measureNetworkPerformance(): void {
-    const { connection } = (navigator as any);
+    const { connection } = navigator as any;
     if (connection) {
       this.metrics.connectionType = connection.effectiveType;
       this.metrics.downloadSpeed = connection.downlink;
@@ -481,7 +481,7 @@ export class PerformanceService {
     } {
     const recommendations: string[] = [];
 
-    this.alerts.forEach(alert => {
+    this.alerts.forEach((alert) => {
       recommendations.push(...alert.suggestions);
     });
 
@@ -500,7 +500,7 @@ export class PerformanceService {
    * Stop monitoring
    */
   stopMonitoring(): void {
-    this.observers.forEach(observer => observer.disconnect());
+    this.observers.forEach((observer) => observer.disconnect());
     this.observers = [];
     this.isMonitoring = false;
 

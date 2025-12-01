@@ -3,7 +3,7 @@
  * REQUEST LOGGING MIDDLEWARE
  * ===============================================
  * @file server/middleware/request-logger.ts
- * 
+ *
  * Express middleware for logging HTTP requests
  * using the centralized logging service.
  */
@@ -54,7 +54,7 @@ export function requestLogger() {
     // Capture response finish event
     res.on('finish', () => {
       const duration = Date.now() - req.startTime;
-      
+
       // Log completed request
       logger.logRequest(req, res, duration);
 

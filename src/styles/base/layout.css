@@ -16,7 +16,7 @@
   /* Layout dimensions - Fixed values to prevent CLS */
   --header-height: 60px;
   --footer-height: 40px;
-  
+
   /* Responsive layout dimensions */
   --size-container: min(1200px, 100vw - 2rem);
   --container-padding: clamp(1rem, 4vw, 2rem);
@@ -174,60 +174,128 @@ section {
  * FLEXBOX UTILITIES
  * ============================================ */
 
-.flex { display: flex; gap: var(--gap); }
-.inline-flex { display: inline-flex; }
-.flex-col { flex-direction: column; }
-.flex-row { flex-direction: row; }
-.flex-wrap { flex-wrap: wrap; }
-.flex-nowrap { flex-wrap: nowrap; }
-.items-center { align-items: center; }
-.items-start { align-items: flex-start; }
-.items-end { align-items: flex-end; }
-.justify-center { justify-content: center; }
-.justify-start { justify-content: flex-start; }
-.justify-end { justify-content: flex-end; }
-.justify-between { justify-content: space-between; }
-.justify-around { justify-content: space-around; }
-.justify-evenly { justify-content: space-evenly; }
+.flex {
+  display: flex;
+  gap: var(--gap);
+}
+.inline-flex {
+  display: inline-flex;
+}
+.flex-col {
+  flex-direction: column;
+}
+.flex-row {
+  flex-direction: row;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+.flex-nowrap {
+  flex-wrap: nowrap;
+}
+.items-center {
+  align-items: center;
+}
+.items-start {
+  align-items: flex-start;
+}
+.items-end {
+  align-items: flex-end;
+}
+.justify-center {
+  justify-content: center;
+}
+.justify-start {
+  justify-content: flex-start;
+}
+.justify-end {
+  justify-content: flex-end;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.justify-around {
+  justify-content: space-around;
+}
+.justify-evenly {
+  justify-content: space-evenly;
+}
 
 /* ============================================
  * GRID UTILITIES
  * ============================================ */
 
-.grid { display: grid; gap: var(--gap); }
-.inline-grid { display: inline-grid; }
-.grid-cols-1 { grid-template-columns: 1fr; }
-.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-.grid-cols-12 { grid-template-columns: repeat(12, 1fr); }
+.grid {
+  display: grid;
+  gap: var(--gap);
+}
+.inline-grid {
+  display: inline-grid;
+}
+.grid-cols-1 {
+  grid-template-columns: 1fr;
+}
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.grid-cols-12 {
+  grid-template-columns: repeat(12, 1fr);
+}
 
 /* ============================================
  * POSITION UTILITIES
  * ============================================ */
 
-.relative { position: relative; }
-.absolute { position: absolute; }
-.fixed { position: fixed; }
-.sticky { position: sticky; }
-.static { position: static; }
+.relative {
+  position: relative;
+}
+.absolute {
+  position: absolute;
+}
+.fixed {
+  position: fixed;
+}
+.sticky {
+  position: sticky;
+}
+.static {
+  position: static;
+}
 
 /* ============================================
  * DISPLAY UTILITIES
  * ============================================ */
 
-.block { display: block; }
-.inline { display: inline; }
-.inline-block { display: inline-block; }
-.hidden { display: none; }
+.block {
+  display: block;
+}
+.inline {
+  display: inline;
+}
+.inline-block {
+  display: inline-block;
+}
+.hidden {
+  display: none;
+}
 
 /* ============================================
  * VISIBILITY UTILITIES
  * ============================================ */
 
 @media (max-width: 767px) {
-  .md\:hidden { display: none; }
-  .sm\:block { display: block; }
+  .md\:hidden {
+    display: none;
+  }
+  .sm\:block {
+    display: block;
+  }
   .grid-cols-2,
   .grid-cols-3,
   .grid-cols-4 {
@@ -236,8 +304,12 @@ section {
 }
 
 @media (min-width: 768px) {
-  .md\:block { display: block; }
-  .sm\:hidden { display: none; }
+  .md\:block {
+    display: block;
+  }
+  .sm\:hidden {
+    display: none;
+  }
 }
 
 /* ============================================
@@ -306,11 +378,11 @@ main,
     top: var(--header-height);
     height: calc(100vh - var(--header-height) - var(--footer-height));
   }
-  
+
   section {
     padding: 1.5rem;
   }
-  
+
   .section-content {
     max-width: min(900px, 92vw);
     padding: 0.75rem;
@@ -322,23 +394,23 @@ main,
     top: var(--header-height);
     height: calc(100vh - var(--header-height) - var(--footer-height));
   }
-  
+
   section {
     height: calc(100svh - var(--header-height));
     padding: 1rem;
   }
-  
+
   .section-content {
     max-width: 95vw;
     padding: 0.5rem;
     font-size: clamp(0.8rem, 2.5vw, 1rem);
   }
-  
+
   .about-content {
     max-width: 95vw;
     gap: 0.8rem;
   }
-  
+
   .container,
   .page-content {
     max-width: 95vw;
@@ -349,12 +421,12 @@ main,
   section {
     padding: 0.75rem;
   }
-  
+
   .section-content {
     max-width: 98vw;
     padding: 0.25rem;
   }
-  
+
   .container,
   .page-content {
     max-width: 98vw;

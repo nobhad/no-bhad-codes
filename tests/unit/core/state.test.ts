@@ -3,7 +3,7 @@
  * STATE MANAGEMENT TESTS
  * ===============================================
  * @file tests/unit/core/state.test.ts
- * 
+ *
  * Unit tests for the state management system.
  */
 
@@ -171,9 +171,9 @@ describe('StateManager', () => {
 
   describe('State Persistence', () => {
     it('should persist state to localStorage when enabled', () => {
-      const persistentState = new StateManager({ 
+      const persistentState = new StateManager({
         persist: true,
-        persistKey: 'test-state' 
+        persistKey: 'test-state'
       });
 
       persistentState.setState('persistentKey', 'persistentValue');
@@ -193,9 +193,9 @@ describe('StateManager', () => {
       });
       (localStorage.getItem as any).mockReturnValue(mockStateData);
 
-      const persistentState = new StateManager({ 
+      const persistentState = new StateManager({
         persist: true,
-        persistKey: 'restore-test' 
+        persistKey: 'restore-test'
       });
 
       expect(persistentState.getState('restoredKey')).toBe('restoredValue');
@@ -209,9 +209,9 @@ describe('StateManager', () => {
         throw new Error('localStorage error');
       });
 
-      const persistentState = new StateManager({ 
+      const persistentState = new StateManager({
         persist: true,
-        persistKey: 'error-test' 
+        persistKey: 'error-test'
       });
 
       // Should not throw, just log error
@@ -246,7 +246,7 @@ describe('StateManager', () => {
 
     it('should support async validators', async () => {
       const asyncValidator = async (value: any) => {
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
         if (value !== 'validAsync') {
           throw new Error('Invalid async value');
         }
@@ -255,13 +255,11 @@ describe('StateManager', () => {
 
       stateManager.setValidator('asyncKey', asyncValidator);
 
-      await expect(
-        stateManager.setStateAsync('asyncKey', 'validAsync')
-      ).resolves.not.toThrow();
+      await expect(stateManager.setStateAsync('asyncKey', 'validAsync')).resolves.not.toThrow();
 
-      await expect(
-        stateManager.setStateAsync('asyncKey', 'invalidAsync')
-      ).rejects.toThrow('Invalid async value');
+      await expect(stateManager.setStateAsync('asyncKey', 'invalidAsync')).rejects.toThrow(
+        'Invalid async value'
+      );
     });
   });
 
@@ -288,11 +286,11 @@ describe('StateManager', () => {
 
       historyState.setState('undoKey', 'value1');
       historyState.setState('undoKey', 'value2');
-      
+
       expect(historyState.getState('undoKey')).toBe('value2');
 
       historyState.undo('undoKey');
-      
+
       expect(historyState.getState('undoKey')).toBe('value1');
 
       historyState.destroy();
@@ -304,11 +302,11 @@ describe('StateManager', () => {
       historyState.setState('redoKey', 'value1');
       historyState.setState('redoKey', 'value2');
       historyState.undo('redoKey');
-      
+
       expect(historyState.getState('redoKey')).toBe('value1');
 
       historyState.redo('redoKey');
-      
+
       expect(historyState.getState('redoKey')).toBe('value2');
 
       historyState.destroy();
@@ -371,8 +369,8 @@ describe('StateManager', () => {
     });
 
     it('should support multiple middleware functions', () => {
-      const middleware1 = vi.fn((key, value) => value + '_1');
-      const middleware2 = vi.fn((key, value) => value + '_2');
+      const middleware1 = vi.fn((key, value) => `${value  }_1`);
+      const middleware2 = vi.fn((key, value) => `${value  }_2`);
 
       stateManager.use(middleware1);
       stateManager.use(middleware2);

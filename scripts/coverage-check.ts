@@ -77,9 +77,11 @@ function checkCoverage(): void {
     const status = coverage >= threshold ? '✅' : '❌';
     const color = coverage >= threshold ? '\x1b[32m' : '\x1b[31m';
     const reset = '\x1b[0m';
-    
-    console.log(`${status} ${metric.padEnd(12)} ${color}${coverage.toFixed(1)}%${reset} (threshold: ${threshold}%)`);
-    
+
+    console.log(
+      `${status} ${metric.padEnd(12)} ${color}${coverage.toFixed(1)}%${reset} (threshold: ${threshold}%)`
+    );
+
     if (coverage < threshold) {
       failed = true;
     }
@@ -91,14 +93,15 @@ function checkCoverage(): void {
   const files = Object.entries(coverageData)
     .filter(([key]) => key !== 'total')
     .map(([file, data]) => ({ file, ...data }))
-    .filter(file => 
-      file.lines.pct < DEFAULT_THRESHOLDS.lines ||
-      file.functions.pct < DEFAULT_THRESHOLDS.functions
+    .filter(
+      (file) =>
+        file.lines.pct < DEFAULT_THRESHOLDS.lines ||
+        file.functions.pct < DEFAULT_THRESHOLDS.functions
     );
 
   if (files.length > 0) {
     console.log('⚠️  Files below coverage thresholds:');
-    files.forEach(file => {
+    files.forEach((file) => {
       console.log(`   📄 ${file.file}`);
       console.log(`      Lines: ${file.lines.pct}% | Functions: ${file.functions.pct}%`);
     });
@@ -131,7 +134,7 @@ function generateBadgeData(): void {
 
   const coverageData: CoverageData = JSON.parse(readFileSync(COVERAGE_FILE, 'utf8'));
   const coverage = Math.round(coverageData.total.lines.pct);
-  
+
   let color = 'red';
   if (coverage >= 80) color = 'brightgreen';
   else if (coverage >= 70) color = 'yellow';

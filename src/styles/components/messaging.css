@@ -243,7 +243,7 @@
 }
 
 .message.unread::before {
-  content: '';
+  content: "";
   position: absolute;
   left: -4px;
   top: 0;
@@ -652,7 +652,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

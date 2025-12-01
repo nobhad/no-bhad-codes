@@ -19,7 +19,9 @@ export type StateAction<_T = unknown> = {
   };
 };
 export type StateReducer<T> = (state: T, action: StateAction<T>) => Partial<T>;
-export type StateMiddleware<T> = (store: StateManager<T>) => (next: (action: StateAction<T>) => void) => (action: StateAction<T>) => void;
+export type StateMiddleware<T> = (
+  store: StateManager<T>
+) => (next: (action: StateAction<T>) => void) => (action: StateAction<T>) => void;
 export type ComputedProperty<T, U> = {
   selector: StateSelector<T, U>;
   dependencies: (keyof T)[];
@@ -62,7 +64,10 @@ export interface AppState {
 export class StateManager<T = AppState> {
   private state: T;
   private listeners = new Map<string, StateListener<T>[]>();
-  private selectors = new Map<string, { selector: StateSelector<T, any>, lastValue: any, listeners: Function[] }>();
+  private selectors = new Map<
+    string,
+    { selector: StateSelector<T, any>; lastValue: any; listeners: Function[] }
+  >();
   private computed = new Map<string, ComputedProperty<T, any>>();
   private reducers = new Map<string, StateReducer<T>>();
   private middleware: StateMiddleware<T>[] = [];
@@ -72,7 +77,10 @@ export class StateManager<T = AppState> {
   private persistenceEnabled = false;
   private persistenceKey = 'app-state';
 
-  constructor(initialState?: T, options?: { enablePersistence?: boolean; persistenceKey?: string }) {
+  constructor(
+    initialState?: T,
+    options?: { enablePersistence?: boolean; persistenceKey?: string }
+  ) {
     // Try to restore from localStorage if persistence is enabled
     if (options?.enablePersistence) {
       this.persistenceEnabled = true;
@@ -91,7 +99,7 @@ export class StateManager<T = AppState> {
       }
     }
 
-    this.state = initialState ? { ...initialState } : {} as T;
+    this.state = initialState ? { ...initialState } : ({} as T);
   }
 
   /**
@@ -116,7 +124,11 @@ export class StateManager<T = AppState> {
   setState<K extends keyof T>(keyOrUpdates: K | Partial<T>, value?: T[K]): void {
     const previousState = { ...this.state };
 
-    if (typeof keyOrUpdates === 'string' || typeof keyOrUpdates === 'number' || typeof keyOrUpdates === 'symbol') {
+    if (
+      typeof keyOrUpdates === 'string' ||
+      typeof keyOrUpdates === 'number' ||
+      typeof keyOrUpdates === 'symbol'
+    ) {
       // Key-value API
       this.state = { ...this.state, [keyOrUpdates]: value };
     } else {
@@ -219,7 +231,7 @@ export class StateManager<T = AppState> {
       const wildcardListener = listener!;
       const wrappedListener: StateListener<T> = (newState, prevState) => {
         // Call listener for any property that changed
-        Object.keys(newState as any).forEach(key => {
+        Object.keys(newState as any).forEach((key) => {
           const k = key as K;
           if (newState[k] !== prevState[k]) {
             wildcardListener(newState[k], prevState[k], k);
@@ -293,10 +305,7 @@ export class StateManager<T = AppState> {
   /**
    * Create a selector for derived state
    */
-  createSelector<U>(
-    selector: StateSelector<T, U>,
-    listener: (value: U) => void
-  ): () => void {
+  createSelector<U>(selector: StateSelector<T, U>, listener: (value: U) => void): () => void {
     const id = Math.random().toString(36);
     const currentValue = selector(this.state);
 
@@ -358,13 +367,13 @@ export class StateManager<T = AppState> {
   private notifyListeners(newState: T, previousState: T): void {
     // Global listeners
     const globalListeners = this.listeners.get('global') || [];
-    globalListeners.forEach(listener => listener(newState, previousState));
+    globalListeners.forEach((listener) => listener(newState, previousState));
 
     // Property-specific listeners
-    Object.keys(newState as any).forEach(key => {
+    Object.keys(newState as any).forEach((key) => {
       if (newState[key as keyof T] !== previousState[key as keyof T]) {
         const propertyListeners = this.listeners.get(key) || [];
-        propertyListeners.forEach(listener => listener(newState, previousState));
+        propertyListeners.forEach((listener) => listener(newState, previousState));
       }
     });
   }
@@ -374,7 +383,7 @@ export class StateManager<T = AppState> {
       const newValue = selectorData.selector(this.state);
       if (newValue !== selectorData.lastValue) {
         selectorData.lastValue = newValue;
-        selectorData.listeners.forEach(listener => listener(newValue));
+        selectorData.listeners.forEach((listener) => listener(newValue));
       }
     });
   }
@@ -383,14 +392,14 @@ export class StateManager<T = AppState> {
     this.computed.forEach((computedProp, _name) => {
       // Check if any dependency changed
       const hasChanged = computedProp.dependencies.some(
-        dep => this.state[dep] !== previousState[dep]
+        (dep) => this.state[dep] !== previousState[dep]
       );
 
       if (hasChanged) {
         const newValue = computedProp.selector(this.state);
         if (newValue !== computedProp.lastValue) {
           computedProp.lastValue = newValue;
-          computedProp.listeners.forEach(listener => listener(newValue));
+          computedProp.listeners.forEach((listener) => listener(newValue));
         }
       }
     });
@@ -544,9 +553,14 @@ export class StateManager<T = AppState> {
   /**
    * Set validator for state changes
    */
-  private validator?: (state: T, updates: Partial<T>) => boolean | string | Promise<boolean | string>;
+  private validator?: (
+    state: T,
+    updates: Partial<T>
+  ) => boolean | string | Promise<boolean | string>;
 
-  setValidator(validator: (state: T, updates: Partial<T>) => boolean | string | Promise<boolean | string>): void {
+  setValidator(
+    validator: (state: T, updates: Partial<T>) => boolean | string | Promise<boolean | string>
+  ): void {
     this.validator = validator;
   }
 
@@ -575,17 +589,20 @@ export class StateManager<T = AppState> {
 /**
  * Create a new state manager instance
  */
-export function createStateManager<T = AppState>(initialState?: T, options?: {
-  enableHistory?: boolean;
-  enablePersistence?: boolean;
-  persistenceKey?: string;
-}): StateManager<T> {
+export function createStateManager<T = AppState>(
+  initialState?: T,
+  options?: {
+    enableHistory?: boolean;
+    enablePersistence?: boolean;
+    persistenceKey?: string;
+  }
+): StateManager<T> {
   return new StateManager<T>(initialState, options);
 }
 
 // Enhanced connection detection
 const getConnectionType = (): 'slow-2g' | '2g' | '3g' | '4g' | 'unknown' => {
-  const { connection } = (navigator as any);
+  const { connection } = navigator as any;
   if (connection?.effectiveType) {
     return connection.effectiveType;
   }
@@ -638,7 +655,6 @@ const errorHandlingMiddleware: StateMiddleware<AppState> = (store) => (next) => 
   try {
     next(action);
   } catch (error) {
-
     console.error('State update error:', error);
     store.setState({
       lastError: error instanceof Error ? error.message : 'Unknown error',
@@ -680,15 +696,15 @@ appState.addReducer('CLEAR_ERROR', (_state) => ({
 // Built-in computed properties
 appState.createComputed(
   'isReducedExperience',
-  (state) => state.reducedMotion || state.connectionType === 'slow-2g' || state.connectionType === '2g',
+  (state) =>
+    state.reducedMotion || state.connectionType === 'slow-2g' || state.connectionType === '2g',
   ['reducedMotion', 'connectionType']
 );
 
-appState.createComputed(
-  'canShowAnimations',
-  (state) => !state.reducedMotion && state.online,
-  ['reducedMotion', 'online']
-);
+appState.createComputed('canShowAnimations', (state) => !state.reducedMotion && state.online, [
+  'reducedMotion',
+  'online'
+]);
 
 // Network status listeners
 window.addEventListener('online', () => {

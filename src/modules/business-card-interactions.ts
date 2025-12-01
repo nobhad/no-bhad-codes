@@ -134,17 +134,16 @@ export class BusinessCardInteractions extends BaseModule {
       this.enableInteractions();
 
       this.log('BusinessCardInteractions initialization completed');
-
     } catch (error) {
       this.error('BusinessCardInteractions initialization failed:', error);
     }
   }
 
   /**
-     * ==========================================
-     * INTERACTION SETUP
-     * ==========================================
-     */
+   * ==========================================
+   * INTERACTION SETUP
+   * ==========================================
+   */
   setupInteractions() {
     this.log('Setting up card interactions...');
 
@@ -166,10 +165,10 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   /**
-     * ==========================================
-     * ENABLE/DISABLE INTERACTIONS
-     * ==========================================
-     */
+   * ==========================================
+   * ENABLE/DISABLE INTERACTIONS
+   * ==========================================
+   */
   enableInteractions() {
     if (!this.businessCard) {
       this.error('Cannot enable interactions - card element missing');
@@ -201,10 +200,10 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   /**
-     * ==========================================
-     * EVENT LISTENER MANAGEMENT
-     * ==========================================
-     */
+   * ==========================================
+   * EVENT LISTENER MANAGEMENT
+   * ==========================================
+   */
   addEventListeners() {
     if (!this.businessCard) return;
 
@@ -248,10 +247,10 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   /**
-     * ==========================================
-     * CURSOR MANAGEMENT
-     * ==========================================
-     */
+   * ==========================================
+   * CURSOR MANAGEMENT
+   * ==========================================
+   */
   setCardCursor() {
     if (!this.businessCard) return;
 
@@ -271,10 +270,10 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   /**
-     * ==========================================
-     * EVENT HANDLERS
-     * ==========================================
-     */
+   * ==========================================
+   * EVENT HANDLERS
+   * ==========================================
+   */
   handleCardClick(event: MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
@@ -355,7 +354,7 @@ export class BusinessCardInteractions extends BaseModule {
     const normalizedY = (mouseY - viewportCenterY) / (window.innerHeight / 2);
 
     // Apply subtle global tilt with magnetic attraction effect
-    const magneticStrength = 1 - (distance / this.magneticRange);
+    const magneticStrength = 1 - distance / this.magneticRange;
     const rotateX = normalizedY * -this.globalTiltAngle * magneticStrength;
     const rotateY = normalizedX * this.globalTiltAngle * magneticStrength;
 
@@ -443,10 +442,10 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   /**
-     * ==========================================
-     * CARD FLIP ANIMATION
-     * ==========================================
-     */
+   * ==========================================
+   * CARD FLIP ANIMATION
+   * ==========================================
+   */
   flipCard() {
     if (!this.businessCardInner || this.isAnimating) {
       this.log('Cannot flip card - element missing or animating');
@@ -485,10 +484,10 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   /**
-     * ==========================================
-     * ACCESSIBILITY
-     * ==========================================
-     */
+   * ==========================================
+   * ACCESSIBILITY
+   * ==========================================
+   */
   protected override checkReducedMotion(): boolean {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -511,10 +510,10 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   /**
-     * ==========================================
-     * PUBLIC API
-     * ==========================================
-     */
+   * ==========================================
+   * PUBLIC API
+   * ==========================================
+   */
   getCurrentSide() {
     return this.isFlipped ? 'back' : 'front';
   }
@@ -539,10 +538,10 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   /**
-     * ==========================================
-     * STATUS & DEBUG
-     * ==========================================
-     */
+   * ==========================================
+   * STATUS & DEBUG
+   * ==========================================
+   */
   override getStatus() {
     return {
       ...super.getStatus(),
@@ -557,10 +556,10 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   /**
-     * ==========================================
-     * CLEANUP
-     * ==========================================
-     */
+   * ==========================================
+   * CLEANUP
+   * ==========================================
+   */
   protected override async onDestroy() {
     this.log('BusinessCardInteractions cleanup started');
 

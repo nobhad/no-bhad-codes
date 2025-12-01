@@ -3,7 +3,7 @@
  * CONTACT FORM E2E TESTS
  * ===============================================
  * @file tests/e2e/contact-form.spec.ts
- * 
+ *
  * End-to-end tests for contact form functionality.
  */
 
@@ -30,7 +30,7 @@ test.describe('Contact Form', () => {
   test('should validate required fields', async ({ page }) => {
     // Try to submit empty form
     await page.click('.form-button');
-    
+
     // Should show validation errors
     await expect(page.locator('.form-message')).toContainText('First name is required');
   });
@@ -39,14 +39,14 @@ test.describe('Contact Form', () => {
     // Fill in invalid email
     await page.fill('#Email', 'invalid-email');
     await page.blur('#Email');
-    
+
     // Should show email validation error
     await expect(page.locator('.field-error')).toContainText('valid email');
   });
 
   test('should handle form submission', async ({ page }) => {
     // Mock form submission to prevent actual API calls
-    await page.route('/', async route => {
+    await page.route('/', async (route) => {
       if (route.request().method() === 'POST') {
         await route.fulfill({
           status: 200,
@@ -65,13 +65,13 @@ test.describe('Contact Form', () => {
     await page.selectOption('#business-size', 'Small / Particular');
     await page.check('[value="WEB_DEVELOPMENT"]');
     await page.fill('#Message', 'This is a test message with enough content to pass validation.');
-    
+
     // Submit form
     await page.click('.form-button');
-    
+
     // Should show success message
     await expect(page.locator('.form-message.success')).toContainText('Thank you');
-    
+
     // Form should be reset
     await expect(page.locator('#First-Name')).toHaveValue('');
     await expect(page.locator('#Message')).toHaveValue('');
@@ -79,7 +79,7 @@ test.describe('Contact Form', () => {
 
   test('should handle form submission errors', async ({ page }) => {
     // Mock form submission error
-    await page.route('/', async route => {
+    await page.route('/', async (route) => {
       if (route.request().method() === 'POST') {
         await route.fulfill({
           status: 500,
@@ -98,19 +98,19 @@ test.describe('Contact Form', () => {
     await page.selectOption('#business-size', 'Small / Particular');
     await page.check('[value="WEB_DEVELOPMENT"]');
     await page.fill('#Message', 'This is a test message.');
-    
+
     // Submit form
     await page.click('.form-button');
-    
+
     // Should show error message
     await expect(page.locator('.form-message.error')).toContainText('error');
   });
 
   test('should disable submit button during submission', async ({ page }) => {
     // Mock slow form submission
-    await page.route('/', async route => {
+    await page.route('/', async (route) => {
       if (route.request().method() === 'POST') {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -128,27 +128,27 @@ test.describe('Contact Form', () => {
     await page.selectOption('#business-size', 'Small / Particular');
     await page.check('[value="WEB_DEVELOPMENT"]');
     await page.fill('#Message', 'Test message.');
-    
+
     // Submit form
     await page.click('.form-button');
-    
+
     // Button should be disabled and show loading state
     await expect(page.locator('.form-button')).toBeDisabled();
     await expect(page.locator('.form-button')).toContainText('Sending');
-    
+
     // Wait for completion
     await page.waitForSelector('.form-message.success');
-    
+
     // Button should be re-enabled
     await expect(page.locator('.form-button')).not.toBeDisabled();
-    await expect(page.locator('.form-button')).toContainText("Let's Talk");
+    await expect(page.locator('.form-button')).toContainText('Let\'s Talk');
   });
 
   test('should be keyboard accessible', async ({ page }) => {
     // Tab through all form elements
     const expectedTabOrder = [
       '#First-Name',
-      '#Last-Name', 
+      '#Last-Name',
       '#Email',
       '#Company-Name',
       '#business-size',
@@ -160,15 +160,15 @@ test.describe('Contact Form', () => {
       '#Message',
       '.form-button'
     ];
-    
+
     await page.focus('#First-Name');
-    
+
     for (let i = 0; i < expectedTabOrder.length - 1; i++) {
       await page.keyboard.press('Tab');
       // Allow some time for focus transition
       await page.waitForTimeout(100);
     }
-    
+
     // Last element should be the submit button
     await expect(page.locator('.form-button')).toBeFocused();
   });
@@ -177,7 +177,7 @@ test.describe('Contact Form', () => {
     // Select different help options
     await page.check('[value="WEB_DEVELOPMENT"]');
     await expect(page.locator('[value="WEB_DEVELOPMENT"]')).toBeChecked();
-    
+
     // Select different option
     await page.check('[value="DESIGN"]');
     await expect(page.locator('[value="DESIGN"]')).toBeChecked();
@@ -188,7 +188,7 @@ test.describe('Contact Form', () => {
     // Fill short message
     await page.fill('#Message', 'Short');
     await page.blur('#Message');
-    
+
     // Should show length validation error
     await expect(page.locator('.field-error')).toContainText('at least 10 characters');
   });
@@ -196,7 +196,7 @@ test.describe('Contact Form', () => {
   test('should handle business size selection', async ({ page }) => {
     // Should have default placeholder option
     await expect(page.locator('#business-size')).toHaveValue('Business Size');
-    
+
     // Select actual option
     await page.selectOption('#business-size', 'Medium / Start-up');
     await expect(page.locator('#business-size')).toHaveValue('Medium / Start-up');

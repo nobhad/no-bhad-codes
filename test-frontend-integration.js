@@ -15,7 +15,7 @@ const testFormData = {
   description: 'Testing the frontend integration',
   timeline: '1-3-months',
   budget: '25k-50k',
-  features: ['user-auth', 'dashboard']
+  features: ['user-auth', 'dashboard'],
 };
 
 // Function to test API connectivity
@@ -35,13 +35,13 @@ async function testAPIConnectivity() {
 async function testFormSubmission() {
   try {
     console.log('📝 Testing form submission...');
-    
+
     const response = await fetch('http://localhost:3001/api/intake', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(testFormData)
+      body: JSON.stringify(testFormData),
     });
 
     if (!response.ok) {
@@ -61,21 +61,21 @@ async function testFormSubmission() {
 async function runIntegrationTests() {
   console.log('🚀 Starting Frontend Integration Tests...');
   console.log('=====================================');
-  
+
   // Test 1: API Connectivity
   const apiReachable = await testAPIConnectivity();
   if (!apiReachable) {
     console.log('❌ Integration tests failed - API not reachable');
     return;
   }
-  
+
   // Test 2: Form Submission
   const submissionResult = await testFormSubmission();
   if (!submissionResult) {
     console.log('❌ Integration tests failed - Form submission failed');
     return;
   }
-  
+
   console.log('🎉 All Integration Tests Passed!');
   console.log('================================');
   console.log('✅ Backend connectivity: WORKING');
@@ -95,5 +95,5 @@ window.testIntegration = {
   runTests: runIntegrationTests,
   testAPI: testAPIConnectivity,
   testForm: testFormSubmission,
-  testData: testFormData
+  testData: testFormData,
 };

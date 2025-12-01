@@ -182,7 +182,6 @@ body.dark-theme .contact-form .form-select {
   background-color: var(--color-neutral-100);
 }
 
-
 .form-radio-option input[type="radio"]:checked + .radio-button-indicator {
   background-color: var(--color-primary);
 }
@@ -247,7 +246,6 @@ body.dark-theme .contact-form .form-select {
   color: var(--color-bg);
 }
 
-
 .form-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -295,7 +293,7 @@ body.dark-theme .contact-form .form-select {
 }
 
 .form-button.loading::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -330,16 +328,36 @@ body.dark-theme .contact-form .form-select {
   }
 
   /* Adjust grid rows for single column */
-  .form-intro { grid-row: 1; }
-  .contact-form #First-Name { grid-row: 2; }
-  .contact-form #Last-Name { grid-row: 3; }
-  .contact-form #Email { grid-row: 4; }
-  .contact-form #Company-Name { grid-row: 5; }
-  .contact-form .form-select { grid-row: 6; }
-  .form-question { grid-row: 7; }
-  .form-radio-group { grid-row: 8; }
-  .contact-form .form-textarea { grid-row: 9; }
-  .form-actions { grid-row: 10; }
+  .form-intro {
+    grid-row: 1;
+  }
+  .contact-form #First-Name {
+    grid-row: 2;
+  }
+  .contact-form #Last-Name {
+    grid-row: 3;
+  }
+  .contact-form #Email {
+    grid-row: 4;
+  }
+  .contact-form #Company-Name {
+    grid-row: 5;
+  }
+  .contact-form .form-select {
+    grid-row: 6;
+  }
+  .form-question {
+    grid-row: 7;
+  }
+  .form-radio-group {
+    grid-row: 8;
+  }
+  .contact-form .form-textarea {
+    grid-row: 9;
+  }
+  .form-actions {
+    grid-row: 10;
+  }
 
   .form-actions {
     justify-content: center;
@@ -390,7 +408,7 @@ body.dark-theme .contact-form .form-select {
   .form-select {
     border-width: 3px;
   }
-  
+
   .radio-button-indicator {
     border-width: 3px;
   }

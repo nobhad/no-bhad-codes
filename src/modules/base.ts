@@ -59,18 +59,18 @@ export class BaseModule {
   }
 
   /**
-     * Check if user prefers reduced motion
-     * @returns {boolean}
-     */
+   * Check if user prefers reduced motion
+   * @returns {boolean}
+   */
   protected checkReducedMotion(): boolean {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
   /**
-     * Standardized initialization method for all modules with error boundary
-     * Child classes should override onInit()
-     * @returns {Promise<void>}
-     */
+   * Standardized initialization method for all modules with error boundary
+   * Child classes should override onInit()
+   * @returns {Promise<void>}
+   */
   async init(): Promise<void> {
     if (this.isInitialized) {
       this.warn('Module already initialized.');
@@ -95,9 +95,9 @@ export class BaseModule {
   }
 
   /**
-     * Handle initialization errors gracefully
-     * @param {Error} error
-     */
+   * Handle initialization errors gracefully
+   * @param {Error} error
+   */
   protected handleInitError(error: Error): void {
     // Log error details
     this.error(`Module ${this.name} failed to initialize properly:`, error.message);
@@ -113,37 +113,37 @@ export class BaseModule {
   }
 
   /**
-     * Optional error recovery method for child classes
-     * @param {Error} error
-     */
+   * Optional error recovery method for child classes
+   * @param {Error} error
+   */
   protected onErrorRecovery(_error: Error): void {
     // Child classes can override this for custom recovery logic
   }
 
   /**
-     * Alias for init() to support legacy tests
-     * @returns {Promise<void>}
-     */
+   * Alias for init() to support legacy tests
+   * @returns {Promise<void>}
+   */
   async initialize(): Promise<void> {
     return this.init();
   }
 
   /**
-     * Override this method in child classes for custom initialization logic
-     * @returns {Promise<void>}
-     */
+   * Override this method in child classes for custom initialization logic
+   * @returns {Promise<void>}
+   */
   protected async onInit(): Promise<void> {
     // Child classes should override this method
     return Promise.resolve();
   }
 
   /**
-     * Helper to get and cache a single DOM element
-     * @param {string} name - A unique name for the element in the cache
-     * @param {string} selector - CSS selector for the element
-     * @param {boolean} [required=true] - If true, logs an error if element not found
-     * @returns {Element|null} The found element or null
-     */
+   * Helper to get and cache a single DOM element
+   * @param {string} name - A unique name for the element in the cache
+   * @param {string} selector - CSS selector for the element
+   * @param {boolean} [required=true] - If true, logs an error if element not found
+   * @returns {Element|null} The found element or null
+   */
   protected getElement(name: string, selector: string, required = true): Element | null {
     let element = this.elements.get(name);
     if (!element) {
@@ -161,19 +161,25 @@ export class BaseModule {
   }
 
   /**
-     * Helper to get and cache multiple DOM elements (NodeList)
-     * @param {string} name - A unique name for the elements in the cache
-     * @param {string} selector - CSS selector for the elements
-     * @param {boolean} [required=true] - If true, logs a warning if no elements found
-     * @returns {NodeListOf<Element>|Array<Element>} The found elements or an empty array
-     */
-  protected getElements(name: string, selector: string, required = true): NodeListOf<Element> | null {
+   * Helper to get and cache multiple DOM elements (NodeList)
+   * @param {string} name - A unique name for the elements in the cache
+   * @param {string} selector - CSS selector for the elements
+   * @param {boolean} [required=true] - If true, logs a warning if no elements found
+   * @returns {NodeListOf<Element>|Array<Element>} The found elements or an empty array
+   */
+  protected getElements(
+    name: string,
+    selector: string,
+    required = true
+  ): NodeListOf<Element> | null {
     let elements = this.elements.get(name) as NodeListOf<Element> | null;
     if (!elements || (elements as NodeListOf<Element>).length === 0) {
       elements = document.querySelectorAll(selector);
       if ((elements as NodeListOf<Element>).length > 0) {
         this.elements.set(name, elements as any);
-        this.log(`Cached ${(elements as NodeListOf<Element>).length} elements for: ${name} (${selector})`);
+        this.log(
+          `Cached ${(elements as NodeListOf<Element>).length} elements for: ${name} (${selector})`
+        );
       } else if (required) {
         this.warn(`No elements found for "${name}" with selector "${selector}".`);
       }
@@ -182,9 +188,9 @@ export class BaseModule {
   }
 
   /**
-     * Add a GSAP timeline to be managed by the module (killed on destroy)
-     * @param {gsap.core.Timeline|gsap.core.Tween} timeline
-     */
+   * Add a GSAP timeline to be managed by the module (killed on destroy)
+   * @param {gsap.core.Timeline|gsap.core.Tween} timeline
+   */
   protected addTimeline(timeline: any): void {
     if (timeline) {
       this.timelines.add(timeline);
@@ -192,9 +198,9 @@ export class BaseModule {
   }
 
   /**
-     * Remove a GSAP timeline from being managed
-     * @param {gsap.core.Timeline|gsap.core.Tween} timeline
-     */
+   * Remove a GSAP timeline from being managed
+   * @param {gsap.core.Timeline|gsap.core.Tween} timeline
+   */
   protected removeTimeline(timeline: any): void {
     if (timeline) {
       this.timelines.delete(timeline);
@@ -202,13 +208,18 @@ export class BaseModule {
   }
 
   /**
-     * Add an event listener and store it for cleanup
-     * @param {EventTarget} element - The DOM element or EventTarget to attach the listener to
-     * @param {string} event - The event type (e.g., 'click', 'keydown')
-     * @param {Function} handler - The event handler function
-     * @param {string} [key] - An optional unique key for the listener (useful for specific removals)
-     */
-  protected addEventListener(element: Element, event: string, handler: EventListener, key = `${(element as any).id || element.tagName}-${event}-${this.eventListeners.size}`): void {
+   * Add an event listener and store it for cleanup
+   * @param {EventTarget} element - The DOM element or EventTarget to attach the listener to
+   * @param {string} event - The event type (e.g., 'click', 'keydown')
+   * @param {Function} handler - The event handler function
+   * @param {string} [key] - An optional unique key for the listener (useful for specific removals)
+   */
+  protected addEventListener(
+    element: Element,
+    event: string,
+    handler: EventListener,
+    key = `${(element as any).id || element.tagName}-${event}-${this.eventListeners.size}`
+  ): void {
     if (!element || typeof element.addEventListener !== 'function') {
       this.warn(`Cannot add event listener: Invalid element provided for key "${key}".`);
       return;
@@ -224,10 +235,10 @@ export class BaseModule {
   }
 
   /**
-     * Dispatch a custom event from the module
-     * @param {string} eventName - Name of the event
-     * @param {Object} [detail={}] - Custom data for the event
-     */
+   * Dispatch a custom event from the module
+   * @param {string} eventName - Name of the event
+   * @param {Object} [detail={}] - Custom data for the event
+   */
   protected dispatchEvent(eventName: string, detail: any = {}): void {
     const event = new CustomEvent(`${this.name}:${eventName}`, { detail });
     document.dispatchEvent(event);
@@ -235,10 +246,10 @@ export class BaseModule {
   }
 
   /**
-     * Standardized destruction method for all modules
-     * Cleans up event listeners, GSAP timelines, and calls onDestroy()
-     * @returns {Promise<void>}
-     */
+   * Standardized destruction method for all modules
+   * Cleans up event listeners, GSAP timelines, and calls onDestroy()
+   * @returns {Promise<void>}
+   */
   async destroy(): Promise<void> {
     if (this.isDestroyed) {
       this.warn('Module already destroyed.');
@@ -247,22 +258,31 @@ export class BaseModule {
     this.log('Destroying...');
     try {
       // Remove all event listeners
-      this.eventListeners.forEach((listener, key) => { // 'key' is the Map key, not 'type'
-        if (listener && typeof listener === 'object') { // Ensure listener is an object
+      this.eventListeners.forEach((listener, key) => {
+        // 'key' is the Map key, not 'type'
+        if (listener && typeof listener === 'object') {
+          // Ensure listener is an object
           const { element, event, handler } = listener;
-          if (element && event && typeof handler === 'function') { // Ensure handler is a function
+          if (element && event && typeof handler === 'function') {
+            // Ensure handler is a function
             element.removeEventListener(event, handler);
           } else {
-            this.warn(`[${this.name}] Skipping removal for malformed listener (key: ${key}):`, listener);
+            this.warn(
+              `[${this.name}] Skipping removal for malformed listener (key: ${key}):`,
+              listener
+            );
           }
         } else {
-          this.warn(`[${this.name}] Skipping removal for non-object listener (key: ${key}):`, listener);
+          this.warn(
+            `[${this.name}] Skipping removal for non-object listener (key: ${key}):`,
+            listener
+          );
         }
       });
       this.eventListeners.clear();
 
       // Kill all GSAP timelines
-      this.timelines.forEach(tl => tl.kill());
+      this.timelines.forEach((tl) => tl.kill());
       this.timelines.clear();
 
       // Call module-specific onDestroy
@@ -279,7 +299,6 @@ export class BaseModule {
 
       this.log('Destroyed successfully');
       this.dispatchEvent('destroyed');
-
     } catch (error) {
       this.error('Destruction failed:', error);
       // Mark as destroyed even if cleanup failed
@@ -290,15 +309,15 @@ export class BaseModule {
   }
 
   /**
-     * Override this method in child classes for custom cleanup logic
-     */
+   * Override this method in child classes for custom cleanup logic
+   */
   protected async onDestroy(): Promise<void> {
     // Child classes should override this method
   }
 
   /**
-     * Logging methods with module context
-     */
+   * Logging methods with module context
+   */
   protected log(...args: any[]): void {
     if (this.debug) {
       console.log(`[${this.name}]`, ...args);
@@ -314,17 +333,17 @@ export class BaseModule {
   }
 
   /**
-     * Check if module is ready to use
-     * @returns {boolean}
-     */
+   * Check if module is ready to use
+   * @returns {boolean}
+   */
   isReady(): boolean {
     return this.isInitialized && !this.isDestroyed;
   }
 
   /**
-     * Get module status information
-     * @returns {Object}
-     */
+   * Get module status information
+   * @returns {Object}
+   */
   getStatus(): ModuleStatus {
     return {
       name: this.name,
@@ -403,7 +422,7 @@ export class BaseModule {
    * Set module state (placeholder for state management)
    */
   setState(key: string | Record<string, any>, value?: any): void {
-    if (!( this as any).state) {
+    if (!(this as any).state) {
       (this as any).state = {};
     }
 

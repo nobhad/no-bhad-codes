@@ -99,7 +99,7 @@ export class CacheService {
         this.stats.errors++;
         this.isConnected = false;
         this.stats.connected = false;
-        
+
         errorTracker.captureException(error, {
           tags: { component: 'redis-cache' },
           extra: { config: this.config }
@@ -116,7 +116,6 @@ export class CacheService {
       await this.client.connect();
       await this.client.ping();
       console.log('✅ Cache service initialized successfully');
-
     } catch (error) {
       console.error('❌ Failed to initialize cache service:', error);
       throw new Error(`Cache service initialization failed: ${error}`);
@@ -135,14 +134,14 @@ export class CacheService {
 
     try {
       const value = await this.client.get(key);
-      
+
       if (value === null) {
         this.stats.misses++;
         return null;
       }
 
       this.stats.hits++;
-      
+
       try {
         return JSON.parse(value) as T;
       } catch {
@@ -250,7 +249,7 @@ export class CacheService {
 
     try {
       const values = await this.client.mget(...keys);
-      
+
       return values.map((value, index) => {
         if (value === null) {
           this.stats.misses++;
@@ -258,7 +257,7 @@ export class CacheService {
         }
 
         this.stats.hits++;
-        
+
         try {
           return JSON.parse(value) as T;
         } catch {
@@ -283,7 +282,7 @@ export class CacheService {
 
     try {
       const pipeline = this.client.pipeline();
-      
+
       Object.entries(keyValuePairs).forEach(([key, value]) => {
         const serializedValue = typeof value === 'string' ? value : JSON.stringify(value);
         pipeline.setex(key, ttl, serializedValue);
@@ -325,8 +324,8 @@ export class CacheService {
 
     try {
       const pipeline = this.client.pipeline();
-      
-      tags.forEach(tag => {
+
+      tags.forEach((tag) => {
         pipeline.sadd(`tag:${tag}`, key);
         pipeline.expire(`tag:${tag}`, 86400); // Tags expire in 24 hours
       });
@@ -347,18 +346,18 @@ export class CacheService {
 
     try {
       const keys = await this.client.smembers(`tag:${tag}`);
-      
+
       if (keys.length === 0) {
         return 0;
       }
 
       const pipeline = this.client.pipeline();
-      keys.forEach(key => pipeline.del(key));
+      keys.forEach((key) => pipeline.del(key));
       pipeline.del(`tag:${tag}`);
-      
+
       await pipeline.exec();
       this.stats.deletes += keys.length;
-      
+
       console.log(`🗑️  Invalidated ${keys.length} cache keys for tag: ${tag}`);
       return keys.length;
     } catch (error) {
@@ -378,14 +377,14 @@ export class CacheService {
 
     try {
       const keys = await this.client.keys(pattern);
-      
+
       if (keys.length === 0) {
         return 0;
       }
 
       await this.client.del(...keys);
       this.stats.deletes += keys.length;
-      
+
       console.log(`🗑️  Invalidated ${keys.length} cache keys for pattern: ${pattern}`);
       return keys.length;
     } catch (error) {
@@ -486,10 +485,10 @@ export class CacheService {
     // If not in cache, fetch from source
     try {
       const fresh = await fetcher();
-      
+
       // Store in cache for next time
       await this.set(key, fresh, options);
-      
+
       return fresh;
     } catch (error) {
       console.error(`Error in getOrSet for key ${key}:`, error);

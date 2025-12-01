@@ -42,14 +42,16 @@ export class ErrorTrackingService {
   /**
    * Initialize Sentry with configuration
    */
-  init(config: {
-    dsn?: string;
-    environment?: string;
-    release?: string;
-    enableProfiling?: boolean;
-    sampleRate?: number;
-    tracesSampleRate?: number;
-  } = {}): void {
+  init(
+    config: {
+      dsn?: string;
+      environment?: string;
+      release?: string;
+      enableProfiling?: boolean;
+      sampleRate?: number;
+      tracesSampleRate?: number;
+    } = {}
+  ): void {
     const {
       dsn = process.env.SENTRY_DSN,
       environment = process.env.NODE_ENV || 'development',
@@ -67,7 +69,7 @@ export class ErrorTrackingService {
     const integrations = [
       Sentry.httpIntegration(),
       Sentry.expressIntegration(),
-      Sentry.graphqlIntegration(),
+      Sentry.graphqlIntegration()
     ];
 
     // Profiling integration is optional and may not be available
@@ -76,7 +78,10 @@ export class ErrorTrackingService {
         const { nodeProfilingIntegration } = require('@sentry/profiling-node');
         integrations.push(nodeProfilingIntegration());
       } catch (error: any) {
-        console.warn('⚠️ Sentry profiling integration not available:', error?.message || 'Unknown error');
+        console.warn(
+          '⚠️ Sentry profiling integration not available:',
+          error?.message || 'Unknown error'
+        );
       }
     }
 
@@ -93,7 +98,7 @@ export class ErrorTrackingService {
           delete event.request.headers.authorization;
           delete event.request.headers.cookie;
         }
-        
+
         if (event.request?.data) {
           if (typeof event.request.data === 'object' && event.request.data !== null) {
             delete (event.request.data as any).password;
@@ -122,7 +127,7 @@ export class ErrorTrackingService {
       return '';
     }
 
-    return Sentry.withScope(scope => {
+    return Sentry.withScope((scope) => {
       // Set user context
       if (context.user) {
         scope.setUser({
@@ -136,20 +141,20 @@ export class ErrorTrackingService {
         scope.setContext('request', {
           method: context.request.method,
           url: context.request.url,
-          headers: context.request.headers,
+          headers: context.request.headers
         });
       }
 
       // Set extra context
       if (context.extra) {
-        Object.keys(context.extra).forEach(key => {
+        Object.keys(context.extra).forEach((key) => {
           scope.setExtra(key, context.extra![key]);
         });
       }
 
       // Set tags
       if (context.tags) {
-        Object.keys(context.tags).forEach(key => {
+        Object.keys(context.tags).forEach((key) => {
           scope.setTag(key, context.tags![key]);
         });
       }
@@ -166,13 +171,17 @@ export class ErrorTrackingService {
   /**
    * Capture a message with context
    */
-  captureMessage(message: string, level: 'error' | 'warning' | 'info' | 'debug' = 'info', context: ErrorContext = {}): string {
+  captureMessage(
+    message: string,
+    level: 'error' | 'warning' | 'info' | 'debug' = 'info',
+    context: ErrorContext = {}
+  ): string {
     if (!this.isInitialized) {
       console.log(`[${level.toUpperCase()}]`, message);
       return '';
     }
 
-    return Sentry.withScope(scope => {
+    return Sentry.withScope((scope) => {
       if (context.user) {
         scope.setUser({
           id: context.user.id,
@@ -181,13 +190,13 @@ export class ErrorTrackingService {
       }
 
       if (context.extra) {
-        Object.keys(context.extra).forEach(key => {
+        Object.keys(context.extra).forEach((key) => {
           scope.setExtra(key, context.extra![key]);
         });
       }
 
       if (context.tags) {
-        Object.keys(context.tags).forEach(key => {
+        Object.keys(context.tags).forEach((key) => {
           scope.setTag(key, context.tags![key]);
         });
       }
@@ -207,12 +216,15 @@ export class ErrorTrackingService {
     }
 
     // Use Sentry's current transaction API
-    return Sentry.startSpan({
-      name,
-      op: operation
-    }, (span) => {
-      return span;
-    });
+    return Sentry.startSpan(
+      {
+        name,
+        op: operation
+      },
+      (span) => {
+        return span;
+      }
+    );
   }
 
   /**
@@ -294,7 +306,7 @@ export class ErrorTrackingService {
   }
 
   /**
-   * Express request handler middleware  
+   * Express request handler middleware
    */
   requestHandler() {
     return Sentry.expressIntegration();

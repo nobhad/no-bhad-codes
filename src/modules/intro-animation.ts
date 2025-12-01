@@ -251,7 +251,7 @@ export class IntroAnimationModule extends BaseModule {
     // Ensure overlay is visible and card is ready
     gsap.set(this.overlay, { opacity: 1 });
 
-    // Animation sequence: back -> pause -> flip to front (ONE FLIP ONLY)
+    // Animation sequence: back -> pause -> flip to front -> fade in header/footer -> fade out overlay
     this.timeline
       .to({}, { duration: 1.2 }) // Initial pause showing back of card
       .to(this.cardInner, {
@@ -260,16 +260,17 @@ export class IntroAnimationModule extends BaseModule {
         ease: 'power2.inOut'
       }) // Single flip from back to front (180deg to 0deg)
       .to({}, { duration: 0.5 }) // Brief pause showing front
+      .call(() => {
+        // Start fading in header/footer AFTER card flip completes
+        document.documentElement.classList.remove('intro-loading');
+        document.documentElement.classList.add('intro-complete');
+      })
+      .to({}, { duration: 0.6 }) // Wait for header/footer to fade in (0.5s CSS transition + buffer)
       .to(this.overlay, {
         opacity: 0,
         duration: 0.8,
-        ease: 'power2.inOut',
-        onStart: () => {
-          // Show main page content as overlay fades
-          document.documentElement.classList.remove('intro-loading');
-          document.documentElement.classList.add('intro-complete');
-        }
-      }) // Fade out overlay first
+        ease: 'power2.inOut'
+      }) // Fade out overlay after header/footer are visible
       .to(this.introCard, {
         opacity: 0,
         scale: 0.9,

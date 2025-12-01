@@ -162,7 +162,8 @@ export const InteractiveDemo: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Hover over the navigation links to see the interactive effects. Click links to see actions logged.'
+        story:
+          'Hover over the navigation links to see the interactive effects. Click links to see actions logged.'
       }
     }
   },

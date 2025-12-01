@@ -84,11 +84,11 @@ export class Container {
       try {
         // Resolve dependencies first
         const dependencies = await Promise.all(
-          (service.dependencies || []).map(dep => this.resolve(dep))
+          (service.dependencies || []).map((dep) => this.resolve(dep))
         );
 
         // Create instance
-        const instance = await service.factory(...dependencies as unknown[]);
+        const instance = await service.factory(...(dependencies as unknown[]));
 
         // Cache singleton instance
         if (service.singleton) {
@@ -98,7 +98,6 @@ export class Container {
         this.resolving.delete(name);
         this.pending.delete(name);
         return instance as T;
-
       } catch (error) {
         this.resolving.delete(name);
         this.pending.delete(name);
@@ -131,7 +130,7 @@ export class Container {
    */
   getStatus() {
     const registeredServices = Array.from(this.services.keys());
-    const singletonInstances = registeredServices.filter(name => {
+    const singletonInstances = registeredServices.filter((name) => {
       const service = this.services.get(name);
       return service?.singleton && service.instance !== undefined;
     });
@@ -157,7 +156,6 @@ export class Container {
   getRegisteredServices(): string[] {
     return Array.from(this.services.keys());
   }
-
 }
 
 // Global container instance

@@ -1,282 +1,292 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Alert: {{subject}}</title>
     <style>
-        :root {
-            --primary-color: #00ff41;
-            --secondary-color: #0d1117;
-            --text-color: #24292f;
-            --background-color: #ffffff;
-            --border-color: #d0d7de;
-            --error-color: #da3633;
-            --warning-color: #fb8500;
-            --info-color: #0969da;
-            --success-color: #1a7f37;
-        }
-        
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background-color: var(--background-color);
-        }
-        
+      :root {
+        --primary-color: #00ff41;
+        --secondary-color: #0d1117;
+        --text-color: #24292f;
+        --background-color: #ffffff;
+        --border-color: #d0d7de;
+        --error-color: #da3633;
+        --warning-color: #fb8500;
+        --info-color: #0969da;
+        --success-color: #1a7f37;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+        background-color: var(--background-color);
+      }
+
+      .email-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+      }
+
+      .header {
+        background: var(--secondary-color);
+        color: white;
+        padding: 30px;
+        text-align: center;
+        border-radius: 6px 6px 0 0;
+      }
+
+      .header.error {
+        background: var(--error-color);
+      }
+
+      .header.new-client {
+        background: var(--success-color);
+      }
+
+      .header.new-intake {
+        background: var(--primary-color);
+        color: var(--secondary-color);
+      }
+
+      .header.project-milestone {
+        background: var(--info-color);
+      }
+
+      .header.system-alert {
+        background: var(--warning-color);
+      }
+
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: white;
+        margin-bottom: 10px;
+      }
+
+      .content {
+        padding: 40px 30px;
+      }
+
+      .alert-type {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+      }
+
+      .type-error {
+        background-color: #fef2f2;
+        color: var(--error-color);
+      }
+
+      .type-new-client {
+        background-color: #f0fdf4;
+        color: var(--success-color);
+      }
+
+      .type-new-intake {
+        background-color: #f0fff4;
+        color: var(--primary-color);
+      }
+
+      .type-project-milestone {
+        background-color: #eff6ff;
+        color: var(--info-color);
+      }
+
+      .type-system-alert {
+        background-color: #fffbeb;
+        color: var(--warning-color);
+      }
+
+      .alert-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: var(--text-color);
+      }
+
+      .message-section {
+        background-color: #f6f8fa;
+        padding: 20px;
+        border-radius: 6px;
+        margin: 20px 0;
+      }
+
+      .details-section {
+        background-color: #f8f9fa;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 15px;
+        margin: 20px 0;
+        font-family:
+          'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+        font-size: 14px;
+      }
+
+      .timestamp {
+        color: #656d76;
+        font-size: 14px;
+        margin-top: 20px;
+      }
+
+      .footer {
+        padding: 30px;
+        text-align: center;
+        color: #656d76;
+        font-size: 14px;
+        background-color: #f6f8fa;
+        border-radius: 0 0 6px 6px;
+      }
+
+      .footer a {
+        color: var(--primary-color);
+        text-decoration: none;
+      }
+
+      .priority-high {
+        border-left: 4px solid var(--error-color);
+      }
+
+      .priority-normal {
+        border-left: 4px solid var(--info-color);
+      }
+
+      @media (max-width: 600px) {
         .email-container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
+          margin: 0;
+          border-radius: 0;
         }
-        
-        .header {
-            background: var(--secondary-color);
-            color: white;
-            padding: 30px;
-            text-align: center;
-            border-radius: 6px 6px 0 0;
-        }
-        
-        .header.error {
-            background: var(--error-color);
-        }
-        
-        .header.new-client {
-            background: var(--success-color);
-        }
-        
-        .header.new-intake {
-            background: var(--primary-color);
-            color: var(--secondary-color);
-        }
-        
-        .header.project-milestone {
-            background: var(--info-color);
-        }
-        
-        .header.system-alert {
-            background: var(--warning-color);
-        }
-        
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 10px;
-        }
-        
-        .content {
-            padding: 40px 30px;
-        }
-        
-        .alert-type {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-        }
-        
-        .type-error {
-            background-color: #fef2f2;
-            color: var(--error-color);
-        }
-        
-        .type-new-client {
-            background-color: #f0fdf4;
-            color: var(--success-color);
-        }
-        
-        .type-new-intake {
-            background-color: #f0fff4;
-            color: var(--primary-color);
-        }
-        
-        .type-project-milestone {
-            background-color: #eff6ff;
-            color: var(--info-color);
-        }
-        
-        .type-system-alert {
-            background-color: #fffbeb;
-            color: var(--warning-color);
-        }
-        
-        .alert-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: var(--text-color);
-        }
-        
-        .message-section {
-            background-color: #f6f8fa;
-            padding: 20px;
-            border-radius: 6px;
-            margin: 20px 0;
-        }
-        
-        .details-section {
-            background-color: #f8f9fa;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 15px;
-            margin: 20px 0;
-            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-            font-size: 14px;
-        }
-        
-        .timestamp {
-            color: #656d76;
-            font-size: 14px;
-            margin-top: 20px;
-        }
-        
+
+        .content,
+        .header,
         .footer {
-            padding: 30px;
-            text-align: center;
-            color: #656d76;
-            font-size: 14px;
-            background-color: #f6f8fa;
-            border-radius: 0 0 6px 6px;
+          padding: 20px;
         }
-        
-        .footer a {
-            color: var(--primary-color);
-            text-decoration: none;
+
+        .alert-title {
+          font-size: 18px;
         }
-        
-        .priority-high {
-            border-left: 4px solid var(--error-color);
+
+        .details-section {
+          font-size: 12px;
+          padding: 10px;
         }
-        
-        .priority-normal {
-            border-left: 4px solid var(--info-color);
-        }
-        
-        @media (max-width: 600px) {
-            .email-container {
-                margin: 0;
-                border-radius: 0;
-            }
-            
-            .content, .header, .footer {
-                padding: 20px;
-            }
-            
-            .alert-title {
-                font-size: 18px;
-            }
-            
-            .details-section {
-                font-size: 12px;
-                padding: 10px;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="email-container">
-        <div class="header {{type}}">
-            <div class="logo">{{companyName}}</div>
-            <p>Admin Notification System</p>
-        </div>
-        
-        <div class="content">
-            <span class="alert-type type-{{type}}">{{type}}</span>
-            
-            <div class="alert-title">{{subject}}</div>
-            
-            {{#if intakeId}}
-            <!-- New Client Intake Notification -->
-            <div class="message-section priority-normal">
-                <h3>🎉 New Client Intake Submission</h3>
-                <div style="background: white; padding: 20px; border-radius: 6px; margin: 15px 0;">
-                    <p><strong>Intake ID:</strong> <span style="font-family: monospace; color: var(--primary-color); font-size: 16px;">{{intakeId}}</span></p>
-                    <p><strong>Client:</strong> {{clientName}}</p>
-                    <p><strong>Company:</strong> {{companyName}}</p>
-                    <p><strong>Project Type:</strong> {{projectType}}</p>
-                    <p><strong>Budget Range:</strong> {{budget}}</p>
-                    <p><strong>Timeline:</strong> {{timeline}}</p>
-                </div>
-                <p><strong>Action Required:</strong> Please review the full intake form in the admin dashboard and follow up with the client within 24-48 hours.</p>
-            </div>
-            {{else}}
-            <!-- General Notification -->
-            <div class="message-section priority-{{#if (eq type 'error')}}high{{else}}normal{{/if}}">
-                <h3>📢 Alert Message</h3>
-                <p>{{message}}</p>
-            </div>
-            {{/if}}
-            
-            {{#if details}}
-            <div class="details-section">
-                <h4>🔍 Technical Details</h4>
-                <pre>{{#each details}}{{@key}}: {{this}}
-{{/each}}</pre>
-            </div>
-            {{/if}}
-            
-            <div class="timestamp">
-                <strong>Timestamp:</strong> {{timestamp}}
-            </div>
-            
-            <div class="message-section">
-                <h3>🎯 Recommended Actions</h3>
-                {{#if (eq type 'error')}}
-                <ul>
-                    <li>Check system logs for additional context</li>
-                    <li>Verify service health and connectivity</li>
-                    <li>Review error tracking dashboard</li>
-                    <li>Consider rolling back recent deployments if necessary</li>
-                </ul>
-                {{else if (eq type 'new-client')}}
-                <ul>
-                    <li>Send welcome email sequence</li>
-                    <li>Set up client portal access</li>
-                    <li>Schedule kick-off meeting</li>
-                    <li>Add to project management system</li>
-                </ul>
-                {{else if (eq type 'new-intake')}}
-                <ul>
-                    <li>Review intake form details in admin dashboard</li>
-                    <li>Analyze project requirements and scope</li>
-                    <li>Prepare detailed project proposal</li>
-                    <li>Schedule initial consultation call</li>
-                    <li>Create client account if proposal is accepted</li>
-                </ul>
-                {{else if (eq type 'project-milestone')}}
-                <ul>
-                    <li>Update client on milestone completion</li>
-                    <li>Schedule next milestone review</li>
-                    <li>Update project documentation</li>
-                    <li>Prepare deliverables for client review</li>
-                </ul>
-                {{else}}
-                <ul>
-                    <li>Review system health metrics</li>
-                    <li>Check for any ongoing issues</li>
-                    <li>Monitor affected services</li>
-                    <li>Document findings for future reference</li>
-                </ul>
-                {{/if}}
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p>&copy; {{currentYear}} {{companyName}} Admin System</p>
+      <div class="header {{type}}">
+        <div class="logo">{{companyName}}</div>
+        <p>Admin Notification System</p>
+      </div>
+
+      <div class="content">
+        <span class="alert-type type-{{type}}">{{type}}</span>
+
+        <div class="alert-title">{{subject}}</div>
+
+        {{#if intakeId}}
+        <!-- New Client Intake Notification -->
+        <div class="message-section priority-normal">
+          <h3>🎉 New Client Intake Submission</h3>
+          <div style="background: white; padding: 20px; border-radius: 6px; margin: 15px 0">
             <p>
-                <a href="{{websiteUrl}}/admin">Admin Dashboard</a> | 
-                <a href="mailto:{{supportEmail}}">Technical Support</a>
+              <strong>Intake ID:</strong>
+              <span style="font-family: monospace; color: var(--primary-color); font-size: 16px"
+                >{{intakeId}}</span
+              >
             </p>
+            <p><strong>Client:</strong> {{clientName}}</p>
+            <p><strong>Company:</strong> {{companyName}}</p>
+            <p><strong>Project Type:</strong> {{projectType}}</p>
+            <p><strong>Budget Range:</strong> {{budget}}</p>
+            <p><strong>Timeline:</strong> {{timeline}}</p>
+          </div>
+          <p>
+            <strong>Action Required:</strong> Please review the full intake form in the admin
+            dashboard and follow up with the client within 24-48 hours.
+          </p>
         </div>
+        {{else}}
+        <!-- General Notification -->
+        <div class="message-section priority-{{#if (eq type 'error')}}high{{else}}normal{{/if}}">
+          <h3>📢 Alert Message</h3>
+          <p>{{message}}</p>
+        </div>
+        {{/if}} {{#if details}}
+        <div class="details-section">
+          <h4>🔍 Technical Details</h4>
+          <pre>
+{{#each details}}{{@key}}: {{this}}
+{{/each}}</pre
+          >
+        </div>
+        {{/if}}
+
+        <div class="timestamp"><strong>Timestamp:</strong> {{timestamp}}</div>
+
+        <div class="message-section">
+          <h3>🎯 Recommended Actions</h3>
+          {{#if (eq type 'error')}}
+          <ul>
+            <li>Check system logs for additional context</li>
+            <li>Verify service health and connectivity</li>
+            <li>Review error tracking dashboard</li>
+            <li>Consider rolling back recent deployments if necessary</li>
+          </ul>
+          {{else if (eq type 'new-client')}}
+          <ul>
+            <li>Send welcome email sequence</li>
+            <li>Set up client portal access</li>
+            <li>Schedule kick-off meeting</li>
+            <li>Add to project management system</li>
+          </ul>
+          {{else if (eq type 'new-intake')}}
+          <ul>
+            <li>Review intake form details in admin dashboard</li>
+            <li>Analyze project requirements and scope</li>
+            <li>Prepare detailed project proposal</li>
+            <li>Schedule initial consultation call</li>
+            <li>Create client account if proposal is accepted</li>
+          </ul>
+          {{else if (eq type 'project-milestone')}}
+          <ul>
+            <li>Update client on milestone completion</li>
+            <li>Schedule next milestone review</li>
+            <li>Update project documentation</li>
+            <li>Prepare deliverables for client review</li>
+          </ul>
+          {{else}}
+          <ul>
+            <li>Review system health metrics</li>
+            <li>Check for any ongoing issues</li>
+            <li>Monitor affected services</li>
+            <li>Document findings for future reference</li>
+          </ul>
+          {{/if}}
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>&copy; {{currentYear}} {{companyName}} Admin System</p>
+        <p>
+          <a href="{{websiteUrl}}/admin">Admin Dashboard</a> |
+          <a href="mailto:{{supportEmail}}">Technical Support</a>
+        </p>
+      </div>
     </div>
-</body>
+  </body>
 </html>

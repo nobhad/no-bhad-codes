@@ -29,12 +29,36 @@ const createDashboardContent = (args: any) => {
 
   const cards = [];
   const cardTypes = [
-    { title: 'Recent Activity', description: 'Your latest project updates will appear here', buttonText: 'View All' },
-    { title: 'Quick Actions', description: 'Common tasks and shortcuts', buttonText: 'Get Started' },
-    { title: 'Active Projects', description: 'Your ongoing projects and their status', buttonText: 'Manage Projects' },
-    { title: 'Messages', description: 'Recent communications and updates', buttonText: 'View Messages' },
-    { title: 'Invoices', description: 'Billing and payment information', buttonText: 'View Invoices' },
-    { title: 'Support', description: 'Get help and find documentation', buttonText: 'Contact Support' }
+    {
+      title: 'Recent Activity',
+      description: 'Your latest project updates will appear here',
+      buttonText: 'View All'
+    },
+    {
+      title: 'Quick Actions',
+      description: 'Common tasks and shortcuts',
+      buttonText: 'Get Started'
+    },
+    {
+      title: 'Active Projects',
+      description: 'Your ongoing projects and their status',
+      buttonText: 'Manage Projects'
+    },
+    {
+      title: 'Messages',
+      description: 'Recent communications and updates',
+      buttonText: 'View Messages'
+    },
+    {
+      title: 'Invoices',
+      description: 'Billing and payment information',
+      buttonText: 'View Invoices'
+    },
+    {
+      title: 'Support',
+      description: 'Get help and find documentation',
+      buttonText: 'Contact Support'
+    }
   ];
 
   for (let i = 0; i < Math.min(cardCount, cardTypes.length); i++) {
@@ -50,12 +74,16 @@ const createDashboardContent = (args: any) => {
 
   return `
     <div class="content-area">
-      ${showWelcomeMessage ? `
+      ${
+  showWelcomeMessage
+    ? `
         <div class="page-header">
           <h1>Dashboard</h1>
           <p>Welcome to your client dashboard</p>
         </div>
-      ` : ''}
+      `
+    : ''
+}
       
       <div class="action-buttons">
         <button 

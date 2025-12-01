@@ -19,11 +19,11 @@ import { BaseModule } from './base';
 import type { ModuleOptions } from '../types/modules';
 
 interface BusinessCardConfig {
-    businessCardId?: string;
-    businessCardInnerId?: string;
-    frontSelector?: string;
-    backSelector?: string;
-    containerSelector?: string;
+  businessCardId?: string;
+  businessCardInnerId?: string;
+  frontSelector?: string;
+  backSelector?: string;
+  containerSelector?: string;
 }
 
 export class BusinessCardRenderer extends BaseModule {
@@ -68,9 +68,15 @@ export class BusinessCardRenderer extends BaseModule {
       if (!this.hasRequiredElements()) {
         this.error('Required card elements not found for config:', this.elementConfig);
         this.error('Available business card elements in DOM:', {
-          allBusinessCards: Array.from(document.querySelectorAll('[id*="business-card"]')).map(el => ({ id: el.id, classes: el.className })),
-          allCardInners: Array.from(document.querySelectorAll('[id*="business-card-inner"]')).map(el => ({ id: el.id, classes: el.className })),
-          allContainers: Array.from(document.querySelectorAll('[class*="business-card-container"]')).map(el => ({ id: el.id, classes: el.className }))
+          allBusinessCards: Array.from(document.querySelectorAll('[id*="business-card"]')).map(
+            (el) => ({ id: el.id, classes: el.className })
+          ),
+          allCardInners: Array.from(document.querySelectorAll('[id*="business-card-inner"]')).map(
+            (el) => ({ id: el.id, classes: el.className })
+          ),
+          allContainers: Array.from(
+            document.querySelectorAll('[class*="business-card-container"]')
+          ).map((el) => ({ id: el.id, classes: el.className }))
         });
         return;
       }
@@ -80,17 +86,16 @@ export class BusinessCardRenderer extends BaseModule {
 
       this.isRendered = true;
       this.log('BusinessCardRenderer initialization completed');
-
     } catch (error) {
       this.error('BusinessCardRenderer initialization failed:', error);
     }
   }
 
   /**
-     * ==========================================
-     * DOM READY DETECTION
-     * ==========================================
-     */
+   * ==========================================
+   * DOM READY DETECTION
+   * ==========================================
+   */
   async waitForDOMReady() {
     return new Promise((resolve) => {
       if (document.readyState === 'complete' || document.readyState === 'interactive') {
@@ -102,10 +107,10 @@ export class BusinessCardRenderer extends BaseModule {
   }
 
   /**
-     * ==========================================
-     * ELEMENT CACHING
-     * ==========================================
-     */
+   * ==========================================
+   * ELEMENT CACHING
+   * ==========================================
+   */
   cacheCardElements() {
     this.log('Caching business card elements with config:', this.elementConfig);
 
@@ -132,19 +137,19 @@ export class BusinessCardRenderer extends BaseModule {
   }
 
   /**
-     * ==========================================
-     * VALIDATION
-     * ==========================================
-     */
+   * ==========================================
+   * VALIDATION
+   * ==========================================
+   */
   hasRequiredElements() {
     return !!(this.businessCard && this.businessCardInner && this.cardFront && this.cardBack);
   }
 
   /**
-     * ==========================================
-     * CARD RENDERING SETUP
-     * ==========================================
-     */
+   * ==========================================
+   * CARD RENDERING SETUP
+   * ==========================================
+   */
   setupCardRendering() {
     this.log('Setting up card rendering...');
 
@@ -185,14 +190,14 @@ export class BusinessCardRenderer extends BaseModule {
   }
 
   /**
-     * ==========================================
-     * PUBLIC API FOR OTHER MODULES
-     * ==========================================
-     */
+   * ==========================================
+   * PUBLIC API FOR OTHER MODULES
+   * ==========================================
+   */
 
   /**
-     * Get card elements for other modules to use
-     */
+   * Get card elements for other modules to use
+   */
   getCardElements() {
     return {
       businessCard: this.businessCard,
@@ -204,8 +209,8 @@ export class BusinessCardRenderer extends BaseModule {
   }
 
   /**
-     * Show/hide card
-     */
+   * Show/hide card
+   */
   setVisible(visible: boolean) {
     if (!this.hasRequiredElements()) {
       this.error('Cannot set visibility - required elements missing');
@@ -220,8 +225,8 @@ export class BusinessCardRenderer extends BaseModule {
   }
 
   /**
-     * Enable section card after intro completion
-     */
+   * Enable section card after intro completion
+   */
   enableAfterIntro() {
     if (this.elementConfig.businessCardId === 'business-card') {
       this.log('Enabling section card after intro completion');
@@ -232,10 +237,10 @@ export class BusinessCardRenderer extends BaseModule {
   }
 
   /**
-     * ==========================================
-     * STATUS & DEBUG
-     * ==========================================
-     */
+   * ==========================================
+   * STATUS & DEBUG
+   * ==========================================
+   */
   override getStatus() {
     return {
       ...super.getStatus(),
@@ -254,10 +259,10 @@ export class BusinessCardRenderer extends BaseModule {
   }
 
   /**
-     * ==========================================
-     * CLEANUP
-     * ==========================================
-     */
+   * ==========================================
+   * CLEANUP
+   * ==========================================
+   */
   override async onDestroy() {
     this.log('BusinessCardRenderer cleanup started');
 

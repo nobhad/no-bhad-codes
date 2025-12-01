@@ -3,7 +3,7 @@
  * DATABASE QUERY BUILDER
  * ===============================================
  * @file server/database/query-builder.ts
- * 
+ *
  * Fluent, type-safe database query builder for SQLite.
  * Provides a clean API for building and executing database queries.
  */
@@ -12,7 +12,19 @@ import { Database } from 'sqlite3';
 import { logger } from '../services/logger.js';
 
 // Type definitions
-export type WhereOperator = '=' | '!=' | '<' | '<=' | '>' | '>=' | 'LIKE' | 'NOT LIKE' | 'IN' | 'NOT IN' | 'IS NULL' | 'IS NOT NULL';
+export type WhereOperator =
+  | '='
+  | '!='
+  | '<'
+  | '<='
+  | '>'
+  | '>='
+  | 'LIKE'
+  | 'NOT LIKE'
+  | 'IN'
+  | 'NOT IN'
+  | 'IS NULL'
+  | 'IS NOT NULL';
 export type OrderDirection = 'ASC' | 'DESC';
 export type JoinType = 'INNER' | 'LEFT' | 'RIGHT' | 'FULL';
 
@@ -64,7 +76,7 @@ export abstract class BaseQueryBuilder<T = any> {
   protected clone(): this {
     const cloned = Object.create(Object.getPrototypeOf(this));
     Object.assign(cloned, this);
-    
+
     // Deep copy arrays
     cloned.selectColumns = [...this.selectColumns];
     cloned.whereConditions = [...this.whereConditions];
@@ -234,7 +246,7 @@ export abstract class BaseQueryBuilder<T = any> {
 
     let sql = ' WHERE ';
     const params: any[] = [];
-    
+
     conditions.forEach((condition, index) => {
       if (index > 0) {
         sql += ` ${condition.logical} `;
@@ -264,7 +276,7 @@ export abstract class BaseQueryBuilder<T = any> {
     }
 
     return this.joinConditions
-      .map(join => ` ${join.type} JOIN ${join.table} ON ${join.on}`)
+      .map((join) => ` ${join.type} JOIN ${join.table} ON ${join.on}`)
       .join('');
   }
 
@@ -277,7 +289,7 @@ export abstract class BaseQueryBuilder<T = any> {
     }
 
     const orderBy = this.orderByColumns
-      .map(order => `${order.column} ${order.direction}`)
+      .map((order) => `${order.column} ${order.direction}`)
       .join(', ');
 
     return ` ORDER BY ${orderBy}`;
@@ -304,7 +316,7 @@ export abstract class BaseQueryBuilder<T = any> {
 
     let sql = ' HAVING ';
     const params: any[] = [];
-    
+
     this.havingConditions.forEach((condition, index) => {
       if (index > 0) {
         sql += ` ${condition.logical} `;
@@ -343,7 +355,7 @@ export abstract class BaseQueryBuilder<T = any> {
    */
   protected async executeQuery<R = T>(sql: string, params: any[] = []): Promise<QueryResult<R>> {
     const startTime = Date.now();
-    
+
     try {
       await logger.debug('Executing database query');
 
@@ -368,7 +380,6 @@ export abstract class BaseQueryBuilder<T = any> {
         sql,
         params
       };
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
 
@@ -386,7 +397,7 @@ export abstract class BaseQueryBuilder<T = any> {
    */
   protected async executeQuerySingle<R = T>(sql: string, params: any[] = []): Promise<R | null> {
     const startTime = Date.now();
-    
+
     try {
       await logger.debug('Executing single row query');
 
@@ -395,7 +406,7 @@ export abstract class BaseQueryBuilder<T = any> {
           if (error) {
             reject(error);
           } else {
-            resolve(row as R || null);
+            resolve((row as R) || null);
           }
         });
       });
@@ -405,7 +416,6 @@ export abstract class BaseQueryBuilder<T = any> {
       await logger.debug('Single row query completed');
 
       return row;
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
 
@@ -427,7 +437,9 @@ export class SelectQueryBuilder<T = any> extends BaseQueryBuilder<T> {
    * Build and return the SELECT SQL query
    */
   toSql(): { sql: string; params: any[] } {
-    const columns = this.distinctValue ? `DISTINCT ${this.selectColumns.join(', ')}` : this.selectColumns.join(', ');
+    const columns = this.distinctValue
+      ? `DISTINCT ${this.selectColumns.join(', ')}`
+      : this.selectColumns.join(', ');
     let sql = `SELECT ${columns} FROM ${this.tableName}`;
 
     sql += this.buildJoinClause();
@@ -491,7 +503,10 @@ export class SelectQueryBuilder<T = any> extends BaseQueryBuilder<T> {
   /**
    * Execute paginated query (overrides base paginate to return results)
    */
-  async paginate(page: number, perPage: number): Promise<{
+  async paginate(
+    page: number,
+    perPage: number
+  ): Promise<{
     data: T[];
     pagination: {
       page: number;
@@ -526,7 +541,10 @@ export class SelectQueryBuilder<T = any> extends BaseQueryBuilder<T> {
   /**
    * Get paginated results (alias for paginate for backward compatibility)
    */
-  async getPaginated(page: number = 1, perPage: number = 15): Promise<{
+  async getPaginated(
+    page: number = 1,
+    perPage: number = 15
+  ): Promise<{
     data: T[];
     pagination: {
       page: number;
@@ -585,9 +603,9 @@ export class InsertQueryBuilder<T = any> extends BaseQueryBuilder<T> {
 
     const columns = Object.keys(this.insertData[0]);
     const placeholders = columns.map(() => '?').join(', ');
-    
-    let sql = `INSERT`;
-    
+
+    let sql = 'INSERT';
+
     if (this.conflictAction === 'IGNORE') {
       sql += ' OR IGNORE';
     } else if (this.conflictAction === 'REPLACE') {
@@ -599,7 +617,7 @@ export class InsertQueryBuilder<T = any> extends BaseQueryBuilder<T> {
     const valueGroups = this.insertData.map(() => `(${placeholders})`);
     sql += valueGroups.join(', ');
 
-    const params = this.insertData.flatMap(row => columns.map(col => row[col]));
+    const params = this.insertData.flatMap((row) => columns.map((col) => row[col]));
 
     return { sql, params };
   }
@@ -615,7 +633,7 @@ export class InsertQueryBuilder<T = any> extends BaseQueryBuilder<T> {
       await logger.debug('Executing insert query');
 
       const result = await new Promise<{ insertId: number; changes: number }>((resolve, reject) => {
-        this.db.run(sql, params, function(error) {
+        this.db.run(sql, params, function (error) {
           if (error) {
             reject(error);
           } else {
@@ -632,7 +650,6 @@ export class InsertQueryBuilder<T = any> extends BaseQueryBuilder<T> {
       await logger.debug('Insert query completed');
 
       return result;
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
 
@@ -659,13 +676,13 @@ export class UpdateQueryBuilder<T = any> extends BaseQueryBuilder<T> {
   set(column: string, value: any): this;
   set(columnOrData: string | Record<string, any>, value?: any): this {
     const cloned = this.clone();
-    
+
     if (typeof columnOrData === 'string') {
       cloned.updateData = { ...cloned.updateData, [columnOrData]: value };
     } else {
       cloned.updateData = { ...cloned.updateData, ...columnOrData };
     }
-    
+
     return cloned;
   }
 
@@ -700,7 +717,7 @@ export class UpdateQueryBuilder<T = any> extends BaseQueryBuilder<T> {
     }
 
     const setClause = Object.keys(this.updateData)
-      .map(column => `${column} = ?`)
+      .map((column) => `${column} = ?`)
       .join(', ');
 
     let sql = `UPDATE ${this.tableName} SET ${setClause}`;
@@ -727,7 +744,7 @@ export class UpdateQueryBuilder<T = any> extends BaseQueryBuilder<T> {
       await logger.debug('Executing update query');
 
       const result = await new Promise<{ changes: number }>((resolve, reject) => {
-        this.db.run(sql, params, function(error) {
+        this.db.run(sql, params, function (error) {
           if (error) {
             reject(error);
           } else {
@@ -741,7 +758,6 @@ export class UpdateQueryBuilder<T = any> extends BaseQueryBuilder<T> {
       await logger.debug('Update query completed');
 
       return result;
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
 
@@ -789,7 +805,7 @@ export class DeleteQueryBuilder<T = any> extends BaseQueryBuilder<T> {
       await logger.debug('Executing delete query');
 
       const result = await new Promise<{ changes: number }>((resolve, reject) => {
-        this.db.run(sql, params, function(error) {
+        this.db.run(sql, params, function (error) {
           if (error) {
             reject(error);
           } else {
@@ -803,7 +819,6 @@ export class DeleteQueryBuilder<T = any> extends BaseQueryBuilder<T> {
       await logger.debug('Delete query completed');
 
       return result;
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
 
@@ -885,7 +900,6 @@ export class QueryBuilder {
         sql,
         params
       };
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
 

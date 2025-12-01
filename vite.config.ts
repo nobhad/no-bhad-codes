@@ -18,7 +18,7 @@ export default defineConfig({
     // Build client-side JavaScript from src/main.ts
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'src/main.ts'),
+        main: resolve(__dirname, 'src/main.ts')
       },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
@@ -29,13 +29,7 @@ export default defineConfig({
 
     // Optimize chunk splitting
     chunkSizeWarningLimit: 600,
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    }
+    minify: 'terser'
   },
 
   // Development server configuration
@@ -91,10 +85,7 @@ export default defineConfig({
     ViteEjsPlugin({
       // EJS template configuration
       ejs: {
-        views: [
-          resolve(__dirname, 'templates/pages'),
-          resolve(__dirname, 'templates/partials')
-        ],
+        views: [resolve(__dirname, 'templates/pages'), resolve(__dirname, 'templates/partials')],
         options: {
           // EJS compile options
           compileDebug: process.env.NODE_ENV !== 'production',
@@ -131,10 +122,7 @@ export default defineConfig({
 
   // Optimization configuration
   optimizeDeps: {
-    include: [
-      'gsap',
-      'gsap/all'
-    ],
+    include: ['gsap', 'gsap/all'],
     exclude: []
   },
 

@@ -8,7 +8,8 @@
  */
 
 export class ObfuscationUtils {
-  private static readonly CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  private static readonly CHARSET =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
   /**
    * Simple XOR encryption for strings
@@ -16,9 +17,7 @@ export class ObfuscationUtils {
   static encrypt(text: string, key: string): string {
     let result = '';
     for (let i = 0; i < text.length; i++) {
-      result += String.fromCharCode(
-        text.charCodeAt(i) ^ key.charCodeAt(i % key.length)
-      );
+      result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
     }
     return btoa(result);
   }
@@ -30,9 +29,7 @@ export class ObfuscationUtils {
     const decoded = atob(encrypted);
     let result = '';
     for (let i = 0; i < decoded.length; i++) {
-      result += String.fromCharCode(
-        decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length)
-      );
+      result += String.fromCharCode(decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length));
     }
     return result;
   }
@@ -90,7 +87,7 @@ export class ObfuscationUtils {
     while ((match = classRegex.exec(css)) !== null) {
       const originalClass = match[1];
       if (originalClass && !nameMap.has(originalClass)) {
-        nameMap.set(originalClass, `c${  ObfuscationUtils.generateRandomName(6)}`);
+        nameMap.set(originalClass, `c${ObfuscationUtils.generateRandomName(6)}`);
       }
     }
 
@@ -120,7 +117,11 @@ export class ObfuscationUtils {
     if (classMap) {
       classMap.forEach((obfuscatedClassName, original) => {
         const regex = new RegExp(`class=["']([^"']*\\s+)?${original}(\\s+[^"']*)?["']`, 'g');
-        obfuscated = obfuscated.replace(regex, (match, before = '', after = '') => `class="${before}${obfuscatedClassName}${after}".trim()`);
+        obfuscated = obfuscated.replace(
+          regex,
+          (match, before = '', after = '') =>
+            `class="${before}${obfuscatedClassName}${after}".trim()`
+        );
       });
     }
 
@@ -132,9 +133,15 @@ export class ObfuscationUtils {
    */
   static generateFakeSource(realFunction: Function): string {
     const fakeNames = [
-      'validateCredentials', 'encryptPayload', 'authenticateUser',
-      'processPayment', 'sanitizeInput', 'hashPassword',
-      'generateToken', 'verifySignature', 'decryptData'
+      'validateCredentials',
+      'encryptPayload',
+      'authenticateUser',
+      'processPayment',
+      'sanitizeInput',
+      'hashPassword',
+      'generateToken',
+      'verifySignature',
+      'decryptData'
     ];
 
     const fakeName = fakeNames[Math.floor(Math.random() * fakeNames.length)];
@@ -174,7 +181,7 @@ function checkPermissions() { return true; }
 
     let obfuscatedCode = code;
 
-    sensitivePatterns.forEach(pattern => {
+    sensitivePatterns.forEach((pattern) => {
       obfuscatedCode = obfuscatedCode.replace(pattern, (match) => {
         const quote = match[0];
         const content = match.slice(1, -1);

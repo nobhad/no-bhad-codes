@@ -63,10 +63,8 @@ export const PROTECTION_CONFIG: CodeProtectionConfig = {
   whitelist: {
     // Example: Allow your own IP during development
     // ips: ['192.168.1.100', '10.0.0.1'],
-
     // Example: Allow specific browsers
     // userAgents: ['MyTestAgent/1.0'],
-
     // Example: Allow specific domains
     // domains: ['localhost', '127.0.0.1'],
   },
@@ -105,17 +103,10 @@ export const BUILD_OBFUSCATION_CONFIG = {
   level: 'maximum' as const,
 
   // Preserve these function/class names (don't obfuscate them)
-  preserveNames: [
-    'init',
-    'mount',
-    'render',
-    'destroy',
-    'addEventListener',
-    'querySelector'
-  ],
+  preserveNames: ['init', 'mount', 'render', 'destroy', 'addEventListener', 'querySelector'],
 
   // Encryption key for string obfuscation
-  encryptionKey: `nbw_build_key_${  Date.now()}`,
+  encryptionKey: `nbw_build_key_${Date.now()}`,
 
   features: {
     minifyHTML: true,
@@ -124,7 +115,7 @@ export const BUILD_OBFUSCATION_CONFIG = {
     encryptStrings: true,
     antiDebugTraps: true,
     fakeSourceMaps: false, // Set to true to generate fake source maps
-    polymorphicCode: true  // Advanced: code that changes its structure
+    polymorphicCode: true // Advanced: code that changes its structure
   }
 };
 
@@ -155,7 +146,7 @@ export const PROTECTION_PRESETS = {
     features: {
       ...PROTECTION_CONFIG.features,
       consoleDisabling: false, // Allow console for testing
-      antiDebugging: false    // Allow debugging for testing
+      antiDebugging: false // Allow debugging for testing
     }
   },
 
@@ -177,9 +168,9 @@ export const PROTECTION_PRESETS = {
     level: 'advanced' as const,
     features: {
       ...PROTECTION_CONFIG.features,
-      rightClickDisable: false,     // Allow right-click for accessibility
-      keyboardShortcuts: false,     // Allow shortcuts for accessibility
-      consoleDisabling: false      // Allow console for demo purposes
+      rightClickDisable: false, // Allow right-click for accessibility
+      keyboardShortcuts: false, // Allow shortcuts for accessibility
+      consoleDisabling: false // Allow console for demo purposes
     }
   }
 };
