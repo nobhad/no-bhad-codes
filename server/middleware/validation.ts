@@ -3,7 +3,7 @@
  * API VALIDATION MIDDLEWARE
  * ===============================================
  * @file server/middleware/validation.ts
- * 
+ *
  * Comprehensive API validation middleware for all endpoints.
  * Provides request validation, sanitization, and error handling.
  */
@@ -71,7 +71,7 @@ export class ApiValidator {
 
       for (const rule of fieldRules) {
         const fieldValidation = this.validateField(field, fieldValue, rule);
-        
+
         if (!fieldValidation.isValid) {
           errors.push(...fieldValidation.errors);
         } else if (fieldValidation.sanitizedValue !== undefined) {
@@ -90,7 +90,11 @@ export class ApiValidator {
   /**
    * Validate individual field
    */
-  private validateField(field: string, value: any, rule: ValidationRule): {
+  private validateField(
+    field: string,
+    value: any,
+    rule: ValidationRule
+  ): {
     isValid: boolean;
     errors: ValidationError[];
     sanitizedValue?: any;
@@ -117,27 +121,27 @@ export class ApiValidator {
 
     // Type-specific validation
     switch (rule.type) {
-      case 'string':
-        sanitizedValue = this.validateString(field, value, rule, errors);
-        break;
-      case 'number':
-        sanitizedValue = this.validateNumber(field, value, rule, errors);
-        break;
-      case 'boolean':
-        sanitizedValue = this.validateBoolean(field, value, rule, errors);
-        break;
-      case 'email':
-        sanitizedValue = this.validateEmail(field, value, rule, errors);
-        break;
-      case 'array':
-        sanitizedValue = this.validateArray(field, value, rule, errors);
-        break;
-      case 'object':
-        sanitizedValue = this.validateObject(field, value, rule, errors);
-        break;
-      case 'custom':
-        sanitizedValue = this.validateCustom(field, value, rule, errors);
-        break;
+    case 'string':
+      sanitizedValue = this.validateString(field, value, rule, errors);
+      break;
+    case 'number':
+      sanitizedValue = this.validateNumber(field, value, rule, errors);
+      break;
+    case 'boolean':
+      sanitizedValue = this.validateBoolean(field, value, rule, errors);
+      break;
+    case 'email':
+      sanitizedValue = this.validateEmail(field, value, rule, errors);
+      break;
+    case 'array':
+      sanitizedValue = this.validateArray(field, value, rule, errors);
+      break;
+    case 'object':
+      sanitizedValue = this.validateObject(field, value, rule, errors);
+      break;
+    case 'custom':
+      sanitizedValue = this.validateCustom(field, value, rule, errors);
+      break;
     }
 
     // Apply custom validator if present (works for all types, not just 'custom')
@@ -187,7 +191,12 @@ export class ApiValidator {
     };
   }
 
-  private validateString(field: string, value: any, rule: ValidationRule, errors: ValidationError[]): string {
+  private validateString(
+    field: string,
+    value: any,
+    rule: ValidationRule,
+    errors: ValidationError[]
+  ): string {
     if (typeof value !== 'string') {
       errors.push({
         field,
@@ -245,7 +254,12 @@ export class ApiValidator {
     return sanitized;
   }
 
-  private validateNumber(field: string, value: any, rule: ValidationRule, errors: ValidationError[]): number {
+  private validateNumber(
+    field: string,
+    value: any,
+    rule: ValidationRule,
+    errors: ValidationError[]
+  ): number {
     const num = Number(value);
 
     if (isNaN(num)) {
@@ -279,7 +293,12 @@ export class ApiValidator {
     return num;
   }
 
-  private validateBoolean(field: string, value: any, rule: ValidationRule, errors: ValidationError[]): boolean {
+  private validateBoolean(
+    field: string,
+    value: any,
+    rule: ValidationRule,
+    errors: ValidationError[]
+  ): boolean {
     if (typeof value === 'boolean') {
       return value;
     }
@@ -306,7 +325,12 @@ export class ApiValidator {
     return value;
   }
 
-  private validateEmail(field: string, value: any, rule: ValidationRule, errors: ValidationError[]): string {
+  private validateEmail(
+    field: string,
+    value: any,
+    rule: ValidationRule,
+    errors: ValidationError[]
+  ): string {
     if (typeof value !== 'string') {
       errors.push({
         field,
@@ -363,7 +387,12 @@ export class ApiValidator {
     return email;
   }
 
-  private validateArray(field: string, value: any, rule: ValidationRule, errors: ValidationError[]): any[] {
+  private validateArray(
+    field: string,
+    value: any,
+    rule: ValidationRule,
+    errors: ValidationError[]
+  ): any[] {
     if (!Array.isArray(value)) {
       errors.push({
         field,
@@ -395,7 +424,12 @@ export class ApiValidator {
     return value;
   }
 
-  private validateObject(field: string, value: any, rule: ValidationRule, errors: ValidationError[]): any {
+  private validateObject(
+    field: string,
+    value: any,
+    rule: ValidationRule,
+    errors: ValidationError[]
+  ): any {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
       errors.push({
         field,
@@ -409,14 +443,19 @@ export class ApiValidator {
     return value;
   }
 
-  private validateCustom(field: string, value: any, rule: ValidationRule, errors: ValidationError[]): any {
+  private validateCustom(
+    field: string,
+    value: any,
+    rule: ValidationRule,
+    errors: ValidationError[]
+  ): any {
     if (!rule.customValidator) {
       return value;
     }
 
     try {
       const result = rule.customValidator(value);
-      
+
       if (result === false) {
         errors.push({
           field,
@@ -437,7 +476,6 @@ export class ApiValidator {
       if (rule.customSanitizer) {
         return rule.customSanitizer(value);
       }
-
     } catch (error) {
       const err = error as Error;
       errors.push({
@@ -469,13 +507,16 @@ export class ApiValidator {
 /**
  * Express middleware factory for validation
  */
-export function validateRequest(schema: ValidationSchema, options: {
-  validateBody?: boolean;
-  validateQuery?: boolean;
-  validateParams?: boolean;
-  allowUnknownFields?: boolean;
-  stripUnknownFields?: boolean;
-} = {}) {
+export function validateRequest(
+  schema: ValidationSchema,
+  options: {
+    validateBody?: boolean;
+    validateQuery?: boolean;
+    validateParams?: boolean;
+    allowUnknownFields?: boolean;
+    stripUnknownFields?: boolean;
+  } = {}
+) {
   const {
     validateBody = true,
     validateQuery = false,
@@ -489,15 +530,17 @@ export function validateRequest(schema: ValidationSchema, options: {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const validationResults: ValidationResult[] = [];
-      const requestId = req.headers['x-request-id'] as string || 'unknown';
+      const requestId = (req.headers['x-request-id'] as string) || 'unknown';
 
       // Validate request body
       if (validateBody && req.body) {
         const result = validator.validate(req.body, schema);
         validationResults.push(result);
-        
+
         if (result.isValid && result.sanitizedData) {
-          req.body = stripUnknownFields ? result.sanitizedData : { ...req.body, ...result.sanitizedData };
+          req.body = stripUnknownFields
+            ? result.sanitizedData
+            : { ...req.body, ...result.sanitizedData };
         }
       }
 
@@ -505,9 +548,11 @@ export function validateRequest(schema: ValidationSchema, options: {
       if (validateQuery && req.query) {
         const result = validator.validate(req.query, schema);
         validationResults.push(result);
-        
+
         if (result.isValid && result.sanitizedData) {
-          req.query = stripUnknownFields ? result.sanitizedData : { ...req.query, ...result.sanitizedData };
+          req.query = stripUnknownFields
+            ? result.sanitizedData
+            : { ...req.query, ...result.sanitizedData };
         }
       }
 
@@ -515,14 +560,16 @@ export function validateRequest(schema: ValidationSchema, options: {
       if (validateParams && req.params) {
         const result = validator.validate(req.params, schema);
         validationResults.push(result);
-        
+
         if (result.isValid && result.sanitizedData) {
-          req.params = stripUnknownFields ? result.sanitizedData : { ...req.params, ...result.sanitizedData };
+          req.params = stripUnknownFields
+            ? result.sanitizedData
+            : { ...req.params, ...result.sanitizedData };
         }
       }
 
       // Check for validation errors
-      const allErrors = validationResults.flatMap(result => result.errors);
+      const allErrors = validationResults.flatMap((result) => result.errors);
 
       if (allErrors.length > 0) {
         await logger.error('Request validation failed');
@@ -539,7 +586,6 @@ export function validateRequest(schema: ValidationSchema, options: {
       await logger.info('Request validation passed');
 
       next();
-
     } catch (error) {
       const err = error as Error;
       await logger.error('Validation middleware error');
@@ -561,12 +607,13 @@ export const ValidationSchemas = {
   user: {
     name: { type: 'string' as const, minLength: 2, maxLength: 100 },
     email: { type: 'email' as const },
-    password: { 
-      type: 'string' as const, 
-      minLength: 8, 
+    password: {
+      type: 'string' as const,
+      minLength: 8,
       maxLength: 128,
       pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      description: 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+      description:
+        'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
     }
   },
 
@@ -576,16 +623,13 @@ export const ValidationSchemas = {
       { type: 'required' as const },
       { type: 'string' as const, minLength: 2, maxLength: 100 }
     ],
-    email: [
-      { type: 'required' as const },
-      { type: 'email' as const }
-    ],
+    email: [{ type: 'required' as const }, { type: 'email' as const }],
     subject: { type: 'string' as const, maxLength: 200 },
     message: [
       { type: 'required' as const },
-      { 
-        type: 'string' as const, 
-        minLength: 10, 
+      {
+        type: 'string' as const,
+        minLength: 10,
         maxLength: 5000,
         customValidator: (value: string) => {
           // Check for spam patterns
@@ -594,8 +638,11 @@ export const ValidationSchemas = {
             /\b(viagra|casino|loan|mortgage|weight loss|get rich)\b/gi,
             /https?:\/\/[^\s]+/gi // URLs in message
           ];
-          
-          return !spamPatterns.some(pattern => pattern.test(value)) || 'Message appears to contain spam';
+
+          return (
+            !spamPatterns.some((pattern) => pattern.test(value)) ||
+            'Message appears to contain spam'
+          );
         }
       }
     ]
@@ -607,21 +654,26 @@ export const ValidationSchemas = {
       { type: 'required' as const },
       { type: 'string' as const, minLength: 2, maxLength: 100 }
     ],
-    email: [
-      { type: 'required' as const },
-      { type: 'email' as const }
-    ],
+    email: [{ type: 'required' as const }, { type: 'email' as const }],
     companyName: { type: 'string' as const, maxLength: 200 },
     projectType: [
       { type: 'required' as const },
-      { 
-        type: 'string' as const, 
-        allowedValues: ['simple-site', 'business-site', 'portfolio', 'e-commerce', 'web-app', 'browser-extension', 'other']
+      {
+        type: 'string' as const,
+        allowedValues: [
+          'simple-site',
+          'business-site',
+          'portfolio',
+          'e-commerce',
+          'web-app',
+          'browser-extension',
+          'other'
+        ]
       }
     ],
     budgetRange: [
       { type: 'required' as const },
-      { 
+      {
         type: 'string' as const,
         allowedValues: ['under-2k', '2k-5k', '5k-10k', '10k-plus', 'discuss']
       }
@@ -637,15 +689,25 @@ export const ValidationSchemas = {
       { type: 'required' as const },
       { type: 'string' as const, minLength: 20, maxLength: 2000 }
     ],
-    features: { 
-      type: 'array' as const, 
+    features: {
+      type: 'array' as const,
       maxLength: 20,
       customValidator: (features: string[]) => {
         const validFeatures = [
-          'contact-form', 'user-auth', 'payment', 'cms', 'analytics', 
-          'api-integration', 'e-commerce', 'blog', 'gallery', 'booking'
+          'contact-form',
+          'user-auth',
+          'payment',
+          'cms',
+          'analytics',
+          'api-integration',
+          'e-commerce',
+          'blog',
+          'gallery',
+          'booking'
         ];
-        return features.every(feature => validFeatures.includes(feature)) || 'Invalid feature selected';
+        return (
+          features.every((feature) => validFeatures.includes(feature)) || 'Invalid feature selected'
+        );
       }
     }
   },
@@ -654,7 +716,7 @@ export const ValidationSchemas = {
   fileUpload: {
     filename: [
       { type: 'required' as const },
-      { 
+      {
         type: 'string' as const,
         pattern: /^[a-zA-Z0-9._-]+$/,
         maxLength: 255
@@ -664,7 +726,14 @@ export const ValidationSchemas = {
       { type: 'required' as const },
       {
         type: 'string' as const,
-        allowedValues: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'text/plain']
+        allowedValues: [
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'image/webp',
+          'application/pdf',
+          'text/plain'
+        ]
       }
     ],
     fileSize: [

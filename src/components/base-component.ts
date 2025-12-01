@@ -34,10 +34,12 @@ export interface ComponentHooks {
   unmounted?(): void | Promise<void>;
 }
 
-export abstract class BaseComponent<P extends ComponentProps = ComponentProps, S extends ComponentState = ComponentState>
+export abstract class BaseComponent<
+    P extends ComponentProps = ComponentProps,
+    S extends ComponentState = ComponentState,
+  >
   extends BaseModule
   implements ComponentHooks {
-
   protected props: P;
   protected state: S;
   protected template: ComponentTemplate | null = null;
@@ -87,9 +89,9 @@ export abstract class BaseComponent<P extends ComponentProps = ComponentProps, S
     this.props = { ...this.props, ...newProps };
 
     // Notify prop watchers
-    Object.keys(newProps).forEach(key => {
+    Object.keys(newProps).forEach((key) => {
       const watchers = this.propWatchers.get(key as keyof P) || [];
-      watchers.forEach(watcher => watcher(newProps[key], prevProps[key as keyof P]));
+      watchers.forEach((watcher) => watcher(newProps[key], prevProps[key as keyof P]));
     });
 
     await this.beforeUpdate?.(prevProps, this.state);
@@ -105,9 +107,9 @@ export abstract class BaseComponent<P extends ComponentProps = ComponentProps, S
     this.state = { ...this.state, ...updates };
 
     // Notify state watchers
-    Object.keys(updates).forEach(key => {
+    Object.keys(updates).forEach((key) => {
       const watchers = this.stateWatchers.get(key as keyof S) || [];
-      watchers.forEach(watcher => watcher(updates[key], prevState[key as keyof S]));
+      watchers.forEach((watcher) => watcher(updates[key], prevState[key as keyof S]));
     });
 
     await this.beforeUpdate?.(this.props, prevState);
@@ -118,7 +120,10 @@ export abstract class BaseComponent<P extends ComponentProps = ComponentProps, S
   /**
    * Watch for prop changes
    */
-  watchProp<K extends keyof P>(prop: K, callback: (newVal: P[K], oldVal: P[K]) => void): () => void {
+  watchProp<K extends keyof P>(
+    prop: K,
+    callback: (newVal: P[K], oldVal: P[K]) => void
+  ): () => void {
     const watchers = this.propWatchers.get(prop) || [];
     watchers.push(callback);
     this.propWatchers.set(prop, watchers);
@@ -135,7 +140,10 @@ export abstract class BaseComponent<P extends ComponentProps = ComponentProps, S
   /**
    * Watch for state changes
    */
-  watchState<K extends keyof S>(stateKey: K, callback: (newVal: S[K], oldVal: S[K]) => void): () => void {
+  watchState<K extends keyof S>(
+    stateKey: K,
+    callback: (newVal: S[K], oldVal: S[K]) => void
+  ): () => void {
     const watchers = this.stateWatchers.get(stateKey) || [];
     watchers.push(callback);
     this.stateWatchers.set(stateKey, watchers);
@@ -275,8 +283,14 @@ export abstract class BaseComponent<P extends ComponentProps = ComponentProps, S
       props: this.props,
       state: this.state,
       refsCount: this.refs.size,
-      propWatchersCount: Array.from(this.propWatchers.values()).reduce((sum, arr) => sum + arr.length, 0),
-      stateWatchersCount: Array.from(this.stateWatchers.values()).reduce((sum, arr) => sum + arr.length, 0),
+      propWatchersCount: Array.from(this.propWatchers.values()).reduce(
+        (sum, arr) => sum + arr.length,
+        0
+      ),
+      stateWatchersCount: Array.from(this.stateWatchers.values()).reduce(
+        (sum, arr) => sum + arr.length,
+        0
+      ),
       hasShadowRoot: !!this.shadowRoot,
       isMounted: !!this.host
     };

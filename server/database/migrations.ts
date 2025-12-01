@@ -70,13 +70,13 @@ export class MigrationManager {
     }
 
     const files = readdirSync(this.migrationsDir)
-      .filter(file => file.endsWith('.sql'))
+      .filter((file) => file.endsWith('.sql'))
       .sort();
 
-    return files.map(filename => {
+    return files.map((filename) => {
       const fullPath = join(this.migrationsDir, filename);
       const content = readFileSync(fullPath, 'utf-8');
-      
+
       // Parse migration file
       const parts = content.split('-- DOWN');
       const up = parts[0].replace('-- UP', '').trim();
@@ -106,17 +106,13 @@ export class MigrationManager {
    */
   async getExecutedMigrations(): Promise<Migration[]> {
     return new Promise((resolve, reject) => {
-      this.db.all(
-        'SELECT * FROM migrations ORDER BY id ASC',
-        [],
-        (err, rows) => {
-          if (err) {
-            reject(new Error(`Failed to get executed migrations: ${err.message}`));
-          } else {
-            resolve(rows as Migration[]);
-          }
+      this.db.all('SELECT * FROM migrations ORDER BY id ASC', [], (err, rows) => {
+        if (err) {
+          reject(new Error(`Failed to get executed migrations: ${err.message}`));
+        } else {
+          resolve(rows as Migration[]);
         }
-      );
+      });
     });
   }
 
@@ -126,9 +122,9 @@ export class MigrationManager {
   async getPendingMigrations(): Promise<MigrationFile[]> {
     const allMigrations = this.getMigrationFiles();
     const executedMigrations = await this.getExecutedMigrations();
-    const executedIds = new Set(executedMigrations.map(m => m.id));
+    const executedIds = new Set(executedMigrations.map((m) => m.id));
 
-    return allMigrations.filter(migration => !executedIds.has(migration.id));
+    return allMigrations.filter((migration) => !executedIds.has(migration.id));
   }
 
   /**
@@ -199,7 +195,7 @@ export class MigrationManager {
    */
   async rollback(): Promise<void> {
     const executedMigrations = await this.getExecutedMigrations();
-    
+
     if (executedMigrations.length === 0) {
       console.log('No migrations to rollback');
       return;
@@ -207,7 +203,7 @@ export class MigrationManager {
 
     const lastMigration = executedMigrations[executedMigrations.length - 1];
     const migrationFiles = this.getMigrationFiles();
-    const migrationFile = migrationFiles.find(m => m.id === lastMigration.id);
+    const migrationFile = migrationFiles.find((m) => m.id === lastMigration.id);
 
     if (!migrationFile || !migrationFile.down) {
       throw new Error(`Cannot rollback migration ${lastMigration.filename}: no DOWN script found`);
@@ -226,26 +222,22 @@ export class MigrationManager {
           }
 
           // Remove the migration record
-          this.db.run(
-            'DELETE FROM migrations WHERE id = ?',
-            [migrationFile.id],
-            (deleteErr) => {
-              if (deleteErr) {
-                this.db.run('ROLLBACK');
-                reject(new Error(`Failed to remove migration record: ${deleteErr.message}`));
-                return;
-              }
-
-              this.db.run('COMMIT', (commitErr) => {
-                if (commitErr) {
-                  reject(new Error(`Failed to commit rollback: ${commitErr.message}`));
-                } else {
-                  console.log(`⏪ Rolled back migration: ${migrationFile.filename}`);
-                  resolve();
-                }
-              });
+          this.db.run('DELETE FROM migrations WHERE id = ?', [migrationFile.id], (deleteErr) => {
+            if (deleteErr) {
+              this.db.run('ROLLBACK');
+              reject(new Error(`Failed to remove migration record: ${deleteErr.message}`));
+              return;
             }
-          );
+
+            this.db.run('COMMIT', (commitErr) => {
+              if (commitErr) {
+                reject(new Error(`Failed to commit rollback: ${commitErr.message}`));
+              } else {
+                console.log(`⏪ Rolled back migration: ${migrationFile.filename}`);
+                resolve();
+              }
+            });
+          });
         });
       });
     });
@@ -273,7 +265,10 @@ export class MigrationManager {
   /**
    * Create a new migration file template
    */
-  static createMigration(name: string, migrationsDir: string = './server/database/migrations'): string {
+  static createMigration(
+    name: string,
+    migrationsDir: string = './server/database/migrations'
+  ): string {
     const timestamp = Date.now();
     const id = String(timestamp).slice(-6); // Use last 6 digits as ID
     const filename = `${id.padStart(3, '0')}_${name.toLowerCase().replace(/\s+/g, '_')}.sql`;
@@ -299,7 +294,7 @@ export class MigrationManager {
 
     require('fs').writeFileSync(filepath, template);
     console.log(`📝 Created migration: ${filepath}`);
-    
+
     return filepath;
   }
 }

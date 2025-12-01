@@ -3,7 +3,7 @@
  * CLIENT INTAKE MODEL
  * ===============================================
  * @file server/models/ClientIntake.ts
- * 
+ *
  * Model for client intake form submissions.
  */
 
@@ -15,7 +15,14 @@ export interface ClientIntakeAttributes {
   email: string;
   company_name?: string;
   phone?: string;
-  project_type: 'simple-site' | 'business-site' | 'portfolio' | 'e-commerce' | 'web-app' | 'browser-extension' | 'other';
+  project_type:
+    | 'simple-site'
+    | 'business-site'
+    | 'portfolio'
+    | 'e-commerce'
+    | 'web-app'
+    | 'browser-extension'
+    | 'other';
   budget_range: 'under-2k' | '2k-5k' | '5k-10k' | '10k-plus' | 'discuss';
   timeline: 'asap' | '1-3-months' | '3-6-months' | 'flexible';
   description: string;
@@ -164,8 +171,7 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
   }
 
   markAsReviewed(reviewerId: number): this {
-    return this
-      .set('status', 'reviewed')
+    return this.set('status', 'reviewed')
       .set('reviewed_by', reviewerId)
       .set('reviewed_at', new Date().toISOString());
   }
@@ -173,7 +179,7 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
   markAsQuoted(price: number, hours?: number): this {
     this.set('status', 'quoted');
     this.set('quoted_price', price);
-    
+
     if (hours) {
       this.set('estimated_hours', hours);
     }
@@ -200,12 +206,12 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
     // Project type complexity
     const typeScores = {
       'simple-site': 1,
-      'portfolio': 2,
+      portfolio: 2,
       'business-site': 3,
       'e-commerce': 4,
       'web-app': 5,
       'browser-extension': 4,
-      'other': 3
+      other: 3
     };
     score += typeScores[this.getProjectType()] || 3;
 
@@ -215,10 +221,10 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
 
     // Timeline urgency
     const timelineScores = {
-      'asap': 2,
+      asap: 2,
       '1-3-months': 1,
       '3-6-months': 0.5,
-      'flexible': 0
+      flexible: 0
     };
     score += timelineScores[this.getTimeline()] || 0;
 
@@ -228,7 +234,7 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
       '2k-5k': 1,
       '5k-10k': 0.5,
       '10k-plus': 0,
-      'discuss': 1
+      discuss: 1
     };
     score += budgetScores[this.getBudgetRange()] || 1;
 
@@ -239,12 +245,12 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
     const complexity = this.calculateComplexityScore();
     const baseHours = {
       'simple-site': 8,
-      'portfolio': 20,
+      portfolio: 20,
       'business-site': 40,
       'e-commerce': 80,
       'web-app': 120,
       'browser-extension': 60,
-      'other': 40
+      other: 40
     };
 
     const base = baseHours[this.getProjectType()] || 40;
@@ -256,16 +262,16 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
   suggestQuotedPrice(): number {
     const estimatedHours = this.getEstimatedHours() || this.suggestEstimatedHours();
     const hourlyRate = 100; // Base hourly rate
-    
+
     // Adjust rate based on project type
     const rateMultipliers = {
       'simple-site': 0.8,
-      'portfolio': 0.9,
+      portfolio: 0.9,
       'business-site': 1.0,
       'e-commerce': 1.2,
       'web-app': 1.3,
       'browser-extension': 1.1,
-      'other': 1.0
+      other: 1.0
     };
 
     const multiplier = rateMultipliers[this.getProjectType()] || 1.0;
@@ -280,8 +286,8 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
       .where('status', '=', 'pending')
       .orderBy('created_at', 'DESC')
       .get();
-    
-    return result.rows.map(row => {
+
+    return result.rows.map((row) => {
       const intake = new this();
       intake.setAttributes(row as any, true);
       return intake;
@@ -293,21 +299,23 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
       .where('status', '=', status)
       .orderBy('created_at', 'DESC')
       .get();
-    
-    return result.rows.map(row => {
+
+    return result.rows.map((row) => {
       const intake = new this();
       intake.setAttributes(row as any, true);
       return intake;
     });
   }
 
-  static async findByPriority(priority: ClientIntakeAttributes['priority']): Promise<ClientIntake[]> {
+  static async findByPriority(
+    priority: ClientIntakeAttributes['priority']
+  ): Promise<ClientIntake[]> {
     const result = await this.query()
       .where('priority', '=', priority)
       .orderBy('created_at', 'DESC')
       .get();
-    
-    return result.rows.map(row => {
+
+    return result.rows.map((row) => {
       const intake = new this();
       intake.setAttributes(row as any, true);
       return intake;
@@ -319,21 +327,23 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
       .where('email', '=', email.toLowerCase())
       .orderBy('created_at', 'DESC')
       .get();
-    
-    return result.rows.map(row => {
+
+    return result.rows.map((row) => {
       const intake = new this();
       intake.setAttributes(row as any, true);
       return intake;
     });
   }
 
-  static async findByProjectType(projectType: ClientIntakeAttributes['project_type']): Promise<ClientIntake[]> {
+  static async findByProjectType(
+    projectType: ClientIntakeAttributes['project_type']
+  ): Promise<ClientIntake[]> {
     const result = await this.query()
       .where('project_type', '=', projectType)
       .orderBy('created_at', 'DESC')
       .get();
-    
-    return result.rows.map(row => {
+
+    return result.rows.map((row) => {
       const intake = new this();
       intake.setAttributes(row as any, true);
       return intake;
@@ -348,8 +358,8 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
       .where('created_at', '>=', cutoffDate.toISOString())
       .orderBy('created_at', 'DESC')
       .get();
-    
-    return result.rows.map(row => {
+
+    return result.rows.map((row) => {
       const intake = new this();
       intake.setAttributes(row as any, true);
       return intake;
@@ -405,7 +415,15 @@ export class ClientIntake extends BaseModel<ClientIntakeAttributes> {
 
   // Validation
   static validateProjectType(projectType: string): boolean {
-    const validTypes = ['simple-site', 'business-site', 'portfolio', 'e-commerce', 'web-app', 'browser-extension', 'other'];
+    const validTypes = [
+      'simple-site',
+      'business-site',
+      'portfolio',
+      'e-commerce',
+      'web-app',
+      'browser-extension',
+      'other'
+    ];
     return validTypes.includes(projectType);
   }
 

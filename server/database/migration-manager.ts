@@ -3,7 +3,7 @@
  * DATABASE MIGRATION MANAGER
  * ===============================================
  * @file server/database/migration-manager.ts
- * 
+ *
  * Manages database schema migrations with version tracking.
  */
 
@@ -63,23 +63,21 @@ export class MigrationManager {
     try {
       // Ensure migrations directory exists
       await fs.mkdir(this.migrationDir, { recursive: true });
-      
+
       const files = await fs.readdir(this.migrationDir);
-      const migrationFiles = files
-        .filter(file => file.endsWith('.sql'))
-        .sort();
+      const migrationFiles = files.filter((file) => file.endsWith('.sql')).sort();
 
       const migrations: Migration[] = [];
 
       for (const file of migrationFiles) {
         const filePath = path.join(this.migrationDir, file);
         const content = await fs.readFile(filePath, 'utf-8');
-        
+
         // Parse migration file format:
         // -- Migration: migration_name
         // -- Up
         // SQL statements for up migration
-        // -- Down  
+        // -- Down
         // SQL statements for down migration
 
         const lines = content.split('\n');
@@ -90,7 +88,7 @@ export class MigrationManager {
 
         for (const line of lines) {
           const trimmedLine = line.trim();
-          
+
           if (trimmedLine.startsWith('-- Migration:')) {
             migrationName = trimmedLine.replace('-- Migration:', '').trim();
           } else if (trimmedLine === '-- Up') {
@@ -99,9 +97,9 @@ export class MigrationManager {
             currentSection = 'down';
           } else if (!trimmedLine.startsWith('--') && trimmedLine) {
             if (currentSection === 'up') {
-              upSql += line + '\n';
+              upSql += `${line  }\n`;
             } else if (currentSection === 'down') {
-              downSql += line + '\n';
+              downSql += `${line  }\n`;
             }
           }
         }
@@ -132,13 +130,13 @@ export class MigrationManager {
   async getAppliedMigrations(): Promise<Migration[]> {
     return new Promise((resolve, reject) => {
       const query = 'SELECT * FROM migrations ORDER BY id ASC';
-      
+
       this.db.all(query, (err, rows: any[]) => {
         if (err) {
           logger.logError(err, { category: 'DATABASE_MIGRATION' });
           reject(err);
         } else {
-          const migrations = rows.map(row => ({
+          const migrations = rows.map((row) => ({
             id: row.id,
             name: row.name,
             filename: row.filename,
@@ -158,12 +156,12 @@ export class MigrationManager {
   async migrate(): Promise<void> {
     try {
       await this.initialize();
-      
+
       const available = await this.getAvailableMigrations();
       const applied = await this.getAppliedMigrations();
-      const appliedIds = new Set(applied.map(m => m.id));
+      const appliedIds = new Set(applied.map((m) => m.id));
 
-      const pending = available.filter(m => !appliedIds.has(m.id));
+      const pending = available.filter((m) => !appliedIds.has(m.id));
 
       if (pending.length === 0) {
         logger.info('No pending migrations');
@@ -198,7 +196,7 @@ export class MigrationManager {
         this.db.exec(migration.up, (err) => {
           if (err) {
             this.db.run('ROLLBACK');
-            logger.logError(err, { 
+            logger.logError(err, {
               category: 'DATABASE_MIGRATION',
               metadata: { migrationName: migration.name }
             });
@@ -211,7 +209,7 @@ export class MigrationManager {
           this.db.run(query, [migration.id, migration.name, migration.filename], (err) => {
             if (err) {
               this.db.run('ROLLBACK');
-              logger.logError(err, { 
+              logger.logError(err, {
                 category: 'DATABASE_MIGRATION',
                 metadata: { migrationName: migration.name }
               });
@@ -240,7 +238,7 @@ export class MigrationManager {
 
       const lastMigration = applied[applied.length - 1];
       const available = await this.getAvailableMigrations();
-      const migration = available.find(m => m.id === lastMigration.id);
+      const migration = available.find((m) => m.id === lastMigration.id);
 
       if (!migration) {
         throw new Error(`Migration file not found for: ${lastMigration.name}`);
@@ -272,7 +270,7 @@ export class MigrationManager {
         this.db.exec(migration.down, (err) => {
           if (err) {
             this.db.run('ROLLBACK');
-            logger.logError(err, { 
+            logger.logError(err, {
               category: 'DATABASE_MIGRATION',
               metadata: { migrationName: migration.name }
             });
@@ -285,7 +283,7 @@ export class MigrationManager {
           this.db.run(query, [migration.id], (err) => {
             if (err) {
               this.db.run('ROLLBACK');
-              logger.logError(err, { 
+              logger.logError(err, {
                 category: 'DATABASE_MIGRATION',
                 metadata: { migrationName: migration.name }
               });
@@ -311,8 +309,8 @@ export class MigrationManager {
   }> {
     const available = await this.getAvailableMigrations();
     const applied = await this.getAppliedMigrations();
-    const appliedIds = new Set(applied.map(m => m.id));
-    const pending = available.filter(m => !appliedIds.has(m.id));
+    const appliedIds = new Set(applied.map((m) => m.id));
+    const pending = available.filter((m) => !appliedIds.has(m.id));
 
     return { available, applied, pending };
   }
@@ -327,7 +325,7 @@ export class MigrationManager {
 
       // Get next ID
       const available = await this.getAvailableMigrations();
-      const nextId = available.length > 0 ? Math.max(...available.map(m => m.id)) + 1 : 1;
+      const nextId = available.length > 0 ? Math.max(...available.map((m) => m.id)) + 1 : 1;
 
       // Create filename
       const filename = `${nextId.toString().padStart(3, '0')}_${name.toLowerCase().replace(/\s+/g, '_')}.sql`;
@@ -348,7 +346,7 @@ export class MigrationManager {
 
       await fs.writeFile(filePath, template);
       logger.info(`Created migration file: ${filename}`);
-      
+
       return filePath;
     } catch (error: any) {
       logger.logError(error, { category: 'DATABASE_MIGRATION' });

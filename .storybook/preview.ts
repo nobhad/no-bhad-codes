@@ -10,14 +10,14 @@ import '../src/styles/admin-dashboard.css';
 const preview: Preview = {
   parameters: {
     actions: { argTypesRegex: '^on[A-Z].*' },
-    
+
     controls: {
       matchers: {
         color: /(background|color)$/i,
         date: /Date$/i,
       },
     },
-    
+
     docs: {
       extractComponentDescription: (component, { notes }) => {
         if (notes) {
@@ -26,7 +26,7 @@ const preview: Preview = {
         return null;
       },
     },
-    
+
     backgrounds: {
       default: 'light',
       values: [
@@ -35,7 +35,7 @@ const preview: Preview = {
           value: '#f8f9fa',
         },
         {
-          name: 'dark', 
+          name: 'dark',
           value: '#3a3a3a',
         },
         {
@@ -44,7 +44,7 @@ const preview: Preview = {
         },
       ],
     },
-    
+
     viewport: {
       viewports: {
         mobile: {
@@ -78,7 +78,7 @@ const preview: Preview = {
       },
     },
   },
-  
+
   globalTypes: {
     theme: {
       description: 'Global theme for components',
@@ -94,11 +94,11 @@ const preview: Preview = {
       },
     },
   },
-  
+
   decorators: [
     (story, context) => {
       const theme = context.globals.theme || 'light';
-      
+
       return `
         <html data-theme="${theme}">
           <body style="

@@ -110,7 +110,6 @@ export class DataService extends BaseService {
 
       // Clear cache when new data is loaded
       this.cache.clear();
-
     } catch (error) {
       this.error('Failed to load portfolio data:', error);
       throw error;
@@ -132,7 +131,7 @@ export class DataService extends BaseService {
    */
   getProject(id: string): Project | null {
     const projects = this.getProjects();
-    return projects.find(project => project.id === id) || null;
+    return projects.find((project) => project.id === id) || null;
   }
 
   /**
@@ -146,7 +145,7 @@ export class DataService extends BaseService {
     }
 
     const projects = this.getProjects();
-    const featured = projects.filter(project => project.featured);
+    const featured = projects.filter((project) => project.featured);
 
     this.cache.set(cacheKey, featured);
     return featured;
@@ -173,15 +172,15 @@ export class DataService extends BaseService {
     }
 
     const projects = this.getProjects();
-    const categoryProjects = projects.filter(project => project.category === categoryId);
+    const categoryProjects = projects.filter((project) => project.category === categoryId);
 
     this.cache.set(cacheKey, categoryProjects);
     return categoryProjects;
   }
 
   /**
- * Get navigation data
- */
+   * Get navigation data
+   */
   getNavigation(): { main: NavigationItem[] } {
     if (!this.data) {
       throw new Error('Data not loaded. Call init() first.');
@@ -223,13 +222,15 @@ export class DataService extends BaseService {
     const results: Project[] = [];
     const searchTerm = query.toLowerCase();
 
-    projects.forEach(project => {
+    projects.forEach((project) => {
       const searchableText = [
         project.title,
         project.description,
         project.fullDescription || '',
         ...project.technologies
-      ].join(' ').toLowerCase();
+      ]
+        .join(' ')
+        .toLowerCase();
 
       if (searchableText.includes(searchTerm)) {
         results.push(project);
@@ -253,10 +254,10 @@ export class DataService extends BaseService {
     const projects = this.getProjects();
     const results: Project[] = [];
 
-    projects.forEach(project => {
-      if (project.technologies.some(tech =>
-        tech.toLowerCase().includes(technology.toLowerCase())
-      )) {
+    projects.forEach((project) => {
+      if (
+        project.technologies.some((tech) => tech.toLowerCase().includes(technology.toLowerCase()))
+      ) {
         results.push(project);
       }
     });

@@ -23,7 +23,7 @@ const templates = [
   },
   {
     input: resolve(projectRoot, 'projects/index.html'),
-    output: resolve(projectRoot, 'dist-temp/projects/index.html'), 
+    output: resolve(projectRoot, 'dist-temp/projects/index.html'),
     data: 'projects'
   },
   {
@@ -56,9 +56,7 @@ const templates = [
 // Load template data
 let templateData;
 try {
-  templateData = JSON.parse(
-    readFileSync(resolve(projectRoot, 'templates/data.json'), 'utf-8')
-  );
+  templateData = JSON.parse(readFileSync(resolve(projectRoot, 'templates/data.json'), 'utf-8'));
 } catch (error) {
   console.error('Failed to read template data:', error);
   process.exit(1);
@@ -74,7 +72,7 @@ const ejsOptions = {
 
 console.log('🔧 Pre-compiling EJS templates...');
 
-templates.forEach(template => {
+templates.forEach((template) => {
   try {
     // Ensure output directory exists
     const outputDir = dirname(template.output);
@@ -84,7 +82,7 @@ templates.forEach(template => {
 
     // Read the template file
     const templateContent = readFileSync(template.input, 'utf-8');
-    
+
     // Get page-specific data
     const pageData = templateData.pages?.[template.data] || {
       title: 'No Bhad Codes',
@@ -92,16 +90,19 @@ templates.forEach(template => {
     };
 
     // Render the template
-    const rendered = ejs.render(templateContent, {
-      ...templateData,
-      pageData,
-      pages: templateData.pages
-    }, ejsOptions);
+    const rendered = ejs.render(
+      templateContent,
+      {
+        ...templateData,
+        pageData,
+        pages: templateData.pages
+      },
+      ejsOptions
+    );
 
     // Write the compiled HTML
     writeFileSync(template.output, rendered, 'utf-8');
     console.log(`✅ Compiled: ${template.input} -> ${template.output}`);
-
   } catch (error) {
     console.error(`❌ Failed to compile ${template.input}:`, error.message);
     process.exit(1);

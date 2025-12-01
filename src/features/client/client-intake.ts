@@ -98,18 +98,21 @@ export class ClientIntakeModule extends BaseModule {
 
   private setupFormLogic(): void {
     // Handle referral source visibility
-    const referralRadios = this.form.querySelectorAll('input[name="wasReferred"]') as NodeListOf<HTMLInputElement>;
+    const referralRadios = this.form.querySelectorAll(
+      'input[name="wasReferred"]'
+    ) as NodeListOf<HTMLInputElement>;
     const referralSection = this.form.querySelector('#referralSource') as HTMLElement;
     const referralNameField = this.form.querySelector('#referralName') as HTMLInputElement;
 
-    referralRadios.forEach(radio => {
+    referralRadios.forEach((radio) => {
       radio.addEventListener('change', () => {
         if (radio.value === 'yes') {
           referralSection.style.display = 'block';
           referralSection.classList.add('active');
           referralNameField.required = true;
           if (this.animationsEnabled) {
-            gsap.fromTo(referralSection,
+            gsap.fromTo(
+              referralSection,
               { opacity: 0, height: 0 },
               { opacity: 1, height: 'auto', duration: 0.3 }
             );
@@ -203,14 +206,16 @@ export class ClientIntakeModule extends BaseModule {
       const selectedType = projectTypeSelect.value as keyof typeof featureSections;
 
       // Hide all feature sections
-      Object.values(featureSections).forEach(sectionId => {
+      Object.values(featureSections).forEach((sectionId) => {
         const section = this.form.querySelector(`#${sectionId}`) as HTMLElement;
         if (section) {
           section.style.display = 'none';
           section.classList.remove('active');
           // Clear checkboxes in hidden sections
-          const checkboxes = section.querySelectorAll('input[type="checkbox"]') as NodeListOf<HTMLInputElement>;
-          checkboxes.forEach(checkbox => {
+          const checkboxes = section.querySelectorAll(
+            'input[type="checkbox"]'
+          ) as NodeListOf<HTMLInputElement>;
+          checkboxes.forEach((checkbox) => {
             checkbox.checked = false;
             checkbox.required = false;
           });
@@ -220,7 +225,7 @@ export class ClientIntakeModule extends BaseModule {
       // Update budget options
       budgetSelect.innerHTML = '<option value="">Select budget range...</option>';
       const options = budgetOptions[selectedType] || budgetOptions.other;
-      options.forEach(option => {
+      options.forEach((option) => {
         const optionElement = document.createElement('option');
         optionElement.value = option.value;
         optionElement.textContent = option.text;
@@ -229,23 +234,24 @@ export class ClientIntakeModule extends BaseModule {
 
       // Show relevant feature section
       if (selectedType && featureSections[selectedType]) {
-        const sectionToShow = this.form.querySelector(`#${featureSections[selectedType]}`) as HTMLElement;
+        const sectionToShow = this.form.querySelector(
+          `#${featureSections[selectedType]}`
+        ) as HTMLElement;
         if (sectionToShow) {
           sectionToShow.style.display = 'block';
           sectionToShow.classList.add('active');
 
           // Make at least one checkbox required
-          const firstCheckbox = sectionToShow.querySelector('input[type="checkbox"]') as HTMLInputElement;
+          const firstCheckbox = sectionToShow.querySelector(
+            'input[type="checkbox"]'
+          ) as HTMLInputElement;
           if (firstCheckbox) {
             firstCheckbox.required = true;
           }
 
           // Animate section in
           if (this.animationsEnabled) {
-            gsap.fromTo(sectionToShow,
-              { opacity: 0, y: 20 },
-              { opacity: 1, y: 0, duration: 0.4 }
-            );
+            gsap.fromTo(sectionToShow, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4 });
           }
         }
       }
@@ -257,9 +263,11 @@ export class ClientIntakeModule extends BaseModule {
   private setupProgressTracking(): void {
     if (!this.progressTrackingEnabled || !this.progressFill) return;
 
-    const inputs = this.form.querySelectorAll('input, select, textarea') as NodeListOf<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>;
+    const inputs = this.form.querySelectorAll('input, select, textarea') as NodeListOf<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >;
 
-    inputs.forEach(input => {
+    inputs.forEach((input) => {
       input.addEventListener('input', () => this.updateProgress());
       input.addEventListener('change', () => this.updateProgress());
     });
@@ -272,7 +280,9 @@ export class ClientIntakeModule extends BaseModule {
     if (!this.progressFill) return;
 
     const formData = new FormData(this.form);
-    const totalFields = this.form.querySelectorAll('input:not([type="hidden"]), select, textarea').length;
+    const totalFields = this.form.querySelectorAll(
+      'input:not([type="hidden"]), select, textarea'
+    ).length;
     let filledFields = 0;
 
     // Count filled text inputs, selects, and textareas
@@ -301,15 +311,19 @@ export class ClientIntakeModule extends BaseModule {
 
   private setupFormValidation(): void {
     // Real-time validation for required fields
-    const requiredFields = this.form.querySelectorAll('[required]') as NodeListOf<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>;
+    const requiredFields = this.form.querySelectorAll('[required]') as NodeListOf<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >;
 
-    requiredFields.forEach(field => {
+    requiredFields.forEach((field) => {
       field.addEventListener('blur', () => this.validateField(field));
       field.addEventListener('input', () => this.clearFieldError(field));
     });
   }
 
-  private validateField(field: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): boolean {
+  private validateField(
+    field: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+  ): boolean {
     const isValid = field.checkValidity();
     const fieldGroup = field.closest('.form-group') as HTMLElement;
 
@@ -347,9 +361,11 @@ export class ClientIntakeModule extends BaseModule {
   private setupAutoSave(): void {
     if (!this.autoSaveEnabled) return;
 
-    const inputs = this.form.querySelectorAll('input, select, textarea') as NodeListOf<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>;
+    const inputs = this.form.querySelectorAll('input, select, textarea') as NodeListOf<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >;
 
-    inputs.forEach(input => {
+    inputs.forEach((input) => {
       input.addEventListener('change', () => this.saveFormData());
     });
 
@@ -374,10 +390,13 @@ export class ClientIntakeModule extends BaseModule {
         }
       }
 
-      localStorage.setItem('intakeFormData', JSON.stringify({
-        data,
-        timestamp: Date.now()
-      }));
+      localStorage.setItem(
+        'intakeFormData',
+        JSON.stringify({
+          data,
+          timestamp: Date.now()
+        })
+      );
     } catch (error) {
       this.warn('Failed to save form data:', error);
     }
@@ -398,12 +417,17 @@ export class ClientIntakeModule extends BaseModule {
 
       // Populate form fields
       Object.entries(data).forEach(([key, value]) => {
-        const field = this.form.querySelector(`[name="${key}"]`) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+        const field = this.form.querySelector(`[name="${key}"]`) as
+          | HTMLInputElement
+          | HTMLSelectElement
+          | HTMLTextAreaElement;
         if (field) {
           if (field.type === 'checkbox' || field.type === 'radio') {
             if (Array.isArray(value)) {
               value.forEach((v: string) => {
-                const specificField = this.form.querySelector(`[name="${key}"][value="${v}"]`) as HTMLInputElement;
+                const specificField = this.form.querySelector(
+                  `[name="${key}"][value="${v}"]`
+                ) as HTMLInputElement;
                 if (specificField) specificField.checked = true;
               });
             } else {
@@ -437,10 +461,12 @@ export class ClientIntakeModule extends BaseModule {
   private async submitForm(): Promise<void> {
     try {
       // Validate all required fields
-      const requiredFields = this.form.querySelectorAll('[required]') as NodeListOf<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>;
+      const requiredFields = this.form.querySelectorAll('[required]') as NodeListOf<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >;
       let isFormValid = true;
 
-      requiredFields.forEach(field => {
+      requiredFields.forEach((field) => {
         if (!this.validateField(field)) {
           isFormValid = false;
         }
@@ -513,7 +539,6 @@ export class ClientIntakeModule extends BaseModule {
       } else {
         this.showSuccessMessage(result);
       }
-
     } catch (error) {
       this.error('Form submission failed:', error);
       this.showError('There was an error submitting your form. Please try again.');
@@ -604,7 +629,7 @@ document.addEventListener('DOMContentLoaded', () => {
       animationsEnabled: true
     });
 
-    module.init().catch(error => {
+    module.init().catch((error) => {
       console.error('Failed to initialize intake form:', error);
     });
   }

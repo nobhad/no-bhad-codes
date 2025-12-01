@@ -60,9 +60,7 @@ const mockPortfolioData = {
     }
   ],
   navigation: {
-    main: [
-      { id: 'home', title: 'home', path: '/', eyebrow: '00' }
-    ]
+    main: [{ id: 'home', title: 'home', path: '/', eyebrow: '00' }]
   }
 };
 
@@ -120,7 +118,9 @@ describe('DataService', () => {
     it('should throw error if data not loaded', () => {
       const uninitializedService = new DataService();
 
-      expect(() => uninitializedService.getProjects()).toThrow('Data not loaded. Call init() first.');
+      expect(() => uninitializedService.getProjects()).toThrow(
+        'Data not loaded. Call init() first.'
+      );
     });
   });
 
@@ -151,8 +151,8 @@ describe('DataService', () => {
       const featured = dataService.getFeaturedProjects();
 
       expect(featured).toHaveLength(2);
-      expect(featured.every(p => p.featured)).toBe(true);
-      expect(featured.map(p => p.id)).toEqual(['portfolio', 'branding']);
+      expect(featured.every((p) => p.featured)).toBe(true);
+      expect(featured.map((p) => p.id)).toEqual(['portfolio', 'branding']);
     });
 
     it('should include category information', () => {

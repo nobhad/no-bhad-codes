@@ -3,7 +3,7 @@
  * SECURITY MIDDLEWARE
  * ===============================================
  * @file server/middleware/security.ts
- * 
+ *
  * Security middleware for rate limiting, CSRF protection,
  * and other security measures.
  */
@@ -25,9 +25,12 @@ class RateLimitStore {
 
   constructor() {
     // Clean up expired entries every 5 minutes
-    this.cleanupInterval = setInterval(() => {
-      this.cleanup();
-    }, 5 * 60 * 1000);
+    this.cleanupInterval = setInterval(
+      () => {
+        this.cleanup();
+      },
+      5 * 60 * 1000
+    );
   }
 
   get(key: string): RateLimitEntry | undefined {
@@ -45,7 +48,10 @@ class RateLimitStore {
   private cleanup(): void {
     const now = Date.now();
     for (const [key, entry] of this.store.entries()) {
-      if (entry.resetTime < now && (!entry.blocked || (entry.blockExpiry && entry.blockExpiry < now))) {
+      if (
+        entry.resetTime < now &&
+        (!entry.blocked || (entry.blockExpiry && entry.blockExpiry < now))
+      ) {
         this.store.delete(key);
       }
     }
@@ -64,15 +70,17 @@ const rateLimitStore = new RateLimitStore();
 /**
  * Rate limiting middleware
  */
-export function rateLimit(options: {
-  windowMs?: number;
-  maxRequests?: number;
-  blockDuration?: number;
-  keyGenerator?: (req: Request) => string;
-  skipIf?: (req: Request) => boolean;
-  message?: string;
-  onLimitReached?: (req: Request, entry: RateLimitEntry) => void;
-} = {}) {
+export function rateLimit(
+  options: {
+    windowMs?: number;
+    maxRequests?: number;
+    blockDuration?: number;
+    keyGenerator?: (req: Request) => string;
+    skipIf?: (req: Request) => boolean;
+    message?: string;
+    onLimitReached?: (req: Request, entry: RateLimitEntry) => void;
+  } = {}
+) {
   const {
     windowMs = 15 * 60 * 1000, // 15 minutes
     maxRequests = 100,
@@ -96,14 +104,18 @@ export function rateLimit(options: {
       // Check if IP is blocked
       if (entry?.blocked && entry.blockExpiry && entry.blockExpiry > now) {
         const remainingTime = Math.ceil((entry.blockExpiry - now) / 1000);
-        
-        await logger.logSecurity('rate_limit_blocked', {
-          ip: req.ip,
-          path: req.path,
-          method: req.method,
-          userAgent: req.get('User-Agent'),
-          remainingBlockTime: remainingTime
-        }, req);
+
+        await logger.logSecurity(
+          'rate_limit_blocked',
+          {
+            ip: req.ip,
+            path: req.path,
+            method: req.method,
+            userAgent: req.get('User-Agent'),
+            remainingBlockTime: remainingTime
+          },
+          req
+        );
 
         return res.status(429).json({
           success: false,
@@ -144,15 +156,19 @@ export function rateLimit(options: {
         currentEntry.blockExpiry = now + blockDuration;
         rateLimitStore.set(key, currentEntry);
 
-        await logger.logSecurity('rate_limit_exceeded', {
-          ip: req.ip,
-          path: req.path,
-          method: req.method,
-          requestCount: currentEntry.count,
-          maxRequests,
-          blockDuration: blockDuration / 1000,
-          userAgent: req.get('User-Agent')
-        }, req);
+        await logger.logSecurity(
+          'rate_limit_exceeded',
+          {
+            ip: req.ip,
+            path: req.path,
+            method: req.method,
+            requestCount: currentEntry.count,
+            maxRequests,
+            blockDuration: blockDuration / 1000,
+            userAgent: req.get('User-Agent')
+          },
+          req
+        );
 
         if (onLimitReached) {
           onLimitReached(req, currentEntry);
@@ -167,7 +183,6 @@ export function rateLimit(options: {
       }
 
       next();
-
     } catch (error) {
       const err = error as Error;
       await logger.error('Rate limit middleware error');
@@ -181,16 +196,14 @@ export function rateLimit(options: {
 /**
  * CSRF protection middleware
  */
-export function csrfProtection(options: {
-  headerName?: string;
-  cookieName?: string;
-  skipIf?: (req: Request) => boolean;
-} = {}) {
-  const {
-    headerName = 'x-csrf-token',
-    cookieName = 'csrf-token',
-    skipIf = () => false
-  } = options;
+export function csrfProtection(
+  options: {
+    headerName?: string;
+    cookieName?: string;
+    skipIf?: (req: Request) => boolean;
+  } = {}
+) {
+  const { headerName = 'x-csrf-token', cookieName = 'csrf-token', skipIf = () => false } = options;
 
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -207,14 +220,18 @@ export function csrfProtection(options: {
       const cookieToken = req.cookies?.[cookieName];
 
       if (!token || !cookieToken || token !== cookieToken) {
-        await logger.logSecurity('csrf_token_mismatch', {
-          ip: req.ip,
-          path: req.path,
-          method: req.method,
-          hasHeaderToken: !!token,
-          hasCookieToken: !!cookieToken,
-          userAgent: req.get('User-Agent')
-        }, req);
+        await logger.logSecurity(
+          'csrf_token_mismatch',
+          {
+            ip: req.ip,
+            path: req.path,
+            method: req.method,
+            hasHeaderToken: !!token,
+            hasCookieToken: !!cookieToken,
+            userAgent: req.get('User-Agent')
+          },
+          req
+        );
 
         return res.status(403).json({
           success: false,
@@ -224,7 +241,6 @@ export function csrfProtection(options: {
       }
 
       next();
-
     } catch (error) {
       const err = error as Error;
       await logger.error('CSRF protection middleware error');
@@ -241,23 +257,29 @@ export function csrfProtection(options: {
 /**
  * IP whitelist/blacklist middleware
  */
-export function ipFilter(options: {
-  whitelist?: string[];
-  blacklist?: string[];
-  trustProxy?: boolean;
-} = {}) {
+export function ipFilter(
+  options: {
+    whitelist?: string[];
+    blacklist?: string[];
+    trustProxy?: boolean;
+  } = {}
+) {
   const { whitelist, blacklist, trustProxy = true } = options;
 
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const ip = trustProxy ? (req.ip || req.connection.remoteAddress) : req.connection.remoteAddress;
+      const ip = trustProxy ? req.ip || req.connection.remoteAddress : req.connection.remoteAddress;
 
       if (!ip) {
-        await logger.logSecurity('ip_filter_no_ip', {
-          path: req.path,
-          method: req.method,
-          headers: req.headers
-        }, req);
+        await logger.logSecurity(
+          'ip_filter_no_ip',
+          {
+            path: req.path,
+            method: req.method,
+            headers: req.headers
+          },
+          req
+        );
 
         return res.status(400).json({
           success: false,
@@ -268,12 +290,16 @@ export function ipFilter(options: {
 
       // Check blacklist first
       if (blacklist && blacklist.includes(ip)) {
-        await logger.logSecurity('ip_blacklisted', {
-          ip,
-          path: req.path,
-          method: req.method,
-          userAgent: req.get('User-Agent')
-        }, req);
+        await logger.logSecurity(
+          'ip_blacklisted',
+          {
+            ip,
+            path: req.path,
+            method: req.method,
+            userAgent: req.get('User-Agent')
+          },
+          req
+        );
 
         return res.status(403).json({
           success: false,
@@ -284,13 +310,17 @@ export function ipFilter(options: {
 
       // Check whitelist if specified
       if (whitelist && whitelist.length > 0 && !whitelist.includes(ip)) {
-        await logger.logSecurity('ip_not_whitelisted', {
-          ip,
-          path: req.path,
-          method: req.method,
-          whitelist: whitelist.length,
-          userAgent: req.get('User-Agent')
-        }, req);
+        await logger.logSecurity(
+          'ip_not_whitelisted',
+          {
+            ip,
+            path: req.path,
+            method: req.method,
+            whitelist: whitelist.length,
+            userAgent: req.get('User-Agent')
+          },
+          req
+        );
 
         return res.status(403).json({
           success: false,
@@ -300,7 +330,6 @@ export function ipFilter(options: {
       }
 
       next();
-
     } catch (error) {
       const err = error as Error;
       await logger.error('IP filter middleware error');
@@ -313,11 +342,13 @@ export function ipFilter(options: {
 /**
  * Request size limiting middleware
  */
-export function requestSizeLimit(options: {
-  maxBodySize?: number;
-  maxUrlLength?: number;
-  maxHeaderSize?: number;
-} = {}) {
+export function requestSizeLimit(
+  options: {
+    maxBodySize?: number;
+    maxUrlLength?: number;
+    maxHeaderSize?: number;
+  } = {}
+) {
   const {
     maxBodySize = 10 * 1024 * 1024, // 10MB
     maxUrlLength = 2048,
@@ -328,13 +359,17 @@ export function requestSizeLimit(options: {
     try {
       // Check URL length
       if (req.url.length > maxUrlLength) {
-        await logger.logSecurity('url_too_long', {
-          ip: req.ip,
-          urlLength: req.url.length,
-          maxUrlLength,
-          path: req.path,
-          method: req.method
-        }, req);
+        await logger.logSecurity(
+          'url_too_long',
+          {
+            ip: req.ip,
+            urlLength: req.url.length,
+            maxUrlLength,
+            path: req.path,
+            method: req.method
+          },
+          req
+        );
 
         return res.status(414).json({
           success: false,
@@ -346,13 +381,17 @@ export function requestSizeLimit(options: {
       // Check header size
       const headerSize = JSON.stringify(req.headers).length;
       if (headerSize > maxHeaderSize) {
-        await logger.logSecurity('headers_too_large', {
-          ip: req.ip,
-          headerSize,
-          maxHeaderSize,
-          path: req.path,
-          method: req.method
-        }, req);
+        await logger.logSecurity(
+          'headers_too_large',
+          {
+            ip: req.ip,
+            headerSize,
+            maxHeaderSize,
+            path: req.path,
+            method: req.method
+          },
+          req
+        );
 
         return res.status(431).json({
           success: false,
@@ -365,13 +404,17 @@ export function requestSizeLimit(options: {
       // but we can add additional checking here
       const contentLength = req.get('Content-Length');
       if (contentLength && parseInt(contentLength) > maxBodySize) {
-        await logger.logSecurity('body_too_large', {
-          ip: req.ip,
-          contentLength: parseInt(contentLength),
-          maxBodySize,
-          path: req.path,
-          method: req.method
-        }, req);
+        await logger.logSecurity(
+          'body_too_large',
+          {
+            ip: req.ip,
+            contentLength: parseInt(contentLength),
+            maxBodySize,
+            path: req.path,
+            method: req.method
+          },
+          req
+        );
 
         return res.status(413).json({
           success: false,
@@ -381,7 +424,6 @@ export function requestSizeLimit(options: {
       }
 
       next();
-
     } catch (error) {
       const err = error as Error;
       await logger.error('Request size limit middleware error');
@@ -394,12 +436,14 @@ export function requestSizeLimit(options: {
 /**
  * Suspicious activity detection middleware
  */
-export function suspiciousActivityDetector(options: {
-  maxPathTraversal?: number;
-  maxSqlInjectionAttempts?: number;
-  maxXssAttempts?: number;
-  blockDuration?: number;
-} = {}) {
+export function suspiciousActivityDetector(
+  options: {
+    maxPathTraversal?: number;
+    maxSqlInjectionAttempts?: number;
+    maxXssAttempts?: number;
+    blockDuration?: number;
+  } = {}
+) {
   const {
     maxPathTraversal = 3,
     maxSqlInjectionAttempts = 3,
@@ -407,20 +451,23 @@ export function suspiciousActivityDetector(options: {
     blockDuration = 24 * 60 * 60 * 1000 // 24 hours
   } = options;
 
-  const suspiciousActivity = new Map<string, {
-    pathTraversal: number;
-    sqlInjection: number;
-    xssAttempts: number;
-    lastActivity: number;
-    blocked?: boolean;
-    blockExpiry?: number;
-  }>();
+  const suspiciousActivity = new Map<
+    string,
+    {
+      pathTraversal: number;
+      sqlInjection: number;
+      xssAttempts: number;
+      lastActivity: number;
+      blocked?: boolean;
+      blockExpiry?: number;
+    }
+  >();
 
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const ip = req.ip || 'unknown';
       const now = Date.now();
-      let activity = suspiciousActivity.get(ip) || {
+      const activity = suspiciousActivity.get(ip) || {
         pathTraversal: 0,
         sqlInjection: 0,
         xssAttempts: 0,
@@ -429,12 +476,16 @@ export function suspiciousActivityDetector(options: {
 
       // Check if IP is blocked
       if (activity.blocked && activity.blockExpiry && activity.blockExpiry > now) {
-        await logger.logSecurity('suspicious_activity_blocked', {
-          ip,
-          path: req.path,
-          method: req.method,
-          blockExpiry: activity.blockExpiry
-        }, req);
+        await logger.logSecurity(
+          'suspicious_activity_blocked',
+          {
+            ip,
+            path: req.path,
+            method: req.method,
+            blockExpiry: activity.blockExpiry
+          },
+          req
+        );
 
         return res.status(403).json({
           success: false,
@@ -451,13 +502,17 @@ export function suspiciousActivityDetector(options: {
       if (fullUrl.includes('../') || fullUrl.includes('..\\')) {
         activity.pathTraversal++;
         suspicious = true;
-        
-        await logger.logSecurity('path_traversal_attempt', {
-          ip,
-          path: req.path,
-          fullUrl,
-          attempts: activity.pathTraversal
-        }, req);
+
+        await logger.logSecurity(
+          'path_traversal_attempt',
+          {
+            ip,
+            path: req.path,
+            fullUrl,
+            attempts: activity.pathTraversal
+          },
+          req
+        );
       }
 
       // Check for SQL injection patterns
@@ -467,15 +522,19 @@ export function suspiciousActivityDetector(options: {
         /(script|javascript|vbscript|onload|onerror)/gi
       ];
 
-      if (sqlPatterns.some(pattern => pattern.test(fullUrl) || pattern.test(body))) {
+      if (sqlPatterns.some((pattern) => pattern.test(fullUrl) || pattern.test(body))) {
         activity.sqlInjection++;
         suspicious = true;
 
-        await logger.logSecurity('sql_injection_attempt', {
-          ip,
-          path: req.path,
-          attempts: activity.sqlInjection
-        }, req);
+        await logger.logSecurity(
+          'sql_injection_attempt',
+          {
+            ip,
+            path: req.path,
+            attempts: activity.sqlInjection
+          },
+          req
+        );
       }
 
       // Check for XSS patterns
@@ -487,15 +546,19 @@ export function suspiciousActivityDetector(options: {
         /onload\s*=/gi
       ];
 
-      if (xssPatterns.some(pattern => pattern.test(fullUrl) || pattern.test(body))) {
+      if (xssPatterns.some((pattern) => pattern.test(fullUrl) || pattern.test(body))) {
         activity.xssAttempts++;
         suspicious = true;
 
-        await logger.logSecurity('xss_attempt', {
-          ip,
-          path: req.path,
-          attempts: activity.xssAttempts
-        }, req);
+        await logger.logSecurity(
+          'xss_attempt',
+          {
+            ip,
+            path: req.path,
+            attempts: activity.xssAttempts
+          },
+          req
+        );
       }
 
       if (suspicious) {
@@ -503,21 +566,26 @@ export function suspiciousActivityDetector(options: {
         suspiciousActivity.set(ip, activity);
 
         // Check if we should block this IP
-        if (activity.pathTraversal >= maxPathTraversal ||
-            activity.sqlInjection >= maxSqlInjectionAttempts ||
-            activity.xssAttempts >= maxXssAttempts) {
-          
+        if (
+          activity.pathTraversal >= maxPathTraversal ||
+          activity.sqlInjection >= maxSqlInjectionAttempts ||
+          activity.xssAttempts >= maxXssAttempts
+        ) {
           activity.blocked = true;
           activity.blockExpiry = now + blockDuration;
           suspiciousActivity.set(ip, activity);
 
-          await logger.logSecurity('suspicious_activity_ip_blocked', {
-            ip,
-            pathTraversal: activity.pathTraversal,
-            sqlInjection: activity.sqlInjection,
-            xssAttempts: activity.xssAttempts,
-            blockDuration: blockDuration / 1000
-          }, req);
+          await logger.logSecurity(
+            'suspicious_activity_ip_blocked',
+            {
+              ip,
+              pathTraversal: activity.pathTraversal,
+              sqlInjection: activity.sqlInjection,
+              xssAttempts: activity.xssAttempts,
+              blockDuration: blockDuration / 1000
+            },
+            req
+          );
 
           return res.status(403).json({
             success: false,
@@ -528,7 +596,6 @@ export function suspiciousActivityDetector(options: {
       }
 
       next();
-
     } catch (error) {
       const err = error as Error;
       await logger.error('Suspicious activity detector error');

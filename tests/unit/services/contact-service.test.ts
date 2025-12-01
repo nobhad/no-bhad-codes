@@ -3,7 +3,7 @@
  * CONTACT SERVICE TESTS
  * ===============================================
  * @file tests/unit/services/contact-service.test.ts
- * 
+ *
  * Unit tests for the contact service.
  */
 
@@ -82,9 +82,9 @@ describe('ContactService', () => {
         message: 'Test message'
       };
 
-      await expect(
-        contactService.submitForm(incompleteFormData as any)
-      ).rejects.toThrow('Email is required');
+      await expect(contactService.submitForm(incompleteFormData as any)).rejects.toThrow(
+        'Email is required'
+      );
 
       expect(mockFetch).not.toHaveBeenCalled();
     });
@@ -96,9 +96,9 @@ describe('ContactService', () => {
         message: 'Test message'
       };
 
-      await expect(
-        contactService.submitForm(invalidFormData)
-      ).rejects.toThrow('Invalid email format');
+      await expect(contactService.submitForm(invalidFormData)).rejects.toThrow(
+        'Invalid email format'
+      );
 
       expect(mockFetch).not.toHaveBeenCalled();
     });
@@ -110,9 +110,9 @@ describe('ContactService', () => {
         message: 'Hi' // Too short
       };
 
-      await expect(
-        contactService.submitForm(shortMessageData)
-      ).rejects.toThrow('Message must be at least 10 characters');
+      await expect(contactService.submitForm(shortMessageData)).rejects.toThrow(
+        'Message must be at least 10 characters'
+      );
 
       expect(mockFetch).not.toHaveBeenCalled();
     });
@@ -135,7 +135,7 @@ describe('ContactService', () => {
       await contactService.submitForm(formDataWithScripts);
 
       const sentData = JSON.parse(mockFetch.mock.calls[0][1].body);
-      
+
       expect(sentData.name).toBe('JohnDoe'); // Scripts removed
       expect(sentData.subject).toBe('Bold Subject'); // Safe HTML allowed
       expect(sentData.message).toBe('This is a  message.'); // Scripts removed
@@ -150,9 +150,9 @@ describe('ContactService', () => {
         message: 'BUY NOW! CHEAP VIAGRA! CLICK HERE! www.spam-site.com'
       };
 
-      await expect(
-        contactService.submitForm(spamFormData)
-      ).rejects.toThrow('Message appears to be spam');
+      await expect(contactService.submitForm(spamFormData)).rejects.toThrow(
+        'Message appears to be spam'
+      );
 
       expect(mockFetch).not.toHaveBeenCalled();
     });
@@ -164,9 +164,9 @@ describe('ContactService', () => {
         message: 'This is a legitimate message.'
       };
 
-      await expect(
-        contactService.submitForm(suspiciousEmailData)
-      ).rejects.toThrow('Email domain not allowed');
+      await expect(contactService.submitForm(suspiciousEmailData)).rejects.toThrow(
+        'Email domain not allowed'
+      );
 
       expect(mockFetch).not.toHaveBeenCalled();
     });
@@ -176,7 +176,8 @@ describe('ContactService', () => {
         name: 'Jane Smith',
         email: 'jane.smith@gmail.com',
         subject: 'Website Inquiry',
-        message: 'I am interested in learning more about your services and would like to schedule a consultation.'
+        message:
+          'I am interested in learning more about your services and would like to schedule a consultation.'
       };
 
       mockFetch.mockResolvedValueOnce({
@@ -228,14 +229,13 @@ describe('ContactService', () => {
 
       // Mock a timeout
       mockFetch.mockImplementationOnce(
-        () => new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Network timeout')), 100)
-        )
+        () =>
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Network timeout')), 100))
       );
 
-      await expect(
-        contactService.submitForm(formData)
-      ).rejects.toThrow('Failed to send message. Please try again.');
+      await expect(contactService.submitForm(formData)).rejects.toThrow(
+        'Failed to send message. Please try again.'
+      );
     });
 
     it('should handle server errors', async () => {
@@ -252,9 +252,9 @@ describe('ContactService', () => {
         json: () => Promise.resolve({ error: 'Server error' })
       });
 
-      await expect(
-        contactService.submitForm(formData)
-      ).rejects.toThrow('Server error occurred. Please try again later.');
+      await expect(contactService.submitForm(formData)).rejects.toThrow(
+        'Server error occurred. Please try again later.'
+      );
     });
 
     it('should retry failed requests', async () => {
@@ -289,9 +289,9 @@ describe('ContactService', () => {
 
       mockFetch.mockRejectedValue(new Error('Persistent network error'));
 
-      await expect(
-        contactService.submitForm(formData)
-      ).rejects.toThrow('Failed to send message. Please try again.');
+      await expect(contactService.submitForm(formData)).rejects.toThrow(
+        'Failed to send message. Please try again.'
+      );
 
       // Should try 3 times (initial + 2 retries)
       expect(mockFetch).toHaveBeenCalledTimes(3);
@@ -497,7 +497,7 @@ describe('ContactService', () => {
       };
 
       const validation = customService.validateForm(shortNameData);
-      
+
       expect(validation.isValid).toBe(false);
       expect(validation.errors).toContain('Name must be at least 2 characters');
     });

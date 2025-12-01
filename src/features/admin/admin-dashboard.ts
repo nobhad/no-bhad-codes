@@ -123,7 +123,7 @@ class AdminAuth {
       const data = encoder.encode(inputKey);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 
       if (hashHex === this.AUTH_KEY_HASH) {
         // Clear failed attempts on successful login
@@ -140,7 +140,6 @@ class AdminAuth {
       // Record failed attempt
       AdminSecurity.recordFailedAttempt();
       return false;
-
     } catch (error) {
       console.error('[AdminAuth] Authentication error:', error);
       // Record failed attempt for errors too
@@ -155,8 +154,8 @@ class AdminAuth {
       if (!sessionData) return false;
 
       const session = JSON.parse(sessionData);
-      const isValid = session.authenticated &&
-                     (Date.now() - session.timestamp) < this.SESSION_DURATION;
+      const isValid =
+        session.authenticated && Date.now() - session.timestamp < this.SESSION_DURATION;
 
       if (!isValid) {
         this.logout();
@@ -274,7 +273,8 @@ class AdminDashboard {
             this.showAuthError('Invalid access key. Please try again.');
           }
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Authentication failed. Please try again.';
+          const message =
+            error instanceof Error ? error.message : 'Authentication failed. Please try again.';
           this.showAuthError(message);
         }
       });
@@ -303,7 +303,7 @@ class AdminDashboard {
 
     // Tab navigation
     const tabButtons = document.querySelectorAll('.tab-btn');
-    tabButtons.forEach(btn => {
+    tabButtons.forEach((btn) => {
       btn.addEventListener('click', (e) => {
         const target = e.target as HTMLButtonElement;
         const tabName = target.dataset.tab;
@@ -380,13 +380,13 @@ class AdminDashboard {
 
   private switchTab(tabName: string): void {
     // Update active tab button
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    document.querySelectorAll('.tab-btn').forEach((btn) => {
       btn.classList.remove('active');
     });
     document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
 
     // Update active tab content
-    document.querySelectorAll('.tab-content').forEach(content => {
+    document.querySelectorAll('.tab-content').forEach((content) => {
       content.classList.remove('active');
     });
     document.getElementById(`${tabName}-tab`)?.classList.add('active');
@@ -445,7 +445,7 @@ class AdminDashboard {
 
   private async loadOverviewData(): Promise<void> {
     // Simulate API call - replace with actual data fetching
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Mock data - replace with actual analytics data
     this.updateElement('total-visitors', '1,234');
@@ -491,9 +491,19 @@ class AdminDashboard {
       }
 
       if (perfData.alerts && perfData.alerts.length > 0) {
-        this.displayPerformanceAlerts(perfData.alerts.map(msg => ({ type: 'warning' as const, message: msg, metric: '', value: 0, threshold: 0 } as PerformanceAlert)));
+        this.displayPerformanceAlerts(
+          perfData.alerts.map(
+            (msg) =>
+              ({
+                type: 'warning' as const,
+                message: msg,
+                metric: '',
+                value: 0,
+                threshold: 0
+              }) as PerformanceAlert
+          )
+        );
       }
-
     } catch (error) {
       console.error('[AdminDashboard] Error loading performance data:', error);
     }
@@ -505,18 +515,20 @@ class AdminDashboard {
       if (window.opener?.NBW_DEBUG) {
         const debug = window.opener.NBW_DEBUG;
         if (debug.getPerformanceReport) {
-          return await debug.getPerformanceReport() as unknown as PerformanceMetricsDisplay;
+          return (await debug.getPerformanceReport()) as unknown as PerformanceMetricsDisplay;
         }
       }
 
       // Try to get data from current window (if services are available)
       if (window.NBW_DEBUG?.getPerformanceReport) {
-        return await window.NBW_DEBUG.getPerformanceReport() as unknown as PerformanceMetricsDisplay;
+        return (await window.NBW_DEBUG.getPerformanceReport()) as unknown as PerformanceMetricsDisplay;
       }
 
       // Try to access services directly from container
       const { container } = await import('../../core/container');
-      const performanceService = await container.resolve('PerformanceService') as { generateReport?: () => PerformanceReport };
+      const performanceService = (await container.resolve('PerformanceService')) as {
+        generateReport?: () => PerformanceReport;
+      };
       if (performanceService?.generateReport) {
         const report = performanceService.generateReport();
         return {
@@ -537,13 +549,15 @@ class AdminDashboard {
             status: this.getVitalStatus('ttfb', report.metrics.ttfb)
           },
           bundleSize: {
-            total: report.metrics.bundleSize ? `${Math.round(report.metrics.bundleSize / 1024)} KB` : 'N/A',
+            total: report.metrics.bundleSize
+              ? `${Math.round(report.metrics.bundleSize / 1024)} KB`
+              : 'N/A',
             main: 'N/A',
             vendor: 'N/A'
           },
           score: report.score || 0,
           grade: this.getGradeFromScore(report.score || 0),
-          alerts: (report.alerts || []).map(alert => alert.message)
+          alerts: (report.alerts || []).map((alert) => alert.message)
         };
       }
     } catch (error) {
@@ -595,34 +609,46 @@ class AdminDashboard {
       const analyticsData = await this.getAnalyticsData();
 
       // Update with real data if available, otherwise use mock data
-      this.populateDataList('popular-pages', analyticsData.popularPages || [
-        { label: 'Homepage', value: '2,145 views' },
-        { label: 'Art Portfolio', value: '856 views' },
-        { label: 'Codes Section', value: '634 views' },
-        { label: 'Contact', value: '423 views' },
-        { label: 'About', value: '312 views' }
-      ]);
+      this.populateDataList(
+        'popular-pages',
+        analyticsData.popularPages || [
+          { label: 'Homepage', value: '2,145 views' },
+          { label: 'Art Portfolio', value: '856 views' },
+          { label: 'Codes Section', value: '634 views' },
+          { label: 'Contact', value: '423 views' },
+          { label: 'About', value: '312 views' }
+        ]
+      );
 
-      this.populateDataList('device-breakdown', analyticsData.deviceBreakdown || [
-        { label: 'Desktop', value: '45%' },
-        { label: 'Mobile', value: '38%' },
-        { label: 'Tablet', value: '17%' }
-      ]);
+      this.populateDataList(
+        'device-breakdown',
+        analyticsData.deviceBreakdown || [
+          { label: 'Desktop', value: '45%' },
+          { label: 'Mobile', value: '38%' },
+          { label: 'Tablet', value: '17%' }
+        ]
+      );
 
-      this.populateDataList('geo-distribution', analyticsData.geoDistribution || [
-        { label: 'United States', value: '42%' },
-        { label: 'Canada', value: '18%' },
-        { label: 'United Kingdom', value: '12%' },
-        { label: 'Germany', value: '8%' },
-        { label: 'Other', value: '20%' }
-      ]);
+      this.populateDataList(
+        'geo-distribution',
+        analyticsData.geoDistribution || [
+          { label: 'United States', value: '42%' },
+          { label: 'Canada', value: '18%' },
+          { label: 'United Kingdom', value: '12%' },
+          { label: 'Germany', value: '8%' },
+          { label: 'Other', value: '20%' }
+        ]
+      );
 
-      this.populateDataList('engagement-events', analyticsData.engagementEvents || [
-        { label: 'Business Card Flips', value: '456' },
-        { label: 'Contact Form Submissions', value: '23' },
-        { label: 'External Link Clicks', value: '187' },
-        { label: 'Download Clicks', value: '34' }
-      ]);
+      this.populateDataList(
+        'engagement-events',
+        analyticsData.engagementEvents || [
+          { label: 'Business Card Flips', value: '456' },
+          { label: 'Contact Form Submissions', value: '23' },
+          { label: 'External Link Clicks', value: '187' },
+          { label: 'Download Clicks', value: '34' }
+        ]
+      );
     } catch (error) {
       console.error('[AdminDashboard] Error loading analytics data:', error);
 
@@ -670,12 +696,14 @@ class AdminDashboard {
 
       // Try to get data from current window
       if (window.NBW_DEBUG?.getVisitorData) {
-        return await window.NBW_DEBUG.getVisitorData() as AnalyticsData;
+        return (await window.NBW_DEBUG.getVisitorData()) as AnalyticsData;
       }
 
       // Try to access visitor tracking service directly
       const { container } = await import('../../core/container');
-      const visitorService = await container.resolve('VisitorTrackingService') as { exportData?: () => Promise<RawVisitorData> };
+      const visitorService = (await container.resolve('VisitorTrackingService')) as {
+        exportData?: () => Promise<RawVisitorData>;
+      };
       if (visitorService?.exportData) {
         const data = await visitorService.exportData();
         return this.formatAnalyticsData(data);
@@ -854,23 +882,32 @@ class AdminDashboard {
     }
   }
 
-  private populateDataList(listId: string, data: Array<{ label: string; value: string | number }>): void {
+  private populateDataList(
+    listId: string,
+    data: Array<{ label: string; value: string | number }>
+  ): void {
     const list = document.getElementById(listId);
     if (!list) return;
 
-    list.innerHTML = data.map(item => `
+    list.innerHTML = data
+      .map(
+        (item) => `
       <div class="data-item">
         <span>${item.label}</span>
         <span>${String(item.value)}</span>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   }
 
   private populateVisitorsTable(visitors: VisitorInfo[]): void {
     const tbody = document.querySelector('#visitors-table tbody');
     if (!tbody) return;
 
-    tbody.innerHTML = visitors.map(visitor => `
+    tbody.innerHTML = visitors
+      .map(
+        (visitor) => `
       <tr>
         <td>${visitor.id}</td>
         <td>${visitor.firstVisit}</td>
@@ -885,7 +922,9 @@ class AdminDashboard {
           </button>
         </td>
       </tr>
-    `).join('');
+    `
+      )
+      .join('');
   }
 
   private populateSystemStatus(status: ApplicationStatus): void {
@@ -894,7 +933,9 @@ class AdminDashboard {
 
     const allItems = { ...status.modules, ...status.services };
 
-    container.innerHTML = Object.entries(allItems).map(([name, data]) => `
+    container.innerHTML = Object.entries(allItems)
+      .map(
+        ([name, data]) => `
       <div class="status-item">
         <span>${name}</span>
         <div style="display: flex; align-items: center; gap: 8px;">
@@ -902,7 +943,9 @@ class AdminDashboard {
           <span>${data.status}</span>
         </div>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   }
 
   private async initializePerformanceDashboard(): Promise<void> {
@@ -923,16 +966,18 @@ class AdminDashboard {
 
       if (dashboardContainer) {
         const { createPerformanceDashboard } = await import('../../components');
-        await createPerformanceDashboard({
-          position: 'top-left',
-          minimized: false,
-          autoHide: false,
-          updateInterval: 3000,
-          showAlerts: true,
-          showRecommendations: true
-        }, dashboardContainer);
+        await createPerformanceDashboard(
+          {
+            position: 'top-left',
+            minimized: false,
+            autoHide: false,
+            updateInterval: 3000,
+            showAlerts: true,
+            showRecommendations: true
+          },
+          dashboardContainer
+        );
       }
-
     } catch (error) {
       console.warn('[AdminDashboard] Failed to initialize performance dashboard component:', error);
     }
@@ -942,22 +987,34 @@ class AdminDashboard {
     const container = document.getElementById('performance-alerts');
     if (!container || !alerts.length) return;
 
-    container.innerHTML = alerts.slice(0, 5).map(alert => `
+    container.innerHTML = alerts
+      .slice(0, 5)
+      .map(
+        (alert) => `
       <div class="performance-alert alert-${alert.type}">
         <div class="alert-header">
           <span class="alert-metric">${alert.metric.toUpperCase()}</span>
           <span class="alert-value">${Math.round(alert.value)}</span>
         </div>
         <div class="alert-message">${alert.message}</div>
-        ${alert.suggestions && alert.suggestions.length > 0 ? `
+        ${
+  alert.suggestions && alert.suggestions.length > 0
+    ? `
           <div class="alert-suggestions">
             <ul>
-              ${alert.suggestions.slice(0, 2).map((suggestion: string) => `<li>${suggestion}</li>`).join('')}
+              ${alert.suggestions
+    .slice(0, 2)
+    .map((suggestion: string) => `<li>${suggestion}</li>`)
+    .join('')}
             </ul>
           </div>
-        ` : ''}
+        `
+    : ''
+}
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   }
 
   private showLoading(show: boolean): void {
@@ -973,9 +1030,12 @@ class AdminDashboard {
 
   private startAutoRefresh(): void {
     // Refresh dashboard data every 5 minutes
-    this.refreshInterval = setInterval(() => {
-      this.loadTabData(this.currentTab);
-    }, 5 * 60 * 1000);
+    this.refreshInterval = setInterval(
+      () => {
+        this.loadTabData(this.currentTab);
+      },
+      5 * 60 * 1000
+    );
   }
 
   private async exportData(type: string): Promise<void> {
@@ -1010,7 +1070,6 @@ class AdminDashboard {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
     } catch (error) {
       console.error(`[AdminDashboard] Error exporting ${type} data:`, error);
       alert(`Failed to export ${type} data. Please try again.`);
@@ -1044,7 +1103,11 @@ class AdminDashboard {
   }
 
   private async clearOldData(): Promise<void> {
-    if (!confirm('Are you sure you want to clear data older than 90 days? This action cannot be undone.')) {
+    if (
+      !confirm(
+        'Are you sure you want to clear data older than 90 days? This action cannot be undone.'
+      )
+    ) {
       return;
     }
 
@@ -1058,11 +1121,17 @@ class AdminDashboard {
   }
 
   private async resetAnalytics(): Promise<void> {
-    if (!confirm('Are you sure you want to reset ALL analytics data? This action cannot be undone.')) {
+    if (
+      !confirm('Are you sure you want to reset ALL analytics data? This action cannot be undone.')
+    ) {
       return;
     }
 
-    if (!confirm('This will permanently delete all visitor data, page views, and analytics. Type "RESET" to confirm.')) {
+    if (
+      !confirm(
+        'This will permanently delete all visitor data, page views, and analytics. Type "RESET" to confirm.'
+      )
+    ) {
       return;
     }
 

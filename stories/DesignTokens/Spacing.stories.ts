@@ -5,7 +5,8 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Consistent spacing scale for margins, padding, and layout throughout the design system.',
+        component:
+          'Consistent spacing scale for margins, padding, and layout throughout the design system.',
       },
     },
   },

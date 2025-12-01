@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <!-- 
     TEMPLATE.HTML - STANDARDIZED PAGE TEMPLATE
     
@@ -17,174 +17,231 @@
     4. Ensure all styling matches this foundation
 -->
 <html lang="en" data-theme="light">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{PAGE_TITLE}} - No Bhad Codes</title>
-    
+
     <!-- Security Headers -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://formspree.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://formspree.io https://api.netlify.com; object-src 'none'; base-uri 'self'; form-action 'self' https://formspree.io;">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
-    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), interest-cohort=()">
-    
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://formspree.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://formspree.io https://api.netlify.com; object-src 'none'; base-uri 'self'; form-action 'self' https://formspree.io;"
+    />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    <meta
+      http-equiv="Permissions-Policy"
+      content="camera=(), microphone=(), geolocation=(), interest-cohort=()"
+    />
+
     <!-- Favicon -->
-    <link rel="icon" href="/favicon.png" type="image/png">
-    
+    <link rel="icon" href="/favicon.png" type="image/png" />
+
     <!-- PWA Support -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#ff6b6b">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="NBW">
-    
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#ff6b6b" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="NBW" />
+
     <!-- SEO and Social -->
-    <meta name="description" content="{{PAGE_DESCRIPTION}}">
-    <meta property="og:title" content="{{PAGE_TITLE}} - No Bhad Codes">
-    <meta property="og:description" content="{{PAGE_DESCRIPTION}}">
-    <meta property="og:type" content="website">
-    
+    <meta name="description" content="{{PAGE_DESCRIPTION}}" />
+    <meta property="og:title" content="{{PAGE_TITLE}} - No Bhad Codes" />
+    <meta property="og:description" content="{{PAGE_DESCRIPTION}}" />
+    <meta property="og:type" content="website" />
+
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/CustomEase.min.js"></script>
-    
+
     <!-- Load page-specific module -->
     <script type="module" src="{{PAGE_SCRIPT}}"></script>
     <script>
-        // Prevent layout shifts by ensuring clean initial state
-        history.scrollRestoration = 'manual';
-        
-        // Single scroll reset without multiple timeouts to prevent CLS
-        window.addEventListener('DOMContentLoaded', function() {
-            const main = document.querySelector('main');
-            if (main) {
-                main.scrollTop = 0;
-            }
-        });
+      // Prevent layout shifts by ensuring clean initial state
+      history.scrollRestoration = 'manual';
+
+      // Single scroll reset without multiple timeouts to prevent CLS
+      window.addEventListener('DOMContentLoaded', function () {
+        const main = document.querySelector('main');
+        if (main) {
+          main.scrollTop = 0;
+        }
+      });
     </script>
 
     <!-- Preload critical font -->
     <!-- Local fonts loaded via CSS -->
-    
+
     <!-- Page-specific critical CSS can be added here if needed -->
     {{ADDITIONAL_STYLES}}
-</head>
-<body>
-
+  </head>
+  <body>
     <!-- NAVIGATION -->
     <header class="header">
-        <div class="container is--full">
-            <nav class="nav-row">
-                <a href="/" aria-label="home" class="nav-logo-row">
-                    no bhad codes
-                </a>
-                <div class="nav-row__right">
-                    <button id="toggle-theme" class="theme-button" aria-label="Toggle dark/light theme">
-                        <div class="icon-wrap" style="transform: rotate(0deg);">
-                            <svg class="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"></circle>
-                                <path d="M12 2V4M12 20V22M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2"></path>
-                            </svg>
-                            <svg class="theme-icon moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                               <path d="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79z"></path>
-                            </svg>
-                        </div>
-                    </button>
-                    <button role="button" data-menu-toggle="" class="menu-button">
-                        <div class="menu-button-text">
-                            <p class="p-large">Menu</p>
-                            <p class="p-large">Close</p>
-                        </div>
-                        <div class="icon-wrap">
-                            
-                        <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 16 16" fill="none" class="menu-button-icon">
-                                <path d="M7.33333 16L7.33333 -3.2055e-07L8.66667 -3.78832e-07L8.66667 16L7.33333 16Z" fill="currentColor"></path>
-                                <path d="M16 8.66667L-2.62269e-07 8.66667L-3.78832e-07 7.33333L16 7.33333L16 8.66667Z" fill="currentColor"></path>
-                                <path d="M6 7.33333L7.33333 7.33333L7.33333 6C7.33333 6.73637 6.73638 7.33333 6 7.33333Z" fill="currentColor"></path>
-                                <path d="M10 7.33333L8.66667 7.33333L8.66667 6C8.66667 6.73638 9.26362 7.33333 10 7.33333Z" fill="currentColor"></path>
-                                <path d="M6 8.66667L7.33333 8.66667L7.33333 10C7.33333 9.26362 6.73638 8.66667 6 8.66667Z" fill="currentColor"></path>
-                                <path d="M10 8.66667L8.66667 8.66667L8.66667 10C8.66667 9.26362 9.26362 8.66667 10 8.66667Z" fill="currentColor"></path>
-                            </svg></div>
-                    </button>
-                </div>
-            </nav>
-        </div>
+      <div class="container is--full">
+        <nav class="nav-row">
+          <a href="/" aria-label="home" class="nav-logo-row"> no bhad codes </a>
+          <div class="nav-row__right">
+            <button id="toggle-theme" class="theme-button" aria-label="Toggle dark/light theme">
+              <div class="icon-wrap" style="transform: rotate(0deg)">
+                <svg
+                  class="theme-icon sun-icon"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"></circle>
+                  <path
+                    d="M12 2V4M12 20V22M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  ></path>
+                </svg>
+                <svg
+                  class="theme-icon moon-icon"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79z"></path>
+                </svg>
+              </div>
+            </button>
+            <button role="button" data-menu-toggle="" class="menu-button">
+              <div class="menu-button-text">
+                <p class="p-large">Menu</p>
+                <p class="p-large">Close</p>
+              </div>
+              <div class="icon-wrap">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="100%"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  class="menu-button-icon"
+                >
+                  <path
+                    d="M7.33333 16L7.33333 -3.2055e-07L8.66667 -3.78832e-07L8.66667 16L7.33333 16Z"
+                    fill="currentColor"
+                  ></path>
+                  <path
+                    d="M16 8.66667L-2.62269e-07 8.66667L-3.78832e-07 7.33333L16 7.33333L16 8.66667Z"
+                    fill="currentColor"
+                  ></path>
+                  <path
+                    d="M6 7.33333L7.33333 7.33333L7.33333 6C7.33333 6.73637 6.73638 7.33333 6 7.33333Z"
+                    fill="currentColor"
+                  ></path>
+                  <path
+                    d="M10 7.33333L8.66667 7.33333L8.66667 6C8.66667 6.73638 9.26362 7.33333 10 7.33333Z"
+                    fill="currentColor"
+                  ></path>
+                  <path
+                    d="M6 8.66667L7.33333 8.66667L7.33333 10C7.33333 9.26362 6.73638 8.66667 6 8.66667Z"
+                    fill="currentColor"
+                  ></path>
+                  <path
+                    d="M10 8.66667L8.66667 8.66667L8.66667 10C8.66667 9.26362 9.26362 8.66667 10 8.66667Z"
+                    fill="currentColor"
+                  ></path>
+                </svg>
+              </div>
+            </button>
+          </div>
+        </nav>
+      </div>
     </header>
 
     <!-- MOBILE/OVERLAY NAVIGATION -->
     <nav data-nav="closed" class="nav">
-        <div data-menu-toggle="" class="overlay"></div>
-        <div class="menu">
-            <div class="menu-bg">
-                <div class="bg-panel first"></div>
-                <div class="bg-panel second"></div>
-                <div class="bg-panel"></div>
-            </div>
-            <div class="menu-inner">
-                <ul class="menu-list">
-                    <li class="menu-list-item">
-                        <a href="/" class="menu-link">
-                            <p class="menu-link-heading" data-text="home">home</p>
-                            <p class="eyebrow">00</p>
-                            <div class="menu-link-bg"></div>
-                        </a>
-                    </li>
-                    <li class="menu-list-item">
-                        <a href="/#about" class="menu-link">
-                            <p class="menu-link-heading" data-text="about">about</p>
-                            <p class="eyebrow">01</p>
-                            <div class="menu-link-bg"></div>
-                        </a>
-                    </li>
-                    <li class="menu-list-item">
-                        <a href="/#contact" class="menu-link">
-                            <p class="menu-link-heading" data-text="contact">contact</p>
-                            <p class="eyebrow">02</p>
-                            <div class="menu-link-bg"></div>
-                        </a>
-                    </li>
-                    <li class="menu-list-item">
-                        <a href="/projects.html" class="menu-link disabled">
-                            <p class="menu-link-heading" data-text="portfolio">portfolio</p>
-                            <p class="eyebrow">03</p>
-                            <div class="menu-link-bg"></div>
-                            <div class="coming-soon-banner">coming soon</div>
-                        </a>
-                    </li>
-                    <li class="menu-list-item has-submenu">
-                        <a href="/client.html" class="menu-link" data-submenu-toggle="">
-                            <p class="menu-link-heading" data-text="client portal">client portal</p>
-                            <svg class="submenu-carrot" width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                            </svg>
-                            <p class="eyebrow">04</p>
-                            <div class="menu-link-bg"></div>
-                        </a>
-                        <div class="submenu" data-submenu="">
-                            <div class="submenu-inner">
-                                <ul class="submenu-list">
-                                    <li class="submenu-item">
-                                        <a href="/client/intake" class="submenu-link">
-                                            <span class="eyebrow">01</span>
-                                            <span class="submenu-link-heading" data-text="new">new</span>
-                                            <div class="submenu-link-bg"></div>
-                                        </a>
-                                    </li>
-                                    <li class="submenu-item">
-                                        <a href="/client/portal" class="submenu-link">
-                                            <span class="eyebrow">02</span>
-                                            <span class="submenu-link-heading" data-text="existing">existing</span>
-                                            <div class="submenu-link-bg"></div>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-            </div>
+      <div data-menu-toggle="" class="overlay"></div>
+      <div class="menu">
+        <div class="menu-bg">
+          <div class="bg-panel first"></div>
+          <div class="bg-panel second"></div>
+          <div class="bg-panel"></div>
         </div>
+        <div class="menu-inner">
+          <ul class="menu-list">
+            <li class="menu-list-item">
+              <a href="/" class="menu-link">
+                <p class="menu-link-heading" data-text="home">home</p>
+                <p class="eyebrow">00</p>
+                <div class="menu-link-bg"></div>
+              </a>
+            </li>
+            <li class="menu-list-item">
+              <a href="/#about" class="menu-link">
+                <p class="menu-link-heading" data-text="about">about</p>
+                <p class="eyebrow">01</p>
+                <div class="menu-link-bg"></div>
+              </a>
+            </li>
+            <li class="menu-list-item">
+              <a href="/#contact" class="menu-link">
+                <p class="menu-link-heading" data-text="contact">contact</p>
+                <p class="eyebrow">02</p>
+                <div class="menu-link-bg"></div>
+              </a>
+            </li>
+            <li class="menu-list-item">
+              <a href="/projects.html" class="menu-link disabled">
+                <p class="menu-link-heading" data-text="portfolio">portfolio</p>
+                <p class="eyebrow">03</p>
+                <div class="menu-link-bg"></div>
+                <div class="coming-soon-banner">coming soon</div>
+              </a>
+            </li>
+            <li class="menu-list-item has-submenu">
+              <a href="/client.html" class="menu-link" data-submenu-toggle="">
+                <p class="menu-link-heading" data-text="client portal">client portal</p>
+                <svg
+                  class="submenu-carrot"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4 6L8 10L12 6"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></path>
+                </svg>
+                <p class="eyebrow">04</p>
+                <div class="menu-link-bg"></div>
+              </a>
+              <div class="submenu" data-submenu="">
+                <div class="submenu-inner">
+                  <ul class="submenu-list">
+                    <li class="submenu-item">
+                      <a href="/client/intake" class="submenu-link">
+                        <span class="eyebrow">01</span>
+                        <span class="submenu-link-heading" data-text="new">new</span>
+                        <div class="submenu-link-bg"></div>
+                      </a>
+                    </li>
+                    <li class="submenu-item">
+                      <a href="/client/portal" class="submenu-link">
+                        <span class="eyebrow">02</span>
+                        <span class="submenu-link-heading" data-text="existing">existing</span>
+                        <div class="submenu-link-bg"></div>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
     </nav>
 
     <!-- MAIN SCROLLABLE CONTENT -->
@@ -196,10 +253,10 @@
         - Responsive across all screen sizes
     -->
     <main>
-        <!-- Replace {{PAGE_CONTENT}} with your page content -->
-        {{PAGE_CONTENT}}
-        
-        <!-- Example page structure:
+      <!-- Replace {{PAGE_CONTENT}} with your page content -->
+      {{PAGE_CONTENT}}
+
+      <!-- Example page structure:
         <section class="page-section">
             <div class="container">
                 <h1>Page Title</h1>
@@ -211,10 +268,11 @@
 
     <!-- FOOTER -->
     <footer class="footer">
-        <div class="container is--full">
-            <p class="footer-text">© <span id="current-year">2025</span> no bhad codes. All rights reserved.</p>
-        </div>
+      <div class="container is--full">
+        <p class="footer-text">
+          © <span id="current-year">2025</span> no bhad codes. All rights reserved.
+        </p>
+      </div>
     </footer>
-
-</body>
+  </body>
 </html>

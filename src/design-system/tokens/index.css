@@ -8,11 +8,11 @@
  */
 
 /* Import all token files in order */
-@import './colors.css';
-@import './typography.css';
-@import './spacing.css';
-@import './shadows.css';
-@import './borders.css';
-@import './animations.css';
-@import './breakpoints.css';
-@import './z-index.css';
+@import "./colors.css";
+@import "./typography.css";
+@import "./spacing.css";
+@import "./shadows.css";
+@import "./borders.css";
+@import "./animations.css";
+@import "./breakpoints.css";
+@import "./z-index.css";

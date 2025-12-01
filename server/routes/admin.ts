@@ -52,8 +52,9 @@ const router = express.Router();
  *       403:
  *         description: Admin access required
  */
-router.get('/system-status', 
-  authenticateToken, 
+router.get(
+  '/system-status',
+  authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const timestamp = new Date().toISOString();
@@ -94,7 +95,7 @@ router.get('/system-status',
       res.json(systemStatus);
     } catch (error) {
       console.error('Error getting system status:', error);
-      
+
       errorTracker.captureException(error as Error, {
         tags: { component: 'admin-status' },
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' }
@@ -120,8 +121,9 @@ router.get('/system-status',
  *     security:
  *       - BearerAuth: []
  */
-router.get('/cache/stats', 
-  authenticateToken, 
+router.get(
+  '/cache/stats',
+  authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (!cacheService.isAvailable()) {
@@ -158,8 +160,9 @@ router.get('/cache/stats',
  *     security:
  *       - BearerAuth: []
  */
-router.post('/cache/clear', 
-  authenticateToken, 
+router.post(
+  '/cache/clear',
+  authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (!cacheService.isAvailable()) {
@@ -171,7 +174,7 @@ router.post('/cache/clear',
 
     try {
       const cleared = await cacheService.clear();
-      
+
       if (cleared) {
         // Log the cache clear action
         errorTracker.captureMessage('Admin cleared cache', 'info', {
@@ -223,8 +226,9 @@ router.post('/cache/clear',
  *                 type: string
  *                 example: "client:*"
  */
-router.post('/cache/invalidate', 
-  authenticateToken, 
+router.post(
+  '/cache/invalidate',
+  authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { tag, pattern } = req.body;

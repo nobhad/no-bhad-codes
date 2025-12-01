@@ -20,7 +20,7 @@ beforeEach(() => {
       <footer class="footer"></footer>
     </div>
   `;
-  
+
   // Mock localStorage
   const localStorageMock = {
     getItem: vi.fn(),
@@ -74,8 +74,8 @@ Object.defineProperty(window, 'matchMedia', {
     removeListener: vi.fn(), // deprecated
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
+    dispatchEvent: vi.fn()
+  }))
 });
 
 // Mock fetch for data loading tests

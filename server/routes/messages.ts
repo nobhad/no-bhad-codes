@@ -26,12 +26,12 @@ const storage = multer.diskStorage({
     cb(null, path.join(__dirname, '../../uploads/messages/'));
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = `${Date.now()  }-${  Math.round(Math.random() * 1e9)}`;
     cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
 
-const upload = multer({ 
+const upload = multer({
   storage,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit for message attachments
@@ -42,12 +42,12 @@ const upload = multer({
     const allowedTypes = /jpeg|jpg|png|pdf|doc|docx|txt|zip/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
-    
+
     if (mimetype && extname) {
       return cb(null, true);
-    } else {
-      cb(new Error('Invalid attachment type'));
     }
+    cb(new Error('Invalid attachment type'));
+
   }
 });
 
@@ -56,17 +56,18 @@ const upload = multer({
 // ===================================
 
 // Get all message threads for client
-router.get('/threads', 
+router.get(
+  '/threads',
   authenticateToken,
   cache({ ttl: 60, tags: ['messages'] }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-  const db = getDatabase();
-  let query = '';
-  let params: any[] = [];
+    const db = getDatabase();
+    let query = '';
+    let params: any[] = [];
 
-  if (req.user!.type === 'admin') {
-    // Admin can see all threads
-    query = `
+    if (req.user!.type === 'admin') {
+      // Admin can see all threads
+      query = `
       SELECT 
         mt.*,
         c.company_name,
@@ -82,9 +83,9 @@ router.get('/threads',
       GROUP BY mt.id
       ORDER BY mt.last_message_at DESC
     `;
-  } else {
-    // Client can only see their own threads
-    query = `
+    } else {
+      // Client can only see their own threads
+      query = `
       SELECT 
         mt.*,
         p.project_name,
@@ -97,461 +98,530 @@ router.get('/threads',
       GROUP BY mt.id
       ORDER BY mt.last_message_at DESC
     `;
-    params = [req.user!.id];
-  }
+      params = [req.user!.id];
+    }
 
-  const threads = await db.all(query, params);
+    const threads = await db.all(query, params);
 
-  res.json({ threads });
-}));
+    res.json({ threads });
+  })
+);
 
 // Create new message thread
-router.post('/threads', 
+router.post(
+  '/threads',
   authenticateToken,
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-  const { subject, thread_type = 'general', priority = 'normal', project_id } = req.body;
+    const { subject, thread_type = 'general', priority = 'normal', project_id } = req.body;
 
-  if (!subject || subject.trim().length === 0) {
-    return res.status(400).json({
-      error: 'Subject is required',
-      code: 'MISSING_SUBJECT'
-    });
-  }
-
-  const db = getDatabase();
-
-  // If project_id provided, verify project access
-  if (project_id) {
-    let project;
-    if (req.user!.type === 'admin') {
-      project = await db.get('SELECT id FROM projects WHERE id = ?', [project_id]);
-    } else {
-      project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [project_id, req.user!.id]);
-    }
-
-    if (!project) {
-      return res.status(404).json({
-        error: 'Project not found or access denied',
-        code: 'PROJECT_NOT_FOUND'
+    if (!subject || subject.trim().length === 0) {
+      return res.status(400).json({
+        error: 'Subject is required',
+        code: 'MISSING_SUBJECT'
       });
     }
-  }
 
-  const client_id = req.user!.type === 'admin' ? req.body.client_id : req.user!.id;
+    const db = getDatabase();
 
-  const result = await db.run(`
+    // If project_id provided, verify project access
+    if (project_id) {
+      let project;
+      if (req.user!.type === 'admin') {
+        project = await db.get('SELECT id FROM projects WHERE id = ?', [project_id]);
+      } else {
+        project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
+          project_id,
+          req.user!.id
+        ]);
+      }
+
+      if (!project) {
+        return res.status(404).json({
+          error: 'Project not found or access denied',
+          code: 'PROJECT_NOT_FOUND'
+        });
+      }
+    }
+
+    const client_id = req.user!.type === 'admin' ? req.body.client_id : req.user!.id;
+
+    const result = await db.run(
+      `
     INSERT INTO message_threads (client_id, project_id, subject, thread_type, priority)
     VALUES (?, ?, ?, ?, ?)
-  `, [client_id, project_id || null, subject.trim(), thread_type, priority]);
+  `,
+      [client_id, project_id || null, subject.trim(), thread_type, priority]
+    );
 
-  const newThread = await db.get(`
+    const newThread = await db.get(
+      `
     SELECT * FROM message_threads WHERE id = ?
-  `, [result.lastID]);
+  `,
+      [result.lastID]
+    );
 
-  res.status(201).json({
-    message: 'Message thread created successfully',
-    thread: newThread
-  });
-}));
+    res.status(201).json({
+      message: 'Message thread created successfully',
+      thread: newThread
+    });
+  })
+);
 
 // Send message in thread
-router.post('/threads/:threadId/messages', 
+router.post(
+  '/threads/:threadId/messages',
   authenticateToken,
   upload.array('attachments', 3),
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-  const threadId = parseInt(req.params.threadId);
-  const { message, priority = 'normal', reply_to } = req.body;
-  const attachments = req.files as Express.Multer.File[];
+    const threadId = parseInt(req.params.threadId);
+    const { message, priority = 'normal', reply_to } = req.body;
+    const attachments = req.files as Express.Multer.File[];
 
-  if (!message || message.trim().length === 0) {
-    return res.status(400).json({
-      error: 'Message content is required',
-      code: 'MISSING_MESSAGE'
-    });
-  }
+    if (!message || message.trim().length === 0) {
+      return res.status(400).json({
+        error: 'Message content is required',
+        code: 'MISSING_MESSAGE'
+      });
+    }
 
-  const db = getDatabase();
+    const db = getDatabase();
 
-  // Verify thread access
-  let thread;
-  if (req.user!.type === 'admin') {
-    thread = await db.get('SELECT * FROM message_threads WHERE id = ?', [threadId]);
-  } else {
-    thread = await db.get('SELECT * FROM message_threads WHERE id = ? AND client_id = ?', [threadId, req.user!.id]);
-  }
+    // Verify thread access
+    let thread;
+    if (req.user!.type === 'admin') {
+      thread = await db.get('SELECT * FROM message_threads WHERE id = ?', [threadId]);
+    } else {
+      thread = await db.get('SELECT * FROM message_threads WHERE id = ? AND client_id = ?', [
+        threadId,
+        req.user!.id
+      ]);
+    }
 
-  if (!thread) {
-    return res.status(404).json({
-      error: 'Message thread not found',
-      code: 'THREAD_NOT_FOUND'
-    });
-  }
+    if (!thread) {
+      return res.status(404).json({
+        error: 'Message thread not found',
+        code: 'THREAD_NOT_FOUND'
+      });
+    }
 
-  // Process attachments
-  let attachmentData = null;
-  if (attachments && attachments.length > 0) {
-    attachmentData = JSON.stringify(attachments.map(file => ({
-      filename: file.filename,
-      originalName: file.originalname,
-      path: file.path,
-      size: file.size,
-      mimeType: file.mimetype
-    })));
-  }
+    // Process attachments
+    let attachmentData = null;
+    if (attachments && attachments.length > 0) {
+      attachmentData = JSON.stringify(
+        attachments.map((file) => ({
+          filename: file.filename,
+          originalName: file.originalname,
+          path: file.path,
+          size: file.size,
+          mimeType: file.mimetype
+        }))
+      );
+    }
 
-  const sender_name = req.user!.type === 'admin' ? 'Admin' : req.user!.email;
+    const sender_name = req.user!.type === 'admin' ? 'Admin' : req.user!.email;
 
-  const result = await db.run(`
+    const result = await db.run(
+      `
     INSERT INTO general_messages (
       client_id, sender_type, sender_name, subject, message, priority, 
       reply_to, attachments, thread_id
     )
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `, [
-    thread.client_id,
-    req.user!.type,
-    sender_name,
-    thread.subject,
-    message.trim(),
-    priority,
-    reply_to || null,
-    attachmentData,
-    threadId
-  ]);
+  `,
+      [
+        thread.client_id,
+        req.user!.type,
+        sender_name,
+        thread.subject,
+        message.trim(),
+        priority,
+        reply_to || null,
+        attachmentData,
+        threadId
+      ]
+    );
 
-  // Update thread last message timestamp
-  await db.run(`
+    // Update thread last message timestamp
+    await db.run(
+      `
     UPDATE message_threads 
     SET last_message_at = CURRENT_TIMESTAMP, last_message_by = ?
     WHERE id = ?
-  `, [sender_name, threadId]);
+  `,
+      [sender_name, threadId]
+    );
 
-  const newMessage = await db.get(`
+    const newMessage = await db.get(
+      `
     SELECT * FROM general_messages WHERE id = ?
-  `, [result.lastID]);
+  `,
+      [result.lastID]
+    );
 
-  // Send email notification
-  try {
-    const recipientType = req.user!.type === 'admin' ? 'client' : 'admin';
-    
-    if (recipientType === 'client') {
-      // Notify client
-      const client = await db.get('SELECT email, contact_name FROM clients WHERE id = ?', [thread.client_id]);
-      
-      if (client) {
-        await emailService.sendMessageNotification(client.email, {
-          recipientName: client.contact_name || 'Client',
-          senderName: sender_name,
-          subject: thread.subject,
-          message: message.trim(),
-          threadId: threadId,
-          portalUrl: `${process.env.CLIENT_PORTAL_URL || 'https://nobhadcodes.com/client/portal.html'}?thread=${threadId}`,
-          hasAttachments: attachments && attachments.length > 0
+    // Send email notification
+    try {
+      const recipientType = req.user!.type === 'admin' ? 'client' : 'admin';
+
+      if (recipientType === 'client') {
+        // Notify client
+        const client = await db.get('SELECT email, contact_name FROM clients WHERE id = ?', [
+          thread.client_id
+        ]);
+
+        if (client) {
+          await emailService.sendMessageNotification(client.email, {
+            recipientName: client.contact_name || 'Client',
+            senderName: sender_name,
+            subject: thread.subject,
+            message: message.trim(),
+            threadId: threadId,
+            portalUrl: `${process.env.CLIENT_PORTAL_URL || 'https://nobhadcodes.com/client/portal.html'}?thread=${threadId}`,
+            hasAttachments: attachments && attachments.length > 0
+          });
+        }
+      } else {
+        // Notify admin
+        await emailService.sendAdminNotification('New Client Message', {
+          type: 'new-client',
+          message: `New message from client in thread: ${thread.subject}`,
+          details: {
+            threadId: threadId,
+            subject: thread.subject,
+            clientId: thread.client_id,
+            message: message.trim(),
+            hasAttachments: attachments && attachments.length > 0
+          },
+          timestamp: new Date()
         });
       }
-    } else {
-      // Notify admin
-      await emailService.sendAdminNotification('New Client Message', {
-        type: 'new-client',
-        message: `New message from client in thread: ${thread.subject}`,
-        details: {
-          threadId: threadId,
-          subject: thread.subject,
-          clientId: thread.client_id,
-          message: message.trim(),
-          hasAttachments: attachments && attachments.length > 0
-        },
-        timestamp: new Date()
-      });
+    } catch (emailError) {
+      console.error('Failed to send message notification:', emailError);
+      // Continue - don't fail message sending due to email issues
     }
-  } catch (emailError) {
-    console.error('Failed to send message notification:', emailError);
-    // Continue - don't fail message sending due to email issues
-  }
 
-  res.status(201).json({
-    message: 'Message sent successfully',
-    messageData: newMessage
-  });
-}));
+    res.status(201).json({
+      message: 'Message sent successfully',
+      messageData: newMessage
+    });
+  })
+);
 
 // Get messages in thread
-router.get('/threads/:threadId/messages', 
+router.get(
+  '/threads/:threadId/messages',
   authenticateToken,
   cache({ ttl: 30, tags: ['messages'] }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-  const threadId = parseInt(req.params.threadId);
-  const db = getDatabase();
+    const threadId = parseInt(req.params.threadId);
+    const db = getDatabase();
 
-  // Verify thread access
-  let thread;
-  if (req.user!.type === 'admin') {
-    thread = await db.get('SELECT * FROM message_threads WHERE id = ?', [threadId]);
-  } else {
-    thread = await db.get('SELECT * FROM message_threads WHERE id = ? AND client_id = ?', [threadId, req.user!.id]);
-  }
+    // Verify thread access
+    let thread;
+    if (req.user!.type === 'admin') {
+      thread = await db.get('SELECT * FROM message_threads WHERE id = ?', [threadId]);
+    } else {
+      thread = await db.get('SELECT * FROM message_threads WHERE id = ? AND client_id = ?', [
+        threadId,
+        req.user!.id
+      ]);
+    }
 
-  if (!thread) {
-    return res.status(404).json({
-      error: 'Message thread not found',
-      code: 'THREAD_NOT_FOUND'
-    });
-  }
+    if (!thread) {
+      return res.status(404).json({
+        error: 'Message thread not found',
+        code: 'THREAD_NOT_FOUND'
+      });
+    }
 
-  const messages = await db.all(`
+    const messages = await db.all(
+      `
     SELECT 
       id, sender_type, sender_name, message, priority, reply_to,
       attachments, is_read, read_at, created_at, updated_at
     FROM general_messages 
     WHERE thread_id = ?
     ORDER BY created_at ASC
-  `, [threadId]);
+  `,
+      [threadId]
+    );
 
-  // Parse attachments JSON
-  messages.forEach(msg => {
-    if (msg.attachments) {
-      try {
-        msg.attachments = JSON.parse(msg.attachments);
-      } catch (e) {
+    // Parse attachments JSON
+    messages.forEach((msg) => {
+      if (msg.attachments) {
+        try {
+          msg.attachments = JSON.parse(msg.attachments);
+        } catch (e) {
+          msg.attachments = [];
+        }
+      } else {
         msg.attachments = [];
       }
-    } else {
-      msg.attachments = [];
-    }
-  });
+    });
 
-  res.json({
-    thread,
-    messages
-  });
-}));
+    res.json({
+      thread,
+      messages
+    });
+  })
+);
 
 // Mark thread messages as read
-router.put('/threads/:threadId/read', 
+router.put(
+  '/threads/:threadId/read',
   authenticateToken,
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-  const threadId = parseInt(req.params.threadId);
-  const db = getDatabase();
+    const threadId = parseInt(req.params.threadId);
+    const db = getDatabase();
 
-  // Verify thread access
-  let thread;
-  if (req.user!.type === 'admin') {
-    thread = await db.get('SELECT * FROM message_threads WHERE id = ?', [threadId]);
-  } else {
-    thread = await db.get('SELECT * FROM message_threads WHERE id = ? AND client_id = ?', [threadId, req.user!.id]);
-  }
+    // Verify thread access
+    let thread;
+    if (req.user!.type === 'admin') {
+      thread = await db.get('SELECT * FROM message_threads WHERE id = ?', [threadId]);
+    } else {
+      thread = await db.get('SELECT * FROM message_threads WHERE id = ? AND client_id = ?', [
+        threadId,
+        req.user!.id
+      ]);
+    }
 
-  if (!thread) {
-    return res.status(404).json({
-      error: 'Message thread not found',
-      code: 'THREAD_NOT_FOUND'
-    });
-  }
+    if (!thread) {
+      return res.status(404).json({
+        error: 'Message thread not found',
+        code: 'THREAD_NOT_FOUND'
+      });
+    }
 
-  // Mark messages as read (except own messages)
-  await db.run(`
+    // Mark messages as read (except own messages)
+    await db.run(
+      `
     UPDATE general_messages 
     SET is_read = 1, read_at = CURRENT_TIMESTAMP
     WHERE thread_id = ? AND sender_type != ?
-  `, [threadId, req.user!.type]);
+  `,
+      [threadId, req.user!.type]
+    );
 
-  res.json({
-    message: 'Messages marked as read'
-  });
-}));
+    res.json({
+      message: 'Messages marked as read'
+    });
+  })
+);
 
 // ===================================
 // QUICK MESSAGE ENDPOINTS
 // ===================================
 
 // Send quick inquiry (creates thread automatically)
-router.post('/inquiry', 
+router.post(
+  '/inquiry',
   authenticateToken,
   upload.array('attachments', 3),
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-  const { subject, message, priority = 'normal', message_type = 'inquiry' } = req.body;
-  const attachments = req.files as Express.Multer.File[];
+    const { subject, message, priority = 'normal', message_type = 'inquiry' } = req.body;
+    const attachments = req.files as Express.Multer.File[];
 
-  if (!subject || !message) {
-    return res.status(400).json({
-      error: 'Subject and message are required',
-      code: 'MISSING_REQUIRED_FIELDS'
-    });
-  }
+    if (!subject || !message) {
+      return res.status(400).json({
+        error: 'Subject and message are required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
 
-  const db = getDatabase();
+    const db = getDatabase();
 
-  // Create thread first
-  const threadResult = await db.run(`
+    // Create thread first
+    const threadResult = await db.run(
+      `
     INSERT INTO message_threads (client_id, subject, thread_type, priority)
     VALUES (?, ?, ?, ?)
-  `, [req.user!.id, subject.trim(), 'general', priority]);
+  `,
+      [req.user!.id, subject.trim(), 'general', priority]
+    );
 
-  const threadId = threadResult.lastID;
+    const threadId = threadResult.lastID;
 
-  // Process attachments
-  let attachmentData = null;
-  if (attachments && attachments.length > 0) {
-    attachmentData = JSON.stringify(attachments.map(file => ({
-      filename: file.filename,
-      originalName: file.originalname,
-      path: file.path,
-      size: file.size,
-      mimeType: file.mimetype
-    })));
-  }
+    // Process attachments
+    let attachmentData = null;
+    if (attachments && attachments.length > 0) {
+      attachmentData = JSON.stringify(
+        attachments.map((file) => ({
+          filename: file.filename,
+          originalName: file.originalname,
+          path: file.path,
+          size: file.size,
+          mimeType: file.mimetype
+        }))
+      );
+    }
 
-  // Send message
-  await db.run(`
+    // Send message
+    await db.run(
+      `
     INSERT INTO general_messages (
       client_id, sender_type, sender_name, subject, message, 
       message_type, priority, attachments, thread_id
     )
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `, [
-    req.user!.id,
-    req.user!.type,
-    req.user!.email,
-    subject.trim(),
-    message.trim(),
-    message_type,
-    priority,
-    attachmentData,
-    threadId
-  ]);
+  `,
+      [
+        req.user!.id,
+        req.user!.type,
+        req.user!.email,
+        subject.trim(),
+        message.trim(),
+        message_type,
+        priority,
+        attachmentData,
+        threadId
+      ]
+    );
 
-  // Send admin notification
-  try {
-    await emailService.sendAdminNotification('New Client Inquiry', {
-      type: 'new-client',
-      message: `New ${message_type} received from client`,
-      details: {
-        subject: subject.trim(),
-        message: message.trim(),
-        clientId: req.user!.id,
-        threadId: threadId,
-        priority: priority,
-        hasAttachments: attachments && attachments.length > 0
-      },
-      timestamp: new Date()
+    // Send admin notification
+    try {
+      await emailService.sendAdminNotification('New Client Inquiry', {
+        type: 'new-client',
+        message: `New ${message_type} received from client`,
+        details: {
+          subject: subject.trim(),
+          message: message.trim(),
+          clientId: req.user!.id,
+          threadId: threadId,
+          priority: priority,
+          hasAttachments: attachments && attachments.length > 0
+        },
+        timestamp: new Date()
+      });
+    } catch (emailError) {
+      console.error('Failed to send admin notification:', emailError);
+    }
+
+    res.status(201).json({
+      message: 'Inquiry sent successfully',
+      threadId: threadId
     });
-  } catch (emailError) {
-    console.error('Failed to send admin notification:', emailError);
-  }
-
-  res.status(201).json({
-    message: 'Inquiry sent successfully',
-    threadId: threadId
-  });
-}));
+  })
+);
 
 // ===================================
 // NOTIFICATION PREFERENCES
 // ===================================
 
 // Get notification preferences
-router.get('/preferences', 
+router.get(
+  '/preferences',
   authenticateToken,
   cache({ ttl: 300, tags: ['preferences'] }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-  const db = getDatabase();
+    const db = getDatabase();
 
-  let preferences = await db.get(
-    'SELECT * FROM notification_preferences WHERE client_id = ?',
-    [req.user!.id]
-  );
+    let preferences = await db.get('SELECT * FROM notification_preferences WHERE client_id = ?', [
+      req.user!.id
+    ]);
 
-  if (!preferences) {
-    // Create default preferences
-    const result = await db.run(`
+    if (!preferences) {
+      // Create default preferences
+      const result = await db.run(
+        `
       INSERT INTO notification_preferences (client_id)
       VALUES (?)
-    `, [req.user!.id]);
+    `,
+        [req.user!.id]
+      );
 
-    preferences = await db.get(
-      'SELECT * FROM notification_preferences WHERE id = ?',
-      [result.lastID]
-    );
-  }
+      preferences = await db.get('SELECT * FROM notification_preferences WHERE id = ?', [
+        result.lastID
+      ]);
+    }
 
-  res.json({ preferences });
-}));
+    res.json({ preferences });
+  })
+);
 
 // Update notification preferences
-router.put('/preferences', 
+router.put(
+  '/preferences',
   authenticateToken,
   invalidateCache(['preferences']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-  const {
-    email_notifications,
-    project_updates,
-    new_messages,
-    milestone_updates,
-    invoice_notifications,
-    marketing_emails,
-    notification_frequency
-  } = req.body;
+    const {
+      email_notifications,
+      project_updates,
+      new_messages,
+      milestone_updates,
+      invoice_notifications,
+      marketing_emails,
+      notification_frequency
+    } = req.body;
 
-  const db = getDatabase();
+    const db = getDatabase();
 
-  const updates: string[] = [];
-  const values: any[] = [];
-  const allowedFields = [
-    'email_notifications', 'project_updates', 'new_messages',
-    'milestone_updates', 'invoice_notifications', 'marketing_emails',
-    'notification_frequency'
-  ];
+    const updates: string[] = [];
+    const values: any[] = [];
+    const allowedFields = [
+      'email_notifications',
+      'project_updates',
+      'new_messages',
+      'milestone_updates',
+      'invoice_notifications',
+      'marketing_emails',
+      'notification_frequency'
+    ];
 
-  for (const field of allowedFields) {
-    if (req.body[field] !== undefined) {
-      updates.push(`${field} = ?`);
-      values.push(req.body[field]);
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updates.push(`${field} = ?`);
+        values.push(req.body[field]);
+      }
     }
-  }
 
-  if (updates.length === 0) {
-    return res.status(400).json({
-      error: 'No valid fields to update',
-      code: 'NO_UPDATES'
-    });
-  }
+    if (updates.length === 0) {
+      return res.status(400).json({
+        error: 'No valid fields to update',
+        code: 'NO_UPDATES'
+      });
+    }
 
-  values.push(req.user!.id);
+    values.push(req.user!.id);
 
-  await db.run(`
+    await db.run(
+      `
     UPDATE notification_preferences 
     SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP
     WHERE client_id = ?
-  `, values);
+  `,
+      values
+    );
 
-  const updatedPreferences = await db.get(
-    'SELECT * FROM notification_preferences WHERE client_id = ?',
-    [req.user!.id]
-  );
+    const updatedPreferences = await db.get(
+      'SELECT * FROM notification_preferences WHERE client_id = ?',
+      [req.user!.id]
+    );
 
-  res.json({
-    message: 'Notification preferences updated successfully',
-    preferences: updatedPreferences
-  });
-}));
+    res.json({
+      message: 'Notification preferences updated successfully',
+      preferences: updatedPreferences
+    });
+  })
+);
 
 // ===================================
 // ADMIN ENDPOINTS
 // ===================================
 
 // Get message analytics (admin only)
-router.get('/analytics', 
-  authenticateToken, 
+router.get(
+  '/analytics',
+  authenticateToken,
   requireAdmin,
   cache({ ttl: 300, tags: ['analytics'] }),
   asyncHandler(async (req: express.Request, res: express.Response) => {
-  const db = getDatabase();
+    const db = getDatabase();
 
-  const analytics = await db.get(`
+    const analytics = await db.get(`
     SELECT 
       COUNT(DISTINCT mt.id) as total_threads,
       COUNT(DISTINCT CASE WHEN mt.status = 'active' THEN mt.id END) as active_threads,
@@ -565,7 +635,7 @@ router.get('/analytics',
     LEFT JOIN general_messages gm ON mt.id = gm.thread_id
   `);
 
-  const recentActivity = await db.all(`
+    const recentActivity = await db.all(`
     SELECT 
       mt.subject,
       mt.thread_type,
@@ -580,11 +650,12 @@ router.get('/analytics',
     LIMIT 10
   `);
 
-  res.json({
-    analytics,
-    recentActivity
-  });
-}));
+    res.json({
+      analytics,
+      recentActivity
+    });
+  })
+);
 
 export { router as messagesRouter };
 export default router;

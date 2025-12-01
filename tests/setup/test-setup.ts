@@ -3,7 +3,7 @@
  * TEST SETUP
  * ===============================================
  * @file tests/setup/test-setup.ts
- * 
+ *
  * Global test setup and configuration.
  */
 
@@ -14,7 +14,7 @@ import { vi, beforeEach, afterEach } from 'vitest';
 // Mock window properties that might not exist in jsdom
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: vi.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -22,22 +22,22 @@ Object.defineProperty(window, 'matchMedia', {
     removeListener: vi.fn(), // Deprecated
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
+    dispatchEvent: vi.fn()
+  }))
 });
 
 // Mock IntersectionObserver
 global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
-  disconnect: vi.fn(),
+  disconnect: vi.fn()
 }));
 
 // Mock ResizeObserver
 global.ResizeObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
-  disconnect: vi.fn(),
+  disconnect: vi.fn()
 }));
 
 // Mock localStorage
@@ -47,11 +47,11 @@ const localStorageMock = {
   removeItem: vi.fn(),
   clear: vi.fn(),
   length: 0,
-  key: vi.fn(),
+  key: vi.fn()
 };
 
 Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock,
+  value: localStorageMock
 });
 
 // Mock sessionStorage
@@ -61,11 +61,11 @@ const sessionStorageMock = {
   removeItem: vi.fn(),
   clear: vi.fn(),
   length: 0,
-  key: vi.fn(),
+  key: vi.fn()
 };
 
 Object.defineProperty(window, 'sessionStorage', {
-  value: sessionStorageMock,
+  value: sessionStorageMock
 });
 
 // Mock fetch
@@ -84,17 +84,18 @@ beforeEach(() => {
 beforeEach(() => {
   // Set up fresh DOM for each test
   if (document.body) {
-    document.body.innerHTML = '<div id="app"><header class="header"><nav class="navigation"><div class="theme-toggle" id="theme-toggle"><div class="theme-icon-wrap">🌙</div></div></nav></header><main id="main"></main><footer class="footer"></footer></div>';
+    document.body.innerHTML =
+      '<div id="app"><header class="header"><nav class="navigation"><div class="theme-toggle" id="theme-toggle"><div class="theme-icon-wrap">🌙</div></div></nav></header><main id="main"></main><footer class="footer"></footer></div>';
   }
 });
 
 afterEach(() => {
   // Restore console methods
   Object.assign(console, originalConsole);
-  
+
   // Clear all mocks
   vi.clearAllMocks();
-  
+
   // Reset DOM
   if (document.body) {
     document.body.innerHTML = '';
@@ -162,7 +163,7 @@ global.testUtils = {
   },
 
   flushPromises: (): Promise<void> => {
-    return new Promise(resolve => setTimeout(resolve, 0));
+    return new Promise((resolve) => setTimeout(resolve, 0));
   }
 };
 

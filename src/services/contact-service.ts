@@ -88,7 +88,11 @@ export class ContactService extends BaseService {
       // Rate limiting check
       const clientIdentifier = this.getClientIdentifier(formData);
       if (!SanitizationUtils.checkRateLimit(clientIdentifier, 5, 300000)) {
-        SanitizationUtils.logSecurityViolation('rate_limit_exceeded', { identifier: clientIdentifier }, navigator.userAgent);
+        SanitizationUtils.logSecurityViolation(
+          'rate_limit_exceeded',
+          { identifier: clientIdentifier },
+          navigator.userAgent
+        );
         return {
           success: false,
           message: 'Too many requests. Please wait a few minutes before trying again.',
@@ -112,10 +116,14 @@ export class ContactService extends BaseService {
       // Check for XSS attempts
       const xssCheck = this.detectXssInFormData(formData);
       if (xssCheck.detected) {
-        SanitizationUtils.logSecurityViolation('xss_attempt', {
-          fields: xssCheck.fields,
-          formData: sanitizedData
-        }, navigator.userAgent);
+        SanitizationUtils.logSecurityViolation(
+          'xss_attempt',
+          {
+            fields: xssCheck.fields,
+            formData: sanitizedData
+          },
+          navigator.userAgent
+        );
 
         return {
           success: false,
@@ -176,7 +184,6 @@ export class ContactService extends BaseService {
       };
     }
     throw new Error(`Netlify submission failed: ${response.status} ${response.statusText}`);
-
   }
 
   /**
@@ -212,7 +219,6 @@ export class ContactService extends BaseService {
     }
     const errorText = await response.text();
     throw new Error(`Formspree submission failed: ${response.status} - ${errorText}`);
-
   }
 
   /**
@@ -274,7 +280,6 @@ export class ContactService extends BaseService {
     }
     const errorText = await response.text();
     throw new Error(`Custom endpoint submission failed: ${response.status} - ${errorText}`);
-
   }
 
   /**
@@ -373,7 +378,8 @@ export class ContactService extends BaseService {
    */
   private getClientIdentifier(formData: ContactFormData): string {
     // Use email + IP-like identifier (in real app, you'd get actual IP from server)
-    const browserFingerprint = navigator.userAgent + navigator.language + screen.width + screen.height;
+    const browserFingerprint =
+      navigator.userAgent + navigator.language + screen.width + screen.height;
     const hash = btoa(formData.email + browserFingerprint).slice(0, 16);
     return hash;
   }

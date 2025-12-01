@@ -12,7 +12,11 @@
  */
 
 import { BaseModule } from './base';
-import { ContactService, type ContactFormData, type ContactBackend } from '../services/contact-service';
+import {
+  ContactService,
+  type ContactFormData,
+  type ContactBackend
+} from '../services/contact-service';
 import { SanitizationUtils } from '../utils/sanitization-utils';
 import type { ModuleOptions } from '../types/modules';
 
@@ -63,7 +67,7 @@ export class ContactFormModule extends BaseModule {
 
     // Add input validation listeners
     const inputs = this.form!.querySelectorAll('input, select, textarea');
-    inputs.forEach(input => {
+    inputs.forEach((input) => {
       this.addEventListener(input, 'input', this.handleInputChange);
       this.addEventListener(input, 'blur', this.handleInputChange);
     });
@@ -79,7 +83,9 @@ export class ContactFormModule extends BaseModule {
     this.form.noValidate = true;
 
     const validateForm = () => {
-      const requiredFields = this.form!.querySelectorAll('input[required], select[required], textarea[required]');
+      const requiredFields = this.form!.querySelectorAll(
+        'input[required], select[required], textarea[required]'
+      );
       const isValid = Array.from(requiredFields).every((field) => {
         const input = field as any;
         return input.value && input.value.trim() !== '';
@@ -144,7 +150,10 @@ export class ContactFormModule extends BaseModule {
       case 'text':
         if (inputField.required && value.length < 2) {
           isValid = false;
-          errorMessage = inputField.name === 'name' ? 'Name is required' : 'This field must be at least 2 characters';
+          errorMessage =
+              inputField.name === 'name'
+                ? 'Name is required'
+                : 'This field must be at least 2 characters';
         }
         break;
       }
@@ -233,10 +242,12 @@ export class ContactFormModule extends BaseModule {
       } else {
         throw new Error(result.error || 'Failed to send message');
       }
-
     } catch (error) {
       this.error('Form submission failed:', error);
-      this.showFormMessage('Sorry, there was an error sending your message. Please try again.', 'error');
+      this.showFormMessage(
+        'Sorry, there was an error sending your message. Please try again.',
+        'error'
+      );
     } finally {
       this.isSubmitting = false;
       this.setSubmitButtonState(false);
@@ -244,8 +255,8 @@ export class ContactFormModule extends BaseModule {
   }
 
   /**
-     * Gather form data into ContactFormData structure with client-side sanitization
-     */
+   * Gather form data into ContactFormData structure with client-side sanitization
+   */
   private gatherFormData(): Partial<ContactFormData> {
     if (!this.form) return {};
 
@@ -274,12 +285,12 @@ export class ContactFormModule extends BaseModule {
   }
 
   /**
-     * Show validation errors
-     */
+   * Show validation errors
+   */
   private showValidationErrors(errors: string[]) {
     this.clearAllErrors();
 
-    errors.forEach(error => {
+    errors.forEach((error) => {
       this.log('Validation error:', error);
     });
 
@@ -287,21 +298,23 @@ export class ContactFormModule extends BaseModule {
   }
 
   /**
-     * Clear all field errors
-     */
+   * Clear all field errors
+   */
   private clearAllErrors() {
     const errorMessages = this.form?.querySelectorAll('.field-error');
-    errorMessages?.forEach(error => error.remove());
+    errorMessages?.forEach((error) => error.remove());
 
     const errorFields = this.form?.querySelectorAll('.error');
-    errorFields?.forEach(field => field.classList.remove('error'));
+    errorFields?.forEach((field) => field.classList.remove('error'));
   }
 
   validateForm(): boolean {
-    const inputs = this.form!.querySelectorAll('input[required], select[required], textarea[required]');
+    const inputs = this.form!.querySelectorAll(
+      'input[required], select[required], textarea[required]'
+    );
     let allValid = true;
 
-    inputs.forEach(input => {
+    inputs.forEach((input) => {
       if (!this.validateField(input)) {
         allValid = false;
       }
@@ -367,7 +380,6 @@ export class ContactFormModule extends BaseModule {
       return { success: true };
     }
     throw new Error(`HTTP error! status: ${response.status}`);
-
   }
 
   async submitToFormspree(data: any) {
@@ -383,7 +395,6 @@ export class ContactFormModule extends BaseModule {
     }
     const errorData = await response.json();
     throw new Error(errorData.message || 'Formspree submission failed');
-
   }
 
   async submitToEmailJS(_data: any) {
@@ -400,21 +411,32 @@ export class ContactFormModule extends BaseModule {
 
     // Check for XSS patterns
     if (SanitizationUtils.detectXss(value)) {
-      this.showFieldError(field, 'Invalid characters detected. Please remove any HTML or script tags.');
-      SanitizationUtils.logSecurityViolation('client_xss_attempt', {
-        fieldName: field.name || field.id,
-        fieldType: field.type,
-        value: SanitizationUtils.sanitizeText(value)
-      }, navigator.userAgent);
+      this.showFieldError(
+        field,
+        'Invalid characters detected. Please remove any HTML or script tags.'
+      );
+      SanitizationUtils.logSecurityViolation(
+        'client_xss_attempt',
+        {
+          fieldName: field.name || field.id,
+          fieldType: field.type,
+          value: SanitizationUtils.sanitizeText(value)
+        },
+        navigator.userAgent
+      );
     }
 
     // Check for extremely long input (potential DoS)
     if (value.length > 5000) {
       this.showFieldError(field, 'Input too long. Please shorten your message.');
-      SanitizationUtils.logSecurityViolation('input_length_violation', {
-        fieldName: field.name || field.id,
-        length: value.length
-      }, navigator.userAgent);
+      SanitizationUtils.logSecurityViolation(
+        'input_length_violation',
+        {
+          fieldName: field.name || field.id,
+          length: value.length
+        },
+        navigator.userAgent
+      );
     }
   }
 

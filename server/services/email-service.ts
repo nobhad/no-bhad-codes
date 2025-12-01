@@ -88,7 +88,7 @@ async function sendEmail(emailContent: EmailContent): Promise<EmailResult> {
       subject: emailContent.subject,
       text: emailContent.text,
       html: emailContent.html,
-      replyTo: emailConfig.replyTo,
+      replyTo: emailConfig.replyTo
     });
 
     console.log('[EMAIL] Message sent successfully:', info.messageId);
@@ -101,7 +101,7 @@ async function sendEmail(emailContent: EmailContent): Promise<EmailResult> {
     console.log(`Subject: ${emailContent.subject}`);
     return {
       success: false,
-      message: `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      message: `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`
     };
   }
 }
@@ -146,7 +146,7 @@ export async function sendWelcomeEmail(
       Best regards,
       No Bhad Codes Team
     `,
-    html: generateWelcomeEmailHTML(name, portalUrl),
+    html: generateWelcomeEmailHTML(name, portalUrl)
   };
 
   return sendEmail(emailContent);
@@ -189,7 +189,7 @@ export async function sendNewIntakeNotification(
 
       Review the full details in the admin dashboard.
     `,
-    html: generateIntakeNotificationHTML(intakeData, projectId),
+    html: generateIntakeNotificationHTML(intakeData, projectId)
   };
 
   return sendEmail(emailContent);
@@ -263,9 +263,13 @@ function generateWelcomeEmailHTML(name: string, portalUrl: string): string {
 }
 
 function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: number): string {
-  const features = Array.isArray(intakeData.features) ? intakeData.features : [intakeData.features].filter(Boolean);
-  const addons = Array.isArray(intakeData.addons) ? intakeData.addons : [intakeData.addons].filter(Boolean);
-  
+  const features = Array.isArray(intakeData.features)
+    ? intakeData.features
+    : [intakeData.features].filter(Boolean);
+  const addons = Array.isArray(intakeData.addons)
+    ? intakeData.addons
+    : [intakeData.addons].filter(Boolean);
+
   return `
     <!DOCTYPE html>
     <html>
@@ -339,23 +343,31 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
             </div>
           </div>
           
-          ${features.length > 0 ? `
+          ${
+  features.length > 0
+    ? `
           <div class="section">
             <h3>Requested Features</h3>
             <div class="features-list">
-              ${features.map(feature => `<div>• ${feature}</div>`).join('')}
+              ${features.map((feature) => `<div>• ${feature}</div>`).join('')}
             </div>
           </div>
-          ` : ''}
+          `
+    : ''
+}
           
-          ${addons.length > 0 ? `
+          ${
+  addons.length > 0
+    ? `
           <div class="section">
             <h3>Additional Services</h3>
             <div class="features-list">
-              ${addons.map(addon => `<div>• ${addon}</div>`).join('')}
+              ${addons.map((addon) => `<div>• ${addon}</div>`).join('')}
             </div>
           </div>
-          ` : ''}
+          `
+    : ''
+}
           
           <div class="section">
             <h3>Additional Information</h3>
@@ -370,23 +382,31 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
               <div>${intakeData.hosting || 'Not specified'}</div>
             </div>
             
-            ${intakeData.integrations ? `
+            ${
+  intakeData.integrations
+    ? `
             <div style="margin-top: 15px;">
               <div class="info-label">Integrations:</div>
               <div style="background: #fff; padding: 10px; border-left: 4px solid #00ff41; margin-top: 5px;">
                 ${intakeData.integrations}
               </div>
             </div>
-            ` : ''}
+            `
+    : ''
+}
             
-            ${intakeData.challenges ? `
+            ${
+  intakeData.challenges
+    ? `
             <div style="margin-top: 15px;">
               <div class="info-label">Challenges/Concerns:</div>
               <div style="background: #fff; padding: 10px; border-left: 4px solid #00ff41; margin-top: 5px;">
                 ${intakeData.challenges}
               </div>
             </div>
-            ` : ''}
+            `
+    : ''
+}
           </div>
           
           <p style="text-align: center; margin-top: 30px;">
@@ -414,8 +434,8 @@ export const emailService = {
       secure: config.secure,
       auth: {
         user: config.auth.user,
-        pass: config.auth.pass,
-      },
+        pass: config.auth.pass
+      }
     });
 
     console.log('[EMAIL] Email service initialized successfully');
@@ -447,23 +467,30 @@ export const emailService = {
       isProcessingQueue: false
     };
   },
-  
-  async sendWelcomeEmail(email: string, nameOrData: string | any, accessTokenOrOptions?: string | any): Promise<EmailResult> {
+
+  async sendWelcomeEmail(
+    email: string,
+    nameOrData: string | any,
+    accessTokenOrOptions?: string | any
+  ): Promise<EmailResult> {
     if (typeof nameOrData === 'string' && typeof accessTokenOrOptions === 'string') {
       // Original function signature
       return sendWelcomeEmail(email, nameOrData, accessTokenOrOptions);
-    } else {
-      // Object-based signature for compatibility
-      const data = nameOrData;
-      return sendWelcomeEmail(email, data.name || 'Valued Client', data.accessToken || '');
     }
+    // Object-based signature for compatibility
+    const data = nameOrData;
+    return sendWelcomeEmail(email, data.name || 'Valued Client', data.accessToken || '');
+
   },
-  
+
   async sendNewIntakeNotification(intakeData: IntakeData, projectId: number): Promise<EmailResult> {
     return sendNewIntakeNotification(intakeData, projectId);
   },
-  
-  async sendPasswordResetEmail(email: string, data: { resetToken: string; name?: string }): Promise<EmailResult> {
+
+  async sendPasswordResetEmail(
+    email: string,
+    data: { resetToken: string; name?: string }
+  ): Promise<EmailResult> {
     console.log('[EMAIL] Preparing password reset email for:', email);
 
     const resetUrl = `${process.env.WEBSITE_URL || 'http://localhost:3000'}/reset-password?token=${data.resetToken}`;
@@ -514,12 +541,12 @@ export const emailService = {
           </div>
         </body>
         </html>
-      `,
+      `
     };
 
     return sendEmail(emailContent);
   },
-  
+
   async sendAdminNotification(title: string | any, data?: any): Promise<EmailResult> {
     if (typeof title === 'string') {
       console.log('Sending admin notification:', title, data);
@@ -528,22 +555,22 @@ export const emailService = {
     }
     return { success: true, message: 'Admin notification logged for development' };
   },
-  
+
   async sendMessageNotification(email: string, data: any): Promise<EmailResult> {
     console.log('Sending message notification to:', email, data);
     return { success: true, message: 'Message notification logged for development' };
   },
-  
+
   async sendProjectUpdateEmail(email: string, data: any): Promise<EmailResult> {
     console.log('Sending project update email to:', email, data);
     return { success: true, message: 'Project update email logged for development' };
   },
-  
+
   async sendIntakeConfirmation(data: any): Promise<EmailResult> {
     console.log('Sending intake confirmation:', data);
     return { success: true, message: 'Intake confirmation logged for development' };
   },
-  
+
   async sendEmail(data: any): Promise<EmailResult> {
     console.log('Sending email:', data);
     return { success: true, message: 'Email logged for development' };

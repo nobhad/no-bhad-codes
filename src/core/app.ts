@@ -50,73 +50,101 @@ export class Application {
     container.singleton('ComponentRegistry', async () => ComponentRegistry);
 
     // Register router service
-    container.register('RouterService', async () => {
-      const { RouterService } = await import('../services/router-service');
-      return new RouterService({
-        defaultRoute: '/',
-        smoothScrolling: true,
-        scrollOffset: 80,
-        transitionDuration: 600
-      });
-    }, { singleton: true });
+    container.register(
+      'RouterService',
+      async () => {
+        const { RouterService } = await import('../services/router-service');
+        return new RouterService({
+          defaultRoute: '/',
+          smoothScrolling: true,
+          scrollOffset: 80,
+          transitionDuration: 600
+        });
+      },
+      { singleton: true }
+    );
 
     // Register data service
-    container.register('DataService', async () => {
-      const { DataService } = await import('../services/data-service');
-      return new DataService();
-    }, { singleton: true });
+    container.register(
+      'DataService',
+      async () => {
+        const { DataService } = await import('../services/data-service');
+        return new DataService();
+      },
+      { singleton: true }
+    );
 
     // Register contact service
-    container.register('ContactService', async () => {
-      const { ContactService } = await import('../services/contact-service');
-      return new ContactService({
-        backend: 'netlify' // Can be configured based on environment
-      });
-    }, { singleton: true });
+    container.register(
+      'ContactService',
+      async () => {
+        const { ContactService } = await import('../services/contact-service');
+        return new ContactService({
+          backend: 'netlify' // Can be configured based on environment
+        });
+      },
+      { singleton: true }
+    );
 
     // Register performance service
-    container.register('PerformanceService', async () => {
-      const { PerformanceService } = await import('../services/performance-service');
-      return new PerformanceService({
-        lcp: 2500,
-        fid: 100,
-        cls: 0.1,
-        bundleSize: 600 * 1024,
-        ttfb: 200
-      });
-    }, { singleton: true });
+    container.register(
+      'PerformanceService',
+      async () => {
+        const { PerformanceService } = await import('../services/performance-service');
+        return new PerformanceService({
+          lcp: 2500,
+          fid: 100,
+          cls: 0.1,
+          bundleSize: 600 * 1024,
+          ttfb: 200
+        });
+      },
+      { singleton: true }
+    );
 
     // Register bundle analyzer service
-    container.register('BundleAnalyzerService', async () => {
-      const { BundleAnalyzerService } = await import('../services/bundle-analyzer');
-      return new BundleAnalyzerService();
-    }, { singleton: true });
+    container.register(
+      'BundleAnalyzerService',
+      async () => {
+        const { BundleAnalyzerService } = await import('../services/bundle-analyzer');
+        return new BundleAnalyzerService();
+      },
+      { singleton: true }
+    );
 
     // Register visitor tracking service
-    container.register('VisitorTrackingService', async () => {
-      const { VisitorTrackingService } = await import('../services/visitor-tracking');
-      return new VisitorTrackingService({
-        enableTracking: true,
-        respectDoNotTrack: true,
-        cookieConsent: true,
-        sessionTimeout: 30,
-        trackScrollDepth: true,
-        trackClicks: true,
-        trackBusinessCardInteractions: true,
-        trackFormSubmissions: true,
-        trackDownloads: true,
-        trackExternalLinks: true,
-        batchSize: 10,
-        flushInterval: 30
-      });
-    }, { singleton: true });
+    container.register(
+      'VisitorTrackingService',
+      async () => {
+        const { VisitorTrackingService } = await import('../services/visitor-tracking');
+        return new VisitorTrackingService({
+          enableTracking: true,
+          respectDoNotTrack: true,
+          cookieConsent: true,
+          sessionTimeout: 30,
+          trackScrollDepth: true,
+          trackClicks: true,
+          trackBusinessCardInteractions: true,
+          trackFormSubmissions: true,
+          trackDownloads: true,
+          trackExternalLinks: true,
+          batchSize: 10,
+          flushInterval: 30
+        });
+      },
+      { singleton: true }
+    );
 
     // Register code protection service (uses config)
-    container.register('CodeProtectionService', async () => {
-      const { CodeProtectionService } = await import('../services/code-protection-service');
-      const { getProtectionConfig } = await import('../config/protection.config');
-      return new CodeProtectionService(getProtectionConfig());
-    }, { singleton: true });
+    container.register(
+      'CodeProtectionService',
+      async () => {
+        const { CodeProtectionService } = await import('../services/code-protection-service');
+        const { getProtectionConfig } = await import('../config/protection.config');
+        return new CodeProtectionService(getProtectionConfig());
+      },
+      { singleton: true }
+    );
   }
 
   /**
@@ -169,7 +197,9 @@ export class Application {
         name: 'SectionCardInteractions',
         type: 'dom',
         factory: async () => {
-          const { BusinessCardInteractions } = await import('../modules/business-card-interactions');
+          const { BusinessCardInteractions } = await import(
+            '../modules/business-card-interactions'
+          );
           const renderer = await container.resolve('SectionCardRenderer');
           return new BusinessCardInteractions(renderer as any);
         },
@@ -258,8 +288,12 @@ export class Application {
             const { AdminDashboard } = await import('../features/admin/admin-dashboard');
             const _adminDashboard = new AdminDashboard();
             return {
-              init: async () => { /* AdminDashboard initializes itself */ },
-              destroy: () => { /* AdminDashboard handles its own cleanup */ },
+              init: async () => {
+                /* AdminDashboard initializes itself */
+              },
+              destroy: () => {
+                /* AdminDashboard handles its own cleanup */
+              },
               isInitialized: true,
               name: 'AdminDashboardModule'
             };
@@ -276,7 +310,7 @@ export class Application {
     ];
 
     // Register modules in container
-    modules.forEach(module => {
+    modules.forEach((module) => {
       container.register(module.name, module.factory, {
         singleton: true,
         dependencies: module.dependencies || []
@@ -296,28 +330,33 @@ export class Application {
 
       if (!ConsentBanner.hasExistingConsent()) {
         // Show consent banner immediately
-        const _consentBanner = await createConsentBanner({
-          position: 'bottom',
-          theme: 'light',
-          showDetailsLink: true,
-          autoHide: false,
-          companyName: 'No Bhad Codes',
-          onAccept: async () => {
-            // Initialize visitor tracking when consent is given
-            try {
-              const trackingService = await container.resolve('VisitorTrackingService') as any;
-              await trackingService.init();
-            } catch (error) {
-              console.error('[Application] Failed to initialize visitor tracking:', error);
+        const _consentBanner = await createConsentBanner(
+          {
+            position: 'bottom',
+            theme: 'light',
+            showDetailsLink: true,
+            autoHide: false,
+            companyName: 'No Bhad Codes',
+            onAccept: async () => {
+              // Initialize visitor tracking when consent is given
+              try {
+                const trackingService = (await container.resolve('VisitorTrackingService')) as any;
+                await trackingService.init();
+              } catch (error) {
+                console.error('[Application] Failed to initialize visitor tracking:', error);
+              }
+            },
+            onDecline: () => {
+              console.log('[Application] Visitor tracking declined');
             }
           },
-          onDecline: () => {
-            console.log('[Application] Visitor tracking declined');
-          }
-        }, document.body);
+          document.body
+        );
       } else {
         // If consent already exists, we'll initialize tracking later in main init
-        console.log('[Application] Existing consent found, will initialize tracking after services');
+        console.log(
+          '[Application] Existing consent found, will initialize tracking after services'
+        );
       }
     } catch (error) {
       console.error('[Application] Failed to initialize consent banner:', error);
@@ -354,7 +393,9 @@ export class Application {
         const { ConsentBanner } = await import('../components');
         const consentStatus = ConsentBanner.getConsentStatus?.();
         if (consentStatus === 'accepted') {
-          const trackingService = await container.resolve('VisitorTrackingService') as ServiceInstance;
+          const trackingService = (await container.resolve(
+            'VisitorTrackingService'
+          )) as ServiceInstance;
           await trackingService.init?.();
         }
       }
@@ -370,15 +411,17 @@ export class Application {
       // Enable section card after intro completion
       setTimeout(() => {
         const sectionRenderer = this.getModule('SectionCardRenderer');
-        if (sectionRenderer && 'enableAfterIntro' in sectionRenderer && typeof sectionRenderer.enableAfterIntro === 'function') {
+        if (
+          sectionRenderer &&
+          'enableAfterIntro' in sectionRenderer &&
+          typeof sectionRenderer.enableAfterIntro === 'function'
+        ) {
           sectionRenderer.enableAfterIntro();
         }
 
         // Setup sticky footer content visibility
         this.setupStickyFooter();
       }, 3000);
-
-
     } catch (error) {
       console.error('[Application] Initialization failed:', error);
       throw error;
@@ -389,12 +432,20 @@ export class Application {
    * Initialize core services
    */
   private async initializeServices(): Promise<void> {
-    const services: string[] = ['VisitorTrackingService', 'PerformanceService', 'BundleAnalyzerService', 'RouterService', 'DataService', 'ContactService', 'CodeProtectionService'];
+    const services: string[] = [
+      'VisitorTrackingService',
+      'PerformanceService',
+      'BundleAnalyzerService',
+      'RouterService',
+      'DataService',
+      'ContactService',
+      'CodeProtectionService'
+    ];
 
     for (const serviceName of services) {
       try {
         console.log(`[Application] Initializing ${serviceName}...`);
-        const service = await container.resolve(serviceName) as ServiceInstance;
+        const service = (await container.resolve(serviceName)) as ServiceInstance;
         await service.init?.();
         this.services.set(serviceName, service);
         console.log(`[Application] ${serviceName} initialized`);
@@ -445,7 +496,7 @@ export class Application {
     for (const moduleName of coreModules) {
       try {
         console.log(`[Application] Initializing ${moduleName}...`);
-        const moduleInstance = await container.resolve(moduleName) as any;
+        const moduleInstance = (await container.resolve(moduleName)) as any;
         await moduleInstance.init();
         this.modules.set(moduleName, moduleInstance);
         console.log(`[Application] ${moduleName} initialized`);
@@ -476,7 +527,7 @@ export class Application {
     for (const moduleName of coreModuleList) {
       try {
         console.log(`[Application] Initializing ${moduleName}...`);
-        const moduleInstance = await container.resolve(moduleName) as ModuleInstance;
+        const moduleInstance = (await container.resolve(moduleName)) as ModuleInstance;
         await moduleInstance.init?.();
         this.modules.set(moduleName, moduleInstance);
         console.log(`[Application] ${moduleName} initialized`);
@@ -566,13 +617,23 @@ export class Application {
       modules: Object.fromEntries(
         Array.from(this.modules.entries()).map(([name, module]) => [
           name,
-          (typeof module === 'object' && module && 'getStatus' in module && typeof module.getStatus === 'function') ? module.getStatus() : { loaded: true }
+          typeof module === 'object' &&
+          module &&
+          'getStatus' in module &&
+          typeof module.getStatus === 'function'
+            ? module.getStatus()
+            : { loaded: true }
         ])
       ),
       services: Object.fromEntries(
         Array.from(this.services.entries()).map(([name, service]) => [
           name,
-          (typeof service === 'object' && service && 'getStatus' in service && typeof service.getStatus === 'function') ? service.getStatus() : { loaded: true }
+          typeof service === 'object' &&
+          service &&
+          'getStatus' in service &&
+          typeof service.getStatus === 'function'
+            ? service.getStatus()
+            : { loaded: true }
         ])
       )
     };
@@ -626,17 +687,25 @@ if (typeof window !== 'undefined') {
     getStatus: () => app.getStatus(),
     getComponentStats: () => ComponentRegistry.getStats(),
     getPerformanceReport: async () => {
-      const perfService = await container.resolve('PerformanceService') as ServiceInstance & { generateReport?: () => unknown };
+      const perfService = (await container.resolve('PerformanceService')) as ServiceInstance & {
+        generateReport?: () => unknown;
+      };
       return perfService.generateReport?.();
     },
     getBundleAnalysis: async () => {
-      const bundleService = await container.resolve('BundleAnalyzerService') as ServiceInstance & { analyzeBundles?: () => Promise<unknown> };
+      const bundleService = (await container.resolve(
+        'BundleAnalyzerService'
+      )) as ServiceInstance & { analyzeBundles?: () => Promise<unknown> };
       return bundleService.analyzeBundles?.();
     },
     getVisitorData: async () => {
       try {
-        const trackingService = await container.resolve('VisitorTrackingService') as ServiceInstance & { exportData?: () => Promise<unknown> };
-        return trackingService.exportData ? trackingService.exportData() : { error: 'Export method not available' };
+        const trackingService = (await container.resolve(
+          'VisitorTrackingService'
+        )) as ServiceInstance & { exportData?: () => Promise<unknown> };
+        return trackingService.exportData
+          ? trackingService.exportData()
+          : { error: 'Export method not available' };
       } catch (_error) {
         return { error: 'Visitor tracking not initialized or consented' };
       }
@@ -660,22 +729,43 @@ if (typeof window !== 'undefined') {
 
       console.log('SectionCardRenderer:', {
         exists: !!renderer,
-        status: (renderer && typeof renderer === 'object' && 'getStatus' in renderer && typeof renderer.getStatus === 'function') ? renderer.getStatus() : 'No status method'
+        status:
+          renderer &&
+          typeof renderer === 'object' &&
+          'getStatus' in renderer &&
+          typeof renderer.getStatus === 'function'
+            ? renderer.getStatus()
+            : 'No status method'
       });
       console.log('SectionCardInteractions:', {
         exists: !!interactions,
-        status: (interactions && typeof interactions === 'object' && 'getStatus' in interactions && typeof interactions.getStatus === 'function') ? interactions.getStatus() : 'No status method'
+        status:
+          interactions &&
+          typeof interactions === 'object' &&
+          'getStatus' in interactions &&
+          typeof interactions.getStatus === 'function'
+            ? interactions.getStatus()
+            : 'No status method'
       });
 
-      if (renderer && 'getCardElements' in renderer && typeof renderer.getCardElements === 'function') {
+      if (
+        renderer &&
+        'getCardElements' in renderer &&
+        typeof renderer.getCardElements === 'function'
+      ) {
         console.log('Renderer elements:', renderer.getCardElements());
       }
 
-      console.log('All business card elements:', Array.from(document.querySelectorAll('[id*="business-card"], [class*="business-card"]')).map(el => ({
-        tag: el.tagName,
-        id: el.id,
-        classes: el.className
-      })));
+      console.log(
+        'All business card elements:',
+        Array.from(
+          document.querySelectorAll('[id*="business-card"], [class*="business-card"]')
+        ).map((el) => ({
+          tag: el.tagName,
+          id: el.id,
+          classes: el.className
+        }))
+      );
 
       // Test clicking on section card
       const sectionCard = document.getElementById('business-card');

@@ -71,7 +71,6 @@ export class ClientLandingModule extends BaseModule {
           // Show error message
           this.showErrorMessage(result.error || 'Failed to submit intake form');
         }
-
       } catch (error) {
         console.error('Form submission error:', error);
         this.showErrorMessage('Network error. Please check your connection and try again.');
@@ -119,7 +118,9 @@ export class ClientLandingModule extends BaseModule {
     this.contentContainer = document.querySelector('.client-content') as HTMLElement;
     this.buttonsContainer = document.querySelector('.client-buttons') as HTMLElement;
     this.newButton = document.querySelector('.client-buttons .btn[href*="intake"]') as HTMLElement;
-    this.existingButton = document.querySelector('.client-buttons .btn[href*="portal"]') as HTMLElement;
+    this.existingButton = document.querySelector(
+      '.client-buttons .btn[href*="portal"]'
+    ) as HTMLElement;
     this.titleElement = document.querySelector('.login-title') as HTMLElement;
   }
 
@@ -189,7 +190,7 @@ export class ClientLandingModule extends BaseModule {
 
   private setActiveButton(activeButton: HTMLElement | null): void {
     // Reset all buttons to inactive state
-    [this.newButton, this.existingButton].forEach(button => {
+    [this.newButton, this.existingButton].forEach((button) => {
       if (button) {
         const fillElement = button.querySelector('.button-fill') as HTMLElement;
         if (fillElement) {
@@ -370,7 +371,7 @@ export class ClientLandingModule extends BaseModule {
 
   private setupButtonAnimations(): void {
     const buttons = document.querySelectorAll('.client-buttons .btn');
-    buttons.forEach(button => {
+    buttons.forEach((button) => {
       this.animateButton(button as HTMLElement);
     });
   }

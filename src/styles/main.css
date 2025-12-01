@@ -40,7 +40,9 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   font-weight: 500;
   line-height: 1.4;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
   overflow-x: hidden;
   min-height: 100vh;
   display: flex;
@@ -48,7 +50,12 @@ body {
 }
 
 /* Typography - Universal H tag styling across all pages */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font--acme);
   line-height: 1.2;
   text-transform: uppercase;
@@ -240,13 +247,24 @@ select {
   font-family: inherit;
   box-sizing: border-box;
   transition: all 0.2s ease;
-  height: clamp(32px, 8vw, 44px);
+  min-height: clamp(32px, 8vw, 44px);
+  height: auto;
 }
 
 textarea {
   height: auto;
   min-height: clamp(60px, 15vw, 100px);
   resize: vertical;
+}
+
+/* Select elements need extra padding for caret */
+select,
+.form-select {
+  padding-right: clamp(32px, 5vw, 40px);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right clamp(12px, 2vw, 16px) center;
 }
 
 /* UNIVERSAL FORM FOCUS - Identical across all pages */
@@ -469,7 +487,9 @@ section {
 
 /* Smooth fade out of intro animation container after intro completion */
 #intro-animation-container {
-  transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+  transition:
+    opacity 0.8s ease-out,
+    visibility 0.8s ease-out;
 }
 
 /* Intro animation container - controlled by intro module */
@@ -504,10 +524,10 @@ section {
   align-items: center;
   box-sizing: border-box;
   gap: 1rem;
-  
+
   /* Scale content to fit proportionally */
   transform-origin: center center;
-  
+
   /* Ensure content scales but maintains readability */
   font-size: clamp(0.875rem, 2vw, 1.125rem);
 }
@@ -614,7 +634,7 @@ html[data-theme="dark"] .tech-stack {
 
 .contact-section h2 {
   font-size: clamp(1.2rem, 3vw, 1.8rem);
-  margin-bottom: 0.25rem;
+  margin-bottom: 1rem; /* Match about section spacing */
 }
 
 .contact-section p {
@@ -670,7 +690,7 @@ html[data-theme="dark"] .tech-stack {
 }
 
 .text-link::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
@@ -685,16 +705,26 @@ html[data-theme="dark"] .tech-stack {
 }
 
 /* Responsive Visibility */
-.hidden { display: none; }
+.hidden {
+  display: none;
+}
 
 @media (max-width: 767px) {
-  .md\:hidden { display: none; }
-  .sm\:block { display: block; }
+  .md\:hidden {
+    display: none;
+  }
+  .sm\:block {
+    display: block;
+  }
 }
 
 @media (min-width: 768px) {
-  .md\:block { display: block; }
-  .sm\:hidden { display: none; }
+  .md\:block {
+    display: block;
+  }
+  .sm\:hidden {
+    display: none;
+  }
 }
 
 /* Responsive Images */
@@ -760,12 +790,12 @@ img {
     box-shadow: none !important;
     text-shadow: none !important;
   }
-  
+
   body {
     font-size: 12pt;
     line-height: 1.5;
   }
-  
+
   .no-print {
     display: none !important;
   }
@@ -776,16 +806,16 @@ img {
   :root {
     --header-height: 50px;
   }
-  
+
   main {
     top: var(--header-height);
     height: calc(100vh - var(--header-height) - var(--footer-height));
   }
-  
+
   section {
     padding: 1.5rem;
   }
-  
+
   .section-content {
     max-width: min(900px, 92vw);
     padding: 0.75rem;
@@ -796,37 +826,37 @@ img {
   :root {
     --header-height: 45px;
   }
-  
+
   main {
     top: var(--header-height);
     height: calc(100vh - var(--header-height) - var(--footer-height));
   }
-  
+
   section {
     height: calc(100svh - var(--header-height));
     padding: 1rem;
   }
-  
+
   .section-content {
     max-width: 95vw;
     padding: 0.5rem;
     font-size: clamp(0.8rem, 2.5vw, 1rem);
   }
-  
+
   .section-content h1 {
     font-size: clamp(1.5rem, 6vw, 2.5rem);
   }
-  
+
   .section-content h2 {
     font-size: clamp(1.25rem, 5vw, 2rem);
   }
-  
+
   /* Mobile about section */
   .about-content {
     max-width: 95vw;
     gap: 0.8rem;
   }
-  
+
   .tech-stack {
     padding: 0.8rem;
   }
@@ -836,7 +866,7 @@ img {
   section {
     padding: 0.75rem;
   }
-  
+
   .section-content {
     max-width: 98vw;
     padding: 0.25rem;

@@ -1,18 +1,16 @@
-import { defineConfig } from 'vite'
-import { ViteEjsPlugin } from 'vite-plugin-ejs'
-import { readFileSync } from 'fs'
-import { fileURLToPath } from 'url'
-import { dirname, resolve } from 'path'
+import { defineConfig } from 'vite';
+import { ViteEjsPlugin } from 'vite-plugin-ejs';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Read the data file once and cache it
 let templateData;
 try {
-  templateData = JSON.parse(
-    readFileSync(resolve(__dirname, './templates/data.json'), 'utf-8')
-  );
+  templateData = JSON.parse(readFileSync(resolve(__dirname, './templates/data.json'), 'utf-8'));
 } catch (error) {
   console.error('Failed to read template data:', error);
   templateData = {
@@ -24,26 +22,29 @@ try {
 
 export default defineConfig({
   plugins: [
-    ViteEjsPlugin({
-      ...templateData,
-      // Make sure the data is available at the root level
-      pageData: templateData.pages?.home || {
-        title: 'No Bhad Codes',
-        description: 'Professional web development services',
-        scriptSrc: '/src/main.ts'
+    ViteEjsPlugin(
+      {
+        ...templateData,
+        // Make sure the data is available at the root level
+        pageData: templateData.pages?.home || {
+          title: 'No Bhad Codes',
+          description: 'Professional web development services',
+          scriptSrc: '/src/main.ts'
+        }
+      },
+      {
+        // Configure EJS options for better template resolution
+        ejs: {
+          views: [resolve(__dirname, 'templates'), resolve(__dirname, '.')],
+          root: resolve(__dirname),
+          cache: false,
+          rmWhitespace: false,
+          delimiter: '%',
+          openDelimiter: '<',
+          closeDelimiter: '>'
+        }
       }
-    }, {
-      // Configure EJS options for better template resolution
-      ejs: {
-        views: [resolve(__dirname, 'templates'), resolve(__dirname, '.')],
-        root: resolve(__dirname),
-        cache: false,
-        rmWhitespace: false,
-        delimiter: '%',
-        openDelimiter: '<',
-        closeDelimiter: '>'
-      }
-    })
+    )
   ],
   root: '.',
   publicDir: 'public',
@@ -71,17 +72,17 @@ export default defineConfig({
             // Other vendor dependencies
             return 'vendor-libs';
           }
-          
+
           // Admin dashboard chunk (separate from main app)
           if (id.includes('src/admin/')) {
             return 'admin';
           }
-          
+
           // Core application chunks
           if (id.includes('src/core/')) {
             return 'core';
           }
-          
+
           // Component system chunk - split further for better caching
           if (id.includes('src/components/')) {
             // Performance dashboard in separate chunk (large)
@@ -90,7 +91,7 @@ export default defineConfig({
             }
             return 'components';
           }
-          
+
           // Services chunk - split heavy services
           if (id.includes('src/services/')) {
             // Large services get separate chunks
@@ -99,7 +100,7 @@ export default defineConfig({
             }
             return 'services';
           }
-          
+
           // Module chunks - split by feature for better lazy loading
           if (id.includes('src/modules/')) {
             const moduleMatch = id.match(/src\/modules\/(.+?)(\.ts|\/)/);
@@ -112,12 +113,12 @@ export default defineConfig({
             }
             return 'modules';
           }
-          
+
           // Design system chunk
           if (id.includes('src/design-system/') || id.includes('src/styles/')) {
             return 'design-system';
           }
-          
+
           // Main chunk for entry points
           if (id.includes('src/main.ts') || id.includes('index.html')) {
             return 'main';
@@ -125,7 +126,9 @@ export default defineConfig({
         },
         // Use dynamic imports for venture-specific code
         chunkFileNames: (chunkInfo) => {
-          const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop().split('.')[0] : 'chunk';
+          const facadeModuleId = chunkInfo.facadeModuleId
+            ? chunkInfo.facadeModuleId.split('/').pop().split('.')[0]
+            : 'chunk';
           return `js/${facadeModuleId}-[hash].js`;
         }
       }
@@ -182,4 +185,4 @@ export default defineConfig({
     __DEV__: JSON.stringify(process.env.NODE_ENV !== 'production'),
     __PROD__: JSON.stringify(process.env.NODE_ENV === 'production')
   }
-})
+});

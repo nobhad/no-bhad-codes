@@ -67,9 +67,13 @@ export class ButtonComponent extends BaseComponent<ButtonProps, ButtonState> {
       fullWidth && 'btn--full-width',
       this.state.pressed && 'btn--pressed',
       this.state.focused && 'btn--focused'
-    ].filter(Boolean).join(' ');
+    ]
+      .filter(Boolean)
+      .join(' ');
 
-    const iconHtml = icon ? `<span class="btn__icon btn__icon--${iconPosition}">${icon}</span>` : '';
+    const iconHtml = icon
+      ? `<span class="btn__icon btn__icon--${iconPosition}">${icon}</span>`
+      : '';
     const loadingHtml = loading ? '<span class="btn__spinner"></span>' : '';
 
     return ComponentUtils.html`

@@ -68,7 +68,7 @@ async function testCacheService(): Promise<void> {
     // Test SET
     const testKey = 'test-key';
     const testValue: TestValue = { message: 'Hello Cache!', timestamp: new Date().toISOString() };
-    
+
     console.log('   Setting test value...');
     const setResult = await cacheService.set(testKey, testValue, { ttl: 60 });
     console.log(setResult ? '✅ SET operation successful' : '❌ SET operation failed');
@@ -87,7 +87,7 @@ async function testCacheService(): Promise<void> {
     console.log('\n🔄 Testing getOrSet pattern...');
     const expensiveOperation = async (): Promise<ExpensiveOperationResult> => {
       console.log('   🔄 Performing expensive operation...');
-      await new Promise(resolve => setTimeout(resolve, 100)); // Simulate work
+      await new Promise((resolve) => setTimeout(resolve, 100)); // Simulate work
       return { computed: true, value: Math.random(), time: Date.now() };
     };
 
@@ -103,9 +103,17 @@ async function testCacheService(): Promise<void> {
 
     // Test tagging and invalidation
     console.log('\n🏷️  Testing cache tagging and invalidation...');
-    
-    await cacheService.set('user:1', { id: 1, name: 'John' }, { ttl: 60, tags: ['users', 'user:1'] });
-    await cacheService.set('user:2', { id: 2, name: 'Jane' }, { ttl: 60, tags: ['users', 'user:2'] });
+
+    await cacheService.set(
+      'user:1',
+      { id: 1, name: 'John' },
+      { ttl: 60, tags: ['users', 'user:1'] }
+    );
+    await cacheService.set(
+      'user:2',
+      { id: 2, name: 'Jane' },
+      { ttl: 60, tags: ['users', 'user:2'] }
+    );
     await cacheService.set('post:1', { id: 1, title: 'Hello' }, { ttl: 60, tags: ['posts'] });
 
     console.log('   Added test data with tags...');
@@ -142,18 +150,19 @@ async function testCacheService(): Promise<void> {
 
     console.log('\n🎉 All cache tests passed successfully!');
     console.log('\n💡 Redis caching is ready for production use!');
-
   } catch (error: any) {
     console.error('❌ Cache service test failed:', error.message);
-    
+
     if (error.code === 'ECONNREFUSED') {
       console.log('\n💡 Tips to fix connection issues:');
-      console.log('   1. Install Redis: brew install redis (macOS) or apt-get install redis (Ubuntu)');
+      console.log(
+        '   1. Install Redis: brew install redis (macOS) or apt-get install redis (Ubuntu)'
+      );
       console.log('   2. Start Redis server: redis-server');
       console.log('   3. Check Redis is running: redis-cli ping');
       console.log('   4. Update .env with correct Redis settings');
     }
-    
+
     process.exit(1);
   } finally {
     await cacheService.disconnect();

@@ -38,9 +38,14 @@ type Story = StoryObj;
 const createMenuLink = (args: any) => {
   const { state, eyebrow, text, comingSoon } = args;
 
-  const stateClass = state === 'hover' ? ' menu-link-hover' :
-    state === 'active' ? ' menu-link-active' :
-      state === 'disabled' ? ' disabled' : '';
+  const stateClass =
+    state === 'hover'
+      ? ' menu-link-hover'
+      : state === 'active'
+        ? ' menu-link-active'
+        : state === 'disabled'
+          ? ' disabled'
+          : '';
 
   return `
     <div style="background: #000; padding: 2rem; width: 300px;">

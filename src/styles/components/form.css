@@ -52,7 +52,8 @@ select {
   font-family: inherit;
   box-sizing: border-box;
   transition: all 0.2s ease;
-  height: clamp(32px, 8vw, 44px);
+  min-height: clamp(32px, 8vw, 44px);
+  height: auto;
 }
 
 textarea {
@@ -222,7 +223,7 @@ label {
     padding: clamp(6px, 2vw, 16px);
     gap: clamp(6px, 1.5vw, 12px);
   }
-  
+
   .form-input,
   .form-textarea,
   .form-select,
@@ -230,9 +231,10 @@ label {
   textarea,
   select {
     font-size: clamp(0.7rem, 2.5vw, 0.9rem);
-    height: clamp(28px, 7vw, 40px);
+    min-height: clamp(28px, 7vw, 40px);
+    height: auto;
   }
-  
+
   textarea {
     min-height: clamp(50px, 12vw, 80px);
   }
@@ -245,7 +247,7 @@ label {
     max-width: 98vw;
     padding: clamp(4px, 1.5vw, 12px);
   }
-  
+
   .btn,
   .form-button,
   .login-btn {
@@ -268,7 +270,7 @@ label {
   select {
     border-width: 3px;
   }
-  
+
   .btn,
   .form-button,
   .login-btn {

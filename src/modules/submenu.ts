@@ -125,7 +125,7 @@ export class SubmenuModule extends BaseModule {
    */
   public closeAllSubmenus(): void {
     const openSubmenus = document.querySelectorAll('.has-submenu.submenu-open');
-    openSubmenus.forEach(submenu => {
+    openSubmenus.forEach((submenu) => {
       this.closeSubmenu(submenu);
     });
     this.currentOpenSubmenu = null;

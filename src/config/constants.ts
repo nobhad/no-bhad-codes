@@ -108,8 +108,10 @@ export const APP_CONSTANTS = {
  * Get project status color
  */
 export function getProjectStatusColor(status: string): string {
-  return APP_CONSTANTS.PROJECT_COLORS[status as keyof typeof APP_CONSTANTS.PROJECT_COLORS]
-    || APP_CONSTANTS.PROJECT_COLORS.default;
+  return (
+    APP_CONSTANTS.PROJECT_COLORS[status as keyof typeof APP_CONSTANTS.PROJECT_COLORS] ||
+    APP_CONSTANTS.PROJECT_COLORS.default
+  );
 }
 
 /**

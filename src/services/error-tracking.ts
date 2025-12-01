@@ -28,19 +28,20 @@ export interface FrontendErrorContext {
 }
 
 export class FrontendErrorTrackingService extends BaseService {
-
   constructor() {
     super('ErrorTrackingService');
   }
 
-  async init(config: {
-    dsn?: string;
-    environment?: string;
-    release?: string;
-    sampleRate?: number;
-    tracesSampleRate?: number;
-    enableUserFeedback?: boolean;
-  } = {}): Promise<void> {
+  async init(
+    config: {
+      dsn?: string;
+      environment?: string;
+      release?: string;
+      sampleRate?: number;
+      tracesSampleRate?: number;
+      enableUserFeedback?: boolean;
+    } = {}
+  ): Promise<void> {
     const {
       dsn = this.getDsnFromMeta(),
       environment = this.getEnvironment(),
@@ -78,7 +79,10 @@ export class FrontendErrorTrackingService extends BaseService {
           // Filter out development noise
           if (environment === 'development') {
             const error = hint.originalException;
-            if (error instanceof Error && error.message.includes('ResizeObserver loop limit exceeded')) {
+            if (
+              error instanceof Error &&
+              error.message.includes('ResizeObserver loop limit exceeded')
+            ) {
               return null;
             }
           }
@@ -105,7 +109,6 @@ export class FrontendErrorTrackingService extends BaseService {
 
       // Set initial context
       this.setInitialContext();
-
     } catch (error) {
       this.error('Failed to initialize error tracking:', error);
     }
@@ -120,7 +123,7 @@ export class FrontendErrorTrackingService extends BaseService {
       return '';
     }
 
-    return Sentry.withScope(scope => {
+    return Sentry.withScope((scope) => {
       // Set user context
       if (context.user) {
         scope.setUser({
@@ -152,14 +155,14 @@ export class FrontendErrorTrackingService extends BaseService {
 
       // Set extra context
       if (context.extra) {
-        Object.keys(context.extra).forEach(key => {
+        Object.keys(context.extra).forEach((key) => {
           scope.setExtra(key, context.extra![key]);
         });
       }
 
       // Set tags
       if (context.tags) {
-        Object.keys(context.tags).forEach(key => {
+        Object.keys(context.tags).forEach((key) => {
           scope.setTag(key, context.tags![key]);
         });
       }
@@ -176,13 +179,17 @@ export class FrontendErrorTrackingService extends BaseService {
   /**
    * Capture a message with context
    */
-  captureMessage(message: string, level: 'error' | 'warning' | 'info' | 'debug' = 'info', context: FrontendErrorContext = {}): string {
+  captureMessage(
+    message: string,
+    level: 'error' | 'warning' | 'info' | 'debug' = 'info',
+    context: FrontendErrorContext = {}
+  ): string {
     if (!this.isInitialized) {
       console.log(`[${level.toUpperCase()}]`, message);
       return '';
     }
 
-    return Sentry.withScope(scope => {
+    return Sentry.withScope((scope) => {
       // Apply context similar to captureException
       if (context.user) {
         scope.setUser(context.user);
@@ -197,13 +204,13 @@ export class FrontendErrorTrackingService extends BaseService {
       }
 
       if (context.extra) {
-        Object.keys(context.extra).forEach(key => {
+        Object.keys(context.extra).forEach((key) => {
           scope.setExtra(key, context.extra![key]);
         });
       }
 
       if (context.tags) {
-        Object.keys(context.tags).forEach(key => {
+        Object.keys(context.tags).forEach((key) => {
           scope.setTag(key, context.tags![key]);
         });
       }
@@ -223,10 +230,13 @@ export class FrontendErrorTrackingService extends BaseService {
     }
 
     // Use Sentry's current API for browser
-    return Sentry.startSpan({
-      name,
-      op: operation
-    }, (span) => span);
+    return Sentry.startSpan(
+      {
+        name,
+        op: operation
+      },
+      (span) => span
+    );
   }
 
   /**
@@ -301,8 +311,10 @@ export class FrontendErrorTrackingService extends BaseService {
 
   private getEnvironment(): string {
     const metaTag = document.querySelector('meta[name="app-environment"]');
-    return metaTag?.getAttribute('content') ||
-           (window.location.hostname === 'localhost' ? 'development' : 'production');
+    return (
+      metaTag?.getAttribute('content') ||
+      (window.location.hostname === 'localhost' ? 'development' : 'production')
+    );
   }
 
   private getRelease(): string {

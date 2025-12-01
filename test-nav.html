@@ -1,87 +1,99 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="light">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Navigation Test - Eyebrow Positioning</title>
-    <link rel="stylesheet" href="/src/styles/main-new.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/src/styles/main-new.css" />
+  </head>
+  <body>
     <div class="nbw-ui">
-        <header class="header">
-            <div class="container is--full">
-                <nav class="nav-row">
-                    <a href="/" class="nav-logo-row">no bhad codes</a>
-                    <div class="nav-row__right">
-                        <button class="menu-button" data-menu-toggle>
-                            <div class="menu-button-text">
-                                <p>Menu</p>
-                                <p>Close</p>
-                            </div>
-                            <div class="icon-wrap">
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" class="menu-button-icon">
-                                    <path d="M7.33333 16L7.33333 0L8.66667 0L8.66667 16L7.33333 16Z" fill="currentColor"/>
-                                    <path d="M16 8.66667L0 8.66667L0 7.33333L16 7.33333L16 8.66667Z" fill="currentColor"/>
-                                </svg>
-                            </div>
-                        </button>
-                    </div>
-                </nav>
+      <header class="header">
+        <div class="container is--full">
+          <nav class="nav-row">
+            <a href="/" class="nav-logo-row">no bhad codes</a>
+            <div class="nav-row__right">
+              <button class="menu-button" data-menu-toggle>
+                <div class="menu-button-text">
+                  <p>Menu</p>
+                  <p>Close</p>
+                </div>
+                <div class="icon-wrap">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    class="menu-button-icon"
+                  >
+                    <path
+                      d="M7.33333 16L7.33333 0L8.66667 0L8.66667 16L7.33333 16Z"
+                      fill="currentColor"
+                    />
+                    <path
+                      d="M16 8.66667L0 8.66667L0 7.33333L16 7.33333L16 8.66667Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </div>
+              </button>
             </div>
-        </header>
+          </nav>
+        </div>
+      </header>
     </div>
 
     <div data-nav="closed" class="nav">
-        <div data-menu-toggle class="overlay"></div>
-        <nav class="menu">
-            <div class="menu-bg">
-                <div class="bg-panel first"></div>
-                <div class="bg-panel second"></div>
-                <div class="bg-panel"></div>
-            </div>
-            <div class="menu-inner">
-                <ul class="menu-list">
-                    <li class="menu-list-item">
-                        <a href="/" class="menu-link">
-                            <p class="menu-link-heading" data-text="home">home</p>
-                            <p class="eyebrow">00</p>
-                            <div class="menu-link-bg"></div>
-                        </a>
-                    </li>
-                    <li class="menu-list-item">
-                        <a href="#about" class="menu-link">
-                            <p class="menu-link-heading" data-text="about">about</p>
-                            <p class="eyebrow">01</p>
-                            <div class="menu-link-bg"></div>
-                        </a>
-                    </li>
-                    <li class="menu-list-item">
-                        <a href="#contact" class="menu-link">
-                            <p class="menu-link-heading" data-text="contact">contact</p>
-                            <p class="eyebrow">02</p>
-                            <div class="menu-link-bg"></div>
-                        </a>
-                    </li>
-                    <li class="menu-list-item">
-                        <a href="/projects.html" class="menu-link disabled">
-                            <p class="menu-link-heading" data-text="portfolio">portfolio</p>
-                            <p class="eyebrow">03</p>
-                            <div class="coming-soon-banner">Coming Soon</div>
-                            <div class="menu-link-bg"></div>
-                        </a>
-                    </li>
-                    <li class="menu-list-item">
-                        <a href="/client/portal" class="menu-link">
-                            <p class="menu-link-heading" data-text="client portal">client portal</p>
-                            <p class="eyebrow">04</p>
-                            <div class="menu-link-bg"></div>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+      <div data-menu-toggle class="overlay"></div>
+      <nav class="menu">
+        <div class="menu-bg">
+          <div class="bg-panel first"></div>
+          <div class="bg-panel second"></div>
+          <div class="bg-panel"></div>
+        </div>
+        <div class="menu-inner">
+          <ul class="menu-list">
+            <li class="menu-list-item">
+              <a href="/" class="menu-link">
+                <p class="menu-link-heading" data-text="home">home</p>
+                <p class="eyebrow">00</p>
+                <div class="menu-link-bg"></div>
+              </a>
+            </li>
+            <li class="menu-list-item">
+              <a href="#about" class="menu-link">
+                <p class="menu-link-heading" data-text="about">about</p>
+                <p class="eyebrow">01</p>
+                <div class="menu-link-bg"></div>
+              </a>
+            </li>
+            <li class="menu-list-item">
+              <a href="#contact" class="menu-link">
+                <p class="menu-link-heading" data-text="contact">contact</p>
+                <p class="eyebrow">02</p>
+                <div class="menu-link-bg"></div>
+              </a>
+            </li>
+            <li class="menu-list-item">
+              <a href="/projects.html" class="menu-link disabled">
+                <p class="menu-link-heading" data-text="portfolio">portfolio</p>
+                <p class="eyebrow">03</p>
+                <div class="coming-soon-banner">Coming Soon</div>
+                <div class="menu-link-bg"></div>
+              </a>
+            </li>
+            <li class="menu-list-item">
+              <a href="/client/portal" class="menu-link">
+                <p class="menu-link-heading" data-text="client portal">client portal</p>
+                <p class="eyebrow">04</p>
+                <div class="menu-link-bg"></div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
     </div>
 
     <script type="module" src="/src/main.ts"></script>
-</body>
+  </body>
 </html>

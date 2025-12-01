@@ -28,7 +28,7 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     // Create subdirectories based on file type
     let subDir = 'general';
-    
+
     if (file.fieldname === 'avatar') {
       subDir = 'avatars';
     } else if (file.fieldname === 'project_file') {
@@ -38,12 +38,12 @@ const storage = multer.diskStorage({
     } else if (file.fieldname === 'message_attachment') {
       subDir = 'messages';
     }
-    
+
     const targetDir = resolve(uploadDir, subDir);
     if (!existsSync(targetDir)) {
       mkdirSync(targetDir, { recursive: true });
     }
-    
+
     cb(null, targetDir);
   },
   filename: (req, file, cb) => {
@@ -69,7 +69,7 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCa
   };
 
   const fileName = file.originalname.toLowerCase();
-  const isAllowed = Object.values(allowedTypes).some(regex => regex.test(fileName));
+  const isAllowed = Object.values(allowedTypes).some((regex) => regex.test(fileName));
 
   if (isAllowed) {
     cb(null, true);
@@ -111,7 +111,8 @@ const upload = multer({
  *                 type: string
  *                 enum: [general, avatar, project_file, invoice_attachment, message_attachment]
  */
-router.post('/single', 
+router.post(
+  '/single',
   authenticateToken,
   upload.single('file'),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
@@ -164,7 +165,8 @@ router.post('/single',
  *                   type: string
  *                   format: binary
  */
-router.post('/multiple',
+router.post(
+  '/multiple',
   authenticateToken,
   upload.array('files', 5),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
@@ -175,7 +177,7 @@ router.post('/multiple',
       });
     }
 
-    const files = (req.files as Express.Multer.File[]).map(file => ({
+    const files = (req.files as Express.Multer.File[]).map((file) => ({
       id: `${Date.now()}-${Math.random().toString(36).substring(2)}`,
       filename: file.filename,
       originalName: file.originalname,
@@ -215,7 +217,8 @@ router.post('/multiple',
  *                 type: string
  *                 format: binary
  */
-router.post('/avatar',
+router.post(
+  '/avatar',
   authenticateToken,
   upload.single('avatar'),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
@@ -262,7 +265,7 @@ router.post('/avatar',
     res.status(201).json({
       success: true,
       message: 'Avatar uploaded successfully',
-      avatar: avatarInfo,
+      avatar: avatarInfo
     });
   })
 );
@@ -293,7 +296,8 @@ router.post('/avatar',
  *                 type: string
  *                 format: binary
  */
-router.post('/project/:projectId',
+router.post(
+  '/project/:projectId',
   authenticateToken,
   upload.single('project_file'),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
@@ -331,7 +335,15 @@ router.post('/project/:projectId',
       await db.run(
         `INSERT INTO files (project_id, filename, original_filename, mimetype, size, file_path, uploaded_by, created_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-        [projectId, req.file.filename, req.file.originalname, req.file.mimetype, req.file.size, projectFile.url, req.user?.id]
+        [
+          projectId,
+          req.file.filename,
+          req.file.originalname,
+          req.file.mimetype,
+          req.file.size,
+          projectFile.url,
+          req.user?.id
+        ]
       );
     } catch (dbError) {
       console.error('Failed to save file info to database:', dbError);
@@ -341,7 +353,7 @@ router.post('/project/:projectId',
     res.status(201).json({
       success: true,
       message: 'Project file uploaded successfully',
-      file: projectFile,
+      file: projectFile
     });
   })
 );
@@ -379,41 +391,43 @@ router.get('/test', (req: express.Request, res: express.Response) => {
 });
 
 // Error handler for multer
-router.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  if (error instanceof multer.MulterError) {
-    if (error.code === 'LIMIT_FILE_SIZE') {
+router.use(
+  (error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (error instanceof multer.MulterError) {
+      if (error.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({
+          error: 'File too large',
+          code: 'FILE_TOO_LARGE',
+          message: 'File size cannot exceed 10MB'
+        });
+      }
+
+      if (error.code === 'LIMIT_FILE_COUNT') {
+        return res.status(400).json({
+          error: 'Too many files',
+          code: 'TOO_MANY_FILES',
+          message: 'Cannot upload more than 5 files at once'
+        });
+      }
+
       return res.status(400).json({
-        error: 'File too large',
-        code: 'FILE_TOO_LARGE',
-        message: 'File size cannot exceed 10MB'
+        error: 'Upload error',
+        code: 'UPLOAD_ERROR',
+        message: error.message
       });
     }
-    
-    if (error.code === 'LIMIT_FILE_COUNT') {
+
+    if (error.message.includes('File type not allowed')) {
       return res.status(400).json({
-        error: 'Too many files',
-        code: 'TOO_MANY_FILES',
-        message: 'Cannot upload more than 5 files at once'
+        error: 'File type not allowed',
+        code: 'INVALID_FILE_TYPE',
+        message: error.message
       });
     }
-    
-    return res.status(400).json({
-      error: 'Upload error',
-      code: 'UPLOAD_ERROR',
-      message: error.message
-    });
+
+    next(error);
   }
-  
-  if (error.message.includes('File type not allowed')) {
-    return res.status(400).json({
-      error: 'File type not allowed',
-      code: 'INVALID_FILE_TYPE',
-      message: error.message
-    });
-  }
-  
-  next(error);
-});
+);
 
 export { router as uploadsRouter };
 export default router;

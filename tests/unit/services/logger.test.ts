@@ -3,7 +3,7 @@
  * LOGGER SERVICE TESTS
  * ===============================================
  * @file tests/unit/services/logger.test.ts
- * 
+ *
  * Unit tests for the centralized logging service.
  */
 
@@ -27,7 +27,7 @@ describe('LoggerService', () => {
   beforeEach(() => {
     // Reset mocks
     vi.clearAllMocks();
-    
+
     // Mock configuration
     mockConfig = {
       LOG_LEVEL: 'info',
@@ -69,18 +69,10 @@ describe('LoggerService', () => {
       await logger.error('error message');
 
       // Only WARN and ERROR should be logged
-      expect(mockConsoleLog).not.toHaveBeenCalledWith(
-        expect.stringContaining('debug message')
-      );
-      expect(mockConsoleLog).not.toHaveBeenCalledWith(
-        expect.stringContaining('info message')
-      );
-      expect(mockConsoleWarn).toHaveBeenCalledWith(
-        expect.stringContaining('warn message')
-      );
-      expect(mockConsoleError).toHaveBeenCalledWith(
-        expect.stringContaining('error message')
-      );
+      expect(mockConsoleLog).not.toHaveBeenCalledWith(expect.stringContaining('debug message'));
+      expect(mockConsoleLog).not.toHaveBeenCalledWith(expect.stringContaining('info message'));
+      expect(mockConsoleWarn).toHaveBeenCalledWith(expect.stringContaining('warn message'));
+      expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('error message'));
     });
   });
 
@@ -91,16 +83,16 @@ describe('LoggerService', () => {
       const afterTime = new Date().toISOString();
 
       expect(mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringMatching(/\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z \\[INFO\\] test message/)
+        expect.stringMatching(
+          /\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z \\[INFO\\] test message/
+        )
       );
     });
 
     it('should include category in log entry', async () => {
       await logger.info('test message', { category: 'TEST' });
 
-      expect(mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('[TEST]')
-      );
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('[TEST]'));
     });
 
     it('should include metadata in log entry', async () => {
@@ -164,9 +156,7 @@ describe('LoggerService', () => {
       logger.updateConfig({ console: true });
       await logger.info('console message');
 
-      expect(mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('console message')
-      );
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('console message'));
     });
 
     it('should not output to console when disabled', async () => {
@@ -206,12 +196,8 @@ describe('LoggerService', () => {
 
       await logger.logRequest(mockReq, mockRes, 150);
 
-      expect(mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('GET /api/test 200')
-      );
-      expect(mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('150ms')
-      );
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('GET /api/test 200'));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('150ms'));
     });
 
     it('should log slow requests as warnings', async () => {
@@ -221,9 +207,7 @@ describe('LoggerService', () => {
       await logger.logRequest(mockReq, mockRes, 1500); // > 1000ms
 
       // Should log both the request and a slow request warning
-      expect(mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('GET /slow 200')
-      );
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('GET /slow 200'));
     });
   });
 
@@ -234,9 +218,7 @@ describe('LoggerService', () => {
 
       await logger.logError(error, context);
 
-      expect(mockConsoleError).toHaveBeenCalledWith(
-        expect.stringContaining('Test error')
-      );
+      expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('Test error'));
     });
   });
 
@@ -259,9 +241,7 @@ describe('LoggerService', () => {
 
       await logger.logDatabase('User query', details);
 
-      expect(mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('Database: User query')
-      );
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Database: User query'));
     });
   });
 
@@ -272,13 +252,9 @@ describe('LoggerService', () => {
 
       await childLogger.info('child log message');
 
-      expect(mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('child log message')
-      );
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('child log message'));
       // Context should be included in the log
-      expect(mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('req-123')
-      );
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('req-123'));
     });
   });
 

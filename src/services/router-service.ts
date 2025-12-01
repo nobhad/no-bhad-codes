@@ -131,13 +131,16 @@ export class RouterService extends BaseService {
    * Register multiple routes
    */
   addRoutes(routes: Route[]): void {
-    routes.forEach(route => this.addRoute(route));
+    routes.forEach((route) => this.addRoute(route));
   }
 
   /**
    * Navigate to a route
    */
-  async navigate(path: string, options: { replace?: boolean; smooth?: boolean } = {}): Promise<void> {
+  async navigate(
+    path: string,
+    options: { replace?: boolean; smooth?: boolean } = {}
+  ): Promise<void> {
     console.log('[RouterService] navigate() called with path:', path, 'options:', options);
 
     // Allow re-navigation to hash links (for re-scrolling to sections)
@@ -171,7 +174,6 @@ export class RouterService extends BaseService {
       console.log('[RouterService] Calling performNavigation...');
       await this.performNavigation(path, options);
       console.log('[RouterService] Navigation complete');
-
     } catch (error) {
       console.error('[RouterService] Navigation failed:', error);
       this.error('Navigation failed:', error);
@@ -366,9 +368,10 @@ export class RouterService extends BaseService {
         if (!start) start = timestamp;
 
         const progress = Math.min((timestamp - start) / duration, 1);
-        const easeInOutCubic = progress < 0.5
-          ? 4 * progress * progress * progress
-          : (progress - 1) * (2 * progress - 2) * (2 * progress - 2) + 1;
+        const easeInOutCubic =
+          progress < 0.5
+            ? 4 * progress * progress * progress
+            : (progress - 1) * (2 * progress - 2) * (2 * progress - 2) + 1;
 
         window.scrollTo(0, startY + distance * easeInOutCubic);
 

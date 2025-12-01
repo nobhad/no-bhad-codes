@@ -26,17 +26,47 @@ export class SanitizationUtils {
    * Dangerous HTML tags to remove completely
    */
   private static readonly DANGEROUS_TAGS = [
-    'script', 'iframe', 'object', 'embed', 'form', 'input', 'textarea', 'button',
-    'select', 'option', 'link', 'meta', 'style', 'title', 'base', 'svg', 'math'
+    'script',
+    'iframe',
+    'object',
+    'embed',
+    'form',
+    'input',
+    'textarea',
+    'button',
+    'select',
+    'option',
+    'link',
+    'meta',
+    'style',
+    'title',
+    'base',
+    'svg',
+    'math'
   ];
 
   /**
    * JavaScript event attributes to remove
    */
   private static readonly JS_EVENT_ATTRIBUTES = [
-    'onload', 'onerror', 'onclick', 'onmouseover', 'onmouseout', 'onkeydown',
-    'onkeyup', 'onkeypress', 'onfocus', 'onblur', 'onchange', 'onsubmit',
-    'onreset', 'onselect', 'onabort', 'onunload', 'onresize', 'onscroll'
+    'onload',
+    'onerror',
+    'onclick',
+    'onmouseover',
+    'onmouseout',
+    'onkeydown',
+    'onkeyup',
+    'onkeypress',
+    'onfocus',
+    'onblur',
+    'onchange',
+    'onsubmit',
+    'onreset',
+    'onselect',
+    'onabort',
+    'onunload',
+    'onresize',
+    'onscroll'
   ];
 
   /**
@@ -45,8 +75,7 @@ export class SanitizationUtils {
   static escapeHtml(input: string): string {
     if (!input || typeof input !== 'string') return '';
 
-    return input.replace(/[&<>"'`=/]/g, (match) =>
-      SanitizationUtils.HTML_ENTITIES[match] || match);
+    return input.replace(/[&<>"'`=/]/g, (match) => SanitizationUtils.HTML_ENTITIES[match] || match);
   }
 
   /**
@@ -64,9 +93,7 @@ export class SanitizationUtils {
   static sanitizeText(input: string): string {
     if (!input || typeof input !== 'string') return '';
 
-    return SanitizationUtils.escapeHtml(
-      SanitizationUtils.stripHtml(input.trim())
-    );
+    return SanitizationUtils.escapeHtml(SanitizationUtils.stripHtml(input.trim()));
   }
 
   /**
@@ -92,13 +119,13 @@ export class SanitizationUtils {
     let cleaned = message.trim();
 
     // Remove dangerous HTML tags
-    SanitizationUtils.DANGEROUS_TAGS.forEach(tag => {
+    SanitizationUtils.DANGEROUS_TAGS.forEach((tag) => {
       const regex = new RegExp(`<\\/?${tag}[^>]*>`, 'gi');
       cleaned = cleaned.replace(regex, '');
     });
 
     // Remove JavaScript event attributes
-    SanitizationUtils.JS_EVENT_ATTRIBUTES.forEach(attr => {
+    SanitizationUtils.JS_EVENT_ATTRIBUTES.forEach((attr) => {
       const regex = new RegExp(`${attr}\\s*=\\s*[^\\s>]*`, 'gi');
       cleaned = cleaned.replace(regex, '');
     });
@@ -139,8 +166,7 @@ export class SanitizationUtils {
     if (!phone || typeof phone !== 'string') return '';
 
     // Remove HTML and keep only numbers, spaces, dashes, parentheses, plus
-    const cleaned = SanitizationUtils.stripHtml(phone.trim())
-      .replace(/[^0-9\s\-()+ ext.]/g, '');
+    const cleaned = SanitizationUtils.stripHtml(phone.trim()).replace(/[^0-9\s\-()+ ext.]/g, '');
 
     return SanitizationUtils.escapeHtml(cleaned);
   }
@@ -212,7 +238,7 @@ export class SanitizationUtils {
       /behavior:/i
     ];
 
-    return xssPatterns.some(pattern => pattern.test(input));
+    return xssPatterns.some((pattern) => pattern.test(input));
   }
 
   /**
@@ -251,7 +277,7 @@ export class SanitizationUtils {
   static generateNonce(): string {
     const array = new Uint8Array(16);
     crypto.getRandomValues(array);
-    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
   }
 
   /**

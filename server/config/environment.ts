@@ -3,7 +3,7 @@
  * ENVIRONMENT CONFIGURATION SERVICE
  * ===============================================
  * @file server/config/environment.ts
- * 
+ *
  * Validates environment variables and provides
  * typed configuration access throughout the app.
  */
@@ -120,7 +120,11 @@ export interface AppConfig {
  */
 const configSchema: ConfigSchema = {
   // Application settings
-  NODE_ENV: { required: true, default: 'development', values: ['development', 'production', 'test'] },
+  NODE_ENV: {
+    required: true,
+    default: 'development',
+    values: ['development', 'production', 'test']
+  },
   PORT: { required: true, default: 3001, type: 'number' },
   FRONTEND_URL: { required: true, default: 'http://localhost:3000', type: 'url' },
   API_BASE_URL: { required: false, default: 'http://localhost:3001', type: 'url' },
@@ -258,13 +262,13 @@ function validateConfigValue(key: string, schema: ConfigSchemaItem): void {
       validationErrors.push(`Missing required environment variable: ${key}`);
       return;
     }
-    
+
     // Use default value if provided
     if (defaultValue !== undefined) {
       (config as any)[key] = defaultValue;
       return;
     }
-    
+
     // Optional value with no default
     return;
   }
@@ -298,7 +302,6 @@ function validateConfigValue(key: string, schema: ConfigSchemaItem): void {
     }
 
     (config as any)[key] = value;
-
   } catch (error: any) {
     validationErrors.push(`Invalid ${key}: ${error.message}`);
   }
@@ -316,10 +319,10 @@ function validateConfig(): void {
 
   if (validationErrors.length > 0) {
     console.error('❌ Environment Configuration Errors:');
-    validationErrors.forEach(error => console.error(`   ${error}`));
+    validationErrors.forEach((error) => console.error(`   ${error}`));
     console.error('\n💡 Please check your .env file and ensure all required variables are set.');
     console.error('📄 See .env.example for reference configuration.');
-    
+
     if (config.NODE_ENV === 'production') {
       process.exit(1);
     } else {
@@ -335,16 +338,21 @@ function generateDerivedConfig(): void {
   // Auto-generate secrets in development if not provided
   if ((config as any).NODE_ENV === 'development') {
     if (!(config as any).JWT_SECRET || (config as any).JWT_SECRET.includes('change-this')) {
-      (config as any).JWT_SECRET = 'dev-jwt-secret-' + Math.random().toString(36).substring(7);
+      (config as any).JWT_SECRET = `dev-jwt-secret-${  Math.random().toString(36).substring(7)}`;
       console.warn('⚠️  Using auto-generated JWT_SECRET for development');
     }
-    
-    if (!(config as any).REFRESH_TOKEN_SECRET || (config as any).REFRESH_TOKEN_SECRET.includes('change-this')) {
-      (config as any).REFRESH_TOKEN_SECRET = 'dev-refresh-secret-' + Math.random().toString(36).substring(7);
+
+    if (
+      !(config as any).REFRESH_TOKEN_SECRET ||
+      (config as any).REFRESH_TOKEN_SECRET.includes('change-this')
+    ) {
+      (config as any).REFRESH_TOKEN_SECRET =
+        `dev-refresh-secret-${  Math.random().toString(36).substring(7)}`;
     }
-    
+
     if (!(config as any).SESSION_SECRET || (config as any).SESSION_SECRET.includes('change-this')) {
-      (config as any).SESSION_SECRET = 'dev-session-secret-' + Math.random().toString(36).substring(7);
+      (config as any).SESSION_SECRET =
+        `dev-session-secret-${  Math.random().toString(36).substring(7)}`;
     }
   }
 
@@ -356,8 +364,8 @@ function generateDerivedConfig(): void {
   // Email validation - require email config if enabled
   if ((config as any).EMAIL_ENABLED) {
     const emailRequiredFields = ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS', 'FROM_EMAIL'];
-    const missingEmailFields = emailRequiredFields.filter(field => !(config as any)[field]);
-    
+    const missingEmailFields = emailRequiredFields.filter((field) => !(config as any)[field]);
+
     if (missingEmailFields.length > 0) {
       console.warn(`⚠️  EMAIL_ENABLED is true but missing: ${missingEmailFields.join(', ')}`);
       console.warn('   Email functionality will be disabled.');
@@ -375,7 +383,7 @@ function generateDerivedConfig(): void {
     (config as any).LOG_ERROR_FILE ? path.dirname((config as any).LOG_ERROR_FILE) : undefined
   ].filter(Boolean) as string[];
 
-  directories.forEach(dir => {
+  directories.forEach((dir) => {
     try {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
@@ -413,13 +421,13 @@ function getConfigSummary(): object {
  */
 function initializeConfig(): AppConfig {
   console.log('🔧 Initializing environment configuration...');
-  
+
   validateConfig();
   generateDerivedConfig();
-  
+
   const summary = getConfigSummary();
   console.log('✅ Configuration loaded:', JSON.stringify(summary, null, 2));
-  
+
   return config as AppConfig;
 }
 

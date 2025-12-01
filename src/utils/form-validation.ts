@@ -11,14 +11,16 @@
  * Check if all required fields in a form are filled and update button state
  */
 export function validateFormCompletion(form: HTMLFormElement): void {
-  const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
+  const requiredFields = form.querySelectorAll(
+    'input[required], select[required], textarea[required]'
+  );
   const submitButton = form.querySelector('.form-button') as HTMLButtonElement | HTMLInputElement;
 
   if (!submitButton) return;
 
   let allFieldsFilled = true;
 
-  requiredFields.forEach(field => {
+  requiredFields.forEach((field) => {
     const input = field as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
     if (!input.value.trim()) {
       allFieldsFilled = false;
@@ -36,10 +38,12 @@ export function validateFormCompletion(form: HTMLFormElement): void {
  * Initialize form validation on a form element
  */
 export function initFormValidation(form: HTMLFormElement): void {
-  const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
+  const requiredFields = form.querySelectorAll(
+    'input[required], select[required], textarea[required]'
+  );
 
   // Check validation on input changes
-  requiredFields.forEach(field => {
+  requiredFields.forEach((field) => {
     field.addEventListener('input', () => validateFormCompletion(form));
     field.addEventListener('change', () => validateFormCompletion(form));
   });
@@ -53,5 +57,5 @@ export function initFormValidation(form: HTMLFormElement): void {
  */
 export function initAllFormsValidation(): void {
   const forms = document.querySelectorAll('form');
-  forms.forEach(form => initFormValidation(form as HTMLFormElement));
+  forms.forEach((form) => initFormValidation(form as HTMLFormElement));
 }

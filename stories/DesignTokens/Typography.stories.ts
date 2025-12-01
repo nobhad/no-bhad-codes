@@ -5,7 +5,8 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Typography scale and font tokens used throughout the No Bhad Codes design system.',
+        component:
+          'Typography scale and font tokens used throughout the No Bhad Codes design system.',
       },
     },
   },

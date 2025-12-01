@@ -9,9 +9,21 @@
 
 export type ClientProjectStatus = 'pending' | 'in-progress' | 'in-review' | 'completed' | 'on-hold';
 export type ProjectPriority = 'low' | 'medium' | 'high' | 'urgent';
-export type ProjectType = 'website' | 'application' | 'ecommerce' | 'extension' | 'consultation' | 'other';
+export type ProjectType =
+  | 'website'
+  | 'application'
+  | 'ecommerce'
+  | 'extension'
+  | 'consultation'
+  | 'other';
 export type BudgetRange = 'under-5k' | '5k-10k' | '10k-25k' | '25k-50k' | 'over-50k' | 'ongoing';
-export type Timeline = 'asap' | '1-month' | '2-3-months' | '3-6-months' | 'over-6-months' | 'flexible';
+export type Timeline =
+  | 'asap'
+  | '1-month'
+  | '2-3-months'
+  | '3-6-months'
+  | 'over-6-months'
+  | 'flexible';
 
 export interface ClientProject {
   id: string;
@@ -193,5 +205,5 @@ export function formatFileSize(bytes: number): string {
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   if (bytes === 0) return '0 Bytes';
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return `${Math.round(bytes / Math.pow(1024, i) * 100) / 100  } ${  sizes[i]}`;
+  return `${Math.round((bytes / Math.pow(1024, i)) * 100) / 100} ${sizes[i]}`;
 }

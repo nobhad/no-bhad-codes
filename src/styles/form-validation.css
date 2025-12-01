@@ -5,61 +5,61 @@
 .form-input.error,
 .form-select.error,
 .form-textarea.error {
-    border-color: #ff4757;
-    background-color: rgba(255, 71, 87, 0.05);
+  border-color: #ff4757;
+  background-color: rgba(255, 71, 87, 0.05);
 }
 
 .field-error {
-    color: #ff4757;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-    padding-left: 0.5rem;
-    display: block;
+  color: #ff4757;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  padding-left: 0.5rem;
+  display: block;
 }
 
 .form-message {
-    padding: 1rem;
-    border-radius: 4px;
-    margin-bottom: 1.5rem;
-    font-weight: 500;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
 }
 
 .form-message.success {
-    background-color: rgba(46, 213, 115, 0.1);
-    border: 1px solid #2ed573;
-    color: #2ed573;
+  background-color: rgba(46, 213, 115, 0.1);
+  border: 1px solid #2ed573;
+  color: #2ed573;
 }
 
 .form-message.error {
-    background-color: rgba(255, 71, 87, 0.1);
-    border: 1px solid #ff4757;
-    color: #ff4757;
+  background-color: rgba(255, 71, 87, 0.1);
+  border: 1px solid #ff4757;
+  color: #ff4757;
 }
 
 .form-button.loading {
-    opacity: 0.7;
-    cursor: not-allowed;
-    position: relative;
+  opacity: 0.7;
+  cursor: not-allowed;
+  position: relative;
 }
 
 .form-button.loading::after {
-    content: '';
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1rem;
-    height: 1rem;
-    border: 2px solid transparent;
-    border-top-color: currentColor;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+  content: "";
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-    to {
-        transform: translateY(-50%) rotate(360deg);
-    }
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
 }
 
 /* ===============================================
@@ -67,12 +67,12 @@
    =============================================== */
 
 .form-button.form-valid {
-    background-color: var(--color-primary) !important;
-    color: #000000 !important;
-    border-color: var(--color-primary) !important;
+  background-color: var(--color-primary) !important;
+  color: #000000 !important;
+  border-color: var(--color-primary) !important;
 }
 
 .form-button.form-valid:hover {
-    background-color: var(--color-primary) !important;
-    color: #000000 !important;
+  background-color: var(--color-primary) !important;
+  color: #000000 !important;
 }

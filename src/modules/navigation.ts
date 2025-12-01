@@ -87,7 +87,7 @@ export class NavigationModule extends BaseModule {
   private setupEventListeners(): void {
     // Menu toggle buttons
     if (this.menuToggles) {
-      this.menuToggles.forEach(toggle => {
+      this.menuToggles.forEach((toggle) => {
         this.addEventListener(toggle as Element, 'click', () => {
           this.toggleMenu();
         });
@@ -96,7 +96,11 @@ export class NavigationModule extends BaseModule {
 
     // Menu links - only handle submenu toggles and close menu on valid link clicks
     if (this.menuLinks) {
-      console.log('[NavigationModule] Setting up click handlers for', this.menuLinks.length, 'menu links');
+      console.log(
+        '[NavigationModule] Setting up click handlers for',
+        this.menuLinks.length,
+        'menu links'
+      );
       this.menuLinks.forEach((link, index) => {
         const linkHref = (link as HTMLAnchorElement).getAttribute('href');
         console.log('[NavigationModule] Link', index, 'href:', linkHref);
@@ -123,9 +127,17 @@ export class NavigationModule extends BaseModule {
 
               // Check if we're on the home page
               const currentPath = window.location.pathname;
-              const isHomePage = currentPath === '/' || currentPath === '/index.html' || currentPath === '';
+              const isHomePage =
+                currentPath === '/' || currentPath === '/index.html' || currentPath === '';
 
-              console.log('[NavigationModule] Hash link clicked:', href, 'isHomePage:', isHomePage, 'hasRouter:', !!this.routerService);
+              console.log(
+                '[NavigationModule] Hash link clicked:',
+                href,
+                'isHomePage:',
+                isHomePage,
+                'hasRouter:',
+                !!this.routerService
+              );
 
               if (this.routerService) {
                 // Small delay to let menu close animation start
@@ -166,7 +178,6 @@ export class NavigationModule extends BaseModule {
         this.closeMenu();
       }
     });
-
   }
 
   /**
@@ -217,18 +228,31 @@ export class NavigationModule extends BaseModule {
     this.nav.setAttribute('data-nav', 'open');
     document.body.style.overflow = 'hidden';
 
-
     // Create opening animation exactly like working version 9.0
     const tl = gsap.timeline();
 
     // Faster opening sequence
     tl.set(this.nav, { display: 'block' })
       .set(document.querySelector('.menu'), { xPercent: 0 }, '<')
-      .fromTo(this.menuButtonTexts, { yPercent: 0 }, { yPercent: -100, stagger: 0.15, duration: 0.5 })
-      .fromTo(document.querySelector('.menu-button-icon'), { rotation: 0 }, { rotation: 45, duration: 0.5 }, '<')
+      .fromTo(
+        this.menuButtonTexts,
+        { yPercent: 0 },
+        { yPercent: -100, stagger: 0.15, duration: 0.5 }
+      )
+      .fromTo(
+        document.querySelector('.menu-button-icon'),
+        { rotation: 0 },
+        { rotation: 45, duration: 0.5 },
+        '<'
+      )
       .fromTo(this.overlay, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5 }, '<')
       .fromTo(this.bgPanels, { xPercent: 101 }, { xPercent: 0, stagger: 0.08, duration: 0.4 }, '<')
-      .fromTo(this.menuLinks, { yPercent: 140, autoAlpha: 0 }, { yPercent: 0, autoAlpha: 1, stagger: 0.04, duration: 0.5 }, '<+=0.25');
+      .fromTo(
+        this.menuLinks,
+        { yPercent: 140, autoAlpha: 0 },
+        { yPercent: 0, autoAlpha: 1, stagger: 0.04, duration: 0.5 },
+        '<+=0.25'
+      );
   }
 
   /**
@@ -255,7 +279,6 @@ export class NavigationModule extends BaseModule {
       .to(this.menuButtonTexts, { yPercent: 0, duration: 0.3 }, '<')
       .to(document.querySelector('.menu-button-icon'), { rotation: 0, duration: 0.3 }, '<')
       .set(this.nav, { display: 'none' });
-
   }
 
   /**
@@ -437,7 +460,7 @@ export class NavigationModule extends BaseModule {
     const currentPath = window.location.pathname;
 
     if (this.menuLinks) {
-      this.menuLinks.forEach(link => {
+      this.menuLinks.forEach((link) => {
         const href = (link as HTMLAnchorElement).getAttribute('href');
         const linkElement = link as HTMLElement;
 
@@ -445,10 +468,12 @@ export class NavigationModule extends BaseModule {
         linkElement.classList.remove('active');
 
         // Check for exact match or partial match for hash links
-        if (href === currentPath ||
-            (currentPath === '/' && href?.startsWith('/#')) ||
-            (currentPath === '/projects' && href === '/projects') ||
-            (currentPath === '/client' && href === '/client')) {
+        if (
+          href === currentPath ||
+          (currentPath === '/' && href?.startsWith('/#')) ||
+          (currentPath === '/projects' && href === '/projects') ||
+          (currentPath === '/client' && href === '/client')
+        ) {
           linkElement.classList.add('active');
         }
       });

@@ -3,7 +3,7 @@
  * API ROUTES
  * ===============================================
  * @file server/routes/api.ts
- * 
+ *
  * Main API routes with comprehensive validation and security.
  */
 
@@ -18,7 +18,7 @@ import {
   rateLimit,
   csrfProtection,
   requestSizeLimit,
-  suspiciousActivityDetector,
+  suspiciousActivityDetector
 } from '../middleware/security.js';
 import { logger } from '../services/logger.js';
 import { getDatabase } from '../database/init.js';
@@ -37,15 +37,15 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + extname(file.originalname));
-  },
+    const uniqueSuffix = `${Date.now()  }-${  Math.round(Math.random() * 1e9)}`;
+    cb(null, `${file.fieldname  }-${  uniqueSuffix  }${extname(file.originalname)}`);
+  }
 });
 
 const upload = multer({
   storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: 10 * 1024 * 1024 // 10MB limit
   },
   fileFilter: (req, file, cb) => {
     // Allow common file types
@@ -58,34 +58,41 @@ const upload = multer({
     } else {
       cb(new Error('Invalid file type. Only images, PDFs, documents, and archives are allowed.'));
     }
-  },
+  }
 });
 
 // Global API middleware
-router.use(requestSizeLimit({
-  maxBodySize: 10 * 1024 * 1024, // 10MB
-  maxUrlLength: 2048,
-  maxHeaderSize: 8192
-}));
+router.use(
+  requestSizeLimit({
+    maxBodySize: 10 * 1024 * 1024, // 10MB
+    maxUrlLength: 2048,
+    maxHeaderSize: 8192
+  })
+);
 
-router.use(suspiciousActivityDetector({
-  maxPathTraversal: 3,
-  maxSqlInjectionAttempts: 3,
-  maxXssAttempts: 3,
-  blockDuration: 24 * 60 * 60 * 1000
-}));
+router.use(
+  suspiciousActivityDetector({
+    maxPathTraversal: 3,
+    maxSqlInjectionAttempts: 3,
+    maxXssAttempts: 3,
+    blockDuration: 24 * 60 * 60 * 1000
+  })
+);
 
 // General rate limiting for all API routes
-router.use(rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  maxRequests: 100,
-  message: 'Too many API requests'
-}));
+router.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    maxRequests: 100,
+    message: 'Too many API requests'
+  })
+);
 
 /**
  * Contact form submission
  */
-router.post('/contact',
+router.post(
+  '/contact',
   // Stricter rate limiting for contact forms
   rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
@@ -93,7 +100,7 @@ router.post('/contact',
     keyGenerator: (req) => req.ip || 'unknown',
     message: 'Too many contact form submissions'
   }),
-  
+
   // Validate contact form data
   validateRequest(ValidationSchemas.contact, {
     validateBody: true,
@@ -103,9 +110,11 @@ router.post('/contact',
   async (req, res) => {
     try {
       const { name, email, subject, message } = req.body;
-      const requestId = req.headers['x-request-id'] as string || 'unknown';
+      const requestId = (req.headers['x-request-id'] as string) || 'unknown';
 
-      await logger.info(`Contact form submission received - from: ${email}, subject: ${subject}, requestId: ${requestId}`);
+      await logger.info(
+        `Contact form submission received - from: ${email}, subject: ${subject}, requestId: ${requestId}`
+      );
 
       // Send email notification to admin
       const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -161,20 +170,25 @@ Received: ${new Date().toISOString()}
           `.trim()
         });
 
-        await logger.info(`Contact form email sent to admin - messageId: ${messageId}, from: ${email}`);
+        await logger.info(
+          `Contact form email sent to admin - messageId: ${messageId}, from: ${email}`
+        );
       } catch (emailError) {
         // Log error but don't fail the request - form submission still recorded
-        await logger.error(`Failed to send contact form email - messageId: ${messageId}, error: ${emailError}`);
+        await logger.error(
+          `Failed to send contact form email - messageId: ${messageId}, error: ${emailError}`
+        );
       }
 
-      await logger.info(`Contact form processed successfully - messageId: ${messageId}, from: ${email}`);
+      await logger.info(
+        `Contact form processed successfully - messageId: ${messageId}, from: ${email}`
+      );
 
       res.json({
         success: true,
         message: 'Your message has been sent successfully',
         messageId
       });
-
     } catch (error) {
       const err = error as Error;
       await logger.error('Contact form processing error');
@@ -191,7 +205,8 @@ Received: ${new Date().toISOString()}
 /**
  * Client intake form submission
  */
-router.post('/intake',
+router.post(
+  '/intake',
   // Rate limiting for intake forms
   rateLimit({
     windowMs: 24 * 60 * 60 * 1000, // 24 hours
@@ -209,37 +224,40 @@ router.post('/intake',
   async (req, res) => {
     try {
       const intakeData = req.body;
-      const requestId = req.headers['x-request-id'] as string || 'unknown';
+      const requestId = (req.headers['x-request-id'] as string) || 'unknown';
 
       await logger.info('Client intake form received');
 
       // Process intake form data
       const { getDatabase } = await import('../database/init.js');
       const db = getDatabase();
-      
+
       // Generate unique intake ID
       const intakeId = `INT-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-      
+
       // Insert intake form data into database
-      const result = await db.run(`
+      const result = await db.run(
+        `
         INSERT INTO client_intakes (
           intake_id, company_name, first_name, last_name, email, phone,
           project_type, budget_range, timeline, project_description,
           additional_info, status, created_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', datetime('now'))
-      `, [
-        intakeId,
-        intakeData.companyName || intakeData['company-name'],
-        intakeData.firstName || intakeData['first-name'],
-        intakeData.lastName || intakeData['last-name'],
-        intakeData.email,
-        intakeData.phone || null,
-        intakeData.projectType || intakeData['project-type'],
-        intakeData.budget || null,
-        intakeData.timeline || null,
-        intakeData.projectDescription || intakeData['project-description'],
-        intakeData.additionalInfo || intakeData['additional-info'] || null
-      ]);
+      `,
+        [
+          intakeId,
+          intakeData.companyName || intakeData['company-name'],
+          intakeData.firstName || intakeData['first-name'],
+          intakeData.lastName || intakeData['last-name'],
+          intakeData.email,
+          intakeData.phone || null,
+          intakeData.projectType || intakeData['project-type'],
+          intakeData.budget || null,
+          intakeData.timeline || null,
+          intakeData.projectDescription || intakeData['project-description'],
+          intakeData.additionalInfo || intakeData['additional-info'] || null
+        ]
+      );
 
       // Send notification email to admin
       try {
@@ -274,11 +292,11 @@ router.post('/intake',
 
       res.json({
         success: true,
-        message: 'Your intake form has been submitted successfully. We will review your project requirements and get back to you within 24-48 hours.',
+        message:
+          'Your intake form has been submitted successfully. We will review your project requirements and get back to you within 24-48 hours.',
         intakeId,
         estimatedResponseTime: '24-48 hours'
       });
-
     } catch (error) {
       const err = error as Error;
       await logger.error('Intake form processing error');
@@ -301,7 +319,7 @@ router.post(
   rateLimit({
     windowMs: 10 * 60 * 1000, // 10 minutes
     maxRequests: 10,
-    message: 'Too many file uploads',
+    message: 'Too many file uploads'
   }),
 
   // Add multer middleware for file handling
@@ -314,7 +332,7 @@ router.post(
         return res.status(400).json({
           success: false,
           error: 'No file uploaded',
-          code: 'NO_FILE',
+          code: 'NO_FILE'
         });
       }
 
@@ -325,7 +343,7 @@ router.post(
         mimetype: req.file.mimetype,
         size: req.file.size,
         url: `/uploads/general/${req.file.filename}`,
-        uploadedAt: new Date().toISOString(),
+        uploadedAt: new Date().toISOString()
       };
 
       // Save file metadata to database (optional)
@@ -343,12 +361,14 @@ router.post(
         // Don't fail - file is already uploaded
       }
 
-      await logger.info(`File uploaded successfully - filename: ${fileInfo.filename}, fileId: ${fileId}`);
+      await logger.info(
+        `File uploaded successfully - filename: ${fileInfo.filename}, fileId: ${fileId}`
+      );
 
       res.status(201).json({
         success: true,
         message: 'File uploaded successfully',
-        file: { ...fileInfo, id: fileId > 0 ? fileId : fileInfo.id },
+        file: { ...fileInfo, id: fileId > 0 ? fileId : fileInfo.id }
       });
     } catch (error) {
       const err = error as Error;
@@ -366,7 +386,8 @@ router.post(
 /**
  * Health check endpoint
  */
-router.get('/health',
+router.get(
+  '/health',
   // Lighter rate limiting for health checks
   rateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
@@ -388,7 +409,6 @@ router.get('/health',
         success: true,
         data: health
       });
-
     } catch (error) {
       const err = error as Error;
       await logger.error('Health check error');
@@ -405,7 +425,8 @@ router.get('/health',
 /**
  * User registration endpoint
  */
-router.post('/auth/register',
+router.post(
+  '/auth/register',
   // Registration rate limiting
   rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
@@ -423,7 +444,7 @@ router.post('/auth/register',
   async (req, res) => {
     try {
       const { name, email, password } = req.body;
-      const requestId = req.headers['x-request-id'] as string || 'unknown';
+      const requestId = (req.headers['x-request-id'] as string) || 'unknown';
 
       await logger.info(`User registration attempt - email: ${email}, requestId: ${requestId}`);
 
@@ -432,11 +453,13 @@ router.post('/auth/register',
       const existingUser = await db.get('SELECT id, email FROM users WHERE email = ?', [email]);
 
       if (existingUser) {
-        await logger.warn(`Registration attempt with existing email - email: ${email}, requestId: ${requestId}`);
+        await logger.warn(
+          `Registration attempt with existing email - email: ${email}, requestId: ${requestId}`
+        );
         return res.status(409).json({
           success: false,
           error: 'User already exists',
-          code: 'USER_EXISTS',
+          code: 'USER_EXISTS'
         });
       }
 
@@ -459,16 +482,16 @@ router.post('/auth/register',
         throw new Error('JWT_SECRET not configured');
       }
 
-      const accessToken = jwt.sign(
-        { id: userId, email, type: 'client' },
-        jwtSecret,
-        { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as SignOptions
-      );
+      const accessToken = jwt.sign({ id: userId, email, type: 'client' }, jwtSecret, {
+        expiresIn: process.env.JWT_EXPIRES_IN || '7d'
+      } as SignOptions);
 
       // Send welcome email
       try {
         await emailService.sendWelcomeEmail(email, name, accessToken);
-        await logger.info(`Welcome email sent - email: ${email}, userId: ${userId}, requestId: ${requestId}`);
+        await logger.info(
+          `Welcome email sent - email: ${email}, userId: ${userId}, requestId: ${requestId}`
+        );
       } catch (emailError) {
         // Log error but don't fail registration
         await logger.error(
@@ -476,13 +499,15 @@ router.post('/auth/register',
         );
       }
 
-      await logger.info(`User registration successful - email: ${email}, userId: ${userId}, requestId: ${requestId}`);
+      await logger.info(
+        `User registration successful - email: ${email}, userId: ${userId}, requestId: ${requestId}`
+      );
 
       res.status(201).json({
         success: true,
         message: 'Registration successful',
         userId,
-        token: accessToken,
+        token: accessToken
       });
     } catch (error) {
       const err = error as Error;
@@ -491,7 +516,7 @@ router.post('/auth/register',
       res.status(500).json({
         success: false,
         error: 'Registration failed',
-        code: 'REGISTRATION_ERROR',
+        code: 'REGISTRATION_ERROR'
       });
     }
   }
@@ -500,7 +525,8 @@ router.post('/auth/register',
 /**
  * Data query endpoint with pagination
  */
-router.get('/data',
+router.get(
+  '/data',
   validateRequest(ValidationSchemas.pagination, {
     validateQuery: true,
     stripUnknownFields: false
@@ -508,13 +534,7 @@ router.get('/data',
 
   async (req, res) => {
     try {
-      const {
-        page = 1,
-        limit = 20,
-        sortBy = 'createdAt',
-        sortOrder = 'desc',
-        search
-      } = req.query;
+      const { page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc', search } = req.query;
 
       await logger.info('Data query request');
 
@@ -562,20 +582,19 @@ router.get('/data',
           page: pageNum,
           limit: limitNum,
           total,
-          totalPages,
+          totalPages
         },
         meta: {
           sortBy: sortField,
           sortOrder: order,
-          search: search || null,
-        },
+          search: search || null
+        }
       };
 
       res.json({
         success: true,
-        ...result,
+        ...result
       });
-
     } catch (error) {
       const err = error as Error;
       await logger.error('Data query error');
@@ -592,7 +611,8 @@ router.get('/data',
 /**
  * API status and metrics endpoint
  */
-router.get('/status',
+router.get(
+  '/status',
   rateLimit({
     windowMs: 5 * 60 * 1000, // 5 minutes
     maxRequests: 10
@@ -603,16 +623,23 @@ router.get('/status',
       // Gather actual metrics from database
       const db = getDatabase();
 
-      let totalUsers = 0, activeUsers = 0, totalProjects = 0, activeProjects = 0, totalInvoices = 0;
+      let totalUsers = 0,
+        activeUsers = 0,
+        totalProjects = 0,
+        activeProjects = 0,
+        totalInvoices = 0;
 
       try {
-        const [usersRow, activeUsersRow, projectsRow, activeProjectsRow, invoicesRow] = await Promise.all([
-          db.get('SELECT COUNT(*) as count FROM users'),
-          db.get("SELECT COUNT(*) as count FROM users WHERE status = 'active'"),
-          db.get('SELECT COUNT(*) as count FROM projects'),
-          db.get("SELECT COUNT(*) as count FROM projects WHERE status IN ('in-progress', 'pending')"),
-          db.get('SELECT COUNT(*) as count FROM invoices'),
-        ]);
+        const [usersRow, activeUsersRow, projectsRow, activeProjectsRow, invoicesRow] =
+          await Promise.all([
+            db.get('SELECT COUNT(*) as count FROM users'),
+            db.get('SELECT COUNT(*) as count FROM users WHERE status = \'active\''),
+            db.get('SELECT COUNT(*) as count FROM projects'),
+            db.get(
+              'SELECT COUNT(*) as count FROM projects WHERE status IN (\'in-progress\', \'pending\')'
+            ),
+            db.get('SELECT COUNT(*) as count FROM invoices')
+          ]);
 
         totalUsers = usersRow?.count || 0;
         activeUsers = activeUsersRow?.count || 0;
@@ -633,29 +660,28 @@ router.get('/status',
         database: {
           users: {
             total: totalUsers,
-            active: activeUsers,
+            active: activeUsers
           },
           projects: {
             total: totalProjects,
-            active: activeProjects,
+            active: activeProjects
           },
           invoices: {
-            total: totalInvoices,
-          },
+            total: totalInvoices
+          }
         },
         requests: {
           rateLimit: {
             remaining: res.get('X-RateLimit-Remaining'),
-            reset: res.get('X-RateLimit-Reset'),
-          },
-        },
+            reset: res.get('X-RateLimit-Reset')
+          }
+        }
       };
 
       res.json({
         success: true,
         data: status
       });
-
     } catch (error) {
       const err = error as Error;
       await logger.error('API status error');

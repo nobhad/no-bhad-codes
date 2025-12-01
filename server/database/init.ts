@@ -51,7 +51,7 @@ class DatabaseConnectionPool implements Database {
   constructor(dbPath: string, maxConnections: number = 5) {
     this.dbPath = dbPath;
     this.maxConnections = maxConnections;
-    
+
     // Setup cleanup interval for idle connections
     this.cleanupInterval = setInterval(() => {
       this.cleanupIdleConnections();
@@ -87,7 +87,7 @@ class DatabaseConnectionPool implements Database {
 
   private async getConnection(): Promise<PooledConnection> {
     // Look for an available connection
-    const availableConnection = this.connections.find(conn => !conn.inUse);
+    const availableConnection = this.connections.find((conn) => !conn.inUse);
     if (availableConnection) {
       availableConnection.inUse = true;
       availableConnection.lastUsed = Date.now();
@@ -105,10 +105,10 @@ class DatabaseConnectionPool implements Database {
     // Wait for available connection
     return new Promise((resolve, reject) => {
       this.waitingQueue.push({ resolve, reject });
-      
+
       // Set timeout for waiting requests
       setTimeout(() => {
-        const index = this.waitingQueue.findIndex(item => item.resolve === resolve);
+        const index = this.waitingQueue.findIndex((item) => item.resolve === resolve);
         if (index !== -1) {
           this.waitingQueue.splice(index, 1);
           reject(new Error('Database connection timeout'));
@@ -134,9 +134,9 @@ class DatabaseConnectionPool implements Database {
   private cleanupIdleConnections(): void {
     const maxIdleTime = 5 * 60 * 1000; // 5 minutes
     const now = Date.now();
-    
-    this.connections = this.connections.filter(conn => {
-      if (!conn.inUse && (now - conn.lastUsed) > maxIdleTime) {
+
+    this.connections = this.connections.filter((conn) => {
+      if (!conn.inUse && now - conn.lastUsed > maxIdleTime) {
         conn.db.close();
         return false;
       }
@@ -176,7 +176,7 @@ class DatabaseConnectionPool implements Database {
     const connection = await this.getConnection();
     try {
       return await new Promise<{ lastID?: number; changes?: number }>((resolve, reject) => {
-        connection.db.run(sql, params, function(err) {
+        connection.db.run(sql, params, function (err) {
           if (err) reject(err);
           else resolve({ lastID: this.lastID, changes: this.changes });
         });
@@ -193,26 +193,27 @@ class DatabaseConnectionPool implements Database {
     }
 
     // Close all connections
-    const closePromises = this.connections.map(conn => 
-      new Promise<void>((resolve) => {
-        conn.db.close(() => resolve());
-      })
+    const closePromises = this.connections.map(
+      (conn) =>
+        new Promise<void>((resolve) => {
+          conn.db.close(() => resolve());
+        })
     );
 
     await Promise.all(closePromises);
     this.connections = [];
-    
+
     // Reject any waiting requests
-    this.waitingQueue.forEach(waiter => {
+    this.waitingQueue.forEach((waiter) => {
       waiter.reject(new Error('Database pool is closing'));
     });
     this.waitingQueue = [];
   }
 
   getConnectionStats(): ConnectionStats {
-    const activeConnections = this.connections.filter(conn => conn.inUse).length;
-    const idleConnections = this.connections.filter(conn => !conn.inUse).length;
-    
+    const activeConnections = this.connections.filter((conn) => conn.inUse).length;
+    const idleConnections = this.connections.filter((conn) => !conn.inUse).length;
+
     return {
       activeConnections,
       idleConnections,
@@ -241,20 +242,21 @@ export function getDatabase(): Database {
 export async function initializeDatabase(): Promise<void> {
   const dbPath = process.env.DATABASE_PATH || './data/client_portal.db';
   const maxConnections = parseInt(process.env.DB_MAX_CONNECTIONS || '5');
-  
+
   try {
     dbPool = new DatabaseConnectionPool(dbPath, maxConnections);
-    
+
     // Test the connection by running a simple query
     await dbPool.get('SELECT 1');
-    
+
     console.log(`✅ Database connection pool initialized with ${maxConnections} max connections`);
     console.log(`📊 Database path: ${dbPath}`);
-    
+
     // Log connection stats
     const stats = dbPool.getConnectionStats();
-    console.log(`📈 Pool stats: ${stats.activeConnections} active, ${stats.totalConnections} total`);
-    
+    console.log(
+      `📈 Pool stats: ${stats.activeConnections} active, ${stats.totalConnections} total`
+    );
   } catch (error: any) {
     console.error('❌ Failed to initialize database:', error.message);
     throw error;
@@ -268,11 +270,11 @@ export async function closeDatabase(): Promise<void> {
   if (!dbPool) {
     return;
   }
-  
+
   try {
     const stats = dbPool.getConnectionStats();
     console.log(`🔄 Closing database pool (${stats.totalConnections} connections)...`);
-    
+
     await dbPool.close();
     dbPool = null;
     console.log('✅ Database connection pool closed');

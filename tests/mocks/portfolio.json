@@ -40,11 +40,7 @@
   "contact": {
     "title": "Contact",
     "intro": "Get in touch",
-    "businessSizes": [
-      { "value": "small", "label": "Small Business" }
-    ],
-    "helpOptions": [
-      { "value": "development", "label": "Development" }
-    ]
+    "businessSizes": [{ "value": "small", "label": "Small Business" }],
+    "helpOptions": [{ "value": "development", "label": "Development" }]
   }
 }

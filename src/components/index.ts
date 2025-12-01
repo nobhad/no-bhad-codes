@@ -8,13 +8,32 @@
  */
 
 // Import all dependencies needed for both exports and local registration
-import { BaseComponent, type ComponentProps, type ComponentState, type ComponentTemplate, type ComponentHooks } from './base-component';
-import { componentStore, ComponentUtils, type ComponentDefinition, type ComponentInstance } from './component-store';
+import {
+  BaseComponent,
+  type ComponentProps,
+  type ComponentState,
+  type ComponentTemplate,
+  type ComponentHooks
+} from './base-component';
+import {
+  componentStore,
+  ComponentUtils,
+  type ComponentDefinition,
+  type ComponentInstance
+} from './component-store';
 import { ButtonComponent, type ButtonProps, type ButtonState } from './button-component';
 import { ModalComponent, type ModalProps, type ModalState } from './modal-component';
-import { PerformanceDashboard, type PerformanceDashboardProps, type PerformanceDashboardState } from './performance-dashboard';
+import {
+  PerformanceDashboard,
+  type PerformanceDashboardProps,
+  type PerformanceDashboardState
+} from './performance-dashboard';
 import { ConsentBanner, type ConsentBannerProps, type ConsentBannerState } from './consent-banner';
-import { AnalyticsDashboard, type AnalyticsDashboardProps, type AnalyticsDashboardState } from './analytics-dashboard';
+import {
+  AnalyticsDashboard,
+  type AnalyticsDashboardProps,
+  type AnalyticsDashboardState
+} from './analytics-dashboard';
 
 // Re-export all components, types, and utilities
 export { BaseComponent };
@@ -75,14 +94,20 @@ export const createButton = (props: ButtonProps, mountTarget?: string | HTMLElem
 export const createModal = (props: ModalProps, mountTarget?: string | HTMLElement) =>
   componentStore.create<ModalComponent>('Modal', props, mountTarget);
 
-export const createPerformanceDashboard = (props: PerformanceDashboardProps = {}, mountTarget?: string | HTMLElement) =>
-  componentStore.create<PerformanceDashboard>('PerformanceDashboard', props, mountTarget);
+export const createPerformanceDashboard = (
+  props: PerformanceDashboardProps = {},
+  mountTarget?: string | HTMLElement
+) => componentStore.create<PerformanceDashboard>('PerformanceDashboard', props, mountTarget);
 
-export const createConsentBanner = (props: ConsentBannerProps = {}, mountTarget?: string | HTMLElement) =>
-  componentStore.create<ConsentBanner>('ConsentBanner', props, mountTarget);
+export const createConsentBanner = (
+  props: ConsentBannerProps = {},
+  mountTarget?: string | HTMLElement
+) => componentStore.create<ConsentBanner>('ConsentBanner', props, mountTarget);
 
-export const createAnalyticsDashboard = (props: AnalyticsDashboardProps = {}, mountTarget?: string | HTMLElement) =>
-  componentStore.create<AnalyticsDashboard>('AnalyticsDashboard', props, mountTarget);
+export const createAnalyticsDashboard = (
+  props: AnalyticsDashboardProps = {},
+  mountTarget?: string | HTMLElement
+) => componentStore.create<AnalyticsDashboard>('AnalyticsDashboard', props, mountTarget);
 
 // Utility functions for common operations
 export class ComponentRegistry {
@@ -113,11 +138,13 @@ export class ComponentRegistry {
   /**
    * Create components from JSON configuration
    */
-  static async fromConfig(config: {
-    component: string;
-    props: any;
-    target: string;
-  }[]): Promise<BaseComponent[]> {
+  static async fromConfig(
+    config: {
+      component: string;
+      props: any;
+      target: string;
+    }[]
+  ): Promise<BaseComponent[]> {
     const components: BaseComponent[] = [];
 
     for (const item of config) {
@@ -135,11 +162,12 @@ export class ComponentRegistry {
   /**
    * Bulk update component props
    */
-  static async updateComponentsByType(componentName: string, props: Partial<ComponentProps>): Promise<void> {
+  static async updateComponentsByType(
+    componentName: string,
+    props: Partial<ComponentProps>
+  ): Promise<void> {
     const instances = componentStore.findByName(componentName);
-    await Promise.all(
-      instances.map(instance => componentStore.updateProps(instance.id, props))
-    );
+    await Promise.all(instances.map((instance) => componentStore.updateProps(instance.id, props)));
   }
 
   /**

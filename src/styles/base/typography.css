@@ -13,7 +13,7 @@
  * ============================================ */
 
 /* Google Fonts Import */
-@import url('https://fonts.googleapis.com/css2?family=Acme&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Acme&display=swap");
 
 /* ============================================
  * FONT FACE DEFINITIONS
@@ -32,7 +32,12 @@
  * ============================================ */
 
 /* Universal heading styling */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font--acme);
   line-height: 1.2;
   text-transform: uppercase;
@@ -115,26 +120,54 @@ p {
  * ============================================ */
 
 /* Text alignment */
-.text-left { text-align: left; }
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.text-justify { text-align: justify; }
+.text-left {
+  text-align: left;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+.text-justify {
+  text-align: justify;
+}
 
 /* Font weights */
-.font-normal { font-weight: 400; }
-.font-medium { font-weight: 500; }
-.font-semibold { font-weight: 600; }
-.font-bold { font-weight: 700; }
+.font-normal {
+  font-weight: 400;
+}
+.font-medium {
+  font-weight: 500;
+}
+.font-semibold {
+  font-weight: 600;
+}
+.font-bold {
+  font-weight: 700;
+}
 
 /* Font styles */
-.italic { font-style: italic; }
-.not-italic { font-style: normal; }
+.italic {
+  font-style: italic;
+}
+.not-italic {
+  font-style: normal;
+}
 
 /* Text transformations */
-.uppercase { text-transform: uppercase; }
-.lowercase { text-transform: lowercase; }
-.capitalize { text-transform: capitalize; }
-.normal-case { text-transform: none; }
+.uppercase {
+  text-transform: uppercase;
+}
+.lowercase {
+  text-transform: lowercase;
+}
+.capitalize {
+  text-transform: capitalize;
+}
+.normal-case {
+  text-transform: none;
+}
 
 /* Text overflow */
 .truncate {
@@ -143,8 +176,12 @@ p {
   white-space: nowrap;
 }
 
-.text-ellipsis { text-overflow: ellipsis; }
-.text-clip { text-overflow: clip; }
+.text-ellipsis {
+  text-overflow: ellipsis;
+}
+.text-clip {
+  text-overflow: clip;
+}
 
 /* ============================================
  * SPECIALIZED TYPOGRAPHY CLASSES
@@ -174,7 +211,7 @@ p {
 }
 
 .text-link::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
@@ -199,32 +236,37 @@ p {
  * ============================================ */
 
 @media screen and (max-width: 767px) {
-  h1, .h1 {
+  h1,
+  .h1 {
     font-size: clamp(1.5rem, 6vw, 2.5rem);
   }
-  
-  h2, .h2 {
+
+  h2,
+  .h2 {
     font-size: clamp(1.25rem, 5vw, 2rem);
   }
-  
-  h3, .h3 {
+
+  h3,
+  .h3 {
     font-size: clamp(1.125rem, 4vw, 1.5rem);
   }
-  
+
   .text-base {
     font-size: clamp(0.8rem, 2.5vw, 1rem);
   }
 }
 
 @media screen and (max-width: 479px) {
-  h1, .h1 {
+  h1,
+  .h1 {
     font-size: clamp(1.25rem, 7vw, 2rem);
   }
-  
-  h2, .h2 {
+
+  h2,
+  .h2 {
     font-size: clamp(1.125rem, 6vw, 1.75rem);
   }
-  
+
   .text-base {
     font-size: clamp(0.75rem, 3vw, 0.9rem);
   }

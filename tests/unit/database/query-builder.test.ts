@@ -3,13 +3,19 @@
  * QUERY BUILDER TESTS
  * ===============================================
  * @file tests/unit/database/query-builder.test.ts
- * 
+ *
  * Unit tests for the database query builder.
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Database } from 'sqlite3';
-import { QueryBuilder, SelectQueryBuilder, InsertQueryBuilder, UpdateQueryBuilder, DeleteQueryBuilder } from '../../../server/database/query-builder.js';
+import {
+  QueryBuilder,
+  SelectQueryBuilder,
+  InsertQueryBuilder,
+  UpdateQueryBuilder,
+  DeleteQueryBuilder
+} from '../../../server/database/query-builder.js';
 
 // Mock logger
 vi.mock('../../../server/services/logger.js', () => ({
@@ -60,7 +66,10 @@ describe('QueryBuilder', () => {
 
   describe('Raw SQL Execution', () => {
     it('should execute raw SQL queries', async () => {
-      const mockRows = [{ id: 1, name: 'John' }, { id: 2, name: 'Jane' }];
+      const mockRows = [
+        { id: 1, name: 'John' },
+        { id: 2, name: 'Jane' }
+      ];
       mockDb.all.mockImplementation((sql, params, callback) => {
         callback(null, mockRows);
       });
@@ -82,9 +91,9 @@ describe('QueryBuilder', () => {
         callback(error, null);
       });
 
-      await expect(
-        queryBuilder.raw('INVALID SQL')
-      ).rejects.toThrow('Database query failed: SQL error');
+      await expect(queryBuilder.raw('INVALID SQL')).rejects.toThrow(
+        'Database query failed: SQL error'
+      );
     });
   });
 
@@ -157,10 +166,7 @@ describe('SelectQueryBuilder', () => {
 
   describe('WHERE Clauses', () => {
     it('should build WHERE clauses', () => {
-      const { sql, params } = selectBuilder
-        .where('id', '=', 1)
-        .where('active', '=', true)
-        .toSql();
+      const { sql, params } = selectBuilder.where('id', '=', 1).where('active', '=', true).toSql();
 
       expect(sql).toBe('SELECT * FROM users WHERE id = ? AND active = ?');
       expect(params).toEqual([1, true]);
@@ -177,27 +183,21 @@ describe('SelectQueryBuilder', () => {
     });
 
     it('should build WHERE IN clauses', () => {
-      const { sql, params } = selectBuilder
-        .whereIn('id', [1, 2, 3])
-        .toSql();
+      const { sql, params } = selectBuilder.whereIn('id', [1, 2, 3]).toSql();
 
       expect(sql).toBe('SELECT * FROM users WHERE id IN (?, ?, ?)');
       expect(params).toEqual([1, 2, 3]);
     });
 
     it('should build WHERE NULL clauses', () => {
-      const { sql, params } = selectBuilder
-        .whereNull('deleted_at')
-        .toSql();
+      const { sql, params } = selectBuilder.whereNull('deleted_at').toSql();
 
       expect(sql).toBe('SELECT * FROM users WHERE deleted_at IS NULL');
       expect(params).toEqual([]);
     });
 
     it('should build LIKE clauses', () => {
-      const { sql, params } = selectBuilder
-        .whereLike('name', '%john%')
-        .toSql();
+      const { sql, params } = selectBuilder.whereLike('name', '%john%').toSql();
 
       expect(sql).toBe('SELECT * FROM users WHERE name LIKE ?');
       expect(params).toEqual(['%john%']);
@@ -206,17 +206,13 @@ describe('SelectQueryBuilder', () => {
 
   describe('JOIN Clauses', () => {
     it('should build INNER JOIN', () => {
-      const { sql } = selectBuilder
-        .join('profiles', 'users.id = profiles.user_id')
-        .toSql();
+      const { sql } = selectBuilder.join('profiles', 'users.id = profiles.user_id').toSql();
 
       expect(sql).toBe('SELECT * FROM users INNER JOIN profiles ON users.id = profiles.user_id');
     });
 
     it('should build LEFT JOIN', () => {
-      const { sql } = selectBuilder
-        .leftJoin('orders', 'users.id = orders.user_id')
-        .toSql();
+      const { sql } = selectBuilder.leftJoin('orders', 'users.id = orders.user_id').toSql();
 
       expect(sql).toBe('SELECT * FROM users LEFT JOIN orders ON users.id = orders.user_id');
     });
@@ -229,25 +225,20 @@ describe('SelectQueryBuilder', () => {
 
       expect(sql).toBe(
         'SELECT * FROM users INNER JOIN profiles ON users.id = profiles.user_id' +
-        ' LEFT JOIN orders ON users.id = orders.user_id'
+          ' LEFT JOIN orders ON users.id = orders.user_id'
       );
     });
   });
 
   describe('ORDER BY Clauses', () => {
     it('should build ORDER BY', () => {
-      const { sql } = selectBuilder
-        .orderBy('name', 'ASC')
-        .toSql();
+      const { sql } = selectBuilder.orderBy('name', 'ASC').toSql();
 
       expect(sql).toBe('SELECT * FROM users ORDER BY name ASC');
     });
 
     it('should build multiple ORDER BY', () => {
-      const { sql } = selectBuilder
-        .orderBy('role', 'ASC')
-        .orderBy('created_at', 'DESC')
-        .toSql();
+      const { sql } = selectBuilder.orderBy('role', 'ASC').orderBy('created_at', 'DESC').toSql();
 
       expect(sql).toBe('SELECT * FROM users ORDER BY role ASC, created_at DESC');
     });
@@ -255,10 +246,7 @@ describe('SelectQueryBuilder', () => {
 
   describe('GROUP BY and HAVING', () => {
     it('should build GROUP BY', () => {
-      const { sql } = selectBuilder
-        .select('role', 'COUNT(*) as count')
-        .groupBy('role')
-        .toSql();
+      const { sql } = selectBuilder.select('role', 'COUNT(*) as count').groupBy('role').toSql();
 
       expect(sql).toBe('SELECT role, COUNT(*) as count FROM users GROUP BY role');
     });
@@ -270,25 +258,22 @@ describe('SelectQueryBuilder', () => {
         .having('COUNT(*)', '>', 5)
         .toSql();
 
-      expect(sql).toBe('SELECT role, COUNT(*) as count FROM users GROUP BY role HAVING COUNT(*) > ?');
+      expect(sql).toBe(
+        'SELECT role, COUNT(*) as count FROM users GROUP BY role HAVING COUNT(*) > ?'
+      );
       expect(params).toEqual([5]);
     });
   });
 
   describe('LIMIT and OFFSET', () => {
     it('should build LIMIT', () => {
-      const { sql } = selectBuilder
-        .limit(10)
-        .toSql();
+      const { sql } = selectBuilder.limit(10).toSql();
 
       expect(sql).toBe('SELECT * FROM users LIMIT 10');
     });
 
     it('should build LIMIT with OFFSET', () => {
-      const { sql } = selectBuilder
-        .limit(10)
-        .offset(20)
-        .toSql();
+      const { sql } = selectBuilder.limit(10).offset(20).toSql();
 
       expect(sql).toBe('SELECT * FROM users LIMIT 10 OFFSET 20');
     });
@@ -301,7 +286,10 @@ describe('SelectQueryBuilder', () => {
 
       // Mock db.all for SELECT query (used by get())
       mockDb.all.mockImplementation((sql, params, callback) => {
-        callback(null, [{ id: 1, name: 'User 1' }, { id: 2, name: 'User 2' }]);
+        callback(null, [
+          { id: 1, name: 'User 1' },
+          { id: 2, name: 'User 2' }
+        ]);
       });
 
       const result = await selectBuilder.paginate(3, 15); // page 3, 15 per page
@@ -377,7 +365,10 @@ describe('SelectQueryBuilder', () => {
       });
 
       // Mock data query
-      const mockRows = [{ id: 1, name: 'John' }, { id: 2, name: 'Jane' }];
+      const mockRows = [
+        { id: 1, name: 'John' },
+        { id: 2, name: 'Jane' }
+      ];
       mockDb.all.mockImplementationOnce((sql, params, callback) => {
         callback(null, mockRows);
       });
@@ -454,7 +445,7 @@ describe('InsertQueryBuilder', () => {
 
   describe('Query Execution', () => {
     it('should execute insert query', async () => {
-      mockDb.run.mockImplementation(function (sql, params, callback) {
+      mockDb.run.mockImplementation((sql, params, callback) => {
         callback.call({ lastID: 123, changes: 1 }, null);
       });
 
@@ -472,9 +463,9 @@ describe('InsertQueryBuilder', () => {
         callback(error);
       });
 
-      await expect(
-        insertBuilder.values({ name: 'John' }).execute()
-      ).rejects.toThrow('Insert query failed: Insert failed');
+      await expect(insertBuilder.values({ name: 'John' }).execute()).rejects.toThrow(
+        'Insert query failed: Insert failed'
+      );
     });
   });
 });
@@ -510,10 +501,7 @@ describe('UpdateQueryBuilder', () => {
     });
 
     it('should build increment operations', () => {
-      const { sql } = updateBuilder
-        .increment('login_count', 1)
-        .where('id', '=', 1)
-        .toSql();
+      const { sql } = updateBuilder.increment('login_count', 1).where('id', '=', 1).toSql();
 
       expect(sql).toBe('UPDATE users SET login_count = ? WHERE id = ?');
     });
@@ -533,7 +521,7 @@ describe('UpdateQueryBuilder', () => {
 
   describe('Query Execution', () => {
     it('should execute update query', async () => {
-      mockDb.run.mockImplementation(function (sql, params, callback) {
+      mockDb.run.mockImplementation((sql, params, callback) => {
         callback.call({ changes: 1 }, null);
       });
 
@@ -568,9 +556,7 @@ describe('DeleteQueryBuilder', () => {
 
   describe('Query Building', () => {
     it('should build DELETE query', () => {
-      const { sql, params } = deleteBuilder
-        .where('id', '=', 1)
-        .toSql();
+      const { sql, params } = deleteBuilder.where('id', '=', 1).toSql();
 
       expect(sql).toBe('DELETE FROM users WHERE id = ?');
       expect(params).toEqual([1]);
@@ -585,13 +571,11 @@ describe('DeleteQueryBuilder', () => {
 
   describe('Query Execution', () => {
     it('should execute delete query', async () => {
-      mockDb.run.mockImplementation(function (sql, params, callback) {
+      mockDb.run.mockImplementation((sql, params, callback) => {
         callback.call({ changes: 1 }, null);
       });
 
-      const result = await deleteBuilder
-        .where('id', '=', 1)
-        .execute();
+      const result = await deleteBuilder.where('id', '=', 1).execute();
 
       expect(result.changes).toBe(1);
     });
@@ -602,9 +586,9 @@ describe('DeleteQueryBuilder', () => {
         callback(error);
       });
 
-      await expect(
-        deleteBuilder.where('id', '=', 1).execute()
-      ).rejects.toThrow('Delete query failed: Delete failed');
+      await expect(deleteBuilder.where('id', '=', 1).execute()).rejects.toThrow(
+        'Delete query failed: Delete failed'
+      );
     });
   });
 });

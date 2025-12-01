@@ -67,14 +67,15 @@ async function testEmailService(): Promise<void> {
     console.log('\n🎨 Testing template loading...');
     if (status.templatesLoaded > 0) {
       console.log('✅ Templates loaded successfully!');
-      console.log('   Available templates: welcome, project-update, admin-notification, password-reset');
+      console.log(
+        '   Available templates: welcome, project-update, admin-notification, password-reset'
+      );
     } else {
       console.log('⚠️  No templates loaded. Check template directory.');
     }
 
     console.log('\n🎉 Email service test completed successfully!');
     console.log('\n💡 To test actual email sending, configure SMTP settings in .env file');
-
   } catch (error: any) {
     console.error('❌ Email service test failed:', error.message);
     process.exit(1);
