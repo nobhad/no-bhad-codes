@@ -360,6 +360,294 @@ router.post(
 
 /**
  * @swagger
+ * /api/uploads/project/{projectId}:
+ *   get:
+ *     tags:
+ *       - Uploads
+ *     summary: Get all files for a project
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ */
+router.get(
+  '/project/:projectId',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.projectId);
+
+    if (isNaN(projectId)) {
+      return res.status(400).json({
+        error: 'Invalid project ID',
+        code: 'INVALID_PROJECT_ID'
+      });
+    }
+
+    try {
+      const db = await getDatabase();
+      const files = await db.all(
+        `SELECT id, project_id, filename, original_filename, mimetype, size, file_path, uploaded_by, created_at
+         FROM files
+         WHERE project_id = ?
+         ORDER BY created_at DESC`,
+        [projectId]
+      );
+
+      res.json({
+        success: true,
+        files: files.map((file: any) => ({
+          id: file.id,
+          projectId: file.project_id,
+          filename: file.filename,
+          originalName: file.original_filename,
+          mimetype: file.mimetype,
+          size: file.size,
+          url: file.file_path,
+          uploadedBy: file.uploaded_by,
+          uploadedAt: file.created_at
+        }))
+      });
+    } catch (dbError) {
+      console.error('Failed to fetch files:', dbError);
+      return res.status(500).json({
+        error: 'Failed to fetch files',
+        code: 'DB_ERROR'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/uploads/client:
+ *   get:
+ *     tags:
+ *       - Uploads
+ *     summary: Get all files for the authenticated client
+ *     security:
+ *       - BearerAuth: []
+ */
+router.get(
+  '/client',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = req.user?.id;
+
+    if (!clientId) {
+      return res.status(401).json({
+        error: 'Not authenticated',
+        code: 'NOT_AUTHENTICATED'
+      });
+    }
+
+    try {
+      const db = await getDatabase();
+      // Get files from projects belonging to this client
+      const files = await db.all(
+        `SELECT f.id, f.project_id, f.filename, f.original_filename, f.mimetype, f.size, f.file_path, f.uploaded_by, f.created_at,
+                p.name as project_name
+         FROM files f
+         LEFT JOIN projects p ON f.project_id = p.id
+         WHERE p.client_id = ? OR f.uploaded_by = ?
+         ORDER BY f.created_at DESC`,
+        [clientId, clientId]
+      );
+
+      res.json({
+        success: true,
+        files: files.map((file: any) => ({
+          id: file.id,
+          projectId: file.project_id,
+          projectName: file.project_name,
+          filename: file.filename,
+          originalName: file.original_filename,
+          mimetype: file.mimetype,
+          size: file.size,
+          url: file.file_path,
+          uploadedBy: file.uploaded_by,
+          uploadedAt: file.created_at
+        }))
+      });
+    } catch (dbError) {
+      console.error('Failed to fetch client files:', dbError);
+      return res.status(500).json({
+        error: 'Failed to fetch files',
+        code: 'DB_ERROR'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/uploads/file/{fileId}:
+ *   get:
+ *     tags:
+ *       - Uploads
+ *     summary: Download/preview a specific file
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: fileId
+ *         required: true
+ *         schema:
+ *           type: integer
+ */
+router.get(
+  '/file/:fileId',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const fileId = parseInt(req.params.fileId);
+
+    if (isNaN(fileId)) {
+      return res.status(400).json({
+        error: 'Invalid file ID',
+        code: 'INVALID_FILE_ID'
+      });
+    }
+
+    try {
+      const db = await getDatabase();
+      const file = await db.get(
+        `SELECT f.*, p.client_id
+         FROM files f
+         LEFT JOIN projects p ON f.project_id = p.id
+         WHERE f.id = ?`,
+        [fileId]
+      );
+
+      if (!file) {
+        return res.status(404).json({
+          error: 'File not found',
+          code: 'FILE_NOT_FOUND'
+        });
+      }
+
+      // Check access: client owns the project or uploaded the file
+      const clientId = req.user?.id;
+      if (file.client_id !== clientId && file.uploaded_by !== clientId) {
+        return res.status(403).json({
+          error: 'Access denied',
+          code: 'ACCESS_DENIED'
+        });
+      }
+
+      // Construct the full file path
+      const filePath = resolve(process.cwd(), file.file_path.replace(/^\//, ''));
+
+      if (!existsSync(filePath)) {
+        return res.status(404).json({
+          error: 'File not found on disk',
+          code: 'FILE_MISSING'
+        });
+      }
+
+      // Set content disposition based on query param
+      const download = req.query.download === 'true';
+      if (download) {
+        res.setHeader('Content-Disposition', `attachment; filename="${file.original_filename}"`);
+      } else {
+        res.setHeader('Content-Disposition', `inline; filename="${file.original_filename}"`);
+      }
+
+      res.setHeader('Content-Type', file.mimetype);
+      res.sendFile(filePath);
+    } catch (dbError) {
+      console.error('Failed to fetch file:', dbError);
+      return res.status(500).json({
+        error: 'Failed to fetch file',
+        code: 'DB_ERROR'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/uploads/file/{fileId}:
+ *   delete:
+ *     tags:
+ *       - Uploads
+ *     summary: Delete a file
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: fileId
+ *         required: true
+ *         schema:
+ *           type: integer
+ */
+router.delete(
+  '/file/:fileId',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const fileId = parseInt(req.params.fileId);
+
+    if (isNaN(fileId)) {
+      return res.status(400).json({
+        error: 'Invalid file ID',
+        code: 'INVALID_FILE_ID'
+      });
+    }
+
+    try {
+      const db = await getDatabase();
+      const file = await db.get(
+        `SELECT f.*, p.client_id
+         FROM files f
+         LEFT JOIN projects p ON f.project_id = p.id
+         WHERE f.id = ?`,
+        [fileId]
+      );
+
+      if (!file) {
+        return res.status(404).json({
+          error: 'File not found',
+          code: 'FILE_NOT_FOUND'
+        });
+      }
+
+      // Check access: only the uploader can delete
+      const clientId = req.user?.id;
+      if (file.uploaded_by !== clientId) {
+        return res.status(403).json({
+          error: 'Access denied - only the uploader can delete this file',
+          code: 'ACCESS_DENIED'
+        });
+      }
+
+      // Delete from database
+      await db.run('DELETE FROM files WHERE id = ?', [fileId]);
+
+      // Try to delete the physical file
+      const filePath = resolve(process.cwd(), file.file_path.replace(/^\//, ''));
+      if (existsSync(filePath)) {
+        const fs = await import('fs/promises');
+        await fs.unlink(filePath);
+      }
+
+      res.json({
+        success: true,
+        message: 'File deleted successfully'
+      });
+    } catch (dbError) {
+      console.error('Failed to delete file:', dbError);
+      return res.status(500).json({
+        error: 'Failed to delete file',
+        code: 'DB_ERROR'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
  * /api/uploads/test:
  *   get:
  *     tags:

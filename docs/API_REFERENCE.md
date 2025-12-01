@@ -45,6 +45,38 @@ Test invoice system health
 
 ---
 
+#### 🔍 **GET** `/api/invoices/me`
+Get all invoices for the authenticated client with summary statistics
+
+**Authentication:** Required
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "invoices": [
+    {
+      "id": 1,
+      "invoice_number": "INV-2025-001",
+      "client_id": 5,
+      "project_id": 1,
+      "amount_total": 2500.00,
+      "amount_paid": 0,
+      "status": "sent",
+      "due_date": "2025-12-30T00:00:00.000Z",
+      "created_at": "2025-11-30T10:00:00.000Z",
+      "project_name": "Website Redesign"
+    }
+  ],
+  "count": 1,
+  "summary": {
+    "totalOutstanding": 2500.00,
+    "totalPaid": 1500.00
+  }
+}
+```
+
+---
+
 #### 📝 **POST** `/api/invoices`
 Create a new invoice
 
@@ -517,6 +549,119 @@ Upload file for specific project
     "uploadedBy": 1,
     "uploadedAt": "2025-09-02T05:46:22.662Z"
   }
+}
+```
+
+---
+
+#### 🔍 **GET** `/api/uploads/client`
+Get all files for authenticated client
+
+**Authentication:** Required
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "files": [
+    {
+      "id": 1,
+      "originalName": "project-brief.pdf",
+      "filename": "1701234567890-abc123.pdf",
+      "mimetype": "application/pdf",
+      "size": 245760,
+      "projectId": 1,
+      "projectName": "Website Redesign",
+      "uploadedAt": "2025-12-01T10:30:00.000Z",
+      "uploadedBy": 5
+    }
+  ],
+  "count": 1
+}
+```
+
+---
+
+#### 🔍 **GET** `/api/uploads/project/:projectId`
+Get all files for a specific project
+
+**Authentication:** Required
+**Parameters:**
+- `projectId` (integer) - Project ID
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "files": [...],
+  "count": 3
+}
+```
+
+**Error (403 Forbidden):**
+```json
+{
+  "error": "Access denied to this project"
+}
+```
+
+---
+
+#### 📥 **GET** `/api/uploads/file/:fileId`
+Download or preview a specific file
+
+**Authentication:** Required
+**Parameters:**
+- `fileId` (integer) - File ID
+
+**Query Parameters:**
+- `download` (boolean, optional) - If `true`, forces download with `Content-Disposition: attachment`; otherwise `inline` for preview
+
+**Response:** File stream with appropriate Content-Type and Content-Disposition headers
+
+**Access Control:** User must own the project the file belongs to, or have uploaded the file
+
+**Error (403 Forbidden):**
+```json
+{
+  "error": "Access denied to this file"
+}
+```
+
+**Error (404 Not Found):**
+```json
+{
+  "error": "File not found"
+}
+```
+
+---
+
+#### 🗑️ **DELETE** `/api/uploads/file/:fileId`
+Delete a specific file
+
+**Authentication:** Required
+**Parameters:**
+- `fileId` (integer) - File ID
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "File deleted successfully"
+}
+```
+
+**Error (403 Forbidden):**
+```json
+{
+  "error": "Access denied - you do not own this file"
+}
+```
+
+**Error (404 Not Found):**
+```json
+{
+  "error": "File not found"
 }
 ```
 

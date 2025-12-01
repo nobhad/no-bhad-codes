@@ -331,6 +331,72 @@ router.get(
 
 /**
  * @swagger
+ * /api/invoices/me:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Get all invoices for the authenticated client
+ *     description: Returns invoices for the currently logged-in client with summary stats
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Client invoices retrieved successfully
+ */
+router.get(
+  '/me',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = req.user?.id;
+
+    if (!clientId) {
+      return res.status(401).json({
+        error: 'Authentication required',
+        code: 'AUTH_REQUIRED'
+      });
+    }
+
+    try {
+      const invoices = await getInvoiceService().getClientInvoices(clientId);
+
+      // Calculate summary stats
+      let totalOutstanding = 0;
+      let totalPaid = 0;
+
+      invoices.forEach((invoice: any) => {
+        if (invoice.status === 'paid') {
+          totalPaid += parseFloat(invoice.amount_total) || 0;
+        } else if (['sent', 'viewed', 'partial', 'overdue'].includes(invoice.status)) {
+          totalOutstanding += parseFloat(invoice.amount_total) || 0;
+          // Subtract any partial payments
+          if (invoice.amount_paid) {
+            totalOutstanding -= parseFloat(invoice.amount_paid) || 0;
+            totalPaid += parseFloat(invoice.amount_paid) || 0;
+          }
+        }
+      });
+
+      res.json({
+        success: true,
+        invoices,
+        count: invoices.length,
+        summary: {
+          totalOutstanding,
+          totalPaid
+        }
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        error: 'Failed to retrieve invoices',
+        code: 'RETRIEVAL_FAILED',
+        message: error.message
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
  * /api/invoices/client/{clientId}:
  *   get:
  *     tags:

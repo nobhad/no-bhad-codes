@@ -237,6 +237,9 @@ export class ClientPortalModule extends BaseModule {
       });
     }
 
+    // Setup file upload handlers (drag & drop)
+    this.setupFileUploadHandlers();
+
     console.log('Dashboard event listeners setup complete');
     this.dashboardListenersSetup = true;
   }
@@ -676,20 +679,663 @@ export class ClientPortalModule extends BaseModule {
     });
   }
 
-  private loadFiles(): void {
-    if (!this.currentProject) return;
+  /** Files API base URL */
+  private static readonly FILES_API_BASE = 'http://localhost:3001/api/uploads';
 
-    const filesContainer = document.getElementById('files-grid');
+  /** Invoices API base URL */
+  private static readonly INVOICES_API_BASE = 'http://localhost:3001/api/invoices';
+
+  /**
+   * Load files from API and render the list
+   */
+  private async loadFiles(): Promise<void> {
+    const filesContainer = document.getElementById('files-list');
     if (!filesContainer) return;
 
-    if (this.currentProject.files.length === 0) {
-      filesContainer.innerHTML = '<p class="no-files">No files available yet.</p>';
+    // Show loading state
+    filesContainer.innerHTML = '<p class="loading-files">Loading files...</p>';
+
+    try {
+      const token = localStorage.getItem('client_auth_token');
+
+      // Use demo data if no token (demo mode)
+      if (!token || token.startsWith('demo_token_')) {
+        this.renderDemoFiles(filesContainer);
+        return;
+      }
+
+      const response = await fetch(`${ClientPortalModule.FILES_API_BASE}/client`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch files');
+      }
+
+      const data = await response.json();
+      this.renderFilesList(filesContainer, data.files || []);
+    } catch (error) {
+      console.error('Error loading files:', error);
+      // Fall back to demo data on error
+      this.renderDemoFiles(filesContainer);
+    }
+  }
+
+  /**
+   * Render demo files for demo mode
+   */
+  private renderDemoFiles(container: HTMLElement): void {
+    const demoFiles = [
+      {
+        id: 1,
+        originalName: 'Project-Requirements.pdf',
+        mimetype: 'application/pdf',
+        size: 245760,
+        uploadedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+        projectName: 'Website Redesign'
+      },
+      {
+        id: 2,
+        originalName: 'Logo-Design-v2.png',
+        mimetype: 'image/png',
+        size: 1048576,
+        uploadedAt: new Date(Date.now() - 86400000).toISOString(),
+        projectName: 'Brand Identity'
+      },
+      {
+        id: 3,
+        originalName: 'Meeting-Notes.docx',
+        mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        size: 32768,
+        uploadedAt: new Date().toISOString(),
+        projectName: 'Website Redesign'
+      }
+    ];
+    this.renderFilesList(container, demoFiles);
+  }
+
+  /**
+   * Render the files list
+   */
+  private renderFilesList(container: HTMLElement, files: any[]): void {
+    if (files.length === 0) {
+      container.innerHTML = '<p class="no-files">No files uploaded yet. Drag and drop files above to upload.</p>';
       return;
     }
 
-    // Populate files when available
-    filesContainer.innerHTML = '';
-    // Implementation for files display will be added later
+    container.innerHTML = files
+      .map(
+        (file) => `
+      <div class="file-item" data-file-id="${file.id}">
+        <div class="file-icon">
+          ${this.getFileIcon(file.mimetype)}
+        </div>
+        <div class="file-info">
+          <span class="file-name">${this.escapeHtml(file.originalName)}</span>
+          <span class="file-meta">
+            ${file.projectName ? `${file.projectName} • ` : ''}
+            ${this.formatDate(file.uploadedAt)} • ${this.formatFileSize(file.size)}
+          </span>
+        </div>
+        <div class="file-actions">
+          <button class="btn btn-sm btn-outline btn-preview" data-file-id="${file.id}" data-mimetype="${file.mimetype}">
+            Preview
+          </button>
+          <button class="btn btn-sm btn-outline btn-download" data-file-id="${file.id}" data-filename="${this.escapeHtml(file.originalName)}">
+            Download
+          </button>
+        </div>
+      </div>
+    `
+      )
+      .join('');
+
+    // Attach event listeners to buttons
+    this.attachFileActionListeners(container);
+  }
+
+  /**
+   * Get appropriate icon SVG for file type
+   */
+  private getFileIcon(mimetype: string): string {
+    // Image icon
+    const imageIcon =
+      '<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\' ry=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg>';
+    // PDF icon
+    const pdfIcon =
+      '<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\'/><polyline points=\'14 2 14 8 20 8\'/><line x1=\'16\' y1=\'13\' x2=\'8\' y2=\'13\'/><line x1=\'16\' y1=\'17\' x2=\'8\' y2=\'17\'/><polyline points=\'10 9 9 9 8 9\'/></svg>';
+    // Default document icon
+    const docIcon =
+      '<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\'/><polyline points=\'14 2 14 8 20 8\'/></svg>';
+
+    if (mimetype.startsWith('image/')) {
+      return imageIcon;
+    }
+    if (mimetype === 'application/pdf') {
+      return pdfIcon;
+    }
+    return docIcon;
+  }
+
+  /**
+   * Format file size in human-readable format
+   */
+  private formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    const size = parseFloat((bytes / Math.pow(k, i)).toFixed(1));
+    return `${size} ${sizes[i]}`;
+  }
+
+  /**
+   * Escape HTML to prevent XSS
+   */
+  private escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  /**
+   * Attach event listeners to file action buttons
+   */
+  private attachFileActionListeners(container: HTMLElement): void {
+    // Preview buttons
+    container.querySelectorAll('.btn-preview').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const fileId = (btn as HTMLElement).dataset.fileId;
+        const mimetype = (btn as HTMLElement).dataset.mimetype;
+        if (fileId) {
+          this.previewFile(parseInt(fileId), mimetype || '');
+        }
+      });
+    });
+
+    // Download buttons
+    container.querySelectorAll('.btn-download').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const fileId = (btn as HTMLElement).dataset.fileId;
+        const filename = (btn as HTMLElement).dataset.filename;
+        if (fileId) {
+          this.downloadFile(parseInt(fileId), filename || 'download');
+        }
+      });
+    });
+  }
+
+  /**
+   * Preview a file - opens in modal or new tab
+   */
+  private previewFile(fileId: number, mimetype: string): void {
+    const token = localStorage.getItem('client_auth_token');
+
+    // For demo mode, show a demo message
+    if (!token || token.startsWith('demo_token_')) {
+      alert('Preview not available in demo mode. Please log in to preview files.');
+      return;
+    }
+
+    // For images and PDFs, open in new tab
+    if (mimetype.startsWith('image/') || mimetype === 'application/pdf') {
+      const url = `${ClientPortalModule.FILES_API_BASE}/file/${fileId}`;
+      window.open(url, '_blank');
+    } else {
+      // For other files, trigger download instead
+      this.downloadFile(fileId, 'file');
+    }
+  }
+
+  /**
+   * Download a file
+   */
+  private downloadFile(fileId: number, filename: string): void {
+    const token = localStorage.getItem('client_auth_token');
+
+    // For demo mode, show a demo message
+    if (!token || token.startsWith('demo_token_')) {
+      alert('Download not available in demo mode. Please log in to download files.');
+      return;
+    }
+
+    // Create a temporary link to trigger download
+    const url = `${ClientPortalModule.FILES_API_BASE}/file/${fileId}?download=true`;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  /**
+   * Setup file upload handlers (drag & drop + browse)
+   */
+  private setupFileUploadHandlers(): void {
+    const dropzone = document.getElementById('upload-dropzone');
+    const fileInput = document.getElementById('file-input') as HTMLInputElement;
+    const browseBtn = document.getElementById('btn-browse-files');
+
+    if (!dropzone) return;
+
+    // Browse button click
+    if (browseBtn && fileInput) {
+      browseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        fileInput.click();
+      });
+
+      // File input change
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files && fileInput.files.length > 0) {
+          this.uploadFiles(Array.from(fileInput.files));
+          fileInput.value = ''; // Reset input
+        }
+      });
+    }
+
+    // Drag & drop handlers
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.add('drag-active');
+    });
+
+    dropzone.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove('drag-active');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove('drag-active');
+
+      const files = e.dataTransfer?.files;
+      if (files && files.length > 0) {
+        this.uploadFiles(Array.from(files));
+      }
+    });
+
+    // Prevent default drag behavior on window
+    window.addEventListener('dragover', (e) => e.preventDefault());
+    window.addEventListener('drop', (e) => e.preventDefault());
+  }
+
+  /**
+   * Upload files to the server
+   */
+  private async uploadFiles(files: File[]): Promise<void> {
+    const token = localStorage.getItem('client_auth_token');
+
+    // Demo mode check
+    if (!token || token.startsWith('demo_token_')) {
+      alert('File upload not available in demo mode. Please log in to upload files.');
+      return;
+    }
+
+    // Check file count limit
+    if (files.length > 5) {
+      alert('Maximum 5 files allowed per upload.');
+      return;
+    }
+
+    // Check file sizes
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const oversizedFiles = files.filter((f) => f.size > maxSize);
+    if (oversizedFiles.length > 0) {
+      alert(`Some files exceed the 10MB limit: ${oversizedFiles.map((f) => f.name).join(', ')}`);
+      return;
+    }
+
+    // Show upload progress
+    const dropzone = document.getElementById('upload-dropzone');
+    if (dropzone) {
+      dropzone.innerHTML = `
+        <div class="upload-progress">
+          <p>Uploading ${files.length} file(s)...</p>
+          <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+        </div>
+      `;
+    }
+
+    try {
+      const formData = new FormData();
+      files.forEach((file) => {
+        formData.append('files', file);
+      });
+
+      const response = await fetch(`${ClientPortalModule.FILES_API_BASE}/multiple`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Upload failed');
+      }
+
+      const result = await response.json();
+
+      // Reset dropzone
+      this.resetDropzone();
+
+      // Show success message
+      this.showUploadSuccess(result.files?.length || files.length);
+
+      // Reload files list
+      await this.loadFiles();
+    } catch (error) {
+      console.error('Upload error:', error);
+      this.resetDropzone();
+      alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Reset dropzone to initial state
+   */
+  private resetDropzone(): void {
+    const dropzone = document.getElementById('upload-dropzone');
+    if (dropzone) {
+      dropzone.innerHTML = `
+        <div class="dropzone-content">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <p>Drag and drop files here</p>
+          <span class="dropzone-hint">or</span>
+          <button type="button" class="btn btn-secondary" id="btn-browse-files">Browse Files</button>
+        </div>
+      `;
+      // Re-attach browse button listener
+      const browseBtn = document.getElementById('btn-browse-files');
+      const fileInput = document.getElementById('file-input') as HTMLInputElement;
+      if (browseBtn && fileInput) {
+        browseBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          fileInput.click();
+        });
+      }
+    }
+  }
+
+  /**
+   * Show upload success message
+   */
+  private showUploadSuccess(count: number): void {
+    const filesSection = document.getElementById('tab-files');
+    if (filesSection) {
+      const successMsg = document.createElement('div');
+      successMsg.className = 'upload-success-message';
+      successMsg.innerHTML = `<span>✓ ${count} file(s) uploaded successfully</span>`;
+      filesSection.insertBefore(successMsg, filesSection.firstChild);
+
+      // Remove after 3 seconds
+      setTimeout(() => {
+        successMsg.remove();
+      }, 3000);
+    }
+  }
+
+  // =====================================================
+  // INVOICE MANAGEMENT
+  // =====================================================
+
+  /**
+   * Load invoices from API and render the list
+   */
+  private async loadInvoices(): Promise<void> {
+    const invoicesContainer = document.querySelector('.invoices-list');
+    const summaryOutstanding = document.querySelector('.summary-card:first-child .summary-value');
+    const summaryPaid = document.querySelector('.summary-card:last-child .summary-value');
+
+    if (!invoicesContainer) return;
+
+    // Show loading state
+    const invoiceItems = invoicesContainer.querySelectorAll('.invoice-item');
+    invoiceItems.forEach((item) => item.remove());
+
+    try {
+      const token = localStorage.getItem('client_auth_token');
+
+      // Use demo data if no token (demo mode)
+      if (!token || token.startsWith('demo_token_')) {
+        this.renderDemoInvoices(invoicesContainer as HTMLElement);
+        return;
+      }
+
+      const response = await fetch(`${ClientPortalModule.INVOICES_API_BASE}/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch invoices');
+      }
+
+      const data = await response.json();
+
+      // Update summary cards
+      if (summaryOutstanding && data.summary) {
+        summaryOutstanding.textContent = this.formatCurrency(data.summary.totalOutstanding);
+      }
+      if (summaryPaid && data.summary) {
+        summaryPaid.textContent = this.formatCurrency(data.summary.totalPaid);
+      }
+
+      this.renderInvoicesList(invoicesContainer as HTMLElement, data.invoices || []);
+    } catch (error) {
+      console.error('Error loading invoices:', error);
+      this.renderDemoInvoices(invoicesContainer as HTMLElement);
+    }
+  }
+
+  /**
+   * Render demo invoices for demo mode
+   */
+  private renderDemoInvoices(container: HTMLElement): void {
+    const demoInvoices = [
+      {
+        id: 1,
+        invoice_number: 'INV-2025-001',
+        created_at: '2025-11-30T10:00:00Z',
+        due_date: '2025-12-30T10:00:00Z',
+        amount_total: 2500.0,
+        status: 'sent',
+        project_name: 'Website Redesign'
+      },
+      {
+        id: 2,
+        invoice_number: 'INV-2025-002',
+        created_at: '2025-11-15T10:00:00Z',
+        due_date: '2025-12-15T10:00:00Z',
+        amount_total: 1500.0,
+        status: 'paid',
+        project_name: 'Brand Identity'
+      }
+    ];
+
+    // Update summary with demo data
+    const summaryOutstanding = document.querySelector('.summary-card:first-child .summary-value');
+    const summaryPaid = document.querySelector('.summary-card:last-child .summary-value');
+    if (summaryOutstanding) summaryOutstanding.textContent = '$2,500.00';
+    if (summaryPaid) summaryPaid.textContent = '$1,500.00';
+
+    this.renderInvoicesList(container, demoInvoices);
+  }
+
+  /**
+   * Render invoices list
+   */
+  private renderInvoicesList(container: HTMLElement, invoices: any[]): void {
+    // Remove existing invoice items but keep the h3
+    const existingItems = container.querySelectorAll('.invoice-item');
+    existingItems.forEach((item) => item.remove());
+
+    // Remove no invoices message if exists
+    const noInvoicesMsg = container.querySelector('.no-invoices-message');
+    if (noInvoicesMsg) noInvoicesMsg.remove();
+
+    if (invoices.length === 0) {
+      const noInvoices = document.createElement('p');
+      noInvoices.className = 'no-invoices-message';
+      noInvoices.textContent =
+        'No invoices yet. Your first invoice will appear here once your project begins.';
+      container.appendChild(noInvoices);
+      return;
+    }
+
+    invoices.forEach((invoice) => {
+      const invoiceElement = document.createElement('div');
+      invoiceElement.className = 'invoice-item';
+      invoiceElement.dataset.invoiceId = String(invoice.id);
+
+      const statusClass = this.getInvoiceStatusClass(invoice.status);
+      const statusLabel = this.getInvoiceStatusLabel(invoice.status);
+
+      invoiceElement.innerHTML = `
+        <div class="invoice-info">
+          <span class="invoice-number">${this.escapeHtml(invoice.invoice_number)}</span>
+          <span class="invoice-date">${this.formatDate(invoice.created_at)}</span>
+          <span class="invoice-project">${this.escapeHtml(invoice.project_name || 'Project')}</span>
+        </div>
+        <div class="invoice-amount">${this.formatCurrency(invoice.amount_total)}</div>
+        <span class="invoice-status ${statusClass}">${statusLabel}</span>
+        <div class="invoice-actions">
+          <button class="btn btn-outline btn-sm btn-preview-invoice"
+                  data-invoice-id="${invoice.id}">Preview</button>
+          <button class="btn btn-outline btn-sm btn-download-invoice"
+                  data-invoice-id="${invoice.id}"
+                  data-invoice-number="${this.escapeHtml(invoice.invoice_number)}">Download</button>
+        </div>
+      `;
+
+      container.appendChild(invoiceElement);
+    });
+
+    this.attachInvoiceActionListeners(container);
+  }
+
+  /**
+   * Get CSS class for invoice status
+   */
+  private getInvoiceStatusClass(status: string): string {
+    const statusMap: Record<string, string> = {
+      draft: 'status-draft',
+      sent: 'status-pending',
+      viewed: 'status-pending',
+      partial: 'status-partial',
+      paid: 'status-paid',
+      overdue: 'status-overdue',
+      cancelled: 'status-cancelled'
+    };
+    return statusMap[status] || 'status-pending';
+  }
+
+  /**
+   * Get display label for invoice status
+   */
+  private getInvoiceStatusLabel(status: string): string {
+    const labelMap: Record<string, string> = {
+      draft: 'Draft',
+      sent: 'Pending',
+      viewed: 'Viewed',
+      partial: 'Partial',
+      paid: 'Paid',
+      overdue: 'Overdue',
+      cancelled: 'Cancelled'
+    };
+    return labelMap[status] || 'Pending';
+  }
+
+  /**
+   * Format currency value
+   */
+  private formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount || 0);
+  }
+
+  /**
+   * Attach event listeners to invoice action buttons
+   */
+  private attachInvoiceActionListeners(container: HTMLElement): void {
+    // Preview buttons
+    container.querySelectorAll('.btn-preview-invoice').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const invoiceId = (e.currentTarget as HTMLElement).dataset.invoiceId;
+        if (invoiceId) {
+          this.previewInvoice(parseInt(invoiceId));
+        }
+      });
+    });
+
+    // Download buttons
+    container.querySelectorAll('.btn-download-invoice').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const invoiceId = (e.currentTarget as HTMLElement).dataset.invoiceId;
+        const invoiceNumber = (e.currentTarget as HTMLElement).dataset.invoiceNumber || 'invoice';
+        if (invoiceId) {
+          this.downloadInvoice(parseInt(invoiceId), invoiceNumber);
+        }
+      });
+    });
+  }
+
+  /**
+   * Preview invoice (open in new tab or modal)
+   */
+  private previewInvoice(invoiceId: number): void {
+    const token = localStorage.getItem('client_auth_token');
+
+    if (!token || token.startsWith('demo_token_')) {
+      alert('Invoice preview not available in demo mode.');
+      return;
+    }
+
+    // Open invoice in new tab (can be enhanced with a modal later)
+    const url = `${ClientPortalModule.INVOICES_API_BASE}/${invoiceId}`;
+    window.open(url, '_blank');
+  }
+
+  /**
+   * Download invoice as PDF
+   * Note: This requires a PDF generation endpoint on the backend
+   */
+  private downloadInvoice(invoiceId: number, invoiceNumber: string): void {
+    const token = localStorage.getItem('client_auth_token');
+
+    if (!token || token.startsWith('demo_token_')) {
+      alert('Invoice download not available in demo mode.');
+      return;
+    }
+
+    // For now, open the invoice endpoint
+    // A proper implementation would generate a PDF
+    const url = `${ClientPortalModule.INVOICES_API_BASE}/${invoiceId}`;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${invoiceNumber}.pdf`;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   private loadMessages(): void {
@@ -1181,6 +1827,13 @@ export class ClientPortalModule extends BaseModule {
         btn.classList.add('active');
       }
     });
+
+    // Load tab-specific data
+    if (tabName === 'files') {
+      this.loadFiles();
+    } else if (tabName === 'invoices') {
+      this.loadInvoices();
+    }
   }
 
   private toggleAccountFolder(): void {

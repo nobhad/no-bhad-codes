@@ -51,7 +51,7 @@ This document summarizes the comprehensive invoice generation and file upload sy
 - **File Processing**: Multer with custom storage configuration
 - **Security**: MIME type validation, size limits, authentication
 - **Storage**: Organized directory structure by file purpose
-- **API Endpoints**: 5 specialized upload endpoints
+- **API Endpoints**: 9 specialized upload endpoints (including CRUD)
 - **Error Handling**: Comprehensive multer error processing
 
 **Files Created/Modified**:
@@ -59,6 +59,44 @@ This document summarizes the comprehensive invoice generation and file upload sy
 - `server/routes/uploads.ts` - Upload handling and validation
 - `server/app.ts` - Static file serving and route registration
 - `uploads/` directory structure with subdirectories
+
+### 3. 📂 Client Portal File Management (December 2025)
+
+**Purpose**: Complete file management interface for clients in the Client Portal.
+
+**Key Achievements**:
+
+- ✅ Drag & drop file upload with visual feedback
+- ✅ File list rendering from backend API
+- ✅ Demo mode fallback when backend unavailable
+- ✅ File preview (images/PDFs open in new browser tab)
+- ✅ File download with original filename
+- ✅ Access control (clients can only access their own files)
+- ✅ File type icons (document, image, PDF)
+- ✅ Human-readable file size formatting
+- ✅ XSS protection via HTML escaping
+
+**Technical Implementation**:
+
+- **Frontend**: Vanilla TypeScript with Fetch API
+- **Backend**: Express.js with Multer middleware
+- **Authentication**: JWT token-based access control
+- **Demo Mode**: Graceful fallback when server unavailable
+
+**API Endpoints Added**:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/uploads/client` | GET | Get all files for authenticated client |
+| `/api/uploads/project/:projectId` | GET | Get files for specific project |
+| `/api/uploads/file/:fileId` | GET | Download/preview a file |
+| `/api/uploads/file/:fileId` | DELETE | Delete a file |
+
+**Files Created/Modified**:
+
+- `server/routes/uploads.ts` - Added 4 new endpoints
+- `src/features/client/client-portal.ts` - ~400 lines of file handling code
+- `eslint.config.js` - Added File, FileList, DataTransfer globals
 
 ## 🏗️ Architecture Highlights
 
@@ -259,7 +297,7 @@ The systems provide a solid foundation for the No Bhad Codes client management p
 
 ---
 
-**Implementation Date**: September 2, 2025  
-**Systems Status**: ✅ Complete and Operational  
-**Documentation Status**: ✅ Complete and Current  
-**Testing Status**: ✅ Validated and Verified
+**Last Updated**: December 1, 2025
+**Systems Status**: ✅ Complete and Operational
+**Documentation Status**: ✅ Complete and Current
+**Testing Status**: ✅ 259 tests passing

@@ -643,25 +643,33 @@ Get comprehensive project dashboard data.
 
 ## File Management Endpoints
 
-### POST `/projects/:id/files`
-Upload files to project.
+### Upload Endpoints
 
-**Headers:** 
+#### POST `/api/uploads/single`
+Upload a single file.
+
+**Headers:**
 - `Authorization: Bearer <token>`
 - `Content-Type: multipart/form-data`
 
-**Request:**
-```
-POST /api/projects/101/files
-Content-Type: multipart/form-data
+**Form Data:**
+- `file` (file) - The file to upload
 
-files: [File objects]
-```
+#### POST `/api/uploads/multiple`
+Upload multiple files (max 5).
 
-**Response:**
+**Headers:**
+- `Authorization: Bearer <token>`
+- `Content-Type: multipart/form-data`
+
+**Form Data:**
+- `files` (file[]) - Array of files to upload
+
+**Response (201 Created):**
 ```json
 {
-  "message": "3 file(s) uploaded successfully",
+  "success": true,
+  "message": "3 files uploaded successfully",
   "files": [
     {
       "id": 502,
@@ -677,9 +685,92 @@ files: [File objects]
 **File Upload Limits:**
 - Maximum file size: 10MB per file
 - Maximum files per request: 5
-- Allowed file types: PDF, DOC, DOCX, TXT, PNG, JPG, JPEG, GIF, ZIP
+- Allowed file types: PDF, DOC, DOCX, TXT, PNG, JPG, JPEG, GIF, WEBP, ZIP
 
-### GET `/projects/:id/files`
+### File Retrieval Endpoints
+
+#### GET `/api/uploads/client`
+Get all files for authenticated client (across all projects).
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "files": [
+    {
+      "id": 501,
+      "originalName": "Website Wireframes V2.pdf",
+      "filename": "1643728800-wireframes.pdf",
+      "mimetype": "application/pdf",
+      "size": 2048576,
+      "projectId": 1,
+      "projectName": "Corporate Website",
+      "uploadedAt": "2024-01-20T14:30:00Z",
+      "uploadedBy": 5
+    }
+  ],
+  "count": 1
+}
+```
+
+#### GET `/api/uploads/project/:projectId`
+Get all files for a specific project.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Parameters:**
+- `projectId` (integer) - Project ID
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "files": [...],
+  "count": 3
+}
+```
+
+#### GET `/api/uploads/file/:fileId`
+Download or preview a specific file.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Parameters:**
+- `fileId` (integer) - File ID
+
+**Query Parameters:**
+- `download` (boolean, optional) - If `true`, forces download; otherwise inline preview
+
+**Response:** File stream with appropriate headers
+
+#### DELETE `/api/uploads/file/:fileId`
+Delete a specific file.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Parameters:**
+- `fileId` (integer) - File ID
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "File deleted successfully"
+}
+```
+
+### Legacy Project File Endpoints
+
+#### POST `/projects/:id/files`
+Upload files to a specific project.
+
+**Headers:**
+- `Authorization: Bearer <token>`
+- `Content-Type: multipart/form-data`
+
+#### GET `/projects/:id/files`
 List project files.
 
 **Headers:** `Authorization: Bearer <token>`
