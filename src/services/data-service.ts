@@ -75,12 +75,6 @@ export interface PortfolioData {
 }
 
 export class DataService extends BaseService {
-  getVentures() {
-    throw new Error('Method not implemented.');
-  }
-  getVenture(_id: string) {
-    throw new Error('Method not implemented.');
-  }
   private data: PortfolioData | null = null;
   private cache = new Map<string, any>();
 
@@ -132,6 +126,21 @@ export class DataService extends BaseService {
   getProject(id: string): Project | null {
     const projects = this.getProjects();
     return projects.find((project) => project.id === id) || null;
+  }
+
+  /**
+   * Get all ventures (alias for getProjects)
+   * Ventures and projects are used interchangeably in this portfolio
+   */
+  getVentures(): Project[] {
+    return this.getProjects();
+  }
+
+  /**
+   * Get specific venture by ID (alias for getProject)
+   */
+  getVenture(id: string): Project | null {
+    return this.getProject(id);
   }
 
   /**

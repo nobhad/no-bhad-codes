@@ -647,5 +647,104 @@ router.post(
   })
 );
 
+/**
+ * @swagger
+ * /api/auth/admin/login:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Admin login
+ *     description: Authenticate admin credentials and return JWT token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [password]
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 description: Admin password
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Admin login successful"
+ *                 token:
+ *                   type: string
+ *                 expiresIn:
+ *                   type: string
+ *                   example: "1h"
+ *       401:
+ *         description: Invalid credentials
+ *       429:
+ *         description: Too many attempts
+ */
+router.post(
+  '/admin/login',
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({
+        error: 'Password is required',
+        code: 'MISSING_PASSWORD'
+      });
+    }
+
+    // Get admin password hash from environment
+    const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
+    if (!adminPasswordHash) {
+      console.error('ADMIN_PASSWORD_HASH not configured');
+      return res.status(500).json({
+        error: 'Server configuration error',
+        code: 'CONFIG_ERROR'
+      });
+    }
+
+    // Verify password using bcrypt
+    const isValidPassword = await bcrypt.compare(password, adminPasswordHash);
+    if (!isValidPassword) {
+      return res.status(401).json({
+        error: 'Invalid credentials',
+        code: 'INVALID_CREDENTIALS'
+      });
+    }
+
+    // Generate JWT token for admin
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      console.error('JWT_SECRET not configured');
+      return res.status(500).json({
+        error: 'Server configuration error',
+        code: 'CONFIG_ERROR'
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: 0, // Admin doesn't have a client ID
+        email: 'admin@nobhadcodes.com',
+        type: 'admin'
+      },
+      secret,
+      { expiresIn: '1h' } as SignOptions // Shorter expiry for admin sessions
+    );
+
+    res.json({
+      message: 'Admin login successful',
+      token,
+      expiresIn: '1h'
+    });
+  })
+);
+
 export { router as authRouter };
 export default router;

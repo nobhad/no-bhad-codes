@@ -3,12 +3,14 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Form Fields](#form-fields)
-3. [Validation](#validation)
-4. [Form Submission](#form-submission)
-5. [Backend Integration](#backend-integration)
-6. [Styling](#styling)
-7. [File Locations](#file-locations)
+2. [Features](#features)
+3. [HTML Structure](#html-structure)
+4. [Form Fields](#form-fields)
+5. [Validation](#validation)
+6. [Form Submission](#form-submission)
+7. [Backend Integration](#backend-integration)
+8. [Styling](#styling)
+9. [File Locations](#file-locations)
 
 ---
 
@@ -16,7 +18,91 @@
 
 The New Project Request form allows existing clients to submit requests for additional projects. The form collects project details, budget, timeline, and requirements.
 
-**Access:** Client Portal > + NEW PROJECT button
+**Access:** Client Portal > + NEW PROJECT button (`tab-new-project`)
+
+---
+
+## Features
+
+| Feature | Description |
+|---------|-------------|
+| Project Name | Custom name for the project |
+| Project Type | Dropdown selection of project categories |
+| Budget Range | Predefined budget options |
+| Timeline | Desired completion timeline |
+| Description | Free-form project requirements |
+| Required Fields | All fields required for submission |
+| Form Reset | Form clears after successful submission |
+
+---
+
+## HTML Structure
+
+### Complete New Project Tab
+
+```html
+<!-- templates/pages/client-portal.ejs:337-393 -->
+<div class="tab-content" id="tab-new-project">
+    <div class="page-header">
+        <h2>Start a New Project</h2>
+    </div>
+
+    <form class="new-project-form" id="new-project-form">
+        <p class="form-intro">Ready to start something new? Fill out the form below to request a new project.</p>
+
+        <div class="form-group">
+            <label for="project-name">Project Name</label>
+            <input type="text" id="project-name" class="form-input"
+                   placeholder="e.g., Company Website Redesign" required>
+        </div>
+
+        <div class="form-group">
+            <label for="project-type">Project Type</label>
+            <select id="project-type" class="form-select" required>
+                <option value="">Select a project type</option>
+                <option value="website">New Website</option>
+                <option value="redesign">Website Redesign</option>
+                <option value="webapp">Web Application</option>
+                <option value="ecommerce">E-Commerce Site</option>
+                <option value="maintenance">Maintenance & Updates</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="project-budget">Estimated Budget</label>
+            <select id="project-budget" class="form-select" required>
+                <option value="">Select a budget range</option>
+                <option value="1k-2.5k">$1,000 - $2,500</option>
+                <option value="2.5k-5k">$2,500 - $5,000</option>
+                <option value="5k-10k">$5,000 - $10,000</option>
+                <option value="10k-25k">$10,000 - $25,000</option>
+                <option value="25k+">$25,000+</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="project-timeline">Desired Timeline</label>
+            <select id="project-timeline" class="form-select" required>
+                <option value="">Select a timeline</option>
+                <option value="asap">As soon as possible</option>
+                <option value="1-2months">1-2 months</option>
+                <option value="3-6months">3-6 months</option>
+                <option value="flexible">Flexible</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="project-description">Project Description</label>
+            <textarea id="project-description" class="form-textarea" rows="5"
+                      placeholder="Tell me about your project goals, requirements, and any specific features you need..."
+                      required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-secondary">Submit Project Request</button>
+    </form>
+</div>
+```
 
 ---
 
@@ -26,11 +112,18 @@ The New Project Request form allows existing clients to submit requests for addi
 
 ```html
 <div class="form-group">
-  <label for="project-name">Project Name</label>
-  <input type="text" id="project-name" class="form-input"
-         placeholder="e.g., Company Website Redesign" required>
+    <label for="project-name">Project Name</label>
+    <input type="text" id="project-name" class="form-input"
+           placeholder="e.g., Company Website Redesign" required>
 </div>
 ```
+
+| Property | Value |
+|----------|-------|
+| ID | `project-name` |
+| Type | `text` |
+| Required | Yes |
+| Placeholder | "e.g., Company Website Redesign" |
 
 ### Project Type
 
@@ -47,16 +140,16 @@ Dropdown selection for project category:
 
 ```html
 <div class="form-group">
-  <label for="project-type">Project Type</label>
-  <select id="project-type" class="form-select" required>
-    <option value="">Select a project type</option>
-    <option value="website">New Website</option>
-    <option value="redesign">Website Redesign</option>
-    <option value="webapp">Web Application</option>
-    <option value="ecommerce">E-Commerce Site</option>
-    <option value="maintenance">Maintenance & Updates</option>
-    <option value="other">Other</option>
-  </select>
+    <label for="project-type">Project Type</label>
+    <select id="project-type" class="form-select" required>
+        <option value="">Select a project type</option>
+        <option value="website">New Website</option>
+        <option value="redesign">Website Redesign</option>
+        <option value="webapp">Web Application</option>
+        <option value="ecommerce">E-Commerce Site</option>
+        <option value="maintenance">Maintenance & Updates</option>
+        <option value="other">Other</option>
+    </select>
 </div>
 ```
 
@@ -74,15 +167,15 @@ Budget range selection:
 
 ```html
 <div class="form-group">
-  <label for="project-budget">Estimated Budget</label>
-  <select id="project-budget" class="form-select" required>
-    <option value="">Select a budget range</option>
-    <option value="1k-2.5k">$1,000 - $2,500</option>
-    <option value="2.5k-5k">$2,500 - $5,000</option>
-    <option value="5k-10k">$5,000 - $10,000</option>
-    <option value="10k-25k">$10,000 - $25,000</option>
-    <option value="25k+">$25,000+</option>
-  </select>
+    <label for="project-budget">Estimated Budget</label>
+    <select id="project-budget" class="form-select" required>
+        <option value="">Select a budget range</option>
+        <option value="1k-2.5k">$1,000 - $2,500</option>
+        <option value="2.5k-5k">$2,500 - $5,000</option>
+        <option value="5k-10k">$5,000 - $10,000</option>
+        <option value="10k-25k">$10,000 - $25,000</option>
+        <option value="25k+">$25,000+</option>
+    </select>
 </div>
 ```
 
@@ -99,14 +192,14 @@ Timeline preference selection:
 
 ```html
 <div class="form-group">
-  <label for="project-timeline">Desired Timeline</label>
-  <select id="project-timeline" class="form-select" required>
-    <option value="">Select a timeline</option>
-    <option value="asap">As soon as possible</option>
-    <option value="1-2months">1-2 months</option>
-    <option value="3-6months">3-6 months</option>
-    <option value="flexible">Flexible</option>
-  </select>
+    <label for="project-timeline">Desired Timeline</label>
+    <select id="project-timeline" class="form-select" required>
+        <option value="">Select a timeline</option>
+        <option value="asap">As soon as possible</option>
+        <option value="1-2months">1-2 months</option>
+        <option value="3-6months">3-6 months</option>
+        <option value="flexible">Flexible</option>
+    </select>
 </div>
 ```
 
@@ -116,12 +209,19 @@ Free-form text area for detailed requirements:
 
 ```html
 <div class="form-group">
-  <label for="project-description">Project Description</label>
-  <textarea id="project-description" class="form-textarea" rows="5"
-            placeholder="Tell me about your project goals, requirements, and any specific features you need..."
-            required></textarea>
+    <label for="project-description">Project Description</label>
+    <textarea id="project-description" class="form-textarea" rows="5"
+              placeholder="Tell me about your project goals, requirements, and any specific features you need..."
+              required></textarea>
 </div>
 ```
+
+| Property | Value |
+|----------|-------|
+| ID | `project-description` |
+| Rows | 5 |
+| Required | Yes |
+| Placeholder | Detailed prompt for requirements |
 
 ---
 
@@ -131,13 +231,13 @@ Free-form text area for detailed requirements:
 
 All fields are required for submission:
 
-- Project Name
-- Project Type
-- Estimated Budget
-- Desired Timeline
-- Project Description
+- [x] Project Name
+- [x] Project Type
+- [x] Estimated Budget
+- [x] Desired Timeline
+- [x] Project Description
 
-### Client-Side Validation
+### Client-Side Validation (Planned)
 
 ```typescript
 const form = document.getElementById('new-project-form') as HTMLFormElement;
@@ -163,7 +263,20 @@ form.addEventListener('submit', (e) => {
     return;
   }
 
-  // ... additional validation
+  if (!projectBudget.value) {
+    showError('Please select a budget range');
+    return;
+  }
+
+  if (!projectTimeline.value) {
+    showError('Please select a timeline');
+    return;
+  }
+
+  if (!projectDescription.value.trim()) {
+    showError('Please enter a project description');
+    return;
+  }
 
   // Submit form
   submitProjectRequest({
@@ -180,7 +293,7 @@ form.addEventListener('submit', (e) => {
 
 ## Form Submission
 
-### Submit Handler
+### Submit Handler (Planned)
 
 ```typescript
 async function submitProjectRequest(data: ProjectRequestData): Promise<void> {
@@ -379,17 +492,45 @@ await emailService.sendAdminNotification({
 }
 ```
 
+### Focus States
+
+```css
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
+}
+```
+
+### Error States
+
+```css
+.form-input.error,
+.form-select.error,
+.form-textarea.error {
+  border-color: #dc2626;
+}
+
+.error-message {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+```
+
 ---
 
 ## File Locations
 
-| File | Purpose |
-|------|---------|
-| `templates/pages/client-portal.ejs:337-393` | New Project form HTML |
-| `src/features/client/client-portal.ts` | Form submission handler |
-| `src/styles/pages/client-portal.css` | Form styling |
-| `server/routes/projects.ts` | Project request API |
-| `server/services/email-service.ts` | Email notifications |
+| File | Lines | Purpose |
+|------|-------|---------|
+| `templates/pages/client-portal.ejs` | 337-393 | New Project form HTML |
+| `src/features/client/client-portal.ts` | - | Form submission handler (planned) |
+| `src/styles/pages/client-portal.css` | - | Form styling |
+| `server/routes/projects.ts` | - | Project request API |
+| `server/services/email-service.ts` | - | Email notifications |
 
 ---
 
@@ -397,3 +538,4 @@ await emailService.sendAdminNotification({
 
 - [Client Portal](./CLIENT_PORTAL.md) - Main portal overview
 - [Messages](./MESSAGES.md) - Project discussions happen in messages
+- [CSS Architecture](./CSS_ARCHITECTURE.md) - Form styling system

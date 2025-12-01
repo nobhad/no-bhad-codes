@@ -327,6 +327,9 @@ export class ClientPortalModule extends BaseModule {
     });
   }
 
+  /** API base URL for authentication */
+  private static readonly API_BASE = 'http://localhost:3001/api/auth';
+
   private async handleLogin(event: Event): Promise<void> {
     event.preventDefault();
     if (!this.loginForm) return;
@@ -355,32 +358,71 @@ export class ClientPortalModule extends BaseModule {
     this.setLoginLoading(true);
 
     try {
-      // For demo purposes, simulate successful login
-      if (credentials.email && credentials.password) {
-        // Simulate a successful login response
-        const mockUserData = {
-          token: `demo_token_${Date.now()}`,
-          user: {
-            id: 1,
-            email: credentials.email,
-            name: credentials.email
-              .split('@')[0]
-              .replace(/[^a-zA-Z]/g, ' ')
-              .replace(/\b\w/g, (l) => l.toUpperCase())
-          }
-        };
+      // Try backend authentication first
+      try {
+        const response = await fetch(`${ClientPortalModule.API_BASE}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(credentials)
+        });
 
-        // Store authentication token
-        localStorage.setItem('client_auth_token', mockUserData.token);
+        if (response.ok) {
+          const data = await response.json();
 
-        this.isLoggedIn = true;
-        this.currentUser = mockUserData.user.email;
+          // Store authentication token
+          localStorage.setItem('client_auth_token', data.token);
 
-        // Load mock user projects
-        await this.loadMockUserProjects(mockUserData.user);
-        this.showDashboard();
-      } else {
-        throw new Error('Please enter both email and password');
+          this.isLoggedIn = true;
+          this.currentUser = data.user.email;
+
+          // Load user projects from backend or mock
+          await this.loadMockUserProjects({
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.contactName || data.user.companyName || data.user.email.split('@')[0]
+          });
+          this.showDashboard();
+          return;
+        }
+
+        // Handle specific error responses from backend
+        const errorData = await response.json();
+        if (errorData.code === 'INVALID_CREDENTIALS') {
+          throw new Error('Invalid email or password');
+        } else if (errorData.code === 'ACCOUNT_INACTIVE') {
+          throw new Error('Your account is inactive. Please contact support.');
+        } else {
+          throw new Error(errorData.error || 'Login failed');
+        }
+      } catch (fetchError) {
+        // If backend is unavailable, fall back to demo mode
+        if (fetchError instanceof TypeError && fetchError.message.includes('fetch')) {
+          console.warn('[ClientPortal] Backend unavailable, using demo mode');
+
+          // Demo mode fallback - simulate successful login
+          const mockUserData = {
+            token: `demo_token_${Date.now()}`,
+            user: {
+              id: 1,
+              email: credentials.email,
+              name: credentials.email
+                .split('@')[0]
+                .replace(/[^a-zA-Z]/g, ' ')
+                .replace(/\b\w/g, (l) => l.toUpperCase())
+            }
+          };
+
+          localStorage.setItem('client_auth_token', mockUserData.token);
+          this.isLoggedIn = true;
+          this.currentUser = mockUserData.user.email;
+
+          await this.loadMockUserProjects(mockUserData.user);
+          this.showDashboard();
+          return;
+        }
+
+        // Re-throw authentication errors
+        throw fetchError;
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -789,8 +831,14 @@ export class ClientPortalModule extends BaseModule {
     const token = localStorage.getItem('client_auth_token');
     if (!token) return;
 
+    // Skip auth check for demo tokens
+    if (token.startsWith('demo_token_')) {
+      console.log('[ClientPortal] Demo token detected, skipping auth check');
+      return;
+    }
+
     try {
-      const response = await fetch('http://localhost:3001/api/auth/profile', {
+      const response = await fetch(`${ClientPortalModule.API_BASE}/profile`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -800,7 +848,11 @@ export class ClientPortalModule extends BaseModule {
         const data = await response.json();
         this.isLoggedIn = true;
         this.currentUser = data.user.email;
-        await this.loadMockUserProjects(data.user);
+        await this.loadMockUserProjects({
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.contactName || data.user.companyName || data.user.email.split('@')[0]
+        });
         this.showDashboard();
       } else {
         // Token is invalid, remove it
@@ -808,7 +860,10 @@ export class ClientPortalModule extends BaseModule {
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      localStorage.removeItem('client_auth_token');
+      // Don't remove token on network errors - might just be backend down
+      if (!(error instanceof TypeError)) {
+        localStorage.removeItem('client_auth_token');
+      }
     }
   }
 

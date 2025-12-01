@@ -3,20 +3,178 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [CSS Variables](#css-variables)
-3. [Theme System](#theme-system)
-4. [Client Portal Classes](#client-portal-classes)
-5. [Utility Classes](#utility-classes)
-6. [Responsive Design](#responsive-design)
-7. [Naming Conventions](#naming-conventions)
-8. [File Organization](#file-organization)
-9. [Best Practices](#best-practices)
+2. [Standardized Components](#standardized-components)
+3. [CSS Variables](#css-variables)
+4. [Theme System](#theme-system)
+5. [Client Portal Classes](#client-portal-classes)
+6. [Utility Classes](#utility-classes)
+7. [Responsive Design](#responsive-design)
+8. [Naming Conventions](#naming-conventions)
+9. [File Organization](#file-organization)
+10. [Best Practices](#best-practices)
 
 ---
 
 ## Overview
 
 The project uses a CSS variable-based architecture for consistent theming across light and dark modes. The Client Portal uses the `cp-` prefix for portal-specific classes to avoid conflicts with main site styles.
+
+**Main stylesheet:** `src/styles/pages/client-portal.css` (3050 lines)
+
+---
+
+## Standardized Components
+
+The Client Portal CSS defines standardized component classes documented at the top of the file for consistency across all views.
+
+### Component: Card
+
+Use for any content container/section:
+
+```css
+/* src/styles/pages/client-portal.css:25-34 */
+.cp-card {
+  background: var(--color-neutral-200);
+  border: 4px solid #000000;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.cp-card:last-child {
+  margin-bottom: 0;
+}
+```
+
+### Component: Card Header
+
+Use for section titles within cards:
+
+```css
+/* src/styles/pages/client-portal.css:40-48 */
+.cp-card-header {
+  font-family: var(--font--acme);
+  font-size: 1.1rem;
+  color: var(--color-dark);
+  margin: 0 0 1rem 0;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--color-dark);
+  padding-bottom: 0.5rem;
+}
+```
+
+### Component: Buttons
+
+Standard button classes with consistent styling:
+
+```css
+/* src/styles/pages/client-portal.css:55-98 */
+.cp-btn,
+.client-portal-main .btn,
+.client-portal-main .btn-primary,
+.client-portal-main .btn-secondary,
+.client-portal-main .btn-outline,
+.client-portal-main button[type="submit"] {
+  padding: 0.75rem 1.5rem;
+  background: var(--color-neutral-300);
+  color: var(--color-dark);
+  border: 4px solid var(--color-dark);
+  border-radius: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  font-family: inherit;
+  line-height: 1.2;
+}
+
+/* Primary/Submit button */
+.cp-btn-primary,
+.client-portal-main .btn-primary,
+.client-portal-main button[type="submit"] {
+  background: var(--color-neutral-300);
+}
+
+/* Small button */
+.cp-btn-sm,
+.client-portal-main .btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  border-width: 3px;
+}
+
+/* Hover state */
+.cp-btn:hover,
+.client-portal-main .btn:hover {
+  background: var(--color-primary);
+  color: var(--color-dark);
+}
+```
+
+### Component: Form Input
+
+Standardized form inputs:
+
+```css
+.cp-input,
+.client-portal-main .form-input,
+.client-portal-main .form-select,
+.client-portal-main .form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--color-neutral-100);
+  border: 2px solid var(--color-dark);
+  border-radius: 4px;
+  color: var(--color-dark);
+  font-size: 1rem;
+}
+
+.cp-input:focus,
+.client-portal-main .form-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
+}
+```
+
+### Component: Badge/Status
+
+Status indicators:
+
+```css
+.cp-badge {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 999px;
+  display: inline-block;
+}
+```
+
+### Component: Stat Card
+
+Quick stats display:
+
+```css
+.cp-stat {
+  background: var(--color-neutral-100);
+  border: 4px solid #000000;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.cp-stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  display: block;
+}
+
+.cp-stat-label {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+```
 
 ---
 
@@ -156,6 +314,14 @@ All Client Portal specific classes use the `cp-` prefix to avoid conflicts with 
 | Class | Purpose |
 |-------|---------|
 | `.cp-shadow` | Intense multi-layer shadow utility |
+| `.cp-card` | Content container card |
+| `.cp-card-header` | Section title in card |
+| `.cp-btn` | Standard button |
+| `.cp-btn-primary` | Primary action button |
+| `.cp-btn-sm` | Small button |
+| `.cp-input` | Form input field |
+| `.cp-badge` | Status badge |
+| `.cp-stat` | Stat card |
 | `.cp-project-cards` | Project cards container |
 | `.cp-project-card` | Individual project card |
 | `.cp-password-wrapper` | Password field with toggle |
@@ -164,6 +330,7 @@ All Client Portal specific classes use the `cp-` prefix to avoid conflicts with 
 ### Shadow Utility Class
 
 ```css
+/* src/styles/pages/client-portal.css:18-23 */
 .cp-shadow {
   box-shadow:
     20px 6px 30px rgba(0, 0, 0, 0.6),
@@ -174,7 +341,7 @@ All Client Portal specific classes use the `cp-` prefix to avoid conflicts with 
 
 ### Project Card (Avoiding Conflicts)
 
-The `.cp-project-card` class was created because `.project-card` in `projects.css` had conflicting rules that made the card invisible:
+The `.cp-project-card` class was created because `.project-card` in `projects.css` had conflicting rules:
 
 ```css
 /* WRONG - conflicts with projects.css */
@@ -230,12 +397,13 @@ The `.cp-project-card` class was created because `.project-card` in `projects.cs
 
 ### Status Classes
 
-| Class | Usage |
-|-------|-------|
-| `.status-badge` | Status indicator base |
-| `.status-pending` | Yellow pending status |
-| `.status-paid` | Green paid status |
-| `.status-overdue` | Red overdue status |
+| Class | Usage | Colors |
+|-------|-------|--------|
+| `.status-badge` | Status indicator base | - |
+| `.status-pending` | Yellow pending status | `#fef3c7` / `#92400e` |
+| `.status-paid` | Green paid status | `#d1fae5` / `#065f46` |
+| `.status-overdue` | Red overdue status | `#fee2e2` / `#991b1b` |
+| `.status-draft` | Gray draft status | neutral-200 |
 
 ---
 
@@ -252,7 +420,7 @@ The `.cp-project-card` class was created because `.project-card` in `projects.cs
 | `--bp-xl` | `1200px` |
 | `--bp-2xl` | `1400px` |
 
-### Responsive Grid Example
+### Settings Grid (3 → 2 → 1 columns)
 
 ```css
 .settings-grid {
@@ -270,6 +438,39 @@ The `.cp-project-card` class was created because `.project-card` in `projects.cs
 @media (max-width: 768px) {
   .settings-grid {
     grid-template-columns: 1fr;
+  }
+}
+```
+
+### Invoice Summary Grid (2 → 1 columns)
+
+```css
+.invoice-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 576px) {
+  .invoice-summary {
+    grid-template-columns: 1fr;
+  }
+}
+```
+
+### Invoice Item Grid (4 → 1 columns)
+
+```css
+.invoice-item {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto auto;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .invoice-item {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
   }
 }
 ```
@@ -343,7 +544,7 @@ src/styles/
 │   ├── messaging.css     # Messaging components
 │   └── ...
 └── pages/
-    ├── client-portal.css  # Client Portal specific
+    ├── client-portal.css  # Client Portal specific (3050 lines)
     ├── client.css         # Client landing page
     ├── projects.css       # Projects page
     ├── admin.css          # Admin dashboard
@@ -377,10 +578,11 @@ src/styles/
 
 - Use CSS variables for colors, spacing, and sizing
 - Use `clamp()` for fluid responsive values
-- Prefix scoped styles to avoid conflicts
+- Prefix scoped styles with `cp-` to avoid conflicts
 - Use semantic class names
 - Group related styles together
 - Add comments for complex selectors
+- Use the standardized component classes defined at the top of client-portal.css
 
 ### Don'ts
 
@@ -424,7 +626,7 @@ box-shadow:
 |------|---------|
 | `src/styles/variables.css` | CSS variables and themes |
 | `src/styles/main.css` | Main site styles |
-| `src/styles/pages/client-portal.css` | Client Portal specific |
+| `src/styles/pages/client-portal.css` | Client Portal specific (3050 lines) |
 | `src/styles/components/*.css` | Reusable components |
 
 ---
@@ -432,4 +634,6 @@ box-shadow:
 ## Related Documentation
 
 - [Client Portal](./CLIENT_PORTAL.md) - Uses these styles
+- [Messages](./MESSAGES.md) - Emoji picker styling
+- [Settings](./SETTINGS.md) - Settings grid layout
 - [All Feature Docs](./README.md) - Feature-specific styling
