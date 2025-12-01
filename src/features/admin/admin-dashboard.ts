@@ -10,6 +10,10 @@
 
 import { AdminSecurity } from './admin-security';
 import type { PerformanceMetrics, PerformanceAlert } from '../../services/performance-service';
+import { Chart, registerables } from 'chart.js';
+
+// Register all Chart.js components
+Chart.register(...registerables);
 
 // Type definitions
 interface PerformanceReport {
@@ -102,60 +106,120 @@ declare global {
   }
 }
 
-// Admin authentication and session management
+// Admin authentication and session management using JWT backend
 class AdminAuth {
-  // TODO: Replace with backend JWT authentication via /api/admin/login
-  // For now, using environment-configurable password hash
-  // Set VITE_ADMIN_PASSWORD_HASH at build time or use default
-  private static readonly AUTH_KEY_HASH =
-    (import.meta.env && import.meta.env.VITE_ADMIN_PASSWORD_HASH) ||
-    '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'; // Default: 'admin' in SHA256
   private static readonly SESSION_KEY = 'nbw_admin_session';
-  private static readonly SESSION_DURATION = 60 * 60 * 1000; // 1 hour
+  private static readonly TOKEN_KEY = 'nbw_admin_token';
+  private static readonly API_BASE = '/api/auth';
 
+  /**
+   * Authenticate with backend JWT API
+   * Falls back to client-side hash for offline/development mode
+   */
   static async authenticate(inputKey: string): Promise<boolean> {
     try {
       // Check rate limiting first
       AdminSecurity.checkRateLimit();
 
-      // Hash the input key using Web Crypto API
+      // Try backend authentication first
+      try {
+        const response = await fetch(`${this.API_BASE}/admin/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ password: inputKey })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+
+          // Clear failed attempts on successful login
+          AdminSecurity.clearAttempts();
+
+          // Store JWT token and session
+          localStorage.setItem(this.TOKEN_KEY, data.token);
+          const session = {
+            authenticated: true,
+            timestamp: Date.now(),
+            expiresIn: data.expiresIn
+          };
+          sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
+
+          return true;
+        } else if (response.status === 401) {
+          // Invalid credentials
+          AdminSecurity.recordFailedAttempt();
+          return false;
+        }
+        // For other errors, fall through to fallback
+      } catch (fetchError) {
+        console.warn('[AdminAuth] Backend auth failed, using fallback:', fetchError);
+      }
+
+      // Fallback: Client-side hash authentication for offline/development
+      const fallbackHash =
+        (import.meta.env && import.meta.env.VITE_ADMIN_PASSWORD_HASH) ||
+        '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'; // Default: 'admin' in SHA256
+
       const encoder = new TextEncoder();
       const data = encoder.encode(inputKey);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 
-      if (hashHex === this.AUTH_KEY_HASH) {
-        // Clear failed attempts on successful login
+      if (hashHex === fallbackHash) {
         AdminSecurity.clearAttempts();
-
-        // Store session with timestamp
         const session = {
           authenticated: true,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          fallback: true // Mark as fallback auth
         };
         sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
         return true;
       }
-      // Record failed attempt
+
       AdminSecurity.recordFailedAttempt();
       return false;
     } catch (error) {
       console.error('[AdminAuth] Authentication error:', error);
-      // Record failed attempt for errors too
       AdminSecurity.recordFailedAttempt();
       throw error;
     }
   }
 
+  /**
+   * Check if user is authenticated (valid session or token)
+   */
   static isAuthenticated(): boolean {
     try {
+      // Check for JWT token first
+      const token = localStorage.getItem(this.TOKEN_KEY);
+      if (token) {
+        // Validate token hasn't expired (basic check)
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          if (payload.exp && payload.exp * 1000 > Date.now()) {
+            return true;
+          }
+          // Token expired, clean up
+          this.logout();
+          return false;
+        } catch {
+          // Invalid token format
+          this.logout();
+          return false;
+        }
+      }
+
+      // Fallback: Check session storage
       const sessionData = sessionStorage.getItem(this.SESSION_KEY);
       if (!sessionData) return false;
 
       const session = JSON.parse(sessionData);
+      const sessionDuration = 60 * 60 * 1000; // 1 hour
       const isValid =
-        session.authenticated && Date.now() - session.timestamp < this.SESSION_DURATION;
+        session.authenticated && Date.now() - session.timestamp < sessionDuration;
 
       if (!isValid) {
         this.logout();
@@ -168,11 +232,25 @@ class AdminAuth {
     }
   }
 
+  /**
+   * Get the current JWT token for API calls
+   */
+  static getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  /**
+   * Logout and clear all auth data
+   */
   static logout(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
     sessionStorage.removeItem(this.SESSION_KEY);
     window.location.reload();
   }
 
+  /**
+   * Extend session timestamp for activity
+   */
   static extendSession(): void {
     try {
       const sessionData = sessionStorage.getItem(this.SESSION_KEY);
@@ -191,6 +269,7 @@ class AdminAuth {
 class AdminDashboard {
   private currentTab = 'overview';
   private refreshInterval: NodeJS.Timeout | null = null;
+  private charts: Map<string, Chart> = new Map();
 
   constructor() {
     this.init();
@@ -460,9 +539,9 @@ class AdminDashboard {
     this.updateElement('card-interactions', '456');
     this.updateElement('interactions-change', '+18% from last week', 'positive');
 
-    // Load charts (placeholder)
-    this.loadChart('visitors-chart', 'Line chart showing visitor trends');
-    this.loadChart('sources-chart', 'Pie chart showing traffic sources');
+    // Load real Chart.js charts
+    this.loadChart('visitors-chart', 'visitors');
+    this.loadChart('sources-chart', 'sources');
   }
 
   private async loadPerformanceData(): Promise<void> {
@@ -875,11 +954,119 @@ class AdminDashboard {
     }
   }
 
-  private loadChart(containerId: string, placeholder: string): void {
+  /**
+   * Create or update a Chart.js chart
+   */
+  private loadChart(containerId: string, chartType: 'visitors' | 'sources'): void {
     const container = document.getElementById(containerId);
-    if (container) {
-      container.innerHTML = `<div class="chart-placeholder">${placeholder}</div>`;
+    if (!container) return;
+
+    // Destroy existing chart if it exists
+    const existingChart = this.charts.get(containerId);
+    if (existingChart) {
+      existingChart.destroy();
     }
+
+    // Create canvas element
+    container.innerHTML = '<canvas></canvas>';
+    const canvas = container.querySelector('canvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let chart: Chart;
+
+    if (chartType === 'visitors') {
+      // Line chart for visitor trends
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [
+            {
+              label: 'Visitors',
+              data: [120, 190, 150, 220, 180, 250, 210],
+              borderColor: '#00ff41',
+              backgroundColor: 'rgba(0, 255, 65, 0.1)',
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: 'Page Views',
+              data: [300, 450, 380, 520, 420, 600, 480],
+              borderColor: '#333333',
+              backgroundColor: 'rgba(51, 51, 51, 0.1)',
+              tension: 0.4,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                usePointStyle: true,
+                padding: 20
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+    } else {
+      // Doughnut chart for traffic sources
+      chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Direct', 'Search', 'Social', 'Referral', 'Email'],
+          datasets: [
+            {
+              data: [35, 30, 20, 10, 5],
+              backgroundColor: [
+                '#00ff41',
+                '#333333',
+                '#666666',
+                '#999999',
+                '#cccccc'
+              ],
+              borderColor: '#ffffff',
+              borderWidth: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                usePointStyle: true,
+                padding: 15
+              }
+            }
+          }
+        }
+      });
+    }
+
+    this.charts.set(containerId, chart);
   }
 
   private populateDataList(

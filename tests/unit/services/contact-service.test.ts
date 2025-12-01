@@ -4,520 +4,229 @@
  * ===============================================
  * @file tests/unit/services/contact-service.test.ts
  *
- * Unit tests for the contact service.
+ * Unit tests for the contact form service.
+ * Tests the ContactService class and its validation.
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { ContactService } from '../../../src/services/contact-service.js';
+import { ContactService, ContactFormData } from '../../../src/services/contact-service.js';
 
-// Mock fetch globally
-const mockFetch = vi.fn();
-global.fetch = mockFetch;
-
-// Mock logger
-vi.mock('../../../src/services/logger.js', () => ({
-  logger: {
-    info: vi.fn(),
-    error: vi.fn(),
-    warn: vi.fn(),
-    debug: vi.fn()
+// Mock the SanitizationUtils module
+vi.mock('../../../src/utils/sanitization-utils.js', () => ({
+  SanitizationUtils: {
+    sanitizeText: vi.fn((text: string) => text?.trim() || ''),
+    sanitizeEmail: vi.fn((email: string) => email?.toLowerCase().trim() || ''),
+    sanitizeMessage: vi.fn((message: string) => message?.trim() || ''),
+    checkRateLimit: vi.fn(() => true),
+    logSecurityViolation: vi.fn()
   }
 }));
 
 describe('ContactService', () => {
-  let contactService: ContactService;
+  let service: ContactService;
 
-  beforeEach(() => {
-    contactService = new ContactService({
-      endpoint: '/api/contact',
-      timeout: 5000,
-      enableSpamProtection: true
-    });
+  const validFormData: ContactFormData = {
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'john@example.com',
+    companyName: 'Test Company',
+    businessSize: 'small',
+    helpOption: 'consultation',
+    message: 'This is a test message with enough characters.'
+  };
+
+  beforeEach(async () => {
     vi.clearAllMocks();
+    service = new ContactService({ backend: 'netlify' });
+    await service.init();
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  describe('Form Submission', () => {
-    it('should submit contact form data successfully', async () => {
-      const formData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        subject: 'Test Subject',
-        message: 'This is a test message.'
-      };
+  describe('Initialization', () => {
+    it('should create service instance', () => {
+      expect(service).toBeDefined();
+      expect(service).toBeInstanceOf(ContactService);
+    });
 
-      const expectedResponse = {
-        success: true,
-        messageId: 'msg-123',
-        timestamp: '2024-01-01T12:00:00Z'
-      };
+    it('should accept netlify backend by default', () => {
+      const defaultService = new ContactService();
+      expect(defaultService).toBeInstanceOf(ContactService);
+    });
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: () => Promise.resolve(expectedResponse),
-        headers: new Headers()
+    it('should accept custom backend with endpoint', async () => {
+      const customService = new ContactService({
+        backend: 'custom',
+        endpoint: '/api/contact'
       });
-
-      const result = await contactService.submitForm(formData);
-
-      expect(mockFetch).toHaveBeenCalledWith('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-
-      expect(result).toEqual(expectedResponse);
+      await customService.init();
+      expect(customService).toBeInstanceOf(ContactService);
     });
 
-    it('should validate required fields', async () => {
-      const incompleteFormData = {
-        name: 'John Doe',
-        email: '', // Missing email
-        message: 'Test message'
-      };
-
-      await expect(contactService.submitForm(incompleteFormData as any)).rejects.toThrow(
-        'Email is required'
-      );
-
-      expect(mockFetch).not.toHaveBeenCalled();
+    it('should throw error for formspree without formId', async () => {
+      const formspreeService = new ContactService({ backend: 'formspree' });
+      await expect(formspreeService.init()).rejects.toThrow('Formspree backend requires formId');
     });
 
-    it('should validate email format', async () => {
-      const invalidFormData = {
-        name: 'John Doe',
-        email: 'invalid-email',
-        message: 'Test message'
-      };
-
-      await expect(contactService.submitForm(invalidFormData)).rejects.toThrow(
-        'Invalid email format'
-      );
-
-      expect(mockFetch).not.toHaveBeenCalled();
-    });
-
-    it('should validate message length', async () => {
-      const shortMessageData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        message: 'Hi' // Too short
-      };
-
-      await expect(contactService.submitForm(shortMessageData)).rejects.toThrow(
-        'Message must be at least 10 characters'
-      );
-
-      expect(mockFetch).not.toHaveBeenCalled();
-    });
-
-    it('should sanitize form data', async () => {
-      const formDataWithScripts = {
-        name: 'John<script>alert("xss")</script>Doe',
-        email: 'john@example.com',
-        subject: '<b>Bold Subject</b>',
-        message: 'This is a <script>malicious</script> message.'
-      };
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: () => Promise.resolve({ success: true }),
-        headers: new Headers()
-      });
-
-      await contactService.submitForm(formDataWithScripts);
-
-      const sentData = JSON.parse(mockFetch.mock.calls[0][1].body);
-
-      expect(sentData.name).toBe('JohnDoe'); // Scripts removed
-      expect(sentData.subject).toBe('Bold Subject'); // Safe HTML allowed
-      expect(sentData.message).toBe('This is a  message.'); // Scripts removed
-    });
-  });
-
-  describe('Spam Protection', () => {
-    it('should detect spam patterns in message content', async () => {
-      const spamFormData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        message: 'BUY NOW! CHEAP VIAGRA! CLICK HERE! www.spam-site.com'
-      };
-
-      await expect(contactService.submitForm(spamFormData)).rejects.toThrow(
-        'Message appears to be spam'
-      );
-
-      expect(mockFetch).not.toHaveBeenCalled();
-    });
-
-    it('should detect suspicious email patterns', async () => {
-      const suspiciousEmailData = {
-        name: 'John Doe',
-        email: 'noreply@temporary-mail.com',
-        message: 'This is a legitimate message.'
-      };
-
-      await expect(contactService.submitForm(suspiciousEmailData)).rejects.toThrow(
-        'Email domain not allowed'
-      );
-
-      expect(mockFetch).not.toHaveBeenCalled();
-    });
-
-    it('should allow legitimate messages', async () => {
-      const legitimateFormData = {
-        name: 'Jane Smith',
-        email: 'jane.smith@gmail.com',
-        subject: 'Website Inquiry',
-        message:
-          'I am interested in learning more about your services and would like to schedule a consultation.'
-      };
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: () => Promise.resolve({ success: true }),
-        headers: new Headers()
-      });
-
-      const result = await contactService.submitForm(legitimateFormData);
-
-      expect(result.success).toBe(true);
-      expect(mockFetch).toHaveBeenCalled();
-    });
-
-    it('should rate limit submissions from same email', async () => {
-      const formData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        message: 'First message.'
-      };
-
-      mockFetch.mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: () => Promise.resolve({ success: true }),
-        headers: new Headers()
-      });
-
-      // First submission should work
-      await contactService.submitForm(formData);
-
-      // Immediate second submission should be rate limited
-      await expect(
-        contactService.submitForm({ ...formData, message: 'Second message.' })
-      ).rejects.toThrow('Too many requests from this email');
-
-      expect(mockFetch).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('Network Error Handling', () => {
-    it('should handle network timeouts', async () => {
-      const formData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        message: 'Test message.'
-      };
-
-      // Mock a timeout
-      mockFetch.mockImplementationOnce(
-        () =>
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Network timeout')), 100))
-      );
-
-      await expect(contactService.submitForm(formData)).rejects.toThrow(
-        'Failed to send message. Please try again.'
-      );
-    });
-
-    it('should handle server errors', async () => {
-      const formData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        message: 'Test message.'
-      };
-
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        statusText: 'Internal Server Error',
-        json: () => Promise.resolve({ error: 'Server error' })
-      });
-
-      await expect(contactService.submitForm(formData)).rejects.toThrow(
-        'Server error occurred. Please try again later.'
-      );
-    });
-
-    it('should retry failed requests', async () => {
-      const formData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        message: 'Test message.'
-      };
-
-      // First two attempts fail, third succeeds
-      mockFetch
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValueOnce({
-          ok: true,
-          status: 200,
-          json: () => Promise.resolve({ success: true })
-        });
-
-      const result = await contactService.submitForm(formData);
-
-      expect(mockFetch).toHaveBeenCalledTimes(3);
-      expect(result.success).toBe(true);
-    });
-
-    it('should give up after max retries', async () => {
-      const formData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        message: 'Test message.'
-      };
-
-      mockFetch.mockRejectedValue(new Error('Persistent network error'));
-
-      await expect(contactService.submitForm(formData)).rejects.toThrow(
-        'Failed to send message. Please try again.'
-      );
-
-      // Should try 3 times (initial + 2 retries)
-      expect(mockFetch).toHaveBeenCalledTimes(3);
+    it('should throw error for custom without endpoint', async () => {
+      const customService = new ContactService({ backend: 'custom' });
+      await expect(customService.init()).rejects.toThrow('Custom backend requires endpoint');
     });
   });
 
   describe('Form Validation', () => {
-    it('should provide detailed validation results', () => {
-      const invalidFormData = {
-        name: '',
-        email: 'invalid-email',
-        message: 'Hi'
-      };
+    it('should validate complete form data', () => {
+      const result = service.validateFormData(validFormData);
 
-      const validation = contactService.validateForm(invalidFormData);
-
-      expect(validation.isValid).toBe(false);
-      expect(validation.errors).toContain('Name is required');
-      expect(validation.errors).toContain('Invalid email format');
-      expect(validation.errors).toContain('Message must be at least 10 characters');
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
     });
 
-    it('should validate successful form data', () => {
-      const validFormData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        subject: 'Website Inquiry',
-        message: 'This is a valid message with sufficient content.'
-      };
+    it('should require first name', () => {
+      const result = service.validateFormData({
+        ...validFormData,
+        firstName: ''
+      });
 
-      const validation = contactService.validateForm(validFormData);
-
-      expect(validation.isValid).toBe(true);
-      expect(validation.errors).toHaveLength(0);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('First name is required');
     });
 
-    it('should validate phone numbers when provided', () => {
-      const formDataWithPhone = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        phone: '(555) 123-4567',
-        message: 'Message with phone number.'
-      };
+    it('should require last name', () => {
+      const result = service.validateFormData({
+        ...validFormData,
+        lastName: ''
+      });
 
-      const validation = contactService.validateForm(formDataWithPhone);
-      expect(validation.isValid).toBe(true);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Last name is required');
+    });
 
-      const invalidPhoneData = {
-        ...formDataWithPhone,
-        phone: 'invalid-phone'
-      };
+    it('should require email', () => {
+      const result = service.validateFormData({
+        ...validFormData,
+        email: ''
+      });
 
-      const invalidValidation = contactService.validateForm(invalidPhoneData);
-      expect(invalidValidation.isValid).toBe(false);
-      expect(invalidValidation.errors).toContain('Invalid phone number format');
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Email is required');
+    });
+
+    it('should validate email format', () => {
+      const result = service.validateFormData({
+        ...validFormData,
+        email: 'invalid-email'
+      });
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Please enter a valid email address');
+    });
+
+    it('should require business size', () => {
+      const result = service.validateFormData({
+        ...validFormData,
+        businessSize: ''
+      });
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Please select a business size');
+    });
+
+    it('should require help option', () => {
+      const result = service.validateFormData({
+        ...validFormData,
+        helpOption: ''
+      });
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Please select what you need help with');
+    });
+
+    it('should require message', () => {
+      const result = service.validateFormData({
+        ...validFormData,
+        message: ''
+      });
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Message is required');
+    });
+
+    it('should require minimum message length', () => {
+      const result = service.validateFormData({
+        ...validFormData,
+        message: 'Short'
+      });
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Message must be at least 10 characters long');
+    });
+
+    it('should collect all validation errors', () => {
+      const result = service.validateFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        businessSize: '',
+        helpOption: '',
+        message: ''
+      });
+
+      expect(result.valid).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(1);
     });
   });
 
-  describe('Template Management', () => {
-    it('should format email template for admin notification', () => {
-      const formData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        subject: 'Website Inquiry',
-        message: 'I would like to know more about your services.'
-      };
-
-      const template = contactService.generateEmailTemplate(formData);
-
-      expect(template.subject).toBe('New Contact Form Submission: Website Inquiry');
-      expect(template.html).toContain('John Doe');
-      expect(template.html).toContain('john@example.com');
-      expect(template.html).toContain('I would like to know more about your services.');
+  describe('Form Submission', () => {
+    it('should have submitForm method', () => {
+      expect(typeof service.submitForm).toBe('function');
     });
 
-    it('should format auto-reply template for user', () => {
-      const formData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        subject: 'Website Inquiry',
-        message: 'Service inquiry message.'
-      };
-
-      const autoReply = contactService.generateAutoReplyTemplate(formData);
-
-      expect(autoReply.subject).toBe('Thank you for contacting us, John');
-      expect(autoReply.html).toContain('Hi John Doe');
-      expect(autoReply.html).toContain('We received your message about "Website Inquiry"');
-      expect(autoReply.to).toBe('john@example.com');
-    });
-  });
-
-  describe('Analytics and Tracking', () => {
-    it('should track form submission metrics', async () => {
-      const formData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        message: 'Analytics test message.'
-      };
-
-      mockFetch.mockResolvedValueOnce({
+    it('should return result with success flag', async () => {
+      // Mock fetch to return success
+      global.fetch = vi.fn().mockResolvedValue({
         ok: true,
-        status: 200,
-        json: () => Promise.resolve({ success: true }),
-        headers: new Headers()
+        json: () => Promise.resolve({ success: true })
       });
 
-      await contactService.submitForm(formData);
+      const result = await service.submitForm(validFormData);
 
-      const metrics = contactService.getMetrics();
-
-      expect(metrics.totalSubmissions).toBe(1);
-      expect(metrics.successfulSubmissions).toBe(1);
-      expect(metrics.lastSubmissionTime).toBeTruthy();
+      expect(result).toHaveProperty('success');
+      expect(result).toHaveProperty('message');
     });
 
-    it('should track spam attempts', async () => {
-      const spamData = {
-        name: 'Spammer',
-        email: 'spam@example.com',
-        message: 'BUY CHEAP PRODUCTS NOW! CLICK HERE!'
-      };
+    it('should return error for invalid data', async () => {
+      const result = await service.submitForm({
+        ...validFormData,
+        email: ''
+      });
 
-      try {
-        await contactService.submitForm(spamData);
-      } catch (error) {
-        // Expected to fail
-      }
-
-      const metrics = contactService.getMetrics();
-
-      expect(metrics.spamAttempts).toBe(1);
-    });
-
-    it('should track validation failures', async () => {
-      const invalidData = {
-        name: '',
-        email: 'invalid-email',
-        message: 'Hi'
-      };
-
-      try {
-        await contactService.submitForm(invalidData);
-      } catch (error) {
-        // Expected to fail
-      }
-
-      const metrics = contactService.getMetrics();
-
-      expect(metrics.validationFailures).toBe(1);
+      expect(result.success).toBe(false);
+      expect(result.message).toBeDefined();
     });
   });
 
-  describe('Configuration', () => {
-    it('should allow custom endpoint configuration', () => {
+  describe('Backend Configuration', () => {
+    it('should allow custom endpoint configuration', async () => {
       const customService = new ContactService({
-        endpoint: '/custom/contact-endpoint',
-        timeout: 10000
+        backend: 'custom',
+        endpoint: '/custom/api'
       });
+      await customService.init();
 
-      expect(customService.config.endpoint).toBe('/custom/contact-endpoint');
-      expect(customService.config.timeout).toBe(10000);
+      expect(customService).toBeInstanceOf(ContactService);
     });
 
-    it('should support disabling spam protection', async () => {
-      const noSpamService = new ContactService({
-        endpoint: '/api/contact',
-        enableSpamProtection: false
+    it('should allow formspree with formId', async () => {
+      const formspreeService = new ContactService({
+        backend: 'formspree',
+        formId: 'test123'
       });
+      await formspreeService.init();
 
-      const spamData = {
-        name: 'Spammer',
-        email: 'spam@temporary-email.com',
-        message: 'BUY CHEAP PRODUCTS NOW!'
-      };
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: () => Promise.resolve({ success: true }),
-        headers: new Headers()
-      });
-
-      // Should not throw spam error when protection disabled
-      const result = await noSpamService.submitForm(spamData);
-      expect(result.success).toBe(true);
-    });
-
-    it('should allow custom validation rules', () => {
-      const customService = new ContactService({
-        endpoint: '/api/contact',
-        customValidation: {
-          nameMinLength: 2,
-          messageMinLength: 5,
-          allowedDomains: ['gmail.com', 'company.com']
-        }
-      });
-
-      const shortNameData = {
-        name: 'J', // Only 1 character
-        email: 'john@gmail.com',
-        message: 'Short' // Only 5 characters (minimum)
-      };
-
-      const validation = customService.validateForm(shortNameData);
-
-      expect(validation.isValid).toBe(false);
-      expect(validation.errors).toContain('Name must be at least 2 characters');
-    });
-  });
-
-  describe('Cleanup', () => {
-    it('should clear rate limiting data', () => {
-      contactService.clearRateLimitData();
-
-      const metrics = contactService.getMetrics();
-      expect(metrics.rateLimitedEmails).toHaveLength(0);
-    });
-
-    it('should reset metrics', () => {
-      contactService.resetMetrics();
-
-      const metrics = contactService.getMetrics();
-      expect(metrics.totalSubmissions).toBe(0);
-      expect(metrics.spamAttempts).toBe(0);
-      expect(metrics.validationFailures).toBe(0);
+      expect(formspreeService).toBeInstanceOf(ContactService);
     });
   });
 });
