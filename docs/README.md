@@ -4,6 +4,18 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 
 ## 📚 Documentation Overview
 
+### Client Portal Features
+
+| Document | Description |
+|----------|-------------|
+| **[Client Portal](./features/CLIENT_PORTAL.md)** | Main dashboard, project cards, quick stats, activity log |
+| **[Messages](./features/MESSAGES.md)** | Messaging system, emoji picker, keyboard shortcuts |
+| **[Files](./features/FILES.md)** | File upload, drag & drop, file management |
+| **[Invoices](./features/INVOICES.md)** | Invoice history, status tracking, PDF download |
+| **[Settings](./features/SETTINGS.md)** | Account, notifications, billing information |
+| **[New Project](./features/NEW_PROJECT.md)** | Project request form, validation |
+| **[CSS Architecture](./features/CSS_ARCHITECTURE.md)** | Variables, themes, naming conventions |
+
 ### Architecture & Development
 
 - **[Performance & Bundle Optimization](./OPTIMIZATION.md)** - Bundle optimization strategies, performance monitoring, Core Web Vitals tracking, and development best practices
