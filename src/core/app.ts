@@ -432,15 +432,27 @@ export class Application {
    * Initialize core services
    */
   private async initializeServices(): Promise<void> {
+    // Determine page type to conditionally load services
+    const currentPath = window.location.pathname;
+    const isClientPage = currentPath.includes('/client/');
+    const isAdminPage = currentPath.includes('/admin');
+
+    // Base services for all pages
     const services: string[] = [
       'VisitorTrackingService',
       'PerformanceService',
       'BundleAnalyzerService',
-      'RouterService',
-      'DataService',
-      'ContactService',
-      'CodeProtectionService'
+      'RouterService'
     ];
+
+    // Only load DataService on main site pages (not client/admin pages)
+    if (!isClientPage && !isAdminPage) {
+      services.push('DataService');
+      services.push('ContactService');
+    }
+
+    // CodeProtectionService for all pages
+    services.push('CodeProtectionService');
 
     for (const serviceName of services) {
       try {
