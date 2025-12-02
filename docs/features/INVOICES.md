@@ -33,7 +33,8 @@ The Invoice System provides clients with a complete view of their payment histor
 | Invoice List from API | Complete | Dynamic list from backend with demo fallback |
 | Status Badges | Complete | Visual status indicators (Pending, Paid, Overdue, etc.) |
 | Preview | Complete | View invoice details in new tab |
-| Download | Complete | Download invoice (PDF generation pending) |
+| Download | Complete | Download invoice as PDF |
+| PDF Generation | Complete | Full PDF generation with PDFKit |
 | Project Association | Complete | Link invoices to specific projects |
 | Demo Mode | Complete | Fallback demo data when backend unavailable |
 
@@ -202,6 +203,56 @@ Mark invoice as paid.
 
 ---
 
+#### GET `/api/invoices/:id/pdf`
+
+Download invoice as PDF.
+
+**Authentication:** Required (JWT Bearer token)
+
+**Response:** PDF file stream with headers:
+- `Content-Type: application/pdf`
+- `Content-Disposition: attachment; filename="invoice-INV-2025-001.pdf"`
+
+**PDF Contents:**
+- Company header with logo placeholder
+- Invoice number and dates (issue date, due date)
+- Bill To section with client details
+- Line items table with description, quantity, rate, amount
+- Subtotal, tax (if applicable), and total
+- Payment terms and notes
+
+**Implementation (server/routes/invoices.ts):**
+
+```typescript
+import PDFDocument from 'pdfkit';
+
+router.get('/:id/pdf', authenticateToken, asyncHandler(async (req, res) => {
+  const invoiceId = parseInt(req.params.id);
+  const invoice = await getInvoiceService().getInvoiceById(invoiceId);
+
+  // Verify ownership
+  if (req.user!.type === 'client' && invoice.clientId !== req.user!.id) {
+    return res.status(403).json({ error: 'Not authorized' });
+  }
+
+  const doc = new PDFDocument({ margin: 50 });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition',
+    `attachment; filename="invoice-${invoice.invoiceNumber}.pdf"`);
+  doc.pipe(res);
+
+  // Header
+  doc.fontSize(24).font('Helvetica-Bold').text('INVOICE', { align: 'right' });
+  doc.fontSize(10).font('Helvetica')
+     .text(`Invoice #: ${invoice.invoiceNumber}`, { align: 'right' });
+
+  // Bill To section, Line Items, Totals...
+  doc.end();
+}));
+```
+
+---
+
 ## Frontend Implementation
 
 ### TypeScript Module
@@ -286,6 +337,47 @@ private renderInvoicesList(container: HTMLElement, invoices: any[]): void {
   });
 
   this.attachInvoiceActionListeners(container);
+}
+```
+
+#### downloadInvoice()
+
+Downloads invoice as PDF via blob fetch.
+
+```typescript
+private async downloadInvoice(invoiceId: number, invoiceNumber: string): Promise<void> {
+  const token = localStorage.getItem('client_auth_token');
+
+  if (!token || token.startsWith('demo_token_')) {
+    alert('Invoice download not available in demo mode.');
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `${ClientPortalModule.INVOICES_API_BASE}/${invoiceId}/pdf`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to download invoice');
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `invoice-${invoiceNumber}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  } catch (error) {
+    console.error('Error downloading invoice:', error);
+    alert('Failed to download invoice. Please try again.');
+  }
 }
 ```
 

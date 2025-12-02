@@ -8,6 +8,7 @@
  */
 
 import express from 'express';
+import PDFDocument from 'pdfkit';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { InvoiceService, InvoiceCreateData } from '../services/invoice-service.js';
@@ -788,6 +789,179 @@ router.post(
       res.status(500).json({
         error: 'Failed to generate invoice from intake',
         code: 'GENERATION_FAILED',
+        message: error.message
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/{id}/pdf:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Download invoice as PDF
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ */
+router.get(
+  '/:id/pdf',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const invoice = await getInvoiceService().getInvoiceById(invoiceId);
+      const db = getDatabase();
+
+      // Get client info
+      const client = await db.get(
+        'SELECT contact_name, company_name, email FROM clients WHERE id = ?',
+        [invoice.clientId]
+      );
+
+      // Get project info
+      const project = await db.get('SELECT name FROM projects WHERE id = ?', [invoice.projectId]);
+
+      // Create PDF document
+      const doc = new PDFDocument({ margin: 50 });
+
+      // Set response headers
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="invoice-${invoice.invoiceNumber}.pdf"`
+      );
+
+      // Pipe PDF to response
+      doc.pipe(res);
+
+      // Header
+      doc.fontSize(24).font('Helvetica-Bold').text('INVOICE', { align: 'right' });
+      doc.fontSize(10).font('Helvetica').text(`Invoice #: ${invoice.invoiceNumber}`, { align: 'right' });
+      doc.text(`Date: ${invoice.createdAt ? new Date(invoice.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}`, { align: 'right' });
+      if (invoice.dueDate) {
+        doc.text(`Due Date: ${new Date(invoice.dueDate).toLocaleDateString()}`, { align: 'right' });
+      }
+
+      doc.moveDown(2);
+
+      // Company info (left side)
+      doc.fontSize(14).font('Helvetica-Bold').text('No Bhad Codes', { continued: false });
+      doc.fontSize(10).font('Helvetica').text('Web Development Services');
+      doc.text('support@nobhadcodes.com');
+
+      doc.moveDown(2);
+
+      // Bill To section
+      doc.fontSize(12).font('Helvetica-Bold').text('Bill To:');
+      doc.fontSize(10).font('Helvetica');
+      if (client?.company_name) doc.text(client.company_name);
+      if (client?.contact_name) doc.text(client.contact_name);
+      if (client?.email) doc.text(client.email);
+
+      doc.moveDown(2);
+
+      // Project info
+      if (project?.name) {
+        doc.fontSize(10).font('Helvetica-Bold').text('Project: ', { continued: true });
+        doc.font('Helvetica').text(project.name);
+        doc.moveDown();
+      }
+
+      // Line items table header
+      const tableTop = doc.y + 20;
+      doc.fontSize(10).font('Helvetica-Bold');
+      doc.text('Description', 50, tableTop);
+      doc.text('Qty', 300, tableTop, { width: 50, align: 'right' });
+      doc.text('Rate', 360, tableTop, { width: 70, align: 'right' });
+      doc.text('Amount', 440, tableTop, { width: 70, align: 'right' });
+
+      // Line under header
+      doc.moveTo(50, tableTop + 15).lineTo(510, tableTop + 15).stroke();
+
+      // Line items
+      let y = tableTop + 25;
+      doc.font('Helvetica');
+
+      const lineItems = typeof invoice.lineItems === 'string'
+        ? JSON.parse(invoice.lineItems)
+        : invoice.lineItems || [];
+
+      lineItems.forEach((item: any) => {
+        doc.text(item.description || '', 50, y, { width: 240 });
+        doc.text(item.quantity?.toString() || '1', 300, y, { width: 50, align: 'right' });
+        doc.text(`$${(item.rate || 0).toFixed(2)}`, 360, y, { width: 70, align: 'right' });
+        doc.text(`$${(item.amount || 0).toFixed(2)}`, 440, y, { width: 70, align: 'right' });
+        y += 20;
+      });
+
+      // Totals
+      y += 20;
+      doc.moveTo(300, y).lineTo(510, y).stroke();
+      y += 10;
+
+      doc.font('Helvetica-Bold');
+      doc.text('Total:', 360, y, { width: 70, align: 'right' });
+      doc.text(`$${(invoice.amountTotal || 0).toFixed(2)}`, 440, y, { width: 70, align: 'right' });
+
+      if (invoice.amountPaid > 0) {
+        y += 15;
+        doc.font('Helvetica');
+        doc.text('Paid:', 360, y, { width: 70, align: 'right' });
+        doc.text(`$${(invoice.amountPaid || 0).toFixed(2)}`, 440, y, { width: 70, align: 'right' });
+
+        y += 15;
+        doc.font('Helvetica-Bold');
+        doc.text('Balance Due:', 360, y, { width: 70, align: 'right' });
+        doc.text(`$${((invoice.amountTotal || 0) - (invoice.amountPaid || 0)).toFixed(2)}`, 440, y, {
+          width: 70,
+          align: 'right'
+        });
+      }
+
+      // Notes
+      if (invoice.notes) {
+        doc.moveDown(3);
+        doc.fontSize(10).font('Helvetica-Bold').text('Notes:');
+        doc.font('Helvetica').text(invoice.notes);
+      }
+
+      // Terms
+      if (invoice.terms) {
+        doc.moveDown();
+        doc.fontSize(10).font('Helvetica-Bold').text('Terms:');
+        doc.font('Helvetica').text(invoice.terms);
+      }
+
+      // Footer
+      doc.fontSize(8).text('Thank you for your business!', 50, 750, { align: 'center' });
+
+      // Finalize PDF
+      doc.end();
+    } catch (error: any) {
+      if (error.message.includes('not found')) {
+        return res.status(404).json({
+          error: 'Invoice not found',
+          code: 'NOT_FOUND'
+        });
+      }
+
+      res.status(500).json({
+        error: 'Failed to generate PDF',
+        code: 'PDF_GENERATION_FAILED',
         message: error.message
       });
     }

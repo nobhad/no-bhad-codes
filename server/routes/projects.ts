@@ -187,6 +187,61 @@ router.get(
   })
 );
 
+// Submit project request (client)
+router.post(
+  '/request',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return res.status(403).json({ error: 'Only clients can submit project requests', code: 'ACCESS_DENIED' });
+    }
+
+    const { name, projectType, budget, timeline, description } = req.body;
+
+    if (!name || !projectType || !description) {
+      return res.status(400).json({
+        error: 'Project name, type, and description are required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    const db = getDatabase();
+
+    // Create project with pending status
+    const result = await db.run(
+      `INSERT INTO projects (client_id, name, description, status, priority, project_type, budget_range, timeline)
+       VALUES (?, ?, ?, 'pending', 'medium', ?, ?, ?)`,
+      [req.user!.id, name, description, projectType, budget || null, timeline || null]
+    );
+
+    const newProject = await db.get('SELECT * FROM projects WHERE id = ?', [result.lastID]);
+
+    // Get client info for notification
+    const client = await db.get('SELECT email, contact_name, company_name FROM clients WHERE id = ?', [req.user!.id]);
+
+    // Send admin notification
+    try {
+      await emailService.sendAdminNotification({
+        subject: 'New Project Request',
+        intakeId: result.lastID?.toString() || 'N/A',
+        clientName: client?.contact_name || 'Unknown',
+        companyName: client?.company_name || 'Unknown Company',
+        projectType: projectType,
+        budget: budget || 'Not specified',
+        timeline: timeline || 'Not specified'
+      });
+    } catch (emailError) {
+      console.error('Failed to send admin notification:', emailError);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Project request submitted successfully. We will review and get back to you soon!',
+      project: newProject
+    });
+  })
+);
+
 // Create new project (admin only)
 router.post(
   '/',

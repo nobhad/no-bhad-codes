@@ -35,11 +35,22 @@ The Client Portal is a dedicated dashboard for clients to manage their projects,
   - File list from API with demo fallback
   - File preview (images/PDFs open in new tab)
   - File download with original filename
+  - File delete with confirmation
   - Multi-file upload support (up to 5 files)
-- Invoice history and status tracking
-- Account and billing settings
-- Notification preferences
-- New project request form
+- **Invoice System:**
+  - Invoice list from API with summary stats
+  - Status badges (Pending, Paid, Overdue, etc.)
+  - Invoice preview in new tab
+  - PDF download via PDFKit
+- **Settings with Backend Persistence:**
+  - Profile updates (name, company, phone)
+  - Password change with verification
+  - Notification preferences
+  - Billing information
+- **New Project Request:**
+  - Form submission to backend API
+  - Project type, budget, timeline selection
+  - Admin notification on submission
 - Live project preview iframe
 - JWT authentication (real login with demo fallback)
 
@@ -64,7 +75,7 @@ The Client Portal is a dedicated dashboard for clients to manage their projects,
 
 ```
 src/features/client/
-├── client-portal.ts      # Main portal module (~1600 lines)
+├── client-portal.ts      # Main portal module (~2400 lines)
 ├── client-intake.ts      # Intake form handling
 └── client-landing.ts     # Landing page logic
 
@@ -75,7 +86,11 @@ src/styles/pages/
 └── client-portal.css     # Portal-specific styles
 
 server/routes/
-└── uploads.ts            # File upload API endpoints
+├── uploads.ts            # File upload API endpoints
+├── clients.ts            # Client profile/settings API
+├── projects.ts           # Project management API
+├── invoices.ts           # Invoice API with PDF generation
+└── messages.ts           # Messaging API
 ```
 
 ---
@@ -478,7 +493,7 @@ The Client Portal includes a complete invoice management system. For detailed do
 | Invoice List from API | Dynamic list from backend with demo fallback |
 | Status Badges | Visual status indicators (Pending, Paid, Overdue, etc.) |
 | Invoice Preview | Open invoice details in new tab |
-| Invoice Download | Download invoice (PDF generation pending) |
+| Invoice PDF Download | Download invoice as PDF via PDFKit |
 
 ### API Endpoints
 
@@ -486,6 +501,7 @@ The Client Portal includes a complete invoice management system. For detailed do
 |----------|--------|-------------|
 | `/api/invoices/me` | GET | Get all invoices for authenticated client with summary |
 | `/api/invoices/:id` | GET | Get specific invoice details |
+| `/api/invoices/:id/pdf` | GET | Download invoice as PDF |
 
 ### TypeScript Methods
 
@@ -495,7 +511,7 @@ loadInvoices()              // Fetch and render invoice list
 renderInvoicesList()        // Render invoice items
 formatCurrency()            // Format as USD currency
 previewInvoice(id)          // Open invoice in new tab
-downloadInvoice(id, number) // Trigger invoice download
+downloadInvoice(id, number) // Download PDF via blob fetch
 ```
 
 ---
@@ -630,15 +646,25 @@ private hideAllViews(): void {
 
 ## Settings & Forms
 
+Settings are now persisted to the backend API. For detailed documentation, see [SETTINGS.md](./SETTINGS.md).
+
+### API Endpoints
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/clients/me` | GET | Get current client profile |
+| `/api/clients/me` | PUT | Update profile (name, company, phone) |
+| `/api/clients/me/password` | PUT | Change password |
+| `/api/clients/me/notifications` | PUT | Update notification preferences |
+| `/api/clients/me/billing` | PUT | Update billing information |
+
 ### Form Save Methods
 
-| Method | LocalStorage Key | Purpose |
-|--------|-----------------|---------|
-| `saveContactInfo()` | `client_contact_info` | Save contact details |
-| `saveBillingAddress()` | `client_billing_address` | Save billing address |
-| `saveNotificationPrefs()` | `client_notification_prefs` | Save notification settings |
-| `saveBillingViewAddress()` | `client_billing_view_address` | Save billing view data |
-| `saveTaxInfo()` | `client_tax_info` | Save tax information |
+| Method | API Endpoint | Purpose |
+|--------|--------------|---------|
+| `saveProfileSettings()` | `/api/clients/me` + `/me/password` | Save profile and password |
+| `saveNotificationSettings()` | `/api/clients/me/notifications` | Save notification preferences |
+| `saveBillingSettings()` | `/api/clients/me/billing` | Save billing information |
 
 ### Success Message
 
@@ -728,10 +754,16 @@ Settings grid adapts to viewport:
 |------|---------|
 | `client/portal.html` | Entry point HTML |
 | `templates/pages/client-portal.ejs` | Main EJS template |
-| `src/features/client/client-portal.ts` | Main TypeScript module (~1600 lines) |
+| `src/features/client/client-portal.ts` | Main TypeScript module (~2400 lines) |
 | `src/styles/pages/client-portal.css` | Portal-specific styles |
 | `src/client-portal.ts` | Entry point script |
 | `server/routes/uploads.ts` | File upload API endpoints |
+| `server/routes/clients.ts` | Client profile/settings API |
+| `server/routes/projects.ts` | Project request API |
+| `server/routes/invoices.ts` | Invoice API with PDF generation |
+| `server/routes/messages.ts` | Messaging API |
+| `server/database/migrations/006_client_settings_columns.sql` | Settings schema |
+| `server/database/migrations/007_project_request_columns.sql` | Project request schema |
 
 ---
 

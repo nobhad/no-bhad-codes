@@ -197,21 +197,72 @@ Run `npm run dev:full` to start both frontend and backend
 
 ---
 
-## In Progress
+### Client Portal Feature Completion
 
-### Client Portal Sidebar Redesign
+**Completed:** December 1, 2025
 
-**Status:** Partially Complete
+**Summary:** Fully built out all remaining Client Portal features including file delete, settings save, new project submission, project preview, invoice PDF generation, and messaging.
 
-**TODOs:**
+**Features Implemented:**
 
-- [x] Fix theme toggle on client portal page
-- [x] Fix menu toggle on client portal page
-- [x] Add spacing to main content area
-- [x] Sidebar below header
-- [x] Implement collapsed/expanded states
-- [ ] Create collapsible sidebar with tabs for dashboard content
-- [ ] Follow evergreen styling patterns with project CSS variables
+- [x] **File Delete** - Added delete button with confirmation to file list
+- [x] **Settings Save** - Profile, password, notifications, and billing info now save to backend
+- [x] **New Project** - Form submission creates project request with admin notification
+- [x] **Project Preview** - Iframe loads project preview URL from API
+- [x] **Invoice PDF** - Full PDF generation with pdfkit for invoice downloads
+- [x] **Messages** - Connected to messaging API with thread support and send functionality
+
+**Backend Endpoints Added:**
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/clients/me` | GET | Get current client's profile |
+| `/api/clients/me` | PUT | Update profile info |
+| `/api/clients/me/password` | PUT | Change password |
+| `/api/clients/me/notifications` | PUT | Update notification preferences |
+| `/api/clients/me/billing` | PUT | Update billing information |
+| `/api/projects/request` | POST | Submit new project request |
+| `/api/invoices/:id/pdf` | GET | Download invoice as PDF |
+
+**Database Migrations Added:**
+
+| Migration | Description |
+|-----------|-------------|
+| `006_client_settings_columns.sql` | Notification and billing columns on clients |
+| `007_project_request_columns.sql` | Project type, budget, timeline, preview URL |
+
+**Frontend Methods Added:**
+
+| Method | Purpose |
+|--------|---------|
+| `deleteFile()` | Delete file with confirmation |
+| `setupSettingsFormHandlers()` | Bind settings form events |
+| `saveProfileSettings()` | Save profile + password changes |
+| `saveNotificationSettings()` | Save notification preferences |
+| `saveBillingSettings()` | Save billing info |
+| `submitProjectRequest()` | Submit new project form |
+| `loadProjectPreview()` | Load preview into iframe |
+| `loadMessagesFromAPI()` | Fetch messages from API |
+| `renderMessages()` | Render message list |
+| `sendMessage()` | Send message to thread |
+
+**Dependencies Added:**
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `pdfkit` | ^0.x | PDF generation for invoices |
+
+---
+
+### Module Loading Optimization
+
+**Completed:** December 1, 2025
+
+**Summary:** Conditionally load modules based on page type to prevent unnecessary code execution.
+
+- Client Portal only loads `ThemeModule` and `ClientPortalModule`
+- Admin Dashboard only loads `ThemeModule` and `AdminDashboardModule`
+- Main site loads full module set
 
 ---
 
@@ -221,8 +272,12 @@ Run `npm run dev:full` to start both frontend and backend
 
 | File | Purpose |
 |------|---------|
-| `src/features/client/client-portal.ts` | Main client portal module |
+| `src/features/client/client-portal.ts` | Main client portal module (~2400 lines) |
 | `server/routes/uploads.ts` | File upload API endpoints |
+| `server/routes/clients.ts` | Client profile/settings API |
+| `server/routes/projects.ts` | Project/request API |
+| `server/routes/invoices.ts` | Invoice API + PDF generation |
+| `server/routes/messages.ts` | Messaging API |
 | `src/styles/pages/client-portal.css` | Client portal styles |
 | `templates/pages/client-portal.ejs` | Client portal HTML template |
 
@@ -250,6 +305,7 @@ npm run build
 | Package | Version | Purpose |
 |---------|---------|---------|
 | `emoji-picker-element` | ^1.x | Web component emoji picker |
+| `pdfkit` | ^0.x | PDF generation for invoices |
 
 ---
 
