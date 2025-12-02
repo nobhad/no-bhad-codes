@@ -1,11 +1,23 @@
 /* Footer Component */
 
 .footer {
-  background: transparent;
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: var(--footer-height, 40px);
+  background: var(--color-neutral-300);
   padding: var(--spacing-sm) 0;
   font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  color: var(--color-dark);
   text-align: center;
+  z-index: 200;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  /* Override intro-loading hide - footer should always be visible */
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .footer-text {
@@ -14,5 +26,6 @@
 
 /* Footer in dark mode */
 [data-theme="dark"] .footer {
-  background: transparent;
+  background: var(--color-neutral-700);
+  color: var(--color-neutral-100);
 }

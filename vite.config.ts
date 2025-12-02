@@ -34,7 +34,7 @@ export default defineConfig({
 
   // Development server configuration
   server: {
-    port: 3000,
+    port: 4000,
     host: true,
     strictPort: false,
     open: false,
@@ -43,12 +43,12 @@ export default defineConfig({
     // Proxy API requests to backend server
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'http://localhost:4001',
         changeOrigin: true,
         secure: false
       },
       '/uploads': {
-        target: 'http://localhost:3001',
+        target: 'http://localhost:4001',
         changeOrigin: true,
         secure: false
       }

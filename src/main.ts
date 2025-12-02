@@ -11,6 +11,19 @@
 // Import new modular CSS architecture
 import './styles/main-new.css';
 
+// Failsafe: Ensure page content is visible after 3 seconds
+// This catches cases where intro animation fails or takes too long
+if (typeof window !== 'undefined') {
+  setTimeout(() => {
+    const html = document.documentElement;
+    if (html.classList.contains('intro-loading')) {
+      console.warn('[Failsafe] Forcing intro-loading removal after timeout');
+      html.classList.remove('intro-loading');
+      html.classList.add('intro-complete', 'intro-finished');
+    }
+  }, 3000);
+}
+
 // Import and initialize application
 import { app } from './core/app';
 

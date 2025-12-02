@@ -1,10 +1,10 @@
-# Current Work - December 1, 2025
+# Current Work - December 2, 2025
 
 ---
 
 ## System Status
 
-**Last Updated**: December 1, 2025
+**Last Updated**: December 2, 2025
 
 ### Build Status
 
@@ -17,9 +17,185 @@
 
 Run `npm run dev:full` to start both frontend and backend
 
+**Development URLs:**
+- Frontend: http://localhost:4000
+- Backend API: http://localhost:4001
+- API Docs: http://localhost:4001/api-docs
+
+---
+
+## Known Issues
+
+### Redis Caching Disabled
+
+**Status**: Deferred (not needed for development)
+
+**Issue**: Redis connection errors when starting the server:
+```
+Redis connection closed
+Failed to initialize cache service: Error: Connection is closed.
+Redis error: AggregateError [ECONNREFUSED]
+```
+
+**Cause**: Redis is not installed/running locally. The cache service tries to connect to Redis on localhost:6379.
+
+**Current Solution**:
+- [x] Added `REDIS_ENABLED` environment variable check in `server/app.ts`
+- [x] When `REDIS_ENABLED` is not set to `true`, Redis initialization is skipped entirely
+- [x] Server runs without caching functionality (fine for development)
+
+**To Enable Redis Later (Production):**
+1. Install Redis: `brew install redis` (macOS)
+2. Start Redis: `brew services start redis`
+3. Add to `.env`: `REDIS_ENABLED=true`
+4. Optionally configure: `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`
+
+**Files Modified:**
+- `server/app.ts` - Added REDIS_ENABLED check before cache initialization
+
+---
+
+### Port Configuration Changed
+
+**Status**: Complete
+
+**Issue**: Port conflict with another project running on localhost:3000/3001. Requests from other project were hitting this project's backend.
+
+**Solution**: Changed all ports to 4000/4001:
+- Frontend: 3000 → 4000
+- Backend: 3001 → 4001
+
+**Files Modified:**
+- `vite.config.ts` - Frontend port and proxy targets
+- `server/app.ts` - Backend port default
+- `server/config/environment.ts` - Default PORT, FRONTEND_URL, API_BASE_URL
+- `server/simple-auth-server.ts` - Port and CORS origins
+- `server/test-server.ts` - Port
+- `server/config/swagger.ts` - API docs URLs
+- `src/config/api.ts` - Development API base URL
+- `src/features/client/client-portal.ts` - Changed hardcoded URLs to relative paths (`/api/...`)
+- `src/features/client/client-intake.ts` - Changed hardcoded URL to relative path
+- `.env` - Created with PORT=4001, FRONTEND_URL=http://localhost:4000
+
+---
+
+### Footer Not Displaying on Main Page
+
+**Status**: Fixed (v3) - VERIFIED WORKING
+
+**Issue**: The footer element exists in the DOM but is not visible on the main home page. The footer has `position: fixed` and `bottom: 0` CSS but doesn't appear on screen.
+
+**Root Cause Analysis (Deep Dive v2):**
+- **Primary Cause**: The `index.html` starts with `class="intro-loading"` on the `<html>` element
+- The CSS rule `.intro-loading .footer { opacity: 0 !important; visibility: hidden !important; }` hides the footer
+- The `IntroAnimationModule` is supposed to remove `intro-loading` and add `intro-complete` when the intro finishes
+- If the intro animation fails to initialize or complete, the class is never removed and the footer stays hidden
+
+**Previous Fix (z-index):**
+- [x] Changed z-index from 10 to 200 in `layout.css`
+- [x] Changed z-index from 10 to 200 in `main.css` (both instances)
+- [x] Changed z-index from 100 to 200 in `components/footer.css`
+
+**Additional Fix (Intro Animation Failsafe):**
+- [x] Added CSS animation fallback that shows footer after 3 seconds if JS fails
+- [x] Added JavaScript failsafe in `main.ts` that forces class removal after 3 seconds
+- [x] CSS `@keyframes intro-fallback-show` animation added to `layout.css`
+
+**Final Fix (v3 - December 2, 2025):**
+- [x] Removed footer from intro-loading CSS rules entirely (footer should always be visible)
+- [x] Added `opacity: 1 !important; visibility: visible !important;` to `footer.css`
+- [x] Footer is no longer hidden during intro animation
+
+**Files Modified:**
+- `src/styles/base/layout.css` - Removed `.footer` from intro-loading rules, added CSS fallback
+- `src/styles/components/footer.css` - Added explicit visibility with !important
+- `src/main.ts` - Added JavaScript failsafe timer
+- `vite.config.js` - Updated port from 3000 to 4000 (this file was being used, not .ts)
+
+---
+
+### Client Landing Page Loading Unnecessary Modules
+
+**Status**: Fixed
+
+**Issue**: The client-landing page loads main page modules that don't exist on this page, causing console errors:
+```
+[BusinessCardRenderer] Required card elements not found
+[contact-form] Required element "Contact form" with selector ".contact-form" not found
+BusinessCardRenderer.enableAfterIntro: Cannot read properties of null (reading 'style')
+```
+
+**Root Cause**: The page type detection in `app.ts` only checked for `/client` AND `/portal`, so `/client/landing` was being treated as a main site page.
+
+**Fix Applied:**
+- [x] Added specific page type detection for `/client/landing` and `/client/intake`
+- [x] Created dedicated module lists for each client page type:
+  - `clientLandingModules`: ThemeModule, FooterModule
+  - `clientIntakeModules`: ThemeModule, NavigationModule, FooterModule
+  - `clientPortalModules`: ThemeModule, ClientPortalModule
+- [x] Removed `ClientLandingModule` from main site modules (was causing errors)
+
+**Files Modified:**
+- `src/core/app.ts` - Updated page type detection and module lists
+
+---
+
+### DataService Portfolio Load Error
+
+**Status**: Known
+
+**Issue**: Console error when loading main page:
+```
+[DataService] Failed to load portfolio data: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+```
+
+**Cause**: The DataService is trying to fetch JSON data from a URL that returns HTML (likely a 404 page). This happens when the portfolio JSON endpoint doesn't exist or the server returns an HTML error page instead of JSON.
+
+**Impact**: Navigation data fails to load, portfolio data unavailable
+
+**Files Involved**:
+- `src/services/data-service.ts` - Data service making the fetch request
+- `src/core/app.ts` - Application initialization
+
+**Next Steps**:
+- [ ] Verify the portfolio JSON endpoint exists on the server
+- [ ] Add proper 404 handling to return JSON error responses
+- [ ] Add fallback data in DataService when fetch fails
+
 ---
 
 ## Completed Today
+
+### Client Portal Landing Page - Two Card Layout
+
+**Completed:** December 2, 2025
+
+**Summary:** Created a new client portal landing page (`/client/landing`) with two cards - one for new client intake and one for existing client login.
+
+**Features Implemented:**
+
+- [x] Two-card layout (Intake and Login)
+- [x] New Client card links to `/client/intake` for project intake form
+- [x] Existing Client card with inline login form
+- [x] Login form features:
+  - [x] Email and password fields
+  - [x] Password visibility toggle
+  - [x] Loading state on submit
+  - [x] Error messages
+  - [x] Demo mode fallback (demo@example.com / demo123)
+- [x] Responsive design (stacks vertically on mobile)
+- [x] Hover effects on cards
+
+**Files Created/Modified:**
+
+| File | Changes |
+|------|---------|
+| `templates/pages/client-landing.ejs` | Created new template with two-card layout |
+| `src/styles/pages/client.css` | Added `.portal-cards` and `.portal-card` styles |
+
+**Route:** `/client/landing`
+
+---
 
 ### Client Portal File Management System
 

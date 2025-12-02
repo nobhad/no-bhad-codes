@@ -4,8 +4,7 @@
 
 -- UP
 -- Add columns for project requests from clients
-ALTER TABLE projects ADD COLUMN project_type TEXT;
-ALTER TABLE projects ADD COLUMN budget_range TEXT;
+-- Note: project_type and budget_range already exist in initial schema
 ALTER TABLE projects ADD COLUMN timeline TEXT;
 ALTER TABLE projects ADD COLUMN preview_url TEXT;
 

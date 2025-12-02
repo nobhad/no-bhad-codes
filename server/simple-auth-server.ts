@@ -7,12 +7,12 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 const app = express();
-const PORT = 3001;
+const PORT = 4001;
 
 // Middleware
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    origin: ['http://localhost:5173', 'http://localhost:4000'],
     credentials: true
   })
 );

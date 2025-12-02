@@ -507,7 +507,7 @@ export class ClientIntakeModule extends BaseModule {
       intakeData.submittedAt = new Date().toISOString();
 
       // Submit to API
-      const response = await fetch('http://localhost:3001/api/intake', {
+      const response = await fetch('/api/intake', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

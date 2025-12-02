@@ -1,0 +1,119 @@
+<section class="client-login">
+    <div class="container">
+        <div class="client-content">
+            <h1 class="login-title">CLIENT PORTAL</h1>
+            <p class="login-subtitle">New client or returning?</p>
+
+            <div class="portal-cards">
+                <!-- Intake Card -->
+                <div class="portal-card">
+                    <div class="portal-card-header">
+                        <h2>New Client</h2>
+                    </div>
+                    <div class="portal-card-body">
+                        <p>Ready to start a new project? Fill out our intake form and I'll get back to you within 24-48 hours.</p>
+                        <div class="portal-card-avatar">
+                            <img src="/images/avatar.svg" alt="Avatar" />
+                        </div>
+                        <a href="/client/intake" class="btn btn-primary">Start Intake Form</a>
+                    </div>
+                </div>
+
+                <!-- Login Card -->
+                <div class="portal-card">
+                    <div class="portal-card-header">
+                        <h2>Existing Client</h2>
+                    </div>
+                    <div class="portal-card-body">
+                        <p>Already have an account? Sign in to access your projects, files, and messages.</p>
+                        <form id="loginForm" class="login-form" novalidate>
+                            <div class="form-group">
+                                <label for="login-email">Email</label>
+                                <input type="email" id="login-email" name="email" class="form-input" placeholder="your@email.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="login-password">Password</label>
+                                <div class="password-input-wrapper">
+                                    <input type="password" id="login-password" name="password" class="form-input" placeholder="Enter password" required>
+                                    <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                            <circle cx="12" cy="12" r="3"></circle>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="login-error" id="loginError"></div>
+                            <button type="submit" class="btn btn-primary btn-full">
+                                <span class="btn-text">Sign In</span>
+                                <span class="btn-loader"></span>
+                            </button>
+                        </form>
+                        <div class="login-footer">
+                            <p>Forgot your password? <a href="mailto:hello@nobhadcodes.com">Contact me</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script type="module">
+    // Password toggle
+    document.querySelector('.password-toggle')?.addEventListener('click', function() {
+        const input = document.getElementById('login-password');
+        const type = input.type === 'password' ? 'text' : 'password';
+        input.type = type;
+    });
+
+    // Login form submission
+    document.getElementById('loginForm')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        const errorDiv = document.getElementById('loginError');
+        const submitBtn = this.querySelector('button[type="submit"]');
+
+        // Show loading state
+        submitBtn.classList.add('loading');
+        errorDiv.textContent = '';
+        errorDiv.classList.remove('show');
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.token) {
+                // Store token and redirect to portal
+                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('clientEmail', email);
+                window.location.href = '/client/portal';
+            } else {
+                // Show error
+                errorDiv.textContent = data.message || 'Invalid email or password';
+                errorDiv.classList.add('show');
+            }
+        } catch (error) {
+            // Demo mode fallback
+            if (email === 'demo@example.com' && password === 'demo123') {
+                localStorage.setItem('authToken', 'demo-token');
+                localStorage.setItem('clientEmail', email);
+                window.location.href = '/client/portal';
+            } else {
+                errorDiv.textContent = 'Unable to connect. Try demo@example.com / demo123';
+                errorDiv.classList.add('show');
+            }
+        } finally {
+            submitBtn.classList.remove('loading');
+        }
+    });
+</script>

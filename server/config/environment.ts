@@ -125,9 +125,9 @@ const configSchema: ConfigSchema = {
     default: 'development',
     values: ['development', 'production', 'test']
   },
-  PORT: { required: true, default: 3001, type: 'number' },
-  FRONTEND_URL: { required: true, default: 'http://localhost:3000', type: 'url' },
-  API_BASE_URL: { required: false, default: 'http://localhost:3001', type: 'url' },
+  PORT: { required: true, default: 4001, type: 'number' },
+  FRONTEND_URL: { required: true, default: 'http://localhost:4000', type: 'url' },
+  API_BASE_URL: { required: false, default: 'http://localhost:4001', type: 'url' },
 
   // Database
   DATABASE_PATH: { required: true, default: './data/client_portal.db' },

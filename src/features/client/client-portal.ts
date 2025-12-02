@@ -605,7 +605,7 @@ export class ClientPortalModule extends BaseModule {
   }
 
   /** API base URL for authentication */
-  private static readonly API_BASE = 'http://localhost:3001/api/auth';
+  private static readonly API_BASE = '/api/auth';
 
   private async handleLogin(event: Event): Promise<void> {
     event.preventDefault();
@@ -954,19 +954,19 @@ export class ClientPortalModule extends BaseModule {
   }
 
   /** Files API base URL */
-  private static readonly FILES_API_BASE = 'http://localhost:3001/api/uploads';
+  private static readonly FILES_API_BASE = '/api/uploads';
 
   /** Invoices API base URL */
-  private static readonly INVOICES_API_BASE = 'http://localhost:3001/api/invoices';
+  private static readonly INVOICES_API_BASE = '/api/invoices';
 
   /** Clients API base URL */
-  private static readonly CLIENTS_API_BASE = 'http://localhost:3001/api/clients';
+  private static readonly CLIENTS_API_BASE = '/api/clients';
 
   /** Projects API base URL */
-  private static readonly PROJECTS_API_BASE = 'http://localhost:3001/api/projects';
+  private static readonly PROJECTS_API_BASE = '/api/projects';
 
   /** Messages API base URL */
-  private static readonly MESSAGES_API_BASE = 'http://localhost:3001/api/messages';
+  private static readonly MESSAGES_API_BASE = '/api/messages';
 
   /**
    * Load files from API and render the list
