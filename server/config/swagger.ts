@@ -62,7 +62,7 @@ const options = {
     },
     servers: [
       {
-        url: process.env.API_BASE_URL || 'http://localhost:3001',
+        url: process.env.API_BASE_URL || 'http://localhost:4001',
         description: 'Development server'
       },
       {
@@ -470,8 +470,8 @@ export function setupSwagger(app: Express): void {
   app.get('/api-docs', swaggerUi.setup(specs, swaggerUiOptions));
 
   console.log('📚 API Documentation available at:');
-  console.log('   • Swagger UI: http://localhost:3001/api-docs');
-  console.log('   • OpenAPI JSON: http://localhost:3001/api-docs.json');
+  console.log('   • Swagger UI: http://localhost:4001/api-docs');
+  console.log('   • OpenAPI JSON: http://localhost:4001/api-docs.json');
 }
 
 export { specs };

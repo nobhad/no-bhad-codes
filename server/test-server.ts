@@ -2,7 +2,7 @@
 import express from 'express';
 
 const app = express();
-const PORT = 3001;
+const PORT = 4001;
 
 app.get('/', (req, res) => {
   res.json({ message: 'Test server working' });

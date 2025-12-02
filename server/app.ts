@@ -35,7 +35,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 4001;
 
 // Initialize Sentry for error tracking
 errorTracker.init({
@@ -181,22 +181,26 @@ async function startServer() {
       console.log('📧 Server will continue without email functionality');
     }
 
-    // Initialize cache service
-    const cacheConfig = {
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD,
-      db: parseInt(process.env.REDIS_DB || '0'),
-      keyPrefix: process.env.REDIS_KEY_PREFIX || 'nbc:',
-      lazyConnect: true
-    };
+    // Initialize cache service (only if Redis is enabled)
+    if (process.env.REDIS_ENABLED === 'true') {
+      const cacheConfig = {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+        password: process.env.REDIS_PASSWORD,
+        db: parseInt(process.env.REDIS_DB || '0'),
+        keyPrefix: process.env.REDIS_KEY_PREFIX || 'nbc:',
+        lazyConnect: true
+      };
 
-    try {
-      await cacheService.init(cacheConfig);
-      console.log('✅ Cache service initialized');
-    } catch (cacheError) {
-      console.warn('⚠️  Cache service initialization failed:', cacheError);
-      console.log('🚀 Server will continue without caching functionality');
+      try {
+        await cacheService.init(cacheConfig);
+        console.log('✅ Cache service initialized');
+      } catch (cacheError) {
+        console.warn('⚠️  Cache service initialization failed:', cacheError);
+        console.log('🚀 Server will continue without caching functionality');
+      }
+    } else {
+      console.log('ℹ️  Redis caching disabled (set REDIS_ENABLED=true to enable)');
     }
 
     // Start server

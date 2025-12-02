@@ -507,24 +507,38 @@ export class Application {
 
     // Determine current page type
     const currentPath = window.location.pathname;
-    const isClientPortal = currentPath.includes('/client') && currentPath.includes('/portal');
+    const isClientPortal = currentPath.includes('/client/portal');
+    const isClientLanding = currentPath.includes('/client/landing');
+    const isClientIntake = currentPath.includes('/client/intake');
     const isAdminPage = currentPath.includes('/admin');
     const isHomePage = currentPath === '/' || currentPath === '/index.html';
 
-    // Core modules for the main site
+    // Core modules for the main site (home page)
     const mainSiteModules = [
       'ThemeModule',
       'SectionCardRenderer', // Section business card renderer
       'SectionCardInteractions', // Section business card interactions
       'NavigationModule',
-      'ContactFormModule',
-      'ClientLandingModule' // Client landing page animations
+      'ContactFormModule'
     ];
 
-    // Modules for Client Portal only
+    // Modules for Client Portal dashboard
     const clientPortalModules = [
-      'ThemeModule', // Theme still needed for dark mode toggle
+      'ThemeModule',
       'ClientPortalModule'
+    ];
+
+    // Modules for Client Landing page (login/intake selection)
+    const clientLandingModules = [
+      'ThemeModule',
+      'FooterModule'
+    ];
+
+    // Modules for Client Intake form
+    const clientIntakeModules = [
+      'ThemeModule',
+      'NavigationModule',
+      'FooterModule'
     ];
 
     // Modules for Admin Dashboard only
@@ -537,6 +551,10 @@ export class Application {
     let baseCoreModules: string[];
     if (isClientPortal) {
       baseCoreModules = clientPortalModules;
+    } else if (isClientLanding) {
+      baseCoreModules = clientLandingModules;
+    } else if (isClientIntake) {
+      baseCoreModules = clientIntakeModules;
     } else if (isAdminPage) {
       baseCoreModules = adminModules;
     } else {

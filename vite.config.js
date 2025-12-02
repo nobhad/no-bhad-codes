@@ -146,10 +146,10 @@ export default defineConfig({
     reportCompressedSize: true
   },
   server: {
-    port: 3000,
+    port: 4000,
     open: true,
     hmr: {
-      port: 3000,
+      port: 4000,
       host: 'localhost'
     },
     watch: {
