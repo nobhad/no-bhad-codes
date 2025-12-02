@@ -15,6 +15,181 @@ import { cache, invalidateCache, QueryCache } from '../middleware/cache.js';
 
 const router = express.Router();
 
+// =====================================================
+// CURRENT CLIENT ENDPOINTS (/me)
+// =====================================================
+
+/**
+ * GET /me - Get current client's profile
+ */
+router.get(
+  '/me',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
+    const db = getDatabase();
+    const client = await db.get(
+      `SELECT id, email, company_name, contact_name, phone, status,
+              notification_messages, notification_status, notification_invoices, notification_weekly,
+              billing_company, billing_address, billing_address2, billing_city,
+              billing_state, billing_zip, billing_country,
+              created_at, updated_at
+       FROM clients WHERE id = ?`,
+      [req.user!.id]
+    );
+
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found', code: 'CLIENT_NOT_FOUND' });
+    }
+
+    res.json({ success: true, client });
+  })
+);
+
+/**
+ * PUT /me - Update current client's profile
+ */
+router.put(
+  '/me',
+  authenticateToken,
+  invalidateCache(['clients']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
+    const { contact_name, company_name, phone } = req.body;
+    const db = getDatabase();
+
+    await db.run(
+      `UPDATE clients SET contact_name = ?, company_name = ?, phone = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [contact_name || null, company_name || null, phone || null, req.user!.id]
+    );
+
+    const updatedClient = await db.get(
+      `SELECT id, email, company_name, contact_name, phone FROM clients WHERE id = ?`,
+      [req.user!.id]
+    );
+
+    res.json({ success: true, message: 'Profile updated successfully', client: updatedClient });
+  })
+);
+
+/**
+ * PUT /me/password - Change current client's password
+ */
+router.put(
+  '/me/password',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Current and new passwords are required', code: 'MISSING_FIELDS' });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters', code: 'WEAK_PASSWORD' });
+    }
+
+    const db = getDatabase();
+    const client = await db.get('SELECT password_hash FROM clients WHERE id = ?', [req.user!.id]);
+
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found', code: 'CLIENT_NOT_FOUND' });
+    }
+
+    // Verify current password
+    const validPassword = await bcrypt.compare(currentPassword, client.password_hash);
+    if (!validPassword) {
+      return res.status(401).json({ error: 'Current password is incorrect', code: 'INVALID_PASSWORD' });
+    }
+
+    // Hash and save new password
+    const newHash = await bcrypt.hash(newPassword, 12);
+    await db.run(
+      'UPDATE clients SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [newHash, req.user!.id]
+    );
+
+    res.json({ success: true, message: 'Password changed successfully' });
+  })
+);
+
+/**
+ * PUT /me/notifications - Update notification preferences
+ */
+router.put(
+  '/me/notifications',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
+    const { messages, status, invoices, weekly } = req.body;
+    const db = getDatabase();
+
+    await db.run(
+      `UPDATE clients SET
+         notification_messages = ?,
+         notification_status = ?,
+         notification_invoices = ?,
+         notification_weekly = ?,
+         updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [messages ? 1 : 0, status ? 1 : 0, invoices ? 1 : 0, weekly ? 1 : 0, req.user!.id]
+    );
+
+    res.json({ success: true, message: 'Notification preferences updated' });
+  })
+);
+
+/**
+ * PUT /me/billing - Update billing information
+ */
+router.put(
+  '/me/billing',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
+    const { company, address, address2, city, state, zip, country } = req.body;
+    const db = getDatabase();
+
+    await db.run(
+      `UPDATE clients SET
+         billing_company = ?,
+         billing_address = ?,
+         billing_address2 = ?,
+         billing_city = ?,
+         billing_state = ?,
+         billing_zip = ?,
+         billing_country = ?,
+         updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [company || null, address || null, address2 || null, city || null,
+       state || null, zip || null, country || null, req.user!.id]
+    );
+
+    res.json({ success: true, message: 'Billing information updated' });
+  })
+);
+
+// =====================================================
+// ADMIN CLIENT ENDPOINTS
+// =====================================================
+
 // Get all clients (admin only)
 router.get(
   '/',

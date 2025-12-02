@@ -425,54 +425,106 @@ private showSuccessMessage(message: string): void {
 
 ## Backend Integration
 
+**Status:** Complete
+
+All settings forms now save to the backend API via the `/api/clients/me` endpoints.
+
 ### API Endpoints
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/users/profile` | GET | Get user profile |
-| `/api/users/profile` | PUT | Update profile |
-| `/api/users/password` | PUT | Change password |
-| `/api/users/notifications` | GET | Get notification prefs |
-| `/api/users/notifications` | PUT | Update notification prefs |
-| `/api/users/billing` | GET | Get billing info |
-| `/api/users/billing` | PUT | Update billing info |
+| `/api/clients/me` | GET | Get current client's profile |
+| `/api/clients/me` | PUT | Update profile (name, company, phone) |
+| `/api/clients/me/password` | PUT | Change password |
+| `/api/clients/me/notifications` | PUT | Update notification preferences |
+| `/api/clients/me/billing` | PUT | Update billing information |
 
-### Database Schema
+### Frontend Save Methods
+
+```typescript
+// Profile Settings
+private async saveProfileSettings(): Promise<void> {
+  const token = localStorage.getItem('client_auth_token');
+
+  const response = await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      contact_name: contactName,
+      company_name: companyName,
+      phone: phone
+    })
+  });
+
+  // Also handle password change if fields filled
+  if (currentPassword && newPassword) {
+    await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/password`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+  }
+}
+
+// Notification Settings
+private async saveNotificationSettings(): Promise<void> {
+  const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+  const settings = {
+    messages: checkboxes[0]?.checked || false,
+    status: checkboxes[1]?.checked || false,
+    invoices: checkboxes[2]?.checked || false,
+    weekly: checkboxes[3]?.checked || false
+  };
+
+  await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/notifications`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(settings)
+  });
+}
+
+// Billing Settings
+private async saveBillingSettings(): Promise<void> {
+  const billing = {
+    company: document.getElementById('billing-company')?.value,
+    address: document.getElementById('billing-address')?.value,
+    address2: document.getElementById('billing-address2')?.value,
+    city: document.getElementById('billing-city')?.value,
+    state: document.getElementById('billing-state')?.value,
+    zip: document.getElementById('billing-zip')?.value,
+    country: document.getElementById('billing-country')?.value
+  };
+
+  await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/billing`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(billing)
+  });
+}
+```
+
+### Database Columns (clients table)
 
 ```sql
--- User profiles (extends auth users)
-CREATE TABLE user_profiles (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER UNIQUE NOT NULL,
-  company TEXT,
-  phone TEXT,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
+-- Added via migration 006_client_settings_columns.sql
 
 -- Notification preferences
-CREATE TABLE notification_preferences (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER UNIQUE NOT NULL,
-  email_messages BOOLEAN DEFAULT 1,
-  email_status_changes BOOLEAN DEFAULT 1,
-  email_invoices BOOLEAN DEFAULT 1,
-  email_weekly_summary BOOLEAN DEFAULT 0,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
+notification_messages INTEGER DEFAULT 1,
+notification_status INTEGER DEFAULT 1,
+notification_invoices INTEGER DEFAULT 1,
+notification_weekly INTEGER DEFAULT 0,
 
 -- Billing information
-CREATE TABLE billing_info (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER UNIQUE NOT NULL,
-  company_name TEXT,
-  address_line1 TEXT,
-  address_line2 TEXT,
-  city TEXT,
-  state TEXT,
-  postal_code TEXT,
-  country TEXT,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
+billing_company TEXT,
+billing_address TEXT,
+billing_address2 TEXT,
+billing_city TEXT,
+billing_state TEXT,
+billing_zip TEXT,
+billing_country TEXT
 ```
 
 ---

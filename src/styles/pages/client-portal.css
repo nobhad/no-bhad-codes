@@ -868,6 +868,18 @@ html[data-theme="dark"] .login-form label {
   gap: 0.5rem;
 }
 
+/* Delete button danger styling */
+.file-actions .btn-delete {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #991b1b;
+}
+
+.file-actions .btn-delete:hover {
+  background: #991b1b;
+  color: #ffffff;
+}
+
 /* Uniform button styles for client portal */
 .client-portal-main .btn,
 .client-portal-main .btn-primary,

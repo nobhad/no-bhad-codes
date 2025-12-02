@@ -2,10 +2,13 @@
 
 ## Table of Contents
 1. [Authentication](#authentication)
-2. [Invoice Management API](#invoice-management-api)
-3. [File Upload API](#file-upload-api)
-4. [Error Handling](#error-handling)
-5. [Request/Response Examples](#requestresponse-examples)
+2. [Client Settings API](#client-settings-api)
+3. [Project Management API](#project-management-api)
+4. [Invoice Management API](#invoice-management-api)
+5. [File Upload API](#file-upload-api)
+6. [Messaging API](#messaging-api)
+7. [Error Handling](#error-handling)
+8. [Request/Response Examples](#requestresponse-examples)
 
 ## Authentication
 
@@ -20,6 +23,215 @@ Authorization: Bearer <your-jwt-token>
 2. Include token in `Authorization` header for protected endpoints
 3. Token expires after configured time (default: 24 hours)
 4. Refresh token via `/api/auth/refresh` when needed
+
+## Client Settings API
+
+### Base URL
+```
+/api/clients
+```
+
+### Endpoints
+
+#### 🔍 **GET** `/api/clients/me`
+Get current authenticated client's profile
+
+**Authentication:** Required (Client only)
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "client": {
+    "id": 5,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "company": "Acme Corp",
+    "phone": "+1 555-0123",
+    "notification_messages": 1,
+    "notification_status": 1,
+    "notification_invoices": 1,
+    "notification_weekly": 0,
+    "billing_company": "Acme Corp",
+    "billing_address": "123 Main St",
+    "billing_city": "New York",
+    "billing_state": "NY",
+    "billing_zip": "10001",
+    "billing_country": "USA"
+  }
+}
+```
+
+---
+
+#### 🔄 **PUT** `/api/clients/me`
+Update current client's profile information
+
+**Authentication:** Required (Client only)
+**Request Body:**
+```json
+{
+  "name": "John Doe",
+  "company": "Acme Corp",
+  "phone": "+1 555-0123"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Profile updated successfully"
+}
+```
+
+---
+
+#### 🔐 **PUT** `/api/clients/me/password`
+Change client's password
+
+**Authentication:** Required (Client only)
+**Request Body:**
+```json
+{
+  "currentPassword": "oldPassword123",
+  "newPassword": "newSecurePassword456"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Password changed successfully"
+}
+```
+
+**Error (400 Bad Request):**
+```json
+{
+  "error": "Current password is incorrect"
+}
+```
+
+---
+
+#### 🔔 **PUT** `/api/clients/me/notifications`
+Update notification preferences
+
+**Authentication:** Required (Client only)
+**Request Body:**
+```json
+{
+  "messages": true,
+  "status": true,
+  "invoices": true,
+  "weekly": false
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Notification preferences updated"
+}
+```
+
+---
+
+#### 💳 **PUT** `/api/clients/me/billing`
+Update billing information
+
+**Authentication:** Required (Client only)
+**Request Body:**
+```json
+{
+  "company": "Acme Corp",
+  "address": "123 Main St",
+  "city": "New York",
+  "state": "NY",
+  "zip": "10001",
+  "country": "USA"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Billing information updated"
+}
+```
+
+---
+
+## Project Management API
+
+### Base URL
+```
+/api/projects
+```
+
+### Endpoints
+
+#### 📝 **POST** `/api/projects/request`
+Submit a new project request (clients only)
+
+**Authentication:** Required (Client only)
+**Request Body:**
+```json
+{
+  "name": "Company Website Redesign",
+  "projectType": "redesign",
+  "budget": "5k-10k",
+  "timeline": "1-2months",
+  "description": "We need to modernize our existing website..."
+}
+```
+
+**Valid Project Types:**
+- `website` - New Website
+- `redesign` - Website Redesign
+- `webapp` - Web Application
+- `ecommerce` - E-Commerce Site
+- `maintenance` - Maintenance & Updates
+- `other` - Other
+
+**Valid Budget Ranges:**
+- `1k-2.5k` - $1,000 - $2,500
+- `2.5k-5k` - $2,500 - $5,000
+- `5k-10k` - $5,000 - $10,000
+- `10k-25k` - $10,000 - $25,000
+- `25k+` - $25,000+
+
+**Valid Timelines:**
+- `asap` - As soon as possible
+- `1-2months` - 1-2 months
+- `3-6months` - 3-6 months
+- `flexible` - Flexible
+
+**Response (201 Created):**
+```json
+{
+  "success": true,
+  "message": "Project request submitted successfully. You will be contacted shortly.",
+  "project": {
+    "id": 15,
+    "name": "Company Website Redesign",
+    "status": "pending",
+    "created_at": "2025-12-01T15:30:00.000Z"
+  }
+}
+```
+
+**Error (403 Forbidden):**
+```json
+{
+  "error": "Only clients can submit project requests"
+}
+```
+
+---
 
 ## Invoice Management API
 
@@ -306,7 +518,7 @@ Send invoice to client
 #### 💳 **POST** `/api/invoices/:id/pay`
 Mark invoice as paid
 
-**Authentication:** Required  
+**Authentication:** Required
 **Parameters:**
 - `id` (integer) - Invoice ID
 
@@ -327,6 +539,41 @@ Mark invoice as paid
   "invoice": {
     // Updated invoice with status: "paid" and payment details
   }
+}
+```
+
+---
+
+#### 📄 **GET** `/api/invoices/:id/pdf`
+Download invoice as PDF
+
+**Authentication:** Required
+**Parameters:**
+- `id` (integer) - Invoice ID
+
+**Response:** PDF file stream with headers:
+- `Content-Type: application/pdf`
+- `Content-Disposition: attachment; filename="invoice-INV-2025-001.pdf"`
+
+**PDF Contents:**
+- Company header with contact information
+- Invoice number and dates
+- Bill To section with client details
+- Line items table
+- Subtotal, tax, and total
+- Payment terms and notes
+
+**Error (403 Forbidden):**
+```json
+{
+  "error": "Not authorized to view this invoice"
+}
+```
+
+**Error (404 Not Found):**
+```json
+{
+  "error": "Invoice not found"
 }
 ```
 
@@ -664,6 +911,185 @@ Delete a specific file
   "error": "File not found"
 }
 ```
+
+## Messaging API
+
+### Base URL
+```
+/api/messages
+```
+
+### Endpoints
+
+#### 🔍 **GET** `/api/messages/threads`
+Get all message threads for authenticated user
+
+**Authentication:** Required
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "threads": [
+    {
+      "id": 1,
+      "client_id": 5,
+      "subject": "General Discussion",
+      "thread_type": "general",
+      "project_id": 1,
+      "priority": "normal",
+      "created_at": "2025-11-30T10:00:00.000Z",
+      "last_message_at": "2025-12-01T14:30:00.000Z",
+      "unread_count": 2
+    }
+  ],
+  "count": 1
+}
+```
+
+---
+
+#### 📝 **POST** `/api/messages/threads`
+Create a new message thread
+
+**Authentication:** Required
+**Request Body:**
+```json
+{
+  "subject": "Project Question",
+  "projectId": 1,
+  "priority": "normal"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "success": true,
+  "message": "Thread created successfully",
+  "thread": {
+    "id": 2,
+    "client_id": 5,
+    "subject": "Project Question",
+    "thread_type": "general",
+    "project_id": 1,
+    "priority": "normal",
+    "created_at": "2025-12-01T15:00:00.000Z"
+  }
+}
+```
+
+---
+
+#### 🔍 **GET** `/api/messages/threads/:id/messages`
+Get all messages in a thread
+
+**Authentication:** Required
+**Parameters:**
+- `id` (integer) - Thread ID
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "messages": [
+    {
+      "id": 1,
+      "thread_id": 1,
+      "sender_id": 5,
+      "sender_type": "client",
+      "sender_name": "John Doe",
+      "content": "Hello, I have a question about the project timeline.",
+      "created_at": "2025-12-01T14:00:00.000Z",
+      "read_at": null
+    },
+    {
+      "id": 2,
+      "thread_id": 1,
+      "sender_id": 1,
+      "sender_type": "admin",
+      "sender_name": "Noelle",
+      "content": "Sure! We're on track for the December deadline.",
+      "created_at": "2025-12-01T14:30:00.000Z",
+      "read_at": null
+    }
+  ],
+  "count": 2
+}
+```
+
+---
+
+#### 📝 **POST** `/api/messages/threads/:id/messages`
+Send a message in a thread
+
+**Authentication:** Required
+**Parameters:**
+- `id` (integer) - Thread ID
+
+**Request Body:**
+```json
+{
+  "content": "Thank you for the update!"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "success": true,
+  "message": {
+    "id": 3,
+    "thread_id": 1,
+    "sender_id": 5,
+    "sender_type": "client",
+    "content": "Thank you for the update!",
+    "created_at": "2025-12-01T14:45:00.000Z"
+  }
+}
+```
+
+---
+
+#### 🔍 **GET** `/api/messages/preferences`
+Get notification preferences for messages
+
+**Authentication:** Required
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "preferences": {
+    "email_notifications": true,
+    "email_frequency": "immediate",
+    "push_notifications": false
+  }
+}
+```
+
+---
+
+#### 🔄 **PUT** `/api/messages/preferences`
+Update notification preferences
+
+**Authentication:** Required
+**Request Body:**
+```json
+{
+  "email_notifications": true,
+  "email_frequency": "daily",
+  "push_notifications": true
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Preferences updated successfully"
+}
+```
+
+---
 
 ## Error Handling
 

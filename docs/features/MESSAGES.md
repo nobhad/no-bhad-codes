@@ -287,30 +287,223 @@ if (messageInput && sendButton) {
 
 ## TypeScript Implementation
 
-### Loading Messages
+### API Base URL
 
 ```typescript
-// src/features/client/client-portal.ts:653-673
-private loadMessages(): void {
-  if (!this.currentProject) return;
+private static readonly MESSAGES_API_BASE = 'http://localhost:3001/api/messages';
+```
 
-  const messagesContainer = document.getElementById('messages-list');
-  if (!messagesContainer) return;
+### Loading Messages from API
 
-  messagesContainer.innerHTML = '';
+```typescript
+private async loadMessagesFromAPI(): Promise<void> {
+  const messagesThread = document.getElementById('messages-thread');
+  if (!messagesThread) return;
 
-  this.currentProject.messages.forEach((message: any) => {
+  const token = localStorage.getItem('client_auth_token');
+
+  if (!token || token.startsWith('demo_token_')) {
+    this.renderDemoMessages(messagesThread);
+    return;
+  }
+
+  try {
+    const response = await fetch(`${ClientPortalModule.MESSAGES_API_BASE}/threads`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!response.ok) {
+      this.renderDemoMessages(messagesThread);
+      return;
+    }
+
+    const data = await response.json();
+    const threads = data.threads || [];
+
+    if (threads.length === 0) {
+      this.renderDemoMessages(messagesThread);
+      return;
+    }
+
+    // Get messages from first thread
+    const threadId = threads[0].id;
+    const messagesResponse = await fetch(
+      `${ClientPortalModule.MESSAGES_API_BASE}/threads/${threadId}/messages`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    if (messagesResponse.ok) {
+      const messagesData = await messagesResponse.json();
+      this.renderMessages(messagesThread, messagesData.messages || []);
+    }
+  } catch (error) {
+    console.error('Error loading messages:', error);
+    this.renderDemoMessages(messagesThread);
+  }
+}
+```
+
+### Rendering Messages
+
+```typescript
+private renderMessages(container: HTMLElement, messages: any[]): void {
+  container.innerHTML = '';
+
+  messages.forEach((message) => {
+    const isReceived = message.sender_type === 'admin' || message.sender_type === 'system';
     const messageElement = document.createElement('div');
-    messageElement.className = `message message-${message.senderRole}`;
+    messageElement.className = `message ${isReceived ? 'message-received' : 'message-sent'}`;
+
+    const avatarHtml = isReceived
+      ? `<div class="message-avatar">
+           <img src="/images/avatar.svg" alt="Noelle" class="avatar-img">
+         </div>`
+      : `<div class="message-avatar">
+           <div class="avatar-placeholder">YOU</div>
+         </div>`;
+
+    const senderName = isReceived ? (message.sender_name || 'Noelle') : 'You';
+
     messageElement.innerHTML = `
-      <div class="message-header">
-        <span class="message-sender">${message.sender}</span>
-        <span class="message-time">${this.formatDate(message.timestamp)}</span>
+      ${isReceived ? avatarHtml : ''}
+      <div class="message-content">
+        <div class="message-header">
+          <span class="message-sender">${senderName}</span>
+          <span class="message-time">${this.formatDate(message.created_at)}</span>
+        </div>
+        <div class="message-body">${this.escapeHtml(message.content)}</div>
       </div>
-      <div class="message-content">${message.message}</div>
+      ${!isReceived ? avatarHtml : ''}
     `;
-    messagesContainer.appendChild(messageElement);
+
+    container.appendChild(messageElement);
   });
+
+  // Scroll to bottom
+  container.scrollTop = container.scrollHeight;
+}
+```
+
+### Sending Messages
+
+```typescript
+private async sendMessage(): Promise<void> {
+  const messageInput = document.getElementById('message-input') as HTMLTextAreaElement;
+  if (!messageInput) return;
+
+  const content = messageInput.value.trim();
+  if (!content) return;
+
+  const token = localStorage.getItem('client_auth_token');
+
+  if (!token || token.startsWith('demo_token_')) {
+    // Demo mode: show message locally
+    const messagesThread = document.getElementById('messages-thread');
+    if (messagesThread) {
+      const messageElement = document.createElement('div');
+      messageElement.className = 'message message-sent';
+      messageElement.innerHTML = `
+        <div class="message-content">
+          <div class="message-header">
+            <span class="message-sender">You</span>
+            <span class="message-time">${this.formatDate(new Date().toISOString())}</span>
+          </div>
+          <div class="message-body">${this.escapeHtml(content)}</div>
+        </div>
+        <div class="message-avatar">
+          <div class="avatar-placeholder">YOU</div>
+        </div>
+      `;
+      messagesThread.appendChild(messageElement);
+      messagesThread.scrollTop = messagesThread.scrollHeight;
+    }
+    messageInput.value = '';
+    return;
+  }
+
+  try {
+    // Get or create thread
+    const threadsResponse = await fetch(`${ClientPortalModule.MESSAGES_API_BASE}/threads`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const threadsData = await threadsResponse.json();
+    let threadId: number;
+
+    if (threadsData.threads && threadsData.threads.length > 0) {
+      threadId = threadsData.threads[0].id;
+    } else {
+      // Create new thread
+      const createResponse = await fetch(`${ClientPortalModule.MESSAGES_API_BASE}/threads`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ subject: 'General Discussion' })
+      });
+      const createData = await createResponse.json();
+      threadId = createData.thread.id;
+    }
+
+    // Send message
+    const response = await fetch(
+      `${ClientPortalModule.MESSAGES_API_BASE}/threads/${threadId}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ content })
+      }
+    );
+
+    if (response.ok) {
+      messageInput.value = '';
+      await this.loadMessagesFromAPI();
+    }
+  } catch (error) {
+    console.error('Error sending message:', error);
+    alert('Failed to send message. Please try again.');
+  }
+}
+```
+
+### Demo Messages Fallback
+
+```typescript
+private renderDemoMessages(container: HTMLElement): void {
+  container.innerHTML = `
+    <div class="message message-received">
+      <div class="message-avatar">
+        <img src="/images/avatar.svg" alt="Noelle" class="avatar-img">
+      </div>
+      <div class="message-content">
+        <div class="message-header">
+          <span class="message-sender">Noelle</span>
+          <span class="message-time">Nov 30, 2025 at 10:30 AM</span>
+        </div>
+        <div class="message-body">
+          Welcome to your project portal! I'm excited to work with you.
+          I've reviewed your intake form and will begin the planning phase shortly.
+        </div>
+      </div>
+    </div>
+    <div class="message message-sent">
+      <div class="message-content">
+        <div class="message-header">
+          <span class="message-sender">You</span>
+          <span class="message-time">Nov 30, 2025 at 11:15 AM</span>
+        </div>
+        <div class="message-body">
+          Thanks! Looking forward to seeing the initial designs.
+        </div>
+      </div>
+      <div class="message-avatar">
+        <div class="avatar-placeholder">YOU</div>
+      </div>
+    </div>
+  `;
 }
 ```
 

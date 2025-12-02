@@ -237,92 +237,64 @@ All fields are required for submission:
 - [x] Desired Timeline
 - [x] Project Description
 
-### Client-Side Validation (Planned)
+### Client-Side Validation
+
+**Status:** Complete
 
 ```typescript
-const form = document.getElementById('new-project-form') as HTMLFormElement;
-
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-
-  // Check all required fields
-  const projectName = document.getElementById('project-name') as HTMLInputElement;
-  const projectType = document.getElementById('project-type') as HTMLSelectElement;
-  const projectBudget = document.getElementById('project-budget') as HTMLSelectElement;
-  const projectTimeline = document.getElementById('project-timeline') as HTMLSelectElement;
-  const projectDescription = document.getElementById('project-description') as HTMLTextAreaElement;
-
-  // Validate
-  if (!projectName.value.trim()) {
-    showError('Please enter a project name');
-    return;
-  }
-
-  if (!projectType.value) {
-    showError('Please select a project type');
-    return;
-  }
-
-  if (!projectBudget.value) {
-    showError('Please select a budget range');
-    return;
-  }
-
-  if (!projectTimeline.value) {
-    showError('Please select a timeline');
-    return;
-  }
-
-  if (!projectDescription.value.trim()) {
-    showError('Please enter a project description');
-    return;
-  }
-
-  // Submit form
-  submitProjectRequest({
-    name: projectName.value,
-    type: projectType.value,
-    budget: projectBudget.value,
-    timeline: projectTimeline.value,
-    description: projectDescription.value
+// Form validation and submission is handled by setupSettingsFormHandlers()
+const newProjectForm = document.getElementById('new-project-form') as HTMLFormElement;
+if (newProjectForm) {
+  newProjectForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await this.submitProjectRequest();
   });
-});
+}
 ```
 
 ---
 
 ## Form Submission
 
-### Submit Handler (Planned)
+### Submit Handler
+
+**Status:** Complete
 
 ```typescript
-async function submitProjectRequest(data: ProjectRequestData): Promise<void> {
-  try {
-    const response = await fetch('/api/projects/request', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAuthToken()}`
-      },
-      body: JSON.stringify(data)
-    });
+private async submitProjectRequest(): Promise<void> {
+  const token = localStorage.getItem('client_auth_token');
 
-    if (!response.ok) {
-      throw new Error('Failed to submit project request');
-    }
+  if (!token || token.startsWith('demo_token_')) {
+    alert('Project requests cannot be submitted in demo mode.');
+    return;
+  }
 
-    // Show success message
-    showSuccess('Project request submitted successfully!');
+  const name = (document.getElementById('project-name') as HTMLInputElement)?.value;
+  const projectType = (document.getElementById('project-type') as HTMLSelectElement)?.value;
+  const budget = (document.getElementById('project-budget') as HTMLSelectElement)?.value;
+  const timeline = (document.getElementById('project-timeline') as HTMLSelectElement)?.value;
+  const description = (document.getElementById('project-description') as HTMLTextAreaElement)?.value;
 
-    // Reset form
+  if (!name || !projectType || !description) {
+    alert('Please fill in all required fields');
+    return;
+  }
+
+  const response = await fetch(`${ClientPortalModule.PROJECTS_API_BASE}/request`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ name, projectType, budget, timeline, description })
+  });
+
+  const data = await response.json();
+
+  if (response.ok) {
+    alert(data.message || 'Project request submitted successfully!');
     form.reset();
-
-    // Navigate to dashboard
-    switchTab('dashboard');
-
-  } catch (error) {
-    showError('Failed to submit project request. Please try again.');
-    console.error('Project request error:', error);
+    this.switchTab('dashboard');
   }
 }
 ```
@@ -340,11 +312,13 @@ async function submitProjectRequest(data: ProjectRequestData): Promise<void> {
 
 ## Backend Integration
 
+**Status:** Complete
+
 ### API Endpoint
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/projects/request` | POST | Submit project request |
+| `/api/projects/request` | POST | Submit project request (clients only) |
 
 ### Request Payload
 
@@ -375,24 +349,20 @@ interface ProjectRequestResponse {
 
 ### Database Schema
 
+Project requests are stored in the `projects` table with `status = 'pending'`:
+
 ```sql
-CREATE TABLE project_requests (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  client_id INTEGER NOT NULL,
-  name TEXT NOT NULL,
-  type TEXT NOT NULL,
-  budget TEXT NOT NULL,
-  timeline TEXT NOT NULL,
-  description TEXT NOT NULL,
-  status TEXT DEFAULT 'pending',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  reviewed_at DATETIME,
-  reviewed_by INTEGER,
-  notes TEXT,
-  FOREIGN KEY (client_id) REFERENCES clients(id),
-  FOREIGN KEY (reviewed_by) REFERENCES users(id)
-);
+-- New columns added via migration 007_project_request_columns.sql
+ALTER TABLE projects ADD COLUMN project_type TEXT;
+ALTER TABLE projects ADD COLUMN budget_range TEXT;
+ALTER TABLE projects ADD COLUMN timeline TEXT;
+ALTER TABLE projects ADD COLUMN preview_url TEXT;
 ```
+
+Projects created via the request form have these characteristics:
+- `status` = 'pending'
+- `priority` = 'medium'
+- `project_type`, `budget_range`, `timeline` populated from form
 
 ### Email Notifications
 
@@ -527,7 +497,7 @@ await emailService.sendAdminNotification({
 | File | Lines | Purpose |
 |------|-------|---------|
 | `templates/pages/client-portal.ejs` | 337-393 | New Project form HTML |
-| `src/features/client/client-portal.ts` | - | Form submission handler (planned) |
+| `src/features/client/client-portal.ts` | 290-347 | Form submission handler |
 | `src/styles/pages/client-portal.css` | - | Form styling |
 | `server/routes/projects.ts` | - | Project request API |
 | `server/services/email-service.ts` | - | Email notifications |

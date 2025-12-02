@@ -235,13 +235,287 @@ export class ClientPortalModule extends BaseModule {
           sendButton.click();
         }
       });
+
+      // Send button click handler
+      sendButton.addEventListener('click', (e) => {
+        this.sendMessage(e);
+      });
     }
 
     // Setup file upload handlers (drag & drop)
     this.setupFileUploadHandlers();
 
+    // Setup settings form handlers
+    this.setupSettingsFormHandlers();
+
     console.log('Dashboard event listeners setup complete');
     this.dashboardListenersSetup = true;
+  }
+
+  /**
+   * Setup settings form handlers (profile, notifications, billing)
+   */
+  private setupSettingsFormHandlers(): void {
+    // Profile form
+    const profileForm = document.getElementById('profile-form') as HTMLFormElement;
+    if (profileForm) {
+      profileForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await this.saveProfileSettings();
+      });
+    }
+
+    // Notifications form
+    const notificationsForm = document.getElementById('notifications-form') as HTMLFormElement;
+    if (notificationsForm) {
+      notificationsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await this.saveNotificationSettings();
+      });
+    }
+
+    // Billing form
+    const billingForm = document.getElementById('billing-form') as HTMLFormElement;
+    if (billingForm) {
+      billingForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await this.saveBillingSettings();
+      });
+    }
+
+    // New project form
+    const newProjectForm = document.getElementById('new-project-form') as HTMLFormElement;
+    if (newProjectForm) {
+      newProjectForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await this.submitProjectRequest();
+      });
+    }
+  }
+
+  /**
+   * Submit new project request
+   */
+  private async submitProjectRequest(): Promise<void> {
+    const token = localStorage.getItem('client_auth_token');
+
+    if (!token || token.startsWith('demo_token_')) {
+      alert('Project requests cannot be submitted in demo mode. Please log in with a real account.');
+      return;
+    }
+
+    const name = (document.getElementById('project-name') as HTMLInputElement)?.value;
+    const projectType = (document.getElementById('project-type') as HTMLSelectElement)?.value;
+    const budget = (document.getElementById('project-budget') as HTMLSelectElement)?.value;
+    const timeline = (document.getElementById('project-timeline') as HTMLSelectElement)?.value;
+    const description = (document.getElementById('project-description') as HTMLTextAreaElement)?.value;
+
+    if (!name || !projectType || !description) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${ClientPortalModule.PROJECTS_API_BASE}/request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name,
+          projectType,
+          budget,
+          timeline,
+          description
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit project request');
+      }
+
+      alert(data.message || 'Project request submitted successfully!');
+
+      // Clear the form
+      const form = document.getElementById('new-project-form') as HTMLFormElement;
+      if (form) form.reset();
+
+      // Switch to dashboard tab
+      this.switchTab('dashboard');
+    } catch (error) {
+      console.error('Error submitting project request:', error);
+      alert(error instanceof Error ? error.message : 'Failed to submit project request. Please try again.');
+    }
+  }
+
+  /**
+   * Save profile settings
+   */
+  private async saveProfileSettings(): Promise<void> {
+    const token = localStorage.getItem('client_auth_token');
+
+    if (!token || token.startsWith('demo_token_')) {
+      alert('Settings cannot be saved in demo mode. Please log in with a real account.');
+      return;
+    }
+
+    const contactName = (document.getElementById('settings-name') as HTMLInputElement)?.value;
+    const companyName = (document.getElementById('settings-company') as HTMLInputElement)?.value;
+    const phone = (document.getElementById('settings-phone') as HTMLInputElement)?.value;
+    const currentPassword = (document.getElementById('current-password') as HTMLInputElement)?.value;
+    const newPassword = (document.getElementById('new-password') as HTMLInputElement)?.value;
+    const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement)?.value;
+
+    try {
+      // Update profile info
+      const profileResponse = await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          contact_name: contactName,
+          company_name: companyName,
+          phone: phone
+        })
+      });
+
+      if (!profileResponse.ok) {
+        const error = await profileResponse.json();
+        throw new Error(error.error || 'Failed to update profile');
+      }
+
+      // If password fields are filled, update password
+      if (currentPassword && newPassword) {
+        if (newPassword !== confirmPassword) {
+          alert('New passwords do not match');
+          return;
+        }
+
+        if (newPassword.length < 8) {
+          alert('Password must be at least 8 characters');
+          return;
+        }
+
+        const passwordResponse = await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/password`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            currentPassword,
+            newPassword
+          })
+        });
+
+        if (!passwordResponse.ok) {
+          const error = await passwordResponse.json();
+          throw new Error(error.error || 'Failed to update password');
+        }
+
+        // Clear password fields
+        (document.getElementById('current-password') as HTMLInputElement).value = '';
+        (document.getElementById('new-password') as HTMLInputElement).value = '';
+        (document.getElementById('confirm-password') as HTMLInputElement).value = '';
+      }
+
+      alert('Profile updated successfully!');
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      alert(error instanceof Error ? error.message : 'Failed to save profile. Please try again.');
+    }
+  }
+
+  /**
+   * Save notification settings
+   */
+  private async saveNotificationSettings(): Promise<void> {
+    const token = localStorage.getItem('client_auth_token');
+
+    if (!token || token.startsWith('demo_token_')) {
+      alert('Settings cannot be saved in demo mode. Please log in with a real account.');
+      return;
+    }
+
+    const form = document.getElementById('notifications-form');
+    if (!form) return;
+
+    const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+    const settings = {
+      messages: (checkboxes[0] as HTMLInputElement)?.checked || false,
+      status: (checkboxes[1] as HTMLInputElement)?.checked || false,
+      invoices: (checkboxes[2] as HTMLInputElement)?.checked || false,
+      weekly: (checkboxes[3] as HTMLInputElement)?.checked || false
+    };
+
+    try {
+      const response = await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/notifications`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(settings)
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update notification preferences');
+      }
+
+      alert('Notification preferences saved!');
+    } catch (error) {
+      console.error('Error saving notifications:', error);
+      alert(error instanceof Error ? error.message : 'Failed to save preferences. Please try again.');
+    }
+  }
+
+  /**
+   * Save billing settings
+   */
+  private async saveBillingSettings(): Promise<void> {
+    const token = localStorage.getItem('client_auth_token');
+
+    if (!token || token.startsWith('demo_token_')) {
+      alert('Settings cannot be saved in demo mode. Please log in with a real account.');
+      return;
+    }
+
+    const billing = {
+      company: (document.getElementById('billing-company') as HTMLInputElement)?.value,
+      address: (document.getElementById('billing-address') as HTMLInputElement)?.value,
+      address2: (document.getElementById('billing-address2') as HTMLInputElement)?.value,
+      city: (document.getElementById('billing-city') as HTMLInputElement)?.value,
+      state: (document.getElementById('billing-state') as HTMLInputElement)?.value,
+      zip: (document.getElementById('billing-zip') as HTMLInputElement)?.value,
+      country: (document.getElementById('billing-country') as HTMLInputElement)?.value
+    };
+
+    try {
+      const response = await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/billing`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(billing)
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update billing information');
+      }
+
+      alert('Billing information saved!');
+    } catch (error) {
+      console.error('Error saving billing:', error);
+      alert(error instanceof Error ? error.message : 'Failed to save billing info. Please try again.');
+    }
   }
 
   private setupAnimations(): void {
@@ -685,6 +959,15 @@ export class ClientPortalModule extends BaseModule {
   /** Invoices API base URL */
   private static readonly INVOICES_API_BASE = 'http://localhost:3001/api/invoices';
 
+  /** Clients API base URL */
+  private static readonly CLIENTS_API_BASE = 'http://localhost:3001/api/clients';
+
+  /** Projects API base URL */
+  private static readonly PROJECTS_API_BASE = 'http://localhost:3001/api/projects';
+
+  /** Messages API base URL */
+  private static readonly MESSAGES_API_BASE = 'http://localhost:3001/api/messages';
+
   /**
    * Load files from API and render the list
    */
@@ -786,6 +1069,9 @@ export class ClientPortalModule extends BaseModule {
           <button class="btn btn-sm btn-outline btn-download" data-file-id="${file.id}" data-filename="${this.escapeHtml(file.originalName)}">
             Download
           </button>
+          <button class="btn btn-sm btn-outline btn-delete" data-file-id="${file.id}" data-filename="${this.escapeHtml(file.originalName)}">
+            Delete
+          </button>
         </div>
       </div>
     `
@@ -867,6 +1153,18 @@ export class ClientPortalModule extends BaseModule {
         }
       });
     });
+
+    // Delete buttons
+    container.querySelectorAll('.btn-delete').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const fileId = (btn as HTMLElement).dataset.fileId;
+        const filename = (btn as HTMLElement).dataset.filename;
+        if (fileId) {
+          this.deleteFile(parseInt(fileId), filename || 'file');
+        }
+      });
+    });
   }
 
   /**
@@ -912,6 +1210,64 @@ export class ClientPortalModule extends BaseModule {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+  }
+
+  /**
+   * Delete a file
+   */
+  private async deleteFile(fileId: number, filename: string): Promise<void> {
+    const token = localStorage.getItem('client_auth_token');
+
+    // For demo mode, show a demo message
+    if (!token || token.startsWith('demo_token_')) {
+      alert('Delete not available in demo mode. Please log in to delete files.');
+      return;
+    }
+
+    // Confirm deletion
+    if (!confirm(`Are you sure you want to delete "${filename}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${ClientPortalModule.FILES_API_BASE}/file/${fileId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete file');
+      }
+
+      // Remove the file item from the DOM
+      const fileItem = document.querySelector(`.file-item[data-file-id="${fileId}"]`);
+      if (fileItem) {
+        fileItem.remove();
+      }
+
+      // Check if there are any files left
+      const filesContainer = document.querySelector('.files-list-section .file-item');
+      if (!filesContainer) {
+        const container = document.querySelector('.files-list-section');
+        if (container) {
+          const noFilesMsg = container.querySelector('.no-files');
+          if (!noFilesMsg) {
+            const msgEl = document.createElement('p');
+            msgEl.className = 'no-files';
+            msgEl.textContent = 'No files uploaded yet. Drag and drop files above to upload.';
+            container.appendChild(msgEl);
+          }
+        }
+      }
+
+      console.log(`File ${filename} deleted successfully`);
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      alert(error instanceof Error ? error.message : 'Failed to delete file. Please try again.');
+    }
   }
 
   /**
@@ -1316,9 +1672,8 @@ export class ClientPortalModule extends BaseModule {
 
   /**
    * Download invoice as PDF
-   * Note: This requires a PDF generation endpoint on the backend
    */
-  private downloadInvoice(invoiceId: number, invoiceNumber: string): void {
+  private async downloadInvoice(invoiceId: number, invoiceNumber: string): Promise<void> {
     const token = localStorage.getItem('client_auth_token');
 
     if (!token || token.startsWith('demo_token_')) {
@@ -1326,16 +1681,32 @@ export class ClientPortalModule extends BaseModule {
       return;
     }
 
-    // For now, open the invoice endpoint
-    // A proper implementation would generate a PDF
-    const url = `${ClientPortalModule.INVOICES_API_BASE}/${invoiceId}`;
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${invoiceNumber}.pdf`;
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    try {
+      // Fetch PDF from the backend endpoint
+      const response = await fetch(`${ClientPortalModule.INVOICES_API_BASE}/${invoiceId}/pdf`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download invoice');
+      }
+
+      // Get blob and create download link
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `invoice-${invoiceNumber}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      alert('Failed to download invoice. Please try again.');
+    }
   }
 
   private loadMessages(): void {
@@ -1413,9 +1784,186 @@ export class ClientPortalModule extends BaseModule {
     if (this.loginSection) this.loginSection.style.display = 'block';
   }
 
+  /** Current message thread ID */
+  private currentThreadId: number | null = null;
+
+  /**
+   * Load messages from API
+   */
+  private async loadMessagesFromAPI(): Promise<void> {
+    const messagesContainer = document.getElementById('messages-list');
+    if (!messagesContainer) return;
+
+    const token = localStorage.getItem('client_auth_token');
+
+    if (!token || token.startsWith('demo_token_')) {
+      // Demo mode - show demo messages
+      this.renderDemoMessages(messagesContainer);
+      return;
+    }
+
+    try {
+      // Get message threads first
+      const threadsResponse = await fetch(`${ClientPortalModule.MESSAGES_API_BASE}/threads`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!threadsResponse.ok) {
+        throw new Error('Failed to load message threads');
+      }
+
+      const threadsData = await threadsResponse.json();
+      const threads = threadsData.threads || [];
+
+      if (threads.length === 0) {
+        messagesContainer.innerHTML = `
+          <div class="no-messages">
+            <p>No messages yet. Start a conversation!</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Get the first (most recent) thread's messages
+      const thread = threads[0];
+      this.currentThreadId = thread.id;
+
+      const messagesResponse = await fetch(
+        `${ClientPortalModule.MESSAGES_API_BASE}/threads/${thread.id}/messages`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (!messagesResponse.ok) {
+        throw new Error('Failed to load messages');
+      }
+
+      const messagesData = await messagesResponse.json();
+      this.renderMessages(messagesContainer, messagesData.messages || []);
+
+      // Mark messages as read
+      await fetch(`${ClientPortalModule.MESSAGES_API_BASE}/threads/${thread.id}/read`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (error) {
+      console.error('Error loading messages:', error);
+      this.renderDemoMessages(messagesContainer);
+    }
+  }
+
+  /**
+   * Render demo messages
+   */
+  private renderDemoMessages(container: HTMLElement): void {
+    const demoMessages = [
+      {
+        id: 1,
+        sender_type: 'admin',
+        sender_name: 'Support',
+        message: 'Welcome to your client portal! Feel free to send us any questions.',
+        created_at: new Date(Date.now() - 86400000).toISOString()
+      },
+      {
+        id: 2,
+        sender_type: 'client',
+        sender_name: 'You',
+        message: 'Thanks! Looking forward to working together.',
+        created_at: new Date(Date.now() - 3600000).toISOString()
+      }
+    ];
+    this.renderMessages(container, demoMessages);
+  }
+
+  /**
+   * Render messages list
+   */
+  private renderMessages(container: HTMLElement, messages: any[]): void {
+    if (messages.length === 0) {
+      container.innerHTML = '<div class="no-messages"><p>No messages in this thread yet.</p></div>';
+      return;
+    }
+
+    container.innerHTML = messages
+      .map(
+        (msg) => `
+        <div class="message message-${msg.sender_type === 'client' ? 'sent' : 'received'}">
+          <div class="message-header">
+            <span class="message-sender">${this.escapeHtml(msg.sender_name || 'Unknown')}</span>
+            <span class="message-time">${this.formatDate(msg.created_at)}</span>
+          </div>
+          <div class="message-content">${this.escapeHtml(msg.message)}</div>
+        </div>
+      `
+      )
+      .join('');
+
+    // Scroll to bottom
+    container.scrollTop = container.scrollHeight;
+  }
+
+  /**
+   * Send a message
+   */
   private async sendMessage(event: Event): Promise<void> {
     event.preventDefault();
-    // Implementation for sending messages
+
+    const messageInput = document.getElementById('message-input') as HTMLTextAreaElement;
+    if (!messageInput) return;
+
+    const message = messageInput.value.trim();
+    if (!message) return;
+
+    const token = localStorage.getItem('client_auth_token');
+
+    if (!token || token.startsWith('demo_token_')) {
+      alert('Messaging is not available in demo mode. Please log in with a real account.');
+      return;
+    }
+
+    try {
+      let url: string;
+      let body: any;
+
+      if (this.currentThreadId) {
+        // Send to existing thread
+        url = `${ClientPortalModule.MESSAGES_API_BASE}/threads/${this.currentThreadId}/messages`;
+        body = { message };
+      } else {
+        // Create new inquiry thread
+        url = `${ClientPortalModule.MESSAGES_API_BASE}/inquiry`;
+        body = { subject: 'General Inquiry', message };
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to send message');
+      }
+
+      const data = await response.json();
+
+      // If new thread created, save the ID
+      if (data.threadId) {
+        this.currentThreadId = data.threadId;
+      }
+
+      // Clear input
+      messageInput.value = '';
+
+      // Reload messages
+      this.loadMessagesFromAPI();
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert(error instanceof Error ? error.message : 'Failed to send message. Please try again.');
+    }
   }
 
   private handleTabClick(event: Event): void {
@@ -1833,6 +2381,76 @@ export class ClientPortalModule extends BaseModule {
       this.loadFiles();
     } else if (tabName === 'invoices') {
       this.loadInvoices();
+    } else if (tabName === 'preview') {
+      this.loadProjectPreview();
+    } else if (tabName === 'messages') {
+      this.loadMessagesFromAPI();
+    }
+  }
+
+  /**
+   * Load project preview into iframe
+   */
+  private async loadProjectPreview(): Promise<void> {
+    const iframe = document.getElementById('preview-iframe') as HTMLIFrameElement;
+    const urlDisplay = document.getElementById('preview-url');
+    const openNewTabBtn = document.getElementById('btn-open-new-tab');
+    const refreshBtn = document.getElementById('btn-refresh-preview');
+
+    if (!iframe) return;
+
+    const token = localStorage.getItem('client_auth_token');
+
+    if (!token || token.startsWith('demo_token_')) {
+      // Demo mode - show placeholder
+      iframe.src = '';
+      if (urlDisplay) urlDisplay.textContent = 'Preview not available in demo mode';
+      return;
+    }
+
+    try {
+      // Get client's projects to find one with a preview URL
+      const response = await fetch(`${ClientPortalModule.PROJECTS_API_BASE}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load projects');
+      }
+
+      const data = await response.json();
+      const projects = data.projects || [];
+
+      // Find a project with a preview URL
+      const projectWithPreview = projects.find((p: any) => p.preview_url);
+
+      if (projectWithPreview && projectWithPreview.preview_url) {
+        const previewUrl = projectWithPreview.preview_url;
+        iframe.src = previewUrl;
+        if (urlDisplay) urlDisplay.textContent = previewUrl;
+
+        // Setup open in new tab button
+        if (openNewTabBtn) {
+          openNewTabBtn.onclick = () => window.open(previewUrl, '_blank');
+        }
+
+        // Setup refresh button
+        if (refreshBtn) {
+          refreshBtn.onclick = () => {
+            iframe.src = '';
+            setTimeout(() => {
+              iframe.src = previewUrl;
+            }, 100);
+          };
+        }
+      } else {
+        iframe.src = '';
+        if (urlDisplay) urlDisplay.textContent = 'No preview available for your projects yet';
+      }
+    } catch (error) {
+      console.error('Error loading project preview:', error);
+      iframe.src = '';
+      if (urlDisplay) urlDisplay.textContent = 'Error loading preview';
     }
   }
 

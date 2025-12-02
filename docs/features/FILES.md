@@ -35,6 +35,7 @@ The File Management system allows clients to upload, view, preview, and download
 | Demo Mode | Complete | Fallback demo files when backend unavailable |
 | File Preview | Complete | Open images/PDFs in new browser tab |
 | File Download | Complete | Download files with original filename |
+| File Delete | Complete | Delete files with confirmation dialog |
 | File Icons | Complete | Visual file type identification |
 | File Size Display | Complete | Human-readable file sizes |
 | Upload Progress | Complete | Visual feedback during upload |
@@ -449,6 +450,36 @@ private downloadFile(fileId: number, filename: string): void {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
+}
+```
+
+#### deleteFile()
+
+Deletes a file with confirmation dialog.
+
+```typescript
+private async deleteFile(fileId: number, filename: string): Promise<void> {
+  const token = localStorage.getItem('client_auth_token');
+
+  if (!token || token.startsWith('demo_token_')) {
+    alert('Delete not available in demo mode.');
+    return;
+  }
+
+  if (!confirm(`Are you sure you want to delete "${filename}"?`)) {
+    return;
+  }
+
+  const response = await fetch(`${ClientPortalModule.FILES_API_BASE}/file/${fileId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (response.ok) {
+    // Remove from DOM
+    const fileItem = document.querySelector(`.file-item[data-file-id="${fileId}"]`);
+    if (fileItem) fileItem.remove();
+  }
 }
 ```
 
