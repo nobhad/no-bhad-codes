@@ -18,7 +18,7 @@ export class ClientLandingModule extends BaseModule {
   private readonly DEMO_EMAIL = 'demo@example.com';
   private readonly DEMO_PASSWORD = 'nobhadDemo123';
 
-  // DOM elements
+  // DOM elements - Desktop
   private loginForm: HTMLFormElement | null = null;
   private emailInput: HTMLInputElement | null = null;
   private passwordInput: HTMLInputElement | null = null;
@@ -27,6 +27,13 @@ export class ClientLandingModule extends BaseModule {
   private submitButton: HTMLButtonElement | null = null;
   private openIntakeButton: HTMLButtonElement | null = null;
   private intakeModal: HTMLElement | null = null;
+
+  // DOM elements - Mobile
+  private loginFormMobile: HTMLFormElement | null = null;
+  private emailInputMobile: HTMLInputElement | null = null;
+  private passwordInputMobile: HTMLInputElement | null = null;
+  private loginErrorMobile: HTMLElement | null = null;
+  private openIntakeButtonMobile: HTMLButtonElement | null = null;
 
   constructor() {
     super('client-landing');
@@ -85,14 +92,22 @@ export class ClientLandingModule extends BaseModule {
   }
 
   private cacheElements(): void {
+    // Desktop elements
     this.loginForm = document.getElementById('loginForm') as HTMLFormElement;
     this.emailInput = document.getElementById('login-email') as HTMLInputElement;
     this.passwordInput = document.getElementById('login-password') as HTMLInputElement;
-    this.passwordToggle = document.querySelector('.password-toggle') as HTMLButtonElement;
+    this.passwordToggle = document.querySelector('.desktop-login-form .password-toggle') as HTMLButtonElement;
     this.loginError = document.getElementById('loginError') as HTMLElement;
     this.submitButton = this.loginForm?.querySelector('button[type="submit"]') as HTMLButtonElement;
     this.openIntakeButton = document.getElementById('openIntakeModal') as HTMLButtonElement;
     this.intakeModal = document.getElementById('intakeModal') as HTMLElement;
+
+    // Mobile elements
+    this.loginFormMobile = document.getElementById('loginFormMobile') as HTMLFormElement;
+    this.emailInputMobile = document.getElementById('login-email-mobile') as HTMLInputElement;
+    this.passwordInputMobile = document.getElementById('login-password-mobile') as HTMLInputElement;
+    this.loginErrorMobile = document.getElementById('loginErrorMobile') as HTMLElement;
+    this.openIntakeButtonMobile = document.getElementById('openIntakeModalMobile') as HTMLButtonElement;
 
     console.log('[ClientLandingModule] Elements cached:', {
       loginForm: !!this.loginForm,
@@ -107,16 +122,40 @@ export class ClientLandingModule extends BaseModule {
   }
 
   private setupLoginForm(): void {
-    if (!this.loginForm) {
-      console.warn('[ClientLandingModule] Login form not found');
-      return;
+    // Desktop form
+    if (this.loginForm) {
+      this.loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        console.log('[ClientLandingModule] Desktop login form submitted');
+        await this.handleLogin();
+      });
     }
 
-    this.loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      console.log('[ClientLandingModule] Login form submitted');
-      await this.handleLogin();
-    });
+    // Mobile form
+    if (this.loginFormMobile) {
+      this.loginFormMobile.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        console.log('[ClientLandingModule] Mobile login form submitted');
+        await this.handleLoginMobile();
+      });
+
+      // Setup mobile password toggle
+      const mobilePasswordToggle = this.loginFormMobile.querySelector('.password-toggle') as HTMLButtonElement;
+      if (mobilePasswordToggle && this.passwordInputMobile) {
+        mobilePasswordToggle.addEventListener('click', () => {
+          const isPassword = this.passwordInputMobile!.type === 'password';
+          this.passwordInputMobile!.type = isPassword ? 'text' : 'password';
+          const svg = mobilePasswordToggle.querySelector('svg');
+          if (svg) {
+            if (isPassword) {
+              svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+            } else {
+              svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+            }
+          }
+        });
+      }
+    }
   }
 
   private setupPasswordToggle(): void {
@@ -145,16 +184,26 @@ export class ClientLandingModule extends BaseModule {
   }
 
   private setupIntakeModal(): void {
-    if (!this.openIntakeButton || !this.intakeModal) {
-      console.warn('[ClientLandingModule] Intake modal elements not found');
+    if (!this.intakeModal) {
+      console.warn('[ClientLandingModule] Intake modal not found');
       return;
     }
 
-    // Open modal when button is clicked
-    this.openIntakeButton.addEventListener('click', () => {
-      console.log('[ClientLandingModule] Opening intake modal');
-      this.openIntakeModalWithAnimation();
-    });
+    // Open modal when desktop button is clicked
+    if (this.openIntakeButton) {
+      this.openIntakeButton.addEventListener('click', () => {
+        console.log('[ClientLandingModule] Opening intake modal (desktop)');
+        this.openIntakeModalWithAnimation();
+      });
+    }
+
+    // Open modal when mobile button is clicked
+    if (this.openIntakeButtonMobile) {
+      this.openIntakeButtonMobile.addEventListener('click', () => {
+        console.log('[ClientLandingModule] Opening intake modal (mobile)');
+        this.openIntakeModalWithAnimation();
+      });
+    }
 
     // Close modal when clicking outside content
     this.intakeModal.addEventListener('click', (e) => {
@@ -378,6 +427,78 @@ export class ClientLandingModule extends BaseModule {
     }
   }
 
+  private async handleLoginMobile(): Promise<void> {
+    // Clear previous errors
+    this.clearErrorMobile();
+
+    const email = this.emailInputMobile?.value.trim() || '';
+    const password = this.passwordInputMobile?.value || '';
+
+    // Basic validation
+    if (!email || !password) {
+      this.showErrorMobile('Please enter both email and password');
+      return;
+    }
+
+    // Show loading state
+    this.setLoadingMobile(true);
+
+    try {
+      // Check for demo credentials
+      if (email === this.DEMO_EMAIL && password === this.DEMO_PASSWORD) {
+        console.log('[ClientLandingModule] Demo login successful (mobile)');
+        localStorage.setItem('clientAuth', JSON.stringify({
+          email: this.DEMO_EMAIL,
+          name: 'Demo User',
+          isDemo: true,
+          loginTime: Date.now()
+        }));
+        window.location.href = '/client/portal';
+        return;
+      }
+
+      // Try actual API login
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        console.log('[ClientLandingModule] Login successful (mobile)');
+        if (result.token) {
+          localStorage.setItem('clientAuthToken', result.token);
+        }
+        localStorage.setItem('clientAuth', JSON.stringify({
+          email: result.user?.email || email,
+          name: result.user?.name || 'Client',
+          isDemo: false,
+          loginTime: Date.now()
+        }));
+        window.location.href = '/client/portal';
+      } else {
+        this.showErrorMobile(result.error || 'Invalid email or password');
+      }
+    } catch (error) {
+      console.error('[ClientLandingModule] Login error (mobile):', error);
+      if (email === this.DEMO_EMAIL && password === this.DEMO_PASSWORD) {
+        localStorage.setItem('clientAuth', JSON.stringify({
+          email: this.DEMO_EMAIL,
+          name: 'Demo User',
+          isDemo: true,
+          loginTime: Date.now()
+        }));
+        window.location.href = '/client/portal';
+        return;
+      }
+      this.showErrorMobile('Login failed. Please check your credentials.');
+    } finally {
+      this.setLoadingMobile(false);
+    }
+  }
+
   private showError(message: string): void {
     if (this.loginError) {
       this.loginError.textContent = message;
@@ -385,10 +506,24 @@ export class ClientLandingModule extends BaseModule {
     }
   }
 
+  private showErrorMobile(message: string): void {
+    if (this.loginErrorMobile) {
+      this.loginErrorMobile.textContent = message;
+      this.loginErrorMobile.style.display = 'block';
+    }
+  }
+
   private clearError(): void {
     if (this.loginError) {
       this.loginError.textContent = '';
       this.loginError.style.display = 'none';
+    }
+  }
+
+  private clearErrorMobile(): void {
+    if (this.loginErrorMobile) {
+      this.loginErrorMobile.textContent = '';
+      this.loginErrorMobile.style.display = 'none';
     }
   }
 
@@ -403,6 +538,24 @@ export class ClientLandingModule extends BaseModule {
         if (btnLoader) (btnLoader as HTMLElement).style.display = 'block';
       } else {
         this.submitButton.disabled = false;
+        if (btnText) (btnText as HTMLElement).style.opacity = '1';
+        if (btnLoader) (btnLoader as HTMLElement).style.display = 'none';
+      }
+    }
+  }
+
+  private setLoadingMobile(loading: boolean): void {
+    const submitBtn = this.loginFormMobile?.querySelector('button[type="submit"]') as HTMLButtonElement;
+    if (submitBtn) {
+      const btnText = submitBtn.querySelector('.btn-text');
+      const btnLoader = submitBtn.querySelector('.btn-loader');
+
+      if (loading) {
+        submitBtn.disabled = true;
+        if (btnText) (btnText as HTMLElement).style.opacity = '0';
+        if (btnLoader) (btnLoader as HTMLElement).style.display = 'block';
+      } else {
+        submitBtn.disabled = false;
         if (btnText) (btnText as HTMLElement).style.opacity = '1';
         if (btnLoader) (btnLoader as HTMLElement).style.display = 'none';
       }

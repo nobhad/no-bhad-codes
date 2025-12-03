@@ -9,7 +9,7 @@
 .contact-form {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: clamp(6px, 1.5vw, 12px) clamp(8px, 2vw, 16px);
+  gap: clamp(12px, 2.5vw, 18px) clamp(8px, 2vw, 16px);
   padding: clamp(8px, 2.5vw, 20px);
   max-width: min(600px, 95vw);
   width: 100%;
@@ -267,9 +267,9 @@ body.dark-theme .contact-form .form-select {
 
 /* Form Message Styles */
 .form-message {
-  padding: 15px;
-  margin: 15px 0;
-  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 10px 0;
+  border-radius: 6px;
   font-weight: 500;
   text-align: center;
 }

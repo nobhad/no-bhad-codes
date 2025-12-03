@@ -688,7 +688,7 @@ html[data-theme="dark"] .coming-soon-banner {
   :root {
     --base-gap: clamp(0.3rem, 1vw, 0.6rem);
     --menu-padding: clamp(0.75rem, 3vw, 1.5rem);
-    --menu-heading-size: clamp(2.5rem, 8vw, 4.5rem); /* Larger menu headings on mobile */
+    --menu-heading-size: clamp(5rem, 18vw, 8rem); /* Larger menu headings on mobile */
     --menu-button-size: clamp(2.2rem, 5vw, 2.8rem);
     --theme-button-size: clamp(2.2rem, 5vw, 2.8rem);
 
@@ -705,9 +705,14 @@ html[data-theme="dark"] .coming-soon-banner {
   }
 
   .nav-logo-row {
-    font-size: 14px; /* Match MENU text size */
+    font-size: 18px; /* Bigger on mobile */
     gap: 4px;
     min-width: auto;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .menu-button-text {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   .nav-logo__icon {
@@ -742,6 +747,12 @@ html[data-theme="dark"] .coming-soon-banner {
   /* Links take up more room on mobile */
   .menu-list-item {
     min-height: clamp(4rem, 10vw, 5.5rem);
+  }
+
+  /* Bigger menu link text on mobile */
+  .menu-link-heading {
+    font-size: 3rem !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   .menu-link {
