@@ -675,6 +675,8 @@ html[data-theme="dark"] .login-form label {
   height: 12px;
   background: var(--color-neutral-300);
   border: 2px solid var(--color-dark);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .progress-fill {
