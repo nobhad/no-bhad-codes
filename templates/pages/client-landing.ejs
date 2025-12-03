@@ -2,7 +2,6 @@
     <div class="container">
         <div class="client-content">
             <h1 class="login-title">CLIENT PORTAL</h1>
-            <p class="login-subtitle">New client or returning?</p>
 
             <div class="portal-cards">
                 <!-- Intake Card -->
@@ -15,7 +14,7 @@
                         <div class="portal-card-avatar">
                             <img src="/images/avatar.svg" alt="Avatar" />
                         </div>
-                        <a href="/client/intake" class="btn btn-primary">Start Intake Form</a>
+                        <button type="button" class="btn btn-primary" id="openIntakeModal">Start Intake Form</button>
                     </div>
                 </div>
 
@@ -25,7 +24,7 @@
                         <h2>Existing Client</h2>
                     </div>
                     <div class="portal-card-body">
-                        <p>Already have an account? Sign in to access your projects, files, and messages.</p>
+                        <p class="login-description">Already have an account? Sign in to access your projects, files, and messages.</p>
                         <form id="loginForm" class="login-form" novalidate>
                             <div class="form-group">
                                 <label for="login-email">Email</label>
@@ -116,4 +115,213 @@
             submitBtn.classList.remove('loading');
         }
     });
+
+    // Terminal Intake Modal
+    const openModalBtn = document.getElementById('openIntakeModal');
+    const modal = document.getElementById('intakeModal');
+    const closeModalBtn = document.getElementById('closeIntakeModal');
+    const minimizeModalBtn = document.getElementById('minimizeIntakeModal');
+
+    // Move modal to body so it's outside main container
+    if (modal && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+    }
+
+    openModalBtn?.addEventListener('click', () => {
+        modal?.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        // Initialize the terminal intake if not already done
+        if (!window.terminalIntakeInitialized) {
+            import('/src/features/client/terminal-intake.ts').then(module => {
+                const container = document.querySelector('#intakeModal .terminal-intake-container');
+                if (container) {
+                    const intake = new module.TerminalIntakeModule(container);
+                    intake.init();
+                    window.terminalIntakeInitialized = true;
+                }
+            });
+        }
+    });
+
+    closeModalBtn?.addEventListener('click', () => {
+        modal?.classList.remove('open');
+        modal?.classList.remove('minimized');
+        modal?.classList.remove('fullscreen');
+        document.body.style.overflow = '';
+        // Reset so it can reinitialize with resume prompt next time
+        window.terminalIntakeInitialized = false;
+        // Clear the container so it reinitializes fresh
+        const container = document.querySelector('#intakeModal .terminal-intake-container');
+        if (container) container.innerHTML = '';
+    });
+
+    minimizeModalBtn?.addEventListener('click', () => {
+        modal?.classList.toggle('minimized');
+    });
+
+    // Close on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal?.classList.contains('open')) {
+            modal.classList.remove('open');
+            modal.classList.remove('minimized');
+            modal.classList.remove('fullscreen');
+            document.body.style.overflow = '';
+            window.terminalIntakeInitialized = false;
+            const container = document.querySelector('#intakeModal .terminal-intake-container');
+            if (container) container.innerHTML = '';
+        }
+    });
+
+    // Close on backdrop click
+    modal?.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('open');
+            modal.classList.remove('minimized');
+            modal.classList.remove('fullscreen');
+            document.body.style.overflow = '';
+            window.terminalIntakeInitialized = false;
+            const container = document.querySelector('#intakeModal .terminal-intake-container');
+            if (container) container.innerHTML = '';
+        }
+    });
 </script>
+
+<!-- Terminal Intake Modal -->
+<div id="intakeModal" class="intake-modal">
+    <div class="intake-modal-content">
+        <section class="terminal-intake-container">
+            <!-- Terminal UI will be rendered by JavaScript -->
+        </section>
+    </div>
+</div>
+
+<link rel="stylesheet" href="/src/styles/pages/terminal-intake.css">
+<style>
+    /* Modal Styles */
+    .intake-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 999999;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    /* Lower footer z-index when modal is open so overlay covers it */
+    body:has(.intake-modal.open) .footer,
+    body:has(.intake-modal.open) footer {
+        z-index: 1 !important;
+    }
+
+    .intake-modal.open {
+        display: flex;
+    }
+
+    /* Hide footer when modal is open */
+    body:has(.intake-modal.open) .footer {
+        display: none;
+    }
+
+    .intake-modal.minimized {
+        align-items: flex-end;
+        justify-content: flex-start;
+        background: transparent;
+        pointer-events: none;
+        padding: 20px;
+    }
+
+    .intake-modal.minimized .intake-modal-content {
+        pointer-events: auto;
+        max-width: 300px;
+        max-height: none;
+    }
+
+    .intake-modal.minimized .terminal-window {
+        max-height: none;
+    }
+
+    .intake-modal.minimized .terminal-chat,
+    .intake-modal.minimized .terminal-progress,
+    .intake-modal.minimized .terminal-input-area {
+        display: none;
+    }
+
+    .intake-modal.minimized .terminal-header {
+        cursor: pointer;
+    }
+
+    .intake-modal-content {
+        width: 100%;
+        max-width: 650px;
+        max-height: 75vh;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .intake-modal .terminal-intake-container {
+        height: auto;
+    }
+
+    .intake-modal .terminal-intake {
+        min-height: auto;
+        height: auto;
+    }
+
+    .intake-modal .terminal-window {
+        max-height: 75vh;
+        flex: none;
+    }
+
+    .intake-modal .terminal-chat {
+        max-height: 55vh;
+        min-height: 400px;
+    }
+
+    .intake-modal .terminal-btn.close,
+    .intake-modal .terminal-btn.minimize,
+    .intake-modal .terminal-btn.maximize {
+        cursor: pointer;
+        transition: transform 0.1s ease;
+    }
+
+    .intake-modal .terminal-btn.close:hover,
+    .intake-modal .terminal-btn.minimize:hover,
+    .intake-modal .terminal-btn.maximize:hover {
+        transform: scale(1.2);
+    }
+
+    /* Fullscreen mode */
+    .intake-modal.fullscreen .intake-modal-content {
+        max-width: 100vw;
+        max-height: 100vh;
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+    }
+
+    .intake-modal.fullscreen .terminal-intake {
+        height: 100vh;
+    }
+
+    .intake-modal.fullscreen .terminal-window {
+        max-height: 100vh;
+        height: 100vh;
+        border: none;
+        border-radius: 0;
+    }
+
+    .intake-modal.fullscreen .terminal-chat {
+        max-height: calc(100vh - 150px);
+        min-height: calc(100vh - 150px);
+    }
+
+    .intake-modal.fullscreen {
+        padding: 0;
+    }
+</style>

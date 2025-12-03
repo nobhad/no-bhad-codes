@@ -631,6 +631,11 @@ body[data-page="client-landing"] .client-login,
 
 /* Responsive - Mobile */
 @media (max-width: 768px) {
+  /* Hide login description on mobile */
+  .login-description {
+    display: none;
+  }
+
   .client-login:has(.portal-cards) {
     position: relative;
     top: auto;

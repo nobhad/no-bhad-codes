@@ -120,12 +120,39 @@ export class ClientPortalModule extends BaseModule {
 
     console.log('Setting up dashboard event listeners...');
 
-    // Sidebar toggle
+    // Sidebar toggle (desktop)
     const sidebarToggle = document.getElementById('sidebar-toggle');
     if (sidebarToggle) {
       sidebarToggle.addEventListener('click', (e) => {
         e.preventDefault();
         this.toggleSidebar();
+      });
+    }
+
+    // Mobile hamburger menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileOverlay = document.getElementById('mobile-overlay');
+    const sidebar = document.getElementById('sidebar');
+
+    if (mobileMenuToggle && sidebar) {
+      mobileMenuToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.toggleMobileMenu();
+      });
+    }
+
+    // Close mobile menu when clicking overlay
+    if (mobileOverlay) {
+      mobileOverlay.addEventListener('click', () => {
+        this.closeMobileMenu();
+      });
+    }
+
+    // Close mobile menu when clicking sidebar close button
+    const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+    if (sidebarCloseBtn) {
+      sidebarCloseBtn.addEventListener('click', () => {
+        this.closeMobileMenu();
       });
     }
 
@@ -142,6 +169,8 @@ export class ClientPortalModule extends BaseModule {
             // Update active state on buttons
             sidebarButtons.forEach((b) => b.classList.remove('active'));
             btn.classList.add('active');
+            // Close mobile menu after selecting a tab
+            this.closeMobileMenu();
           }
         });
       });
@@ -1013,27 +1042,30 @@ export class ClientPortalModule extends BaseModule {
     const demoFiles = [
       {
         id: 1,
-        originalName: 'Project-Requirements.pdf',
+        originalName: 'Project-Outline.pdf',
         mimetype: 'application/pdf',
         size: 245760,
-        uploadedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-        projectName: 'Website Redesign'
+        uploadedAt: new Date().toISOString(),
+        projectName: 'Website Redesign',
+        uploadedBy: 'admin' // Shared by Noelle - client cannot delete
       },
       {
         id: 2,
-        originalName: 'Logo-Design-v2.png',
-        mimetype: 'image/png',
-        size: 1048576,
-        uploadedAt: new Date(Date.now() - 86400000).toISOString(),
-        projectName: 'Brand Identity'
+        originalName: 'My-Brand-Assets.zip',
+        mimetype: 'application/zip',
+        size: 5242880,
+        uploadedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+        projectName: 'Website Redesign',
+        uploadedBy: 'client' // Uploaded by client - can delete
       },
       {
         id: 3,
-        originalName: 'Meeting-Notes.docx',
-        mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        size: 32768,
-        uploadedAt: new Date().toISOString(),
-        projectName: 'Website Redesign'
+        originalName: 'Intake-Summary.pdf',
+        mimetype: 'application/pdf',
+        size: 128000,
+        uploadedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
+        projectName: 'Website Redesign',
+        uploadedBy: 'admin' // Shared by Noelle - client cannot delete
       }
     ];
     this.renderFilesList(container, demoFiles);
@@ -1048,10 +1080,25 @@ export class ClientPortalModule extends BaseModule {
       return;
     }
 
+    // Get current client email to determine ownership
+    const clientEmail = localStorage.getItem('clientEmail') || '';
+
+    // Trash icon SVG
+    const trashIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>';
+
     container.innerHTML = files
-      .map(
-        (file) => `
+      .map((file) => {
+        // Only show delete button if client uploaded the file (not shared by admin/Noelle)
+        const canDelete = file.uploadedBy === clientEmail || file.uploadedBy === 'client';
+        const deleteIcon = canDelete
+          ? `<button class="file-delete-icon btn-delete" data-file-id="${file.id}" data-filename="${this.escapeHtml(file.originalName)}" aria-label="Delete file">
+              ${trashIcon}
+            </button>`
+          : '';
+
+        return `
       <div class="file-item" data-file-id="${file.id}">
+        ${deleteIcon}
         <div class="file-icon">
           ${this.getFileIcon(file.mimetype)}
         </div>
@@ -1069,13 +1116,10 @@ export class ClientPortalModule extends BaseModule {
           <button class="btn btn-sm btn-outline btn-download" data-file-id="${file.id}" data-filename="${this.escapeHtml(file.originalName)}">
             Download
           </button>
-          <button class="btn btn-sm btn-outline btn-delete" data-file-id="${file.id}" data-filename="${this.escapeHtml(file.originalName)}">
-            Delete
-          </button>
         </div>
       </div>
-    `
-      )
+    `;
+      })
       .join('');
 
     // Attach event listeners to buttons
@@ -1915,8 +1959,10 @@ export class ClientPortalModule extends BaseModule {
 
     const token = localStorage.getItem('client_auth_token');
 
+    // Demo mode - add message locally (not saved, resets on refresh)
     if (!token || token.startsWith('demo_token_')) {
-      alert('Messaging is not available in demo mode. Please log in with a real account.');
+      this.addDemoMessage(message);
+      messageInput.value = '';
       return;
     }
 
@@ -1964,6 +2010,43 @@ export class ClientPortalModule extends BaseModule {
       console.error('Error sending message:', error);
       alert(error instanceof Error ? error.message : 'Failed to send message. Please try again.');
     }
+  }
+
+  /**
+   * Add a demo message locally (for demo mode only, resets on refresh)
+   */
+  private addDemoMessage(message: string): void {
+    const messagesThread = document.getElementById('messages-thread');
+    if (!messagesThread) return;
+
+    const now = new Date();
+    const timeString = `${now.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })  } at ${  now.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    })}`;
+
+    const messageHTML = `
+      <div class="message message-sent">
+        <div class="message-content">
+          <div class="message-header">
+            <span class="message-sender">You</span>
+            <span class="message-time">${timeString}</span>
+          </div>
+          <div class="message-body">${this.escapeHtml(message)}</div>
+        </div>
+        <div class="message-avatar" data-name="You">
+          <div class="avatar-placeholder">YOU</div>
+        </div>
+      </div>
+    `;
+
+    messagesThread.insertAdjacentHTML('beforeend', messageHTML);
+    messagesThread.scrollTop = messagesThread.scrollHeight;
   }
 
   private handleTabClick(event: Event): void {
@@ -2354,6 +2437,45 @@ export class ClientPortalModule extends BaseModule {
   }
 
   /**
+   * Toggle mobile menu (hamburger)
+   */
+  private toggleMobileMenu(): void {
+    const sidebar = document.getElementById('sidebar');
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileOverlay = document.getElementById('mobile-overlay');
+
+    if (!sidebar || !mobileMenuToggle) {
+      console.error('Mobile menu elements not found');
+      return;
+    }
+
+    const isOpen = sidebar.classList.contains('mobile-open');
+
+    if (isOpen) {
+      this.closeMobileMenu();
+    } else {
+      sidebar.classList.add('mobile-open');
+      mobileMenuToggle.classList.add('active');
+      mobileOverlay?.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  /**
+   * Close mobile menu
+   */
+  private closeMobileMenu(): void {
+    const sidebar = document.getElementById('sidebar');
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileOverlay = document.getElementById('mobile-overlay');
+
+    sidebar?.classList.remove('mobile-open');
+    mobileMenuToggle?.classList.remove('active');
+    mobileOverlay?.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  /**
    * Switch to a specific tab in the dashboard
    */
   private switchTab(tabName: string): void {
@@ -2376,6 +2498,9 @@ export class ClientPortalModule extends BaseModule {
       }
     });
 
+    // Update mobile header title
+    this.updateMobileHeaderTitle(tabName);
+
     // Load tab-specific data
     if (tabName === 'files') {
       this.loadFiles();
@@ -2386,6 +2511,26 @@ export class ClientPortalModule extends BaseModule {
     } else if (tabName === 'messages') {
       this.loadMessagesFromAPI();
     }
+  }
+
+  /**
+   * Update the mobile header title based on current tab
+   */
+  private updateMobileHeaderTitle(tabName: string): void {
+    const mobileHeaderTitle = document.getElementById('mobile-header-title');
+    if (!mobileHeaderTitle) return;
+
+    const titles: Record<string, string> = {
+      dashboard: 'Dashboard',
+      files: 'Files',
+      messages: 'Messages',
+      invoices: 'Invoices',
+      settings: 'Settings',
+      'new-project': 'New Project',
+      preview: 'Project Preview'
+    };
+
+    mobileHeaderTitle.textContent = titles[tabName] || 'Dashboard';
   }
 
   /**
