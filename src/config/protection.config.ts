@@ -150,14 +150,18 @@ export const PROTECTION_PRESETS = {
     }
   },
 
-  // For production - full protection (right-click enabled for usability)
+  // For production - full protection (right-click and console enabled for usability)
   production: {
     ...PROTECTION_CONFIG,
-    enabled: true,
-    level: 'maximum' as const,
+    enabled: false, // Disabled - use build-time obfuscation instead
+    level: 'standard' as const,
     features: {
       ...PROTECTION_CONFIG.features,
-      rightClickDisable: false // Allow right-click for usability
+      rightClickDisable: false, // Allow right-click for usability
+      consoleDisabling: false, // Never disable console - breaks error handling
+      devToolsBlocking: false, // Don't block devtools - user hostile
+      antiDebugging: false, // Don't use anti-debugging - user hostile
+      keyboardShortcuts: false // Don't block keyboard - user hostile
     }
   },
 
