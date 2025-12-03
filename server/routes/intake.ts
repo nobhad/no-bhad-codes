@@ -214,6 +214,23 @@ router.post('/', async (req: Request, res: Response) => {
         ]
       );
 
+      // Auto-generate project milestones based on project type and timeline
+      const milestones = generateProjectMilestones(intakeData.projectType, intakeData.timeline);
+      for (const milestone of milestones) {
+        await db.run(
+          `INSERT INTO milestones (project_id, title, description, due_date, deliverables, is_completed, created_at)
+           VALUES (?, ?, ?, ?, ?, 0, datetime('now'))`,
+          [
+            projectId,
+            milestone.title,
+            milestone.description,
+            milestone.dueDate,
+            JSON.stringify(milestone.deliverables)
+          ]
+        );
+      }
+      console.log(`Created ${milestones.length} milestones for project ${projectId}`);
+
       // Generate access token for client portal
       const accessToken = jwt.sign(
         {
@@ -376,6 +393,107 @@ function generateProjectName(projectType: string, companyName: string): string {
 
   const typeName = typeNames[projectType] || 'Web Project';
   return `${companyName} - ${typeName}`;
+}
+
+interface Milestone {
+  title: string;
+  description: string;
+  dueDate: string;
+  deliverables: string[];
+}
+
+function generateProjectMilestones(projectType: string, timeline: string): Milestone[] {
+  const now = new Date();
+
+  // Calculate timeline multiplier based on timeline selection
+  let timelineWeeks = 4; // default
+  switch (timeline) {
+    case 'asap':
+      timelineWeeks = 2;
+      break;
+    case '1-2-weeks':
+      timelineWeeks = 2;
+      break;
+    case '2-4-weeks':
+      timelineWeeks = 4;
+      break;
+    case '1-2-months':
+      timelineWeeks = 6;
+      break;
+    case '2-3-months':
+      timelineWeeks = 10;
+      break;
+    case 'flexible':
+      timelineWeeks = 8;
+      break;
+  }
+
+  const addDays = (date: Date, days: number): string => {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result.toISOString().split('T')[0];
+  };
+
+  // Base milestones for all project types
+  const baseMilestones: Milestone[] = [
+    {
+      title: 'Discovery & Planning',
+      description: 'Review requirements, create project plan and timeline',
+      dueDate: addDays(now, Math.floor(timelineWeeks * 0.15 * 7)),
+      deliverables: ['Requirements document', 'Project timeline', 'Technical specification']
+    },
+    {
+      title: 'Design & Wireframes',
+      description: 'Create visual designs and layout wireframes for approval',
+      dueDate: addDays(now, Math.floor(timelineWeeks * 0.35 * 7)),
+      deliverables: ['Wireframe mockups', 'Color palette', 'Typography selection', 'Design approval']
+    },
+    {
+      title: 'Development',
+      description: 'Build the core functionality and features',
+      dueDate: addDays(now, Math.floor(timelineWeeks * 0.7 * 7)),
+      deliverables: ['Core features implemented', 'Responsive design', 'Content integration']
+    },
+    {
+      title: 'Testing & Revisions',
+      description: 'Quality assurance testing and client revisions',
+      dueDate: addDays(now, Math.floor(timelineWeeks * 0.85 * 7)),
+      deliverables: ['Bug fixes', 'Performance optimization', 'Client feedback integration']
+    },
+    {
+      title: 'Launch',
+      description: 'Final deployment and go-live',
+      dueDate: addDays(now, timelineWeeks * 7),
+      deliverables: ['Production deployment', 'DNS configuration', 'Launch checklist complete']
+    }
+  ];
+
+  // Add project-type specific milestones
+  const additionalMilestones: Milestone[] = [];
+
+  if (projectType === 'ecommerce') {
+    additionalMilestones.push({
+      title: 'Payment Integration',
+      description: 'Set up payment processing and checkout flow',
+      dueDate: addDays(now, Math.floor(timelineWeeks * 0.6 * 7)),
+      deliverables: ['Payment gateway setup', 'Checkout testing', 'Order management']
+    });
+  }
+
+  if (projectType === 'web-app') {
+    additionalMilestones.push({
+      title: 'User Authentication',
+      description: 'Implement user login, registration, and security',
+      dueDate: addDays(now, Math.floor(timelineWeeks * 0.4 * 7)),
+      deliverables: ['Login system', 'User registration', 'Password recovery']
+    });
+  }
+
+  // Combine and sort by due date
+  const allMilestones = [...baseMilestones, ...additionalMilestones];
+  allMilestones.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+
+  return allMilestones;
 }
 
 export default router;
