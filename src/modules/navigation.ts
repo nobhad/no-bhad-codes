@@ -161,8 +161,15 @@ export class NavigationModule extends BaseModule {
                 }
               }, 100);
             } else {
-              // For non-hash links, just close menu and let browser navigate
+              // For non-hash links (like /client/landing), navigate explicitly
+              event.preventDefault();
               this.closeMenu();
+
+              // Small delay to let menu close animation start, then navigate
+              setTimeout(() => {
+                console.log('[NavigationModule] Navigating to:', href);
+                window.location.href = href;
+              }, 100);
             }
           }
         });
