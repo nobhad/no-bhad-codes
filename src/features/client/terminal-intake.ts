@@ -591,6 +591,11 @@ export class TerminalIntakeModule {
 
         await this.delay(300);
         await this.addBootMessage('  ✓ Progress restored');
+        await this.delay(200);
+
+        // Show previous conversation history
+        await this.showPreviousConversation(savedProgress.currentQuestionIndex);
+
         await this.delay(300);
         await this.askCurrentQuestion();
       } else {
@@ -641,7 +646,7 @@ export class TerminalIntakeModule {
 
     if (this.inputElement) {
       this.inputElement.disabled = false;
-      this.inputElement.placeholder = 'Type 1 or 2...';
+      this.inputElement.placeholder = 'Click or type 1 or 2...';
       this.inputElement.focus();
     }
   }
@@ -686,11 +691,12 @@ export class TerminalIntakeModule {
             </div>
             <span class="progress-percent" id="progressPercent">0%</span>
           </div>
-          <div class="terminal-login-info">${loginTime}<br><span class="terminal-prompt-line">client@NoBhadCodes project-intake % </span><span class="terminal-typing-text" id="terminalTypingText"></span><span class="terminal-cursor" id="terminalCursor">█</span></div>
-          <div class="terminal-chat" id="terminalChat"></div>
+          <div class="terminal-chat" id="terminalChat">
+            <div class="terminal-login-info">${loginTime}<br><span class="terminal-prompt-line">client@NoBhadCodes project-intake % </span><span class="terminal-typing-text" id="terminalTypingText"></span><span class="terminal-cursor" id="terminalCursor">█</span></div>
+          </div>
           <div class="terminal-input-area">
             <span class="terminal-prompt">></span>
-            <input type="text" class="terminal-input" id="terminalInput" placeholder="Type your response..." autocomplete="off">
+            <input type="text" class="terminal-input" id="terminalInput" placeholder="Click or type your response..." autocomplete="off">
             <button class="terminal-send" id="terminalSend">SEND</button>
           </div>
         </div>
@@ -719,8 +725,13 @@ export class TerminalIntakeModule {
     // Enter key on document for multiselect confirmation
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
+        // Check if we're in a modal that's closed (skip if so)
         const modal = document.getElementById('intakeModal');
-        if (modal && !modal.classList.contains('open')) return;
+        const isModalClosed = modal && !modal.classList.contains('open');
+        if (isModalClosed) return;
+
+        // Skip if processing
+        if (this.isProcessing) return;
 
         const question = this.getCurrentQuestion();
         if (question?.type === 'multiselect' && this.selectedOptions.length > 0) {
@@ -954,7 +965,7 @@ export class TerminalIntakeModule {
   private setupCompanyConfirmHandler(companyName: string): void {
     // Enable input for typing 1 or 2
     if (this.inputElement) {
-      this.inputElement.placeholder = 'Type 1 or 2...';
+      this.inputElement.placeholder = 'Click or type 1 or 2...';
       this.inputElement.disabled = false;
       this.inputElement.focus();
     }
@@ -1016,7 +1027,7 @@ export class TerminalIntakeModule {
 
   private setupForCompanyHandler(): void {
     if (this.inputElement) {
-      this.inputElement.placeholder = 'Type 1 or 2...';
+      this.inputElement.placeholder = 'Click or type 1 or 2...';
       this.inputElement.disabled = false;
       this.inputElement.focus();
     }
@@ -1069,7 +1080,7 @@ export class TerminalIntakeModule {
     });
 
     if (this.inputElement) {
-      this.inputElement.placeholder = 'Enter company name';
+      this.inputElement.placeholder = 'Click or type company name...';
       this.inputElement.disabled = false;
       this.inputElement.focus();
     }
@@ -1144,6 +1155,69 @@ export class TerminalIntakeModule {
     line.textContent = text;
     this.chatContainer.appendChild(line);
     this.scrollToBottom();
+  }
+
+  /**
+   * Show previous conversation history when resuming
+   */
+  private async showPreviousConversation(upToIndex: number): Promise<void> {
+    this.addMessage({
+      type: 'system',
+      content: '--- Previous answers ---'
+    });
+
+    await this.delay(100);
+
+    // Go through each question up to the current index
+    for (let i = 0; i < upToIndex; i++) {
+      const question = QUESTIONS[i];
+
+      // Check if this question was applicable (check dependencies)
+      if (question.dependsOn) {
+        const dependencyField = question.dependsOn.field;
+        const dependencyValue = this.intakeData[dependencyField];
+        const requiredValue = question.dependsOn.value;
+
+        const matches = Array.isArray(requiredValue)
+          ? requiredValue.includes(dependencyValue as string)
+          : dependencyValue === requiredValue;
+
+        if (!matches) continue; // Skip this question - dependency not met
+      }
+
+      // Get the answer for this question
+      const answer = question.field ? this.intakeData[question.field] : undefined;
+      if (answer === undefined) continue; // Skip if no answer
+
+      // Show the question (without typing animation for speed)
+      this.addMessage({
+        type: 'ai',
+        content: question.question,
+        questionIndex: i
+      });
+
+      // Format the answer for display
+      let displayAnswer: string;
+      if (Array.isArray(answer)) {
+        displayAnswer = answer.join(', ');
+      } else {
+        displayAnswer = String(answer);
+      }
+
+      // Show the user's answer
+      this.addMessage({
+        type: 'user',
+        content: displayAnswer,
+        questionIndex: i
+      });
+    }
+
+    this.addMessage({
+      type: 'system',
+      content: '--- Continuing ---'
+    });
+
+    await this.delay(100);
   }
 
   private getCurrentQuestion(): IntakeQuestion | null {
@@ -1228,7 +1302,7 @@ export class TerminalIntakeModule {
 
     // Update input placeholder
     if (this.inputElement) {
-      this.inputElement.placeholder = question.placeholder || 'Type your response...';
+      this.inputElement.placeholder = question.placeholder || 'Click or type your response...';
       this.inputElement.disabled = false;
       this.inputElement.focus();
     }
@@ -1387,73 +1461,71 @@ export class TerminalIntakeModule {
     const data = this.intakeData;
 
     const sections = [
-      '═══════════════════════════════════════',
-      '         PROJECT REQUEST SUMMARY',
-      '═══════════════════════════════════════',
+      '--- PROJECT SUMMARY ---',
       '',
-      '► CONTACT INFORMATION',
-      `  Name: ${this.formatFieldForReview('name', data.name as string)}`,
-      `  Email: ${this.formatFieldForReview('email', data.email as string)}`,
-      `  Company: ${this.formatFieldForReview('company', data.company as string)}`,
-      `  Phone: ${this.formatFieldForReview('phone', data.phone as string)}`,
+      '[CONTACT]',
+      `Name: ${this.formatFieldForReview('name', data.name as string)}`,
+      `Email: ${this.formatFieldForReview('email', data.email as string)}`,
+      `Company: ${this.formatFieldForReview('company', data.company as string)}`,
+      `Phone: ${this.formatFieldForReview('phone', data.phone as string)}`,
       '',
-      '► PROJECT DETAILS',
-      `  Type: ${this.formatFieldForReview('projectType', data.projectType as string)}`,
-      `  Description: ${this.formatFieldForReview('projectDescription', data.projectDescription as string)}`,
-      `  Timeline: ${this.formatFieldForReview('timeline', data.timeline as string)}`,
-      `  Budget: ${this.formatFieldForReview('budget', data.budget as string)}`,
+      '[PROJECT]',
+      `Type: ${this.formatFieldForReview('projectType', data.projectType as string)}`,
+      `Description: ${this.formatFieldForReview('projectDescription', data.projectDescription as string)}`,
+      `Timeline: ${this.formatFieldForReview('timeline', data.timeline as string)}`,
+      `Budget: ${this.formatFieldForReview('budget', data.budget as string)}`,
       '',
-      '► FEATURES & INTEGRATIONS',
-      `  Features: ${this.formatFieldForReview('features', data.features as string[])}`
+      '[FEATURES]',
+      `Features: ${this.formatFieldForReview('features', data.features as string[])}`
     ];
 
     if (data.customFeatures) {
-      sections.push(`  Custom Features: ${data.customFeatures}`);
+      sections.push(`Custom: ${data.customFeatures}`);
     }
 
-    sections.push(`  Third-party Integrations: ${data.hasIntegrations === 'yes' ? this.formatFieldForReview('integrations', data.integrations as string[]) : 'None needed'}`);
+    sections.push(`Integrations: ${data.hasIntegrations === 'yes' ? this.formatFieldForReview('integrations', data.integrations as string[]) : 'None'}`);
 
     sections.push(
       '',
-      '► DESIGN & BRANDING',
-      `  Design Level: ${this.formatFieldForReview('designLevel', data.designLevel as string)}`,
-      `  Brand Assets: ${this.formatFieldForReview('brandAssets', data.brandAssets as string[])}`
+      '[DESIGN]',
+      `Level: ${this.formatFieldForReview('designLevel', data.designLevel as string)}`,
+      `Assets: ${this.formatFieldForReview('brandAssets', data.brandAssets as string[])}`
     );
 
     if (data.inspiration) {
-      sections.push(`  Inspiration: ${data.inspiration}`);
+      sections.push(`Inspiration: ${data.inspiration}`);
     }
 
     sections.push(
       '',
-      '► TECHNICAL INFO',
-      `  Tech Comfort: ${this.formatFieldForReview('techComfort', data.techComfort as string)}`,
-      `  Current Site: ${data.hasCurrentSite === 'yes' ? data.currentSite : 'No existing site'}`,
-      `  Domain: ${data.hasDomain === 'yes' ? data.domainName : (data.hasDomain === 'no' ? 'Needs domain' : 'Needs advice')}`,
-      `  Hosting: ${this.formatFieldForReview('hosting', data.hosting as string)}`
+      '[TECHNICAL]',
+      `Comfort: ${this.formatFieldForReview('techComfort', data.techComfort as string)}`,
+      `Site: ${data.hasCurrentSite === 'yes' ? data.currentSite : 'None'}`,
+      `Domain: ${data.hasDomain === 'yes' ? data.domainName : (data.hasDomain === 'no' ? 'Need' : 'Advice')}`,
+      `Hosting: ${this.formatFieldForReview('hosting', data.hosting as string)}`
     );
 
     if (data.hostingProvider) {
-      sections.push(`  Hosting Provider: ${data.hostingProvider}`);
+      sections.push(`Provider: ${data.hostingProvider}`);
     }
 
     sections.push(
       '',
-      '► OTHER',
-      `  Concerns: ${this.formatFieldForReview('challenges', data.challenges as string[])}`
+      '[OTHER]',
+      `Concerns: ${this.formatFieldForReview('challenges', data.challenges as string[])}`
     );
 
     if (data.additionalInfo) {
-      sections.push(`  Additional Info: ${data.additionalInfo}`);
+      sections.push(`Notes: ${data.additionalInfo}`);
     }
 
     if (data.referralName) {
-      sections.push(`  Referred by: ${data.referralName}`);
+      sections.push(`Referral: ${data.referralName}`);
     }
 
     sections.push(
       '',
-      '═══════════════════════════════════════'
+      '--- END SUMMARY ---'
     );
 
     return sections.join('\n');
@@ -1480,13 +1552,21 @@ export class TerminalIntakeModule {
 
     await this.delay(300);
 
+    // Add instructions for making changes
+    this.addMessage({
+      type: 'system',
+      content: 'To make changes, scroll up and click on any answer to edit it, or select "Start over" below.'
+    });
+
+    await this.delay(200);
+
     // Ask for confirmation
     this.addMessage({
       type: 'ai',
       content: 'Does everything look correct?',
       options: [
         { value: 'yes', label: 'Yes, submit my request' },
-        { value: 'no', label: 'No, I need to make changes' }
+        { value: 'no', label: 'Start over' }
       ]
     });
 
@@ -1576,7 +1656,7 @@ export class TerminalIntakeModule {
 
       if (this.inputElement) {
         this.inputElement.disabled = false;
-        this.inputElement.placeholder = 'Type 1 or 2...';
+        this.inputElement.placeholder = 'Click or type 1 or 2...';
         this.inputElement.focus();
       }
     });
@@ -1662,7 +1742,7 @@ export class TerminalIntakeModule {
 
       if (this.inputElement) {
         this.inputElement.disabled = false;
-        this.inputElement.placeholder = 'Type 1 or 2...';
+        this.inputElement.placeholder = 'Click or type 1 or 2...';
         this.inputElement.focus();
       }
     });
@@ -1755,21 +1835,35 @@ Thank you for choosing No Bhad Codes!
   private async goBackToQuestion(questionIndex: number): Promise<void> {
     if (this.isProcessing) return;
 
-    // Don't allow going back during review/submission
-    const currentQuestion = this.getCurrentQuestion();
-    if (!currentQuestion) return;
-
     // Find the question at the given index
     if (questionIndex >= QUESTIONS.length || questionIndex < 0) return;
 
-    // Add a system message indicating we're going back
-    this.addMessage({
-      type: 'system',
-      content: '↩ Going back to edit previous answer...'
+    // Remove all chat messages from the clicked question onwards (in DOM)
+    if (this.chatContainer) {
+      const allMessages = this.chatContainer.querySelectorAll('.chat-message');
+      let foundQuestion = false;
+      allMessages.forEach((msg) => {
+        const msgIndex = msg.getAttribute('data-question-index');
+        if (msgIndex !== null && parseInt(msgIndex, 10) >= questionIndex) {
+          foundQuestion = true;
+        }
+        if (foundQuestion) {
+          msg.remove();
+        }
+      });
+    }
+
+    // Filter messages array to only keep messages before this question
+    this.messages = this.messages.filter((msg) => {
+      if (msg.questionIndex === undefined) return true; // Keep system messages without question index
+      return msg.questionIndex < questionIndex;
     });
 
-    // Clear the data for this question and all subsequent questions
+    // Get the old answer to pre-fill for text inputs
     const question = QUESTIONS[questionIndex];
+    const oldAnswer = question.field ? this.intakeData[question.field] : undefined;
+
+    // Clear the data for this question and all subsequent questions
     if (question.field) {
       delete this.intakeData[question.field];
     }
@@ -1782,6 +1876,9 @@ Thank you for choosing No Bhad Codes!
       }
     }
 
+    // Clear selected options for multiselect questions
+    this.selectedOptions = [];
+
     // Set the question index to go back to that question
     this.currentQuestionIndex = questionIndex;
 
@@ -1790,6 +1887,14 @@ Thank you for choosing No Bhad Codes!
 
     await this.delay(300);
     await this.askCurrentQuestion();
+
+    // Pre-fill the input with old answer for text-based questions
+    if (oldAnswer && this.inputElement && typeof oldAnswer === 'string') {
+      const questionType = question.type;
+      if (questionType === 'text' || questionType === 'email' || questionType === 'tel' || questionType === 'url' || questionType === 'textarea') {
+        this.inputElement.value = oldAnswer;
+      }
+    }
   }
 
   /**
@@ -1801,8 +1906,7 @@ Thank you for choosing No Bhad Codes!
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#x27;')
-      .replace(/\//g, '&#x2F;');
+      .replace(/'/g, '&#x27;');
   }
 
   private addMessage(message: ChatMessage): void {
@@ -1818,7 +1922,10 @@ Thank you for choosing No Bhad Codes!
       messageEl.classList.add('clickable-message');
       messageEl.dataset.questionIndex = String(message.questionIndex);
       messageEl.title = 'Click to edit this answer';
-      messageEl.addEventListener('click', () => this.goBackToQuestion(message.questionIndex!));
+      messageEl.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent bubbling to option click handler
+        this.goBackToQuestion(message.questionIndex!);
+      });
     }
 
     const contentEl = document.createElement('div');
