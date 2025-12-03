@@ -71,7 +71,7 @@ router.put(
     );
 
     const updatedClient = await db.get(
-      `SELECT id, email, company_name, contact_name, phone FROM clients WHERE id = ?`,
+      'SELECT id, email, company_name, contact_name, phone FROM clients WHERE id = ?',
       [req.user!.id]
     );
 
@@ -179,7 +179,7 @@ router.put(
          updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
       [company || null, address || null, address2 || null, city || null,
-       state || null, zip || null, country || null, req.user!.id]
+        state || null, zip || null, country || null, req.user!.id]
     );
 
     res.json({ success: true, message: 'Billing information updated' });

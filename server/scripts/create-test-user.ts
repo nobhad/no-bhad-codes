@@ -27,7 +27,7 @@ async function createTestUser() {
           db.run(
             'UPDATE clients SET password_hash = ? WHERE email = ?',
             [hash, email],
-            function (updateErr) {
+            (updateErr) => {
               if (updateErr) {
                 console.error('Error updating:', updateErr);
               } else {

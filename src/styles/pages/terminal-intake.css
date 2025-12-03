@@ -78,11 +78,11 @@
    ============================================================================ */
 
 .terminal-login-info {
-  padding: 8px 20px;
+  padding: 0 0 12px 0;
   color: #888888;
   font-size: 13px;
   font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
-  background: #1e1e1e;
+  background: transparent;
 }
 
 .terminal-prompt-line {
@@ -96,6 +96,12 @@
 .terminal-cursor {
   color: #00ff00;
   font-weight: bold;
+  animation: cursor-blink 1s step-end infinite;
+}
+
+.typing-cursor {
+  display: inline;
+  margin-left: 2px;
 }
 
 /* ============================================================================
@@ -108,9 +114,14 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   gap: 16px;
   min-height: 400px;
   max-height: calc(100vh - 250px);
+}
+
+.terminal-chat > * {
+  width: 100%;
 }
 
 /* Custom scrollbar */
@@ -198,11 +209,15 @@
   color: #00aaff;
 }
 
-/* System Messages - gray, centered */
+/* System Messages - summary/review styling */
 .chat-message.system .message-content {
-  color: #666666;
-  font-size: 12px;
-  font-style: italic;
+  color: #00ff00;
+  font-size: 13px;
+  font-style: normal;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+  padding: 8px 0;
 }
 
 /* Error Messages - red */
@@ -318,6 +333,17 @@ input.terminal-input {
 .terminal-input::placeholder,
 .terminal-input-area input::placeholder {
   color: #555555;
+}
+
+/* Blinking caret animation for input */
+@keyframes caret-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.terminal-input {
+  caret-color: #00ff00;
+  animation: none;
 }
 
 .terminal-input:focus,
@@ -486,11 +512,30 @@ input.terminal-input:focus {
    ============================================================================ */
 
 @media (max-width: 768px) {
+  body[data-page="client-intake"] #main-content {
+    padding: 0;
+    margin: 0;
+  }
+
+  .terminal-intake-container {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+  }
+
+  .terminal-intake {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+  }
+
   .terminal-window {
     border-radius: 0;
     border-left: none;
     border-right: none;
     max-width: 100%;
+    width: 100%;
+    margin: 0;
   }
 
   .terminal-chat {

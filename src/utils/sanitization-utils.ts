@@ -17,9 +17,7 @@ export class SanitizationUtils {
     '>': '&gt;',
     '"': '&quot;',
     '\'': '&#x27;',
-    '/': '&#x2F;',
-    '`': '&#96;',
-    '=': '&#x3D;'
+    '`': '&#96;'
   };
 
   /**
@@ -75,7 +73,7 @@ export class SanitizationUtils {
   static escapeHtml(input: string): string {
     if (!input || typeof input !== 'string') return '';
 
-    return input.replace(/[&<>"'`=/]/g, (match) => SanitizationUtils.HTML_ENTITIES[match] || match);
+    return input.replace(/[&<>"'`]/g, (match) => SanitizationUtils.HTML_ENTITIES[match] || match);
   }
 
   /**
