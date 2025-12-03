@@ -1,5 +1,12 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "framework": "vite"
+  "framework": "vite",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/client/landing", "destination": "/client/landing.html" },
+    { "source": "/client/portal", "destination": "/client/portal.html" },
+    { "source": "/client/intake", "destination": "/client/intake.html" }
+  ]
 }
