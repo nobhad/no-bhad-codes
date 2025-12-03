@@ -324,50 +324,49 @@ main {
  * INTRO ANIMATION STATES
  * ============================================ */
 
-/* CSS Fallback Animation - ensures content shows even if JS fails */
+/* CSS Fallback Animation - ensures header background shows even if JS fails */
 @keyframes intro-fallback-show {
   0%, 90% {
-    opacity: 0;
-    visibility: hidden;
+    background: transparent;
   }
   100% {
-    opacity: 1;
-    visibility: visible;
+    background: var(--color-neutral-300);
   }
 }
 
-/* Default: ensure content is visible and prevent unwanted transitions */
+/* Default: ensure content is ALWAYS visible */
 .header,
 main,
 .footer {
   opacity: 1 !important;
   visibility: visible !important;
-  transition: none !important; /* Prevent opacity transitions on navigation */
 }
 
-/* Hide main page content during intro animation - with CSS fallback */
-/* NOTE: Footer is NOT hidden during intro - it should always be visible */
-.intro-loading .header,
-.intro-loading main {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  /* CSS fallback: show content after 3 seconds even if JS fails */
-  animation: intro-fallback-show 3s ease-in-out forwards;
+/* During intro animation - header visible with transparent background (desktop only) */
+/* Content is visible but covered by intro overlay (z-index 9999) */
+.intro-loading .header {
+  background: transparent !important;
 }
 
-/* Show content after intro completes (with transition only for intro completion) */
-.intro-complete .header,
-.intro-complete main {
-  opacity: 1 !important;
-  visibility: visible !important;
-  transition: opacity 0.5s ease-in-out !important;
-  animation: none !important; /* Cancel fallback animation when JS works */
+/* After intro completes - header gets its normal background */
+.intro-complete .header {
+  background: var(--color-neutral-300) !important;
+  transition: background 0.5s ease-in-out !important;
 }
 
-/* After intro completes, remove transition to prevent flicker */
-.intro-complete.intro-finished .header,
-.intro-complete.intro-finished main {
+/* After intro finishes, remove transition to prevent flicker on navigation */
+.intro-complete.intro-finished .header {
   transition: none !important;
+}
+
+/* Mobile: header always fully visible with normal background */
+@media screen and (max-width: 767px) {
+  .intro-loading .header,
+  .intro-complete .header,
+  .intro-complete.intro-finished .header {
+    background: var(--color-neutral-300) !important;
+    transition: none !important;
+  }
 }
 
 /* ============================================
@@ -409,7 +408,7 @@ main,
     min-height: auto;
     flex: 1;
     overflow: visible;
-    scroll-snap-type: none;
+    scroll-snap-type: y proximity;
   }
 
   section {
@@ -431,12 +430,110 @@ main,
     gap: 0.8rem;
   }
 
-  /* Sections should be natural height, not full viewport */
-  .business-card-section,
-  .about-section,
-  .contact-section,
+  /* MOBILE SECTION LAYOUT:
+     1. Intro (business card) - full viewport, centered
+     2. About - full viewport with about text (before tech stack)
+     3. Tech Stack - full viewport
+     4. Contact - natural height with footer visible
+  */
+
+  /* Intro/Business card section - fill viewport for centering */
+  .business-card-section {
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    scroll-snap-align: start;
+  }
+
+  /* About section - becomes a container for two visual sections on mobile */
+  .about-section {
+    min-height: auto;
+    flex: 0 0 auto;
+    padding: 0;
+  }
+
+  /* About content wrapper - stack children as separate visual sections */
+  .about-section .about-content {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    gap: 0;
+    max-width: 100%;
+  }
+
+  /* About text section - full viewport */
+  .about-section .about-text-wrapper {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .about-section .about-text-wrapper h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .about-section .about-text-wrapper p {
+    max-width: 90vw;
+    margin-bottom: 1rem;
+  }
+
+  /* Tech stack viewport - full viewport, centers the compact tech-stack box */
+  .about-section .tech-stack-viewport {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    scroll-snap-align: start;
+    padding: 1rem;
+  }
+
+  /* Tech stack box - compact, centered in viewport */
+  .about-section .tech-stack {
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+  }
+
+  .about-section .tech-stack h3 {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  .about-section .tech-list {
+    max-width: 85vw;
+    line-height: 1.6;
+    text-align: justify;
+    font-size: 0.9rem;
+  }
+
+  /* Contact section - natural height */
+  .contact-section {
+    min-height: auto;
+    flex: 0 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .contact-section h2 {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Other sections that might exist */
   .hero-section,
-  main > section {
+  main > section:not(.business-card-section):not(.about-section):not(.contact-section) {
     min-height: auto;
     flex: 0 0 auto;
   }

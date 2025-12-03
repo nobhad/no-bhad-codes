@@ -861,6 +861,13 @@ html[data-theme="dark"] .coming-soon-banner {
 
 /* Removed automatic dark mode preference - site manages theme manually */
 
+/* Hide theme toggle on mobile */
+@media screen and (max-width: 767px) {
+  .theme-button {
+    display: none !important;
+  }
+}
+
 /* Print styles */
 @media print {
   .nav,

@@ -113,7 +113,6 @@ export class IntroAnimationModule extends BaseModule {
       height: ${cardHeight}px;
       perspective: 1000px;
       position: relative;
-      transform: translate(${cardPosition.left}px, ${cardPosition.top}px);
     `;
 
     // Create card inner (flip container)
@@ -290,6 +289,9 @@ export class IntroAnimationModule extends BaseModule {
     // Ensure main page content is visible (in case animation was skipped)
     document.documentElement.classList.remove('intro-loading');
     document.documentElement.classList.add('intro-complete');
+
+    // Scroll to top so header is visible (especially important on mobile)
+    window.scrollTo(0, 0);
 
     // After transition completes, add intro-finished to stop future transitions
     setTimeout(() => {

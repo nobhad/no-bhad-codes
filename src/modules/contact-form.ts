@@ -267,9 +267,11 @@ export class ContactFormModule extends BaseModule {
       lastName: formData.get('Last-Name')?.toString().trim() || '',
       email: formData.get('Email')?.toString().trim() || '',
       companyName: formData.get('Company-Name')?.toString().trim(),
-      businessSize: formData.get('Business-Size')?.toString() || '',
-      helpOption: formData.get('help-options')?.toString() || '',
-      message: formData.get('Message')?.toString().trim() || ''
+      inquiryType: formData.get('Inquiry-Type')?.toString() || '',
+      projectType: formData.get('Project-Type')?.toString() || '',
+      timeline: formData.get('Timeline')?.toString() || '',
+      budgetRange: formData.get('Budget-Range')?.toString() || '',
+      message: formData.get('Project-Description')?.toString().trim() || ''
     };
 
     // Apply client-side sanitization as first defense layer
@@ -278,8 +280,10 @@ export class ContactFormModule extends BaseModule {
       lastName: SanitizationUtils.sanitizeText(rawData.lastName),
       email: SanitizationUtils.sanitizeEmail(rawData.email),
       companyName: rawData.companyName ? SanitizationUtils.sanitizeText(rawData.companyName) : '',
-      businessSize: SanitizationUtils.sanitizeText(rawData.businessSize),
-      helpOption: SanitizationUtils.sanitizeText(rawData.helpOption),
+      inquiryType: SanitizationUtils.sanitizeText(rawData.inquiryType),
+      projectType: rawData.projectType ? SanitizationUtils.sanitizeText(rawData.projectType) : undefined,
+      timeline: rawData.timeline ? SanitizationUtils.sanitizeText(rawData.timeline) : undefined,
+      budgetRange: rawData.budgetRange ? SanitizationUtils.sanitizeText(rawData.budgetRange) : undefined,
       message: SanitizationUtils.sanitizeMessage(rawData.message)
     };
   }
@@ -294,7 +298,8 @@ export class ContactFormModule extends BaseModule {
       this.log('Validation error:', error);
     });
 
-    this.showFormMessage(errors.join('<br>'), 'error');
+    // Join with newline - showFormMessage uses textContent so HTML won't render
+    this.showFormMessage(errors.join('\n'), 'error');
   }
 
   /**
@@ -346,7 +351,22 @@ export class ContactFormModule extends BaseModule {
 
     const messageDiv = document.createElement('div');
     messageDiv.className = `form-message ${type}`;
-    messageDiv.textContent = message;
+
+    // Handle multiple error messages by creating separate lines
+    // Use textContent for each line to prevent XSS
+    const lines = message.split('\n');
+    if (lines.length > 1) {
+      lines.forEach((line, index) => {
+        const span = document.createElement('span');
+        span.textContent = line;
+        messageDiv.appendChild(span);
+        if (index < lines.length - 1) {
+          messageDiv.appendChild(document.createElement('br'));
+        }
+      });
+    } else {
+      messageDiv.textContent = message;
+    }
 
     this.form!.insertBefore(messageDiv, this.form!.firstChild);
 
