@@ -186,7 +186,7 @@ export class ClientLandingModule extends BaseModule {
       if (email === this.DEMO_EMAIL && password === this.DEMO_PASSWORD) {
         console.log('[ClientLandingModule] Demo login successful');
         // Store demo session
-        sessionStorage.setItem('clientAuth', JSON.stringify({
+        localStorage.setItem('clientAuth', JSON.stringify({
           email: this.DEMO_EMAIL,
           name: 'Demo User',
           isDemo: true,
@@ -213,9 +213,9 @@ export class ClientLandingModule extends BaseModule {
         console.log('[ClientLandingModule] Login successful');
         // Store auth token
         if (result.token) {
-          sessionStorage.setItem('clientAuthToken', result.token);
+          localStorage.setItem('clientAuthToken', result.token);
         }
-        sessionStorage.setItem('clientAuth', JSON.stringify({
+        localStorage.setItem('clientAuth', JSON.stringify({
           email: result.user?.email || email,
           name: result.user?.name || 'Client',
           isDemo: false,
@@ -231,7 +231,7 @@ export class ClientLandingModule extends BaseModule {
       console.error('[ClientLandingModule] Login error:', error);
       // If API fails, check for demo credentials as fallback
       if (email === this.DEMO_EMAIL && password === this.DEMO_PASSWORD) {
-        sessionStorage.setItem('clientAuth', JSON.stringify({
+        localStorage.setItem('clientAuth', JSON.stringify({
           email: this.DEMO_EMAIL,
           name: 'Demo User',
           isDemo: true,

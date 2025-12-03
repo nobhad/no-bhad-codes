@@ -165,6 +165,14 @@ export class ClientPortalModule extends BaseModule {
       });
     }
 
+    // Logout button
+    const logoutBtn = document.getElementById('btn-logout');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        this.handleLogout();
+      });
+    }
+
     // Sidebar buttons with data-tab attribute
     const sidebarButtons = document.querySelectorAll('.sidebar-buttons .btn[data-tab]');
     if (sidebarButtons.length > 0) {
@@ -2482,6 +2490,19 @@ export class ClientPortalModule extends BaseModule {
     mobileMenuToggle?.classList.remove('active');
     mobileOverlay?.classList.remove('active');
     document.body.style.overflow = '';
+  }
+
+  /**
+   * Handle user logout - clear session and redirect to landing page
+   */
+  private handleLogout(): void {
+    // Clear auth data from localStorage
+    localStorage.removeItem('clientPortalAuth');
+    localStorage.removeItem('clientEmail');
+    localStorage.removeItem('clientName');
+
+    // Redirect to client landing page
+    window.location.href = '/client/landing';
   }
 
   /**
