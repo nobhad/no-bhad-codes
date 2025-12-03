@@ -588,43 +588,52 @@
   padding: var(--space-1) var(--space-2);
   border-radius: var(--border-radius-full);
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-bold);
   text-transform: capitalize;
+  border: 2px solid #000;
+  color: #000;
 }
 
 .status-badge.status-pending {
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
+  background: #f59e0b;
+  border-color: #000;
+  color: #000;
 }
 
 .status-badge.status-active {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: #3b82f6;
+  border-color: #000;
+  color: #000;
 }
 
 .status-badge.status-completed {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background: #10b981;
+  border-color: #000;
+  color: #000;
 }
 
 .status-badge.status-new {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: #3b82f6;
+  border-color: #000;
+  color: #000;
 }
 
 .status-badge.status-read {
-  background: rgba(107, 114, 128, 0.1);
-  color: #6b7280;
+  background: #9ca3af;
+  border-color: #000;
+  color: #000;
 }
 
 .status-badge.status-replied {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background: #10b981;
+  border-color: #000;
+  color: #000;
 }
 
 .status-badge.status-archived {
-  background: rgba(75, 85, 99, 0.1);
-  color: #4b5563;
+  background: #6b7280;
+  border-color: #000;
+  color: #000;
 }
 
 /* Admin Table Card - Consistent styling for data tables */
@@ -948,19 +957,22 @@
 /* Status badges for projects */
 .status-badge.status-in_progress,
 .status-badge.status-in-progress {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: #3b82f6;
+  border-color: #000;
+  color: #000;
 }
 
 .status-badge.status-on_hold,
 .status-badge.status-on-hold {
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
+  background: #f59e0b;
+  border-color: #000;
+  color: #000;
 }
 
 .status-badge.status-cancelled {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: #ef4444;
+  border-color: #000;
+  color: #000;
 }
 
 /* Action buttons in tables */
@@ -1439,12 +1451,13 @@
 
 .pd-tab-btn {
   padding: var(--space-3) var(--space-4);
-  background: transparent;
-  border: none;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border-primary);
+  border-bottom: none;
   border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
@@ -1452,14 +1465,17 @@
 
 .pd-tab-btn:hover {
   color: var(--color-text-primary);
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-tertiary, #333);
+  border-color: var(--color-brand-primary);
 }
 
 .pd-tab-btn.active {
-  color: var(--color-brand-primary);
-  background: var(--color-bg-secondary);
-  border-bottom: 2px solid var(--color-brand-primary);
-  margin-bottom: -2px;
+  color: #000;
+  background: var(--color-brand-primary);
+  border-color: #000;
+  border-bottom: 3px solid #000;
+  margin-bottom: -3px;
+  font-weight: var(--font-weight-bold);
 }
 
 /* Project Detail Tab Content */
