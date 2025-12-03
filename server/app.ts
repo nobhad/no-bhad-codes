@@ -24,6 +24,7 @@ import adminRouter from './routes/admin.js';
 import messagesRouter from './routes/messages.js';
 import invoicesRouter from './routes/invoices.js';
 import uploadsRouter from './routes/uploads.js';
+import intakeRouter from './routes/intake.js';
 import { setupSwagger } from './config/swagger.js';
 import { logger } from './middleware/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -123,6 +124,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api/messages', messagesRouter);
 app.use('/api/invoices', invoicesRouter);
 app.use('/api/uploads', uploadsRouter);
+app.use('/api/intake', intakeRouter);
 
 // 404 handler
 // Note: Express 5 doesn't support app.use('*') - use regular middleware instead
