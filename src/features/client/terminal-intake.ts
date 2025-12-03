@@ -74,12 +74,27 @@ const QUESTIONS: IntakeQuestion[] = [
     validation: (value) => {
       // Remove all non-digit characters for validation
       const digits = value.replace(/\D/g, '');
-      // Valid phone numbers should have 10-15 digits
+      // US phone numbers: 10 digits, or 11 digits starting with 1
       if (digits.length < 10) {
-        return `Please enter a valid phone number (you entered ${digits.length} digits, need at least 10)`;
+        return `Please enter a valid phone number (you entered ${digits.length} digits, need 10)`;
       }
-      if (digits.length > 15) {
-        return `Please enter a valid phone number (you entered ${digits.length} digits, max is 15)`;
+      if (digits.length === 11 && !digits.startsWith('1')) {
+        return 'Please enter a valid US phone number (11 digits must start with 1)';
+      }
+      if (digits.length > 11) {
+        return `Please enter a valid phone number (you entered ${digits.length} digits, max is 11)`;
+      }
+      // Reject obviously fake numbers (555-555-xxxx pattern used in movies)
+      if (digits.startsWith('555555') || digits.startsWith('1555555')) {
+        return 'Please enter a real phone number (555-555-xxxx numbers are fictional)';
+      }
+      // Reject all same digits
+      if (/^(\d)\1+$/.test(digits)) {
+        return 'Please enter a real phone number';
+      }
+      // Reject sequential digits
+      if (digits === '1234567890' || digits === '0987654321' || digits === '12345678901') {
+        return 'Please enter a real phone number';
       }
       return null;
     },
