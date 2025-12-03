@@ -731,7 +731,7 @@ router.post(
     const token = jwt.sign(
       {
         id: 0, // Admin doesn't have a client ID
-        email: 'admin@nobhadcodes.com',
+        email: process.env.ADMIN_EMAIL || 'nobhaduri@gmail.com',
         type: 'admin'
       },
       secret,
