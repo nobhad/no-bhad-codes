@@ -6,27 +6,15 @@
   <meta name="theme-color" content="#e0e0e0">
   <title>No Bhad Codes - Professional Web Development</title>
 
-  <!-- Prevent theme flash and hide header during intro -->
-  <style>
-    :root {
-      --bg: #ffffff;
-      --fg: #000000;
-      --color-neutral-300: #e5e5e5;
-      --color-primary: #00ff41;
-    }
-    [data-theme="dark"] {
-      --bg: #1a1a1a;
-      --fg: #ffffff;
-      --color-neutral-300: #333333;
-    }
-    html { background-color: var(--bg); color: var(--fg); }
-    body { background-color: var(--bg); color: var(--fg); margin: 0; padding: 0; }
-    /* Hide header during intro animation - critical CSS */
-    .intro-loading .header { opacity: 0 !important; visibility: hidden !important; }
-    .intro-complete .header { opacity: 1 !important; visibility: visible !important; }
-  </style>
+  <!-- All CSS moved to external stylesheets -->
   <script>
     (function() {
+      // Scroll to top immediately on page load (prevents browser scroll restoration)
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+      window.scrollTo(0, 0);
+
       try {
         const savedTheme = localStorage.getItem('theme');
         const theme = savedTheme || 'light';

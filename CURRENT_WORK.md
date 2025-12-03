@@ -2,6 +2,58 @@
 
 ---
 
+## Active Work
+
+### Mobile Intro Animation - Card Flip
+**Status**: In Progress
+
+**Goal**: On mobile, the business card should show back first, then flip to front. Header should be visible immediately (no overlay).
+
+**Implementation**:
+- [x] Created `runMobileCardFlip()` method in `intro-animation.ts`
+- [x] Immediately removes `intro-loading` class (header visible from page load)
+- [x] Sets card to `rotateY(180)` (back showing)
+- [x] After 1s pause, flips to front (`rotateY(0)`)
+- [x] Created `completeMobileIntro()` for simpler cleanup
+- [x] No overlay on mobile - just in-place card flip
+- [x] Added CSS rule to start card showing back on mobile (prevents front flash)
+
+**Files Modified**:
+- `src/modules/intro-animation.ts` - Mobile card flip animation
+- `src/styles/components/business-card.css` - Mobile card initial state
+
+---
+
+### Desktop Card Alignment
+**Status**: Known Issue (DO NOT FIX YET)
+
+**Concern**: Card alignment is off on desktop during intro animation.
+
+**Notes**: Focus is on mobile fixes first. Will address desktop alignment after mobile is working.
+
+---
+
+### Mobile Navigation Styling
+**Status**: In Progress
+
+**Concerns Raised**:
+- [x] "NO BHAD CODES" logo should be same size as "MENU" text
+- [x] Add padding above first link in mobile nav
+- [x] Links should take up more room (taller) on mobile
+
+**Fixes Applied**:
+- Changed `.nav-logo-row` font-size from 16px to 14px (matches MENU text)
+- Changed mobile `.nav-logo-row` font-size from 12px to 14px
+- Added `.menu-list { padding-top: 2rem }` for first link spacing
+- Increased `.menu-list-item min-height` from `clamp(3rem, 7vw, 4.5rem)` to `clamp(4rem, 10vw, 5.5rem)`
+- Increased `.menu-link` padding on mobile
+- Increased `--menu-heading-size` from `clamp(2rem, 6vw, 4rem)` to `clamp(2.5rem, 8vw, 4.5rem)`
+
+**Files Modified**:
+- `src/styles/components/navigation.css` - Mobile nav link sizing
+
+---
+
 ## System Status
 
 **Last Updated**: December 3, 2025

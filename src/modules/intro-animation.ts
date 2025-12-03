@@ -39,6 +39,13 @@ export class IntroAnimationModule extends BaseModule {
   override async init(): Promise<void> {
     await super.init();
 
+    // On mobile, flip the actual business card (no overlay)
+    const isMobile = window.innerWidth <= 767;
+    if (isMobile) {
+      this.runMobileCardFlip();
+      return;
+    }
+
     try {
       this.createIntroElements();
       this.setupEventListeners();
@@ -58,7 +65,7 @@ export class IntroAnimationModule extends BaseModule {
     // Find the section card to align with
     const sectionCard = document.querySelector('.business-card-container') as HTMLElement;
 
-    // Create full page overlay
+    // Create full page overlay (desktop only - mobile skips this)
     this.overlay = document.createElement('div');
     this.overlay.id = 'intro-overlay';
     this.overlay.style.cssText = `
@@ -278,6 +285,55 @@ export class IntroAnimationModule extends BaseModule {
       }); // Then fade out the card
 
     // Intro animation started
+  }
+
+  /**
+   * Run card flip animation on mobile (no overlay, flip actual card in section)
+   */
+  private runMobileCardFlip(): void {
+    // Scroll to top so header is visible
+    window.scrollTo(0, 0);
+
+    // Immediately show header (remove intro-loading class)
+    document.documentElement.classList.remove('intro-loading');
+    document.documentElement.classList.add('intro-complete');
+
+    const cardInner = document.getElementById('business-card-inner');
+
+    if (!cardInner) {
+      // Card not found, just complete
+      this.completeMobileIntro();
+      return;
+    }
+
+    // Start with back showing (rotated 180deg)
+    gsap.set(cardInner, { rotationY: 180 });
+
+    // Create timeline for mobile card flip
+    this.timeline = gsap.timeline({
+      onComplete: () => this.completeMobileIntro()
+    });
+
+    this.timeline
+      .to({}, { duration: 1.0 }) // Pause showing back
+      .to(cardInner, {
+        rotationY: 0,
+        duration: 0.8,
+        ease: 'power2.inOut'
+      }); // Flip to front
+  }
+
+  /**
+   * Complete mobile intro (simpler than desktop - no overlay to clean up)
+   */
+  private completeMobileIntro(): void {
+    this.isComplete = true;
+    document.documentElement.classList.add('intro-finished');
+
+    // Update app state
+    if (typeof window !== 'undefined' && (window as any).NBW_STATE) {
+      (window as any).NBW_STATE.setState({ introAnimating: false });
+    }
   }
 
   /**

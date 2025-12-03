@@ -11,6 +11,12 @@
   </style>
   <script>
     (function() {
+      // Scroll to top immediately on page load (prevents browser scroll restoration)
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+      window.scrollTo(0, 0);
+
       try {
         const savedTheme = localStorage.getItem('theme');
         document.documentElement.setAttribute('data-theme', savedTheme || 'light');
