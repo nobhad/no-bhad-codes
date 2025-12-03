@@ -75,8 +75,11 @@ const QUESTIONS: IntakeQuestion[] = [
       // Remove all non-digit characters for validation
       const digits = value.replace(/\D/g, '');
       // Valid phone numbers should have 10-15 digits
-      if (digits.length < 10 || digits.length > 15) {
-        return 'Please enter a valid phone number (10+ digits)';
+      if (digits.length < 10) {
+        return `Please enter a valid phone number (you entered ${digits.length} digits, need at least 10)`;
+      }
+      if (digits.length > 15) {
+        return `Please enter a valid phone number (you entered ${digits.length} digits, max is 15)`;
       }
       return null;
     },
@@ -746,6 +749,23 @@ export class TerminalIntakeModule {
     document.addEventListener('keydown', (e) => {
       // Skip if processing
       if (this.isProcessing) return;
+
+      // Skip if user is typing in the input field (has text or is focused with non-number key intent)
+      // Only allow number shortcuts when input is empty or not focused
+      if (this.inputElement) {
+        const inputHasText = this.inputElement.value.trim().length > 0;
+        const inputIsFocused = document.activeElement === this.inputElement;
+
+        // If input has text, don't intercept number keys - let user type
+        if (inputHasText) return;
+
+        // If input is focused but question is text-based, don't intercept
+        const question = this.getCurrentQuestion();
+        if (inputIsFocused && question) {
+          const textTypes = ['text', 'email', 'tel', 'url', 'textarea'];
+          if (textTypes.includes(question.type)) return;
+        }
+      }
 
       // Only handle if the modal is open and this terminal is active
       const modal = document.getElementById('intakeModal');
@@ -1831,6 +1851,7 @@ Thank you for choosing No Bhad Codes!
 
   /**
    * Go back to a previous question to edit the answer
+   * This resets ALL progress from that point forward
    */
   private async goBackToQuestion(questionIndex: number): Promise<void> {
     if (this.isProcessing) return;
@@ -1838,19 +1859,43 @@ Thank you for choosing No Bhad Codes!
     // Find the question at the given index
     if (questionIndex >= QUESTIONS.length || questionIndex < 0) return;
 
-    // Remove all chat messages from the clicked question onwards (in DOM)
+    this.isProcessing = true;
+
+    // Get the old answer to pre-fill for text inputs (before we clear data)
+    const question = QUESTIONS[questionIndex];
+    const oldAnswer = question.field ? this.intakeData[question.field] : undefined;
+
+    // Clear the data for this question and ALL subsequent questions
+    for (let i = questionIndex; i < QUESTIONS.length; i++) {
+      const q = QUESTIONS[i];
+      if (q.field && this.intakeData[q.field]) {
+        delete this.intakeData[q.field];
+      }
+    }
+    // Also clear the special 'name' field if resetting to greeting
+    if (questionIndex === 0 && this.intakeData.name) {
+      delete this.intakeData.name;
+    }
+
+    // Remove ALL chat messages from the clicked question onwards (in DOM)
+    // Be more aggressive - track by position, not just by index
     if (this.chatContainer) {
-      const allMessages = this.chatContainer.querySelectorAll('.chat-message');
-      let foundQuestion = false;
-      allMessages.forEach((msg) => {
+      const allMessages = Array.from(this.chatContainer.querySelectorAll('.chat-message'));
+      let startRemoving = false;
+
+      for (const msg of allMessages) {
         const msgIndex = msg.getAttribute('data-question-index');
         if (msgIndex !== null && parseInt(msgIndex, 10) >= questionIndex) {
-          foundQuestion = true;
+          startRemoving = true;
         }
-        if (foundQuestion) {
+        if (startRemoving) {
           msg.remove();
         }
-      });
+      }
+
+      // Also remove any typing indicators or other elements that came after
+      const typingIndicators = this.chatContainer.querySelectorAll('.typing-indicator');
+      typingIndicators.forEach(el => el.remove());
     }
 
     // Filter messages array to only keep messages before this question
@@ -1858,23 +1903,6 @@ Thank you for choosing No Bhad Codes!
       if (msg.questionIndex === undefined) return true; // Keep system messages without question index
       return msg.questionIndex < questionIndex;
     });
-
-    // Get the old answer to pre-fill for text inputs
-    const question = QUESTIONS[questionIndex];
-    const oldAnswer = question.field ? this.intakeData[question.field] : undefined;
-
-    // Clear the data for this question and all subsequent questions
-    if (question.field) {
-      delete this.intakeData[question.field];
-    }
-
-    // Also clear any dependent questions' data
-    for (let i = questionIndex + 1; i < QUESTIONS.length; i++) {
-      const q = QUESTIONS[i];
-      if (q.field && this.intakeData[q.field]) {
-        delete this.intakeData[q.field];
-      }
-    }
 
     // Clear selected options for multiselect questions
     this.selectedOptions = [];
@@ -1884,6 +1912,17 @@ Thank you for choosing No Bhad Codes!
 
     // Save the updated progress
     this.saveProgress();
+
+    // Update progress bar to reflect the reset
+    this.updateProgress();
+
+    // Add a visual indicator that we're resetting
+    this.addMessage({
+      type: 'system',
+      content: '--- Editing previous answer ---'
+    });
+
+    this.isProcessing = false;
 
     await this.delay(300);
     await this.askCurrentQuestion();
