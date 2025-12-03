@@ -11,6 +11,16 @@
 // Import new modular CSS architecture
 import './styles/main-new.css';
 
+// Vercel Analytics (privacy-focused, no cookies)
+import { inject } from '@vercel/analytics';
+import { injectSpeedInsights } from '@vercel/speed-insights';
+
+// Initialize analytics in production
+if (import.meta.env?.PROD) {
+  inject();
+  injectSpeedInsights();
+}
+
 // Failsafe: Ensure page content is visible after 3 seconds
 // This catches cases where intro animation fails or takes too long
 if (typeof window !== 'undefined') {

@@ -1,6 +1,6 @@
 # Client Portal Dashboard
 
-**Last Updated:** December 1, 2025
+**Last Updated:** December 2, 2025
 
 ## Table of Contents
 
@@ -10,15 +10,16 @@
 4. [Dashboard Sections](#dashboard-sections)
 5. [Navigation](#navigation)
 6. [Tab System](#tab-system)
-7. [Login System](#login-system)
-8. [File Management](#file-management)
-9. [Invoice Management](#invoice-management)
-10. [Project Management](#project-management)
-11. [View Management](#view-management)
-12. [Settings & Forms](#settings--forms)
-13. [Styling](#styling)
-14. [File Locations](#file-locations)
-15. [Related Documentation](#related-documentation)
+7. [Mobile Responsiveness](#mobile-responsiveness)
+8. [Login System](#login-system)
+9. [File Management](#file-management)
+10. [Invoice Management](#invoice-management)
+11. [Project Management](#project-management)
+12. [View Management](#view-management)
+13. [Settings & Forms](#settings--forms)
+14. [Styling](#styling)
+15. [File Locations](#file-locations)
+16. [Related Documentation](#related-documentation)
 
 ---
 
@@ -357,6 +358,146 @@ private switchTab(tabName: string): void {
 | Settings | `tab-settings` |
 | New Project | `tab-new-project` |
 | Preview | `tab-preview` |
+
+---
+
+## Mobile Responsiveness
+
+The Client Portal is fully responsive on mobile devices (screens under 768px).
+
+### Mobile Navigation
+
+On mobile, the sidebar is replaced with a hamburger menu:
+
+- Fixed header bar at top with hamburger button (right) and page title (left)
+- Sidebar slides in from the right side
+- Dark overlay behind sidebar when open
+- Close button inside sidebar to dismiss
+- Page title updates when switching tabs
+
+**HTML Structure:**
+
+```html
+<!-- Mobile Header Bar (visible on mobile only) -->
+<header class="mobile-header" id="mobile-header">
+    <h1 class="mobile-header-title" id="mobile-header-title">Dashboard</h1>
+    <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle menu">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+    </button>
+</header>
+
+<!-- Mobile Overlay -->
+<div class="mobile-overlay" id="mobile-overlay"></div>
+```
+
+**TypeScript Methods:**
+
+```typescript
+// Mobile menu toggle
+private setupMobileMenuToggle(): void {
+  const toggle = document.getElementById('mobile-menu-toggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('mobile-overlay');
+
+  toggle?.addEventListener('click', () => {
+    sidebar?.classList.toggle('mobile-open');
+    overlay?.classList.toggle('active');
+  });
+}
+
+// Update mobile header title on tab switch
+private updateMobileHeaderTitle(tabName: string): void {
+  const titleMap: Record<string, string> = {
+    dashboard: 'Dashboard',
+    files: 'Files',
+    messages: 'Messages',
+    invoices: 'Invoices',
+    settings: 'Settings',
+    'new-project': 'New Project',
+    preview: 'Preview'
+  };
+  const title = document.getElementById('mobile-header-title');
+  if (title) title.textContent = titleMap[tabName] || 'Dashboard';
+}
+```
+
+### Mobile Dashboard
+
+- Stat cards stack in single column
+- Project cards appear above quick stats
+- Recent activity section full width
+
+### Mobile Files
+
+- File items stack vertically
+- Drag/drop zone hidden (not functional on touch)
+- Only Browse Files button shown for uploads
+- Trash icon only on client-uploaded files
+
+### Mobile Messages
+
+- Emoji picker hidden
+- Chat area takes most of screen height
+- Messages thread is scrollable
+- Send button visible (no Enter key on mobile keyboards)
+- Avatar positioning optimized for touch
+
+### Mobile CSS
+
+Key mobile styles in `src/styles/pages/client-portal.css`:
+
+```css
+@media (max-width: 768px) {
+  /* Fixed header bar */
+  .mobile-header {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    z-index: 1000;
+  }
+
+  /* Sidebar slides from right */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 1001;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* Dark overlay */
+  .mobile-overlay.active {
+    display: block;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  /* Stack stat cards */
+  .quick-stats {
+    flex-direction: column;
+  }
+
+  /* Hide emoji picker */
+  .emoji-picker-container {
+    display: none !important;
+  }
+
+  /* Chat fills screen */
+  .messages-container {
+    height: calc(100vh - 100px);
+  }
+}
+```
 
 ---
 

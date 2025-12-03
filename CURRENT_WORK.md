@@ -166,6 +166,65 @@ BusinessCardRenderer.enableAfterIntro: Cannot read properties of null (reading '
 
 ## Completed Today
 
+### Client Portal Mobile Responsiveness
+
+**Completed:** December 2, 2025
+
+**Summary:** Comprehensive mobile responsiveness improvements for the Client Portal, including hamburger navigation, mobile-optimized layouts, and touch-friendly interactions.
+
+**Features Implemented:**
+
+Mobile Navigation:
+- [x] Fixed header bar with hamburger menu on mobile
+- [x] Sidebar slides from right side with dark overlay
+- [x] Close button inside sidebar when open
+- [x] Page title updates dynamically when switching tabs
+
+Dashboard:
+- [x] Stack stat cards in single column on mobile
+- [x] Move project status cards above quick stats section
+
+Files Page:
+- [x] Stack file items vertically on mobile
+- [x] Hide drag/drop zone on mobile (tap doesn't work for drag/drop)
+- [x] Show only Browse Files button for uploads
+- [x] Trash icon only appears on client-uploaded files (admin files not deletable)
+- [x] Updated demo files: Project-Outline.pdf (newest), My-Brand-Assets.zip, Intake-Summary.pdf (oldest)
+
+Messages Page:
+- [x] Hide emoji picker on mobile
+- [x] Fix avatar positioning aligned with message bubbles
+- [x] Extend message bubbles to edges of container
+- [x] Chat area takes most of screen height and is scrollable
+- [x] Enable demo message sending (temporary, resets on refresh)
+- [x] Add unread message from admin in demo conversation
+
+Client Landing Page:
+- [x] Hide "Already have an account? Sign in..." text on mobile
+
+**Files Modified:**
+
+| File | Changes |
+|------|---------|
+| `server/app.ts` | Added terminal intake route |
+| `src/features/client/client-portal.ts` | Mobile menu toggle, demo messaging, file permissions |
+| `src/features/client/terminal-intake.ts` | New terminal-style intake form module |
+| `src/styles/base/layout.css` | Mobile layout adjustments |
+| `src/styles/pages/client-portal.css` | ~400 lines of mobile styles |
+| `src/styles/pages/client.css` | Hide login description on mobile |
+| `src/styles/pages/terminal-intake.css` | Terminal intake styles |
+| `templates/pages/client-intake.ejs` | Updated for terminal intake |
+| `templates/pages/client-landing.ejs` | Added login-description class |
+| `templates/pages/client-portal.ejs` | Mobile header bar, sidebar overlay, updated demo data |
+
+**Verification:**
+
+- [x] TypeScript: 0 errors
+- [x] ESLint: 0 errors
+- [x] Build: Success
+
+---
+
 ### Client Portal Landing Page - Two Card Layout
 
 **Completed:** December 2, 2025
