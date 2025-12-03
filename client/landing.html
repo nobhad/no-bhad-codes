@@ -1,23 +1,96 @@
-<%
-  // Data is injected by ViteEjsPlugin from templates/data.json
-  const pageData = pages.clientLanding;
-%>
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
-    <%- include('../templates/partials/head.ejs') %>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Portal - No Bhad Codes</title>
+  <style>
+    :root { --bg: #ffffff; --fg: #000000; }
+    [data-theme="dark"] { --bg: #1a1a1a; --fg: #ffffff; }
+    html, body { background-color: var(--bg); color: var(--fg); margin: 0; padding: 0; }
+  </style>
+  <script>
+    (function() {
+      try {
+        const savedTheme = localStorage.getItem('theme');
+        document.documentElement.setAttribute('data-theme', savedTheme || 'light');
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+  <meta name="description" content="Client Portal - Access your projects, files, and messages">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <meta name="theme-color" content="#ff6b6b">
+  <script type="module" src="/src/main.ts"></script>
 </head>
-<body<% if (pageData.bodyClass) { %> class="<%= pageData.bodyClass %>"<% } %>>
-    
-    <%- include('../templates/partials/header.ejs') %>
-    
-    <%- include('../templates/partials/navigation.ejs') %>
-    
-    <!-- MAIN SCROLLABLE CONTENT -->
-    <main<% if (pageData.mainClass) { %> class="<%= pageData.mainClass %>"<% } %>>
-        <%- include('../templates/pages/client-landing.ejs') %>
-    </main>
-
-    <%- include('../templates/partials/footer.ejs') %>
+<body data-page="client-landing">
+  <header class="header">
+    <a href="/" class="logo"><img src="/images/avatar.svg" alt="No Bhad Codes" class="logo-image"></a>
+    <button class="theme-toggle" aria-label="Toggle theme">
+      <svg class="theme-icon sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+      <svg class="theme-icon moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </button>
+  </header>
+  <nav class="navigation" id="navigation">
+    <ul class="nav-list">
+      <li class="nav-item"><a href="/" class="nav-link" data-section="home"><span class="eyebrow">00</span>home</a></li>
+      <li class="nav-item"><a href="/#about" class="nav-link" data-section="about"><span class="eyebrow">01</span>about</a></li>
+      <li class="nav-item"><a href="/#contact" class="nav-link" data-section="contact"><span class="eyebrow">02</span>contact</a></li>
+      <li class="nav-item"><a href="#" class="nav-link disabled" data-section="portfolio"><span class="eyebrow">03</span>portfolio <span class="coming-soon">coming soon</span></a></li>
+      <li class="nav-item"><a href="/client/landing" class="nav-link active" data-section="client-portal"><span class="eyebrow">04</span>client portal</a></li>
+    </ul>
+  </nav>
+  <main id="main-content">
+    <section class="client-login">
+      <div class="container">
+        <div class="client-content">
+          <h1 class="login-title">CLIENT PORTAL</h1>
+          <div class="portal-cards">
+            <div class="portal-card">
+              <div class="portal-card-header"><h2>New Client</h2></div>
+              <div class="portal-card-body">
+                <p>Ready to start a new project? Fill out our intake form and I'll get back to you within 24-48 hours.</p>
+                <div class="portal-card-avatar"><img src="/images/avatar.svg" alt="Avatar" /></div>
+                <button type="button" class="btn btn-primary" id="openIntakeModal">Start Intake Form</button>
+              </div>
+            </div>
+            <div class="portal-card">
+              <div class="portal-card-header"><h2>Existing Client</h2></div>
+              <div class="portal-card-body">
+                <p class="login-description">Already have an account? Sign in to access your projects, files, and messages.</p>
+                <form id="loginForm" class="login-form" novalidate>
+                  <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" name="email" class="form-input" placeholder="your@email.com" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <div class="password-input-wrapper">
+                      <input type="password" id="login-password" name="password" class="form-input" placeholder="Enter password" required>
+                      <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="login-error" id="loginError"></div>
+                  <button type="submit" class="btn btn-primary btn-full"><span class="btn-text">Sign In</span><span class="btn-loader"></span></button>
+                </form>
+                <div class="login-footer"><p>Forgot your password? <a href="mailto:hello@nobhad.codes">Contact me</a></p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div id="intakeModal" class="intake-modal">
+    <div class="intake-modal-content">
+      <section class="terminal-intake-container"></section>
+    </div>
+  </div>
+  <footer class="footer"><div class="footer-content"><p>&copy; 2025 No Bhad Codes. All rights reserved.</p></div></footer>
+  <link rel="stylesheet" href="/src/styles/pages/terminal-intake.css">
 </body>
 </html>

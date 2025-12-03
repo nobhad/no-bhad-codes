@@ -50,11 +50,15 @@ function getApiConfig(): ApiConfig {
 
   // Fallback to environment-based detection
   if (!baseUrl) {
-    if (isDevelopment) {
+    // Check for Vite environment variable (set at build time)
+    const viteApiUrl = import.meta.env?.VITE_API_URL;
+    if (viteApiUrl) {
+      baseUrl = viteApiUrl;
+    } else if (isDevelopment) {
       baseUrl = 'http://localhost:4001';
     } else if (isProduction) {
-      // In production, assume API is on same domain
-      baseUrl = window?.location?.origin || '';
+      // In production, use VITE_API_URL or empty for same-origin
+      baseUrl = '';
     } else {
       // Default for other environments
       baseUrl = '';
