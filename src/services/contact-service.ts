@@ -17,8 +17,10 @@ export interface ContactFormData {
   lastName: string;
   email: string;
   companyName?: string;
-  businessSize: string;
-  helpOption: string;
+  inquiryType: string;
+  projectType?: string;
+  timeline?: string;
+  budgetRange?: string;
   message: string;
 }
 
@@ -166,9 +168,17 @@ export class ContactService extends BaseService {
     if (formData.companyName) {
       form.append('Company-Name', formData.companyName);
     }
-    form.append('Business-Size', formData.businessSize);
-    form.append('help-options', formData.helpOption);
-    form.append('Message', formData.message);
+    form.append('Inquiry-Type', formData.inquiryType);
+    if (formData.projectType) {
+      form.append('Project-Type', formData.projectType);
+    }
+    if (formData.timeline) {
+      form.append('Timeline', formData.timeline);
+    }
+    if (formData.budgetRange) {
+      form.append('Budget-Range', formData.budgetRange);
+    }
+    form.append('Project-Description', formData.message);
 
     const response = await fetch('/', {
       method: 'POST',
@@ -204,8 +214,10 @@ export class ContactService extends BaseService {
         lastName: formData.lastName,
         email: formData.email,
         companyName: formData.companyName,
-        businessSize: formData.businessSize,
-        helpOption: formData.helpOption,
+        inquiryType: formData.inquiryType,
+        projectType: formData.projectType,
+        timeline: formData.timeline,
+        budgetRange: formData.budgetRange,
         message: formData.message
       })
     });
@@ -234,8 +246,10 @@ export class ContactService extends BaseService {
       from_name: `${formData.firstName} ${formData.lastName}`,
       from_email: formData.email,
       company_name: formData.companyName || 'N/A',
-      business_size: formData.businessSize,
-      help_option: formData.helpOption,
+      inquiry_type: formData.inquiryType,
+      project_type: formData.projectType || 'N/A',
+      timeline: formData.timeline || 'N/A',
+      budget_range: formData.budgetRange || 'N/A',
       message: formData.message
     };
 
@@ -302,11 +316,7 @@ export class ContactService extends BaseService {
       errors.push('Please enter a valid email address');
     }
 
-    if (!formData.businessSize || formData.businessSize === 'Business Size') {
-      errors.push('Please select a business size');
-    }
-
-    if (!formData.helpOption) {
+    if (!formData.inquiryType) {
       errors.push('Please select what you need help with');
     }
 
@@ -339,8 +349,10 @@ export class ContactService extends BaseService {
       lastName: SanitizationUtils.sanitizeText(formData.lastName),
       email: SanitizationUtils.sanitizeEmail(formData.email),
       companyName: formData.companyName ? SanitizationUtils.sanitizeText(formData.companyName) : '',
-      businessSize: SanitizationUtils.sanitizeText(formData.businessSize),
-      helpOption: SanitizationUtils.sanitizeText(formData.helpOption),
+      inquiryType: SanitizationUtils.sanitizeText(formData.inquiryType),
+      projectType: formData.projectType ? SanitizationUtils.sanitizeText(formData.projectType) : undefined,
+      timeline: formData.timeline ? SanitizationUtils.sanitizeText(formData.timeline) : undefined,
+      budgetRange: formData.budgetRange ? SanitizationUtils.sanitizeText(formData.budgetRange) : undefined,
       message: SanitizationUtils.sanitizeMessage(formData.message)
     };
   }
@@ -356,8 +368,10 @@ export class ContactService extends BaseService {
       lastName: formData.lastName,
       email: formData.email,
       companyName: formData.companyName,
-      businessSize: formData.businessSize,
-      helpOption: formData.helpOption,
+      inquiryType: formData.inquiryType,
+      projectType: formData.projectType,
+      timeline: formData.timeline,
+      budgetRange: formData.budgetRange,
       message: formData.message
     };
 
@@ -437,8 +451,10 @@ export class ContactService extends BaseService {
       <p><strong>Name:</strong> ${formData.firstName} ${formData.lastName}</p>
       <p><strong>Email:</strong> ${formData.email}</p>
       <p><strong>Company:</strong> ${formData.companyName || 'N/A'}</p>
-      <p><strong>Business Size:</strong> ${formData.businessSize}</p>
-      <p><strong>Help Needed:</strong> ${formData.helpOption}</p>
+      <p><strong>Inquiry Type:</strong> ${formData.inquiryType}</p>
+      ${formData.projectType ? `<p><strong>Project Type:</strong> ${formData.projectType}</p>` : ''}
+      ${formData.timeline ? `<p><strong>Timeline:</strong> ${formData.timeline}</p>` : ''}
+      ${formData.budgetRange ? `<p><strong>Budget:</strong> ${formData.budgetRange}</p>` : ''}
       <p><strong>Message:</strong></p>
       <p>${formData.message}</p>
     `;

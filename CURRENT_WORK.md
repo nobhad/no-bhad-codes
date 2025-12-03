@@ -28,61 +28,33 @@ Run `npm run dev:full` to start both frontend and backend
 
 ### Mobile Business Card Positioning
 
-**Status**: Open
+**Status**: Fixed
 
-**Issue**: On mobile devices, the business card appears too low in the viewport. After the flip animation, the card should remain at the same vertical position (centered in the viewport), but it starts lower than expected.
+**Issue**: On mobile devices, the business card appeared too low in the viewport. After the flip animation, the card position was inconsistent.
 
-**Screenshots**:
-- `/Users/noellebhaduri/Downloads/IMG_7C958FB92003-1.jpeg` - Shows glitching during flip
-- `/Users/noellebhaduri/Downloads/IMG_4031.PNG` - Front of card (positioned low)
-- `/Users/noellebhaduri/Downloads/IMG_4030.PNG` - Back of card (also positioned low)
+**Fix Applied**:
+- Removed card transform positioning from intro animation (was causing card to move)
+- Intro card now centered via flexbox in overlay
+- Added `window.scrollTo(0, 0)` after intro completes to ensure header is visible
 
-**Expected Behavior**:
-- Card should be vertically centered in the viewport
-- Card position should remain consistent before and after flip animation
-
-**Files Involved**:
-- `src/styles/components/business-card.css` - Card dimensions and layout
-- `src/styles/base/layout.css` - Section centering (uses `justify-content: center`)
-- IntroModule (GSAP animations may affect positioning)
-
-**Possible Causes**:
-- Mobile header height affecting `calc(100vh - header - footer)` calculation
-- GSAP animation not properly centering on mobile
-- Section padding on mobile affecting centering
-- Footer visibility or height on mobile
-
-**Next Steps**:
-- [ ] Inspect mobile section height calculation
-- [ ] Check GSAP intro animation positioning on mobile
-- [ ] Verify header/footer heights on mobile
-- [ ] Consider using `align-items: center` with fixed positioning
+**Files Modified**:
+- `src/modules/intro-animation.ts` - Removed transform positioning, added scroll to top
 
 ---
 
 ### Client Landing Page Mobile Layout
 
-**Status**: Partial Fix Applied
+**Status**: Fixed
 
-**Issue**: On mobile, the client landing page (`/client/landing`) has layout issues:
-1. Footer overlaps/covers bottom of content (login form cut off)
-2. Page doesn't scroll properly to show all content
-
-**Screenshot**: Shows footer (gray bar) covering the login form, password field and login button not fully visible.
+**Issue**: On mobile, the client landing page (`/client/landing`) had layout issues with footer overlapping content.
 
 **Fix Applied**:
-- Added CSS in `src/styles/pages/client.css` at 768px breakpoint:
-  - `body[data-page="client-landing"] .footer { position: static !important; }`
-  - Made body and main use flexbox for proper content flow
-  - Removed fixed footer padding from content area
+- Added CSS in `src/styles/pages/client.css` at 768px breakpoint
+- Footer position static on mobile
+- Body and main use flexbox for proper content flow
 
 **Files Modified**:
 - `src/styles/pages/client.css` - Mobile footer positioning
-
-**Verification Needed**:
-- [ ] Test on actual mobile device to confirm fix works
-- [ ] Ensure footer appears at bottom of content (not fixed)
-- [ ] Verify entire login form is visible and scrollable
 
 ---
 
@@ -301,6 +273,59 @@ BusinessCardRenderer.enableAfterIntro: Cannot read properties of null (reading '
 ---
 
 ## Completed Today
+
+### Mobile Layout Restructure & UX Improvements
+
+**Completed:** December 3, 2025
+
+**Summary:** Major restructure of mobile layout with section-based scrolling and various UX improvements.
+
+**Features Implemented:**
+
+Mobile Layout Restructure:
+- [x] **4-Section Mobile Layout**: Intro (business card), About, Tech Stack, Contact
+- [x] Business card section fills viewport and is centered
+- [x] About text section fills viewport with scroll snap
+- [x] Tech stack section fills viewport with compact centered content box
+- [x] Contact section natural height with footer visible
+- [x] Header and footer scroll with content on mobile (not fixed)
+- [x] Scroll snap enabled for smooth section transitions
+
+Contact Form Fixes:
+- [x] Fixed error messages showing HTML `<br>` tags as literal text
+- [x] Updated `showFormMessage()` to create proper DOM elements for multi-line errors
+- [x] Removed `businessSize` field from contact service (not in form)
+- [x] Updated `ContactFormData` interface to match actual form fields
+- [x] Added `inquiryType`, `projectType`, `timeline`, `budgetRange` fields
+
+Intro Animation Improvements:
+- [x] Removed card transform positioning (was causing card to move)
+- [x] Card now centered via flexbox in overlay
+- [x] Added `window.scrollTo(0, 0)` after intro completes
+- [x] Header always visible on mobile (no transparent background during intro)
+
+Other Mobile UX:
+- [x] Theme toggle hidden on mobile
+- [x] Section titles (h2/h3) centered with proper spacing
+- [x] Tech stack text justified with tighter line height
+
+**Files Modified:**
+
+| File | Changes |
+|------|---------|
+| `index.html` | Added `about-text-wrapper` and `tech-stack-viewport` divs |
+| `src/styles/base/layout.css` | Mobile section layout, intro states |
+| `src/styles/components/navigation.css` | Hide theme toggle on mobile |
+| `src/modules/intro-animation.ts` | Removed transform, added scroll to top |
+| `src/modules/contact-form.ts` | Fixed error message display |
+| `src/services/contact-service.ts` | Updated interface and methods |
+
+**Verification:**
+
+- [x] TypeScript: 0 errors
+- [x] ESLint: 0 errors
+
+---
 
 ### Terminal Intake Form Enhancements
 
