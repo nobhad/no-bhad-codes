@@ -32,7 +32,7 @@ export class IntroAnimationModule extends BaseModule {
   override async init(): Promise<void> {
     await super.init();
 
-    // Both mobile and desktop: flip the actual business card (no overlay)
+    // Both mobile and desktop: flip the actual business card
     try {
       this.runCardFlip();
     } catch (error) {
