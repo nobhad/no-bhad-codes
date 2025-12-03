@@ -699,6 +699,11 @@ html[data-theme="dark"] .coming-soon-banner {
     --list-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
   }
 
+  /* Mobile: Header scrolls with content instead of fixed */
+  .header {
+    position: static;
+  }
+
   .nav-logo-row {
     font-size: 12px;
     gap: 4px;

@@ -60,6 +60,32 @@ Run `npm run dev:full` to start both frontend and backend
 
 ---
 
+### Client Landing Page Mobile Layout
+
+**Status**: Partial Fix Applied
+
+**Issue**: On mobile, the client landing page (`/client/landing`) has layout issues:
+1. Footer overlaps/covers bottom of content (login form cut off)
+2. Page doesn't scroll properly to show all content
+
+**Screenshot**: Shows footer (gray bar) covering the login form, password field and login button not fully visible.
+
+**Fix Applied**:
+- Added CSS in `src/styles/pages/client.css` at 768px breakpoint:
+  - `body[data-page="client-landing"] .footer { position: static !important; }`
+  - Made body and main use flexbox for proper content flow
+  - Removed fixed footer padding from content area
+
+**Files Modified**:
+- `src/styles/pages/client.css` - Mobile footer positioning
+
+**Verification Needed**:
+- [ ] Test on actual mobile device to confirm fix works
+- [ ] Ensure footer appears at bottom of content (not fixed)
+- [ ] Verify entire login form is visible and scrollable
+
+---
+
 ### Redis Caching Disabled
 
 **Status**: Deferred (not needed for development)

@@ -633,6 +633,24 @@ body[data-page="client-landing"] .client-login,
     display: none;
   }
 
+  /* Client landing page - make footer static at bottom of content */
+  body[data-page="client-landing"] {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body[data-page="client-landing"] main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body[data-page="client-landing"] .footer {
+    position: static !important;
+    margin-top: auto;
+  }
+
   .client-login:has(.portal-cards) {
     position: relative;
     top: auto;
@@ -644,10 +662,10 @@ body[data-page="client-landing"] .client-login,
     height: auto;
     min-height: auto;
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: visible;
     padding: 1rem;
     padding-top: calc(var(--header-height, 60px) + 1rem);
-    padding-bottom: calc(var(--footer-height, 60px) + 1rem);
+    padding-bottom: 1rem;
     box-sizing: border-box;
   }
 
@@ -736,7 +754,7 @@ body[data-page="client-landing"] .client-login,
   .client-login:has(.portal-cards) {
     padding: 0.5rem;
     padding-top: calc(var(--header-height, 60px) + 0.5rem);
-    padding-bottom: calc(var(--footer-height, 60px) + 0.5rem);
+    padding-bottom: 0.5rem;
   }
 
   .portal-cards {

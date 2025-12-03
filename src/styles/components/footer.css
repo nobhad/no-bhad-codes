@@ -29,3 +29,13 @@
   background: var(--color-neutral-700);
   color: var(--color-neutral-100);
 }
+
+/* Mobile: Footer scrolls with content instead of fixed */
+@media (max-width: 768px) {
+  .footer {
+    position: static !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+  }
+}
