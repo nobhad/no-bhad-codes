@@ -1474,6 +1474,9 @@ export class TerminalIntakeModule {
     // Save progress after each answer
     this.saveProgress();
 
+    // Clear selected options for next question (important for multiselect)
+    this.selectedOptions = [];
+
     await this.delay(300);
     await this.askCurrentQuestion();
   }
@@ -1898,23 +1901,20 @@ Thank you for choosing No Bhad Codes!
       delete this.intakeData.name;
     }
 
-    // Remove ALL chat messages from the clicked question onwards (in DOM)
-    // Be more aggressive - track by position, not just by index
+    // Remove ALL elements from the clicked question onwards (in DOM)
+    // Very aggressive - remove any element with questionIndex >= target, plus everything after
     if (this.chatContainer) {
-      const allMessages = Array.from(this.chatContainer.querySelectorAll('.chat-message'));
-      let startRemoving = false;
-
-      for (const msg of allMessages) {
-        const msgIndex = msg.getAttribute('data-question-index');
-        if (msgIndex !== null && parseInt(msgIndex, 10) >= questionIndex) {
-          startRemoving = true;
+      // First pass: find and remove ALL elements with questionIndex >= target
+      const elementsToRemove: Element[] = [];
+      this.chatContainer.querySelectorAll('[data-question-index]').forEach((el) => {
+        const idx = parseInt(el.getAttribute('data-question-index') || '-1', 10);
+        if (idx >= questionIndex) {
+          elementsToRemove.push(el);
         }
-        if (startRemoving) {
-          msg.remove();
-        }
-      }
+      });
+      elementsToRemove.forEach(el => el.remove());
 
-      // Also remove any typing indicators or other elements that came after
+      // Second pass: remove any orphaned elements that came after (typing indicators, etc.)
       const typingIndicators = this.chatContainer.querySelectorAll('.typing-indicator');
       typingIndicators.forEach(el => el.remove());
     }
@@ -1937,28 +1937,37 @@ Thank you for choosing No Bhad Codes!
     // Update progress bar to reflect the reset
     this.updateProgress();
 
-    // Add a visual indicator that we're resetting
-    this.addMessage({
-      type: 'system',
-      content: '--- Editing previous answer ---'
-    });
-
     this.isProcessing = false;
 
-    await this.delay(300);
+    await this.delay(200);
     await this.askCurrentQuestion();
 
-    // Pre-fill the input with old answer for text-based questions
-    // This lets users just hit Enter to confirm the same value
-    if (oldAnswer && this.inputElement && typeof oldAnswer === 'string') {
-      const textTypes = ['text', 'email', 'tel', 'url', 'textarea'];
-      if (textTypes.includes(question.type)) {
-        // Small delay to ensure input is ready after askCurrentQuestion
-        await this.delay(50);
-        this.inputElement.value = oldAnswer;
-        this.inputElement.focus();
-        // Move cursor to end of text
-        this.inputElement.setSelectionRange(oldAnswer.length, oldAnswer.length);
+    // Scroll to the new question
+    this.scrollToBottom();
+
+    // Pre-fill based on question type
+    if (oldAnswer) {
+      // Small delay to ensure UI is ready after askCurrentQuestion
+      await this.delay(50);
+
+      if (question.type === 'multiselect' && Array.isArray(oldAnswer)) {
+        // Pre-select the previously chosen options for multiselect
+        this.selectedOptions = [...oldAnswer];
+        oldAnswer.forEach((value) => {
+          const optionBtn = this.chatContainer?.querySelector(`.chat-option[data-value="${value}"]`) as HTMLElement;
+          if (optionBtn) {
+            optionBtn.classList.add('selected');
+          }
+        });
+      } else if (typeof oldAnswer === 'string') {
+        // Pre-fill text-based questions
+        const textTypes = ['text', 'email', 'tel', 'url', 'textarea'];
+        if (textTypes.includes(question.type) && this.inputElement) {
+          this.inputElement.value = oldAnswer;
+          this.inputElement.focus();
+          // Move cursor to end of text
+          this.inputElement.setSelectionRange(oldAnswer.length, oldAnswer.length);
+        }
       }
     }
   }
@@ -2045,6 +2054,17 @@ Thank you for choosing No Bhad Codes!
 
     const messageEl = document.createElement('div');
     messageEl.className = `chat-message ${message.type}`;
+
+    // Add questionIndex attribute for DOM cleanup when editing (same as addMessage)
+    if (message.questionIndex !== undefined && (message.type === 'ai' || message.type === 'user')) {
+      messageEl.classList.add('clickable-message');
+      messageEl.dataset.questionIndex = String(message.questionIndex);
+      messageEl.title = 'Click to edit this answer';
+      messageEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.goBackToQuestion(message.questionIndex!);
+      });
+    }
 
     const contentEl = document.createElement('div');
     contentEl.className = 'message-content';
