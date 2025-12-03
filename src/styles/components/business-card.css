@@ -457,6 +457,13 @@
   }
 }
 
+@media (max-width: 767px) {
+  /* Mobile: Start card showing back (rotated 180deg), JS will flip to front */
+  .intro-loading .business-card-inner {
+    transform: rotateY(180deg);
+  }
+}
+
 @media (max-width: 480px) {
   .business-card-container,
   .intro-animation-container {

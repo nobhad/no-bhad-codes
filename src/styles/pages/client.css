@@ -627,15 +627,21 @@ body[data-page="client-landing"] .client-login,
 }
 
 /* Responsive - Mobile */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   /* Hide login description on mobile */
   .login-description {
     display: none;
   }
 
-  /* Client landing page - make footer static at bottom of content */
+  /* Client landing page - header static, normal document flow */
+  body[data-page="client-landing"] .header {
+    position: static !important;
+  }
+
+  /* Client landing page - normal document flow */
   body[data-page="client-landing"] {
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
   }
@@ -644,29 +650,36 @@ body[data-page="client-landing"] .client-login,
     flex: 1;
     display: flex;
     flex-direction: column;
+    position: static !important;
+    top: auto !important;
+    bottom: auto !important;
+    height: auto !important;
   }
 
+  /* Footer at end of content - need to scroll to see it */
   body[data-page="client-landing"] .footer {
     position: static !important;
-    margin-top: auto;
+    flex-shrink: 0;
   }
 
-  .client-login:has(.portal-cards) {
-    position: relative;
-    top: auto;
-    left: auto;
-    right: auto;
-    bottom: auto;
+  /* Client login section fills viewport so footer is below fold */
+  body[data-page="client-landing"] .client-login {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
     width: 100%;
-    max-width: 100vw;
     height: auto;
-    min-height: auto;
-    overflow-x: hidden;
-    overflow-y: visible;
+    min-height: calc(100vh - var(--header-height));
+    min-height: calc(100dvh - var(--header-height));
+    overflow: visible;
     padding: 1rem;
-    padding-top: calc(var(--header-height, 60px) + 1rem);
-    padding-bottom: 1rem;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 
   .client-login:has(.portal-cards) .container {

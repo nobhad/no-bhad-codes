@@ -334,24 +334,24 @@ main {
   }
 }
 
-/* Default: ensure content is ALWAYS visible */
-.header,
+/* Default: ensure main and footer are ALWAYS visible */
 main,
 .footer {
   opacity: 1 !important;
   visibility: visible !important;
 }
 
-/* During intro animation - header visible with transparent background (desktop only) */
-/* Content is visible but covered by intro overlay (z-index 9999) */
+/* Desktop: Hide header during intro animation */
 .intro-loading .header {
-  background: transparent !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
-/* After intro completes - header gets its normal background */
+/* Desktop: Show header after intro completes */
 .intro-complete .header {
-  background: var(--color-neutral-300) !important;
-  transition: background 0.5s ease-in-out !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: opacity 0.5s ease-in-out !important;
 }
 
 /* After intro finishes, remove transition to prevent flicker on navigation */
@@ -359,13 +359,31 @@ main,
   transition: none !important;
 }
 
-/* Mobile: header always fully visible with normal background */
+/* Mobile: header and content always visible, no intro animation effects */
 @media screen and (max-width: 767px) {
+  .header,
   .intro-loading .header,
   .intro-complete .header,
   .intro-complete.intro-finished .header {
-    background: var(--color-neutral-300) !important;
-    transition: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Ensure business card section is visible on mobile page load */
+  .intro-loading .business-card-section,
+  .intro-loading .business-card-container,
+  .intro-loading .business-card,
+  .intro-loading .business-card-inner,
+  .intro-loading .business-card-front,
+  .intro-loading .business-card-back {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Ensure main content is visible */
+  .intro-loading main {
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 }
 
@@ -437,17 +455,23 @@ main,
      4. Contact - natural height with footer visible
   */
 
-  /* Intro/Business card section - fill viewport for centering */
+  /* Intro/Business card section - exact viewport height minus header, card centered */
   .business-card-section {
-    min-height: 100vh;
-    min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+    height: calc(100vh - var(--header-height));
+    height: calc(100dvh - var(--header-height)); /* Dynamic viewport height for mobile browsers */
+    min-height: calc(100vh - var(--header-height));
+    min-height: calc(100dvh - var(--header-height));
+    max-height: calc(100vh - var(--header-height));
+    max-height: calc(100dvh - var(--header-height));
     flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 1rem;
+    padding: 0;
+    margin: 0;
     scroll-snap-align: start;
+    overflow: hidden;
   }
 
   /* About section - becomes a container for two visual sections on mobile */
