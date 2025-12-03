@@ -403,6 +403,15 @@ const FEATURE_OPTIONS: Record<string, { value: string; label: string }[]> = {
   ]
 };
 
+export interface TerminalIntakeOptions {
+  isModal?: boolean; // If true, show minimize/maximize/close buttons
+  clientData?: {
+    name?: string;
+    email?: string;
+    company?: string;
+  };
+}
+
 export class TerminalIntakeModule {
   private container: HTMLElement;
   private chatContainer: HTMLElement | null = null;
@@ -416,11 +425,16 @@ export class TerminalIntakeModule {
   private messages: ChatMessage[] = [];
   private isProcessing = false;
   private selectedOptions: string[] = [];
+  private isModal: boolean;
+  private clientData: TerminalIntakeOptions['clientData'];
+  private confirmedCompany = false; // Track if we've confirmed/asked about company
 
   private static STORAGE_KEY = 'terminalIntakeProgress';
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, options: TerminalIntakeOptions = {}) {
     this.container = container;
+    this.isModal = options.isModal ?? false;
+    this.clientData = options.clientData;
   }
 
   async init(): Promise<void> {
@@ -525,15 +539,24 @@ export class TerminalIntakeModule {
   }
 
   private render(): void {
+    // Only show window control buttons in modal mode
+    const buttonsHtml = this.isModal
+      ? `<div class="terminal-buttons">
+              <button class="terminal-btn close" id="terminalClose" aria-label="Close"></button>
+              <button class="terminal-btn minimize" id="terminalMinimize" aria-label="Minimize"></button>
+              <button class="terminal-btn maximize" id="terminalMaximize" aria-label="Maximize"></button>
+            </div>`
+      : `<div class="terminal-buttons">
+              <span class="terminal-btn close" style="cursor: default;"></span>
+              <span class="terminal-btn minimize" style="cursor: default;"></span>
+              <span class="terminal-btn maximize" style="cursor: default;"></span>
+            </div>`;
+
     this.container.innerHTML = `
       <div class="terminal-intake">
         <div class="terminal-window">
           <div class="terminal-header">
-            <div class="terminal-buttons">
-              <button class="terminal-btn close" id="terminalClose" aria-label="Close"></button>
-              <button class="terminal-btn minimize" id="terminalMinimize" aria-label="Minimize"></button>
-              <button class="terminal-btn maximize" id="terminalMaximize" aria-label="Maximize"></button>
-            </div>
+            ${buttonsHtml}
             <span class="terminal-title">project_intake.sh - No Bhad Codes</span>
           </div>
           <div class="terminal-progress">
@@ -601,14 +624,20 @@ export class TerminalIntakeModule {
     const minimizeBtn = this.container.querySelector('#terminalMinimize');
     minimizeBtn?.addEventListener('click', () => {
       const modal = document.getElementById('intakeModal');
-      modal?.classList.toggle('minimized');
+      if (modal) {
+        modal.classList.remove('fullscreen'); // Can't be both
+        modal.classList.toggle('minimized');
+      }
     });
 
     // Maximize button - fullscreen modal
     const maximizeBtn = this.container.querySelector('#terminalMaximize');
     maximizeBtn?.addEventListener('click', () => {
       const modal = document.getElementById('intakeModal');
-      modal?.classList.toggle('fullscreen');
+      if (modal) {
+        modal.classList.remove('minimized'); // Can't be both
+        modal.classList.toggle('fullscreen');
+      }
     });
 
     // Click header to restore from minimized
@@ -642,6 +671,218 @@ export class TerminalIntakeModule {
     // Empty line before starting
     await this.addBootMessage('');
     await this.delay(300);
+
+    // If we have existing client data, pre-fill and handle company confirmation
+    if (this.clientData) {
+      await this.handleExistingClientData();
+    } else {
+      await this.askCurrentQuestion();
+    }
+  }
+
+  private async handleExistingClientData(): Promise<void> {
+    // Pre-fill name and email if available
+    if (this.clientData?.name) {
+      this.intakeData.name = this.clientData.name;
+    }
+    if (this.clientData?.email) {
+      this.intakeData.email = this.clientData.email;
+    }
+
+    // If we have a company name, ask if this project is for that company
+    if (this.clientData?.company) {
+      await this.askCompanyConfirmation();
+    } else {
+      // No company on file - ask if this is for a company
+      await this.askIfForCompany();
+    }
+  }
+
+  private async askCompanyConfirmation(): Promise<void> {
+    const companyName = this.clientData?.company || '';
+    await this.showTypingIndicator(500);
+
+    // Show the question with options
+    this.addMessage({
+      type: 'ai',
+      content: `Is this project for "${companyName}"?`,
+      options: [
+        { value: 'yes', label: 'Yes' },
+        { value: 'no', label: 'No, different company/personal' }
+      ]
+    });
+
+    // Set up custom handler for this question
+    this.setupCompanyConfirmHandler(companyName);
+  }
+
+  private setupCompanyConfirmHandler(companyName: string): void {
+    // Enable input for typing 1 or 2
+    if (this.inputElement) {
+      this.inputElement.placeholder = 'Type 1 or 2...';
+      this.inputElement.disabled = false;
+      this.inputElement.focus();
+    }
+
+    // Override option click handler temporarily
+    const originalClickHandler = this.handleOptionClick.bind(this);
+    this.handleOptionClick = (target: HTMLElement) => {
+      const value = target.dataset.value;
+      if (value === 'yes' || value === 'no') {
+        this.handleCompanyConfirmAnswer(value, companyName);
+        this.handleOptionClick = originalClickHandler;
+      }
+    };
+
+    // Override handleUserInput for number input
+    const originalInputHandler = this.handleUserInput.bind(this);
+    this.handleUserInput = async () => {
+      const input = this.inputElement?.value.trim();
+      if (input === '1') {
+        this.handleCompanyConfirmAnswer('yes', companyName);
+        this.handleUserInput = originalInputHandler;
+        this.handleOptionClick = originalClickHandler;
+      } else if (input === '2') {
+        this.handleCompanyConfirmAnswer('no', companyName);
+        this.handleUserInput = originalInputHandler;
+        this.handleOptionClick = originalClickHandler;
+      }
+    };
+  }
+
+  private async handleCompanyConfirmAnswer(value: string, companyName: string): Promise<void> {
+    const displayText = value === 'yes' ? 'Yes' : 'No, different company/personal';
+    this.addMessage({ type: 'user', content: displayText });
+    if (this.inputElement) this.inputElement.value = '';
+
+    if (value === 'yes') {
+      this.intakeData.company = companyName;
+      this.confirmedCompany = true;
+      await this.skipToRelevantQuestion();
+    } else {
+      await this.askIfForCompany();
+    }
+  }
+
+  private async askIfForCompany(): Promise<void> {
+    await this.showTypingIndicator(500);
+
+    this.addMessage({
+      type: 'ai',
+      content: 'Is this project for a company or business?',
+      options: [
+        { value: 'yes', label: 'Yes' },
+        { value: 'no', label: 'No, personal project' }
+      ]
+    });
+
+    this.setupForCompanyHandler();
+  }
+
+  private setupForCompanyHandler(): void {
+    if (this.inputElement) {
+      this.inputElement.placeholder = 'Type 1 or 2...';
+      this.inputElement.disabled = false;
+      this.inputElement.focus();
+    }
+
+    const originalClickHandler = this.handleOptionClick.bind(this);
+    this.handleOptionClick = (target: HTMLElement) => {
+      const value = target.dataset.value;
+      if (value === 'yes' || value === 'no') {
+        this.handleForCompanyAnswer(value);
+        this.handleOptionClick = originalClickHandler;
+      }
+    };
+
+    const originalInputHandler = this.handleUserInput.bind(this);
+    this.handleUserInput = async () => {
+      const input = this.inputElement?.value.trim();
+      if (input === '1') {
+        this.handleForCompanyAnswer('yes');
+        this.handleUserInput = originalInputHandler;
+        this.handleOptionClick = originalClickHandler;
+      } else if (input === '2') {
+        this.handleForCompanyAnswer('no');
+        this.handleUserInput = originalInputHandler;
+        this.handleOptionClick = originalClickHandler;
+      }
+    };
+  }
+
+  private async handleForCompanyAnswer(value: string): Promise<void> {
+    const displayText = value === 'yes' ? 'Yes' : 'No, personal project';
+    this.addMessage({ type: 'user', content: displayText });
+    if (this.inputElement) this.inputElement.value = '';
+
+    if (value === 'yes') {
+      this.confirmedCompany = true;
+      await this.askForCompanyName();
+    } else {
+      this.intakeData.company = '';
+      this.confirmedCompany = true;
+      await this.skipToRelevantQuestion();
+    }
+  }
+
+  private async askForCompanyName(): Promise<void> {
+    await this.showTypingIndicator(500);
+
+    this.addMessage({
+      type: 'ai',
+      content: 'What\'s the company or business name?'
+    });
+
+    if (this.inputElement) {
+      this.inputElement.placeholder = 'Enter company name';
+      this.inputElement.disabled = false;
+      this.inputElement.focus();
+    }
+
+    const originalInputHandler = this.handleUserInput.bind(this);
+    this.handleUserInput = async () => {
+      const value = this.inputElement?.value.trim();
+      if (!value) return;
+
+      this.addMessage({ type: 'user', content: value });
+      this.intakeData.company = value;
+      if (this.inputElement) this.inputElement.value = '';
+
+      this.handleUserInput = originalInputHandler;
+      await this.skipToRelevantQuestion();
+    };
+  }
+
+  private async skipToRelevantQuestion(): Promise<void> {
+    // Skip questions we already have data for
+    const fieldsToSkip = ['name', 'email', 'company'];
+
+    while (this.currentQuestionIndex < QUESTIONS.length) {
+      const question = QUESTIONS[this.currentQuestionIndex];
+
+      // Skip if we have this data and it's a skippable field
+      if (fieldsToSkip.includes(question.field) && this.intakeData[question.field as keyof IntakeData]) {
+        this.currentQuestionIndex++;
+        continue;
+      }
+
+      // Also skip company if we've already handled it
+      if (question.field === 'company' && this.confirmedCompany) {
+        this.currentQuestionIndex++;
+        continue;
+      }
+
+      // Check dependsOn conditions
+      if (question.dependsOn) {
+        const depValue = this.intakeData[question.dependsOn.field as keyof IntakeData];
+        if (depValue !== question.dependsOn.value) {
+          this.currentQuestionIndex++;
+          continue;
+        }
+      }
+
+      break;
+    }
 
     await this.askCurrentQuestion();
   }

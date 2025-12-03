@@ -129,6 +129,15 @@ export class ClientPortalModule extends BaseModule {
       });
     }
 
+    // Header sidebar toggle buttons (arrows next to page titles)
+    const headerSidebarToggles = document.querySelectorAll('.header-sidebar-toggle');
+    headerSidebarToggles.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.toggleSidebar();
+      });
+    });
+
     // Mobile hamburger menu toggle
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
     const mobileOverlay = document.getElementById('mobile-overlay');

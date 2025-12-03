@@ -1,0 +1,481 @@
+/**
+ * ===============================================
+ * TERMINAL INTAKE FORM STYLES
+ * ===============================================
+ * AI Chat-style intake form with terminal aesthetic
+ */
+
+/* ============================================================================
+   BASE TERMINAL STYLES
+   ============================================================================ */
+
+.terminal-intake {
+  font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+  background-color: #0a0a0a;
+  color: #00ff00;
+  min-height: calc(100vh - var(--header-height, 60px) - var(--footer-height, 60px));
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+}
+
+.terminal-window {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  background: #0a0a0a;
+  border: 4px solid #000000;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow:
+    0 0 20px rgba(0, 255, 0, 0.1),
+    inset 0 0 60px rgba(0, 255, 0, 0.03);
+}
+
+/* ============================================================================
+   TERMINAL HEADER (Title Bar)
+   ============================================================================ */
+
+.terminal-header {
+  background: linear-gradient(180deg, #1a1a1a 0%, #111111 100%);
+  border-bottom: 2px solid #000000;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.terminal-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.terminal-btn {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+}
+
+.terminal-btn.close { background: #ff5f56; }
+.terminal-btn.minimize { background: #ffbd2e; }
+.terminal-btn.maximize { background: #27ca40; }
+
+.terminal-title {
+  color: #888888;
+  font-size: 13px;
+  flex: 1;
+  text-align: center;
+  font-family: inherit;
+}
+
+/* ============================================================================
+   CHAT CONTAINER
+   ============================================================================ */
+
+.terminal-chat {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 400px;
+  max-height: calc(100vh - 250px);
+}
+
+/* Custom scrollbar */
+.terminal-chat::-webkit-scrollbar {
+  width: 8px;
+}
+
+.terminal-chat::-webkit-scrollbar-track {
+  background: #0a0a0a;
+  border-left: 1px solid #00aa00;
+}
+
+.terminal-chat::-webkit-scrollbar-thumb {
+  background: #00aa00;
+  border-radius: 4px;
+}
+
+.terminal-chat::-webkit-scrollbar-thumb:hover {
+  background: #00ff00;
+}
+
+/* ============================================================================
+   MESSAGE STYLES - Terminal Flow
+   ============================================================================ */
+
+.chat-message {
+  margin-bottom: 4px;
+}
+
+/* Override any global styles on message content */
+.terminal-intake .message-content,
+.terminal-chat .message-content,
+.terminal-window .message-content {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  padding: 0 !important;
+  display: inline;
+}
+
+/* AI Messages - green with > prompt */
+.chat-message.ai .message-content {
+  color: #00ff00;
+  line-height: 1.6;
+}
+
+.chat-message.ai .message-content::before {
+  content: "> ";
+  color: #ffff00;
+}
+
+/* User Messages - white with $ prompt */
+.chat-message.user {
+  margin-bottom: 12px;
+}
+
+.chat-message.user .message-content {
+  color: #ffffff !important;
+}
+
+.chat-message.user .message-content::before {
+  content: "$ ";
+  color: #00aaff;
+}
+
+/* System Messages - gray, centered */
+.chat-message.system .message-content {
+  color: #666666;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Error Messages - red */
+.chat-message.error .message-content {
+  color: #ff4444;
+}
+
+.chat-message.error .message-content::before {
+  content: "[ERROR] ";
+  color: #ff0066;
+}
+
+/* Success Messages - green */
+.chat-message.success .message-content {
+  color: #00ff00;
+  white-space: pre-line;
+}
+
+.chat-message.success .message-content::before {
+  content: "";
+}
+
+/* ============================================================================
+   BOOT SEQUENCE
+   ============================================================================ */
+
+.boot-line {
+  color: #888888;
+  font-size: 14px;
+  line-height: 1.6;
+  font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+}
+
+.boot-line:empty {
+  height: 1em;
+}
+
+/* ============================================================================
+   TYPING INDICATOR / BLINKING CURSOR
+   ============================================================================ */
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 8px 0;
+  color: #00aa00;
+}
+
+.typing-indicator::before {
+  content: "> ";
+  color: #ffff00;
+}
+
+.typing-indicator::after {
+  content: "█";
+  color: #00ff00;
+  animation: cursor-blink 1s step-end infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Hide the dots, we're using cursor instead */
+.typing-indicator span {
+  display: none;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.3; }
+}
+
+/* ============================================================================
+   INPUT AREA
+   ============================================================================ */
+
+.terminal-input-area {
+  border-top: none;
+  padding: 16px;
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.terminal-prompt {
+  color: #00aaff;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.terminal-input {
+  flex: 1;
+  background: transparent !important;
+  border: none !important;
+  color: #ffffff !important;
+  font-family: 'Courier New', Consolas, 'Liberation Mono', monospace !important;
+  font-size: 14px;
+  outline: none !important;
+  caret-color: #ffffff;
+  box-shadow: none !important;
+}
+
+.terminal-input::placeholder {
+  color: #555555;
+}
+
+.terminal-input:focus,
+.terminal-input:hover,
+.terminal-input:active {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.terminal-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.terminal-send {
+  background: #00aa00;
+  color: #0a0a0a;
+  border: none;
+  padding: 8px 16px;
+  font-family: inherit;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 4px;
+}
+
+.terminal-send:hover:not(:disabled) {
+  background: #00ff00;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.terminal-send:disabled {
+  background: #333333;
+  color: #666666;
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+   OPTIONS (For multiple choice questions) - Terminal numbered list style
+   ============================================================================ */
+
+.chat-options {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  padding-left: 20px;
+}
+
+.chat-option {
+  background: transparent;
+  border: none;
+  color: #00aaff;
+  padding: 2px 0;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.2s;
+  text-align: left;
+}
+
+.chat-option:hover {
+  color: #ffffff;
+}
+
+.chat-option.selected {
+  color: #00ff00;
+}
+
+.chat-option.selected::after {
+  content: " <";
+  color: #ffff00;
+}
+
+/* Checkbox-style options (multi-select) */
+.chat-options.multi-select .chat-option::before {
+  content: "[ ] ";
+  color: #00aa00;
+}
+
+.chat-options.multi-select .chat-option.selected::before {
+  content: "[x] ";
+  color: #00ff00;
+}
+
+.chat-options.multi-select .chat-option.selected::after {
+  content: "";
+}
+
+/* Confirm button for multiselect */
+.confirm-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #ffff00 !important;
+  padding: 4px 0 !important;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.confirm-btn:hover {
+  color: #00ff00 !important;
+}
+
+/* ============================================================================
+   PROGRESS BAR
+   ============================================================================ */
+
+.terminal-progress {
+  padding: 8px 16px;
+  background: #111111;
+  border-bottom: 2px solid #000000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progress-label {
+  color: #888888;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 4px;
+  background: #222222;
+  border-radius: 2px;
+  overflow: hidden;
+  align-self: center;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00aa00, #00ff00);
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+}
+
+.progress-percent {
+  color: #00ff00;
+  font-size: 12px;
+  min-width: 40px;
+  text-align: right;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .terminal-window {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    max-width: 100%;
+  }
+
+  .terminal-chat {
+    padding: 12px;
+    max-height: calc(100vh - 280px);
+  }
+
+  .chat-message .message-content {
+    max-width: 95%;
+  }
+
+  .chat-options {
+    flex-direction: column;
+  }
+
+  .chat-option {
+    width: 100%;
+    text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .terminal-header {
+    padding: 6px 12px;
+  }
+
+  .terminal-title {
+    font-size: 11px;
+  }
+
+  .terminal-input-area {
+    padding: 12px;
+  }
+
+  .terminal-prompt {
+    display: none;
+  }
+}
+
+/* ============================================================================
+   DARK MODE ADJUSTMENTS (already dark, but ensure consistency)
+   ============================================================================ */
+
+[data-theme="dark"] .terminal-intake,
+.dark-mode .terminal-intake {
+  background-color: #0a0a0a;
+}
+
+[data-theme="light"] .terminal-intake {
+  /* Keep terminal dark even in light mode */
+  background-color: #0a0a0a;
+}
