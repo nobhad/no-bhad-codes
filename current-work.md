@@ -1,10 +1,56 @@
 # Current Work & Concerns
 
-**Last Updated:** 2025-11-09 11:50
+**Last Updated:** 2025-12-03
 
 ---
 
 ## ✅ RECENT PROGRESS (This Session)
+
+### Client Landing Page Redesign - COMPLETED
+**Status:** Desktop layout simplified and improved ✅
+**Priority:** HIGH - User-facing UI improvement
+
+**Changes Made:**
+- **File:** `client/landing.html`
+  - Simplified desktop layout: card on left, login form on right
+  - Changed from two cards to one card + form area
+  - Added "LOGIN" heading inside form above email field
+  - Moved "Forgot your password? Contact me" inside form below Sign In button
+  - Made "Contact me" link bold in both desktop and mobile views
+
+- **File:** `src/styles/pages/client.css`
+  - Added `.portal-layout` grid system (two columns, equal height)
+  - Added `.portal-form-area` styles for right-side form
+  - Fixed two-column grid display on desktop (`.portal-cards.desktop-only` now uses `display: grid`)
+  - Left-aligned email/password labels
+  - Form matches card height with `align-items: stretch` and `grid-auto-rows: 1fr`
+
+**Result:**
+- ✅ Clean two-column layout on desktop
+- ✅ Card and form same height
+- ✅ Simplified visual hierarchy
+
+### About Section Styling - COMPLETED
+**Status:** Improved spacing and alignment ✅
+
+**Changes Made:**
+- **File:** `src/styles/main-new.css`
+  - Added spacing between ABOUT title and text (margin-bottom: 1.5rem)
+  - Added spacing between paragraphs (margin-bottom: 1rem)
+  - Added spacing between text wrapper and tech stack
+  - Left-aligned ABOUT section h2 and TECH STACK h3
+  - Left-aligned CONTACT section h2
+  - Increased tech stack padding (1.5rem 2rem)
+
+- **File:** `src/styles/base/layout.css`
+  - Fixed mobile header text alignment (changed from center to left for about-text-wrapper h2 and tech-stack h3)
+
+**Result:**
+- ✅ All section headers left-aligned (desktop & mobile)
+- ✅ Better visual spacing in about section
+- ✅ Consistent text alignment across all views
+
+---
 
 ### Navigation Route Registration Fix - COMPLETED
 **Status:** Fixed About and Contact navigation links ✅
