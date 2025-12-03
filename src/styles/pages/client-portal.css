@@ -559,19 +559,11 @@ html[data-theme="dark"] .login-form label {
 
 .btn-logout {
   width: 100%;
-  background: transparent;
-  border: 2px solid var(--color-dark);
-  color: var(--color-dark);
-  padding: 0.75rem 1rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .btn-logout:hover {
-  background: #ff4444;
-  border-color: #ff4444;
-  color: white;
+  box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.4);
 }
 
 /* Sidebar Logo */
@@ -604,9 +596,14 @@ html[data-theme="dark"] .login-form label {
 
 .sidebar-buttons .btn {
   width: 100%;
-  padding: 0.75rem 1rem;
-  font-size: 0.85rem;
+  padding: 0.85rem 1.1rem;
+  font-size: 0.9rem;
   text-align: center;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-buttons .btn:hover {
+  box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.4);
 }
 
 /* Sidebar Toggle Button */
@@ -640,6 +637,27 @@ html[data-theme="dark"] .login-form label {
   transform: rotate(180deg);
 }
 
+
+/* Collapsed state avatar - hidden by default, shown when collapsed */
+.sidebar-collapsed-logo {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-collapsed-logo {
+  display: flex;
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 36px;
+}
+
+.sidebar-collapsed-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
 
 /* Collapsed state */
 .sidebar.collapsed .sidebar-content {
