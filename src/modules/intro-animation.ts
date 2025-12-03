@@ -86,14 +86,23 @@ export class IntroAnimationModule extends BaseModule {
       return;
     }
 
-    // Start with back showing (rotated 180deg)
-    gsap.set(cardInner, { rotationY: 180 });
+    // Get parent container for perspective
+    const cardContainer = cardInner.parentElement;
+
+    // Force disable CSS transitions and set initial state
+    cardInner.style.transition = 'none';
+    cardInner.style.transform = 'rotateY(180deg)';
+
+    // Ensure parent has perspective for 3D effect
+    if (cardContainer) {
+      cardContainer.style.perspective = '1000px';
+    }
 
     // Setup Enter key to skip animation
     this.skipHandler = this.handleKeyPress;
     document.addEventListener('keydown', this.skipHandler);
 
-    // Create timeline for card flip
+    // Create timeline for card flip - 100% GSAP controlled
     this.timeline = gsap.timeline({
       onComplete: () => this.completeIntro()
     });
@@ -107,9 +116,11 @@ export class IntroAnimationModule extends BaseModule {
       })
       .to(cardInner, {
         rotationY: 0,
-        duration: 0.8,
-        ease: 'power2.inOut'
-      }); // Flip to front
+        duration: 1.2,
+        ease: 'power2.inOut',
+        force3D: true,
+        overwrite: true
+      }); // Flip to front with smooth 3D rotation
   }
 
 
