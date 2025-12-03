@@ -1,27 +1,139 @@
-<%
-  // Set pageData with fallback
-  const pageData = (typeof pages !== 'undefined' && pages.home) ? pages.home : {
-    title: 'No Bhad Codes',
-    description: 'Professional web development services',
-    scriptSrc: '/src/main.ts'
-  };
-%>
 <!DOCTYPE html>
-<html lang="en" class="intro-loading">
+<html lang="en" class="intro-loading" data-theme="light">
 <head>
-    <%- include('./templates/partials/head.ejs', { pageData, site, navigation }) %>
-</head>
-<body<% if (pageData.bodyClass) { %> class="<%= pageData.bodyClass %>"<% } %>>
-    
-    <%- include('./templates/partials/header.ejs', { pageData, site, navigation }) %>
-    
-    <%- include('./templates/partials/navigation.ejs', { pageData, site, navigation }) %>
-    
-    <!-- MAIN SCROLLABLE CONTENT -->
-    <main<% if (pageData.mainClass) { %> class="<%= pageData.mainClass %>"<% } %>>
-        <%- include('./templates/pages/home', { pageData, site, navigation }) %>
-    </main>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>No Bhad Codes - Professional Web Development</title>
 
-    <%- include('./templates/partials/footer.ejs', { pageData, site, navigation }) %>
+  <!-- Prevent theme flash -->
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #000000;
+      --color-neutral-300: #e5e5e5;
+      --color-primary: #ff6b6b;
+    }
+    [data-theme="dark"] {
+      --bg: #1a1a1a;
+      --fg: #ffffff;
+      --color-neutral-300: #333333;
+    }
+    html { background-color: var(--bg); color: var(--fg); }
+    body { background-color: var(--bg); color: var(--fg); margin: 0; padding: 0; }
+  </style>
+  <script>
+    (function() {
+      try {
+        const savedTheme = localStorage.getItem('theme');
+        document.documentElement.setAttribute('data-theme', savedTheme || 'light');
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
+  <!-- SEO -->
+  <meta name="description" content="Professional web development services by Noelle Bhaduri. Custom websites, client portals, and modern web applications.">
+  <meta name="author" content="Noelle Bhaduri">
+  <meta name="keywords" content="web development, portfolio, typescript, client management, professional websites">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="No Bhad Codes - Professional Web Development">
+  <meta property="og:description" content="Professional web development services by Noelle Bhaduri">
+  <meta property="og:site_name" content="No Bhad Codes">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#ff6b6b">
+
+  <!-- GSAP -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/CustomEase.min.js"></script>
+
+  <!-- Main Script -->
+  <script type="module" src="/src/main.ts"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <a href="/" class="logo">
+      <img src="/images/avatar.svg" alt="No Bhad Codes" class="logo-image">
+    </a>
+    <button class="theme-toggle" aria-label="Toggle theme">
+      <svg class="theme-icon sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+      <svg class="theme-icon moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+  </header>
+
+  <!-- Navigation -->
+  <nav class="navigation" id="navigation">
+    <ul class="nav-list">
+      <li class="nav-item"><a href="/" class="nav-link" data-section="home"><span class="eyebrow">00</span>home</a></li>
+      <li class="nav-item"><a href="#about" class="nav-link" data-section="about"><span class="eyebrow">01</span>about</a></li>
+      <li class="nav-item"><a href="#contact" class="nav-link" data-section="contact"><span class="eyebrow">02</span>contact</a></li>
+      <li class="nav-item"><a href="#" class="nav-link disabled" data-section="portfolio"><span class="eyebrow">03</span>portfolio <span class="coming-soon">coming soon</span></a></li>
+      <li class="nav-item"><a href="/client/landing" class="nav-link" data-section="client-portal"><span class="eyebrow">04</span>client portal</a></li>
+    </ul>
+  </nav>
+
+  <!-- Main Content -->
+  <main id="main-content">
+    <!-- Home Section -->
+    <section id="home" class="section home-section" data-section="home">
+      <div class="section-content">
+        <div class="hero">
+          <h1 class="hero-title">
+            <span class="title-line">NO BHAD</span>
+            <span class="title-line">CODES</span>
+          </h1>
+          <p class="hero-subtitle">Professional Web Development</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section about-section" data-section="about">
+      <div class="section-content">
+        <h2 class="section-title">About</h2>
+        <div class="about-content">
+          <p>I'm Noelle, a full-stack developer specializing in modern web applications, client portals, and custom business solutions.</p>
+          <p>With expertise in TypeScript, React, Node.js, and cloud infrastructure, I build scalable, maintainable applications that solve real business problems.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section contact-section" data-section="contact">
+      <div class="section-content">
+        <h2 class="section-title">Contact</h2>
+        <div class="contact-content">
+          <p>Ready to start your project? Get in touch!</p>
+          <a href="mailto:hello@nobhad.codes" class="contact-link">hello@nobhad.codes</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; 2025 No Bhad Codes. All rights reserved.</p>
+    </div>
+  </footer>
 </body>
 </html>

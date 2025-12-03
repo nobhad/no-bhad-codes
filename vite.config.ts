@@ -15,10 +15,13 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: false, // Disable source maps in production for code protection
 
-    // Build client-side JavaScript from src/main.ts
+    // Build all HTML entry points
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'src/main.ts')
+        main: resolve(__dirname, 'index.html'),
+        'client-landing': resolve(__dirname, 'client/landing.html'),
+        'client-portal': resolve(__dirname, 'client/portal.html'),
+        'client-intake': resolve(__dirname, 'client/intake.html')
       },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
