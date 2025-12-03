@@ -387,7 +387,8 @@
 
 /* Override for client landing page - center content in viewport */
 body[data-page="client-landing"] .client-login,
-.client-login:has(.portal-cards) {
+.client-login:has(.portal-cards),
+.client-login:has(.portal-layout) {
   position: fixed;
   top: var(--header-height);
   left: 0;
@@ -402,7 +403,8 @@ body[data-page="client-landing"] .client-login,
   padding: 1rem;
 }
 
-.client-login:has(.portal-cards) .container {
+.client-login:has(.portal-cards) .container,
+.client-login:has(.portal-layout) .container {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -411,7 +413,8 @@ body[data-page="client-landing"] .client-login,
   width: auto;
 }
 
-.client-login:has(.portal-cards) .client-content {
+.client-login:has(.portal-cards) .client-content,
+.client-login:has(.portal-layout) .client-content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -419,7 +422,71 @@ body[data-page="client-landing"] .client-login,
 }
 
 /* ===============================================
-   PORTAL CARDS - INTAKE & LOGIN
+   PORTAL LAYOUT - CARD ON LEFT, FORM ON RIGHT
+   =============================================== */
+
+.portal-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  width: 80vw;
+  max-width: 1000px;
+  margin-top: 1rem;
+  align-items: stretch;
+  grid-auto-rows: 1fr;
+}
+
+.portal-layout > * {
+  width: 100%;
+  min-width: 0;
+}
+
+.portal-layout.desktop-only {
+  display: grid;
+}
+
+/* Form area on the right - no card wrapper */
+.portal-form-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.portal-form-area .login-form {
+  width: 100%;
+  height: 100%;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.portal-form-area .login-form .btn-full {
+  margin-top: auto;
+}
+
+.portal-form-area h2 {
+  margin: 0;
+  font-family: var(--font--acme);
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  color: var(--color-dark);
+}
+
+.portal-form-area .login-description {
+  color: var(--color-dark);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ===============================================
+   PORTAL CARDS - INTAKE & LOGIN (LEGACY)
    =============================================== */
 
 .portal-cards {
@@ -531,6 +598,14 @@ body[data-page="client-landing"] .client-login,
   gap: 1rem;
 }
 
+.login-form .form-heading {
+  margin: 0 0 0.5rem 0;
+  font-family: var(--font--acme);
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  color: var(--color-dark);
+}
+
 /* Dark mode: login form container border black */
 [data-theme="dark"] .login-form,
 .dark-mode .login-form {
@@ -547,6 +622,7 @@ body[data-page="client-landing"] .client-login,
   font-weight: 600;
   color: var(--color-dark);
   font-size: 0.9rem;
+  text-align: left;
 }
 
 .login-form .form-input {
@@ -633,6 +709,11 @@ body[data-page="client-landing"] .client-login,
 
 .desktop-only {
   display: block;
+}
+
+/* Portal cards needs grid display even with desktop-only class */
+.portal-cards.desktop-only {
+  display: grid;
 }
 
 /* Responsive - Mobile */
@@ -1061,15 +1142,16 @@ body[data-page="client-landing"] .client-login,
 
 /* Login specific styling */
 .login-footer {
-  margin-top: 1.5rem;
+  margin-top: 0.5rem;
   text-align: center;
   font-size: 0.9rem;
   color: var(--fg);
   opacity: 0.8;
+  border: none;
 }
 
 .login-footer p {
-  margin-bottom: 0.5rem;
+  margin: 0;
 }
 
 /* Error messages */
