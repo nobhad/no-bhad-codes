@@ -291,12 +291,19 @@ export class IntroAnimationModule extends BaseModule {
    * Run card flip animation on mobile (no overlay, flip actual card in section)
    */
   private runMobileCardFlip(): void {
-    // Scroll to top so header is visible
+    // Scroll to top so header is visible (multiple times to ensure it sticks)
     window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
 
     // Immediately show header (remove intro-loading class)
     document.documentElement.classList.remove('intro-loading');
     document.documentElement.classList.add('intro-complete');
+
+    // Force scroll to top again after a frame to catch any layout recalculation
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+    });
 
     const cardInner = document.getElementById('business-card-inner');
 

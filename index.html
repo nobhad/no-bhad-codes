@@ -194,19 +194,19 @@
       <h2>contact</h2>
       <p class="section-subtitle">Whether you need a new project, have questions, or just want to say hello - I'd love to hear from you!</p>
 
-      <form class="contact-form" method="post" name="contact-form">
+      <form class="contact-form" method="post" name="contact-form" novalidate>
         <!-- Honeypot field for bot detection -->
         <input name="bot-field" style="display: none;" />
 
-        <input autocomplete="off" class="form-input" data-name="First Name" id="First-Name" maxlength="256" name="First-Name" placeholder="First Name" required="" type="text">
+        <input autocomplete="off" class="form-input" data-name="First Name" id="First-Name" maxlength="256" name="First-Name" placeholder="First Name" data-required="true" type="text">
 
-        <input autocomplete="off" class="form-input" data-name="Last Name" id="Last-Name" maxlength="256" name="Last-Name" placeholder="Last Name" required="" type="text">
+        <input autocomplete="off" class="form-input" data-name="Last Name" id="Last-Name" maxlength="256" name="Last-Name" placeholder="Last Name" data-required="true" type="text">
 
         <input autocomplete="on" class="form-input" data-name="Company Name" id="Company-Name" maxlength="256" name="Company-Name" placeholder="Company/Organization Name (Optional)" type="text">
 
-        <input autocomplete="on" class="form-input" data-name="Email" id="Email" maxlength="256" name="Email" placeholder="Email Address" required="" type="email">
+        <input autocomplete="on" class="form-input" data-name="Email" id="Email" maxlength="256" name="Email" placeholder="Email Address" data-required="true" type="email">
 
-        <select class="form-select" data-name="Inquiry Type" id="inquiry-type" name="Inquiry-Type" required="">
+        <select class="form-select" data-name="Inquiry Type" id="inquiry-type" name="Inquiry-Type" data-required="true">
           <option value="">What can I help you with?</option>
           <option value="New Project">New Project - I need something built</option>
           <option value="Existing Project">Existing Project - Updates/fixes needed</option>
@@ -251,7 +251,7 @@
           </div>
         </div>
 
-        <textarea autocomplete="off" class="form-textarea" data-name="Project Description" id="project-description" maxlength="1000" name="Project-Description" placeholder="Tell me about your project or inquiry..." required=""></textarea>
+        <textarea autocomplete="off" class="form-textarea" data-name="Project Description" id="project-description" maxlength="1000" name="Project-Description" placeholder="Tell me about your project or inquiry..." data-required="true"></textarea>
 
         <div class="form-actions">
           <input class="form-button" data-wait="Sending..." type="submit" value="Let's Talk">

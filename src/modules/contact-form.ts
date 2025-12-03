@@ -84,7 +84,7 @@ export class ContactFormModule extends BaseModule {
 
     const validateForm = () => {
       const requiredFields = this.form!.querySelectorAll(
-        'input[required], select[required], textarea[required]'
+        'input[data-required], select[data-required], textarea[data-required]'
       );
       const isValid = Array.from(requiredFields).every((field) => {
         const input = field as any;
@@ -112,7 +112,7 @@ export class ContactFormModule extends BaseModule {
   }
 
   handleInputChange(e: Event) {
-    this.validateField(e.target as HTMLInputElement);
+    // Only check for security issues on input, don't validate (validation happens on submit)
     this.checkForSecurityIssues(e.target as HTMLInputElement);
   }
 
@@ -121,6 +121,7 @@ export class ContactFormModule extends BaseModule {
     const value = inputField.value.trim();
     let isValid = true;
     let errorMessage = '';
+    const isRequired = inputField.hasAttribute('data-required');
 
     // Get the parent form-group
     const formGroup = field.closest('.form-group');
@@ -132,7 +133,7 @@ export class ContactFormModule extends BaseModule {
 
     // Validate based on field type
     if (inputField.tagName === 'TEXTAREA') {
-      if (inputField.required && value.length < 10) {
+      if (isRequired && value.length < 10) {
         isValid = false;
         errorMessage = 'Please provide a more detailed message';
       }
@@ -142,13 +143,13 @@ export class ContactFormModule extends BaseModule {
         if (value && !this.isValidEmail(value)) {
           isValid = false;
           errorMessage = 'Please enter a valid email address';
-        } else if (inputField.required && !value) {
+        } else if (isRequired && !value) {
           isValid = false;
           errorMessage = 'Email is required';
         }
         break;
       case 'text':
-        if (inputField.required && value.length < 2) {
+        if (isRequired && value.length < 2) {
           isValid = false;
           errorMessage =
               inputField.name === 'name'
@@ -315,7 +316,7 @@ export class ContactFormModule extends BaseModule {
 
   validateForm(): boolean {
     const inputs = this.form!.querySelectorAll(
-      'input[required], select[required], textarea[required]'
+      'input[data-required], select[data-required], textarea[data-required]'
     );
     let allValid = true;
 
