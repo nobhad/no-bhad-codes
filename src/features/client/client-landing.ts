@@ -11,6 +11,7 @@
  */
 
 import { BaseModule } from '../../modules/base';
+import { gsap } from 'gsap';
 
 export class ClientLandingModule extends BaseModule {
   // Demo credentials for testing
@@ -33,11 +34,50 @@ export class ClientLandingModule extends BaseModule {
 
   protected override async onInit(): Promise<void> {
     console.log('[ClientLandingModule] Initializing...');
+
+    // Check if user is already logged in and redirect to portal
+    if (this.isLoggedIn()) {
+      console.log('[ClientLandingModule] User already logged in, redirecting to portal...');
+      window.location.href = '/client/portal';
+      return;
+    }
+
     this.cacheElements();
     this.setupLoginForm();
     this.setupPasswordToggle();
     this.setupIntakeModal();
     console.log('[ClientLandingModule] Initialization complete');
+  }
+
+  /**
+   * Check if user is already logged in by checking localStorage
+   */
+  private isLoggedIn(): boolean {
+    const clientAuth = localStorage.getItem('clientAuth');
+
+    // Check if we have auth data
+    if (clientAuth) {
+      try {
+        const authData = JSON.parse(clientAuth);
+        // Check if the session is still valid (optional: add expiration check)
+        if (authData.email && authData.loginTime) {
+          // Session is valid - we have both clientAuth and optionally a token
+          return true;
+        }
+      } catch {
+        // Invalid JSON, clear it
+        localStorage.removeItem('clientAuth');
+        localStorage.removeItem('clientAuthToken');
+      }
+    }
+
+    // Also check for the token stored by client-portal.ts
+    const portalToken = localStorage.getItem('client_auth_token');
+    if (portalToken && !portalToken.startsWith('demo_token_')) {
+      return true;
+    }
+
+    return false;
   }
 
   protected override async onDestroy(): Promise<void> {
@@ -113,11 +153,7 @@ export class ClientLandingModule extends BaseModule {
     // Open modal when button is clicked
     this.openIntakeButton.addEventListener('click', () => {
       console.log('[ClientLandingModule] Opening intake modal');
-      this.intakeModal!.classList.add('open');
-      document.body.style.overflow = 'hidden';
-
-      // Initialize terminal intake if not already done
-      this.initTerminalIntake();
+      this.openIntakeModalWithAnimation();
     });
 
     // Close modal when clicking outside content
@@ -135,11 +171,67 @@ export class ClientLandingModule extends BaseModule {
     });
   }
 
+  private openIntakeModalWithAnimation(): void {
+    if (!this.intakeModal) return;
+
+    const modalContent = this.intakeModal.querySelector('.intake-modal-content') as HTMLElement;
+
+    // Show modal (display: flex)
+    this.intakeModal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    // Reset styles for animation
+    gsap.set(this.intakeModal, { background: 'rgba(0, 0, 0, 0)' });
+    gsap.set(modalContent, { maxWidth: '200px', opacity: 0.8 });
+
+    // Create timeline for smooth sequential animation
+    const tl = gsap.timeline();
+
+    // First: expand the terminal width
+    tl.to(modalContent, {
+      maxWidth: '900px',
+      opacity: 1,
+      duration: 0.3,
+      ease: 'power2.out'
+    });
+
+    // Then: fade in the overlay
+    tl.to(this.intakeModal, {
+      background: 'rgba(0, 0, 0, 0.8)',
+      duration: 0.3,
+      ease: 'power2.inOut'
+    }, '+=0.1'); // Small delay after expansion
+
+    // Initialize terminal intake
+    this.initTerminalIntake();
+  }
+
   private closeIntakeModal(): void {
     if (this.intakeModal) {
       console.log('[ClientLandingModule] Closing intake modal');
-      this.intakeModal.classList.remove('open');
-      document.body.style.overflow = '';
+
+      const modalContent = this.intakeModal.querySelector('.intake-modal-content') as HTMLElement;
+
+      // Animate out
+      const tl = gsap.timeline({
+        onComplete: () => {
+          this.intakeModal!.classList.remove('open');
+          document.body.style.overflow = '';
+        }
+      });
+
+      tl.to(this.intakeModal, {
+        background: 'rgba(0, 0, 0, 0)',
+        duration: 0.2,
+        ease: 'power2.in'
+      });
+
+      tl.to(modalContent, {
+        maxWidth: '200px',
+        opacity: 0,
+        duration: 0.2,
+        ease: 'power2.in'
+      }, '-=0.1');
     }
   }
 
@@ -154,15 +246,55 @@ export class ClientLandingModule extends BaseModule {
       const module = new TerminalIntakeModule(container as HTMLElement);
       await module.init();
       container.setAttribute('data-initialized', 'true');
+
+      // Setup terminal window button handlers
+      this.setupTerminalButtons();
     } catch (error) {
       console.error('[ClientLandingModule] Failed to initialize terminal intake:', error);
       container.innerHTML = `
         <div style="text-align: center; padding: 2rem; color: #ff4444;">
           <h2>Unable to load intake form</h2>
-          <p>Please try refreshing the page or contact hello@nobhadcodes.com</p>
+          <p>Please try refreshing the page or contact nobhaduri@gmail.com</p>
         </div>
       `;
     }
+  }
+
+  private setupTerminalButtons(): void {
+    if (!this.intakeModal) return;
+
+    const closeBtn = this.intakeModal.querySelector('.terminal-btn.close');
+    const minimizeBtn = this.intakeModal.querySelector('.terminal-btn.minimize');
+    const maximizeBtn = this.intakeModal.querySelector('.terminal-btn.maximize');
+    const modalContent = this.intakeModal.querySelector('.intake-modal-content');
+
+    // Close button - close the modal
+    closeBtn?.addEventListener('click', () => {
+      this.closeIntakeModal();
+    });
+
+    // Minimize button - shrink to bottom of screen
+    minimizeBtn?.addEventListener('click', () => {
+      this.intakeModal?.classList.toggle('minimized');
+      this.intakeModal?.classList.remove('fullscreen');
+    });
+
+    // Maximize button - fullscreen
+    maximizeBtn?.addEventListener('click', () => {
+      this.intakeModal?.classList.toggle('fullscreen');
+      this.intakeModal?.classList.remove('minimized');
+    });
+
+    // Click on minimized modal content to restore
+    modalContent?.addEventListener('click', (e) => {
+      if (this.intakeModal?.classList.contains('minimized')) {
+        // Only restore if clicking on the header area (not the buttons)
+        const target = e.target as HTMLElement;
+        if (!target.closest('.terminal-btn')) {
+          this.intakeModal.classList.remove('minimized');
+        }
+      }
+    });
   }
 
   private async handleLogin(): Promise<void> {

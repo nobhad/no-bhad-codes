@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#e0e0e0">
   <title>No Bhad Codes - Professional Web Development</title>
 
-  <!-- Prevent theme flash -->
+  <!-- Prevent theme flash and hide header during intro -->
   <style>
     :root {
       --bg: #ffffff;
       --fg: #000000;
       --color-neutral-300: #e5e5e5;
-      --color-primary: #ff6b6b;
+      --color-primary: #00ff41;
     }
     [data-theme="dark"] {
       --bg: #1a1a1a;
@@ -20,12 +21,21 @@
     }
     html { background-color: var(--bg); color: var(--fg); }
     body { background-color: var(--bg); color: var(--fg); margin: 0; padding: 0; }
+    /* Hide header during intro animation - critical CSS */
+    .intro-loading .header { opacity: 0 !important; visibility: hidden !important; }
+    .intro-complete .header { opacity: 1 !important; visibility: visible !important; }
   </style>
   <script>
     (function() {
       try {
         const savedTheme = localStorage.getItem('theme');
-        document.documentElement.setAttribute('data-theme', savedTheme || 'light');
+        const theme = savedTheme || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        // Update theme-color meta tag to match site background
+        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeColorMeta) {
+          themeColorMeta.setAttribute('content', theme === 'dark' ? '#2a2a2a' : '#e0e0e0');
+        }
       } catch (e) {
         document.documentElement.setAttribute('data-theme', 'light');
       }
@@ -49,7 +59,6 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
-  <meta name="theme-color" content="#ff6b6b">
 
   <!-- GSAP -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>

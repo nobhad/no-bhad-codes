@@ -31,11 +31,12 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
   }
 
   // Log request
+  const hasBody = req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0;
   console.log(`🔄 ${req.method} ${req.path}`, {
     timestamp: new Date().toISOString(),
     ip: req.ip,
     userAgent: req.get('User-Agent'),
-    ...(req.body && Object.keys(req.body).length > 0 && {
+    ...(hasBody && {
       body: sanitizeBody(req.body)
     })
   });

@@ -349,8 +349,8 @@ main,
 /* NOTE: Footer is NOT hidden during intro - it should always be visible */
 .intro-loading .header,
 .intro-loading main {
-  opacity: 0;
-  visibility: hidden;
+  opacity: 0 !important;
+  visibility: hidden !important;
   /* CSS fallback: show content after 3 seconds even if JS fails */
   animation: intro-fallback-show 3s ease-in-out forwards;
 }

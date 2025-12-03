@@ -99,6 +99,14 @@ export class ThemeModule extends BaseModule {
     // Store in localStorage
     localStorage.setItem('theme', theme);
 
+    // Update theme-color meta tag to match site background
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeColorMeta) {
+      // Light mode: #e0e0e0 (neutral-300), Dark mode: #2a2a2a (dark neutral-300)
+      const themeColor = theme === 'dark' ? '#2a2a2a' : '#e0e0e0';
+      themeColorMeta.setAttribute('content', themeColor);
+    }
+
     // Update theme buttons
     this.updateThemeButton(theme);
     this.updateDashboardThemeButton(theme);

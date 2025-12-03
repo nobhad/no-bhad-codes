@@ -459,10 +459,7 @@ body[data-page="client-landing"] .client-login,
 }
 
 .portal-card:hover {
-  transform: translate(-3px, -3px);
-  box-shadow:
-    8px 8px 16px rgba(0, 0, 0, 0.25),
-    16px 16px 32px rgba(0, 0, 0, 0.18);
+  /* No transform - cards stay in place */
 }
 
 .portal-card-header {
@@ -984,4 +981,109 @@ body[data-page="client-landing"] .client-login,
     margin-left: 1rem;
     margin-right: 1rem;
   }
+}
+
+/* ===============================================
+   INTAKE MODAL - FULL SCREEN OVERLAY
+   =============================================== */
+
+.intake-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  transition: background 0.4s ease;
+}
+
+.intake-modal.open {
+  display: flex;
+}
+
+.intake-modal-content {
+  width: 100%;
+  max-width: 900px;
+  height: 85vh;
+  max-height: 85vh;
+  overflow: hidden; /* No scrolling on the modal content wrapper */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure terminal window fills the modal content and doesn't cause outer scroll */
+.intake-modal-content .terminal-intake {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.intake-modal-content .terminal-window {
+  flex: 1;
+  min-height: 0;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.intake-modal-content .terminal-chat {
+  flex: 1;
+  min-height: 0;
+  max-height: none; /* Override the calc() max-height */
+  overflow-y: auto;
+}
+
+/* Minimized state - small bar at bottom left */
+.intake-modal.minimized {
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 0;
+  background: transparent !important;
+  pointer-events: none;
+}
+
+.intake-modal.minimized .intake-modal-content {
+  max-width: 350px;
+  height: auto;
+  max-height: none;
+  margin: 1rem;
+  margin-left: -5rem;
+  margin-bottom: -1rem;
+  overflow: hidden;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.intake-modal.minimized .terminal-intake {
+  height: auto;
+  min-height: auto;
+}
+
+.intake-modal.minimized .terminal-window {
+  flex: none;
+  max-height: none;
+}
+
+/* Hide everything except header when minimized */
+.intake-modal.minimized .terminal-progress,
+.intake-modal.minimized .terminal-login-info,
+.intake-modal.minimized .terminal-chat,
+.intake-modal.minimized .terminal-input-area {
+  display: none;
+}
+
+/* Fullscreen state */
+.intake-modal.fullscreen .intake-modal-content {
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border-radius: 0;
 }

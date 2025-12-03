@@ -8,6 +8,8 @@
  * through a conversational terminal interface.
  */
 
+import { gsap } from 'gsap';
+
 interface IntakeQuestion {
   id: string;
   field: string;
@@ -43,8 +45,8 @@ const QUESTIONS: IntakeQuestion[] = [
     placeholder: 'Enter your full name'
   },
   {
-    id: 'name',
-    field: 'name',
+    id: 'email',
+    field: 'email',
     question: 'Nice to meet you, {{name}}! What\'s your email address so I can send you the project details?',
     type: 'email',
     required: true,
@@ -68,6 +70,15 @@ const QUESTIONS: IntakeQuestion[] = [
     question: 'What\'s the best phone number to reach you?',
     type: 'tel',
     required: true,
+    validation: (value) => {
+      // Remove all non-digit characters for validation
+      const digits = value.replace(/\D/g, '');
+      // Valid phone numbers should have 10-15 digits
+      if (digits.length < 10 || digits.length > 15) {
+        return 'Please enter a valid phone number (10+ digits)';
+      }
+      return null;
+    },
     placeholder: '(555) 123-4567'
   },
   // Project Overview
@@ -497,44 +508,88 @@ export class TerminalIntakeModule {
       ]
     });
 
-    // Temporarily override option click handler for resume choice
-    const handleResumeChoice = async (e: Event) => {
-      const target = e.target as HTMLElement;
-      if (target.classList.contains('chat-option')) {
-        e.stopPropagation();
-        this.chatContainer?.removeEventListener('click', handleResumeChoice, true);
+    // Flag to prevent double handling
+    let handled = false;
 
-        const choice = target.dataset.value;
-        this.addMessage({ type: 'user', content: target.textContent || choice || '' });
+    // Declare handler references for cleanup
+    let handleResumeClick: ((e: Event) => Promise<void>) | null = null;
+    let handleResumeKeydown: ((e: KeyboardEvent) => Promise<void>) | null = null;
 
-        if (choice === 'resume') {
-          // Restore progress
-          this.currentQuestionIndex = savedProgress.currentQuestionIndex;
-          this.intakeData = savedProgress.intakeData;
-          this.updateProgress();
+    const processChoice = async (choice: 'resume' | 'restart', displayText: string) => {
+      if (handled) return;
+      handled = true;
 
-          await this.delay(300);
-          await this.addBootMessage('  ✓ Progress restored');
-          await this.delay(300);
-          await this.askCurrentQuestion();
-        } else {
-          // Start fresh
-          this.clearProgress();
-          this.currentQuestionIndex = 0;
-          this.intakeData = {};
+      // Remove listeners
+      if (handleResumeClick) {
+        this.chatContainer?.removeEventListener('click', handleResumeClick, true);
+      }
+      if (handleResumeKeydown) {
+        document.removeEventListener('keydown', handleResumeKeydown);
+      }
 
-          await this.delay(300);
-          await this.addBootMessage('  ✓ Starting fresh');
-          await this.delay(300);
-          await this.askCurrentQuestion();
+      this.addMessage({ type: 'user', content: displayText });
+      if (this.inputElement) this.inputElement.value = '';
+
+      if (choice === 'resume') {
+        // Restore progress
+        this.currentQuestionIndex = savedProgress.currentQuestionIndex;
+        this.intakeData = savedProgress.intakeData;
+        this.updateProgress();
+
+        await this.delay(300);
+        await this.addBootMessage('  ✓ Progress restored');
+        await this.delay(300);
+        await this.askCurrentQuestion();
+      } else {
+        // Start fresh - clear the chat first
+        this.clearProgress();
+        this.currentQuestionIndex = 0;
+        this.intakeData = {};
+        this.messages = [];
+
+        // Clear the chat container
+        if (this.chatContainer) {
+          this.chatContainer.innerHTML = '';
         }
+
+        // Start fresh with full boot sequence
+        await this.startConversation();
       }
     };
 
-    this.chatContainer?.addEventListener('click', handleResumeChoice, true);
+    // Handle click on options
+    handleResumeClick = async (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('chat-option')) {
+        e.stopPropagation();
+        const choice = target.dataset.value as 'resume' | 'restart';
+        const displayText = target.textContent || choice || '';
+        await processChoice(choice, displayText);
+      }
+    };
+
+    // Handle keyboard input (1 or 2) - immediate response, no Enter needed
+    handleResumeKeydown = async (e: KeyboardEvent) => {
+      if (e.key === '1') {
+        e.preventDefault();
+        e.stopPropagation();
+        await processChoice('resume', '[1] Resume where I left off');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        e.stopPropagation();
+        await processChoice('restart', '[2] Start over');
+      }
+    };
+
+    this.chatContainer?.addEventListener('click', handleResumeClick, true);
+
+    // Listen on document for keyboard input (in case input doesn't have focus)
+    document.addEventListener('keydown', handleResumeKeydown);
 
     if (this.inputElement) {
-      this.inputElement.disabled = true;
+      this.inputElement.disabled = false;
+      this.inputElement.placeholder = 'Type 1 or 2...';
+      this.inputElement.focus();
     }
   }
 
@@ -552,6 +607,18 @@ export class TerminalIntakeModule {
               <span class="terminal-btn maximize" style="cursor: default;"></span>
             </div>`;
 
+    // Generate login timestamp
+    const now = new Date();
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const dayName = days[now.getDay()];
+    const monthName = months[now.getMonth()];
+    const date = now.getDate();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    const loginTime = `Last login: ${dayName} ${monthName} ${date} ${hours}:${minutes}:${seconds} on ttys001`;
+
     this.container.innerHTML = `
       <div class="terminal-intake">
         <div class="terminal-window">
@@ -566,9 +633,10 @@ export class TerminalIntakeModule {
             </div>
             <span class="progress-percent" id="progressPercent">0%</span>
           </div>
+          <div class="terminal-login-info">${loginTime}<br><span class="terminal-prompt-line">client@NoBhadCodes project-intake % </span><span class="terminal-typing-text" id="terminalTypingText"></span><span class="terminal-cursor" id="terminalCursor">█</span></div>
           <div class="terminal-chat" id="terminalChat"></div>
           <div class="terminal-input-area">
-            <span class="terminal-prompt">$</span>
+            <span class="terminal-prompt">></span>
             <input type="text" class="terminal-input" id="terminalInput" placeholder="Type your response..." autocomplete="off">
             <button class="terminal-send" id="terminalSend">SEND</button>
           </div>
@@ -587,11 +655,65 @@ export class TerminalIntakeModule {
     // Send button click
     this.sendButton?.addEventListener('click', () => this.handleUserInput());
 
-    // Enter key to send
+    // Enter key to send (on input)
     this.inputElement?.addEventListener('keypress', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         this.handleUserInput();
+      }
+    });
+
+    // Enter key on document for multiselect confirmation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        const modal = document.getElementById('intakeModal');
+        if (modal && !modal.classList.contains('open')) return;
+
+        const question = this.getCurrentQuestion();
+        if (question?.type === 'multiselect' && this.selectedOptions.length > 0) {
+          e.preventDefault();
+          this.handleUserInput();
+        }
+      }
+    });
+
+    // Number keys for immediate select/multiselect option selection (1-9)
+    // Use document listener so it works even without input focus
+    document.addEventListener('keydown', (e) => {
+      // Skip if processing
+      if (this.isProcessing) return;
+
+      // Only handle if the modal is open and this terminal is active
+      const modal = document.getElementById('intakeModal');
+      if (modal && !modal.classList.contains('open')) return;
+
+      const question = this.getCurrentQuestion();
+      // Only handle for select/multiselect questions with options
+      if (!question || !question.options) return;
+      if (question.type !== 'select' && question.type !== 'multiselect') return;
+
+      const num = parseInt(e.key, 10);
+      if (num >= 1 && num <= question.options.length) {
+        e.preventDefault();
+        const option = question.options[num - 1];
+
+        if (question.type === 'select') {
+          // Single select - submit immediately
+          this.processAnswer(option.value, option.label);
+        } else {
+          // Multiselect - toggle the option
+          const optionBtn = this.chatContainer?.querySelector(`.chat-option[data-value="${option.value}"]`) as HTMLElement;
+          if (optionBtn) {
+            optionBtn.classList.toggle('selected');
+            if (optionBtn.classList.contains('selected')) {
+              if (!this.selectedOptions.includes(option.value)) {
+                this.selectedOptions.push(option.value);
+              }
+            } else {
+              this.selectedOptions = this.selectedOptions.filter((v) => v !== option.value);
+            }
+          }
+        }
       }
     });
 
@@ -655,6 +777,14 @@ export class TerminalIntakeModule {
   }
 
   private async startConversation(): Promise<void> {
+    // Type "./project_intake.sh" command with GSAP
+    await this.typeCommand('./project_intake.sh');
+    await this.delay(400);
+
+    // Show avatar first
+    await this.showAvatarIntro();
+    await this.delay(300);
+
     // Terminal boot sequence
     await this.addBootMessage('Bootstrapping...');
     await this.delay(300);
@@ -668,7 +798,7 @@ export class TerminalIntakeModule {
     await this.addBootMessage('  ✓ Ready to collect project details');
     await this.delay(400);
 
-    // Empty line before starting
+    // Empty line before starting conversation
     await this.addBootMessage('');
     await this.delay(300);
 
@@ -678,6 +808,33 @@ export class TerminalIntakeModule {
     } else {
       await this.askCurrentQuestion();
     }
+  }
+
+  /**
+   * Display the avatar SVG full-width before the first message
+   */
+  private async showAvatarIntro(): Promise<void> {
+    if (!this.chatContainer) return;
+
+    const avatarContainer = document.createElement('div');
+    avatarContainer.className = 'terminal-avatar-intro';
+    avatarContainer.innerHTML = `
+      <img src="/images/avatar.svg" alt="No Bhad Codes" class="terminal-avatar-img" />
+    `;
+
+    // Start invisible
+    avatarContainer.style.opacity = '0';
+    this.chatContainer.appendChild(avatarContainer);
+    this.scrollToBottom();
+
+    // Fade in with GSAP
+    gsap.to(avatarContainer, {
+      opacity: 1,
+      duration: 0.5,
+      ease: 'power2.out'
+    });
+
+    await this.delay(500);
   }
 
   private async handleExistingClientData(): Promise<void> {
@@ -965,7 +1122,7 @@ export class TerminalIntakeModule {
       message.multiSelect = true;
     }
 
-    this.addMessage(message);
+    await this.addMessageWithTyping(message);
 
     // Update input placeholder
     if (this.inputElement) {
@@ -1136,6 +1293,8 @@ export class TerminalIntakeModule {
         submittedAt: new Date().toISOString()
       };
 
+      console.log('[TerminalIntake] Submitting data:', submitData);
+
       const response = await fetch('/api/intake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1143,6 +1302,8 @@ export class TerminalIntakeModule {
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[TerminalIntake] Server error response:', errorText);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -1178,7 +1339,7 @@ Thank you for choosing No Bhad Codes!
       console.error('[TerminalIntake] Submission error:', error);
       this.addMessage({
         type: 'error',
-        content: 'Failed to submit your request. Please try again or contact hello@nobhadcodes.com'
+        content: 'Failed to submit your request. Please try again or contact nobhaduri@gmail.com'
       });
 
       // Re-enable input for retry
@@ -1199,6 +1360,9 @@ Thank you for choosing No Bhad Codes!
 
     const contentEl = document.createElement('div');
     contentEl.className = 'message-content';
+
+    // For AI messages, we'll type them out - but set content immediately for now
+    // The typing animation happens in addMessageWithTyping
     contentEl.textContent = message.content;
     messageEl.appendChild(contentEl);
 
@@ -1235,6 +1399,63 @@ Thank you for choosing No Bhad Codes!
     this.scrollToBottom();
   }
 
+  /**
+   * Add an AI message with typing animation
+   */
+  private async addMessageWithTyping(message: ChatMessage): Promise<void> {
+    if (!this.chatContainer) return;
+
+    this.messages.push(message);
+
+    const messageEl = document.createElement('div');
+    messageEl.className = `chat-message ${message.type}`;
+
+    const contentEl = document.createElement('div');
+    contentEl.className = 'message-content';
+    contentEl.textContent = ''; // Start empty
+    messageEl.appendChild(contentEl);
+
+    this.chatContainer.appendChild(messageEl);
+    this.scrollToBottom();
+
+    // Type out the content character by character
+    const text = message.content;
+    for (let i = 0; i < text.length; i++) {
+      contentEl.textContent += text[i];
+      this.scrollToBottom();
+      await this.delay(15 + Math.random() * 10); // Fast typing speed
+    }
+
+    // Add options if present (after typing completes)
+    if (message.options && message.options.length > 0) {
+      const optionsEl = document.createElement('div');
+      optionsEl.className = `chat-options${message.multiSelect ? ' multi-select' : ''}`;
+
+      message.options.forEach((option, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'chat-option';
+        btn.dataset.value = option.value;
+        btn.dataset.index = String(index + 1);
+        btn.textContent = `[${index + 1}] ${option.label}`;
+        optionsEl.appendChild(btn);
+      });
+
+      messageEl.appendChild(optionsEl);
+
+      if (message.multiSelect) {
+        const confirmBtn = document.createElement('button');
+        confirmBtn.className = 'terminal-send confirm-btn';
+        confirmBtn.style.marginTop = '12px';
+        confirmBtn.style.marginLeft = '20px';
+        confirmBtn.textContent = '> CONFIRM SELECTION';
+        confirmBtn.addEventListener('click', () => this.handleUserInput());
+        messageEl.appendChild(confirmBtn);
+      }
+    }
+
+    this.scrollToBottom();
+  }
+
   private async showTypingIndicator(duration: number): Promise<void> {
     if (!this.chatContainer) return;
 
@@ -1256,8 +1477,14 @@ Thank you for choosing No Bhad Codes!
   }
 
   private updateProgress(override?: number): void {
-    const totalQuestions = QUESTIONS.filter((q) => !q.dependsOn || this.shouldShowQuestion(q)).length;
-    const progress = override ?? Math.round((this.currentQuestionIndex / totalQuestions) * 100);
+    // Simple calculation: use total base questions (non-dependent)
+    // This gives a stable denominator
+    const totalBaseQuestions = QUESTIONS.filter((q) => !q.dependsOn).length;
+
+    // Calculate progress based on answered questions vs total base questions
+    // Cap at 95% until form is submitted
+    const answeredCount = Object.keys(this.intakeData).length;
+    const progress = override ?? Math.min(Math.round((answeredCount / totalBaseQuestions) * 100), 95);
 
     if (this.progressFill) {
       this.progressFill.style.width = `${progress}%`;
@@ -1281,6 +1508,35 @@ Thank you for choosing No Bhad Codes!
 
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Type out a command character by character using GSAP
+   */
+  private async typeCommand(text: string): Promise<void> {
+    const typingText = document.getElementById('terminalTypingText');
+    const cursor = document.getElementById('terminalCursor');
+
+    if (!typingText || !cursor) return;
+
+    // Make cursor blink
+    gsap.to(cursor, {
+      opacity: 0,
+      duration: 0.5,
+      repeat: -1,
+      yoyo: true,
+      ease: 'steps(1)'
+    });
+
+    // Type each character
+    for (let i = 0; i < text.length; i++) {
+      typingText.textContent += text[i];
+      await this.delay(50 + Math.random() * 30); // Random delay for natural feel
+    }
+
+    // Stop cursor blinking and hide it
+    gsap.killTweensOf(cursor);
+    cursor.style.opacity = '0';
   }
 }
 
