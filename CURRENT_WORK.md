@@ -140,6 +140,50 @@ BusinessCardRenderer.enableAfterIntro: Cannot read properties of null (reading '
 
 ---
 
+### Client Portal Sidebar Content Height
+
+**Status**: Deferred
+
+**Issue**: The sidebar-content div does not fill the full height of the sidebar, causing the SIGN OUT button to not be pushed to the bottom as intended.
+
+**Attempted Fixes:**
+- [x] Added `height: 100%` and `box-sizing: border-box` - caused layout issues (reverted)
+- [x] Added `flex: 1` - did not fill height
+- [x] Added `flex: 1 1 0` with `min-height: 0` - still not filling height
+- [x] Added `flex-grow: 1` - caused issues when sidebar is collapsed (reverted)
+- [x] Added `height: calc(100% - 48px)` - did not work as expected (reverted)
+
+**Current State**: Reverted to basic styles. Sign out button appears after nav buttons instead of at bottom.
+
+**Root Cause**: The sidebar collapse animation conflicts with height-based flex solutions. When sidebar collapses, the content height calculations break.
+
+**Files Involved:**
+- `src/styles/pages/client-portal.css` - `.sidebar` (line ~523) and `.sidebar-content` (line ~543)
+- `client/portal.html` - HTML structure with sidebar-content containing sidebar-footer
+
+**Possible Future Solutions:**
+- Use JavaScript to set height dynamically based on sidebar state
+- Restructure HTML to separate nav buttons from sign out button
+- Use CSS Grid instead of Flexbox for more control
+
+---
+
+### Client Portal Footer Z-Index
+
+**Status**: Fixed
+
+**Issue**: Footer was appearing over the sidebar instead of behind it.
+
+**Root Cause**: Main `footer.css` has `z-index: 50` while sidebar has `z-index: 10`. Needed to override footer z-index for client portal.
+
+**Fix Applied:**
+- [x] Added `z-index: 1 !important` to `[data-page="client-portal"] .footer` in client-portal.css
+
+**Files Modified:**
+- `src/styles/pages/client-portal.css` - Line ~274
+
+---
+
 ### DataService Portfolio Load Error
 
 **Status**: Known

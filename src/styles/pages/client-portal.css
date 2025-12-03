@@ -270,6 +270,11 @@
    END STANDARDIZED COMPONENTS
    ===================================================== */
 
+/* Hide footer on client portal - causes z-index issues with sidebar */
+[data-page="client-portal"] .footer {
+  display: none !important;
+}
+
 /* Client Portal Main Container */
 .client-portal-main {
   position: fixed;
@@ -531,6 +536,9 @@ html[data-theme="dark"] .login-form label {
 .sidebar.collapsed {
   width: 56px;
   min-width: 56px;
+  /* Keep border and shadow when collapsed */
+  border-right: 4px solid var(--color-dark);
+  box-shadow: 8px 0 40px rgba(0, 0, 0, 0.5), 4px 0 15px rgba(0, 0, 0, 0.3);
 }
 
 /* Sidebar Content */
@@ -539,6 +547,31 @@ html[data-theme="dark"] .login-form label {
   flex-direction: column;
   padding: 1.5rem;
   gap: 2rem;
+}
+
+/* Sidebar Footer - positioned at bottom */
+.sidebar-footer {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  right: 1.5rem;
+}
+
+.btn-logout {
+  width: 100%;
+  background: transparent;
+  border: 2px solid var(--color-dark);
+  color: var(--color-dark);
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-logout:hover {
+  background: #ff4444;
+  border-color: #ff4444;
+  color: white;
 }
 
 /* Sidebar Logo */
@@ -607,10 +640,9 @@ html[data-theme="dark"] .login-form label {
   transform: rotate(180deg);
 }
 
+
 /* Collapsed state */
-.sidebar.collapsed .sidebar-title,
-.sidebar.collapsed .sidebar-buttons,
-.sidebar.collapsed .sidebar-logo {
+.sidebar.collapsed .sidebar-content {
   display: none;
 }
 
@@ -1516,7 +1548,8 @@ html[data-theme="dark"] .login-form label {
 .dashboard-container {
   display: flex;
   width: 100%;
-  min-height: calc(100vh - var(--footer-height));
+  min-height: 100vh;
+  height: 100vh;
 }
 
 /* Content Area */
