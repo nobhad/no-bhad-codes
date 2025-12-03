@@ -23,8 +23,8 @@ export class ThemeModule extends BaseModule {
   }
 
   protected override async onInit(): Promise<void> {
-    // Get theme toggle button (main site header)
-    this.themeButton = this.getElement('themeButton', '#toggle-theme', true) as HTMLElement | null;
+    // Get theme toggle button (main site header) - not required as some pages don't have it
+    this.themeButton = this.getElement('themeButton', '#toggle-theme', false) as HTMLElement | null;
 
     // Get dashboard theme toggle button (client portal dashboard header)
     this.dashboardThemeButton = document.getElementById(
