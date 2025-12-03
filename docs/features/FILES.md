@@ -20,7 +20,7 @@ The File Management system allows clients to upload, view, preview, and download
 
 **Access:** Client Portal > Files tab (`tab-files`)
 
-**Last Updated:** December 1, 2025
+**Last Updated:** December 2, 2025
 
 ---
 
@@ -28,19 +28,21 @@ The File Management system allows clients to upload, view, preview, and download
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| Drag & Drop Upload | Complete | Intuitive file upload via drag and drop |
+| Drag & Drop Upload | Complete | Intuitive file upload via drag and drop (desktop only) |
 | Browse Files | Complete | Traditional file picker button |
 | Multi-file Upload | Complete | Upload up to 5 files at once |
 | File List from API | Complete | Dynamic file list from backend |
 | Demo Mode | Complete | Fallback demo files when backend unavailable |
 | File Preview | Complete | Open images/PDFs in new browser tab |
 | File Download | Complete | Download files with original filename |
-| File Delete | Complete | Delete files with confirmation dialog |
+| File Delete | Complete | Delete files with confirmation (client files only) |
 | File Icons | Complete | Visual file type identification |
 | File Size Display | Complete | Human-readable file sizes |
 | Upload Progress | Complete | Visual feedback during upload |
 | Success Messages | Complete | Confirmation after successful upload |
 | Access Control | Complete | Clients can only access their own files |
+| Admin File Protection | Complete | Clients cannot delete admin-uploaded files |
+| Mobile Responsive | Complete | Optimized layout for mobile devices |
 | Project Filtering | Planned | Filter files by project |
 
 ---
@@ -668,14 +670,66 @@ private escapeHtml(text: string): string {
 
 ---
 
+## Mobile Responsiveness
+
+On mobile devices (screens under 768px), the Files section adapts for touch interaction:
+
+### Mobile Layout Changes
+
+- File items stack vertically instead of horizontal layout
+- Drag & drop zone is hidden (not functional on touch devices)
+- Only "Browse Files" button shown for uploads
+- Trash icon only appears on client-uploaded files (admin files not deletable)
+- File actions (preview/download) remain accessible
+
+### Delete Permission Logic
+
+Clients can only delete files they uploaded themselves. Admin-uploaded files show no delete option:
+
+```typescript
+// Render file with conditional delete button
+const canDelete = file.uploadedBy === 'client';
+const deleteButton = canDelete
+  ? `<button class="file-delete-icon" data-file-id="${file.id}" title="Delete file">
+       <svg><!-- Trash icon --></svg>
+     </button>`
+  : '';
+```
+
+### Mobile CSS
+
+```css
+@media (max-width: 768px) {
+  /* Hide drag/drop zone on mobile */
+  .upload-dropzone .dropzone-content p,
+  .upload-dropzone .dropzone-hint {
+    display: none;
+  }
+
+  /* Stack file items */
+  .file-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .file-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+```
+
+---
+
 ## File Locations
 
 | File | Purpose |
 |------|---------|
 | `server/routes/uploads.ts` | Backend API endpoints |
-| `src/features/client/client-portal.ts:679-1075` | Frontend file handling |
-| `src/styles/pages/client-portal.css:773-870` | File section styling |
-| `templates/pages/client-portal.ejs:76-126` | Files tab HTML |
+| `src/features/client/client-portal.ts` | Frontend file handling |
+| `src/styles/pages/client-portal.css` | File section styling (incl. mobile) |
+| `templates/pages/client-portal.ejs` | Files tab HTML |
 
 ---
 

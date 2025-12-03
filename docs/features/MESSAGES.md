@@ -1,5 +1,7 @@
 # Messaging System
 
+**Last Updated:** December 2, 2025
+
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -10,8 +12,9 @@
 6. [Keyboard Shortcuts](#keyboard-shortcuts)
 7. [TypeScript Implementation](#typescript-implementation)
 8. [Backend Integration](#backend-integration)
-9. [Styling](#styling)
-10. [File Locations](#file-locations)
+9. [Mobile Responsiveness](#mobile-responsiveness)
+10. [Styling](#styling)
+11. [File Locations](#file-locations)
 
 ---
 
@@ -28,13 +31,15 @@ The messaging system provides real-time communication between clients and develo
 | Feature | Description |
 |---------|-------------|
 | Thread View | Chronological message display |
-| Emoji Picker | Native emoji keyboard via `emoji-picker-element` web component |
+| Emoji Picker | Native emoji keyboard via `emoji-picker-element` (desktop only) |
 | Enter to Send | Quick message sending with keyboard |
 | Shift+Enter | Insert newline without sending |
 | Sender Identification | Visual distinction between sent/received |
 | Timestamps | Date and time for each message |
 | Avatar Display | Profile images for sender identification |
 | Click-outside Close | Emoji picker closes when clicking outside |
+| Demo Mode Messaging | Users can send messages in demo mode (resets on refresh) |
+| Mobile Responsive | Optimized layout for mobile devices |
 
 ---
 
@@ -598,6 +603,89 @@ await emailService.sendMessageNotification(clientEmail, {
   portalUrl: 'https://portal.nobhadcodes.com',
   hasAttachments: false
 });
+```
+
+---
+
+## Mobile Responsiveness
+
+On mobile devices (screens under 768px), the messaging interface adapts for touch interaction:
+
+### Mobile Layout Changes
+
+- Emoji picker is hidden (difficult to use on mobile)
+- Chat container takes most of screen height
+- Messages thread is scrollable within container
+- Send button always visible (mobile keyboards don't always have Enter)
+- Message bubbles extend to edges of container
+- Avatar positioning optimized for touch
+
+### Demo Mode Messaging
+
+In demo mode, users can send messages that display locally but reset on page refresh:
+
+```typescript
+private addDemoMessage(content: string): void {
+  const messagesThread = document.getElementById('messages-thread');
+  if (!messagesThread) return;
+
+  const messageElement = document.createElement('div');
+  messageElement.className = 'message message-sent';
+  messageElement.innerHTML = `
+    <div class="message-content">
+      <div class="message-header">
+        <span class="message-sender">You</span>
+        <span class="message-time">${this.formatDate(new Date().toISOString())}</span>
+      </div>
+      <div class="message-body">${this.escapeHtml(content)}</div>
+    </div>
+    <div class="message-avatar" data-name="You">
+      <div class="avatar-placeholder">YOU</div>
+    </div>
+  `;
+  messagesThread.appendChild(messageElement);
+  messagesThread.scrollTop = messagesThread.scrollHeight;
+}
+```
+
+### Mobile CSS
+
+```css
+@media (max-width: 768px) {
+  /* Hide emoji picker on mobile */
+  .emoji-picker-container {
+    display: none !important;
+  }
+
+  /* Chat takes most of screen height */
+  .messages-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 100px);
+  }
+
+  .messages-thread {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    padding: 0.5rem;
+  }
+
+  /* Message bubbles extend to edges */
+  .message {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .message-received .message-content {
+    border-radius: 0 12px 12px 12px;
+  }
+
+  .message-sent .message-content {
+    border-radius: 12px 0 12px 12px;
+  }
+}
 ```
 
 ---
