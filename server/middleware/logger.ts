@@ -25,7 +25,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
   const startTime = Date.now();
 
   // Skip logging for health checks and static assets
-  const skipPaths = ['/api/health', '/favicon.ico'];
+  const skipPaths = ['/api/health', '/health', '/favicon.ico'];
   if (skipPaths.some((path) => req.path.includes(path))) {
     return next();
   }
@@ -35,7 +35,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
     timestamp: new Date().toISOString(),
     ip: req.ip,
     userAgent: req.get('User-Agent'),
-    ...(Object.keys(req.body).length > 0 && {
+    ...(req.body && Object.keys(req.body).length > 0 && {
       body: sanitizeBody(req.body)
     })
   });

@@ -150,14 +150,14 @@ export const PROTECTION_PRESETS = {
     }
   },
 
-  // For production - full protection
+  // For production - full protection (right-click enabled for usability)
   production: {
     ...PROTECTION_CONFIG,
     enabled: true,
     level: 'maximum' as const,
     features: {
-      ...PROTECTION_CONFIG.features
-      // All features enabled
+      ...PROTECTION_CONFIG.features,
+      rightClickDisable: false // Allow right-click for usability
     }
   },
 
