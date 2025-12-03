@@ -226,14 +226,18 @@ export class RouterService extends BaseService {
 
     console.log('[RouterService] Should smooth scroll:', shouldSmooth);
 
-    if (shouldSmooth) {
-      console.log('[RouterService] Starting smooth scroll...');
-      await this.smoothScrollToSection(section);
-      console.log('[RouterService] Smooth scroll complete');
-    } else {
-      console.log('[RouterService] Starting instant scroll...');
-      this.scrollToSection(section);
-      console.log('[RouterService] Instant scroll complete');
+    // Use native scrollIntoView for reliable scrolling
+    try {
+      console.log('[RouterService] Using scrollIntoView...');
+      section.scrollIntoView({
+        behavior: shouldSmooth ? 'smooth' : 'instant',
+        block: 'start'
+      });
+      console.log('[RouterService] scrollIntoView complete');
+    } catch (_e) {
+      // Fallback for older browsers
+      console.log('[RouterService] Fallback scroll...');
+      section.scrollIntoView(true);
     }
 
     // Update current route
