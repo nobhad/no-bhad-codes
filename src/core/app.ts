@@ -544,7 +544,8 @@ export class Application {
     const clientLandingModules = [
       'ThemeModule',
       'NavigationModule',
-      'FooterModule'
+      'FooterModule',
+      'ClientLandingModule'
     ];
 
     // Modules for Client Intake form
