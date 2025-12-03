@@ -27,13 +27,13 @@
   max-width: 900px;
   width: 100%;
   margin: 0 auto;
-  background: #0a0a0a;
-  border: 4px solid #000000;
-  border-radius: 0;
+  background: #1e1e1e;
+  border: 1px solid #3d3d3d;
+  border-radius: 10px;
   overflow: hidden;
   box-shadow:
-    0 0 20px rgba(0, 255, 0, 0.1),
-    inset 0 0 60px rgba(0, 255, 0, 0.03);
+    6px 6px 12px rgba(0, 0, 0, 0.3),
+    12px 12px 24px rgba(0, 0, 0, 0.2);
 }
 
 /* ============================================================================
@@ -41,9 +41,9 @@
    ============================================================================ */
 
 .terminal-header {
-  background: linear-gradient(180deg, #1a1a1a 0%, #111111 100%);
-  border-bottom: 2px solid #000000;
-  padding: 8px 16px;
+  background: #1a1a1a;
+  border-bottom: 1px solid #3d3d3d;
+  padding: 10px 16px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -74,6 +74,31 @@
 }
 
 /* ============================================================================
+   LOGIN INFO
+   ============================================================================ */
+
+.terminal-login-info {
+  padding: 8px 20px;
+  color: #888888;
+  font-size: 13px;
+  font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+  background: #1e1e1e;
+}
+
+.terminal-prompt-line {
+  color: #888888;
+}
+
+.terminal-typing-text {
+  color: #ffffff;
+}
+
+.terminal-cursor {
+  color: #00ff00;
+  font-weight: bold;
+}
+
+/* ============================================================================
    CHAT CONTAINER
    ============================================================================ */
 
@@ -94,17 +119,16 @@
 }
 
 .terminal-chat::-webkit-scrollbar-track {
-  background: #0a0a0a;
-  border-left: 1px solid #00aa00;
+  background: #1e1e1e;
 }
 
 .terminal-chat::-webkit-scrollbar-thumb {
-  background: #00aa00;
+  background: #3d3d3d;
   border-radius: 4px;
 }
 
 .terminal-chat::-webkit-scrollbar-thumb:hover {
-  background: #00ff00;
+  background: #555555;
 }
 
 /* ============================================================================
@@ -137,7 +161,7 @@
 
 .chat-message.ai .message-content::before {
   content: "> ";
-  color: #ffff00;
+  color: #00ff00;
 }
 
 /* User Messages - white with $ prompt */
@@ -150,7 +174,7 @@
 }
 
 .chat-message.user .message-content::before {
-  content: "$ ";
+  content: "> ";
   color: #00aaff;
 }
 
@@ -210,12 +234,14 @@
 
 .typing-indicator::before {
   content: "> ";
-  color: #ffff00;
+  color: #00ff00;
 }
 
 .typing-indicator::after {
   content: "█";
   color: #00ff00;
+  font-size: 1.2em;
+  font-weight: bold;
   animation: cursor-blink 1s step-end infinite;
 }
 
@@ -239,9 +265,9 @@
    ============================================================================ */
 
 .terminal-input-area {
-  border-top: none;
-  padding: 16px;
-  background: #0a0a0a;
+  border-top: 1px solid #3d3d3d;
+  padding: 10px 16px;
+  background: #1e1e1e;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -253,7 +279,10 @@
   white-space: nowrap;
 }
 
-.terminal-input {
+.terminal-input,
+.terminal-input-area input,
+.terminal-input-area input[type="text"],
+input.terminal-input {
   flex: 1;
   background: transparent !important;
   border: none !important;
@@ -261,21 +290,28 @@
   font-family: 'Courier New', Consolas, 'Liberation Mono', monospace !important;
   font-size: 14px;
   outline: none !important;
-  caret-color: #ffffff;
+  caret-color: #00ff00 !important;
   box-shadow: none !important;
+  padding: 4px 0 !important;
 }
 
-.terminal-input::placeholder {
+.terminal-input::placeholder,
+.terminal-input-area input::placeholder {
   color: #555555;
 }
 
 .terminal-input:focus,
 .terminal-input:hover,
-.terminal-input:active {
+.terminal-input:active,
+.terminal-input-area input:focus,
+.terminal-input-area input:hover,
+.terminal-input-area input:active,
+input.terminal-input:focus {
   background: transparent !important;
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
+  caret-color: #00ff00 !important;
 }
 
 .terminal-input:disabled {
@@ -297,7 +333,6 @@
 
 .terminal-send:hover:not(:disabled) {
   background: #00ff00;
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
 }
 
 .terminal-send:disabled {
@@ -341,7 +376,7 @@
 
 .chat-option.selected::after {
   content: " <";
-  color: #ffff00;
+  color: #00ff00;
 }
 
 /* Checkbox-style options (multi-select) */
@@ -361,18 +396,21 @@
 
 /* Confirm button for multiselect */
 .confirm-btn {
-  background: transparent !important;
+  background: #00aa00 !important;
   border: none !important;
-  color: #ffff00 !important;
-  padding: 4px 0 !important;
+  color: #0a0a0a !important;
+  padding: 8px 16px !important;
   font-family: inherit;
   font-size: 14px;
+  font-weight: bold;
   cursor: pointer;
   text-align: left;
+  border-radius: 4px;
 }
 
 .confirm-btn:hover {
-  color: #00ff00 !important;
+  background: #00ff00 !important;
+  color: #0a0a0a !important;
 }
 
 /* ============================================================================
@@ -380,11 +418,13 @@
    ============================================================================ */
 
 .terminal-progress {
-  padding: 8px 16px;
+  padding: 1rem 16px 8px 16px;
   background: #111111;
   border-bottom: 2px solid #000000;
-  display: flex;
-  align-items: center;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
   gap: 12px;
 }
 
@@ -392,15 +432,19 @@
   color: #888888;
   font-size: 12px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.progress-bar {
-  flex: 1;
-  height: 4px;
+.terminal-progress .progress-bar {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0;
+  height: 6px;
   background: #222222;
-  border-radius: 2px;
+  border-radius: 3px;
   overflow: hidden;
-  align-self: center;
+  display: block !important;
+  border: none !important;
 }
 
 .progress-fill {
@@ -478,4 +522,47 @@
 [data-theme="light"] .terminal-intake {
   /* Keep terminal dark even in light mode */
   background-color: #0a0a0a;
+}
+
+/* ============================================================================
+   AVATAR INTRO
+   ============================================================================ */
+
+.terminal-avatar-intro {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem 0;
+  margin: 0.5rem 0;
+}
+
+.terminal-avatar-img {
+  width: 150px;
+  height: auto;
+  filter: brightness(0) invert(1) brightness(0.8) contrast(1.1);
+  animation: avatar-flicker 3s infinite;
+  position: relative;
+}
+
+/* Grainy overlay on top of avatar */
+.terminal-avatar-intro::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.08;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+@keyframes avatar-flicker {
+  0%, 95%, 100% { opacity: 1; }
+  96% { opacity: 0.85; }
+  97% { opacity: 0.95; }
+  98% { opacity: 0.8; }
+  99% { opacity: 1; }
 }

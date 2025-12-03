@@ -2496,7 +2496,10 @@ export class ClientPortalModule extends BaseModule {
    * Handle user logout - clear session and redirect to landing page
    */
   private handleLogout(): void {
-    // Clear auth data from localStorage
+    // Clear all auth data from localStorage
+    localStorage.removeItem('clientAuth');
+    localStorage.removeItem('clientAuthToken');
+    localStorage.removeItem('client_auth_token');
     localStorage.removeItem('clientPortalAuth');
     localStorage.removeItem('clientEmail');
     localStorage.removeItem('clientName');

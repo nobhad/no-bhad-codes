@@ -140,47 +140,79 @@ BusinessCardRenderer.enableAfterIntro: Cannot read properties of null (reading '
 
 ---
 
-### Client Portal Sidebar Content Height
-
-**Status**: Deferred
-
-**Issue**: The sidebar-content div does not fill the full height of the sidebar, causing the SIGN OUT button to not be pushed to the bottom as intended.
-
-**Attempted Fixes:**
-- [x] Added `height: 100%` and `box-sizing: border-box` - caused layout issues (reverted)
-- [x] Added `flex: 1` - did not fill height
-- [x] Added `flex: 1 1 0` with `min-height: 0` - still not filling height
-- [x] Added `flex-grow: 1` - caused issues when sidebar is collapsed (reverted)
-- [x] Added `height: calc(100% - 48px)` - did not work as expected (reverted)
-
-**Current State**: Reverted to basic styles. Sign out button appears after nav buttons instead of at bottom.
-
-**Root Cause**: The sidebar collapse animation conflicts with height-based flex solutions. When sidebar collapses, the content height calculations break.
-
-**Files Involved:**
-- `src/styles/pages/client-portal.css` - `.sidebar` (line ~523) and `.sidebar-content` (line ~543)
-- `client/portal.html` - HTML structure with sidebar-content containing sidebar-footer
-
-**Possible Future Solutions:**
-- Use JavaScript to set height dynamically based on sidebar state
-- Restructure HTML to separate nav buttons from sign out button
-- Use CSS Grid instead of Flexbox for more control
-
----
-
-### Client Portal Footer Z-Index
+### Client Portal Sidebar Layout
 
 **Status**: Fixed
 
-**Issue**: Footer was appearing over the sidebar instead of behind it.
+**Issue**: Multiple sidebar layout issues - SIGN OUT button not at bottom, footer overlapping sidebar, collapsed state showing partial content.
 
-**Root Cause**: Main `footer.css` has `z-index: 50` while sidebar has `z-index: 10`. Needed to override footer z-index for client portal.
-
-**Fix Applied:**
-- [x] Added `z-index: 1 !important` to `[data-page="client-portal"] .footer` in client-portal.css
+**Fixes Applied:**
+- [x] SIGN OUT button positioned at bottom using `position: absolute` on `.sidebar-footer`
+- [x] Hide entire `.sidebar-content` when collapsed (prevents partial text showing)
+- [x] Hide footer on client portal entirely (`display: none !important`) to avoid z-index conflicts
+- [x] Dashboard container uses full `100vh` height instead of `calc(100vh - footer-height)`
+- [x] Added small avatar logo at top of collapsed sidebar linking to home page
+- [x] Sidebar buttons slightly larger with diffuse shadows
+- [x] Added `handleLogout()` method to clear auth and redirect to landing page
 
 **Files Modified:**
-- `src/styles/pages/client-portal.css` - Line ~274
+- `src/styles/pages/client-portal.css` - Sidebar and footer styles
+- `src/features/client/client-portal.ts` - Added handleLogout method
+- `client/portal.html` - Added collapsed avatar logo, btn-secondary class to logout button
+
+---
+
+### Intake Modal Missing Overlay
+
+**Status**: Fixed
+
+**Issue**: Client landing page intake modal was missing the dark overlay background when opened.
+
+**Fixes Applied:**
+- [x] Added `.intake-modal` CSS with dark overlay (`rgba(0, 0, 0, 0.8)`)
+- [x] Fixed CSS to use `.open` class (not `.active`) to match JavaScript
+- [x] Added minimized and fullscreen states for modal
+
+**Files Modified:**
+- `src/styles/pages/client.css` - Added intake-modal styles (lines 993-1041)
+
+---
+
+### Terminal Intake Dividing Line
+
+**Status**: Fixed
+
+**Issue**: Terminal intake form was missing the dividing line above the input text area.
+
+**Fixes Applied:**
+- [x] Changed `.terminal-input-area` border-top from `none` to `2px solid #000000`
+
+**Files Modified:**
+- `src/styles/pages/terminal-intake.css` - Added border-top to input area
+
+---
+
+### Persistent Login for Client Portal
+
+**Status**: Fixed
+
+**Issue**: User was being taken back to landing page even when already logged in. Session should persist unless user explicitly logs out.
+
+**Fixes Applied:**
+- [x] Added `isLoggedIn()` check in `ClientLandingModule.onInit()` to redirect to portal if already authenticated
+- [x] Checks for `clientAuth` localStorage data with valid email and loginTime
+- [x] Also checks for `client_auth_token` stored by portal
+- [x] Updated `handleLogout()` in `ClientPortalModule` to clear all auth-related localStorage keys:
+  - `clientAuth`
+  - `clientAuthToken`
+  - `client_auth_token`
+  - `clientPortalAuth`
+  - `clientEmail`
+  - `clientName`
+
+**Files Modified:**
+- `src/features/client/client-landing.ts` - Added isLoggedIn() check and redirect
+- `src/features/client/client-portal.ts` - Updated handleLogout() to clear all auth keys
 
 ---
 
