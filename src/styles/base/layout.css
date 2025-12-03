@@ -391,14 +391,33 @@ main,
 }
 
 @media screen and (max-width: 767px) {
+  /* Mobile: Normal document flow with header/footer scrolling with content */
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
   main {
-    top: var(--header-height);
-    height: calc(100vh - var(--header-height) - var(--footer-height));
+    position: static;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    flex: 1;
+    overflow: visible;
+    scroll-snap-type: none;
   }
 
   section {
-    height: calc(100svh - var(--header-height));
+    min-height: auto;
+    height: auto;
     padding: 1rem;
+    scroll-snap-align: none;
+    flex: 0 0 auto;
   }
 
   .section-content {
@@ -410,6 +429,16 @@ main,
   .about-content {
     max-width: 95vw;
     gap: 0.8rem;
+  }
+
+  /* Sections should be natural height, not full viewport */
+  .business-card-section,
+  .about-section,
+  .contact-section,
+  .hero-section,
+  main > section {
+    min-height: auto;
+    flex: 0 0 auto;
   }
 
   .container,
