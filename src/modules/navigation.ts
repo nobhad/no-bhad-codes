@@ -73,11 +73,11 @@ export class NavigationModule extends BaseModule {
    * Cache all navigation elements
    */
   private async cacheElements(): Promise<void> {
-    this.nav = this.getElement('nav', '[data-nav]', true) as HTMLElement | null;
+    this.nav = this.getElement('nav', '[data-nav]', false) as HTMLElement | null;
     this.overlay = this.getElement('overlay', '.overlay', false) as HTMLElement | null;
-    this.menuToggles = this.getElements('menuToggles', '[data-menu-toggle]', true);
-    this.menuLinks = this.getElements('menuLinks', '.menu-link', true);
-    this.bgPanels = this.getElements('bgPanels', '.bg-panel', true);
+    this.menuToggles = this.getElements('menuToggles', '[data-menu-toggle]', false);
+    this.menuLinks = this.getElements('menuLinks', '.menu-link', false);
+    this.bgPanels = this.getElements('bgPanels', '.bg-panel', false);
     this.menuButtonTexts = this.getElements('menuButtonTexts', '.menu-button-text p', false);
   }
 
@@ -139,23 +139,27 @@ export class NavigationModule extends BaseModule {
                 !!this.routerService
               );
 
-              if (this.routerService) {
-                // Small delay to let menu close animation start
-                setTimeout(() => {
-                  if (isHomePage) {
-                    // If already on home page, just scroll to section
-                    console.log('[NavigationModule] Navigating to section:', href);
-                    this.routerService!.navigate(href, { smooth: true });
+              // Small delay to let menu close animation start
+              setTimeout(() => {
+                if (isHomePage) {
+                  // If already on home page, just scroll to section
+                  console.log('[NavigationModule] Navigating to section:', href);
+                  if (this.routerService) {
+                    this.routerService.navigate(href, { smooth: true });
                   } else {
-                    // If on another page, navigate to home page with hash
-                    // This will load the home page and then scroll to the section
-                    console.log('[NavigationModule] Redirecting to home with hash:', `/${href}`);
-                    window.location.href = `/${href}`;
+                    // Fallback: scroll directly to element
+                    const targetId = href.replace('#', '');
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                      targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
                   }
-                }, 100);
-              } else {
-                console.error('[NavigationModule] RouterService not available!');
-              }
+                } else {
+                  // If on another page, navigate to home page with hash
+                  console.log('[NavigationModule] Redirecting to home with hash:', `/${href}`);
+                  window.location.href = `/${href}`;
+                }
+              }, 100);
             } else {
               // For non-hash links, just close menu and let browser navigate
               this.closeMenu();

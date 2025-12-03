@@ -57,75 +57,203 @@
   <script type="module" src="/src/main.ts"></script>
 </head>
 <body>
-  <!-- Header -->
+  <!-- NAVIGATION HEADER -->
   <header class="header">
-    <a href="/" class="logo">
-      <img src="/images/avatar.svg" alt="No Bhad Codes" class="logo-image">
-    </a>
-    <button class="theme-toggle" aria-label="Toggle theme">
-      <svg class="theme-icon sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="5"></circle>
-        <line x1="12" y1="1" x2="12" y2="3"></line>
-        <line x1="12" y1="21" x2="12" y2="23"></line>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-        <line x1="1" y1="12" x2="3" y2="12"></line>
-        <line x1="21" y1="12" x2="23" y2="12"></line>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-      </svg>
-      <svg class="theme-icon moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-      </svg>
-    </button>
+    <div class="container is--full">
+      <nav class="nav-row">
+        <a href="/" aria-label="Go to homepage" class="nav-logo-row">
+          no bhad codes
+        </a>
+        <div class="nav-row__right">
+          <button id="toggle-theme" class="theme-button" aria-label="Toggle dark/light theme">
+            <div class="icon-wrap">
+              <svg class="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"></circle>
+                <path d="M12 2V4M12 20V22M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2"></path>
+              </svg>
+              <svg class="theme-icon moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79z"></path>
+              </svg>
+            </div>
+          </button>
+          <button role="button" data-menu-toggle="" class="menu-button">
+            <div class="menu-button-text">
+              <p class="p-large">Menu</p>
+              <p class="p-large">Close</p>
+            </div>
+            <div class="icon-wrap">
+              <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 16 16" fill="none" class="menu-button-icon">
+                <path d="M7.33333 16L7.33333 -3.2055e-07L8.66667 -3.78832e-07L8.66667 16L7.33333 16Z" fill="currentColor"></path>
+                <path d="M16 8.66667L-2.62269e-07 8.66667L-3.78832e-07 7.33333L16 7.33333L16 8.66667Z" fill="currentColor"></path>
+                <path d="M6 7.33333L7.33333 7.33333L7.33333 6C7.33333 6.73637 6.73638 7.33333 6 7.33333Z" fill="currentColor"></path>
+                <path d="M10 7.33333L8.66667 7.33333L8.66667 6C8.66667 6.73638 9.26362 7.33333 10 7.33333Z" fill="currentColor"></path>
+                <path d="M6 8.66667L7.33333 8.66667L7.33333 10C7.33333 9.26362 6.73638 8.66667 6 8.66667Z" fill="currentColor"></path>
+                <path d="M10 8.66667L8.66667 8.66667L8.66667 10C8.66667 9.26362 9.26362 8.66667 10 8.66667Z" fill="currentColor"></path>
+              </svg>
+            </div>
+          </button>
+        </div>
+      </nav>
+    </div>
   </header>
 
-  <!-- Navigation -->
-  <nav class="navigation" id="navigation">
-    <ul class="nav-list">
-      <li class="nav-item"><a href="/" class="nav-link" data-section="home"><span class="eyebrow">00</span>home</a></li>
-      <li class="nav-item"><a href="#about" class="nav-link" data-section="about"><span class="eyebrow">01</span>about</a></li>
-      <li class="nav-item"><a href="#contact" class="nav-link" data-section="contact"><span class="eyebrow">02</span>contact</a></li>
-      <li class="nav-item"><a href="#" class="nav-link disabled" data-section="portfolio"><span class="eyebrow">03</span>portfolio <span class="coming-soon">coming soon</span></a></li>
-      <li class="nav-item"><a href="/client/landing" class="nav-link" data-section="client-portal"><span class="eyebrow">04</span>client portal</a></li>
-    </ul>
+  <!-- MOBILE/OVERLAY NAVIGATION -->
+  <nav data-nav="closed" class="nav">
+    <div data-menu-toggle="" class="overlay"></div>
+    <div class="menu">
+      <div class="menu-bg">
+        <div class="bg-panel first"></div>
+        <div class="bg-panel second"></div>
+        <div class="bg-panel"></div>
+      </div>
+      <div class="menu-inner">
+        <ul class="menu-list">
+          <li class="menu-list-item">
+            <a href="#intro" class="menu-link">
+              <p class="menu-link-heading" data-text="home">home</p>
+              <p class="eyebrow">00</p>
+              <div class="menu-link-bg"></div>
+            </a>
+          </li>
+          <li class="menu-list-item">
+            <a href="#about" class="menu-link">
+              <p class="menu-link-heading" data-text="about">about</p>
+              <p class="eyebrow">01</p>
+              <div class="menu-link-bg"></div>
+            </a>
+          </li>
+          <li class="menu-list-item">
+            <a href="#contact" class="menu-link">
+              <p class="menu-link-heading" data-text="contact">contact</p>
+              <p class="eyebrow">02</p>
+              <div class="menu-link-bg"></div>
+            </a>
+          </li>
+          <li class="menu-list-item">
+            <a href="#" class="menu-link disabled">
+              <p class="menu-link-heading" data-text="portfolio">portfolio</p>
+              <p class="eyebrow">03</p>
+              <div class="coming-soon-banner">Coming Soon</div>
+              <div class="menu-link-bg"></div>
+            </a>
+          </li>
+          <li class="menu-list-item">
+            <a href="/client/landing" class="menu-link">
+              <p class="menu-link-heading" data-text="client portal">client portal</p>
+              <p class="eyebrow">04</p>
+              <div class="menu-link-bg"></div>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
   </nav>
 
   <!-- Main Content -->
   <main id="main-content">
-    <!-- Home Section -->
-    <section id="home" class="section home-section" data-section="home">
-      <div class="section-content">
-        <div class="hero">
-          <h1 class="hero-title">
-            <span class="title-line">NO BHAD</span>
-            <span class="title-line">CODES</span>
-          </h1>
-          <p class="hero-subtitle">Professional Web Development</p>
+    <!-- BUSINESS CARD INTRO - First section shown on load -->
+    <section id="intro" class="business-card-section">
+      <div class="business-card-container">
+        <div id="business-card" class="business-card">
+          <div id="business-card-inner" class="business-card-inner">
+            <!-- FRONT OF CARD -->
+            <div class="business-card-front">
+              <img src="/images/business-card_front.svg" alt="Business Card Front" class="card-svg" width="525" height="299.7">
+            </div>
+            <!-- BACK OF CARD -->
+            <div class="business-card-back">
+              <img src="/images/business-card_back.svg" alt="Avatar" class="card-svg" width="525" height="299.7">
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- About Section -->
-    <section id="about" class="section about-section" data-section="about">
-      <div class="section-content">
-        <h2 class="section-title">About</h2>
-        <div class="about-content">
-          <p>I'm Noelle, a full-stack developer specializing in modern web applications, client portals, and custom business solutions.</p>
-          <p>With expertise in TypeScript, React, Node.js, and cloud infrastructure, I build scalable, maintainable applications that solve real business problems.</p>
+    <!-- ABOUT SECTION -->
+    <section id="about" class="about-section">
+      <h2>about</h2>
+      <div class="about-content">
+        <p>Hi, I'm Noelle Bhaduri – I build web solutions from simple link trees to complex custom software. My work includes animated landing pages, browser extensions, e-commerce platforms, content management systems, and responsive portfolios for creators and businesses.</p>
+
+        <p>I combine technical expertise with creative design, developing type-safe applications with modern frameworks, architecting scalable backends, and crafting engaging user experiences. From concept to deployment, I deliver solutions tailored to your specific needs.</p>
+
+        <p>Currently based in the Boston, MA area and actively seeking web development opportunities.</p>
+
+        <div class="tech-stack">
+          <h3>tech stack</h3>
+          <p class="tech-list">JavaScript • TypeScript • React • Next.js • Vue.js • HTML5 • CSS3 • Node.js • Express.js • Git • npm/yarn • MongoDB • Mongoose • MySQL • Supabase • Tailwind CSS • Bootstrap • Webpack • Vite • JSON • AJAX • jQuery • PHP • GSAP • Vuetify • Bootstrap Vue • Jotai • Zod • EJS • XML • Chrome Extensions API • Adobe Illustrator • Photoshop • Claude Code CLI</p>
         </div>
       </div>
     </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="section contact-section" data-section="contact">
-      <div class="section-content">
-        <h2 class="section-title">Contact</h2>
-        <div class="contact-content">
-          <p>Ready to start your project? Get in touch!</p>
-          <a href="mailto:hello@nobhad.codes" class="contact-link">hello@nobhad.codes</a>
+    <!-- CONTACT SECTION -->
+    <section id="contact" class="contact-section">
+      <h2>contact</h2>
+      <p class="section-subtitle">Whether you need a new project, have questions, or just want to say hello - I'd love to hear from you!</p>
+
+      <form class="contact-form" method="post" name="contact-form">
+        <!-- Honeypot field for bot detection -->
+        <input name="bot-field" style="display: none;" />
+
+        <input autocomplete="off" class="form-input" data-name="First Name" id="First-Name" maxlength="256" name="First-Name" placeholder="First Name" required="" type="text">
+
+        <input autocomplete="off" class="form-input" data-name="Last Name" id="Last-Name" maxlength="256" name="Last-Name" placeholder="Last Name" required="" type="text">
+
+        <input autocomplete="on" class="form-input" data-name="Company Name" id="Company-Name" maxlength="256" name="Company-Name" placeholder="Company/Organization Name (Optional)" type="text">
+
+        <input autocomplete="on" class="form-input" data-name="Email" id="Email" maxlength="256" name="Email" placeholder="Email Address" required="" type="email">
+
+        <select class="form-select" data-name="Inquiry Type" id="inquiry-type" name="Inquiry-Type" required="">
+          <option value="">What can I help you with?</option>
+          <option value="New Project">New Project - I need something built</option>
+          <option value="Existing Project">Existing Project - Updates/fixes needed</option>
+          <option value="Consultation">Consultation - I have questions</option>
+          <option value="Collaboration">Collaboration - Let's work together</option>
+          <option value="General">General Inquiry</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <!-- PROJECT DETAILS SECTION (conditional) -->
+        <div class="project-details" id="project-details" style="display: none;">
+          <select class="form-select" data-name="Project Type" id="project-type" name="Project-Type">
+            <option value="">What type of project?</option>
+            <option value="Simple Site">Simple Site (1-2 pages, landing page)</option>
+            <option value="Small Business Website">Small Business Website</option>
+            <option value="Portfolio Website">Portfolio Website</option>
+            <option value="E-commerce Store">E-commerce Store</option>
+            <option value="Web Application">Web Application</option>
+            <option value="Browser Extension">Browser Extension</option>
+            <option value="Other">Other - Let's discuss</option>
+          </select>
+
+          <div class="form-row">
+            <select class="form-select" data-name="Timeline" id="timeline" name="Timeline">
+              <option value="">Timeline?</option>
+              <option value="ASAP">ASAP</option>
+              <option value="1-2 months">1-2 months</option>
+              <option value="2-4 months">2-4 months</option>
+              <option value="4+ months">4+ months</option>
+              <option value="Flexible">Flexible</option>
+            </select>
+
+            <select class="form-select" data-name="Budget Range" id="budget-range" name="Budget-Range">
+              <option value="">Budget range?</option>
+              <option value="Under $2K">Under $2K</option>
+              <option value="$2K-5K">$2K-5K</option>
+              <option value="$5K-10K">$5K-10K</option>
+              <option value="$10K-25K">$10K-25K</option>
+              <option value="$25K+">$25K+</option>
+              <option value="Let's discuss">Let's discuss</option>
+            </select>
+          </div>
         </div>
-      </div>
+
+        <textarea autocomplete="off" class="form-textarea" data-name="Project Description" id="project-description" maxlength="1000" name="Project-Description" placeholder="Tell me about your project or inquiry..." required=""></textarea>
+
+        <div class="form-actions">
+          <input class="form-button" data-wait="Sending..." type="submit" value="Let's Talk">
+        </div>
+      </form>
     </section>
   </main>
 
