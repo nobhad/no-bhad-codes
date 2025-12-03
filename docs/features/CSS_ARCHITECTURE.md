@@ -339,6 +339,46 @@ All Client Portal specific classes use the `cp-` prefix to avoid conflicts with 
 }
 ```
 
+### Portal Layout (Client Landing Page)
+
+The `.portal-layout` system provides a two-column grid for the client landing page:
+
+```css
+/* src/styles/pages/client.css */
+.portal-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  width: 80vw;
+  max-width: 1000px;
+  margin-top: 1rem;
+  align-items: stretch;
+  grid-auto-rows: 1fr;
+}
+
+.portal-layout.desktop-only {
+  display: grid;
+}
+
+.portal-form-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.portal-form-area .login-form {
+  width: 100%;
+  height: 100%;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+```
+
 ### Project Card (Avoiding Conflicts)
 
 The `.cp-project-card` class was created because `.project-card` in `projects.css` had conflicting rules:

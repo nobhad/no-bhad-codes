@@ -211,6 +211,7 @@ main section:not(.business-card-section) {
   text-align: left;
   width: 100%;
   max-width: 600px;
+  margin-bottom: 1.5rem;
 }
 
 .tech-stack {
