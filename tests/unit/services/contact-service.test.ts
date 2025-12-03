@@ -30,8 +30,7 @@ describe('ContactService', () => {
     lastName: 'Doe',
     email: 'john@example.com',
     companyName: 'Test Company',
-    businessSize: 'small',
-    helpOption: 'consultation',
+    inquiryType: 'consultation',
     message: 'This is a test message with enough characters.'
   };
 
@@ -124,20 +123,10 @@ describe('ContactService', () => {
       expect(result.errors).toContain('Please enter a valid email address');
     });
 
-    it('should require business size', () => {
+    it('should require inquiry type', () => {
       const result = service.validateFormData({
         ...validFormData,
-        businessSize: ''
-      });
-
-      expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Please select a business size');
-    });
-
-    it('should require help option', () => {
-      const result = service.validateFormData({
-        ...validFormData,
-        helpOption: ''
+        inquiryType: ''
       });
 
       expect(result.valid).toBe(false);
@@ -169,8 +158,7 @@ describe('ContactService', () => {
         firstName: '',
         lastName: '',
         email: '',
-        businessSize: '',
-        helpOption: '',
+        inquiryType: '',
         message: ''
       });
 
