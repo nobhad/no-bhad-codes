@@ -86,20 +86,28 @@ describe('DataService', () => {
       expect(dataService.getStatus().dataLoaded).toBe(true);
     });
 
-    it('should handle fetch errors', async () => {
+    it('should use fallback data on fetch errors', async () => {
       (fetch as Mock).mockResolvedValue({
         ok: false,
         status: 404,
         statusText: 'Not Found'
       });
 
-      await expect(dataService.init()).rejects.toThrow('Failed to load data: 404 Not Found');
+      await dataService.init();
+
+      // Should use fallback data instead of throwing
+      expect(dataService.getStatus().dataLoaded).toBe(true);
+      expect(dataService.getProjects()).toEqual([]);
     });
 
-    it('should handle network errors', async () => {
+    it('should use fallback data on network errors', async () => {
       (fetch as Mock).mockRejectedValue(new Error('Network error'));
 
-      await expect(dataService.init()).rejects.toThrow('Network error');
+      await dataService.init();
+
+      // Should use fallback data instead of throwing
+      expect(dataService.getStatus().dataLoaded).toBe(true);
+      expect(dataService.getProjects()).toEqual([]);
     });
   });
 
