@@ -502,21 +502,6 @@ export class Application {
    * Initialize modules
    */
   private async initializeModules(): Promise<void> {
-    // Re-enable client portal module for actual functionality
-    const coreModules = ['ClientPortalModule'];
-
-    for (const moduleName of coreModules) {
-      try {
-        console.log(`[Application] Initializing ${moduleName}...`);
-        const moduleInstance = (await container.resolve(moduleName)) as any;
-        await moduleInstance.init();
-        this.modules.set(moduleName, moduleInstance);
-        console.log(`[Application] ${moduleName} initialized`);
-      } catch (error) {
-        console.error(`[Application] Failed to initialize ${moduleName}:`, error);
-      }
-    }
-
     // Determine current page type
     const currentPath = window.location.pathname;
     const isClientPortal = currentPath.includes('/client/portal');

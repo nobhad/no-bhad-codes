@@ -119,6 +119,20 @@ router.post(
       // Send email notification to admin
       const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
+      // Store in database
+      const db = getDatabase();
+      try {
+        await db.run(
+          `INSERT INTO contact_submissions (name, email, subject, message, ip_address, user_agent, message_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [name, email, subject, message, req.ip || 'unknown', req.get('User-Agent') || 'unknown', messageId]
+        );
+        await logger.info(`Contact form saved to database - messageId: ${messageId}`);
+      } catch (dbError) {
+        // Log but don't fail - email will still be sent
+        await logger.error(`Failed to save contact form to database: ${dbError}`);
+      }
+
       try {
         await emailService.sendEmail({
           to: process.env.ADMIN_EMAIL || 'admin@nobhadcodes.com',

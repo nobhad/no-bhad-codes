@@ -107,7 +107,7 @@ router.post(
 
     // Find user in database
     const client = await db.get(
-      'SELECT id, email, password_hash, company_name, contact_name, status FROM clients WHERE email = ?',
+      'SELECT id, email, password_hash, company_name, contact_name, status, is_admin FROM clients WHERE email = ?',
       [email.toLowerCase()]
     );
 
@@ -149,7 +149,8 @@ router.post(
       {
         id: client.id,
         email: client.email,
-        type: 'client'
+        type: client.is_admin ? 'admin' : 'client',
+        isAdmin: Boolean(client.is_admin)
       },
       secret,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as SignOptions
@@ -157,13 +158,16 @@ router.post(
 
     // Return user data (without password) and token
     res.json({
+      success: true,
       message: 'Login successful',
       user: {
         id: client.id,
         email: client.email,
+        name: client.contact_name,
         companyName: client.company_name,
         contactName: client.contact_name,
-        status: client.status
+        status: client.status,
+        isAdmin: Boolean(client.is_admin)
       },
       token,
       expiresIn: process.env.JWT_EXPIRES_IN || '7d'
@@ -742,6 +746,128 @@ router.post(
       message: 'Admin login successful',
       token,
       expiresIn: '1h'
+    });
+  })
+);
+
+/**
+ * @swagger
+ * /api/auth/verify-invitation:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Verify invitation token
+ *     description: Check if an invitation token is valid
+ */
+router.post(
+  '/verify-invitation',
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        error: 'Token is required'
+      });
+    }
+
+    const db = getDatabase();
+    const client = await db.get(`
+      SELECT id, email, contact_name, company_name, invitation_expires_at
+      FROM clients
+      WHERE invitation_token = ?
+    `, [token]);
+
+    if (!client) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid invitation token'
+      });
+    }
+
+    // Check if token is expired
+    if (client.invitation_expires_at && new Date(client.invitation_expires_at) < new Date()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invitation has expired. Please contact support for a new invitation.'
+      });
+    }
+
+    res.json({
+      success: true,
+      email: client.email,
+      name: client.contact_name,
+      company: client.company_name
+    });
+  })
+);
+
+/**
+ * @swagger
+ * /api/auth/set-password:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Set password for invited client
+ *     description: Set password using invitation token (magic link)
+ */
+router.post(
+  '/set-password',
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Token and password are required'
+      });
+    }
+
+    // Password validation
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password must be at least 8 characters long'
+      });
+    }
+
+    const db = getDatabase();
+    const client = await db.get(`
+      SELECT id, email, invitation_expires_at
+      FROM clients
+      WHERE invitation_token = ?
+    `, [token]);
+
+    if (!client) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid invitation token'
+      });
+    }
+
+    // Check if token is expired
+    if (client.invitation_expires_at && new Date(client.invitation_expires_at) < new Date()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invitation has expired. Please contact support for a new invitation.'
+      });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Update client with password and activate account
+    await db.run(`
+      UPDATE clients
+      SET password_hash = ?, status = 'active', invitation_token = NULL, invitation_expires_at = NULL
+      WHERE id = ?
+    `, [hashedPassword, client.id]);
+
+    res.json({
+      success: true,
+      message: 'Password set successfully. You can now log in.',
+      email: client.email
     });
   })
 );

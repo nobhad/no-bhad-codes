@@ -1806,6 +1806,45 @@ export class ClientPortalModule extends BaseModule {
           this.setupDashboardEventListeners();
         }, 100);
       }
+
+      // Show admin features if user is admin
+      this.setupAdminFeatures();
+    }
+  }
+
+  /**
+   * Check if user is admin and show admin-only UI elements
+   */
+  private setupAdminFeatures(): void {
+    try {
+      // Check localStorage for admin flag
+      const authData = localStorage.getItem('clientAuth');
+      if (authData) {
+        const parsed = JSON.parse(authData);
+        if (parsed.isAdmin) {
+          // Show admin buttons
+          const adminButtons = document.querySelectorAll('.btn-admin');
+          adminButtons.forEach(btn => btn.classList.remove('hidden'));
+          console.log('[ClientPortal] Admin features enabled');
+        }
+      }
+
+      // Also check JWT token for admin flag
+      const token = localStorage.getItem('client_auth_token');
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          if (payload.isAdmin || payload.type === 'admin') {
+            const adminButtons = document.querySelectorAll('.btn-admin');
+            adminButtons.forEach(btn => btn.classList.remove('hidden'));
+            console.log('[ClientPortal] Admin features enabled (from token)');
+          }
+        } catch {
+          // Invalid token format, ignore
+        }
+      }
+    } catch (error) {
+      console.error('[ClientPortal] Error checking admin status:', error);
     }
   }
 

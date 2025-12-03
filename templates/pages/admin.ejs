@@ -10,6 +10,7 @@
   
   <div class="nav-tabs">
     <button class="tab-btn active" data-tab="overview">Overview</button>
+    <button class="tab-btn" data-tab="leads">Leads</button>
     <button class="tab-btn" data-tab="performance">Performance</button>
     <button class="tab-btn" data-tab="analytics">Analytics</button>
     <button class="tab-btn" data-tab="visitors">Visitors</button>
@@ -56,6 +57,59 @@
       <div class="chart-container">
         <h3>Traffic Sources</h3>
         <div id="sources-chart" class="chart"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leads Tab -->
+  <div id="leads-tab" class="tab-content">
+    <div class="leads-container">
+      <div class="leads-header">
+        <h2>Intake Form Submissions</h2>
+        <div class="leads-actions">
+          <button id="refresh-leads-btn" class="btn-refresh">Refresh</button>
+        </div>
+      </div>
+
+      <div class="leads-stats">
+        <div class="stat-card">
+          <span class="stat-label">Total Leads</span>
+          <span class="stat-value" id="total-leads">-</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Pending</span>
+          <span class="stat-value" id="pending-leads">-</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">In Progress</span>
+          <span class="stat-value" id="active-leads">-</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Completed</span>
+          <span class="stat-value" id="completed-leads">-</span>
+        </div>
+      </div>
+
+      <div class="leads-table-container">
+        <table class="leads-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th>Company</th>
+              <th>Email</th>
+              <th>Project Type</th>
+              <th>Budget</th>
+              <th>Timeline</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="leads-table-body">
+            <tr>
+              <td colspan="8" class="loading-row">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
