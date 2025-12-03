@@ -184,15 +184,38 @@ main section:not(.business-card-section) {
 }
 
 /* About section specific styling */
-.about-content p {
+.about-section h2 {
+  margin-bottom: 1.5rem;
+  text-align: left;
+  width: 100%;
+}
+
+.about-content p,
+.about-text-wrapper p {
   font-size: clamp(0.85rem, 2vw, 1rem);
   line-height: 1.6;
   color: var(--fg);
+  margin-bottom: 1rem;
+}
+
+.about-text-wrapper {
+  margin-bottom: 1rem;
+}
+
+.tech-stack-viewport {
+  margin-top: 0.5rem;
+}
+
+/* Contact section styling */
+.contact-section h2 {
+  text-align: left;
+  width: 100%;
+  max-width: 600px;
 }
 
 .tech-stack {
   background-color: #f8f9fa;
-  padding: 1rem;
+  padding: 1.5rem 2rem;
   border-radius: 8px;
   border: 2px solid var(--color-neutral-400);
 }
@@ -207,6 +230,7 @@ html[data-theme="dark"] .tech-stack {
   margin-bottom: 0.5rem;
   color: var(--fg);
   font-weight: 600;
+  text-align: left;
 }
 
 .tech-list {

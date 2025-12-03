@@ -501,7 +501,7 @@ main,
   }
 
   .about-section .about-text-wrapper h2 {
-    text-align: center;
+    text-align: left;
     margin-bottom: 2rem;
   }
 
@@ -533,7 +533,7 @@ main,
   }
 
   .about-section .tech-stack h3 {
-    text-align: center;
+    text-align: left;
     margin-bottom: 1rem;
   }
 
