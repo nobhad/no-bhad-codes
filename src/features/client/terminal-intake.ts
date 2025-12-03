@@ -1863,7 +1863,13 @@ Thank you for choosing No Bhad Codes!
 
     // Get the old answer to pre-fill for text inputs (before we clear data)
     const question = QUESTIONS[questionIndex];
-    const oldAnswer = question.field ? this.intakeData[question.field] : undefined;
+    // Handle special case: greeting question stores name but has empty field property
+    let oldAnswer: string | string[] | undefined;
+    if (question.id === 'greeting') {
+      oldAnswer = this.intakeData.name as string;
+    } else if (question.field) {
+      oldAnswer = this.intakeData[question.field];
+    }
 
     // Clear the data for this question and ALL subsequent questions
     for (let i = questionIndex; i < QUESTIONS.length; i++) {
@@ -1928,10 +1934,16 @@ Thank you for choosing No Bhad Codes!
     await this.askCurrentQuestion();
 
     // Pre-fill the input with old answer for text-based questions
+    // This lets users just hit Enter to confirm the same value
     if (oldAnswer && this.inputElement && typeof oldAnswer === 'string') {
-      const questionType = question.type;
-      if (questionType === 'text' || questionType === 'email' || questionType === 'tel' || questionType === 'url' || questionType === 'textarea') {
+      const textTypes = ['text', 'email', 'tel', 'url', 'textarea'];
+      if (textTypes.includes(question.type)) {
+        // Small delay to ensure input is ready after askCurrentQuestion
+        await this.delay(50);
         this.inputElement.value = oldAnswer;
+        this.inputElement.focus();
+        // Move cursor to end of text
+        this.inputElement.setSelectionRange(oldAnswer.length, oldAnswer.length);
       }
     }
   }
