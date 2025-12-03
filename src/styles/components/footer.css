@@ -11,7 +11,7 @@
   font-size: var(--font-size-sm);
   color: var(--color-dark);
   text-align: center;
-  z-index: 200;
+  z-index: 50;
   display: flex !important;
   align-items: center;
   justify-content: center;

@@ -1,7 +1,27 @@
 <!-- Dashboard Layout -->
 <div class="dashboard-container">
+    <!-- Mobile Header Bar -->
+    <header class="mobile-header" id="mobile-header">
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle menu">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+        <h1 class="mobile-header-title" id="mobile-header-title">Dashboard</h1>
+    </header>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobile-overlay"></div>
+
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
+        <!-- Mobile Close Button -->
+        <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close menu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
         <div class="sidebar-content">
             <!-- Logo -->
             <a href="/" class="sidebar-logo">
@@ -20,11 +40,7 @@
             </div>
         </div>
 
-        <!-- Sidebar Toggle Button -->
-        <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle Sidebar">
-            <span class="toggle-icon">◀</span>
-        </button>
-    </aside>
+        </aside>
 
     <!-- Content Area -->
     <div class="dashboard-content" id="dashboard-content">
@@ -32,7 +48,20 @@
             <!-- Dashboard View (Default) -->
             <div class="tab-content active" id="tab-dashboard">
                 <div class="page-header">
+                    <button class="header-sidebar-toggle" aria-label="Toggle sidebar">◀</button>
                     <h2>Welcome Back, <span id="client-name">Client</span>!</h2>
+                </div>
+
+                <!-- Project Cards -->
+                <div class="cp-project-cards">
+                    <div class="cp-project-card cp-shadow">
+                        <h3>Your Website Project</h3>
+                        <p class="project-status">Status: <span class="status-badge">In Progress</span></p>
+                        <p class="project-progress">Progress: 25%</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 25%"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Quick Stats -->
@@ -51,22 +80,11 @@
                     </button>
                 </div>
 
-                <!-- Project Cards -->
-                <div class="cp-project-cards">
-                    <div class="cp-project-card cp-shadow">
-                        <h3>Your Website Project</h3>
-                        <p class="project-status">Status: <span class="status-badge">In Progress</span></p>
-                        <p class="project-progress">Progress: 25%</p>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 25%"></div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Recent Activity -->
                 <div class="recent-activity cp-shadow">
                     <h3>Recent Activity</h3>
                     <ul class="activity-list">
+                        <li>Project outline uploaded - Dec 1, 2025</li>
                         <li>Project intake received - Nov 30, 2025</li>
                         <li>Account activated - Nov 28, 2025</li>
                     </ul>
@@ -76,6 +94,7 @@
             <!-- Files View -->
             <div class="tab-content" id="tab-files">
                 <div class="page-header">
+                    <button class="header-sidebar-toggle" aria-label="Toggle sidebar">◀</button>
                     <h2>Files</h2>
                 </div>
 
@@ -83,7 +102,8 @@
                 <div class="files-upload-section cp-shadow">
                     <h3>Upload Files</h3>
                     <div class="upload-dropzone" id="upload-dropzone">
-                        <p>Drag and drop files here or</p>
+                        <p class="dropzone-desktop">Drag and drop files here or</p>
+                        <p class="dropzone-mobile">Tap to select files</p>
                         <button class="btn btn-secondary" id="btn-browse-files">Browse Files</button>
                         <input type="file" id="file-input" multiple hidden>
                     </div>
@@ -128,6 +148,7 @@
             <!-- Messages View -->
             <div class="tab-content" id="tab-messages">
                 <div class="page-header">
+                    <button class="header-sidebar-toggle" aria-label="Toggle sidebar">◀</button>
                     <h2>Messages</h2>
                 </div>
 
@@ -135,7 +156,7 @@
                 <div class="messages-container cp-shadow">
                     <div class="messages-thread" id="messages-thread">
                         <div class="message message-received">
-                            <div class="message-avatar">
+                            <div class="message-avatar" data-name="Noelle">
                                 <img src="/images/avatar.svg" alt="Noelle" class="avatar-img">
                             </div>
                             <div class="message-content">
@@ -158,8 +179,22 @@
                                     Thanks! Looking forward to seeing the initial designs.
                                 </div>
                             </div>
-                            <div class="message-avatar">
+                            <div class="message-avatar" data-name="You">
                                 <div class="avatar-placeholder">YOU</div>
+                            </div>
+                        </div>
+                        <div class="message message-received message-unread">
+                            <div class="message-avatar" data-name="Noelle">
+                                <img src="/images/avatar.svg" alt="Noelle" class="avatar-img">
+                            </div>
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="message-sender">Noelle</span>
+                                    <span class="message-time">Dec 1, 2025 at 9:00 AM</span>
+                                </div>
+                                <div class="message-body">
+                                    The project outline is now uploaded in the Files section. Take a look when you get a chance and let me know if you have any questions!
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -183,6 +218,7 @@
             <!-- Invoices View -->
             <div class="tab-content" id="tab-invoices">
                 <div class="page-header">
+                    <button class="header-sidebar-toggle" aria-label="Toggle sidebar">◀</button>
                     <h2>Invoices</h2>
                 </div>
 
@@ -221,11 +257,12 @@
             <!-- Settings View -->
             <div class="tab-content" id="tab-settings">
                 <div class="page-header">
+                    <button class="header-sidebar-toggle" aria-label="Toggle sidebar">◀</button>
                     <h2>Settings</h2>
                 </div>
 
                 <div class="settings-grid">
-                <!-- Account Section (Profile + Password) -->
+                <!-- Account Section (Profile) -->
                 <div class="settings-section cp-shadow">
                     <h3>Account</h3>
                     <form class="settings-form" id="profile-form">
@@ -245,6 +282,14 @@
                             <label for="settings-phone">Phone</label>
                             <input type="tel" id="settings-phone" class="form-input" placeholder="(555) 555-5555">
                         </div>
+                        <button type="submit" class="btn btn-secondary">Save Changes</button>
+                    </form>
+                </div>
+
+                <!-- Change Password Section -->
+                <div class="settings-section cp-shadow">
+                    <h3>Change Password</h3>
+                    <form class="settings-form" id="password-form">
                         <div class="form-group">
                             <label for="current-password">Current Password</label>
                             <div class="cp-password-wrapper">
@@ -266,135 +311,137 @@
                                 <button type="button" class="cp-password-toggle" data-target="confirm-password" aria-label="Toggle password visibility"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-secondary">Save Changes</button>
-                    </form>
-                </div>
-
-                <!-- Notification Preferences -->
-                <div class="settings-section cp-shadow">
-                    <h3>Notification Preferences</h3>
-                    <form class="settings-form" id="notifications-form">
-                        <div class="checkbox-group">
-                            <label class="checkbox-item">
-                                <input type="checkbox" checked>
-                                <span>Email me when I receive a new message</span>
-                            </label>
-                            <label class="checkbox-item">
-                                <input type="checkbox" checked>
-                                <span>Email me when project status changes</span>
-                            </label>
-                            <label class="checkbox-item">
-                                <input type="checkbox" checked>
-                                <span>Email me when a new invoice is generated</span>
-                            </label>
-                            <label class="checkbox-item">
-                                <input type="checkbox">
-                                <span>Email me weekly project summary</span>
-                            </label>
-                        </div>
-                        <button type="submit" class="btn btn-secondary">Save Preferences</button>
+                        <button type="submit" class="btn btn-secondary">Update Password</button>
                     </form>
                 </div>
 
                 <!-- Billing Info Section -->
-                <div class="settings-section cp-shadow">
+                <div class="settings-section settings-section-wide cp-shadow">
                     <h3>Billing Information</h3>
-                    <form class="settings-form" id="billing-form">
-                        <div class="form-group">
-                            <label for="billing-company">Company Name</label>
-                            <input type="text" id="billing-company" class="form-input" placeholder="Your company name">
+                    <form class="settings-form billing-form-grid" id="billing-form">
+                        <div class="billing-column">
+                            <div class="form-group">
+                                <label for="billing-name">Full Name</label>
+                                <input type="text" id="billing-name" class="form-input" placeholder="Your full name">
+                            </div>
+                            <div class="form-group">
+                                <label for="billing-company">Company Name</label>
+                                <input type="text" id="billing-company" class="form-input" placeholder="Your company name">
+                            </div>
+                            <div class="form-group">
+                                <label for="billing-address">Street Address</label>
+                                <input type="text" id="billing-address" class="form-input" placeholder="123 Main St">
+                            </div>
+                            <div class="form-group">
+                                <label for="billing-address2">Address Line 2</label>
+                                <input type="text" id="billing-address2" class="form-input" placeholder="Apt, Suite, etc.">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="billing-address">Street Address</label>
-                            <input type="text" id="billing-address" class="form-input" placeholder="123 Main St">
+                        <div class="billing-column">
+                            <div class="form-group">
+                                <label for="billing-city">City</label>
+                                <input type="text" id="billing-city" class="form-input" placeholder="City">
+                            </div>
+                            <div class="form-group">
+                                <label for="billing-state">State / Province</label>
+                                <input type="text" id="billing-state" class="form-input" placeholder="State">
+                            </div>
+                            <div class="form-group">
+                                <label for="billing-zip">ZIP / Postal Code</label>
+                                <input type="text" id="billing-zip" class="form-input" placeholder="12345">
+                            </div>
+                            <div class="form-group">
+                                <label for="billing-country">Country</label>
+                                <input type="text" id="billing-country" class="form-input" placeholder="United States">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="billing-address2">Address Line 2</label>
-                            <input type="text" id="billing-address2" class="form-input" placeholder="Apt, Suite, etc.">
-                        </div>
-                        <div class="form-group">
-                            <label for="billing-city">City</label>
-                            <input type="text" id="billing-city" class="form-input" placeholder="City">
-                        </div>
-                        <div class="form-group">
-                            <label for="billing-state">State / Province</label>
-                            <input type="text" id="billing-state" class="form-input" placeholder="State">
-                        </div>
-                        <div class="form-group">
-                            <label for="billing-zip">ZIP / Postal Code</label>
-                            <input type="text" id="billing-zip" class="form-input" placeholder="12345">
-                        </div>
-                        <div class="form-group">
-                            <label for="billing-country">Country</label>
-                            <input type="text" id="billing-country" class="form-input" placeholder="United States">
-                        </div>
-                        <button type="submit" class="btn btn-secondary">Save Billing Info</button>
+                        <button type="submit" class="btn btn-secondary billing-submit">Save Billing Info</button>
                     </form>
                 </div>
                 </div>
             </div>
 
-            <!-- New Project View -->
+            <!-- New Project View - Terminal Intake Form -->
             <div class="tab-content" id="tab-new-project">
                 <div class="page-header">
-                    <h2>Start a New Project</h2>
+                    <button class="header-sidebar-toggle" aria-label="Toggle sidebar">◀</button>
+                    <h2>New Project</h2>
                 </div>
-
-                <form class="new-project-form" id="new-project-form">
-                    <p class="form-intro">Ready to start something new? Fill out the form below to request a new project.</p>
-                    <div class="form-group">
-                        <label for="project-name">Project Name</label>
-                        <input type="text" id="project-name" class="form-input" placeholder="e.g., Company Website Redesign" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="project-type">Project Type</label>
-                        <select id="project-type" class="form-select" required>
-                            <option value="">Select a project type</option>
-                            <option value="website">New Website</option>
-                            <option value="redesign">Website Redesign</option>
-                            <option value="webapp">Web Application</option>
-                            <option value="ecommerce">E-Commerce Site</option>
-                            <option value="maintenance">Maintenance & Updates</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="project-budget">Estimated Budget</label>
-                        <select id="project-budget" class="form-select" required>
-                            <option value="">Select a budget range</option>
-                            <option value="1k-2.5k">$1,000 - $2,500</option>
-                            <option value="2.5k-5k">$2,500 - $5,000</option>
-                            <option value="5k-10k">$5,000 - $10,000</option>
-                            <option value="10k-25k">$10,000 - $25,000</option>
-                            <option value="25k+">$25,000+</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="project-timeline">Desired Timeline</label>
-                        <select id="project-timeline" class="form-select" required>
-                            <option value="">Select a timeline</option>
-                            <option value="asap">As soon as possible</option>
-                            <option value="1-2months">1-2 months</option>
-                            <option value="3-6months">3-6 months</option>
-                            <option value="flexible">Flexible</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="project-description">Project Description</label>
-                        <textarea id="project-description" class="form-textarea" rows="5" placeholder="Tell me about your project goals, requirements, and any specific features you need..." required></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-secondary">Submit Project Request</button>
-                </form>
+                <section class="terminal-intake-container portal-intake">
+                    <!-- Terminal UI will be rendered by JavaScript -->
+                </section>
             </div>
+
+            <link rel="stylesheet" href="/src/styles/pages/terminal-intake.css">
+            <script type="module">
+                // Initialize terminal intake when the new project tab is shown
+                document.addEventListener('DOMContentLoaded', () => {
+                    const newProjectBtn = document.getElementById('btn-new-project');
+                    const intakeContainer = document.querySelector('#tab-new-project .terminal-intake-container');
+                    let intakeInitialized = false;
+
+                    // Helper to get client data from logged-in user
+                    function getClientDataForIntake() {
+                        const token = localStorage.getItem('client_auth_token');
+
+                        // If demo mode (token starts with demo_token_), return empty data
+                        if (!token || token.startsWith('demo_token_')) {
+                            return undefined;
+                        }
+
+                        // Get data from the client name element and email from localStorage
+                        const clientNameEl = document.getElementById('client-name');
+                        const settingsNameEl = document.getElementById('settings-name');
+                        const settingsEmailEl = document.getElementById('settings-email');
+                        const settingsCompanyEl = document.getElementById('settings-company');
+
+                        const clientData = {
+                            name: settingsNameEl?.value || clientNameEl?.textContent || undefined,
+                            email: settingsEmailEl?.value || localStorage.getItem('clientEmail') || undefined,
+                            company: settingsCompanyEl?.value || undefined
+                        };
+
+                        // Only return data if we have at least name or email
+                        const hasClientData = clientData.name && clientData.name !== 'Client';
+                        return hasClientData ? clientData : undefined;
+                    }
+
+                    // Initialize when tab is clicked
+                    newProjectBtn?.addEventListener('click', () => {
+                        if (!intakeInitialized && intakeContainer) {
+                            import('/src/features/client/terminal-intake.ts').then(module => {
+                                const clientData = getClientDataForIntake();
+
+                                const intake = new module.TerminalIntakeModule(intakeContainer, {
+                                    isModal: false, // Not a popup
+                                    clientData: clientData
+                                });
+                                intake.init();
+                                intakeInitialized = true;
+                            });
+                        }
+                    });
+
+                    // Also initialize if tab is already active on page load
+                    if (intakeContainer && intakeContainer.closest('.tab-content.active')) {
+                        import('/src/features/client/terminal-intake.ts').then(module => {
+                            const clientData = getClientDataForIntake();
+
+                            const intake = new module.TerminalIntakeModule(intakeContainer, {
+                                isModal: false,
+                                clientData: clientData
+                            });
+                            intake.init();
+                            intakeInitialized = true;
+                        });
+                    }
+                });
+            </script>
 
             <!-- Project Preview View -->
             <div class="tab-content" id="tab-preview">
                 <div class="page-header">
+                    <button class="header-sidebar-toggle" aria-label="Toggle sidebar">◀</button>
                     <h2>Project Preview</h2>
                 </div>
 

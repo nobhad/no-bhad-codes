@@ -543,6 +543,7 @@ export class Application {
     // Modules for Client Landing page (login/intake selection)
     const clientLandingModules = [
       'ThemeModule',
+      'NavigationModule',
       'FooterModule'
     ];
 

@@ -51,19 +51,7 @@
   z-index: 100;
 }
 
-/* Footer positioning */
-.footer {
-  height: var(--footer-height);
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 200;
-  background: var(--color-neutral-300);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+/* Footer styles defined in components/footer.css */
 
 /* Main content area - properly calculated between header and footer */
 main {

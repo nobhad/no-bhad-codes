@@ -105,14 +105,7 @@ h6 {
   z-index: 100;
 }
 
-.footer {
-  height: var(--footer-height);
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 200;
-}
+/* Footer styles defined in components/footer.css */
 
 /* Main content area - properly calculated between header and footer */
 main {
@@ -402,19 +395,7 @@ main section:not(.business-card-section) {
   visibility: visible;
 }
 
-/* Footer fixed at bottom of viewport */
-.footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: var(--footer-height);
-  background: var(--color-neutral-300);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 200;
-}
+/* Footer styles defined in components/footer.css */
 
 /* Footer content always visible */
 .footer .footer-text {

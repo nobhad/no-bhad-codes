@@ -135,7 +135,18 @@
             import('/src/features/client/terminal-intake.ts').then(module => {
                 const container = document.querySelector('#intakeModal .terminal-intake-container');
                 if (container) {
-                    const intake = new module.TerminalIntakeModule(container);
+                    // Get existing client data from localStorage if available
+                    const clientData = {
+                        name: localStorage.getItem('clientName') || undefined,
+                        email: localStorage.getItem('clientEmail') || undefined,
+                        company: localStorage.getItem('clientCompany') || undefined
+                    };
+                    // Only pass clientData if we have at least name or email
+                    const hasClientData = clientData.name || clientData.email;
+                    const intake = new module.TerminalIntakeModule(container, {
+                        isModal: true,
+                        clientData: hasClientData ? clientData : undefined
+                    });
                     intake.init();
                     window.terminalIntakeInitialized = true;
                 }
@@ -172,18 +183,7 @@
         }
     });
 
-    // Close on backdrop click
-    modal?.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.classList.remove('open');
-            modal.classList.remove('minimized');
-            modal.classList.remove('fullscreen');
-            document.body.style.overflow = '';
-            window.terminalIntakeInitialized = false;
-            const container = document.querySelector('#intakeModal .terminal-intake-container');
-            if (container) container.innerHTML = '';
-        }
-    });
+    // Backdrop click disabled - must use close button
 </script>
 
 <!-- Terminal Intake Modal -->
