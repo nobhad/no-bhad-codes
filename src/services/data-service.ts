@@ -96,7 +96,9 @@ export class DataService extends BaseService {
       const response = await fetch('/data/portfolio.json');
 
       if (!response.ok) {
-        throw new Error(`Failed to load data: ${response.status} ${response.statusText}`);
+        this.warn(`Failed to load portfolio.json (${response.status}), using fallback data`);
+        this.data = this.getFallbackData();
+        return;
       }
 
       this.data = await response.json();
@@ -105,9 +107,41 @@ export class DataService extends BaseService {
       // Clear cache when new data is loaded
       this.cache.clear();
     } catch (error) {
-      this.error('Failed to load portfolio data:', error);
-      throw error;
+      this.warn('Failed to load portfolio data, using fallback:', error);
+      this.data = this.getFallbackData();
     }
+  }
+
+  /**
+   * Fallback data when portfolio.json is unavailable
+   */
+  private getFallbackData(): PortfolioData {
+    return {
+      projects: [],
+      categories: [],
+      navigation: {
+        main: [
+          { id: 'home', title: 'home', path: '/', eyebrow: '00' },
+          { id: 'about', title: 'about', path: '#about', eyebrow: '01' },
+          { id: 'contact', title: 'contact', path: '#contact', eyebrow: '02' }
+        ]
+      },
+      profile: {
+        name: 'Noelle Bhaduri',
+        title: 'Web Developer',
+        location: 'Boston, MA',
+        bio: '',
+        techStack: [],
+        tagline: 'no bhad codes',
+        social: {}
+      },
+      contact: {
+        title: 'Contact',
+        intro: 'Get in touch',
+        businessSizes: [],
+        helpOptions: []
+      }
+    };
   }
 
   /**
