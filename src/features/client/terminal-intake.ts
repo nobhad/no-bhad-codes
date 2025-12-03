@@ -31,6 +31,7 @@ interface ChatMessage {
   content: string;
   options?: { value: string; label: string }[];
   multiSelect?: boolean;
+  questionIndex?: number; // Track which question this message belongs to
 }
 
 // Question flow definitions
@@ -136,6 +137,15 @@ const QUESTIONS: IntakeQuestion[] = [
     type: 'multiselect',
     required: true,
     options: [] // Will be dynamically set based on projectType
+  },
+  {
+    id: 'customFeatures',
+    field: 'customFeatures',
+    question: 'Please describe the custom features you need:',
+    type: 'text',
+    required: true,
+    dependsOn: { field: 'features', value: 'custom' },
+    placeholder: 'Describe your custom feature requirements...'
   },
   {
     id: 'hasIntegrations',
@@ -246,6 +256,49 @@ const QUESTIONS: IntakeQuestion[] = [
     required: true,
     dependsOn: { field: 'hasCurrentSite', value: 'yes' },
     placeholder: 'https://example.com'
+  },
+  {
+    id: 'hasDomain',
+    field: 'hasDomain',
+    question: 'Do you have a domain name for this project?',
+    type: 'select',
+    required: true,
+    options: [
+      { value: 'yes', label: 'Yes, I have a domain' },
+      { value: 'no', label: 'No, I need help getting one' },
+      { value: 'unsure', label: 'Not sure / Need advice' }
+    ]
+  },
+  {
+    id: 'domainName',
+    field: 'domainName',
+    question: 'What\'s your domain name?',
+    type: 'text',
+    required: true,
+    dependsOn: { field: 'hasDomain', value: 'yes' },
+    placeholder: 'example.com'
+  },
+  {
+    id: 'hosting',
+    field: 'hosting',
+    question: 'What are your hosting preferences?',
+    type: 'select',
+    required: true,
+    options: [
+      { value: 'have-hosting', label: 'I already have hosting' },
+      { value: 'need-hosting', label: 'I need hosting set up' },
+      { value: 'need-recommendation', label: 'I need a recommendation' },
+      { value: 'unsure', label: 'Not sure what I need' }
+    ]
+  },
+  {
+    id: 'hostingProvider',
+    field: 'hostingProvider',
+    question: 'Who is your current hosting provider?',
+    type: 'text',
+    required: true,
+    dependsOn: { field: 'hosting', value: 'have-hosting' },
+    placeholder: 'e.g., GoDaddy, Bluehost, AWS, etc.'
   },
   {
     id: 'challenges',
@@ -717,6 +770,29 @@ export class TerminalIntakeModule {
       }
     });
 
+    // Arrow key navigation to go back to previous questions
+    // Up arrow = go back one question
+    document.addEventListener('keydown', (e) => {
+      // Skip if processing
+      if (this.isProcessing) return;
+
+      // Only handle if the modal is open and this terminal is active
+      const modal = document.getElementById('intakeModal');
+      if (modal && !modal.classList.contains('open')) return;
+
+      // Only respond to up arrow key
+      if (e.key !== 'ArrowUp') return;
+
+      // Don't navigate if user is typing in the input
+      if (document.activeElement === this.inputElement && this.inputElement?.value) return;
+
+      // Only allow going back if we have answered at least one question
+      if (this.currentQuestionIndex > 0) {
+        e.preventDefault();
+        this.goBackToQuestion(this.currentQuestionIndex - 1);
+      }
+    });
+
     // Option button clicks (delegated)
     this.chatContainer?.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
@@ -819,7 +895,9 @@ export class TerminalIntakeModule {
     const avatarContainer = document.createElement('div');
     avatarContainer.className = 'terminal-avatar-intro';
     avatarContainer.innerHTML = `
-      <img src="/images/avatar.svg" alt="No Bhad Codes" class="terminal-avatar-img" />
+      <div class="terminal-avatar-wrapper">
+        <img src="/images/avatar.svg" alt="No Bhad Codes" class="terminal-avatar-img" />
+      </div>
     `;
 
     // Start invisible
@@ -1032,7 +1110,21 @@ export class TerminalIntakeModule {
       // Check dependsOn conditions
       if (question.dependsOn) {
         const depValue = this.intakeData[question.dependsOn.field as keyof IntakeData];
-        if (depValue !== question.dependsOn.value) {
+        const expectedValue = question.dependsOn.value;
+
+        // Handle array values (from multiselect fields)
+        let matches = false;
+        if (Array.isArray(depValue)) {
+          // Check if any of the selected values match the expected value
+          matches = Array.isArray(expectedValue)
+            ? expectedValue.some(v => depValue.includes(v))
+            : depValue.includes(expectedValue);
+        } else {
+          // Simple string comparison
+          matches = depValue === expectedValue;
+        }
+
+        if (!matches) {
           this.currentQuestionIndex++;
           continue;
         }
@@ -1063,16 +1155,24 @@ export class TerminalIntakeModule {
         const dependentValue = this.intakeData[question.dependsOn.field];
         const requiredValue = question.dependsOn.value;
 
-        if (Array.isArray(requiredValue)) {
-          if (!requiredValue.includes(dependentValue as string)) {
-            this.currentQuestionIndex++;
-            continue;
-          }
+        // Handle array values (from multiselect fields)
+        let matches = false;
+        if (Array.isArray(dependentValue)) {
+          // dependentValue is an array (e.g., features selected)
+          matches = Array.isArray(requiredValue)
+            ? requiredValue.some(v => dependentValue.includes(v))
+            : dependentValue.includes(requiredValue);
+        } else if (Array.isArray(requiredValue)) {
+          // requiredValue is an array, dependentValue is string
+          matches = requiredValue.includes(dependentValue as string);
         } else {
-          if (dependentValue !== requiredValue) {
-            this.currentQuestionIndex++;
-            continue;
-          }
+          // Both are strings
+          matches = dependentValue === requiredValue;
+        }
+
+        if (!matches) {
+          this.currentQuestionIndex++;
+          continue;
         }
       }
 
@@ -1086,7 +1186,8 @@ export class TerminalIntakeModule {
     const question = this.getCurrentQuestion();
 
     if (!question) {
-      await this.submitIntake();
+      // All questions answered - show review before submitting
+      await this.showReviewAndConfirm();
       return;
     }
 
@@ -1109,10 +1210,11 @@ export class TerminalIntakeModule {
 
     await this.showTypingIndicator(600);
 
-    // Add the AI message
+    // Add the AI message with questionIndex for clickable navigation
     const message: ChatMessage = {
       type: 'ai',
-      content: questionText
+      content: questionText,
+      questionIndex: this.currentQuestionIndex
     };
 
     if (question.type === 'select' && question.options) {
@@ -1212,8 +1314,9 @@ export class TerminalIntakeModule {
     } else {
       const inputValue = this.inputElement?.value.trim();
       if (!inputValue) return;
-      value = inputValue;
-      displayValue = inputValue;
+      // Sanitize text input to prevent XSS
+      value = this.sanitizeInput(inputValue);
+      displayValue = this.sanitizeInput(inputValue);
     }
 
     await this.processAnswer(value, displayValue);
@@ -1238,8 +1341,8 @@ export class TerminalIntakeModule {
       }
     }
 
-    // Add user response to chat
-    this.addMessage({ type: 'user', content: displayValue });
+    // Add user response to chat (with questionIndex for clickable navigation)
+    this.addMessage({ type: 'user', content: displayValue, questionIndex: this.currentQuestionIndex });
 
     // Store the data
     if (question.field) {
@@ -1266,6 +1369,305 @@ export class TerminalIntakeModule {
     await this.askCurrentQuestion();
   }
 
+  /**
+   * Format a field value for display in the review
+   */
+  private formatFieldForReview(field: string, value: string | string[] | undefined): string {
+    if (!value) return 'Not provided';
+    if (Array.isArray(value)) {
+      return value.length > 0 ? value.join(', ') : 'None selected';
+    }
+    return value;
+  }
+
+  /**
+   * Generate a summary of all answers for review
+   */
+  private generateReviewSummary(): string {
+    const data = this.intakeData;
+
+    const sections = [
+      '═══════════════════════════════════════',
+      '         PROJECT REQUEST SUMMARY',
+      '═══════════════════════════════════════',
+      '',
+      '► CONTACT INFORMATION',
+      `  Name: ${this.formatFieldForReview('name', data.name as string)}`,
+      `  Email: ${this.formatFieldForReview('email', data.email as string)}`,
+      `  Company: ${this.formatFieldForReview('company', data.company as string)}`,
+      `  Phone: ${this.formatFieldForReview('phone', data.phone as string)}`,
+      '',
+      '► PROJECT DETAILS',
+      `  Type: ${this.formatFieldForReview('projectType', data.projectType as string)}`,
+      `  Description: ${this.formatFieldForReview('projectDescription', data.projectDescription as string)}`,
+      `  Timeline: ${this.formatFieldForReview('timeline', data.timeline as string)}`,
+      `  Budget: ${this.formatFieldForReview('budget', data.budget as string)}`,
+      '',
+      '► FEATURES & INTEGRATIONS',
+      `  Features: ${this.formatFieldForReview('features', data.features as string[])}`
+    ];
+
+    if (data.customFeatures) {
+      sections.push(`  Custom Features: ${data.customFeatures}`);
+    }
+
+    sections.push(`  Third-party Integrations: ${data.hasIntegrations === 'yes' ? this.formatFieldForReview('integrations', data.integrations as string[]) : 'None needed'}`);
+
+    sections.push(
+      '',
+      '► DESIGN & BRANDING',
+      `  Design Level: ${this.formatFieldForReview('designLevel', data.designLevel as string)}`,
+      `  Brand Assets: ${this.formatFieldForReview('brandAssets', data.brandAssets as string[])}`
+    );
+
+    if (data.inspiration) {
+      sections.push(`  Inspiration: ${data.inspiration}`);
+    }
+
+    sections.push(
+      '',
+      '► TECHNICAL INFO',
+      `  Tech Comfort: ${this.formatFieldForReview('techComfort', data.techComfort as string)}`,
+      `  Current Site: ${data.hasCurrentSite === 'yes' ? data.currentSite : 'No existing site'}`,
+      `  Domain: ${data.hasDomain === 'yes' ? data.domainName : (data.hasDomain === 'no' ? 'Needs domain' : 'Needs advice')}`,
+      `  Hosting: ${this.formatFieldForReview('hosting', data.hosting as string)}`
+    );
+
+    if (data.hostingProvider) {
+      sections.push(`  Hosting Provider: ${data.hostingProvider}`);
+    }
+
+    sections.push(
+      '',
+      '► OTHER',
+      `  Concerns: ${this.formatFieldForReview('challenges', data.challenges as string[])}`
+    );
+
+    if (data.additionalInfo) {
+      sections.push(`  Additional Info: ${data.additionalInfo}`);
+    }
+
+    if (data.referralName) {
+      sections.push(`  Referred by: ${data.referralName}`);
+    }
+
+    sections.push(
+      '',
+      '═══════════════════════════════════════'
+    );
+
+    return sections.join('\n');
+  }
+
+  /**
+   * Show review and ask for confirmation before submitting
+   */
+  private async showReviewAndConfirm(): Promise<void> {
+    await this.showTypingIndicator(800);
+
+    this.addMessage({
+      type: 'ai',
+      content: 'Great! Here\'s a summary of your project request. Please review:'
+    });
+
+    await this.delay(500);
+
+    // Show the review summary
+    this.addMessage({
+      type: 'system',
+      content: this.generateReviewSummary()
+    });
+
+    await this.delay(300);
+
+    // Ask for confirmation
+    this.addMessage({
+      type: 'ai',
+      content: 'Does everything look correct?',
+      options: [
+        { value: 'yes', label: 'Yes, submit my request' },
+        { value: 'no', label: 'No, I need to make changes' }
+      ]
+    });
+
+    // Wait for confirmation
+    await this.waitForReviewConfirmation();
+  }
+
+  /**
+   * Wait for user to confirm or reject the review
+   */
+  private async waitForReviewConfirmation(): Promise<void> {
+    return new Promise((resolve) => {
+      // Declare handlers with let to avoid no-use-before-define
+      let handleConfirmClick: ((e: Event) => Promise<void>) | null = null;
+      let handleConfirmKeydown: ((e: KeyboardEvent) => Promise<void>) | null = null;
+
+      handleConfirmKeydown = async (e: KeyboardEvent) => {
+        if (e.key === '1') {
+          e.preventDefault();
+          if (handleConfirmClick) {
+            this.chatContainer?.removeEventListener('click', handleConfirmClick, true);
+          }
+          if (handleConfirmKeydown) {
+            document.removeEventListener('keydown', handleConfirmKeydown);
+          }
+          this.addMessage({ type: 'user', content: '[1] Yes, submit my request' });
+          await this.submitIntake();
+          resolve();
+        } else if (e.key === '2') {
+          e.preventDefault();
+          if (handleConfirmClick) {
+            this.chatContainer?.removeEventListener('click', handleConfirmClick, true);
+          }
+          if (handleConfirmKeydown) {
+            document.removeEventListener('keydown', handleConfirmKeydown);
+          }
+          this.addMessage({ type: 'user', content: '[2] No, I need to make changes' });
+          this.addMessage({
+            type: 'ai',
+            content: 'No problem! To make changes, please start over with a fresh form. Your progress has been saved if you\'d like to continue later.',
+            options: [
+              { value: 'restart', label: 'Start Over' },
+              { value: 'submit', label: 'Actually, submit as is' }
+            ]
+          });
+          await this.waitForChangeDecision();
+          resolve();
+        }
+      };
+
+      handleConfirmClick = async (e: Event) => {
+        const target = e.target as HTMLElement;
+        if (target.classList.contains('chat-option')) {
+          e.stopPropagation();
+          const choice = target.dataset.value;
+          const displayText = target.textContent || '';
+
+          if (handleConfirmClick) {
+            this.chatContainer?.removeEventListener('click', handleConfirmClick, true);
+          }
+          if (handleConfirmKeydown) {
+            document.removeEventListener('keydown', handleConfirmKeydown);
+          }
+
+          this.addMessage({ type: 'user', content: displayText });
+
+          if (choice === 'yes') {
+            await this.submitIntake();
+          } else {
+            // Let them know how to make changes
+            this.addMessage({
+              type: 'ai',
+              content: 'No problem! To make changes, please start over with a fresh form. Your progress has been saved if you\'d like to continue later.',
+              options: [
+                { value: 'restart', label: 'Start Over' },
+                { value: 'submit', label: 'Actually, submit as is' }
+              ]
+            });
+            await this.waitForChangeDecision();
+          }
+          resolve();
+        }
+      };
+
+      this.chatContainer?.addEventListener('click', handleConfirmClick, true);
+      document.addEventListener('keydown', handleConfirmKeydown);
+
+      if (this.inputElement) {
+        this.inputElement.disabled = false;
+        this.inputElement.placeholder = 'Type 1 or 2...';
+        this.inputElement.focus();
+      }
+    });
+  }
+
+  /**
+   * Wait for user decision after they said they want changes
+   */
+  private async waitForChangeDecision(): Promise<void> {
+    return new Promise((resolve) => {
+      // Declare handlers with let to avoid no-use-before-define
+      let handleClick: ((e: Event) => Promise<void>) | null = null;
+      let handleKeydown: ((e: KeyboardEvent) => Promise<void>) | null = null;
+
+      handleKeydown = async (e: KeyboardEvent) => {
+        if (e.key === '1') {
+          e.preventDefault();
+          if (handleClick) {
+            this.chatContainer?.removeEventListener('click', handleClick, true);
+          }
+          if (handleKeydown) {
+            document.removeEventListener('keydown', handleKeydown);
+          }
+          this.addMessage({ type: 'user', content: '[1] Start Over' });
+          this.clearProgress();
+          this.currentQuestionIndex = 0;
+          this.intakeData = {};
+          this.messages = [];
+          if (this.chatContainer) {
+            this.chatContainer.innerHTML = '';
+          }
+          await this.startConversation();
+          resolve();
+        } else if (e.key === '2') {
+          e.preventDefault();
+          if (handleClick) {
+            this.chatContainer?.removeEventListener('click', handleClick, true);
+          }
+          if (handleKeydown) {
+            document.removeEventListener('keydown', handleKeydown);
+          }
+          this.addMessage({ type: 'user', content: '[2] Actually, submit as is' });
+          await this.submitIntake();
+          resolve();
+        }
+      };
+
+      handleClick = async (e: Event) => {
+        const target = e.target as HTMLElement;
+        if (target.classList.contains('chat-option')) {
+          e.stopPropagation();
+          const choice = target.dataset.value;
+          const displayText = target.textContent || '';
+
+          if (handleClick) {
+            this.chatContainer?.removeEventListener('click', handleClick, true);
+          }
+          if (handleKeydown) {
+            document.removeEventListener('keydown', handleKeydown);
+          }
+
+          this.addMessage({ type: 'user', content: displayText });
+
+          if (choice === 'restart') {
+            // Clear and restart
+            this.clearProgress();
+            this.currentQuestionIndex = 0;
+            this.intakeData = {};
+            this.messages = [];
+            if (this.chatContainer) {
+              this.chatContainer.innerHTML = '';
+            }
+            await this.startConversation();
+          } else {
+            await this.submitIntake();
+          }
+          resolve();
+        }
+      };
+
+      this.chatContainer?.addEventListener('click', handleClick, true);
+      document.addEventListener('keydown', handleKeydown);
+
+      if (this.inputElement) {
+        this.inputElement.disabled = false;
+        this.inputElement.placeholder = 'Type 1 or 2...';
+        this.inputElement.focus();
+      }
+    });
+  }
+
   private async submitIntake(): Promise<void> {
     this.isProcessing = true;
 
@@ -1275,7 +1677,7 @@ export class TerminalIntakeModule {
     await this.showTypingIndicator(1000);
     this.addMessage({
       type: 'ai',
-      content: 'Excellent! I have all the information I need. Let me process your project request...'
+      content: 'Processing your project request...'
     });
 
     await this.showTypingIndicator(1500);
@@ -1307,19 +1709,16 @@ export class TerminalIntakeModule {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const result = await response.json();
+      // Parse response (not currently displayed but may be used in future)
+      await response.json();
 
       // Clear saved progress after successful submission
       this.clearProgress();
 
-      // Success message
       this.addMessage({
         type: 'success',
         content: `
 PROJECT REQUEST SUBMITTED SUCCESSFULLY!
-
-Project ID: ${result.data?.projectId || 'Pending'}
-Client ID: ${result.data?.clientId || 'Pending'}
 
 What happens next:
 1. You'll receive a confirmation email shortly
@@ -1350,6 +1749,62 @@ Thank you for choosing No Bhad Codes!
     this.isProcessing = false;
   }
 
+  /**
+   * Go back to a previous question to edit the answer
+   */
+  private async goBackToQuestion(questionIndex: number): Promise<void> {
+    if (this.isProcessing) return;
+
+    // Don't allow going back during review/submission
+    const currentQuestion = this.getCurrentQuestion();
+    if (!currentQuestion) return;
+
+    // Find the question at the given index
+    if (questionIndex >= QUESTIONS.length || questionIndex < 0) return;
+
+    // Add a system message indicating we're going back
+    this.addMessage({
+      type: 'system',
+      content: '↩ Going back to edit previous answer...'
+    });
+
+    // Clear the data for this question and all subsequent questions
+    const question = QUESTIONS[questionIndex];
+    if (question.field) {
+      delete this.intakeData[question.field];
+    }
+
+    // Also clear any dependent questions' data
+    for (let i = questionIndex + 1; i < QUESTIONS.length; i++) {
+      const q = QUESTIONS[i];
+      if (q.field && this.intakeData[q.field]) {
+        delete this.intakeData[q.field];
+      }
+    }
+
+    // Set the question index to go back to that question
+    this.currentQuestionIndex = questionIndex;
+
+    // Save the updated progress
+    this.saveProgress();
+
+    await this.delay(300);
+    await this.askCurrentQuestion();
+  }
+
+  /**
+   * Sanitize user input to prevent XSS
+   */
+  private sanitizeInput(input: string): string {
+    return input
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;');
+  }
+
   private addMessage(message: ChatMessage): void {
     if (!this.chatContainer) return;
 
@@ -1357,6 +1812,14 @@ Thank you for choosing No Bhad Codes!
 
     const messageEl = document.createElement('div');
     messageEl.className = `chat-message ${message.type}`;
+
+    // Make AI questions and user answers clickable to go back
+    if (message.questionIndex !== undefined && (message.type === 'ai' || message.type === 'user')) {
+      messageEl.classList.add('clickable-message');
+      messageEl.dataset.questionIndex = String(message.questionIndex);
+      messageEl.title = 'Click to edit this answer';
+      messageEl.addEventListener('click', () => this.goBackToQuestion(message.questionIndex!));
+    }
 
     const contentEl = document.createElement('div');
     contentEl.className = 'message-content';
@@ -1500,9 +1963,17 @@ Thank you for choosing No Bhad Codes!
     const dependentValue = this.intakeData[question.dependsOn.field];
     const requiredValue = question.dependsOn.value;
 
-    if (Array.isArray(requiredValue)) {
+    // Handle array values (from multiselect fields)
+    if (Array.isArray(dependentValue)) {
+      // dependentValue is an array (e.g., features selected)
+      return Array.isArray(requiredValue)
+        ? requiredValue.some(v => dependentValue.includes(v))
+        : dependentValue.includes(requiredValue);
+    } else if (Array.isArray(requiredValue)) {
+      // requiredValue is an array, dependentValue is string
       return requiredValue.includes(dependentValue as string);
     }
+    // Both are strings
     return dependentValue === requiredValue;
   }
 

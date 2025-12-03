@@ -28,6 +28,7 @@ import intakeRouter from './routes/intake.js';
 import { setupSwagger } from './config/swagger.js';
 import { logger } from './middleware/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { sanitizeInputs } from './middleware/sanitization.js';
 
 // Load environment variables
 dotenv.config();
@@ -84,6 +85,15 @@ app.use(
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Global input sanitization - sanitize all request body, query, and params
+// to prevent XSS and script injection attacks
+app.use(sanitizeInputs({
+  sanitizeBody: true,
+  sanitizeQuery: true,
+  sanitizeParams: true,
+  skipPaths: ['/uploads'] // Skip file upload paths
+}));
 
 // Static file serving
 app.use('/uploads', express.static(resolve(__dirname, '../uploads')));

@@ -204,7 +204,7 @@ router.post('/', async (req: Request, res: Response) => {
       await db.run(
         `
         INSERT INTO project_updates (
-          project_id, title, description, type, author, created_at
+          project_id, title, description, update_type, author, created_at
         ) VALUES (?, ?, ?, 'general', 'system', datetime('now'))
       `,
         [

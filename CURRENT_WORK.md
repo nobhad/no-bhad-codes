@@ -1,10 +1,10 @@
-# Current Work - December 2, 2025
+# Current Work - December 3, 2025
 
 ---
 
 ## System Status
 
-**Last Updated**: December 2, 2025 (evening)
+**Last Updated**: December 3, 2025
 
 ### Build Status
 
@@ -25,6 +25,40 @@ Run `npm run dev:full` to start both frontend and backend
 ---
 
 ## Known Issues
+
+### Mobile Business Card Positioning
+
+**Status**: Open
+
+**Issue**: On mobile devices, the business card appears too low in the viewport. After the flip animation, the card should remain at the same vertical position (centered in the viewport), but it starts lower than expected.
+
+**Screenshots**:
+- `/Users/noellebhaduri/Downloads/IMG_7C958FB92003-1.jpeg` - Shows glitching during flip
+- `/Users/noellebhaduri/Downloads/IMG_4031.PNG` - Front of card (positioned low)
+- `/Users/noellebhaduri/Downloads/IMG_4030.PNG` - Back of card (also positioned low)
+
+**Expected Behavior**:
+- Card should be vertically centered in the viewport
+- Card position should remain consistent before and after flip animation
+
+**Files Involved**:
+- `src/styles/components/business-card.css` - Card dimensions and layout
+- `src/styles/base/layout.css` - Section centering (uses `justify-content: center`)
+- IntroModule (GSAP animations may affect positioning)
+
+**Possible Causes**:
+- Mobile header height affecting `calc(100vh - header - footer)` calculation
+- GSAP animation not properly centering on mobile
+- Section padding on mobile affecting centering
+- Footer visibility or height on mobile
+
+**Next Steps**:
+- [ ] Inspect mobile section height calculation
+- [ ] Check GSAP intro animation positioning on mobile
+- [ ] Verify header/footer heights on mobile
+- [ ] Consider using `align-items: center` with fixed positioning
+
+---
 
 ### Redis Caching Disabled
 
@@ -241,6 +275,84 @@ BusinessCardRenderer.enableAfterIntro: Cannot read properties of null (reading '
 ---
 
 ## Completed Today
+
+### Terminal Intake Form Enhancements
+
+**Completed:** December 3, 2025
+
+**Summary:** Major enhancements to the terminal intake form including security improvements, navigation features, and UX enhancements.
+
+**Features Implemented:**
+
+Global Input Sanitization:
+- [x] Created `server/middleware/sanitization.ts` - comprehensive sanitization utilities
+- [x] `sanitizeString()` - HTML entity encoding to prevent XSS
+- [x] `sanitizeObject()` - recursive sanitization for nested objects/arrays
+- [x] `sanitizeInputs()` - Express middleware for body, query, and params
+- [x] `stripDangerousPatterns()` - aggressive sanitization for high-risk fields
+- [x] Applied globally in `server/app.ts` after body parsing
+
+Terminal Intake Navigation:
+- [x] **Click to Edit**: Users can click on previous answers to go back and edit
+- [x] Added `questionIndex` property to ChatMessage interface
+- [x] Added `goBackToQuestion()` method to navigate to previous questions
+- [x] Added CSS styles for `.clickable-message` with hover states
+- [x] **Arrow Key Navigation**: Press Up Arrow to go back to previous question
+- [x] Works when not actively typing in input field
+- [x] Navigation removes subsequent messages and answers
+
+Terminal Intake Review Summary:
+- [x] Added `generateReviewSummary()` to format all answers for review
+- [x] Added `showReviewAndConfirm()` to display review before submission
+- [x] Added `waitForReviewConfirmation()` for yes/no confirmation
+- [x] Added `waitForChangeDecision()` for restart/submit decision
+- [x] User sees all answers before final submission
+
+Additional Questions:
+- [x] Added `customFeatures` text question with `dependsOn: { field: 'features', value: 'custom' }`
+- [x] Added `hasDomain` select question (yes/no/needs-advice)
+- [x] Added `domainName` text question (appears if hasDomain = yes)
+- [x] Added `hosting` select question
+- [x] Added `hostingProvider` text question (appears if hosting = have-hosting)
+- [x] Fixed `dependsOn` logic to handle array values from multiselect fields
+
+Other Fixes:
+- [x] Fixed avatar static overlay to only cover SVG (not full container)
+- [x] Removed Project ID and Client ID from success message
+- [x] Fixed multiple lint errors in terminal-intake.ts
+
+**Files Created:**
+
+| File | Purpose |
+|------|---------|
+| `server/middleware/sanitization.ts` | Input sanitization middleware |
+
+**Files Modified:**
+
+| File | Changes |
+|------|---------|
+| `server/app.ts` | Added sanitizeInputs() middleware globally |
+| `src/features/client/terminal-intake.ts` | Added navigation, review, new questions |
+| `src/styles/pages/terminal-intake.css` | Click-to-edit hover styles, avatar wrapper |
+
+**Security:**
+- All incoming request body, query params, and URL params are now sanitized
+- HTML entities encoded: `&`, `<`, `>`, `"`, `'`, `/`, `` ` ``, `=`
+- Sensitive fields (password, tokens) are skipped during sanitization
+- Dangerous patterns (script tags, javascript:, event handlers) can be stripped
+
+**Navigation Features:**
+- **Click**: Click any previous answer to edit it
+- **Arrow Up**: Go back one question
+- Both methods remove subsequent Q&A from the conversation
+
+**Verification:**
+
+- [x] TypeScript: 0 errors
+- [x] ESLint: 0 errors
+- [x] Build: Success
+
+---
 
 ### Client Portal Mobile Responsiveness
 
