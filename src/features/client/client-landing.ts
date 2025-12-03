@@ -260,12 +260,21 @@ export class ClientLandingModule extends BaseModule {
       console.log('[ClientLandingModule] Closing intake modal');
 
       const modalContent = this.intakeModal.querySelector('.intake-modal-content') as HTMLElement;
+      const container = this.intakeModal.querySelector('.terminal-intake-container');
 
       // Animate out
       const tl = gsap.timeline({
         onComplete: () => {
           this.intakeModal!.classList.remove('open');
+          this.intakeModal!.classList.remove('minimized');
+          this.intakeModal!.classList.remove('fullscreen');
           document.body.style.overflow = '';
+
+          // Reset the container so it can be re-initialized with resume prompt
+          if (container) {
+            container.removeAttribute('data-initialized');
+            container.innerHTML = '';
+          }
         }
       });
 
