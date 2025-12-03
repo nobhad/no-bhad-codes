@@ -115,6 +115,19 @@ export class RouterService extends BaseService {
       title: 'Client Dashboard - No Bhad Codes'
     });
 
+    // Admin page - no section navigation needed
+    this.routes.set('/admin', {
+      path: '/admin',
+      section: '',
+      title: 'Admin Dashboard - No Bhad Codes'
+    });
+
+    this.routes.set('/admin/', {
+      path: '/admin/',
+      section: '',
+      title: 'Admin Dashboard - No Bhad Codes'
+    });
+
     this.log('Default routes registered');
   }
 

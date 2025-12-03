@@ -73,6 +73,8 @@
           <button class="btn btn-secondary" id="btn-settings" data-tab="settings">SETTINGS</button>
           <button class="btn btn-secondary" id="btn-new-project" data-tab="new-project">+ NEW PROJECT</button>
           <button class="btn btn-secondary btn-preview hidden" id="btn-preview" data-tab="preview">PROJECT PREVIEW</button>
+          <!-- Admin-only buttons (hidden by default, shown via JS for admin users) -->
+          <button class="btn btn-secondary btn-admin hidden" id="btn-leads" data-tab="leads">LEADS</button>
         </div>
         <!-- Sign Out Button -->
         <div class="sidebar-footer">
@@ -501,6 +503,63 @@
             </div>
             <div class="preview-frame-wrapper">
               <iframe id="preview-iframe" class="preview-frame" src="" title="Project Preview"></iframe>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leads View (Admin Only) -->
+        <div class="tab-content" id="tab-leads">
+          <div class="page-header">
+            <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <h2>Intake Form Submissions</h2>
+          </div>
+
+          <!-- Leads Stats -->
+          <div class="leads-stats quick-stats">
+            <div class="stat-card cp-shadow">
+              <span class="stat-number" id="leads-total">-</span>
+              <span class="stat-label">Total Leads</span>
+            </div>
+            <div class="stat-card cp-shadow">
+              <span class="stat-number" id="leads-pending">-</span>
+              <span class="stat-label">Pending</span>
+            </div>
+            <div class="stat-card cp-shadow">
+              <span class="stat-number" id="leads-active">-</span>
+              <span class="stat-label">In Progress</span>
+            </div>
+            <div class="stat-card cp-shadow">
+              <span class="stat-number" id="leads-completed">-</span>
+              <span class="stat-label">Completed</span>
+            </div>
+          </div>
+
+          <!-- Leads Table -->
+          <div class="leads-table-section cp-shadow">
+            <div class="leads-table-header">
+              <h3>All Submissions</h3>
+              <button class="btn btn-secondary btn-sm" id="btn-refresh-leads">Refresh</button>
+            </div>
+            <div class="leads-table-wrapper">
+              <table class="leads-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th>Company</th>
+                    <th>Email</th>
+                    <th>Project Type</th>
+                    <th>Budget</th>
+                    <th>Timeline</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="leads-table-body">
+                  <tr>
+                    <td colspan="8" class="loading-row">Loading...</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

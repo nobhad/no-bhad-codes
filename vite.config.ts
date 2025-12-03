@@ -1,6 +1,40 @@
-import { defineConfig } from 'vite';
+import { defineConfig, Plugin } from 'vite';
 import { resolve } from 'path';
 import { ViteEjsPlugin } from 'vite-plugin-ejs';
+
+/**
+ * Custom plugin to handle MPA routing in development
+ * Rewrites URLs like /admin to /admin/index.html
+ */
+function mpaRoutingPlugin(): Plugin {
+  return {
+    name: 'mpa-routing',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = req.url || '';
+
+        // Rewrite /admin to /admin/index.html
+        if (url === '/admin' || url === '/admin/') {
+          req.url = '/admin/index.html';
+        }
+        // Rewrite /client/landing to /client/landing.html
+        else if (url === '/client/landing' || url === '/client/landing/') {
+          req.url = '/client/landing.html';
+        }
+        // Rewrite /client/portal to /client/portal.html
+        else if (url === '/client/portal' || url === '/client/portal/') {
+          req.url = '/client/portal.html';
+        }
+        // Rewrite /client/intake to /client/intake.html
+        else if (url === '/client/intake' || url === '/client/intake/') {
+          req.url = '/client/intake.html';
+        }
+
+        next();
+      });
+    }
+  };
+}
 
 export default defineConfig({
   // Root directory
@@ -21,7 +55,9 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         'client-landing': resolve(__dirname, 'client/landing.html'),
         'client-portal': resolve(__dirname, 'client/portal.html'),
-        'client-intake': resolve(__dirname, 'client/intake.html')
+        'client-intake': resolve(__dirname, 'client/intake.html'),
+        'client-set-password': resolve(__dirname, 'client/set-password.html'),
+        'admin': resolve(__dirname, 'admin/index.html')
       },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
@@ -34,6 +70,9 @@ export default defineConfig({
     chunkSizeWarningLimit: 600,
     minify: 'terser'
   },
+
+  // Multi-page application mode
+  appType: 'mpa',
 
   // Development server configuration
   server: {
@@ -85,6 +124,9 @@ export default defineConfig({
 
   // Plugin configuration
   plugins: [
+    // MPA routing for dev server
+    mpaRoutingPlugin(),
+
     ViteEjsPlugin({
       // EJS template configuration
       ejs: {

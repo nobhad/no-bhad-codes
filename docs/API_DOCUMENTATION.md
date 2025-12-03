@@ -115,6 +115,92 @@ Refresh JWT token before expiration.
 }
 ```
 
+### POST `/auth/verify-invitation`
+Verify a client invitation token before password setup.
+
+**Request:**
+```json
+{
+  "token": "abc123def456..."
+}
+```
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "email": "client@example.com",
+  "name": "John Smith"
+}
+```
+
+**Response (Invalid/Expired Token):**
+```json
+{
+  "success": false,
+  "error": "Invalid or expired invitation link"
+}
+```
+
+**Error Responses:**
+- `400` - Missing token
+- `401` - Invalid or expired token
+
+### POST `/auth/set-password`
+Set password for a new client account using invitation token.
+
+**Request:**
+```json
+{
+  "token": "abc123def456...",
+  "password": "newSecurePassword123"
+}
+```
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "message": "Password set successfully. You can now log in."
+}
+```
+
+**Error Responses:**
+- `400` - Missing token or password
+- `400` - Password must be at least 8 characters
+- `401` - Invalid or expired invitation token
+
+## Admin Endpoints
+
+### POST `/admin/leads/:id/invite`
+Invite a lead to create a client portal account.
+
+**Headers:** `Authorization: Bearer <admin-token>`
+
+**URL Parameters:**
+- `id` - Lead ID to invite
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "message": "Invitation sent successfully",
+  "inviteLink": "https://nobhadcodes.com/client/set-password.html?token=abc123..."
+}
+```
+
+**Process:**
+1. Generates secure 64-character invitation token
+2. Creates client account with hashed token
+3. Sets token expiration (7 days)
+4. Updates lead status to `active`
+5. Sends invitation email with magic link
+
+**Error Responses:**
+- `400` - Lead already invited
+- `404` - Lead not found
+- `500` - Failed to send invitation
+
 ## Client Management Endpoints
 
 ### GET `/clients`

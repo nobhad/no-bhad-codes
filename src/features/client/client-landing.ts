@@ -74,7 +74,7 @@ export class ClientLandingModule extends BaseModule {
       } catch {
         // Invalid JSON, clear it
         localStorage.removeItem('clientAuth');
-        localStorage.removeItem('clientAuthToken');
+        localStorage.removeItem('client_auth_token');
       }
     }
 
@@ -401,19 +401,24 @@ export class ClientLandingModule extends BaseModule {
 
       if (response.ok && result.success) {
         console.log('[ClientLandingModule] Login successful');
-        // Store auth token
+        // Store auth token (use 'client_auth_token' to match client-portal.ts)
         if (result.token) {
-          localStorage.setItem('clientAuthToken', result.token);
+          localStorage.setItem('client_auth_token', result.token);
         }
         localStorage.setItem('clientAuth', JSON.stringify({
           email: result.user?.email || email,
-          name: result.user?.name || 'Client',
+          name: result.user?.name || result.user?.contactName || 'Client',
           isDemo: false,
+          isAdmin: result.user?.isAdmin || false,
           loginTime: Date.now()
         }));
 
-        // Redirect to portal
-        window.location.href = '/client/portal';
+        // Redirect to admin portal if admin, otherwise client portal
+        if (result.user?.isAdmin) {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/client/portal';
+        }
       } else {
         this.showError(result.error || 'Invalid email or password');
       }
@@ -478,15 +483,21 @@ export class ClientLandingModule extends BaseModule {
       if (response.ok && result.success) {
         console.log('[ClientLandingModule] Login successful (mobile)');
         if (result.token) {
-          localStorage.setItem('clientAuthToken', result.token);
+          localStorage.setItem('client_auth_token', result.token);
         }
         localStorage.setItem('clientAuth', JSON.stringify({
           email: result.user?.email || email,
           name: result.user?.name || 'Client',
           isDemo: false,
+          isAdmin: result.user?.isAdmin || false,
           loginTime: Date.now()
         }));
-        window.location.href = '/client/portal';
+        // Redirect to admin portal if admin, otherwise client portal
+        if (result.user?.isAdmin) {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/client/portal';
+        }
       } else {
         this.showErrorMobile(result.error || 'Invalid email or password');
       }
