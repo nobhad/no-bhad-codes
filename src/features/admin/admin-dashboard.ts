@@ -11,6 +11,7 @@
 import { AdminSecurity } from './admin-security';
 import type { PerformanceMetrics, PerformanceAlert } from '../../services/performance-service';
 import { Chart, registerables } from 'chart.js';
+import { SanitizationUtils } from '../../utils/sanitization-utils';
 
 // Register all Chart.js components
 Chart.register(...registerables);
@@ -669,16 +670,23 @@ class AdminDashboard {
                   ? 'status-active'
                   : 'status-completed';
             const showActivateBtn = lead.status === 'pending';
+            // Sanitize user data to prevent XSS
+            const safeContactName = SanitizationUtils.escapeHtml(lead.contact_name || '-');
+            const safeCompanyName = SanitizationUtils.escapeHtml(lead.company_name || '-');
+            const safeEmail = SanitizationUtils.escapeHtml(lead.email || '-');
+            const safeProjectType = SanitizationUtils.escapeHtml(lead.project_type || '-');
+            const safeBudgetRange = SanitizationUtils.escapeHtml(lead.budget_range || '-');
+            const safeStatus = SanitizationUtils.escapeHtml(lead.status || 'pending');
             return `
             <tr data-lead-id="${lead.id}">
               <td>${date}</td>
-              <td>${lead.contact_name || '-'}</td>
-              <td>${lead.company_name || '-'}</td>
-              <td>${lead.email || '-'}</td>
-              <td>${lead.project_type || '-'}</td>
-              <td>${lead.budget_range || '-'}</td>
+              <td>${safeContactName}</td>
+              <td>${safeCompanyName}</td>
+              <td>${safeEmail}</td>
+              <td>${safeProjectType}</td>
+              <td>${safeBudgetRange}</td>
               <td>
-                <span class="status-badge ${statusClass}">${lead.status || 'pending'}</span>
+                <span class="status-badge ${statusClass}">${safeStatus}</span>
                 ${showActivateBtn ? `<button class="action-btn action-convert activate-lead-btn" data-id="${lead.id}" onclick="event.stopPropagation()" style="margin-left: 0.5rem;">Activate</button>` : ''}
               </td>
             </tr>
@@ -758,18 +766,23 @@ class AdminDashboard {
         tableBody.innerHTML = data.submissions
           .map((submission: any) => {
             const date = new Date(submission.created_at).toLocaleDateString();
-            // Truncate message for display
+            // Sanitize user data to prevent XSS
+            const safeName = SanitizationUtils.escapeHtml(submission.name || '-');
+            const safeEmail = SanitizationUtils.escapeHtml(submission.email || '-');
+            const safeSubject = SanitizationUtils.escapeHtml(submission.subject || '-');
+            const safeMessage = SanitizationUtils.escapeHtml(submission.message || '-');
+            // Truncate message for display (after sanitization)
             const truncatedMessage =
-              submission.message && submission.message.length > 50
-                ? `${submission.message.substring(0, 50)}...`
-                : submission.message || '-';
+              safeMessage.length > 50 ? `${safeMessage.substring(0, 50)}...` : safeMessage;
+            // For title attribute, also escape
+            const safeTitleMessage = SanitizationUtils.escapeHtml(submission.message || '');
             return `
             <tr data-contact-id="${submission.id}">
               <td>${date}</td>
-              <td>${submission.name || '-'}</td>
-              <td>${submission.email || '-'}</td>
-              <td>${submission.subject || '-'}</td>
-              <td class="message-cell" title="${(submission.message || '').replace(/"/g, '&quot;')}">${truncatedMessage}</td>
+              <td>${safeName}</td>
+              <td>${safeEmail}</td>
+              <td>${safeSubject}</td>
+              <td class="message-cell" title="${safeTitleMessage}">${truncatedMessage}</td>
               <td>
                 <select class="contact-status-select status-select" data-id="${submission.id}" onclick="event.stopPropagation()">
                   <option value="new" ${submission.status === 'new' ? 'selected' : ''}>New</option>
@@ -858,6 +871,17 @@ class AdminDashboard {
           ? 'status-active'
           : 'status-completed';
 
+    // Sanitize user data to prevent XSS
+    const safeContactName = SanitizationUtils.escapeHtml(lead.contact_name || '-');
+    const safeCompanyName = SanitizationUtils.escapeHtml(lead.company_name || '-');
+    const safeEmail = SanitizationUtils.escapeHtml(lead.email || '-');
+    const safePhone = SanitizationUtils.escapeHtml(lead.phone || '');
+    const safeBudgetRange = SanitizationUtils.escapeHtml(lead.budget_range || '-');
+    const safeTimeline = SanitizationUtils.escapeHtml(lead.timeline || '-');
+    const safeStatus = SanitizationUtils.escapeHtml(lead.status || 'pending');
+    const safeDescription = SanitizationUtils.escapeHtml(lead.description || '');
+    const safeFeatures = SanitizationUtils.escapeHtml(lead.features || '');
+
     modalBody.innerHTML = `
       <div class="detail-grid">
         <div class="detail-row">
@@ -866,19 +890,19 @@ class AdminDashboard {
         </div>
         <div class="detail-row">
           <span class="detail-label">Contact Name</span>
-          <span class="detail-value">${lead.contact_name || '-'}</span>
+          <span class="detail-value">${safeContactName}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Company</span>
-          <span class="detail-value">${lead.company_name || '-'}</span>
+          <span class="detail-value">${safeCompanyName}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Email</span>
-          <span class="detail-value"><a href="mailto:${lead.email}">${lead.email || '-'}</a></span>
+          <span class="detail-value"><a href="mailto:${safeEmail}">${safeEmail}</a></span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Phone</span>
-          <span class="detail-value">${lead.phone ? `<a href="tel:${lead.phone}">${lead.phone}</a>` : '-'}</span>
+          <span class="detail-value">${safePhone ? `<a href="tel:${safePhone}">${safePhone}</a>` : '-'}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Project Type</span>
@@ -886,32 +910,32 @@ class AdminDashboard {
         </div>
         <div class="detail-row">
           <span class="detail-label">Budget Range</span>
-          <span class="detail-value">${lead.budget_range || '-'}</span>
+          <span class="detail-value">${safeBudgetRange}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Timeline</span>
-          <span class="detail-value">${lead.timeline || '-'}</span>
+          <span class="detail-value">${safeTimeline}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Status</span>
-          <span class="detail-value"><span class="status-badge ${statusClass}">${lead.status || 'pending'}</span></span>
+          <span class="detail-value"><span class="status-badge ${statusClass}">${safeStatus}</span></span>
         </div>
         ${
-  lead.description
+  safeDescription
     ? `
         <div class="detail-row">
           <span class="detail-label">Description</span>
-          <span class="detail-value message-full">${lead.description}</span>
+          <span class="detail-value message-full">${safeDescription}</span>
         </div>
         `
     : ''
 }
         ${
-  lead.features
+  safeFeatures
     ? `
         <div class="detail-row">
           <span class="detail-label">Features</span>
-          <span class="detail-value message-full">${lead.features}</span>
+          <span class="detail-value message-full">${safeFeatures}</span>
         </div>
         `
     : ''
@@ -1005,6 +1029,13 @@ class AdminDashboard {
     const date = new Date(contact.created_at).toLocaleString();
     const statusClass = `status-${contact.status || 'new'}`;
 
+    // Sanitize user data to prevent XSS
+    const safeName = SanitizationUtils.escapeHtml(contact.name || '-');
+    const safeEmail = SanitizationUtils.escapeHtml(contact.email || '-');
+    const safeSubject = SanitizationUtils.escapeHtml(contact.subject || '-');
+    const safeStatus = SanitizationUtils.escapeHtml(contact.status || 'new');
+    const safeMessage = SanitizationUtils.escapeHtml(contact.message || '-');
+
     modalBody.innerHTML = `
       <div class="detail-grid">
         <div class="detail-row">
@@ -1013,23 +1044,23 @@ class AdminDashboard {
         </div>
         <div class="detail-row">
           <span class="detail-label">Name</span>
-          <span class="detail-value">${contact.name || '-'}</span>
+          <span class="detail-value">${safeName}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Email</span>
-          <span class="detail-value"><a href="mailto:${contact.email}">${contact.email || '-'}</a></span>
+          <span class="detail-value"><a href="mailto:${safeEmail}">${safeEmail}</a></span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Subject</span>
-          <span class="detail-value">${contact.subject || '-'}</span>
+          <span class="detail-value">${safeSubject}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Status</span>
-          <span class="detail-value"><span class="status-badge ${statusClass}">${contact.status || 'new'}</span></span>
+          <span class="detail-value"><span class="status-badge ${statusClass}">${safeStatus}</span></span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Message</span>
-          <span class="detail-value message-full">${contact.message || '-'}</span>
+          <span class="detail-value message-full">${safeMessage}</span>
         </div>
         ${
   contact.read_at
@@ -1493,19 +1524,24 @@ class AdminDashboard {
             '<p class="empty-state">No messages yet. Start the conversation with your client.</p>';
         } else {
           messagesThread.innerHTML = messages
-            .map(
-              (msg: any) => `
+            .map((msg: any) => {
+              // Sanitize user data to prevent XSS
+              const safeSenderName = SanitizationUtils.escapeHtml(
+                msg.sender_type === 'admin' ? 'You' : (project.contact_name || 'Client')
+              );
+              const safeContent = SanitizationUtils.escapeHtml(msg.content || '');
+              return `
             <div class="message ${msg.sender_type === 'admin' ? 'message-sent' : 'message-received'}">
               <div class="message-content">
                 <div class="message-header">
-                  <span class="message-sender">${msg.sender_type === 'admin' ? 'You' : project.contact_name || 'Client'}</span>
+                  <span class="message-sender">${safeSenderName}</span>
                   <span class="message-time">${new Date(msg.created_at).toLocaleString()}</span>
                 </div>
-                <div class="message-body">${msg.content}</div>
+                <div class="message-body">${safeContent}</div>
               </div>
             </div>
-          `
-            )
+          `;
+            })
             .join('');
           // Scroll to bottom
           messagesThread.scrollTop = messagesThread.scrollHeight;
@@ -1657,8 +1693,17 @@ class AdminDashboard {
             '<p class="empty-state">No milestones yet. Add milestones to track project progress.</p>';
         } else {
           milestonesList.innerHTML = milestones
-            .map(
-              (m: any) => `
+            .map((m: any) => {
+              // Sanitize user data to prevent XSS
+              const safeTitle = SanitizationUtils.escapeHtml(m.title || '');
+              const safeDescription = SanitizationUtils.escapeHtml(m.description || '');
+              const safeDeliverables =
+                m.deliverables && m.deliverables.length > 0
+                  ? m.deliverables
+                    .map((d: string) => `<li>${SanitizationUtils.escapeHtml(d)}</li>`)
+                    .join('')
+                  : '';
+              return `
             <div class="milestone-item ${m.is_completed ? 'completed' : ''}" data-milestone-id="${m.id}">
               <div class="milestone-checkbox">
                 <input type="checkbox" ${m.is_completed ? 'checked' : ''}
@@ -1666,24 +1711,16 @@ class AdminDashboard {
               </div>
               <div class="milestone-content">
                 <div class="milestone-header">
-                  <h4 class="milestone-title">${m.title}</h4>
+                  <h4 class="milestone-title">${safeTitle}</h4>
                   ${m.due_date ? `<span class="milestone-due-date">${new Date(m.due_date).toLocaleDateString()}</span>` : ''}
                 </div>
-                ${m.description ? `<p class="milestone-description">${m.description}</p>` : ''}
-                ${
-  m.deliverables && m.deliverables.length > 0
-    ? `
-                  <ul class="milestone-deliverables">
-                    ${m.deliverables.map((d: string) => `<li>${d}</li>`).join('')}
-                  </ul>
-                `
-    : ''
-}
+                ${safeDescription ? `<p class="milestone-description">${safeDescription}</p>` : ''}
+                ${safeDeliverables ? `<ul class="milestone-deliverables">${safeDeliverables}</ul>` : ''}
               </div>
               <button class="btn btn-danger btn-sm" onclick="window.adminDashboard?.deleteMilestone(${m.id})">Delete</button>
             </div>
-          `
-            )
+          `;
+            })
             .join('');
         }
       }
@@ -2353,7 +2390,11 @@ class AdminDashboard {
           minute: '2-digit'
         });
         const date = new Date(msg.created_at).toLocaleDateString();
-        const senderName = isAdmin ? 'You (Admin)' : msg.sender_name || 'Client';
+        const rawSenderName = isAdmin ? 'You (Admin)' : (msg.sender_name || 'Client');
+        // Sanitize user data to prevent XSS
+        const safeSenderName = SanitizationUtils.escapeHtml(rawSenderName);
+        const safeContent = SanitizationUtils.escapeHtml(msg.message || msg.content || '');
+        const safeInitials = SanitizationUtils.escapeHtml(rawSenderName.substring(0, 2).toUpperCase());
 
         if (isAdmin) {
           // Admin message (sent - right aligned)
@@ -2361,10 +2402,10 @@ class AdminDashboard {
           <div class="message message-sent">
             <div class="message-content">
               <div class="message-header">
-                <span class="message-sender">${senderName}</span>
+                <span class="message-sender">${safeSenderName}</span>
                 <span class="message-time">${date} at ${time}</span>
               </div>
-              <div class="message-body">${msg.message || msg.content || ''}</div>
+              <div class="message-body">${safeContent}</div>
             </div>
             <div class="message-avatar" data-name="Admin">
               <div class="avatar-placeholder">ADM</div>
@@ -2375,15 +2416,15 @@ class AdminDashboard {
         // Client message (received - left aligned)
         return `
           <div class="message message-received">
-            <div class="message-avatar" data-name="${senderName}">
-              <div class="avatar-placeholder">${senderName.substring(0, 2).toUpperCase()}</div>
+            <div class="message-avatar" data-name="${safeSenderName}">
+              <div class="avatar-placeholder">${safeInitials}</div>
             </div>
             <div class="message-content">
               <div class="message-header">
-                <span class="message-sender">${senderName}</span>
+                <span class="message-sender">${safeSenderName}</span>
                 <span class="message-time">${date} at ${time}</span>
               </div>
-              <div class="message-body">${msg.message || msg.content || ''}</div>
+              <div class="message-body">${safeContent}</div>
             </div>
           </div>
         `;
@@ -3008,16 +3049,24 @@ class AdminDashboard {
                 ? 'status-completed'
                 : '';
 
+        // Sanitize user data to prevent XSS
+        const safeContactName = SanitizationUtils.escapeHtml(lead.contact_name || '-');
+        const safeCompanyName = SanitizationUtils.escapeHtml(lead.company_name || '-');
+        const safeEmail = SanitizationUtils.escapeHtml(lead.email || '-');
+        const safeBudgetRange = SanitizationUtils.escapeHtml(lead.budget_range || '-');
+        const safeTimeline = SanitizationUtils.escapeHtml(lead.timeline || '-');
+        const safeStatus = SanitizationUtils.escapeHtml(lead.status || 'pending');
+
         return `
           <tr>
             <td>${date}</td>
-            <td>${lead.contact_name || '-'}</td>
-            <td>${lead.company_name || '-'}</td>
-            <td><a href="mailto:${lead.email}">${lead.email || '-'}</a></td>
+            <td>${safeContactName}</td>
+            <td>${safeCompanyName}</td>
+            <td><a href="mailto:${safeEmail}">${safeEmail}</a></td>
             <td>${this.formatProjectType(lead.project_type)}</td>
-            <td>${lead.budget_range || '-'}</td>
-            <td>${lead.timeline || '-'}</td>
-            <td><span class="status-badge ${statusClass}">${lead.status || 'pending'}</span></td>
+            <td>${safeBudgetRange}</td>
+            <td>${safeTimeline}</td>
+            <td><span class="status-badge ${statusClass}">${safeStatus}</span></td>
           </tr>
         `;
       })

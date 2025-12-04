@@ -94,7 +94,7 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
       <div class="consent-banner ${positionClass} ${themeClass}" data-ref="banner">
         <div class="consent-banner__content">
           <div class="consent-banner__icon">
-            🍪
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cookie"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/></svg>
           </div>
           
           <div class="consent-banner__text">
@@ -189,40 +189,46 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
         position: fixed;
         left: 0;
         right: 0;
-        background: rgba(255, 255, 255, 0.98);
+        background: var(--color-neutral-300, #e5e5e5);
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        border: 2px solid var(--color-border-primary, #d4d4d4);
+        box-shadow: 0 4px 20px var(--color-shadow, rgba(0, 0, 0, 0.15));
         z-index: 10001;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: var(--font-family-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
         animation: slideIn 0.3s ease-out;
         max-width: 100%;
         padding: 0 20px;
         box-sizing: border-box;
+        color: var(--color-dark, #171717);
       }
 
       .consent-banner--top {
         top: 0;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        border-radius: 0 0 12px 12px;
+        border-bottom: 2px solid var(--color-border-primary, #d4d4d4);
+        border-radius: 0 0 var(--border-radius-lg, 8px) var(--border-radius-lg, 8px);
       }
 
       .consent-banner--bottom {
         bottom: 0;
-        border-top: 1px solid rgba(0, 0, 0, 0.1);
-        border-radius: 12px 12px 0 0;
+        border-top: 2px solid var(--color-border-primary, #d4d4d4);
+        border-radius: var(--border-radius-lg, 8px) var(--border-radius-lg, 8px) 0 0;
       }
 
       .consent-banner--dark {
-        background: rgba(33, 33, 33, 0.98);
-        border-color: rgba(255, 255, 255, 0.1);
-        color: white;
+        background: var(--color-gray-900, #171717);
+        border-color: var(--color-gray-700, #404040);
+        color: var(--color-gray-100, #f5f5f5);
       }
 
       .consent-banner--dark .consent-banner__btn--secondary {
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
-        border-color: rgba(255, 255, 255, 0.2);
+        background: var(--color-gray-800, #262626);
+        color: var(--color-gray-100, #f5f5f5);
+        border-color: var(--color-gray-600, #525252);
+      }
+
+      .consent-banner--dark .consent-banner__btn--secondary:hover {
+        background: var(--color-gray-700, #404040);
+        border-color: var(--color-gray-500, #737373);
       }
 
       .consent-banner__content {
@@ -235,9 +241,14 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
       }
 
       .consent-banner__icon {
-        font-size: 24px;
         flex-shrink: 0;
         margin-top: 4px;
+        color: var(--color-brand-primary, #00ff41);
+      }
+
+      .consent-banner__icon svg {
+        width: 28px;
+        height: 28px;
       }
 
       .consent-banner__text {
@@ -247,36 +258,42 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
 
       .consent-banner__title {
         margin: 0 0 8px 0;
-        font-size: 18px;
-        font-weight: 600;
+        font-size: var(--font-size-lg, 1.125rem);
+        font-weight: var(--font-weight-semibold, 600);
+        font-family: var(--font-family-display, var(--font--acme, 'Acme', sans-serif));
+        text-transform: uppercase;
         color: inherit;
       }
 
       .consent-banner__message {
-        margin: 0 0 16px 0;
-        font-size: 14px;
-        line-height: 1.5;
+        margin: 0 0 12px 0;
+        font-size: var(--font-size-sm, 0.875rem);
+        line-height: var(--line-height-normal, 1.5);
         color: inherit;
-        opacity: 0.8;
+        opacity: 0.85;
       }
 
       .consent-banner__details {
-        background: rgba(0, 0, 0, 0.05);
-        border-radius: 8px;
+        background: var(--color-state-hover, rgba(0, 0, 0, 0.05));
+        border-radius: var(--border-radius-md, 6px);
         padding: 16px;
         margin-top: 12px;
-        font-size: 13px;
-        line-height: 1.4;
+        font-size: var(--font-size-xs, 0.75rem);
+        line-height: var(--line-height-normal, 1.5);
+        border: 1px solid var(--color-border-secondary, #e5e5e5);
       }
 
       .consent-banner--dark .consent-banner__details {
-        background: rgba(255, 255, 255, 0.05);
+        background: var(--color-gray-800, #262626);
+        border-color: var(--color-gray-700, #404040);
       }
 
       .consent-banner__details h4 {
         margin: 0 0 8px 0;
-        font-size: 14px;
-        font-weight: 600;
+        font-size: var(--font-size-sm, 0.875rem);
+        font-weight: var(--font-weight-semibold, 600);
+        font-family: var(--font-family-display, var(--font--acme, 'Acme', sans-serif));
+        text-transform: uppercase;
       }
 
       .consent-banner__details ul {
@@ -308,35 +325,41 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
 
       .consent-banner__btn {
         padding: 10px 20px;
-        border: 1px solid transparent;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 500;
+        border: 2px solid transparent;
+        border-radius: var(--border-radius-md, 6px);
+        font-size: var(--font-size-sm, 0.875rem);
+        font-weight: var(--font-weight-medium, 500);
         cursor: pointer;
         transition: all 0.2s ease;
         white-space: nowrap;
+        font-family: inherit;
+      }
+
+      .consent-banner__btn:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
       }
 
       .consent-banner__btn--primary {
-        background: #2563eb;
-        color: white;
-        border-color: #2563eb;
+        background: var(--color-brand-primary, #00ff41);
+        color: var(--color-gray-900, #171717);
+        border-color: var(--color-brand-primary, #00ff41);
       }
 
       .consent-banner__btn--primary:hover {
-        background: #1d4ed8;
-        border-color: #1d4ed8;
+        background: var(--color-interactive-primary-hover, #00cc33);
+        border-color: var(--color-interactive-primary-hover, #00cc33);
       }
 
       .consent-banner__btn--secondary {
-        background: transparent;
-        color: #374151;
-        border-color: #d1d5db;
+        background: var(--color-neutral-100, #f5f5f5);
+        color: var(--color-gray-700, #404040);
+        border-color: var(--color-border-primary, #d4d4d4);
       }
 
       .consent-banner__btn--secondary:hover {
-        background: #f9fafb;
-        border-color: #9ca3af;
+        background: var(--color-gray-200, #e5e5e5);
+        border-color: var(--color-gray-400, #a3a3a3);
       }
 
       .consent-banner__links {
@@ -348,20 +371,25 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
       .consent-banner__link {
         background: none;
         border: none;
-        color: #333;
-        font-size: 13px;
+        color: var(--color-text-secondary, #404040);
+        font-size: var(--font-size-xs, 0.75rem);
         text-decoration: underline;
         cursor: pointer;
-        transition: opacity 0.2s ease;
+        transition: color 0.2s ease;
         padding: 0;
+        font-family: inherit;
       }
 
       .consent-banner__link:hover {
-        opacity: 0.7;
+        color: var(--color-brand-primary, #00ff41);
       }
 
       .consent-banner--dark .consent-banner__link {
-        color: #ccc;
+        color: var(--color-gray-400, #a3a3a3);
+      }
+
+      .consent-banner--dark .consent-banner__link:hover {
+        color: var(--color-brand-primary, #00ff41);
       }
 
       @keyframes slideIn {
