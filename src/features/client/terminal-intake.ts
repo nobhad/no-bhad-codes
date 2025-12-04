@@ -9,6 +9,7 @@
  */
 
 import { gsap } from 'gsap';
+import { BRANDING, getContactEmail } from '../../config/branding';
 
 interface IntakeQuestion {
   id: string;
@@ -734,7 +735,7 @@ export class TerminalIntakeModule {
             <span class="progress-percent" id="progressPercent" aria-live="polite">0%</span>
           </div>
           <div class="terminal-chat" id="terminalChat" role="log" aria-live="polite" aria-label="Chat conversation">
-            <div class="terminal-login-info" aria-hidden="true">${loginTime}<br><span class="terminal-prompt-line">client@NoBhadCodes project-intake % </span><span class="terminal-typing-text" id="terminalTypingText"></span><span class="terminal-cursor" id="terminalCursor">█</span></div>
+            <div class="terminal-login-info" aria-hidden="true">${loginTime}<br><span class="terminal-prompt-line">${BRANDING.TERMINAL.PROMPT} project-intake % </span><span class="terminal-typing-text" id="terminalTypingText"></span><span class="terminal-cursor" id="terminalCursor">█</span></div>
           </div>
           <div class="terminal-input-area" role="form" aria-label="Project intake form">
             <span class="terminal-prompt" aria-hidden="true">></span>
@@ -1893,7 +1894,7 @@ Thank you for choosing No Bhad Codes!
       console.error('[TerminalIntake] Submission error:', error);
       this.addMessage({
         type: 'error',
-        content: 'Failed to submit your request. Please try again or contact nobhaduri@gmail.com'
+        content: `Failed to submit your request. Please try again or contact ${getContactEmail('fallback')}`
       });
 
       // Re-enable input for retry

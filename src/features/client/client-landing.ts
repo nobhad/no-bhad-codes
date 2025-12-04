@@ -12,11 +12,18 @@
 
 import { BaseModule } from '../../modules/base';
 import { gsap } from 'gsap';
+import { getContactEmail } from '../../config/branding';
+
+// Demo credentials should be in environment variables for production
+const DEMO_CREDENTIALS = {
+  EMAIL: import.meta.env.VITE_DEMO_EMAIL || 'demo@example.com',
+  PASSWORD: import.meta.env.VITE_DEMO_PASSWORD || 'nobhadDemo123'
+};
 
 export class ClientLandingModule extends BaseModule {
   // Demo credentials for testing
-  private readonly DEMO_EMAIL = 'demo@example.com';
-  private readonly DEMO_PASSWORD = 'nobhadDemo123';
+  private readonly DEMO_EMAIL = DEMO_CREDENTIALS.EMAIL;
+  private readonly DEMO_PASSWORD = DEMO_CREDENTIALS.PASSWORD;
 
   // DOM elements - Desktop
   private loginForm: HTMLFormElement | null = null;
@@ -330,7 +337,7 @@ export class ClientLandingModule extends BaseModule {
       container.innerHTML = `
         <div style="text-align: center; padding: 2rem; color: #ff4444;">
           <h2>Unable to load intake form</h2>
-          <p>Please try refreshing the page or contact nobhaduri@gmail.com</p>
+          <p>Please try refreshing the page or contact ${getContactEmail('fallback')}</p>
         </div>
       `;
     }

@@ -15,7 +15,23 @@ export const APP_CONSTANTS = {
     TOKEN_REFRESH_CHECK: 6 * 24 * 60 * 60 * 1000, // 6 days
     PERFORMANCE_MONITORING: 30000,
     INTEGRITY_CHECK: 3000,
-    RATE_LIMIT_WINDOW: 300000 // 5 minutes
+    RATE_LIMIT_WINDOW: 300000, // 5 minutes
+    // Visitor tracking
+    SESSION_ACTIVITY_THRESHOLD: 5000,
+    EVENT_DEBOUNCE: 1000,
+    // DevTools detection
+    DEVTOOLS_CHECK_INTERVAL: 100,
+    MONITORING_INTERVALS: {
+      FAST: 1000,
+      MEDIUM: 2000,
+      SLOW: 3000,
+      VERY_SLOW: 5000
+    },
+    // Typing animation
+    TYPING_SPEED_MIN: 15,
+    TYPING_SPEED_VARIANCE: 10,
+    COMMAND_TYPING_SPEED: 50,
+    COMMAND_TYPING_VARIANCE: 30
   },
 
   // Performance thresholds (in milliseconds)
@@ -86,6 +102,18 @@ export const APP_CONSTANTS = {
     DEFAULT: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
     SMOOTH: 'cubic-bezier(0.4, 0, 0.2, 1)',
     BOUNCE: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+  },
+
+  // UI dimensions and thresholds
+  UI: {
+    // Business card 3D
+    CARD_PERSPECTIVE: 1000,
+    CARD_MAGNETIC_RANGE: 200,
+    CARD_FLIP_ROTATION: 180,
+    // DevTools detection
+    DEVTOOLS_SIZE_THRESHOLD: 200,
+    // Max events stored
+    MAX_STORED_EVENTS: 1000
   },
 
   // Breakpoints (should match CSS)

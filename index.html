@@ -436,8 +436,12 @@
     <!-- Footer -->
     <footer class="footer">
       <div class="footer-content">
-        <p>&copy; 2025 No Bhad Codes. All rights reserved.</p>
+        <p>&copy; <span id="copyright-year"></span> No Bhad Codes. All rights reserved.</p>
       </div>
     </footer>
+    <script>
+      // Dynamic copyright year
+      document.getElementById('copyright-year').textContent = new Date().getFullYear();
+    </script>
   </body>
 </html>

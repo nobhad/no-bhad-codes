@@ -408,8 +408,14 @@ export class ContactFormModule extends BaseModule {
   }
 
   async submitToFormspree(data: any) {
-    // Replace 'your-form-id' with actual Formspree endpoint
-    const response = await fetch('https://formspree.io/f/your-form-id', {
+    // Get Formspree form ID from environment variable
+    const formId = import.meta.env.VITE_FORMSPREE_FORM_ID;
+
+    if (!formId) {
+      throw new Error('Formspree form ID not configured in environment variables');
+    }
+
+    const response = await fetch(`https://formspree.io/f/${formId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
