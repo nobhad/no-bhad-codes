@@ -163,7 +163,11 @@ export async function sendNewIntakeNotification(
 ): Promise<EmailResult> {
   console.log('[EMAIL] Preparing intake notification for project:', projectId);
 
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@nobhadcodes.com';
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) {
+    console.warn('[EMAIL] ADMIN_EMAIL not configured - skipping intake notification');
+    return { success: false, message: 'Admin email not configured' };
+  }
 
   const emailContent: EmailContent = {
     to: adminEmail,

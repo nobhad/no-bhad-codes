@@ -1005,15 +1005,19 @@ export class ClientPortalModule extends BaseModule {
     this.currentProject.updates.forEach((update: any) => {
       const updateElement = document.createElement('div');
       updateElement.className = 'timeline-item';
+      // Sanitize user data to prevent XSS
+      const safeTitle = this.escapeHtml(update.title || '');
+      const safeDescription = this.escapeHtml(update.description || '');
+      const safeAuthor = this.escapeHtml(update.author || '');
       updateElement.innerHTML = `
         <div class="timeline-marker ${update.type}"></div>
         <div class="timeline-content">
           <div class="timeline-header">
-            <h4>${update.title}</h4>
+            <h4>${safeTitle}</h4>
             <span class="timeline-date">${this.formatDate(update.date)}</span>
           </div>
-          <p>${update.description}</p>
-          <div class="timeline-author">by ${update.author}</div>
+          <p>${safeDescription}</p>
+          <div class="timeline-author">by ${safeAuthor}</div>
         </div>
       `;
       timelineContainer.appendChild(updateElement);
@@ -1804,12 +1808,15 @@ export class ClientPortalModule extends BaseModule {
     this.currentProject.messages.forEach((message: any) => {
       const messageElement = document.createElement('div');
       messageElement.className = `message message-${message.senderRole}`;
+      // Sanitize user data to prevent XSS
+      const safeSender = this.escapeHtml(message.sender || '');
+      const safeMessage = this.escapeHtml(message.message || '');
       messageElement.innerHTML = `
         <div class="message-header">
-          <span class="message-sender">${message.sender}</span>
+          <span class="message-sender">${safeSender}</span>
           <span class="message-time">${this.formatDate(message.timestamp)}</span>
         </div>
-        <div class="message-content">${message.message}</div>
+        <div class="message-content">${safeMessage}</div>
       `;
       messagesContainer.appendChild(messageElement);
     });
