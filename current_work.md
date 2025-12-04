@@ -1,8 +1,49 @@
-# Current Work - December 3, 2025
+# Current Work - December 4, 2025
 
 ---
 
 ## Active Work
+
+### Hardcoding Elimination & Documentation Update - COMPLETED
+**Status**: Complete ✅
+**Date**: December 4, 2025
+
+**Summary**: Deep dive to eliminate hardcoded values throughout the codebase and comprehensive documentation update.
+
+**Configuration Files Created:**
+- [x] `src/config/branding.ts` - Company identity, emails, meta info, terminal branding
+- [x] `src/config/routes.ts` - Centralized route path definitions
+- [x] `src/vite-env.d.ts` - TypeScript definitions for Vite environment variables
+- [x] `docs/CONFIGURATION.md` - Comprehensive configuration guide
+
+**Changes Made:**
+
+| File | Changes |
+|------|---------|
+| `src/services/contact-service.ts` | EmailJS IDs now from `VITE_EMAILJS_SERVICE_ID` & `VITE_EMAILJS_TEMPLATE_ID` env vars |
+| `src/modules/contact-form.ts` | Formspree ID now from `VITE_FORMSPREE_FORM_ID` env var |
+| `src/features/client/client-landing.ts` | Demo credentials from env vars, error email uses `getContactEmail()` |
+| `src/features/client/terminal-intake.ts` | Uses `BRANDING.TERMINAL.PROMPT` and `getContactEmail()` |
+| `src/features/admin/admin-dashboard.ts` | Removed duplicate ImportMeta declaration |
+| `index.html` | Copyright year now dynamically set via JS |
+| `.env.example` | Added FormSpree, EmailJS, demo credential env variables |
+
+**Documentation Updated:**
+
+| File | Changes |
+|------|---------|
+| `README.md` | Fixed ports (3000/3001 → 4000/4001), Node.js (18+ → 20.x), added config files to structure, updated env vars, fixed Docker/deployment |
+| `docs/DEVELOPER_GUIDE.md` | Fixed Node.js version, updated port numbers and env examples |
+| `CONTRIBUTING.md` | Fixed Node.js version requirement |
+| `docs/README.md` | Fixed prerequisites, installation steps, added link to Configuration Guide |
+| `docs/CONFIGURATION.md` | NEW - Complete config guide with all env vars, frontend config files, TypeScript setup |
+
+**Verification:**
+- [x] TypeScript: 0 errors
+- [x] ESLint: 0 errors
+- [x] Build: Success
+
+---
 
 ### Mobile Intro Animation - Card Flip
 **Status**: In Progress
