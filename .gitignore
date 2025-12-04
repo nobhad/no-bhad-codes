@@ -74,7 +74,7 @@ dist
 
 # Gatsby files
 .cache/
-public
+# public - REMOVED: This project uses Vite, not Gatsby. public/ contains static assets
 
 # Storybook build outputs
 .out
@@ -145,7 +145,7 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
-data/
+/data/
 backups/
 
 # Build outputs

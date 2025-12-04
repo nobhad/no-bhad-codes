@@ -225,12 +225,10 @@ export class Application {
         factory: async () => {
           const { ContactFormModule } = await import('../modules/contact-form');
           const _contactService = await container.resolve('ContactService');
-          // Use custom backend with /api/contact for local development
-          const isDevelopment = window.location.hostname === 'localhost' ||
-                               window.location.hostname === '127.0.0.1';
+          // Always use custom backend - Vercel proxies /api/* to Railway
           return new ContactFormModule({
-            backend: isDevelopment ? 'custom' : 'netlify',
-            endpoint: isDevelopment ? '/api/contact' : undefined
+            backend: 'custom',
+            endpoint: '/api/contact'
           });
         },
         dependencies: ['ContactService']
