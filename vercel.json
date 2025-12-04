@@ -13,6 +13,13 @@
       ]
     },
     {
+      "source": "/data/(.*).json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" },
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+    {
       "source": "/(.*)",
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" }
@@ -20,9 +27,11 @@
     }
   ],
   "rewrites": [
+    { "source": "/api/:path*", "destination": "https://no-bhad-codes-production.up.railway.app/api/:path*" },
     { "source": "/client/landing", "destination": "/client/landing.html" },
     { "source": "/client/portal", "destination": "/client/portal.html" },
     { "source": "/client/intake", "destination": "/client/intake.html" },
-    { "source": "/client/set-password", "destination": "/client/set-password.html" }
+    { "source": "/client/set-password", "destination": "/client/set-password.html" },
+    { "source": "/admin", "destination": "/admin/index.html" }
   ]
 }

@@ -4,6 +4,115 @@
 
 ## Active Work
 
+### Static Assets & API Proxy Fixes - COMPLETED
+**Status**: Complete
+**Date**: December 4, 2025
+
+**Summary**: Fixed 404 errors for static assets, resolved Vercel build warnings, and added API proxy to Railway.
+
+**Issues Fixed:**
+
+| Issue | Root Cause | Fix |
+|-------|-----------|-----|
+| site.webmanifest 404 | `.gitignore` line 77 had `public` (Gatsby pattern) | Removed `public` from gitignore |
+| portfolio.json 404 | Same - public folder ignored | Fixed gitignore, added `/data/` for root only |
+| Contact form 405 error | Using Netlify forms on Vercel | Added API proxy to Railway in vercel.json |
+| Node.js auto-upgrade warning | `"node": ">=20"` in package.json | Changed to `"node": "20.x"` |
+| Dynamic import warning | Mixed static/dynamic imports in app.ts | Made all component imports static |
+| Sentry profiling warning | ES module `require` incompatibility | Set `profilesSampleRate: 0` |
+
+**API Proxy Configuration:**
+- Added rewrite rule: `/api/:path*` → `https://no-bhad-codes-production.up.railway.app/api/:path*`
+- Contact form now uses 'custom' backend with `/api/contact`
+- All API endpoints (intake, auth, clients, etc.) now work through Vercel proxy
+
+**Files Modified:**
+
+| File | Changes |
+|------|---------|
+| `.gitignore` | Removed `public`, changed `data/` to `/data/` |
+| `package.json` | Node version `>=20` → `20.x` |
+| `src/core/app.ts` | Static imports for ConsentBanner, custom backend for contact form |
+| `server/instrument.ts` | Added `profilesSampleRate: 0` to Sentry config |
+| `vercel.json` | Added API proxy to Railway, headers for JSON files |
+
+**Verification:**
+- [x] TypeScript: 0 errors
+- [x] ESLint: 0 errors
+- [x] Build: Success
+- [x] Public assets now tracked by git
+
+---
+
+### Cookie Consent & Intake Form Fixes - COMPLETED
+**Status**: Complete
+**Date**: December 4, 2025
+
+**Summary**: Fixed cookie consent timing/styling and intake form edit loop bug.
+
+**Cookie Consent Fixes:**
+
+| Issue | Fix |
+|-------|-----|
+| Shows before intro animation | Added `waitForIntroComplete()` - waits for `intro-complete` class |
+| Cookie SVG green | Changed to `color: #000000` (black) |
+| Buttons rounded | Set `border-radius: 0` (sharp corners) |
+| Buttons need black borders | Set `border: 3px solid #000000` on all buttons |
+
+**Intake Form Fixes:**
+
+| Issue | Fix |
+|-------|-----|
+| Multiselect edit loop | Added `e.stopPropagation()` to confirm button click handlers |
+| Typing animation when editing | Added `skipTyping` param to `askCurrentQuestion()` |
+| Scroll not working when editing | Added `scrollToQuestion()` method |
+
+**Console Error Fixes:**
+
+| Error | Fix |
+|-------|-----|
+| FooterModule "Current year element not found" | Changed from `error()` to `log()` |
+
+**Files Modified:**
+
+| File | Changes |
+|------|---------|
+| `src/core/app.ts` | `waitForIntroComplete()`, consent banner timing |
+| `src/components/consent-banner.ts` | Black icon, sharp corners, black borders |
+| `src/features/client/terminal-intake.ts` | stopPropagation, skipTyping, scrollToQuestion |
+| `src/modules/footer.ts` | Graceful handling of missing element |
+
+**Verification:**
+- [x] TypeScript: 0 errors
+- [x] ESLint: 0 errors
+
+---
+
+### Tech Stack Update - COMPLETED
+**Status**: Complete
+**Date**: December 4, 2025
+
+**Summary**: Updated the tech stack section on the about page to include all technologies used.
+
+**Added:**
+- Sentry (error monitoring)
+- Playwright (E2E testing)
+- Vitest (unit testing)
+- PostgreSQL (via Supabase)
+- Railway/Vercel (deployment)
+- SQLite, Redis, JWT Auth
+- Storybook, Chart.js, PDFKit
+- Nodemailer, Handlebars
+
+**Removed (redundant):**
+- JSON, AJAX, XML
+- Bootstrap Vue
+
+**Files Modified:**
+- `index.html` - Tech stack list in about section
+
+---
+
 ### Consent Banner Styling Update - COMPLETED
 **Status**: Complete
 **Date**: December 4, 2025
