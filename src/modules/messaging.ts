@@ -10,6 +10,7 @@
 
 import { BaseModule } from './base';
 import { gsap } from 'gsap';
+import { SanitizationUtils } from '../utils/sanitization-utils';
 
 export interface MessageThread {
   id: number;
@@ -414,20 +415,25 @@ export class MessagingModule extends BaseModule {
       const priorityIcon = this.getPriorityIcon(thread.priority);
       const statusIcon = this.getThreadTypeIcon(thread.thread_type);
 
+      // Sanitize user data to prevent XSS
+      const safeSubject = SanitizationUtils.escapeHtml(thread.subject);
+      const safeLastMessageBy = SanitizationUtils.escapeHtml(thread.last_message_by);
+      const safeProjectName = thread.project_name ? SanitizationUtils.escapeHtml(thread.project_name) : '';
+
       threadElement.innerHTML = `
         <div class="thread-header">
           <div class="thread-title">
             <span class="thread-icon">${statusIcon}</span>
-            <span class="thread-subject">${thread.subject}</span>
+            <span class="thread-subject">${safeSubject}</span>
             ${thread.priority !== 'normal' ? `<span class="priority-icon">${priorityIcon}</span>` : ''}
           </div>
           ${thread.unread_count > 0 ? `<span class="unread-count">${thread.unread_count}</span>` : ''}
         </div>
         <div class="thread-meta">
-          <span class="thread-last-message">Last message by ${thread.last_message_by}</span>
+          <span class="thread-last-message">Last message by ${safeLastMessageBy}</span>
           <span class="thread-time">${this.formatRelativeTime(thread.last_message_at)}</span>
         </div>
-        ${thread.project_name ? `<div class="thread-project">Project: ${thread.project_name}</div>` : ''}
+        ${safeProjectName ? `<div class="thread-project">Project: ${safeProjectName}</div>` : ''}
       `;
 
       threadElement.addEventListener('click', () => {
@@ -466,12 +472,16 @@ export class MessagingModule extends BaseModule {
       const attachmentsHtml =
         message.attachments.length > 0 ? this.renderAttachments(message.attachments) : '';
 
+      // Sanitize user data to prevent XSS
+      const safeSenderName = SanitizationUtils.escapeHtml(message.sender_name);
+      const safePriority = SanitizationUtils.escapeHtml(message.priority);
+
       messageElement.innerHTML = `
         ${isReply ? '<div class="reply-indicator">Reply</div>' : ''}
         <div class="message-header">
-          <span class="message-sender">${message.sender_name}</span>
+          <span class="message-sender">${safeSenderName}</span>
           <span class="message-time">${this.formatTime(message.created_at)}</span>
-          ${message.priority !== 'normal' ? `<span class="priority-badge priority-${message.priority}">${message.priority}</span>` : ''}
+          ${message.priority !== 'normal' ? `<span class="priority-badge priority-${safePriority}">${safePriority}</span>` : ''}
         </div>
         <div class="message-content">${this.formatMessageContent(message.message)}</div>
         ${attachmentsHtml}
@@ -488,20 +498,25 @@ export class MessagingModule extends BaseModule {
     if (attachments.length === 0) return '';
 
     const attachmentsHtml = attachments
-      .map(
-        (attachment) => `
+      .map((attachment) => {
+        // Sanitize user data to prevent XSS
+        const safeOriginalName = SanitizationUtils.escapeHtml(attachment.originalName);
+        // URL-encode the filename to prevent injection in onclick handler
+        const safeFilename = encodeURIComponent(attachment.filename);
+
+        return `
       <div class="message-attachment">
         <span class="attachment-icon">${this.getFileIcon(attachment.mimeType)}</span>
         <div class="attachment-info">
-          <div class="attachment-name">${attachment.originalName}</div>
+          <div class="attachment-name">${safeOriginalName}</div>
           <div class="attachment-size">${this.formatFileSize(attachment.size)}</div>
         </div>
-        <button type="button" class="attachment-download" onclick="window.open('/api/messages/attachments/${attachment.filename}', '_blank')">
+        <button type="button" class="attachment-download" onclick="window.open('/api/messages/attachments/${safeFilename}', '_blank')">
           Download
         </button>
       </div>
-    `
-      )
+    `;
+      })
       .join('');
 
     return `<div class="message-attachments">${attachmentsHtml}</div>`;
