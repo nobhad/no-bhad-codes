@@ -14,6 +14,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middle
 import { InvoiceService, InvoiceCreateData } from '../services/invoice-service.js';
 import { emailService } from '../services/email-service.js';
 import { getDatabase } from '../database/init.js';
+import { auditLogger } from '../services/audit-logger.js';
 
 const router = express.Router();
 

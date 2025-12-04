@@ -1323,7 +1323,7 @@ export class TerminalIntakeModule {
     return null;
   }
 
-  private async askCurrentQuestion(): Promise<void> {
+  private async askCurrentQuestion(skipTyping: boolean = false): Promise<void> {
     const question = this.getCurrentQuestion();
 
     if (!question) {
@@ -1349,7 +1349,10 @@ export class TerminalIntakeModule {
       questionText = questionText.replace('{{name}}', (this.intakeData.name as string) || 'there');
     }
 
-    await this.showTypingIndicator(600);
+    // Skip typing indicator when editing (skipTyping = true)
+    if (!skipTyping) {
+      await this.showTypingIndicator(600);
+    }
 
     // Add the AI message with questionIndex for clickable navigation
     const message: ChatMessage = {
@@ -1365,7 +1368,12 @@ export class TerminalIntakeModule {
       message.multiSelect = true;
     }
 
-    await this.addMessageWithTyping(message);
+    // Skip typing animation when editing (skipTyping = true)
+    if (skipTyping) {
+      this.addMessage(message);
+    } else {
+      await this.addMessageWithTyping(message);
+    }
 
     // Update input placeholder
     if (this.inputElement) {
@@ -1978,15 +1986,11 @@ Thank you for choosing No Bhad Codes!
     this.isProcessing = false;
 
     await this.delay(200);
-    await this.askCurrentQuestion();
+    // Skip typing animation when editing - show question immediately
+    await this.askCurrentQuestion(true);
 
-    // Scroll to the new question
-    this.scrollToBottom();
-
-    // Pre-fill based on question type
+    // Pre-fill based on question type - no delay needed since we're not typing
     if (oldAnswer) {
-      // Small delay to ensure UI is ready after askCurrentQuestion
-      await this.delay(50);
 
       if (question.type === 'multiselect' && Array.isArray(oldAnswer)) {
         // Pre-select the previously chosen options for multiselect
@@ -2009,6 +2013,29 @@ Thank you for choosing No Bhad Codes!
           this.inputElement.setSelectionRange(oldAnswer.length, oldAnswer.length);
         }
       }
+    }
+
+    // Scroll to the question being edited (scroll UP to show it)
+    this.scrollToQuestion(questionIndex);
+  }
+
+  /**
+   * Scroll to a specific question element
+   */
+  private scrollToQuestion(questionIndex: number): void {
+    if (!this.chatContainer) return;
+
+    // Find the question element by questionIndex
+    const questionEl = this.chatContainer.querySelector(
+      `[data-question-index="${questionIndex}"]`
+    ) as HTMLElement;
+
+    if (questionEl) {
+      // Scroll the question into view with smooth behavior
+      questionEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      // Fallback: scroll to bottom if question element not found
+      this.scrollToBottom();
     }
   }
 
@@ -2077,7 +2104,10 @@ Thank you for choosing No Bhad Codes!
         confirmBtn.style.marginLeft = '20px';
         confirmBtn.textContent = '> CONFIRM SELECTION';
         confirmBtn.setAttribute('aria-label', 'Confirm your selections');
-        confirmBtn.addEventListener('click', () => this.handleUserInput());
+        confirmBtn.addEventListener('click', (e) => {
+          e.stopPropagation(); // Prevent click from bubbling to parent message (which triggers goBackToQuestion)
+          this.handleUserInput();
+        });
         messageEl.appendChild(confirmBtn);
       }
     }
@@ -2148,7 +2178,10 @@ Thank you for choosing No Bhad Codes!
         confirmBtn.style.marginLeft = '20px';
         confirmBtn.textContent = '> CONFIRM SELECTION';
         confirmBtn.setAttribute('aria-label', 'Confirm your selections');
-        confirmBtn.addEventListener('click', () => this.handleUserInput());
+        confirmBtn.addEventListener('click', (e) => {
+          e.stopPropagation(); // Prevent click from bubbling to parent message (which triggers goBackToQuestion)
+          this.handleUserInput();
+        });
         messageEl.appendChild(confirmBtn);
       }
     }

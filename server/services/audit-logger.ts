@@ -23,37 +23,11 @@
 import { getDatabase } from '../database/init.js';
 import type { Request } from 'express';
 
-// Audit action types
-export type AuditAction =
-  | 'create'
-  | 'update'
-  | 'delete'
-  | 'login'
-  | 'logout'
-  | 'login_failed'
-  | 'view'
-  | 'export'
-  | 'import'
-  | 'upload'
-  | 'download'
-  | 'send_message'
-  | 'send_email'
-  | 'status_change'
-  | 'password_reset'
-  | 'magic_link_requested'
-  | 'magic_link_login';
+// Audit action types - expandable string type
+export type AuditAction = string;
 
-// Entity types that can be audited
-export type AuditEntityType =
-  | 'client'
-  | 'project'
-  | 'invoice'
-  | 'message'
-  | 'file'
-  | 'intake'
-  | 'contact_submission'
-  | 'session'
-  | 'settings';
+// Entity types that can be audited - expandable string type
+export type AuditEntityType = string;
 
 // User types
 export type AuditUserType = 'admin' | 'client' | 'system';

@@ -115,6 +115,58 @@ Refresh JWT token before expiration.
 }
 ```
 
+### POST `/auth/magic-link`
+Request a magic link for passwordless login.
+
+**Request:**
+```json
+{
+  "email": "client@example.com"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "If an account with that email exists, a login link has been sent."
+}
+```
+
+**Notes:**
+- Always returns success for security (doesn't reveal if email exists)
+- Magic link expires in 15 minutes
+- Rate limited: 3 requests per 15 minutes per IP
+
+### POST `/auth/verify-magic-link`
+Verify magic link token and authenticate user.
+
+**Request:**
+```json
+{
+  "token": "abc123def456..."
+}
+```
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "user": {
+    "id": 1,
+    "email": "client@example.com",
+    "name": "John Smith",
+    "companyName": "Acme Corp"
+  },
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "expiresIn": "7d"
+}
+```
+
+**Error Responses:**
+- `400` - Invalid or expired token
+- `401` - Account inactive
+
 ### POST `/auth/verify-invitation`
 Verify a client invitation token before password setup.
 

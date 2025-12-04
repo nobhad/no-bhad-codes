@@ -243,7 +243,7 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
       .consent-banner__icon {
         flex-shrink: 0;
         margin-top: 4px;
-        color: var(--color-brand-primary, #00ff41);
+        color: #000000;
       }
 
       .consent-banner__icon svg {
@@ -325,8 +325,8 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
 
       .consent-banner__btn {
         padding: 10px 20px;
-        border: 2px solid transparent;
-        border-radius: var(--border-radius-md, 6px);
+        border: 3px solid #000000;
+        border-radius: 0;
         font-size: var(--font-size-sm, 0.875rem);
         font-weight: var(--font-weight-medium, 500);
         cursor: pointer;
@@ -337,29 +337,29 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
 
       .consent-banner__btn:focus {
         outline: none;
-        box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25);
       }
 
       .consent-banner__btn--primary {
         background: var(--color-brand-primary, #00ff41);
-        color: var(--color-gray-900, #171717);
-        border-color: var(--color-brand-primary, #00ff41);
+        color: #000000;
+        border-color: #000000;
       }
 
       .consent-banner__btn--primary:hover {
         background: var(--color-interactive-primary-hover, #00cc33);
-        border-color: var(--color-interactive-primary-hover, #00cc33);
+        border-color: #000000;
       }
 
       .consent-banner__btn--secondary {
         background: var(--color-neutral-100, #f5f5f5);
         color: var(--color-gray-700, #404040);
-        border-color: var(--color-border-primary, #d4d4d4);
+        border-color: #000000;
       }
 
       .consent-banner__btn--secondary:hover {
         background: var(--color-gray-200, #e5e5e5);
-        border-color: var(--color-gray-400, #a3a3a3);
+        border-color: #000000;
       }
 
       .consent-banner__links {

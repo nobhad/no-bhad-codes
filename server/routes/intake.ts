@@ -15,6 +15,7 @@ import { getDatabase } from '../database/init.js';
 import { generateProjectPlan, ProjectPlan } from '../services/project-generator.js';
 import { generateInvoice, Invoice } from '../services/invoice-generator.js';
 import { sendWelcomeEmail, sendNewIntakeNotification } from '../services/email-service.js';
+import { auditLogger } from '../services/audit-logger.js';
 
 const router = express.Router();
 
