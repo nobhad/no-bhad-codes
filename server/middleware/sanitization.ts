@@ -66,6 +66,26 @@ export function sanitizeObject(obj: any): any {
 }
 
 /**
+ * Sanitize object values in place (for read-only objects like req.query)
+ */
+function sanitizeInPlace(obj: Record<string, any>): void {
+  const skipFields = ['password', 'password_hash', 'token', 'accessToken', 'refreshToken'];
+
+  for (const key of Object.keys(obj)) {
+    if (skipFields.includes(key)) continue;
+
+    const value = obj[key];
+    if (typeof value === 'string') {
+      obj[key] = sanitizeString(value);
+    } else if (Array.isArray(value)) {
+      obj[key] = value.map((item) => sanitizeObject(item));
+    } else if (value && typeof value === 'object') {
+      sanitizeInPlace(value);
+    }
+  }
+}
+
+/**
  * Express middleware to sanitize request body, query params, and URL params
  * Apply this middleware before route handlers to ensure all inputs are sanitized
  */
@@ -91,19 +111,19 @@ export function sanitizeInputs(
         return next();
       }
 
-      // Sanitize request body
+      // Sanitize request body (can be reassigned)
       if (sanitizeBody && req.body && typeof req.body === 'object') {
         req.body = sanitizeObject(req.body);
       }
 
-      // Sanitize query parameters
+      // Sanitize query parameters (read-only, must mutate in place)
       if (sanitizeQuery && req.query && typeof req.query === 'object') {
-        req.query = sanitizeObject(req.query);
+        sanitizeInPlace(req.query as Record<string, any>);
       }
 
-      // Sanitize URL parameters
+      // Sanitize URL parameters (read-only, must mutate in place)
       if (sanitizeParams && req.params && typeof req.params === 'object') {
-        req.params = sanitizeObject(req.params);
+        sanitizeInPlace(req.params as Record<string, any>);
       }
 
       next();
