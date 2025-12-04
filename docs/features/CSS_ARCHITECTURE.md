@@ -570,25 +570,28 @@ The `.cp-project-card` class was created because `.project-card` in `projects.cs
 
 ```
 src/styles/
+├── main.css               # Main entry point (imports all modules)
 ├── variables.css           # CSS variables and theme
-├── main.css               # Main site styles
-├── main-new.css           # New component styles
+├── form-validation.css     # Form validation styles
 ├── base/
 │   ├── reset.css         # CSS reset
 │   ├── layout.css        # Layout utilities
-│   └── typography.css    # Typography styles
+│   └── typography.css    # Typography styles (includes @font-face)
 ├── components/
 │   ├── form.css          # Form components
 │   ├── navigation.css    # Navigation styles
 │   ├── footer.css        # Footer styles
-│   ├── messaging.css     # Messaging components
-│   └── ...
+│   ├── loading.css       # Loading indicators
+│   ├── portfolio-carousel.css # Portfolio carousel
+│   └── business-card.css # Business card component
 └── pages/
-    ├── client-portal.css  # Client Portal specific (3050 lines)
+    ├── client-portal.css  # Client Portal specific
     ├── client.css         # Client landing page
+    ├── client-intake.css  # Client intake form
+    ├── client-dashboard.css # Client dashboard
     ├── projects.css       # Projects page
     ├── admin.css          # Admin dashboard
-    └── ...
+    └── contact.css        # Contact page
 ```
 
 ### Import Order

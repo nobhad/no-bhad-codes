@@ -642,8 +642,8 @@ REDIS_HOST=your-redis-server
 REDIS_PORT=6379
 REDIS_PASSWORD=your-redis-password
 
-# Error tracking
-SENTRY_DSN=your-sentry-dsn
+# Error tracking (optional - leave empty to disable)
+SENTRY_DSN=
 ```
 
 ### Deployment Checklist

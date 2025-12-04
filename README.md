@@ -819,7 +819,7 @@ NODE_ENV=production tsx server/app.ts
 FROM node:20-alpine
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 COPY dist/ ./dist/
 COPY public/ ./public/
 EXPOSE 4001

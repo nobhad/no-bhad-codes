@@ -61,7 +61,7 @@ src/admin/
 └── README.md            # This file
 
 admin.html               # Dashboard HTML entry point
-src/styles/admin-dashboard.css # Dashboard styles
+src/styles/pages/admin.css # Dashboard styles
 ```
 
 ### Integration Points
