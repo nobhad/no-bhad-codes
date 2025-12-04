@@ -322,8 +322,8 @@ export class Application {
   }
 
   /**
-   * Initialize consent banner early (before other modules)
-   * This ensures users see the banner immediately without waiting for app initialization
+   * Initialize consent banner AFTER intro animation completes
+   * This ensures users see the intro animation first, then the consent banner
    */
   private async initConsentBanner(): Promise<void> {
     if (typeof window === 'undefined') return;
@@ -332,7 +332,17 @@ export class Application {
       const { createConsentBanner, ConsentBanner } = await import('../components');
 
       if (!ConsentBanner.hasExistingConsent()) {
-        // Show consent banner immediately
+        // Wait for intro animation to complete before showing consent banner
+        // Check if we're on the home page with intro animation
+        const currentPath = window.location.pathname;
+        const isHomePage = currentPath === '/' || currentPath === '/index.html';
+
+        if (isHomePage) {
+          // Wait for intro animation to complete (listen for intro-complete class)
+          await this.waitForIntroComplete();
+        }
+
+        // Show consent banner after intro animation
         const _consentBanner = await createConsentBanner(
           {
             position: 'bottom',
@@ -364,6 +374,50 @@ export class Application {
     } catch (error) {
       console.error('[Application] Failed to initialize consent banner:', error);
     }
+  }
+
+  /**
+   * Wait for intro animation to complete
+   * Returns immediately if intro is already complete or times out after 4 seconds
+   */
+  private waitForIntroComplete(): Promise<void> {
+    return new Promise((resolve) => {
+      const html = document.documentElement;
+
+      // Check if intro is already complete
+      if (html.classList.contains('intro-complete') || html.classList.contains('intro-finished')) {
+        resolve();
+        return;
+      }
+
+      // If no intro-loading class, intro isn't running
+      if (!html.classList.contains('intro-loading')) {
+        resolve();
+        return;
+      }
+
+      // Set up observer to watch for intro-complete class
+      const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            if (html.classList.contains('intro-complete') || html.classList.contains('intro-finished')) {
+              observer.disconnect();
+              // Small delay to ensure smooth transition
+              setTimeout(resolve, 300);
+              return;
+            }
+          }
+        }
+      });
+
+      observer.observe(html, { attributes: true });
+
+      // Timeout fallback - don't wait forever
+      setTimeout(() => {
+        observer.disconnect();
+        resolve();
+      }, 4000);
+    });
   }
 
   /**

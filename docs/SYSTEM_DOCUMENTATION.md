@@ -514,6 +514,78 @@ export const requireAdmin = (req: AuthenticatedRequest, res: Response, next: Nex
 export const requireClient = (req: AuthenticatedRequest, res: Response, next: NextFunction)
 ```
 
+### Magic Link Authentication
+
+Passwordless login option for clients:
+
+- **Request**: POST `/api/auth/magic-link` with email
+- **Verify**: POST `/api/auth/verify-magic-link` with token
+- **Security**: Token expires in 15 minutes, single use
+- **Rate Limited**: 3 requests per 15 minutes per IP
+
+```typescript
+// Request magic link
+await fetch('/api/auth/magic-link', {
+  method: 'POST',
+  body: JSON.stringify({ email: 'client@example.com' })
+});
+
+// Verify and login
+const response = await fetch('/api/auth/verify-magic-link', {
+  method: 'POST',
+  body: JSON.stringify({ token: 'abc123...' })
+});
+const { token, user } = await response.json();
+```
+
+### Audit Logging
+
+Comprehensive audit logging tracks all user actions:
+
+**Automatic Logging (via middleware):**
+- All POST, PUT, PATCH, DELETE requests
+- User info, IP address, user agent
+- Request path and body
+- Response status
+
+**Manual Logging (via service):**
+- Login/logout events
+- Failed login attempts
+- Password resets
+- Status changes
+
+**Audit Log Schema:**
+```sql
+CREATE TABLE audit_logs (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER,
+  user_email TEXT,
+  user_type TEXT,      -- 'admin', 'client', 'system'
+  action TEXT,         -- 'create', 'update', 'delete', 'login', etc.
+  entity_type TEXT,    -- 'client', 'project', 'invoice', etc.
+  entity_id TEXT,
+  entity_name TEXT,
+  old_value TEXT,      -- JSON
+  new_value TEXT,      -- JSON
+  changes TEXT,        -- JSON diff
+  ip_address TEXT,
+  user_agent TEXT,
+  created_at DATETIME
+);
+```
+
+**Query Audit Logs:**
+```typescript
+import { auditLogger } from './services/audit-logger.js';
+
+const logs = await auditLogger.query({
+  userId: 1,
+  action: 'login',
+  startDate: '2024-01-01',
+  limit: 50
+});
+```
+
 ### Security Features
 
 - **Helmet.js**: HTTP security headers
@@ -521,6 +593,8 @@ export const requireClient = (req: AuthenticatedRequest, res: Response, next: Ne
 - **Input Validation**: Request body validation and sanitization
 - **File Upload Security**: MIME type validation, size limits, secure storage
 - **Error Handling**: Secure error messages without sensitive information exposure
+- **Audit Logging**: All write operations logged with user context
+- **Rate Limiting**: Prevents brute force attacks on auth endpoints
 
 ### Environment Variables
 

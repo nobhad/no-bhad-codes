@@ -12,6 +12,7 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { emailService } from '../services/email-service.js';
 import { cache, invalidateCache, QueryCache } from '../middleware/cache.js';
+import { auditLogger } from '../services/audit-logger.js';
 
 const router = express.Router();
 
@@ -73,6 +74,12 @@ router.put(
     const updatedClient = await db.get(
       'SELECT id, email, company_name, contact_name, phone FROM clients WHERE id = ?',
       [req.user!.id]
+    );
+
+    await auditLogger.logUpdate('client', String(req.user!.id), req.user!.email,
+      { contact_name: req.body.original_contact_name, company_name: req.body.original_company_name },
+      { contact_name, company_name, phone },
+      req
     );
 
     res.json({ success: true, message: 'Profile updated successfully', client: updatedClient });

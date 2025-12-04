@@ -10,20 +10,10 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     user_type TEXT CHECK(user_type IN ('admin', 'client', 'system')) DEFAULT 'client',
 
     -- Action details
-    action TEXT NOT NULL CHECK(action IN (
-        'create', 'update', 'delete',
-        'login', 'logout', 'login_failed',
-        'view', 'export', 'import',
-        'upload', 'download',
-        'send_message', 'send_email',
-        'status_change', 'password_reset'
-    )),
+    action TEXT NOT NULL,
 
     -- Entity being acted upon
-    entity_type TEXT NOT NULL CHECK(entity_type IN (
-        'client', 'project', 'invoice', 'message', 'file',
-        'intake', 'contact_submission', 'session', 'settings'
-    )),
+    entity_type TEXT NOT NULL,
     entity_id TEXT,
     entity_name TEXT,
 

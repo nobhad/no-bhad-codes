@@ -33,6 +33,7 @@ import { setupSwagger } from './config/swagger.js';
 import { logger } from './middleware/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { sanitizeInputs } from './middleware/sanitization.js';
+import { auditMiddleware } from './middleware/audit.js';
 
 // Load environment variables
 dotenv.config();
@@ -100,6 +101,9 @@ app.use(
     skipPaths: ['/uploads'], // Skip file upload paths
   })
 );
+
+// Audit logging middleware - logs all POST, PUT, DELETE operations
+app.use(auditMiddleware());
 
 // Static file serving
 app.use('/uploads', express.static(resolve(__dirname, '../uploads')));

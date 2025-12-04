@@ -14,6 +14,7 @@ import { existsSync, mkdirSync } from 'fs';
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { getDatabase } from '../database/init.js';
+import { auditLogger } from '../services/audit-logger.js';
 
 const router = express.Router();
 
