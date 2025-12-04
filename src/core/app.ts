@@ -10,7 +10,7 @@
 
 import { container } from './container';
 import { appState } from './state';
-import { componentStore, ComponentRegistry } from '../components';
+import { componentStore, ComponentRegistry, createConsentBanner, ConsentBanner } from '../components';
 import type { ModuleDefinition } from '../types/modules';
 
 // Type definitions
@@ -329,8 +329,6 @@ export class Application {
     if (typeof window === 'undefined') return;
 
     try {
-      const { createConsentBanner, ConsentBanner } = await import('../components');
-
       if (!ConsentBanner.hasExistingConsent()) {
         // Wait for intro animation to complete before showing consent banner
         // Check if we're on the home page with intro animation
@@ -447,7 +445,6 @@ export class Application {
 
       // If consent was already accepted, initialize tracking now
       if (typeof window !== 'undefined') {
-        const { ConsentBanner } = await import('../components');
         const consentStatus = ConsentBanner.getConsentStatus?.();
         if (consentStatus === 'accepted') {
           const trackingService = (await container.resolve(
