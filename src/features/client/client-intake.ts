@@ -33,6 +33,7 @@ export class ClientIntakeModule extends BaseModule {
   private autoSaveEnabled: boolean;
   private progressTrackingEnabled: boolean;
   private animationsEnabled: boolean;
+  private autoSaveIntervalId: ReturnType<typeof setInterval> | null = null;
 
   constructor(container: HTMLElement, options: IntakeModuleOptions = {}) {
     super('client-intake', {
@@ -369,8 +370,8 @@ export class ClientIntakeModule extends BaseModule {
       input.addEventListener('change', () => this.saveFormData());
     });
 
-    // Auto-save every 30 seconds
-    setInterval(() => this.saveFormData(), 30000);
+    // Auto-save every 30 seconds - store interval ID for cleanup
+    this.autoSaveIntervalId = setInterval(() => this.saveFormData(), 30000);
   }
 
   private saveFormData(): void {
@@ -607,6 +608,12 @@ export class ClientIntakeModule extends BaseModule {
       // Save current form state before destroying
       if (this.autoSaveEnabled) {
         this.saveFormData();
+      }
+
+      // Clear autosave interval
+      if (this.autoSaveIntervalId) {
+        clearInterval(this.autoSaveIntervalId);
+        this.autoSaveIntervalId = null;
       }
 
       // Remove event listeners

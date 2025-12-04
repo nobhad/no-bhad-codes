@@ -305,63 +305,16 @@ export class CodeProtectionService {
    * Right-click blocking
    */
   private setupRightClickBlocking(): void {
-    document.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-      this.logViolation('rightclick', { target: e.target });
-      return false;
-    });
-
-    document.addEventListener('selectstart', (e) => {
-      e.preventDefault();
-      return false;
-    });
-
-    document.addEventListener('dragstart', (e) => {
-      e.preventDefault();
-      return false;
-    });
+    document.addEventListener('contextmenu', this.handleContextMenu);
+    document.addEventListener('selectstart', this.handleSelectStart);
+    document.addEventListener('dragstart', this.handleDragStart);
   }
 
   /**
    * Keyboard shortcuts blocking
    */
   private setupKeyboardBlocking(): void {
-    interface KeyCombo {
-      key: string;
-      ctrl?: boolean;
-      shift?: boolean;
-      alt?: boolean;
-    }
-
-    const blockedKeys: KeyCombo[] = [
-      { key: 'F12' },
-      { key: 'I', ctrl: true, shift: true }, // Ctrl+Shift+I
-      { key: 'J', ctrl: true, shift: true }, // Ctrl+Shift+J
-      { key: 'C', ctrl: true, shift: true }, // Ctrl+Shift+C
-      { key: 'U', ctrl: true }, // Ctrl+U (view source)
-      { key: 'S', ctrl: true }, // Ctrl+S (save)
-      { key: 'A', ctrl: true }, // Ctrl+A (select all)
-      { key: 'P', ctrl: true }, // Ctrl+P (print)
-      { key: 'F', ctrl: true } // Ctrl+F (find)
-    ];
-
-    document.addEventListener('keydown', (e) => {
-      const blocked = blockedKeys.some(
-        (combo) =>
-          e.key === combo.key &&
-          (!combo.ctrl || e.ctrlKey) &&
-          (!combo.shift || e.shiftKey) &&
-          (!combo.alt || e.altKey)
-      );
-
-      if (blocked) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.logViolation('keyboard', { key: e.key, ctrl: e.ctrlKey, shift: e.shiftKey });
-        return false;
-      }
-      return true;
-    });
+    document.addEventListener('keydown', this.handleKeyDown);
   }
 
   /**
@@ -436,31 +389,30 @@ export class CodeProtectionService {
    * Anti-debugging techniques
    */
   private setupAntiDebugging(): void {
-    // Infinite debugger loop
-    const antiDebugger = () => {
-      setInterval(() => {
-        const start = performance.now();
+    // Infinite debugger loop - store interval ID for cleanup
+    const antiDebugInterval = setInterval(() => {
+      const start = performance.now();
 
-        debugger; // Intentional: anti-debugging trap
-        const end = performance.now();
+      debugger; // Intentional: anti-debugging trap
+      const end = performance.now();
 
-        if (end - start > 100) {
-          this.debuggerDetected = true;
-          this.onDebuggerDetected();
-        }
-      }, 1000);
-    };
+      if (end - start > 100) {
+        this.debuggerDetected = true;
+        this.onDebuggerDetected();
+      }
+    }, 1000);
+
+    // Store interval for cleanup
+    this.protectionIntervals.push(antiDebugInterval);
 
     // Function toString override
     const originalToString = Function.prototype.toString;
     Function.prototype.toString = function () {
-      if (this === antiDebugger || this.name.includes('protection')) {
+      if (this.name.includes('protection')) {
         throw new Error('Access denied');
       }
       return originalToString.call(this);
     };
-
-    antiDebugger();
   }
 
   /**
@@ -592,13 +544,57 @@ export class CodeProtectionService {
       protectionElement.remove();
     }
 
-    // Re-enable right click
+    // Remove all event listeners
     document.removeEventListener('contextmenu', this.handleContextMenu);
+    document.removeEventListener('selectstart', this.handleSelectStart);
+    document.removeEventListener('dragstart', this.handleDragStart);
+    document.removeEventListener('keydown', this.handleKeyDown);
   }
 
+  // Event handler references for cleanup
   private handleContextMenu = (e: Event) => {
     e.preventDefault();
+    this.logViolation('rightclick', { target: e.target });
     return false;
+  };
+
+  private handleSelectStart = (e: Event) => {
+    e.preventDefault();
+    return false;
+  };
+
+  private handleDragStart = (e: Event) => {
+    e.preventDefault();
+    return false;
+  };
+
+  private handleKeyDown = (e: KeyboardEvent) => {
+    const blockedKeys = [
+      { key: 'F12' },
+      { key: 'I', ctrl: true, shift: true },
+      { key: 'J', ctrl: true, shift: true },
+      { key: 'C', ctrl: true, shift: true },
+      { key: 'U', ctrl: true },
+      { key: 'S', ctrl: true },
+      { key: 'A', ctrl: true },
+      { key: 'P', ctrl: true },
+      { key: 'F', ctrl: true }
+    ];
+
+    const blocked = blockedKeys.some(
+      (combo) =>
+        e.key === combo.key &&
+        (!combo.ctrl || e.ctrlKey) &&
+        (!combo.shift || e.shiftKey)
+    );
+
+    if (blocked) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.logViolation('keyboard', { key: e.key, ctrl: e.ctrlKey, shift: e.shiftKey });
+      return false;
+    }
+    return true;
   };
 
   /**

@@ -18,6 +18,29 @@ import { rateLimit } from '../middleware/security.js';
 const router = express.Router();
 
 /**
+ * Validate password strength
+ * Requirements: 12+ chars, uppercase, lowercase, number, special char
+ */
+function validatePasswordStrength(password: string): { valid: boolean; error?: string } {
+  if (password.length < 12) {
+    return { valid: false, error: 'Password must be at least 12 characters long' };
+  }
+  if (!/[A-Z]/.test(password)) {
+    return { valid: false, error: 'Password must contain at least one uppercase letter' };
+  }
+  if (!/[a-z]/.test(password)) {
+    return { valid: false, error: 'Password must contain at least one lowercase letter' };
+  }
+  if (!/[0-9]/.test(password)) {
+    return { valid: false, error: 'Password must contain at least one number' };
+  }
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    return { valid: false, error: 'Password must contain at least one special character (!@#$%^&*...)' };
+  }
+  return { valid: true };
+}
+
+/**
  * @swagger
  * /api/auth/login:
  *   post:
@@ -93,6 +116,13 @@ const router = express.Router();
  */
 router.post(
   '/login',
+  // Rate limit: 5 login attempts per 15 minutes per IP to prevent brute force
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    maxRequests: 5,
+    message: 'Too many login attempts. Please try again later.',
+    keyGenerator: (req) => `login:${req.ip}`,
+  }),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { email, password } = req.body;
 
@@ -595,9 +625,10 @@ router.post(
     }
 
     // Validate password strength
-    if (password.length < 8) {
+    const passwordValidation = validatePasswordStrength(password);
+    if (!passwordValidation.valid) {
       return res.status(400).json({
-        error: 'Password must be at least 8 characters long',
+        error: passwordValidation.error,
         code: 'WEAK_PASSWORD',
       });
     }
@@ -710,6 +741,13 @@ router.post(
  */
 router.post(
   '/admin/login',
+  // Rate limit: 3 admin login attempts per 15 minutes per IP (stricter for admin)
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    maxRequests: 3,
+    message: 'Too many admin login attempts. Please try again later.',
+    keyGenerator: (req) => `admin-login:${req.ip}`,
+  }),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { password } = req.body;
 
@@ -844,10 +882,11 @@ router.post(
     }
 
     // Password validation
-    if (password.length < 8) {
+    const passwordValidation = validatePasswordStrength(password);
+    if (!passwordValidation.valid) {
       return res.status(400).json({
         success: false,
-        error: 'Password must be at least 8 characters long',
+        error: passwordValidation.error,
       });
     }
 

@@ -351,7 +351,7 @@ export class ClientPortalModule extends BaseModule {
    * Submit new project request
    */
   private async submitProjectRequest(): Promise<void> {
-    const token = localStorage.getItem('client_auth_token');
+    const token = sessionStorage.getItem('client_auth_token');
 
     if (!token || token.startsWith('demo_token_')) {
       alert(
@@ -416,7 +416,7 @@ export class ClientPortalModule extends BaseModule {
    * Save profile settings
    */
   private async saveProfileSettings(): Promise<void> {
-    const token = localStorage.getItem('client_auth_token');
+    const token = sessionStorage.getItem('client_auth_token');
 
     if (!token || token.startsWith('demo_token_')) {
       alert('Settings cannot be saved in demo mode. Please log in with a real account.');
@@ -498,7 +498,7 @@ export class ClientPortalModule extends BaseModule {
    * Save notification settings
    */
   private async saveNotificationSettings(): Promise<void> {
-    const token = localStorage.getItem('client_auth_token');
+    const token = sessionStorage.getItem('client_auth_token');
 
     if (!token || token.startsWith('demo_token_')) {
       alert('Settings cannot be saved in demo mode. Please log in with a real account.');
@@ -544,7 +544,7 @@ export class ClientPortalModule extends BaseModule {
    * Save billing settings
    */
   private async saveBillingSettings(): Promise<void> {
-    const token = localStorage.getItem('client_auth_token');
+    const token = sessionStorage.getItem('client_auth_token');
 
     if (!token || token.startsWith('demo_token_')) {
       alert('Settings cannot be saved in demo mode. Please log in with a real account.');
@@ -714,7 +714,7 @@ export class ClientPortalModule extends BaseModule {
           const data = await response.json();
 
           // Store authentication token
-          localStorage.setItem('client_auth_token', data.token);
+          sessionStorage.setItem('client_auth_token', data.token);
 
           this.isLoggedIn = true;
           this.currentUser = data.user.email;
@@ -756,7 +756,7 @@ export class ClientPortalModule extends BaseModule {
             }
           };
 
-          localStorage.setItem('client_auth_token', mockUserData.token);
+          sessionStorage.setItem('client_auth_token', mockUserData.token);
           this.isLoggedIn = true;
           this.currentUser = mockUserData.user.email;
 
@@ -1050,7 +1050,7 @@ export class ClientPortalModule extends BaseModule {
     filesContainer.innerHTML = '<p class="loading-files">Loading files...</p>';
 
     try {
-      const token = localStorage.getItem('client_auth_token');
+      const token = sessionStorage.getItem('client_auth_token');
 
       // Use demo data if no token (demo mode)
       if (!token || token.startsWith('demo_token_')) {
@@ -1124,7 +1124,7 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // Get current client email to determine ownership
-    const clientEmail = localStorage.getItem('clientEmail') || '';
+    const clientEmail = sessionStorage.getItem('clientEmail') || '';
 
     // Trash icon SVG
     const trashIcon =
@@ -1259,7 +1259,7 @@ export class ClientPortalModule extends BaseModule {
    * Preview a file - opens in modal or new tab
    */
   private previewFile(fileId: number, mimetype: string): void {
-    const token = localStorage.getItem('client_auth_token');
+    const token = sessionStorage.getItem('client_auth_token');
 
     // For demo mode, show a demo message
     if (!token || token.startsWith('demo_token_')) {
@@ -1281,7 +1281,7 @@ export class ClientPortalModule extends BaseModule {
    * Download a file
    */
   private downloadFile(fileId: number, filename: string): void {
-    const token = localStorage.getItem('client_auth_token');
+    const token = sessionStorage.getItem('client_auth_token');
 
     // For demo mode, show a demo message
     if (!token || token.startsWith('demo_token_')) {
@@ -1304,7 +1304,7 @@ export class ClientPortalModule extends BaseModule {
    * Delete a file
    */
   private async deleteFile(fileId: number, filename: string): Promise<void> {
-    const token = localStorage.getItem('client_auth_token');
+    const token = sessionStorage.getItem('client_auth_token');
 
     // For demo mode, show a demo message
     if (!token || token.startsWith('demo_token_')) {
@@ -1417,7 +1417,7 @@ export class ClientPortalModule extends BaseModule {
    * Upload files to the server
    */
   private async uploadFiles(files: File[]): Promise<void> {
-    const token = localStorage.getItem('client_auth_token');
+    const token = sessionStorage.getItem('client_auth_token');
 
     // Demo mode check
     if (!token || token.startsWith('demo_token_')) {
@@ -1553,7 +1553,7 @@ export class ClientPortalModule extends BaseModule {
     invoiceItems.forEach((item) => item.remove());
 
     try {
-      const token = localStorage.getItem('client_auth_token');
+      const token = sessionStorage.getItem('client_auth_token');
 
       // Use demo data if no token (demo mode)
       if (!token || token.startsWith('demo_token_')) {
@@ -1746,7 +1746,7 @@ export class ClientPortalModule extends BaseModule {
    * Preview invoice (open in new tab or modal)
    */
   private previewInvoice(invoiceId: number): void {
-    const token = localStorage.getItem('client_auth_token');
+    const token = sessionStorage.getItem('client_auth_token');
 
     if (!token || token.startsWith('demo_token_')) {
       alert('Invoice preview not available in demo mode.');
@@ -1762,7 +1762,7 @@ export class ClientPortalModule extends BaseModule {
    * Download invoice as PDF
    */
   private async downloadInvoice(invoiceId: number, invoiceNumber: string): Promise<void> {
-    const token = localStorage.getItem('client_auth_token');
+    const token = sessionStorage.getItem('client_auth_token');
 
     if (!token || token.startsWith('demo_token_')) {
       alert('Invoice download not available in demo mode.');
@@ -1847,8 +1847,8 @@ export class ClientPortalModule extends BaseModule {
    */
   private setupAdminFeatures(): void {
     try {
-      // Check localStorage for admin flag
-      const authData = localStorage.getItem('clientAuth');
+      // Check sessionStorage for admin flag
+      const authData = sessionStorage.getItem('clientAuth');
       if (authData) {
         const parsed = JSON.parse(authData);
         if (parsed.isAdmin) {
@@ -1860,7 +1860,7 @@ export class ClientPortalModule extends BaseModule {
       }
 
       // Also check JWT token for admin flag
-      const token = localStorage.getItem('client_auth_token');
+      const token = sessionStorage.getItem('client_auth_token');
       if (token) {
         try {
           const payload = JSON.parse(atob(token.split('.')[1]));
@@ -1896,7 +1896,7 @@ export class ClientPortalModule extends BaseModule {
 
   private logout(): void {
     // Clear authentication token
-    localStorage.removeItem('client_auth_token');
+    sessionStorage.removeItem('client_auth_token');
 
     this.isLoggedIn = false;
     this.currentProject = null;
@@ -1924,7 +1924,7 @@ export class ClientPortalModule extends BaseModule {
     const messagesContainer = document.getElementById('messages-list');
     if (!messagesContainer) return;
 
-    const token = localStorage.getItem('client_auth_token');
+    const token = sessionStorage.getItem('client_auth_token');
 
     if (!token || token.startsWith('demo_token_')) {
       // Demo mode - show demo messages
@@ -2043,7 +2043,7 @@ export class ClientPortalModule extends BaseModule {
     const message = messageInput.value.trim();
     if (!message) return;
 
-    const token = localStorage.getItem('client_auth_token');
+    const token = sessionStorage.getItem('client_auth_token');
 
     // Demo mode - add message locally (not saved, resets on refresh)
     if (!token || token.startsWith('demo_token_')) {
@@ -2191,7 +2191,7 @@ export class ClientPortalModule extends BaseModule {
   }
 
   private async checkExistingAuth(): Promise<void> {
-    const token = localStorage.getItem('client_auth_token');
+    const token = sessionStorage.getItem('client_auth_token');
     if (!token) return;
 
     // Skip auth check for demo tokens
@@ -2219,13 +2219,13 @@ export class ClientPortalModule extends BaseModule {
         this.showDashboard();
       } else {
         // Token is invalid, remove it
-        localStorage.removeItem('client_auth_token');
+        sessionStorage.removeItem('client_auth_token');
       }
     } catch (error) {
       console.error('Auth check failed:', error);
       // Don't remove token on network errors - might just be backend down
       if (!(error instanceof TypeError)) {
-        localStorage.removeItem('client_auth_token');
+        sessionStorage.removeItem('client_auth_token');
       }
     }
   }
@@ -2565,13 +2565,13 @@ export class ClientPortalModule extends BaseModule {
    * Handle user logout - clear session and redirect to landing page
    */
   private handleLogout(): void {
-    // Clear all auth data from localStorage
-    localStorage.removeItem('clientAuth');
-    localStorage.removeItem('clientAuthToken');
-    localStorage.removeItem('client_auth_token');
-    localStorage.removeItem('clientPortalAuth');
-    localStorage.removeItem('clientEmail');
-    localStorage.removeItem('clientName');
+    // Clear all auth data from sessionStorage
+    sessionStorage.removeItem('clientAuth');
+    sessionStorage.removeItem('clientAuthToken');
+    sessionStorage.removeItem('client_auth_token');
+    sessionStorage.removeItem('clientPortalAuth');
+    sessionStorage.removeItem('clientEmail');
+    sessionStorage.removeItem('clientName');
 
     // Redirect to client landing page
     window.location.href = '/client/landing';
@@ -2646,7 +2646,7 @@ export class ClientPortalModule extends BaseModule {
 
     if (!iframe) return;
 
-    const token = localStorage.getItem('client_auth_token');
+    const token = sessionStorage.getItem('client_auth_token');
 
     if (!token || token.startsWith('demo_token_')) {
       // Demo mode - show placeholder
@@ -2780,7 +2780,7 @@ export class ClientPortalModule extends BaseModule {
   }
 
   private loadUserSettings(): void {
-    // Load user data from localStorage or API
+    // Load user data from sessionStorage or API
     const userData = {
       name: this.currentUser || 'User',
       email: this.currentUser || '',
@@ -2829,9 +2829,9 @@ export class ClientPortalModule extends BaseModule {
   }
 
   private loadBillingSettings(): void {
-    // Load billing data from localStorage or API
-    const savedBillingData = localStorage.getItem('client_billing_address');
-    const savedTaxData = localStorage.getItem('client_tax_info');
+    // Load billing data from sessionStorage or API
+    const savedBillingData = sessionStorage.getItem('client_billing_address');
+    const savedTaxData = sessionStorage.getItem('client_tax_info');
 
     const billingData = savedBillingData
       ? JSON.parse(savedBillingData)
@@ -2875,8 +2875,8 @@ export class ClientPortalModule extends BaseModule {
   }
 
   private loadContactSettings(): void {
-    // Load contact data from localStorage or API
-    const savedContactData = localStorage.getItem('client_contact_info');
+    // Load contact data from sessionStorage or API
+    const savedContactData = sessionStorage.getItem('client_contact_info');
 
     const contactData = savedContactData
       ? JSON.parse(savedContactData)
@@ -2905,9 +2905,9 @@ export class ClientPortalModule extends BaseModule {
   }
 
   private loadNotificationSettings(): void {
-    // Load notification preferences from localStorage
-    const savedNotifications = localStorage.getItem('client_notification_prefs');
-    const savedFrequency = localStorage.getItem('client_notification_frequency');
+    // Load notification preferences from sessionStorage
+    const savedNotifications = sessionStorage.getItem('client_notification_prefs');
+    const savedFrequency = sessionStorage.getItem('client_notification_frequency');
 
     const notificationPrefs = savedNotifications
       ? JSON.parse(savedNotifications)
@@ -2944,8 +2944,8 @@ export class ClientPortalModule extends BaseModule {
     const data = Object.fromEntries(formData);
     console.log('Saving contact info:', data);
 
-    // Save to localStorage for now
-    localStorage.setItem('client_contact_info', JSON.stringify(data));
+    // Save to sessionStorage for now
+    sessionStorage.setItem('client_contact_info', JSON.stringify(data));
 
     // Show success message
     this.showSuccessMessage('Contact information saved successfully!');
@@ -2955,8 +2955,8 @@ export class ClientPortalModule extends BaseModule {
     const data = Object.fromEntries(formData);
     console.log('Saving billing address:', data);
 
-    // Save to localStorage for now
-    localStorage.setItem('client_billing_address', JSON.stringify(data));
+    // Save to sessionStorage for now
+    sessionStorage.setItem('client_billing_address', JSON.stringify(data));
 
     // Show success message
     this.showSuccessMessage('Billing address saved successfully!');
@@ -2973,8 +2973,8 @@ export class ClientPortalModule extends BaseModule {
 
     console.log('Saving notification preferences:', prefs);
 
-    // Save to localStorage for now
-    localStorage.setItem('client_notification_prefs', JSON.stringify(prefs));
+    // Save to sessionStorage for now
+    sessionStorage.setItem('client_notification_prefs', JSON.stringify(prefs));
 
     // Show success message
     this.showSuccessMessage('Notification preferences saved successfully!');
@@ -2984,8 +2984,8 @@ export class ClientPortalModule extends BaseModule {
     const data = Object.fromEntries(formData);
     console.log('Saving billing view address:', data);
 
-    // Save to localStorage for now
-    localStorage.setItem('client_billing_view_address', JSON.stringify(data));
+    // Save to sessionStorage for now
+    sessionStorage.setItem('client_billing_view_address', JSON.stringify(data));
 
     // Show success message
     this.showSuccessMessage('Billing address updated successfully!');
@@ -2995,8 +2995,8 @@ export class ClientPortalModule extends BaseModule {
     const data = Object.fromEntries(formData);
     console.log('Saving tax info:', data);
 
-    // Save to localStorage for now
-    localStorage.setItem('client_tax_info', JSON.stringify(data));
+    // Save to sessionStorage for now
+    sessionStorage.setItem('client_tax_info', JSON.stringify(data));
 
     // Show success message
     this.showSuccessMessage('Tax information saved successfully!');
