@@ -1,11 +1,7 @@
 import type { Preview } from '@storybook/html-vite';
 
-// Import ALL CSS files from the site
-import '../src/styles/main-new.css';
-import '../src/styles/pages/client-portal.css';
-import '../src/styles/components/navigation.css';
-import '../src/styles/components/form.css';
-import '../src/styles/admin-dashboard.css';
+// Import main CSS (includes all components and pages)
+import '../src/styles/main.css';
 
 const preview: Preview = {
   parameters: {

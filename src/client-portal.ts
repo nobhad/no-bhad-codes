@@ -7,8 +7,8 @@
  * Entry point for client portal with full dashboard functionality.
  */
 
-// Import only the necessary CSS for client portal
-import './styles/main-new.css';
+// Import main CSS for client portal
+import './styles/main.css';
 
 // Only initialize essential modules for client portal
 import { container } from './core/container';

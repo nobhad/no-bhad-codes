@@ -8,8 +8,8 @@
  * Initializes the application with the new architecture.
  */
 
-// Import new modular CSS architecture
-import './styles/main-new.css';
+// Import main CSS
+import './styles/main.css';
 
 // Vercel Analytics (privacy-focused, no cookies)
 import { inject } from '@vercel/analytics';
