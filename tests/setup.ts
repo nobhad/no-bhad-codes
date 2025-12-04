@@ -28,11 +28,11 @@ beforeEach(() => {
     removeItem: vi.fn(),
     clear: vi.fn(),
     length: 0,
-    key: vi.fn()
+    key: vi.fn(),
   };
   Object.defineProperty(window, 'localStorage', {
     value: localStorageMock,
-    writable: true
+    writable: true,
   });
 });
 
@@ -57,10 +57,10 @@ vi.mock('gsap', () => ({
       kill: vi.fn(),
       play: vi.fn(),
       pause: vi.fn(),
-      restart: vi.fn()
+      restart: vi.fn(),
     })),
-    killTweensOf: vi.fn()
-  }
+    killTweensOf: vi.fn(),
+  },
 }));
 
 // Mock window.matchMedia for reduced motion detection
@@ -74,8 +74,8 @@ Object.defineProperty(window, 'matchMedia', {
     removeListener: vi.fn(), // deprecated
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn()
-  }))
+    dispatchEvent: vi.fn(),
+  })),
 });
 
 // Mock fetch for data loading tests
@@ -94,22 +94,22 @@ Object.defineProperty(window, 'performance', {
       requestStart: Date.now() - 800,
       responseStart: Date.now() - 600,
       domContentLoadedEventEnd: Date.now() - 400,
-      loadEventEnd: Date.now() - 200
-    }
+      loadEventEnd: Date.now() - 200,
+    },
   },
-  writable: true
+  writable: true,
 });
 
 // Mock PerformanceObserver
 const MockPerformanceObserver = vi.fn().mockImplementation((callback) => ({
   observe: vi.fn(),
   disconnect: vi.fn(),
-  takeRecords: vi.fn(() => [])
+  takeRecords: vi.fn(() => []),
 })) as any;
 Object.defineProperty(MockPerformanceObserver, 'supportedEntryTypes', {
   value: ['navigation', 'resource', 'mark', 'measure', 'paint'],
   writable: false,
-  configurable: true
+  configurable: true,
 });
 global.PerformanceObserver = MockPerformanceObserver;
 
@@ -120,14 +120,14 @@ global.IntersectionObserver = vi.fn().mockImplementation((callback) => ({
   disconnect: vi.fn(),
   root: null,
   rootMargin: '',
-  thresholds: []
+  thresholds: [],
 }));
 
 // Mock ResizeObserver
 global.ResizeObserver = vi.fn().mockImplementation((callback) => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
-  disconnect: vi.fn()
+  disconnect: vi.fn(),
 }));
 
 // Mock console methods to avoid noise in tests
@@ -136,7 +136,7 @@ const consoleMock = {
   error: vi.fn(),
   warn: vi.fn(),
   info: vi.fn(),
-  debug: vi.fn()
+  debug: vi.fn(),
 };
 Object.assign(console, consoleMock);
 

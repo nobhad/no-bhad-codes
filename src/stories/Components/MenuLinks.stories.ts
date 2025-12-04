@@ -3,33 +3,33 @@ import type { Meta, StoryObj } from '@storybook/html';
 const meta: Meta = {
   title: 'Components/Menu Links',
   parameters: {
-    layout: 'centered'
+    layout: 'centered',
   },
   argTypes: {
     state: {
       control: 'select',
       options: ['normal', 'hover', 'active', 'disabled'],
-      description: 'Link state'
+      description: 'Link state',
     },
     eyebrow: {
       control: 'text',
-      description: 'Eyebrow number'
+      description: 'Eyebrow number',
     },
     text: {
       control: 'text',
-      description: 'Link text'
+      description: 'Link text',
     },
     comingSoon: {
       control: 'boolean',
-      description: 'Show coming soon banner'
-    }
+      description: 'Show coming soon banner',
+    },
   },
   args: {
     state: 'normal',
     eyebrow: '00',
     text: 'home',
-    comingSoon: false
-  }
+    comingSoon: false,
+  },
 };
 
 export default meta;
@@ -77,21 +77,21 @@ const createMenuLink = (args: any) => {
 };
 
 export const Normal: Story = {
-  render: createMenuLink
+  render: createMenuLink,
 };
 
 export const Hover: Story = {
   args: {
-    state: 'hover'
+    state: 'hover',
   },
-  render: createMenuLink
+  render: createMenuLink,
 };
 
 export const Active: Story = {
   args: {
-    state: 'active'
+    state: 'active',
   },
-  render: createMenuLink
+  render: createMenuLink,
 };
 
 export const Disabled: Story = {
@@ -99,39 +99,39 @@ export const Disabled: Story = {
     state: 'disabled',
     text: 'portfolio',
     eyebrow: '03',
-    comingSoon: true
+    comingSoon: true,
   },
-  render: createMenuLink
+  render: createMenuLink,
 };
 
 export const About: Story = {
   args: {
     text: 'about',
-    eyebrow: '01'
+    eyebrow: '01',
   },
-  render: createMenuLink
+  render: createMenuLink,
 };
 
 export const Contact: Story = {
   args: {
     text: 'contact',
-    eyebrow: '02'
+    eyebrow: '02',
   },
-  render: createMenuLink
+  render: createMenuLink,
 };
 
 export const ClientPortal: Story = {
   args: {
     text: 'client portal',
-    eyebrow: '04'
+    eyebrow: '04',
   },
-  render: createMenuLink
+  render: createMenuLink,
 };
 
 // Full menu demonstration
 export const FullMenu: Story = {
   parameters: {
-    layout: 'fullscreen'
+    layout: 'fullscreen',
   },
   render: () => `
     <div style="background: #000; min-height: 100vh; padding: 2rem;">
@@ -176,13 +176,13 @@ export const FullMenu: Story = {
         </ul>
       </div>
     </div>
-  `
+  `,
 };
 
 // Interactive hover states demo
 export const HoverStates: Story = {
   parameters: {
-    layout: 'padded'
+    layout: 'padded',
   },
   render: () => `
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; background: #000; padding: 2rem; border-radius: 8px;">
@@ -241,5 +241,5 @@ export const HoverStates: Story = {
         opacity: 0.2;
       }
     </style>
-  `
+  `,
 };

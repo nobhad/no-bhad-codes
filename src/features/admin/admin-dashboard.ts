@@ -218,7 +218,11 @@ class AdminAuth {
         try {
           const payload = JSON.parse(atob(clientToken.split('.')[1]));
           // Check if user is admin and token not expired
-          if ((payload.isAdmin || payload.type === 'admin') && payload.exp && payload.exp * 1000 > Date.now()) {
+          if (
+            (payload.isAdmin || payload.type === 'admin') &&
+            payload.exp &&
+            payload.exp * 1000 > Date.now()
+          ) {
             return true;
           }
         } catch {
@@ -232,8 +236,7 @@ class AdminAuth {
 
       const session = JSON.parse(sessionData);
       const sessionDuration = 60 * 60 * 1000; // 1 hour
-      const isValid =
-        session.authenticated && Date.now() - session.timestamp < sessionDuration;
+      const isValid = session.authenticated && Date.now() - session.timestamp < sessionDuration;
 
       if (!isValid) {
         this.logout();
@@ -248,9 +251,28 @@ class AdminAuth {
 
   /**
    * Get the current JWT token for API calls
+   * Checks both admin token and client token (for admin users logged in via client portal)
    */
   static getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    // First check for admin-specific token
+    const adminToken = localStorage.getItem(this.TOKEN_KEY);
+    if (adminToken) return adminToken;
+
+    // Also check for client portal token (admin users use this)
+    const clientToken = localStorage.getItem('client_auth_token');
+    if (clientToken) {
+      try {
+        const payload = JSON.parse(atob(clientToken.split('.')[1]));
+        // Only return if this is an admin user
+        if (payload.isAdmin || payload.type === 'admin') {
+          return clientToken;
+        }
+      } catch {
+        // Invalid token format
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -378,7 +400,8 @@ class AdminDashboard {
 
   private setupEventListeners(): void {
     // Logout button (both old and new IDs)
-    const logoutBtn = document.getElementById('logout-btn') || document.getElementById('btn-logout');
+    const logoutBtn =
+      document.getElementById('logout-btn') || document.getElementById('btn-logout');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
         // Clear auth data and redirect to client landing
@@ -577,13 +600,14 @@ class AdminDashboard {
   }
 
   private async loadLeads(): Promise<void> {
-    const token = localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
     if (!token) return;
 
     try {
       const response = await fetch('/api/admin/leads', {
         headers: {
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         }
       });
 
@@ -596,7 +620,7 @@ class AdminDashboard {
     }
   }
 
-  private updateLeadsDisplay(data: { leads: any[], stats: any }): void {
+  private updateLeadsDisplay(data: { leads: any[]; stats: any }): void {
     // Store leads data for detail views
     this.leadsData = data.leads || [];
 
@@ -613,7 +637,7 @@ class AdminDashboard {
 
     if (statTotal) statTotal.textContent = data.stats?.total?.toString() || '0';
     if (statPending) statPending.textContent = data.stats?.pending?.toString() || '0';
-    if (statVisitors) statVisitors.textContent = '0';  // No visitor tracking backend yet
+    if (statVisitors) statVisitors.textContent = '0'; // No visitor tracking backend yet
     if (leadsTotal) leadsTotal.textContent = data.stats?.total?.toString() || '0';
     if (leadsPending) leadsPending.textContent = data.stats?.pending?.toString() || '0';
     if (leadsActive) leadsActive.textContent = data.stats?.active?.toString() || '0';
@@ -626,10 +650,12 @@ class AdminDashboard {
       if (recentLeads.length === 0) {
         recentList.innerHTML = '<li>No leads yet</li>';
       } else {
-        recentList.innerHTML = recentLeads.map((lead: any) => {
-          const date = new Date(lead.created_at).toLocaleDateString();
-          return `<li>${lead.contact_name || 'Unknown'} - ${lead.project_type || 'Project'} - ${date}</li>`;
-        }).join('');
+        recentList.innerHTML = recentLeads
+          .map((lead: any) => {
+            const date = new Date(lead.created_at).toLocaleDateString();
+            return `<li>${lead.contact_name || 'Unknown'} - ${lead.project_type || 'Project'} - ${date}</li>`;
+          })
+          .join('');
       }
     }
 
@@ -639,12 +665,17 @@ class AdminDashboard {
       if (data.leads.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">No leads found</td></tr>';
       } else {
-        tableBody.innerHTML = data.leads.map((lead: any) => {
-          const date = new Date(lead.created_at).toLocaleDateString();
-          const statusClass = lead.status === 'pending' ? 'status-pending' :
-            lead.status === 'active' ? 'status-active' : 'status-completed';
-          const showActivateBtn = lead.status === 'pending';
-          return `
+        tableBody.innerHTML = data.leads
+          .map((lead: any) => {
+            const date = new Date(lead.created_at).toLocaleDateString();
+            const statusClass =
+              lead.status === 'pending'
+                ? 'status-pending'
+                : lead.status === 'active'
+                  ? 'status-active'
+                  : 'status-completed';
+            const showActivateBtn = lead.status === 'pending';
+            return `
             <tr data-lead-id="${lead.id}">
               <td>${date}</td>
               <td>${lead.contact_name || '-'}</td>
@@ -658,7 +689,8 @@ class AdminDashboard {
               </td>
             </tr>
           `;
-        }).join('');
+          })
+          .join('');
 
         // Add click handlers to rows
         const rows = tableBody.querySelectorAll('tr[data-lead-id]');
@@ -686,13 +718,14 @@ class AdminDashboard {
   }
 
   private async loadContactSubmissions(): Promise<void> {
-    const token = localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
     if (!token) return;
 
     try {
       const response = await fetch('/api/admin/contact-submissions', {
         headers: {
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         }
       });
 
@@ -705,7 +738,7 @@ class AdminDashboard {
     }
   }
 
-  private updateContactsDisplay(data: { submissions: any[], stats: any }): void {
+  private updateContactsDisplay(data: { submissions: any[]; stats: any }): void {
     // Store contacts data for detail views
     this.contactsData = data.submissions || [];
 
@@ -725,15 +758,18 @@ class AdminDashboard {
     const tableBody = document.getElementById('contacts-table-body');
     if (tableBody && data.submissions) {
       if (data.submissions.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="6" class="loading-row">No contact form submissions yet</td></tr>';
+        tableBody.innerHTML =
+          '<tr><td colspan="6" class="loading-row">No contact form submissions yet</td></tr>';
       } else {
-        tableBody.innerHTML = data.submissions.map((submission: any) => {
-          const date = new Date(submission.created_at).toLocaleDateString();
-          // Truncate message for display
-          const truncatedMessage = submission.message && submission.message.length > 50
-            ? `${submission.message.substring(0, 50)}...`
-            : (submission.message || '-');
-          return `
+        tableBody.innerHTML = data.submissions
+          .map((submission: any) => {
+            const date = new Date(submission.created_at).toLocaleDateString();
+            // Truncate message for display
+            const truncatedMessage =
+              submission.message && submission.message.length > 50
+                ? `${submission.message.substring(0, 50)}...`
+                : submission.message || '-';
+            return `
             <tr data-contact-id="${submission.id}">
               <td>${date}</td>
               <td>${submission.name || '-'}</td>
@@ -750,7 +786,8 @@ class AdminDashboard {
               </td>
             </tr>
           `;
-        }).join('');
+          })
+          .join('');
 
         // Add click handlers to rows (for viewing details)
         const rows = tableBody.querySelectorAll('tr[data-contact-id]');
@@ -781,14 +818,15 @@ class AdminDashboard {
   }
 
   private async updateContactStatus(id: number, status: string): Promise<void> {
-    const token = localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
     if (!token) return;
 
     try {
       const response = await fetch(`/api/admin/contact-submissions/${id}/status`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ status })
@@ -819,8 +857,12 @@ class AdminDashboard {
     modalTitle.textContent = 'Intake Submission Details';
 
     const date = new Date(lead.created_at).toLocaleString();
-    const statusClass = lead.status === 'pending' ? 'status-pending' :
-      lead.status === 'active' ? 'status-active' : 'status-completed';
+    const statusClass =
+      lead.status === 'pending'
+        ? 'status-pending'
+        : lead.status === 'active'
+          ? 'status-active'
+          : 'status-completed';
 
     modalBody.innerHTML = `
       <div class="detail-grid">
@@ -860,20 +902,30 @@ class AdminDashboard {
           <span class="detail-label">Status</span>
           <span class="detail-value"><span class="status-badge ${statusClass}">${lead.status || 'pending'}</span></span>
         </div>
-        ${lead.description ? `
+        ${
+  lead.description
+    ? `
         <div class="detail-row">
           <span class="detail-label">Description</span>
           <span class="detail-value message-full">${lead.description}</span>
         </div>
-        ` : ''}
-        ${lead.features ? `
+        `
+    : ''
+}
+        ${
+  lead.features
+    ? `
         <div class="detail-row">
           <span class="detail-label">Features</span>
           <span class="detail-value message-full">${lead.features}</span>
         </div>
-        ` : ''}
+        `
+    : ''
+}
       </div>
-      ${lead.email && lead.status === 'pending' ? `
+      ${
+  lead.email && lead.status === 'pending'
+    ? `
       <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border-secondary);">
         <button class="btn btn-primary" id="invite-lead-btn" style="width: 100%;">
           Invite to Client Portal
@@ -882,7 +934,9 @@ class AdminDashboard {
           Sends an email invitation to set up their account
         </p>
       </div>
-      ` : ''}
+      `
+    : ''
+}
     `;
 
     modal.style.display = 'flex';
@@ -897,7 +951,8 @@ class AdminDashboard {
   }
 
   private async inviteLead(leadId: number, email: string): Promise<void> {
-    const token = localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
     if (!token) return;
 
     const inviteBtn = document.getElementById('invite-lead-btn') as HTMLButtonElement;
@@ -910,7 +965,7 @@ class AdminDashboard {
       const response = await fetch(`/api/admin/leads/${leadId}/invite`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -982,18 +1037,26 @@ class AdminDashboard {
           <span class="detail-label">Message</span>
           <span class="detail-value message-full">${contact.message || '-'}</span>
         </div>
-        ${contact.read_at ? `
+        ${
+  contact.read_at
+    ? `
         <div class="detail-row">
           <span class="detail-label">Read At</span>
           <span class="detail-value">${new Date(contact.read_at).toLocaleString()}</span>
         </div>
-        ` : ''}
-        ${contact.replied_at ? `
+        `
+    : ''
+}
+        ${
+  contact.replied_at
+    ? `
         <div class="detail-row">
           <span class="detail-label">Replied At</span>
           <span class="detail-value">${new Date(contact.replied_at).toLocaleString()}</span>
         </div>
-        ` : ''}
+        `
+    : ''
+}
       </div>
     `;
 
@@ -1006,13 +1069,14 @@ class AdminDashboard {
   }
 
   private async loadProjects(): Promise<void> {
-    const token = localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
     if (!token) return;
 
     try {
       const response = await fetch('/api/admin/leads', {
         headers: {
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         }
       });
 
@@ -1026,10 +1090,10 @@ class AdminDashboard {
     }
   }
 
-  private updateProjectsDisplay(data: { leads: any[], stats: any }): void {
+  private updateProjectsDisplay(data: { leads: any[]; stats: any }): void {
     // Filter to only show non-pending projects (actual projects vs leads)
-    const projects = (data.leads || []).filter((p: any) =>
-      p.status !== 'pending' || p.project_name
+    const projects = (data.leads || []).filter(
+      (p: any) => p.status !== 'pending' || p.project_name
     );
 
     // Update stats
@@ -1038,7 +1102,9 @@ class AdminDashboard {
     const projectsCompleted = document.getElementById('projects-completed');
     const projectsOnHold = document.getElementById('projects-on-hold');
 
-    const activeCount = projects.filter((p: any) => p.status === 'active' || p.status === 'in_progress').length;
+    const activeCount = projects.filter(
+      (p: any) => p.status === 'active' || p.status === 'in_progress'
+    ).length;
     const completedCount = projects.filter((p: any) => p.status === 'completed').length;
     const onHoldCount = projects.filter((p: any) => p.status === 'on_hold').length;
 
@@ -1051,10 +1117,12 @@ class AdminDashboard {
     const tableBody = document.getElementById('projects-table-body');
     if (tableBody) {
       if (projects.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">No projects yet. Convert leads to start projects.</td></tr>';
+        tableBody.innerHTML =
+          '<tr><td colspan="7" class="loading-row">No projects yet. Convert leads to start projects.</td></tr>';
       } else {
-        tableBody.innerHTML = projects.map((project: any) => {
-          return `
+        tableBody.innerHTML = projects
+          .map((project: any) => {
+            return `
             <tr data-project-id="${project.id}">
               <td>${project.project_name || project.description?.substring(0, 30) || 'Untitled Project'}</td>
               <td>${project.contact_name || '-'}<br><small>${project.company_name || ''}</small></td>
@@ -1076,13 +1144,17 @@ class AdminDashboard {
               </td>
             </tr>
           `;
-        }).join('');
+          })
+          .join('');
 
         // Add click handlers for rows
         const rows = tableBody.querySelectorAll('tr[data-project-id]');
         rows.forEach((row) => {
           row.addEventListener('click', (e) => {
-            if ((e.target as HTMLElement).tagName === 'SELECT' || (e.target as HTMLElement).tagName === 'BUTTON') return;
+            if (
+              (e.target as HTMLElement).tagName === 'SELECT' ||
+              (e.target as HTMLElement).tagName === 'BUTTON'
+            ) {return;}
             const projectId = parseInt((row as HTMLElement).dataset.projectId || '0');
             this.showProjectDetails(projectId);
           });
@@ -1118,14 +1190,15 @@ class AdminDashboard {
   }
 
   private async updateProjectStatus(id: number, status: string): Promise<void> {
-    const token = localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
     if (!token) return;
 
     try {
       const response = await fetch(`/api/projects/${id}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ status })
@@ -1203,7 +1276,11 @@ class AdminDashboard {
     if (projectType) projectType.textContent = this.formatProjectType(project.project_type);
     if (budget) budget.textContent = project.budget_range || '-';
     if (timeline) timeline.textContent = project.timeline || '-';
-    if (startDate) startDate.textContent = project.created_at ? new Date(project.created_at).toLocaleDateString() : '-';
+    if (startDate) {
+      startDate.textContent = project.created_at
+        ? new Date(project.created_at).toLocaleDateString()
+        : '-';
+    }
 
     // Progress
     const progressPercent = document.getElementById('pd-progress-percent');
@@ -1246,11 +1323,17 @@ class AdminDashboard {
       clientAccountStatus.textContent = hasAccount ? 'Active' : 'Not Invited';
       clientAccountStatus.className = `status-badge status-${hasAccount ? 'active' : 'pending'}`;
     }
-    if (clientLastLogin) clientLastLogin.textContent = project.last_login_at ? new Date(project.last_login_at).toLocaleString() : 'Never';
+    if (clientLastLogin) {
+      clientLastLogin.textContent = project.last_login_at
+        ? new Date(project.last_login_at).toLocaleString()
+        : 'Never';
+    }
 
     // Load project-specific data
     this.loadProjectMessages(project.id);
     this.loadProjectFiles(project.id);
+    this.loadProjectMilestones(project.id);
+    this.loadProjectInvoices(project.id);
   }
 
   /**
@@ -1314,6 +1397,21 @@ class AdminDashboard {
         }
       });
     }
+
+    // Add milestone handler
+    const addMilestoneBtn = document.getElementById('btn-add-milestone');
+    if (addMilestoneBtn) {
+      addMilestoneBtn.addEventListener('click', () => this.showAddMilestonePrompt());
+    }
+
+    // Create invoice handler
+    const createInvoiceBtn = document.getElementById('btn-create-invoice');
+    if (createInvoiceBtn) {
+      createInvoiceBtn.addEventListener('click', () => this.showCreateInvoicePrompt());
+    }
+
+    // File upload handlers
+    this.setupFileUploadHandlers();
   }
 
   /**
@@ -1322,18 +1420,21 @@ class AdminDashboard {
   private async saveProjectSettings(): Promise<void> {
     if (!this.currentProjectId) return;
 
-    const token = localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
     if (!token) return;
 
     const name = (document.getElementById('pd-setting-name') as HTMLInputElement)?.value;
     const status = (document.getElementById('pd-setting-status') as HTMLSelectElement)?.value;
-    const progress = parseInt((document.getElementById('pd-setting-progress') as HTMLInputElement)?.value || '0');
+    const progress = parseInt(
+      (document.getElementById('pd-setting-progress') as HTMLInputElement)?.value || '0'
+    );
 
     try {
       const response = await fetch(`/api/projects/${this.currentProjectId}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -1368,9 +1469,11 @@ class AdminDashboard {
     const messagesThread = document.getElementById('pd-messages-thread');
     if (!messagesThread) return;
 
-    const token = localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
     if (!token) {
-      messagesThread.innerHTML = '<p class="empty-state">Authentication required to view messages.</p>';
+      messagesThread.innerHTML =
+        '<p class="empty-state">Authentication required to view messages.</p>';
       return;
     }
 
@@ -1378,12 +1481,13 @@ class AdminDashboard {
       // Get the client ID for this project
       const project = this.projectsData.find((p: any) => p.id === projectId);
       if (!project || !project.client_id) {
-        messagesThread.innerHTML = '<p class="empty-state">No client account linked. Invite the client first to enable messaging.</p>';
+        messagesThread.innerHTML =
+          '<p class="empty-state">No client account linked. Invite the client first to enable messaging.</p>';
         return;
       }
 
       const response = await fetch(`/api/messages?client_id=${project.client_id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       if (response.ok) {
@@ -1391,9 +1495,12 @@ class AdminDashboard {
         const messages = data.messages || [];
 
         if (messages.length === 0) {
-          messagesThread.innerHTML = '<p class="empty-state">No messages yet. Start the conversation with your client.</p>';
+          messagesThread.innerHTML =
+            '<p class="empty-state">No messages yet. Start the conversation with your client.</p>';
         } else {
-          messagesThread.innerHTML = messages.map((msg: any) => `
+          messagesThread.innerHTML = messages
+            .map(
+              (msg: any) => `
             <div class="message ${msg.sender_type === 'admin' ? 'message-sent' : 'message-received'}">
               <div class="message-content">
                 <div class="message-header">
@@ -1403,7 +1510,9 @@ class AdminDashboard {
                 <div class="message-body">${msg.content}</div>
               </div>
             </div>
-          `).join('');
+          `
+            )
+            .join('');
           // Scroll to bottom
           messagesThread.scrollTop = messagesThread.scrollHeight;
         }
@@ -1423,7 +1532,8 @@ class AdminDashboard {
     const messageInput = document.getElementById('pd-message-input') as HTMLTextAreaElement;
     if (!messageInput || !messageInput.value.trim()) return;
 
-    const token = localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
     if (!token) return;
 
     const project = this.projectsData.find((p: any) => p.id === this.currentProjectId);
@@ -1436,7 +1546,7 @@ class AdminDashboard {
       const response = await fetch('/api/messages', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -1466,7 +1576,8 @@ class AdminDashboard {
     const filesList = document.getElementById('pd-files-list');
     if (!filesList) return;
 
-    const token = localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
     if (!token) {
       filesList.innerHTML = '<p class="empty-state">Authentication required to view files.</p>';
       return;
@@ -1474,7 +1585,7 @@ class AdminDashboard {
 
     try {
       const response = await fetch(`/api/files?project_id=${projectId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       if (response.ok) {
@@ -1484,7 +1595,9 @@ class AdminDashboard {
         if (files.length === 0) {
           filesList.innerHTML = '<p class="empty-state">No files uploaded yet.</p>';
         } else {
-          filesList.innerHTML = files.map((file: any) => `
+          filesList.innerHTML = files
+            .map(
+              (file: any) => `
             <div class="file-item">
               <span class="file-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1500,7 +1613,9 @@ class AdminDashboard {
                 <a href="/uploads/${file.filename}" class="btn btn-outline btn-sm" target="_blank">Download</a>
               </div>
             </div>
-          `).join('');
+          `
+            )
+            .join('');
         }
       }
     } catch (error) {
@@ -1520,6 +1635,442 @@ class AdminDashboard {
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
   }
 
+  /**
+   * Load milestones for the current project
+   */
+  private async loadProjectMilestones(projectId: number): Promise<void> {
+    const milestonesList = document.getElementById('pd-milestones-list');
+    if (!milestonesList) return;
+
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    if (!token) {
+      milestonesList.innerHTML = '<p class="empty-state">Authentication required.</p>';
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/projects/${projectId}/milestones`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const milestones = data.milestones || [];
+
+        if (milestones.length === 0) {
+          milestonesList.innerHTML =
+            '<p class="empty-state">No milestones yet. Add milestones to track project progress.</p>';
+        } else {
+          milestonesList.innerHTML = milestones
+            .map(
+              (m: any) => `
+            <div class="milestone-item ${m.is_completed ? 'completed' : ''}" data-milestone-id="${m.id}">
+              <div class="milestone-checkbox">
+                <input type="checkbox" ${m.is_completed ? 'checked' : ''}
+                       onchange="window.adminDashboard?.toggleMilestone(${m.id}, this.checked)">
+              </div>
+              <div class="milestone-content">
+                <div class="milestone-header">
+                  <h4 class="milestone-title">${m.title}</h4>
+                  ${m.due_date ? `<span class="milestone-due-date">${new Date(m.due_date).toLocaleDateString()}</span>` : ''}
+                </div>
+                ${m.description ? `<p class="milestone-description">${m.description}</p>` : ''}
+                ${
+  m.deliverables && m.deliverables.length > 0
+    ? `
+                  <ul class="milestone-deliverables">
+                    ${m.deliverables.map((d: string) => `<li>${d}</li>`).join('')}
+                  </ul>
+                `
+    : ''
+}
+              </div>
+              <button class="btn btn-danger btn-sm" onclick="window.adminDashboard?.deleteMilestone(${m.id})">Delete</button>
+            </div>
+          `
+            )
+            .join('');
+        }
+      }
+    } catch (error) {
+      console.error('[AdminDashboard] Error loading milestones:', error);
+      milestonesList.innerHTML = '<p class="empty-state">Error loading milestones.</p>';
+    }
+  }
+
+  /**
+   * Show prompt to add a new milestone
+   */
+  private showAddMilestonePrompt(): void {
+    if (!this.currentProjectId) return;
+
+    const title = prompt('Enter milestone title:');
+    if (!title) return;
+
+    const description = prompt('Enter milestone description (optional):') || '';
+    const dueDateStr = prompt('Enter due date (YYYY-MM-DD, optional):') || '';
+
+    this.addMilestone(title, description, dueDateStr);
+  }
+
+  /**
+   * Add a new milestone to the current project
+   */
+  private async addMilestone(title: string, description: string, dueDate: string): Promise<void> {
+    if (!this.currentProjectId) return;
+
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    if (!token) return;
+
+    try {
+      const response = await fetch(`/api/projects/${this.currentProjectId}/milestones`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title,
+          description: description || null,
+          due_date: dueDate || null,
+          deliverables: []
+        })
+      });
+
+      if (response.ok) {
+        this.loadProjectMilestones(this.currentProjectId);
+      } else {
+        const error = await response.json();
+        alert(`Failed to add milestone: ${error.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('[AdminDashboard] Error adding milestone:', error);
+      alert('Error adding milestone');
+    }
+  }
+
+  /**
+   * Toggle milestone completion status (exposed globally for onclick)
+   */
+  public async toggleMilestone(milestoneId: number, isCompleted: boolean): Promise<void> {
+    if (!this.currentProjectId) return;
+
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    if (!token) return;
+
+    try {
+      const response = await fetch(
+        `/api/projects/${this.currentProjectId}/milestones/${milestoneId}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ is_completed: isCompleted })
+        }
+      );
+
+      if (response.ok) {
+        this.loadProjectMilestones(this.currentProjectId);
+      }
+    } catch (error) {
+      console.error('[AdminDashboard] Error toggling milestone:', error);
+    }
+  }
+
+  /**
+   * Delete a milestone (exposed globally for onclick)
+   */
+  public async deleteMilestone(milestoneId: number): Promise<void> {
+    if (!this.currentProjectId) return;
+    if (!confirm('Are you sure you want to delete this milestone?')) return;
+
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    if (!token) return;
+
+    try {
+      const response = await fetch(
+        `/api/projects/${this.currentProjectId}/milestones/${milestoneId}`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.ok) {
+        this.loadProjectMilestones(this.currentProjectId);
+      } else {
+        alert('Failed to delete milestone');
+      }
+    } catch (error) {
+      console.error('[AdminDashboard] Error deleting milestone:', error);
+      alert('Error deleting milestone');
+    }
+  }
+
+  /**
+   * Load invoices for the current project
+   */
+  private async loadProjectInvoices(projectId: number): Promise<void> {
+    const invoicesList = document.getElementById('pd-invoices-list');
+    const outstandingEl = document.getElementById('pd-outstanding');
+    const paidEl = document.getElementById('pd-paid');
+
+    if (!invoicesList) return;
+
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    if (!token) {
+      invoicesList.innerHTML = '<p class="empty-state">Authentication required.</p>';
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/invoices/project/${projectId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const invoices = data.invoices || [];
+
+        // Calculate totals
+        let totalOutstanding = 0;
+        let totalPaid = 0;
+
+        invoices.forEach((inv: any) => {
+          const amount = parseFloat(inv.amount_total) || 0;
+          const paid = parseFloat(inv.amount_paid) || 0;
+          if (inv.status === 'paid') {
+            totalPaid += amount;
+          } else if (['sent', 'viewed', 'partial', 'overdue'].includes(inv.status)) {
+            totalOutstanding += amount - paid;
+            totalPaid += paid;
+          }
+        });
+
+        if (outstandingEl) outstandingEl.textContent = `$${totalOutstanding.toFixed(2)}`;
+        if (paidEl) paidEl.textContent = `$${totalPaid.toFixed(2)}`;
+
+        if (invoices.length === 0) {
+          invoicesList.innerHTML = '<p class="empty-state">No invoices created yet.</p>';
+        } else {
+          invoicesList.innerHTML = invoices
+            .map((inv: any) => {
+              const statusClass =
+                inv.status === 'paid'
+                  ? 'status-completed'
+                  : inv.status === 'overdue'
+                    ? 'status-cancelled'
+                    : 'status-active';
+              return `
+              <div class="invoice-item">
+                <div class="invoice-info">
+                  <strong>${inv.invoice_number || `INV-${inv.id}`}</strong>
+                  <span class="invoice-date">${new Date(inv.created_at).toLocaleDateString()}</span>
+                </div>
+                <div class="invoice-amount">$${(parseFloat(inv.amount_total) || 0).toFixed(2)}</div>
+                <span class="status-badge ${statusClass}">${inv.status}</span>
+                <div class="invoice-actions">
+                  <a href="/api/invoices/${inv.id}/pdf" class="btn btn-outline btn-sm" target="_blank">PDF</a>
+                  ${inv.status === 'draft' ? `<button class="btn btn-secondary btn-sm" onclick="window.adminDashboard?.sendInvoice(${inv.id})">Send</button>` : ''}
+                </div>
+              </div>
+            `;
+            })
+            .join('');
+        }
+      }
+    } catch (error) {
+      console.error('[AdminDashboard] Error loading invoices:', error);
+      invoicesList.innerHTML = '<p class="empty-state">Error loading invoices.</p>';
+    }
+  }
+
+  /**
+   * Show prompt to create a new invoice
+   */
+  private showCreateInvoicePrompt(): void {
+    if (!this.currentProjectId) return;
+
+    const project = this.projectsData.find((p: any) => p.id === this.currentProjectId);
+    if (!project) return;
+
+    const description = prompt('Enter line item description:', 'Web Development Services');
+    if (!description) return;
+
+    const amountStr = prompt('Enter amount ($):', '1000');
+    if (!amountStr) return;
+
+    const amount = parseFloat(amountStr);
+    if (isNaN(amount) || amount <= 0) {
+      alert('Please enter a valid amount');
+      return;
+    }
+
+    this.createInvoice(project.client_id, description, amount);
+  }
+
+  /**
+   * Create a new invoice for the current project
+   */
+  private async createInvoice(
+    clientId: number,
+    description: string,
+    amount: number
+  ): Promise<void> {
+    if (!this.currentProjectId) return;
+
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    if (!token) return;
+
+    try {
+      const response = await fetch('/api/invoices', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          projectId: this.currentProjectId,
+          clientId,
+          lineItems: [
+            {
+              description,
+              quantity: 1,
+              rate: amount,
+              amount
+            }
+          ],
+          notes: '',
+          terms: 'Payment due within 30 days'
+        })
+      });
+
+      if (response.ok) {
+        alert('Invoice created successfully!');
+        this.loadProjectInvoices(this.currentProjectId);
+      } else {
+        const error = await response.json();
+        alert(`Failed to create invoice: ${error.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('[AdminDashboard] Error creating invoice:', error);
+      alert('Error creating invoice');
+    }
+  }
+
+  /**
+   * Send an invoice to the client (exposed globally for onclick)
+   */
+  public async sendInvoice(invoiceId: number): Promise<void> {
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    if (!token) return;
+
+    try {
+      const response = await fetch(`/api/invoices/${invoiceId}/send`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        alert('Invoice sent successfully!');
+        if (this.currentProjectId) {
+          this.loadProjectInvoices(this.currentProjectId);
+        }
+      } else {
+        alert('Failed to send invoice');
+      }
+    } catch (error) {
+      console.error('[AdminDashboard] Error sending invoice:', error);
+      alert('Error sending invoice');
+    }
+  }
+
+  /**
+   * Set up file upload handlers for project detail view
+   */
+  private setupFileUploadHandlers(): void {
+    const dropzone = document.getElementById('pd-upload-dropzone');
+    const fileInput = document.getElementById('pd-file-input') as HTMLInputElement;
+    const browseBtn = document.getElementById('btn-pd-browse-files');
+
+    if (browseBtn && fileInput) {
+      browseBtn.addEventListener('click', () => fileInput.click());
+    }
+
+    if (fileInput) {
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files && fileInput.files.length > 0) {
+          this.uploadFiles(fileInput.files);
+          fileInput.value = ''; // Reset input
+        }
+      });
+    }
+
+    if (dropzone) {
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+
+      dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('dragover');
+      });
+
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
+          this.uploadFiles(e.dataTransfer.files);
+        }
+      });
+    }
+  }
+
+  /**
+   * Upload files to the current project
+   */
+  private async uploadFiles(files: FileList): Promise<void> {
+    if (!this.currentProjectId) return;
+
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    if (!token) return;
+
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('files', files[i]);
+    }
+
+    try {
+      const response = await fetch(`/api/projects/${this.currentProjectId}/files`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(`${data.files?.length || files.length} file(s) uploaded successfully!`);
+        this.loadProjectFiles(this.currentProjectId);
+      } else {
+        const error = await response.json();
+        alert(`Failed to upload files: ${error.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('[AdminDashboard] Error uploading files:', error);
+      alert('Error uploading files');
+    }
+  }
+
   private loadSystemInfo(): void {
     const sysVersion = document.getElementById('sys-version');
     const sysEnv = document.getElementById('sys-environment');
@@ -1531,7 +2082,7 @@ class AdminDashboard {
     if (sysVersion) sysVersion.textContent = '10.0.0';
     if (sysEnv) sysEnv.textContent = import.meta.env?.MODE || 'development';
     if (sysBuildDate) sysBuildDate.textContent = new Date().toLocaleDateString();
-    if (sysUserAgent) sysUserAgent.textContent = `${navigator.userAgent.substring(0, 50)  }...`;
+    if (sysUserAgent) sysUserAgent.textContent = `${navigator.userAgent.substring(0, 50)}...`;
     if (sysScreen) sysScreen.textContent = `${screen.width} x ${screen.height}`;
     if (sysViewport) sysViewport.textContent = `${window.innerWidth} x ${window.innerHeight}`;
 
@@ -1577,7 +2128,10 @@ class AdminDashboard {
         // Calculate average session duration
         const sessionsWithTime = pageViews.filter((pv: any) => pv.timeOnPage);
         if (sessionsWithTime.length > 0) {
-          const totalTime = sessionsWithTime.reduce((sum: number, pv: any) => sum + (pv.timeOnPage || 0), 0);
+          const totalTime = sessionsWithTime.reduce(
+            (sum: number, pv: any) => sum + (pv.timeOnPage || 0),
+            0
+          );
           const avgTimeMs = totalTime / sessionsWithTime.length;
           const avgSeconds = Math.round(avgTimeMs / 1000);
           const minutes = Math.floor(avgSeconds / 60);
@@ -1627,7 +2181,8 @@ class AdminDashboard {
           // Clear messages when no client selected
           const messagesThread = document.getElementById('admin-messages-thread');
           if (messagesThread) {
-            messagesThread.innerHTML = '<div style="text-align: center; color: var(--color-text-secondary, #666); padding: 2rem;">Select a client to view messages</div>';
+            messagesThread.innerHTML =
+              '<div style="text-align: center; color: var(--color-text-secondary, #666); padding: 2rem;">Select a client to view messages</div>';
           }
           const composeArea = document.getElementById('admin-compose-area');
           if (composeArea) {
@@ -1667,7 +2222,8 @@ class AdminDashboard {
   }
 
   private async loadClientThreads(): Promise<void> {
-    const token = localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
     if (!token) return;
 
     const clientSelect = document.getElementById('admin-client-select') as HTMLSelectElement;
@@ -1676,7 +2232,7 @@ class AdminDashboard {
     try {
       const response = await fetch('/api/messages/threads', {
         headers: {
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         }
       });
 
@@ -1710,7 +2266,8 @@ class AdminDashboard {
     threads.forEach((thread: any) => {
       const option = document.createElement('option');
       option.value = `${thread.client_id}:${thread.id}`;
-      const clientName = thread.contact_name || thread.company_name || thread.client_name || 'Unknown Client';
+      const clientName =
+        thread.contact_name || thread.company_name || thread.client_name || 'Unknown Client';
       const unreadText = thread.unread_count > 0 ? ` (${thread.unread_count} unread)` : '';
       option.textContent = `${clientName} - ${thread.subject || 'No subject'}${unreadText}`;
       clientSelect.appendChild(option);
@@ -1738,20 +2295,24 @@ class AdminDashboard {
   }
 
   private async loadThreadMessages(threadId: number): Promise<void> {
-    const token = localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
     if (!token) return;
 
     // Try new container ID first, then old one
-    const container = document.getElementById('admin-messages-thread') || document.getElementById('admin-messages-container');
+    const container =
+      document.getElementById('admin-messages-thread') ||
+      document.getElementById('admin-messages-container');
     if (!container) return;
 
-    container.innerHTML = '<div style="text-align: center; padding: 2rem;">Loading messages...</div>';
+    container.innerHTML =
+      '<div style="text-align: center; padding: 2rem;">Loading messages...</div>';
 
     try {
       // Backend endpoint: /api/messages/threads/:threadId/messages
       const response = await fetch(`/api/messages/threads/${threadId}/messages`, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         }
       });
 
@@ -1763,37 +2324,46 @@ class AdminDashboard {
         await fetch(`/api/messages/threads/${threadId}/read`, {
           method: 'PUT',
           headers: {
-            'Authorization': `Bearer ${token}`
+            Authorization: `Bearer ${token}`
           }
         });
       } else {
-        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">Failed to load messages</div>';
+        container.innerHTML =
+          '<div style="text-align: center; padding: 2rem; color: #666;">Failed to load messages</div>';
       }
     } catch (error) {
       console.error('[AdminDashboard] Failed to load messages:', error);
-      container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">Error loading messages</div>';
+      container.innerHTML =
+        '<div style="text-align: center; padding: 2rem; color: #666;">Error loading messages</div>';
     }
   }
 
   private renderMessages(messages: any[]): void {
-    const container = document.getElementById('admin-messages-thread') || document.getElementById('admin-messages-container');
+    const container =
+      document.getElementById('admin-messages-thread') ||
+      document.getElementById('admin-messages-container');
     if (!container) return;
 
     if (messages.length === 0) {
-      container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">No messages yet. Start the conversation!</div>';
+      container.innerHTML =
+        '<div style="text-align: center; padding: 2rem; color: #666;">No messages yet. Start the conversation!</div>';
       return;
     }
 
     // Use client portal style messages
-    container.innerHTML = messages.map((msg: any) => {
-      const isAdmin = msg.sender_type === 'admin';
-      const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const date = new Date(msg.created_at).toLocaleDateString();
-      const senderName = isAdmin ? 'You (Admin)' : (msg.sender_name || 'Client');
+    container.innerHTML = messages
+      .map((msg: any) => {
+        const isAdmin = msg.sender_type === 'admin';
+        const time = new Date(msg.created_at).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        const date = new Date(msg.created_at).toLocaleDateString();
+        const senderName = isAdmin ? 'You (Admin)' : msg.sender_name || 'Client';
 
-      if (isAdmin) {
-        // Admin message (sent - right aligned)
-        return `
+        if (isAdmin) {
+          // Admin message (sent - right aligned)
+          return `
           <div class="message message-sent">
             <div class="message-content">
               <div class="message-header">
@@ -1807,9 +2377,9 @@ class AdminDashboard {
             </div>
           </div>
         `;
-      }
-      // Client message (received - left aligned)
-      return `
+        }
+        // Client message (received - left aligned)
+        return `
           <div class="message message-received">
             <div class="message-avatar" data-name="${senderName}">
               <div class="avatar-placeholder">${senderName.substring(0, 2).toUpperCase()}</div>
@@ -1823,8 +2393,8 @@ class AdminDashboard {
             </div>
           </div>
         `;
-
-    }).join('');
+      })
+      .join('');
 
     // Scroll to bottom
     container.scrollTop = container.scrollHeight;
@@ -1834,7 +2404,8 @@ class AdminDashboard {
     const input = document.getElementById('admin-message-text') as HTMLInputElement;
     if (!input || !input.value.trim() || !this.selectedThreadId) return;
 
-    const token = localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+    const token =
+      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
     if (!token) return;
 
     const message = input.value.trim();
@@ -1845,10 +2416,10 @@ class AdminDashboard {
       const response = await fetch(`/api/messages/threads/${this.selectedThreadId}/messages`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ message })  // Backend expects 'message' field
+        body: JSON.stringify({ message }) // Backend expects 'message' field
       });
 
       if (response.ok) {
@@ -1926,7 +2497,8 @@ class AdminDashboard {
       content.classList.remove('active');
     });
     // Try both ID formats: tab-{name} (new) and {name}-tab (old)
-    const tabContent = document.getElementById(`tab-${tabName}`) || document.getElementById(`${tabName}-tab`);
+    const tabContent =
+      document.getElementById(`tab-${tabName}`) || document.getElementById(`${tabName}-tab`);
     tabContent?.classList.add('active');
 
     this.currentTab = tabName;
@@ -2405,17 +2977,19 @@ class AdminDashboard {
     }
   }
 
-  private populateLeadsTable(leads: Array<{
-    id: number;
-    created_at: string;
-    contact_name: string;
-    company_name: string;
-    email: string;
-    project_type: string;
-    budget_range: string;
-    timeline: string;
-    status: string;
-  }>): void {
+  private populateLeadsTable(
+    leads: Array<{
+      id: number;
+      created_at: string;
+      contact_name: string;
+      company_name: string;
+      email: string;
+      project_type: string;
+      budget_range: string;
+      timeline: string;
+      status: string;
+    }>
+  ): void {
     const tbody = document.getElementById('leads-table-body');
     if (!tbody) return;
 
@@ -2431,9 +3005,14 @@ class AdminDashboard {
           day: 'numeric',
           year: 'numeric'
         });
-        const statusClass = lead.status === 'pending' ? 'status-pending' :
-          lead.status === 'active' || lead.status === 'in_progress' ? 'status-active' :
-            lead.status === 'completed' ? 'status-completed' : '';
+        const statusClass =
+          lead.status === 'pending'
+            ? 'status-pending'
+            : lead.status === 'active' || lead.status === 'in_progress'
+              ? 'status-active'
+              : lead.status === 'completed'
+                ? 'status-completed'
+                : '';
 
         return `
           <tr>
@@ -2455,11 +3034,11 @@ class AdminDashboard {
     const typeMap: Record<string, string> = {
       'simple-site': 'Simple Website',
       'business-site': 'Business Website',
-      'portfolio': 'Portfolio',
-      'ecommerce': 'E-commerce',
+      portfolio: 'Portfolio',
+      ecommerce: 'E-commerce',
       'web-app': 'Web Application',
       'browser-extension': 'Browser Extension',
-      'other': 'Other'
+      other: 'Other'
     };
     return typeMap[type] || type || '-';
   }
@@ -2599,13 +3178,7 @@ class AdminDashboard {
           datasets: [
             {
               data: [35, 30, 20, 10, 5],
-              backgroundColor: [
-                '#00ff41',
-                '#333333',
-                '#666666',
-                '#999999',
-                '#cccccc'
-              ],
+              backgroundColor: ['#00ff41', '#333333', '#666666', '#999999', '#cccccc'],
               borderColor: '#ffffff',
               borderWidth: 2
             }
@@ -2907,9 +3480,16 @@ window.viewVisitorDetails = (visitorId: string) => {
   alert(`Viewing details for visitor: ${visitorId}`);
 };
 
+// Extend Window interface for global admin dashboard access
+declare global {
+  interface Window {
+    adminDashboard: AdminDashboard | null;
+  }
+}
+
 // Initialize dashboard when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  new AdminDashboard();
+  window.adminDashboard = new AdminDashboard();
 });
 
 export { AdminAuth, AdminDashboard };

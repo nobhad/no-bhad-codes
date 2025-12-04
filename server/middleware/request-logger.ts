@@ -35,7 +35,7 @@ export function requestLogger() {
     req.logger = logger.child({
       requestId: req.id,
       ip: req.ip,
-      userAgent: req.get('user-agent')
+      userAgent: req.get('user-agent'),
     });
 
     // Log incoming request
@@ -47,8 +47,8 @@ export function requestLogger() {
         ip: req.ip,
         userAgent: req.get('user-agent'),
         contentLength: req.get('content-length'),
-        contentType: req.get('content-type')
-      }
+        contentType: req.get('content-type'),
+      },
     });
 
     // Capture response finish event
@@ -66,8 +66,8 @@ export function requestLogger() {
             duration,
             method: req.method,
             url: req.url,
-            statusCode: res.statusCode
-          }
+            statusCode: res.statusCode,
+          },
         });
       }
     });
@@ -76,7 +76,7 @@ export function requestLogger() {
     res.on('error', (error: Error) => {
       req.logger.logError(error, {
         category: 'HTTP_ERROR',
-        requestId: req.id
+        requestId: req.id,
       });
     });
 
@@ -99,8 +99,8 @@ export function errorLogger() {
         body: req.body,
         params: req.params,
         query: req.query,
-        statusCode: res.statusCode
-      }
+        statusCode: res.statusCode,
+      },
     });
 
     // Pass error to next error handler
@@ -120,8 +120,8 @@ export function securityLogger() {
         metadata: {
           ip: req.ip,
           userAgent: req.get('user-agent'),
-          email: req.body?.email
-        }
+          email: req.body?.email,
+        },
       });
     }
 
@@ -131,7 +131,7 @@ export function securityLogger() {
         req.logger.logSecurity('Failed login attempt', {
           ip: req.ip,
           email: req.body?.email,
-          statusCode: res.statusCode
+          statusCode: res.statusCode,
         });
       }
 
@@ -140,7 +140,7 @@ export function securityLogger() {
         req.logger.logSecurity('Rate limit exceeded', {
           ip: req.ip,
           url: req.url,
-          method: req.method
+          method: req.method,
         });
       }
     });

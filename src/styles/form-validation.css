@@ -69,7 +69,7 @@
 .form-button.form-valid {
   background-color: var(--color-primary) !important;
   color: #000000 !important;
-  border-color: var(--color-primary) !important;
+  border-color: #000000 !important;
 }
 
 .form-button.form-valid:hover {

@@ -58,7 +58,7 @@ export class ErrorTrackingService {
       release = process.env.npm_package_version || '1.0.0',
       enableProfiling = false,
       sampleRate = environment === 'production' ? 1.0 : 0.1,
-      tracesSampleRate = environment === 'production' ? 0.1 : 1.0
+      tracesSampleRate = environment === 'production' ? 0.1 : 1.0,
     } = config;
 
     if (!dsn) {
@@ -69,7 +69,7 @@ export class ErrorTrackingService {
     const integrations = [
       Sentry.httpIntegration(),
       Sentry.expressIntegration(),
-      Sentry.graphqlIntegration()
+      Sentry.graphqlIntegration(),
     ];
 
     // Profiling integration is optional and may not be available
@@ -111,7 +111,7 @@ export class ErrorTrackingService {
       beforeSendTransaction(event) {
         // Filter sensitive data from transactions
         return event;
-      }
+      },
     });
 
     this.isInitialized = true;
@@ -132,7 +132,7 @@ export class ErrorTrackingService {
       if (context.user) {
         scope.setUser({
           id: context.user.id,
-          email: context.user.email
+          email: context.user.email,
         });
       }
 
@@ -141,7 +141,7 @@ export class ErrorTrackingService {
         scope.setContext('request', {
           method: context.request.method,
           url: context.request.url,
-          headers: context.request.headers
+          headers: context.request.headers,
         });
       }
 
@@ -185,7 +185,7 @@ export class ErrorTrackingService {
       if (context.user) {
         scope.setUser({
           id: context.user.id,
-          email: context.user.email
+          email: context.user.email,
         });
       }
 
@@ -219,7 +219,7 @@ export class ErrorTrackingService {
     return Sentry.startSpan(
       {
         name,
-        op: operation
+        op: operation,
       },
       (span) => {
         return span;
@@ -245,7 +245,7 @@ export class ErrorTrackingService {
       category: breadcrumb.category || 'custom',
       level: breadcrumb.level || 'info',
       data: breadcrumb.data,
-      timestamp: Date.now() / 1000
+      timestamp: Date.now() / 1000,
     });
   }
 
@@ -301,7 +301,7 @@ export class ErrorTrackingService {
       shouldHandleError(error) {
         // Log all errors to Sentry
         return true;
-      }
+      },
     });
   }
 

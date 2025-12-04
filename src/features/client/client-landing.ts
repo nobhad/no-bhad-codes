@@ -96,7 +96,9 @@ export class ClientLandingModule extends BaseModule {
     this.loginForm = document.getElementById('loginForm') as HTMLFormElement;
     this.emailInput = document.getElementById('login-email') as HTMLInputElement;
     this.passwordInput = document.getElementById('login-password') as HTMLInputElement;
-    this.passwordToggle = document.querySelector('.desktop-login-form .password-toggle') as HTMLButtonElement;
+    this.passwordToggle = document.querySelector(
+      '.desktop-login-form .password-toggle'
+    ) as HTMLButtonElement;
     this.loginError = document.getElementById('loginError') as HTMLElement;
     this.submitButton = this.loginForm?.querySelector('button[type="submit"]') as HTMLButtonElement;
     this.openIntakeButton = document.getElementById('openIntakeModal') as HTMLButtonElement;
@@ -107,7 +109,9 @@ export class ClientLandingModule extends BaseModule {
     this.emailInputMobile = document.getElementById('login-email-mobile') as HTMLInputElement;
     this.passwordInputMobile = document.getElementById('login-password-mobile') as HTMLInputElement;
     this.loginErrorMobile = document.getElementById('loginErrorMobile') as HTMLElement;
-    this.openIntakeButtonMobile = document.getElementById('openIntakeModalMobile') as HTMLButtonElement;
+    this.openIntakeButtonMobile = document.getElementById(
+      'openIntakeModalMobile'
+    ) as HTMLButtonElement;
 
     console.log('[ClientLandingModule] Elements cached:', {
       loginForm: !!this.loginForm,
@@ -140,7 +144,9 @@ export class ClientLandingModule extends BaseModule {
       });
 
       // Setup mobile password toggle
-      const mobilePasswordToggle = this.loginFormMobile.querySelector('.password-toggle') as HTMLButtonElement;
+      const mobilePasswordToggle = this.loginFormMobile.querySelector(
+        '.password-toggle'
+      ) as HTMLButtonElement;
       if (mobilePasswordToggle && this.passwordInputMobile) {
         mobilePasswordToggle.addEventListener('click', () => {
           const isPassword = this.passwordInputMobile!.type === 'password';
@@ -148,9 +154,11 @@ export class ClientLandingModule extends BaseModule {
           const svg = mobilePasswordToggle.querySelector('svg');
           if (svg) {
             if (isPassword) {
-              svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+              svg.innerHTML =
+                '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
             } else {
-              svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+              svg.innerHTML =
+                '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
             }
           }
         });
@@ -174,10 +182,12 @@ export class ClientLandingModule extends BaseModule {
       if (svg) {
         if (isPassword) {
           // Show "eye-off" icon when password is visible
-          svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+          svg.innerHTML =
+            '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
         } else {
           // Show "eye" icon when password is hidden
-          svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+          svg.innerHTML =
+            '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
         }
       }
     });
@@ -245,11 +255,15 @@ export class ClientLandingModule extends BaseModule {
     });
 
     // Then: fade in the overlay
-    tl.to(this.intakeModal, {
-      background: 'rgba(0, 0, 0, 0.8)',
-      duration: 0.3,
-      ease: 'power2.inOut'
-    }, '+=0.1'); // Small delay after expansion
+    tl.to(
+      this.intakeModal,
+      {
+        background: 'rgba(0, 0, 0, 0.8)',
+        duration: 0.3,
+        ease: 'power2.inOut'
+      },
+      '+=0.1'
+    ); // Small delay after expansion
 
     // Initialize terminal intake
     this.initTerminalIntake();
@@ -284,12 +298,16 @@ export class ClientLandingModule extends BaseModule {
         ease: 'power2.in'
       });
 
-      tl.to(modalContent, {
-        maxWidth: '200px',
-        opacity: 0,
-        duration: 0.2,
-        ease: 'power2.in'
-      }, '-=0.1');
+      tl.to(
+        modalContent,
+        {
+          maxWidth: '200px',
+          opacity: 0,
+          duration: 0.2,
+          ease: 'power2.in'
+        },
+        '-=0.1'
+      );
     }
   }
 
@@ -376,12 +394,15 @@ export class ClientLandingModule extends BaseModule {
       if (email === this.DEMO_EMAIL && password === this.DEMO_PASSWORD) {
         console.log('[ClientLandingModule] Demo login successful');
         // Store demo session
-        localStorage.setItem('clientAuth', JSON.stringify({
-          email: this.DEMO_EMAIL,
-          name: 'Demo User',
-          isDemo: true,
-          loginTime: Date.now()
-        }));
+        localStorage.setItem(
+          'clientAuth',
+          JSON.stringify({
+            email: this.DEMO_EMAIL,
+            name: 'Demo User',
+            isDemo: true,
+            loginTime: Date.now()
+          })
+        );
 
         // Redirect to portal
         window.location.href = '/client/portal';
@@ -405,13 +426,16 @@ export class ClientLandingModule extends BaseModule {
         if (result.token) {
           localStorage.setItem('client_auth_token', result.token);
         }
-        localStorage.setItem('clientAuth', JSON.stringify({
-          email: result.user?.email || email,
-          name: result.user?.name || result.user?.contactName || 'Client',
-          isDemo: false,
-          isAdmin: result.user?.isAdmin || false,
-          loginTime: Date.now()
-        }));
+        localStorage.setItem(
+          'clientAuth',
+          JSON.stringify({
+            email: result.user?.email || email,
+            name: result.user?.name || result.user?.contactName || 'Client',
+            isDemo: false,
+            isAdmin: result.user?.isAdmin || false,
+            loginTime: Date.now()
+          })
+        );
 
         // Redirect to admin portal if admin, otherwise client portal
         if (result.user?.isAdmin) {
@@ -426,12 +450,15 @@ export class ClientLandingModule extends BaseModule {
       console.error('[ClientLandingModule] Login error:', error);
       // If API fails, check for demo credentials as fallback
       if (email === this.DEMO_EMAIL && password === this.DEMO_PASSWORD) {
-        localStorage.setItem('clientAuth', JSON.stringify({
-          email: this.DEMO_EMAIL,
-          name: 'Demo User',
-          isDemo: true,
-          loginTime: Date.now()
-        }));
+        localStorage.setItem(
+          'clientAuth',
+          JSON.stringify({
+            email: this.DEMO_EMAIL,
+            name: 'Demo User',
+            isDemo: true,
+            loginTime: Date.now()
+          })
+        );
         window.location.href = '/client/portal';
         return;
       }
@@ -461,12 +488,15 @@ export class ClientLandingModule extends BaseModule {
       // Check for demo credentials
       if (email === this.DEMO_EMAIL && password === this.DEMO_PASSWORD) {
         console.log('[ClientLandingModule] Demo login successful (mobile)');
-        localStorage.setItem('clientAuth', JSON.stringify({
-          email: this.DEMO_EMAIL,
-          name: 'Demo User',
-          isDemo: true,
-          loginTime: Date.now()
-        }));
+        localStorage.setItem(
+          'clientAuth',
+          JSON.stringify({
+            email: this.DEMO_EMAIL,
+            name: 'Demo User',
+            isDemo: true,
+            loginTime: Date.now()
+          })
+        );
         window.location.href = '/client/portal';
         return;
       }
@@ -485,13 +515,16 @@ export class ClientLandingModule extends BaseModule {
         if (result.token) {
           localStorage.setItem('client_auth_token', result.token);
         }
-        localStorage.setItem('clientAuth', JSON.stringify({
-          email: result.user?.email || email,
-          name: result.user?.name || 'Client',
-          isDemo: false,
-          isAdmin: result.user?.isAdmin || false,
-          loginTime: Date.now()
-        }));
+        localStorage.setItem(
+          'clientAuth',
+          JSON.stringify({
+            email: result.user?.email || email,
+            name: result.user?.name || 'Client',
+            isDemo: false,
+            isAdmin: result.user?.isAdmin || false,
+            loginTime: Date.now()
+          })
+        );
         // Redirect to admin portal if admin, otherwise client portal
         if (result.user?.isAdmin) {
           window.location.href = '/admin';
@@ -504,12 +537,15 @@ export class ClientLandingModule extends BaseModule {
     } catch (error) {
       console.error('[ClientLandingModule] Login error (mobile):', error);
       if (email === this.DEMO_EMAIL && password === this.DEMO_PASSWORD) {
-        localStorage.setItem('clientAuth', JSON.stringify({
-          email: this.DEMO_EMAIL,
-          name: 'Demo User',
-          isDemo: true,
-          loginTime: Date.now()
-        }));
+        localStorage.setItem(
+          'clientAuth',
+          JSON.stringify({
+            email: this.DEMO_EMAIL,
+            name: 'Demo User',
+            isDemo: true,
+            loginTime: Date.now()
+          })
+        );
         window.location.href = '/client/portal';
         return;
       }
@@ -565,7 +601,9 @@ export class ClientLandingModule extends BaseModule {
   }
 
   private setLoadingMobile(loading: boolean): void {
-    const submitBtn = this.loginFormMobile?.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const submitBtn = this.loginFormMobile?.querySelector(
+      'button[type="submit"]'
+    ) as HTMLButtonElement;
     if (submitBtn) {
       const btnText = submitBtn.querySelector('.btn-text');
       const btnLoader = submitBtn.querySelector('.btn-loader');

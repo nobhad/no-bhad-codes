@@ -47,14 +47,14 @@ const DEFAULT_THRESHOLDS: CoverageThresholds = {
   lines: 70,
   functions: 70,
   branches: 70,
-  statements: 70
+  statements: 70,
 };
 
 // Custom thresholds for different modules
 const MODULE_THRESHOLDS: Record<string, CoverageThresholds> = {
   'src/core/': { lines: 85, functions: 85, branches: 85, statements: 85 },
   'src/services/': { lines: 80, functions: 80, branches: 80, statements: 80 },
-  'server/services/': { lines: 80, functions: 80, branches: 80, statements: 80 }
+  'server/services/': { lines: 80, functions: 80, branches: 80, statements: 80 },
 };
 
 function checkCoverage(): void {
@@ -144,7 +144,7 @@ function generateBadgeData(): void {
     schemaVersion: 1,
     label: 'coverage',
     message: `${coverage}%`,
-    color: color
+    color: color,
   };
 
   console.log('Coverage Badge Data:');

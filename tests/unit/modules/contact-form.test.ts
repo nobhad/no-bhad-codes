@@ -16,8 +16,8 @@ vi.mock('../../../src/services/logger.js', () => ({
     info: vi.fn(),
     error: vi.fn(),
     warn: vi.fn(),
-    debug: vi.fn()
-  }
+    debug: vi.fn(),
+  },
 }));
 
 vi.mock('../../../src/utils/sanitization-utils.js', () => ({
@@ -26,8 +26,8 @@ vi.mock('../../../src/utils/sanitization-utils.js', () => ({
     sanitizeEmail: vi.fn((email: string) => email?.toLowerCase().trim() || ''),
     sanitizeMessage: vi.fn((message: string) => message?.trim() || ''),
     checkRateLimit: vi.fn(() => true),
-    logSecurityViolation: vi.fn()
-  }
+    logSecurityViolation: vi.fn(),
+  },
 }));
 
 // Create a mock ContactService class
@@ -39,7 +39,7 @@ class MockContactService {
 }
 
 vi.mock('../../../src/services/contact-service.js', () => ({
-  ContactService: MockContactService
+  ContactService: MockContactService,
 }));
 
 describe('ContactFormModule', () => {
@@ -124,7 +124,7 @@ describe('ContactFormModule', () => {
       contactModule = new ContactFormModule({
         backend: 'formspree',
         formId: 'test123',
-        debug: false
+        debug: false,
       });
       expect(contactModule).toBeDefined();
     });
@@ -133,7 +133,7 @@ describe('ContactFormModule', () => {
       contactModule = new ContactFormModule({
         backend: 'custom',
         endpoint: '/api/contact',
-        debug: false
+        debug: false,
       });
       expect(contactModule).toBeDefined();
     });

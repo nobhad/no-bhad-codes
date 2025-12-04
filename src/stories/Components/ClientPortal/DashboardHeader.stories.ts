@@ -3,22 +3,22 @@ import type { Meta, StoryObj } from '@storybook/html';
 const meta: Meta = {
   title: 'Components/Client Portal/Dashboard Header',
   parameters: {
-    layout: 'fullscreen'
+    layout: 'fullscreen',
   },
   argTypes: {
     hasNotifications: {
       control: 'boolean',
-      description: 'Show notification indicator'
+      description: 'Show notification indicator',
     },
     userName: {
       control: 'text',
-      description: 'User name or initial'
-    }
+      description: 'User name or initial',
+    },
   },
   args: {
     hasNotifications: false,
-    userName: '👤'
-  }
+    userName: '👤',
+  },
 };
 
 export default meta;
@@ -49,19 +49,19 @@ const createDashboardHeader = (args: any) => {
 };
 
 export const Default: Story = {
-  render: createDashboardHeader
+  render: createDashboardHeader,
 };
 
 export const WithNotifications: Story = {
   args: {
-    hasNotifications: true
+    hasNotifications: true,
   },
-  render: createDashboardHeader
+  render: createDashboardHeader,
 };
 
 export const CustomUser: Story = {
   args: {
-    userName: 'JD'
+    userName: 'JD',
   },
-  render: createDashboardHeader
+  render: createDashboardHeader,
 };

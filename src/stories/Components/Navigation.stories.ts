@@ -3,17 +3,17 @@ import type { Meta, StoryObj } from '@storybook/html';
 const meta: Meta = {
   title: 'Components/Navigation',
   parameters: {
-    layout: 'fullscreen'
+    layout: 'fullscreen',
   },
   argTypes: {
     isOpen: {
       control: 'boolean',
-      description: 'Navigation open state'
-    }
+      description: 'Navigation open state',
+    },
   },
   args: {
-    isOpen: false
-  }
+    isOpen: false,
+  },
 };
 
 export default meta;
@@ -145,27 +145,27 @@ const createNavigation = (args: any) => {
 };
 
 export const Closed: Story = {
-  render: createNavigation
+  render: createNavigation,
 };
 
 export const Open: Story = {
   args: {
-    isOpen: true
+    isOpen: true,
   },
-  render: createNavigation
+  render: createNavigation,
 };
 
 export const InteractiveDemo: Story = {
   args: {
-    isOpen: true
+    isOpen: true,
   },
   parameters: {
     docs: {
       description: {
         story:
-          'Hover over the navigation links to see the interactive effects. Click links to see actions logged.'
-      }
-    }
+          'Hover over the navigation links to see the interactive effects. Click links to see actions logged.',
+      },
+    },
   },
   render: (args) => `
     ${createNavigation(args)}
@@ -181,5 +181,5 @@ export const InteractiveDemo: Story = {
         <li>Click links to log actions</li>
       </ul>
     </div>
-  `
+  `,
 };

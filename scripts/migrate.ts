@@ -138,7 +138,7 @@ Examples:
   node scripts/migrate.ts status
   node scripts/migrate.ts rollback
 `);
-  }
+  },
 };
 
 // Main execution

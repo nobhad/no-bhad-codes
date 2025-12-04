@@ -74,7 +74,9 @@
 .contact-form .form-input:focus,
 .contact-form .form-textarea:focus,
 .contact-form .form-select:focus {
-  outline: none;
+  outline: none !important;
+  border-color: #22c55e !important;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25) !important;
 }
 
 .contact-form .form-input::placeholder,

@@ -107,7 +107,7 @@ const commonGlobals = {
   afterEach: 'readonly',
   beforeAll: 'readonly',
   afterAll: 'readonly',
-  vi: 'readonly'
+  vi: 'readonly',
 };
 
 export default [
@@ -127,15 +127,15 @@ export default [
       'stories/**',
       'src/stories/**',
       'test-*.js',
-      'test-*.html'
-    ]
+      'test-*.html',
+    ],
   },
   {
     files: ['src/**/*.{js,mjs}', 'scripts/**/*.js', '*.config.js', '*.config.mjs'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      globals: commonGlobals
+      globals: commonGlobals,
     },
     rules: {
       indent: ['error', 2],
@@ -158,8 +158,8 @@ export default [
         {
           anonymous: 'always',
           named: 'never',
-          asyncArrow: 'always'
-        }
+          asyncArrow: 'always',
+        },
       ],
       'keyword-spacing': 'error',
       'space-infix-ops': 'error',
@@ -172,19 +172,19 @@ export default [
       'no-useless-concat': 'error',
       'no-useless-return': 'error',
       'no-shadow': 'warn',
-      'no-use-before-define': ['error', { functions: false }]
-    }
+      'no-use-before-define': ['error', { functions: false }],
+    },
   },
   {
     files: ['src/**/*.ts', 'server/**/*.ts', 'scripts/**/*.ts', 'tests/**/*.ts', '*.config.ts'],
     plugins: {
-      '@typescript-eslint': tsPlugin
+      '@typescript-eslint': tsPlugin,
     },
     languageOptions: {
       parser: tsParser,
       ecmaVersion: 'latest',
       sourceType: 'module',
-      globals: commonGlobals
+      globals: commonGlobals,
     },
     rules: {
       // Disable base ESLint rules that are covered by TypeScript-specific rules
@@ -199,8 +199,8 @@ export default [
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
           destructuredArrayIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_'
-        }
+          caughtErrorsIgnorePattern: '^_',
+        },
       ],
       '@typescript-eslint/no-shadow': 'warn',
       '@typescript-eslint/no-use-before-define': ['error', { functions: false }],
@@ -225,8 +225,8 @@ export default [
         {
           anonymous: 'always',
           named: 'never',
-          asyncArrow: 'always'
-        }
+          asyncArrow: 'always',
+        },
       ],
       'keyword-spacing': 'error',
       'space-infix-ops': 'error',
@@ -237,34 +237,34 @@ export default [
       'prefer-arrow-callback': 'error',
       'prefer-template': 'warn',
       'no-useless-concat': 'error',
-      'no-useless-return': 'error'
-    }
+      'no-useless-return': 'error',
+    },
   },
   {
     // Configuration for test files
     files: ['**/*.test.{js,ts}', '**/*.spec.{js,ts}', 'tests/**/*.{js,ts}'],
     rules: {
-      'no-console': 'off' // Allow console logs in tests
-    }
+      'no-console': 'off', // Allow console logs in tests
+    },
   },
   {
     // Configuration for configuration files
     files: ['*.config.{js,ts,mjs}', 'vite.config.js', 'vitest.config.ts', 'playwright.config.ts'],
     rules: {
-      'no-console': 'off' // Allow console logs in config files
-    }
+      'no-console': 'off', // Allow console logs in config files
+    },
   },
   {
     // Configuration for admin and security files
     files: [
       'src/admin/**/*.{js,ts}',
       'src/services/code-protection-service.ts',
-      'src/utils/obfuscation-utils.ts'
+      'src/utils/obfuscation-utils.ts',
     ],
     rules: {
       'no-debugger': 'off', // Allow debugger in security-related files
       'no-console': 'off', // Allow console in admin files
-      'no-alert': 'off' // Allow alert in admin dashboard
-    }
-  }
+      'no-alert': 'off', // Allow alert in admin dashboard
+    },
+  },
 ];

@@ -3,18 +3,18 @@ import type { Meta, StoryObj } from '@storybook/html';
 const meta: Meta = {
   title: 'Complete Site',
   parameters: {
-    layout: 'fullscreen'
+    layout: 'fullscreen',
   },
   argTypes: {
     page: {
       control: 'select',
       options: ['home', 'projects', 'admin', 'client-portal', 'client-intake'],
-      description: 'Which page to show'
-    }
+      description: 'Which page to show',
+    },
   },
   args: {
-    page: 'home'
-  }
+    page: 'home',
+  },
 };
 
 export default meta;
@@ -645,41 +645,41 @@ const createPage = (args: any) => {
 
 // Main story with dropdown to switch between pages
 export const CompleteSite: Story = {
-  render: createPage
+  render: createPage,
 };
 
 // Individual page stories
 export const HomePage: Story = {
   args: {
-    page: 'home'
+    page: 'home',
   },
-  render: createPage
+  render: createPage,
 };
 
 export const ProjectsPage: Story = {
   args: {
-    page: 'projects'
+    page: 'projects',
   },
-  render: createPage
+  render: createPage,
 };
 
 export const AdminDashboard: Story = {
   args: {
-    page: 'admin'
+    page: 'admin',
   },
-  render: createPage
+  render: createPage,
 };
 
 export const ClientPortal: Story = {
   args: {
-    page: 'client-portal'
+    page: 'client-portal',
   },
-  render: createPage
+  render: createPage,
 };
 
 export const ClientIntakeForm: Story = {
   args: {
-    page: 'client-intake'
+    page: 'client-intake',
   },
-  render: createPage
+  render: createPage,
 };

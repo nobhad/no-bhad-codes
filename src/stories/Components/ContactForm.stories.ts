@@ -3,22 +3,22 @@ import type { Meta, StoryObj } from '@storybook/html';
 const meta: Meta = {
   title: 'Components/Contact Form',
   parameters: {
-    layout: 'centered'
+    layout: 'centered',
   },
   argTypes: {
     showProjectDetails: {
       control: 'boolean',
-      description: 'Show project details section'
+      description: 'Show project details section',
     },
     showCompanyInfo: {
       control: 'boolean',
-      description: 'Show company information'
-    }
+      description: 'Show company information',
+    },
   },
   args: {
     showProjectDetails: false,
-    showCompanyInfo: true
-  }
+    showCompanyInfo: true,
+  },
 };
 
 export default meta;
@@ -52,8 +52,8 @@ const createContactForm = (args: any) => {
         </select>
         
         ${
-  showProjectDetails
-    ? `
+          showProjectDetails
+            ? `
           <div class="project-details" id="project-details">
             <select class="form-select" data-name="Project Type" id="project-type" name="Project-Type">
               <option value="">What type of project?</option>
@@ -88,14 +88,14 @@ const createContactForm = (args: any) => {
             </div>
           </div>
         `
-    : ''
-}
+            : ''
+        }
         
         <textarea autocomplete="off" class="form-textarea" data-name="Project Description" id="project-description" maxlength="1000" name="Project-Description" placeholder="Brief description of your project (What's the main goal? Who's your target audience?)" required=""></textarea>
         
         ${
-  showCompanyInfo
-    ? `
+          showCompanyInfo
+            ? `
           <details class="company-details">
             <summary>+ Company Information (Optional)</summary>
             <div class="company-fields">
@@ -113,8 +113,8 @@ const createContactForm = (args: any) => {
             </div>
           </details>
         `
-    : ''
-}
+            : ''
+        }
         
         <div class="form-actions">
           <input 
@@ -177,27 +177,27 @@ const createContactForm = (args: any) => {
 };
 
 export const Basic: Story = {
-  render: createContactForm
+  render: createContactForm,
 };
 
 export const WithProjectDetails: Story = {
   args: {
-    showProjectDetails: true
+    showProjectDetails: true,
   },
-  render: createContactForm
+  render: createContactForm,
 };
 
 export const WithoutCompanyInfo: Story = {
   args: {
-    showCompanyInfo: false
+    showCompanyInfo: false,
   },
-  render: createContactForm
+  render: createContactForm,
 };
 
 export const FullForm: Story = {
   args: {
     showProjectDetails: true,
-    showCompanyInfo: true
+    showCompanyInfo: true,
   },
-  render: createContactForm
+  render: createContactForm,
 };

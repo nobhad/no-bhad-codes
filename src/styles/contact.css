@@ -61,7 +61,18 @@
 .contact-form .form-input:focus,
 .contact-form .form-textarea:focus,
 .contact-form .form-select:focus {
-  outline: none;
+  outline: none !important;
+  border-color: #22c55e !important;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25) !important;
+}
+
+/* Enhanced keyboard focus for accessibility */
+.contact-form .form-input:focus-visible,
+.contact-form .form-textarea:focus-visible,
+.contact-form .form-select:focus-visible {
+  outline: 2px solid #22c55e !important;
+  outline-offset: 2px !important;
+  border-color: #22c55e !important;
 }
 
 .contact-form .form-input::placeholder,
@@ -221,7 +232,7 @@ body.dark-theme .contact-form .form-select {
   padding: 12px 24px;
   background-color: var(--color-neutral-300);
   color: var(--fg);
-  border: 4px solid #000000;
+  border: 4px solid #000000 !important;
   border-radius: 0;
   font-size: 1rem;
   font-weight: 600;
@@ -244,11 +255,25 @@ body.dark-theme .contact-form .form-select {
 .form-button.form-valid {
   background-color: var(--color-primary);
   color: var(--color-bg);
+  border-color: #000000 !important;
 }
 
 .form-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.form-button:focus,
+.form-button:focus-visible {
+  outline: 2px solid #000000 !important;
+  outline-offset: 2px;
+  border-color: #000000 !important;
+}
+
+.form-button:active {
+  border: 4px solid #000000 !important;
+  outline: 2px solid #000000 !important;
+  outline-offset: 1px;
 }
 
 /* Form Validation Styles - Controlled by GSAP */

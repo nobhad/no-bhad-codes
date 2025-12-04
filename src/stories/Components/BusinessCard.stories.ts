@@ -3,17 +3,17 @@ import type { Meta, StoryObj } from '@storybook/html';
 const meta: Meta = {
   title: 'Components/Business Card',
   parameters: {
-    layout: 'centered'
+    layout: 'centered',
   },
   argTypes: {
     isFlipped: {
       control: 'boolean',
-      description: 'Show back of card'
-    }
+      description: 'Show back of card',
+    },
   },
   args: {
-    isFlipped: false
-  }
+    isFlipped: false,
+  },
 };
 
 export default meta;
@@ -78,19 +78,19 @@ const createBusinessCard = (args: any) => {
 };
 
 export const Front: Story = {
-  render: createBusinessCard
+  render: createBusinessCard,
 };
 
 export const Back: Story = {
   args: {
-    isFlipped: true
+    isFlipped: true,
   },
-  render: createBusinessCard
+  render: createBusinessCard,
 };
 
 export const InSection: Story = {
   parameters: {
-    layout: 'fullscreen'
+    layout: 'fullscreen',
   },
   render: () => `
     <section id="intro" class="business-card-section">
@@ -107,12 +107,12 @@ export const InSection: Story = {
         </div>
       </div>
     </section>
-  `
+  `,
 };
 
 export const Interactive: Story = {
   parameters: {
-    layout: 'centered'
+    layout: 'centered',
   },
   render: () => `
     <div>
@@ -207,5 +207,5 @@ export const Interactive: Story = {
         });
       }
     </script>
-  `
+  `,
 };

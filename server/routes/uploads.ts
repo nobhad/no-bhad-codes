@@ -53,7 +53,7 @@ const storage = multer.diskStorage({
     const ext = extname(file.originalname);
     const filename = `${timestamp}-${randomString}${ext}`;
     cb(null, filename);
-  }
+  },
 });
 
 // File filter for security
@@ -65,7 +65,7 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCa
     spreadsheets: /\.(xls|xlsx|csv)$/i,
     presentations: /\.(ppt|pptx)$/i,
     archives: /\.(zip|rar|tar|gz)$/i,
-    code: /\.(js|ts|html|css|json|xml)$/i
+    code: /\.(js|ts|html|css|json|xml)$/i,
   };
 
   const fileName = file.originalname.toLowerCase();
@@ -84,8 +84,8 @@ const upload = multer({
   fileFilter,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
-    files: 5 // Maximum 5 files per request
-  }
+    files: 5, // Maximum 5 files per request
+  },
 });
 
 /**
@@ -119,7 +119,7 @@ router.post(
     if (!req.file) {
       return res.status(400).json({
         error: 'No file uploaded',
-        code: 'NO_FILE'
+        code: 'NO_FILE',
       });
     }
 
@@ -132,13 +132,13 @@ router.post(
       path: req.file.path,
       url: `/uploads/${req.file.filename}`,
       uploadedBy: req.user?.id,
-      uploadedAt: new Date().toISOString()
+      uploadedAt: new Date().toISOString(),
     };
 
     res.status(201).json({
       success: true,
       message: 'File uploaded successfully',
-      file: fileInfo
+      file: fileInfo,
     });
   })
 );
@@ -173,7 +173,7 @@ router.post(
     if (!req.files || (req.files as Express.Multer.File[]).length === 0) {
       return res.status(400).json({
         error: 'No files uploaded',
-        code: 'NO_FILES'
+        code: 'NO_FILES',
       });
     }
 
@@ -186,13 +186,13 @@ router.post(
       path: file.path,
       url: `/uploads/${file.filename}`,
       uploadedBy: req.user?.id,
-      uploadedAt: new Date().toISOString()
+      uploadedAt: new Date().toISOString(),
     }));
 
     res.status(201).json({
       success: true,
       message: `${files.length} files uploaded successfully`,
-      files
+      files,
     });
   })
 );
@@ -225,7 +225,7 @@ router.post(
     if (!req.file) {
       return res.status(400).json({
         error: 'No avatar file uploaded',
-        code: 'NO_AVATAR'
+        code: 'NO_AVATAR',
       });
     }
 
@@ -233,7 +233,7 @@ router.post(
     if (!req.file.mimetype.startsWith('image/')) {
       return res.status(400).json({
         error: 'Avatar must be an image file',
-        code: 'INVALID_AVATAR_TYPE'
+        code: 'INVALID_AVATAR_TYPE',
       });
     }
 
@@ -245,7 +245,7 @@ router.post(
       size: req.file.size,
       url: `/uploads/avatars/${req.file.filename}`,
       uploadedBy: req.user?.id,
-      uploadedAt: new Date().toISOString()
+      uploadedAt: new Date().toISOString(),
     };
 
     // Update user avatar URL in database
@@ -265,7 +265,7 @@ router.post(
     res.status(201).json({
       success: true,
       message: 'Avatar uploaded successfully',
-      avatar: avatarInfo
+      avatar: avatarInfo,
     });
   })
 );
@@ -306,14 +306,14 @@ router.post(
     if (isNaN(projectId)) {
       return res.status(400).json({
         error: 'Invalid project ID',
-        code: 'INVALID_PROJECT_ID'
+        code: 'INVALID_PROJECT_ID',
       });
     }
 
     if (!req.file) {
       return res.status(400).json({
         error: 'No project file uploaded',
-        code: 'NO_PROJECT_FILE'
+        code: 'NO_PROJECT_FILE',
       });
     }
 
@@ -326,7 +326,7 @@ router.post(
       size: req.file.size,
       url: `/uploads/projects/${req.file.filename}`,
       uploadedBy: req.user?.id,
-      uploadedAt: new Date().toISOString()
+      uploadedAt: new Date().toISOString(),
     };
 
     // Save project file info to database
@@ -342,7 +342,7 @@ router.post(
           req.file.mimetype,
           req.file.size,
           projectFile.url,
-          req.user?.id
+          req.user?.id,
         ]
       );
     } catch (dbError) {
@@ -353,7 +353,7 @@ router.post(
     res.status(201).json({
       success: true,
       message: 'Project file uploaded successfully',
-      file: projectFile
+      file: projectFile,
     });
   })
 );
@@ -383,7 +383,7 @@ router.get(
     if (isNaN(projectId)) {
       return res.status(400).json({
         error: 'Invalid project ID',
-        code: 'INVALID_PROJECT_ID'
+        code: 'INVALID_PROJECT_ID',
       });
     }
 
@@ -404,18 +404,18 @@ router.get(
           projectId: file.project_id,
           filename: file.filename,
           originalName: file.original_filename,
-          mimetype: file.mimetype,
-          size: file.size,
+          mimetype: file.mime_type,
+          size: file.file_size,
           url: file.file_path,
           uploadedBy: file.uploaded_by,
-          uploadedAt: file.created_at
-        }))
+          uploadedAt: file.created_at,
+        })),
       });
     } catch (dbError) {
       console.error('Failed to fetch files:', dbError);
       return res.status(500).json({
         error: 'Failed to fetch files',
-        code: 'DB_ERROR'
+        code: 'DB_ERROR',
       });
     }
   })
@@ -440,7 +440,7 @@ router.get(
     if (!clientId) {
       return res.status(401).json({
         error: 'Not authenticated',
-        code: 'NOT_AUTHENTICATED'
+        code: 'NOT_AUTHENTICATED',
       });
     }
 
@@ -448,7 +448,7 @@ router.get(
       const db = await getDatabase();
       // Get files from projects belonging to this client
       const files = await db.all(
-        `SELECT f.id, f.project_id, f.filename, f.original_filename, f.mimetype, f.size, f.file_path, f.uploaded_by, f.created_at,
+        `SELECT f.id, f.project_id, f.filename, f.original_filename, f.mime_type, f.file_size, f.file_path, f.uploaded_by, f.created_at,
                 p.name as project_name
          FROM files f
          LEFT JOIN projects p ON f.project_id = p.id
@@ -465,18 +465,18 @@ router.get(
           projectName: file.project_name,
           filename: file.filename,
           originalName: file.original_filename,
-          mimetype: file.mimetype,
-          size: file.size,
+          mimetype: file.mime_type,
+          size: file.file_size,
           url: file.file_path,
           uploadedBy: file.uploaded_by,
-          uploadedAt: file.created_at
-        }))
+          uploadedAt: file.created_at,
+        })),
       });
     } catch (dbError) {
       console.error('Failed to fetch client files:', dbError);
       return res.status(500).json({
         error: 'Failed to fetch files',
-        code: 'DB_ERROR'
+        code: 'DB_ERROR',
       });
     }
   })
@@ -507,7 +507,7 @@ router.get(
     if (isNaN(fileId)) {
       return res.status(400).json({
         error: 'Invalid file ID',
-        code: 'INVALID_FILE_ID'
+        code: 'INVALID_FILE_ID',
       });
     }
 
@@ -524,7 +524,7 @@ router.get(
       if (!file) {
         return res.status(404).json({
           error: 'File not found',
-          code: 'FILE_NOT_FOUND'
+          code: 'FILE_NOT_FOUND',
         });
       }
 
@@ -533,7 +533,7 @@ router.get(
       if (file.client_id !== clientId && file.uploaded_by !== clientId) {
         return res.status(403).json({
           error: 'Access denied',
-          code: 'ACCESS_DENIED'
+          code: 'ACCESS_DENIED',
         });
       }
 
@@ -543,7 +543,7 @@ router.get(
       if (!existsSync(filePath)) {
         return res.status(404).json({
           error: 'File not found on disk',
-          code: 'FILE_MISSING'
+          code: 'FILE_MISSING',
         });
       }
 
@@ -561,7 +561,7 @@ router.get(
       console.error('Failed to fetch file:', dbError);
       return res.status(500).json({
         error: 'Failed to fetch file',
-        code: 'DB_ERROR'
+        code: 'DB_ERROR',
       });
     }
   })
@@ -592,7 +592,7 @@ router.delete(
     if (isNaN(fileId)) {
       return res.status(400).json({
         error: 'Invalid file ID',
-        code: 'INVALID_FILE_ID'
+        code: 'INVALID_FILE_ID',
       });
     }
 
@@ -609,7 +609,7 @@ router.delete(
       if (!file) {
         return res.status(404).json({
           error: 'File not found',
-          code: 'FILE_NOT_FOUND'
+          code: 'FILE_NOT_FOUND',
         });
       }
 
@@ -618,7 +618,7 @@ router.delete(
       if (file.uploaded_by !== clientId) {
         return res.status(403).json({
           error: 'Access denied - only the uploader can delete this file',
-          code: 'ACCESS_DENIED'
+          code: 'ACCESS_DENIED',
         });
       }
 
@@ -634,13 +634,13 @@ router.delete(
 
       res.json({
         success: true,
-        message: 'File deleted successfully'
+        message: 'File deleted successfully',
       });
     } catch (dbError) {
       console.error('Failed to delete file:', dbError);
       return res.status(500).json({
         error: 'Failed to delete file',
-        code: 'DB_ERROR'
+        code: 'DB_ERROR',
       });
     }
   })
@@ -665,7 +665,7 @@ router.get('/test', (req: express.Request, res: express.Response) => {
     uploadDir: uploadDir,
     limits: {
       fileSize: '10MB',
-      maxFiles: 5
+      maxFiles: 5,
     },
     allowedTypes: [
       'Images: jpg, jpeg, png, gif, webp',
@@ -673,8 +673,8 @@ router.get('/test', (req: express.Request, res: express.Response) => {
       'Spreadsheets: xls, xlsx, csv',
       'Presentations: ppt, pptx',
       'Archives: zip, rar, tar, gz',
-      'Code: js, ts, html, css, json, xml'
-    ]
+      'Code: js, ts, html, css, json, xml',
+    ],
   });
 });
 
@@ -686,7 +686,7 @@ router.use(
         return res.status(400).json({
           error: 'File too large',
           code: 'FILE_TOO_LARGE',
-          message: 'File size cannot exceed 10MB'
+          message: 'File size cannot exceed 10MB',
         });
       }
 
@@ -694,14 +694,14 @@ router.use(
         return res.status(400).json({
           error: 'Too many files',
           code: 'TOO_MANY_FILES',
-          message: 'Cannot upload more than 5 files at once'
+          message: 'Cannot upload more than 5 files at once',
         });
       }
 
       return res.status(400).json({
         error: 'Upload error',
         code: 'UPLOAD_ERROR',
-        message: error.message
+        message: error.message,
       });
     }
 
@@ -709,7 +709,7 @@ router.use(
       return res.status(400).json({
         error: 'File type not allowed',
         code: 'INVALID_FILE_TYPE',
-        message: error.message
+        message: error.message,
       });
     }
 

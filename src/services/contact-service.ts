@@ -350,9 +350,13 @@ export class ContactService extends BaseService {
       email: SanitizationUtils.sanitizeEmail(formData.email),
       companyName: formData.companyName ? SanitizationUtils.sanitizeText(formData.companyName) : '',
       inquiryType: SanitizationUtils.sanitizeText(formData.inquiryType),
-      projectType: formData.projectType ? SanitizationUtils.sanitizeText(formData.projectType) : undefined,
+      projectType: formData.projectType
+        ? SanitizationUtils.sanitizeText(formData.projectType)
+        : undefined,
       timeline: formData.timeline ? SanitizationUtils.sanitizeText(formData.timeline) : undefined,
-      budgetRange: formData.budgetRange ? SanitizationUtils.sanitizeText(formData.budgetRange) : undefined,
+      budgetRange: formData.budgetRange
+        ? SanitizationUtils.sanitizeText(formData.budgetRange)
+        : undefined,
       message: SanitizationUtils.sanitizeMessage(formData.message)
     };
   }

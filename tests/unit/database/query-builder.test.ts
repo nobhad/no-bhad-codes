@@ -14,7 +14,7 @@ import {
   SelectQueryBuilder,
   InsertQueryBuilder,
   UpdateQueryBuilder,
-  DeleteQueryBuilder
+  DeleteQueryBuilder,
 } from '../../../server/database/query-builder.js';
 
 // Mock logger
@@ -23,15 +23,15 @@ vi.mock('../../../server/services/logger.js', () => ({
     info: vi.fn(),
     error: vi.fn(),
     warn: vi.fn(),
-    debug: vi.fn()
-  }
+    debug: vi.fn(),
+  },
 }));
 
 // Mock sqlite3 Database
 const mockDb = {
   all: vi.fn(),
   get: vi.fn(),
-  run: vi.fn()
+  run: vi.fn(),
 };
 
 describe('QueryBuilder', () => {
@@ -68,7 +68,7 @@ describe('QueryBuilder', () => {
     it('should execute raw SQL queries', async () => {
       const mockRows = [
         { id: 1, name: 'John' },
-        { id: 2, name: 'Jane' }
+        { id: 2, name: 'Jane' },
       ];
       mockDb.all.mockImplementation((sql, params, callback) => {
         callback(null, mockRows);
@@ -288,7 +288,7 @@ describe('SelectQueryBuilder', () => {
       mockDb.all.mockImplementation((sql, params, callback) => {
         callback(null, [
           { id: 1, name: 'User 1' },
-          { id: 2, name: 'User 2' }
+          { id: 2, name: 'User 2' },
         ]);
       });
 
@@ -367,7 +367,7 @@ describe('SelectQueryBuilder', () => {
       // Mock data query
       const mockRows = [
         { id: 1, name: 'John' },
-        { id: 2, name: 'Jane' }
+        { id: 2, name: 'Jane' },
       ];
       mockDb.all.mockImplementationOnce((sql, params, callback) => {
         callback(null, mockRows);
@@ -382,7 +382,7 @@ describe('SelectQueryBuilder', () => {
         total: 25,
         totalPages: 3,
         hasNext: true,
-        hasPrev: true
+        hasPrev: true,
       });
     });
   });
@@ -410,7 +410,7 @@ describe('InsertQueryBuilder', () => {
       const { sql, params } = insertBuilder
         .values([
           { name: 'John', email: 'john@example.com' },
-          { name: 'Jane', email: 'jane@example.com' }
+          { name: 'Jane', email: 'jane@example.com' },
         ])
         .toSql();
 

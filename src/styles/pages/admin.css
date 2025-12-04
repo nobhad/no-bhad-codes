@@ -1660,6 +1660,129 @@
   flex-wrap: wrap;
 }
 
+/* Invoice Items */
+.invoice-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-sm);
+  margin-bottom: var(--space-2);
+}
+
+.invoice-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.invoice-info strong {
+  display: block;
+  color: var(--color-text-primary);
+}
+
+.invoice-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.invoice-amount {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-brand-primary);
+  min-width: 80px;
+  text-align: right;
+}
+
+.invoice-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* Enhanced Milestone Styles */
+.milestone-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.milestone-due-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  padding: 2px 8px;
+  border-radius: var(--border-radius-sm);
+}
+
+.milestone-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: var(--space-2) 0;
+}
+
+.milestone-deliverables {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin: var(--space-2) 0;
+  padding-left: var(--space-4);
+}
+
+.milestone-deliverables li {
+  margin: 2px 0;
+}
+
+.milestone-item .btn-danger {
+  flex-shrink: 0;
+}
+
+/* File Upload Dropzone */
+#pd-upload-dropzone {
+  border: 2px dashed var(--color-border-primary);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-8);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#pd-upload-dropzone:hover,
+#pd-upload-dropzone.dragover {
+  border-color: var(--color-brand-primary);
+  background: rgba(0, 255, 65, 0.05);
+}
+
+#pd-upload-dropzone p {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Invoice Summary */
+.invoice-summary {
+  display: flex;
+  gap: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+
+.invoice-summary-item h4 {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-1) 0;
+}
+
+.invoice-summary-item .summary-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.invoice-summary-item .summary-value.outstanding {
+  color: #f59e0b;
+}
+
+.invoice-summary-item .summary-value.paid {
+  color: var(--color-brand-primary);
+}
+
 /* Responsive adjustments for project detail */
 @media (max-width: 768px) {
   .project-detail-header {

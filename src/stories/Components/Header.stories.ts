@@ -3,22 +3,22 @@ import type { Meta, StoryObj } from '@storybook/html';
 const meta: Meta = {
   title: 'Components/Header',
   parameters: {
-    layout: 'fullscreen'
+    layout: 'fullscreen',
   },
   argTypes: {
     showThemeToggle: {
       control: 'boolean',
-      description: 'Show theme toggle button'
+      description: 'Show theme toggle button',
     },
     logoText: {
       control: 'text',
-      description: 'Logo text'
-    }
+      description: 'Logo text',
+    },
   },
   args: {
     showThemeToggle: true,
-    logoText: 'no bhad codes'
-  }
+    logoText: 'no bhad codes',
+  },
 };
 
 export default meta;
@@ -36,8 +36,8 @@ const createHeader = (args: any) => {
           </a>
           <div class="nav-row__right">
             ${
-  showThemeToggle
-    ? `
+              showThemeToggle
+                ? `
               <button id="toggle-theme" class="theme-button" aria-label="Toggle dark/light theme">
                 <div class="icon-wrap">
                   <svg class="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -50,8 +50,8 @@ const createHeader = (args: any) => {
                 </div>
               </button>
             `
-    : ''
-}
+                : ''
+            }
             <button role="button" data-menu-toggle="" class="menu-button">
               <div class="menu-button-text">
                 <p class="p-large">Menu</p>
@@ -76,19 +76,19 @@ const createHeader = (args: any) => {
 };
 
 export const Default: Story = {
-  render: createHeader
+  render: createHeader,
 };
 
 export const WithoutThemeToggle: Story = {
   args: {
-    showThemeToggle: false
+    showThemeToggle: false,
   },
-  render: createHeader
+  render: createHeader,
 };
 
 export const CustomLogo: Story = {
   args: {
-    logoText: 'Custom Logo'
+    logoText: 'Custom Logo',
   },
-  render: createHeader
+  render: createHeader,
 };

@@ -48,8 +48,8 @@ describe('LoggerService', () => {
           stat: vi.fn().mockResolvedValue({ size: 100 }),
           readdir: vi.fn().mockResolvedValue([]),
           rename: vi.fn().mockResolvedValue(undefined),
-          unlink: vi.fn().mockResolvedValue(undefined)
-        }
+          unlink: vi.fn().mockResolvedValue(undefined),
+        },
       },
       existsSync: vi.fn(() => true),
       mkdirSync: vi.fn(),
@@ -59,8 +59,8 @@ describe('LoggerService', () => {
         stat: vi.fn().mockResolvedValue({ size: 100 }),
         readdir: vi.fn().mockResolvedValue([]),
         rename: vi.fn().mockResolvedValue(undefined),
-        unlink: vi.fn().mockResolvedValue(undefined)
-      }
+        unlink: vi.fn().mockResolvedValue(undefined),
+      },
     }));
 
     // Mock environment config
@@ -71,8 +71,8 @@ describe('LoggerService', () => {
         LOG_ERROR_FILE: './logs/test-error.log',
         LOG_MAX_SIZE: '10m',
         LOG_MAX_FILES: '5d',
-        NODE_ENV: 'test'
-      }
+        NODE_ENV: 'test',
+      },
     }));
 
     // Import after mocks are set up
@@ -182,7 +182,7 @@ describe('LoggerService', () => {
         method: 'GET',
         url: '/test',
         get: vi.fn().mockReturnValue('test-user-agent'),
-        ip: '127.0.0.1'
+        ip: '127.0.0.1',
       };
       const mockRes = { statusCode: 200 };
 

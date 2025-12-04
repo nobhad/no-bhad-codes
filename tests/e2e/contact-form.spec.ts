@@ -51,7 +51,7 @@ test.describe('Contact Form', () => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ success: true })
+          body: JSON.stringify({ success: true }),
         });
       } else {
         await route.continue();
@@ -84,7 +84,7 @@ test.describe('Contact Form', () => {
         await route.fulfill({
           status: 500,
           contentType: 'application/json',
-          body: JSON.stringify({ error: 'Server error' })
+          body: JSON.stringify({ error: 'Server error' }),
         });
       } else {
         await route.continue();
@@ -114,7 +114,7 @@ test.describe('Contact Form', () => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ success: true })
+          body: JSON.stringify({ success: true }),
         });
       } else {
         await route.continue();
@@ -141,7 +141,7 @@ test.describe('Contact Form', () => {
 
     // Button should be re-enabled
     await expect(page.locator('.form-button')).not.toBeDisabled();
-    await expect(page.locator('.form-button')).toContainText('Let\'s Talk');
+    await expect(page.locator('.form-button')).toContainText("Let's Talk");
   });
 
   test('should be keyboard accessible', async ({ page }) => {
@@ -158,7 +158,7 @@ test.describe('Contact Form', () => {
       '[value="SOFTWARE"]',
       '[value="OTHER"]',
       '#Message',
-      '.form-button'
+      '.form-button',
     ];
 
     await page.focus('#First-Name');

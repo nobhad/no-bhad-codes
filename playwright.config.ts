@@ -27,7 +27,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
 
     /* Record video on failure */
-    video: 'retain-on-failure'
+    video: 'retain-on-failure',
   },
 
   /* Configure projects for major browsers */
@@ -38,29 +38,29 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         // Disable reduced motion for testing animations
         userAgent:
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
-      }
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36',
+      },
     },
 
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] }
+      use: { ...devices['Desktop Firefox'] },
     },
 
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] }
+      use: { ...devices['Desktop Safari'] },
     },
 
     /* Test against mobile viewports. */
     {
       name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] }
+      use: { ...devices['Pixel 5'] },
     },
     {
       name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] }
-    }
+      use: { ...devices['iPhone 12'] },
+    },
 
     /* Test against branded browsers. */
     // {
@@ -78,7 +78,7 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000 // 2 minutes
+    timeout: 120 * 1000, // 2 minutes
   },
 
   /* Test timeout */
@@ -88,5 +88,5 @@ export default defineConfig({
   globalSetup: require.resolve('./tests/e2e/global-setup.ts'),
 
   /* Output directories */
-  outputDir: 'test-results/screenshots'
+  outputDir: 'test-results/screenshots',
 });

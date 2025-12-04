@@ -32,7 +32,7 @@ function mpaRoutingPlugin(): Plugin {
 
         next();
       });
-    }
+    },
   };
 }
 
@@ -57,18 +57,18 @@ export default defineConfig({
         'client-portal': resolve(__dirname, 'client/portal.html'),
         'client-intake': resolve(__dirname, 'client/intake.html'),
         'client-set-password': resolve(__dirname, 'client/set-password.html'),
-        'admin': resolve(__dirname, 'admin/index.html')
+        admin: resolve(__dirname, 'admin/index.html'),
       },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
-      }
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+      },
     },
 
     // Optimize chunk splitting
     chunkSizeWarningLimit: 600,
-    minify: 'terser'
+    minify: 'terser',
   },
 
   // Multi-page application mode
@@ -87,14 +87,14 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:4001',
         changeOrigin: true,
-        secure: false
+        secure: false,
       },
       '/uploads': {
         target: 'http://localhost:4001',
         changeOrigin: true,
-        secure: false
-      }
-    }
+        secure: false,
+      },
+    },
   },
 
   // Preview server configuration
@@ -102,7 +102,7 @@ export default defineConfig({
     port: 4173,
     host: true,
     strictPort: false,
-    open: false
+    open: false,
   },
 
   // Resolve configuration
@@ -117,9 +117,9 @@ export default defineConfig({
       '@types': resolve(__dirname, 'src/types'),
       '@utils': resolve(__dirname, 'src/utils'),
       '@config': resolve(__dirname, 'src/config'),
-      '@styles': resolve(__dirname, 'src/styles')
+      '@styles': resolve(__dirname, 'src/styles'),
     },
-    extensions: ['.ts', '.js', '.json']
+    extensions: ['.ts', '.js', '.json'],
   },
 
   // Plugin configuration
@@ -139,8 +139,8 @@ export default defineConfig({
           openDelimiter: '<',
           closeDelimiter: '>',
           cache: process.env.NODE_ENV === 'production',
-          rmWhitespace: process.env.NODE_ENV === 'production'
-        }
+          rmWhitespace: process.env.NODE_ENV === 'production',
+        },
       },
 
       // Data available to all EJS templates
@@ -152,9 +152,9 @@ export default defineConfig({
         siteUrl: process.env.WEBSITE_URL || 'https://nobhadcodes.com',
         year: new Date().getFullYear(),
         nodeEnv: process.env.NODE_ENV || 'development',
-        isDev: process.env.NODE_ENV !== 'production'
-      }
-    })
+        isDev: process.env.NODE_ENV !== 'production',
+      },
+    }),
   ],
 
   // CSS configuration
@@ -162,19 +162,19 @@ export default defineConfig({
     devSourcemap: true,
     preprocessorOptions: {
       // Add any CSS preprocessor options here if needed
-    }
+    },
   },
 
   // Optimization configuration
   optimizeDeps: {
     include: ['gsap', 'gsap/all'],
-    exclude: []
+    exclude: [],
   },
 
   // Define global constants
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
-    __BUILD_TIME__: JSON.stringify(new Date().toISOString())
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
 
   // ESBuild configuration
@@ -182,7 +182,7 @@ export default defineConfig({
     target: 'es2020',
     legalComments: 'none',
     logOverride: {
-      'this-is-undefined-in-esm': 'silent'
-    }
-  }
+      'this-is-undefined-in-esm': 'silent',
+    },
+  },
 });

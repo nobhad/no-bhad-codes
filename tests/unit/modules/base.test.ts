@@ -127,7 +127,7 @@ describe('BaseModule', () => {
 
       // Emit event directly on document
       const event = new CustomEvent('listen-test', {
-        detail: { test: 'data' }
+        detail: { test: 'data' },
       });
       document.dispatchEvent(event);
 
@@ -183,8 +183,8 @@ describe('BaseModule', () => {
       const complexState = {
         nested: {
           array: [1, 2, 3],
-          boolean: true
-        }
+          boolean: true,
+        },
       };
 
       module.setState('complex', complexState);

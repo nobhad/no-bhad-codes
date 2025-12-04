@@ -102,8 +102,10 @@ export class ClientPortalModule extends BaseModule {
       passwordToggle.addEventListener('click', () => {
         const type = passwordInput.type === 'password' ? 'text' : 'password';
         passwordInput.type = type;
-        const eyeIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
-        const eyeOffIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+        const eyeIcon =
+          '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+        const eyeOffIcon =
+          '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
         passwordToggle.innerHTML =
           type === 'password'
             ? `<span class="visually-hidden">Show password</span>${eyeIcon}`
@@ -217,8 +219,10 @@ export class ClientPortalModule extends BaseModule {
 
     // Password toggle buttons
     const passwordToggles = document.querySelectorAll('.cp-password-toggle');
-    const eyeIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
-    const eyeOffIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+    const eyeIcon =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+    const eyeOffIcon =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
     passwordToggles.forEach((toggle) => {
       toggle.addEventListener('click', (e) => {
         e.preventDefault();
@@ -267,7 +271,11 @@ export class ClientPortalModule extends BaseModule {
 
       // Close picker when clicking outside
       document.addEventListener('click', (e) => {
-        if (!emojiPickerWrapper.contains(e.target as Node) && e.target !== emojiToggle && !emojiToggle.contains(e.target as Node)) {
+        if (
+          !emojiPickerWrapper.contains(e.target as Node) &&
+          e.target !== emojiToggle &&
+          !emojiToggle.contains(e.target as Node)
+        ) {
           emojiPickerWrapper.classList.add('hidden');
         }
       });
@@ -346,7 +354,9 @@ export class ClientPortalModule extends BaseModule {
     const token = localStorage.getItem('client_auth_token');
 
     if (!token || token.startsWith('demo_token_')) {
-      alert('Project requests cannot be submitted in demo mode. Please log in with a real account.');
+      alert(
+        'Project requests cannot be submitted in demo mode. Please log in with a real account.'
+      );
       return;
     }
 
@@ -354,7 +364,8 @@ export class ClientPortalModule extends BaseModule {
     const projectType = (document.getElementById('project-type') as HTMLSelectElement)?.value;
     const budget = (document.getElementById('project-budget') as HTMLSelectElement)?.value;
     const timeline = (document.getElementById('project-timeline') as HTMLSelectElement)?.value;
-    const description = (document.getElementById('project-description') as HTMLTextAreaElement)?.value;
+    const description = (document.getElementById('project-description') as HTMLTextAreaElement)
+      ?.value;
 
     if (!name || !projectType || !description) {
       alert('Please fill in all required fields');
@@ -393,7 +404,11 @@ export class ClientPortalModule extends BaseModule {
       this.switchTab('dashboard');
     } catch (error) {
       console.error('Error submitting project request:', error);
-      alert(error instanceof Error ? error.message : 'Failed to submit project request. Please try again.');
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Failed to submit project request. Please try again.'
+      );
     }
   }
 
@@ -411,9 +426,11 @@ export class ClientPortalModule extends BaseModule {
     const contactName = (document.getElementById('settings-name') as HTMLInputElement)?.value;
     const companyName = (document.getElementById('settings-company') as HTMLInputElement)?.value;
     const phone = (document.getElementById('settings-phone') as HTMLInputElement)?.value;
-    const currentPassword = (document.getElementById('current-password') as HTMLInputElement)?.value;
+    const currentPassword = (document.getElementById('current-password') as HTMLInputElement)
+      ?.value;
     const newPassword = (document.getElementById('new-password') as HTMLInputElement)?.value;
-    const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement)?.value;
+    const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement)
+      ?.value;
 
     try {
       // Update profile info
@@ -517,7 +534,9 @@ export class ClientPortalModule extends BaseModule {
       alert('Notification preferences saved!');
     } catch (error) {
       console.error('Error saving notifications:', error);
-      alert(error instanceof Error ? error.message : 'Failed to save preferences. Please try again.');
+      alert(
+        error instanceof Error ? error.message : 'Failed to save preferences. Please try again.'
+      );
     }
   }
 
@@ -560,7 +579,9 @@ export class ClientPortalModule extends BaseModule {
       alert('Billing information saved!');
     } catch (error) {
       console.error('Error saving billing:', error);
-      alert(error instanceof Error ? error.message : 'Failed to save billing info. Please try again.');
+      alert(
+        error instanceof Error ? error.message : 'Failed to save billing info. Please try again.'
+      );
     }
   }
 
@@ -1093,7 +1114,8 @@ export class ClientPortalModule extends BaseModule {
    */
   private renderFilesList(container: HTMLElement, files: any[]): void {
     if (files.length === 0) {
-      container.innerHTML = '<p class="no-files">No files uploaded yet. Drag and drop files above to upload.</p>';
+      container.innerHTML =
+        '<p class="no-files">No files uploaded yet. Drag and drop files above to upload.</p>';
       return;
     }
 
@@ -1101,7 +1123,8 @@ export class ClientPortalModule extends BaseModule {
     const clientEmail = localStorage.getItem('clientEmail') || '';
 
     // Trash icon SVG
-    const trashIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>';
+    const trashIcon =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>';
 
     container.innerHTML = files
       .map((file) => {
@@ -1824,7 +1847,7 @@ export class ClientPortalModule extends BaseModule {
         if (parsed.isAdmin) {
           // Show admin buttons
           const adminButtons = document.querySelectorAll('.btn-admin');
-          adminButtons.forEach(btn => btn.classList.remove('hidden'));
+          adminButtons.forEach((btn) => btn.classList.remove('hidden'));
           console.log('[ClientPortal] Admin features enabled');
         }
       }
@@ -1836,7 +1859,7 @@ export class ClientPortalModule extends BaseModule {
           const payload = JSON.parse(atob(token.split('.')[1]));
           if (payload.isAdmin || payload.type === 'admin') {
             const adminButtons = document.querySelectorAll('.btn-admin');
-            adminButtons.forEach(btn => btn.classList.remove('hidden'));
+            adminButtons.forEach((btn) => btn.classList.remove('hidden'));
             console.log('[ClientPortal] Admin features enabled (from token)');
           }
         } catch {
@@ -2080,7 +2103,7 @@ export class ClientPortalModule extends BaseModule {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
-    })  } at ${  now.toLocaleTimeString('en-US', {
+    })} at ${now.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true

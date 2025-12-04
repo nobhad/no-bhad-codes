@@ -17,8 +17,8 @@ vi.mock('../../../src/services/logger.js', () => ({
     info: vi.fn(),
     error: vi.fn(),
     warn: vi.fn(),
-    debug: vi.fn()
-  }
+    debug: vi.fn(),
+  },
 }));
 
 describe('StateManager', () => {
@@ -62,13 +62,13 @@ describe('StateManager', () => {
           name: 'John Doe',
           settings: {
             theme: 'dark',
-            notifications: true
-          }
+            notifications: true,
+          },
         },
         projects: [
           { id: 1, name: 'Project 1' },
-          { id: 2, name: 'Project 2' }
-        ]
+          { id: 2, name: 'Project 2' },
+        ],
       };
 
       stateManager.setState('complex', complexState);
@@ -175,7 +175,7 @@ describe('StateManager', () => {
       // Create StateManager with persistence enabled
       const persistentState = new StateManager(undefined, {
         enablePersistence: true,
-        persistenceKey: 'test-state-persist'
+        persistenceKey: 'test-state-persist',
       });
 
       // Set some state
@@ -194,7 +194,7 @@ describe('StateManager', () => {
         { restoredKey: 'restoredValue' },
         {
           enablePersistence: true,
-          persistenceKey: 'restore-test'
+          persistenceKey: 'restore-test',
         }
       );
 
@@ -209,7 +209,7 @@ describe('StateManager', () => {
 
       const persistentState = new StateManager(undefined, {
         enablePersistence: true,
-        persistenceKey: 'error-test'
+        persistenceKey: 'error-test',
       });
 
       // The StateManager should be created successfully
@@ -332,11 +332,9 @@ describe('StateManager', () => {
   describe('State Middleware', () => {
     it('should apply middleware to state changes', () => {
       // Implementation uses Redux-style middleware pattern
-      const middlewareFn = vi.fn(
-        (_store) => (next) => (action) => {
-          next(action);
-        }
-      );
+      const middlewareFn = vi.fn((_store) => (next) => (action) => {
+        next(action);
+      });
 
       stateManager.use(middlewareFn);
 
@@ -418,7 +416,7 @@ describe('createStateManager', () => {
   it('should create state manager with custom options', () => {
     const options = {
       enablePersistence: true,
-      persistenceKey: 'custom-test'
+      persistenceKey: 'custom-test',
     };
 
     const manager = createStateManager(undefined, options);

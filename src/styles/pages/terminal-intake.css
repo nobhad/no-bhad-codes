@@ -10,7 +10,7 @@
    ============================================================================ */
 
 .terminal-intake {
-  font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+  font-family: "Courier New", Consolas, "Liberation Mono", monospace;
   background-color: #0a0a0a;
   color: #00ff00;
   min-height: calc(100vh - var(--header-height, 60px) - var(--footer-height, 60px));
@@ -61,9 +61,15 @@
   border: none;
 }
 
-.terminal-btn.close { background: #ff5f56; }
-.terminal-btn.minimize { background: #ffbd2e; }
-.terminal-btn.maximize { background: #27ca40; }
+.terminal-btn.close {
+  background: #ff5f56;
+}
+.terminal-btn.minimize {
+  background: #ffbd2e;
+}
+.terminal-btn.maximize {
+  background: #27ca40;
+}
 
 .terminal-title {
   color: #888888;
@@ -81,7 +87,7 @@
   padding: 0 0 12px 0;
   color: #888888;
   font-size: 13px;
-  font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+  font-family: "Courier New", Consolas, "Liberation Mono", monospace;
   background: transparent;
 }
 
@@ -248,7 +254,7 @@
   color: #888888;
   font-size: 14px;
   line-height: 1.6;
-  font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+  font-family: "Courier New", Consolas, "Liberation Mono", monospace;
 }
 
 .boot-line:empty {
@@ -281,8 +287,14 @@
 }
 
 @keyframes cursor-blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
 }
 
 /* Hide the dots, we're using cursor instead */
@@ -291,8 +303,14 @@
 }
 
 @keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0.3; }
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0.3;
+  }
 }
 
 /* ============================================================================
@@ -322,7 +340,7 @@ input.terminal-input {
   background: transparent !important;
   border: none !important;
   color: #ffffff !important;
-  font-family: 'Courier New', Consolas, 'Liberation Mono', monospace !important;
+  font-family: "Courier New", Consolas, "Liberation Mono", monospace !important;
   font-size: 14px;
   outline: none !important;
   caret-color: #00ff00 !important;
@@ -337,8 +355,14 @@ input.terminal-input {
 
 /* Blinking caret animation for input */
 @keyframes caret-blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
 }
 
 .terminal-input {
@@ -618,7 +642,7 @@ input.terminal-input:focus {
 
 /* Grainy overlay - only on the avatar SVG */
 .terminal-avatar-wrapper::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -631,9 +655,21 @@ input.terminal-input:focus {
 }
 
 @keyframes avatar-flicker {
-  0%, 95%, 100% { opacity: 1; }
-  96% { opacity: 0.85; }
-  97% { opacity: 0.95; }
-  98% { opacity: 0.8; }
-  99% { opacity: 1; }
+  0%,
+  95%,
+  100% {
+    opacity: 1;
+  }
+  96% {
+    opacity: 0.85;
+  }
+  97% {
+    opacity: 0.95;
+  }
+  98% {
+    opacity: 0.8;
+  }
+  99% {
+    opacity: 1;
+  }
 }

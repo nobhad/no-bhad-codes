@@ -81,7 +81,7 @@ export function sanitizeInputs(
     sanitizeBody = true,
     sanitizeQuery = true,
     sanitizeParams = true,
-    skipPaths = []
+    skipPaths = [],
   } = options;
 
   return (req: Request, res: Response, next: NextFunction) => {
@@ -131,25 +131,27 @@ export function stripDangerousPatterns(input: string): string {
     return input;
   }
 
-  return input
-    // Remove script tags
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    // Remove event handlers
-    .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
-    // Remove javascript: URLs
-    .replace(/javascript:/gi, '')
-    // Remove data: URLs that could contain scripts
-    .replace(/data:\s*text\/html/gi, '')
-    // Remove vbscript: URLs
-    .replace(/vbscript:/gi, '')
-    // Remove expression() CSS
-    .replace(/expression\s*\(/gi, '')
-    // Then apply standard sanitization
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
+  return (
+    input
+      // Remove script tags
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      // Remove event handlers
+      .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
+      // Remove javascript: URLs
+      .replace(/javascript:/gi, '')
+      // Remove data: URLs that could contain scripts
+      .replace(/data:\s*text\/html/gi, '')
+      // Remove vbscript: URLs
+      .replace(/vbscript:/gi, '')
+      // Remove expression() CSS
+      .replace(/expression\s*\(/gi, '')
+      // Then apply standard sanitization
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+  );
 }
 
 export default sanitizeInputs;

@@ -22,22 +22,22 @@ Object.defineProperty(window, 'matchMedia', {
     removeListener: vi.fn(), // Deprecated
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn()
-  }))
+    dispatchEvent: vi.fn(),
+  })),
 });
 
 // Mock IntersectionObserver
 global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
-  disconnect: vi.fn()
+  disconnect: vi.fn(),
 }));
 
 // Mock ResizeObserver
 global.ResizeObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
-  disconnect: vi.fn()
+  disconnect: vi.fn(),
 }));
 
 // Mock localStorage
@@ -47,11 +47,11 @@ const localStorageMock = {
   removeItem: vi.fn(),
   clear: vi.fn(),
   length: 0,
-  key: vi.fn()
+  key: vi.fn(),
 };
 
 Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
+  value: localStorageMock,
 });
 
 // Mock sessionStorage
@@ -61,11 +61,11 @@ const sessionStorageMock = {
   removeItem: vi.fn(),
   clear: vi.fn(),
   length: 0,
-  key: vi.fn()
+  key: vi.fn(),
 };
 
 Object.defineProperty(window, 'sessionStorage', {
-  value: sessionStorageMock
+  value: sessionStorageMock,
 });
 
 // Mock fetch
@@ -120,8 +120,8 @@ vi.mock('../../server/config/environment.js', () => ({
     JWT_SECRET: 'test-secret-key',
     EMAIL_ENABLED: false,
     ENABLE_REGISTRATION: true,
-    ENABLE_API_DOCS: false
-  }
+    ENABLE_API_DOCS: false,
+  },
 }));
 
 // Global test utilities
@@ -142,7 +142,7 @@ global.testUtils = {
       isInitialized: false,
       init: vi.fn().mockResolvedValue(undefined),
       destroy: vi.fn().mockResolvedValue(undefined),
-      log: vi.fn()
+      log: vi.fn(),
     };
   },
 
@@ -164,7 +164,7 @@ global.testUtils = {
 
   flushPromises: (): Promise<void> => {
     return new Promise((resolve) => setTimeout(resolve, 0));
-  }
+  },
 };
 
 // Extend global types
