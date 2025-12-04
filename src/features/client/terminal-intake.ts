@@ -726,20 +726,20 @@ export class TerminalIntakeModule {
             ${buttonsHtml}
             <span class="terminal-title">project_intake.sh - No Bhad Codes</span>
           </div>
-          <div class="terminal-progress">
+          <div class="terminal-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Form completion progress">
             <span class="progress-label">Progress:</span>
             <div class="progress-bar">
               <div class="progress-fill" id="progressFill" style="width: 0%"></div>
             </div>
-            <span class="progress-percent" id="progressPercent">0%</span>
+            <span class="progress-percent" id="progressPercent" aria-live="polite">0%</span>
           </div>
-          <div class="terminal-chat" id="terminalChat">
-            <div class="terminal-login-info">${loginTime}<br><span class="terminal-prompt-line">client@NoBhadCodes project-intake % </span><span class="terminal-typing-text" id="terminalTypingText"></span><span class="terminal-cursor" id="terminalCursor">█</span></div>
+          <div class="terminal-chat" id="terminalChat" role="log" aria-live="polite" aria-label="Chat conversation">
+            <div class="terminal-login-info" aria-hidden="true">${loginTime}<br><span class="terminal-prompt-line">client@NoBhadCodes project-intake % </span><span class="terminal-typing-text" id="terminalTypingText"></span><span class="terminal-cursor" id="terminalCursor">█</span></div>
           </div>
-          <div class="terminal-input-area">
-            <span class="terminal-prompt">></span>
-            <input type="text" class="terminal-input" id="terminalInput" placeholder="Click or type your response..." autocomplete="off">
-            <button class="terminal-send" id="terminalSend">SEND</button>
+          <div class="terminal-input-area" role="form" aria-label="Project intake form">
+            <span class="terminal-prompt" aria-hidden="true">></span>
+            <input type="text" class="terminal-input" id="terminalInput" placeholder="Click or type your response..." autocomplete="off" aria-label="Your response" data-1p-ignore data-lpignore="true" data-bwignore>
+            <button class="terminal-send" id="terminalSend" aria-label="Send response">SEND</button>
           </div>
         </div>
       </div>
@@ -2062,6 +2062,7 @@ Thank you for choosing No Bhad Codes!
         btn.dataset.index = String(index + 1);
         // Add number prefix for terminal look
         btn.textContent = `[${index + 1}] ${option.label}`;
+        btn.setAttribute('aria-label', `Option ${index + 1}: ${option.label}`);
         optionsEl.appendChild(btn);
       });
 
@@ -2074,6 +2075,7 @@ Thank you for choosing No Bhad Codes!
         confirmBtn.style.marginTop = '12px';
         confirmBtn.style.marginLeft = '20px';
         confirmBtn.textContent = '> CONFIRM SELECTION';
+        confirmBtn.setAttribute('aria-label', 'Confirm your selections');
         confirmBtn.addEventListener('click', () => this.handleUserInput());
         messageEl.appendChild(confirmBtn);
       }
@@ -2132,6 +2134,7 @@ Thank you for choosing No Bhad Codes!
         btn.dataset.value = option.value;
         btn.dataset.index = String(index + 1);
         btn.textContent = `[${index + 1}] ${option.label}`;
+        btn.setAttribute('aria-label', `Option ${index + 1}: ${option.label}`);
         optionsEl.appendChild(btn);
       });
 
@@ -2143,6 +2146,7 @@ Thank you for choosing No Bhad Codes!
         confirmBtn.style.marginTop = '12px';
         confirmBtn.style.marginLeft = '20px';
         confirmBtn.textContent = '> CONFIRM SELECTION';
+        confirmBtn.setAttribute('aria-label', 'Confirm your selections');
         confirmBtn.addEventListener('click', () => this.handleUserInput());
         messageEl.appendChild(confirmBtn);
       }
@@ -2184,6 +2188,11 @@ Thank you for choosing No Bhad Codes!
 
     if (this.progressFill) {
       this.progressFill.style.width = `${progress}%`;
+      // Update aria-valuenow on the parent progress bar container
+      const progressBar = this.progressFill.closest('.terminal-progress');
+      if (progressBar) {
+        progressBar.setAttribute('aria-valuenow', String(progress));
+      }
     }
     if (this.progressPercent) {
       this.progressPercent.textContent = `${progress}%`;
