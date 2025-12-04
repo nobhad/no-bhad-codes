@@ -9,7 +9,7 @@
 
 import express from 'express';
 import multer from 'multer';
-import { resolve, extname } from 'path';
+import { resolve, extname, normalize } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
@@ -19,6 +19,17 @@ const router = express.Router();
 
 // Ensure uploads directory exists
 const uploadDir = resolve(process.cwd(), 'uploads');
+
+/**
+ * Validate file path to prevent path traversal attacks
+ * Ensures the resolved path is within the uploads directory
+ */
+function isPathSafe(filePath: string): boolean {
+  const resolvedPath = resolve(process.cwd(), filePath.replace(/^\//, ''));
+  const normalizedPath = normalize(resolvedPath);
+  // Ensure the path is within the uploads directory
+  return normalizedPath.startsWith(uploadDir);
+}
 if (!existsSync(uploadDir)) {
   mkdirSync(uploadDir, { recursive: true });
 }
@@ -537,6 +548,15 @@ router.get(
         });
       }
 
+      // Validate path to prevent path traversal attacks
+      if (!isPathSafe(file.file_path)) {
+        console.error('Path traversal attempt detected:', file.file_path);
+        return res.status(403).json({
+          error: 'Invalid file path',
+          code: 'PATH_TRAVERSAL_DETECTED',
+        });
+      }
+
       // Construct the full file path
       const filePath = resolve(process.cwd(), file.file_path.replace(/^\//, ''));
 
@@ -625,11 +645,16 @@ router.delete(
       // Delete from database
       await db.run('DELETE FROM files WHERE id = ?', [fileId]);
 
-      // Try to delete the physical file
-      const filePath = resolve(process.cwd(), file.file_path.replace(/^\//, ''));
-      if (existsSync(filePath)) {
-        const fs = await import('fs/promises');
-        await fs.unlink(filePath);
+      // Validate path before deletion to prevent path traversal attacks
+      if (isPathSafe(file.file_path)) {
+        // Try to delete the physical file
+        const filePath = resolve(process.cwd(), file.file_path.replace(/^\//, ''));
+        if (existsSync(filePath)) {
+          const fs = await import('fs/promises');
+          await fs.unlink(filePath);
+        }
+      } else {
+        console.error('Path traversal attempt detected during delete:', file.file_path);
       }
 
       res.json({

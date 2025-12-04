@@ -13,6 +13,7 @@ import { getDatabase } from '../database/init.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
 import { emailService } from '../services/email-service.js';
+import { rateLimit } from '../middleware/security.js';
 
 const router = express.Router();
 
@@ -453,6 +454,13 @@ router.get('/validate', authenticateToken, (req: AuthenticatedRequest, res) => {
  */
 router.post(
   '/forgot-password',
+  // Rate limit: 3 requests per 15 minutes per IP to prevent abuse
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    maxRequests: 3,
+    message: 'Too many password reset requests. Please try again later.',
+    keyGenerator: (req) => `forgot-password:${req.ip}`,
+  }),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { email } = req.body;
 
@@ -460,6 +468,15 @@ router.post(
       return res.status(400).json({
         error: 'Email is required',
         code: 'MISSING_EMAIL',
+      });
+    }
+
+    // Validate email format before DB query
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (typeof email !== 'string' || !emailRegex.test(email) || email.length > 254) {
+      return res.status(400).json({
+        error: 'Invalid email format',
+        code: 'INVALID_EMAIL',
       });
     }
 
