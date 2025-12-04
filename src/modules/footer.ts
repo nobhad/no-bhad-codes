@@ -29,7 +29,8 @@ export class FooterModule extends BaseModule {
       this.updateCopyrightYear();
       this.log('Copyright year updated successfully');
     } else {
-      this.error('Current year element not found');
+      // Not an error - some pages may not have the dynamic year element
+      this.log('Current year element not found (page may use static footer)');
     }
   }
 
