@@ -1280,10 +1280,10 @@ netlify deploy --prod --dir=dist
 ### Environment Variables
 
 ```bash
-# .env.production
-VITE_API_URL=https://api.nobhadcodes.com
-VITE_ENVIRONMENT=production
-VITE_ANALYTICS_ID=GA-XXXXXXXXX
+# Vercel Environment Variables
+VITE_API_URL=https://no-bhad-codes-production.up.railway.app
+SENTRY_DSN=<your-sentry-dsn>
+VITE_ADMIN_PASSWORD_HASH=<sha256-hash-of-admin-password>
 ```
 
 ---
