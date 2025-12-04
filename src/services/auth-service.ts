@@ -46,12 +46,12 @@ export class AuthService extends BaseService {
   }
 
   /**
-   * Load authentication data from localStorage
+   * Load authentication data from sessionStorage
    */
   private loadStoredAuth(): void {
     try {
-      const storedToken = localStorage.getItem('auth_token');
-      const storedUser = localStorage.getItem('auth_user');
+      const storedToken = sessionStorage.getItem('auth_token');
+      const storedUser = sessionStorage.getItem('auth_user');
 
       if (storedToken && storedUser) {
         this.token = storedToken;
@@ -93,8 +93,8 @@ export class AuthService extends BaseService {
       this.token = loginData.token;
       this.user = loginData.user;
 
-      localStorage.setItem('auth_token', loginData.token);
-      localStorage.setItem('auth_user', JSON.stringify(loginData.user));
+      sessionStorage.setItem('auth_token', loginData.token);
+      sessionStorage.setItem('auth_user', JSON.stringify(loginData.user));
 
       // Schedule token refresh
       this.scheduleTokenRefresh();
@@ -137,8 +137,8 @@ export class AuthService extends BaseService {
     this.token = null;
     this.user = null;
 
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
+    sessionStorage.removeItem('auth_token');
+    sessionStorage.removeItem('auth_user');
 
     if (this.refreshTimer) {
       clearTimeout(this.refreshTimer);
@@ -190,7 +190,7 @@ export class AuthService extends BaseService {
 
       const data = await response.json();
       this.token = data.token;
-      localStorage.setItem('auth_token', data.token);
+      sessionStorage.setItem('auth_token', data.token);
 
       this.scheduleTokenRefresh();
       return true;
@@ -268,7 +268,7 @@ export class AuthService extends BaseService {
 
       const data = await response.json();
       this.user = data.user;
-      localStorage.setItem('auth_user', JSON.stringify(data.user));
+      sessionStorage.setItem('auth_user', JSON.stringify(data.user));
 
       return data.user;
     } catch (error) {

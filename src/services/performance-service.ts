@@ -65,6 +65,8 @@ export class PerformanceService {
   private observers: PerformanceObserver[] = [];
   private alerts: PerformanceAlert[] = [];
   private isMonitoring = false;
+  private monitoringIntervalId: ReturnType<typeof setInterval> | null = null;
+  private visibilityChangeHandler: (() => void) | null = null;
 
   constructor(budget?: Partial<PerformanceBudget>) {
     this.budget = {
@@ -295,18 +297,19 @@ export class PerformanceService {
    * Set up continuous monitoring
    */
   private setupContinuousMonitoring(): void {
-    // Monitor based on configuration
-    setInterval(() => {
+    // Monitor based on configuration - store ID for cleanup
+    this.monitoringIntervalId = setInterval(() => {
       this.monitorMemoryUsage();
       this.measureNetworkPerformance();
     }, APP_CONSTANTS.TIMERS.PERFORMANCE_MONITORING);
 
-    // Monitor page visibility changes
-    document.addEventListener('visibilitychange', () => {
+    // Monitor page visibility changes - store handler for cleanup
+    this.visibilityChangeHandler = () => {
       if (document.visibilityState === 'visible') {
         this.recordCustomMetric('pageVisibilityResume', performance.now());
       }
-    });
+    };
+    document.addEventListener('visibilitychange', this.visibilityChangeHandler);
   }
 
   /**
@@ -500,10 +503,23 @@ export class PerformanceService {
    * Stop monitoring
    */
   stopMonitoring(): void {
+    // Disconnect all PerformanceObservers
     this.observers.forEach((observer) => observer.disconnect());
     this.observers = [];
-    this.isMonitoring = false;
 
+    // Clear monitoring interval
+    if (this.monitoringIntervalId) {
+      clearInterval(this.monitoringIntervalId);
+      this.monitoringIntervalId = null;
+    }
+
+    // Remove visibility change listener
+    if (this.visibilityChangeHandler) {
+      document.removeEventListener('visibilitychange', this.visibilityChangeHandler);
+      this.visibilityChangeHandler = null;
+    }
+
+    this.isMonitoring = false;
     console.log('[PerformanceService] Monitoring stopped');
   }
 

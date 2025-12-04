@@ -169,7 +169,7 @@ export class MessagingModule extends BaseModule {
     try {
       const response = await fetch('/api/messages/threads', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+          Authorization: `Bearer ${sessionStorage.getItem('auth_token')}`,
           'Content-Type': 'application/json'
         }
       });
@@ -195,7 +195,7 @@ export class MessagingModule extends BaseModule {
     try {
       const response = await fetch(`/api/messages/threads/${threadId}/messages`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+          Authorization: `Bearer ${sessionStorage.getItem('auth_token')}`,
           'Content-Type': 'application/json'
         }
       });
@@ -249,7 +249,7 @@ export class MessagingModule extends BaseModule {
       const response = await fetch(`/api/messages/threads/${this.currentThreadId}/messages`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+          Authorization: `Bearer ${sessionStorage.getItem('auth_token')}`
         },
         body: sendFormData
       });
@@ -302,7 +302,7 @@ export class MessagingModule extends BaseModule {
       const response = await fetch('/api/messages/threads', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+          Authorization: `Bearer ${sessionStorage.getItem('auth_token')}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -530,7 +530,7 @@ export class MessagingModule extends BaseModule {
       await fetch(`/api/messages/threads/${threadId}/read`, {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+          Authorization: `Bearer ${sessionStorage.getItem('auth_token')}`,
           'Content-Type': 'application/json'
         }
       });

@@ -133,7 +133,7 @@ class AdminAuth {
           AdminSecurity.clearAttempts();
 
           // Store JWT token and session
-          localStorage.setItem(this.TOKEN_KEY, data.token);
+          sessionStorage.setItem(this.TOKEN_KEY, data.token);
           const session = {
             authenticated: true,
             timestamp: Date.now(),
@@ -152,10 +152,14 @@ class AdminAuth {
         console.warn('[AdminAuth] Backend auth failed, using fallback:', fetchError);
       }
 
-      // Fallback: Client-side hash authentication for offline/development
-      const fallbackHash =
-        (import.meta.env && import.meta.env.VITE_ADMIN_PASSWORD_HASH) ||
-        '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'; // Default: 'admin' in SHA256
+      // Fallback: Client-side hash authentication for development only
+      // SECURITY: No hardcoded fallback - must use environment variable
+      const fallbackHash = import.meta.env && import.meta.env.VITE_ADMIN_PASSWORD_HASH;
+
+      if (!fallbackHash) {
+        console.error('[AdminAuth] VITE_ADMIN_PASSWORD_HASH not configured - admin access disabled');
+        return false;
+      }
 
       const encoder = new TextEncoder();
       const data = encoder.encode(inputKey);
@@ -189,7 +193,7 @@ class AdminAuth {
   static isAuthenticated(): boolean {
     try {
       // Check for admin JWT token first
-      const token = localStorage.getItem(this.TOKEN_KEY);
+      const token = sessionStorage.getItem(this.TOKEN_KEY);
       if (token) {
         // Validate token hasn't expired (basic check)
         try {
@@ -208,7 +212,7 @@ class AdminAuth {
       }
 
       // Also check for client portal auth token (for admin users logged in via client portal)
-      const clientToken = localStorage.getItem('client_auth_token');
+      const clientToken = sessionStorage.getItem('client_auth_token');
       if (clientToken) {
         try {
           const payload = JSON.parse(atob(clientToken.split('.')[1]));
@@ -250,11 +254,11 @@ class AdminAuth {
    */
   static getToken(): string | null {
     // First check for admin-specific token
-    const adminToken = localStorage.getItem(this.TOKEN_KEY);
+    const adminToken = sessionStorage.getItem(this.TOKEN_KEY);
     if (adminToken) return adminToken;
 
     // Also check for client portal token (admin users use this)
-    const clientToken = localStorage.getItem('client_auth_token');
+    const clientToken = sessionStorage.getItem('client_auth_token');
     if (clientToken) {
       try {
         const payload = JSON.parse(atob(clientToken.split('.')[1]));
@@ -274,7 +278,7 @@ class AdminAuth {
    * Logout and clear all auth data
    */
   static logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
+    sessionStorage.removeItem(this.TOKEN_KEY);
     sessionStorage.removeItem(this.SESSION_KEY);
     window.location.reload();
   }
@@ -332,7 +336,7 @@ class AdminDashboard {
 
   private async initializeModules(): Promise<void> {
     // Admin dashboard doesn't use theme toggle or main site navigation
-    // Theme is handled via CSS and localStorage directly
+    // Theme is handled via CSS and sessionStorage directly
     // No additional modules needed for admin portal
   }
 
@@ -400,9 +404,9 @@ class AdminDashboard {
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
         // Clear auth data and redirect to client landing
-        localStorage.removeItem('clientAuth');
-        localStorage.removeItem('client_auth_token');
-        localStorage.removeItem('clientAuthToken');
+        sessionStorage.removeItem('clientAuth');
+        sessionStorage.removeItem('client_auth_token');
+        sessionStorage.removeItem('clientAuthToken');
         window.location.href = '/client/landing';
       });
     }
@@ -596,7 +600,7 @@ class AdminDashboard {
 
   private async loadLeads(): Promise<void> {
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     try {
@@ -721,7 +725,7 @@ class AdminDashboard {
 
   private async loadContactSubmissions(): Promise<void> {
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     try {
@@ -826,7 +830,7 @@ class AdminDashboard {
 
   private async updateContactStatus(id: number, status: string): Promise<void> {
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     try {
@@ -970,7 +974,7 @@ class AdminDashboard {
 
   private async inviteLead(leadId: number, email: string): Promise<void> {
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     const inviteBtn = document.getElementById('invite-lead-btn') as HTMLButtonElement;
@@ -1095,7 +1099,7 @@ class AdminDashboard {
 
   private async loadProjects(): Promise<void> {
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     try {
@@ -1216,7 +1220,7 @@ class AdminDashboard {
 
   private async updateProjectStatus(id: number, status: string): Promise<void> {
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     try {
@@ -1446,7 +1450,7 @@ class AdminDashboard {
     if (!this.currentProjectId) return;
 
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     const name = (document.getElementById('pd-setting-name') as HTMLInputElement)?.value;
@@ -1495,7 +1499,7 @@ class AdminDashboard {
     if (!messagesThread) return;
 
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) {
       messagesThread.innerHTML =
         '<p class="empty-state">Authentication required to view messages.</p>';
@@ -1563,7 +1567,7 @@ class AdminDashboard {
     if (!messageInput || !messageInput.value.trim()) return;
 
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     const project = this.projectsData.find((p: any) => p.id === this.currentProjectId);
@@ -1607,7 +1611,7 @@ class AdminDashboard {
     if (!filesList) return;
 
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) {
       filesList.innerHTML = '<p class="empty-state">Authentication required to view files.</p>';
       return;
@@ -1673,7 +1677,7 @@ class AdminDashboard {
     if (!milestonesList) return;
 
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) {
       milestonesList.innerHTML = '<p class="empty-state">Authentication required.</p>';
       return;
@@ -1752,7 +1756,7 @@ class AdminDashboard {
     if (!this.currentProjectId) return;
 
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     try {
@@ -1789,7 +1793,7 @@ class AdminDashboard {
     if (!this.currentProjectId) return;
 
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     try {
@@ -1821,7 +1825,7 @@ class AdminDashboard {
     if (!confirm('Are you sure you want to delete this milestone?')) return;
 
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     try {
@@ -1855,7 +1859,7 @@ class AdminDashboard {
     if (!invoicesList) return;
 
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) {
       invoicesList.innerHTML = '<p class="empty-state">Authentication required.</p>';
       return;
@@ -1958,7 +1962,7 @@ class AdminDashboard {
     if (!this.currentProjectId) return;
 
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     try {
@@ -2002,7 +2006,7 @@ class AdminDashboard {
    */
   public async sendInvoice(invoiceId: number): Promise<void> {
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     try {
@@ -2073,7 +2077,7 @@ class AdminDashboard {
     if (!this.currentProjectId) return;
 
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     const formData = new FormData();
@@ -2117,14 +2121,14 @@ class AdminDashboard {
     if (sysScreen) sysScreen.textContent = `${screen.width} x ${screen.height}`;
     if (sysViewport) sysViewport.textContent = `${window.innerWidth} x ${window.innerHeight}`;
 
-    // Load visitor tracking data from localStorage
+    // Load visitor tracking data from sessionStorage
     this.loadVisitorStats();
   }
 
   private loadVisitorStats(): void {
     try {
-      // Read visitor tracking events from localStorage (set by visitor-tracking.ts)
-      const eventsJson = localStorage.getItem('nbw_tracking_events');
+      // Read visitor tracking events from sessionStorage (set by visitor-tracking.ts)
+      const eventsJson = sessionStorage.getItem('nbw_tracking_events');
       const events = eventsJson ? JSON.parse(eventsJson) : [];
 
       // Count unique sessions (visitors today)
@@ -2254,7 +2258,7 @@ class AdminDashboard {
 
   private async loadClientThreads(): Promise<void> {
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     const clientSelect = document.getElementById('admin-client-select') as HTMLSelectElement;
@@ -2327,7 +2331,7 @@ class AdminDashboard {
 
   private async loadThreadMessages(threadId: number): Promise<void> {
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     // Try new container ID first, then old one
@@ -2440,7 +2444,7 @@ class AdminDashboard {
     if (!input || !input.value.trim() || !this.selectedThreadId) return;
 
     const token =
-      localStorage.getItem('client_auth_token') || localStorage.getItem('clientAuthToken');
+      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
     if (!token) return;
 
     const message = input.value.trim();
@@ -3501,7 +3505,7 @@ class AdminDashboard {
 
     try {
       // Reset analytics logic here
-      localStorage.clear();
+      sessionStorage.clear();
       sessionStorage.clear();
       alert('Analytics data has been reset.');
       window.location.reload();

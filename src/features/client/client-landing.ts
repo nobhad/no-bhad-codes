@@ -64,10 +64,10 @@ export class ClientLandingModule extends BaseModule {
   }
 
   /**
-   * Check if user is already logged in by checking localStorage
+   * Check if user is already logged in by checking sessionStorage
    */
   private isLoggedIn(): boolean {
-    const clientAuth = localStorage.getItem('clientAuth');
+    const clientAuth = sessionStorage.getItem('clientAuth');
 
     // Check if we have auth data
     if (clientAuth) {
@@ -80,13 +80,13 @@ export class ClientLandingModule extends BaseModule {
         }
       } catch {
         // Invalid JSON, clear it
-        localStorage.removeItem('clientAuth');
-        localStorage.removeItem('client_auth_token');
+        sessionStorage.removeItem('clientAuth');
+        sessionStorage.removeItem('client_auth_token');
       }
     }
 
     // Also check for the token stored by client-portal.ts
-    const portalToken = localStorage.getItem('client_auth_token');
+    const portalToken = sessionStorage.getItem('client_auth_token');
     if (portalToken && !portalToken.startsWith('demo_token_')) {
       return true;
     }
@@ -401,7 +401,7 @@ export class ClientLandingModule extends BaseModule {
       if (email === this.DEMO_EMAIL && password === this.DEMO_PASSWORD) {
         console.log('[ClientLandingModule] Demo login successful');
         // Store demo session
-        localStorage.setItem(
+        sessionStorage.setItem(
           'clientAuth',
           JSON.stringify({
             email: this.DEMO_EMAIL,
@@ -431,9 +431,9 @@ export class ClientLandingModule extends BaseModule {
         console.log('[ClientLandingModule] Login successful');
         // Store auth token (use 'client_auth_token' to match client-portal.ts)
         if (result.token) {
-          localStorage.setItem('client_auth_token', result.token);
+          sessionStorage.setItem('client_auth_token', result.token);
         }
-        localStorage.setItem(
+        sessionStorage.setItem(
           'clientAuth',
           JSON.stringify({
             email: result.user?.email || email,
@@ -457,7 +457,7 @@ export class ClientLandingModule extends BaseModule {
       console.error('[ClientLandingModule] Login error:', error);
       // If API fails, check for demo credentials as fallback
       if (email === this.DEMO_EMAIL && password === this.DEMO_PASSWORD) {
-        localStorage.setItem(
+        sessionStorage.setItem(
           'clientAuth',
           JSON.stringify({
             email: this.DEMO_EMAIL,
@@ -495,7 +495,7 @@ export class ClientLandingModule extends BaseModule {
       // Check for demo credentials
       if (email === this.DEMO_EMAIL && password === this.DEMO_PASSWORD) {
         console.log('[ClientLandingModule] Demo login successful (mobile)');
-        localStorage.setItem(
+        sessionStorage.setItem(
           'clientAuth',
           JSON.stringify({
             email: this.DEMO_EMAIL,
@@ -520,9 +520,9 @@ export class ClientLandingModule extends BaseModule {
       if (response.ok && result.success) {
         console.log('[ClientLandingModule] Login successful (mobile)');
         if (result.token) {
-          localStorage.setItem('client_auth_token', result.token);
+          sessionStorage.setItem('client_auth_token', result.token);
         }
-        localStorage.setItem(
+        sessionStorage.setItem(
           'clientAuth',
           JSON.stringify({
             email: result.user?.email || email,
@@ -544,7 +544,7 @@ export class ClientLandingModule extends BaseModule {
     } catch (error) {
       console.error('[ClientLandingModule] Login error (mobile):', error);
       if (email === this.DEMO_EMAIL && password === this.DEMO_PASSWORD) {
-        localStorage.setItem(
+        sessionStorage.setItem(
           'clientAuth',
           JSON.stringify({
             email: this.DEMO_EMAIL,
