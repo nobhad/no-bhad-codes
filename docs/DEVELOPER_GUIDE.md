@@ -486,7 +486,7 @@ unsubscribe();
 The project uses a modular CSS architecture:
 
 ```scss
-// src/styles/main-new.css - Entry point
+// src/styles/main.css - Entry point
 @import './base/reset.css';
 @import './base/typography.css';
 @import './components/form.css';
@@ -575,7 +575,7 @@ The application includes a comprehensive messaging system for client-developer c
    }
    ```
 
-2. **CSS Styling** (`src/styles/components/messaging.css`)
+2. **CSS Styling** (styles included in `src/styles/main.css`)
    - Responsive design with mobile support
    - Thread sidebar with unread indicators
    - Message bubbles with sender identification
@@ -881,7 +881,7 @@ test.describe('Project Management', () => {
 2. **Build Application**
    ```bash
    # Install production dependencies
-   npm ci --only=production
+   npm ci --omit=dev
    
    # Build frontend and backend
    npm run build

@@ -94,7 +94,7 @@ no-bhad-codes/
 │   │   │   └── modules.ts           # Module system types
 │   │   │
 │   │   ├── 🎨 STYLES (Modular CSS Architecture)
-│   │   │   ├── main-new.css         # New modular CSS entry point
+│   │   │   ├── main.css         # New modular CSS entry point
 │   │   │   ├── base/                # Foundation layer
 │   │   │   │   ├── reset.css        # CSS reset & normalize
 │   │   │   │   ├── typography.css   # Typography system
@@ -724,7 +724,7 @@ export class AdminUsersModule extends BaseModule {
 ```scss
 // Layered CSS Architecture
 src/styles/
-├── main-new.css                 // New modular entry point
+├── main.css                 // New modular entry point
 ├── base/                        // Foundation layer
 │   ├── reset.css               // CSS reset & normalize
 │   ├── typography.css          // Typography system
@@ -756,7 +756,7 @@ src/styles/
 **Key Improvements:**
 - **Consolidated Form System**: All form styles in `components/form.css`
 - **Proper Layering**: Base → Components → Pages → Design System  
-- **Eliminated Duplication**: Single import in `main-new.css`
+- **Eliminated Duplication**: Single import in `main.css`
 - **Better Organization**: Logical separation by function
 
 ### Adding New Styles
@@ -1047,8 +1047,8 @@ src/types/client.ts                     → ClientProject, ClientMessage
 src/types/invoice.ts                    → Invoice, InvoiceItem
 
 # Styles (kebab-case)
-src/styles/client-portal.css
-src/styles/admin-dashboard.css
+src/styles/pages/client-portal.css
+src/styles/pages/admin.css
 ```
 
 ### 2. TypeScript Best Practices

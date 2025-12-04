@@ -61,8 +61,13 @@ export class ErrorTrackingService {
       tracesSampleRate = environment === 'production' ? 0.1 : 1.0,
     } = config;
 
-    if (!dsn) {
-      console.warn('⚠️ Sentry DSN not provided. Error tracking disabled.');
+    // Check if DSN is missing or a placeholder value
+    if (!dsn || dsn.includes('your-sentry') || dsn.includes('placeholder') || !dsn.startsWith('https://')) {
+      if (dsn && dsn !== '') {
+        console.warn('⚠️ Invalid Sentry DSN detected (placeholder or malformed). Error tracking disabled.');
+      } else {
+        console.warn('⚠️ Sentry DSN not provided. Error tracking disabled.');
+      }
       return;
     }
 
