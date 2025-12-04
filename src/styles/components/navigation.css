@@ -43,21 +43,10 @@
   --color-shadow: rgba(0, 0, 0, 0.5);
 }
 
-/* =====================================================
-   2. FONT FACE DECLARATION - VARIABLE FONT
-   ===================================================== */
-@font-face {
-  font-family: var(--font-family-acme);
-  src:
-    url("/fonts/Acme/Acme-Variable.woff2") format("woff2-variations"),
-    url("/fonts/Acme/Acme-Regular.ttf") format("truetype");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
+/* Font defined in typography.css */
 
 /* =====================================================
-   3. BASE LAYOUT & CONTAINER SYSTEM
+   2. BASE LAYOUT & CONTAINER SYSTEM
    ===================================================== */
 * {
   box-sizing: border-box;

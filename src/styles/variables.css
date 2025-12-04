@@ -41,17 +41,7 @@ This CSS file defines global variables and font-face rules for consistent stylin
     - --color-shadow: Shadow color with increased transparency for dark mode.
  */
 
-/* Google Fonts Import */
-@import url("https://fonts.googleapis.com/css2?family=Acme&display=swap");
-
-/* Custom Font Face Definitions */
-@font-face {
-  font-family: "Acme";
-  src: url("/fonts/Acme/Acme-Regular.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: optional; /* Better CLS - font won't cause layout shift */
-}
+/* Font defined in typography.css */
 
 :root {
   /* Font Families */

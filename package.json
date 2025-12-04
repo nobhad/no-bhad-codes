@@ -68,7 +68,7 @@
     "url": "https://github.com/noellebhaduri/no-bhad-codes/issues"
   },
   "engines": {
-    "node": "20.x",
+    "node": ">=20",
     "npm": ">=8.0.0"
   },
   "devDependencies": {
