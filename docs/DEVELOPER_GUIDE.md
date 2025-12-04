@@ -868,6 +868,40 @@ test.describe('Project Management', () => {
 
 ## Deployment Guide
 
+### Quick Reference - Production URLs
+
+| Service | URL |
+|---------|-----|
+| **Backend (Railway)** | https://no-bhad-codes-production.up.railway.app |
+| **Frontend (Vercel)** | https://nobhadcodes.com (or Vercel preview URL) |
+| **API Health Check** | https://no-bhad-codes-production.up.railway.app/health |
+| **API Docs (Swagger)** | https://no-bhad-codes-production.up.railway.app/api-docs |
+
+### Environment Variables Reference
+
+**Railway (Backend):**
+| Variable | Description |
+|----------|-------------|
+| `NODE_ENV` | `production` |
+| `PORT` | `4001` |
+| `DATABASE_PATH` | `./data/client_portal.db` |
+| `JWT_SECRET` | Secure random string (32+ chars) |
+| `ADMIN_EMAIL` | Admin email address |
+| `ADMIN_PASSWORD_HASH` | bcrypt hash of admin password |
+| `EMAIL_ENABLED` | `true` |
+| `SMTP_HOST` | `smtp.gmail.com` |
+| `SMTP_PORT` | `587` |
+| `SMTP_USER` | Gmail address |
+| `SMTP_PASS` | Gmail App Password (16 chars) |
+| `SENTRY_DSN` | Sentry error tracking DSN |
+
+**Vercel (Frontend):**
+| Variable | Description |
+|----------|-------------|
+| `VITE_API_URL` | `https://no-bhad-codes-production.up.railway.app` |
+| `VITE_ADMIN_PASSWORD_HASH` | SHA256 hash for admin dashboard |
+| `SENTRY_DSN` | Sentry error tracking DSN |
+
 ### Production Build
 
 1. **Environment Setup**
@@ -1198,9 +1232,15 @@ CREATE INDEX idx_projects_status_client ON projects(status, client_id);
    ```bash
    # Open SQLite CLI
    sqlite3 data/development.db
-   
+
    # Explain query plans
    EXPLAIN QUERY PLAN SELECT * FROM projects WHERE client_id = 1;
+
+   # DB Browser for SQLite (GUI)
+   # Install: brew install db-browser-for-sqlite
+   open -a "DB Browser for SQLite"
+   # Or open with database directly:
+   open -a "DB Browser for SQLite" ./data/client_portal.db
    ```
 
 4. **VS Code Debugging**

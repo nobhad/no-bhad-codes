@@ -7,6 +7,9 @@
  * Main server application with middleware, routes, and error handling.
  */
 
+// IMPORTANT: Sentry must be imported FIRST before any other modules
+import { Sentry } from './instrument.js';
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -162,7 +165,7 @@ app.use((req, res) => {
 });
 
 // Sentry error handler (must be before other error handlers)
-app.use(errorTracker.errorHandler());
+Sentry.setupExpressErrorHandler(app);
 
 // Global error handler
 app.use(errorHandler);
