@@ -112,7 +112,7 @@
   "dependencies": {
     "@sentry/browser": "^10.8.0",
     "@sentry/integrations": "^7.114.0",
-    "@sentry/node": "^10.8.0",
+    "@sentry/node": "^10.28.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",

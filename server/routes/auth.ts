@@ -14,6 +14,7 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
 import { emailService } from '../services/email-service.js';
 import { rateLimit } from '../middleware/security.js';
+import { auditLogger } from '../services/audit-logger.js';
 
 const router = express.Router();
 
@@ -143,6 +144,7 @@ router.post(
     );
 
     if (!client) {
+      await auditLogger.logLoginFailed(email, req, 'User not found');
       return res.status(401).json({
         error: 'Invalid credentials',
         code: 'INVALID_CREDENTIALS',
@@ -151,6 +153,7 @@ router.post(
 
     // Check if client is active
     if (client.status !== 'active') {
+      await auditLogger.logLoginFailed(email, req, 'Account inactive');
       return res.status(401).json({
         error: 'Account is not active. Please contact support.',
         code: 'ACCOUNT_INACTIVE',
@@ -160,6 +163,7 @@ router.post(
     // Verify password
     const isValidPassword = await bcrypt.compare(password, client.password_hash);
     if (!isValidPassword) {
+      await auditLogger.logLoginFailed(email, req, 'Invalid password');
       return res.status(401).json({
         error: 'Invalid credentials',
         code: 'INVALID_CREDENTIALS',
@@ -185,6 +189,14 @@ router.post(
       },
       secret,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as SignOptions
+    );
+
+    // Log successful login
+    await auditLogger.logLogin(
+      client.id,
+      client.email,
+      client.is_admin ? 'admin' : 'client',
+      req
     );
 
     // Return user data (without password) and token
@@ -771,6 +783,7 @@ router.post(
     // Verify password using bcrypt
     const isValidPassword = await bcrypt.compare(password, adminPasswordHash);
     if (!isValidPassword) {
+      await auditLogger.logLoginFailed(process.env.ADMIN_EMAIL || 'admin', req, 'Invalid admin password');
       return res.status(401).json({
         error: 'Invalid credentials',
         code: 'INVALID_CREDENTIALS',
@@ -787,20 +800,289 @@ router.post(
       });
     }
 
+    const adminEmail = process.env.ADMIN_EMAIL || 'nobhaduri@gmail.com';
     const token = jwt.sign(
       {
         id: 0, // Admin doesn't have a client ID
-        email: process.env.ADMIN_EMAIL || 'nobhaduri@gmail.com',
+        email: adminEmail,
         type: 'admin',
       },
       secret,
       { expiresIn: '1h' } as SignOptions // Shorter expiry for admin sessions
     );
 
+    // Log successful admin login
+    await auditLogger.logLogin(0, adminEmail, 'admin', req);
+
     res.json({
       message: 'Admin login successful',
       token,
       expiresIn: '1h',
+    });
+  })
+);
+
+/**
+ * @swagger
+ * /api/auth/magic-link:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Request magic link for passwordless login
+ *     description: Send a magic link email to allow passwordless authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: "client@example.com"
+ *     responses:
+ *       200:
+ *         description: Magic link sent (always returns success for security)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "If an account with that email exists, a login link has been sent."
+ *       400:
+ *         description: Missing or invalid email
+ *       429:
+ *         description: Too many requests
+ */
+router.post(
+  '/magic-link',
+  // Rate limit: 3 requests per 15 minutes per IP to prevent abuse
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    maxRequests: 3,
+    message: 'Too many magic link requests. Please try again later.',
+    keyGenerator: (req) => `magic-link:${req.ip}`,
+  }),
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        error: 'Email is required',
+        code: 'MISSING_EMAIL',
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (typeof email !== 'string' || !emailRegex.test(email) || email.length > 254) {
+      return res.status(400).json({
+        error: 'Invalid email format',
+        code: 'INVALID_EMAIL',
+      });
+    }
+
+    const db = getDatabase();
+
+    // Find active user by email
+    const client = await db.get(
+      'SELECT id, email, contact_name FROM clients WHERE email = ? AND status = "active"',
+      [email.toLowerCase()]
+    );
+
+    // Always return success for security (don't reveal if email exists)
+    if (client) {
+      try {
+        // Generate magic link token (32 bytes = 64 hex characters)
+        const magicLinkToken = crypto.randomBytes(32).toString('hex');
+        // Token expires in 15 minutes for security
+        const magicLinkExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+        // Store magic link token in database
+        await db.run(
+          `UPDATE clients
+           SET magic_link_token = ?, magic_link_expires_at = ?
+           WHERE id = ?`,
+          [magicLinkToken, magicLinkExpiresAt.toISOString(), client.id]
+        );
+
+        // Send magic link email
+        await emailService.sendMagicLinkEmail(client.email, {
+          magicLinkToken,
+          name: client.contact_name || undefined,
+        });
+
+        await auditLogger.log({
+          action: 'magic_link_requested',
+          entityType: 'session',
+          entityId: String(client.id),
+          entityName: client.email,
+          userId: client.id,
+          userEmail: client.email,
+          userType: 'client',
+          metadata: { email: client.email },
+          ipAddress: req.ip || 'unknown',
+          userAgent: req.get('user-agent') || 'unknown',
+        });
+      } catch (error) {
+        console.error('Failed to send magic link email:', error);
+        // Still return success to user - don't reveal internal errors
+      }
+    }
+
+    res.json({
+      message: 'If an account with that email exists, a login link has been sent.',
+    });
+  })
+);
+
+/**
+ * @swagger
+ * /api/auth/verify-magic-link:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Verify magic link and authenticate user
+ *     description: Verify the magic link token and return JWT for authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [token]
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 example: "abc123def456..."
+ *     responses:
+ *       200:
+ *         description: Authentication successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *                 token:
+ *                   type: string
+ *                 expiresIn:
+ *                   type: string
+ *       400:
+ *         description: Invalid or expired token
+ */
+router.post(
+  '/verify-magic-link',
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        error: 'Token is required',
+        code: 'MISSING_TOKEN',
+      });
+    }
+
+    const db = getDatabase();
+
+    // Find client by magic link token
+    const client = await db.get(
+      `SELECT id, email, contact_name, company_name, status, is_admin, magic_link_expires_at
+       FROM clients
+       WHERE magic_link_token = ?`,
+      [token]
+    );
+
+    if (!client) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid or expired login link',
+        code: 'INVALID_TOKEN',
+      });
+    }
+
+    // Check if token is expired
+    const now = new Date();
+    const expiresAt = new Date(client.magic_link_expires_at);
+
+    if (now > expiresAt) {
+      // Clear expired token
+      await db.run(
+        'UPDATE clients SET magic_link_token = NULL, magic_link_expires_at = NULL WHERE id = ?',
+        [client.id]
+      );
+
+      return res.status(400).json({
+        success: false,
+        error: 'Login link has expired. Please request a new one.',
+        code: 'TOKEN_EXPIRED',
+      });
+    }
+
+    // Check if account is active
+    if (client.status !== 'active') {
+      return res.status(401).json({
+        success: false,
+        error: 'Account is not active. Please contact support.',
+        code: 'ACCOUNT_INACTIVE',
+      });
+    }
+
+    // Clear the magic link token (single use)
+    await db.run(
+      'UPDATE clients SET magic_link_token = NULL, magic_link_expires_at = NULL, last_login_at = ? WHERE id = ?',
+      [new Date().toISOString(), client.id]
+    );
+
+    // Generate JWT token
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      console.error('JWT_SECRET not configured');
+      return res.status(500).json({
+        success: false,
+        error: 'Server configuration error',
+        code: 'CONFIG_ERROR',
+      });
+    }
+
+    const jwtToken = jwt.sign(
+      {
+        id: client.id,
+        email: client.email,
+        type: client.is_admin ? 'admin' : 'client',
+        isAdmin: Boolean(client.is_admin),
+      },
+      secret,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as SignOptions
+    );
+
+    // Log successful magic link login
+    await auditLogger.logLogin(client.id, client.email, 'client', req, { method: 'magic_link' });
+
+    res.json({
+      success: true,
+      message: 'Login successful',
+      user: {
+        id: client.id,
+        email: client.email,
+        name: client.contact_name,
+        companyName: client.company_name,
+        contactName: client.contact_name,
+        status: client.status,
+        isAdmin: Boolean(client.is_admin),
+      },
+      token: jwtToken,
+      expiresIn: process.env.JWT_EXPIRES_IN || '7d',
     });
   })
 );

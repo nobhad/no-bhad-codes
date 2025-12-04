@@ -14,6 +14,8 @@ interface ApiConfig {
       refresh: string;
       validate: string;
       profile: string;
+      magicLink: string;
+      verifyMagicLink: string;
     };
     clients: string;
     projects: string;
@@ -73,7 +75,9 @@ function getApiConfig(): ApiConfig {
         logout: '/api/auth/logout',
         refresh: '/api/auth/refresh',
         validate: '/api/auth/validate',
-        profile: '/api/auth/profile'
+        profile: '/api/auth/profile',
+        magicLink: '/api/auth/magic-link',
+        verifyMagicLink: '/api/auth/verify-magic-link'
       },
       clients: '/api/clients',
       projects: '/api/projects',
@@ -99,5 +103,7 @@ export const authEndpoints = {
   logout: buildApiUrl(apiConfig.endpoints.auth.logout),
   refresh: buildApiUrl(apiConfig.endpoints.auth.refresh),
   validate: buildApiUrl(apiConfig.endpoints.auth.validate),
-  profile: buildApiUrl(apiConfig.endpoints.auth.profile)
+  profile: buildApiUrl(apiConfig.endpoints.auth.profile),
+  magicLink: buildApiUrl(apiConfig.endpoints.auth.magicLink),
+  verifyMagicLink: buildApiUrl(apiConfig.endpoints.auth.verifyMagicLink)
 };

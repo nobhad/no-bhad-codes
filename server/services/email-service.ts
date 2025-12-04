@@ -578,4 +578,84 @@ export const emailService = {
     console.log('Sending email:', data);
     return { success: true, message: 'Email logged for development' };
   },
+
+  /**
+   * Send magic link (passwordless login) email
+   * @param email - Recipient email address
+   * @param data - Magic link data including token and optional name
+   */
+  async sendMagicLinkEmail(
+    email: string,
+    data: { magicLinkToken: string; name?: string }
+  ): Promise<EmailResult> {
+    console.log('[EMAIL] Preparing magic link email for:', email);
+
+    const loginUrl = `${process.env.WEBSITE_URL || 'http://localhost:3000'}/auth/magic-link?token=${data.magicLinkToken}`;
+    const name = data.name || 'there';
+
+    const emailContent: EmailContent = {
+      to: email,
+      subject: 'Your Login Link - No Bhad Codes',
+      text: `
+        Hi ${name},
+
+        Click the link below to sign in to your No Bhad Codes account:
+        ${loginUrl}
+
+        This link will expire in 15 minutes for security.
+
+        If you didn't request this login link, please ignore this email.
+
+        Best regards,
+        No Bhad Codes Team
+      `,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #00ff41; color: #000; padding: 20px; text-align: center; }
+            .content { padding: 20px; background: #f9f9f9; }
+            .button {
+              display: inline-block;
+              padding: 14px 28px;
+              background: #00ff41;
+              color: #000;
+              text-decoration: none;
+              border-radius: 4px;
+              font-weight: bold;
+            }
+            .footer { padding: 20px; text-align: center; font-size: 0.9em; color: #666; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Sign In to No Bhad Codes</h1>
+            </div>
+            <div class="content">
+              <p>Hi ${name},</p>
+              <p>Click the button below to sign in to your account. No password needed!</p>
+              <p style="text-align: center; margin: 30px 0;">
+                <a href="${loginUrl}" class="button">Sign In</a>
+              </p>
+              <p>Or copy and paste this link into your browser:</p>
+              <p style="word-break: break-all; background: #fff; padding: 10px; border: 1px solid #ddd;">${loginUrl}</p>
+              <p><small>This link will expire in 15 minutes for security.</small></p>
+              <p>If you didn't request this login link, you can safely ignore this email.</p>
+            </div>
+            <div class="footer">
+              <p>Best regards,<br>No Bhad Codes Team</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    return sendEmail(emailContent);
+  },
 };

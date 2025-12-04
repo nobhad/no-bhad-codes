@@ -288,4 +288,80 @@ export class AuthService extends BaseService {
       }
     }
   }
+
+  /**
+   * Request magic link for passwordless login
+   * @param email - User's email address
+   */
+  async requestMagicLink(email: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const response = await fetch(authEndpoints.magicLink, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.error || 'Failed to send magic link'
+        };
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Magic link request error:', error);
+      return {
+        success: false,
+        error: 'Network error. Please check your connection.'
+      };
+    }
+  }
+
+  /**
+   * Verify magic link token and authenticate user
+   * @param token - Magic link token from URL
+   */
+  async verifyMagicLink(token: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const response = await fetch(authEndpoints.verifyMagicLink, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ token })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.error || 'Invalid or expired login link'
+        };
+      }
+
+      // Store authentication data
+      this.token = data.token;
+      this.user = data.user;
+
+      sessionStorage.setItem('auth_token', data.token);
+      sessionStorage.setItem('auth_user', JSON.stringify(data.user));
+
+      // Schedule token refresh
+      this.scheduleTokenRefresh();
+
+      return { success: true };
+    } catch (error) {
+      console.error('Magic link verification error:', error);
+      return {
+        success: false,
+        error: 'Network error. Please check your connection.'
+      };
+    }
+  }
 }
