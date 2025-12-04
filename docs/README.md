@@ -18,8 +18,10 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 
 ### Architecture & Development
 
+- **[Configuration Guide](./CONFIGURATION.md)** - Environment variables, frontend config files, TypeScript and Vite configuration
 - **[Performance & Bundle Optimization](./OPTIMIZATION.md)** - Bundle optimization strategies, performance monitoring, Core Web Vitals tracking, and development best practices
 - **[Visitor Tracking System](./VISITOR-TRACKING.md)** - Privacy-compliant analytics, consent management, and engagement metrics
+- **[API Documentation](./API_DOCUMENTATION.md)** - Complete API reference with request/response examples
 
 ### Quick Links
 
@@ -35,8 +37,8 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 
 ### Prerequisites
 
-- Node.js 18+ 
-- npm 7+
+- Node.js 20.x
+- npm 8+
 - Modern browser (Chrome 90+, Firefox 88+, Safari 14+)
 
 ### Installation
@@ -45,10 +47,16 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 # Install dependencies
 npm install
 
-# Start development server
-npm run dev
+# Copy environment configuration
+cp .env.example .env
 
-# Open http://localhost:3000
+# Initialize database
+npm run db:setup
+
+# Start development servers (frontend + backend)
+npm run dev:full
+
+# Open http://localhost:4000
 ```
 
 ### Development Commands

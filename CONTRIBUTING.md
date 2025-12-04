@@ -5,7 +5,7 @@ Thank you for your interest in contributing to No Bhad Codes! This document prov
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 20.x
 - npm 8+
 - Git
 - Basic knowledge of TypeScript, Express.js, and modern web development

@@ -19,7 +19,7 @@
 
 Ensure you have the following installed:
 
-- **Node.js** 18+ with npm 8+
+- **Node.js** 20.x with npm 8+
 - **Git** for version control
 - **VS Code** (recommended) with suggested extensions
 - **Modern browser** for testing (Chrome, Firefox, Safari, Edge)
@@ -69,15 +69,15 @@ The application uses environment variables for configuration. Copy `.env.example
 ```bash
 # Application
 NODE_ENV=development
-PORT=3001
-APP_NAME="No Bhad Codes"
+PORT=4001
+FRONTEND_URL=http://localhost:4000
 
 # Security
-JWT_SECRET="your-development-jwt-secret"
-JWT_EXPIRES_IN="24h"
+JWT_SECRET="your-development-jwt-secret-min-32-chars"
+JWT_EXPIRES_IN="7d"
 
 # Database
-DATABASE_URL="file:./data/development.db"
+DATABASE_PATH=./data/client_portal.db
 
 # Email (optional for development)
 EMAIL_ENABLED=false
