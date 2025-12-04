@@ -57,7 +57,7 @@
 
 ### Prerequisites
 
-- **Node.js** 18+ and **npm** 8+
+- **Node.js** 20.x and **npm** 8+
 - **Git** for version control
 
 ### Installation
@@ -83,10 +83,10 @@ npm run dev:full
 
 ### Development URLs
 
-- **Frontend**: http://localhost:3000
-- **API Server**: http://localhost:3001
-- **Admin Dashboard**: http://localhost:3000/admin
-- **Client Portal**: http://localhost:3000/client/portal.html
+- **Frontend**: http://localhost:4000
+- **API Server**: http://localhost:4001
+- **Admin Dashboard**: http://localhost:4000/admin
+- **Client Portal**: http://localhost:4000/client/portal
 
 ## 📋 Available Scripts
 
@@ -155,6 +155,12 @@ no-bhad-codes/
 │   │   └── project-generator.js # Project planning
 │   └── app.ts                   # Express application
 ├── 📁 src/                      # Frontend source code
+│   ├── 📁 config/               # Frontend configuration
+│   │   ├── api.ts               # API endpoint configuration
+│   │   ├── branding.ts          # Company branding constants
+│   │   ├── constants.ts         # App-wide constants
+│   │   ├── routes.ts            # Route path definitions
+│   │   └── protection.config.ts # Code protection settings
 │   ├── 📁 core/                 # Application core
 │   │   ├── app.ts               # Main application
 │   │   ├── container.ts         # Dependency injection
@@ -168,7 +174,8 @@ no-bhad-codes/
 │   │   ├── 📁 base/             # Base styles (reset, typography)
 │   │   ├── 📁 components/       # Component styles
 │   │   └── 📁 pages/            # Page-specific styles
-│   └── 📁 utils/                # Utility functions
+│   ├── 📁 utils/                # Utility functions
+│   └── vite-env.d.ts            # Vite environment type definitions
 ├── 📁 templates/                # EJS templates
 │   ├── 📁 pages/                # Page templates
 │   └── 📁 partials/             # Reusable template parts
@@ -325,8 +332,10 @@ The application uses comprehensive environment configuration. Copy `.env.example
 
 ```env
 NODE_ENV=development|production
-PORT=3001
-JWT_SECRET=your-secret-key-change-in-production
+PORT=4001
+FRONTEND_URL=http://localhost:4000
+JWT_SECRET=your-secret-key-change-in-production-min-32-chars
+JWT_EXPIRES_IN=7d
 ADMIN_EMAIL=admin@yourdomain.com
 ADMIN_PASSWORD=secure-password
 ```
@@ -336,22 +345,41 @@ ADMIN_PASSWORD=secure-password
 ```env
 # Database
 DATABASE_PATH=./data/client_portal.db
-DATABASE_BACKUP_PATH=./data/backups
+
+# Client Portal URLs
+CLIENT_PORTAL_URL=http://localhost:4000/client/portal
+WEBSITE_URL=http://localhost:4000
 
 # Email Configuration
 EMAIL_ENABLED=false
 SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
+SMTP_FROM="No Bhad Codes <noreply@nobhadcodes.com>"
+SMTP_REPLY_TO=support@nobhadcodes.com
+SUPPORT_EMAIL=support@nobhadcodes.com
 
-# Feature Flags
-ENABLE_REGISTRATION=true
-ENABLE_API_DOCS=true
-MAINTENANCE_MODE=false
+# Third-Party Services (Contact Forms)
+VITE_FORMSPREE_FORM_ID=your-formspree-form-id
+VITE_EMAILJS_SERVICE_ID=your-emailjs-service-id
+VITE_EMAILJS_TEMPLATE_ID=your-emailjs-template-id
+VITE_EMAILJS_PUBLIC_KEY=your-emailjs-public-key
 
-# Logging
-LOG_LEVEL=info
-LOG_FILE=./logs/app.log
+# Error Tracking
+SENTRY_DSN=
+SENTRY_ENVIRONMENT=development
+
+# Redis Cache (optional)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+REDIS_DB=0
+
+# File Storage
+UPLOAD_DIR=./uploads
+MAX_FILE_SIZE=10485760
 ```
 
 ### TypeScript Configuration
@@ -773,7 +801,7 @@ npm run build
 npm run preview
 
 # Run production server
-NODE_ENV=production node dist/server/app.js
+NODE_ENV=production tsx server/app.ts
 ```
 
 ### Environment Setup
@@ -788,13 +816,13 @@ NODE_ENV=production node dist/server/app.js
 ### Docker Deployment (Optional)
 
 ```dockerfile
-FROM node:18-alpine
+FROM node:20-alpine
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 COPY dist/ ./dist/
 COPY public/ ./public/
-EXPOSE 3001
+EXPOSE 4001
 CMD ["node", "dist/server/app.js"]
 ```
 
@@ -831,9 +859,9 @@ CMD ["node", "dist/server/app.js"]
 #### Port Already in Use
 
 ```bash
-# Kill processes on ports 3000/3001
-lsof -ti:3000 | xargs kill -9
-lsof -ti:3001 | xargs kill -9
+# Kill processes on ports 4000/4001
+lsof -ti:4000 | xargs kill -9
+lsof -ti:4001 | xargs kill -9
 ```
 
 #### Database Issues
