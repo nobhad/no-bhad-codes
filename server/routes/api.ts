@@ -144,10 +144,14 @@ router.post(
         await logger.error(`Failed to save contact form to database: ${dbError}`);
       }
 
-      try {
-        await emailService.sendEmail({
-          to: process.env.ADMIN_EMAIL || 'admin@nobhadcodes.com',
-          subject: `Contact Form: ${subjectLine}`,
+      const adminEmail = process.env.ADMIN_EMAIL;
+      if (!adminEmail) {
+        await logger.warn('ADMIN_EMAIL not configured - skipping contact form email notification');
+      } else {
+        try {
+          await emailService.sendEmail({
+            to: adminEmail,
+            subject: `Contact Form: ${subjectLine}`,
           text: `
 New contact form submission:
 
@@ -202,11 +206,12 @@ Received: ${new Date().toISOString()}
         await logger.info(
           `Contact form email sent to admin - messageId: ${messageId}, from: ${email}`
         );
-      } catch (emailError) {
-        // Log error but don't fail the request - form submission still recorded
-        await logger.error(
-          `Failed to send contact form email - messageId: ${messageId}, error: ${emailError}`
-        );
+        } catch (emailError) {
+          // Log error but don't fail the request - form submission still recorded
+          await logger.error(
+            `Failed to send contact form email - messageId: ${messageId}, error: ${emailError}`
+          );
+        }
       }
 
       await logger.info(
