@@ -253,9 +253,17 @@ export class ContactService extends BaseService {
       message: formData.message
     };
 
+    // Get EmailJS config from environment variables
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+
+    if (!serviceId || !templateId) {
+      throw new Error('EmailJS service ID or template ID not configured in environment variables');
+    }
+
     const _response = await (window as any).emailjs.send(
-      'YOUR_SERVICE_ID',
-      'YOUR_TEMPLATE_ID',
+      serviceId,
+      templateId,
       templateParams,
       this.config.apiKey
     );

@@ -100,12 +100,6 @@ interface VisitorInfo {
   device: string;
 }
 
-declare global {
-  interface ImportMeta {
-    env?: Record<string, string | undefined>;
-  }
-}
-
 // Admin authentication and session management using JWT backend
 class AdminAuth {
   private static readonly SESSION_KEY = 'nbw_admin_session';
