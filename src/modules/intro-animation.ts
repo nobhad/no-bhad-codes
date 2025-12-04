@@ -68,15 +68,13 @@ export class IntroAnimationModule extends BaseModule {
    * Run card flip animation (no overlay, flip actual card in section)
    */
   private runCardFlip(): void {
-    // Scroll to top so header is visible
-    window.scrollTo(0, 0);
-    document.body.scrollTop = 0;
-    document.documentElement.scrollTop = 0;
-
-    // Force scroll to top again after a frame
-    requestAnimationFrame(() => {
+    // Only scroll to top if user hasn't navigated away (check if near top)
+    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+    if (currentScroll < 100) {
       window.scrollTo(0, 0);
-    });
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    }
 
     const cardInner = document.getElementById('business-card-inner');
 
@@ -123,19 +121,25 @@ export class IntroAnimationModule extends BaseModule {
       }); // Flip to front with smooth 3D rotation
   }
 
-
   /**
    * Complete the intro and clean up
    */
   private completeIntro(): void {
+    // Prevent multiple completions
+    if (this.isComplete) return;
+
     this.isComplete = true;
 
     // Ensure main page content is visible (in case animation was skipped)
     document.documentElement.classList.remove('intro-loading');
     document.documentElement.classList.add('intro-complete');
 
-    // Scroll to top so header is visible
-    window.scrollTo(0, 0);
+    // Only scroll to top on initial page load (not on subsequent navigations)
+    // Check if user hasn't scrolled yet (still at top)
+    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+    if (currentScroll < 100) {
+      window.scrollTo(0, 0);
+    }
 
     // After transition completes, add intro-finished to stop future transitions
     setTimeout(() => {

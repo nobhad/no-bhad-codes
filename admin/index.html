@@ -1,606 +1,754 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="light">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard - No Bhad Codes</title>
-  <style>
-    :root { --bg: #ffffff; --fg: #000000; }
-    [data-theme="dark"] { --bg: #1a1a1a; --fg: #ffffff; }
-    html, body { background-color: var(--bg); color: var(--fg); margin: 0; padding: 0; }
-  </style>
-  <script>
-    (function() {
-      try {
-        const savedTheme = localStorage.getItem('theme');
-        document.documentElement.setAttribute('data-theme', savedTheme || 'light');
-      } catch (e) {
-        document.documentElement.setAttribute('data-theme', 'light');
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - No Bhad Codes</title>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --fg: #000000;
       }
-    })();
-  </script>
-  <meta name="description" content="Admin Dashboard - Manage your site, leads, and analytics">
-  <meta name="robots" content="noindex, nofollow">
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="manifest" href="/site.webmanifest">
-  <meta name="theme-color" content="#e0e0e0">
-  <script type="module" src="/src/main.ts"></script>
-</head>
-<body data-page="admin">
-  <!-- Dashboard Layout (same structure as client portal) -->
-  <div class="dashboard-container">
-    <!-- Mobile Header Bar -->
-    <header class="mobile-header" id="mobile-header">
-      <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle menu">
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-      </button>
-      <h1 class="mobile-header-title" id="mobile-header-title">Admin</h1>
-    </header>
+      [data-theme='dark'] {
+        --bg: #1a1a1a;
+        --fg: #ffffff;
+      }
+      html,
+      body {
+        background-color: var(--bg);
+        color: var(--fg);
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script>
+      (function () {
+        try {
+          const savedTheme = localStorage.getItem('theme');
+          document.documentElement.setAttribute('data-theme', savedTheme || 'light');
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
+    <meta name="description" content="Admin Dashboard - Manage your site, leads, and analytics" />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#e0e0e0" />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body data-page="admin">
+    <!-- Dashboard Layout (same structure as client portal) -->
+    <div class="dashboard-container">
+      <!-- Mobile Header Bar -->
+      <header class="mobile-header" id="mobile-header">
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle menu">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+        <h1 class="mobile-header-title" id="mobile-header-title">Admin</h1>
+      </header>
 
-    <!-- Mobile Overlay -->
-    <div class="mobile-overlay" id="mobile-overlay"></div>
+      <!-- Mobile Overlay -->
+      <div class="mobile-overlay" id="mobile-overlay"></div>
 
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <!-- Mobile Close Button -->
-      <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close menu">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-      <!-- Collapsed state avatar link -->
-      <a href="/" class="sidebar-collapsed-logo" aria-label="Go to home">
-        <img src="/images/avatar.svg" alt="No Bhad Codes" class="sidebar-collapsed-logo-img">
-      </a>
-      <div class="sidebar-content">
-        <!-- Logo -->
-        <a href="/" class="sidebar-logo">
-          <img src="/images/avatar.svg" alt="No Bhad Codes" class="sidebar-logo-img">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <!-- Mobile Close Button -->
+        <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close menu">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <!-- Collapsed state avatar link -->
+        <a href="/" class="sidebar-collapsed-logo" aria-label="Go to home">
+          <img src="/images/avatar.svg" alt="No Bhad Codes" class="sidebar-collapsed-logo-img" />
         </a>
+        <div class="sidebar-content">
+          <!-- Logo -->
+          <a href="/" class="sidebar-logo">
+            <img src="/images/avatar.svg" alt="No Bhad Codes" class="sidebar-logo-img" />
+          </a>
 
-        <!-- Admin Navigation Buttons -->
-        <div class="sidebar-buttons">
-          <button class="btn btn-secondary active" id="btn-overview" data-tab="overview">OVERVIEW</button>
-          <button class="btn btn-secondary" id="btn-leads" data-tab="leads">LEADS</button>
-          <button class="btn btn-secondary" id="btn-projects" data-tab="projects">PROJECTS</button>
-          <button class="btn btn-secondary" id="btn-messages" data-tab="messages">MESSAGES</button>
-          <button class="btn btn-secondary" id="btn-analytics" data-tab="analytics">ANALYTICS</button>
-          <button class="btn btn-secondary" id="btn-system" data-tab="system">SYSTEM</button>
-        </div>
-
-        <!-- Sign Out Button -->
-        <div class="sidebar-footer">
-          <button class="btn btn-secondary btn-logout" id="btn-logout">SIGN OUT</button>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Content Area -->
-    <div class="dashboard-content" id="dashboard-content">
-      <div class="content-wrapper">
-
-        <!-- Overview Tab (Default) -->
-        <div class="tab-content active" id="tab-overview">
-          <div class="page-header">
-            <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
-            <h2>Admin Dashboard</h2>
-          </div>
-
-          <!-- Quick Stats -->
-          <div class="quick-stats">
-            <button class="stat-card stat-card-clickable cp-shadow" data-tab="leads" type="button">
-              <span class="stat-number" id="stat-total-leads">-</span>
-              <span class="stat-label">Total Leads</span>
+          <!-- Admin Navigation Buttons -->
+          <div class="sidebar-buttons">
+            <button class="btn btn-secondary active" id="btn-overview" data-tab="overview">
+              OVERVIEW
             </button>
-            <button class="stat-card stat-card-clickable cp-shadow" data-tab="leads" type="button">
-              <span class="stat-number" id="stat-pending-leads">-</span>
-              <span class="stat-label">Pending</span>
+            <button class="btn btn-secondary" id="btn-leads" data-tab="leads">LEADS</button>
+            <button class="btn btn-secondary" id="btn-projects" data-tab="projects">
+              PROJECTS
             </button>
-            <button class="stat-card stat-card-clickable cp-shadow" data-tab="analytics" type="button">
-              <span class="stat-number" id="stat-visitors">-</span>
-              <span class="stat-label">Visitors Today</span>
+            <button class="btn btn-secondary" id="btn-messages" data-tab="messages">
+              MESSAGES
             </button>
+            <button class="btn btn-secondary" id="btn-analytics" data-tab="analytics">
+              ANALYTICS
+            </button>
+            <button class="btn btn-secondary" id="btn-system" data-tab="system">SYSTEM</button>
           </div>
 
-          <!-- Recent Leads -->
-          <div class="recent-activity cp-shadow">
-            <h3>Recent Leads</h3>
-            <ul class="activity-list" id="recent-leads-list">
-              <li>Loading...</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Leads Tab -->
-        <div class="tab-content" id="tab-leads">
-          <div class="page-header">
-            <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
-            <h2>Leads Management</h2>
-          </div>
-
-          <!-- Leads Stats -->
-          <div class="quick-stats">
-            <div class="stat-card cp-shadow">
-              <span class="stat-number" id="leads-total">-</span>
-              <span class="stat-label">Total Leads</span>
-            </div>
-            <div class="stat-card cp-shadow">
-              <span class="stat-number" id="leads-pending">-</span>
-              <span class="stat-label">Pending</span>
-            </div>
-            <div class="stat-card cp-shadow">
-              <span class="stat-number" id="leads-active">-</span>
-              <span class="stat-label">In Progress</span>
-            </div>
-            <div class="stat-card cp-shadow">
-              <span class="stat-number" id="leads-completed">-</span>
-              <span class="stat-label">Completed</span>
-            </div>
-          </div>
-
-          <!-- Leads Table -->
-          <div class="admin-table-card">
-            <div class="admin-table-header">
-              <h3>Intake Submissions</h3>
-              <button class="btn btn-secondary" id="refresh-leads-btn">Refresh</button>
-            </div>
-            <div class="leads-table-container">
-              <table class="leads-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Name</th>
-                    <th>Company</th>
-                    <th>Email</th>
-                    <th>Project Type</th>
-                    <th>Budget</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="leads-table-body">
-                  <tr>
-                    <td colspan="7" class="loading-row">Loading leads...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Contact Form Submissions Table -->
-          <div class="admin-table-card">
-            <div class="admin-table-header">
-              <h3>Contact Form Submissions</h3>
-              <div class="admin-table-actions">
-                <span id="contact-new-count" class="status-badge status-new">0 new</span>
-                <button class="btn btn-secondary" id="refresh-contacts-btn">Refresh</button>
-              </div>
-            </div>
-            <div class="contacts-table-container">
-              <table class="contacts-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Subject</th>
-                    <th>Message</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="contacts-table-body">
-                  <tr>
-                    <td colspan="6" class="loading-row">Loading contact submissions...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <!-- Sign Out Button -->
+          <div class="sidebar-footer">
+            <button class="btn btn-secondary btn-logout" id="btn-logout">SIGN OUT</button>
           </div>
         </div>
+      </aside>
 
-        <!-- Projects Tab -->
-        <div class="tab-content" id="tab-projects">
-          <div class="page-header">
-            <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
-            <h2>Projects Management</h2>
-          </div>
-
-          <!-- Projects Stats -->
-          <div class="quick-stats">
-            <div class="stat-card cp-shadow">
-              <span class="stat-number" id="projects-total">-</span>
-              <span class="stat-label">Total Projects</span>
-            </div>
-            <div class="stat-card cp-shadow">
-              <span class="stat-number" id="projects-active">-</span>
-              <span class="stat-label">Active</span>
-            </div>
-            <div class="stat-card cp-shadow">
-              <span class="stat-number" id="projects-completed">-</span>
-              <span class="stat-label">Completed</span>
-            </div>
-            <div class="stat-card cp-shadow">
-              <span class="stat-number" id="projects-on-hold">-</span>
-              <span class="stat-label">On Hold</span>
-            </div>
-          </div>
-
-          <!-- Projects Table -->
-          <div class="admin-table-card">
-            <div class="admin-table-header">
-              <h3>All Projects</h3>
-              <div class="admin-table-actions">
-                <button class="btn btn-secondary" id="refresh-projects-btn">Refresh</button>
-              </div>
-            </div>
-            <div class="projects-table-container">
-              <table class="projects-table">
-                <thead>
-                  <tr>
-                    <th>Project Name</th>
-                    <th>Client</th>
-                    <th>Type</th>
-                    <th>Budget</th>
-                    <th>Timeline</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="projects-table-body">
-                  <tr>
-                    <td colspan="7" class="loading-row">Loading projects...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Messages Tab -->
-        <div class="tab-content" id="tab-messages">
-          <div class="page-header">
-            <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
-            <h2>Client Messages</h2>
-          </div>
-
-          <!-- Client Selector -->
-          <div class="client-selector-wrapper cp-shadow" style="margin-bottom: 1rem; padding: 1rem;">
-            <label for="admin-client-select" style="font-weight: 600; margin-right: 1rem;">Select Client:</label>
-            <select id="admin-client-select" class="form-select" style="min-width: 250px; padding: 0.5rem 1rem; border: 1px solid var(--color-border, #ddd); border-radius: 4px;">
-              <option value="">-- Select a client --</option>
-            </select>
-          </div>
-
-          <!-- Messages Container (like client portal) -->
-          <div class="messages-container cp-shadow">
-            <div class="messages-thread" id="admin-messages-thread">
-              <div style="text-align: center; color: var(--color-text-secondary, #666); padding: 2rem;">
-                Select a client to view messages
-              </div>
+      <!-- Content Area -->
+      <div class="dashboard-content" id="dashboard-content">
+        <div class="content-wrapper">
+          <!-- Overview Tab (Default) -->
+          <div class="tab-content active" id="tab-overview">
+            <div class="page-header">
+              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+              <h2>Admin Dashboard</h2>
             </div>
 
-            <!-- Compose Message -->
-            <div class="message-compose" id="admin-compose-area" style="display: none;">
-              <div class="message-input-wrapper">
-                <textarea id="admin-message-text" class="form-textarea" placeholder="Type your message..."></textarea>
-              </div>
-              <button class="btn btn-secondary" id="btn-admin-send-message">Send Message</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Analytics Tab -->
-        <div class="tab-content" id="tab-analytics">
-          <div class="page-header">
-            <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
-            <h2>Analytics</h2>
-          </div>
-
-          <div class="quick-stats">
-            <div class="stat-card cp-shadow">
-              <span class="stat-number" id="analytics-visitors">-</span>
-              <span class="stat-label">Total Visitors</span>
-            </div>
-            <div class="stat-card cp-shadow">
-              <span class="stat-number" id="analytics-pageviews">-</span>
-              <span class="stat-label">Page Views</span>
-            </div>
-            <div class="stat-card cp-shadow">
-              <span class="stat-number" id="analytics-sessions">-</span>
-              <span class="stat-label">Avg. Session</span>
-            </div>
-          </div>
-
-          <div class="cp-project-card cp-shadow" style="margin-top: 2rem;">
-            <h3>Analytics Dashboard</h3>
-            <p style="color: var(--color-text-secondary, #666);">Analytics data will be loaded here.</p>
-          </div>
-        </div>
-
-        <!-- System Tab -->
-        <div class="tab-content" id="tab-system">
-          <div class="page-header">
-            <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
-            <h2>System Information</h2>
-          </div>
-
-          <div class="cp-project-card cp-shadow">
-            <h3>Build Information</h3>
-            <div class="system-info-grid" style="display: grid; gap: 1rem; margin-top: 1rem;">
-              <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--color-border, #eee);">
-                <span>Version</span>
-                <span id="sys-version">10.0.0</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--color-border, #eee);">
-                <span>Environment</span>
-                <span id="sys-environment">development</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--color-border, #eee);">
-                <span>Build Date</span>
-                <span id="sys-build-date">-</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="cp-project-card cp-shadow" style="margin-top: 1.5rem;">
-            <h3>Browser Information</h3>
-            <div class="system-info-grid" style="display: grid; gap: 1rem; margin-top: 1rem;">
-              <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--color-border, #eee);">
-                <span>User Agent</span>
-                <span id="sys-useragent" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">-</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--color-border, #eee);">
-                <span>Screen Resolution</span>
-                <span id="sys-screen">-</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--color-border, #eee);">
-                <span>Viewport Size</span>
-                <span id="sys-viewport">-</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Project Detail View (mirrors client portal view) -->
-        <div class="tab-content" id="tab-project-detail">
-          <div class="page-header">
-            <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
-            <button class="btn btn-secondary btn-back" id="btn-back-to-projects">&#8592; Back to Projects</button>
-            <h2 id="project-detail-title">Project Details</h2>
-          </div>
-
-          <!-- Project Overview Card -->
-          <div class="project-detail-overview cp-shadow">
-            <div class="project-detail-header">
-              <div class="project-detail-info">
-                <h3 id="pd-project-name">Project Name</h3>
-                <p class="project-client-info">
-                  <strong>Client:</strong> <span id="pd-client-name">-</span>
-                  (<span id="pd-client-email">-</span>)
-                </p>
-                <p><strong>Company:</strong> <span id="pd-company">-</span></p>
-              </div>
-              <div class="project-detail-status">
-                <span class="status-badge" id="pd-status">-</span>
-              </div>
-            </div>
-            <div class="project-detail-meta">
-              <div class="meta-item">
-                <span class="meta-label">Project Type</span>
-                <span class="meta-value" id="pd-type">-</span>
-              </div>
-              <div class="meta-item">
-                <span class="meta-label">Budget</span>
-                <span class="meta-value" id="pd-budget">-</span>
-              </div>
-              <div class="meta-item">
-                <span class="meta-label">Timeline</span>
-                <span class="meta-value" id="pd-timeline">-</span>
-              </div>
-              <div class="meta-item">
-                <span class="meta-label">Started</span>
-                <span class="meta-value" id="pd-start-date">-</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Project Detail Tabs -->
-          <div class="project-detail-tabs">
-            <button class="pd-tab-btn active" data-pd-tab="overview">Overview</button>
-            <button class="pd-tab-btn" data-pd-tab="files">Files</button>
-            <button class="pd-tab-btn" data-pd-tab="messages">Messages</button>
-            <button class="pd-tab-btn" data-pd-tab="invoices">Invoices</button>
-            <button class="pd-tab-btn" data-pd-tab="settings">Settings</button>
-          </div>
-
-          <!-- Overview Sub-Tab -->
-          <div class="pd-tab-content active" id="pd-tab-overview">
-            <!-- Progress Section -->
-            <div class="cp-project-card cp-shadow">
-              <h3>Project Progress</h3>
-              <div class="project-progress-display">
-                <div class="progress-percentage" id="pd-progress-percent">0%</div>
-                <div class="progress-bar">
-                  <div class="progress-fill" id="pd-progress-bar" style="width: 0%"></div>
-                </div>
-              </div>
+            <!-- Quick Stats -->
+            <div class="quick-stats">
+              <button
+                class="stat-card stat-card-clickable cp-shadow"
+                data-tab="leads"
+                type="button"
+              >
+                <span class="stat-number" id="stat-total-leads">-</span>
+                <span class="stat-label">Total Leads</span>
+              </button>
+              <button
+                class="stat-card stat-card-clickable cp-shadow"
+                data-tab="leads"
+                type="button"
+              >
+                <span class="stat-number" id="stat-pending-leads">-</span>
+                <span class="stat-label">Pending</span>
+              </button>
+              <button
+                class="stat-card stat-card-clickable cp-shadow"
+                data-tab="analytics"
+                type="button"
+              >
+                <span class="stat-number" id="stat-visitors">-</span>
+                <span class="stat-label">Visitors Today</span>
+              </button>
             </div>
 
-            <!-- Milestones Section -->
-            <div class="cp-project-card cp-shadow">
-              <div class="card-header-with-action">
-                <h3>Milestones</h3>
-                <button class="btn btn-secondary btn-sm" id="btn-add-milestone">+ Add Milestone</button>
-              </div>
-              <div class="milestones-list" id="pd-milestones-list">
-                <p class="empty-state">No milestones yet. Add milestones to track project progress.</p>
-              </div>
-            </div>
-
-            <!-- Project Description / Notes -->
-            <div class="cp-project-card cp-shadow">
-              <div class="card-header-with-action">
-                <h3>Project Notes</h3>
-                <button class="btn btn-secondary btn-sm" id="btn-edit-notes">Edit</button>
-              </div>
-              <div class="project-notes" id="pd-notes">
-                <p class="empty-state">No project notes yet.</p>
-              </div>
-            </div>
-
-            <!-- Recent Activity -->
+            <!-- Recent Leads -->
             <div class="recent-activity cp-shadow">
-              <h3>Recent Activity</h3>
-              <ul class="activity-list" id="pd-activity-list">
-                <li>No activity recorded yet.</li>
+              <h3>Recent Leads</h3>
+              <ul class="activity-list" id="recent-leads-list">
+                <li>Loading...</li>
               </ul>
             </div>
           </div>
 
-          <!-- Files Sub-Tab -->
-          <div class="pd-tab-content" id="pd-tab-files">
-            <!-- Upload Section -->
-            <div class="files-upload-section cp-shadow">
-              <h3>Upload Files for Client</h3>
-              <div class="upload-dropzone" id="pd-upload-dropzone">
-                <p>Drag and drop files here or</p>
-                <button class="btn btn-secondary" id="btn-pd-browse-files">Browse Files</button>
-                <input type="file" id="pd-file-input" multiple hidden>
+          <!-- Leads Tab -->
+          <div class="tab-content" id="tab-leads">
+            <div class="page-header">
+              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+              <h2>Leads Management</h2>
+            </div>
+
+            <!-- Leads Stats -->
+            <div class="quick-stats">
+              <div class="stat-card cp-shadow">
+                <span class="stat-number" id="leads-total">-</span>
+                <span class="stat-label">Total Leads</span>
+              </div>
+              <div class="stat-card cp-shadow">
+                <span class="stat-number" id="leads-pending">-</span>
+                <span class="stat-label">Pending</span>
+              </div>
+              <div class="stat-card cp-shadow">
+                <span class="stat-number" id="leads-active">-</span>
+                <span class="stat-label">In Progress</span>
+              </div>
+              <div class="stat-card cp-shadow">
+                <span class="stat-number" id="leads-completed">-</span>
+                <span class="stat-label">Completed</span>
               </div>
             </div>
 
-            <!-- Files List -->
-            <div class="files-list-section cp-shadow">
-              <h3>Project Files</h3>
-              <div class="files-list" id="pd-files-list">
-                <p class="empty-state">No files uploaded yet.</p>
+            <!-- Leads Table -->
+            <div class="admin-table-card">
+              <div class="admin-table-header">
+                <h3>Intake Submissions</h3>
+                <button class="btn btn-secondary" id="refresh-leads-btn">Refresh</button>
+              </div>
+              <div class="leads-table-container">
+                <table class="leads-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Name</th>
+                      <th>Company</th>
+                      <th>Email</th>
+                      <th>Project Type</th>
+                      <th>Budget</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="leads-table-body">
+                    <tr>
+                      <td colspan="7" class="loading-row">Loading leads...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Contact Form Submissions Table -->
+            <div class="admin-table-card">
+              <div class="admin-table-header">
+                <h3>Contact Form Submissions</h3>
+                <div class="admin-table-actions">
+                  <span id="contact-new-count" class="status-badge status-new">0 new</span>
+                  <button class="btn btn-secondary" id="refresh-contacts-btn">Refresh</button>
+                </div>
+              </div>
+              <div class="contacts-table-container">
+                <table class="contacts-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Subject</th>
+                      <th>Message</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="contacts-table-body">
+                    <tr>
+                      <td colspan="6" class="loading-row">Loading contact submissions...</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
 
-          <!-- Messages Sub-Tab -->
-          <div class="pd-tab-content" id="pd-tab-messages">
+          <!-- Projects Tab -->
+          <div class="tab-content" id="tab-projects">
+            <div class="page-header">
+              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+              <h2>Projects Management</h2>
+            </div>
+
+            <!-- Projects Stats -->
+            <div class="quick-stats">
+              <div class="stat-card cp-shadow">
+                <span class="stat-number" id="projects-total">-</span>
+                <span class="stat-label">Total Projects</span>
+              </div>
+              <div class="stat-card cp-shadow">
+                <span class="stat-number" id="projects-active">-</span>
+                <span class="stat-label">Active</span>
+              </div>
+              <div class="stat-card cp-shadow">
+                <span class="stat-number" id="projects-completed">-</span>
+                <span class="stat-label">Completed</span>
+              </div>
+              <div class="stat-card cp-shadow">
+                <span class="stat-number" id="projects-on-hold">-</span>
+                <span class="stat-label">On Hold</span>
+              </div>
+            </div>
+
+            <!-- Projects Table -->
+            <div class="admin-table-card">
+              <div class="admin-table-header">
+                <h3>All Projects</h3>
+                <div class="admin-table-actions">
+                  <button class="btn btn-secondary" id="refresh-projects-btn">Refresh</button>
+                </div>
+              </div>
+              <div class="projects-table-container">
+                <table class="projects-table">
+                  <thead>
+                    <tr>
+                      <th>Project Name</th>
+                      <th>Client</th>
+                      <th>Type</th>
+                      <th>Budget</th>
+                      <th>Timeline</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="projects-table-body">
+                    <tr>
+                      <td colspan="7" class="loading-row">Loading projects...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Messages Tab -->
+          <div class="tab-content" id="tab-messages">
+            <div class="page-header">
+              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+              <h2>Client Messages</h2>
+            </div>
+
+            <!-- Client Selector -->
+            <div
+              class="client-selector-wrapper cp-shadow"
+              style="margin-bottom: 1rem; padding: 1rem"
+            >
+              <label for="admin-client-select" style="font-weight: 600; margin-right: 1rem"
+                >Select Client:</label
+              >
+              <select
+                id="admin-client-select"
+                class="form-select"
+                style="
+                  min-width: 250px;
+                  padding: 0.5rem 1rem;
+                  border: 1px solid var(--color-border, #ddd);
+                  border-radius: 4px;
+                "
+              >
+                <option value="">-- Select a client --</option>
+              </select>
+            </div>
+
+            <!-- Messages Container (like client portal) -->
             <div class="messages-container cp-shadow">
-              <div class="messages-thread" id="pd-messages-thread">
-                <p class="empty-state">No messages yet. Start the conversation with your client.</p>
+              <div class="messages-thread" id="admin-messages-thread">
+                <div
+                  style="
+                    text-align: center;
+                    color: var(--color-text-secondary, #666);
+                    padding: 2rem;
+                  "
+                >
+                  Select a client to view messages
+                </div>
               </div>
 
-              <div class="message-compose">
+              <!-- Compose Message -->
+              <div class="message-compose" id="admin-compose-area" style="display: none">
                 <div class="message-input-wrapper">
-                  <textarea id="pd-message-input" class="form-textarea" placeholder="Type your message to the client..."></textarea>
+                  <textarea
+                    id="admin-message-text"
+                    class="form-textarea"
+                    placeholder="Type your message..."
+                  ></textarea>
                 </div>
-                <button class="btn btn-secondary" id="btn-pd-send-message">Send Message</button>
+                <button class="btn btn-secondary" id="btn-admin-send-message">Send Message</button>
               </div>
             </div>
           </div>
 
-          <!-- Invoices Sub-Tab -->
-          <div class="pd-tab-content" id="pd-tab-invoices">
-            <!-- Invoice Summary -->
-            <div class="invoice-summary">
-              <div class="summary-card cp-shadow">
-                <span class="summary-label">Total Outstanding</span>
-                <span class="summary-value" id="pd-outstanding">$0.00</span>
+          <!-- Analytics Tab -->
+          <div class="tab-content" id="tab-analytics">
+            <div class="page-header">
+              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+              <h2>Analytics</h2>
+            </div>
+
+            <div class="quick-stats">
+              <div class="stat-card cp-shadow">
+                <span class="stat-number" id="analytics-visitors">-</span>
+                <span class="stat-label">Total Visitors</span>
               </div>
-              <div class="summary-card cp-shadow">
-                <span class="summary-label">Total Paid</span>
-                <span class="summary-value" id="pd-paid">$0.00</span>
+              <div class="stat-card cp-shadow">
+                <span class="stat-number" id="analytics-pageviews">-</span>
+                <span class="stat-label">Page Views</span>
+              </div>
+              <div class="stat-card cp-shadow">
+                <span class="stat-number" id="analytics-sessions">-</span>
+                <span class="stat-label">Avg. Session</span>
               </div>
             </div>
 
-            <!-- Create Invoice Button -->
+            <div class="cp-project-card cp-shadow" style="margin-top: 2rem">
+              <h3>Analytics Dashboard</h3>
+              <p style="color: var(--color-text-secondary, #666)">
+                Analytics data will be loaded here.
+              </p>
+            </div>
+          </div>
+
+          <!-- System Tab -->
+          <div class="tab-content" id="tab-system">
+            <div class="page-header">
+              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+              <h2>System Information</h2>
+            </div>
+
             <div class="cp-project-card cp-shadow">
-              <div class="card-header-with-action">
-                <h3>Invoices</h3>
-                <button class="btn btn-secondary" id="btn-create-invoice">+ Create Invoice</button>
+              <h3>Build Information</h3>
+              <div class="system-info-grid" style="display: grid; gap: 1rem; margin-top: 1rem">
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 0.5rem 0;
+                    border-bottom: 1px solid var(--color-border, #eee);
+                  "
+                >
+                  <span>Version</span>
+                  <span id="sys-version">10.0.0</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 0.5rem 0;
+                    border-bottom: 1px solid var(--color-border, #eee);
+                  "
+                >
+                  <span>Environment</span>
+                  <span id="sys-environment">development</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 0.5rem 0;
+                    border-bottom: 1px solid var(--color-border, #eee);
+                  "
+                >
+                  <span>Build Date</span>
+                  <span id="sys-build-date">-</span>
+                </div>
               </div>
-              <div class="invoices-list" id="pd-invoices-list">
-                <p class="empty-state">No invoices created yet.</p>
+            </div>
+
+            <div class="cp-project-card cp-shadow" style="margin-top: 1.5rem">
+              <h3>Browser Information</h3>
+              <div class="system-info-grid" style="display: grid; gap: 1rem; margin-top: 1rem">
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 0.5rem 0;
+                    border-bottom: 1px solid var(--color-border, #eee);
+                  "
+                >
+                  <span>User Agent</span>
+                  <span
+                    id="sys-useragent"
+                    style="max-width: 300px; overflow: hidden; text-overflow: ellipsis"
+                    >-</span
+                  >
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 0.5rem 0;
+                    border-bottom: 1px solid var(--color-border, #eee);
+                  "
+                >
+                  <span>Screen Resolution</span>
+                  <span id="sys-screen">-</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 0.5rem 0;
+                    border-bottom: 1px solid var(--color-border, #eee);
+                  "
+                >
+                  <span>Viewport Size</span>
+                  <span id="sys-viewport">-</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Settings Sub-Tab -->
-          <div class="pd-tab-content" id="pd-tab-settings">
-            <div class="settings-grid">
-              <!-- Project Settings -->
-              <div class="settings-section cp-shadow">
-                <h3>Project Settings</h3>
-                <form class="settings-form" id="pd-project-settings-form">
-                  <div class="form-group">
-                    <label for="pd-setting-name">Project Name</label>
-                    <input type="text" id="pd-setting-name" class="form-input">
-                  </div>
-                  <div class="form-group">
-                    <label for="pd-setting-status">Status</label>
-                    <select id="pd-setting-status" class="form-select">
-                      <option value="pending">Pending</option>
-                      <option value="active">Active</option>
-                      <option value="on_hold">On Hold</option>
-                      <option value="completed">Completed</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="pd-setting-progress">Progress (%)</label>
-                    <input type="number" id="pd-setting-progress" class="form-input" min="0" max="100">
-                  </div>
-                  <button type="submit" class="btn btn-secondary">Save Changes</button>
-                </form>
-              </div>
+          <!-- Project Detail View (mirrors client portal view) -->
+          <div class="tab-content" id="tab-project-detail">
+            <div class="page-header">
+              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+              <button class="btn btn-secondary btn-back" id="btn-back-to-projects">
+                &#8592; Back to Projects
+              </button>
+              <h2 id="project-detail-title">Project Details</h2>
+            </div>
 
-              <!-- Client Account -->
-              <div class="settings-section cp-shadow">
-                <h3>Client Account</h3>
-                <div class="client-account-info">
-                  <p><strong>Email:</strong> <span id="pd-client-account-email">-</span></p>
-                  <p><strong>Account Status:</strong> <span id="pd-client-account-status" class="status-badge">-</span></p>
-                  <p><strong>Last Login:</strong> <span id="pd-client-last-login">Never</span></p>
+            <!-- Project Overview Card -->
+            <div class="project-detail-overview cp-shadow">
+              <div class="project-detail-header">
+                <div class="project-detail-info">
+                  <h3 id="pd-project-name">Project Name</h3>
+                  <p class="project-client-info">
+                    <strong>Client:</strong> <span id="pd-client-name">-</span> (<span
+                      id="pd-client-email"
+                      >-</span
+                    >)
+                  </p>
+                  <p><strong>Company:</strong> <span id="pd-company">-</span></p>
                 </div>
-                <div class="client-account-actions">
-                  <button class="btn btn-secondary btn-sm" id="btn-resend-invite">Resend Invitation</button>
-                  <button class="btn btn-secondary btn-sm" id="btn-reset-password">Reset Password</button>
+                <div class="project-detail-status">
+                  <span class="status-badge" id="pd-status">-</span>
                 </div>
               </div>
+              <div class="project-detail-meta">
+                <div class="meta-item">
+                  <span class="meta-label">Project Type</span>
+                  <span class="meta-value" id="pd-type">-</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Budget</span>
+                  <span class="meta-value" id="pd-budget">-</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Timeline</span>
+                  <span class="meta-value" id="pd-timeline">-</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Started</span>
+                  <span class="meta-value" id="pd-start-date">-</span>
+                </div>
+              </div>
+            </div>
 
-              <!-- Preview URL -->
-              <div class="settings-section cp-shadow">
-                <h3>Preview URL</h3>
-                <form class="settings-form" id="pd-preview-form">
-                  <div class="form-group">
-                    <label for="pd-preview-url">Client Preview URL</label>
-                    <input type="url" id="pd-preview-url" class="form-input" placeholder="https://preview.example.com">
+            <!-- Project Detail Tabs -->
+            <div class="project-detail-tabs">
+              <button class="pd-tab-btn active" data-pd-tab="overview">Overview</button>
+              <button class="pd-tab-btn" data-pd-tab="files">Files</button>
+              <button class="pd-tab-btn" data-pd-tab="messages">Messages</button>
+              <button class="pd-tab-btn" data-pd-tab="invoices">Invoices</button>
+              <button class="pd-tab-btn" data-pd-tab="settings">Settings</button>
+            </div>
+
+            <!-- Overview Sub-Tab -->
+            <div class="pd-tab-content active" id="pd-tab-overview">
+              <!-- Progress Section -->
+              <div class="cp-project-card cp-shadow">
+                <h3>Project Progress</h3>
+                <div class="project-progress-display">
+                  <div class="progress-percentage" id="pd-progress-percent">0%</div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" id="pd-progress-bar" style="width: 0%"></div>
                   </div>
-                  <button type="submit" class="btn btn-secondary">Save Preview URL</button>
-                </form>
+                </div>
+              </div>
+
+              <!-- Milestones Section -->
+              <div class="cp-project-card cp-shadow">
+                <div class="card-header-with-action">
+                  <h3>Milestones</h3>
+                  <button class="btn btn-secondary btn-sm" id="btn-add-milestone">
+                    + Add Milestone
+                  </button>
+                </div>
+                <div class="milestones-list" id="pd-milestones-list">
+                  <p class="empty-state">
+                    No milestones yet. Add milestones to track project progress.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Project Description / Notes -->
+              <div class="cp-project-card cp-shadow">
+                <div class="card-header-with-action">
+                  <h3>Project Notes</h3>
+                  <button class="btn btn-secondary btn-sm" id="btn-edit-notes">Edit</button>
+                </div>
+                <div class="project-notes" id="pd-notes">
+                  <p class="empty-state">No project notes yet.</p>
+                </div>
+              </div>
+
+              <!-- Recent Activity -->
+              <div class="recent-activity cp-shadow">
+                <h3>Recent Activity</h3>
+                <ul class="activity-list" id="pd-activity-list">
+                  <li>No activity recorded yet.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Files Sub-Tab -->
+            <div class="pd-tab-content" id="pd-tab-files">
+              <!-- Upload Section -->
+              <div class="files-upload-section cp-shadow">
+                <h3>Upload Files for Client</h3>
+                <div class="upload-dropzone" id="pd-upload-dropzone">
+                  <p>Drag and drop files here or</p>
+                  <button class="btn btn-secondary" id="btn-pd-browse-files">Browse Files</button>
+                  <input type="file" id="pd-file-input" multiple hidden />
+                </div>
+              </div>
+
+              <!-- Files List -->
+              <div class="files-list-section cp-shadow">
+                <h3>Project Files</h3>
+                <div class="files-list" id="pd-files-list">
+                  <p class="empty-state">No files uploaded yet.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Messages Sub-Tab -->
+            <div class="pd-tab-content" id="pd-tab-messages">
+              <div class="messages-container cp-shadow">
+                <div class="messages-thread" id="pd-messages-thread">
+                  <p class="empty-state">
+                    No messages yet. Start the conversation with your client.
+                  </p>
+                </div>
+
+                <div class="message-compose">
+                  <div class="message-input-wrapper">
+                    <textarea
+                      id="pd-message-input"
+                      class="form-textarea"
+                      placeholder="Type your message to the client..."
+                    ></textarea>
+                  </div>
+                  <button class="btn btn-secondary" id="btn-pd-send-message">Send Message</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Invoices Sub-Tab -->
+            <div class="pd-tab-content" id="pd-tab-invoices">
+              <!-- Invoice Summary -->
+              <div class="invoice-summary">
+                <div class="summary-card cp-shadow">
+                  <span class="summary-label">Total Outstanding</span>
+                  <span class="summary-value" id="pd-outstanding">$0.00</span>
+                </div>
+                <div class="summary-card cp-shadow">
+                  <span class="summary-label">Total Paid</span>
+                  <span class="summary-value" id="pd-paid">$0.00</span>
+                </div>
+              </div>
+
+              <!-- Create Invoice Button -->
+              <div class="cp-project-card cp-shadow">
+                <div class="card-header-with-action">
+                  <h3>Invoices</h3>
+                  <button class="btn btn-secondary" id="btn-create-invoice">
+                    + Create Invoice
+                  </button>
+                </div>
+                <div class="invoices-list" id="pd-invoices-list">
+                  <p class="empty-state">No invoices created yet.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Settings Sub-Tab -->
+            <div class="pd-tab-content" id="pd-tab-settings">
+              <div class="settings-grid">
+                <!-- Project Settings -->
+                <div class="settings-section cp-shadow">
+                  <h3>Project Settings</h3>
+                  <form class="settings-form" id="pd-project-settings-form">
+                    <div class="form-group">
+                      <label for="pd-setting-name">Project Name</label>
+                      <input type="text" id="pd-setting-name" class="form-input" />
+                    </div>
+                    <div class="form-group">
+                      <label for="pd-setting-status">Status</label>
+                      <select id="pd-setting-status" class="form-select">
+                        <option value="pending">Pending</option>
+                        <option value="active">Active</option>
+                        <option value="on_hold">On Hold</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="pd-setting-progress">Progress (%)</label>
+                      <input
+                        type="number"
+                        id="pd-setting-progress"
+                        class="form-input"
+                        min="0"
+                        max="100"
+                      />
+                    </div>
+                    <button type="submit" class="btn btn-secondary">Save Changes</button>
+                  </form>
+                </div>
+
+                <!-- Client Account -->
+                <div class="settings-section cp-shadow">
+                  <h3>Client Account</h3>
+                  <div class="client-account-info">
+                    <p><strong>Email:</strong> <span id="pd-client-account-email">-</span></p>
+                    <p>
+                      <strong>Account Status:</strong>
+                      <span id="pd-client-account-status" class="status-badge">-</span>
+                    </p>
+                    <p><strong>Last Login:</strong> <span id="pd-client-last-login">Never</span></p>
+                  </div>
+                  <div class="client-account-actions">
+                    <button class="btn btn-secondary btn-sm" id="btn-resend-invite">
+                      Resend Invitation
+                    </button>
+                    <button class="btn btn-secondary btn-sm" id="btn-reset-password">
+                      Reset Password
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Preview URL -->
+                <div class="settings-section cp-shadow">
+                  <h3>Preview URL</h3>
+                  <form class="settings-form" id="pd-preview-form">
+                    <div class="form-group">
+                      <label for="pd-preview-url">Client Preview URL</label>
+                      <input
+                        type="url"
+                        id="pd-preview-url"
+                        class="form-input"
+                        placeholder="https://preview.example.com"
+                      />
+                    </div>
+                    <button type="submit" class="btn btn-secondary">Save Preview URL</button>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
         </div>
-
       </div>
     </div>
-  </div>
 
-  <!-- Detail Modal for Leads/Contacts -->
-  <div class="admin-modal-overlay" id="detail-modal" style="display: none;">
-    <div class="admin-modal">
-      <div class="admin-modal-header">
-        <h3 id="modal-title">Details</h3>
-        <button class="admin-modal-close" id="modal-close-btn" aria-label="Close modal">&times;</button>
-      </div>
-      <div class="admin-modal-body" id="modal-body">
-        <!-- Dynamic content will be inserted here -->
-      </div>
-      <div class="admin-modal-footer">
-        <button class="btn btn-secondary" id="modal-close-btn-footer">Close</button>
+    <!-- Detail Modal for Leads/Contacts -->
+    <div class="admin-modal-overlay" id="detail-modal" style="display: none">
+      <div class="admin-modal">
+        <div class="admin-modal-header">
+          <h3 id="modal-title">Details</h3>
+          <button class="admin-modal-close" id="modal-close-btn" aria-label="Close modal">
+            &times;
+          </button>
+        </div>
+        <div class="admin-modal-body" id="modal-body">
+          <!-- Dynamic content will be inserted here -->
+        </div>
+        <div class="admin-modal-footer">
+          <button class="btn btn-secondary" id="modal-close-btn-footer">Close</button>
+        </div>
       </div>
     </div>
-  </div>
-</body>
+  </body>
 </html>

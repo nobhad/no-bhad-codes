@@ -3,22 +3,22 @@ import type { Meta, StoryObj } from '@storybook/html';
 const meta: Meta = {
   title: 'Components/Footer',
   parameters: {
-    layout: 'fullscreen'
+    layout: 'fullscreen',
   },
   argTypes: {
     year: {
       control: 'number',
-      description: 'Copyright year'
+      description: 'Copyright year',
     },
     siteName: {
       control: 'text',
-      description: 'Site name'
-    }
+      description: 'Site name',
+    },
   },
   args: {
     year: 2025,
-    siteName: 'NO BHAD CODES'
-  }
+    siteName: 'NO BHAD CODES',
+  },
 };
 
 export default meta;
@@ -37,13 +37,13 @@ const createFooter = (args: any) => {
 };
 
 export const Default: Story = {
-  render: createFooter
+  render: createFooter,
 };
 
 export const CustomText: Story = {
   args: {
     year: 2024,
-    siteName: 'Custom Company'
+    siteName: 'Custom Company',
   },
-  render: createFooter
+  render: createFooter,
 };

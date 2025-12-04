@@ -99,7 +99,7 @@ router.post(
     if (!email || !password) {
       return res.status(400).json({
         error: 'Email and password are required',
-        code: 'MISSING_CREDENTIALS'
+        code: 'MISSING_CREDENTIALS',
       });
     }
 
@@ -114,7 +114,7 @@ router.post(
     if (!client) {
       return res.status(401).json({
         error: 'Invalid credentials',
-        code: 'INVALID_CREDENTIALS'
+        code: 'INVALID_CREDENTIALS',
       });
     }
 
@@ -122,7 +122,7 @@ router.post(
     if (client.status !== 'active') {
       return res.status(401).json({
         error: 'Account is not active. Please contact support.',
-        code: 'ACCOUNT_INACTIVE'
+        code: 'ACCOUNT_INACTIVE',
       });
     }
 
@@ -131,7 +131,7 @@ router.post(
     if (!isValidPassword) {
       return res.status(401).json({
         error: 'Invalid credentials',
-        code: 'INVALID_CREDENTIALS'
+        code: 'INVALID_CREDENTIALS',
       });
     }
 
@@ -141,7 +141,7 @@ router.post(
       console.error('JWT_SECRET not configured');
       return res.status(500).json({
         error: 'Server configuration error',
-        code: 'CONFIG_ERROR'
+        code: 'CONFIG_ERROR',
       });
     }
 
@@ -150,7 +150,7 @@ router.post(
         id: client.id,
         email: client.email,
         type: client.is_admin ? 'admin' : 'client',
-        isAdmin: Boolean(client.is_admin)
+        isAdmin: Boolean(client.is_admin),
       },
       secret,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as SignOptions
@@ -167,10 +167,10 @@ router.post(
         companyName: client.company_name,
         contactName: client.contact_name,
         status: client.status,
-        isAdmin: Boolean(client.is_admin)
+        isAdmin: Boolean(client.is_admin),
       },
       token,
-      expiresIn: process.env.JWT_EXPIRES_IN || '7d'
+      expiresIn: process.env.JWT_EXPIRES_IN || '7d',
     });
   })
 );
@@ -229,7 +229,7 @@ router.get(
     if (!client) {
       return res.status(404).json({
         error: 'User not found',
-        code: 'USER_NOT_FOUND'
+        code: 'USER_NOT_FOUND',
       });
     }
 
@@ -241,8 +241,8 @@ router.get(
         contactName: client.contact_name,
         phone: client.phone,
         status: client.status,
-        createdAt: client.created_at
-      }
+        createdAt: client.created_at,
+      },
     });
   })
 );
@@ -300,7 +300,7 @@ router.post(
     if (!secret) {
       return res.status(500).json({
         error: 'Server configuration error',
-        code: 'CONFIG_ERROR'
+        code: 'CONFIG_ERROR',
       });
     }
 
@@ -309,7 +309,7 @@ router.post(
       {
         id: req.user!.id,
         email: req.user!.email,
-        type: req.user!.type
+        type: req.user!.type,
       },
       secret,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as SignOptions
@@ -317,7 +317,7 @@ router.post(
 
     res.json({
       token: newToken,
-      expiresIn: process.env.JWT_EXPIRES_IN || '7d'
+      expiresIn: process.env.JWT_EXPIRES_IN || '7d',
     });
   })
 );
@@ -354,7 +354,7 @@ router.post('/logout', authenticateToken, (req, res) => {
   // In a more sophisticated setup, you might want to blacklist the token
   // For now, we'll just return success and let the client remove the token
   res.json({
-    message: 'Logout successful'
+    message: 'Logout successful',
   });
 });
 
@@ -402,7 +402,7 @@ router.post('/logout', authenticateToken, (req, res) => {
 router.get('/validate', authenticateToken, (req: AuthenticatedRequest, res) => {
   res.json({
     valid: true,
-    user: req.user
+    user: req.user,
   });
 });
 
@@ -459,7 +459,7 @@ router.post(
     if (!email) {
       return res.status(400).json({
         error: 'Email is required',
-        code: 'MISSING_EMAIL'
+        code: 'MISSING_EMAIL',
       });
     }
 
@@ -491,7 +491,7 @@ router.post(
         // Send reset email
         await emailService.sendPasswordResetEmail(client.email, {
           name: client.contact_name || 'Client',
-          resetToken
+          resetToken,
         });
 
         // Send admin notification
@@ -501,9 +501,9 @@ router.post(
           details: {
             clientId: client.id,
             email: client.email,
-            name: client.contact_name || 'Unknown'
+            name: client.contact_name || 'Unknown',
           },
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       } catch (error) {
         console.error('Failed to send password reset email:', error);
@@ -512,7 +512,7 @@ router.post(
     }
 
     res.json({
-      message: 'If an account with that email exists, a password reset link has been sent.'
+      message: 'If an account with that email exists, a password reset link has been sent.',
     });
   })
 );
@@ -573,7 +573,7 @@ router.post(
     if (!token || !password) {
       return res.status(400).json({
         error: 'Token and password are required',
-        code: 'MISSING_FIELDS'
+        code: 'MISSING_FIELDS',
       });
     }
 
@@ -581,7 +581,7 @@ router.post(
     if (password.length < 8) {
       return res.status(400).json({
         error: 'Password must be at least 8 characters long',
-        code: 'WEAK_PASSWORD'
+        code: 'WEAK_PASSWORD',
       });
     }
 
@@ -600,7 +600,7 @@ router.post(
     if (!client) {
       return res.status(400).json({
         error: 'Invalid or expired reset token',
-        code: 'INVALID_TOKEN'
+        code: 'INVALID_TOKEN',
       });
     }
 
@@ -611,7 +611,7 @@ router.post(
     if (now > expiry) {
       return res.status(400).json({
         error: 'Reset token has expired',
-        code: 'TOKEN_EXPIRED'
+        code: 'TOKEN_EXPIRED',
       });
     }
 
@@ -638,7 +638,7 @@ router.post(
         companyName: client.company_name || 'Unknown Company',
         projectType: 'Password Reset',
         budget: 'N/A',
-        timeline: 'Completed'
+        timeline: 'Completed',
       });
     } catch (emailError) {
       console.error('Failed to send password reset confirmation:', emailError);
@@ -646,7 +646,7 @@ router.post(
     }
 
     res.json({
-      message: 'Password reset successfully'
+      message: 'Password reset successfully',
     });
   })
 );
@@ -699,7 +699,7 @@ router.post(
     if (!password) {
       return res.status(400).json({
         error: 'Password is required',
-        code: 'MISSING_PASSWORD'
+        code: 'MISSING_PASSWORD',
       });
     }
 
@@ -709,7 +709,7 @@ router.post(
       console.error('ADMIN_PASSWORD_HASH not configured');
       return res.status(500).json({
         error: 'Server configuration error',
-        code: 'CONFIG_ERROR'
+        code: 'CONFIG_ERROR',
       });
     }
 
@@ -718,7 +718,7 @@ router.post(
     if (!isValidPassword) {
       return res.status(401).json({
         error: 'Invalid credentials',
-        code: 'INVALID_CREDENTIALS'
+        code: 'INVALID_CREDENTIALS',
       });
     }
 
@@ -728,7 +728,7 @@ router.post(
       console.error('JWT_SECRET not configured');
       return res.status(500).json({
         error: 'Server configuration error',
-        code: 'CONFIG_ERROR'
+        code: 'CONFIG_ERROR',
       });
     }
 
@@ -736,7 +736,7 @@ router.post(
       {
         id: 0, // Admin doesn't have a client ID
         email: process.env.ADMIN_EMAIL || 'nobhaduri@gmail.com',
-        type: 'admin'
+        type: 'admin',
       },
       secret,
       { expiresIn: '1h' } as SignOptions // Shorter expiry for admin sessions
@@ -745,7 +745,7 @@ router.post(
     res.json({
       message: 'Admin login successful',
       token,
-      expiresIn: '1h'
+      expiresIn: '1h',
     });
   })
 );
@@ -767,21 +767,24 @@ router.post(
     if (!token) {
       return res.status(400).json({
         success: false,
-        error: 'Token is required'
+        error: 'Token is required',
       });
     }
 
     const db = getDatabase();
-    const client = await db.get(`
+    const client = await db.get(
+      `
       SELECT id, email, contact_name, company_name, invitation_expires_at
       FROM clients
       WHERE invitation_token = ?
-    `, [token]);
+    `,
+      [token]
+    );
 
     if (!client) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid invitation token'
+        error: 'Invalid invitation token',
       });
     }
 
@@ -789,7 +792,7 @@ router.post(
     if (client.invitation_expires_at && new Date(client.invitation_expires_at) < new Date()) {
       return res.status(400).json({
         success: false,
-        error: 'Invitation has expired. Please contact support for a new invitation.'
+        error: 'Invitation has expired. Please contact support for a new invitation.',
       });
     }
 
@@ -797,7 +800,7 @@ router.post(
       success: true,
       email: client.email,
       name: client.contact_name,
-      company: client.company_name
+      company: client.company_name,
     });
   })
 );
@@ -819,7 +822,7 @@ router.post(
     if (!token || !password) {
       return res.status(400).json({
         success: false,
-        error: 'Token and password are required'
+        error: 'Token and password are required',
       });
     }
 
@@ -827,21 +830,24 @@ router.post(
     if (password.length < 8) {
       return res.status(400).json({
         success: false,
-        error: 'Password must be at least 8 characters long'
+        error: 'Password must be at least 8 characters long',
       });
     }
 
     const db = getDatabase();
-    const client = await db.get(`
+    const client = await db.get(
+      `
       SELECT id, email, invitation_expires_at
       FROM clients
       WHERE invitation_token = ?
-    `, [token]);
+    `,
+      [token]
+    );
 
     if (!client) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid invitation token'
+        error: 'Invalid invitation token',
       });
     }
 
@@ -849,7 +855,7 @@ router.post(
     if (client.invitation_expires_at && new Date(client.invitation_expires_at) < new Date()) {
       return res.status(400).json({
         success: false,
-        error: 'Invitation has expired. Please contact support for a new invitation.'
+        error: 'Invitation has expired. Please contact support for a new invitation.',
       });
     }
 
@@ -858,16 +864,19 @@ router.post(
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Update client with password and activate account
-    await db.run(`
+    await db.run(
+      `
       UPDATE clients
       SET password_hash = ?, status = 'active', invitation_token = NULL, invitation_expires_at = NULL
       WHERE id = ?
-    `, [hashedPassword, client.id]);
+    `,
+      [hashedPassword, client.id]
+    );
 
     res.json({
       success: true,
       message: 'Password set successfully. You can now log in.',
-      email: client.email
+      email: client.email,
     });
   })
 );

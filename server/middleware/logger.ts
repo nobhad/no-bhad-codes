@@ -37,8 +37,8 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
     ip: req.ip,
     userAgent: req.get('User-Agent'),
     ...(hasBody && {
-      body: sanitizeBody(req.body)
-    })
+      body: sanitizeBody(req.body),
+    }),
   });
 
   // Override res.json to log response

@@ -83,7 +83,7 @@ export class ApiValidator {
     return {
       isValid: errors.length === 0,
       errors,
-      sanitizedData: errors.length === 0 ? sanitizedData : undefined
+      sanitizedData: errors.length === 0 ? sanitizedData : undefined,
     };
   }
 
@@ -108,7 +108,7 @@ export class ApiValidator {
         errors.push({
           field,
           message: `${field} is required`,
-          code: 'REQUIRED'
+          code: 'REQUIRED',
         });
         return { isValid: false, errors };
       }
@@ -121,27 +121,27 @@ export class ApiValidator {
 
     // Type-specific validation
     switch (rule.type) {
-    case 'string':
-      sanitizedValue = this.validateString(field, value, rule, errors);
-      break;
-    case 'number':
-      sanitizedValue = this.validateNumber(field, value, rule, errors);
-      break;
-    case 'boolean':
-      sanitizedValue = this.validateBoolean(field, value, rule, errors);
-      break;
-    case 'email':
-      sanitizedValue = this.validateEmail(field, value, rule, errors);
-      break;
-    case 'array':
-      sanitizedValue = this.validateArray(field, value, rule, errors);
-      break;
-    case 'object':
-      sanitizedValue = this.validateObject(field, value, rule, errors);
-      break;
-    case 'custom':
-      sanitizedValue = this.validateCustom(field, value, rule, errors);
-      break;
+      case 'string':
+        sanitizedValue = this.validateString(field, value, rule, errors);
+        break;
+      case 'number':
+        sanitizedValue = this.validateNumber(field, value, rule, errors);
+        break;
+      case 'boolean':
+        sanitizedValue = this.validateBoolean(field, value, rule, errors);
+        break;
+      case 'email':
+        sanitizedValue = this.validateEmail(field, value, rule, errors);
+        break;
+      case 'array':
+        sanitizedValue = this.validateArray(field, value, rule, errors);
+        break;
+      case 'object':
+        sanitizedValue = this.validateObject(field, value, rule, errors);
+        break;
+      case 'custom':
+        sanitizedValue = this.validateCustom(field, value, rule, errors);
+        break;
     }
 
     // Apply custom validator if present (works for all types, not just 'custom')
@@ -154,14 +154,14 @@ export class ApiValidator {
             field,
             message: `${field} failed custom validation`,
             code: 'CUSTOM_VALIDATION_FAILED',
-            value
+            value,
           });
         } else if (typeof result === 'string') {
           errors.push({
             field,
             message: result,
             code: 'CUSTOM_VALIDATION_FAILED',
-            value
+            value,
           });
         }
       } catch (error) {
@@ -169,7 +169,7 @@ export class ApiValidator {
           field,
           message: `${field} custom validation error: ${(error as Error).message}`,
           code: 'CUSTOM_VALIDATION_ERROR',
-          value
+          value,
         });
       }
     }
@@ -187,7 +187,7 @@ export class ApiValidator {
     return {
       isValid: errors.length === 0,
       errors,
-      sanitizedValue
+      sanitizedValue,
     };
   }
 
@@ -202,7 +202,7 @@ export class ApiValidator {
         field,
         message: `${field} must be a string`,
         code: 'INVALID_TYPE',
-        value
+        value,
       });
       return value;
     }
@@ -215,7 +215,7 @@ export class ApiValidator {
         field,
         message: `${field} must be at least ${rule.minLength} characters`,
         code: 'MIN_LENGTH',
-        value
+        value,
       });
     }
 
@@ -224,7 +224,7 @@ export class ApiValidator {
         field,
         message: `${field} must be at most ${rule.maxLength} characters`,
         code: 'MAX_LENGTH',
-        value
+        value,
       });
     }
 
@@ -234,7 +234,7 @@ export class ApiValidator {
         field,
         message: `${field} format is invalid`,
         code: 'INVALID_PATTERN',
-        value
+        value,
       });
     }
 
@@ -244,7 +244,7 @@ export class ApiValidator {
         field,
         message: `${field} must be one of: ${rule.allowedValues.join(', ')}`,
         code: 'INVALID_VALUE',
-        value
+        value,
       });
     }
 
@@ -267,7 +267,7 @@ export class ApiValidator {
         field,
         message: `${field} must be a valid number`,
         code: 'INVALID_NUMBER',
-        value
+        value,
       });
       return value;
     }
@@ -277,7 +277,7 @@ export class ApiValidator {
         field,
         message: `${field} must be at least ${rule.min}`,
         code: 'MIN_VALUE',
-        value
+        value,
       });
     }
 
@@ -286,7 +286,7 @@ export class ApiValidator {
         field,
         message: `${field} must be at most ${rule.max}`,
         code: 'MAX_VALUE',
-        value
+        value,
       });
     }
 
@@ -319,7 +319,7 @@ export class ApiValidator {
       field,
       message: `${field} must be a boolean value`,
       code: 'INVALID_BOOLEAN',
-      value
+      value,
     });
 
     return value;
@@ -336,7 +336,7 @@ export class ApiValidator {
         field,
         message: `${field} must be a string`,
         code: 'INVALID_TYPE',
-        value
+        value,
       });
       return value;
     }
@@ -350,7 +350,7 @@ export class ApiValidator {
         field,
         message: `${field} must be a valid email address`,
         code: 'INVALID_EMAIL',
-        value
+        value,
       });
       return value;
     }
@@ -361,7 +361,7 @@ export class ApiValidator {
         field,
         message: `${field} email address is too long`,
         code: 'EMAIL_TOO_LONG',
-        value
+        value,
       });
     }
 
@@ -371,7 +371,7 @@ export class ApiValidator {
       'tempmail.org',
       'guerrillamail.com',
       'mailinator.com',
-      'throwaway.email'
+      'throwaway.email',
     ];
 
     const domain = email.split('@')[1];
@@ -380,7 +380,7 @@ export class ApiValidator {
         field,
         message: `${field} temporary email addresses are not allowed`,
         code: 'DISPOSABLE_EMAIL',
-        value
+        value,
       });
     }
 
@@ -398,7 +398,7 @@ export class ApiValidator {
         field,
         message: `${field} must be an array`,
         code: 'INVALID_ARRAY',
-        value
+        value,
       });
       return value;
     }
@@ -408,7 +408,7 @@ export class ApiValidator {
         field,
         message: `${field} must have at least ${rule.minLength} items`,
         code: 'MIN_ARRAY_LENGTH',
-        value
+        value,
       });
     }
 
@@ -417,7 +417,7 @@ export class ApiValidator {
         field,
         message: `${field} must have at most ${rule.maxLength} items`,
         code: 'MAX_ARRAY_LENGTH',
-        value
+        value,
       });
     }
 
@@ -435,7 +435,7 @@ export class ApiValidator {
         field,
         message: `${field} must be an object`,
         code: 'INVALID_OBJECT',
-        value
+        value,
       });
       return value;
     }
@@ -461,14 +461,14 @@ export class ApiValidator {
           field,
           message: `${field} failed custom validation`,
           code: 'CUSTOM_VALIDATION_FAILED',
-          value
+          value,
         });
       } else if (typeof result === 'string') {
         errors.push({
           field,
           message: result,
           code: 'CUSTOM_VALIDATION_FAILED',
-          value
+          value,
         });
       }
 
@@ -482,7 +482,7 @@ export class ApiValidator {
         field,
         message: `${field} custom validation error: ${err.message}`,
         code: 'CUSTOM_VALIDATION_ERROR',
-        value
+        value,
       });
     }
 
@@ -522,7 +522,7 @@ export function validateRequest(
     validateQuery = false,
     validateParams = false,
     allowUnknownFields = false,
-    stripUnknownFields = true
+    stripUnknownFields = true,
   } = options;
 
   const validator = ApiValidator.getInstance();
@@ -578,7 +578,7 @@ export function validateRequest(
           success: false,
           error: 'Validation failed',
           details: allErrors,
-          code: 'VALIDATION_ERROR'
+          code: 'VALIDATION_ERROR',
         });
       }
 
@@ -593,7 +593,7 @@ export function validateRequest(
       res.status(500).json({
         success: false,
         error: 'Internal validation error',
-        code: 'VALIDATION_SYSTEM_ERROR'
+        code: 'VALIDATION_SYSTEM_ERROR',
       });
     }
   };
@@ -613,18 +613,19 @@ export const ValidationSchemas = {
       maxLength: 128,
       pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
       description:
-        'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
-    }
+        'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+    },
   },
 
-  // Contact form
+  // Contact form - accepts both name OR firstName/lastName
   contact: {
-    name: [
-      { type: 'required' as const },
-      { type: 'string' as const, minLength: 2, maxLength: 100 }
-    ],
+    name: { type: 'string' as const, minLength: 2, maxLength: 100 },
+    firstName: { type: 'string' as const, minLength: 1, maxLength: 50 },
+    lastName: { type: 'string' as const, minLength: 1, maxLength: 50 },
     email: [{ type: 'required' as const }, { type: 'email' as const }],
     subject: { type: 'string' as const, maxLength: 200 },
+    inquiryType: { type: 'string' as const, maxLength: 200 },
+    companyName: { type: 'string' as const, maxLength: 200 },
     message: [
       { type: 'required' as const },
       {
@@ -636,23 +637,23 @@ export const ValidationSchemas = {
           const spamPatterns = [
             /\b(buy now|click here|limited time|act fast|urgent|winner|congratulations)\b/gi,
             /\b(viagra|casino|loan|mortgage|weight loss|get rich)\b/gi,
-            /https?:\/\/[^\s]+/gi // URLs in message
+            /https?:\/\/[^\s]+/gi, // URLs in message
           ];
 
           return (
             !spamPatterns.some((pattern) => pattern.test(value)) ||
             'Message appears to contain spam'
           );
-        }
-      }
-    ]
+        },
+      },
+    ],
   },
 
   // Client intake
   clientIntake: {
     name: [
       { type: 'required' as const },
-      { type: 'string' as const, minLength: 2, maxLength: 100 }
+      { type: 'string' as const, minLength: 2, maxLength: 100 },
     ],
     email: [{ type: 'required' as const }, { type: 'email' as const }],
     companyName: { type: 'string' as const, maxLength: 200 },
@@ -667,27 +668,27 @@ export const ValidationSchemas = {
           'e-commerce',
           'web-app',
           'browser-extension',
-          'other'
-        ]
-      }
+          'other',
+        ],
+      },
     ],
     budgetRange: [
       { type: 'required' as const },
       {
         type: 'string' as const,
-        allowedValues: ['under-2k', '2k-5k', '5k-10k', '10k-plus', 'discuss']
-      }
+        allowedValues: ['under-2k', '2k-5k', '5k-10k', '10k-plus', 'discuss'],
+      },
     ],
     timeline: [
       { type: 'required' as const },
       {
         type: 'string' as const,
-        allowedValues: ['asap', '1-3-months', '3-6-months', 'flexible']
-      }
+        allowedValues: ['asap', '1-3-months', '3-6-months', 'flexible'],
+      },
     ],
     description: [
       { type: 'required' as const },
-      { type: 'string' as const, minLength: 20, maxLength: 2000 }
+      { type: 'string' as const, minLength: 20, maxLength: 2000 },
     ],
     features: {
       type: 'array' as const,
@@ -703,13 +704,13 @@ export const ValidationSchemas = {
           'e-commerce',
           'blog',
           'gallery',
-          'booking'
+          'booking',
         ];
         return (
           features.every((feature) => validFeatures.includes(feature)) || 'Invalid feature selected'
         );
-      }
-    }
+      },
+    },
   },
 
   // File upload
@@ -719,8 +720,8 @@ export const ValidationSchemas = {
       {
         type: 'string' as const,
         pattern: /^[a-zA-Z0-9._-]+$/,
-        maxLength: 255
-      }
+        maxLength: 255,
+      },
     ],
     fileType: [
       { type: 'required' as const },
@@ -732,14 +733,14 @@ export const ValidationSchemas = {
           'image/gif',
           'image/webp',
           'application/pdf',
-          'text/plain'
-        ]
-      }
+          'text/plain',
+        ],
+      },
     ],
     fileSize: [
       { type: 'required' as const },
-      { type: 'number' as const, min: 1, max: 10 * 1024 * 1024 } // 10MB max
-    ]
+      { type: 'number' as const, min: 1, max: 10 * 1024 * 1024 }, // 10MB max
+    ],
   },
 
   // API pagination
@@ -748,6 +749,6 @@ export const ValidationSchemas = {
     limit: { type: 'number' as const, min: 1, max: 100 },
     sortBy: { type: 'string' as const, maxLength: 50 },
     sortOrder: { type: 'string' as const, allowedValues: ['asc', 'desc'] },
-    search: { type: 'string' as const, maxLength: 200 }
-  }
+    search: { type: 'string' as const, maxLength: 200 },
+  },
 };

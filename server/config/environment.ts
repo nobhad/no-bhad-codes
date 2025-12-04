@@ -123,7 +123,7 @@ const configSchema: ConfigSchema = {
   NODE_ENV: {
     required: true,
     default: 'development',
-    values: ['development', 'production', 'test']
+    values: ['development', 'production', 'test'],
   },
   PORT: { required: true, default: 4001, type: 'number' },
   FRONTEND_URL: { required: true, default: 'http://localhost:4000', type: 'url' },
@@ -200,7 +200,7 @@ const configSchema: ConfigSchema = {
   FORCE_SSL: { required: false, default: false, type: 'boolean' },
   TRUST_PROXY: { required: false, default: false, type: 'boolean' },
   HELMET_ENABLED: { required: false, default: true, type: 'boolean' },
-  CLUSTER_WORKERS: { required: false, default: 'auto' }
+  CLUSTER_WORKERS: { required: false, default: 'auto' },
 };
 
 /**
@@ -246,7 +246,7 @@ const validators: Record<string, (value: any) => any> = {
     } catch {
       throw new Error('Invalid URL format');
     }
-  }
+  },
 };
 
 /**
@@ -338,7 +338,7 @@ function generateDerivedConfig(): void {
   // Auto-generate secrets in development if not provided
   if ((config as any).NODE_ENV === 'development') {
     if (!(config as any).JWT_SECRET || (config as any).JWT_SECRET.includes('change-this')) {
-      (config as any).JWT_SECRET = `dev-jwt-secret-${  Math.random().toString(36).substring(7)}`;
+      (config as any).JWT_SECRET = `dev-jwt-secret-${Math.random().toString(36).substring(7)}`;
       console.warn('⚠️  Using auto-generated JWT_SECRET for development');
     }
 
@@ -347,12 +347,12 @@ function generateDerivedConfig(): void {
       (config as any).REFRESH_TOKEN_SECRET.includes('change-this')
     ) {
       (config as any).REFRESH_TOKEN_SECRET =
-        `dev-refresh-secret-${  Math.random().toString(36).substring(7)}`;
+        `dev-refresh-secret-${Math.random().toString(36).substring(7)}`;
     }
 
     if (!(config as any).SESSION_SECRET || (config as any).SESSION_SECRET.includes('change-this')) {
       (config as any).SESSION_SECRET =
-        `dev-session-secret-${  Math.random().toString(36).substring(7)}`;
+        `dev-session-secret-${Math.random().toString(36).substring(7)}`;
     }
   }
 
@@ -380,7 +380,7 @@ function generateDerivedConfig(): void {
     (config as any).DATABASE_PATH ? path.dirname((config as any).DATABASE_PATH) : undefined,
     (config as any).DATABASE_BACKUP_PATH,
     (config as any).LOG_FILE ? path.dirname((config as any).LOG_FILE) : undefined,
-    (config as any).LOG_ERROR_FILE ? path.dirname((config as any).LOG_ERROR_FILE) : undefined
+    (config as any).LOG_ERROR_FILE ? path.dirname((config as any).LOG_ERROR_FILE) : undefined,
   ].filter(Boolean) as string[];
 
   directories.forEach((dir) => {
@@ -408,9 +408,9 @@ function getConfigSummary(): object {
       passwordReset: (config as any).ENABLE_PASSWORD_RESET,
       emailVerification: (config as any).ENABLE_EMAIL_VERIFICATION,
       twoFactor: (config as any).ENABLE_2FA,
-      apiDocs: (config as any).ENABLE_API_DOCS
+      apiDocs: (config as any).ENABLE_API_DOCS,
     },
-    maintenanceMode: (config as any).MAINTENANCE_MODE
+    maintenanceMode: (config as any).MAINTENANCE_MODE,
   };
 
   return summary;

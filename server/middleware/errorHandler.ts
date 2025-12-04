@@ -43,11 +43,11 @@ export const errorHandler = (
       body: req.body,
       params: req.params,
       query: req.query,
-      headers: req.headers
+      headers: req.headers,
     },
     requestId: req.id,
     ip: req.ip,
-    userAgent: req.get('user-agent')
+    userAgent: req.get('user-agent'),
   });
 
   // Handle specific error types
@@ -78,7 +78,7 @@ export const errorHandler = (
     error: message,
     code,
     timestamp: new Date().toISOString(),
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+    ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
   });
 };
 

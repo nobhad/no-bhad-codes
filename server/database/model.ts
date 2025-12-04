@@ -15,7 +15,7 @@ import {
   InsertQueryBuilder,
   UpdateQueryBuilder,
   DeleteQueryBuilder,
-  QueryResult
+  QueryResult,
 } from './query-builder.js';
 import { logger } from '../services/logger.js';
 
@@ -58,7 +58,7 @@ export class BaseModel<T = any> {
     softDeletes: false,
     fillable: [],
     hidden: [],
-    casts: {}
+    casts: {},
   };
 
   // Instance properties
@@ -253,7 +253,7 @@ export class BaseModel<T = any> {
         instance.setAttributes(row as any, true);
         return instance;
       }),
-      pagination: result.pagination
+      pagination: result.pagination,
     };
   }
 
@@ -320,18 +320,18 @@ export class BaseModel<T = any> {
     }
 
     switch (castType) {
-    case 'string':
-      return String(value);
-    case 'number':
-      return Number(value);
-    case 'boolean':
-      return Boolean(value);
-    case 'date':
-      return value instanceof Date ? value : new Date(value);
-    case 'json':
-      return typeof value === 'string' ? JSON.parse(value) : value;
-    default:
-      return value;
+      case 'string':
+        return String(value);
+      case 'number':
+        return Number(value);
+      case 'boolean':
+        return Boolean(value);
+      case 'date':
+        return value instanceof Date ? value : new Date(value);
+      case 'json':
+        return typeof value === 'string' ? JSON.parse(value) : value;
+      default:
+        return value;
     }
   }
 
@@ -474,7 +474,6 @@ export class BaseModel<T = any> {
       }
 
       return false;
-
     } catch (error) {
       const err = error as Error;
       await logger.error('Model save failed');
@@ -512,7 +511,6 @@ export class BaseModel<T = any> {
       }
 
       return false;
-
     } catch (error) {
       const err = error as Error;
       await logger.error('Model delete failed');

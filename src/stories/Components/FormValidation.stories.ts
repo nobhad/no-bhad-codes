@@ -3,18 +3,18 @@ import type { Meta, StoryObj } from '@storybook/html';
 const meta: Meta = {
   title: 'Components/Form Validation',
   parameters: {
-    layout: 'centered'
+    layout: 'centered',
   },
   argTypes: {
     formType: {
       control: 'select',
       options: ['contact', 'intake', 'simple'],
-      description: 'Type of form to demonstrate'
-    }
+      description: 'Type of form to demonstrate',
+    },
   },
   args: {
-    formType: 'simple'
-  }
+    formType: 'simple',
+  },
 };
 
 export default meta;
@@ -178,12 +178,12 @@ const createValidationDemo = (args: any) => {
 };
 
 export const SimpleForm: Story = {
-  render: createValidationDemo
+  render: createValidationDemo,
 };
 
 export const ValidationStates: Story = {
   parameters: {
-    layout: 'padded'
+    layout: 'padded',
   },
   render: () => `
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 800px;">
@@ -239,12 +239,12 @@ export const ValidationStates: Story = {
         <li>Subtle hover effect when valid (lifted + shadow)</li>
       </ul>
     </div>
-  `
+  `,
 };
 
 export const LiveDemo: Story = {
   parameters: {
-    layout: 'padded'
+    layout: 'padded',
   },
   render: () => `
     <div style="max-width: 600px; margin: 0 auto;">
@@ -405,5 +405,5 @@ export const LiveDemo: Story = {
         }
       </script>
     </div>
-  `
+  `,
 };

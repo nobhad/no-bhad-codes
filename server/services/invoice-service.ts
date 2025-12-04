@@ -114,7 +114,7 @@ export class InvoiceService {
       issuedDate,
       JSON.stringify(data.lineItems),
       data.notes || null,
-      data.terms || 'Payment due within 30 days'
+      data.terms || 'Payment due within 30 days',
     ]);
 
     return this.getInvoiceById(result.lastID!);
@@ -267,7 +267,7 @@ export class InvoiceService {
 
     return this.updateInvoiceStatus(id, 'paid', {
       ...paymentData,
-      paidDate
+      paidDate,
     });
   }
 
@@ -305,7 +305,7 @@ export class InvoiceService {
       totalAmount: row.total_amount || 0,
       totalPaid: row.total_paid || 0,
       totalOutstanding: row.total_outstanding || 0,
-      overdue: row.overdue || 0
+      overdue: row.overdue || 0,
     };
   }
 
@@ -341,7 +341,7 @@ export class InvoiceService {
       clientId: intake.client_id,
       lineItems,
       notes: `Generated from intake: ${intake.project_description}`,
-      terms: 'Payment due within 30 days. 50% upfront, 50% on completion.'
+      terms: 'Payment due within 30 days. 50% upfront, 50% on completion.',
     });
   }
 
@@ -367,127 +367,127 @@ export class InvoiceService {
 
     // Generate line items based on project type
     switch (projectType.toLowerCase()) {
-    case 'website':
-    case 'business site':
-      lineItems.push(
-        {
-          description: 'Website Design & Development',
-          quantity: 1,
-          rate: baseAmount * 0.7,
-          amount: baseAmount * 0.7
-        },
-        {
-          description: 'Content Management System Setup',
-          quantity: 1,
-          rate: baseAmount * 0.2,
-          amount: baseAmount * 0.2
-        },
-        {
-          description: 'SEO Optimization & Testing',
-          quantity: 1,
-          rate: baseAmount * 0.1,
-          amount: baseAmount * 0.1
-        }
-      );
-      break;
+      case 'website':
+      case 'business site':
+        lineItems.push(
+          {
+            description: 'Website Design & Development',
+            quantity: 1,
+            rate: baseAmount * 0.7,
+            amount: baseAmount * 0.7,
+          },
+          {
+            description: 'Content Management System Setup',
+            quantity: 1,
+            rate: baseAmount * 0.2,
+            amount: baseAmount * 0.2,
+          },
+          {
+            description: 'SEO Optimization & Testing',
+            quantity: 1,
+            rate: baseAmount * 0.1,
+            amount: baseAmount * 0.1,
+          }
+        );
+        break;
 
-    case 'web app':
-    case 'application':
-      lineItems.push(
-        {
-          description: 'Application Development',
-          quantity: 1,
-          rate: baseAmount * 0.6,
-          amount: baseAmount * 0.6
-        },
-        {
-          description: 'Database Design & Setup',
-          quantity: 1,
-          rate: baseAmount * 0.2,
-          amount: baseAmount * 0.2
-        },
-        {
-          description: 'API Development',
-          quantity: 1,
-          rate: baseAmount * 0.1,
-          amount: baseAmount * 0.1
-        },
-        {
-          description: 'Testing & Deployment',
-          quantity: 1,
-          rate: baseAmount * 0.1,
-          amount: baseAmount * 0.1
-        }
-      );
-      break;
+      case 'web app':
+      case 'application':
+        lineItems.push(
+          {
+            description: 'Application Development',
+            quantity: 1,
+            rate: baseAmount * 0.6,
+            amount: baseAmount * 0.6,
+          },
+          {
+            description: 'Database Design & Setup',
+            quantity: 1,
+            rate: baseAmount * 0.2,
+            amount: baseAmount * 0.2,
+          },
+          {
+            description: 'API Development',
+            quantity: 1,
+            rate: baseAmount * 0.1,
+            amount: baseAmount * 0.1,
+          },
+          {
+            description: 'Testing & Deployment',
+            quantity: 1,
+            rate: baseAmount * 0.1,
+            amount: baseAmount * 0.1,
+          }
+        );
+        break;
 
-    case 'e-commerce':
-      lineItems.push(
-        {
-          description: 'E-commerce Platform Development',
-          quantity: 1,
-          rate: baseAmount * 0.5,
-          amount: baseAmount * 0.5
-        },
-        {
-          description: 'Payment Integration',
-          quantity: 1,
-          rate: baseAmount * 0.2,
-          amount: baseAmount * 0.2
-        },
-        {
-          description: 'Product Catalog Setup',
-          quantity: 1,
-          rate: baseAmount * 0.2,
-          amount: baseAmount * 0.2
-        },
-        {
-          description: 'Security & Testing',
-          quantity: 1,
-          rate: baseAmount * 0.1,
-          amount: baseAmount * 0.1
-        }
-      );
-      break;
+      case 'e-commerce':
+        lineItems.push(
+          {
+            description: 'E-commerce Platform Development',
+            quantity: 1,
+            rate: baseAmount * 0.5,
+            amount: baseAmount * 0.5,
+          },
+          {
+            description: 'Payment Integration',
+            quantity: 1,
+            rate: baseAmount * 0.2,
+            amount: baseAmount * 0.2,
+          },
+          {
+            description: 'Product Catalog Setup',
+            quantity: 1,
+            rate: baseAmount * 0.2,
+            amount: baseAmount * 0.2,
+          },
+          {
+            description: 'Security & Testing',
+            quantity: 1,
+            rate: baseAmount * 0.1,
+            amount: baseAmount * 0.1,
+          }
+        );
+        break;
 
-    case 'browser extension':
-      lineItems.push(
-        {
-          description: 'Browser Extension Development',
-          quantity: 1,
-          rate: baseAmount * 0.8,
-          amount: baseAmount * 0.8
-        },
-        {
-          description: 'Cross-browser Compatibility',
-          quantity: 1,
-          rate: baseAmount * 0.1,
-          amount: baseAmount * 0.1
-        },
-        {
-          description: 'Store Submission & Review',
-          quantity: 1,
-          rate: baseAmount * 0.1,
-          amount: baseAmount * 0.1
-        }
-      );
-      break;
+      case 'browser extension':
+        lineItems.push(
+          {
+            description: 'Browser Extension Development',
+            quantity: 1,
+            rate: baseAmount * 0.8,
+            amount: baseAmount * 0.8,
+          },
+          {
+            description: 'Cross-browser Compatibility',
+            quantity: 1,
+            rate: baseAmount * 0.1,
+            amount: baseAmount * 0.1,
+          },
+          {
+            description: 'Store Submission & Review',
+            quantity: 1,
+            rate: baseAmount * 0.1,
+            amount: baseAmount * 0.1,
+          }
+        );
+        break;
 
-    default:
-      lineItems.push(
-        {
-          description: `${projectType} Development`,
-          quantity: 1,
-          rate: baseAmount * 0.8,
-          amount: baseAmount * 0.8
-        },
-        {
-          description: 'Testing & Deployment',
-          quantity: 1,
-          rate: baseAmount * 0.2,
-          amount: baseAmount * 0.2
-        }
-      );
+      default:
+        lineItems.push(
+          {
+            description: `${projectType} Development`,
+            quantity: 1,
+            rate: baseAmount * 0.8,
+            amount: baseAmount * 0.8,
+          },
+          {
+            description: 'Testing & Deployment',
+            quantity: 1,
+            rate: baseAmount * 0.2,
+            amount: baseAmount * 0.2,
+          }
+        );
     }
 
     return lineItems;
@@ -515,7 +515,7 @@ export class InvoiceService {
       notes: row.notes,
       terms: row.terms,
       createdAt: row.created_at,
-      updatedAt: row.updated_at
+      updatedAt: row.updated_at,
     };
   }
 }

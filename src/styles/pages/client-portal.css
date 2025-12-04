@@ -529,7 +529,9 @@ html[data-theme="dark"] .login-form label {
   transition: width 0.2s ease;
   position: relative;
   height: 100%;
-  box-shadow: 8px 0 40px rgba(0, 0, 0, 0.5), 4px 0 15px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    8px 0 40px rgba(0, 0, 0, 0.5),
+    4px 0 15px rgba(0, 0, 0, 0.3);
   z-index: 10;
 }
 
@@ -538,7 +540,9 @@ html[data-theme="dark"] .login-form label {
   min-width: 56px;
   /* Keep border and shadow when collapsed */
   border-right: 4px solid var(--color-dark);
-  box-shadow: 8px 0 40px rgba(0, 0, 0, 0.5), 4px 0 15px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    8px 0 40px rgba(0, 0, 0, 0.5),
+    4px 0 15px rgba(0, 0, 0, 0.3);
 }
 
 /* Sidebar Content */
@@ -636,7 +640,6 @@ html[data-theme="dark"] .login-form label {
 .sidebar.collapsed .sidebar-toggle .toggle-icon {
   transform: rotate(180deg);
 }
-
 
 /* Collapsed state avatar - hidden by default, shown when collapsed */
 .sidebar-collapsed-logo {
@@ -911,7 +914,9 @@ html[data-theme="dark"] .login-form label {
   color: var(--color-neutral-500);
   padding: 0.25rem;
   border-radius: 4px;
-  transition: color 0.2s ease, background 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
 }
 
 .file-delete-icon:hover {
@@ -1590,7 +1595,9 @@ html[data-theme="dark"] .login-form label {
   color: var(--color-neutral-100);
   margin: 0;
   text-transform: uppercase;
-  text-shadow: 4px 6px 6px #000000, 0 0 10px rgba(0, 0, 0, 0.9);
+  text-shadow:
+    4px 6px 6px #000000,
+    0 0 10px rgba(0, 0, 0, 0.9);
 }
 
 /* Sidebar toggle arrow in page header */
@@ -1605,7 +1612,9 @@ html[data-theme="dark"] .login-form label {
   font-family: var(--font--acme);
   font-size: clamp(1.25rem, 3.5vw, 1.75rem);
   color: var(--color-neutral-100);
-  text-shadow: 4px 6px 6px #000000, 0 0 10px rgba(0, 0, 0, 0.9);
+  text-shadow:
+    4px 6px 6px #000000,
+    0 0 10px rgba(0, 0, 0, 0.9);
   filter: drop-shadow(4px 6px 6px #000000) drop-shadow(0 0 10px rgba(0, 0, 0, 0.9));
 }
 
@@ -1618,7 +1627,9 @@ html[data-theme="dark"] .login-form label {
   transform: rotate(180deg);
   /* Adjust shadow to appear bottom-right after rotation (which is top-left in rotated space) */
   filter: drop-shadow(-4px -6px 6px #000000) drop-shadow(0 0 10px rgba(0, 0, 0, 0.9));
-  text-shadow: -4px -6px 6px #000000, 0 0 10px rgba(0, 0, 0, 0.9);
+  text-shadow:
+    -4px -6px 6px #000000,
+    0 0 10px rgba(0, 0, 0, 0.9);
 }
 
 /* Action Buttons */
@@ -3244,7 +3255,9 @@ html[data-theme="dark"] .login-form label {
     width: 20px;
     height: 2px;
     background: var(--color-dark);
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transition:
+      transform 0.3s ease,
+      opacity 0.3s ease;
   }
 
   /* Hamburger to X animation when menu open */
@@ -3272,7 +3285,9 @@ html[data-theme="dark"] .login-form label {
     z-index: 99;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition:
+      opacity 0.3s ease,
+      visibility 0.3s ease;
   }
 
   .mobile-overlay.active {

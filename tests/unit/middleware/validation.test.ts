@@ -12,7 +12,7 @@ import { Request, Response, NextFunction } from 'express';
 import {
   ApiValidator,
   validateRequest,
-  ValidationSchemas
+  ValidationSchemas,
 } from '../../../server/middleware/validation.js';
 
 // Mock logger
@@ -22,8 +22,8 @@ vi.mock('../../../server/services/logger.js', () => ({
     error: vi.fn(),
     warn: vi.fn(),
     debug: vi.fn(),
-    logSecurity: vi.fn()
-  }
+    logSecurity: vi.fn(),
+  },
 }));
 
 describe('ApiValidator', () => {
@@ -37,12 +37,12 @@ describe('ApiValidator', () => {
     it('should validate required fields successfully', () => {
       const schema = {
         name: { type: 'required' as const },
-        email: { type: 'required' as const }
+        email: { type: 'required' as const },
       };
 
       const validData = {
         name: 'John Doe',
-        email: 'john@example.com'
+        email: 'john@example.com',
       };
 
       const result = validator.validate(validData, schema);
@@ -55,11 +55,11 @@ describe('ApiValidator', () => {
     it('should fail validation for missing required fields', () => {
       const schema = {
         name: { type: 'required' as const },
-        email: { type: 'required' as const }
+        email: { type: 'required' as const },
       };
 
       const invalidData = {
-        name: 'John Doe'
+        name: 'John Doe',
         // email missing
       };
 
@@ -76,7 +76,7 @@ describe('ApiValidator', () => {
   describe('String Validation', () => {
     it('should validate string length constraints', () => {
       const schema = {
-        name: { type: 'string' as const, minLength: 2, maxLength: 50 }
+        name: { type: 'string' as const, minLength: 2, maxLength: 50 },
       };
 
       // Valid string
@@ -98,8 +98,8 @@ describe('ApiValidator', () => {
       const schema = {
         username: {
           type: 'string' as const,
-          pattern: /^[a-zA-Z0-9_]+$/
-        }
+          pattern: /^[a-zA-Z0-9_]+$/,
+        },
       };
 
       // Valid username
@@ -116,8 +116,8 @@ describe('ApiValidator', () => {
       const schema = {
         status: {
           type: 'string' as const,
-          allowedValues: ['active', 'inactive', 'pending']
-        }
+          allowedValues: ['active', 'inactive', 'pending'],
+        },
       };
 
       // Valid value
@@ -132,11 +132,11 @@ describe('ApiValidator', () => {
 
     it('should sanitize HTML content', () => {
       const schema = {
-        message: { type: 'string' as const }
+        message: { type: 'string' as const },
       };
 
       const maliciousData = {
-        message: '<script>alert("xss")</script>Hello world'
+        message: '<script>alert("xss")</script>Hello world',
       };
 
       const result = validator.validate(maliciousData, schema);
@@ -151,7 +151,7 @@ describe('ApiValidator', () => {
   describe('Email Validation', () => {
     it('should validate correct email formats', () => {
       const schema = {
-        email: { type: 'email' as const }
+        email: { type: 'email' as const },
       };
 
       const validEmails = ['test@example.com', 'user.name@domain.co.uk', 'user+tag@example.org'];
@@ -164,7 +164,7 @@ describe('ApiValidator', () => {
 
     it('should reject invalid email formats', () => {
       const schema = {
-        email: { type: 'email' as const }
+        email: { type: 'email' as const },
       };
 
       const invalidEmails = [
@@ -172,7 +172,7 @@ describe('ApiValidator', () => {
         '@domain.com',
         'user@',
         'user..name@domain.com',
-        'user@domain'
+        'user@domain',
       ];
 
       invalidEmails.forEach((email) => {
@@ -184,7 +184,7 @@ describe('ApiValidator', () => {
 
     it('should convert email to lowercase', () => {
       const schema = {
-        email: { type: 'email' as const }
+        email: { type: 'email' as const },
       };
 
       const result = validator.validate({ email: 'TEST@EXAMPLE.COM' }, schema);
@@ -195,7 +195,7 @@ describe('ApiValidator', () => {
 
     it('should detect disposable email domains', () => {
       const schema = {
-        email: { type: 'email' as const }
+        email: { type: 'email' as const },
       };
 
       const result = validator.validate({ email: 'test@10minutemail.com' }, schema);
@@ -208,7 +208,7 @@ describe('ApiValidator', () => {
   describe('Number Validation', () => {
     it('should validate number ranges', () => {
       const schema = {
-        age: { type: 'number' as const, min: 18, max: 100 }
+        age: { type: 'number' as const, min: 18, max: 100 },
       };
 
       // Valid number
@@ -228,7 +228,7 @@ describe('ApiValidator', () => {
 
     it('should convert string numbers', () => {
       const schema = {
-        count: { type: 'number' as const }
+        count: { type: 'number' as const },
       };
 
       const result = validator.validate({ count: '42' }, schema);
@@ -239,7 +239,7 @@ describe('ApiValidator', () => {
 
     it('should reject invalid numbers', () => {
       const schema = {
-        value: { type: 'number' as const }
+        value: { type: 'number' as const },
       };
 
       const result = validator.validate({ value: 'not-a-number' }, schema);
@@ -252,7 +252,7 @@ describe('ApiValidator', () => {
   describe('Boolean Validation', () => {
     it('should validate boolean values', () => {
       const schema = {
-        active: { type: 'boolean' as const }
+        active: { type: 'boolean' as const },
       };
 
       // Native boolean
@@ -267,7 +267,7 @@ describe('ApiValidator', () => {
 
     it('should convert string boolean representations', () => {
       const schema = {
-        enabled: { type: 'boolean' as const }
+        enabled: { type: 'boolean' as const },
       };
 
       const truthyValues = ['true', 'TRUE', '1'];
@@ -288,7 +288,7 @@ describe('ApiValidator', () => {
 
     it('should reject invalid boolean values', () => {
       const schema = {
-        flag: { type: 'boolean' as const }
+        flag: { type: 'boolean' as const },
       };
 
       const result = validator.validate({ flag: 'maybe' }, schema);
@@ -301,7 +301,7 @@ describe('ApiValidator', () => {
   describe('Array Validation', () => {
     it('should validate array length constraints', () => {
       const schema = {
-        tags: { type: 'array' as const, minLength: 1, maxLength: 5 }
+        tags: { type: 'array' as const, minLength: 1, maxLength: 5 },
       };
 
       // Valid array
@@ -321,7 +321,7 @@ describe('ApiValidator', () => {
 
     it('should reject non-array values', () => {
       const schema = {
-        items: { type: 'array' as const }
+        items: { type: 'array' as const },
       };
 
       const result = validator.validate({ items: 'not-an-array' }, schema);
@@ -341,8 +341,8 @@ describe('ApiValidator', () => {
               (value.length >= 8 && /[A-Z]/.test(value) && /[0-9]/.test(value)) ||
               'Password must be at least 8 characters with uppercase and number'
             );
-          }
-        }
+          },
+        },
       };
 
       // Valid password
@@ -360,8 +360,8 @@ describe('ApiValidator', () => {
         username: {
           type: 'custom' as const,
           customValidator: () => true,
-          customSanitizer: (value: string) => value.toLowerCase().trim()
-        }
+          customSanitizer: (value: string) => value.toLowerCase().trim(),
+        },
       };
 
       const result = validator.validate({ username: '  JOHN_DOE  ' }, schema);
@@ -374,7 +374,7 @@ describe('ApiValidator', () => {
   describe('Multiple Rules', () => {
     it('should apply multiple validation rules to the same field', () => {
       const schema = {
-        email: [{ type: 'required' as const }, { type: 'email' as const }]
+        email: [{ type: 'required' as const }, { type: 'email' as const }],
       };
 
       // Missing field
@@ -407,12 +407,12 @@ describe('validateRequest Middleware', () => {
       headers: {},
       ip: '127.0.0.1',
       path: '/test',
-      method: 'POST'
+      method: 'POST',
     };
 
     mockRes = {
       status: vi.fn().mockReturnThis(),
-      json: vi.fn().mockReturnThis()
+      json: vi.fn().mockReturnThis(),
     };
 
     mockNext = vi.fn() as unknown as NextFunction;
@@ -421,12 +421,12 @@ describe('validateRequest Middleware', () => {
   it('should validate request body and call next on success', async () => {
     const schema = {
       name: { type: 'required' as const },
-      email: { type: 'email' as const }
+      email: { type: 'email' as const },
     };
 
     mockReq.body = {
       name: 'John Doe',
-      email: 'john@example.com'
+      email: 'john@example.com',
     };
 
     const middleware = validateRequest(schema);
@@ -439,11 +439,11 @@ describe('validateRequest Middleware', () => {
   it('should return 400 error on validation failure', async () => {
     const schema = {
       name: { type: 'required' as const },
-      email: { type: 'email' as const }
+      email: { type: 'email' as const },
     };
 
     mockReq.body = {
-      email: 'invalid-email'
+      email: 'invalid-email',
       // name missing
     };
 
@@ -456,14 +456,14 @@ describe('validateRequest Middleware', () => {
       expect.objectContaining({
         success: false,
         error: 'Validation failed',
-        code: 'VALIDATION_ERROR'
+        code: 'VALIDATION_ERROR',
       })
     );
   });
 
   it('should validate query parameters when enabled', async () => {
     const schema = {
-      page: { type: 'number' as const, min: 1 }
+      page: { type: 'number' as const, min: 1 },
     };
 
     mockReq.query = { page: '5' };
@@ -477,12 +477,12 @@ describe('validateRequest Middleware', () => {
 
   it('should strip unknown fields when enabled', async () => {
     const schema = {
-      name: { type: 'string' as const }
+      name: { type: 'string' as const },
     };
 
     mockReq.body = {
       name: 'John Doe',
-      unwantedField: 'should be removed'
+      unwantedField: 'should be removed',
     };
 
     const middleware = validateRequest(schema, { stripUnknownFields: true });
@@ -507,7 +507,7 @@ describe('ValidationSchemas', () => {
         name: 'John Doe',
         email: 'john@example.com',
         subject: 'Website Inquiry',
-        message: 'I would like to know more about your services and how we can work together.'
+        message: 'I would like to know more about your services and how we can work together.',
       };
 
       const result = validator.validate(contactData, ValidationSchemas.contact);
@@ -520,7 +520,7 @@ describe('ValidationSchemas', () => {
       const spamData = {
         name: 'Spammer',
         email: 'spam@example.com',
-        message: 'BUY NOW! CLICK HERE for URGENT limited time offer!'
+        message: 'BUY NOW! CLICK HERE for URGENT limited time offer!',
       };
 
       const result = validator.validate(spamData, ValidationSchemas.contact);
@@ -545,7 +545,7 @@ describe('ValidationSchemas', () => {
         timeline: '1-3-months',
         description:
           'We need a professional business website to showcase our services and attract new customers.',
-        features: ['contact-form', 'analytics', 'cms']
+        features: ['contact-form', 'analytics', 'cms'],
       };
 
       const result = validator.validate(intakeData, ValidationSchemas.clientIntake);
@@ -561,7 +561,7 @@ describe('ValidationSchemas', () => {
         projectType: 'invalid-type', // Not in allowed values
         budgetRange: '2k-5k',
         timeline: '1-3-months',
-        description: 'Test description that meets minimum length requirements.'
+        description: 'Test description that meets minimum length requirements.',
       };
 
       const result = validator.validate(invalidData, ValidationSchemas.clientIntake);
@@ -580,7 +580,7 @@ describe('ValidationSchemas', () => {
       const userData = {
         name: 'John Doe',
         email: 'john@example.com',
-        password: 'StrongPass123!'
+        password: 'StrongPass123!',
       };
 
       const result = validator.validate(userData, ValidationSchemas.user);
@@ -592,7 +592,7 @@ describe('ValidationSchemas', () => {
       const userData = {
         name: 'John Doe',
         email: 'john@example.com',
-        password: 'weak'
+        password: 'weak',
       };
 
       const result = validator.validate(userData, ValidationSchemas.user);

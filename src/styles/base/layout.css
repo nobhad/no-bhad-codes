@@ -68,7 +68,8 @@ main {
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  scroll-snap-type: y mandatory;
+  /* Disabled scroll-snap to fix scroll jumping issues */
+  /* scroll-snap-type: y proximity; */
 }
 
 /* ============================================
@@ -94,8 +95,9 @@ main > section {
   width: 100%;
   position: relative;
   overflow: hidden;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+  /* Disabled scroll-snap to fix scroll jumping issues */
+  /* scroll-snap-align: start; */
+  /* scroll-snap-stop: always; */
 }
 
 /* Section base styles - fill main content area */
@@ -326,7 +328,8 @@ main {
 
 /* CSS Fallback Animation - ensures header background shows even if JS fails */
 @keyframes intro-fallback-show {
-  0%, 90% {
+  0%,
+  90% {
     background: transparent;
   }
   100% {

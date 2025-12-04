@@ -197,9 +197,8 @@ export class Application {
         name: 'SectionCardInteractions',
         type: 'dom',
         factory: async () => {
-          const { BusinessCardInteractions } = await import(
-            '../modules/business-card-interactions'
-          );
+          const { BusinessCardInteractions } =
+            await import('../modules/business-card-interactions');
           const renderer = await container.resolve('SectionCardRenderer');
           return new BusinessCardInteractions(renderer as any);
         },
@@ -226,8 +225,12 @@ export class Application {
         factory: async () => {
           const { ContactFormModule } = await import('../modules/contact-form');
           const _contactService = await container.resolve('ContactService');
+          // Use custom backend with /api/contact for local development
+          const isDevelopment = window.location.hostname === 'localhost' ||
+                               window.location.hostname === '127.0.0.1';
           return new ContactFormModule({
-            backend: 'netlify' // Will use the ContactService configuration
+            backend: isDevelopment ? 'custom' : 'netlify',
+            endpoint: isDevelopment ? '/api/contact' : undefined
           });
         },
         dependencies: ['ContactService']
@@ -520,10 +523,7 @@ export class Application {
     ];
 
     // Modules for Client Portal dashboard
-    const clientPortalModules = [
-      'ThemeModule',
-      'ClientPortalModule'
-    ];
+    const clientPortalModules = ['ThemeModule', 'ClientPortalModule'];
 
     // Modules for Client Landing page (login/intake selection)
     const clientLandingModules = [
@@ -534,17 +534,10 @@ export class Application {
     ];
 
     // Modules for Client Intake form
-    const clientIntakeModules = [
-      'ThemeModule',
-      'NavigationModule',
-      'FooterModule'
-    ];
+    const clientIntakeModules = ['ThemeModule', 'NavigationModule', 'FooterModule'];
 
     // Modules for Admin Dashboard only
-    const adminModules = [
-      'ThemeModule',
-      'AdminDashboardModule'
-    ];
+    const adminModules = ['ThemeModule', 'AdminDashboardModule'];
 
     // Select appropriate modules based on page type
     let baseCoreModules: string[];

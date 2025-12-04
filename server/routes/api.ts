@@ -18,7 +18,7 @@ import {
   rateLimit,
   csrfProtection,
   requestSizeLimit,
-  suspiciousActivityDetector
+  suspiciousActivityDetector,
 } from '../middleware/security.js';
 import { logger } from '../services/logger.js';
 import { getDatabase } from '../database/init.js';
@@ -37,15 +37,15 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = `${Date.now()  }-${  Math.round(Math.random() * 1e9)}`;
-    cb(null, `${file.fieldname  }-${  uniqueSuffix  }${extname(file.originalname)}`);
-  }
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`);
+  },
 });
 
 const upload = multer({
   storage,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
+    fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: (req, file, cb) => {
     // Allow common file types
@@ -58,7 +58,7 @@ const upload = multer({
     } else {
       cb(new Error('Invalid file type. Only images, PDFs, documents, and archives are allowed.'));
     }
-  }
+  },
 });
 
 // Global API middleware
@@ -66,7 +66,7 @@ router.use(
   requestSizeLimit({
     maxBodySize: 10 * 1024 * 1024, // 10MB
     maxUrlLength: 2048,
-    maxHeaderSize: 8192
+    maxHeaderSize: 8192,
   })
 );
 
@@ -75,7 +75,7 @@ router.use(
     maxPathTraversal: 3,
     maxSqlInjectionAttempts: 3,
     maxXssAttempts: 3,
-    blockDuration: 24 * 60 * 60 * 1000
+    blockDuration: 24 * 60 * 60 * 1000,
   })
 );
 
@@ -84,7 +84,7 @@ router.use(
   rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     maxRequests: 100,
-    message: 'Too many API requests'
+    message: 'Too many API requests',
   })
 );
 
@@ -98,22 +98,25 @@ router.post(
     windowMs: 60 * 60 * 1000, // 1 hour
     maxRequests: 5,
     keyGenerator: (req) => req.ip || 'unknown',
-    message: 'Too many contact form submissions'
+    message: 'Too many contact form submissions',
   }),
 
   // Validate contact form data
   validateRequest(ValidationSchemas.contact, {
     validateBody: true,
-    stripUnknownFields: true
+    stripUnknownFields: true,
   }),
 
   async (req, res) => {
     try {
-      const { name, email, subject, message } = req.body;
+      const { firstName, lastName, email, subject, inquiryType, companyName, message } = req.body;
+      // Support both name field and firstName/lastName
+      const name = req.body.name || `${firstName || ''} ${lastName || ''}`.trim();
+      const subjectLine = subject || inquiryType || 'Contact Form Submission';
       const requestId = (req.headers['x-request-id'] as string) || 'unknown';
 
       await logger.info(
-        `Contact form submission received - from: ${email}, subject: ${subject}, requestId: ${requestId}`
+        `Contact form submission received - from: ${email}, subject: ${subjectLine}, requestId: ${requestId}`
       );
 
       // Send email notification to admin
@@ -125,7 +128,15 @@ router.post(
         await db.run(
           `INSERT INTO contact_submissions (name, email, subject, message, ip_address, user_agent, message_id)
            VALUES (?, ?, ?, ?, ?, ?, ?)`,
-          [name, email, subject, message, req.ip || 'unknown', req.get('User-Agent') || 'unknown', messageId]
+          [
+            name,
+            email,
+            subjectLine,
+            message,
+            req.ip || 'unknown',
+            req.get('User-Agent') || 'unknown',
+            messageId,
+          ]
         );
         await logger.info(`Contact form saved to database - messageId: ${messageId}`);
       } catch (dbError) {
@@ -136,12 +147,12 @@ router.post(
       try {
         await emailService.sendEmail({
           to: process.env.ADMIN_EMAIL || 'admin@nobhadcodes.com',
-          subject: `Contact Form: ${subject}`,
+          subject: `Contact Form: ${subjectLine}`,
           text: `
 New contact form submission:
 
 From: ${name} (${email})
-Subject: ${subject}
+${companyName ? `Company: ${companyName}\n` : ''}Subject: ${subjectLine}
 Message:
 ${message}
 
@@ -163,9 +174,13 @@ Received: ${new Date().toISOString()}
       <td style="padding: 8px; background: #f5f5f5; font-weight: bold;">Email:</td>
       <td style="padding: 8px;"><a href="mailto:${email}">${email}</a></td>
     </tr>
+    ${companyName ? `<tr>
+      <td style="padding: 8px; background: #f5f5f5; font-weight: bold;">Company:</td>
+      <td style="padding: 8px;">${companyName}</td>
+    </tr>` : ''}
     <tr>
       <td style="padding: 8px; background: #f5f5f5; font-weight: bold;">Subject:</td>
-      <td style="padding: 8px;">${subject}</td>
+      <td style="padding: 8px;">${subjectLine}</td>
     </tr>
   </table>
 
@@ -181,7 +196,7 @@ Received: ${new Date().toISOString()}
     Received: ${new Date().toLocaleString()}
   </p>
 </div>
-          `.trim()
+          `.trim(),
         });
 
         await logger.info(
@@ -201,7 +216,7 @@ Received: ${new Date().toISOString()}
       res.json({
         success: true,
         message: 'Your message has been sent successfully',
-        messageId
+        messageId,
       });
     } catch (error) {
       const err = error as Error;
@@ -210,7 +225,7 @@ Received: ${new Date().toISOString()}
       res.status(500).json({
         success: false,
         error: 'Failed to process contact form',
-        code: 'CONTACT_PROCESSING_ERROR'
+        code: 'CONTACT_PROCESSING_ERROR',
       });
     }
   }
@@ -226,13 +241,13 @@ router.post(
     windowMs: 24 * 60 * 60 * 1000, // 24 hours
     maxRequests: 3,
     keyGenerator: (req) => req.body.email || req.ip,
-    message: 'Too many intake form submissions'
+    message: 'Too many intake form submissions',
   }),
 
   // Validate intake form data
   validateRequest(ValidationSchemas.clientIntake, {
     validateBody: true,
-    stripUnknownFields: true
+    stripUnknownFields: true,
   }),
 
   async (req, res) => {
@@ -269,7 +284,7 @@ router.post(
           intakeData.budget || null,
           intakeData.timeline || null,
           intakeData.projectDescription || intakeData['project-description'],
-          intakeData.additionalInfo || intakeData['additional-info'] || null
+          intakeData.additionalInfo || intakeData['additional-info'] || null,
         ]
       );
 
@@ -283,7 +298,7 @@ router.post(
           companyName: intakeData.companyName || intakeData['company-name'],
           projectType: intakeData.projectType || intakeData['project-type'],
           budget: intakeData.budget || 'Not specified',
-          timeline: intakeData.timeline || 'Not specified'
+          timeline: intakeData.timeline || 'Not specified',
         });
       } catch (emailError) {
         await logger.error('Failed to send admin notification email');
@@ -296,7 +311,7 @@ router.post(
           to: intakeData.email,
           name: intakeData.firstName || intakeData['first-name'],
           intakeId,
-          estimatedResponseTime: '24-48 hours'
+          estimatedResponseTime: '24-48 hours',
         });
       } catch (emailError) {
         await logger.error('Failed to send client confirmation email');
@@ -309,7 +324,7 @@ router.post(
         message:
           'Your intake form has been submitted successfully. We will review your project requirements and get back to you within 24-48 hours.',
         intakeId,
-        estimatedResponseTime: '24-48 hours'
+        estimatedResponseTime: '24-48 hours',
       });
     } catch (error) {
       const err = error as Error;
@@ -318,7 +333,7 @@ router.post(
       res.status(500).json({
         success: false,
         error: 'Failed to process intake form. Please try again or contact support.',
-        code: 'INTAKE_PROCESSING_ERROR'
+        code: 'INTAKE_PROCESSING_ERROR',
       });
     }
   }
@@ -333,7 +348,7 @@ router.post(
   rateLimit({
     windowMs: 10 * 60 * 1000, // 10 minutes
     maxRequests: 10,
-    message: 'Too many file uploads'
+    message: 'Too many file uploads',
   }),
 
   // Add multer middleware for file handling
@@ -346,7 +361,7 @@ router.post(
         return res.status(400).json({
           success: false,
           error: 'No file uploaded',
-          code: 'NO_FILE'
+          code: 'NO_FILE',
         });
       }
 
@@ -357,7 +372,7 @@ router.post(
         mimetype: req.file.mimetype,
         size: req.file.size,
         url: `/uploads/general/${req.file.filename}`,
-        uploadedAt: new Date().toISOString()
+        uploadedAt: new Date().toISOString(),
       };
 
       // Save file metadata to database (optional)
@@ -382,7 +397,7 @@ router.post(
       res.status(201).json({
         success: true,
         message: 'File uploaded successfully',
-        file: { ...fileInfo, id: fileId > 0 ? fileId : fileInfo.id }
+        file: { ...fileInfo, id: fileId > 0 ? fileId : fileInfo.id },
       });
     } catch (error) {
       const err = error as Error;
@@ -391,7 +406,7 @@ router.post(
       res.status(500).json({
         success: false,
         error: 'File upload failed',
-        code: 'UPLOAD_ERROR'
+        code: 'UPLOAD_ERROR',
       });
     }
   }
@@ -406,7 +421,7 @@ router.get(
   rateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
     maxRequests: 20,
-    message: 'Too many health check requests'
+    message: 'Too many health check requests',
   }),
 
   async (req, res) => {
@@ -416,12 +431,12 @@ router.get(
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         memory: process.memoryUsage(),
-        environment: process.env.NODE_ENV || 'development'
+        environment: process.env.NODE_ENV || 'development',
       };
 
       res.json({
         success: true,
-        data: health
+        data: health,
       });
     } catch (error) {
       const err = error as Error;
@@ -430,7 +445,7 @@ router.get(
       res.status(500).json({
         success: false,
         error: 'Health check failed',
-        code: 'HEALTH_CHECK_ERROR'
+        code: 'HEALTH_CHECK_ERROR',
       });
     }
   }
@@ -446,13 +461,13 @@ router.post(
     windowMs: 60 * 60 * 1000, // 1 hour
     maxRequests: 5,
     keyGenerator: (req) => req.ip || 'unknown',
-    message: 'Too many registration attempts'
+    message: 'Too many registration attempts',
   }),
 
   // Validate user registration data
   validateRequest(ValidationSchemas.user, {
     validateBody: true,
-    stripUnknownFields: true
+    stripUnknownFields: true,
   }),
 
   async (req, res) => {
@@ -473,7 +488,7 @@ router.post(
         return res.status(409).json({
           success: false,
           error: 'User already exists',
-          code: 'USER_EXISTS'
+          code: 'USER_EXISTS',
         });
       }
 
@@ -497,7 +512,7 @@ router.post(
       }
 
       const accessToken = jwt.sign({ id: userId, email, type: 'client' }, jwtSecret, {
-        expiresIn: process.env.JWT_EXPIRES_IN || '7d'
+        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
       } as SignOptions);
 
       // Send welcome email
@@ -521,7 +536,7 @@ router.post(
         success: true,
         message: 'Registration successful',
         userId,
-        token: accessToken
+        token: accessToken,
       });
     } catch (error) {
       const err = error as Error;
@@ -530,7 +545,7 @@ router.post(
       res.status(500).json({
         success: false,
         error: 'Registration failed',
-        code: 'REGISTRATION_ERROR'
+        code: 'REGISTRATION_ERROR',
       });
     }
   }
@@ -543,7 +558,7 @@ router.get(
   '/data',
   validateRequest(ValidationSchemas.pagination, {
     validateQuery: true,
-    stripUnknownFields: false
+    stripUnknownFields: false,
   }),
 
   async (req, res) => {
@@ -596,18 +611,18 @@ router.get(
           page: pageNum,
           limit: limitNum,
           total,
-          totalPages
+          totalPages,
         },
         meta: {
           sortBy: sortField,
           sortOrder: order,
-          search: search || null
-        }
+          search: search || null,
+        },
       };
 
       res.json({
         success: true,
-        ...result
+        ...result,
       });
     } catch (error) {
       const err = error as Error;
@@ -616,7 +631,7 @@ router.get(
       res.status(500).json({
         success: false,
         error: 'Data query failed',
-        code: 'DATA_QUERY_ERROR'
+        code: 'DATA_QUERY_ERROR',
       });
     }
   }
@@ -629,7 +644,7 @@ router.get(
   '/status',
   rateLimit({
     windowMs: 5 * 60 * 1000, // 5 minutes
-    maxRequests: 10
+    maxRequests: 10,
   }),
 
   async (req, res) => {
@@ -647,12 +662,12 @@ router.get(
         const [usersRow, activeUsersRow, projectsRow, activeProjectsRow, invoicesRow] =
           await Promise.all([
             db.get('SELECT COUNT(*) as count FROM users'),
-            db.get('SELECT COUNT(*) as count FROM users WHERE status = \'active\''),
+            db.get("SELECT COUNT(*) as count FROM users WHERE status = 'active'"),
             db.get('SELECT COUNT(*) as count FROM projects'),
             db.get(
-              'SELECT COUNT(*) as count FROM projects WHERE status IN (\'in-progress\', \'pending\')'
+              "SELECT COUNT(*) as count FROM projects WHERE status IN ('in-progress', 'pending')"
             ),
-            db.get('SELECT COUNT(*) as count FROM invoices')
+            db.get('SELECT COUNT(*) as count FROM invoices'),
           ]);
 
         totalUsers = usersRow?.count || 0;
@@ -674,27 +689,27 @@ router.get(
         database: {
           users: {
             total: totalUsers,
-            active: activeUsers
+            active: activeUsers,
           },
           projects: {
             total: totalProjects,
-            active: activeProjects
+            active: activeProjects,
           },
           invoices: {
-            total: totalInvoices
-          }
+            total: totalInvoices,
+          },
         },
         requests: {
           rateLimit: {
             remaining: res.get('X-RateLimit-Remaining'),
-            reset: res.get('X-RateLimit-Reset')
-          }
-        }
+            reset: res.get('X-RateLimit-Reset'),
+          },
+        },
       };
 
       res.json({
         success: true,
-        data: status
+        data: status,
       });
     } catch (error) {
       const err = error as Error;
@@ -703,7 +718,7 @@ router.get(
       res.status(500).json({
         success: false,
         error: 'Status check failed',
-        code: 'STATUS_ERROR'
+        code: 'STATUS_ERROR',
       });
     }
   }
@@ -717,7 +732,7 @@ router.use(async (req, res) => {
     success: false,
     error: 'API endpoint not found',
     code: 'ENDPOINT_NOT_FOUND',
-    path: req.path
+    path: req.path,
   });
 });
 
@@ -734,7 +749,7 @@ router.use(async (error: any, req: any, res: any, next: any) => {
     success: false,
     error: error.message || 'Internal server error',
     code: error.code || 'INTERNAL_ERROR',
-    requestId: req.headers['x-request-id']
+    requestId: req.headers['x-request-id'],
   });
 });
 

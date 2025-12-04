@@ -26,16 +26,16 @@ const storage = multer.diskStorage({
     cb(null, path.join(__dirname, '../../uploads/messages/'));
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = `${Date.now()  }-${  Math.round(Math.random() * 1e9)}`;
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
+  },
 });
 
 const upload = multer({
   storage,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit for message attachments
-    files: 3 // Max 3 files per message
+    files: 3, // Max 3 files per message
   },
   fileFilter: (req, file, cb) => {
     // Allow common attachment types
@@ -47,8 +47,7 @@ const upload = multer({
       return cb(null, true);
     }
     cb(new Error('Invalid attachment type'));
-
-  }
+  },
 });
 
 // ===================================
@@ -118,7 +117,7 @@ router.post(
     if (!subject || subject.trim().length === 0) {
       return res.status(400).json({
         error: 'Subject is required',
-        code: 'MISSING_SUBJECT'
+        code: 'MISSING_SUBJECT',
       });
     }
 
@@ -132,14 +131,14 @@ router.post(
       } else {
         project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
           project_id,
-          req.user!.id
+          req.user!.id,
         ]);
       }
 
       if (!project) {
         return res.status(404).json({
           error: 'Project not found or access denied',
-          code: 'PROJECT_NOT_FOUND'
+          code: 'PROJECT_NOT_FOUND',
         });
       }
     }
@@ -163,7 +162,7 @@ router.post(
 
     res.status(201).json({
       message: 'Message thread created successfully',
-      thread: newThread
+      thread: newThread,
     });
   })
 );
@@ -182,7 +181,7 @@ router.post(
     if (!message || message.trim().length === 0) {
       return res.status(400).json({
         error: 'Message content is required',
-        code: 'MISSING_MESSAGE'
+        code: 'MISSING_MESSAGE',
       });
     }
 
@@ -195,14 +194,14 @@ router.post(
     } else {
       thread = await db.get('SELECT * FROM message_threads WHERE id = ? AND client_id = ?', [
         threadId,
-        req.user!.id
+        req.user!.id,
       ]);
     }
 
     if (!thread) {
       return res.status(404).json({
         error: 'Message thread not found',
-        code: 'THREAD_NOT_FOUND'
+        code: 'THREAD_NOT_FOUND',
       });
     }
 
@@ -215,7 +214,7 @@ router.post(
           originalName: file.originalname,
           path: file.path,
           size: file.size,
-          mimeType: file.mimetype
+          mimeType: file.mimetype,
         }))
       );
     }
@@ -239,7 +238,7 @@ router.post(
         priority,
         reply_to || null,
         attachmentData,
-        threadId
+        threadId,
       ]
     );
 
@@ -267,7 +266,7 @@ router.post(
       if (recipientType === 'client') {
         // Notify client
         const client = await db.get('SELECT email, contact_name FROM clients WHERE id = ?', [
-          thread.client_id
+          thread.client_id,
         ]);
 
         if (client) {
@@ -278,7 +277,7 @@ router.post(
             message: message.trim(),
             threadId: threadId,
             portalUrl: `${process.env.CLIENT_PORTAL_URL || 'https://nobhadcodes.com/client/portal.html'}?thread=${threadId}`,
-            hasAttachments: attachments && attachments.length > 0
+            hasAttachments: attachments && attachments.length > 0,
           });
         }
       } else {
@@ -291,9 +290,9 @@ router.post(
             subject: thread.subject,
             clientId: thread.client_id,
             message: message.trim(),
-            hasAttachments: attachments && attachments.length > 0
+            hasAttachments: attachments && attachments.length > 0,
           },
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
     } catch (emailError) {
@@ -303,7 +302,7 @@ router.post(
 
     res.status(201).json({
       message: 'Message sent successfully',
-      messageData: newMessage
+      messageData: newMessage,
     });
   })
 );
@@ -324,14 +323,14 @@ router.get(
     } else {
       thread = await db.get('SELECT * FROM message_threads WHERE id = ? AND client_id = ?', [
         threadId,
-        req.user!.id
+        req.user!.id,
       ]);
     }
 
     if (!thread) {
       return res.status(404).json({
         error: 'Message thread not found',
-        code: 'THREAD_NOT_FOUND'
+        code: 'THREAD_NOT_FOUND',
       });
     }
 
@@ -362,7 +361,7 @@ router.get(
 
     res.json({
       thread,
-      messages
+      messages,
     });
   })
 );
@@ -383,14 +382,14 @@ router.put(
     } else {
       thread = await db.get('SELECT * FROM message_threads WHERE id = ? AND client_id = ?', [
         threadId,
-        req.user!.id
+        req.user!.id,
       ]);
     }
 
     if (!thread) {
       return res.status(404).json({
         error: 'Message thread not found',
-        code: 'THREAD_NOT_FOUND'
+        code: 'THREAD_NOT_FOUND',
       });
     }
 
@@ -405,7 +404,7 @@ router.put(
     );
 
     res.json({
-      message: 'Messages marked as read'
+      message: 'Messages marked as read',
     });
   })
 );
@@ -427,7 +426,7 @@ router.post(
     if (!subject || !message) {
       return res.status(400).json({
         error: 'Subject and message are required',
-        code: 'MISSING_REQUIRED_FIELDS'
+        code: 'MISSING_REQUIRED_FIELDS',
       });
     }
 
@@ -453,7 +452,7 @@ router.post(
           originalName: file.originalname,
           path: file.path,
           size: file.size,
-          mimeType: file.mimetype
+          mimeType: file.mimetype,
         }))
       );
     }
@@ -476,7 +475,7 @@ router.post(
         message_type,
         priority,
         attachmentData,
-        threadId
+        threadId,
       ]
     );
 
@@ -491,9 +490,9 @@ router.post(
           clientId: req.user!.id,
           threadId: threadId,
           priority: priority,
-          hasAttachments: attachments && attachments.length > 0
+          hasAttachments: attachments && attachments.length > 0,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     } catch (emailError) {
       console.error('Failed to send admin notification:', emailError);
@@ -501,7 +500,7 @@ router.post(
 
     res.status(201).json({
       message: 'Inquiry sent successfully',
-      threadId: threadId
+      threadId: threadId,
     });
   })
 );
@@ -519,7 +518,7 @@ router.get(
     const db = getDatabase();
 
     let preferences = await db.get('SELECT * FROM notification_preferences WHERE client_id = ?', [
-      req.user!.id
+      req.user!.id,
     ]);
 
     if (!preferences) {
@@ -533,7 +532,7 @@ router.get(
       );
 
       preferences = await db.get('SELECT * FROM notification_preferences WHERE id = ?', [
-        result.lastID
+        result.lastID,
       ]);
     }
 
@@ -554,7 +553,7 @@ router.put(
       milestone_updates,
       invoice_notifications,
       marketing_emails,
-      notification_frequency
+      notification_frequency,
     } = req.body;
 
     const db = getDatabase();
@@ -568,7 +567,7 @@ router.put(
       'milestone_updates',
       'invoice_notifications',
       'marketing_emails',
-      'notification_frequency'
+      'notification_frequency',
     ];
 
     for (const field of allowedFields) {
@@ -581,7 +580,7 @@ router.put(
     if (updates.length === 0) {
       return res.status(400).json({
         error: 'No valid fields to update',
-        code: 'NO_UPDATES'
+        code: 'NO_UPDATES',
       });
     }
 
@@ -603,7 +602,7 @@ router.put(
 
     res.json({
       message: 'Notification preferences updated successfully',
-      preferences: updatedPreferences
+      preferences: updatedPreferences,
     });
   })
 );
@@ -652,7 +651,7 @@ router.get(
 
     res.json({
       analytics,
-      recentActivity
+      recentActivity,
     });
   })
 );

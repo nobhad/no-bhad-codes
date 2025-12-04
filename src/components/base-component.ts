@@ -35,9 +35,9 @@ export interface ComponentHooks {
 }
 
 export abstract class BaseComponent<
-    P extends ComponentProps = ComponentProps,
-    S extends ComponentState = ComponentState,
-  >
+  P extends ComponentProps = ComponentProps,
+  S extends ComponentState = ComponentState,
+>
   extends BaseModule
   implements ComponentHooks {
   protected props: P;

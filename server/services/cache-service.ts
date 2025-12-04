@@ -48,7 +48,7 @@ export class CacheService {
     misses: 0,
     sets: 0,
     deletes: 0,
-    errors: 0
+    errors: 0,
   };
   private config: CacheConfig | null = null;
 
@@ -80,7 +80,7 @@ export class CacheService {
         reconnectOnError: (err) => {
           const targetError = 'READONLY';
           return err.message.includes(targetError);
-        }
+        },
       });
 
       // Set up event listeners
@@ -102,7 +102,7 @@ export class CacheService {
 
         errorTracker.captureException(error, {
           tags: { component: 'redis-cache' },
-          extra: { config: this.config }
+          extra: { config: this.config },
         });
       });
 
@@ -431,7 +431,7 @@ export class CacheService {
       return {
         ...this.stats,
         memoryUsage,
-        keyCount
+        keyCount,
       };
     } catch (error) {
       console.error('Error getting cache stats:', error);

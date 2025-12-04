@@ -517,7 +517,9 @@ body[data-page="client-landing"] .client-login,
   box-shadow:
     6px 6px 12px rgba(0, 0, 0, 0.2),
     12px 12px 24px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 /* Dark mode: keep border black and darker shadows */

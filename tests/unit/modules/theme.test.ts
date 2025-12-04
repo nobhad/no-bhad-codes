@@ -14,17 +14,17 @@ import { ThemeModule } from '@/modules/theme';
 const mockLocalStorage = {
   getItem: vi.fn(),
   setItem: vi.fn(),
-  removeItem: vi.fn()
+  removeItem: vi.fn(),
 };
 Object.defineProperty(window, 'localStorage', {
-  value: mockLocalStorage
+  value: mockLocalStorage,
 });
 
 // Mock dispatchEvent for testing event emissions
 const mockDispatchEvent = vi.fn();
 Object.defineProperty(document, 'dispatchEvent', {
   value: mockDispatchEvent,
-  writable: true
+  writable: true,
 });
 
 // Mock state manager with stateful mock
@@ -52,7 +52,7 @@ vi.mock('../../../src/core/state.js', () => ({
         if (index > -1) mockSubscribers.splice(index, 1);
       };
     }),
-    destroy: vi.fn()
+    destroy: vi.fn(),
   })),
   appState: {
     setState: vi.fn((updates: any) => {
@@ -74,8 +74,8 @@ vi.mock('../../../src/core/state.js', () => ({
         if (index > -1) mockSubscribers.splice(index, 1);
       };
     }),
-    destroy: vi.fn()
-  }
+    destroy: vi.fn(),
+  },
 }));
 
 describe('ThemeModule', () => {
@@ -132,8 +132,8 @@ describe('ThemeModule', () => {
         removeListener: vi.fn(),
         addEventListener: vi.fn(),
         removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn()
-      }))
+        dispatchEvent: vi.fn(),
+      })),
     });
   });
 

@@ -3,23 +3,23 @@ import type { Meta, StoryObj } from '@storybook/html';
 const meta: Meta = {
   title: 'Components/Intake Form',
   parameters: {
-    layout: 'padded'
+    layout: 'padded',
   },
   argTypes: {
     showHeader: {
       control: 'boolean',
-      description: 'Show form header'
+      description: 'Show form header',
     },
     formStyle: {
       control: 'select',
       options: ['full', 'basic', 'minimal'],
-      description: 'Form complexity'
-    }
+      description: 'Form complexity',
+    },
   },
   args: {
     showHeader: true,
-    formStyle: 'full'
-  }
+    formStyle: 'full',
+  },
 };
 
 export default meta;
@@ -31,8 +31,8 @@ const createIntakeForm = (args: any) => {
   return `
     <div style="max-width: 800px; margin: 0 auto;">
       ${
-  showHeader
-    ? `
+        showHeader
+          ? `
         <header class="intake-header">
           <div class="container">
             <h1>NO BHAD CODES</h1>
@@ -40,8 +40,8 @@ const createIntakeForm = (args: any) => {
           </div>
         </header>
       `
-    : ''
-}
+          : ''
+      }
 
       <div class="intake-form-container">
         <h2>Tell us about your project</h2>
@@ -69,8 +69,8 @@ const createIntakeForm = (args: any) => {
             </div>
 
             ${
-  formStyle !== 'minimal'
-    ? `
+              formStyle !== 'minimal'
+                ? `
               <div class="form-row">
                 <div class="form-group">
                   <label for="budget">Budget Range</label>
@@ -99,13 +99,13 @@ const createIntakeForm = (args: any) => {
                 </div>
               </div>
             `
-    : ''
-}
+                : ''
+            }
           </div>
 
           ${
-  formStyle === 'full'
-    ? `
+            formStyle === 'full'
+              ? `
             <div class="form-section">
               <h3>Contact Information</h3>
               
@@ -134,8 +134,8 @@ const createIntakeForm = (args: any) => {
               </div>
             </div>
           `
-    : ''
-}
+              : ''
+          }
 
           <div class="form-actions">
             <button 
@@ -196,27 +196,27 @@ const createIntakeForm = (args: any) => {
 };
 
 export const Full: Story = {
-  render: createIntakeForm
+  render: createIntakeForm,
 };
 
 export const WithoutHeader: Story = {
   args: {
-    showHeader: false
+    showHeader: false,
   },
-  render: createIntakeForm
+  render: createIntakeForm,
 };
 
 export const BasicForm: Story = {
   args: {
-    formStyle: 'basic'
+    formStyle: 'basic',
   },
-  render: createIntakeForm
+  render: createIntakeForm,
 };
 
 export const MinimalForm: Story = {
   args: {
     formStyle: 'minimal',
-    showHeader: false
+    showHeader: false,
   },
-  render: createIntakeForm
+  render: createIntakeForm,
 };

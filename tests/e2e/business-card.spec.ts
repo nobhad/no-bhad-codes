@@ -83,7 +83,7 @@ test.describe('Business Card', () => {
     const viewports = [
       { width: 320, height: 568 }, // Mobile
       { width: 768, height: 1024 }, // Tablet
-      { width: 1920, height: 1080 } // Desktop
+      { width: 1920, height: 1080 }, // Desktop
     ];
 
     for (const viewport of viewports) {

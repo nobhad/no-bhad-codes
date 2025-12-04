@@ -141,15 +141,16 @@ select {
   transition: all 0.2s ease;
 }
 
-/* Universal focus styling */
+/* Universal focus styling - Green for all form inputs */
 .form-input:focus,
 .form-textarea:focus,
 .form-select:focus,
 input:focus,
 textarea:focus,
 select:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  outline: none !important;
+  border-color: #22c55e !important;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25) !important;
 }
 
 /* Additional Typography Styles */
@@ -260,15 +261,16 @@ select,
   background-position: right clamp(12px, 2vw, 16px) center;
 }
 
-/* UNIVERSAL FORM FOCUS - Identical across all pages */
+/* UNIVERSAL FORM FOCUS - Green border for all form inputs */
 .form-input:focus,
 .form-textarea:focus,
 .form-select:focus,
 input:focus,
 textarea:focus,
 select:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  outline: none !important;
+  border-color: #22c55e !important;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25) !important;
 }
 
 /* UNIVERSAL BUTTON STYLING - All buttons identical */
@@ -484,12 +486,14 @@ html {
 }
 
 main {
-  scroll-snap-type: y mandatory;
+  /* Disabled scroll-snap to fix scroll jumping issues */
+  /* scroll-snap-type: y proximity; */
 }
 
 section {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+  /* Disabled scroll-snap to fix scroll jumping issues */
+  /* scroll-snap-align: start; */
+  /* scroll-snap-stop: always; */
 }
 
 /* Container for content within sections - Proportional scaling */

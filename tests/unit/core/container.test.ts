@@ -98,7 +98,7 @@ describe('Container', () => {
           return new MockDependentService(dependency);
         },
         {
-          dependencies: ['DependencyService']
+          dependencies: ['DependencyService'],
         }
       );
 
@@ -111,17 +111,13 @@ describe('Container', () => {
     it('should detect circular dependencies when using declared dependencies', async () => {
       // The container detects circular dependencies through the declared dependencies array
       // When ServiceA depends on ServiceB and ServiceB depends on ServiceA
-      container.register(
-        'ServiceA',
-        async () => new MockService('ServiceA'),
-        { dependencies: ['ServiceB'] }
-      );
+      container.register('ServiceA', async () => new MockService('ServiceA'), {
+        dependencies: ['ServiceB'],
+      });
 
-      container.register(
-        'ServiceB',
-        async () => new MockService('ServiceB'),
-        { dependencies: ['ServiceA'] }
-      );
+      container.register('ServiceB', async () => new MockService('ServiceB'), {
+        dependencies: ['ServiceA'],
+      });
 
       await expect(container.resolve('ServiceA')).rejects.toThrow(/Circular dependency/);
     });
@@ -177,7 +173,7 @@ describe('Container', () => {
 
       container.register('Dependency', depFactory);
       container.register('Service', serviceFactory, {
-        dependencies: ['Dependency']
+        dependencies: ['Dependency'],
       });
 
       await container.resolve('Service');
@@ -274,7 +270,7 @@ describe('Container', () => {
       const [instance1, instance2, instance3] = await Promise.all([
         container.resolve('SlowSingleton'),
         container.resolve('SlowSingleton'),
-        container.resolve('SlowSingleton')
+        container.resolve('SlowSingleton'),
       ]);
 
       expect(slowFactory).toHaveBeenCalledOnce();

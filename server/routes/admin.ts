@@ -93,19 +93,19 @@ router.get(
           cache: {
             connected: cacheConnected,
             available: cacheService.isAvailable(),
-            stats: cacheStats
+            stats: cacheStats,
           },
           email: {
             initialized: emailStatus.initialized,
             queueSize: emailStatus.queueSize,
             templatesLoaded: emailStatus.templatesLoaded,
-            isProcessingQueue: emailStatus.isProcessingQueue
+            isProcessingQueue: emailStatus.isProcessingQueue,
           },
           database: {
             connected: true, // We'll assume it's connected if we got this far
-            type: 'sqlite'
-          }
-        }
+            type: 'sqlite',
+          },
+        },
       };
 
       res.json(systemStatus);
@@ -114,13 +114,13 @@ router.get(
 
       errorTracker.captureException(error as Error, {
         tags: { component: 'admin-status' },
-        user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' }
+        user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
       });
 
       res.status(500).json({
         status: 'error',
         timestamp,
-        error: 'Failed to retrieve system status'
+        error: 'Failed to retrieve system status',
       });
     }
   })
@@ -145,7 +145,7 @@ router.get(
     if (!cacheService.isAvailable()) {
       return res.status(503).json({
         error: 'Cache service not available',
-        code: 'CACHE_UNAVAILABLE'
+        code: 'CACHE_UNAVAILABLE',
       });
     }
 
@@ -153,13 +153,13 @@ router.get(
       const stats = await cacheService.getStats();
       res.json({
         cache: stats,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
       console.error('Error getting cache stats:', error);
       res.status(500).json({
         error: 'Failed to retrieve cache statistics',
-        code: 'CACHE_STATS_ERROR'
+        code: 'CACHE_STATS_ERROR',
       });
     }
   })
@@ -184,7 +184,7 @@ router.post(
     if (!cacheService.isAvailable()) {
       return res.status(503).json({
         error: 'Cache service not available',
-        code: 'CACHE_UNAVAILABLE'
+        code: 'CACHE_UNAVAILABLE',
       });
     }
 
@@ -195,24 +195,24 @@ router.post(
         // Log the cache clear action
         errorTracker.captureMessage('Admin cleared cache', 'info', {
           tags: { component: 'admin-cache' },
-          user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' }
+          user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
         });
 
         res.json({
           message: 'Cache cleared successfully',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       } else {
         res.status(500).json({
           error: 'Failed to clear cache',
-          code: 'CACHE_CLEAR_FAILED'
+          code: 'CACHE_CLEAR_FAILED',
         });
       }
     } catch (error) {
       console.error('Error clearing cache:', error);
       res.status(500).json({
         error: 'Failed to clear cache',
-        code: 'CACHE_CLEAR_ERROR'
+        code: 'CACHE_CLEAR_ERROR',
       });
     }
   })
@@ -252,14 +252,14 @@ router.post(
     if (!tag && !pattern) {
       return res.status(400).json({
         error: 'Either tag or pattern is required',
-        code: 'MISSING_PARAMETERS'
+        code: 'MISSING_PARAMETERS',
       });
     }
 
     if (!cacheService.isAvailable()) {
       return res.status(503).json({
         error: 'Cache service not available',
-        code: 'CACHE_UNAVAILABLE'
+        code: 'CACHE_UNAVAILABLE',
       });
     }
 
@@ -276,7 +276,7 @@ router.post(
       errorTracker.captureMessage('Admin invalidated cache', 'info', {
         tags: { component: 'admin-cache' },
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
-        extra: { tag, pattern, invalidatedCount: count }
+        extra: { tag, pattern, invalidatedCount: count },
       });
 
       res.json({
@@ -284,13 +284,13 @@ router.post(
         count,
         tag,
         pattern,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
       console.error('Error invalidating cache:', error);
       res.status(500).json({
         error: 'Failed to invalidate cache',
-        code: 'CACHE_INVALIDATE_ERROR'
+        code: 'CACHE_INVALIDATE_ERROR',
       });
     }
   })
@@ -356,14 +356,14 @@ router.get(
           total: stats?.total || 0,
           pending: stats?.pending || 0,
           active: stats?.active || 0,
-          completed: stats?.completed || 0
-        }
+          completed: stats?.completed || 0,
+        },
       });
     } catch (error) {
       console.error('Error fetching leads:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to fetch leads'
+        error: 'Failed to fetch leads',
       });
     }
   })
@@ -427,14 +427,14 @@ router.get(
           new: stats?.new || 0,
           read: stats?.read || 0,
           replied: stats?.replied || 0,
-          archived: stats?.archived || 0
-        }
+          archived: stats?.archived || 0,
+        },
       });
     } catch (error) {
       console.error('Error fetching contact submissions:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to fetch contact submissions'
+        error: 'Failed to fetch contact submissions',
       });
     }
   })
@@ -463,7 +463,7 @@ router.put(
       if (!['new', 'read', 'replied', 'archived'].includes(status)) {
         return res.status(400).json({
           success: false,
-          error: 'Invalid status value'
+          error: 'Invalid status value',
         });
       }
 
@@ -480,20 +480,17 @@ router.put(
 
       values.push(id);
 
-      await db.run(
-        `UPDATE contact_submissions SET ${updateFields} WHERE id = ?`,
-        values
-      );
+      await db.run(`UPDATE contact_submissions SET ${updateFields} WHERE id = ?`, values);
 
       res.json({
         success: true,
-        message: 'Status updated successfully'
+        message: 'Status updated successfully',
       });
     } catch (error) {
       console.error('Error updating contact submission status:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to update status'
+        error: 'Failed to update status',
       });
     }
   })
@@ -520,7 +517,8 @@ router.post(
       const db = getDatabase();
 
       // Get the lead/project
-      const lead = await db.get(`
+      const lead = await db.get(
+        `
         SELECT
           p.id,
           p.project_name,
@@ -537,25 +535,30 @@ router.post(
         FROM projects p
         LEFT JOIN clients c ON p.client_id = c.id
         WHERE p.id = ?
-      `, [id]);
+      `,
+        [id]
+      );
 
       if (!lead) {
         return res.status(404).json({
           success: false,
-          error: 'Lead not found'
+          error: 'Lead not found',
         });
       }
 
       if (!lead.email) {
         return res.status(400).json({
           success: false,
-          error: 'Lead does not have an email address'
+          error: 'Lead does not have an email address',
         });
       }
 
       // Check if client already exists
       let clientId = lead.client_id;
-      const existingClient = await db.get('SELECT id, invitation_token FROM clients WHERE email = ?', [lead.email]);
+      const existingClient = await db.get(
+        'SELECT id, invitation_token FROM clients WHERE email = ?',
+        [lead.email]
+      );
 
       // Generate invitation token (valid for 7 days)
       const invitationToken = crypto.randomBytes(32).toString('hex');
@@ -564,17 +567,23 @@ router.post(
       if (existingClient) {
         // Update existing client with new invitation token
         clientId = existingClient.id;
-        await db.run(`
+        await db.run(
+          `
           UPDATE clients
           SET invitation_token = ?, invitation_expires_at = ?, invitation_sent_at = CURRENT_TIMESTAMP, status = 'pending'
           WHERE id = ?
-        `, [invitationToken, expiresAt, clientId]);
+        `,
+          [invitationToken, expiresAt, clientId]
+        );
       } else {
         // Create new client with pending status (no password yet)
-        const result = await db.run(`
+        const result = await db.run(
+          `
           INSERT INTO clients (email, password_hash, contact_name, company_name, phone, status, invitation_token, invitation_expires_at, invitation_sent_at)
           VALUES (?, '', ?, ?, ?, 'pending', ?, ?, CURRENT_TIMESTAMP)
-        `, [lead.email, lead.contact_name, lead.company_name, lead.phone, invitationToken, expiresAt]);
+        `,
+          [lead.email, lead.contact_name, lead.company_name, lead.phone, invitationToken, expiresAt]
+        );
         clientId = result.lastID;
 
         // Update project to link to new client
@@ -640,14 +649,14 @@ No Bhad Codes Team
   </div>
 </body>
 </html>
-        `
+        `,
       });
 
       // Log the invitation
       errorTracker.captureMessage('Admin sent client invitation', 'info', {
         tags: { component: 'admin-invite' },
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
-        extra: { leadId: id, clientEmail: lead.email }
+        extra: { leadId: id, clientEmail: lead.email },
       });
 
       res.json({
@@ -655,13 +664,13 @@ No Bhad Codes Team
         message: 'Invitation sent successfully',
         clientId,
         email: lead.email,
-        emailResult
+        emailResult,
       });
     } catch (error) {
       console.error('Error inviting lead:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to send invitation'
+        error: 'Failed to send invitation',
       });
     }
   })

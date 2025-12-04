@@ -3,23 +3,23 @@ import type { Meta, StoryObj } from '@storybook/html';
 const meta: Meta = {
   title: 'Components/Client Portal/Sidebar',
   parameters: {
-    layout: 'fullscreen'
+    layout: 'fullscreen',
   },
   argTypes: {
     isCollapsed: {
       control: 'boolean',
-      description: 'Sidebar collapsed state'
+      description: 'Sidebar collapsed state',
     },
     activeSection: {
       control: 'select',
       options: ['profile', 'billing', 'settings', 'dashboard', 'projects', 'messages'],
-      description: 'Active navigation item'
-    }
+      description: 'Active navigation item',
+    },
   },
   args: {
     isCollapsed: false,
-    activeSection: 'dashboard'
-  }
+    activeSection: 'dashboard',
+  },
 };
 
 export default meta;
@@ -77,26 +77,26 @@ const createSidebar = (args: any) => {
 };
 
 export const Expanded: Story = {
-  render: createSidebar
+  render: createSidebar,
 };
 
 export const Collapsed: Story = {
   args: {
-    isCollapsed: true
+    isCollapsed: true,
   },
-  render: createSidebar
+  render: createSidebar,
 };
 
 export const ActiveProjects: Story = {
   args: {
-    activeSection: 'projects'
+    activeSection: 'projects',
   },
-  render: createSidebar
+  render: createSidebar,
 };
 
 export const ActiveMessages: Story = {
   args: {
-    activeSection: 'messages'
+    activeSection: 'messages',
   },
-  render: createSidebar
+  render: createSidebar,
 };

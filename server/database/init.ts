@@ -77,7 +77,7 @@ class DatabaseConnectionPool implements Database {
           db,
           inUse: false,
           lastUsed: Date.now(),
-          id: Math.random().toString(36).substring(7)
+          id: Math.random().toString(36).substring(7),
         };
 
         resolve(connection);
@@ -219,7 +219,7 @@ class DatabaseConnectionPool implements Database {
       idleConnections,
       totalConnections: this.connections.length,
       maxConnections: this.maxConnections,
-      queuedRequests: this.waitingQueue.length
+      queuedRequests: this.waitingQueue.length,
     };
   }
 }

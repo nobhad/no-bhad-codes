@@ -282,9 +282,13 @@ export class ContactFormModule extends BaseModule {
       email: SanitizationUtils.sanitizeEmail(rawData.email),
       companyName: rawData.companyName ? SanitizationUtils.sanitizeText(rawData.companyName) : '',
       inquiryType: SanitizationUtils.sanitizeText(rawData.inquiryType),
-      projectType: rawData.projectType ? SanitizationUtils.sanitizeText(rawData.projectType) : undefined,
+      projectType: rawData.projectType
+        ? SanitizationUtils.sanitizeText(rawData.projectType)
+        : undefined,
       timeline: rawData.timeline ? SanitizationUtils.sanitizeText(rawData.timeline) : undefined,
-      budgetRange: rawData.budgetRange ? SanitizationUtils.sanitizeText(rawData.budgetRange) : undefined,
+      budgetRange: rawData.budgetRange
+        ? SanitizationUtils.sanitizeText(rawData.budgetRange)
+        : undefined,
       message: SanitizationUtils.sanitizeMessage(rawData.message)
     };
   }

@@ -40,7 +40,8 @@ const QUESTIONS: IntakeQuestion[] = [
   {
     id: 'greeting',
     field: '',
-    question: 'Hello! I\'m here to help you start your project. Let\'s gather some information to create a custom proposal for you. First, what\'s your name?',
+    question:
+      'Hello! I\'m here to help you start your project. Let\'s gather some information to create a custom proposal for you. First, what\'s your name?',
     type: 'text',
     required: true,
     placeholder: 'Enter your full name'
@@ -48,7 +49,8 @@ const QUESTIONS: IntakeQuestion[] = [
   {
     id: 'email',
     field: 'email',
-    question: 'Nice to meet you, {{name}}! What\'s your email address so I can send you the project details?',
+    question:
+      'Nice to meet you, {{name}}! What\'s your email address so I can send you the project details?',
     type: 'email',
     required: true,
     validation: (value) => {
@@ -104,7 +106,8 @@ const QUESTIONS: IntakeQuestion[] = [
   {
     id: 'projectType',
     field: 'projectType',
-    question: 'Great! Now let\'s talk about your project. What type of project are you looking to build?',
+    question:
+      'Great! Now let\'s talk about your project. What type of project are you looking to build?',
     type: 'select',
     required: true,
     options: [
@@ -120,7 +123,8 @@ const QUESTIONS: IntakeQuestion[] = [
   {
     id: 'projectDescription',
     field: 'projectDescription',
-    question: 'Tell me more about your project. What are your goals and what do you want to achieve?',
+    question:
+      'Tell me more about your project. What are your goals and what do you want to achieve?',
     type: 'textarea',
     required: true,
     placeholder: 'Describe your project goals, target audience, and vision...'
@@ -544,7 +548,11 @@ export class TerminalIntakeModule {
     localStorage.setItem(TerminalIntakeModule.STORAGE_KEY, JSON.stringify(progress));
   }
 
-  private loadProgress(): { currentQuestionIndex: number; intakeData: IntakeData; timestamp: number } | null {
+  private loadProgress(): {
+    currentQuestionIndex: number;
+    intakeData: IntakeData;
+    timestamp: number;
+  } | null {
     try {
       const saved = localStorage.getItem(TerminalIntakeModule.STORAGE_KEY);
       if (saved) {
@@ -564,7 +572,10 @@ export class TerminalIntakeModule {
     localStorage.removeItem(TerminalIntakeModule.STORAGE_KEY);
   }
 
-  private async askToResume(savedProgress: { currentQuestionIndex: number; intakeData: IntakeData }): Promise<void> {
+  private async askToResume(savedProgress: {
+    currentQuestionIndex: number;
+    intakeData: IntakeData;
+  }): Promise<void> {
     await this.addBootMessage('Bootstrapping...');
     await this.delay(300);
     await this.addBootMessage('  ✓ Previous session detected');
@@ -572,7 +583,7 @@ export class TerminalIntakeModule {
 
     this.addMessage({
       type: 'ai',
-      content: `Welcome back${savedProgress.intakeData.name ? `, ${  savedProgress.intakeData.name}` : ''}! I found your previous progress. Would you like to continue where you left off or start fresh?`,
+      content: `Welcome back${savedProgress.intakeData.name ? `, ${savedProgress.intakeData.name}` : ''}! I found your previous progress. Would you like to continue where you left off or start fresh?`,
       options: [
         { value: 'resume', label: 'Resume where I left off' },
         { value: 'restart', label: 'Start over' }
@@ -686,7 +697,20 @@ export class TerminalIntakeModule {
     // Generate login timestamp
     const now = new Date();
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
     const dayName = days[now.getDay()];
     const monthName = months[now.getMonth()];
     const date = now.getDate();
@@ -801,7 +825,9 @@ export class TerminalIntakeModule {
           this.processAnswer(option.value, option.label);
         } else {
           // Multiselect - toggle the option
-          const optionBtn = this.chatContainer?.querySelector(`.chat-option[data-value="${option.value}"]`) as HTMLElement;
+          const optionBtn = this.chatContainer?.querySelector(
+            `.chat-option[data-value="${option.value}"]`
+          ) as HTMLElement;
           if (optionBtn) {
             optionBtn.classList.toggle('selected');
             if (optionBtn.classList.contains('selected')) {
@@ -857,7 +883,9 @@ export class TerminalIntakeModule {
         modal.classList.remove('fullscreen');
         document.body.style.overflow = '';
         // Reset so it can reinitialize with resume prompt next time
-        (window as typeof globalThis & { terminalIntakeInitialized?: boolean }).terminalIntakeInitialized = false;
+        (
+          window as typeof globalThis & { terminalIntakeInitialized?: boolean }
+        ).terminalIntakeInitialized = false;
         // Clear the container
         const container = document.querySelector('#intakeModal .terminal-intake-container');
         if (container) container.innerHTML = '';
@@ -1142,7 +1170,10 @@ export class TerminalIntakeModule {
       const question = QUESTIONS[this.currentQuestionIndex];
 
       // Skip if we have this data and it's a skippable field
-      if (fieldsToSkip.includes(question.field) && this.intakeData[question.field as keyof IntakeData]) {
+      if (
+        fieldsToSkip.includes(question.field) &&
+        this.intakeData[question.field as keyof IntakeData]
+      ) {
         this.currentQuestionIndex++;
         continue;
       }
@@ -1163,7 +1194,7 @@ export class TerminalIntakeModule {
         if (Array.isArray(depValue)) {
           // Check if any of the selected values match the expected value
           matches = Array.isArray(expectedValue)
-            ? expectedValue.some(v => depValue.includes(v))
+            ? expectedValue.some((v) => depValue.includes(v))
             : depValue.includes(expectedValue);
         } else {
           // Simple string comparison
@@ -1269,7 +1300,7 @@ export class TerminalIntakeModule {
         if (Array.isArray(dependentValue)) {
           // dependentValue is an array (e.g., features selected)
           matches = Array.isArray(requiredValue)
-            ? requiredValue.some(v => dependentValue.includes(v))
+            ? requiredValue.some((v) => dependentValue.includes(v))
             : dependentValue.includes(requiredValue);
         } else if (Array.isArray(requiredValue)) {
           // requiredValue is an array, dependentValue is string
@@ -1302,19 +1333,19 @@ export class TerminalIntakeModule {
 
     // Dynamically set options for budget and features based on project type
     if (question.id === 'budget') {
-      const projectType = this.intakeData.projectType as string || 'other';
+      const projectType = (this.intakeData.projectType as string) || 'other';
       question.options = BUDGET_OPTIONS[projectType] || BUDGET_OPTIONS.other;
     }
 
     if (question.id === 'features') {
-      const projectType = this.intakeData.projectType as string || 'other';
+      const projectType = (this.intakeData.projectType as string) || 'other';
       question.options = FEATURE_OPTIONS[projectType] || FEATURE_OPTIONS.other;
     }
 
     // Replace placeholders in question text
     let questionText = question.question;
     if (questionText.includes('{{name}}')) {
-      questionText = questionText.replace('{{name}}', this.intakeData.name as string || 'there');
+      questionText = questionText.replace('{{name}}', (this.intakeData.name as string) || 'there');
     }
 
     await this.showTypingIndicator(600);
@@ -1451,7 +1482,11 @@ export class TerminalIntakeModule {
     }
 
     // Add user response to chat (with questionIndex for clickable navigation)
-    this.addMessage({ type: 'user', content: displayValue, questionIndex: this.currentQuestionIndex });
+    this.addMessage({
+      type: 'user',
+      content: displayValue,
+      questionIndex: this.currentQuestionIndex
+    });
 
     // Store the data
     if (question.field) {
@@ -1521,7 +1556,9 @@ export class TerminalIntakeModule {
       sections.push(`Custom: ${data.customFeatures}`);
     }
 
-    sections.push(`Integrations: ${data.hasIntegrations === 'yes' ? this.formatFieldForReview('integrations', data.integrations as string[]) : 'None'}`);
+    sections.push(
+      `Integrations: ${data.hasIntegrations === 'yes' ? this.formatFieldForReview('integrations', data.integrations as string[]) : 'None'}`
+    );
 
     sections.push(
       '',
@@ -1539,7 +1576,7 @@ export class TerminalIntakeModule {
       '[TECHNICAL]',
       `Comfort: ${this.formatFieldForReview('techComfort', data.techComfort as string)}`,
       `Site: ${data.hasCurrentSite === 'yes' ? data.currentSite : 'None'}`,
-      `Domain: ${data.hasDomain === 'yes' ? data.domainName : (data.hasDomain === 'no' ? 'Need' : 'Advice')}`,
+      `Domain: ${data.hasDomain === 'yes' ? data.domainName : data.hasDomain === 'no' ? 'Need' : 'Advice'}`,
       `Hosting: ${this.formatFieldForReview('hosting', data.hosting as string)}`
     );
 
@@ -1561,10 +1598,7 @@ export class TerminalIntakeModule {
       sections.push(`Referral: ${data.referralName}`);
     }
 
-    sections.push(
-      '',
-      '--- END SUMMARY ---'
-    );
+    sections.push('', '--- END SUMMARY ---');
 
     return sections.join('\n');
   }
@@ -1593,7 +1627,8 @@ export class TerminalIntakeModule {
     // Add instructions for making changes
     this.addMessage({
       type: 'system',
-      content: 'To make changes, scroll up and click on any answer to edit it, or select "Start over" below.'
+      content:
+        'To make changes, scroll up and click on any answer to edit it, or select "Start over" below.'
     });
 
     await this.delay(200);
@@ -1644,7 +1679,8 @@ export class TerminalIntakeModule {
           this.addMessage({ type: 'user', content: '[2] No, I need to make changes' });
           this.addMessage({
             type: 'ai',
-            content: 'No problem! To make changes, please start over with a fresh form. Your progress has been saved if you\'d like to continue later.',
+            content:
+              'No problem! To make changes, please start over with a fresh form. Your progress has been saved if you\'d like to continue later.',
             options: [
               { value: 'restart', label: 'Start Over' },
               { value: 'submit', label: 'Actually, submit as is' }
@@ -1677,7 +1713,8 @@ export class TerminalIntakeModule {
             // Let them know how to make changes
             this.addMessage({
               type: 'ai',
-              content: 'No problem! To make changes, please start over with a fresh form. Your progress has been saved if you\'d like to continue later.',
+              content:
+                'No problem! To make changes, please start over with a fresh form. Your progress has been saved if you\'d like to continue later.',
               options: [
                 { value: 'restart', label: 'Start Over' },
                 { value: 'submit', label: 'Actually, submit as is' }
@@ -1912,11 +1949,11 @@ Thank you for choosing No Bhad Codes!
           elementsToRemove.push(el);
         }
       });
-      elementsToRemove.forEach(el => el.remove());
+      elementsToRemove.forEach((el) => el.remove());
 
       // Second pass: remove any orphaned elements that came after (typing indicators, etc.)
       const typingIndicators = this.chatContainer.querySelectorAll('.typing-indicator');
-      typingIndicators.forEach(el => el.remove());
+      typingIndicators.forEach((el) => el.remove());
     }
 
     // Filter messages array to only keep messages before this question
@@ -1954,7 +1991,9 @@ Thank you for choosing No Bhad Codes!
         // Pre-select the previously chosen options for multiselect
         this.selectedOptions = [...oldAnswer];
         oldAnswer.forEach((value) => {
-          const optionBtn = this.chatContainer?.querySelector(`.chat-option[data-value="${value}"]`) as HTMLElement;
+          const optionBtn = this.chatContainer?.querySelector(
+            `.chat-option[data-value="${value}"]`
+          ) as HTMLElement;
           if (optionBtn) {
             optionBtn.classList.add('selected');
           }
@@ -2140,7 +2179,8 @@ Thank you for choosing No Bhad Codes!
     // Calculate progress based on answered questions vs total base questions
     // Cap at 95% until form is submitted
     const answeredCount = Object.keys(this.intakeData).length;
-    const progress = override ?? Math.min(Math.round((answeredCount / totalBaseQuestions) * 100), 95);
+    const progress =
+      override ?? Math.min(Math.round((answeredCount / totalBaseQuestions) * 100), 95);
 
     if (this.progressFill) {
       this.progressFill.style.width = `${progress}%`;
@@ -2160,7 +2200,7 @@ Thank you for choosing No Bhad Codes!
     if (Array.isArray(dependentValue)) {
       // dependentValue is an array (e.g., features selected)
       return Array.isArray(requiredValue)
-        ? requiredValue.some(v => dependentValue.includes(v))
+        ? requiredValue.some((v) => dependentValue.includes(v))
         : dependentValue.includes(requiredValue);
     } else if (Array.isArray(requiredValue)) {
       // requiredValue is an array, dependentValue is string

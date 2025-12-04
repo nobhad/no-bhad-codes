@@ -9,7 +9,7 @@ export default defineConfig({
     include: [
       'src/**/*.{test,spec}.{js,ts}',
       'server/**/*.{test,spec}.{js,ts}',
-      'tests/unit/**/*.{test,spec}.{js,ts}'
+      'tests/unit/**/*.{test,spec}.{js,ts}',
     ],
     exclude: ['node_modules/**', 'dist/**', 'build/**', '**/*.d.ts'],
     coverage: {
@@ -31,7 +31,7 @@ export default defineConfig({
         'server/app.ts',
         '**/types/**',
         '**/*.type.ts',
-        '**/*.types.ts'
+        '**/*.types.ts',
       ],
       include: ['src/**/*.{js,ts}', 'server/**/*.{js,ts}'],
       thresholds: {
@@ -39,28 +39,28 @@ export default defineConfig({
           branches: 70,
           functions: 70,
           lines: 70,
-          statements: 70
+          statements: 70,
         },
         // Higher thresholds for critical modules
         'src/core/**/*.ts': {
           branches: 85,
           functions: 85,
           lines: 85,
-          statements: 85
+          statements: 85,
         },
         'src/services/**/*.ts': {
           branches: 80,
           functions: 80,
           lines: 80,
-          statements: 80
+          statements: 80,
         },
         'server/services/**/*.ts': {
           branches: 80,
           functions: 80,
           lines: 80,
-          statements: 80
-        }
-      }
+          statements: 80,
+        },
+      },
     },
     // Fail tests if coverage thresholds are not met
     testTimeout: 10000,
@@ -71,14 +71,14 @@ export default defineConfig({
     reporters: ['verbose', 'html', 'json'],
     outputFile: {
       html: './coverage/index.html',
-      json: './coverage/coverage.json'
-    }
+      json: './coverage/coverage.json',
+    },
     // Coverage reporting configuration
   },
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
-      '@tests': resolve(__dirname, 'tests')
-    }
-  }
+      '@tests': resolve(__dirname, 'tests'),
+    },
+  },
 });

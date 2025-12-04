@@ -13,7 +13,7 @@ const PORT = 4001;
 app.use(
   cors({
     origin: ['http://localhost:5173', 'http://localhost:4000'],
-    credentials: true
+    credentials: true,
   })
 );
 app.use(express.json());
@@ -33,8 +33,8 @@ const users: Array<{
     email: 'admin@nobhadcodes.com',
     password: bcrypt.hashSync('password123', 10),
     role: 'admin',
-    name: 'Admin User'
-  }
+    name: 'Admin User',
+  },
 ];
 
 // Simple in-memory clients store
@@ -112,10 +112,10 @@ app.post('/api/auth/login', async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        role: user.role
+        role: user.role,
       },
       token,
-      expiresIn: '7d'
+      expiresIn: '7d',
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -142,8 +142,8 @@ app.get('/api/auth/profile', (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
     res.status(401).json({ message: 'Invalid token' });
@@ -159,7 +159,7 @@ app.post('/api/intake', (req, res) => {
     // Basic validation
     if (!name || !email || !projectType) {
       return res.status(400).json({
-        message: 'Name, email, and project type are required'
+        message: 'Name, email, and project type are required',
       });
     }
 
@@ -176,7 +176,7 @@ app.post('/api/intake', (req, res) => {
       description: description || '',
       features: features || [],
       createdAt: new Date().toISOString(),
-      status: 'new'
+      status: 'new',
     };
 
     intakes.push(newIntake);
@@ -190,7 +190,7 @@ app.post('/api/intake', (req, res) => {
       phone: phone || '',
       status: 'pending' as const,
       createdAt: new Date().toISOString(),
-      intakeId: newIntake.id
+      intakeId: newIntake.id,
     };
 
     clients.push(newClient);
@@ -207,7 +207,7 @@ app.post('/api/intake', (req, res) => {
       timeline: timeline || '',
       description: description || '',
       features: features || [],
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     projects.push(newProject);
@@ -217,10 +217,10 @@ app.post('/api/intake', (req, res) => {
         id: newIntake.id,
         name: newIntake.name,
         email: newIntake.email,
-        projectType: newIntake.projectType
+        projectType: newIntake.projectType,
       },
       client: { id: newClient.id, status: newClient.status },
-      project: { id: newProject.id, title: newProject.title, status: newProject.status }
+      project: { id: newProject.id, title: newProject.title, status: newProject.status },
     });
 
     res.status(201).json({
@@ -228,17 +228,17 @@ app.post('/api/intake', (req, res) => {
       intake: {
         id: newIntake.id,
         status: 'new',
-        projectType: newIntake.projectType
+        projectType: newIntake.projectType,
       },
       client: {
         id: newClient.id,
-        status: newClient.status
+        status: newClient.status,
       },
       project: {
         id: newProject.id,
         title: newProject.title,
-        status: newProject.status
-      }
+        status: newProject.status,
+      },
     });
   } catch (error) {
     console.error('Intake submission error:', error);
@@ -283,7 +283,7 @@ app.post('/api/admin/clients/:clientId/activate', (req, res) => {
       role: 'client',
       name: client.name,
       clientId: client.id,
-      status: 'active'
+      status: 'active',
     };
 
     users.push(newUser);
@@ -302,7 +302,7 @@ app.post('/api/admin/clients/:clientId/activate', (req, res) => {
       clientId: client.id,
       email: client.email,
       tempPassword: tempPassword,
-      projectId: project?.id
+      projectId: project?.id,
     });
 
     res.json({
@@ -311,20 +311,20 @@ app.post('/api/admin/clients/:clientId/activate', (req, res) => {
         id: client.id,
         name: client.name,
         email: client.email,
-        status: client.status
+        status: client.status,
       },
       credentials: {
         email: client.email,
         tempPassword: tempPassword,
-        loginUrl: 'http://localhost:5173/client-portal'
+        loginUrl: 'http://localhost:5173/client-portal',
       },
       project: project
         ? {
-          id: project.id,
-          title: project.title,
-          status: project.status
-        }
-        : null
+            id: project.id,
+            title: project.title,
+            status: project.status,
+          }
+        : null,
     });
   } catch (error) {
     res.status(401).json({ message: 'Invalid token' });
@@ -351,7 +351,7 @@ app.get('/api/admin/clients', (req, res) => {
       const clientProjects = projects.filter((p) => p.clientId === client.id);
       return {
         ...client,
-        projects: clientProjects
+        projects: clientProjects,
       };
     });
 
@@ -359,7 +359,7 @@ app.get('/api/admin/clients', (req, res) => {
       clients: clientsWithProjects,
       total: clients.length,
       pending: clients.filter((c) => c.status === 'pending').length,
-      active: clients.filter((c) => c.status === 'active').length
+      active: clients.filter((c) => c.status === 'active').length,
     });
   } catch (error) {
     res.status(401).json({ message: 'Invalid token' });
@@ -388,12 +388,12 @@ app.get('/api/admin/projects', (req, res) => {
         ...project,
         client: client
           ? {
-            id: client.id,
-            name: client.name,
-            email: client.email,
-            company: client.company
-          }
-          : null
+              id: client.id,
+              name: client.name,
+              email: client.email,
+              company: client.company,
+            }
+          : null,
       };
     });
 
@@ -402,7 +402,7 @@ app.get('/api/admin/projects', (req, res) => {
       total: projects.length,
       pending: projects.filter((p) => p.status === 'pending').length,
       active: projects.filter((p) => p.status === 'active').length,
-      completed: projects.filter((p) => p.status === 'completed').length
+      completed: projects.filter((p) => p.status === 'completed').length,
     });
   } catch (error) {
     res.status(401).json({ message: 'Invalid token' });
@@ -426,7 +426,7 @@ app.get('/api/intake', (req, res) => {
 
     res.json({
       intakes: intakes,
-      total: intakes.length
+      total: intakes.length,
     });
   } catch (error) {
     res.status(401).json({ message: 'Invalid token' });
@@ -456,13 +456,13 @@ app.get('/', (req, res) => {
       admin_projects: 'GET /api/admin/projects (admin only)',
 
       // Health
-      health: 'GET /health'
+      health: 'GET /health',
     },
     workflow: {
       client_onboarding:
         '1. Submit intake → 2. Admin reviews → 3. Admin activates client → 4. Client gets login credentials',
-      admin_process: '1. View pending clients → 2. Activate client account → 3. Manage projects'
-    }
+      admin_process: '1. View pending clients → 2. Activate client account → 3. Manage projects',
+    },
   });
 });
 

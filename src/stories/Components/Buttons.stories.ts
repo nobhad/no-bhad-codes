@@ -3,35 +3,35 @@ import type { Meta, StoryObj } from '@storybook/html';
 const meta: Meta = {
   title: 'Components/Buttons',
   parameters: {
-    layout: 'centered'
+    layout: 'centered',
   },
   argTypes: {
     variant: {
       control: 'select',
       options: ['primary', 'secondary', 'outline', 'danger', 'success'],
-      description: 'Button variant'
+      description: 'Button variant',
     },
     size: {
       control: 'select',
       options: ['small', 'medium', 'large'],
-      description: 'Button size'
+      description: 'Button size',
     },
     disabled: {
       control: 'boolean',
-      description: 'Disabled state'
+      description: 'Disabled state',
     },
     loading: {
       control: 'boolean',
-      description: 'Loading state'
+      description: 'Loading state',
     },
     text: {
       control: 'text',
-      description: 'Button text'
+      description: 'Button text',
     },
     icon: {
       control: 'text',
-      description: 'Icon (emoji or symbol)'
-    }
+      description: 'Icon (emoji or symbol)',
+    },
   },
   args: {
     variant: 'primary',
@@ -39,8 +39,8 @@ const meta: Meta = {
     disabled: false,
     loading: false,
     text: 'Button',
-    icon: ''
-  }
+    icon: '',
+  },
 };
 
 export default meta;
@@ -74,61 +74,61 @@ const createButton = (args: any) => {
 };
 
 export const Primary: Story = {
-  render: createButton
+  render: createButton,
 };
 
 export const Secondary: Story = {
   args: {
-    variant: 'secondary'
+    variant: 'secondary',
   },
-  render: createButton
+  render: createButton,
 };
 
 export const Outline: Story = {
   args: {
-    variant: 'outline'
+    variant: 'outline',
   },
-  render: createButton
+  render: createButton,
 };
 
 export const WithIcon: Story = {
   args: {
     text: 'New Project',
-    icon: '+'
+    icon: '+',
   },
-  render: createButton
+  render: createButton,
 };
 
 export const Loading: Story = {
   args: {
     loading: true,
-    text: 'Save Changes'
+    text: 'Save Changes',
   },
-  render: createButton
+  render: createButton,
 };
 
 export const Disabled: Story = {
   args: {
     disabled: true,
-    text: 'Submit'
+    text: 'Submit',
   },
-  render: createButton
+  render: createButton,
 };
 
 export const Small: Story = {
   args: {
     size: 'small',
-    text: 'Small Button'
+    text: 'Small Button',
   },
-  render: createButton
+  render: createButton,
 };
 
 export const Large: Story = {
   args: {
     size: 'large',
-    text: 'Large Button'
+    text: 'Large Button',
   },
-  render: createButton
+  render: createButton,
 };
 
 // Specific button types from the site
@@ -152,7 +152,7 @@ export const ThemeToggle: Story = {
         </svg>
       </div>
     </button>
-  `
+  `,
 };
 
 export const MenuButton: Story = {
@@ -173,7 +173,7 @@ export const MenuButton: Story = {
         </svg>
       </div>
     </button>
-  `
+  `,
 };
 
 export const SidebarToggle: Story = {
@@ -186,7 +186,7 @@ export const SidebarToggle: Story = {
         args: [{ action: 'toggle-sidebar' }]
       })"
     >☰</button>
-  `
+  `,
 };
 
 export const HeaderButton: Story = {
@@ -199,13 +199,13 @@ export const HeaderButton: Story = {
         args: [{ action: 'open-notifications' }]
       })"
     >🔔</button>
-  `
+  `,
 };
 
 export const NavButton: Story = {
   render: () => `
     <button class="nav-btn active" id="nav-dashboard">📊 Dashboard</button>
-  `
+  `,
 };
 
 export const FilterButton: Story = {
@@ -214,19 +214,19 @@ export const FilterButton: Story = {
       All Projects
       <span class="filter-count" data-count="all">12</span>
     </button>
-  `
+  `,
 };
 
 export const FormButton: Story = {
   render: () => `
     <input class="form-button" data-wait="Sending..." type="submit" value="Let's Talk">
-  `
+  `,
 };
 
 // Button groups
 export const ButtonGroup: Story = {
   parameters: {
-    layout: 'padded'
+    layout: 'padded',
   },
   render: () => `
     <div class="action-buttons">
@@ -234,12 +234,12 @@ export const ButtonGroup: Story = {
       <button class="btn btn-secondary" id="btn-messages">View Messages</button>
       <button class="btn btn-secondary" id="btn-invoices">View Invoices</button>
     </div>
-  `
+  `,
 };
 
 export const AllVariants: Story = {
   parameters: {
-    layout: 'padded'
+    layout: 'padded',
   },
   render: () => `
     <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
@@ -254,5 +254,5 @@ export const AllVariants: Story = {
       <button class="header-btn">🔔</button>
       <button class="sidebar-toggle">☰</button>
     </div>
-  `
+  `,
 };

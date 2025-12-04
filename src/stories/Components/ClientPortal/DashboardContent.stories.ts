@@ -3,22 +3,22 @@ import type { Meta, StoryObj } from '@storybook/html';
 const meta: Meta = {
   title: 'Components/Client Portal/Dashboard Content',
   parameters: {
-    layout: 'padded'
+    layout: 'padded',
   },
   argTypes: {
     showWelcomeMessage: {
       control: 'boolean',
-      description: 'Show welcome message'
+      description: 'Show welcome message',
     },
     cardCount: {
       control: { type: 'range', min: 1, max: 6, step: 1 },
-      description: 'Number of content cards'
-    }
+      description: 'Number of content cards',
+    },
   },
   args: {
     showWelcomeMessage: true,
-    cardCount: 2
-  }
+    cardCount: 2,
+  },
 };
 
 export default meta;
@@ -32,33 +32,33 @@ const createDashboardContent = (args: any) => {
     {
       title: 'Recent Activity',
       description: 'Your latest project updates will appear here',
-      buttonText: 'View All'
+      buttonText: 'View All',
     },
     {
       title: 'Quick Actions',
       description: 'Common tasks and shortcuts',
-      buttonText: 'Get Started'
+      buttonText: 'Get Started',
     },
     {
       title: 'Active Projects',
       description: 'Your ongoing projects and their status',
-      buttonText: 'Manage Projects'
+      buttonText: 'Manage Projects',
     },
     {
       title: 'Messages',
       description: 'Recent communications and updates',
-      buttonText: 'View Messages'
+      buttonText: 'View Messages',
     },
     {
       title: 'Invoices',
       description: 'Billing and payment information',
-      buttonText: 'View Invoices'
+      buttonText: 'View Invoices',
     },
     {
       title: 'Support',
       description: 'Get help and find documentation',
-      buttonText: 'Contact Support'
-    }
+      buttonText: 'Contact Support',
+    },
   ];
 
   for (let i = 0; i < Math.min(cardCount, cardTypes.length); i++) {
@@ -75,15 +75,15 @@ const createDashboardContent = (args: any) => {
   return `
     <div class="content-area">
       ${
-  showWelcomeMessage
-    ? `
+        showWelcomeMessage
+          ? `
         <div class="page-header">
           <h1>Dashboard</h1>
           <p>Welcome to your client dashboard</p>
         </div>
       `
-    : ''
-}
+          : ''
+      }
       
       <div class="action-buttons">
         <button 
@@ -120,27 +120,27 @@ const createDashboardContent = (args: any) => {
 };
 
 export const Default: Story = {
-  render: createDashboardContent
+  render: createDashboardContent,
 };
 
 export const WithoutWelcome: Story = {
   args: {
-    showWelcomeMessage: false
+    showWelcomeMessage: false,
   },
-  render: createDashboardContent
+  render: createDashboardContent,
 };
 
 export const ManyCards: Story = {
   args: {
-    cardCount: 4
+    cardCount: 4,
   },
-  render: createDashboardContent
+  render: createDashboardContent,
 };
 
 export const MinimalContent: Story = {
   args: {
     showWelcomeMessage: false,
-    cardCount: 1
+    cardCount: 1,
   },
-  render: createDashboardContent
+  render: createDashboardContent,
 };

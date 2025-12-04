@@ -383,7 +383,14 @@ export class NavigationModule extends BaseModule {
           { id: 'home', text: 'home', href: '/', eyebrow: '00' },
           { id: 'about', text: 'about', href: '#about', eyebrow: '01' },
           { id: 'contact', text: 'contact', href: '#contact', eyebrow: '02' },
-          { id: 'portfolio', text: 'portfolio', href: '#', eyebrow: '03', disabled: true, comingSoon: true },
+          {
+            id: 'portfolio',
+            text: 'portfolio',
+            href: '#',
+            eyebrow: '03',
+            disabled: true,
+            comingSoon: true
+          },
           { id: 'client-portal', text: 'client portal', href: '/client/landing', eyebrow: '04' }
         ];
       }
