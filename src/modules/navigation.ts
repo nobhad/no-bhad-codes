@@ -37,6 +37,10 @@ export class NavigationModule extends BaseModule {
   // State subscriptions
   private unsubscribeNav?: () => void;
 
+  // Touch device detection
+  private isTouchDevice: boolean = false;
+  private activeTouchLink: Element | null = null;
+
   // Services
   private routerService: RouterService | null = null;
   private dataService: DataService | null = null;
@@ -55,6 +59,11 @@ export class NavigationModule extends BaseModule {
 
   protected override async onInit(): Promise<void> {
     console.log('[NavigationModule] Starting initialization...');
+
+    // Detect touch device
+    this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    console.log('[NavigationModule] Touch device:', this.isTouchDevice);
+
     await this.cacheElements();
     console.log('[NavigationModule] Elements cached, RouterService:', !!this.routerService);
     this.setupEventListeners();
@@ -101,11 +110,25 @@ export class NavigationModule extends BaseModule {
         this.menuLinks.length,
         'menu links'
       );
+
+      // Setup touch handling for mobile - tap once to animate, tap again to navigate
+      if (this.isTouchDevice) {
+        this.setupTouchHandlers();
+      }
+
       this.menuLinks.forEach((link, index) => {
         const linkHref = (link as HTMLAnchorElement).getAttribute('href');
         console.log('[NavigationModule] Link', index, 'href:', linkHref);
         this.addEventListener(link as Element, 'click', (event: Event) => {
           console.log('[NavigationModule] Click handler fired for:', linkHref);
+
+          // On touch devices, handle tap-to-animate behavior
+          if (this.isTouchDevice && !link.classList.contains('touch-active')) {
+            // First tap - just show animation, don't navigate
+            event.preventDefault();
+            this.setTouchActiveLink(link);
+            return;
+          }
           // Handle submenu toggle links
           if ((link as Element).hasAttribute('data-submenu-toggle')) {
             return; // Let submenu module handle this
@@ -462,6 +485,50 @@ export class NavigationModule extends BaseModule {
   private onSectionEnter(sectionName: string): void {
     this.log(`Entered section: ${sectionName}`);
     this.dispatchEvent('section-entered', { sectionName });
+  }
+
+  /**
+   * Setup touch event handlers for mobile tap-to-animate behavior
+   */
+  private setupTouchHandlers(): void {
+    // Listen for taps outside menu links to clear touch-active state
+    document.addEventListener('touchstart', (event: TouchEvent) => {
+      if (!this.activeTouchLink) return;
+
+      const target = event.target as Element;
+      const isMenuLink = target.closest('.menu-link');
+
+      // If tapping outside any menu link, clear the active state
+      if (!isMenuLink) {
+        this.clearTouchActiveLink();
+      }
+    });
+
+    console.log('[NavigationModule] Touch handlers initialized');
+  }
+
+  /**
+   * Set a menu link as touch-active (shows hover animation)
+   */
+  private setTouchActiveLink(link: Element): void {
+    // Clear any previously active link
+    this.clearTouchActiveLink();
+
+    // Set new active link
+    link.classList.add('touch-active');
+    this.activeTouchLink = link;
+
+    console.log('[NavigationModule] Touch-active set on:', (link as HTMLAnchorElement).href);
+  }
+
+  /**
+   * Clear touch-active state from all links
+   */
+  private clearTouchActiveLink(): void {
+    if (this.activeTouchLink) {
+      this.activeTouchLink.classList.remove('touch-active');
+      this.activeTouchLink = null;
+    }
   }
 
   /**

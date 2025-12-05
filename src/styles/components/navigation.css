@@ -322,11 +322,6 @@ li {
   pointer-events: none;
 }
 
-/* Dark mode: use light background for hover effect */
-html[data-theme="dark"] .menu-link-bg {
-  background-color: var(--color-light, #ffffff);
-}
-
 /* =====================================================
    8.5. DISABLED MENU LINKS & COMING SOON BANNER
    ===================================================== */
@@ -743,10 +738,11 @@ html[data-theme="dark"] .coming-soon-banner {
     min-height: clamp(4rem, 10vw, 5.5rem);
   }
 
-  /* Bigger menu link text on mobile */
+  /* Menu link text on mobile - preserve rolling effect */
   .menu-link-heading {
-    font-size: 3rem !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    font-size: clamp(3rem, 12vw, 4.5rem) !important;
+    /* Keep the 1em offset for rolling duplicate text effect */
+    text-shadow: 0 1em 0 var(--color-neutral-100);
   }
 
   .menu-link {
@@ -1209,6 +1205,24 @@ html[data-theme="dark"] .submenu-link-heading {
   }
 }
 
+/* =====================================================
+   MOBILE TOUCH - Tap-to-animate via JavaScript
+   .touch-active class added on first tap, removed on second tap or tap elsewhere
+   ===================================================== */
+
+/* Touch-active state - triggers hover animation on mobile */
+.menu-link.touch-active .menu-link-heading {
+  transform: translateY(-100%);
+}
+
+.menu-link.touch-active .menu-link-heading::before {
+  transform: translateY(-100%);
+}
+
+.menu-link.touch-active .menu-link-bg {
+  transform: scale(1, 1);
+}
+
 /* Dark Mode Text Enhancements */
 html[data-theme="dark"] .nav-logo-row {
   text-shadow: 0 2px 4px var(--color-shadow);
@@ -1253,42 +1267,4 @@ html[data-theme="dark"] .bg-panel.first {
 
 html[data-theme="dark"] .bg-panel.second {
   background-color: var(--color-neutral-100);
-}
-
-/* =====================================================
-   HOVER TEXT COLOR - Light text on dark hover background
-   Works on both desktop (hover) and mobile (active/focus)
-   ===================================================== */
-
-/* Light theme: dark bg on hover/active = light text */
-html[data-theme="light"] .menu-link:hover .menu-link-heading,
-html[data-theme="light"] .menu-link:active .menu-link-heading,
-html[data-theme="light"] .menu-link:focus .menu-link-heading,
-html[data-theme="light"] .menu-link:hover .eyebrow,
-html[data-theme="light"] .menu-link:active .eyebrow,
-html[data-theme="light"] .menu-link:focus .eyebrow {
-  color: var(--color-light, #ffffff);
-}
-
-/* Dark theme: light bg on hover/active = dark text */
-html[data-theme="dark"] .menu-link:hover .menu-link-heading,
-html[data-theme="dark"] .menu-link:active .menu-link-heading,
-html[data-theme="dark"] .menu-link:focus .menu-link-heading,
-html[data-theme="dark"] .menu-link:hover .eyebrow,
-html[data-theme="dark"] .menu-link:active .eyebrow,
-html[data-theme="dark"] .menu-link:focus .eyebrow {
-  color: var(--color-dark, #000000);
-}
-
-/* Same for submenu links */
-html[data-theme="light"] .submenu-link:hover .submenu-link-heading,
-html[data-theme="light"] .submenu-link:active .submenu-link-heading,
-html[data-theme="light"] .submenu-link:focus .submenu-link-heading {
-  color: var(--color-light, #ffffff);
-}
-
-html[data-theme="dark"] .submenu-link:hover .submenu-link-heading,
-html[data-theme="dark"] .submenu-link:active .submenu-link-heading,
-html[data-theme="dark"] .submenu-link:focus .submenu-link-heading {
-  color: var(--color-dark, #000000);
 }

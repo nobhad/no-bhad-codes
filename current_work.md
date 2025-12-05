@@ -4,6 +4,61 @@
 
 ## Active Work
 
+### Magic Link Login + Mobile Nav + Intake Form Improvements - COMPLETED
+**Status**: Complete
+**Date**: December 4, 2025
+
+**Summary**: Added magic link login option, fixed mobile navigation styling, improved intake form flow with conditional company question, and enhanced terminal modal UX.
+
+**Magic Link Login:**
+
+| Feature | Details |
+|---------|---------|
+| Desktop button | Added "Sign in with Magic Link" button below password login |
+| Mobile button | Added same button to mobile login form |
+| Divider styling | Added "or" divider between password and magic link options |
+| Handler | `handleMagicLinkRequest()` sends email to `/api/auth/magic-link` |
+| Feedback | Shows success message regardless of email existence (security) |
+
+**Mobile Navigation Fixes:**
+
+| Issue | Fix |
+|-------|-----|
+| Hover effect on mobile | Added `@media (hover: none)` with `:active` states |
+| Tap-to-animate | JavaScript toggles `.touch-active` class on first tap |
+| Second tap navigates | Only navigates on second tap after animation shown |
+| Rolling text effect | Fixed mobile to use `text-shadow: 0 1em 0` for duplicate text |
+| Font size | Set to `clamp(3rem, 12vw, 4.5rem)` for mobile viewports |
+
+**Intake Form Improvements:**
+
+| Feature | Details |
+|---------|---------|
+| Conditional company question | Intercepts company question to ask "Is this for a company?" first |
+| Personal project flow | If "No", skips company name and goes to phone |
+| Company flow | If "Yes", asks for company name, then continues |
+| Number key support | Added direct keydown handlers for 1/2 keys on company questions |
+| Modal animation | Opens at full width immediately (no expansion animation) |
+| Modal timing | Overlay fades in, then typing starts after complete |
+
+**Files Modified:**
+
+| File | Changes |
+|------|---------|
+| `client/landing.html` | Added magic link buttons and dividers |
+| `src/features/client/client-landing.ts` | Magic link handlers, modal animation simplified |
+| `src/features/client/terminal-intake.ts` | Conditional company question, keydown handlers |
+| `src/styles/pages/client.css` | Login divider styling |
+| `src/styles/components/navigation.css` | Mobile touch styles, font size, rolling effect |
+| `src/modules/navigation.ts` | Touch device detection, tap-to-animate logic |
+
+**Verification:**
+- [x] TypeScript: 0 errors
+- [x] ESLint: 0 errors
+- [x] Build: Success
+
+---
+
 ### Static Assets & API Proxy Fixes - COMPLETED
 **Status**: Complete
 **Date**: December 4, 2025
