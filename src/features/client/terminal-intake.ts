@@ -1034,30 +1034,52 @@ export class TerminalIntakeModule {
       this.inputElement.focus();
     }
 
-    // Override option click handler temporarily
     const originalClickHandler = this.handleOptionClick.bind(this);
+    const originalInputHandler = this.handleUserInput.bind(this);
+
+    // Use a variable to hold keyHandler reference for cleanup
+    let keyHandler: ((e: KeyboardEvent) => void) | null = null;
+
+    const cleanup = () => {
+      this.handleUserInput = originalInputHandler;
+      this.handleOptionClick = originalClickHandler;
+      if (keyHandler) document.removeEventListener('keydown', keyHandler);
+    };
+
+    keyHandler = (e: KeyboardEvent) => {
+      if (e.key === '1') {
+        e.preventDefault();
+        cleanup();
+        this.handleCompanyConfirmAnswer('yes', companyName);
+      } else if (e.key === '2') {
+        e.preventDefault();
+        cleanup();
+        this.handleCompanyConfirmAnswer('no', companyName);
+      }
+    };
+
+    // Override option click handler temporarily
     this.handleOptionClick = (target: HTMLElement) => {
       const value = target.dataset.value;
       if (value === 'yes' || value === 'no') {
+        cleanup();
         this.handleCompanyConfirmAnswer(value, companyName);
-        this.handleOptionClick = originalClickHandler;
       }
     };
 
     // Override handleUserInput for number input
-    const originalInputHandler = this.handleUserInput.bind(this);
     this.handleUserInput = async () => {
       const input = this.inputElement?.value.trim();
       if (input === '1') {
+        cleanup();
         this.handleCompanyConfirmAnswer('yes', companyName);
-        this.handleUserInput = originalInputHandler;
-        this.handleOptionClick = originalClickHandler;
       } else if (input === '2') {
+        cleanup();
         this.handleCompanyConfirmAnswer('no', companyName);
-        this.handleUserInput = originalInputHandler;
-        this.handleOptionClick = originalClickHandler;
       }
     };
+
+    document.addEventListener('keydown', keyHandler);
   }
 
   private async handleCompanyConfirmAnswer(value: string, companyName: string): Promise<void> {
@@ -1097,27 +1119,49 @@ export class TerminalIntakeModule {
     }
 
     const originalClickHandler = this.handleOptionClick.bind(this);
-    this.handleOptionClick = (target: HTMLElement) => {
-      const value = target.dataset.value;
-      if (value === 'yes' || value === 'no') {
-        this.handleForCompanyAnswer(value);
-        this.handleOptionClick = originalClickHandler;
+    const originalInputHandler = this.handleUserInput.bind(this);
+
+    // Use a variable to hold keyHandler reference for cleanup
+    let keyHandler: ((e: KeyboardEvent) => void) | null = null;
+
+    const cleanup = () => {
+      this.handleUserInput = originalInputHandler;
+      this.handleOptionClick = originalClickHandler;
+      if (keyHandler) document.removeEventListener('keydown', keyHandler);
+    };
+
+    keyHandler = (e: KeyboardEvent) => {
+      if (e.key === '1') {
+        e.preventDefault();
+        cleanup();
+        this.handleForCompanyAnswer('yes');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        cleanup();
+        this.handleForCompanyAnswer('no');
       }
     };
 
-    const originalInputHandler = this.handleUserInput.bind(this);
+    this.handleOptionClick = (target: HTMLElement) => {
+      const value = target.dataset.value;
+      if (value === 'yes' || value === 'no') {
+        cleanup();
+        this.handleForCompanyAnswer(value);
+      }
+    };
+
     this.handleUserInput = async () => {
       const input = this.inputElement?.value.trim();
       if (input === '1') {
+        cleanup();
         this.handleForCompanyAnswer('yes');
-        this.handleUserInput = originalInputHandler;
-        this.handleOptionClick = originalClickHandler;
       } else if (input === '2') {
+        cleanup();
         this.handleForCompanyAnswer('no');
-        this.handleUserInput = originalInputHandler;
-        this.handleOptionClick = originalClickHandler;
       }
     };
+
+    document.addEventListener('keydown', keyHandler);
   }
 
   private async handleForCompanyAnswer(value: string): Promise<void> {
@@ -1329,6 +1373,12 @@ export class TerminalIntakeModule {
     if (!question) {
       // All questions answered - show review before submitting
       await this.showReviewAndConfirm();
+      return;
+    }
+
+    // Intercept company question - ask if it's for a company first
+    if (question.field === 'company' && !this.confirmedCompany) {
+      await this.askIfForCompany();
       return;
     }
 

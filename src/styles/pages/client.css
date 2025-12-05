@@ -657,6 +657,28 @@ body[data-page="client-landing"] .client-login,
   min-height: 1.2em;
 }
 
+/* Login divider - "or" separator */
+.login-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 0.75rem 0;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--color-neutral-400);
+}
+
+.login-divider span {
+  padding: 0 0.75rem;
+  font-size: 0.85rem;
+  color: var(--color-neutral-600);
+  text-transform: lowercase;
+}
+
 .login-error.show {
   display: block;
 }

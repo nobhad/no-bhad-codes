@@ -224,6 +224,7 @@
                         name="password"
                         class="form-input"
                         placeholder="Enter password"
+                        autocomplete="current-password"
                         required
                       />
                       <button
@@ -249,6 +250,12 @@
                   <div class="login-error" id="loginError"></div>
                   <button type="submit" class="btn btn-primary btn-full">
                     <span class="btn-text">Sign In</span><span class="btn-loader"></span>
+                  </button>
+                  <div class="login-divider">
+                    <span>or</span>
+                  </div>
+                  <button type="button" class="btn btn-secondary btn-full" id="magicLinkBtn">
+                    <span class="btn-text">Sign in with Magic Link</span>
                   </button>
                   <div class="login-footer">
                     <p>
@@ -287,6 +294,7 @@
                         name="password"
                         class="form-input"
                         placeholder="Enter password"
+                        autocomplete="current-password"
                       />
                       <button
                         type="button"
@@ -310,6 +318,12 @@
                   </div>
                   <div class="login-error" id="loginErrorMobile"></div>
                   <button type="submit" class="btn btn-primary btn-full">SIGN IN</button>
+                  <div class="login-divider">
+                    <span>or</span>
+                  </div>
+                  <button type="button" class="btn btn-secondary btn-full" id="magicLinkBtnMobile">
+                    Sign in with Magic Link
+                  </button>
                 </form>
               </div>
 

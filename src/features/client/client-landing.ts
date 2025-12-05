@@ -42,6 +42,10 @@ export class ClientLandingModule extends BaseModule {
   private loginErrorMobile: HTMLElement | null = null;
   private openIntakeButtonMobile: HTMLButtonElement | null = null;
 
+  // Magic link elements
+  private magicLinkBtn: HTMLButtonElement | null = null;
+  private magicLinkBtnMobile: HTMLButtonElement | null = null;
+
   constructor() {
     super('client-landing');
   }
@@ -60,6 +64,7 @@ export class ClientLandingModule extends BaseModule {
     this.setupLoginForm();
     this.setupPasswordToggle();
     this.setupIntakeModal();
+    this.setupMagicLink();
     console.log('[ClientLandingModule] Initialization complete');
   }
 
@@ -119,6 +124,10 @@ export class ClientLandingModule extends BaseModule {
     this.openIntakeButtonMobile = document.getElementById(
       'openIntakeModalMobile'
     ) as HTMLButtonElement;
+
+    // Magic link buttons
+    this.magicLinkBtn = document.getElementById('magicLinkBtn') as HTMLButtonElement;
+    this.magicLinkBtnMobile = document.getElementById('magicLinkBtnMobile') as HTMLButtonElement;
 
     console.log('[ClientLandingModule] Elements cached:', {
       loginForm: !!this.loginForm,
@@ -237,43 +246,128 @@ export class ClientLandingModule extends BaseModule {
     });
   }
 
+  private setupMagicLink(): void {
+    // Desktop magic link button
+    if (this.magicLinkBtn) {
+      this.magicLinkBtn.addEventListener('click', () => {
+        console.log('[ClientLandingModule] Magic link button clicked (desktop)');
+        this.handleMagicLinkRequest(false);
+      });
+    }
+
+    // Mobile magic link button
+    if (this.magicLinkBtnMobile) {
+      this.magicLinkBtnMobile.addEventListener('click', () => {
+        console.log('[ClientLandingModule] Magic link button clicked (mobile)');
+        this.handleMagicLinkRequest(true);
+      });
+    }
+  }
+
+  private async handleMagicLinkRequest(isMobile: boolean): Promise<void> {
+    const emailInput = isMobile ? this.emailInputMobile : this.emailInput;
+    const errorEl = isMobile ? this.loginErrorMobile : this.loginError;
+    const button = isMobile ? this.magicLinkBtnMobile : this.magicLinkBtn;
+    const email = emailInput?.value.trim() || '';
+
+    // Clear previous errors
+    if (errorEl) {
+      errorEl.textContent = '';
+      errorEl.style.display = 'none';
+    }
+
+    // Validate email
+    if (!email) {
+      if (errorEl) {
+        errorEl.textContent = 'Please enter your email address';
+        errorEl.style.display = 'block';
+      }
+      emailInput?.focus();
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      if (errorEl) {
+        errorEl.textContent = 'Please enter a valid email address';
+        errorEl.style.display = 'block';
+      }
+      return;
+    }
+
+    // Show loading state
+    if (button) {
+      button.disabled = true;
+      const btnText = button.querySelector('.btn-text');
+      if (btnText) {
+        btnText.textContent = 'Sending...';
+      } else {
+        button.textContent = 'Sending...';
+      }
+    }
+
+    try {
+      const response = await fetch('/api/auth/magic-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+
+      const result = await response.json();
+
+      // Always show success message for security (don't reveal if email exists)
+      if (errorEl) {
+        errorEl.textContent = result.message || 'If an account exists, a login link has been sent to your email.';
+        errorEl.style.display = 'block';
+        errorEl.style.color = 'var(--color-success, #22c55e)';
+      }
+    } catch (error) {
+      console.error('[ClientLandingModule] Magic link request error:', error);
+      if (errorEl) {
+        errorEl.textContent = 'Unable to send magic link. Please try again.';
+        errorEl.style.display = 'block';
+        errorEl.style.color = 'var(--color-error, #ef4444)';
+      }
+    } finally {
+      // Reset button
+      if (button) {
+        button.disabled = false;
+        const btnText = button.querySelector('.btn-text');
+        if (btnText) {
+          btnText.textContent = 'Sign in with Magic Link';
+        } else {
+          button.textContent = 'Sign in with Magic Link';
+        }
+      }
+    }
+  }
+
   private openIntakeModalWithAnimation(): void {
     if (!this.intakeModal) return;
 
     const modalContent = this.intakeModal.querySelector('.intake-modal-content') as HTMLElement;
 
-    // Show modal (display: flex)
+    // Show modal at full size immediately
     this.intakeModal.classList.add('open');
     document.body.style.overflow = 'hidden';
 
-    // Reset styles for animation
-    gsap.set(this.intakeModal, { background: 'rgba(0, 0, 0, 0)' });
-    gsap.set(modalContent, { maxWidth: '200px', opacity: 0.8 });
+    // Set modal content to full width immediately
+    gsap.set(modalContent, { maxWidth: '900px', opacity: 1 });
 
-    // Create timeline for smooth sequential animation
-    const tl = gsap.timeline();
-
-    // First: expand the terminal width
-    tl.to(modalContent, {
-      maxWidth: '900px',
-      opacity: 1,
-      duration: 0.3,
-      ease: 'power2.out'
-    });
-
-    // Then: fade in the overlay
-    tl.to(
+    // Just fade in the overlay quickly
+    gsap.fromTo(
       this.intakeModal,
+      { background: 'rgba(0, 0, 0, 0)' },
       {
         background: 'rgba(0, 0, 0, 0.8)',
-        duration: 0.3,
-        ease: 'power2.inOut'
-      },
-      '+=0.1'
-    ); // Small delay after expansion
-
-    // Initialize terminal intake
-    this.initTerminalIntake();
+        duration: 0.15,
+        ease: 'power2.out',
+        onComplete: () => {
+          this.initTerminalIntake();
+        }
+      }
+    );
   }
 
   private closeIntakeModal(): void {
