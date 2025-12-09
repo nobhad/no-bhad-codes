@@ -242,6 +242,32 @@ export class Application {
         }
       },
       {
+        name: 'ScrollSnapModule',
+        type: 'dom',
+        factory: async () => {
+          // Load scroll snap on all pages EXCEPT client portal
+          const currentPath = window.location.pathname;
+          const isClientPortal = currentPath.includes('/client');
+
+          if (!isClientPortal) {
+            const { ScrollSnapModule } = await import('../modules/scroll-snap');
+            return new ScrollSnapModule({
+              containerSelector: 'main',
+              sectionSelector: '.business-card-section, .about-section, .contact-section, .hero-section, .page-section, main > section',
+              snapDuration: 0.6,
+              snapDelay: 150
+            });
+          }
+          // Return a dummy module for client portal pages
+          return {
+            init: async () => {},
+            destroy: () => {},
+            isInitialized: true,
+            name: 'ScrollSnapModule'
+          };
+        }
+      },
+      {
         name: 'ClientLandingModule',
         type: 'dom',
         factory: async () => {
@@ -578,7 +604,8 @@ export class Application {
       'SectionCardRenderer', // Section business card renderer
       'SectionCardInteractions', // Section business card interactions
       'NavigationModule',
-      'ContactFormModule'
+      'ContactFormModule',
+      'ScrollSnapModule' // GSAP scroll snapping for sections
     ];
 
     // Modules for Client Portal dashboard

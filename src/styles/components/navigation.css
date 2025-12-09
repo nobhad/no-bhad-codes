@@ -29,8 +29,8 @@
   --theme-button-size: clamp(2rem, 4vw, 2.5rem);
 
   /* Menu dimensions - sized to fit content */
-  --menu-width-desktop: clamp(38rem, 45vw, 48rem);
-  --menu-width-tablet: clamp(32rem, 55vw, 40rem);
+  --menu-width-desktop: clamp(42rem, 55vw, 56rem);
+  --menu-width-tablet: clamp(36rem, 65vw, 48rem);
   --menu-width-mobile: 100vw;
   --menu-border-radius: 1.25rem;
   --menu-height: 100vh; /* Full viewport height for main menu */
@@ -809,7 +809,7 @@ html[data-theme="dark"] .coming-soon-banner {
   }
 
   .menu {
-    width: clamp(42rem, 40vw, 52rem);
+    width: clamp(48rem, 50vw, 60rem);
   }
 }
 
@@ -818,7 +818,7 @@ html[data-theme="dark"] .coming-soon-banner {
   :root {
     --base-gap: 1.1rem;
     --menu-padding: 3rem;
-    --menu-heading-size: clamp(5rem, 4vw, 6rem);
+    --menu-heading-size: clamp(6rem, 5vw, 8rem); /* Larger link text on ultra-wide */
 
     --menu-multiplier: 0.13;
     --list-multiplier: 0.1;
@@ -828,7 +828,7 @@ html[data-theme="dark"] .coming-soon-banner {
   }
 
   .menu {
-    width: clamp(48rem, 35vw, 58rem);
+    width: clamp(54rem, 45vw, 66rem); /* Original width */
   }
 }
 

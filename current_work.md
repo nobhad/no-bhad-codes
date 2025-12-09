@@ -1,8 +1,46 @@
-# Current Work - December 4, 2025
+# Current Work - December 9, 2025
 
 ---
 
 ## Active Work
+
+### GSAP Scroll Snap Module - IN PROGRESS
+**Status**: In Progress
+**Date**: December 9, 2025
+
+**Summary**: Implementing GSAP-based scroll snapping so sections lock into place, centered in the viewport area between header and footer.
+
+**Requirements**:
+- Sections should snap to center when scrolling stops
+- Viewport center calculation must account for header and footer heights
+- Should work on all pages EXCEPT client portal
+- Must use GSAP (not CSS scroll-snap)
+
+**Implementation**:
+- [x] Created `ScrollSnapModule` in `src/modules/scroll-snap.ts`
+- [x] Uses GSAP ScrollTrigger and ScrollToPlugin
+- [x] Added to `mainSiteModules` in app.ts for initialization
+- [x] Detects window vs container scroll mode (mobile vs desktop)
+- [x] Reads CSS variables for header/footer heights
+- [x] Added `getEffectiveViewportHeight()` helper method
+- [x] Added `getViewportCenterY()` helper method
+- [ ] Test scroll snap on desktop
+- [ ] Test scroll snap on mobile
+
+**Files Modified**:
+
+| File | Changes |
+|------|---------|
+| `src/modules/scroll-snap.ts` | Created GSAP scroll snap module with viewport calculations |
+| `src/core/app.ts` | Added ScrollSnapModule to mainSiteModules |
+
+**Technical Details**:
+- On desktop: `main` element is fixed positioned, scroll happens in container
+- On mobile: `main` is static positioned, scroll happens on window
+- Viewport center calculated as: `headerHeight + (window.innerHeight - headerHeight) / 2` for window scroll
+- Snap delay: 150ms after scroll stops
+
+---
 
 ### Magic Link Login + Mobile Nav + Intake Form Improvements - COMPLETED
 **Status**: Complete

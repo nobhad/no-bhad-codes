@@ -32,12 +32,45 @@ export class IntroAnimationModule extends BaseModule {
   override async init(): Promise<void> {
     await super.init();
 
+    // Check if intro has already been shown this session
+    const introShown = sessionStorage.getItem('introShown');
+    if (introShown === 'true') {
+      this.log('Intro already shown this session - skipping');
+      this.skipIntroImmediately();
+      return;
+    }
+
     // Both mobile and desktop: flip the actual business card
     try {
       this.runCardFlip();
     } catch (error) {
       this.error('Failed to initialize intro animation:', error);
       this.completeIntro();
+    }
+  }
+
+  /**
+   * Skip intro immediately (for returning visitors in same session)
+   */
+  private skipIntroImmediately(): void {
+    this.isComplete = true;
+
+    // Remove intro classes and show content immediately
+    document.documentElement.classList.remove('intro-loading');
+    document.documentElement.classList.add('intro-complete', 'intro-finished');
+
+    // Make sure card is showing front
+    const cardInner = document.getElementById('business-card-inner');
+    if (cardInner) {
+      cardInner.style.transition = 'none';
+      cardInner.style.transform = 'rotateY(0deg)';
+    }
+
+    // Make header visible immediately
+    const header = document.querySelector('.header') as HTMLElement;
+    if (header) {
+      header.style.removeProperty('opacity');
+      header.style.removeProperty('visibility');
     }
   }
 
@@ -155,6 +188,9 @@ export class IntroAnimationModule extends BaseModule {
     if (this.isComplete) return;
 
     this.isComplete = true;
+
+    // Mark intro as shown for this session (skip on subsequent page loads)
+    sessionStorage.setItem('introShown', 'true');
 
     // Ensure main page content is visible (in case animation was skipped)
     document.documentElement.classList.remove('intro-loading');
