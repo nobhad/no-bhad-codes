@@ -98,10 +98,10 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
           </div>
           
           <div class="consent-banner__text">
-            <h3 class="consent-banner__title">We respect your privacy</h3>
+            <h3 class="consent-banner__title">I respect your privacy</h3>
             <p class="consent-banner__message">
-              ${companyName} uses cookies and similar technologies to enhance your browsing experience, 
-              analyze site traffic, and understand visitor behavior. Your privacy is important to us.
+              ${companyName} uses cookies and similar technologies to enhance your browsing experience,
+              analyze site traffic, and understand visitor behavior. Your privacy is important to me.
             </p>
             
             ${showDetails ? this.renderDetails() : ''}
@@ -160,15 +160,15 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
   private renderDetails(): string {
     return ComponentUtils.html`
       <div class="consent-banner__details">
-        <h4>What we track:</h4>
+        <h4>What I track:</h4>
         <ul>
           <li><strong>Page Views:</strong> Which pages you visit and how long you stay</li>
           <li><strong>Interactions:</strong> Buttons you click and forms you use</li>
-          <li><strong>Performance:</strong> How fast our site loads for you</li>
+          <li><strong>Performance:</strong> How fast the site loads for you</li>
           <li><strong>Technical Info:</strong> Your browser type and screen size</li>
         </ul>
         
-        <h4>What we don't track:</h4>
+        <h4>What I don't track:</h4>
         <ul>
           <li>Personal information without consent</li>
           <li>Your identity across other websites</li>
@@ -177,7 +177,7 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
         
         <p class="consent-banner__note">
           You can change your mind anytime by clearing your browser cookies or 
-          contacting us. Declining won't affect your ability to use our website.
+          contacting me. Declining won't affect your ability to use the website.
         </p>
       </div>
     `;

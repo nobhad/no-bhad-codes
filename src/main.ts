@@ -21,7 +21,7 @@ if (import.meta.env?.PROD) {
   injectSpeedInsights();
 }
 
-// Failsafe: Ensure page content is visible after 3 seconds
+// Failsafe: Ensure page content is visible after 10 seconds
 // This catches cases where intro animation fails or takes too long
 if (typeof window !== 'undefined') {
   setTimeout(() => {
@@ -31,7 +31,7 @@ if (typeof window !== 'undefined') {
       html.classList.remove('intro-loading');
       html.classList.add('intro-complete', 'intro-finished');
     }
-  }, 3000);
+  }, 10000);
 }
 
 // Import and initialize application

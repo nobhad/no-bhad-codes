@@ -350,16 +350,10 @@ main,
   visibility: hidden !important;
 }
 
-/* Desktop: Show header after intro completes */
+/* Desktop: Show header after intro completes (GSAP handles animation) */
 .intro-complete .header {
   opacity: 1 !important;
   visibility: visible !important;
-  transition: opacity 0.5s ease-in-out !important;
-}
-
-/* After intro finishes, remove transition to prevent flicker on navigation */
-.intro-complete.intro-finished .header {
-  transition: none !important;
 }
 
 /* Mobile: header and content always visible, no intro animation effects */

@@ -338,6 +338,14 @@ export class Application {
           await this.waitForIntroComplete();
         }
 
+        // Create a wrapper element for the consent banner (don't mount to body directly!)
+        let consentWrapper = document.getElementById('consent-banner-wrapper');
+        if (!consentWrapper) {
+          consentWrapper = document.createElement('div');
+          consentWrapper.id = 'consent-banner-wrapper';
+          document.body.appendChild(consentWrapper);
+        }
+
         // Show consent banner after intro animation
         const _consentBanner = await createConsentBanner(
           {
@@ -359,7 +367,7 @@ export class Application {
               console.log('[Application] Visitor tracking declined');
             }
           },
-          document.body
+          consentWrapper
         );
       } else {
         // If consent already exists, we'll initialize tracking later in main init
@@ -373,33 +381,35 @@ export class Application {
   }
 
   /**
-   * Wait for intro animation to complete
-   * Returns immediately if intro is already complete or times out after 4 seconds
+   * Wait for intro animation to fully complete
+   * Waits for intro-finished class (added at the very end of animation)
    */
   private waitForIntroComplete(): Promise<void> {
     return new Promise((resolve) => {
       const html = document.documentElement;
 
-      // Check if intro is already complete
-      if (html.classList.contains('intro-complete') || html.classList.contains('intro-finished')) {
-        resolve();
+      // Check if intro is already fully finished
+      if (html.classList.contains('intro-finished')) {
+        // 2 seconds after header animation completes
+        setTimeout(resolve, 2000);
         return;
       }
 
       // If no intro-loading class, intro isn't running
       if (!html.classList.contains('intro-loading')) {
-        resolve();
+        setTimeout(resolve, 10000);
         return;
       }
 
-      // Set up observer to watch for intro-complete class
+      // Set up observer to watch for intro-finished class (not intro-complete)
       const observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-            if (html.classList.contains('intro-complete') || html.classList.contains('intro-finished')) {
+            // Only trigger on intro-finished (the final class added after all animations)
+            if (html.classList.contains('intro-finished')) {
               observer.disconnect();
-              // Small delay to ensure smooth transition
-              setTimeout(resolve, 300);
+              // 2 seconds after header animation completes
+              setTimeout(resolve, 2000);
               return;
             }
           }
@@ -408,11 +418,11 @@ export class Application {
 
       observer.observe(html, { attributes: true });
 
-      // Timeout fallback - don't wait forever
+      // Timeout fallback
       setTimeout(() => {
         observer.disconnect();
         resolve();
-      }, 4000);
+      }, 20000);
     });
   }
 

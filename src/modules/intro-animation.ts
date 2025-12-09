@@ -105,19 +105,45 @@ export class IntroAnimationModule extends BaseModule {
       onComplete: () => this.completeIntro()
     });
 
+    // Get header element for direct animation
+    const header = document.querySelector('.header') as HTMLElement;
+
     this.timeline
-      .to({}, { duration: 1.0 }) // Pause showing back
-      .call(() => {
-        // Show header/footer as card starts to flip
-        document.documentElement.classList.remove('intro-loading');
-        document.documentElement.classList.add('intro-complete');
-      })
+      .to({}, { duration: 3.0 }) // Pause showing back (longer delay before flip)
       .to(cardInner, {
         rotationY: 0,
-        duration: 1.2,
+        duration: 2.0,
         ease: 'power2.inOut',
         force3D: true,
-        overwrite: true
+        overwrite: true,
+        onComplete: () => {
+          // Remove intro-loading class FIRST so CSS !important rules don't block GSAP
+          document.documentElement.classList.remove('intro-loading');
+          document.documentElement.classList.add('intro-complete');
+
+          // Animate header with inline !important to override CSS !important rules
+          if (header) {
+            // Set initial state with !important
+            header.style.setProperty('opacity', '0', 'important');
+            header.style.setProperty('visibility', 'visible', 'important');
+
+            // Animate using proxy object since GSAP can't set !important directly
+            const proxy = { opacity: 0 };
+            gsap.to(proxy, {
+              opacity: 1,
+              duration: 1.5,
+              ease: 'power2.out',
+              onUpdate: () => {
+                header.style.setProperty('opacity', String(proxy.opacity), 'important');
+              },
+              onComplete: () => {
+                // Clear inline styles so CSS takes over
+                header.style.removeProperty('opacity');
+                header.style.removeProperty('visibility');
+              }
+            });
+          }
+        }
       }); // Flip to front with smooth 3D rotation
   }
 
