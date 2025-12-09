@@ -29,6 +29,7 @@ export class BusinessCardInteractions extends BaseModule {
   private isHovering = false;
   private isAnimating = false;
   private isEnabled = false;
+  private currentRotationY = 0; // Track actual rotation value for directional flips
 
   // Animation configuration
   private cardFlipDuration = 0.8;
@@ -283,8 +284,16 @@ export class BusinessCardInteractions extends BaseModule {
       return;
     }
 
-    this.log('Card clicked - flipping card');
-    this.flipCard();
+    // Determine flip direction based on click position
+    const rect = this.businessCard?.getBoundingClientRect();
+    if (!rect) return;
+
+    const clickX = event.clientX;
+    const cardCenterX = rect.left + rect.width / 2;
+    const flipDirection = clickX < cardCenterX ? 'left' : 'right';
+
+    this.log(`Card clicked on ${flipDirection} side - flipping ${flipDirection}`);
+    this.flipCard(flipDirection);
 
     // Trigger interaction callback
     if (this.onCardInteraction) {
@@ -312,7 +321,7 @@ export class BusinessCardInteractions extends BaseModule {
     gsap.to(this.businessCardInner, {
       duration: this.tiltDuration * 0.5, // faster response when hovering
       rotationX: rotateX,
-      rotationY: rotateY + (this.isFlipped ? 180 : 0),
+      rotationY: rotateY + this.currentRotationY,
       ease: 'power2.out'
     });
   }
@@ -340,7 +349,7 @@ export class BusinessCardInteractions extends BaseModule {
       gsap.to(this.businessCardInner, {
         duration: this.tiltDuration * 2,
         rotationX: 0,
-        rotationY: this.isFlipped ? 180 : 0,
+        rotationY: this.currentRotationY,
         ease: 'power2.out'
       });
       return;
@@ -361,7 +370,7 @@ export class BusinessCardInteractions extends BaseModule {
     gsap.to(this.businessCardInner, {
       duration: this.tiltDuration * 1.5,
       rotationX: rotateX,
-      rotationY: rotateY + (this.isFlipped ? 180 : 0),
+      rotationY: rotateY + this.currentRotationY,
       ease: 'power2.out'
     });
   }
@@ -411,7 +420,7 @@ export class BusinessCardInteractions extends BaseModule {
     gsap.to(this.businessCardInner, {
       duration: 0.5,
       rotationX: 0,
-      rotationY: this.isFlipped ? 180 : 0,
+      rotationY: this.currentRotationY,
       ease: 'power2.out'
     });
 
@@ -421,10 +430,16 @@ export class BusinessCardInteractions extends BaseModule {
     }
   }
 
+  private touchStartX: number | null = null;
+
   handleTouchStart(event: TouchEvent) {
     if (!this.isEnabled || this.isAnimating) return;
 
     event.preventDefault();
+    // Store touch start position for direction detection
+    if (event.touches.length > 0) {
+      this.touchStartX = event.touches[0].clientX;
+    }
     this.log('Touch started on card');
   }
 
@@ -432,8 +447,23 @@ export class BusinessCardInteractions extends BaseModule {
     if (!this.isEnabled || this.isAnimating) return;
 
     event.preventDefault();
-    this.log('Touch ended on card - flipping');
-    this.flipCard();
+
+    // Determine flip direction based on touch position
+    const rect = this.businessCard?.getBoundingClientRect();
+    if (!rect) return;
+
+    // Use changedTouches for touchend, fallback to stored touchStartX
+    const touchX = event.changedTouches.length > 0
+      ? event.changedTouches[0].clientX
+      : this.touchStartX ?? (rect.left + rect.width / 2);
+
+    const cardCenterX = rect.left + rect.width / 2;
+    const flipDirection = touchX < cardCenterX ? 'left' : 'right';
+
+    this.log(`Touch ended on card - flipping ${flipDirection}`);
+    this.flipCard(flipDirection);
+
+    this.touchStartX = null;
 
     // Trigger interaction callback
     if (this.onCardInteraction) {
@@ -446,13 +476,13 @@ export class BusinessCardInteractions extends BaseModule {
    * CARD FLIP ANIMATION
    * ==========================================
    */
-  flipCard() {
+  flipCard(direction: 'left' | 'right' = 'right') {
     if (!this.businessCardInner || this.isAnimating) {
       this.log('Cannot flip card - element missing or animating');
       return;
     }
 
-    this.log('Starting card flip animation');
+    this.log(`Starting card flip animation (direction: ${direction})`);
     this.isAnimating = true;
 
     // Kill existing flip timeline
@@ -462,6 +492,14 @@ export class BusinessCardInteractions extends BaseModule {
 
     // Toggle flip state
     this.isFlipped = !this.isFlipped;
+
+    // Calculate new rotation based on direction
+    // Left click = flip left (subtract 180), Right click = flip right (add 180)
+    if (direction === 'left') {
+      this.currentRotationY -= 180;
+    } else {
+      this.currentRotationY += 180;
+    }
 
     // Create flip animation
     this.cardFlipTimeline = gsap.timeline({
@@ -478,7 +516,7 @@ export class BusinessCardInteractions extends BaseModule {
 
     this.cardFlipTimeline.to(this.businessCardInner, {
       duration: this.cardFlipDuration,
-      rotationY: this.isFlipped ? 180 : 0,
+      rotationY: this.currentRotationY,
       ease: 'power2.inOut'
     });
   }
@@ -526,6 +564,7 @@ export class BusinessCardInteractions extends BaseModule {
     this.isFlipped = false;
     this.isAnimating = false;
     this.isHovering = false;
+    this.currentRotationY = 0;
 
     gsap.set(this.businessCardInner, {
       rotationY: 0,
