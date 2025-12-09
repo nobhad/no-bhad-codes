@@ -386,25 +386,21 @@
    =============================================== */
 
 /* Override for client landing page - center content in viewport */
-body[data-page="client-landing"] .client-login,
-.client-login:has(.portal-cards),
-.client-login:has(.portal-layout) {
+body[data-page="client-landing"] .client-login {
   position: fixed;
   top: var(--header-height);
   left: 0;
   right: 0;
   bottom: var(--footer-height);
-  height: calc(100vh - var(--header-height) - var(--footer-height));
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
+  overflow: auto;
   padding: 1rem;
 }
 
-.client-login:has(.portal-cards) .container,
-.client-login:has(.portal-layout) .container {
+body[data-page="client-landing"] .client-login .container {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -413,8 +409,7 @@ body[data-page="client-landing"] .client-login,
   width: auto;
 }
 
-.client-login:has(.portal-cards) .client-content,
-.client-login:has(.portal-layout) .client-content {
+body[data-page="client-landing"] .client-login .client-content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -422,7 +417,367 @@ body[data-page="client-landing"] .client-login,
 }
 
 /* ===============================================
-   PORTAL LAYOUT - CARD ON LEFT, FORM ON RIGHT
+   AUTH CONTAINER - UNIFIED LOGIN DESIGN
+   =============================================== */
+
+.auth-container {
+  width: 100%;
+  max-width: 480px;
+  height: 600px; /* Fixed height - NEVER changes */
+  background: var(--color-neutral-100);
+  border: 4px solid #000000;
+  padding: 2rem;
+  box-shadow:
+    6px 6px 12px rgba(0, 0, 0, 0.2),
+    12px 12px 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+/* New Client CTA - Below auth container */
+.new-client-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.new-client-title {
+  margin: 0;
+  font-family: var(--font--acme);
+  font-size: 1.25rem;
+  text-transform: uppercase;
+  color: var(--color-dark);
+  letter-spacing: 0.05em;
+}
+
+[data-theme="dark"] .auth-container {
+  box-shadow:
+    6px 6px 12px rgba(0, 0, 0, 0.5),
+    12px 12px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Auth Header - Logo and Title */
+.auth-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  filter: brightness(0);
+}
+
+[data-theme="dark"] .auth-logo {
+  filter: brightness(0) invert(1) brightness(0.9);
+}
+
+.auth-title {
+  margin: 0;
+  font-family: var(--font--acme);
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  color: var(--color-dark);
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+/* Auth Method Toggle */
+.auth-toggle {
+  display: flex;
+  border: 2px solid #000000;
+  margin-bottom: 1.5rem;
+}
+
+.auth-toggle-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: var(--color-neutral-200);
+  border: none;
+  font-family: var(--font--acme);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  color: var(--color-dark);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.auth-toggle-btn:first-child {
+  border-right: 1px solid #000000;
+}
+
+.auth-toggle-btn:last-child {
+  border-left: 1px solid #000000;
+}
+
+.auth-toggle-btn:hover:not(.active) {
+  background: var(--color-neutral-300);
+}
+
+.auth-toggle-btn.active {
+  background: var(--color-primary);
+  color: var(--color-dark);
+}
+
+/* Auth Forms - Matches contact form styling */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Reserve space for error messages to prevent layout shift */
+.auth-form .login-error {
+  min-height: 1.25em;
+  margin: 0;
+  color: #ef4444;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.auth-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.auth-form label {
+  font-weight: 600;
+  color: var(--color-dark);
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  text-align: left;
+}
+
+.auth-form .form-input {
+  width: 100%;
+  padding: clamp(6px, 1.5vw, 12px) clamp(8px, 2vw, 14px);
+  border: 2px solid var(--form-input-border, var(--color-neutral-400));
+  border-radius: clamp(6px, 1.5vw, 12px);
+  font-size: clamp(0.75rem, 2vw, 1rem);
+  background-color: var(--color-neutral-100);
+  color: var(--fg);
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  height: clamp(32px, 8vw, 44px);
+}
+
+.auth-form .form-input:focus {
+  outline: none !important;
+  border-color: #22c55e !important;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25) !important;
+}
+
+.auth-form .form-input::placeholder {
+  color: var(--form-input-placeholder, var(--color-neutral-500));
+  opacity: 1;
+}
+
+/* Auth Form Buttons */
+.auth-form .btn {
+  position: relative;
+  margin-top: 0.5rem;
+}
+
+.auth-form .btn-loader {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.auth-form .btn.loading .btn-text {
+  opacity: 0;
+}
+
+.auth-form .btn.loading .btn-loader {
+  display: block;
+}
+
+/* Password Input Wrapper */
+.auth-form .password-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.auth-form .password-input-wrapper .form-input {
+  padding-right: 2.5rem;
+}
+
+/* Password Toggle Icons */
+.auth-form .password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: var(--fg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-form .password-toggle:hover {
+  color: var(--color-primary);
+}
+
+.auth-form .password-toggle .password-icon-hide {
+  display: none;
+}
+
+.auth-form .password-toggle.showing .password-icon-show {
+  display: none;
+}
+
+.auth-form .password-toggle.showing .password-icon-hide {
+  display: block;
+}
+
+/* Auth Footer */
+.auth-footer {
+  text-align: center;
+  margin-top: 0.25rem;
+}
+
+.forgot-password-link {
+  color: var(--color-dark);
+  font-size: 0.875rem;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.forgot-password-link:hover {
+  color: var(--color-primary);
+}
+
+/* Magic Link Info */
+.magic-link-info {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-neutral-600);
+  margin: 0.5rem 0 0 0;
+}
+
+/* Auth Divider */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0 1rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--color-neutral-400);
+}
+
+.auth-divider span {
+  padding: 0 0.75rem;
+  font-size: 0.85rem;
+  color: var(--color-neutral-600);
+}
+
+/* Auth Container - Mobile Responsive */
+@media (max-width: 767px) {
+  /* Client landing page - normal document flow on mobile */
+  body[data-page="client-landing"] .client-login {
+    position: static;
+    height: auto;
+    min-height: calc(100vh - var(--header-height));
+    min-height: calc(100dvh - var(--header-height));
+    overflow: visible;
+    padding: 1.5rem 1rem;
+  }
+
+  body[data-page="client-landing"] .header {
+    position: static !important;
+  }
+
+  .auth-container {
+    max-width: 100%;
+    height: 560px; /* Fixed height for mobile - NEVER changes */
+    padding: 1.5rem;
+    border-width: 3px;
+  }
+
+  .new-client-cta {
+    margin-top: 1rem;
+  }
+
+  .auth-logo {
+    width: 60px;
+    height: 60px;
+  }
+
+  .auth-title {
+    font-size: 1.25rem;
+  }
+
+  .auth-toggle-btn {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .auth-form .form-input {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .auth-form .btn {
+    padding: 0.625rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-container {
+    height: 520px; /* Fixed height for small screens - NEVER changes */
+    padding: 1.25rem;
+  }
+
+  .auth-header {
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .auth-logo {
+    width: 50px;
+    height: 50px;
+  }
+
+  .auth-title {
+    font-size: 1.1rem;
+  }
+
+  .auth-toggle {
+    margin-bottom: 1rem;
+  }
+
+  .auth-toggle-btn {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* ===============================================
+   PORTAL LAYOUT - CARD ON LEFT, FORM ON RIGHT (LEGACY)
    =============================================== */
 
 .portal-layout {

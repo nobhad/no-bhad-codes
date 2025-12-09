@@ -6,6 +6,7 @@
  *
  * Handles client landing page functionality including:
  * - Login form submission and validation
+ * - Auth method toggle (Password / Magic Link)
  * - Password visibility toggle
  * - Intake modal opening
  */
@@ -25,33 +26,25 @@ export class ClientLandingModule extends BaseModule {
   private readonly DEMO_EMAIL = DEMO_CREDENTIALS.EMAIL;
   private readonly DEMO_PASSWORD = DEMO_CREDENTIALS.PASSWORD;
 
-  // DOM elements - Desktop
+  // DOM elements - Auth container
+  private authToggleBtns: NodeListOf<HTMLButtonElement> | null = null;
   private loginForm: HTMLFormElement | null = null;
+  private magicLinkForm: HTMLFormElement | null = null;
   private emailInput: HTMLInputElement | null = null;
   private passwordInput: HTMLInputElement | null = null;
   private passwordToggle: HTMLButtonElement | null = null;
   private loginError: HTMLElement | null = null;
-  private submitButton: HTMLButtonElement | null = null;
+  private magicLinkEmailInput: HTMLInputElement | null = null;
+  private magicLinkError: HTMLElement | null = null;
   private openIntakeButton: HTMLButtonElement | null = null;
   private intakeModal: HTMLElement | null = null;
-
-  // DOM elements - Mobile
-  private loginFormMobile: HTMLFormElement | null = null;
-  private emailInputMobile: HTMLInputElement | null = null;
-  private passwordInputMobile: HTMLInputElement | null = null;
-  private loginErrorMobile: HTMLElement | null = null;
-  private openIntakeButtonMobile: HTMLButtonElement | null = null;
-
-  // Magic link elements
-  private magicLinkBtn: HTMLButtonElement | null = null;
-  private magicLinkBtnMobile: HTMLButtonElement | null = null;
 
   constructor() {
     super('client-landing');
   }
 
   protected override async onInit(): Promise<void> {
-    console.log('[ClientLandingModule] Initializing...');
+    console.log('[ClientLandingModule] Initializing on path:', window.location.pathname);
 
     // Check if user is already logged in and redirect to portal
     if (this.isLoggedIn()) {
@@ -60,11 +53,19 @@ export class ClientLandingModule extends BaseModule {
       return;
     }
 
+    // Wait for DOM to be fully loaded
+    if (document.readyState === 'loading') {
+      await new Promise<void>((resolve) => {
+        document.addEventListener('DOMContentLoaded', () => resolve());
+      });
+    }
+
     this.cacheElements();
+    this.setupAuthToggle();
     this.setupLoginForm();
+    this.setupMagicLinkForm();
     this.setupPasswordToggle();
     this.setupIntakeModal();
-    this.setupMagicLink();
     console.log('[ClientLandingModule] Initialization complete');
   }
 
@@ -104,82 +105,95 @@ export class ClientLandingModule extends BaseModule {
   }
 
   private cacheElements(): void {
-    // Desktop elements
+    // Auth toggle buttons
+    this.authToggleBtns = document.querySelectorAll('.auth-toggle-btn');
+
+    // Password login form elements
     this.loginForm = document.getElementById('loginForm') as HTMLFormElement;
     this.emailInput = document.getElementById('login-email') as HTMLInputElement;
     this.passwordInput = document.getElementById('login-password') as HTMLInputElement;
-    this.passwordToggle = document.querySelector(
-      '.desktop-login-form .password-toggle'
-    ) as HTMLButtonElement;
+    this.passwordToggle = document.querySelector('.password-toggle') as HTMLButtonElement;
     this.loginError = document.getElementById('loginError') as HTMLElement;
-    this.submitButton = this.loginForm?.querySelector('button[type="submit"]') as HTMLButtonElement;
+
+    // Magic link form elements
+    this.magicLinkForm = document.getElementById('magicLinkForm') as HTMLFormElement;
+    this.magicLinkEmailInput = document.getElementById('magic-link-email') as HTMLInputElement;
+    this.magicLinkError = document.getElementById('magicLinkError') as HTMLElement;
+
+    // Intake modal elements
     this.openIntakeButton = document.getElementById('openIntakeModal') as HTMLButtonElement;
     this.intakeModal = document.getElementById('intakeModal') as HTMLElement;
 
-    // Mobile elements
-    this.loginFormMobile = document.getElementById('loginFormMobile') as HTMLFormElement;
-    this.emailInputMobile = document.getElementById('login-email-mobile') as HTMLInputElement;
-    this.passwordInputMobile = document.getElementById('login-password-mobile') as HTMLInputElement;
-    this.loginErrorMobile = document.getElementById('loginErrorMobile') as HTMLElement;
-    this.openIntakeButtonMobile = document.getElementById(
-      'openIntakeModalMobile'
-    ) as HTMLButtonElement;
-
-    // Magic link buttons
-    this.magicLinkBtn = document.getElementById('magicLinkBtn') as HTMLButtonElement;
-    this.magicLinkBtnMobile = document.getElementById('magicLinkBtnMobile') as HTMLButtonElement;
-
     console.log('[ClientLandingModule] Elements cached:', {
+      authToggleBtns: this.authToggleBtns?.length || 0,
       loginForm: !!this.loginForm,
       emailInput: !!this.emailInput,
       passwordInput: !!this.passwordInput,
       passwordToggle: !!this.passwordToggle,
-      loginError: !!this.loginError,
-      submitButton: !!this.submitButton,
+      magicLinkForm: !!this.magicLinkForm,
       openIntakeButton: !!this.openIntakeButton,
       intakeModal: !!this.intakeModal
     });
   }
 
+  /**
+   * Setup auth method toggle (Password / Magic Link)
+   */
+  private setupAuthToggle(): void {
+    if (!this.authToggleBtns || this.authToggleBtns.length === 0) {
+      console.warn('[ClientLandingModule] Auth toggle buttons not found');
+      return;
+    }
+
+    this.authToggleBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const method = btn.dataset.authMethod;
+        console.log('[ClientLandingModule] Auth method toggled to:', method);
+
+        // Update active state on buttons
+        this.authToggleBtns?.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Show/hide forms based on selected method
+        if (method === 'password') {
+          if (this.loginForm) this.loginForm.style.display = 'flex';
+          if (this.magicLinkForm) this.magicLinkForm.style.display = 'none';
+        } else if (method === 'magic-link') {
+          if (this.loginForm) this.loginForm.style.display = 'none';
+          if (this.magicLinkForm) this.magicLinkForm.style.display = 'flex';
+        }
+
+        // Clear any previous errors
+        this.clearError();
+        this.clearMagicLinkError();
+      });
+    });
+  }
+
   private setupLoginForm(): void {
-    // Desktop form
-    if (this.loginForm) {
-      this.loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        console.log('[ClientLandingModule] Desktop login form submitted');
-        await this.handleLogin();
-      });
+    if (!this.loginForm) {
+      console.warn('[ClientLandingModule] Login form not found');
+      return;
     }
 
-    // Mobile form
-    if (this.loginFormMobile) {
-      this.loginFormMobile.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        console.log('[ClientLandingModule] Mobile login form submitted');
-        await this.handleLoginMobile();
-      });
+    this.loginForm.addEventListener('submit', async (e: Event) => {
+      e.preventDefault();
+      console.log('[ClientLandingModule] Login form submitted');
+      await this.handleLogin();
+    });
+  }
 
-      // Setup mobile password toggle
-      const mobilePasswordToggle = this.loginFormMobile.querySelector(
-        '.password-toggle'
-      ) as HTMLButtonElement;
-      if (mobilePasswordToggle && this.passwordInputMobile) {
-        mobilePasswordToggle.addEventListener('click', () => {
-          const isPassword = this.passwordInputMobile!.type === 'password';
-          this.passwordInputMobile!.type = isPassword ? 'text' : 'password';
-          const svg = mobilePasswordToggle.querySelector('svg');
-          if (svg) {
-            if (isPassword) {
-              svg.innerHTML =
-                '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
-            } else {
-              svg.innerHTML =
-                '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
-            }
-          }
-        });
-      }
+  private setupMagicLinkForm(): void {
+    if (!this.magicLinkForm) {
+      console.warn('[ClientLandingModule] Magic link form not found');
+      return;
     }
+
+    this.magicLinkForm.addEventListener('submit', async (e: Event) => {
+      e.preventDefault();
+      console.log('[ClientLandingModule] Magic link form submitted');
+      await this.handleMagicLinkRequest();
+    });
   }
 
   private setupPasswordToggle(): void {
@@ -193,19 +207,8 @@ export class ClientLandingModule extends BaseModule {
       const isPassword = this.passwordInput!.type === 'password';
       this.passwordInput!.type = isPassword ? 'text' : 'password';
 
-      // Update the icon (swap between eye and eye-off)
-      const svg = this.passwordToggle!.querySelector('svg');
-      if (svg) {
-        if (isPassword) {
-          // Show "eye-off" icon when password is visible
-          svg.innerHTML =
-            '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
-        } else {
-          // Show "eye" icon when password is hidden
-          svg.innerHTML =
-            '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
-        }
-      }
+      // Toggle the showing class for icon visibility
+      this.passwordToggle!.classList.toggle('showing', isPassword);
     });
   }
 
@@ -215,18 +218,10 @@ export class ClientLandingModule extends BaseModule {
       return;
     }
 
-    // Open modal when desktop button is clicked
+    // Open modal when button is clicked
     if (this.openIntakeButton) {
       this.openIntakeButton.addEventListener('click', () => {
-        console.log('[ClientLandingModule] Opening intake modal (desktop)');
-        this.openIntakeModalWithAnimation();
-      });
-    }
-
-    // Open modal when mobile button is clicked
-    if (this.openIntakeButtonMobile) {
-      this.openIntakeButtonMobile.addEventListener('click', () => {
-        console.log('[ClientLandingModule] Opening intake modal (mobile)');
+        console.log('[ClientLandingModule] Opening intake modal');
         this.openIntakeModalWithAnimation();
       });
     }
@@ -246,66 +241,29 @@ export class ClientLandingModule extends BaseModule {
     });
   }
 
-  private setupMagicLink(): void {
-    // Desktop magic link button
-    if (this.magicLinkBtn) {
-      this.magicLinkBtn.addEventListener('click', () => {
-        console.log('[ClientLandingModule] Magic link button clicked (desktop)');
-        this.handleMagicLinkRequest(false);
-      });
-    }
-
-    // Mobile magic link button
-    if (this.magicLinkBtnMobile) {
-      this.magicLinkBtnMobile.addEventListener('click', () => {
-        console.log('[ClientLandingModule] Magic link button clicked (mobile)');
-        this.handleMagicLinkRequest(true);
-      });
-    }
-  }
-
-  private async handleMagicLinkRequest(isMobile: boolean): Promise<void> {
-    const emailInput = isMobile ? this.emailInputMobile : this.emailInput;
-    const errorEl = isMobile ? this.loginErrorMobile : this.loginError;
-    const button = isMobile ? this.magicLinkBtnMobile : this.magicLinkBtn;
-    const email = emailInput?.value.trim() || '';
+  private async handleMagicLinkRequest(): Promise<void> {
+    const email = this.magicLinkEmailInput?.value.trim() || '';
 
     // Clear previous errors
-    if (errorEl) {
-      errorEl.textContent = '';
-      errorEl.style.display = 'none';
-    }
+    this.clearMagicLinkError();
 
     // Validate email
     if (!email) {
-      if (errorEl) {
-        errorEl.textContent = 'Please enter your email address';
-        errorEl.style.display = 'block';
-      }
-      emailInput?.focus();
+      this.showMagicLinkError('Please enter your email address');
+      this.magicLinkEmailInput?.focus();
       return;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      if (errorEl) {
-        errorEl.textContent = 'Please enter a valid email address';
-        errorEl.style.display = 'block';
-      }
+      this.showMagicLinkError('Please enter a valid email address');
       return;
     }
 
     // Show loading state
-    if (button) {
-      button.disabled = true;
-      const btnText = button.querySelector('.btn-text');
-      if (btnText) {
-        btnText.textContent = 'Sending...';
-      } else {
-        button.textContent = 'Sending...';
-      }
-    }
+    const submitBtn = this.magicLinkForm?.querySelector('button[type="submit"]') as HTMLButtonElement;
+    this.setButtonLoading(submitBtn, true, 'Sending...');
 
     try {
       const response = await fetch('/api/auth/magic-link', {
@@ -317,29 +275,14 @@ export class ClientLandingModule extends BaseModule {
       const result = await response.json();
 
       // Always show success message for security (don't reveal if email exists)
-      if (errorEl) {
-        errorEl.textContent = result.message || 'If an account exists, a login link has been sent to your email.';
-        errorEl.style.display = 'block';
-        errorEl.style.color = 'var(--color-success, #22c55e)';
-      }
+      this.showMagicLinkSuccess(
+        result.message || 'If an account exists, a login link has been sent to your email.'
+      );
     } catch (error) {
       console.error('[ClientLandingModule] Magic link request error:', error);
-      if (errorEl) {
-        errorEl.textContent = 'Unable to send magic link. Please try again.';
-        errorEl.style.display = 'block';
-        errorEl.style.color = 'var(--color-error, #ef4444)';
-      }
+      this.showMagicLinkError('Unable to send magic link. Please try again.');
     } finally {
-      // Reset button
-      if (button) {
-        button.disabled = false;
-        const btnText = button.querySelector('.btn-text');
-        if (btnText) {
-          btnText.textContent = 'Sign in with Magic Link';
-        } else {
-          button.textContent = 'Sign in with Magic Link';
-        }
-      }
+      this.setButtonLoading(submitBtn, false, 'Send Magic Link');
     }
   }
 
@@ -488,7 +431,8 @@ export class ClientLandingModule extends BaseModule {
     }
 
     // Show loading state
-    this.setLoading(true);
+    const submitBtn = this.loginForm?.querySelector('button[type="submit"]') as HTMLButtonElement;
+    this.setButtonLoading(submitBtn, true);
 
     try {
       // Check for demo credentials
@@ -565,94 +509,7 @@ export class ClientLandingModule extends BaseModule {
       }
       this.showError('Login failed. Please check your credentials and try again.');
     } finally {
-      this.setLoading(false);
-    }
-  }
-
-  private async handleLoginMobile(): Promise<void> {
-    // Clear previous errors
-    this.clearErrorMobile();
-
-    const email = this.emailInputMobile?.value.trim() || '';
-    const password = this.passwordInputMobile?.value || '';
-
-    // Basic validation
-    if (!email || !password) {
-      this.showErrorMobile('Please enter both email and password');
-      return;
-    }
-
-    // Show loading state
-    this.setLoadingMobile(true);
-
-    try {
-      // Check for demo credentials
-      if (email === this.DEMO_EMAIL && password === this.DEMO_PASSWORD) {
-        console.log('[ClientLandingModule] Demo login successful (mobile)');
-        sessionStorage.setItem(
-          'clientAuth',
-          JSON.stringify({
-            email: this.DEMO_EMAIL,
-            name: 'Demo User',
-            isDemo: true,
-            loginTime: Date.now()
-          })
-        );
-        window.location.href = '/client/portal';
-        return;
-      }
-
-      // Try actual API login
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        console.log('[ClientLandingModule] Login successful (mobile)');
-        if (result.token) {
-          sessionStorage.setItem('client_auth_token', result.token);
-        }
-        sessionStorage.setItem(
-          'clientAuth',
-          JSON.stringify({
-            email: result.user?.email || email,
-            name: result.user?.name || 'Client',
-            isDemo: false,
-            isAdmin: result.user?.isAdmin || false,
-            loginTime: Date.now()
-          })
-        );
-        // Redirect to admin portal if admin, otherwise client portal
-        if (result.user?.isAdmin) {
-          window.location.href = '/admin';
-        } else {
-          window.location.href = '/client/portal';
-        }
-      } else {
-        this.showErrorMobile(result.error || 'Invalid email or password');
-      }
-    } catch (error) {
-      console.error('[ClientLandingModule] Login error (mobile):', error);
-      if (email === this.DEMO_EMAIL && password === this.DEMO_PASSWORD) {
-        sessionStorage.setItem(
-          'clientAuth',
-          JSON.stringify({
-            email: this.DEMO_EMAIL,
-            name: 'Demo User',
-            isDemo: true,
-            loginTime: Date.now()
-          })
-        );
-        window.location.href = '/client/portal';
-        return;
-      }
-      this.showErrorMobile('Login failed. Please check your credentials.');
-    } finally {
-      this.setLoadingMobile(false);
+      this.setButtonLoading(submitBtn, false);
     }
   }
 
@@ -660,13 +517,7 @@ export class ClientLandingModule extends BaseModule {
     if (this.loginError) {
       this.loginError.textContent = message;
       this.loginError.style.display = 'block';
-    }
-  }
-
-  private showErrorMobile(message: string): void {
-    if (this.loginErrorMobile) {
-      this.loginErrorMobile.textContent = message;
-      this.loginErrorMobile.style.display = 'block';
+      this.loginError.style.color = '';
     }
   }
 
@@ -677,46 +528,49 @@ export class ClientLandingModule extends BaseModule {
     }
   }
 
-  private clearErrorMobile(): void {
-    if (this.loginErrorMobile) {
-      this.loginErrorMobile.textContent = '';
-      this.loginErrorMobile.style.display = 'none';
+  private showMagicLinkError(message: string): void {
+    if (this.magicLinkError) {
+      this.magicLinkError.textContent = message;
+      this.magicLinkError.style.display = 'block';
+      this.magicLinkError.style.color = 'var(--color-error, #ef4444)';
     }
   }
 
-  private setLoading(loading: boolean): void {
-    if (this.submitButton) {
-      const btnText = this.submitButton.querySelector('.btn-text');
-      const btnLoader = this.submitButton.querySelector('.btn-loader');
+  private showMagicLinkSuccess(message: string): void {
+    if (this.magicLinkError) {
+      this.magicLinkError.textContent = message;
+      this.magicLinkError.style.display = 'block';
+      this.magicLinkError.style.color = 'var(--color-success, #22c55e)';
+    }
+  }
 
-      if (loading) {
-        this.submitButton.disabled = true;
-        if (btnText) (btnText as HTMLElement).style.opacity = '0';
-        if (btnLoader) (btnLoader as HTMLElement).style.display = 'block';
-      } else {
-        this.submitButton.disabled = false;
-        if (btnText) (btnText as HTMLElement).style.opacity = '1';
-        if (btnLoader) (btnLoader as HTMLElement).style.display = 'none';
+  private clearMagicLinkError(): void {
+    if (this.magicLinkError) {
+      this.magicLinkError.textContent = '';
+      this.magicLinkError.style.display = 'none';
+    }
+  }
+
+  private setButtonLoading(button: HTMLButtonElement | null, loading: boolean, loadingText?: string): void {
+    if (!button) return;
+
+    const btnText = button.querySelector('.btn-text');
+
+    if (loading) {
+      button.disabled = true;
+      button.classList.add('loading');
+      if (btnText && loadingText) {
+        (btnText as HTMLElement).dataset.originalText = (btnText as HTMLElement).textContent || '';
+        (btnText as HTMLElement).textContent = loadingText;
       }
-    }
-  }
-
-  private setLoadingMobile(loading: boolean): void {
-    const submitBtn = this.loginFormMobile?.querySelector(
-      'button[type="submit"]'
-    ) as HTMLButtonElement;
-    if (submitBtn) {
-      const btnText = submitBtn.querySelector('.btn-text');
-      const btnLoader = submitBtn.querySelector('.btn-loader');
-
-      if (loading) {
-        submitBtn.disabled = true;
-        if (btnText) (btnText as HTMLElement).style.opacity = '0';
-        if (btnLoader) (btnLoader as HTMLElement).style.display = 'block';
-      } else {
-        submitBtn.disabled = false;
-        if (btnText) (btnText as HTMLElement).style.opacity = '1';
-        if (btnLoader) (btnLoader as HTMLElement).style.display = 'none';
+    } else {
+      button.disabled = false;
+      button.classList.remove('loading');
+      if (btnText) {
+        const originalText = (btnText as HTMLElement).dataset.originalText;
+        if (originalText) {
+          (btnText as HTMLElement).textContent = originalText;
+        }
       }
     }
   }

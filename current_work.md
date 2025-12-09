@@ -42,6 +42,33 @@
 
 ---
 
+### Client Portal Auth Container - IN PROGRESS
+
+**Status**: In Progress
+**Date**: December 9, 2025
+
+**Summary**: Restructured client portal login page with unified auth container design.
+
+**Completed**:
+
+- [x] Unified auth container for desktop/mobile
+- [x] Password/Magic Link toggle buttons
+- [x] Password visibility toggle with icons
+- [x] Fixed button text color (black on green)
+- [x] Form inputs match contact form styling
+- [x] Button loader hidden by default
+- [x] Auth container width increased to 480px
+- [x] Made container responsive with min-height (not fixed height)
+- [x] Reserved space for error messages to prevent layout shift
+
+**Known Issues / Concerns**:
+
+| Issue | Priority | Notes |
+|-------|----------|-------|
+| VH calculations not accounting for footer | Medium | Client portal layout uses VH but doesn't subtract footer height properly |
+
+---
+
 ### Magic Link Login + Mobile Nav + Intake Form Improvements - COMPLETED
 **Status**: Complete
 **Date**: December 4, 2025

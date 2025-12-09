@@ -183,156 +183,122 @@
       <section class="client-login">
         <div class="container">
           <div class="client-content">
-            <!-- DESKTOP: Card on left, form on right -->
-            <h1 class="login-title desktop-only">CLIENT PORTAL</h1>
-            <div class="portal-layout desktop-only">
-              <div class="portal-card">
-                <div class="portal-card-header"><h2>New Client</h2></div>
-                <div class="portal-card-body">
-                  <p>
-                    Ready to start a new project? Fill out our intake form and I'll get back to you
-                    within 24-48 hours.
-                  </p>
-                  <div class="portal-card-avatar">
-                    <img src="/images/avatar.svg" alt="Avatar" />
-                  </div>
-                  <button type="button" class="btn btn-primary" id="openIntakeModal">
-                    Start Intake Form
-                  </button>
-                </div>
+            <!-- Auth Container - Unified for desktop and mobile -->
+            <div class="auth-container">
+              <!-- Logo and App Name -->
+              <div class="auth-header">
+                <img src="/images/avatar.svg" alt="No Bhad Codes Logo" class="auth-logo" />
+                <h1 class="auth-title">CLIENT PORTAL</h1>
               </div>
-              <div class="portal-form-area">
-                <form id="loginForm" class="login-form desktop-login-form" novalidate>
-                  <h3 class="form-heading">LOGIN</h3>
-                  <div class="form-group">
-                    <label for="login-email">Email</label>
+
+              <!-- Auth Method Toggle -->
+              <div class="auth-toggle">
+                <button type="button" class="auth-toggle-btn active" data-auth-method="password">
+                  Password
+                </button>
+                <button type="button" class="auth-toggle-btn" data-auth-method="magic-link">
+                  Magic Link
+                </button>
+              </div>
+
+              <!-- Password Login Form -->
+              <form id="loginForm" class="auth-form" data-form-type="password" novalidate>
+                <div class="login-error" id="loginError"></div>
+                <div class="form-group">
+                  <label for="login-email">Email</label>
+                  <input
+                    type="email"
+                    id="login-email"
+                    name="email"
+                    class="form-input"
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="login-password">Password</label>
+                  <div class="password-input-wrapper">
                     <input
-                      type="email"
-                      id="login-email"
-                      name="email"
+                      type="password"
+                      id="login-password"
+                      name="password"
                       class="form-input"
-                      placeholder="your@email.com"
+                      placeholder="Enter password"
+                      autocomplete="current-password"
                       required
                     />
-                  </div>
-                  <div class="form-group">
-                    <label for="login-password">Password</label>
-                    <div class="password-input-wrapper">
-                      <input
-                        type="password"
-                        id="login-password"
-                        name="password"
-                        class="form-input"
-                        placeholder="Enter password"
-                        autocomplete="current-password"
-                        required
-                      />
-                      <button
-                        type="button"
-                        class="password-toggle"
-                        aria-label="Toggle password visibility"
+                    <button
+                      type="button"
+                      class="password-toggle"
+                      aria-label="Toggle password visibility"
+                    >
+                      <svg
+                        class="password-icon-show"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                        >
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                          <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                      </button>
-                    </div>
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      <svg
+                        class="password-icon-hide"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        style="display: none;"
+                      >
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    </button>
                   </div>
-                  <div class="login-error" id="loginError"></div>
-                  <button type="submit" class="btn btn-primary btn-full">
-                    <span class="btn-text">Sign In</span><span class="btn-loader"></span>
-                  </button>
-                  <div class="login-divider">
-                    <span>or</span>
-                  </div>
-                  <button type="button" class="btn btn-secondary btn-full" id="magicLinkBtn">
-                    <span class="btn-text">Sign in with Magic Link</span>
-                  </button>
-                  <div class="login-footer">
-                    <p>
-                      Forgot your password?
-                      <a href="mailto:hello@nobhad.codes"><strong>Contact me</strong></a>
-                    </p>
-                  </div>
-                </form>
-              </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                  <span class="btn-text">Sign In</span>
+                  <span class="btn-loader"></span>
+                </button>
+                <div class="auth-footer">
+                  <a href="mailto:hello@nobhad.codes" class="forgot-password-link">Forgot password?</a>
+                </div>
+              </form>
+
+              <!-- Magic Link Form (hidden by default) -->
+              <form id="magicLinkForm" class="auth-form" data-form-type="magic-link" style="display: none;" novalidate>
+                <div class="login-error" id="magicLinkError"></div>
+                <div class="form-group">
+                  <label for="magic-link-email">Email</label>
+                  <input
+                    type="email"
+                    id="magic-link-email"
+                    name="email"
+                    class="form-input"
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                  <span class="btn-text">Send Magic Link</span>
+                  <span class="btn-loader"></span>
+                </button>
+                <p class="magic-link-info">We'll send a secure login link to your email.</p>
+              </form>
             </div>
 
-            <!-- MOBILE: Simple stacked layout -->
-            <div class="mobile-portal-layout mobile-only">
-              <div class="mobile-avatar"><img src="/images/avatar.svg" alt="Avatar" /></div>
-              <a href="/client/intake" class="btn btn-primary">START INTAKE FORM</a>
-              <h1 class="mobile-portal-title">CLIENT PORTAL</h1>
-
-              <div class="mobile-login-box">
-                <form id="loginFormMobile" class="login-form mobile-login-form" novalidate>
-                  <div class="form-group">
-                    <label for="login-email-mobile">Email</label>
-                    <input
-                      type="email"
-                      id="login-email-mobile"
-                      name="email"
-                      class="form-input"
-                      placeholder="your@email.com"
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label for="login-password-mobile">Password</label>
-                    <div class="password-input-wrapper">
-                      <input
-                        type="password"
-                        id="login-password-mobile"
-                        name="password"
-                        class="form-input"
-                        placeholder="Enter password"
-                        autocomplete="current-password"
-                      />
-                      <button
-                        type="button"
-                        class="password-toggle"
-                        aria-label="Toggle password visibility"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                        >
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                          <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="login-error" id="loginErrorMobile"></div>
-                  <button type="submit" class="btn btn-primary btn-full">SIGN IN</button>
-                  <div class="login-divider">
-                    <span>or</span>
-                  </div>
-                  <button type="button" class="btn btn-secondary btn-full" id="magicLinkBtnMobile">
-                    Sign in with Magic Link
-                  </button>
-                </form>
-              </div>
-
-              <div class="mobile-forgot-password">
-                <p>
-                  Forgot your password?
-                  <a href="mailto:hello@nobhad.codes"><strong>Contact me</strong></a>
-                </p>
-              </div>
+            <!-- New Client CTA - Outside auth container -->
+            <div class="new-client-cta">
+              <h2 class="new-client-title">New Client?</h2>
+              <button type="button" class="btn btn-secondary" id="openIntakeModal">
+                Start Intake Form
+              </button>
             </div>
           </div>
         </div>
