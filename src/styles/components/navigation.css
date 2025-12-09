@@ -794,12 +794,12 @@ html[data-theme="dark"] .coming-soon-banner {
   }
 }
 
-/* Large Screens */
-@media screen and (min-width: 1200px) {
+/* Large Screens (1200-1599px) - Narrower menu, larger text */
+@media screen and (min-width: 1200px) and (max-width: 1599px) {
   :root {
     --base-gap: 0.9rem;
     --menu-padding: 2.5rem;
-    --menu-heading-size: clamp(4rem, 4.5vw, 5.5rem);
+    --menu-heading-size: clamp(4.5rem, 5vw, 6rem);
 
     --menu-multiplier: 0.12;
     --list-multiplier: 0.09;
@@ -809,7 +809,7 @@ html[data-theme="dark"] .coming-soon-banner {
   }
 
   .menu {
-    width: clamp(48rem, 50vw, 60rem);
+    width: clamp(36rem, 42vw, 48rem);
   }
 }
 
