@@ -8,7 +8,7 @@
  * DESIGN:
  * - Uses GSAP ScrollTrigger for smooth section snapping
  * - Snaps to closest section when scrolling stops
- * - Desktop only (mobile uses native CSS scroll-snap)
+ * - DESKTOP ONLY - completely disabled on mobile for free scrolling
  * - Respects reduced motion preferences
  */
 
@@ -58,7 +58,7 @@ export class ScrollSnapModule extends BaseModule {
   constructor(options: ScrollSnapOptions = {}) {
     super('ScrollSnapModule', { debug: true, ...options });
 
-    // Set configuration with defaults
+    // Set configuration with defaults (desktop only - mobile is disabled in init())
     this.containerSelector = options.containerSelector || 'main';
     this.sectionSelector = options.sectionSelector || '.business-card-section, .about-section, .contact-section';
     this.snapDuration = options.snapDuration || 0.6;
@@ -74,6 +74,13 @@ export class ScrollSnapModule extends BaseModule {
 
   override async init(): Promise<void> {
     await super.init();
+
+    // MOBILE: Disable scroll snap completely - free scrolling on mobile
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    if (isMobile) {
+      this.log('Mobile detected - scroll snap disabled');
+      return;
+    }
 
     // Skip if reduced motion is preferred
     if (this.reducedMotion) {
@@ -116,15 +123,18 @@ export class ScrollSnapModule extends BaseModule {
 
     this.log(`Found ${this.sections.length} sections for scroll snap`);
 
-    // Detect if scrolling happens on the container or on window
-    // On mobile, main has position: static and overflow: visible
+    // On desktop, main has position: fixed with overflow-y: auto
+    // Always use container scroll on desktop - don't rely on scrollHeight check
+    // which can fail during intro animation when content is hidden
     const containerStyle = window.getComputedStyle(this.container);
-    const hasContainerScroll =
-      (containerStyle.overflowY === 'auto' || containerStyle.overflowY === 'scroll') &&
-      this.container.scrollHeight > this.container.clientHeight;
+    const isContainerFixed = containerStyle.position === 'fixed';
+    const hasOverflowScroll =
+      containerStyle.overflowY === 'auto' || containerStyle.overflowY === 'scroll';
 
-    this.useWindowScroll = !hasContainerScroll;
-    this.log(`Using ${this.useWindowScroll ? 'window' : 'container'} scroll`);
+    // Desktop (fixed container with overflow scroll) = use container scroll
+    // Otherwise (static/relative with overflow visible) = use window scroll
+    this.useWindowScroll = !(isContainerFixed && hasOverflowScroll);
+    this.log(`Using ${this.useWindowScroll ? 'window' : 'container'} scroll (container position: ${containerStyle.position}, overflow: ${containerStyle.overflowY})`);
 
     // Set up scroll listener
     this.scrollHandler = this.handleScroll;
@@ -136,6 +146,10 @@ export class ScrollSnapModule extends BaseModule {
 
     // Handle window resize
     window.addEventListener('resize', this.handleResize);
+
+    // Wait for intro animation to complete, then refresh ScrollTrigger
+    // This ensures accurate measurements after all content is visible
+    this.waitForIntroComplete();
 
     // Set up ScrollTrigger for each section
     this.sections.forEach((section, index) => {
@@ -300,6 +314,52 @@ export class ScrollSnapModule extends BaseModule {
   private handleResize(): void {
     // Refresh ScrollTrigger on resize
     ScrollTrigger.refresh();
+  }
+
+  /**
+   * Wait for intro animation to complete, then refresh ScrollTrigger
+   * This ensures accurate measurements after all content is visible
+   */
+  private waitForIntroComplete(): void {
+    const html = document.documentElement;
+
+    // If intro is already complete or not running, refresh immediately
+    if (html.classList.contains('intro-complete') || html.classList.contains('intro-finished')) {
+      this.log('Intro already complete, refreshing ScrollTrigger');
+      setTimeout(() => ScrollTrigger.refresh(), 100);
+      return;
+    }
+
+    // If intro-loading is not present, intro is not running
+    if (!html.classList.contains('intro-loading')) {
+      this.log('No intro animation, refreshing ScrollTrigger');
+      setTimeout(() => ScrollTrigger.refresh(), 100);
+      return;
+    }
+
+    // Set up observer to watch for intro-complete class
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          if (html.classList.contains('intro-complete') || html.classList.contains('intro-finished')) {
+            observer.disconnect();
+            this.log('Intro animation complete, refreshing ScrollTrigger');
+            // Small delay to ensure all animations have settled
+            setTimeout(() => ScrollTrigger.refresh(), 200);
+            return;
+          }
+        }
+      }
+    });
+
+    observer.observe(html, { attributes: true });
+
+    // Timeout fallback - refresh after 10 seconds regardless
+    setTimeout(() => {
+      observer.disconnect();
+      this.log('Intro timeout reached, refreshing ScrollTrigger');
+      ScrollTrigger.refresh();
+    }, 10000);
   }
 
   /**

@@ -65,7 +65,29 @@ export class ClientLandingModule extends BaseModule {
     this.setupMagicLinkForm();
     this.setupPasswordToggle();
     this.setupIntakeModal();
+
+    // Check for direct intake link (e.g., ?intake=true or #intake)
+    this.checkForDirectIntakeLink();
+
     console.log('[ClientLandingModule] Initialization complete');
+  }
+
+  /**
+   * Check if URL contains intake parameter to auto-open the form
+   * Supports: ?intake=true, ?intake=1, or #intake
+   */
+  private checkForDirectIntakeLink(): void {
+    const urlParams = new URLSearchParams(window.location.search);
+    const intakeParam = urlParams.get('intake');
+    const hashIntake = window.location.hash === '#intake';
+
+    if (intakeParam === 'true' || intakeParam === '1' || hashIntake) {
+      console.log('[ClientLandingModule] Direct intake link detected, opening form');
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        this.openIntakeModalWithAnimation();
+      }, 100);
+    }
   }
 
   /**

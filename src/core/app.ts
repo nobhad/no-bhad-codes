@@ -253,7 +253,7 @@ export class Application {
             const { ScrollSnapModule } = await import('../modules/scroll-snap');
             return new ScrollSnapModule({
               containerSelector: 'main',
-              sectionSelector: '.business-card-section, .about-section, .contact-section, .hero-section, .page-section, main > section',
+              sectionSelector: '.business-card-section, .text-animation-section, .about-section, .contact-section, .hero-section, .page-section, main > section',
               snapDuration: 0.6,
               snapDelay: 150
             });
@@ -264,6 +264,25 @@ export class Application {
             destroy: () => {},
             isInitialized: true,
             name: 'ScrollSnapModule'
+          };
+        }
+      },
+      {
+        name: 'TextAnimationModule',
+        type: 'dom',
+        factory: async () => {
+          // Only load text animation on index/home page
+          const currentPath = window.location.pathname;
+          if (currentPath === '/' || currentPath === '/index.html') {
+            const { TextAnimationModule } = await import('../modules/text-animation');
+            return new TextAnimationModule();
+          }
+          // Return a dummy module for other pages
+          return {
+            init: async () => {},
+            destroy: () => {},
+            isInitialized: true,
+            name: 'TextAnimationModule'
           };
         }
       },
@@ -605,7 +624,8 @@ export class Application {
       'SectionCardInteractions', // Section business card interactions
       'NavigationModule',
       'ContactFormModule',
-      'ScrollSnapModule' // GSAP scroll snapping for sections
+      'ScrollSnapModule', // GSAP scroll snapping for sections
+      'TextAnimationModule' // GSAP text animation for home page
     ];
 
     // Modules for Client Portal dashboard

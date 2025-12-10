@@ -7,6 +7,22 @@
     <title>No Bhad Codes - Professional Web Development</title>
 
     <!-- All CSS moved to external stylesheets -->
+    <!-- Critical CSS for mobile - ensures header visible from first paint (same fixed as desktop) -->
+    <style>
+      @media screen and (max-width: 767px) {
+        /* CRITICAL: Header must be visible immediately on mobile */
+        .header,
+        .intro-loading .header {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+        .header > *,
+        .intro-loading .header > * {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+      }
+    </style>
     <script>
       (function () {
         // Scroll to top immediately on page load (prevents browser scroll restoration)
@@ -14,6 +30,20 @@
           history.scrollRestoration = 'manual';
         }
         window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+
+        // Also scroll to top after DOM loads and window loads
+        document.addEventListener('DOMContentLoaded', function() {
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        });
+        window.addEventListener('load', function() {
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        });
 
         try {
           const savedTheme = localStorage.getItem('theme');
@@ -226,6 +256,32 @@
             </div>
           </div>
         </div>
+      </section>
+
+      <!-- ANIMATED TEXT SECTION -->
+      <section id="text-animation" class="text-animation-section">
+        <svg viewBox="0 0 1280 720" class="text-animation-svg">
+          <defs>
+            <mask id="maskLeft">
+              <rect x="-50%" width="100%" height="100%" fill="#fff"/>
+            </mask>
+            <mask id="maskRight">
+              <rect x="50%" width="100%" height="100%" fill="#fff"/>
+            </mask>
+          </defs>
+          <g font-size="150" class="text-animation-group">
+            <g mask="url(#maskLeft)" class="text-left">
+              <text y="120">NO</text>
+              <text y="250">BHAD</text>
+              <text y="380">CODES</text>
+            </g>
+            <g mask="url(#maskRight)" class="text-right">
+              <text y="120">NO</text>
+              <text y="250">BHAD</text>
+              <text y="380">CODES</text>
+            </g>
+          </g>
+        </svg>
       </section>
 
       <!-- ABOUT SECTION -->

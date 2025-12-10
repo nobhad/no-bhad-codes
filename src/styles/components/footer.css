@@ -24,10 +24,10 @@
   margin: 0;
 }
 
-/* Footer in dark mode */
+/* Footer in dark mode - use light text color */
 [data-theme="dark"] .footer {
-  background: var(--color-neutral-700);
-  color: var(--color-neutral-100);
+  background: var(--color-neutral-300);
+  color: #e0e0e0;
 }
 
 /* Mobile: Footer scrolls with content instead of fixed */

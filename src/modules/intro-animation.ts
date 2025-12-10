@@ -32,6 +32,22 @@ export class IntroAnimationModule extends BaseModule {
   override async init(): Promise<void> {
     await super.init();
 
+    // MOBILE: Ensure header is visible from the very start (no intro effect on header)
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    if (isMobile) {
+      const header = document.querySelector('.header') as HTMLElement;
+      if (header) {
+        // Ensure header itself is visible
+        header.style.removeProperty('opacity');
+        header.style.removeProperty('visibility');
+        // Ensure header children are visible
+        Array.from(header.children).forEach(child => {
+          (child as HTMLElement).style.removeProperty('opacity');
+          (child as HTMLElement).style.removeProperty('visibility');
+        });
+      }
+    }
+
     // Check if intro has already been shown this session
     const introShown = sessionStorage.getItem('introShown');
     if (introShown === 'true') {
@@ -154,11 +170,26 @@ export class IntroAnimationModule extends BaseModule {
           document.documentElement.classList.remove('intro-loading');
           document.documentElement.classList.add('intro-complete');
 
-          // Animate header with inline !important to override CSS !important rules
+          // MOBILE: Skip header animation - header is always visible on mobile (no intro effect)
+          const isMobile = window.matchMedia('(max-width: 767px)').matches;
+          if (isMobile) {
+            // Just ensure header is visible, no animation
+            if (header) {
+              header.style.removeProperty('opacity');
+              header.style.removeProperty('visibility');
+            }
+            return;
+          }
+
+          // DESKTOP ONLY: Animate header CONTENT (not header itself, to prevent layout shift)
           if (header) {
-            // Set initial state with !important
-            header.style.setProperty('opacity', '0', 'important');
-            header.style.setProperty('visibility', 'visible', 'important');
+            const headerChildren = header.children;
+
+            // Set initial state on children with !important
+            Array.from(headerChildren).forEach(child => {
+              (child as HTMLElement).style.setProperty('opacity', '0', 'important');
+              (child as HTMLElement).style.setProperty('visibility', 'visible', 'important');
+            });
 
             // Animate using proxy object since GSAP can't set !important directly
             const proxy = { opacity: 0 };
@@ -167,12 +198,16 @@ export class IntroAnimationModule extends BaseModule {
               duration: 1.5,
               ease: 'power2.out',
               onUpdate: () => {
-                header.style.setProperty('opacity', String(proxy.opacity), 'important');
+                Array.from(headerChildren).forEach(child => {
+                  (child as HTMLElement).style.setProperty('opacity', String(proxy.opacity), 'important');
+                });
               },
               onComplete: () => {
                 // Clear inline styles so CSS takes over
-                header.style.removeProperty('opacity');
-                header.style.removeProperty('visibility');
+                Array.from(headerChildren).forEach(child => {
+                  (child as HTMLElement).style.removeProperty('opacity');
+                  (child as HTMLElement).style.removeProperty('visibility');
+                });
               }
             });
           }

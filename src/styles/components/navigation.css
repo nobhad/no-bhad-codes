@@ -94,14 +94,12 @@ li {
 /* =====================================================
    4. HEADER & NAVIGATION STRUCTURE
    ===================================================== */
+/* NOTE: Position properties (fixed/static, top, left, right) are handled
+   in layout.css to avoid specificity conflicts and layout shift issues */
 .header {
   z-index: 110;
   font-family: var(--font-family-acme);
   padding: 0;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
   width: 100%;
 }
 
@@ -688,10 +686,7 @@ html[data-theme="dark"] .coming-soon-banner {
     --list-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
   }
 
-  /* Mobile: Header scrolls with content instead of fixed */
-  .header {
-    position: static;
-  }
+  /* NOTE: Header position: static is handled in layout.css mobile section */
 
   .nav-logo-row {
     font-size: 20px;
