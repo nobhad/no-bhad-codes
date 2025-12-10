@@ -28,9 +28,9 @@
   --menu-button-size: clamp(2rem, 4vw, 2.5rem);
   --theme-button-size: clamp(2rem, 4vw, 2.5rem);
 
-  /* Menu dimensions - sized to fit content */
-  --menu-width-desktop: clamp(42rem, 55vw, 56rem);
-  --menu-width-tablet: clamp(36rem, 65vw, 48rem);
+  /* Menu dimensions */
+  --menu-width-desktop: 35rem;
+  --menu-width-tablet: 32rem;
   --menu-width-mobile: 100vw;
   --menu-border-radius: 1.25rem;
   --menu-height: 100vh; /* Full viewport height for main menu */
@@ -94,12 +94,14 @@ li {
 /* =====================================================
    4. HEADER & NAVIGATION STRUCTURE
    ===================================================== */
-/* NOTE: Position properties (fixed/static, top, left, right) are handled
-   in layout.css to avoid specificity conflicts and layout shift issues */
 .header {
   z-index: 110;
   font-family: var(--font-family-acme);
   padding: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   width: 100%;
 }
 
@@ -375,7 +377,7 @@ li {
 
 /* Dark theme adjustments for coming soon banner */
 html[data-theme="dark"] .coming-soon-banner {
-  color: var(--color-dark);
+  color: #3a3a3a;
   background: var(--color-primary);
 }
 
@@ -686,7 +688,10 @@ html[data-theme="dark"] .coming-soon-banner {
     --list-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
   }
 
-  /* NOTE: Header position: static is handled in layout.css mobile section */
+  /* Mobile: Header scrolls with content instead of fixed */
+  .header {
+    position: static;
+  }
 
   .nav-logo-row {
     font-size: 20px;
@@ -789,12 +794,12 @@ html[data-theme="dark"] .coming-soon-banner {
   }
 }
 
-/* Large Screens (1200-1599px) - Narrower menu, larger text */
-@media screen and (min-width: 1200px) and (max-width: 1599px) {
+/* Large Screens */
+@media screen and (min-width: 1200px) {
   :root {
     --base-gap: 0.9rem;
     --menu-padding: 2.5rem;
-    --menu-heading-size: clamp(4.5rem, 5vw, 6rem);
+    --menu-heading-size: 5.5rem;
 
     --menu-multiplier: 0.12;
     --list-multiplier: 0.09;
@@ -804,7 +809,7 @@ html[data-theme="dark"] .coming-soon-banner {
   }
 
   .menu {
-    width: clamp(36rem, 42vw, 48rem);
+    width: 40rem;
   }
 }
 
@@ -813,17 +818,13 @@ html[data-theme="dark"] .coming-soon-banner {
   :root {
     --base-gap: 1.1rem;
     --menu-padding: 3rem;
-    --menu-heading-size: clamp(6rem, 5vw, 8rem); /* Larger link text on ultra-wide */
+    --menu-heading-size: 6rem;
 
     --menu-multiplier: 0.13;
     --list-multiplier: 0.1;
 
     --menu-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--menu-multiplier)));
     --list-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
-  }
-
-  .menu {
-    width: clamp(54rem, 45vw, 66rem); /* Original width */
   }
 }
 

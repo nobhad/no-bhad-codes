@@ -77,7 +77,10 @@ export class ContactFormModule extends BaseModule {
   }
 
   private setupFormValidation(): void {
-    if (!this.form || !this.submitButton) return;
+    if (!this.form || !this.submitButton) {
+      this.warn('Form or submit button not found for validation setup');
+      return;
+    }
 
     // Disable browser validation in favor of custom validation
     this.form.noValidate = true;
@@ -86,26 +89,38 @@ export class ContactFormModule extends BaseModule {
       const requiredFields = this.form!.querySelectorAll(
         'input[data-required], select[data-required], textarea[data-required]'
       );
+
       const isValid = Array.from(requiredFields).every((field) => {
-        const input = field as any;
-        return input.value && input.value.trim() !== '';
+        const input = field as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+        const value = input.value?.trim() || '';
+        return value !== '';
+      });
+
+      this.log('Form validation:', {
+        requiredFieldsCount: requiredFields.length,
+        isValid,
+        buttonElement: this.submitButton?.tagName
       });
 
       if (this.submitButton) {
         if (isValid) {
           this.submitButton.classList.add('form-valid');
+          this.log('Added form-valid class');
         } else {
           this.submitButton.classList.remove('form-valid');
+          this.log('Removed form-valid class');
         }
       }
     };
 
-    // Add input event listeners to all form fields
-    const allFields = this.form.querySelectorAll('input, select, textarea');
+    // Add input event listeners to all form fields using native addEventListener
+    const allFields = this.form.querySelectorAll('input:not([type="submit"]), select, textarea');
     allFields.forEach((field) => {
-      this.addEventListener(field, 'input', validateForm);
-      this.addEventListener(field, 'change', validateForm);
+      field.addEventListener('input', validateForm);
+      field.addEventListener('change', validateForm);
     });
+
+    this.log('Form validation setup complete, listening on', allFields.length, 'fields');
 
     // Initial validation
     validateForm();

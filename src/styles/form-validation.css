@@ -5,15 +5,15 @@
 .form-input.error,
 .form-select.error,
 .form-textarea.error {
-  border-color: #ff4757;
-  background-color: rgba(255, 71, 87, 0.05);
+  border-color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.05);
 }
 
 .field-error {
-  color: #ff4757;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  padding-left: 0.5rem;
+  color: #ef4444;
+  font-size: 0.85rem;
+  min-height: 1.2em;
+  margin-top: 4px;
   display: block;
 }
 
@@ -31,9 +31,9 @@
 }
 
 .form-message.error {
-  background-color: rgba(255, 71, 87, 0.1);
-  border: 1px solid #ff4757;
-  color: #ff4757;
+  background-color: transparent;
+  border: none;
+  color: #ef4444;
 }
 
 .form-button.loading {

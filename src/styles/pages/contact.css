@@ -20,9 +20,9 @@
 .contact-form {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: clamp(6px, 1.5vw, 12px) clamp(8px, 2vw, 16px);
-  padding: clamp(8px, 2.5vw, 20px);
-  max-width: min(600px, 95vw);
+  gap: clamp(12px, 2.5vw, 18px);
+  padding: clamp(24px, 4vw, 36px);
+  max-width: min(650px, 95vw);
   width: 100%;
   margin: 0 auto;
   border: 4px solid #000000;
@@ -75,8 +75,8 @@
 .contact-form .form-textarea:focus,
 .contact-form .form-select:focus {
   outline: none !important;
-  border-color: #22c55e !important;
-  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25) !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(0, 255, 65, 0.25) !important;
 }
 
 .contact-form .form-input::placeholder,
@@ -120,6 +120,13 @@
   color: var(--fg);
 }
 
+/* Project Details Section (conditional) */
+.contact-form .project-details {
+  grid-column: 1 / 3;
+  grid-row: 6;
+  display: none;
+}
+
 /* Select Arrow Icons */
 .contact-form .form-select {
   background-image: url('data:image/svg+xml;utf8,<svg fill="%232a2a2a" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
@@ -132,7 +139,7 @@ body.dark-theme .contact-form .form-select {
 /* Textarea Specific Styles - Responsive */
 .contact-form .form-textarea {
   grid-column: 1 / 3;
-  grid-row: 8;
+  grid-row: 6;
   min-height: clamp(60px, 15vw, 100px);
   max-height: clamp(80px, 20vw, 150px);
   resize: vertical;
@@ -219,7 +226,7 @@ body.dark-theme .contact-form .form-select {
 /* Form Actions */
 .form-actions {
   grid-column: 1 / 3;
-  grid-row: 9;
+  grid-row: 7;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -232,7 +239,7 @@ body.dark-theme .contact-form .form-select {
   padding: 8px 20px;
   background-color: var(--color-neutral-300);
   color: var(--fg);
-  border: 4px solid #000000;
+  border: 4px solid #000000 !important;
   border-radius: 0;
   font-size: 0.9rem;
   font-weight: 600;
@@ -244,9 +251,17 @@ body.dark-theme .contact-form .form-select {
   transition: background-color 0.3s ease;
 }
 
+.form-button:focus,
+.form-button:active,
+.form-button:hover {
+  border-color: #000000 !important;
+  outline: none !important;
+}
+
 .form-button.form-valid {
-  background-color: var(--color-primary);
-  color: var(--color-bg);
+  background-color: var(--color-primary) !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
 }
 
 .form-button:disabled {
@@ -254,18 +269,21 @@ body.dark-theme .contact-form .form-select {
   cursor: not-allowed;
 }
 
-/* Form Validation Styles - Controlled by GSAP */
+/* Form Validation Styles - Match login form styling */
 .field-error {
-  color: #ff4757;
+  color: #ef4444;
   font-size: 0.85rem;
-  margin-top: 5px;
+  min-height: 1.2em;
+  margin-top: 4px;
   display: block;
+  text-align: left;
 }
 
 .form-input.error,
 .form-textarea.error,
 .form-select.error {
-  border-color: #ff4757;
+  border-color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.05);
 }
 
 /* Form Message Styles */
@@ -281,15 +299,15 @@ body.dark-theme .contact-form .form-select {
 }
 
 .form-message.success {
-  background-color: #22c55e;
-  color: #ffffff;
-  border: 2px solid #16a34a;
+  background-color: transparent;
+  color: var(--fg);
+  border: none;
 }
 
 .form-message.error {
-  background-color: #ef4444;
-  color: #ffffff;
-  border: 2px solid #dc2626;
+  background-color: transparent;
+  color: #ef4444;
+  border: none;
 }
 
 /* Loading States */
@@ -316,7 +334,8 @@ body.dark-theme .contact-form .form-select {
   .contact-form {
     grid-template-columns: 1fr;
     max-width: min(450px, 98vw);
-    gap: clamp(8px, 2vw, 14px);
+    gap: clamp(12px, 2.5vw, 16px);
+    padding: clamp(20px, 4vw, 28px);
   }
 
   /* Reset all elements to single column */
@@ -327,8 +346,6 @@ body.dark-theme .contact-form .form-select {
   .contact-form #Company-Name,
   .contact-form .form-select,
   .contact-form .form-textarea,
-  .form-question,
-  .form-radio-group,
   .form-actions {
     grid-column: 1 / 2;
   }
@@ -352,38 +369,20 @@ body.dark-theme .contact-form .form-select {
   .contact-form .form-select {
     grid-row: 6;
   }
-  .form-question {
+  .contact-form .form-textarea {
     grid-row: 7;
   }
-  .form-radio-group {
+  .form-actions {
     grid-row: 8;
-  }
-  .contact-form .form-textarea {
-    grid-row: 9;
-  }
-  .form-actions {
-    grid-row: 10;
-  }
-
-  .form-actions {
     justify-content: center;
-  }
-
-  .form-radio-group {
-    grid-template-columns: repeat(2, 1fr); /* Mobile: 4 rows of 2 (2 columns) */
-    gap: clamp(6px, 2vw, 10px) clamp(8px, 3vw, 12px);
   }
 }
 
 @media screen and (max-width: 480px) {
   .contact-form {
     max-width: min(380px, 96vw);
-    gap: clamp(6px, 1.5vw, 10px);
-  }
-
-  .form-radio-group {
-    grid-template-columns: repeat(2, 1fr); /* Small screens: 4 rows of 2 (2 columns) */
-    gap: clamp(4px, 1vw, 8px);
+    gap: clamp(10px, 2.5vw, 14px);
+    padding: clamp(16px, 3.5vw, 24px);
   }
 
   .form-button {

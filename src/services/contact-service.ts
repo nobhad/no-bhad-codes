@@ -190,7 +190,7 @@ export class ContactService extends BaseService {
       this.log('Netlify form submission successful');
       return {
         success: true,
-        message: 'Thank you for your message! I\'ll get back to you soon.'
+        message: 'Message received, thanks!'
       };
     }
     throw new Error(`Netlify submission failed: ${response.status} ${response.statusText}`);
@@ -226,7 +226,7 @@ export class ContactService extends BaseService {
       this.log('Formspree submission successful');
       return {
         success: true,
-        message: 'Thank you for your message! I\'ll get back to you soon.'
+        message: 'Message received, thanks!'
       };
     }
     const errorText = await response.text();
@@ -271,7 +271,7 @@ export class ContactService extends BaseService {
     this.log('EmailJS submission successful');
     return {
       success: true,
-      message: 'Thank you for your message! I\'ll get back to you soon.'
+      message: 'Message received, thanks!'
     };
   }
 
@@ -297,7 +297,7 @@ export class ContactService extends BaseService {
       const result = await response.json();
       return {
         success: true,
-        message: result.message || 'Thank you for your message! I\'ll get back to you soon.'
+        message: result.message || 'Message received, thanks!'
       };
     }
     const errorText = await response.text();

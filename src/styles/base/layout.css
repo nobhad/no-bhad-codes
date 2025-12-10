@@ -41,7 +41,7 @@
  * CORE LAYOUT STRUCTURE
  * ============================================ */
 
-/* Header positioning - inherit background from body */
+/* Header positioning */
 .header {
   height: var(--header-height);
   position: fixed;
@@ -49,7 +49,6 @@
   left: 0;
   right: 0;
   z-index: 100;
-  background: inherit;
 }
 
 /* Footer styles defined in components/footer.css */
@@ -345,32 +344,30 @@ main,
   visibility: visible !important;
 }
 
-/* Desktop ONLY: Hide header CONTENT during intro animation (header stays visible for layout) */
-@media screen and (min-width: 768px) {
-  .intro-loading .header > * {
-    opacity: 0 !important;
-    visibility: hidden !important;
-  }
+/* Desktop: Hide header during intro animation */
+.intro-loading .header {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
 
-  /* Desktop: Show header content after intro completes (GSAP handles animation) */
-  .intro-complete .header > * {
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
+/* Desktop: Show header after intro completes */
+.intro-complete .header {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: opacity 0.5s ease-in-out !important;
+}
+
+/* After intro finishes, remove transition to prevent flicker on navigation */
+.intro-complete.intro-finished .header {
+  transition: none !important;
 }
 
 /* Mobile: header and content always visible, no intro animation effects */
 @media screen and (max-width: 767px) {
-  /* Header uses same fixed positioning as desktop - visible on mobile from first paint */
-  .header {
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-
-  /* Ensure header CONTENT is also visible on mobile (override desktop intro rules) */
-  .header > *,
-  .intro-loading .header > *,
-  .intro-complete .header > * {
+  .header,
+  .intro-loading .header,
+  .intro-complete .header,
+  .intro-complete.intro-finished .header {
     opacity: 1 !important;
     visibility: visible !important;
   }
@@ -414,49 +411,13 @@ main,
 }
 
 @media screen and (max-width: 767px) {
-  /* ============================================
-   * MOBILE LAYOUT - FREE SCROLLING
-   * ============================================
-   * NO scroll-snap on mobile - free scrolling enabled.
-   *
-   * Layout structure (all free-scrolling):
-   *   VIEWPORT 1: Header (45px) + Business Card centered in remaining space
-   *   VIEWPORT 2: About text (100vh)
-   *   VIEWPORT 3: Tech stack (100vh)
-   *   VIEWPORT 4: Contact + Footer (natural height)
-   */
-
-  /* Disable ALL scroll-snap on mobile */
-  html,
-  body,
-  main {
-    scroll-snap-type: none !important;
-  }
-
-  /* Body: flex column, allows natural scroll */
+  /* Mobile: Normal document flow with header/footer scrolling with content */
   body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
   }
 
-  /* ============================================
-   * VIEWPORT 1: HEADER (fixed) + BUSINESS CARD
-   * Header fixed at top (same as desktop), business card fills remaining space
-   */
-
-  /* Header: same fixed positioning as desktop */
-  .header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: var(--header-height);
-    z-index: 100;
-    background: inherit;
-  }
-
-  /* Main: normal document flow with padding for fixed header */
   main {
     position: static;
     top: auto;
@@ -468,34 +429,43 @@ main,
     min-height: auto;
     flex: 1;
     overflow: visible;
-    padding-top: var(--header-height);
+    scroll-snap-type: y proximity;
   }
 
-  /* Reset section defaults */
   section {
     min-height: auto;
     height: auto;
-    padding: 0;
-    margin: 0;
+    padding: 1rem;
+    scroll-snap-align: none;
     flex: 0 0 auto;
-    justify-content: flex-start;
-    align-items: stretch;
   }
 
   .section-content {
     max-width: 95vw;
     padding: 0.5rem;
     font-size: clamp(0.8rem, 2.5vw, 1rem);
-    justify-content: flex-start;
-    align-items: stretch;
   }
 
-  /* Business card: directly centered in viewport height on mobile */
+  .about-content {
+    max-width: 95vw;
+    gap: 0.8rem;
+  }
+
+  /* MOBILE SECTION LAYOUT:
+     1. Intro (business card) - full viewport, centered
+     2. About - full viewport with about text (before tech stack)
+     3. Tech Stack - full viewport
+     4. Contact - natural height with footer visible
+  */
+
+  /* Intro/Business card section - exact viewport height minus header, card centered */
   .business-card-section {
     height: calc(100vh - var(--header-height));
-    height: calc(100dvh - var(--header-height));
+    height: calc(100dvh - var(--header-height)); /* Dynamic viewport height for mobile browsers */
     min-height: calc(100vh - var(--header-height));
     min-height: calc(100dvh - var(--header-height));
+    max-height: calc(100vh - var(--header-height));
+    max-height: calc(100dvh - var(--header-height));
     flex: 0 0 auto;
     display: flex;
     flex-direction: column;
@@ -503,54 +473,39 @@ main,
     align-items: center;
     padding: 0;
     margin: 0;
+    scroll-snap-align: start;
     overflow: hidden;
-    box-sizing: border-box;
   }
 
-  /* ============================================
-   * VIEWPORT 2: ABOUT TEXT (100vh)
-   */
+  /* About section - becomes a container for two visual sections on mobile */
   .about-section {
     min-height: auto;
-    height: auto;
     flex: 0 0 auto;
     padding: 0;
-    margin: 0;
-    justify-content: flex-start;
-    align-items: stretch;
   }
 
+  /* About content wrapper - stack children as separate visual sections */
   .about-section .about-content {
     display: flex;
     flex-direction: column;
     padding: 0;
-    margin: 0;
     gap: 0;
-    width: 100%;
     max-width: 100%;
-    justify-content: flex-start;
-    align-items: stretch;
   }
 
-  /* About text - full viewport height */
+  /* About text section - full viewport */
   .about-section .about-text-wrapper {
-    height: 100vh;
-    height: 100dvh;
     min-height: 100vh;
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start;
     padding: 2rem 1rem;
-    margin: 0;
-    box-sizing: border-box;
-    overflow: hidden;
   }
 
   .about-section .about-text-wrapper h2 {
     text-align: left;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
   }
 
   .about-section .about-text-wrapper p {
@@ -558,23 +513,19 @@ main,
     margin-bottom: 1rem;
   }
 
-  /* Tech stack - full viewport height */
+  /* Tech stack viewport - full viewport, centers the compact tech-stack box */
   .about-section .tech-stack-viewport {
-    height: 100vh;
-    height: 100dvh;
     min-height: 100vh;
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    scroll-snap-align: start;
     padding: 1rem;
-    margin: 0;
-    box-sizing: border-box;
-    overflow: hidden;
-    /* scroll-snap DISABLED on mobile - GSAP handles it */
   }
 
+  /* Tech stack box - compact, centered in viewport */
   .about-section .tech-stack {
     min-height: auto;
     display: flex;
@@ -596,27 +547,18 @@ main,
     font-size: 0.9rem;
   }
 
-  /* ============================================
-   * SECTION 4: CONTACT + FOOTER
-   */
+  /* Contact section - natural height */
   .contact-section {
     min-height: auto;
-    height: auto;
     flex: 0 0 auto;
     padding: 2rem 1rem;
-    margin: 0;
-    justify-content: center;
-    align-items: center;
-    /* scroll-snap DISABLED on mobile - GSAP handles it */
   }
 
   .contact-section h2 {
     margin-bottom: 1.5rem;
   }
 
-  /* ============================================
-   * OTHER MOBILE OVERRIDES
-   */
+  /* Other sections that might exist */
   .hero-section,
   main > section:not(.business-card-section):not(.about-section):not(.contact-section) {
     min-height: auto;
@@ -626,76 +568,6 @@ main,
   .container,
   .page-content {
     max-width: 95vw;
-  }
-
-  .about-content {
-    max-width: 100%;
-    gap: 0;
-  }
-}
-
-/* ============================================
- * TEXT ANIMATION SECTION
- * ============================================ */
-
-.text-animation-section {
-  height: 100vh;
-  height: 100dvh;
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 0;
-  box-sizing: border-box;
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-  background: var(--color-neutral-300);
-}
-
-.text-animation-svg {
-  width: 100%;
-  height: auto;
-  max-width: 1280px;
-}
-
-.text-animation-svg text {
-  font-family: var(--font-family-display, "Montserrat", sans-serif);
-  font-weight: 900;
-  font-style: normal;
-}
-
-/* Text colors - true black and soft black for depth effect (light mode) */
-.text-animation-svg .text-left {
-  fill: #000000; /* true black */
-}
-
-.text-animation-svg .text-right {
-  fill: #2a2a2a; /* soft black */
-}
-
-/* Dark mode - white and off-white for depth effect */
-html[data-theme="dark"] .text-animation-svg .text-left {
-  fill: #ffffff; /* true white */
-}
-
-html[data-theme="dark"] .text-animation-svg .text-right {
-  fill: #d5d5d5; /* soft white / off-white */
-}
-
-/* Mobile adjustments for text animation */
-@media screen and (max-width: 767px) {
-  .text-animation-svg {
-    max-width: 100%;
-    padding: 0;
-    transform: scale(1.5);
-    transform-origin: center center;
-  }
-
-  .text-animation-svg text {
-    font-size: 120px; /* Larger font on mobile */
   }
 }
 
@@ -712,5 +584,57 @@ html[data-theme="dark"] .text-animation-svg .text-right {
   .container,
   .page-content {
     max-width: 98vw;
+  }
+}
+
+/* ============================================
+ * TEXT ANIMATION SECTION STYLES
+ * ============================================ */
+
+.text-animation-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.text-animation-svg {
+  width: 100%;
+  max-width: 1280px;
+  height: auto;
+  font-family: var(--font--acme), "Acme", sans-serif;
+  font-weight: 700;
+}
+
+/* Light mode: soft black on left, softer black on right */
+.text-animation-svg .text-left {
+  fill: #3a3a3a;
+}
+
+.text-animation-svg .text-right {
+  fill: #333333;
+}
+
+/* Dark mode: left is lighter grey, right is light */
+html[data-theme="dark"] .text-animation-svg .text-left {
+  fill: #9a9a9a;
+}
+
+html[data-theme="dark"] .text-animation-svg .text-right {
+  fill: #d5d5d5;
+}
+
+/* Mobile adjustments for text animation */
+@media screen and (max-width: 767px) {
+  .text-animation-svg {
+    max-width: 100%;
+    padding: 0;
+    transform: scale(1.5);
+    transform-origin: center center;
+  }
+
+  .text-animation-svg text {
+    font-size: 120px;
   }
 }

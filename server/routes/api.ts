@@ -220,7 +220,7 @@ Received: ${new Date().toISOString()}
 
       res.json({
         success: true,
-        message: 'Your message has been sent successfully',
+        message: 'Message received, thanks!',
         messageId,
       });
     } catch (error) {

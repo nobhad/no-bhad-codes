@@ -92,16 +92,32 @@ select::-ms-expand {
   display: none;
 }
 
-/* Form field focus states - Green border */
+/* Form field focus states - Green border (exclude submit buttons) */
 .form-input:focus,
 .form-textarea:focus,
 .form-select:focus,
-input:focus,
+input:not([type="submit"]):focus,
 textarea:focus,
 select:focus {
   outline: none !important;
-  border-color: #22c55e !important;
-  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25) !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(0, 255, 65, 0.25) !important;
+}
+
+/* Submit button focus - keep black border */
+input[type="submit"]:focus,
+input[type="submit"]:active {
+  border-color: #000000 !important;
+  outline: none !important;
+  box-shadow: 0 4px 8px var(--color-shadow) !important;
+}
+
+/* Submit button valid state - lime green background */
+input[type="submit"].form-valid,
+input.form-button.form-valid {
+  background-color: var(--color-primary) !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
 }
 
 /* ============================================
@@ -194,8 +210,23 @@ label {
 .btn-primary.form-valid,
 .form-button.form-valid,
 .login-btn.form-valid {
-  background-color: var(--color-primary);
-  color: var(--color-bg, #000);
+  background-color: var(--color-primary) !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+/* Ensure border stays black on all states */
+.btn:focus,
+.btn:active,
+.btn:hover,
+.form-button:focus,
+.form-button:active,
+.form-button:hover,
+.login-btn:focus,
+.login-btn:active,
+.login-btn:hover {
+  border-color: #000000 !important;
+  outline: none !important;
 }
 
 /* Secondary button styling */
