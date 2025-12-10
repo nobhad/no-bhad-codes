@@ -1589,11 +1589,6 @@ export class TerminalIntakeModule {
       this.intakeData.name = value as string;
     }
 
-    // Auto-set hasDomain when hasCurrentSite is 'yes' (they have a domain if they have a site)
-    if (question.field === 'hasCurrentSite' && value === 'yes') {
-      this.intakeData.hasDomain = 'yes';
-    }
-
     // Clear input
     if (this.inputElement) {
       this.inputElement.value = '';
@@ -1710,8 +1705,9 @@ export class TerminalIntakeModule {
       `Tech Comfort: ${this.formatFieldForReview('techComfort', data.techComfort as string)}`,
       `Has Current Site: ${this.formatFieldForReview('hasCurrentSite', data.hasCurrentSite as string)}`,
       `Current Site URL: ${data.hasCurrentSite === 'yes' ? this.formatFieldForReview('currentSite', data.currentSite as string) : 'N/A'}`,
-      `Has Domain: ${this.formatFieldForReview('hasDomain', data.hasDomain as string)}`,
-      `Domain Name: ${data.hasDomain === 'yes' ? this.formatFieldForReview('domainName', data.domainName as string) : 'N/A'}`,
+      // Only show hasDomain when hasCurrentSite is 'no' (question is only asked then)
+      `Has Domain: ${data.hasCurrentSite === 'no' ? this.formatFieldForReview('hasDomain', data.hasDomain as string) : 'N/A (has current site)'}`,
+      `Domain Name: ${data.hasCurrentSite === 'no' && data.hasDomain === 'yes' ? this.formatFieldForReview('domainName', data.domainName as string) : 'N/A'}`,
       `Hosting: ${this.formatFieldForReview('hosting', data.hosting as string)}`,
       `Hosting Provider: ${data.hosting === 'have-hosting' ? this.formatFieldForReview('hostingProvider', data.hostingProvider as string) : 'N/A'}`,
       '',
