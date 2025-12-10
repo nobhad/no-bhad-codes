@@ -588,7 +588,7 @@ body[data-page="client-landing"] .client-login .client-content {
   border: 2px solid transparent;
   border-top-color: currentColor;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
 }
 
 .auth-form .btn.loading .btn-text {
@@ -1054,7 +1054,7 @@ body[data-page="client-landing"] .client-login .client-content {
   border: 2px solid transparent;
   border-top-color: currentColor;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
 }
 
 .portal-card .login-footer {
@@ -1402,14 +1402,14 @@ body[data-page="client-landing"] .client-login .client-content {
   color: var(--color-dark);
 }
 
-/* Loading spinner - simple animation */
+/* Loading spinner - animation controlled by GSAP */
 .btn-loader {
   width: 16px;
   height: 16px;
   border: 2px solid transparent;
   border-top-color: currentColor;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
 }
 
 /* Login footer styling now controlled from main.css universal system */
@@ -1429,14 +1429,10 @@ body[data-page="client-landing"] .client-login .client-content {
 }
 
 /* ===============================================
-   ANIMATIONS - MINIMAL
+   ANIMATIONS - ALL CONTROLLED BY GSAP
    =============================================== */
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+/* @keyframes spin - REMOVED: Use GSAP createSpinner() instead */
 
 /* ===============================================
    RESPONSIVE - MATCHES MAIN PAGE BREAKPOINTS
@@ -1588,30 +1584,60 @@ body[data-page="client-landing"] .client-login .client-content {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0);
+  background: rgba(0, 0, 0, 0.8);
   z-index: 1000;
   justify-content: center;
   align-items: center;
   padding: 2rem;
-  transition: background 0.4s ease;
 }
 
 .intake-modal.open {
   display: flex;
 }
 
+/* Prevent any transition on modal open - should appear instantly */
+.intake-modal,
+.intake-modal-content,
+.intake-modal-content .terminal-intake,
+.intake-modal-content .terminal-window {
+  transition: none;
+}
+
 .intake-modal-content {
-  width: 100%;
-  max-width: 900px;
+  width: 50vw;
+  min-width: 50vw;
   height: 85vh;
   max-height: 85vh;
   overflow: hidden; /* No scrolling on the modal content wrapper */
   display: flex;
   flex-direction: column;
+  flex-shrink: 0; /* Prevent flex shrinking */
 }
 
-/* Ensure terminal window fills the modal content and doesn't cause outer scroll */
+/* Mobile: full screen */
+@media (max-width: 1024px) {
+  .intake-modal {
+    padding: 0;
+  }
+
+  .intake-modal-content {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+
+  .intake-modal-content .terminal-window {
+    border-radius: 0;
+    border: none;
+  }
+}
+
+/* Ensure all children fill the modal content width */
+.intake-modal-content .terminal-intake-container,
 .intake-modal-content .terminal-intake {
+  width: 100%;
   height: 100%;
   min-height: 0;
   display: flex;

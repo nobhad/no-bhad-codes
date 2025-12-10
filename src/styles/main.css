@@ -92,9 +92,7 @@
 body {
   background-color: var(--color-neutral-300);
   color: var(--color-dark);
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+  /* Theme transitions controlled by GSAP */
 }
 
 /* Footer integration with theme */
@@ -111,11 +109,9 @@ body {
  * 6. SMOOTH TRANSITIONS
  * ============================================ */
 
-* {
-  transition-property: background-color, color, border-color, opacity, transform;
-  transition-duration: 0.2s;
-  transition-timing-function: ease-out;
-}
+/* REMOVED: Global * transition was causing unwanted animation effects
+ * Individual elements should define their own transitions as needed
+ */
 
 /* ============================================
  * 7. SCROLLBAR STYLING
@@ -167,11 +163,9 @@ body {
   z-index: 10;
 }
 
-/* Intro animation container transitions */
+/* Intro animation container - GSAP controls animations */
 #intro-animation-container {
-  transition:
-    opacity 0.8s ease-out,
-    visibility 0.8s ease-out;
+  /* Opacity/visibility controlled by GSAP */
 }
 
 /* Show all sections immediately */

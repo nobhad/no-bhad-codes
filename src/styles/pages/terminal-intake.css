@@ -24,9 +24,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  max-width: 900px;
   width: 100%;
-  margin: 0 auto;
   background: #1e1e1e;
   border: 1px solid #3d3d3d;
   border-radius: 10px;
@@ -34,6 +32,12 @@
   box-shadow:
     6px 6px 12px rgba(0, 0, 0, 0.3),
     12px 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Standalone page: constrain width and center */
+body[data-page="client-intake"] .terminal-window {
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 /* ============================================================================
@@ -102,7 +106,7 @@
 .terminal-cursor {
   color: #00ff00;
   font-weight: bold;
-  animation: cursor-blink 1s step-end infinite;
+  /* Animation controlled by GSAP - see gsap-animations.ts createCursorBlink() */
 }
 
 .typing-cursor {
@@ -283,35 +287,17 @@
   color: #00ff00;
   font-size: 1.2em;
   font-weight: bold;
-  animation: cursor-blink 1s step-end infinite;
+  /* Animation controlled by GSAP - see gsap-animations.ts createCursorBlink() */
 }
 
-@keyframes cursor-blink {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  51%,
-  100% {
-    opacity: 0;
-  }
-}
+/* @keyframes cursor-blink - REMOVED: Use GSAP createCursorBlink() instead */
 
 /* Hide the dots, we're using cursor instead */
 .typing-indicator span {
   display: none;
 }
 
-@keyframes blink {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  51%,
-  100% {
-    opacity: 0.3;
-  }
-}
+/* @keyframes blink - REMOVED: Use GSAP createBlink() instead */
 
 /* ============================================================================
    INPUT AREA
@@ -343,7 +329,7 @@ input.terminal-input {
   font-family: "Courier New", Consolas, "Liberation Mono", monospace !important;
   font-size: 14px;
   outline: none !important;
-  caret-color: #00ff00 !important;
+  caret-color: transparent !important;
   box-shadow: none !important;
   padding: 4px 0 !important;
 }
@@ -353,21 +339,46 @@ input.terminal-input {
   color: #555555;
 }
 
-/* Blinking caret animation for input */
-@keyframes caret-blink {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  51%,
-  100% {
-    opacity: 0;
-  }
+/* @keyframes caret-blink - REMOVED: Use GSAP createCursorBlink() instead */
+
+/* Hide native caret - using custom block cursor instead */
+.terminal-input,
+.terminal-input:focus,
+.terminal-input-area input,
+.terminal-input-area input:focus,
+input.terminal-input,
+input.terminal-input:focus {
+  caret-color: transparent !important;
 }
 
-.terminal-input {
-  caret-color: #00ff00;
-  animation: none;
+/* Wrapper for input + custom cursor positioning */
+.terminal-input-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* Custom block cursor for input */
+.terminal-input-cursor {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0.6em;
+  height: 1.2em;
+  background-color: #00ff00;
+  pointer-events: none;
+}
+
+/* Hidden text measurer - matches input font exactly */
+.terminal-input-measurer {
+  position: absolute;
+  visibility: hidden;
+  white-space: pre;
+  font-family: "Courier New", Consolas, "Liberation Mono", monospace;
+  font-size: 14px;
+  pointer-events: none;
 }
 
 .terminal-input:focus,
@@ -381,7 +392,7 @@ input.terminal-input:focus {
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
-  caret-color: #00ff00 !important;
+  caret-color: transparent !important;
 }
 
 .terminal-input:disabled {
@@ -636,8 +647,8 @@ input.terminal-input:focus {
   width: 150px;
   height: auto;
   filter: brightness(0) invert(1) brightness(0.8) contrast(1.1);
-  animation: avatar-flicker 3s infinite;
   display: block;
+  /* Animation controlled by GSAP - see gsap-animations.ts createAvatarFlicker() */
 }
 
 /* Grainy overlay - only on the avatar SVG */
@@ -654,22 +665,4 @@ input.terminal-input:focus {
   mix-blend-mode: overlay;
 }
 
-@keyframes avatar-flicker {
-  0%,
-  95%,
-  100% {
-    opacity: 1;
-  }
-  96% {
-    opacity: 0.85;
-  }
-  97% {
-    opacity: 0.95;
-  }
-  98% {
-    opacity: 0.8;
-  }
-  99% {
-    opacity: 1;
-  }
-}
+/* @keyframes avatar-flicker - REMOVED: Use GSAP createAvatarFlicker() instead */

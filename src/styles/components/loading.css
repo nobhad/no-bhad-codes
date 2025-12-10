@@ -27,18 +27,11 @@
     transparent 2px,
     rgba(255, 255, 255, 0.03) 3px
   );
-  animation: static-animation 0.2s linear infinite;
   pointer-events: none;
+  /* Animation controlled by GSAP - see gsap-animations.ts createStaticAnimation() */
 }
 
-@keyframes static-animation {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 0 10px;
-  }
-}
+/* @keyframes static-animation - REMOVED: Use GSAP createStaticAnimation() instead */
 
 /* Channel switch spinner */
 .channel-spinner {
@@ -47,14 +40,10 @@
   border: 3px solid rgba(255, 107, 107, 0.2);
   border-top-color: var(--color-primary);
   border-radius: 50%;
-  animation: channel-spin 0.8s linear infinite;
+  /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
 }
 
-@keyframes channel-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+/* @keyframes channel-spin - REMOVED: Use GSAP createSpinner() instead */
 
 /* Channel number display during switch */
 .channel-switch-indicator {
@@ -73,18 +62,10 @@
 
 .channel-switch-indicator.active {
   display: block;
-  animation: blink 0.5s ease-in-out infinite;
+  /* Animation controlled by GSAP - see gsap-animations.ts createBlink() */
 }
 
-@keyframes blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
+/* @keyframes blink - REMOVED: Use GSAP createBlink() instead */
 
 /* Loading bar for content */
 .content-loading-bar {
@@ -99,43 +80,33 @@
 }
 
 .content-loading-bar.active {
-  animation: loading-progress 1s ease-out forwards;
+  /* Animation controlled by GSAP - see gsap-animations.ts animateLoadingProgress() */
 }
 
-@keyframes loading-progress {
-  0% {
-    width: 0%;
-  }
-  50% {
-    width: 70%;
-  }
-  100% {
-    width: 100%;
-  }
-}
+/* @keyframes loading-progress - REMOVED: Use GSAP animateLoadingProgress() instead */
 
 /* Skeleton loader for channel content */
 .channel-skeleton {
   padding: 20px;
-  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  /* Animation controlled by GSAP - see gsap-animations.ts createSkeletonPulse() */
 }
 
 .skeleton-title {
   height: 40px;
   background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
   background-size: 200% 100%;
-  animation: skeleton-shimmer 1.5s infinite;
   margin-bottom: 20px;
   border-radius: 4px;
+  /* Animation controlled by GSAP - see gsap-animations.ts createSkeletonShimmer() */
 }
 
 .skeleton-text {
   height: 20px;
   background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
   background-size: 200% 100%;
-  animation: skeleton-shimmer 1.5s infinite;
   margin-bottom: 10px;
   border-radius: 4px;
+  /* Animation controlled by GSAP - see gsap-animations.ts createSkeletonShimmer() */
 }
 
 .skeleton-text:nth-child(2) {
@@ -145,36 +116,12 @@
   width: 60%;
 }
 
-@keyframes skeleton-shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
+/* @keyframes skeleton-shimmer - REMOVED: Use GSAP createSkeletonShimmer() instead */
 
-@keyframes skeleton-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
+/* @keyframes skeleton-pulse - REMOVED: Use GSAP createSkeletonPulse() instead */
 
-/* Reduced motion support */
+/* Reduced motion support - GSAP respects this via gsap.matchMedia() */
 @media (prefers-reduced-motion: reduce) {
-  .channel-loading-static,
-  .channel-spinner,
-  .channel-switch-indicator,
-  .content-loading-bar,
-  .skeleton-title,
-  .skeleton-text {
-    animation: none;
-  }
-
   .content-loading-bar.active {
     width: 100%;
     transition: none;

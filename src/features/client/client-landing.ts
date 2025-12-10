@@ -12,7 +12,6 @@
  */
 
 import { BaseModule } from '../../modules/base';
-import { gsap } from 'gsap';
 import { getContactEmail } from '../../config/branding';
 
 // Demo credentials should be in environment variables for production
@@ -286,76 +285,44 @@ export class ClientLandingModule extends BaseModule {
     }
   }
 
-  private openIntakeModalWithAnimation(): void {
+  private async openIntakeModalWithAnimation(): Promise<void> {
     if (!this.intakeModal) return;
 
-    const modalContent = this.intakeModal.querySelector('.intake-modal-content') as HTMLElement;
+    // Pre-render terminal content (sync) before showing modal
+    await this.preRenderTerminalIntake();
 
-    // Show modal at full size immediately
+    // Show modal - content is already rendered, appears instantly
     this.intakeModal.classList.add('open');
     document.body.style.overflow = 'hidden';
 
-    // Set modal content to full width immediately
-    gsap.set(modalContent, { maxWidth: '900px', opacity: 1 });
-
-    // Just fade in the overlay quickly
-    gsap.fromTo(
-      this.intakeModal,
-      { background: 'rgba(0, 0, 0, 0)' },
-      {
-        background: 'rgba(0, 0, 0, 0.8)',
-        duration: 0.15,
-        ease: 'power2.out',
-        onComplete: () => {
-          this.initTerminalIntake();
-        }
-      }
-    );
+    // Start terminal animations after modal is visible
+    this.startTerminalAnimations();
   }
 
   private closeIntakeModal(): void {
     if (this.intakeModal) {
       console.log('[ClientLandingModule] Closing intake modal');
 
-      const modalContent = this.intakeModal.querySelector('.intake-modal-content') as HTMLElement;
       const container = this.intakeModal.querySelector('.terminal-intake-container');
 
-      // Animate out
-      const tl = gsap.timeline({
-        onComplete: () => {
-          this.intakeModal!.classList.remove('open');
-          this.intakeModal!.classList.remove('minimized');
-          this.intakeModal!.classList.remove('fullscreen');
-          document.body.style.overflow = '';
+      // Close immediately - just toggle class
+      this.intakeModal.classList.remove('open');
+      this.intakeModal.classList.remove('minimized');
+      this.intakeModal.classList.remove('fullscreen');
+      document.body.style.overflow = '';
 
-          // Reset the container so it can be re-initialized with resume prompt
-          if (container) {
-            container.removeAttribute('data-initialized');
-            container.innerHTML = '';
-          }
-        }
-      });
-
-      tl.to(this.intakeModal, {
-        background: 'rgba(0, 0, 0, 0)',
-        duration: 0.2,
-        ease: 'power2.in'
-      });
-
-      tl.to(
-        modalContent,
-        {
-          maxWidth: '200px',
-          opacity: 0,
-          duration: 0.2,
-          ease: 'power2.in'
-        },
-        '-=0.1'
-      );
+      // Reset the container so it can be re-initialized with resume prompt
+      if (container) {
+        container.removeAttribute('data-initialized');
+        container.innerHTML = '';
+      }
     }
   }
 
-  private async initTerminalIntake(): Promise<void> {
+  // Store terminal module instance for split init
+  private terminalModule: InstanceType<typeof import('./terminal-intake').TerminalIntakeModule> | null = null;
+
+  private async preRenderTerminalIntake(): Promise<void> {
     const container = this.intakeModal?.querySelector('.terminal-intake-container');
     if (!container || container.hasAttribute('data-initialized')) {
       return;
@@ -363,8 +330,9 @@ export class ClientLandingModule extends BaseModule {
 
     try {
       const { TerminalIntakeModule } = await import('./terminal-intake');
-      const module = new TerminalIntakeModule(container as HTMLElement);
-      await module.init();
+      this.terminalModule = new TerminalIntakeModule(container as HTMLElement);
+      // Only render HTML - don't start animations yet
+      this.terminalModule.renderOnly();
       container.setAttribute('data-initialized', 'true');
 
       // Setup terminal window button handlers
@@ -377,6 +345,13 @@ export class ClientLandingModule extends BaseModule {
           <p>Please try refreshing the page or contact ${getContactEmail('fallback')}</p>
         </div>
       `;
+    }
+  }
+
+  private startTerminalAnimations(): void {
+    // Start the terminal conversation animations after modal is visible
+    if (this.terminalModule) {
+      this.terminalModule.startAnimations();
     }
   }
 

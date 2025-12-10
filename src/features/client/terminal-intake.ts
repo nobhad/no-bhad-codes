@@ -286,6 +286,7 @@ const QUESTIONS: IntakeQuestion[] = [
     question: 'Do you have a domain name for this project?',
     type: 'select',
     required: true,
+    dependsOn: { field: 'hasCurrentSite', value: 'no' },
     options: [
       { value: 'yes', label: 'Yes, I have a domain' },
       { value: 'no', label: 'No, I need help getting one' },
@@ -540,6 +541,30 @@ export class TerminalIntakeModule {
     console.log('[TerminalIntake] Initialized successfully');
   }
 
+  /**
+   * Render HTML only - no animations. Use with startAnimations() for split init.
+   * This allows modal to show instantly with content already rendered.
+   */
+  renderOnly(): void {
+    console.log('[TerminalIntake] Rendering only (no animations)...');
+    this.render();
+    this.bindEvents();
+  }
+
+  /**
+   * Start the terminal animations after modal is visible.
+   * Call this after renderOnly() once the modal is displayed.
+   */
+  startAnimations(): void {
+    console.log('[TerminalIntake] Starting animations...');
+    const savedProgress = this.loadProgress();
+    if (savedProgress && savedProgress.currentQuestionIndex > 0) {
+      this.askToResume(savedProgress);
+    } else {
+      this.startConversation();
+    }
+  }
+
   private saveProgress(): void {
     const progress = {
       currentQuestionIndex: this.currentQuestionIndex,
@@ -735,7 +760,7 @@ export class TerminalIntakeModule {
             <span class="progress-percent" id="progressPercent" aria-live="polite">0%</span>
           </div>
           <div class="terminal-chat" id="terminalChat" role="log" aria-live="polite" aria-label="Chat conversation">
-            <div class="terminal-login-info" aria-hidden="true">${loginTime}<br><span class="terminal-prompt-line">${BRANDING.TERMINAL.PROMPT} project-intake % </span><span class="terminal-typing-text" id="terminalTypingText"></span><span class="terminal-cursor" id="terminalCursor">█</span></div>
+            <div class="terminal-login-info" aria-hidden="true">${loginTime}<br><span class="terminal-prompt-line">${BRANDING.TERMINAL.PROMPT} project-intake % </span><span class="terminal-typing-text" id="terminalTypingText">./project_intake.sh</span><span class="terminal-cursor" id="terminalCursor">█</span></div>
           </div>
           <div class="terminal-input-area" role="form" aria-label="Project intake form">
             <span class="terminal-prompt" aria-hidden="true">></span>
@@ -764,6 +789,9 @@ export class TerminalIntakeModule {
         this.handleUserInput();
       }
     });
+
+    // Setup custom block cursor for input field
+    this.setupCustomInputCursor();
 
     // Enter key on document for multiselect confirmation
     document.addEventListener('keydown', (e) => {
@@ -870,6 +898,7 @@ export class TerminalIntakeModule {
     this.chatContainer?.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (target.classList.contains('chat-option')) {
+        e.stopPropagation(); // Prevent bubbling to message click handler (goBackToQuestion)
         this.handleOptionClick(target);
       }
     });
@@ -928,9 +957,14 @@ export class TerminalIntakeModule {
   }
 
   private async startConversation(): Promise<void> {
-    // Type "./project_intake.sh" command with GSAP
-    await this.typeCommand('./project_intake.sh');
-    await this.delay(400);
+    // Command is already rendered and "executed" - hide the cursor
+    const cursor = document.getElementById('terminalCursor');
+    if (cursor) {
+      cursor.style.display = 'none';
+    }
+
+    // Brief pause before starting content
+    await this.delay(200);
 
     // Show avatar first
     await this.showAvatarIntro();
@@ -1555,6 +1589,11 @@ export class TerminalIntakeModule {
       this.intakeData.name = value as string;
     }
 
+    // Auto-set hasDomain when hasCurrentSite is 'yes' (they have a domain if they have a site)
+    if (question.field === 'hasCurrentSite' && value === 'yes') {
+      this.intakeData.hasDomain = 'yes';
+    }
+
     // Clear input
     if (this.inputElement) {
       this.inputElement.value = '';
@@ -1576,18 +1615,66 @@ export class TerminalIntakeModule {
   }
 
   /**
+   * Format a phone number as (###) ###-####
+   */
+  private formatPhoneNumber(phone: string): string {
+    // Remove all non-digit characters
+    const digits = phone.replace(/\D/g, '');
+    // Handle 11-digit numbers starting with 1
+    const cleaned = digits.length === 11 && digits.startsWith('1') ? digits.slice(1) : digits;
+    if (cleaned.length === 10) {
+      return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+    }
+    return phone; // Return original if can't format
+  }
+
+  /**
+   * Capitalize first letter of each word
+   */
+  private capitalizeWords(str: string): string {
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  /**
    * Format a field value for display in the review
    */
   private formatFieldForReview(field: string, value: string | string[] | undefined): string {
+    // Special case: company field with empty string means personal project
+    if (field === 'company' && value === '') {
+      return 'N/A (Personal Project)';
+    }
     if (!value) return 'Not provided';
+
+    // Format phone numbers
+    if (field === 'phone' && typeof value === 'string') {
+      return this.formatPhoneNumber(value);
+    }
+
+    // Capitalize name
+    if (field === 'name' && typeof value === 'string') {
+      return this.capitalizeWords(value);
+    }
+
+    // Capitalize company name
+    if (field === 'company' && typeof value === 'string') {
+      return this.capitalizeWords(value);
+    }
+
     if (Array.isArray(value)) {
       return value.length > 0 ? value.join(', ') : 'None selected';
     }
+
+    // Capitalize first letter of all string values (yes -> Yes, no -> No, etc.)
+    if (typeof value === 'string' && value.length > 0) {
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
     return value;
   }
 
   /**
    * Generate a summary of all answers for review
+   * Shows ALL questions - uses N/A for skipped conditional questions
    */
   private generateReviewSummary(): string {
     const data = this.intakeData;
@@ -1608,56 +1695,35 @@ export class TerminalIntakeModule {
       `Budget: ${this.formatFieldForReview('budget', data.budget as string)}`,
       '',
       '[FEATURES]',
-      `Features: ${this.formatFieldForReview('features', data.features as string[])}`
-    ];
-
-    if (data.customFeatures) {
-      sections.push(`Custom: ${data.customFeatures}`);
-    }
-
-    sections.push(
-      `Integrations: ${data.hasIntegrations === 'yes' ? this.formatFieldForReview('integrations', data.integrations as string[]) : 'None'}`
-    );
-
-    sections.push(
+      `Features: ${this.formatFieldForReview('features', data.features as string[])}`,
+      `Custom Features: ${data.customFeatures ? data.customFeatures : 'N/A'}`,
+      `Need Integrations: ${this.formatFieldForReview('hasIntegrations', data.hasIntegrations as string)}`,
+      `Integrations: ${data.hasIntegrations === 'yes' ? this.formatFieldForReview('integrations', data.integrations as string[]) : 'N/A'}`,
       '',
       '[DESIGN]',
-      `Level: ${this.formatFieldForReview('designLevel', data.designLevel as string)}`,
-      `Assets: ${this.formatFieldForReview('brandAssets', data.brandAssets as string[])}`
-    );
-
-    if (data.inspiration) {
-      sections.push(`Inspiration: ${data.inspiration}`);
-    }
-
-    sections.push(
+      `Design Level: ${this.formatFieldForReview('designLevel', data.designLevel as string)}`,
+      `Brand Assets: ${this.formatFieldForReview('brandAssets', data.brandAssets as string[])}`,
+      `Has Inspiration: ${this.formatFieldForReview('hasInspiration', data.hasInspiration as string)}`,
+      `Inspiration URLs: ${data.hasInspiration === 'yes' ? this.formatFieldForReview('inspiration', data.inspiration as string) : 'N/A'}`,
       '',
       '[TECHNICAL]',
-      `Comfort: ${this.formatFieldForReview('techComfort', data.techComfort as string)}`,
-      `Site: ${data.hasCurrentSite === 'yes' ? data.currentSite : 'None'}`,
-      `Domain: ${data.hasDomain === 'yes' ? data.domainName : data.hasDomain === 'no' ? 'Need' : 'Advice'}`,
-      `Hosting: ${this.formatFieldForReview('hosting', data.hosting as string)}`
-    );
-
-    if (data.hostingProvider) {
-      sections.push(`Provider: ${data.hostingProvider}`);
-    }
-
-    sections.push(
+      `Tech Comfort: ${this.formatFieldForReview('techComfort', data.techComfort as string)}`,
+      `Has Current Site: ${this.formatFieldForReview('hasCurrentSite', data.hasCurrentSite as string)}`,
+      `Current Site URL: ${data.hasCurrentSite === 'yes' ? this.formatFieldForReview('currentSite', data.currentSite as string) : 'N/A'}`,
+      `Has Domain: ${this.formatFieldForReview('hasDomain', data.hasDomain as string)}`,
+      `Domain Name: ${data.hasDomain === 'yes' ? this.formatFieldForReview('domainName', data.domainName as string) : 'N/A'}`,
+      `Hosting: ${this.formatFieldForReview('hosting', data.hosting as string)}`,
+      `Hosting Provider: ${data.hosting === 'have-hosting' ? this.formatFieldForReview('hostingProvider', data.hostingProvider as string) : 'N/A'}`,
       '',
       '[OTHER]',
-      `Concerns: ${this.formatFieldForReview('challenges', data.challenges as string[])}`
-    );
-
-    if (data.additionalInfo) {
-      sections.push(`Notes: ${data.additionalInfo}`);
-    }
-
-    if (data.referralName) {
-      sections.push(`Referral: ${data.referralName}`);
-    }
-
-    sections.push('', '--- END SUMMARY ---');
+      `Concerns: ${this.formatFieldForReview('challenges', data.challenges as string[])}`,
+      `Has Additional Info: ${this.formatFieldForReview('hasAdditionalInfo', data.hasAdditionalInfo as string)}`,
+      `Additional Notes: ${data.hasAdditionalInfo === 'yes' ? this.formatFieldForReview('additionalInfo', data.additionalInfo as string) : 'N/A'}`,
+      `Was Referred: ${this.formatFieldForReview('wasReferred', data.wasReferred as string)}`,
+      `Referral Name: ${data.wasReferred === 'yes' ? this.formatFieldForReview('referralName', data.referralName as string) : 'N/A'}`,
+      '',
+      '--- END SUMMARY ---'
+    ];
 
     return sections.join('\n');
   }
@@ -1668,37 +1734,32 @@ export class TerminalIntakeModule {
   private async showReviewAndConfirm(): Promise<void> {
     await this.showTypingIndicator(800);
 
-    this.addMessage({
+    await this.addMessageWithTyping({
       type: 'ai',
       content: 'Great! Here\'s a summary of your project request. Please review:'
     });
 
-    await this.delay(500);
+    await this.delay(300);
 
-    // Show the review summary
-    this.addMessage({
-      type: 'system',
-      content: this.generateReviewSummary()
-    });
+    // Show the review summary with typing animation
+    await this.addSystemMessageWithTyping(this.generateReviewSummary());
 
     await this.delay(300);
 
-    // Add instructions for making changes
-    this.addMessage({
-      type: 'system',
-      content:
-        'To make changes, scroll up and click on any answer to edit it, or select "Start over" below.'
-    });
+    // Add instructions for making changes with typing
+    await this.addSystemMessageWithTyping(
+      'To make changes, scroll back up to the questions and click on the answer you would like to change.'
+    );
 
     await this.delay(200);
 
-    // Ask for confirmation
-    this.addMessage({
+    // Ask for confirmation with typing
+    await this.addMessageWithTyping({
       type: 'ai',
       content: 'Does everything look correct?',
       options: [
         { value: 'yes', label: 'Yes, submit my request' },
-        { value: 'no', label: 'Start over' }
+        { value: 'no', label: 'No, I need to make changes' }
       ]
     });
 
@@ -1739,10 +1800,10 @@ export class TerminalIntakeModule {
           this.addMessage({
             type: 'ai',
             content:
-              'No problem! To make changes, please start over with a fresh form. Your progress has been saved if you\'d like to continue later.',
+              'No problem! Scroll back up to the questions and click on the answer you would like to change. When you\'re done, select an option below.',
             options: [
-              { value: 'restart', label: 'Start Over' },
-              { value: 'submit', label: 'Actually, submit as is' }
+              { value: 'review', label: 'Done - show summary again' },
+              { value: 'restart', label: 'Start over completely' }
             ]
           });
           await this.waitForChangeDecision();
@@ -1773,10 +1834,10 @@ export class TerminalIntakeModule {
             this.addMessage({
               type: 'ai',
               content:
-                'No problem! To make changes, please start over with a fresh form. Your progress has been saved if you\'d like to continue later.',
+                'No problem! Scroll back up to the questions and click on the answer you would like to change. When you\'re done, select an option below.',
               options: [
-                { value: 'restart', label: 'Start Over' },
-                { value: 'submit', label: 'Actually, submit as is' }
+                { value: 'review', label: 'Done - show summary again' },
+                { value: 'restart', label: 'Start over completely' }
               ]
             });
             await this.waitForChangeDecision();
@@ -1814,15 +1875,9 @@ export class TerminalIntakeModule {
           if (handleKeydown) {
             document.removeEventListener('keydown', handleKeydown);
           }
-          this.addMessage({ type: 'user', content: '[1] Start Over' });
-          this.clearProgress();
-          this.currentQuestionIndex = 0;
-          this.intakeData = {};
-          this.messages = [];
-          if (this.chatContainer) {
-            this.chatContainer.innerHTML = '';
-          }
-          await this.startConversation();
+          this.addMessage({ type: 'user', content: '[1] Done - show summary again' });
+          // Re-show the review summary
+          await this.showReviewAndConfirm();
           resolve();
         } else if (e.key === '2') {
           e.preventDefault();
@@ -1832,8 +1887,15 @@ export class TerminalIntakeModule {
           if (handleKeydown) {
             document.removeEventListener('keydown', handleKeydown);
           }
-          this.addMessage({ type: 'user', content: '[2] Actually, submit as is' });
-          await this.submitIntake();
+          this.addMessage({ type: 'user', content: '[2] Start over completely' });
+          this.clearProgress();
+          this.currentQuestionIndex = 0;
+          this.intakeData = {};
+          this.messages = [];
+          if (this.chatContainer) {
+            this.chatContainer.innerHTML = '';
+          }
+          await this.startConversation();
           resolve();
         }
       };
@@ -1854,7 +1916,10 @@ export class TerminalIntakeModule {
 
           this.addMessage({ type: 'user', content: displayText });
 
-          if (choice === 'restart') {
+          if (choice === 'review') {
+            // Re-show the review summary
+            await this.showReviewAndConfirm();
+          } else if (choice === 'restart') {
             // Clear and restart
             this.clearProgress();
             this.currentQuestionIndex = 0;
@@ -1864,8 +1929,6 @@ export class TerminalIntakeModule {
               this.chatContainer.innerHTML = '';
             }
             await this.startConversation();
-          } else {
-            await this.submitIntake();
           }
           resolve();
         }
@@ -2115,7 +2178,18 @@ Thank you for choosing No Bhad Codes!
       messageEl.dataset.questionIndex = String(message.questionIndex);
       messageEl.title = 'Click to edit this answer';
       messageEl.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent bubbling to option click handler
+        // Only block option/confirm clicks on the CURRENT question (actively selecting)
+        // For old questions, clicking anywhere should trigger edit
+        if (message.questionIndex === this.currentQuestionIndex) {
+          const target = e.target as HTMLElement;
+          if (target.classList.contains('chat-option') ||
+              target.classList.contains('confirm-btn') ||
+              target.closest('.chat-option') ||
+              target.closest('.confirm-btn')) {
+            return;
+          }
+        }
+        e.stopPropagation();
         this.goBackToQuestion(message.questionIndex!);
       });
     }
@@ -2183,6 +2257,17 @@ Thank you for choosing No Bhad Codes!
       messageEl.dataset.questionIndex = String(message.questionIndex);
       messageEl.title = 'Click to edit this answer';
       messageEl.addEventListener('click', (e) => {
+        // Only block option/confirm clicks on the CURRENT question (actively selecting)
+        // For old questions, clicking anywhere should trigger edit
+        if (message.questionIndex === this.currentQuestionIndex) {
+          const target = e.target as HTMLElement;
+          if (target.classList.contains('chat-option') ||
+              target.classList.contains('confirm-btn') ||
+              target.closest('.chat-option') ||
+              target.closest('.confirm-btn')) {
+            return;
+          }
+        }
         e.stopPropagation();
         this.goBackToQuestion(message.questionIndex!);
       });
@@ -2190,8 +2275,27 @@ Thank you for choosing No Bhad Codes!
 
     const contentEl = document.createElement('div');
     contentEl.className = 'message-content';
-    contentEl.textContent = ''; // Start empty
     messageEl.appendChild(contentEl);
+
+    // Create a text span and cursor for typing animation
+    const textSpan = document.createElement('span');
+    textSpan.className = 'typing-text';
+    contentEl.appendChild(textSpan);
+
+    const cursor = document.createElement('span');
+    cursor.className = 'typing-cursor';
+    cursor.textContent = '█';
+    cursor.style.color = '#00ff00';
+    contentEl.appendChild(cursor);
+
+    // Start cursor blinking with GSAP
+    const cursorBlink = gsap.to(cursor, {
+      opacity: 0,
+      duration: 0.5,
+      repeat: -1,
+      yoyo: true,
+      ease: 'steps(1)'
+    });
 
     this.chatContainer.appendChild(messageEl);
     this.scrollToBottom();
@@ -2199,10 +2303,15 @@ Thank you for choosing No Bhad Codes!
     // Type out the content character by character
     const text = message.content;
     for (let i = 0; i < text.length; i++) {
-      contentEl.textContent += text[i];
+      textSpan.textContent += text[i];
       this.scrollToBottom();
       await this.delay(15 + Math.random() * 10); // Fast typing speed
     }
+
+    // Remove cursor 1s after typing completes
+    await this.delay(1000);
+    cursorBlink.kill();
+    cursor.remove();
 
     // Add options if present (after typing completes)
     if (message.options && message.options.length > 0) {
@@ -2235,6 +2344,58 @@ Thank you for choosing No Bhad Codes!
         messageEl.appendChild(confirmBtn);
       }
     }
+
+    this.scrollToBottom();
+  }
+
+  /**
+   * Add a system message with typing animation (for summaries, etc.)
+   */
+  private async addSystemMessageWithTyping(content: string): Promise<void> {
+    if (!this.chatContainer) return;
+
+    const messageEl = document.createElement('div');
+    messageEl.className = 'chat-message system';
+
+    const contentEl = document.createElement('div');
+    contentEl.className = 'message-content';
+    messageEl.appendChild(contentEl);
+
+    // Create a text span and cursor for typing animation
+    const textSpan = document.createElement('span');
+    textSpan.className = 'typing-text';
+    contentEl.appendChild(textSpan);
+
+    const cursor = document.createElement('span');
+    cursor.className = 'typing-cursor';
+    cursor.textContent = '█';
+    cursor.style.color = '#00ff00';
+    contentEl.appendChild(cursor);
+
+    // Start cursor blinking with GSAP
+    const cursorBlink = gsap.to(cursor, {
+      opacity: 0,
+      duration: 0.5,
+      repeat: -1,
+      yoyo: true,
+      ease: 'steps(1)'
+    });
+
+    this.chatContainer.appendChild(messageEl);
+    this.scrollToBottom();
+
+    // Type out the content character by character (faster for system messages)
+    for (let i = 0; i < content.length; i++) {
+      textSpan.textContent += content[i];
+      // Scroll more frequently for long content
+      if (i % 20 === 0) this.scrollToBottom();
+      await this.delay(8 + Math.random() * 5); // Faster typing for system messages
+    }
+
+    // Remove cursor after typing completes
+    await this.delay(500);
+    cursorBlink.kill();
+    cursor.remove();
 
     this.scrollToBottom();
   }
@@ -2303,21 +2464,33 @@ Thank you for choosing No Bhad Codes!
     return dependentValue === requiredValue;
   }
 
-  private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
+  private setupCustomInputCursor(): void {
+    if (!this.inputElement) return;
 
-  /**
-   * Type out a command character by character using GSAP
-   */
-  private async typeCommand(text: string): Promise<void> {
-    const typingText = document.getElementById('terminalTypingText');
-    const cursor = document.getElementById('terminalCursor');
+    const inputArea = this.inputElement.closest('.terminal-input-area');
+    if (!inputArea) return;
 
-    if (!typingText || !cursor) return;
+    // Create wrapper for positioning
+    const wrapper = document.createElement('div');
+    wrapper.className = 'terminal-input-wrapper';
 
-    // Make cursor blink
-    gsap.to(cursor, {
+    // Create custom cursor element
+    const cursor = document.createElement('span');
+    cursor.className = 'terminal-input-cursor';
+
+    // Create hidden text measurer
+    const measurer = document.createElement('span');
+    measurer.className = 'terminal-input-measurer';
+    measurer.setAttribute('aria-hidden', 'true');
+
+    // Move input into wrapper
+    this.inputElement.parentNode?.insertBefore(wrapper, this.inputElement);
+    wrapper.appendChild(this.inputElement);
+    wrapper.appendChild(cursor);
+    wrapper.appendChild(measurer);
+
+    // Start cursor blinking with GSAP
+    const cursorBlink = gsap.to(cursor, {
       opacity: 0,
       duration: 0.5,
       repeat: -1,
@@ -2325,15 +2498,39 @@ Thank you for choosing No Bhad Codes!
       ease: 'steps(1)'
     });
 
-    // Type each character
-    for (let i = 0; i < text.length; i++) {
-      typingText.textContent += text[i];
-      await this.delay(50 + Math.random() * 30); // Random delay for natural feel
-    }
+    // Function to update cursor position based on text
+    const updateCursorPosition = () => {
+      const text = this.inputElement?.value || '';
+      measurer.textContent = text;
+      const textWidth = measurer.offsetWidth;
+      cursor.style.left = `${textWidth}px`;
+    };
 
-    // Stop cursor blinking and hide it
-    gsap.killTweensOf(cursor);
+    // Initially hide cursor (show on focus)
     cursor.style.opacity = '0';
+    cursorBlink.pause();
+
+    // Show cursor on focus
+    this.inputElement.addEventListener('focus', () => {
+      cursor.style.opacity = '1';
+      cursorBlink.play();
+      updateCursorPosition();
+    });
+
+    // Hide cursor on blur
+    this.inputElement.addEventListener('blur', () => {
+      cursor.style.opacity = '0';
+      cursorBlink.pause();
+    });
+
+    // Update cursor position on input
+    this.inputElement.addEventListener('input', updateCursorPosition);
+    this.inputElement.addEventListener('keyup', updateCursorPosition);
+    this.inputElement.addEventListener('click', updateCursorPosition);
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 

@@ -333,8 +333,8 @@
   border: 3px solid var(--color-border);
   border-top-color: var(--color-primary);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
+  /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
 }
 
 .no-results {
@@ -349,28 +349,17 @@
 }
 
 /* ===============================================
-   ANIMATIONS
+   ANIMATIONS - ALL CONTROLLED BY GSAP
    =============================================== */
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+/* @keyframes spin - REMOVED: Use GSAP createSpinner() instead */
 
 /* Fade in animation for project cards */
 .project-card {
-  animation: fadeInUp 0.6s var(--ease-out) forwards;
-  opacity: 0;
-  transform: translateY(20px);
+  /* Animation controlled by GSAP - see gsap-animations.ts fadeInUp() */
 }
 
-@keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* @keyframes fadeInUp - REMOVED: Use GSAP fadeInUp() instead */
 
 /* ===============================================
    RESPONSIVE DESIGN

@@ -53,14 +53,10 @@
   border: 2px solid transparent;
   border-top-color: currentColor;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
 }
 
-@keyframes spin {
-  to {
-    transform: translateY(-50%) rotate(360deg);
-  }
-}
+/* @keyframes spin - REMOVED: Use GSAP createSpinner() instead */
 
 /* ===============================================
    FORM COMPLETION VALIDATION
