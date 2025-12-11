@@ -7,19 +7,26 @@
 
 /* Contact Section - override layout.css centering */
 .contact-section {
-  align-items: flex-start !important; /* Left-align instead of center */
-  padding-left: 2rem !important;
-  padding-right: 2rem !important;
-  width: 100%;
+  align-items: flex-start !important;
+  width: 80vw !important;
+  max-width: 80vw !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
   box-sizing: border-box;
 }
 
-/* Contact heading with decorative line */
+/* Contact heading with decorative line - aligns with form left edge */
 .contact-section h2 {
   position: relative;
   padding-bottom: 1rem;
   margin-bottom: 2rem;
-  max-width: 100% !important;
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+  align-self: stretch;
+  text-align: left;
 }
 
 .contact-section h2::after {
@@ -28,15 +35,14 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 1px;
-  background-color: var(--fg);
-  opacity: 0.3;
+  height: 3px;
+  background-color: #333333;
 }
 
-/* Form Container - transparent, no border */
+/* Form Container - same width as h2 for perfect alignment */
 .contact-form {
   width: 100%;
-  max-width: none;
+  align-self: stretch;
   margin: 0;
   padding: 0;
   border: none;
@@ -54,59 +60,56 @@
   display: flex;
   align-items: flex-start;
   width: 100%;
-  max-width: 90%;
-  gap: 1rem;
+  gap: 2rem;
   opacity: 1;
   pointer-events: auto;
   transition: opacity 0.5s, filter 0.5s;
   box-sizing: border-box;
 }
 
-/* SAL'S EXACT - Left column (50% width) */
+/* SAL'S EXACT - Left column (70% width) */
 .contact-left {
-  flex: 1 0 50%;
-  width: 100%;
+  flex: 0 0 70%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
-  position: relative;
+  gap: 1rem;
+  align-items: flex-start;
   box-sizing: border-box;
-  overflow: hidden;
-  min-height: 0;
+  padding: 0;
+  min-height: auto;
+  overflow: visible;
 }
 
 /* SAL'S EXACT - Right column (flex: 1) */
 .contact-right {
-  flex: 1 0 50%;
-  width: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  padding: 1rem;
-  position: relative;
+  gap: 1rem;
   box-sizing: border-box;
-  overflow: hidden;
-  min-height: 0;
+  min-width: 0;
+  padding: 0;
+  min-height: auto;
+  overflow: visible;
 }
 
 /* SAL'S EXACT - Input wrapper */
 .input-wrapper {
   overflow: visible;
   position: relative;
-  padding: 2px;
+  padding: 0;
   width: 100%;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 /* SAL'S EXACT - Input item */
 .input-item {
   display: flex;
   flex-direction: column;
-  transform: translateY(-105%);
-  animation: drop-in 0.5s cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
+  transform: translateY(0);
 }
 
 .input-item.leaving {
@@ -159,8 +162,8 @@ label.text-small {
 /* SAL'S EXACT - Input field dimensions */
 .input-item input {
   width: 70%;
-  height: 42px;
-  border-radius: 0 22px 22px;
+  height: 60px;
+  border-radius: 0 22px 22px 22px;
   padding: 1rem 1rem 0;
 }
 
@@ -172,7 +175,7 @@ label.text-small {
   height: auto;
   resize: none;
   overflow: hidden;
-  border-radius: 0 22px;
+  border-radius: 0 22px 22px 22px;
   padding: 1.5rem 1rem 0.5rem;
 }
 
@@ -256,10 +259,10 @@ input:-webkit-autofill:active {
 .submit-button svg {
   width: 64px;
   height: 64px;
-  transform: rotate(171deg);
-  fill: var(--bg, #fffbee);
+  transform: rotate(0deg);
+  fill: none;
   stroke: var(--bg, #fffbee);
-  transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 3.5), fill 0.4s, stroke 0.4s;
+  transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 3.5), stroke 0.4s;
 }
 
 .submit-button:hover svg,
@@ -313,9 +316,12 @@ input:-webkit-autofill:active {
   color: #ef4444;
   font-size: 0.85rem;
   min-height: 1.2em;
-  margin-top: 4px;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
   display: block;
   text-align: left;
+  order: 999;
+  width: 100%;
 }
 
 .contact-form .form-input.error,

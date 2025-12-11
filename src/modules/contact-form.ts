@@ -388,7 +388,7 @@ export class ContactFormModule extends BaseModule {
       messageDiv.textContent = message;
     }
 
-    this.form!.insertBefore(messageDiv, this.form!.firstChild);
+    this.form!.appendChild(messageDiv);
 
     // Auto-hide success messages after 5 seconds
     if (type === 'success') {
