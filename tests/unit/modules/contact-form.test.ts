@@ -82,7 +82,7 @@ describe('ContactFormModule', () => {
           <span class="error-message" style="display: none;"></span>
         </div>
         <div class="form-actions">
-          <button type="submit" class="form-button" id="submit-btn">
+          <button type="submit" class="submit-button" id="submit-btn">
             <span class="btn-text">Send Message</span>
             <span class="btn-loader" style="display: none;">Sending...</span>
           </button>
@@ -152,7 +152,7 @@ describe('ContactFormModule', () => {
       contactModule = new ContactFormModule({ debug: false });
       await contactModule.init();
 
-      const button = document.querySelector('.form-button');
+      const button = document.querySelector('.submit-button');
       expect(button).toBeTruthy();
     });
 
