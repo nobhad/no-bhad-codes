@@ -352,9 +352,10 @@
           <!-- Honeypot field for bot detection -->
           <input name="bot-field" style="display: none" aria-hidden="true" tabindex="-1" autocomplete="off" />
 
-          <div class="contact-wrapper">
-            <!-- Left column: form fields -->
-            <section class="contact-left">
+          <!-- Top row: inputs + submit button -->
+          <div class="contact-row">
+            <!-- Left column: name, company, email -->
+            <div class="contact-left">
               <div class="input-wrapper">
                 <div class="input-item">
                   <input
@@ -417,31 +418,10 @@
                   <label class="text-small" for="email">Email</label>
                 </div>
               </div>
-
-              <div class="input-wrapper">
-                <div class="input-item">
-                  <textarea
-                    id="message"
-                    name="Message"
-                    placeholder="..."
-                    required
-                    rows="4"
-                    tabindex="0"
-                    maxlength="1000"
-                    aria-label="Message"
-                    aria-required="true"
-                    data-required="true"
-                    data-1p-ignore
-                    data-lpignore="true"
-                    data-bwignore
-                  ></textarea>
-                  <label class="text-small" for="message">Message</label>
-                </div>
-              </div>
-            </section>
+            </div>
 
             <!-- Right column: submit button -->
-            <section class="contact-right">
+            <div class="contact-right">
               <button class="submit-button" type="submit" tabindex="0" aria-label="Submit contact form">
                 <span>let's talk</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bow-arrow-icon lucide-bow-arrow" aria-hidden="true">
@@ -452,7 +432,31 @@
                   <path d="M9.707 14.293 21 3"/>
                 </svg>
               </button>
-            </section>
+            </div>
+          </div>
+
+          <!-- Bottom row: message textarea spanning full width -->
+          <div class="contact-message-row">
+            <div class="input-wrapper">
+              <div class="input-item">
+                <textarea
+                  id="message"
+                  name="Message"
+                  placeholder="..."
+                  required
+                  rows="4"
+                  tabindex="0"
+                  maxlength="1000"
+                  aria-label="Message"
+                  aria-required="true"
+                  data-required="true"
+                  data-1p-ignore
+                  data-lpignore="true"
+                  data-bwignore
+                ></textarea>
+                <label class="text-small" for="message">Message</label>
+              </div>
+            </div>
           </div>
         </form>
       </section>

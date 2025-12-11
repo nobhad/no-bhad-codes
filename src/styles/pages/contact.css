@@ -5,11 +5,11 @@
  * GSAP animations for form elements
  **/
 
-/* Contact Section - override layout.css centering */
+/* Contact Section - match about section width */
 .contact-section {
   align-items: flex-start !important;
-  width: 80vw !important;
-  max-width: 80vw !important;
+  width: min(1000px, 90vw) !important;
+  max-width: min(1000px, 90vw) !important;
   margin-left: auto !important;
   margin-right: auto !important;
   padding-left: 0 !important;
@@ -85,20 +85,17 @@
   display: block;
 }
 
-/* Two-column wrapper - SAL'S exact layout */
-.contact-wrapper {
-  margin-top: 1rem;
+/* Top row: inputs + submit button side by side */
+.contact-row {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   width: 100%;
   gap: 2rem;
-  opacity: 1;
-  pointer-events: auto;
-  transition: opacity 0.5s, filter 0.5s;
+  margin-top: 1rem;
   box-sizing: border-box;
 }
 
-/* SAL'S EXACT - Left column (70% width) */
+/* Left column: name, company, email inputs */
 .contact-left {
   flex: 0 0 70%;
   display: flex;
@@ -111,18 +108,22 @@
   overflow: visible;
 }
 
-/* SAL'S EXACT - Right column (flex: 1) */
+/* Right column: submit button */
 .contact-right {
   flex: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
   box-sizing: border-box;
-  min-width: 0;
   padding: 0;
-  min-height: auto;
   overflow: visible;
+}
+
+/* Bottom row: message textarea full width */
+.contact-message-row {
+  width: 100%;
+  margin-top: 1rem;
+  box-sizing: border-box;
 }
 
 /* SAL'S EXACT - Input wrapper */
@@ -190,9 +191,9 @@ label.text-small {
               -webkit-text-fill-color 0.4s;
 }
 
-/* SAL'S EXACT - Input field dimensions */
+/* Input field dimensions */
 .input-item input {
-  width: 70%;
+  width: 100%;
   height: 60px;
   border-radius: 0 22px 22px 22px;
   padding: 1rem 1rem 0;
@@ -500,7 +501,7 @@ html[data-theme="dark"] label.text-small {
 
 /* Responsive - Mobile */
 @media screen and (max-width: 800px) {
-  .contact-wrapper {
+  .contact-row {
     flex-direction: column;
     gap: 1rem;
     align-items: flex-start;
@@ -510,10 +511,13 @@ html[data-theme="dark"] label.text-small {
     width: 100%;
   }
 
-  .contact-right,
-  .email-box {
-    flex-direction: row;
-    align-items: center;
+  .contact-right {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .contact-message-row {
+    margin-top: 1rem;
   }
 
   /* Disable transform on mobile for better UX */
