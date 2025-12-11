@@ -268,6 +268,31 @@ export class Application {
         }
       },
       {
+        name: 'InfiniteScrollModule',
+        type: 'dom',
+        factory: async () => {
+          // Load infinite scroll on home page only
+          const currentPath = window.location.pathname;
+          const isHomePage = currentPath === '/' || currentPath === '/index.html';
+
+          if (isHomePage) {
+            const { InfiniteScrollModule } = await import('../modules/infinite-scroll');
+            return new InfiniteScrollModule({
+              containerSelector: 'main',
+              sectionSelector: '.business-card-section, .about-section, .contact-section',
+              enabled: true
+            });
+          }
+          // Return a dummy module for other pages
+          return {
+            init: async () => {},
+            destroy: () => {},
+            isInitialized: true,
+            name: 'InfiniteScrollModule'
+          };
+        }
+      },
+      {
         name: 'TextAnimationModule',
         type: 'dom',
         factory: async () => {
@@ -625,6 +650,7 @@ export class Application {
       'NavigationModule',
       'ContactFormModule',
       'ScrollSnapModule', // GSAP scroll snapping for sections
+      'InfiniteScrollModule', // Infinite looping scroll
       'TextAnimationModule' // GSAP text animation for home page
     ];
 
