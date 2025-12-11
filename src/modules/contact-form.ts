@@ -94,17 +94,10 @@ export class ContactFormModule extends BaseModule {
       );
 
       let firstInvalidField: HTMLElement | null = null;
-      let allRequiredFieldsTouched = true;
 
       const isValid = Array.from(requiredFields).every((field) => {
         const input = field as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-        const fieldId = input.id || input.name;
         const value = input.value?.trim() || '';
-
-        // Check if this required field has been touched
-        if (!touchedFields.has(fieldId)) {
-          allRequiredFieldsTouched = false;
-        }
 
         let fieldValid = true;
 
