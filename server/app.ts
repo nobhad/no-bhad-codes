@@ -20,6 +20,8 @@ import { errorTracker } from './services/error-tracking.js';
 import { emailService } from './services/email-service.js';
 import { cacheService } from './services/cache-service.js';
 import { initializeDatabase } from './database/init.js';
+import { MigrationManager } from './database/migrations.js';
+import sqlite3 from 'sqlite3';
 import authRouter from './routes/auth.js';
 import clientsRouter from './routes/clients.js';
 import projectsRouter from './routes/projects.js';
@@ -182,6 +184,21 @@ async function startServer() {
     // Initialize database
     await initializeDatabase();
     console.log('✅ Database initialized');
+
+    // Run database migrations
+    const dbPath = process.env.DATABASE_PATH || './data/client_portal.db';
+    const db = new sqlite3.Database(dbPath);
+    const migrator = new MigrationManager(db);
+
+    try {
+      await migrator.migrate();
+      console.log('✅ Database migrations complete');
+    } catch (migrationError) {
+      console.error('❌ Migration failed:', migrationError);
+      throw migrationError;
+    } finally {
+      db.close();
+    }
 
     // Initialize email service
     const emailConfig = {
