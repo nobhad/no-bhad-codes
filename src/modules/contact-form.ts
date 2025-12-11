@@ -85,32 +85,85 @@ export class ContactFormModule extends BaseModule {
     // Disable browser validation in favor of custom validation
     this.form.noValidate = true;
 
+    // Track which fields have been interacted with
+    const touchedFields = new Set<string>();
+
     const validateForm = () => {
       const requiredFields = this.form!.querySelectorAll(
         'input[data-required], select[data-required], textarea[data-required]'
       );
 
+      let firstInvalidField: HTMLElement | null = null;
+      let allRequiredFieldsTouched = true;
+
       const isValid = Array.from(requiredFields).every((field) => {
         const input = field as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+        const fieldId = input.id || input.name;
         const value = input.value?.trim() || '';
-        return value !== '';
+
+        // Check if this required field has been touched
+        if (!touchedFields.has(fieldId)) {
+          allRequiredFieldsTouched = false;
+        }
+
+        let fieldValid = true;
+
+        // Message field requires minimum 10 characters
+        if (input.id === 'message' || input.name === 'Message') {
+          fieldValid = value.length >= 10;
+        } else {
+          fieldValid = value !== '';
+        }
+
+        if (!fieldValid && !firstInvalidField) {
+          firstInvalidField = input;
+        }
+
+        return fieldValid;
       });
+
+      // Check if message field has been touched
+      const messageTouched = touchedFields.has('message') || touchedFields.has('Message');
 
       this.log('Form validation:', {
         requiredFieldsCount: requiredFields.length,
         isValid,
+        messageTouched,
+        touchedFields: Array.from(touchedFields),
         buttonElement: this.submitButton?.tagName
       });
 
       if (this.submitButton) {
+        // Remove all arrow direction classes
+        this.submitButton.classList.remove('form-valid', 'point-to-name', 'point-to-email', 'point-to-message');
+
         if (isValid) {
           this.submitButton.classList.add('form-valid');
           this.log('Added form-valid class');
-        } else {
-          this.submitButton.classList.remove('form-valid');
-          this.log('Removed form-valid class');
+        } else if (messageTouched && firstInvalidField) {
+          // Only point to invalid field once message field has been touched
+          const fieldId = (firstInvalidField as HTMLInputElement).id || (firstInvalidField as HTMLInputElement).name;
+          if (fieldId === 'name' || fieldId === 'Name') {
+            this.submitButton.classList.add('point-to-name');
+          } else if (fieldId === 'email' || fieldId === 'Email') {
+            this.submitButton.classList.add('point-to-email');
+          } else if (fieldId === 'message' || fieldId === 'Message') {
+            this.submitButton.classList.add('point-to-message');
+          }
+          this.log('Arrow pointing to:', fieldId);
+
+          // Focus on the invalid field
+          (firstInvalidField as HTMLInputElement).focus();
         }
       }
+    };
+
+    // Track field interactions
+    const markFieldTouched = (e: Event) => {
+      const input = e.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+      const fieldId = input.id || input.name;
+      touchedFields.add(fieldId);
+      validateForm();
     };
 
     // Add input event listeners to all form fields using native addEventListener
@@ -118,12 +171,12 @@ export class ContactFormModule extends BaseModule {
     allFields.forEach((field) => {
       field.addEventListener('input', validateForm);
       field.addEventListener('change', validateForm);
+      field.addEventListener('blur', markFieldTouched); // Mark as touched when leaving field
     });
 
     this.log('Form validation setup complete, listening on', allFields.length, 'fields');
 
-    // Initial validation
-    validateForm();
+    // Don't run initial validation - arrow starts in default position
   }
 
   handleInputChange(e: Event) {
@@ -252,9 +305,16 @@ export class ContactFormModule extends BaseModule {
       const result = await this.contactService.submitForm(formData as ContactFormData);
 
       if (result.success) {
-        this.showFormMessage(result.message, 'success');
         this.form?.reset();
         this.clearAllErrors();
+        // Update button to show "SENT!"
+        if (this.submitButton) {
+          this.submitButton.classList.add('form-sent');
+          const buttonSpan = this.submitButton.querySelector('span');
+          if (buttonSpan) {
+            buttonSpan.textContent = 'SENT!';
+          }
+        }
       } else {
         throw new Error(result.error || 'Failed to send message');
       }
