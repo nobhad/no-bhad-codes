@@ -78,6 +78,7 @@ main {
 
 /* Universal section centering - based on main page pattern */
 .business-card-section,
+.text-animation-section,
 .about-section,
 .contact-section,
 .hero-section,
@@ -593,10 +594,6 @@ main,
  * ============================================ */
 
 .text-animation-section {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
   overflow: hidden;
 }
 
@@ -606,6 +603,9 @@ main,
   height: auto;
   font-family: var(--font--acme), "Acme", sans-serif;
   font-weight: 700;
+  /* Center the SVG content vertically */
+  display: block;
+  margin: auto;
 }
 
 /* Light mode: soft black on left, softer black on right */
