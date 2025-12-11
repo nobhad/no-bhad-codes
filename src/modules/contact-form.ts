@@ -279,31 +279,17 @@ export class ContactFormModule extends BaseModule {
     const formData = new FormData(this.form);
 
     const rawData = {
-      firstName: formData.get('First-Name')?.toString().trim() || '',
-      lastName: formData.get('Last-Name')?.toString().trim() || '',
+      name: formData.get('Name')?.toString().trim() || '',
       email: formData.get('Email')?.toString().trim() || '',
       companyName: formData.get('Company-Name')?.toString().trim(),
-      inquiryType: formData.get('Inquiry-Type')?.toString() || '',
-      projectType: formData.get('Project-Type')?.toString() || '',
-      timeline: formData.get('Timeline')?.toString() || '',
-      budgetRange: formData.get('Budget-Range')?.toString() || '',
-      message: formData.get('Project-Description')?.toString().trim() || ''
+      message: formData.get('Message')?.toString().trim() || ''
     };
 
     // Apply client-side sanitization as first defense layer
     return {
-      firstName: SanitizationUtils.sanitizeText(rawData.firstName),
-      lastName: SanitizationUtils.sanitizeText(rawData.lastName),
+      name: SanitizationUtils.sanitizeText(rawData.name),
       email: SanitizationUtils.sanitizeEmail(rawData.email),
       companyName: rawData.companyName ? SanitizationUtils.sanitizeText(rawData.companyName) : '',
-      inquiryType: SanitizationUtils.sanitizeText(rawData.inquiryType),
-      projectType: rawData.projectType
-        ? SanitizationUtils.sanitizeText(rawData.projectType)
-        : undefined,
-      timeline: rawData.timeline ? SanitizationUtils.sanitizeText(rawData.timeline) : undefined,
-      budgetRange: rawData.budgetRange
-        ? SanitizationUtils.sanitizeText(rawData.budgetRange)
-        : undefined,
       message: SanitizationUtils.sanitizeMessage(rawData.message)
     };
   }

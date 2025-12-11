@@ -13,14 +13,9 @@ import { BaseService } from './base-service';
 import { SanitizationUtils } from '../utils/sanitization-utils';
 
 export interface ContactFormData {
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
   companyName?: string;
-  inquiryType: string;
-  projectType?: string;
-  timeline?: string;
-  budgetRange?: string;
   message: string;
 }
 
@@ -162,23 +157,12 @@ export class ContactService extends BaseService {
   private async submitToNetlify(formData: ContactFormData): Promise<ContactSubmissionResult> {
     const form = new FormData();
     form.append('form-name', 'contact-form');
-    form.append('First-Name', formData.firstName);
-    form.append('Last-Name', formData.lastName);
+    form.append('Name', formData.name);
     form.append('Email', formData.email);
     if (formData.companyName) {
       form.append('Company-Name', formData.companyName);
     }
-    form.append('Inquiry-Type', formData.inquiryType);
-    if (formData.projectType) {
-      form.append('Project-Type', formData.projectType);
-    }
-    if (formData.timeline) {
-      form.append('Timeline', formData.timeline);
-    }
-    if (formData.budgetRange) {
-      form.append('Budget-Range', formData.budgetRange);
-    }
-    form.append('Project-Description', formData.message);
+    form.append('Message', formData.message);
 
     const response = await fetch('/', {
       method: 'POST',
@@ -210,14 +194,9 @@ export class ContactService extends BaseService {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        name: formData.name,
         email: formData.email,
         companyName: formData.companyName,
-        inquiryType: formData.inquiryType,
-        projectType: formData.projectType,
-        timeline: formData.timeline,
-        budgetRange: formData.budgetRange,
         message: formData.message
       })
     });
@@ -243,13 +222,9 @@ export class ContactService extends BaseService {
     }
 
     const templateParams = {
-      from_name: `${formData.firstName} ${formData.lastName}`,
+      from_name: formData.name,
       from_email: formData.email,
       company_name: formData.companyName || 'N/A',
-      inquiry_type: formData.inquiryType,
-      project_type: formData.projectType || 'N/A',
-      timeline: formData.timeline || 'N/A',
-      budget_range: formData.budgetRange || 'N/A',
       message: formData.message
     };
 
@@ -310,22 +285,14 @@ export class ContactService extends BaseService {
   validateFormData(formData: Partial<ContactFormData>): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-    if (!formData.firstName?.trim()) {
-      errors.push('First name is required');
-    }
-
-    if (!formData.lastName?.trim()) {
-      errors.push('Last name is required');
+    if (!formData.name?.trim()) {
+      errors.push('Name is required');
     }
 
     if (!formData.email?.trim()) {
       errors.push('Email is required');
     } else if (!this.isValidEmail(formData.email)) {
       errors.push('Please enter a valid email address');
-    }
-
-    if (!formData.inquiryType) {
-      errors.push('Please select what you need help with');
     }
 
     if (!formData.message?.trim()) {
@@ -353,18 +320,9 @@ export class ContactService extends BaseService {
    */
   private sanitizeFormData(formData: ContactFormData): ContactFormData {
     return {
-      firstName: SanitizationUtils.sanitizeText(formData.firstName),
-      lastName: SanitizationUtils.sanitizeText(formData.lastName),
+      name: SanitizationUtils.sanitizeText(formData.name),
       email: SanitizationUtils.sanitizeEmail(formData.email),
       companyName: formData.companyName ? SanitizationUtils.sanitizeText(formData.companyName) : '',
-      inquiryType: SanitizationUtils.sanitizeText(formData.inquiryType),
-      projectType: formData.projectType
-        ? SanitizationUtils.sanitizeText(formData.projectType)
-        : undefined,
-      timeline: formData.timeline ? SanitizationUtils.sanitizeText(formData.timeline) : undefined,
-      budgetRange: formData.budgetRange
-        ? SanitizationUtils.sanitizeText(formData.budgetRange)
-        : undefined,
       message: SanitizationUtils.sanitizeMessage(formData.message)
     };
   }
@@ -376,14 +334,9 @@ export class ContactService extends BaseService {
     const suspiciousFields: string[] = [];
 
     const fields = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
+      name: formData.name,
       email: formData.email,
       companyName: formData.companyName,
-      inquiryType: formData.inquiryType,
-      projectType: formData.projectType,
-      timeline: formData.timeline,
-      budgetRange: formData.budgetRange,
       message: formData.message
     };
 
@@ -460,13 +413,9 @@ export class ContactService extends BaseService {
   generateEmailTemplate(formData: ContactFormData): string {
     return `
       <h2>New Contact Form Submission</h2>
-      <p><strong>Name:</strong> ${formData.firstName} ${formData.lastName}</p>
+      <p><strong>Name:</strong> ${formData.name}</p>
       <p><strong>Email:</strong> ${formData.email}</p>
       <p><strong>Company:</strong> ${formData.companyName || 'N/A'}</p>
-      <p><strong>Inquiry Type:</strong> ${formData.inquiryType}</p>
-      ${formData.projectType ? `<p><strong>Project Type:</strong> ${formData.projectType}</p>` : ''}
-      ${formData.timeline ? `<p><strong>Timeline:</strong> ${formData.timeline}</p>` : ''}
-      ${formData.budgetRange ? `<p><strong>Budget:</strong> ${formData.budgetRange}</p>` : ''}
       <p><strong>Message:</strong></p>
       <p>${formData.message}</p>
     `;
@@ -478,7 +427,7 @@ export class ContactService extends BaseService {
   generateAutoReplyTemplate(formData: ContactFormData): string {
     return `
       <h2>Thank you for contacting us!</h2>
-      <p>Hi ${formData.firstName},</p>
+      <p>Hi ${formData.name},</p>
       <p>We've received your message and will get back to you soon.</p>
       <p>Best regards,<br>The Team</p>
     `;

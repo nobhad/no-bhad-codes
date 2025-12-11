@@ -270,6 +270,23 @@ input:-webkit-autofill:active {
   transform: rotate(180deg);
 }
 
+/* Dark mode overrides for form text and SVG - use page background color */
+html[data-theme="dark"] .input-item input,
+html[data-theme="dark"] .input-item textarea {
+  color: var(--color-neutral-300);
+  caret-color: var(--color-neutral-300);
+  -webkit-text-fill-color: var(--color-neutral-300);
+}
+
+html[data-theme="dark"] .submit-button svg {
+  stroke: var(--color-neutral-300);
+}
+
+html[data-theme="dark"] label.text-small {
+  color: var(--color-neutral-300);
+  opacity: 0.5;
+}
+
 /* Email alternative box */
 .email-box {
   display: flex;
