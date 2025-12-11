@@ -34,9 +34,11 @@ export class InfiniteScrollModule extends BaseModule {
   private container: HTMLElement | null = null;
   private lastSection: HTMLElement | null = null;
   private topSpacer: HTMLElement | null = null;
+  private bottomSpacer: HTMLElement | null = null;
   private isEnabled = true;
   private isTransitioning = false;
   private hasTriggeredLoop = false;
+  private hasTriggeredReverseLoop = false;
   private lastLogTime = 0;
 
   // Configuration
@@ -99,6 +101,12 @@ export class InfiniteScrollModule extends BaseModule {
       this.warn('Top spacer not found');
     }
 
+    // Get bottom spacer element
+    this.bottomSpacer = document.getElementById('loop-spacer-bottom') as HTMLElement;
+    if (!this.bottomSpacer) {
+      this.warn('Bottom spacer not found');
+    }
+
     // Log initial dimensions
     this.log(`Container dimensions: scrollHeight=${this.container.scrollHeight}, clientHeight=${this.container.clientHeight}, scrollTop=${this.container.scrollTop}`);
 
@@ -109,7 +117,7 @@ export class InfiniteScrollModule extends BaseModule {
   }
 
   /**
-   * Handle scroll events to detect bottom
+   * Handle scroll events to detect bottom or top
    */
   private handleScroll(): void {
     if (!this.container || this.isTransitioning) return;
@@ -118,16 +126,18 @@ export class InfiniteScrollModule extends BaseModule {
     const scrollHeight = this.container.scrollHeight;
     const clientHeight = this.container.clientHeight;
 
-    // Check if we're at the bottom (within 50px threshold)
+    // Check distances from top and bottom
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    const distanceFromTop = scrollTop;
 
     // Throttled debug logging (every 500ms)
     const now = Date.now();
     if (now - this.lastLogTime > 500) {
       this.lastLogTime = now;
-      this.log(`Scroll: distFromBottom=${Math.round(distanceFromBottom)}, scrollTop=${Math.round(scrollTop)}, scrollHeight=${scrollHeight}, clientHeight=${clientHeight}`);
+      this.log(`Scroll: distFromTop=${Math.round(distanceFromTop)}, distFromBottom=${Math.round(distanceFromBottom)}, spacerActive=${this.topSpacer?.classList.contains('active')}`);
     }
 
+    // Forward loop: at bottom, loop to start
     if (distanceFromBottom <= 50 && !this.hasTriggeredLoop) {
       this.log(`TRIGGERING LOOP: At bottom! distFromBottom=${distanceFromBottom}`);
       this.hasTriggeredLoop = true;
@@ -135,6 +145,17 @@ export class InfiniteScrollModule extends BaseModule {
     } else if (distanceFromBottom > 200) {
       // Reset when scrolled back up
       this.hasTriggeredLoop = false;
+    }
+
+    // Reverse loop: at top with spacer active, loop to end
+    const topSpacerActive = this.topSpacer?.classList.contains('active');
+    if (topSpacerActive && distanceFromTop <= 50 && !this.hasTriggeredReverseLoop) {
+      this.log(`TRIGGERING REVERSE LOOP: At top with spacer active!`);
+      this.hasTriggeredReverseLoop = true;
+      this.loopToEnd();
+    } else if (distanceFromTop > 200) {
+      // Reset when scrolled down
+      this.hasTriggeredReverseLoop = false;
     }
   }
 
@@ -156,6 +177,11 @@ export class InfiniteScrollModule extends BaseModule {
       this.log('Top spacer activated');
     }
 
+    // Deactivate bottom spacer if active
+    if (this.bottomSpacer) {
+      this.bottomSpacer.classList.remove('active');
+    }
+
     // Jump to top of scroll container
     // User now sees the spacer (empty), business card is 100vh below
     this.container.scrollTop = 0;
@@ -169,6 +195,47 @@ export class InfiniteScrollModule extends BaseModule {
 
       this.isTransitioning = false;
       this.hasTriggeredLoop = false;
+    }, 100);
+  }
+
+  /**
+   * Loop back to end (reverse scroll)
+   * 1. Deactivate top spacer
+   * 2. Activate bottom spacer (adds 100vh after contact section)
+   * 3. Jump to bottom (user sees spacer, contact is above viewport)
+   * 4. User scrolls up naturally, contact comes down from above
+   */
+  private loopToEnd(): void {
+    if (!this.container || this.isTransitioning) return;
+
+    this.isTransitioning = true;
+    this.log('Looping to end...');
+
+    // Deactivate top spacer
+    if (this.topSpacer) {
+      this.topSpacer.classList.remove('active');
+      this.log('Top spacer deactivated');
+    }
+
+    // Activate bottom spacer - this adds 100vh AFTER contact section
+    if (this.bottomSpacer) {
+      this.bottomSpacer.classList.add('active');
+      this.log('Bottom spacer activated');
+    }
+
+    // Jump to bottom of scroll container
+    // User now sees the spacer (empty), contact is 100vh above
+    this.container.scrollTop = this.container.scrollHeight;
+
+    this.log('Scrolled to bottom - spacer visible, contact above viewport');
+
+    // Refresh ScrollTrigger after layout change
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+      this.log('ScrollTrigger refreshed');
+
+      this.isTransitioning = false;
+      this.hasTriggeredReverseLoop = false;
     }, 100);
   }
 
@@ -205,6 +272,8 @@ export class InfiniteScrollModule extends BaseModule {
   override async destroy(): Promise<void> {
     this.container = null;
     this.lastSection = null;
+    this.topSpacer = null;
+    this.bottomSpacer = null;
 
     await super.destroy();
   }

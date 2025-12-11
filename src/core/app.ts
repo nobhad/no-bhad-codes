@@ -279,7 +279,7 @@ export class Application {
             const { InfiniteScrollModule } = await import('../modules/infinite-scroll');
             return new InfiniteScrollModule({
               containerSelector: 'main',
-              sectionSelector: '.business-card-section, .about-section, .contact-section',
+              lastSectionSelector: '.contact-section',
               enabled: true
             });
           }
