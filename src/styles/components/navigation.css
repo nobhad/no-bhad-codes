@@ -134,6 +134,8 @@ li {
   flex-shrink: 0;
   /* Enhanced visibility in dark theme */
   position: relative;
+  /* Smooth color transition for theme changes - matches body transition speed */
+  transition: color 0.2s ease;
 }
 
 .nav-logo__wordmark {
@@ -432,6 +434,8 @@ html[data-theme="dark"] .coming-soon-banner {
   font-size: inherit;
   line-height: inherit;
   text-shadow: 0 2px 4px var(--color-shadow);
+  /* Smooth color transition for theme changes - matches body transition speed */
+  transition: color 0.2s ease;
 }
 
 .theme-button {
@@ -873,10 +877,12 @@ html[data-theme="dark"] .coming-soon-banner {
 
 /* Removed automatic dark mode preference - site manages theme manually */
 
-/* Hide theme toggle on mobile */
+/* Theme toggle visible on mobile - positioned properly */
 @media screen and (max-width: 767px) {
   .theme-button {
-    display: none !important;
+    display: flex;
+    width: 36px;
+    height: 36px;
   }
 }
 

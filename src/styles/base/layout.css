@@ -357,9 +357,10 @@ main,
   transition: opacity 0.5s ease-in-out !important;
 }
 
-/* After intro finishes, remove transition to prevent flicker on navigation */
+/* After intro finishes, disable opacity/visibility transitions to prevent flicker on navigation */
+/* But allow color transitions for smooth theme switching */
 .intro-complete.intro-finished .header {
-  transition: none !important;
+  transition: opacity 0s, visibility 0s !important;
 }
 
 /* Mobile: header and content always visible, no intro animation effects */

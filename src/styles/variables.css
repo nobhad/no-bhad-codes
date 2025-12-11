@@ -152,11 +152,19 @@ body {
   line-height: 1.6;
   margin: 0;
   padding: 0;
-  background-color: var(--color-neutral-100);
+  background-color: var(--color-neutral-300);
   color: var(--color-dark);
   transition:
-    background-color var(--transition-medium),
-    color var(--transition-medium);
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* Theme transition for main structural elements */
+.header,
+main,
+section,
+.footer {
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Font Utility Classes */
