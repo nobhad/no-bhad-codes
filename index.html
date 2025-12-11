@@ -332,157 +332,113 @@
           <!-- Honeypot field for bot detection -->
           <input name="bot-field" style="display: none" aria-hidden="true" tabindex="-1" autocomplete="off" />
 
-          <p class="form-intro">Whether you need a new project, have questions, or just want to say hello - I'd love to hear from you!</p>
+          <div class="contact-wrapper">
+            <!-- Left column: form fields -->
+            <section class="contact-left">
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input
+                    id="name"
+                    placeholder="..."
+                    required
+                    autocomplete="name"
+                    tabindex="0"
+                    type="text"
+                    name="Name"
+                    maxlength="256"
+                    aria-label="Name"
+                    aria-required="true"
+                    data-required="true"
+                    data-1p-ignore
+                    data-lpignore="true"
+                    data-bwignore
+                  />
+                  <label class="text-small" for="name">Name</label>
+                </div>
+              </div>
 
-          <input
-            autocomplete="off"
-            class="form-input"
-            data-name="First Name"
-            id="First-Name"
-            maxlength="256"
-            name="First-Name"
-            placeholder="First Name"
-            aria-label="First Name"
-            aria-required="true"
-            data-required="true"
-            type="text"
-            data-1p-ignore
-            data-lpignore="true"
-            data-bwignore
-          />
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input
+                    id="company"
+                    placeholder="..."
+                    autocomplete="organization"
+                    tabindex="0"
+                    type="text"
+                    name="Company-Name"
+                    maxlength="256"
+                    aria-label="Company (optional)"
+                    data-1p-ignore
+                    data-lpignore="true"
+                    data-bwignore
+                  />
+                  <label class="text-small" for="company">Company (optional)</label>
+                </div>
+              </div>
 
-          <input
-            autocomplete="off"
-            class="form-input"
-            data-name="Last Name"
-            id="Last-Name"
-            maxlength="256"
-            name="Last-Name"
-            placeholder="Last Name"
-            aria-label="Last Name"
-            aria-required="true"
-            data-required="true"
-            type="text"
-            data-1p-ignore
-            data-lpignore="true"
-            data-bwignore
-          />
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input
+                    id="email"
+                    placeholder="..."
+                    required
+                    autocomplete="email"
+                    tabindex="0"
+                    type="email"
+                    name="Email"
+                    maxlength="256"
+                    aria-label="Email"
+                    aria-required="true"
+                    data-required="true"
+                    data-1p-ignore
+                    data-lpignore="true"
+                    data-bwignore
+                  />
+                  <label class="text-small" for="email">Email</label>
+                </div>
+              </div>
 
-          <input
-            autocomplete="off"
-            class="form-input"
-            data-name="Email"
-            id="Email"
-            maxlength="256"
-            name="Email"
-            placeholder="Email Address"
-            aria-label="Email Address"
-            aria-required="true"
-            data-required="true"
-            type="email"
-            data-1p-ignore
-            data-lpignore="true"
-            data-bwignore
-          />
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <textarea
+                    id="message"
+                    name="Message"
+                    placeholder="..."
+                    required
+                    rows="4"
+                    tabindex="0"
+                    maxlength="1000"
+                    aria-label="Message"
+                    aria-required="true"
+                    data-required="true"
+                    data-1p-ignore
+                    data-lpignore="true"
+                    data-bwignore
+                  ></textarea>
+                  <label class="text-small" for="message">Message</label>
+                </div>
+              </div>
+            </section>
 
-          <input
-            autocomplete="off"
-            class="form-input"
-            data-name="Company Name"
-            id="Company-Name"
-            maxlength="256"
-            name="Company-Name"
-            placeholder="Company/Organization Name (Optional)"
-            aria-label="Company or Organization Name (Optional)"
-            type="text"
-            data-1p-ignore
-            data-lpignore="true"
-            data-bwignore
-          />
-
-          <select
-            class="form-select"
-            data-name="Inquiry Type"
-            id="inquiry-type"
-            name="Inquiry-Type"
-            aria-label="Inquiry Type - What can I help you with?"
-            aria-required="true"
-            data-required="true"
-          >
-            <option value="">What can I help you with?</option>
-            <option value="New Project">New Project - I need something built</option>
-            <option value="Existing Project">Existing Project - Updates/fixes needed</option>
-            <option value="Consultation">Consultation - I have questions</option>
-            <option value="Collaboration">Collaboration - Let's work together</option>
-            <option value="General">General Inquiry</option>
-            <option value="Other">Other</option>
-          </select>
-
-          <!-- PROJECT DETAILS SECTION (conditional) -->
-          <div class="project-details" id="project-details" style="display: none" role="group" aria-label="Project Details">
-            <select
-              class="form-select"
-              data-name="Project Type"
-              id="project-type"
-              name="Project-Type"
-              aria-label="Project Type"
-            >
-              <option value="">What type of project?</option>
-              <option value="Simple Site">Simple Site (1-2 pages, landing page)</option>
-              <option value="Small Business Website">Small Business Website</option>
-              <option value="Portfolio Website">Portfolio Website</option>
-              <option value="E-commerce Store">E-commerce Store</option>
-              <option value="Web Application">Web Application</option>
-              <option value="Browser Extension">Browser Extension</option>
-              <option value="Other">Other - Let's discuss</option>
-            </select>
-
-            <div class="form-row" role="group" aria-label="Timeline and Budget">
-              <select class="form-select" data-name="Timeline" id="timeline" name="Timeline" aria-label="Project Timeline">
-                <option value="">Timeline?</option>
-                <option value="ASAP">ASAP</option>
-                <option value="1-2 months">1-2 months</option>
-                <option value="2-4 months">2-4 months</option>
-                <option value="4+ months">4+ months</option>
-                <option value="Flexible">Flexible</option>
-              </select>
-
-              <select
-                class="form-select"
-                data-name="Budget Range"
-                id="budget-range"
-                name="Budget-Range"
-                aria-label="Budget Range"
-              >
-                <option value="">Budget range?</option>
-                <option value="Under $2K">Under $2K</option>
-                <option value="$2K-5K">$2K-5K</option>
-                <option value="$5K-10K">$5K-10K</option>
-                <option value="$10K-25K">$10K-25K</option>
-                <option value="$25K+">$25K+</option>
-                <option value="Let's discuss">Let's discuss</option>
-              </select>
-            </div>
-          </div>
-
-          <textarea
-            autocomplete="off"
-            class="form-textarea"
-            data-name="Project Description"
-            id="project-description"
-            maxlength="1000"
-            name="Project-Description"
-            placeholder="Tell me about your project or inquiry..."
-            aria-label="Project Description - Tell me about your project or inquiry"
-            aria-required="true"
-            data-required="true"
-            data-1p-ignore
-            data-lpignore="true"
-            data-bwignore
-          ></textarea>
-
-          <div class="form-actions">
-            <input class="form-button" data-wait="Sending..." type="submit" value="Let's Talk" aria-label="Submit contact form" />
+            <!-- Right column: submit + email alternative -->
+            <section class="contact-right">
+              <button class="submit-button" type="submit" tabindex="0" aria-label="Submit contact form">
+                <span>let's talk</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bow-arrow" aria-hidden="true">
+                  <path d="M17 3h4v4"/>
+                  <path d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"/>
+                  <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05"/>
+                  <path d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z"/>
+                  <path d="M9.707 14.293 21 3"/>
+                </svg>
+              </button>
+              <div class="email-box">
+                <span>or</span>
+                <div class="a-wrapper">
+                  <a href="mailto:nobhaduri@gmail.com" target="_blank" rel="noopener noreferrer" tabindex="0">email me</a>
+                </div>
+              </div>
+            </section>
           </div>
         </form>
       </section>
