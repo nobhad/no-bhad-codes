@@ -14,7 +14,7 @@ export function validateFormCompletion(form: HTMLFormElement): void {
   const requiredFields = form.querySelectorAll(
     'input[required], select[required], textarea[required]'
   );
-  const submitButton = form.querySelector('.form-button') as HTMLButtonElement | HTMLInputElement;
+  const submitButton = form.querySelector('.submit-button, .form-button') as HTMLButtonElement | HTMLInputElement;
 
   if (!submitButton) return;
 

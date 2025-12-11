@@ -54,7 +54,7 @@ export class ContactFormModule extends BaseModule {
     await this.contactService.init();
 
     this.form = this.getElement('Contact form', '.contact-form', true) as HTMLFormElement;
-    this.submitButton = this.getElement('Submit button', '.form-button', true) as HTMLButtonElement;
+    this.submitButton = this.getElement('Submit button', '.submit-button', true) as HTMLButtonElement;
 
     if (this.form) {
       this.setupEventListeners();

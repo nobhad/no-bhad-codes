@@ -29,9 +29,11 @@
         if ('scrollRestoration' in history) {
           history.scrollRestoration = 'manual';
         }
-        window.scrollTo(0, 0);
-        document.documentElement.scrollTop = 0;
-        if (document.body) document.body.scrollTop = 0;
+        try {
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          if (document.body) document.body.scrollTop = 0;
+        } catch (e) { /* ignore scroll errors during early page load */ }
 
         // Also scroll to top after DOM loads and window loads
         document.addEventListener('DOMContentLoaded', function() {
@@ -338,6 +340,14 @@
       <section id="contact" class="contact-section">
         <h2>contact</h2>
 
+        <div class="contact-options">
+          <p>
+            <span class="contact-option-label">Message me here</span>,
+            fill out a project <a href="/client/landing" class="contact-option-link">intake form</a>,
+            or <a href="mailto:nobhaduri@gmail.com" class="contact-option-link">email me</a>.
+          </p>
+        </div>
+
         <form class="contact-form" method="post" name="contact-form" novalidate aria-label="Contact form" autocomplete="off" data-form-type="other" data-1p-ignore data-lpignore="true" data-bwignore>
           <!-- Honeypot field for bot detection -->
           <input name="bot-field" style="display: none" aria-hidden="true" tabindex="-1" autocomplete="off" />
@@ -430,7 +440,7 @@
               </div>
             </section>
 
-            <!-- Right column: submit + email alternative -->
+            <!-- Right column: submit button -->
             <section class="contact-right">
               <button class="submit-button" type="submit" tabindex="0" aria-label="Submit contact form">
                 <span>let's talk</span>
@@ -442,12 +452,6 @@
                   <path d="M9.707 14.293 21 3"/>
                 </svg>
               </button>
-              <div class="email-box">
-                <span>or</span>
-                <div class="a-wrapper">
-                  <a href="mailto:nobhaduri@gmail.com" target="_blank" rel="noopener noreferrer" tabindex="0">email me</a>
-                </div>
-              </div>
             </section>
           </div>
         </form>
