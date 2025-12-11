@@ -31,18 +31,24 @@
         }
         window.scrollTo(0, 0);
         document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
+        if (document.body) document.body.scrollTop = 0;
 
         // Also scroll to top after DOM loads and window loads
         document.addEventListener('DOMContentLoaded', function() {
           window.scrollTo(0, 0);
           document.documentElement.scrollTop = 0;
-          document.body.scrollTop = 0;
+          if (document.body) document.body.scrollTop = 0;
+          // Also scroll the main container
+          var main = document.querySelector('main');
+          if (main) main.scrollTop = 0;
         });
         window.addEventListener('load', function() {
           window.scrollTo(0, 0);
           document.documentElement.scrollTop = 0;
-          document.body.scrollTop = 0;
+          if (document.body) document.body.scrollTop = 0;
+          // Also scroll the main container
+          var main = document.querySelector('main');
+          if (main) main.scrollTop = 0;
         });
 
         try {
@@ -228,6 +234,10 @@
 
     <!-- Main Content -->
     <main id="main-content">
+      <!-- LOOP SPACER - Hidden initially, shown after infinite scroll loop -->
+      <!-- This creates space so the business card can scroll up from below viewport -->
+      <section id="loop-spacer" class="loop-spacer-section" aria-hidden="true"></section>
+
       <!-- BUSINESS CARD INTRO - First section shown on load -->
       <section id="intro" class="business-card-section">
         <div class="business-card-container">
@@ -442,6 +452,9 @@
           </div>
         </form>
       </section>
+
+      <!-- LOOP TRIGGER ZONE - Empty space after contact so it can scroll out -->
+      <section id="loop-trigger-zone" class="loop-trigger-zone" aria-hidden="true"></section>
     </main>
 
     <!-- Footer -->

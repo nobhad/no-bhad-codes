@@ -5,54 +5,50 @@
  * @file src/modules/infinite-scroll.ts
  * @extends BaseModule
  *
- * Creates seamless infinite scrolling by cloning sections
- * and repositioning scroll when boundaries are reached.
+ * Creates infinite scrolling by showing a "scroll to continue" indicator
+ * at the end, which smoothly transitions back to start.
+ *
+ * IMPORTANT: This module is designed to work WITH ScrollTrigger-based
+ * animations (like TextAnimationModule) by:
+ * 1. Waiting for all ScrollTrigger animations to complete
+ * 2. Only triggering loop when user explicitly continues past the end
+ * 3. Using a fade transition to hide the scroll jump
+ *
  * DESKTOP ONLY - disabled on mobile for better UX.
  */
 
 import { BaseModule } from './base';
-import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { ModuleOptions } from '../types/modules';
-
-// Register GSAP plugins
-gsap.registerPlugin(ScrollTrigger);
 
 interface InfiniteScrollOptions extends ModuleOptions {
   /** Selector for the scroll container (default: 'main') */
   containerSelector?: string;
-  /** Selector for sections to include in infinite scroll */
-  sectionSelector?: string;
+  /** Selector for the last section (trigger point) */
+  lastSectionSelector?: string;
   /** Enable/disable infinite scroll (default: true) */
   enabled?: boolean;
 }
 
 export class InfiniteScrollModule extends BaseModule {
   private container: HTMLElement | null = null;
-  private sections: HTMLElement[] = [];
-  private clonedSections: HTMLElement[] = [];
+  private lastSection: HTMLElement | null = null;
+  private topSpacer: HTMLElement | null = null;
   private isEnabled = true;
-  private scrollHandler: (() => void) | null = null;
-  private isRepositioning = false;
-
-  // Layout dimensions
-  private headerHeight = 60;
-  private footerHeight = 40;
+  private isTransitioning = false;
+  private hasTriggeredLoop = false;
+  private lastLogTime = 0;
 
   // Configuration
   private containerSelector: string;
-  private sectionSelector: string;
+  private lastSectionSelector: string;
 
   constructor(options: InfiniteScrollOptions = {}) {
     super('InfiniteScrollModule', { debug: true, ...options });
 
     this.containerSelector = options.containerSelector || 'main';
-    this.sectionSelector = options.sectionSelector || '.business-card-section, .about-section, .contact-section';
+    this.lastSectionSelector = options.lastSectionSelector || '.contact-section';
     this.isEnabled = options.enabled !== false;
-
-    // Bind methods
-    this.handleScroll = this.handleScroll.bind(this);
-    this.handleResize = this.handleResize.bind(this);
   }
 
   override async init(): Promise<void> {
@@ -90,205 +86,90 @@ export class InfiniteScrollModule extends BaseModule {
       return;
     }
 
-    // Read header/footer heights from CSS variables
-    const rootStyles = window.getComputedStyle(document.documentElement);
-    const headerVar = rootStyles.getPropertyValue('--header-height').trim();
-    const footerVar = rootStyles.getPropertyValue('--footer-height').trim();
-
-    this.headerHeight = parseInt(headerVar, 10) || 60;
-    this.footerHeight = parseInt(footerVar, 10) || 40;
-
-    // Get all sections
-    this.sections = Array.from(
-      document.querySelectorAll(this.sectionSelector)
-    ) as HTMLElement[];
-
-    if (this.sections.length === 0) {
-      this.warn('No sections found for infinite scroll');
+    // Get last section
+    this.lastSection = document.querySelector(this.lastSectionSelector) as HTMLElement;
+    if (!this.lastSection) {
+      this.warn(`Last section "${this.lastSectionSelector}" not found`);
       return;
     }
 
-    this.log(`Found ${this.sections.length} sections for infinite scroll`);
+    // Get top spacer element
+    this.topSpacer = document.getElementById('loop-spacer') as HTMLElement;
+    if (!this.topSpacer) {
+      this.warn('Top spacer not found');
+    }
 
-    // Clone sections for seamless looping
-    this.cloneSections();
+    // Log initial dimensions
+    this.log(`Container dimensions: scrollHeight=${this.container.scrollHeight}, clientHeight=${this.container.clientHeight}, scrollTop=${this.container.scrollTop}`);
 
-    // Set up scroll listener
-    this.scrollHandler = this.handleScroll;
-    this.container.addEventListener('scroll', this.scrollHandler, { passive: true });
+    // Add scroll listener to detect when we hit the bottom
+    this.container.addEventListener('scroll', this.handleScroll.bind(this), { passive: true });
 
-    // Handle window resize
-    window.addEventListener('resize', this.handleResize);
-
-    // Wait for intro animation to complete
-    this.waitForIntroComplete();
-
-    this.log('Infinite scroll initialized');
+    this.log('Infinite scroll initialized - scroll listener attached');
   }
 
   /**
-   * Clone sections for seamless infinite loop
-   */
-  private cloneSections(): void {
-    if (!this.container || this.sections.length === 0) return;
-
-    // Clone all sections and append to end
-    this.sections.forEach((section, index) => {
-      const clone = section.cloneNode(true) as HTMLElement;
-      clone.classList.add('infinite-scroll-clone');
-      clone.setAttribute('data-clone-index', index.toString());
-      clone.setAttribute('aria-hidden', 'true'); // Hide from screen readers
-
-      // Remove IDs from cloned elements to avoid duplicates
-      clone.removeAttribute('id');
-      clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
-
-      this.container!.appendChild(clone);
-      this.clonedSections.push(clone);
-    });
-
-    this.log(`Cloned ${this.clonedSections.length} sections`);
-  }
-
-  /**
-   * Handle scroll events - check for loop boundaries
+   * Handle scroll events to detect bottom
    */
   private handleScroll(): void {
-    if (!this.container || this.isRepositioning) return;
+    if (!this.container || this.isTransitioning) return;
 
     const scrollTop = this.container.scrollTop;
-    // Reserved for future use (reverse infinite scroll)
-    const _scrollHeight = this.container.scrollHeight;
-    const _clientHeight = this.container.clientHeight;
+    const scrollHeight = this.container.scrollHeight;
+    const clientHeight = this.container.clientHeight;
 
-    // Calculate the height of original content (before clones)
-    const originalContentHeight = this.getOriginalContentHeight();
+    // Check if we're at the bottom (within 50px threshold)
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
 
-    // When scrolled past original content, jump back to start
-    if (scrollTop >= originalContentHeight) {
-      this.repositionScroll(scrollTop - originalContentHeight);
-    } else if (scrollTop <= 0) {
-      // When scrolled before start (if we ever allow reverse), jump to end
-      // For now, just prevent negative scroll
-      // Could implement reverse infinite scroll here
+    // Throttled debug logging (every 500ms)
+    const now = Date.now();
+    if (now - this.lastLogTime > 500) {
+      this.lastLogTime = now;
+      this.log(`Scroll: distFromBottom=${Math.round(distanceFromBottom)}, scrollTop=${Math.round(scrollTop)}, scrollHeight=${scrollHeight}, clientHeight=${clientHeight}`);
+    }
+
+    if (distanceFromBottom <= 50 && !this.hasTriggeredLoop) {
+      this.log(`TRIGGERING LOOP: At bottom! distFromBottom=${distanceFromBottom}`);
+      this.hasTriggeredLoop = true;
+      this.loopToStart();
+    } else if (distanceFromBottom > 200) {
+      // Reset when scrolled back up
+      this.hasTriggeredLoop = false;
     }
   }
 
   /**
-   * Get the total height of original (non-cloned) content
+   * Loop back to start
+   * 1. Activate top spacer (adds 100vh before business card)
+   * 2. Jump to top (user sees spacer, card is below viewport)
+   * 3. User scrolls naturally, card comes up from below
    */
-  private getOriginalContentHeight(): number {
-    let totalHeight = 0;
-    this.sections.forEach(section => {
-      totalHeight += section.offsetHeight;
-    });
-    return totalHeight;
-  }
+  private loopToStart(): void {
+    if (!this.container || this.isTransitioning) return;
 
-  /**
-   * Reposition scroll to create seamless loop
-   */
-  private repositionScroll(newScrollTop: number): void {
-    if (!this.container) return;
+    this.isTransitioning = true;
+    this.log('Looping to start...');
 
-    this.isRepositioning = true;
-
-    // Instantly reposition without animation
-    this.container.scrollTop = newScrollTop;
-
-    // Small delay before allowing scroll handling again
-    requestAnimationFrame(() => {
-      this.isRepositioning = false;
-    });
-
-    this.log(`Repositioned scroll to ${newScrollTop}`);
-  }
-
-  /**
-   * Handle window resize
-   */
-  private handleResize(): void {
-    // Refresh ScrollTrigger on resize
-    ScrollTrigger.refresh();
-  }
-
-  /**
-   * Wait for intro animation to complete
-   */
-  private waitForIntroComplete(): void {
-    const html = document.documentElement;
-
-    if (html.classList.contains('intro-complete') ||
-        html.classList.contains('intro-finished') ||
-        !html.classList.contains('intro-loading')) {
-      this.log('Intro complete, infinite scroll ready');
-      return;
+    // Activate top spacer - this adds 100vh BEFORE business card section
+    if (this.topSpacer) {
+      this.topSpacer.classList.add('active');
+      this.log('Top spacer activated');
     }
 
-    const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-          if (html.classList.contains('intro-complete') || html.classList.contains('intro-finished')) {
-            observer.disconnect();
-            this.log('Intro animation complete');
-            ScrollTrigger.refresh();
-            return;
-          }
-        }
-      }
-    });
+    // Jump to top of scroll container
+    // User now sees the spacer (empty), business card is 100vh below
+    this.container.scrollTop = 0;
 
-    observer.observe(html, { attributes: true });
+    this.log('Scrolled to top - spacer visible, card below viewport');
 
-    // Timeout fallback
+    // Refresh ScrollTrigger after layout change
     setTimeout(() => {
-      observer.disconnect();
       ScrollTrigger.refresh();
-    }, 10000);
-  }
+      this.log('ScrollTrigger refreshed');
 
-  /**
-   * Scroll to a specific section by index (original sections only)
-   */
-  scrollToSection(index: number): void {
-    if (index < 0 || index >= this.sections.length || !this.container) {
-      this.warn(`Invalid section index: ${index}`);
-      return;
-    }
-
-    const section = this.sections[index];
-    if (!section) return;
-
-    const sectionTop = section.offsetTop;
-
-    gsap.to(this.container, {
-      scrollTop: sectionTop,
-      duration: 0.6,
-      ease: 'power2.inOut'
-    });
-  }
-
-  /**
-   * Get current section index (within original sections)
-   */
-  getCurrentSectionIndex(): number {
-    if (!this.container || this.sections.length === 0) return -1;
-
-    const scrollTop = this.container.scrollTop;
-    const originalHeight = this.getOriginalContentHeight();
-
-    // Normalize scroll position to within original content
-    const normalizedScroll = scrollTop % originalHeight;
-
-    let accumulatedHeight = 0;
-    for (let i = 0; i < this.sections.length; i++) {
-      accumulatedHeight += this.sections[i].offsetHeight;
-      if (normalizedScroll < accumulatedHeight) {
-        return i;
-      }
-    }
-
-    return this.sections.length - 1;
+      this.isTransitioning = false;
+      this.hasTriggeredLoop = false;
+    }, 100);
   }
 
   /**
@@ -296,10 +177,6 @@ export class InfiniteScrollModule extends BaseModule {
    */
   enable(): void {
     this.isEnabled = true;
-    if (!this.scrollHandler && this.container) {
-      this.scrollHandler = this.handleScroll;
-      this.container.addEventListener('scroll', this.scrollHandler, { passive: true });
-    }
     this.log('Infinite scroll enabled');
   }
 
@@ -308,19 +185,7 @@ export class InfiniteScrollModule extends BaseModule {
    */
   disable(): void {
     this.isEnabled = false;
-    if (this.scrollHandler && this.container) {
-      this.container.removeEventListener('scroll', this.scrollHandler);
-      this.scrollHandler = null;
-    }
     this.log('Infinite scroll disabled');
-  }
-
-  /**
-   * Remove cloned sections
-   */
-  private removeClones(): void {
-    this.clonedSections.forEach(clone => clone.remove());
-    this.clonedSections = [];
   }
 
   /**
@@ -330,9 +195,7 @@ export class InfiniteScrollModule extends BaseModule {
     return {
       ...super.getStatus(),
       enabled: this.isEnabled,
-      sectionCount: this.sections.length,
-      cloneCount: this.clonedSections.length,
-      currentSection: this.getCurrentSectionIndex()
+      isTransitioning: this.isTransitioning
     };
   }
 
@@ -340,18 +203,8 @@ export class InfiniteScrollModule extends BaseModule {
    * Cleanup on destroy
    */
   override async destroy(): Promise<void> {
-    if (this.scrollHandler && this.container) {
-      this.container.removeEventListener('scroll', this.scrollHandler);
-      this.scrollHandler = null;
-    }
-
-    window.removeEventListener('resize', this.handleResize);
-
-    // Remove cloned sections
-    this.removeClones();
-
     this.container = null;
-    this.sections = [];
+    this.lastSection = null;
 
     await super.destroy();
   }
