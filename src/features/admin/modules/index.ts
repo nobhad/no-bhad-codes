@@ -31,3 +31,15 @@ export async function loadMessagingModule() {
 export async function loadAnalyticsModule() {
   return import('./admin-analytics');
 }
+
+export async function loadOverviewModule() {
+  return import('./admin-overview');
+}
+
+export async function loadPerformanceModule() {
+  return import('./admin-performance');
+}
+
+export async function loadSystemStatusModule() {
+  return import('./admin-system-status');
+}

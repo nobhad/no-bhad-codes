@@ -84,6 +84,7 @@ export class StateManager<T = AppState> {
   private reducers = new Map<string, StateReducer<T>>();
   private middleware: StateMiddleware<T>[] = [];
   private history: { state: T; action?: StateAction<T>; timestamp: number }[] = [];
+  private redoStack: { state: T; action?: StateAction<T>; timestamp: number }[] = [];
   private maxHistorySize = 50;
   private isTimeTravel = false;
   private persistenceEnabled = false;
@@ -151,6 +152,8 @@ export class StateManager<T = AppState> {
     // Add to history if not time traveling
     if (!this.isTimeTravel) {
       this.addToHistory(this.state);
+      // Clear redo stack on new state change (can't redo after new changes)
+      this.redoStack = [];
     }
 
     // Persist to localStorage if enabled
@@ -451,14 +454,21 @@ export class StateManager<T = AppState> {
   undo(): boolean {
     if (this.history.length < 2) return false;
 
-    this.history.pop(); // Remove current state
+    const previousState = { ...this.state };
+    const currentEntry = this.history.pop(); // Remove current state
+
+    // Push current state to redo stack for potential redo
+    if (currentEntry) {
+      this.redoStack.push(currentEntry);
+    }
+
     const previousEntry = this.history[this.history.length - 1];
 
     this.isTimeTravel = true;
     this.state = { ...previousEntry!.state };
-    this.notifyListeners(this.state, this.state);
+    this.notifyListeners(this.state, previousState);
     this.notifySelectors();
-    this.notifyComputed(this.state);
+    this.notifyComputed(previousState);
     this.isTimeTravel = false;
 
     return true;
@@ -476,6 +486,7 @@ export class StateManager<T = AppState> {
    */
   clearHistory(): void {
     this.history = [{ state: { ...this.state }, timestamp: Date.now() }];
+    this.redoStack = [];
   }
 
   /**
@@ -490,6 +501,7 @@ export class StateManager<T = AppState> {
       reducerCount: this.reducers.size,
       middlewareCount: this.middleware.length,
       historySize: this.history.length,
+      redoStackSize: this.redoStack.length,
       reducers: Array.from(this.reducers.keys()),
       computed: Array.from(this.computed.keys())
     };
@@ -551,8 +563,24 @@ export class StateManager<T = AppState> {
    * Time travel forward (redo)
    */
   redo(): boolean {
-    // Redo not implemented in basic version - would need separate redo stack
-    return false;
+    if (this.redoStack.length === 0) return false;
+
+    const previousState = { ...this.state };
+    const redoEntry = this.redoStack.pop();
+
+    if (!redoEntry) return false;
+
+    // Push current state back to history
+    this.addToHistory(this.state);
+
+    this.isTimeTravel = true;
+    this.state = { ...redoEntry.state };
+    this.notifyListeners(this.state, previousState);
+    this.notifySelectors();
+    this.notifyComputed(previousState);
+    this.isTimeTravel = false;
+
+    return true;
   }
 
   /**
@@ -593,6 +621,7 @@ export class StateManager<T = AppState> {
     this.reducers.clear();
     this.middleware = [];
     this.history = [];
+    this.redoStack = [];
     // Clear state as well
     this.state = {} as T;
   }

@@ -139,7 +139,13 @@ export class ContactService extends BaseService {
       case 'custom':
         return await this.submitToCustom(sanitizedData);
       default:
-        throw new Error(`Backend ${this.config.backend} not implemented`);
+        // Gracefully handle unknown backend - should never happen due to TypeScript enforcement
+        this.error(`Unknown backend type: ${this.config.backend}`);
+        return {
+          success: false,
+          message: 'Contact form configuration error. Please try again later.',
+          error: `Unsupported backend: ${this.config.backend}`
+        };
       }
     } catch (error) {
       this.error('Form submission failed:', error);

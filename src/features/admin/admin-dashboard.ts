@@ -19,7 +19,10 @@ import {
   loadContactsModule,
   loadProjectsModule,
   loadMessagingModule,
-  loadAnalyticsModule
+  loadAnalyticsModule,
+  loadOverviewModule,
+  loadPerformanceModule,
+  loadSystemStatusModule
 } from './modules';
 
 // Chart.js is loaded dynamically to reduce initial bundle size
@@ -2406,21 +2409,9 @@ class AdminDashboard {
   }
 
   private async loadOverviewData(): Promise<void> {
-    // Simulate API call - replace with actual data fetching
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    // Mock data - replace with actual analytics data
-    this.updateElement('total-visitors', '1,234');
-    this.updateElement('visitors-change', '+12% from last week', 'positive');
-
-    this.updateElement('page-views', '5,678');
-    this.updateElement('views-change', '+8% from last week', 'positive');
-
-    this.updateElement('avg-session', '2m 34s');
-    this.updateElement('session-change', '-3% from last week', 'negative');
-
-    this.updateElement('card-interactions', '456');
-    this.updateElement('interactions-change', '+18% from last week', 'positive');
+    // Delegate to overview module for real visitor tracking data
+    const overviewModule = await loadOverviewModule();
+    await overviewModule.loadOverviewData(this.moduleContext);
 
     // Load real Chart.js charts
     this.loadChart('visitors-chart', 'visitors');
@@ -2432,40 +2423,9 @@ class AdminDashboard {
       // Initialize the PerformanceDashboard component for admin use
       await this.initializePerformanceDashboard();
 
-      // Get actual performance data from the service
-      const perfData = await this.getPerformanceMetrics();
-
-      // Core Web Vitals
-      this.updateVital('lcp', perfData.lcp);
-      this.updateVital('fid', perfData.fid);
-      this.updateVital('cls', perfData.cls);
-
-      // Bundle analysis
-      if (perfData.bundleSize) {
-        this.updateElement('total-bundle-size', perfData.bundleSize.total);
-        this.updateElement('js-bundle-size', perfData.bundleSize.main);
-        this.updateElement('css-bundle-size', perfData.bundleSize.vendor);
-      }
-
-      // Performance score and alerts
-      if (perfData.score !== undefined) {
-        this.updateElement('performance-score', `${Math.round(perfData.score)}/100`);
-      }
-
-      if (perfData.alerts && perfData.alerts.length > 0) {
-        this.displayPerformanceAlerts(
-          perfData.alerts.map(
-            (msg) =>
-              ({
-                type: 'warning' as const,
-                message: msg,
-                metric: '',
-                value: 0,
-                threshold: 0
-              }) as PerformanceAlert
-          )
-        );
-      }
+      // Delegate to performance module for real metrics
+      const performanceModule = await loadPerformanceModule();
+      await performanceModule.loadPerformanceData(this.moduleContext);
     } catch (error) {
       console.error('[AdminDashboard] Error loading performance data:', error);
     }
@@ -2591,34 +2551,12 @@ class AdminDashboard {
   }
 
   private async loadSystemData(): Promise<void> {
-    // Get application status
-    const appStatus = await this.getApplicationStatus();
-    this.populateSystemStatus(appStatus);
+    // Delegate to system status module for real health checks
+    const systemStatusModule = await loadSystemStatusModule();
+    await systemStatusModule.loadSystemData(this.moduleContext);
   }
 
-  private async getApplicationStatus(): Promise<ApplicationStatus> {
-    try {
-      if (window.NBW_DEBUG?.getStatus) {
-        return window.NBW_DEBUG.getStatus() as ApplicationStatus;
-      }
-    } catch (error) {
-      console.error('[AdminDashboard] Error getting app status:', error);
-    }
-
-    // Fallback mock data
-    return {
-      modules: {
-        ThemeModule: { status: 'healthy' },
-        NavigationModule: { status: 'healthy' },
-        ContactFormModule: { status: 'healthy' }
-      },
-      services: {
-        DataService: { status: 'healthy' },
-        PerformanceService: { status: 'healthy' },
-        ContactService: { status: 'warning' }
-      }
-    };
-  }
+  // NOTE: getApplicationStatus moved to admin-system-status module
 
   private updateElement(id: string, text: string, className?: string): void {
     const element = document.getElementById(id);
@@ -2774,26 +2712,7 @@ class AdminDashboard {
 
   // NOTE: populateVisitorsTable moved to admin-analytics module
 
-  private populateSystemStatus(status: ApplicationStatus): void {
-    const container = document.getElementById('app-status');
-    if (!container) return;
-
-    const allItems = { ...status.modules, ...status.services };
-
-    container.innerHTML = Object.entries(allItems)
-      .map(
-        ([name, data]) => `
-      <div class="status-item">
-        <span>${name}</span>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <div class="status-indicator ${data.status}"></div>
-          <span>${data.status}</span>
-        </div>
-      </div>
-    `
-      )
-      .join('');
-  }
+  // NOTE: populateSystemStatus moved to admin-system-status module
 
   private async initializePerformanceDashboard(): Promise<void> {
     try {
@@ -2915,7 +2834,9 @@ class AdminDashboard {
         filename = `performance-${new Date().toISOString().split('T')[0]}.json`;
         break;
       default:
-        throw new Error('Unknown export type');
+        console.error(`[AdminDashboard] Unknown export type requested: ${type}`);
+        this.showNotification(`Export type '${type}' is not supported`, 'error');
+        return;
       }
 
       // Create and download file
