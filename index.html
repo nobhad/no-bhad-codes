@@ -566,11 +566,31 @@
         const backToLogin = document.getElementById('back-to-login');
         const backToLogin2 = document.getElementById('back-to-login-2');
 
+        // Function to position caret under portal button center
+        function positionCaret() {
+          const buttonRect = trigger.getBoundingClientRect();
+          const dropdownRect = dropdown.getBoundingClientRect();
+          // Calculate the left position: button center relative to dropdown left edge, minus half the caret width (10px)
+          const caretLeft = buttonRect.left + (buttonRect.width / 2) - dropdownRect.left - 10;
+          dropdown.style.setProperty('--caret-left', caretLeft + 'px');
+        }
+
         // Toggle dropdown
         trigger.addEventListener('click', function(e) {
           e.stopPropagation();
           dropdown.classList.toggle('open');
           backdrop.classList.toggle('open');
+          // Position caret after dropdown is visible
+          if (dropdown.classList.contains('open')) {
+            requestAnimationFrame(positionCaret);
+          }
+        });
+
+        // Reposition caret on window resize
+        window.addEventListener('resize', function() {
+          if (dropdown.classList.contains('open')) {
+            positionCaret();
+          }
         });
 
         // Close on backdrop click

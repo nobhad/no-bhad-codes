@@ -659,22 +659,22 @@ main,
   margin: auto;
 }
 
-/* Light mode: soft black on left, softer black on right */
+/* Light mode: lighter on left, darker on right */
 .text-animation-svg .text-left {
-  fill: #3a3a3a;
-}
-
-.text-animation-svg .text-right {
   fill: #333333;
 }
 
-/* Dark mode: left is lighter grey, right is light */
+.text-animation-svg .text-right {
+  fill: #222222;
+}
+
+/* Dark mode: left is light, right is darker grey */
 html[data-theme="dark"] .text-animation-svg .text-left {
-  fill: #9a9a9a;
+  fill: #d5d5d5;
 }
 
 html[data-theme="dark"] .text-animation-svg .text-right {
-  fill: #d5d5d5;
+  fill: #9a9a9a;
 }
 
 /* Mobile adjustments for text animation */
