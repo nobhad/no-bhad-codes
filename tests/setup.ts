@@ -2,7 +2,7 @@
  * Test setup file for Vitest
  */
 
-import { beforeEach, afterEach } from 'vitest';
+import { beforeEach, afterEach, vi } from 'vitest';
 
 // Setup DOM before each test
 beforeEach(() => {

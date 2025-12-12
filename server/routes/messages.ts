@@ -277,7 +277,7 @@ router.post(
             subject: thread.subject,
             message: message.trim(),
             threadId: threadId,
-            portalUrl: `${process.env.CLIENT_PORTAL_URL || 'https://nobhadcodes.com/client/portal.html'}?thread=${threadId}`,
+            portalUrl: `${process.env.CLIENT_PORTAL_URL || 'https://nobhad.codes/client/portal.html'}?thread=${threadId}`,
             hasAttachments: attachments && attachments.length > 0,
           });
         }

@@ -27,7 +27,7 @@
 /* Footer in dark mode - use light text color */
 [data-theme="dark"] .footer {
   background: var(--color-neutral-300);
-  color: #e0e0e0;
+  color: var(--color-dark);
 }
 
 /* Mobile: Footer scrolls with content instead of fixed */

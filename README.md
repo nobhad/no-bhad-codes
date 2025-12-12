@@ -357,9 +357,9 @@ SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
-SMTP_FROM="No Bhad Codes <noreply@nobhadcodes.com>"
-SMTP_REPLY_TO=support@nobhadcodes.com
-SUPPORT_EMAIL=support@nobhadcodes.com
+SMTP_FROM="No Bhad Codes <nobhaduri@gmail.com>"
+SMTP_REPLY_TO=nobhaduri@gmail.com
+SUPPORT_EMAIL=nobhaduri@gmail.com
 
 # Third-Party Services (Contact Forms)
 VITE_FORMSPREE_FORM_ID=your-formspree-form-id
@@ -893,7 +893,7 @@ npm run build
 
 - **Issues**: [GitHub Issues](https://github.com/noellebhaduri/no-bhad-codes/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/noellebhaduri/no-bhad-codes/discussions)
-- **Email**: <noelle@nobhadcodes.com>
+- **Email**: <nobhaduri@gmail.com>
 
 ## 📄 License
 
@@ -903,8 +903,8 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ### Noelle Bhaduri
 
-- Website: [nobhadcodes.com](https://nobhadcodes.com)
-- Email: <noelle@nobhadcodes.com>
+- Website: [nobhad.codes](https://nobhad.codes)
+- Email: <nobhaduri@gmail.com>
 - GitHub: [@noellebhaduri](https://github.com/noellebhaduri)
 - LinkedIn: [Noelle Bhaduri](https://linkedin.com/in/noellebhaduri)
 

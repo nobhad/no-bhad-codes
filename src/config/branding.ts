@@ -10,11 +10,11 @@ export const BRANDING = {
   APP_NAME: 'No Bhad Codes',
   APP_NAME_SHORT: 'NBC',
   APP_IDENTIFIER: 'NoBhadCodes',
-  APP_DOMAIN: 'nobhadcodes.com',
+  APP_DOMAIN: 'nobhad.codes',
 
-  // Contact information
-  CONTACT_EMAIL: 'hello@nobhadcodes.com',
-  SUPPORT_EMAIL: 'support@nobhadcodes.com',
+  // Contact information - all use nobhaduri@gmail.com as the only active email
+  CONTACT_EMAIL: 'nobhaduri@gmail.com',
+  SUPPORT_EMAIL: 'nobhaduri@gmail.com',
   FALLBACK_EMAIL: 'nobhaduri@gmail.com',
 
   // Social/external links

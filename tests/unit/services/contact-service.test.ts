@@ -26,11 +26,9 @@ describe('ContactService', () => {
   let service: ContactService;
 
   const validFormData: ContactFormData = {
-    firstName: 'John',
-    lastName: 'Doe',
+    name: 'John Doe',
     email: 'john@example.com',
     companyName: 'Test Company',
-    inquiryType: 'consultation',
     message: 'This is a test message with enough characters.',
   };
 
@@ -83,24 +81,14 @@ describe('ContactService', () => {
       expect(result.errors).toHaveLength(0);
     });
 
-    it('should require first name', () => {
+    it('should require name', () => {
       const result = service.validateFormData({
         ...validFormData,
-        firstName: '',
+        name: '',
       });
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('First name is required');
-    });
-
-    it('should require last name', () => {
-      const result = service.validateFormData({
-        ...validFormData,
-        lastName: '',
-      });
-
-      expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Last name is required');
+      expect(result.errors).toContain('Name is required');
     });
 
     it('should require email', () => {
@@ -121,16 +109,6 @@ describe('ContactService', () => {
 
       expect(result.valid).toBe(false);
       expect(result.errors).toContain('Please enter a valid email address');
-    });
-
-    it('should require inquiry type', () => {
-      const result = service.validateFormData({
-        ...validFormData,
-        inquiryType: '',
-      });
-
-      expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Please select what you need help with');
     });
 
     it('should require message', () => {
@@ -155,10 +133,8 @@ describe('ContactService', () => {
 
     it('should collect all validation errors', () => {
       const result = service.validateFormData({
-        firstName: '',
-        lastName: '',
+        name: '',
         email: '',
-        inquiryType: '',
         message: '',
       });
 

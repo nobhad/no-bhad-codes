@@ -86,8 +86,8 @@ EMAIL_USER="your-email@gmail.com"
 EMAIL_PASS="your-app-password"
 
 # Admin Configuration
-ADMIN_EMAIL="admin@nobhadcodes.com"
-SUPPORT_EMAIL="support@nobhadcodes.com"
+ADMIN_EMAIL="nobhaduri@gmail.com"
+SUPPORT_EMAIL="nobhaduri@gmail.com"
 
 # Feature Flags
 ENABLE_REGISTRATION=true
@@ -544,7 +544,7 @@ The application includes a comprehensive messaging system for client-developer c
      subject: 'Project Update',
      message: 'Your website is ready for review',
      threadId: 123,
-     portalUrl: 'https://portal.nobhadcodes.com',
+     portalUrl: 'https://portal.nobhad.codes',
      hasAttachments: false
    });
    ```
@@ -873,7 +873,7 @@ test.describe('Project Management', () => {
 | Service | URL |
 |---------|-----|
 | **Backend (Railway)** | https://no-bhad-codes-production.up.railway.app |
-| **Frontend (Vercel)** | https://nobhadcodes.com (or Vercel preview URL) |
+| **Frontend (Vercel)** | https://nobhad.codes (or Vercel preview URL) |
 | **API Health Check** | https://no-bhad-codes-production.up.railway.app/health |
 | **API Docs (Swagger)** | https://no-bhad-codes-production.up.railway.app/api-docs |
 
@@ -952,7 +952,7 @@ test.describe('Project Management', () => {
 ```nginx
 server {
     listen 80;
-    server_name nobhadcodes.com;
+    server_name nobhad.codes;
     
     # Redirect HTTP to HTTPS
     return 301 https://$server_name$request_uri;
@@ -960,14 +960,14 @@ server {
 
 server {
     listen 443 ssl http2;
-    server_name nobhadcodes.com;
+    server_name nobhad.codes;
     
     ssl_certificate /path/to/certificate.pem;
     ssl_certificate_key /path/to/private.key;
     
     # Serve static files
     location / {
-        root /var/www/nobhadcodes;
+        root /var/www/nobhad-codes;
         try_files $uri $uri/ /index.html;
     }
     
@@ -1263,7 +1263,7 @@ CREATE INDEX idx_projects_status_client ON projects(status, client_id);
 - **Code Examples**: Look at existing implementations
 - **Issues**: Search GitHub issues for similar problems
 - **Community**: Join discussions in GitHub Discussions
-- **Support**: Email support@nobhadcodes.com
+- **Support**: Email nobhaduri@gmail.com
 
 ## Contributing Workflow
 

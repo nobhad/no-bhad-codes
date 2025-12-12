@@ -738,4 +738,4 @@ const deleteButton = canDelete
 - [Client Portal](./CLIENT_PORTAL.md) - Main portal overview
 - [API Reference](../API_REFERENCE.md) - Complete API documentation
 - [Settings](./SETTINGS.md) - Storage preferences
-- [CSS Architecture](./CSS_ARCHITECTURE.md) - Styling system
+- [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Styling system

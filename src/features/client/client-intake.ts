@@ -14,7 +14,6 @@
 
 import { BaseModule } from '../../modules/base.js';
 import { gsap } from 'gsap';
-// import type { ClientIntakeForm } from '../../types/client.js';
 
 interface IntakeModuleOptions {
   autoSave?: boolean;

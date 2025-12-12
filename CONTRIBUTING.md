@@ -360,7 +360,7 @@ Brief description of changes
 ### Contact
 - **Issues**: Create a GitHub issue
 - **Questions**: Use GitHub Discussions
-- **Email**: noelle@nobhadcodes.com (for security issues)
+- **Email**: nobhaduri@gmail.com (for security issues)
 
 ## 📈 Recognition
 

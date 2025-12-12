@@ -144,7 +144,7 @@ export default defineConfig({
         description: 'Professional portfolio and client management system',
         author: 'Noelle Bhaduri',
         siteName: 'No Bhad Codes',
-        siteUrl: process.env.WEBSITE_URL || 'https://nobhadcodes.com',
+        siteUrl: process.env.WEBSITE_URL || 'https://nobhad.codes',
         year: new Date().getFullYear(),
         nodeEnv: process.env.NODE_ENV || 'development',
         isDev: process.env.NODE_ENV !== 'production',

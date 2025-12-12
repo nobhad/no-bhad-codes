@@ -401,7 +401,7 @@ router.put(
             description:
               statusDescriptions[req.body.status] || 'Your project status has been updated.',
             clientName: client.contact_name || 'Client',
-            portalUrl: `${process.env.CLIENT_PORTAL_URL || 'https://nobhadcodes.com/client/portal.html'}?project=${projectId}`,
+            portalUrl: `${process.env.CLIENT_PORTAL_URL || 'https://nobhad.codes/client/portal.html'}?project=${projectId}`,
             nextSteps:
               req.body.status === 'completed'
                 ? [

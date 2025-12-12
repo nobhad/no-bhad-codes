@@ -413,12 +413,19 @@ router.post(
     try {
       // Note: Login URL no longer includes email in query string for privacy
       // Client will enter email on the login page (portal login is now on home page)
-      await emailService.sendWelcomeEmail(newClient.email, {
-        name: newClient.contact_name || 'Client',
-        companyName: newClient.company_name,
-        loginUrl: process.env.CLIENT_PORTAL_URL || 'https://nobhadcodes.com',
-        supportEmail: process.env.SUPPORT_EMAIL || 'support@nobhadcodes.com',
-      });
+      const portalUrl = process.env.CLIENT_PORTAL_URL || process.env.FRONTEND_URL;
+      const supportEmail = process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL;
+
+      if (!portalUrl || !supportEmail) {
+        console.warn('CLIENT_PORTAL_URL or SUPPORT_EMAIL not configured, skipping welcome email');
+      } else {
+        await emailService.sendWelcomeEmail(newClient.email, {
+          name: newClient.contact_name || 'Client',
+          companyName: newClient.company_name,
+          loginUrl: portalUrl,
+          supportEmail: supportEmail,
+        });
+      }
 
       // Send admin notification
       await emailService.sendAdminNotification({

@@ -54,13 +54,13 @@ The dashboard is accessible at `/admin.html` and requires authentication.
 - **Security:** Multiple layers of protection
 
 ### File Structure
-```text
-src/admin/
-├── admin-dashboard.ts    # Main dashboard controller
-├── admin-security.ts    # Security measures
-└── README.md            # This file
 
-admin.html               # Dashboard HTML entry point
+```text
+src/features/admin/
+├── admin-dashboard.ts    # Main dashboard controller
+└── README.md             # This file
+
+admin/index.html          # Dashboard HTML entry point
 src/styles/pages/admin.css # Dashboard styles
 ```
 
@@ -73,9 +73,10 @@ src/styles/pages/admin.css # Dashboard styles
 ## Development
 
 ### Running Locally
+
 ```bash
-npm run dev
-# Navigate to http://localhost:3000/admin.html
+npm run dev:full
+# Navigate to http://localhost:4000/admin
 ```
 
 ### Building

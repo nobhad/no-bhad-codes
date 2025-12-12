@@ -4,7 +4,7 @@
 
 The No Bhad Codes API provides a RESTful interface for client management, project tracking, and administrative operations. All endpoints use JSON for request and response payloads unless otherwise specified.
 
-**Base URL:** `https://nobhadcodes.com/api`  
+**Base URL:** `https://nobhad.codes/api`  
 **Authentication:** Bearer token (JWT)  
 **Content-Type:** `application/json`
 
@@ -237,7 +237,7 @@ Invite a lead to create a client portal account.
 {
   "success": true,
   "message": "Invitation sent successfully",
-  "inviteLink": "https://nobhadcodes.com/client/set-password.html?token=abc123..."
+  "inviteLink": "https://nobhad.codes/client/set-password.html?token=abc123..."
 }
 ```
 
@@ -1136,7 +1136,7 @@ Webhook endpoints for real-time notifications:
     "client_id": 1,
     "old_status": "in-progress",
     "new_status": "in-review",
-    "updated_by": "admin@nobhadcodes.com"
+    "updated_by": "nobhaduri@gmail.com"
   }
 }
 ```
@@ -1146,7 +1146,7 @@ Webhook endpoints for real-time notifications:
 ### JavaScript/Node.js
 ```javascript
 const client = new NoBhadCodesAPI({
-  baseURL: 'https://nobhadcodes.com/api',
+  baseURL: 'https://nobhad.codes/api',
   token: 'your-jwt-token'
 });
 
@@ -1166,16 +1166,16 @@ const files = await client.files.upload(projectId, fileArray);
 ### cURL Examples
 ```bash
 # Login
-curl -X POST https://nobhadcodes.com/api/auth/login \
+curl -X POST https://nobhad.codes/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"client@example.com","password":"password123"}'
 
 # Get projects
-curl -X GET https://nobhadcodes.com/api/projects \
+curl -X GET https://nobhad.codes/api/projects \
   -H "Authorization: Bearer your-jwt-token"
 
 # Create milestone
-curl -X POST https://nobhadcodes.com/api/projects/101/milestones \
+curl -X POST https://nobhad.codes/api/projects/101/milestones \
   -H "Authorization: Bearer your-admin-token" \
   -H "Content-Type: application/json" \
   -d '{"title":"New Milestone","due_date":"2024-03-15"}'
@@ -1213,7 +1213,7 @@ Authorization: Bearer <token>
 
 #### Create Message Thread
 ```bash
-curl -X POST https://nobhadcodes.com/api/messages/threads \
+curl -X POST https://nobhad.codes/api/messages/threads \
   -H "Authorization: Bearer your-token" \
   -H "Content-Type: application/json" \
   -d '{
@@ -1228,7 +1228,7 @@ curl -X POST https://nobhadcodes.com/api/messages/threads \
 
 #### Send Message with Attachments
 ```bash
-curl -X POST https://nobhadcodes.com/api/messages/threads/1/messages \
+curl -X POST https://nobhad.codes/api/messages/threads/1/messages \
   -H "Authorization: Bearer your-token" \
   -F "message=Here's my project update" \
   -F "priority=normal" \
@@ -1238,7 +1238,7 @@ curl -X POST https://nobhadcodes.com/api/messages/threads/1/messages \
 
 #### Mark Messages as Read
 ```bash
-curl -X PUT https://nobhadcodes.com/api/messages/threads/1/read \
+curl -X PUT https://nobhad.codes/api/messages/threads/1/read \
   -H "Authorization: Bearer your-token"
 ```
 
@@ -1246,7 +1246,7 @@ curl -X PUT https://nobhadcodes.com/api/messages/threads/1/read \
 
 #### Send Quick Inquiry
 ```bash
-curl -X POST https://nobhadcodes.com/api/messages/inquiry \
+curl -X POST https://nobhad.codes/api/messages/inquiry \
   -H "Authorization: Bearer your-token" \
   -F "subject=Website Development Question" \
   -F "message=I need help with responsive design" \
@@ -1259,7 +1259,7 @@ curl -X POST https://nobhadcodes.com/api/messages/inquiry \
 
 #### Update Notification Settings
 ```bash
-curl -X PUT https://nobhadcodes.com/api/messages/preferences \
+curl -X PUT https://nobhad.codes/api/messages/preferences \
   -H "Authorization: Bearer your-token" \
   -H "Content-Type: application/json" \
   -d '{
@@ -1275,7 +1275,7 @@ curl -X PUT https://nobhadcodes.com/api/messages/preferences \
 
 #### Get Messaging Analytics (Admin Only)
 ```bash
-curl https://nobhadcodes.com/api/messages/analytics \
+curl https://nobhad.codes/api/messages/analytics \
   -H "Authorization: Bearer your-admin-token"
 ```
 
@@ -1304,7 +1304,7 @@ curl https://nobhadcodes.com/api/messages/analytics \
 
 The API uses URL-based versioning:
 - Current version: `v1` (implied, no version prefix required)
-- Future versions: `https://nobhadcodes.com/api/v2/...`
+- Future versions: `https://nobhad.codes/api/v2/...`
 
 **Version compatibility:**
 - Major version changes may include breaking changes
@@ -1314,6 +1314,6 @@ The API uses URL-based versioning:
 ## Support
 
 For API support and questions:
-- **Documentation:** [nobhadcodes.com/docs](https://nobhadcodes.com/docs)
-- **Email:** api-support@nobhadcodes.com
+- **Documentation:** [nobhad.codes/docs](https://nobhad.codes/docs)
+- **Email:** api-nobhaduri@gmail.com
 - **Response Time:** 24-48 hours for technical inquiries

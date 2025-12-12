@@ -9,7 +9,7 @@
 
 /* Base Admin Styles */
 .admin-body {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  background: linear-gradient(135deg, var(--color-admin-bg-start) 0%, var(--color-admin-bg-end) 100%);
   color: var(--color-text-primary);
   min-height: 100vh;
   font-family: "Inter", sans-serif;
@@ -21,7 +21,7 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  background: linear-gradient(135deg, var(--color-admin-bg-start) 0%, var(--color-admin-bg-end) 100%);
 }
 
 .auth-container {
@@ -90,7 +90,7 @@
 .auth-error {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #ef4444;
+  color: var(--color-danger);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-sm);
@@ -219,11 +219,11 @@
 }
 
 .metric-change.positive {
-  color: #10b981;
+  color: var(--color-success);
 }
 
 .metric-change.negative {
-  color: #ef4444;
+  color: var(--color-danger);
 }
 
 .metric-change.neutral {
@@ -324,17 +324,17 @@
 
 .vital-status.good {
   background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  color: var(--color-success);
 }
 
 .vital-status.needs-improvement {
   background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
+  color: var(--color-warning);
 }
 
 .vital-status.poor {
   background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  color: var(--color-danger);
 }
 
 .bundle-info {
@@ -595,43 +595,43 @@
 }
 
 .status-badge.status-pending {
-  background: #f59e0b;
+  background: var(--color-warning);
   border-color: #000;
   color: #000;
 }
 
 .status-badge.status-active {
-  background: #3b82f6;
+  background: var(--color-status-blue);
   border-color: #000;
   color: #000;
 }
 
 .status-badge.status-completed {
-  background: #10b981;
+  background: var(--color-success);
   border-color: #000;
   color: #000;
 }
 
 .status-badge.status-new {
-  background: #3b82f6;
+  background: var(--color-status-blue);
   border-color: #000;
   color: #000;
 }
 
 .status-badge.status-read {
-  background: #9ca3af;
+  background: var(--color-status-gray);
   border-color: #000;
   color: #000;
 }
 
 .status-badge.status-replied {
-  background: #10b981;
+  background: var(--color-success);
   border-color: #000;
   color: #000;
 }
 
 .status-badge.status-archived {
-  background: #6b7280;
+  background: var(--color-status-gray-dark);
   border-color: #000;
   color: #000;
 }
@@ -957,20 +957,20 @@
 /* Status badges for projects */
 .status-badge.status-in_progress,
 .status-badge.status-in-progress {
-  background: #3b82f6;
+  background: var(--color-status-blue);
   border-color: #000;
   color: #000;
 }
 
 .status-badge.status-on_hold,
 .status-badge.status-on-hold {
-  background: #f59e0b;
+  background: var(--color-warning);
   border-color: #000;
   color: #000;
 }
 
 .status-badge.status-cancelled {
-  background: #ef4444;
+  background: var(--color-danger);
   border-color: #000;
   color: #000;
 }
@@ -994,34 +994,34 @@
 
 .action-btn.action-convert {
   background: rgba(16, 185, 129, 0.1);
-  border-color: #10b981;
-  color: #10b981;
+  border-color: var(--color-success);
+  color: var(--color-success);
 }
 
 .action-btn.action-convert:hover {
-  background: #10b981;
+  background: var(--color-success);
   color: white;
 }
 
 .action-btn.action-edit {
   background: rgba(59, 130, 246, 0.1);
-  border-color: #3b82f6;
-  color: #3b82f6;
+  border-color: var(--color-status-blue);
+  color: var(--color-status-blue);
 }
 
 .action-btn.action-edit:hover {
-  background: #3b82f6;
+  background: var(--color-status-blue);
   color: white;
 }
 
 .action-btn.action-invite {
   background: rgba(168, 85, 247, 0.1);
-  border-color: #a855f7;
-  color: #a855f7;
+  border-color: var(--color-admin-purple);
+  color: var(--color-admin-purple);
 }
 
 .action-btn.action-invite:hover {
-  background: #a855f7;
+  background: var(--color-admin-purple);
   color: white;
 }
 
@@ -1098,12 +1098,12 @@
 
 .set-password-error .error-icon {
   background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  color: var(--color-danger);
 }
 
 .set-password-success .success-icon {
   background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  color: var(--color-success);
 }
 
 .set-password-form .form-group {
@@ -1141,7 +1141,7 @@
 
 .set-password-form .form-error {
   background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  color: var(--color-danger);
   padding: var(--space-3);
   border-radius: var(--border-radius-sm);
   font-size: var(--font-size-sm);
@@ -1219,15 +1219,15 @@
 }
 
 .status-indicator.healthy {
-  background: #10b981;
+  background: var(--color-success);
 }
 
 .status-indicator.warning {
-  background: #f59e0b;
+  background: var(--color-warning);
 }
 
 .status-indicator.error {
-  background: #ef4444;
+  background: var(--color-danger);
 }
 
 .export-controls,
@@ -1244,14 +1244,14 @@
 }
 
 .btn-danger {
-  background-color: #dc2626;
-  border-color: #dc2626;
+  background-color: var(--color-danger-bg);
+  border-color: var(--color-danger-bg);
   color: white;
 }
 
 .btn-danger:hover {
-  background-color: #b91c1c;
-  border-color: #b91c1c;
+  background-color: var(--color-danger-hover);
+  border-color: var(--color-danger-hover);
 }
 
 /* Loading Indicator */
@@ -1290,15 +1290,15 @@
 }
 
 .text-success {
-  color: #10b981;
+  color: var(--color-success);
 }
 
 .text-warning {
-  color: #f59e0b;
+  color: var(--color-warning);
 }
 
 .text-danger {
-  color: #ef4444;
+  color: var(--color-danger);
 }
 
 /* Responsive Design */
@@ -1776,7 +1776,7 @@
 }
 
 .invoice-summary-item .summary-value.outstanding {
-  color: #f59e0b;
+  color: var(--color-warning);
 }
 
 .invoice-summary-item .summary-value.paid {

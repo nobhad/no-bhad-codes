@@ -15,31 +15,25 @@ import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
 import { emailService } from '../services/email-service.js';
 import { rateLimit } from '../middleware/security.js';
 import { auditLogger } from '../services/audit-logger.js';
+import {
+  PASSWORD_CONFIG,
+  JWT_CONFIG,
+  TIME_MS,
+  RATE_LIMIT_CONFIG,
+  validatePassword,
+} from '../utils/auth-constants.js';
+import {
+  sendSuccess,
+  sendBadRequest,
+  sendUnauthorized,
+  sendServerError,
+  sendNotFound,
+  ErrorCodes,
+} from '../utils/response.js';
 
 const router = express.Router();
 
-/**
- * Validate password strength
- * Requirements: 12+ chars, uppercase, lowercase, number, special char
- */
-function validatePasswordStrength(password: string): { valid: boolean; error?: string } {
-  if (password.length < 12) {
-    return { valid: false, error: 'Password must be at least 12 characters long' };
-  }
-  if (!/[A-Z]/.test(password)) {
-    return { valid: false, error: 'Password must contain at least one uppercase letter' };
-  }
-  if (!/[a-z]/.test(password)) {
-    return { valid: false, error: 'Password must contain at least one lowercase letter' };
-  }
-  if (!/[0-9]/.test(password)) {
-    return { valid: false, error: 'Password must contain at least one number' };
-  }
-  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-    return { valid: false, error: 'Password must contain at least one special character (!@#$%^&*...)' };
-  }
-  return { valid: true };
-}
+// Note: Using validatePassword from auth-constants.ts instead of local implementation
 
 /**
  * @swagger
@@ -117,10 +111,10 @@ function validatePasswordStrength(password: string): { valid: boolean; error?: s
  */
 router.post(
   '/login',
-  // Rate limit: 5 login attempts per 15 minutes per IP to prevent brute force
+  // Rate limit: login attempts per IP to prevent brute force
   rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 5,
+    windowMs: RATE_LIMIT_CONFIG.LOGIN.WINDOW_MS,
+    maxRequests: RATE_LIMIT_CONFIG.LOGIN.MAX_ATTEMPTS,
     message: 'Too many login attempts. Please try again later.',
     keyGenerator: (req) => `login:${req.ip}`,
   }),
@@ -129,10 +123,7 @@ router.post(
 
     // Validate input
     if (!email || !password) {
-      return res.status(400).json({
-        error: 'Email and password are required',
-        code: 'MISSING_CREDENTIALS',
-      });
+      return sendBadRequest(res, 'Email and password are required', ErrorCodes.MISSING_CREDENTIALS);
     }
 
     const db = getDatabase();
@@ -145,39 +136,27 @@ router.post(
 
     if (!client) {
       await auditLogger.logLoginFailed(email, req, 'User not found');
-      return res.status(401).json({
-        error: 'Invalid credentials',
-        code: 'INVALID_CREDENTIALS',
-      });
+      return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
     }
 
     // Check if client is active
     if (client.status !== 'active') {
       await auditLogger.logLoginFailed(email, req, 'Account inactive');
-      return res.status(401).json({
-        error: 'Account is not active. Please contact support.',
-        code: 'ACCOUNT_INACTIVE',
-      });
+      return sendUnauthorized(res, 'Account is not active. Please contact support.', ErrorCodes.ACCOUNT_INACTIVE);
     }
 
     // Verify password
     const isValidPassword = await bcrypt.compare(password, client.password_hash);
     if (!isValidPassword) {
       await auditLogger.logLoginFailed(email, req, 'Invalid password');
-      return res.status(401).json({
-        error: 'Invalid credentials',
-        code: 'INVALID_CREDENTIALS',
-      });
+      return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
     }
 
     // Generate JWT token
     const secret = process.env.JWT_SECRET;
     if (!secret) {
       console.error('JWT_SECRET not configured');
-      return res.status(500).json({
-        error: 'Server configuration error',
-        code: 'CONFIG_ERROR',
-      });
+      return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
     }
 
     const token = jwt.sign(
@@ -188,7 +167,7 @@ router.post(
         isAdmin: Boolean(client.is_admin),
       },
       secret,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as SignOptions
+      { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
     );
 
     // Log successful login
@@ -200,9 +179,7 @@ router.post(
     );
 
     // Return user data (without password) and token
-    res.json({
-      success: true,
-      message: 'Login successful',
+    return sendSuccess(res, {
       user: {
         id: client.id,
         email: client.email,
@@ -213,8 +190,8 @@ router.post(
         isAdmin: Boolean(client.is_admin),
       },
       token,
-      expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-    });
+      expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY,
+    }, 'Login successful');
   })
 );
 
@@ -270,13 +247,10 @@ router.get(
     );
 
     if (!client) {
-      return res.status(404).json({
-        error: 'User not found',
-        code: 'USER_NOT_FOUND',
-      });
+      return sendNotFound(res, 'User not found', ErrorCodes.NOT_FOUND);
     }
 
-    res.json({
+    return sendSuccess(res, {
       user: {
         id: client.id,
         email: client.email,
@@ -341,10 +315,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const secret = process.env.JWT_SECRET;
     if (!secret) {
-      return res.status(500).json({
-        error: 'Server configuration error',
-        code: 'CONFIG_ERROR',
-      });
+      return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
     }
 
     // Generate new token
@@ -355,12 +326,12 @@ router.post(
         type: req.user!.type,
       },
       secret,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as SignOptions
+      { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
     );
 
-    res.json({
+    return sendSuccess(res, {
       token: newToken,
-      expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+      expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY,
     });
   })
 );
@@ -396,9 +367,7 @@ router.post(
 router.post('/logout', authenticateToken, (req, res) => {
   // In a more sophisticated setup, you might want to blacklist the token
   // For now, we'll just return success and let the client remove the token
-  res.json({
-    message: 'Logout successful',
-  });
+  return sendSuccess(res, undefined, 'Logout successful');
 });
 
 /**
@@ -443,10 +412,7 @@ router.post('/logout', authenticateToken, (req, res) => {
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/validate', authenticateToken, (req: AuthenticatedRequest, res) => {
-  res.json({
-    valid: true,
-    user: req.user,
-  });
+  return sendSuccess(res, { valid: true, user: req.user });
 });
 
 /**
@@ -498,8 +464,8 @@ router.post(
   '/forgot-password',
   // Rate limit: 3 requests per 15 minutes per IP to prevent abuse
   rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 3,
+    windowMs: RATE_LIMIT_CONFIG.FORGOT_PASSWORD.WINDOW_MS,
+    maxRequests: RATE_LIMIT_CONFIG.FORGOT_PASSWORD.MAX_ATTEMPTS,
     message: 'Too many password reset requests. Please try again later.',
     keyGenerator: (req) => `forgot-password:${req.ip}`,
   }),
@@ -507,19 +473,13 @@ router.post(
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({
-        error: 'Email is required',
-        code: 'MISSING_EMAIL',
-      });
+      return sendBadRequest(res, 'Email is required', ErrorCodes.MISSING_FIELDS);
     }
 
     // Validate email format before DB query
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (typeof email !== 'string' || !emailRegex.test(email) || email.length > 254) {
-      return res.status(400).json({
-        error: 'Invalid email format',
-        code: 'INVALID_EMAIL',
-      });
+      return sendBadRequest(res, 'Invalid email format', ErrorCodes.INVALID_EMAIL);
     }
 
     const db = getDatabase();
@@ -535,7 +495,7 @@ router.post(
       try {
         // Generate reset token
         const resetToken = crypto.randomBytes(32).toString('hex');
-        const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
+        const resetTokenExpiry = new Date(Date.now() + TIME_MS.HOUR); // 1 hour from now
 
         // Store reset token in database
         await db.run(
@@ -570,9 +530,7 @@ router.post(
       }
     }
 
-    res.json({
-      message: 'If an account with that email exists, a password reset link has been sent.',
-    });
+    return sendSuccess(res, undefined, 'If an account with that email exists, a password reset link has been sent.');
   })
 );
 
@@ -597,7 +555,8 @@ router.post(
  *                 example: "abc123def456..."
  *               password:
  *                 type: string
- *                 minLength: 8
+ *                 minLength: 12
+ *                 description: "Requires 12+ chars, uppercase, lowercase, number, and special character"
  *                 example: "NewSecurePassword123!"
  *     responses:
  *       200:
@@ -630,19 +589,13 @@ router.post(
     const { token, password } = req.body;
 
     if (!token || !password) {
-      return res.status(400).json({
-        error: 'Token and password are required',
-        code: 'MISSING_FIELDS',
-      });
+      return sendBadRequest(res, 'Token and password are required', ErrorCodes.MISSING_FIELDS);
     }
 
-    // Validate password strength
-    const passwordValidation = validatePasswordStrength(password);
+    // Validate password strength using centralized validation
+    const passwordValidation = validatePassword(password);
     if (!passwordValidation.valid) {
-      return res.status(400).json({
-        error: passwordValidation.error,
-        code: 'WEAK_PASSWORD',
-      });
+      return sendBadRequest(res, passwordValidation.errors.join('. '), ErrorCodes.INVALID_PASSWORD);
     }
 
     const db = getDatabase();
@@ -658,10 +611,7 @@ router.post(
     );
 
     if (!client) {
-      return res.status(400).json({
-        error: 'Invalid or expired reset token',
-        code: 'INVALID_TOKEN',
-      });
+      return sendBadRequest(res, 'Invalid or expired reset token', ErrorCodes.INVALID_TOKEN);
     }
 
     // Check if token is expired
@@ -669,15 +619,11 @@ router.post(
     const expiry = new Date(client.reset_token_expiry);
 
     if (now > expiry) {
-      return res.status(400).json({
-        error: 'Reset token has expired',
-        code: 'TOKEN_EXPIRED',
-      });
+      return sendBadRequest(res, 'Reset token has expired', ErrorCodes.TOKEN_EXPIRED);
     }
 
-    // Hash new password
-    const saltRounds = 12;
-    const password_hash = await bcrypt.hash(password, saltRounds);
+    // Hash new password using centralized salt rounds
+    const password_hash = await bcrypt.hash(password, PASSWORD_CONFIG.SALT_ROUNDS);
 
     // Update password and clear reset token
     await db.run(
@@ -705,9 +651,7 @@ router.post(
       // Continue - password was reset successfully
     }
 
-    res.json({
-      message: 'Password reset successfully',
-    });
+    return sendSuccess(res, undefined, 'Password reset successfully');
   })
 );
 
@@ -753,10 +697,10 @@ router.post(
  */
 router.post(
   '/admin/login',
-  // Rate limit: 3 admin login attempts per 15 minutes per IP (stricter for admin)
+  // Rate limit: admin login attempts per IP (stricter for admin)
   rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 3,
+    windowMs: RATE_LIMIT_CONFIG.ADMIN_LOGIN.WINDOW_MS,
+    maxRequests: RATE_LIMIT_CONFIG.ADMIN_LOGIN.MAX_ATTEMPTS,
     message: 'Too many admin login attempts. Please try again later.',
     keyGenerator: (req) => `admin-login:${req.ip}`,
   }),
@@ -764,43 +708,35 @@ router.post(
     const { password } = req.body;
 
     if (!password) {
-      return res.status(400).json({
-        error: 'Password is required',
-        code: 'MISSING_PASSWORD',
-      });
+      return sendBadRequest(res, 'Password is required', ErrorCodes.MISSING_CREDENTIALS);
     }
 
     // Get admin password hash from environment
     const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
     if (!adminPasswordHash) {
       console.error('ADMIN_PASSWORD_HASH not configured');
-      return res.status(500).json({
-        error: 'Server configuration error',
-        code: 'CONFIG_ERROR',
-      });
+      return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
     }
 
     // Verify password using bcrypt
     const isValidPassword = await bcrypt.compare(password, adminPasswordHash);
     if (!isValidPassword) {
       await auditLogger.logLoginFailed(process.env.ADMIN_EMAIL || 'admin', req, 'Invalid admin password');
-      return res.status(401).json({
-        error: 'Invalid credentials',
-        code: 'INVALID_CREDENTIALS',
-      });
+      return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
     }
 
     // Generate JWT token for admin
     const secret = process.env.JWT_SECRET;
     if (!secret) {
       console.error('JWT_SECRET not configured');
-      return res.status(500).json({
-        error: 'Server configuration error',
-        code: 'CONFIG_ERROR',
-      });
+      return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
     }
 
-    const adminEmail = process.env.ADMIN_EMAIL || 'nobhaduri@gmail.com';
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (!adminEmail) {
+      console.error('ADMIN_EMAIL not configured');
+      return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
+    }
     const token = jwt.sign(
       {
         id: 0, // Admin doesn't have a client ID
@@ -808,17 +744,16 @@ router.post(
         type: 'admin',
       },
       secret,
-      { expiresIn: '1h' } as SignOptions // Shorter expiry for admin sessions
+      { expiresIn: JWT_CONFIG.ADMIN_TOKEN_EXPIRY } as SignOptions // Shorter expiry for admin sessions
     );
 
     // Log successful admin login
     await auditLogger.logLogin(0, adminEmail, 'admin', req);
 
-    res.json({
-      message: 'Admin login successful',
+    return sendSuccess(res, {
       token,
-      expiresIn: '1h',
-    });
+      expiresIn: JWT_CONFIG.ADMIN_TOKEN_EXPIRY,
+    }, 'Admin login successful');
   })
 );
 
@@ -860,10 +795,10 @@ router.post(
  */
 router.post(
   '/magic-link',
-  // Rate limit: 3 requests per 15 minutes per IP to prevent abuse
+  // Rate limit: magic link requests per IP to prevent abuse
   rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 3,
+    windowMs: RATE_LIMIT_CONFIG.MAGIC_LINK.WINDOW_MS,
+    maxRequests: RATE_LIMIT_CONFIG.MAGIC_LINK.MAX_ATTEMPTS,
     message: 'Too many magic link requests. Please try again later.',
     keyGenerator: (req) => `magic-link:${req.ip}`,
   }),
@@ -871,19 +806,13 @@ router.post(
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({
-        error: 'Email is required',
-        code: 'MISSING_EMAIL',
-      });
+      return sendBadRequest(res, 'Email is required', ErrorCodes.MISSING_FIELDS);
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (typeof email !== 'string' || !emailRegex.test(email) || email.length > 254) {
-      return res.status(400).json({
-        error: 'Invalid email format',
-        code: 'INVALID_EMAIL',
-      });
+      return sendBadRequest(res, 'Invalid email format', ErrorCodes.INVALID_EMAIL);
     }
 
     const db = getDatabase();
@@ -900,7 +829,7 @@ router.post(
         // Generate magic link token (32 bytes = 64 hex characters)
         const magicLinkToken = crypto.randomBytes(32).toString('hex');
         // Token expires in 15 minutes for security
-        const magicLinkExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+        const magicLinkExpiresAt = new Date(Date.now() + TIME_MS.FIFTEEN_MINUTES);
 
         // Store magic link token in database
         await db.run(
@@ -934,9 +863,7 @@ router.post(
       }
     }
 
-    res.json({
-      message: 'If an account with that email exists, a login link has been sent.',
-    });
+    return sendSuccess(res, undefined, 'If an account with that email exists, a login link has been sent.');
   })
 );
 
@@ -986,11 +913,7 @@ router.post(
     const { token } = req.body;
 
     if (!token) {
-      return res.status(400).json({
-        success: false,
-        error: 'Token is required',
-        code: 'MISSING_TOKEN',
-      });
+      return sendBadRequest(res, 'Token is required', ErrorCodes.MISSING_FIELDS);
     }
 
     const db = getDatabase();
@@ -1004,11 +927,7 @@ router.post(
     );
 
     if (!client) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid or expired login link',
-        code: 'INVALID_TOKEN',
-      });
+      return sendBadRequest(res, 'Invalid or expired login link', ErrorCodes.INVALID_TOKEN);
     }
 
     // Check if token is expired
@@ -1022,20 +941,12 @@ router.post(
         [client.id]
       );
 
-      return res.status(400).json({
-        success: false,
-        error: 'Login link has expired. Please request a new one.',
-        code: 'TOKEN_EXPIRED',
-      });
+      return sendBadRequest(res, 'Login link has expired. Please request a new one.', ErrorCodes.TOKEN_EXPIRED);
     }
 
     // Check if account is active
     if (client.status !== 'active') {
-      return res.status(401).json({
-        success: false,
-        error: 'Account is not active. Please contact support.',
-        code: 'ACCOUNT_INACTIVE',
-      });
+      return sendUnauthorized(res, 'Account is not active. Please contact support.', ErrorCodes.ACCOUNT_INACTIVE);
     }
 
     // Clear the magic link token (single use)
@@ -1048,11 +959,7 @@ router.post(
     const secret = process.env.JWT_SECRET;
     if (!secret) {
       console.error('JWT_SECRET not configured');
-      return res.status(500).json({
-        success: false,
-        error: 'Server configuration error',
-        code: 'CONFIG_ERROR',
-      });
+      return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
     }
 
     const jwtToken = jwt.sign(
@@ -1063,15 +970,13 @@ router.post(
         isAdmin: Boolean(client.is_admin),
       },
       secret,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as SignOptions
+      { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
     );
 
     // Log successful magic link login
     await auditLogger.logLogin(client.id, client.email, 'client', req, { method: 'magic_link' });
 
-    res.json({
-      success: true,
-      message: 'Login successful',
+    return sendSuccess(res, {
       user: {
         id: client.id,
         email: client.email,
@@ -1082,8 +987,8 @@ router.post(
         isAdmin: Boolean(client.is_admin),
       },
       token: jwtToken,
-      expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-    });
+      expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY,
+    }, 'Login successful');
   })
 );
 
@@ -1102,10 +1007,7 @@ router.post(
     const { token } = req.body;
 
     if (!token) {
-      return res.status(400).json({
-        success: false,
-        error: 'Token is required',
-      });
+      return sendBadRequest(res, 'Token is required', ErrorCodes.MISSING_FIELDS);
     }
 
     const db = getDatabase();
@@ -1119,22 +1021,15 @@ router.post(
     );
 
     if (!client) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid invitation token',
-      });
+      return sendBadRequest(res, 'Invalid invitation token', ErrorCodes.INVALID_TOKEN);
     }
 
     // Check if token is expired
     if (client.invitation_expires_at && new Date(client.invitation_expires_at) < new Date()) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invitation has expired. Please contact support for a new invitation.',
-      });
+      return sendBadRequest(res, 'Invitation has expired. Please contact support for a new invitation.', ErrorCodes.TOKEN_EXPIRED);
     }
 
-    res.json({
-      success: true,
+    return sendSuccess(res, {
       email: client.email,
       name: client.contact_name,
       company: client.company_name,
@@ -1157,19 +1052,13 @@ router.post(
     const { token, password } = req.body;
 
     if (!token || !password) {
-      return res.status(400).json({
-        success: false,
-        error: 'Token and password are required',
-      });
+      return sendBadRequest(res, 'Token and password are required', ErrorCodes.MISSING_FIELDS);
     }
 
-    // Password validation
-    const passwordValidation = validatePasswordStrength(password);
+    // Password validation using centralized validation
+    const passwordValidation = validatePassword(password);
     if (!passwordValidation.valid) {
-      return res.status(400).json({
-        success: false,
-        error: passwordValidation.error,
-      });
+      return sendBadRequest(res, passwordValidation.errors.join('. '), ErrorCodes.INVALID_PASSWORD);
     }
 
     const db = getDatabase();
@@ -1183,23 +1072,16 @@ router.post(
     );
 
     if (!client) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid invitation token',
-      });
+      return sendBadRequest(res, 'Invalid invitation token', ErrorCodes.INVALID_TOKEN);
     }
 
     // Check if token is expired
     if (client.invitation_expires_at && new Date(client.invitation_expires_at) < new Date()) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invitation has expired. Please contact support for a new invitation.',
-      });
+      return sendBadRequest(res, 'Invitation has expired. Please contact support for a new invitation.', ErrorCodes.TOKEN_EXPIRED);
     }
 
-    // Hash the new password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // Hash the new password using centralized salt rounds
+    const hashedPassword = await bcrypt.hash(password, PASSWORD_CONFIG.SALT_ROUNDS);
 
     // Update client with password and activate account
     await db.run(
@@ -1211,11 +1093,7 @@ router.post(
       [hashedPassword, client.id]
     );
 
-    res.json({
-      success: true,
-      message: 'Password set successfully. You can now log in.',
-      email: client.email,
-    });
+    return sendSuccess(res, { email: client.email }, 'Password set successfully. You can now log in.');
   })
 );
 

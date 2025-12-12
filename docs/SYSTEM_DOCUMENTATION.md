@@ -614,7 +614,7 @@ SMTP_HOST=localhost
 SMTP_PORT=587
 SMTP_USER=
 SMTP_PASS=
-SMTP_FROM=noreply@nobhadcodes.com
+SMTP_FROM=nobhaduri@gmail.com
 
 # Redis Cache
 REDIS_HOST=localhost

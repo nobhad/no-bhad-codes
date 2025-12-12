@@ -661,21 +661,14 @@ main,
 
 /* Light mode: lighter on left, darker on right */
 .text-animation-svg .text-left {
-  fill: #333333;
+  fill: var(--color-svg-text-left);
 }
 
 .text-animation-svg .text-right {
-  fill: #222222;
+  fill: var(--color-svg-text-right);
 }
 
-/* Dark mode: left is light, right is darker grey */
-html[data-theme="dark"] .text-animation-svg .text-left {
-  fill: #d5d5d5;
-}
-
-html[data-theme="dark"] .text-animation-svg .text-right {
-  fill: #9a9a9a;
-}
+/* Dark mode: colors automatically switch via CSS variables */
 
 /* Mobile adjustments for text animation */
 @media screen and (max-width: 767px) {

@@ -379,7 +379,7 @@ li {
 
 /* Dark theme adjustments for coming soon banner */
 html[data-theme="dark"] .coming-soon-banner {
-  color: #3a3a3a;
+  color: var(--color-neutral-100);
   background: var(--color-primary);
 }
 
@@ -1400,11 +1400,11 @@ html[data-theme="dark"] .bg-panel.second {
   font-size: 1.25rem;
   text-transform: uppercase;
   margin-bottom: 1rem;
-  color: #333333;
+  color: var(--color-text-primary);
 }
 
 html[data-theme="dark"] .portal-dropdown-header {
-  color: #e0e0e0;
+  color: var(--color-dark);
 }
 
 /* Auth toggle in dropdown */
@@ -1687,7 +1687,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  background-color: #0a0a0a;
+  background-color: var(--color-terminal-bg);
 }
 
 .intake-modal.open {
@@ -1729,7 +1729,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 .intake-modal .terminal-intake {
   min-height: 100% !important;
   height: 100% !important;
-  background-color: #0a0a0a !important;
+  background-color: var(--color-terminal-bg) !important;
 }
 
 .intake-modal .terminal-window {
@@ -1746,7 +1746,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 
 /* Ensure modal container shows content */
 .intake-modal .intake-modal-container {
-  background-color: #0a0a0a;
+  background-color: var(--color-terminal-bg);
 }
 
 /* Force terminal visibility in modal */

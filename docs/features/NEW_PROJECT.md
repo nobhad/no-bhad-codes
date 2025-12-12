@@ -374,7 +374,7 @@ await emailService.sendProjectRequestConfirmation(clientEmail, {
   clientName: 'John Doe',
   projectName: 'Company Website Redesign',
   submittedAt: new Date().toISOString(),
-  portalUrl: 'https://portal.nobhadcodes.com'
+  portalUrl: 'https://portal.nobhad.codes'
 });
 ```
 
@@ -386,7 +386,7 @@ await emailService.sendAdminNotification({
   projectName: 'Company Website Redesign',
   budget: '$5,000 - $10,000',
   timeline: '1-2 months',
-  adminUrl: 'https://admin.nobhadcodes.com/requests'
+  adminUrl: 'https://admin.nobhad.codes/requests'
 });
 ```
 
@@ -508,4 +508,4 @@ await emailService.sendAdminNotification({
 
 - [Client Portal](./CLIENT_PORTAL.md) - Main portal overview
 - [Messages](./MESSAGES.md) - Project discussions happen in messages
-- [CSS Architecture](./CSS_ARCHITECTURE.md) - Form styling system
+- [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Form styling system

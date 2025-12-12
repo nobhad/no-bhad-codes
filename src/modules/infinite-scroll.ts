@@ -150,7 +150,7 @@ export class InfiniteScrollModule extends BaseModule {
     // Reverse loop: at top with spacer active, loop to end
     const topSpacerActive = this.topSpacer?.classList.contains('active');
     if (topSpacerActive && distanceFromTop <= 50 && !this.hasTriggeredReverseLoop) {
-      this.log(`TRIGGERING REVERSE LOOP: At top with spacer active!`);
+      this.log('TRIGGERING REVERSE LOOP: At top with spacer active!');
       this.hasTriggeredReverseLoop = true;
       this.loopToEnd();
     } else if (distanceFromTop > 200) {

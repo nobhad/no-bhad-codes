@@ -1,8 +1,469 @@
-# Current Work - December 9, 2025
+# Current Work - December 12, 2025
+
+---
+
+## Assets to Add
+
+### paw.svg
+
+Red paw print SVG icon - needs to be added to project assets.
+
+**Note:** Contains hardcoded color `#d11818` - should be updated to use CSS variable or `currentColor` for theme compatibility.
+
+---
+
+## Updates - December 12, 2025
+
+### Critical API Issues - RESOLVED
+
+All 3 critical issues from the deep dive have been fixed:
+
+1. **Standardized API Response Format** - Created `server/utils/response.ts`
+   - `sendSuccess()`, `sendBadRequest()`, `sendUnauthorized()`, `sendForbidden()`, `sendNotFound()`, `sendServerError()`
+   - `ErrorCodes` enum for consistent error identification
+
+2. **Centralized Auth Configuration** - Created `server/utils/auth-constants.ts`
+   - `PASSWORD_CONFIG` - Salt rounds (12), min length (12), complexity requirements
+   - `JWT_CONFIG` - User token expiry (7d), admin token expiry (1h)
+   - `TIME_MS` - Time constants (MINUTE, FIFTEEN_MINUTES, HOUR, DAY, WEEK, MONTH)
+   - `RATE_LIMIT_CONFIG` - Centralized rate limiting for all endpoints
+   - `validatePassword()` - Centralized password validation
+
+3. **Refactored auth.ts** - Updated all endpoints to use new utilities
+   - Removed duplicate `validatePasswordStrength()` function
+   - All rate limiters now use `RATE_LIMIT_CONFIG`
+   - All bcrypt hashing now uses `PASSWORD_CONFIG.SALT_ROUNDS`
+   - All JWT tokens now use `JWT_CONFIG` constants
+   - All time calculations now use `TIME_MS` constants
+   - All responses now use standardized response helpers
+
+**Files Created:**
+- `server/utils/response.ts`
+- `server/utils/auth-constants.ts`
+
+**Files Modified:**
+- `server/routes/auth.ts`
+
+**Verification:**
+- TypeScript: 0 errors
+
+### Backend Hardcoded Values - RESOLVED
+
+Fixed all 4 remaining hardcoded values:
+
+1. **auth.ts:735** - Removed fallback email, now requires `ADMIN_EMAIL` env var (returns config error if missing)
+2. **clients.ts:419** - Uses `CLIENT_PORTAL_URL` or `FRONTEND_URL`, `SUPPORT_EMAIL` or `ADMIN_EMAIL` (skips email if not configured)
+3. **invoices.ts:871** - Uses `COMPANY_NAME`, `SUPPORT_EMAIL` or `ADMIN_EMAIL` env vars
+4. **swagger.ts:446-447** - Uses `BRAND_COLOR` and `DARK_BG_COLOR` env vars with sensible defaults
+
+**Files Modified:**
+- `server/routes/auth.ts`
+- `server/routes/clients.ts`
+- `server/routes/invoices.ts`
+- `server/config/swagger.ts`
+
+**New Environment Variables (optional):**
+- `COMPANY_NAME` - Company name for invoices (default: "No Bhad Codes")
+- `BRAND_COLOR` - Brand color for Swagger UI (default: "#00ff41")
+- `DARK_BG_COLOR` - Dark background color for Swagger UI (default: "#1a1a1a")
+
+**Verification:**
+- TypeScript: 0 errors
+
+### Domain & Email Corrections - RESOLVED
+
+Fixed incorrect domain `nobhadcodes.com` to `nobhad.codes` and standardized all emails to `nobhaduri@gmail.com`:
+
+**Config Files:**
+- `src/config/branding.ts` - Updated domain and all emails
+- `server/config/swagger.ts` - Updated contact email and production URL
+- `vite.config.ts` - Updated siteUrl fallback
+
+**Server Files:**
+- `server/app.ts` - Updated SMTP_FROM fallback
+- `server/test-email.ts` - Updated from email fallback
+- `server/simple-auth-server.ts` - Updated test credentials
+- `server/routes/projects.ts` - Updated portalUrl fallback
+- `server/routes/messages.ts` - Updated portalUrl fallback
+- `server/templates/email/message-notification.html` - Updated contact email
+- `server/scripts/create-test-user.ts` - Updated test email
+
+**Client Files:**
+- `client/portal.html` - Updated preview URL
+- `client/intake.html` - Updated contact email
+- `templates/pages/client-intake.ejs` - Updated contact email
+- `templates/pages/client-portal.ejs` - Updated preview URL
+- `archive/client-landing-template.ejs` - Updated contact email
+
+**Documentation (bulk sed replacement):**
+- `docs/API_DOCUMENTATION.md`
+- `docs/SYSTEM_DOCUMENTATION.md`
+- `docs/features/MESSAGES.md`
+- `docs/features/NEW_PROJECT.md`
+- `docs/CONFIGURATION.md`
+- `docs/DEVELOPER_GUIDE.md`
+- `README.md`
+- `CONTRIBUTING.md`
+- `package.json`
+- `stories/Introduction.mdx`
+
+**Verification:**
+- TypeScript: 0 errors
+
+---
+
+## TODOs
+
+### Features
+
+- [x] Theme toggle header transition is weird when menu isn't open (works great when menu is open)
+- [x] Add theme toggle back to mobile
+- [ ] Add infinite scroll
+- [ ] Add animated section between about and contact to balance spacing
+- [x] Add client portal header dropdown login
+- [x] Add intake form modal on main page
+
+### Documentation (from audit December 11, 2025)
+
+- [x] Fix broken `server/routes/users.ts` reference in SETTINGS.md
+- [x] Fix CSS_ARCHITECTURE cross-reference in docs/README.md
+- [x] Add missing `REDIS_ENABLED` to CONFIGURATION.md
+- [x] Create INFINITE_SCROLL.md feature doc
+- [x] Create SCROLL_SNAP.md feature doc
+- [x] Create /docs/design/ directory with UX_GUIDELINES.md, ANIMATIONS.md
+- [x] Move CSS_ARCHITECTURE.md to /docs/design/
+- [x] Fix admin README outdated port (3000 -> 4000)
+- [x] Fix admin README outdated file paths
+- [x] Fix 5 broken CSS_ARCHITECTURE.md links in feature docs (deep dive Dec 11)
+- [x] Create src/features/client/README.md (deep dive Dec 11)
+
+### High Priority Security (from audit December 11, 2025)
+
+- [x] `server/routes/clients.ts:455-499` - Fixed: was already using parameterized queries (safe), updated `any[]` to `(string | number)[]`
+- [x] `server/middleware/security.ts` - Already has rate limiting on login (5 attempts per 15 min)
+- [x] `server/routes/auth.ts` - Already requires 12+ chars with complexity. Fixed swagger docs from minLength: 8 to 12
+- [x] `server/routes/clients.ts:417` - Fixed: removed email from URL in welcome email link
+- [x] `server/routes/intake.ts` - Already has proper BEGIN/COMMIT/ROLLBACK transaction handling
+- [x] `admin-dashboard.ts:157` - Already reads from `VITE_ADMIN_PASSWORD_HASH` env var, no hardcoded hash
+- [x] `contact-form.ts` - Already uses `SanitizationUtils` for all form data
+- [x] `admin-dashboard.ts:3288` - Fixed: added HTML escaping to visitor table data
+
+### Memory Leaks (from audit - all already fixed)
+
+- [x] `performance-service.ts` - Already has `stopMonitoring()` with proper cleanup
+- [x] `code-protection-service.ts` - Already has `stopMonitoring()` clearing `protectionIntervals`
+- [x] `analytics-dashboard.ts` - Already has `destroy()` clearing `updateTimer`
+- [x] `client-intake.ts` - Already has `destroy()` clearing `autoSaveIntervalId`
+
+### CSS Cleanup (from audit December 11, 2025) - MOSTLY COMPLETE
+
+- [x] Remove duplicate video-responsive styles from variables.css
+- [x] Replace hardcoded error colors with `var(--color-error-500)` in form-validation.css
+- [x] Replace hardcoded success colors with `var(--color-success-500)` in form-validation.css
+- [x] Standardize dark mode selectors - replaced `.dark-mode` with `html[data-theme="dark"]`
+- [x] **CSS Color Variable Cleanup (December 12, 2025)** - Major refactor complete:
+  - Added 50+ new CSS color variables to `variables.css`
+  - Fixed `client-portal.css` - 40+ hardcoded colors replaced
+  - Fixed `client.css` - 15+ hardcoded colors replaced (including status badges)
+  - Fixed `terminal-intake.css` - 50+ hardcoded colors replaced
+  - Fixed `admin.css` - 40+ hardcoded colors replaced
+  - Fixed `form.css`, `form-validation.css`, `contact.css`, `navigation.css`, etc.
+  - Only fallback values in `var()` functions remain (correct pattern)
+- [ ] Delete unused CSS files in root styles/ (audit found minimal unused files) - LOW PRIORITY
+- [ ] Standardize breakpoints (767px vs 768px, 479px vs 480px) - LOW PRIORITY
+- [ ] Split large CSS files (admin.css 1820 lines, navigation.css 1647 lines) - LOW PRIORITY
+
+### Code Quality (from audit)
+
+- [ ] Replace 50+ instances of `any` type with proper interfaces
+- [ ] Fix N+1 query in `server/routes/projects.ts:87-104`
+- [x] Standardize API response format across all endpoints - Created `server/utils/response.ts`, updated `auth.ts`
+- [ ] Add HTTPS enforcement in production
+- [ ] Split `admin-dashboard.ts` (3000+ lines)
+- [ ] Split `client-portal.ts` (2400+ lines)
+- [ ] Lazy load code-protection-service when disabled
+
+### Accessibility (from audit)
+
+- [ ] Add ARIA labels to messaging module buttons/icons
+- [ ] Add keyboard support to business card flip
+- [ ] Make file upload dropzone keyboard accessible
+
+### Quick Wins (from deep dive December 11, 2025)
+
+- [x] Fix 5 CSS_ARCHITECTURE.md links in feature docs
+- [x] Remove commented import in `client-intake.ts:17`
+- [x] Fix CORS default in `server/app.ts` (3000 -> 4000)
+- [x] Add `vi` import to `tests/setup.ts`
+- [x] Create `src/features/client/README.md`
+
+### From Deep Dive - Completed
+
+#### Critical API Issues (3) - ALL FIXED
+
+- [x] Standardize API response format across all endpoints - Created `server/utils/response.ts` with `sendSuccess`, `sendBadRequest`, `sendUnauthorized`, `sendServerError`, etc.
+- [x] Centralize bcrypt salt rounds - Created `server/utils/auth-constants.ts` with `PASSWORD_CONFIG.SALT_ROUNDS` (now uses env var or defaults to 12)
+- [x] Centralize JWT expiry config - Created `JWT_CONFIG` with `USER_TOKEN_EXPIRY` (7d) and `ADMIN_TOKEN_EXPIRY` (1h)
+
+**Files Created:**
+
+- `server/utils/response.ts` - Standardized API response helpers with error codes
+- `server/utils/auth-constants.ts` - Centralized auth configuration (passwords, JWT, rate limits, time constants)
+
+**Files Updated:**
+
+- `server/routes/auth.ts` - Refactored all endpoints to use centralized utilities
+
+### From Deep Dive - Pending
+
+#### CSS Architecture - Hardcoded Colors (80+) - ALL FIXED (December 12, 2025)
+
+- [x] Create missing CSS variables: Added 50+ new color tokens to `variables.css`
+- [x] Fix `client-portal.css` - 40+ hardcoded colors replaced with CSS variables
+- [x] Fix `client.css` - 15+ hardcoded colors replaced (including status badges)
+- [x] Fix `terminal-intake.css` - 50+ hardcoded terminal colors replaced
+- [x] Fix `business-card.css` - 12+ hardcoded print/light theme colors replaced
+- [x] Fix `form-validation.css` - error/success colors replaced
+- [x] Fix `admin.css` - 40+ hardcoded colors replaced
+- [x] Fix `form.css`, `contact.css`, `navigation.css`, `loading.css`, `layout.css`, `main.css`, `footer.css`
+- [ ] Consolidate dual CSS variable systems (legacy `variables.css` vs modern `design-system/tokens/colors.css`)
+
+#### Backend Hardcoded Values (8+) - ALL FIXED
+
+- [x] `auth.ts:735` - Now requires `ADMIN_EMAIL` env var (no fallback)
+- [x] `clients.ts:419` - Uses `CLIENT_PORTAL_URL` or `FRONTEND_URL` env vars
+- [x] `invoices.ts:871` - Uses `SUPPORT_EMAIL` or `ADMIN_EMAIL` env vars
+- [x] `swagger.ts:446-447` - Uses `BRAND_COLOR` and `DARK_BG_COLOR` env vars
+- [x] `auth.ts` - Magic number `3600000` (1hr) - NOW uses `TIME_MS.HOUR`
+- [x] `auth.ts` - Magic number `15 * 60 * 1000` - NOW uses `TIME_MS.FIFTEEN_MINUTES`
+- [x] Rate limiting - NOW centralized in `RATE_LIMIT_CONFIG` (auth-constants.ts)
+
+#### Documentation Issues (4)
+
+- [x] Update `API_DOCUMENTATION.md` - Fixed `nobhadcodes.com` to `nobhad.codes`
+- [x] Update `SYSTEM_DOCUMENTATION.md` - Fixed `noreply@nobhadcodes.com` to `nobhaduri@gmail.com`
+- [ ] Create `terminal-intake.ts` dedicated feature documentation
+- [ ] Update `CLIENT_PORTAL.md` - Remove reference to non-existent `client-landing.ts`
+
+#### Dead Code (3)
+
+- [ ] Remove commented code block in `router-service.ts:135-145` (10 lines)
+- [ ] Delete `tests/unit/components/ErrorBoundary.test.ts` (tests non-existent component)
+- [ ] Clean up `/archive/` directory if not needed (5 retired files)
+
+#### Code Organization - Oversized Files (4)
+
+- [ ] Split `admin-dashboard.ts` (3,553 lines - exceeds 300 guideline by 3,253)
+- [ ] Split `client-portal.ts` (3,029 lines - exceeds by 2,729)
+- [ ] Split `terminal-intake.ts` (2,542 lines - exceeds by 2,242)
+- [ ] Split `client-intake.ts` (643 lines - exceeds by 343)
+
+#### Feature Organization (4)
+
+- [ ] Make `TerminalIntakeModule` extend `BaseModule` (currently breaks pattern)
+- [ ] Organize 14 flat modules into subdirectories by concern (UI, animation, utilities)
+- [ ] Register client intake modules in app.ts initialization
+- [ ] Document cross-feature dependencies
+
+#### Test Suite (3)
+
+- [ ] Remove `.js` extensions from test imports (20+ files affected)
+- [ ] Consolidate duplicate setup files (`tests/setup.ts` vs `tests/setup/test-setup.ts`)
+- [ ] Standardize import patterns (aliased `@/` vs relative paths)
 
 ---
 
 ## Active Work
+
+### Codebase Deep Dive & Cleanup - IN PROGRESS
+
+**Status**: Quick Wins Complete, Major Items Pending
+**Date**: December 11, 2025
+
+**Summary**: Comprehensive analysis of entire codebase identified 108 issues across CSS, API, documentation, dead code, tests, and feature organization.
+
+**Issue Summary**:
+
+| Category | Critical | High | Medium | Low | Total |
+|----------|----------|------|--------|-----|-------|
+| CSS Architecture | 0 | 23 | 15 | 5 | 43 |
+| API/Backend | 3 | 12 | 8 | 5 | 28 |
+| Documentation | 0 | 5 | 4 | 3 | 12 |
+| Dead Code | 0 | 2 | 3 | 3 | 8 |
+| Test Suite | 0 | 3 | 2 | 2 | 7 |
+| Feature Organization | 0 | 4 | 4 | 2 | 10 |
+| **TOTAL** | **3** | **49** | **36** | **20** | **108** |
+
+**Quick Wins Completed**:
+
+| Fix | File | Change |
+|-----|------|--------|
+| Fix broken doc links (5) | `docs/features/*.md` | Changed `./CSS_ARCHITECTURE.md` to `../design/CSS_ARCHITECTURE.md` |
+| Remove dead code | `src/features/client/client-intake.ts:17` | Removed commented-out import |
+| Fix CORS default | `server/app.ts:85` | Changed `localhost:3000` to `localhost:4000` |
+| Add missing import | `tests/setup.ts:5` | Added `vi` to vitest imports |
+| Add missing README | `src/features/client/README.md` | Created comprehensive README for client features |
+
+**Key Findings**:
+
+1. **CSS**: 80+ hardcoded colors, dual variable systems causing confusion
+2. **API**: Inconsistent response formats, scattered rate limiting configs
+3. **Files**: 4 files exceed 300-line guideline (admin-dashboard: 3,553 lines)
+4. **Tests**: 20+ files use incorrect `.js` import extensions
+
+**Verification**:
+
+- [x] TypeScript: 0 errors
+- [x] ESLint: 0 errors
+
+---
+
+### Client Portal Header Dropdown & Intake Modal - COMPLETED
+
+**Status**: Complete
+**Date**: December 11, 2025
+
+**Summary**: Added client portal login dropdown in header and intake form modal on main page.
+
+**Features Implemented**:
+
+Header Portal Dropdown:
+- [x] Portal button icon in header (circle-user icon)
+- [x] Dropdown with Password/Magic Link toggle
+- [x] Password form with visibility toggle
+- [x] Forgot password flow with reset confirmation
+- [x] Button turns green when form requirements met
+- [x] Backdrop overlay when open
+- [x] Close on backdrop click or Escape key
+- [x] Mobile responsive (slides up from bottom)
+
+Intake Form Modal:
+- [x] "intake form" link in contact section opens modal
+- [x] Modal loads terminal intake form dynamically
+- [x] Close button (X) in top-right
+- [x] Backdrop overlay with close on click
+- [x] Mobile responsive (full screen on mobile)
+- [x] Lazy loads TerminalIntakeModule on first open
+
+Other Changes:
+- [x] Removed client portal section from main page
+- [x] Swapped menu button icon/text positions
+
+**Files Modified**:
+
+| File | Changes |
+|------|---------|
+| `index.html` | Added portal dropdown, intake modal, portal button in header, module script for intake |
+| `src/styles/components/navigation.css` | Added ~500 lines for portal dropdown and intake modal CSS |
+
+---
+
+### Infinite Scroll Implementation - IN PROGRESS
+
+**Status**: In Progress
+**Date**: December 11, 2025
+
+**Summary**: Implementing infinite scroll that loops back to the top when reaching the bottom of the page.
+
+**Current Implementation**:
+
+- Created `InfiniteScrollModule` in `src/modules/infinite-scroll.ts`
+- Desktop only (disabled on mobile)
+- Detects when user scrolls to bottom of main container
+- Instant jump back to top (no overlay/fade)
+- Added empty buffer section after contact for smoother transition
+
+**Problem**: After loop, business card starts centered and scrolls up - doesn't feel seamless.
+
+**Options to Consider**:
+
+1. **Clone ending content at top** - Add duplicate of contact section at top, hidden initially. Loop lands on clone, scrolling up reveals business card naturally.
+
+2. **Start scrolled partway down after loop** - Instead of `scrollTop = 0`, jump to position where business card is just off-screen at bottom. User scrolls up to reveal it.
+
+3. **Add buffer section at TOP** - Empty section before business card. After loop, land in buffer and scroll down to see card.
+
+4. **Reverse scroll direction** - After loop, auto-scroll upward briefly to reveal business card.
+
+5. **Fade transition on business card only** - Keep instant jump, but fade business card in with subtle animation.
+
+**Current Approach**: Trying Option 2 first.
+
+**Files Modified**:
+
+| File | Changes |
+|------|---------|
+| `src/modules/infinite-scroll.ts` | Created infinite scroll module |
+| `src/core/app.ts` | Added InfiniteScrollModule to mainSiteModules |
+| `src/styles/base/layout.css` | Added scroll buffer section styles |
+| `index.html` | Added empty buffer section after contact |
+
+---
+
+### Theme Toggle Fixes - COMPLETED
+
+**Status**: Complete
+**Date**: December 11, 2025
+
+**Summary**: Fixed theme toggle header transition and restored mobile theme toggle.
+
+**Issues Fixed**:
+
+| Issue | Fix |
+|-------|-----|
+| Header transition weird when menu not open | Added `transition: color 0.2s ease` to `.nav-logo-row`, `.theme-button`, `.menu-button` |
+| Layout.css blocking transitions | Changed `transition: none !important` to `transition: opacity 0s, visibility 0s !important` |
+| Theme toggle hidden on mobile | Changed `display: none !important` to `display: flex` with proper sizing |
+
+**Files Modified**:
+
+| File | Changes |
+|------|---------|
+| `src/styles/components/navigation.css` | Added color transitions, restored mobile theme toggle |
+| `src/styles/base/layout.css` | Fixed header transition rule |
+| `src/styles/variables.css` | Added global theme transitions |
+
+---
+
+### Contact Form Styling - COMPLETED
+
+**Status**: Complete
+**Date**: December 11, 2025
+
+**Summary**: Updated contact form to match Sal Costa's design, fixed dark mode styles, and corrected form validation.
+
+**Changes Made**:
+
+| Change | Details |
+|--------|---------|
+| Contact section width | Set to 80vw with centered alignment |
+| H2 underline | Changed to soft black (#333333), increased to 3px thickness |
+| Input border-radius | Top-left pinched: `0 22px 22px 22px` |
+| Column padding | Removed inherited 24px padding from contact-left/right |
+| Dark mode form text | Uses `--color-neutral-300` (page background color) |
+| Dark mode SVG | Submit button SVG stroke uses `--color-neutral-300` |
+| Business card shadow | Dark mode shadow deepened to `rgba(0, 0, 0, 0.75)` |
+| Form validation | Updated to use `name`, `email`, `message` fields (removed firstName, lastName, inquiryType) |
+
+**Files Modified**:
+
+| File | Changes |
+|------|---------|
+| `src/styles/pages/contact.css` | 80vw width, dark mode text/SVG overrides, pinched border-radius |
+| `src/styles/components/business-card.css` | Dark mode shadow on `.business-card-inner` |
+| `src/services/contact-service.ts` | Updated ContactFormData interface and validation |
+| `src/modules/contact-form.ts` | Updated gatherFormData to match new fields |
+| `tests/unit/services/contact-service.test.ts` | Updated tests for new validation messages |
+
+**Verification**:
+
+- [x] TypeScript: 0 errors
+- [x] ESLint: 0 errors
+- [x] Tests: 256 passing
+- [x] Build: Success
+- [x] Pushed to remote
+
+---
 
 ### GSAP Scroll Snap Module - IN PROGRESS
 **Status**: In Progress
@@ -306,27 +767,28 @@
 
 ---
 
-## 🟠 HIGH PRIORITY FIXES
+## 🟠 HIGH PRIORITY FIXES - MOST ALREADY FIXED
 
-### Backend Security
-- [ ] `server/routes/clients.ts:455-499` - SQL injection risk in dynamic queries
-- [ ] `server/middleware/security.ts` - No rate limiting on login
-- [ ] `server/routes/auth.ts:581` - Password only requires 8 chars
-- [ ] `server/routes/clients.ts:410` - Email exposed in URL
-- [ ] `server/routes/intake.ts:115-289` - Missing transaction rollback handling
+### Backend Security - MOSTLY COMPLETE
+- [x] `server/routes/clients.ts:455-499` - Fixed: was already using parameterized queries (safe), updated type
+- [x] `server/middleware/security.ts` - Already has rate limiting on login (5 attempts per 15 min)
+- [x] `server/routes/auth.ts:581` - Fixed: requires 12+ chars with complexity, swagger docs updated
+- [x] `server/routes/clients.ts:410` - Fixed: removed email from URL in welcome email link
+- [x] `server/routes/intake.ts:115-289` - Already has proper BEGIN/COMMIT/ROLLBACK
 
-### Frontend Security
-- [ ] `admin-dashboard.ts:157` - Hardcoded admin hash
-- [ ] `contact-form.ts:223-250` - Missing input sanitization
-- [ ] `messaging.ts:399,499` - Inline onclick with unsanitized data
+### Frontend Security - COMPLETE
+- [x] `admin-dashboard.ts:157` - Already reads from `VITE_ADMIN_PASSWORD_HASH` env var
+- [x] `contact-form.ts` - Already uses `SanitizationUtils` for all form data
+- [x] `admin-dashboard.ts:3288` - Fixed: added HTML escaping to visitor table data
+- [x] XSS vulnerabilities fixed in messaging.ts, admin-dashboard.ts, client-portal.ts
 
-### Memory Leaks
-- [ ] `performance-service.ts:299` - setInterval never cleared
-- [ ] `code-protection-service.ts:256-257,441` - Multiple intervals not cleaned
-- [ ] `analytics-dashboard.ts:90` - setInterval without cleanup
-- [ ] `client-intake.ts:373` - Autosave interval not destroyed
+### Memory Leaks - ALL ALREADY FIXED
+- [x] `performance-service.ts` - Already has `stopMonitoring()` with proper cleanup
+- [x] `code-protection-service.ts` - Already has `stopMonitoring()` clearing `protectionIntervals`
+- [x] `analytics-dashboard.ts` - Already has `destroy()` clearing `updateTimer`
+- [x] `client-intake.ts` - Already has `destroy()` clearing `autoSaveIntervalId`
 
-### CSS Architecture
+### CSS Architecture - LOW PRIORITY
 - [ ] Delete 8+ unused CSS files in root styles/
 - [ ] Archive legacy `main.css` (892 lines)
 - [ ] Consolidate font-face definitions (defined 3 times)
@@ -339,12 +801,13 @@
 ### Code Quality
 - [ ] Replace 50+ instances of `any` type with proper interfaces
 - [ ] Fix N+1 query in `server/routes/projects.ts:87-104`
-- [ ] Standardize API response format across all endpoints
+- [x] Standardize API response format across all endpoints - Created `server/utils/response.ts`
 - [ ] Add HTTPS enforcement in production
 
-### Performance
-- [ ] Split `admin-dashboard.ts` (3000+ lines)
-- [ ] Split `client-portal.ts` (2400+ lines)
+### Performance - FILE SPLITTING
+- [ ] Split `admin-dashboard.ts` (3,553 lines - exceeds 300 guideline by 3,253)
+- [ ] Split `client-portal.ts` (3,029 lines - exceeds by 2,729)
+- [ ] Split `terminal-intake.ts` (2,542 lines - exceeds by 2,242)
 - [ ] Lazy load code-protection-service when disabled
 
 ### Accessibility
@@ -352,22 +815,24 @@
 - [ ] Add keyboard support to business card flip
 - [ ] Make file upload dropzone keyboard accessible
 
-### CSS Cleanup
-- [ ] Replace 15+ hardcoded colors with CSS variables
-- [ ] Standardize breakpoints (767px, 768px, 479px, 480px)
-- [ ] Remove excessive `!important` usage (10+ instances)
-- [ ] Standardize dark mode selectors
+### CSS Cleanup - MOSTLY COMPLETE
+- [x] Replace 80+ hardcoded colors with CSS variables (December 12, 2025)
+- [ ] Standardize breakpoints (767px vs 768px, 479px vs 480px) - LOW PRIORITY
+- [ ] Remove excessive `!important` usage (10+ instances) - LOW PRIORITY
+- [x] Standardize dark mode selectors - All use `html[data-theme="dark"]`
 
 ---
 
-## Issue Summary
+## Issue Summary - UPDATED December 12, 2025
 
-| Area | Critical | High | Medium | Low | Total |
-|------|----------|------|--------|-----|-------|
-| Backend | 5 | 8 | 7 | 5 | 25 |
-| Frontend | 1 | 8 | 12 | 1 | 22 |
-| CSS/Styles | 0 | 8 | 12 | 3 | 23 |
-| **TOTAL** | **6** | **24** | **31** | **9** | **70** |
+| Area | Critical | High | Medium | Low | Total | Fixed |
+|------|----------|------|--------|-----|-------|-------|
+| Backend | 5 | 8 | 7 | 5 | 25 | ~22 |
+| Frontend | 1 | 8 | 12 | 1 | 22 | ~18 |
+| CSS/Styles | 0 | 8 | 12 | 3 | 23 | ~20 |
+| **TOTAL** | **6** | **24** | **31** | **9** | **70** | **~60** |
+
+**Progress**: ~85% of issues resolved. Remaining items are mostly low priority.
 
 ---
 
@@ -464,7 +929,7 @@
 
 ## System Status
 
-**Last Updated**: December 3, 2025
+**Last Updated**: December 11, 2025
 
 ### Build Status
 
@@ -472,6 +937,19 @@
 - **ESLint**: 0 errors
 - **Tests**: 259 passing (all tests pass)
 - **Build**: Success
+
+### Codebase Health (from Deep Dive) - UPDATED December 12, 2025
+
+| Metric | Value | Status |
+|--------|-------|--------|
+| Total Issues Found | 108 | ~92 fixed |
+| Critical Issues | 0 | ALL FIXED |
+| Quick Wins Completed | 5 | Done |
+| Auth Refactor | Complete | response.ts, auth-constants.ts created |
+| Hardcoded Colors | 0 remaining | ALL FIXED (200+ replaced) |
+| Oversized Files | 4 | Split needed (low priority) |
+| Backend Hardcoded Values | 0 remaining | ALL FIXED |
+| CSS Variables Added | 50+ new tokens | Complete |
 
 ### Development Server
 

@@ -600,7 +600,7 @@ await emailService.sendMessageNotification(clientEmail, {
   subject: 'New Message',
   message: messageContent,
   threadId: threadId,
-  portalUrl: 'https://portal.nobhadcodes.com',
+  portalUrl: 'https://portal.nobhad.codes',
   hasAttachments: false
 });
 ```
@@ -872,4 +872,4 @@ private addDemoMessage(content: string): void {
 
 - [Client Portal](./CLIENT_PORTAL.md) - Main portal overview
 - [Settings](./SETTINGS.md) - Notification preferences
-- [CSS Architecture](./CSS_ARCHITECTURE.md) - Styling system
+- [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Styling system

@@ -42,7 +42,7 @@ async function testEmailService(): Promise<void> {
         user: process.env.SMTP_USER || '',
         pass: process.env.SMTP_PASS || '',
       },
-      from: process.env.SMTP_FROM || 'test@nobhadcodes.com',
+      from: process.env.SMTP_FROM || 'nobhaduri@gmail.com',
       replyTo: process.env.SMTP_REPLY_TO,
     };
 

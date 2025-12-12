@@ -150,7 +150,7 @@
  * REQUIRED FIELDS
  * ============================================ */
 .required {
-  color: #ef4444;
+  color: var(--color-danger);
   font-weight: bold;
 }
 

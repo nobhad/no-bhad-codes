@@ -915,4 +915,4 @@ Settings grid adapts to viewport:
 - [Invoices](./INVOICES.md) - Invoice system
 - [Settings](./SETTINGS.md) - User settings
 - [New Project](./NEW_PROJECT.md) - Project request form
-- [CSS Architecture](./CSS_ARCHITECTURE.md) - Styling system
+- [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Styling system

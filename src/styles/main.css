@@ -206,16 +206,13 @@ main section:not(.business-card-section) {
 /* Contact section styling - h2 styles defined in pages/contact.css */
 
 .tech-stack {
-  background-color: #f8f9fa;
+  background-color: var(--color-neutral-100);
   padding: 1.5rem 2rem;
   border-radius: 8px;
   border: 2px solid var(--color-neutral-400);
 }
 
-/* Dark theme tech stack background */
-html[data-theme="dark"] .tech-stack {
-  background-color: #1e1e1e;
-}
+/* Dark theme: colors automatically switch via CSS variables */
 
 .tech-stack h3 {
   font-size: clamp(1rem, 2.5vw, 1.2rem);

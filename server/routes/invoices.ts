@@ -866,9 +866,11 @@ router.get(
       doc.moveDown(2);
 
       // Company info (left side)
-      doc.fontSize(14).font('Helvetica-Bold').text('No Bhad Codes', { continued: false });
+      const companyName = process.env.COMPANY_NAME || 'No Bhad Codes';
+      const supportEmail = process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL || '';
+      doc.fontSize(14).font('Helvetica-Bold').text(companyName, { continued: false });
       doc.fontSize(10).font('Helvetica').text('Web Development Services');
-      doc.text('support@nobhadcodes.com');
+      if (supportEmail) doc.text(supportEmail);
 
       doc.moveDown(2);
 

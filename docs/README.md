@@ -14,7 +14,21 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 | **[Invoices](./features/INVOICES.md)** | Invoice history, status tracking, PDF download |
 | **[Settings](./features/SETTINGS.md)** | Account, notifications, billing information |
 | **[New Project](./features/NEW_PROJECT.md)** | Project request form, validation |
-| **[CSS Architecture](./features/CSS_ARCHITECTURE.md)** | Variables, themes, naming conventions |
+
+### Scroll & Animation Modules
+
+| Document | Description |
+|----------|-------------|
+| **[Infinite Scroll](./features/INFINITE_SCROLL.md)** | Bidirectional infinite scroll looping |
+| **[Scroll Snap](./features/SCROLL_SNAP.md)** | GSAP-powered section snapping |
+
+### Design System
+
+| Document | Description |
+|----------|-------------|
+| **[CSS Architecture](./design/CSS_ARCHITECTURE.md)** | Variables, themes, naming conventions |
+| **[UX Guidelines](./design/UX_GUIDELINES.md)** | Typography, icons, buttons, forms |
+| **[Animations](./design/ANIMATIONS.md)** | GSAP usage, animation tokens, performance |
 
 ### Architecture & Development
 

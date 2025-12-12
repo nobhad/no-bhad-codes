@@ -1,0 +1,313 @@
+/**
+ * @file client-portal-section.css
+ * @description Client portal login section on main page - matches contact section styling
+ **/
+
+/* Client Portal Section - match contact section width */
+.client-portal-section {
+  align-items: flex-start !important;
+  width: min(1000px, 90vw) !important;
+  max-width: min(1000px, 90vw) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  box-sizing: border-box;
+  overflow: visible !important;
+}
+
+/* Client Portal heading with decorative line - matches contact */
+.client-portal-section h2 {
+  position: relative;
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+  align-self: stretch;
+  text-align: left;
+}
+
+.client-portal-section h2::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--color-text-primary);
+}
+
+/* Portal intro text - matches contact-options */
+.portal-intro {
+  width: 100%;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.portal-intro p {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: var(--fg);
+  line-height: 1.6;
+}
+
+/* Auth Method Toggle - matches client landing page */
+.portal-auth-toggle {
+  display: flex;
+  width: 100%;
+  max-width: 400px;
+  height: 60px;
+  border: 3px solid var(--fg);
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+}
+
+.portal-toggle-btn {
+  flex: 1;
+  height: 100%;
+  padding: 0 1.5rem;
+  background: transparent;
+  border: none;
+  font-family: var(--font--acme);
+  font-size: 0.9rem;
+  font-weight: normal;
+  line-height: 54px;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.portal-toggle-btn:first-child {
+  border-right: 1.5px solid var(--fg);
+}
+
+.portal-toggle-btn:last-child {
+  border-left: 1.5px solid var(--fg);
+}
+
+.portal-toggle-btn:hover:not(.active) {
+  background: var(--color-neutral-400);
+}
+
+.portal-toggle-btn.active {
+  background: var(--color-primary, #00ff41);
+  color: #000;
+}
+
+/* Portal Login Form - matches contact form structure */
+.portal-login-form {
+  width: 100%;
+  align-self: stretch;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
+  box-sizing: border-box;
+  box-shadow: none;
+  overflow: visible;
+  /* Hidden by default */
+  display: none;
+}
+
+/* Active form is visible */
+.portal-login-form.form-active {
+  display: block;
+}
+
+/* Forms wrapper to maintain consistent height */
+.client-portal-section {
+  --portal-form-height: 280px;
+}
+
+/* Both forms have same min-height for consistent section size */
+.portal-login-form[data-form-type="password"],
+.portal-login-form[data-form-type="magic-link"] {
+  min-height: var(--portal-form-height);
+}
+
+/* Login row: stacked layout */
+.portal-login-row {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 1rem;
+  margin-top: 1rem;
+  box-sizing: border-box;
+}
+
+/* Email and password inputs stacked */
+.portal-login-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+  padding: 0;
+  min-height: auto;
+  overflow: visible;
+}
+
+.portal-login-fields .input-wrapper {
+  width: 100%;
+}
+
+/* Submit button below inputs */
+.portal-login-submit {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+  padding: 0;
+  overflow: visible;
+}
+
+/* Portal sign-in button - exact match to toggle button sizing */
+.client-portal-section .btn.btn-primary,
+.client-portal-section .portal-login-submit button,
+.client-portal-section button[type="submit"] {
+  background-color: var(--color-border) !important;
+  color: var(--bg, var(--color-neutral-300)) !important;
+  border: 3px solid var(--color-border) !important;
+  border-radius: 0 !important;
+  height: 60px !important;
+  padding: 0 1.5rem !important;
+  font-family: var(--font--acme) !important;
+  font-size: 0.9rem !important;
+  font-weight: normal !important;
+  line-height: 60px !important;
+  text-transform: uppercase !important;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  outline: none !important;
+  width: 100% !important;
+  max-width: 400px !important;
+}
+
+.client-portal-section .btn.btn-primary:hover,
+.client-portal-section .btn.btn-primary:focus,
+.client-portal-section .portal-login-submit button:hover,
+.client-portal-section .portal-login-submit button:focus,
+.client-portal-section button[type="submit"]:hover,
+.client-portal-section button[type="submit"]:focus {
+  background-color: var(--color-primary, #00ff41) !important;
+  color: var(--color-black) !important;
+  border: 3px solid var(--color-primary, #00ff41) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Dark mode button */
+html[data-theme="dark"] .client-portal-section .btn.btn-primary {
+  background-color: var(--fg);
+  color: var(--bg, var(--color-neutral-300));
+}
+
+/* Password toggle in portal */
+.client-portal-section .password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: var(--bg, #fffbee);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+}
+
+.client-portal-section .password-toggle:hover {
+  color: var(--color-primary, #00ff41);
+}
+
+.client-portal-section .password-toggle .password-icon-hide {
+  display: none;
+}
+
+.client-portal-section .password-toggle.showing .password-icon-show {
+  display: none;
+}
+
+.client-portal-section .password-toggle.showing .password-icon-hide {
+  display: block;
+}
+
+/* Single field layout for magic link */
+.portal-login-fields--single {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.portal-login-fields--single .input-wrapper {
+  width: 100%;
+}
+
+/* Magic link info text */
+.portal-magic-info {
+  font-size: 0.9rem;
+  color: var(--fg);
+  opacity: 0.7;
+  margin-top: 0.5rem;
+  text-align: left;
+}
+
+/* Error message */
+.portal-login-error {
+  color: var(--color-danger);
+  font-size: 0.85rem;
+  min-height: 1.2em;
+  margin-top: 0.5rem;
+  text-align: left;
+}
+
+/* Forgot password link */
+.portal-forgot-password {
+  margin-top: 0.5rem;
+  text-align: left;
+}
+
+
+.portal-link {
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.portal-link:hover,
+.portal-link:focus {
+  color: var(--color-primary, #00ff41);
+}
+
+/* Responsive - Mobile */
+@media screen and (max-width: 800px) {
+  .portal-login-fields {
+    max-width: 100%;
+  }
+
+  .portal-login-fields--single {
+    max-width: 100%;
+  }
+
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .client-portal-section .btn.btn-primary {
+    transition: none !important;
+  }
+}

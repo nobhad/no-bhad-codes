@@ -30,7 +30,7 @@ const users: Array<{
 }> = [
   {
     id: 1,
-    email: 'admin@nobhadcodes.com',
+    email: 'nobhaduri@gmail.com',
     password: bcrypt.hashSync('password123', 10),
     role: 'admin',
     name: 'Admin User',
@@ -468,5 +468,5 @@ app.get('/', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Simple Auth Server running on http://localhost:${PORT}`);
-  console.log('📧 Test credentials: admin@nobhadcodes.com / password123');
+  console.log('📧 Test credentials: nobhaduri@gmail.com / password123');
 });

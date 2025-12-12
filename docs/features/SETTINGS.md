@@ -643,7 +643,7 @@ billing_country TEXT
 | `src/features/client/client-portal.ts` | 1209-1368 | Load settings data |
 | `src/features/client/client-portal.ts` | 1370-1430 | Save settings methods |
 | `src/styles/pages/client-portal.css` | - | Settings styling |
-| `server/routes/users.ts` | - | User API endpoints |
+| `server/routes/clients.ts` | - | Client profile API endpoints |
 | `server/routes/auth.ts` | - | Password change endpoint |
 
 ---
@@ -653,4 +653,4 @@ billing_country TEXT
 - [Client Portal](./CLIENT_PORTAL.md) - Main portal overview
 - [Invoices](./INVOICES.md) - Billing relates to invoices
 - [Messages](./MESSAGES.md) - Notification preferences affect messages
-- [CSS Architecture](./CSS_ARCHITECTURE.md) - Styling system
+- [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Styling system

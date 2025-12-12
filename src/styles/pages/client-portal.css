@@ -24,7 +24,7 @@
 
 .cp-card {
   background: var(--color-neutral-200);
-  border: 4px solid #000000;
+  border: 4px solid var(--color-border);
   padding: 1.5rem;
   margin-bottom: 1.5rem;
 }
@@ -219,7 +219,7 @@
 }
 
 .cp-badge-pending {
-  background: #fbbf24;
+  background: var(--color-warning);
   color: var(--color-dark);
 }
 
@@ -233,7 +233,7 @@
 */
 .cp-stat {
   background: var(--color-neutral-200);
-  border: 4px solid #000000;
+  border: 4px solid var(--color-border);
   padding: 1.5rem;
   text-align: center;
 }
@@ -332,7 +332,7 @@
   background: var(--color-neutral-300);
   padding: clamp(1rem, 3vw, 2rem);
   border-radius: 0;
-  border: 4px solid #000000;
+  border: 4px solid var(--color-border);
   box-shadow: 0 4px 8px var(--color-shadow);
   max-width: 100%;
   width: 100%;
@@ -420,7 +420,7 @@
 
 .login-form .btn {
   padding: clamp(10px, 2.5vw, 14px) clamp(20px, 4vw, 28px);
-  border: 4px solid #000000;
+  border: 4px solid var(--color-border);
   border-radius: 0;
   font-size: clamp(0.9rem, 2vw, 1.1rem);
   font-weight: 600;
@@ -688,9 +688,9 @@ html[data-theme="dark"] .login-form label {
 .cp-project-card {
   display: block;
   background: var(--color-neutral-100);
-  border: 4px solid #000000;
+  border: 4px solid var(--color-border);
   padding: 1.5rem;
-  color: #333333;
+  color: var(--color-text-primary);
   box-shadow:
     20px 6px 30px rgba(0, 0, 0, 0.6),
     8px 8px 16px rgba(0, 0, 0, 0.8),
@@ -741,7 +741,7 @@ html[data-theme="dark"] .login-form label {
 /* Recent Activity */
 .recent-activity {
   background: var(--color-neutral-100);
-  border: 4px solid #000000;
+  border: 4px solid var(--color-border);
   padding: 1.5rem;
   margin-bottom: 2rem;
   box-shadow: 20px 6px 30px rgba(0, 0, 0, 0.6);
@@ -783,7 +783,7 @@ html[data-theme="dark"] .login-form label {
 
 .stat-card {
   background: var(--color-neutral-100);
-  border: 4px solid #000000;
+  border: 4px solid var(--color-border);
   padding: 1.5rem;
   text-align: center;
   box-shadow: 20px 6px 30px rgba(0, 0, 0, 0.6);
@@ -836,7 +836,7 @@ html[data-theme="dark"] .login-form label {
 
 .files-upload-section {
   background: var(--color-neutral-200);
-  border: 4px solid #000000;
+  border: 4px solid var(--color-border);
   padding: 1.5rem;
   margin-bottom: 2rem;
   color: var(--color-dark);
@@ -865,7 +865,7 @@ html[data-theme="dark"] .login-form label {
 
 .files-list-section {
   background: var(--color-neutral-200);
-  border: 4px solid #000000;
+  border: 4px solid var(--color-border);
   padding: 1.5rem;
   color: var(--color-dark);
 }
@@ -920,8 +920,8 @@ html[data-theme="dark"] .login-form label {
 }
 
 .file-delete-icon:hover {
-  color: #991b1b;
-  background: #fee2e2;
+  color: var(--color-error-dark);
+  background: var(--color-error-light);
 }
 
 .file-icon {
@@ -952,14 +952,14 @@ html[data-theme="dark"] .login-form label {
 
 /* Delete button danger styling */
 .file-actions .btn-delete {
-  background: #fee2e2;
-  color: #991b1b;
-  border-color: #991b1b;
+  background: var(--color-error-light);
+  color: var(--color-error-dark);
+  border-color: var(--color-error-dark);
 }
 
 .file-actions .btn-delete:hover {
-  background: #991b1b;
-  color: #ffffff;
+  background: var(--color-error-dark);
+  color: var(--color-white);
 }
 
 /* Uniform button styles for client portal */
@@ -1014,7 +1014,7 @@ html[data-theme="dark"] .login-form label {
   display: flex;
   flex-direction: column;
   background: var(--color-neutral-300);
-  border: 4px solid #000000;
+  border: 4px solid var(--color-border);
   box-shadow: 20px 6px 30px rgba(0, 0, 0, 0.6);
   color: var(--color-dark);
 }
@@ -1173,7 +1173,7 @@ html[data-theme="dark"] .login-form label {
   width: 100%;
   max-width: 400px;
   --background: var(--color-neutral-100);
-  --border-color: #000000;
+  --border-color: var(--color-border);
   --indicator-color: var(--color-primary);
   --input-border-color: var(--color-dark);
   --button-active-background: var(--color-primary);
@@ -1203,7 +1203,7 @@ html[data-theme="dark"] .login-form label {
 
 .summary-card {
   background: var(--color-neutral-100);
-  border: 4px solid #000000;
+  border: 4px solid var(--color-border);
   padding: 1.5rem;
   text-align: center;
   box-shadow: 20px 6px 30px rgba(0, 0, 0, 0.6);
@@ -1227,7 +1227,7 @@ html[data-theme="dark"] .login-form label {
 
 .invoices-list {
   background: var(--color-neutral-300);
-  border: 4px solid #000000;
+  border: 4px solid var(--color-border);
   padding: 1.5rem;
   box-shadow: 20px 6px 30px rgba(0, 0, 0, 0.6);
   color: var(--color-dark);
@@ -1284,7 +1284,7 @@ html[data-theme="dark"] .login-form label {
 }
 
 .status-pending {
-  background: #fbbf24;
+  background: var(--color-warning);
   color: var(--color-dark);
 }
 
@@ -1318,7 +1318,7 @@ html[data-theme="dark"] .login-form label {
   flex-direction: column;
   height: calc(100vh - 200px);
   background: var(--color-neutral-300);
-  border: 4px solid #000000;
+  border: 4px solid var(--color-border);
   color: var(--color-dark);
 }
 
@@ -1399,7 +1399,7 @@ html[data-theme="dark"] .login-form label {
 
 .settings-section {
   background: var(--color-neutral-100);
-  border: 4px solid #000000;
+  border: 4px solid var(--color-border);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -1523,7 +1523,7 @@ html[data-theme="dark"] .login-form label {
 
 .new-project-form {
   background: var(--color-neutral-300);
-  border: 4px solid #000000;
+  border: 4px solid var(--color-border);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -1596,7 +1596,7 @@ html[data-theme="dark"] .login-form label {
   margin: 0;
   text-transform: uppercase;
   text-shadow:
-    4px 6px 6px #000000,
+    4px 6px 6px var(--color-black),
     0 0 10px rgba(0, 0, 0, 0.9);
 }
 
@@ -1613,9 +1613,9 @@ html[data-theme="dark"] .login-form label {
   font-size: clamp(1.25rem, 3.5vw, 1.75rem);
   color: var(--color-neutral-100);
   text-shadow:
-    4px 6px 6px #000000,
+    4px 6px 6px var(--color-black),
     0 0 10px rgba(0, 0, 0, 0.9);
-  filter: drop-shadow(4px 6px 6px #000000) drop-shadow(0 0 10px rgba(0, 0, 0, 0.9));
+  filter: drop-shadow(4px 6px 6px var(--color-black)) drop-shadow(0 0 10px rgba(0, 0, 0, 0.9));
 }
 
 .page-header .header-sidebar-toggle:hover {
@@ -1626,9 +1626,9 @@ html[data-theme="dark"] .login-form label {
 .sidebar.collapsed ~ .dashboard-content .page-header .header-sidebar-toggle {
   transform: rotate(180deg);
   /* Adjust shadow to appear bottom-right after rotation (which is top-left in rotated space) */
-  filter: drop-shadow(-4px -6px 6px #000000) drop-shadow(0 0 10px rgba(0, 0, 0, 0.9));
+  filter: drop-shadow(-4px -6px 6px var(--color-black)) drop-shadow(0 0 10px rgba(0, 0, 0, 0.9));
   text-shadow:
-    -4px -6px 6px #000000,
+    -4px -6px 6px var(--color-black),
     0 0 10px rgba(0, 0, 0, 0.9);
 }
 
@@ -2334,8 +2334,8 @@ html[data-theme="dark"] .login-form label {
 }
 
 .status-badge.status-pending {
-  background: #fbbf24;
-  border-color: #d97706;
+  background: var(--color-warning);
+  border-color: var(--color-warning-dark);
 }
 
 .status-badge.status-active {
@@ -2344,8 +2344,8 @@ html[data-theme="dark"] .login-form label {
 }
 
 .status-badge.status-completed {
-  background: #10b981;
-  border-color: #047857;
+  background: var(--color-success);
+  border-color: var(--color-success-dark);
   color: white;
 }
 
@@ -2567,9 +2567,9 @@ html[data-theme="dark"] .login-form label {
 /* Error States */
 .error-message {
   padding: 1rem;
-  background: #fee2e2;
-  color: #dc2626;
-  border: 2px solid #dc2626;
+  background: var(--color-error-light);
+  color: var(--color-error);
+  border: 2px solid var(--color-error);
   text-align: center;
   margin: 1rem 0;
 }
@@ -2866,7 +2866,7 @@ html[data-theme="dark"] .login-form label {
 }
 
 .content-status:is([class*="Review"], [class*="Needed"]) {
-  background: #ffd700;
+  background: var(--color-accent-gold);
   color: var(--color-dark);
 }
 
@@ -2941,7 +2941,7 @@ html[data-theme="dark"] .login-form label {
 
 .settings-section {
   background: var(--color-neutral-300);
-  border: 4px solid #000000;
+  border: 4px solid var(--color-border);
   padding: 2rem;
   color: var(--color-dark);
 }
@@ -3006,7 +3006,7 @@ html[data-theme="dark"] .login-form label {
   gap: 0.75rem;
   cursor: pointer;
   background: var(--color-neutral-100);
-  border: 2px solid #000000;
+  border: 2px solid var(--color-border);
   padding: 0.75rem 1rem;
 }
 

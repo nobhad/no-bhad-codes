@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Portal Section Mockups</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Acme&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #e0e0e0;
+      --fg: #333333;
+      --color-primary: #00ff41;
+      --font-acme: 'Acme', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-mono);
+      background: var(--bg);
+      color: var(--fg);
+    }
+
+    /* Navigation dots */
+    .nav-dots {
+      position: fixed;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-dot {
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--fg);
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .nav-dot:hover,
+    .nav-dot.active {
+      background: var(--fg);
+    }
+
+    .nav-dot-label {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      white-space: nowrap;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      background: var(--fg);
+      color: var(--bg);
+      padding: 0.25rem 0.5rem;
+    }
+
+    .nav-dot:hover .nav-dot-label {
+      opacity: 1;
+    }
+
+    /* Each full page mockup */
+    .page-mockup {
+      min-height: 100vh;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: var(--bg);
+    }
+
+    /* Section label overlay */
+    .section-label {
+      position: absolute;
+      top: 80px;
+      left: 2rem;
+      font-family: var(--font-acme);
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--color-primary);
+      z-index: 10;
+      background: var(--fg);
+      padding: 0.5rem 1rem;
+    }
+
+    /* Fixed header */
+    .mock-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      z-index: 50;
+    }
+
+    .mock-header .logo {
+      font-family: var(--font-acme);
+      font-size: 1rem;
+      text-transform: lowercase;
+    }
+
+    .mock-header .menu-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+
+    /* Main content */
+    .mock-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding-top: 60px;
+    }
+
+    /* Footer */
+    .mock-footer {
+      padding: 1.5rem 2rem;
+      text-align: center;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.5;
+    }
+
+    /* ===========================================
+       CONTACT SECTION - EXACT COPY FROM MAIN
+       =========================================== */
+    .contact-section {
+      width: min(1000px, 90vw);
+      max-width: min(1000px, 90vw);
+      margin-left: auto;
+      margin-right: auto;
+      padding: 4rem 0;
+    }
+
+    .contact-section h2 {
+      font-family: var(--font-acme);
+      font-size: clamp(2rem, 5vw, 3rem);
+      text-transform: lowercase;
+      position: relative;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+      width: 100%;
+      text-align: left;
+    }
+
+    .contact-section h2::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background-color: var(--fg);
+    }
+
+    .contact-options {
+      width: 100%;
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+
+    .contact-options p {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      line-height: 1.6;
+    }
+
+    .contact-option-label {
+      font-weight: 600;
+    }
+
+    .contact-option-link {
+      color: var(--fg);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      font-weight: 600;
+    }
+
+    .contact-form {
+      width: 100%;
+    }
+
+    .contact-row {
+      display: flex;
+      align-items: stretch;
+      width: 100%;
+      gap: 2rem;
+      margin-top: 1rem;
+    }
+
+    .contact-left {
+      flex: 0 0 70%;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .contact-right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .contact-message-row {
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .input-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .input-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .input-item input,
+    .input-item textarea {
+      border: none;
+      background-color: var(--fg);
+      color: var(--bg);
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .input-item input {
+      width: 100%;
+      height: 60px;
+      border-radius: 0 22px 22px 22px;
+      padding: 1rem 1rem 0;
+    }
+
+    .input-item textarea {
+      width: 100%;
+      min-height: 130px;
+      resize: none;
+      border-radius: 0 22px 22px 22px;
+      padding: 1.5rem 1rem 0.5rem;
+    }
+
+    .input-item input::placeholder,
+    .input-item textarea::placeholder {
+      color: var(--bg);
+      opacity: 0.5;
+    }
+
+    label.text-small {
+      position: absolute;
+      top: 0.25rem;
+      left: 0.5rem;
+      font-size: 1rem;
+      color: var(--bg);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .submit-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 120px;
+      height: 120px;
+      border-radius: 64px;
+      border: none;
+      background-color: var(--fg);
+      cursor: pointer;
+    }
+
+    .submit-button svg {
+      width: 64px;
+      height: 64px;
+      stroke: var(--bg);
+      fill: none;
+    }
+
+    /* ===========================================
+       CLIENT PORTAL SECTION - BASE (matches contact)
+       =========================================== */
+    .client-portal-section {
+      width: min(1000px, 90vw);
+      max-width: min(1000px, 90vw);
+      margin-left: auto;
+      margin-right: auto;
+      padding: 4rem 0;
+    }
+
+    .client-portal-section h2 {
+      font-family: var(--font-acme);
+      font-size: clamp(2rem, 5vw, 3rem);
+      text-transform: lowercase;
+      position: relative;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+      width: 100%;
+      text-align: left;
+    }
+
+    .client-portal-section h2::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background-color: var(--fg);
+    }
+
+    /* Toggle */
+    .portal-auth-toggle {
+      display: flex;
+      width: 100%;
+      max-width: 400px;
+      height: 60px;
+      border: 3px solid var(--fg);
+      margin-bottom: 1rem;
+    }
+
+    .portal-toggle-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      font-family: var(--font-acme);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      cursor: pointer;
+      line-height: 54px;
+    }
+
+    .portal-toggle-btn:first-child {
+      border-right: 1.5px solid var(--fg);
+    }
+
+    .portal-toggle-btn:last-child {
+      border-left: 1.5px solid var(--fg);
+    }
+
+    .portal-toggle-btn.active {
+      background: var(--color-primary);
+      color: var(--fg);
+    }
+
+    /* Portal form fields - match contact */
+    .portal-login-row {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .portal-login-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .portal-login-submit {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    /* Portal button */
+    .client-portal-section .btn-primary {
+      width: 100%;
+      height: 60px;
+      background: #000;
+      border: 3px solid #000;
+      font-family: var(--font-acme);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      color: var(--bg);
+      cursor: pointer;
+      line-height: 60px;
+    }
+
+    .portal-link {
+      display: block;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: var(--fg);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* ===========================================
+       VARIANT B: Centered Card
+       =========================================== */
+    .portal-variant-b {
+      padding: 4rem 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .portal-card-b {
+      background: var(--bg);
+      border: 3px solid var(--fg);
+      box-shadow: 12px 12px 0 var(--fg);
+      padding: 3rem;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .portal-card-b h2 {
+      font-family: var(--font-acme);
+      font-size: clamp(2rem, 5vw, 3rem);
+      text-transform: lowercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .portal-card-b .subtitle {
+      font-size: 0.9rem;
+      opacity: 0.7;
+      margin-bottom: 2rem;
+    }
+
+    /* ===========================================
+       VARIANT C: Two Column Split
+       =========================================== */
+    .portal-variant-c {
+      display: flex;
+      width: 100%;
+    }
+
+    .portal-c-info {
+      width: 40%;
+      background: var(--fg);
+      color: var(--bg);
+      padding: 4rem 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .portal-c-info h2 {
+      font-family: var(--font-acme);
+      font-size: clamp(2rem, 5vw, 3rem);
+      text-transform: lowercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .portal-c-info p {
+      font-size: 0.95rem;
+      line-height: 1.8;
+      opacity: 0.85;
+      margin-bottom: 1rem;
+    }
+
+    .portal-c-info ul {
+      list-style: none;
+      margin-top: 1.5rem;
+    }
+
+    .portal-c-info li {
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    .portal-c-info li::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      color: var(--color-primary);
+    }
+
+    .portal-c-form {
+      flex: 1;
+      padding: 4rem 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* ===========================================
+       VARIANT D: Centered Minimal
+       =========================================== */
+    .portal-variant-d {
+      padding: 5rem 2rem;
+      text-align: center;
+      width: min(1000px, 90vw);
+      max-width: min(1000px, 90vw);
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .portal-variant-d h2 {
+      font-family: var(--font-acme);
+      font-size: clamp(2rem, 5vw, 3rem);
+      text-transform: lowercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .portal-variant-d .subtitle {
+      font-size: 1rem;
+      opacity: 0.6;
+      margin-bottom: 3rem;
+    }
+
+    .portal-d-form {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .portal-d-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-bottom: 2rem;
+    }
+
+    .portal-d-toggle button {
+      background: transparent;
+      border: none;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      opacity: 0.4;
+      padding-bottom: 0.5rem;
+    }
+
+    .portal-d-toggle button.active {
+      opacity: 1;
+      border-bottom: 2px solid var(--fg);
+    }
+
+    /* ===========================================
+       VARIANT E: Dark Background
+       =========================================== */
+    .portal-variant-e {
+      background: var(--fg);
+      color: var(--bg);
+      padding: 4rem 0;
+    }
+
+    .portal-e-content {
+      width: min(1000px, 90vw);
+      max-width: min(1000px, 90vw);
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .portal-variant-e h2 {
+      font-family: var(--font-acme);
+      font-size: clamp(2rem, 5vw, 3rem);
+      text-transform: lowercase;
+      position: relative;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .portal-variant-e h2::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background-color: var(--bg);
+    }
+
+    .portal-variant-e .portal-auth-toggle {
+      border-color: var(--bg);
+    }
+
+    .portal-variant-e .portal-toggle-btn {
+      color: var(--bg);
+    }
+
+    .portal-variant-e .portal-toggle-btn:first-child {
+      border-right-color: var(--bg);
+    }
+
+    .portal-variant-e .portal-toggle-btn:last-child {
+      border-left-color: var(--bg);
+    }
+
+    .portal-variant-e .input-item input {
+      background: var(--bg);
+      color: var(--fg);
+    }
+
+    .portal-variant-e .btn-primary {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: var(--fg);
+    }
+
+    .portal-variant-e .portal-link {
+      color: var(--bg);
+    }
+
+    /* ===========================================
+       VARIANT F: Floating Card
+       =========================================== */
+    .portal-variant-f {
+      padding: 4rem 2rem;
+      position: relative;
+    }
+
+    .portal-variant-f::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: var(--fg);
+    }
+
+    .portal-card-f {
+      position: relative;
+      z-index: 1;
+      background: var(--bg);
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 3rem;
+      border: 3px solid var(--fg);
+    }
+
+    .portal-card-f h2 {
+      font-family: var(--font-acme);
+      font-size: clamp(2rem, 5vw, 3rem);
+      text-transform: lowercase;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .portal-f-toggle {
+      display: flex;
+      width: 100%;
+      height: 55px;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+    }
+
+    .portal-f-toggle button {
+      flex: 1;
+      background: transparent;
+      border: 2px solid var(--fg);
+      font-family: var(--font-acme);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .portal-f-toggle button.active {
+      background: var(--fg);
+      color: var(--bg);
+    }
+
+    .portal-card-f .field-underline {
+      width: 100%;
+      height: 55px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid var(--fg);
+      padding: 0;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .portal-card-f .btn-green {
+      width: 100%;
+      height: 55px;
+      background: var(--color-primary);
+      border: none;
+      font-family: var(--font-acme);
+      font-size: 1rem;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .portal-variant-c {
+        flex-direction: column;
+      }
+      .portal-c-info {
+        width: 100%;
+      }
+      .contact-row {
+        flex-direction: column;
+      }
+      .contact-left {
+        flex: 1;
+        width: 100%;
+      }
+      .nav-dots {
+        right: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fixed header -->
+  <header class="mock-header">
+    <div class="logo">no bhad codes</div>
+    <div class="menu-btn">
+      <span>Menu</span>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M7.33333 16L7.33333 0L8.66667 0L8.66667 16L7.33333 16Z"/>
+        <path d="M16 8.66667L0 8.66667L0 7.33333L16 7.33333L16 8.66667Z"/>
+      </svg>
+    </div>
+  </header>
+
+  <!-- Navigation Dots -->
+  <nav class="nav-dots">
+    <a href="#page-a" class="nav-dot active"><span class="nav-dot-label">Portal A</span></a>
+    <a href="#page-b" class="nav-dot"><span class="nav-dot-label">Portal B</span></a>
+    <a href="#page-c" class="nav-dot"><span class="nav-dot-label">Portal C</span></a>
+    <a href="#page-d" class="nav-dot"><span class="nav-dot-label">Portal D</span></a>
+    <a href="#page-e" class="nav-dot"><span class="nav-dot-label">Portal E</span></a>
+    <a href="#page-f" class="nav-dot"><span class="nav-dot-label">Portal F</span></a>
+  </nav>
+
+  <!-- ==========================================
+       PAGE A: Inline Section (Current Style)
+       ========================================== -->
+  <div id="page-a" class="page-mockup">
+    <span class="section-label">Client Portal A</span>
+    <div class="mock-main">
+
+      <!-- CONTACT SECTION (exact copy) -->
+      <section class="contact-section">
+        <h2>contact</h2>
+        <div class="contact-options">
+          <p>
+            <span class="contact-option-label">Message me here</span>,
+            fill out a project <a href="#" class="contact-option-link">intake form</a>,
+            or <a href="#" class="contact-option-link">email me</a>.
+          </p>
+        </div>
+        <form class="contact-form">
+          <div class="contact-row">
+            <div class="contact-left">
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="text" placeholder="...">
+                  <label class="text-small">Name</label>
+                </div>
+              </div>
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="text" placeholder="...">
+                  <label class="text-small">Company (optional)</label>
+                </div>
+              </div>
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="email" placeholder="...">
+                  <label class="text-small">Email</label>
+                </div>
+              </div>
+            </div>
+            <div class="contact-right">
+              <button type="button" class="submit-button">
+                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 3h4v4"/>
+                  <path d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"/>
+                  <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05"/>
+                  <path d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z"/>
+                  <path d="M9.707 14.293 21 3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="contact-message-row">
+            <div class="input-wrapper">
+              <div class="input-item">
+                <textarea placeholder="..."></textarea>
+                <label class="text-small">Message</label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- CLIENT PORTAL A: Inline (matches contact) -->
+      <section class="client-portal-section">
+        <h2>client portal</h2>
+        <div class="portal-auth-toggle">
+          <button class="portal-toggle-btn active">Password</button>
+          <button class="portal-toggle-btn">Magic Link</button>
+        </div>
+        <div class="portal-login-row">
+          <div class="portal-login-fields">
+            <div class="input-wrapper">
+              <div class="input-item">
+                <input type="email" placeholder="...">
+                <label class="text-small">Email</label>
+              </div>
+            </div>
+            <div class="input-wrapper">
+              <div class="input-item">
+                <input type="password" placeholder="...">
+                <label class="text-small">Password</label>
+              </div>
+            </div>
+          </div>
+          <div class="portal-login-submit">
+            <button class="btn-primary">Sign In</button>
+          </div>
+        </div>
+        <a href="#" class="portal-link">Forgot password?</a>
+      </section>
+
+    </div>
+    <footer class="mock-footer">© 2025 No Bhad Codes. All rights reserved.</footer>
+  </div>
+
+  <!-- ==========================================
+       PAGE B: Centered Card
+       ========================================== -->
+  <div id="page-b" class="page-mockup">
+    <span class="section-label">Client Portal B</span>
+    <div class="mock-main">
+
+      <!-- CONTACT SECTION -->
+      <section class="contact-section">
+        <h2>contact</h2>
+        <div class="contact-options">
+          <p>
+            <span class="contact-option-label">Message me here</span>,
+            fill out a project <a href="#" class="contact-option-link">intake form</a>,
+            or <a href="#" class="contact-option-link">email me</a>.
+          </p>
+        </div>
+        <form class="contact-form">
+          <div class="contact-row">
+            <div class="contact-left">
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="text" placeholder="...">
+                  <label class="text-small">Name</label>
+                </div>
+              </div>
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="text" placeholder="...">
+                  <label class="text-small">Company (optional)</label>
+                </div>
+              </div>
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="email" placeholder="...">
+                  <label class="text-small">Email</label>
+                </div>
+              </div>
+            </div>
+            <div class="contact-right">
+              <button type="button" class="submit-button">
+                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 3h4v4"/>
+                  <path d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"/>
+                  <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05"/>
+                  <path d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z"/>
+                  <path d="M9.707 14.293 21 3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="contact-message-row">
+            <div class="input-wrapper">
+              <div class="input-item">
+                <textarea placeholder="..."></textarea>
+                <label class="text-small">Message</label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- CLIENT PORTAL B: Centered Card -->
+      <section class="portal-variant-b">
+        <div class="portal-card-b">
+          <h2>client portal</h2>
+          <p class="subtitle">Access your projects and files</p>
+          <div class="portal-auth-toggle" style="max-width: 100%;">
+            <button class="portal-toggle-btn active">Password</button>
+            <button class="portal-toggle-btn">Magic Link</button>
+          </div>
+          <div class="portal-login-fields" style="max-width: 100%;">
+            <div class="input-wrapper">
+              <div class="input-item">
+                <input type="email" placeholder="...">
+                <label class="text-small">Email</label>
+              </div>
+            </div>
+            <div class="input-wrapper">
+              <div class="input-item">
+                <input type="password" placeholder="...">
+                <label class="text-small">Password</label>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary" style="max-width: 100%; margin-top: 1rem;">Sign In</button>
+          <a href="#" class="portal-link" style="text-align: center;">Forgot password?</a>
+        </div>
+      </section>
+
+    </div>
+    <footer class="mock-footer">© 2025 No Bhad Codes. All rights reserved.</footer>
+  </div>
+
+  <!-- ==========================================
+       PAGE C: Two Column Split
+       ========================================== -->
+  <div id="page-c" class="page-mockup">
+    <span class="section-label">Client Portal C</span>
+    <div class="mock-main">
+
+      <!-- CONTACT SECTION -->
+      <section class="contact-section">
+        <h2>contact</h2>
+        <div class="contact-options">
+          <p>
+            <span class="contact-option-label">Message me here</span>,
+            fill out a project <a href="#" class="contact-option-link">intake form</a>,
+            or <a href="#" class="contact-option-link">email me</a>.
+          </p>
+        </div>
+        <form class="contact-form">
+          <div class="contact-row">
+            <div class="contact-left">
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="text" placeholder="...">
+                  <label class="text-small">Name</label>
+                </div>
+              </div>
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="text" placeholder="...">
+                  <label class="text-small">Company (optional)</label>
+                </div>
+              </div>
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="email" placeholder="...">
+                  <label class="text-small">Email</label>
+                </div>
+              </div>
+            </div>
+            <div class="contact-right">
+              <button type="button" class="submit-button">
+                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 3h4v4"/>
+                  <path d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"/>
+                  <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05"/>
+                  <path d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z"/>
+                  <path d="M9.707 14.293 21 3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="contact-message-row">
+            <div class="input-wrapper">
+              <div class="input-item">
+                <textarea placeholder="..."></textarea>
+                <label class="text-small">Message</label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- CLIENT PORTAL C: Two Column -->
+      <section class="portal-variant-c">
+        <div class="portal-c-info">
+          <h2>client portal</h2>
+          <p>Access your project files, view progress updates, and communicate with our team.</p>
+          <ul>
+            <li>View project progress</li>
+            <li>Download deliverables</li>
+            <li>Send messages</li>
+            <li>Review invoices</li>
+          </ul>
+        </div>
+        <div class="portal-c-form">
+          <div class="portal-auth-toggle">
+            <button class="portal-toggle-btn active">Password</button>
+            <button class="portal-toggle-btn">Magic Link</button>
+          </div>
+          <div class="portal-login-fields">
+            <div class="input-wrapper">
+              <div class="input-item">
+                <input type="email" placeholder="...">
+                <label class="text-small">Email</label>
+              </div>
+            </div>
+            <div class="input-wrapper">
+              <div class="input-item">
+                <input type="password" placeholder="...">
+                <label class="text-small">Password</label>
+              </div>
+            </div>
+          </div>
+          <div class="portal-login-submit">
+            <button class="btn-primary">Sign In</button>
+          </div>
+          <a href="#" class="portal-link">Forgot password?</a>
+        </div>
+      </section>
+
+    </div>
+    <footer class="mock-footer">© 2025 No Bhad Codes. All rights reserved.</footer>
+  </div>
+
+  <!-- ==========================================
+       PAGE D: Centered Minimal
+       ========================================== -->
+  <div id="page-d" class="page-mockup">
+    <span class="section-label">Client Portal D</span>
+    <div class="mock-main">
+
+      <!-- CONTACT SECTION -->
+      <section class="contact-section">
+        <h2>contact</h2>
+        <div class="contact-options">
+          <p>
+            <span class="contact-option-label">Message me here</span>,
+            fill out a project <a href="#" class="contact-option-link">intake form</a>,
+            or <a href="#" class="contact-option-link">email me</a>.
+          </p>
+        </div>
+        <form class="contact-form">
+          <div class="contact-row">
+            <div class="contact-left">
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="text" placeholder="...">
+                  <label class="text-small">Name</label>
+                </div>
+              </div>
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="text" placeholder="...">
+                  <label class="text-small">Company (optional)</label>
+                </div>
+              </div>
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="email" placeholder="...">
+                  <label class="text-small">Email</label>
+                </div>
+              </div>
+            </div>
+            <div class="contact-right">
+              <button type="button" class="submit-button">
+                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 3h4v4"/>
+                  <path d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"/>
+                  <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05"/>
+                  <path d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z"/>
+                  <path d="M9.707 14.293 21 3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="contact-message-row">
+            <div class="input-wrapper">
+              <div class="input-item">
+                <textarea placeholder="..."></textarea>
+                <label class="text-small">Message</label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- CLIENT PORTAL D: Centered Minimal -->
+      <section class="portal-variant-d">
+        <h2>client portal</h2>
+        <p class="subtitle">sign in to access your projects</p>
+        <div class="portal-d-form">
+          <div class="portal-d-toggle">
+            <button class="active">Password</button>
+            <button>Magic Link</button>
+          </div>
+          <div class="portal-login-fields" style="max-width: 100%;">
+            <div class="input-wrapper">
+              <div class="input-item">
+                <input type="email" placeholder="...">
+                <label class="text-small">Email</label>
+              </div>
+            </div>
+            <div class="input-wrapper">
+              <div class="input-item">
+                <input type="password" placeholder="...">
+                <label class="text-small">Password</label>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary" style="max-width: 100%; margin-top: 1rem; border: 3px solid var(--fg); background: transparent; color: var(--fg);">Sign In</button>
+        </div>
+      </section>
+
+    </div>
+    <footer class="mock-footer">© 2025 No Bhad Codes. All rights reserved.</footer>
+  </div>
+
+  <!-- ==========================================
+       PAGE E: Dark Background
+       ========================================== -->
+  <div id="page-e" class="page-mockup">
+    <span class="section-label">Client Portal E</span>
+    <div class="mock-main">
+
+      <!-- CONTACT SECTION -->
+      <section class="contact-section">
+        <h2>contact</h2>
+        <div class="contact-options">
+          <p>
+            <span class="contact-option-label">Message me here</span>,
+            fill out a project <a href="#" class="contact-option-link">intake form</a>,
+            or <a href="#" class="contact-option-link">email me</a>.
+          </p>
+        </div>
+        <form class="contact-form">
+          <div class="contact-row">
+            <div class="contact-left">
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="text" placeholder="...">
+                  <label class="text-small">Name</label>
+                </div>
+              </div>
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="text" placeholder="...">
+                  <label class="text-small">Company (optional)</label>
+                </div>
+              </div>
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="email" placeholder="...">
+                  <label class="text-small">Email</label>
+                </div>
+              </div>
+            </div>
+            <div class="contact-right">
+              <button type="button" class="submit-button">
+                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 3h4v4"/>
+                  <path d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"/>
+                  <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05"/>
+                  <path d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z"/>
+                  <path d="M9.707 14.293 21 3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="contact-message-row">
+            <div class="input-wrapper">
+              <div class="input-item">
+                <textarea placeholder="..."></textarea>
+                <label class="text-small">Message</label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- CLIENT PORTAL E: Dark Background -->
+      <section class="portal-variant-e">
+        <div class="portal-e-content">
+          <h2>client portal</h2>
+          <div class="portal-auth-toggle">
+            <button class="portal-toggle-btn active">Password</button>
+            <button class="portal-toggle-btn">Magic Link</button>
+          </div>
+          <div class="portal-login-row">
+            <div class="portal-login-fields">
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="email" placeholder="..." style="background: var(--bg); color: var(--fg);">
+                  <label class="text-small" style="color: var(--fg);">Email</label>
+                </div>
+              </div>
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="password" placeholder="..." style="background: var(--bg); color: var(--fg);">
+                  <label class="text-small" style="color: var(--fg);">Password</label>
+                </div>
+              </div>
+            </div>
+            <div class="portal-login-submit">
+              <button class="btn-primary" style="background: var(--color-primary); border-color: var(--color-primary); color: var(--fg);">Sign In</button>
+            </div>
+          </div>
+          <a href="#" class="portal-link">Forgot password?</a>
+        </div>
+      </section>
+
+    </div>
+    <footer class="mock-footer">© 2025 No Bhad Codes. All rights reserved.</footer>
+  </div>
+
+  <!-- ==========================================
+       PAGE F: Floating Card
+       ========================================== -->
+  <div id="page-f" class="page-mockup">
+    <span class="section-label">Client Portal F</span>
+    <div class="mock-main">
+
+      <!-- CONTACT SECTION -->
+      <section class="contact-section">
+        <h2>contact</h2>
+        <div class="contact-options">
+          <p>
+            <span class="contact-option-label">Message me here</span>,
+            fill out a project <a href="#" class="contact-option-link">intake form</a>,
+            or <a href="#" class="contact-option-link">email me</a>.
+          </p>
+        </div>
+        <form class="contact-form">
+          <div class="contact-row">
+            <div class="contact-left">
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="text" placeholder="...">
+                  <label class="text-small">Name</label>
+                </div>
+              </div>
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="text" placeholder="...">
+                  <label class="text-small">Company (optional)</label>
+                </div>
+              </div>
+              <div class="input-wrapper">
+                <div class="input-item">
+                  <input type="email" placeholder="...">
+                  <label class="text-small">Email</label>
+                </div>
+              </div>
+            </div>
+            <div class="contact-right">
+              <button type="button" class="submit-button">
+                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 3h4v4"/>
+                  <path d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"/>
+                  <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05"/>
+                  <path d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z"/>
+                  <path d="M9.707 14.293 21 3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="contact-message-row">
+            <div class="input-wrapper">
+              <div class="input-item">
+                <textarea placeholder="..."></textarea>
+                <label class="text-small">Message</label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- CLIENT PORTAL F: Floating Card -->
+      <section class="portal-variant-f">
+        <div class="portal-card-f">
+          <h2>client portal</h2>
+          <div class="portal-f-toggle">
+            <button class="active">Password</button>
+            <button>Magic Link</button>
+          </div>
+          <input type="email" class="field-underline" placeholder="email">
+          <input type="password" class="field-underline" placeholder="password">
+          <button class="btn-green">Sign In</button>
+          <a href="#" class="portal-link" style="text-align: center;">Forgot password?</a>
+        </div>
+      </section>
+
+    </div>
+    <footer class="mock-footer">© 2025 No Bhad Codes. All rights reserved.</footer>
+  </div>
+
+  <script>
+    // Update active nav dot on scroll
+    const pages = document.querySelectorAll('.page-mockup');
+    const navDots = document.querySelectorAll('.nav-dot');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navDots.forEach(dot => dot.classList.remove('active'));
+          const activeId = entry.target.id;
+          const activeDot = document.querySelector(`.nav-dot[href="#${activeId}"]`);
+          if (activeDot) activeDot.classList.add('active');
+        }
+      });
+    }, { threshold: 0.5 });
+
+    pages.forEach(page => observer.observe(page));
+  </script>
+
+</body>
+</html>

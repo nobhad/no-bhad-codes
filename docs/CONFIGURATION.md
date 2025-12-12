@@ -76,11 +76,18 @@ Copy `.env.example` to `.env` and configure the following variables:
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
+| `REDIS_ENABLED` | No | `false` | Enable/disable Redis caching. Set to `true` to enable. |
 | `REDIS_HOST` | No | `localhost` | Redis server hostname |
 | `REDIS_PORT` | No | `6379` | Redis server port |
 | `REDIS_PASSWORD` | No | - | Redis authentication password |
 | `REDIS_DB` | No | `0` | Redis database number |
 | `REDIS_KEY_PREFIX` | No | `nbc:` | Redis key prefix |
+
+**Note:** Redis is optional for development. When `REDIS_ENABLED` is not set to `true`, the server runs without caching functionality. To enable Redis:
+
+1. Install Redis: `brew install redis` (macOS)
+2. Start Redis: `brew services start redis`
+3. Add to `.env`: `REDIS_ENABLED=true`
 
 ### File Storage
 
@@ -107,9 +114,9 @@ import { BRANDING, getCopyrightText, getContactEmail } from './config/branding';
 
 // Company identity
 BRANDING.APP_NAME          // "No Bhad Codes"
-BRANDING.APP_DOMAIN        // "nobhadcodes.com"
-BRANDING.CONTACT_EMAIL     // "hello@nobhadcodes.com"
-BRANDING.SUPPORT_EMAIL     // "support@nobhadcodes.com"
+BRANDING.APP_DOMAIN        // "nobhad.codes"
+BRANDING.CONTACT_EMAIL     // "nobhaduri@gmail.com"
+BRANDING.SUPPORT_EMAIL     // "nobhaduri@gmail.com"
 
 // SEO/Meta information
 BRANDING.META.TITLE        // Page title

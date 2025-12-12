@@ -52,8 +52,8 @@ const options = {
       `,
       contact: {
         name: 'No Bhad Codes Support',
-        email: 'support@nobhadcodes.com',
-        url: 'https://nobhadcodes.com',
+        email: process.env.SUPPORT_EMAIL || 'nobhaduri@gmail.com',
+        url: process.env.FRONTEND_URL || 'https://nobhad.codes',
       },
       license: {
         name: 'MIT',
@@ -66,7 +66,7 @@ const options = {
         description: 'Development server',
       },
       {
-        url: 'https://api.nobhadcodes.com',
+        url: process.env.PRODUCTION_API_URL || 'https://api.nobhad.codes',
         description: 'Production server',
       },
     ],
@@ -135,8 +135,9 @@ const options = {
             },
             password: {
               type: 'string',
-              minLength: 8,
-              example: 'securePassword123',
+              minLength: 12,
+              description: 'Requires 12+ chars, uppercase, lowercase, number, and special character',
+              example: 'SecurePassword123!',
             },
           },
         },
@@ -438,12 +439,15 @@ const specs = swaggerJsdoc(options);
  * Setup Swagger documentation for Express app
  */
 export function setupSwagger(app: Express): void {
-  // Swagger UI options
+  // Swagger UI options - colors from environment or defaults
+  const brandColor = process.env.BRAND_COLOR || '#00ff41';
+  const darkBgColor = process.env.DARK_BG_COLOR || '#1a1a1a';
+
   const swaggerUiOptions = {
     customCss: `
       .swagger-ui .topbar { display: none; }
-      .swagger-ui .info .title { color: #00ff41; }
-      .swagger-ui .scheme-container { background: #1a1a1a; }
+      .swagger-ui .info .title { color: ${brandColor}; }
+      .swagger-ui .scheme-container { background: ${darkBgColor}; }
     `,
     customSiteTitle: 'No Bhad Codes API Documentation',
     customfavIcon: '/favicon.png',

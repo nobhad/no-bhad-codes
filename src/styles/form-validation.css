@@ -5,12 +5,12 @@
 .form-input.error,
 .form-select.error,
 .form-textarea.error {
-  border-color: #ef4444;
+  border-color: var(--color-error-500);
   background-color: rgba(239, 68, 68, 0.05);
 }
 
 .field-error {
-  color: #ef4444;
+  color: var(--color-error-500);
   font-size: 0.85rem;
   min-height: 1.2em;
   margin-top: 4px;
@@ -25,15 +25,15 @@
 }
 
 .form-message.success {
-  background-color: rgba(46, 213, 115, 0.1);
-  border: 1px solid #2ed573;
-  color: #2ed573;
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid var(--color-success-500);
+  color: var(--color-success-500);
 }
 
 .form-message.error {
   background-color: transparent;
   border: none;
-  color: #ef4444;
+  color: var(--color-error-500);
 }
 
 .form-button.loading {
@@ -64,11 +64,11 @@
 
 .form-button.form-valid {
   background-color: var(--color-primary) !important;
-  color: #000000 !important;
-  border-color: #000000 !important;
+  color: var(--color-black) !important;
+  border-color: var(--color-border) !important;
 }
 
 .form-button.form-valid:hover {
   background-color: var(--color-primary) !important;
-  color: #000000 !important;
+  color: var(--color-black) !important;
 }

@@ -609,11 +609,11 @@ export const ValidationSchemas = {
     email: { type: 'email' as const },
     password: {
       type: 'string' as const,
-      minLength: 8,
+      minLength: 12,
       maxLength: 128,
       pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
       description:
-        'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+        'Password must be 12+ characters with at least one uppercase, lowercase, number, and special character',
     },
   },
 

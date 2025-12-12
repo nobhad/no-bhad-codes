@@ -7,7 +7,7 @@ import bcrypt from 'bcryptjs';
 import sqlite3 from 'sqlite3';
 
 async function createTestUser() {
-  const email = 'arrow@nobhadcodes.com';
+  const email = 'test@nobhad.codes';
   const password = 'Test!1234';
   const hash = await bcrypt.hash(password, 10);
 
