@@ -236,8 +236,8 @@ Fixed incorrect domain `nobhadcodes.com` to `nobhad.codes` and standardized all 
 ### Accessibility (from audit)
 
 - [x] Add ARIA labels to messaging module buttons/icons - DONE
-- [ ] Add keyboard support to business card flip
-- [ ] Make file upload dropzone keyboard accessible
+- [x] Add keyboard support to business card flip - DONE
+- [x] Make file upload dropzone keyboard accessible - DONE
 
 ### Quick Wins (from deep dive December 11, 2025)
 
@@ -863,8 +863,8 @@ Other Changes:
 
 ### Accessibility
 - [x] Add ARIA labels to messaging module buttons/icons - DONE
-- [ ] Add keyboard support to business card flip
-- [ ] Make file upload dropzone keyboard accessible
+- [x] Add keyboard support to business card flip - DONE
+- [x] Make file upload dropzone keyboard accessible - DONE
 
 ### CSS Cleanup - MOSTLY COMPLETE
 - [x] Replace 80+ hardcoded colors with CSS variables (December 12, 2025)

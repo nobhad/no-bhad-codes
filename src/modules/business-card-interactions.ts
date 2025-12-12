@@ -79,6 +79,7 @@ export class BusinessCardInteractions extends BaseModule {
 
     // Bind methods
     this.handleCardClick = this.handleCardClick.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleGlobalMouseMove = this.handleGlobalMouseMove.bind(this);
     this.handleMouseEnter = this.handleMouseEnter.bind(this);
@@ -210,11 +211,20 @@ export class BusinessCardInteractions extends BaseModule {
 
     this.log('Adding card event listeners...');
 
+    // Make card focusable for keyboard accessibility
+    this.businessCard.setAttribute('tabindex', '0');
+    this.businessCard.setAttribute('role', 'button');
+    this.businessCard.setAttribute('aria-label', 'Business card - press Enter or Space to flip');
+    this.businessCard.setAttribute('aria-pressed', String(this.isFlipped));
+
     // Mouse events
     this.businessCard.addEventListener('click', this.handleCardClick, { passive: false });
     this.businessCard.addEventListener('mousemove', this.handleMouseMove, { passive: true });
     this.businessCard.addEventListener('mouseenter', this.handleMouseEnter, { passive: true });
     this.businessCard.addEventListener('mouseleave', this.handleMouseLeave, { passive: true });
+
+    // Keyboard events for accessibility
+    this.businessCard.addEventListener('keydown', this.handleKeyDown, { passive: false });
 
     // Global mouse tracking for subtle following
     document.addEventListener('mousemove', this.handleGlobalMouseMove, { passive: true });
@@ -236,6 +246,9 @@ export class BusinessCardInteractions extends BaseModule {
     this.businessCard.removeEventListener('mousemove', this.handleMouseMove);
     this.businessCard.removeEventListener('mouseenter', this.handleMouseEnter);
     this.businessCard.removeEventListener('mouseleave', this.handleMouseLeave);
+
+    // Keyboard events
+    this.businessCard.removeEventListener('keydown', this.handleKeyDown);
 
     // Global mouse tracking
     document.removeEventListener('mousemove', this.handleGlobalMouseMove);
@@ -295,9 +308,49 @@ export class BusinessCardInteractions extends BaseModule {
     this.log(`Card clicked on ${flipDirection} side - flipping ${flipDirection}`);
     this.flipCard(flipDirection);
 
+    // Update ARIA state
+    this.updateAriaState();
+
     // Trigger interaction callback
     if (this.onCardInteraction) {
       this.onCardInteraction('click');
+    }
+  }
+
+  /**
+   * Handle keyboard events for accessibility
+   * Enter or Space flips the card
+   */
+  handleKeyDown(event: KeyboardEvent) {
+    if (!this.isEnabled || this.isAnimating) {
+      this.log('Card keydown ignored - interactions disabled or animating');
+      return;
+    }
+
+    // Flip on Enter or Space
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      event.stopPropagation();
+
+      this.log('Card flipped via keyboard');
+      this.flipCard('right');
+
+      // Update ARIA state
+      this.updateAriaState();
+
+      // Trigger interaction callback
+      if (this.onCardInteraction) {
+        this.onCardInteraction('keyboard');
+      }
+    }
+  }
+
+  /**
+   * Update ARIA pressed state after flip
+   */
+  private updateAriaState() {
+    if (this.businessCard) {
+      this.businessCard.setAttribute('aria-pressed', String(this.isFlipped));
     }
   }
 

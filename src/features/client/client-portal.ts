@@ -1410,6 +1410,11 @@ export class ClientPortalModule extends BaseModule {
 
     if (!dropzone) return;
 
+    // Make dropzone keyboard accessible
+    dropzone.setAttribute('tabindex', '0');
+    dropzone.setAttribute('role', 'button');
+    dropzone.setAttribute('aria-label', 'File upload dropzone - press Enter or Space to browse files, or drag and drop files here');
+
     // Browse button click
     if (browseBtn && fileInput) {
       browseBtn.addEventListener('click', (e) => {
@@ -1447,6 +1452,14 @@ export class ClientPortalModule extends BaseModule {
       const files = e.dataTransfer?.files;
       if (files && files.length > 0) {
         this.uploadFiles(Array.from(files));
+      }
+    });
+
+    // Keyboard support - Enter or Space triggers file browser
+    dropzone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        fileInput?.click();
       }
     });
 

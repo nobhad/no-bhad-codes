@@ -633,109 +633,7 @@ class AdminDashboard {
     await leadsModule.loadLeads(this.moduleContext);
   }
 
-  private updateLeadsDisplay(data: { leads: any[]; stats: any }): void {
-    // Store leads data for detail views
-    this.leadsData = data.leads || [];
-
-    // Update overview stats
-    const statTotal = document.getElementById('stat-total-leads');
-    const statPending = document.getElementById('stat-pending-leads');
-    const statVisitors = document.getElementById('stat-visitors');
-
-    // Update leads tab stats
-    const leadsTotal = document.getElementById('leads-total');
-    const leadsPending = document.getElementById('leads-pending');
-    const leadsActive = document.getElementById('leads-active');
-    const leadsCompleted = document.getElementById('leads-completed');
-
-    if (statTotal) statTotal.textContent = data.stats?.total?.toString() || '0';
-    if (statPending) statPending.textContent = data.stats?.pending?.toString() || '0';
-    if (statVisitors) statVisitors.textContent = '0'; // No visitor tracking backend yet
-    if (leadsTotal) leadsTotal.textContent = data.stats?.total?.toString() || '0';
-    if (leadsPending) leadsPending.textContent = data.stats?.pending?.toString() || '0';
-    if (leadsActive) leadsActive.textContent = data.stats?.active?.toString() || '0';
-    if (leadsCompleted) leadsCompleted.textContent = data.stats?.completed?.toString() || '0';
-
-    // Update recent leads list
-    const recentList = document.getElementById('recent-leads-list');
-    if (recentList && data.leads) {
-      const recentLeads = data.leads.slice(0, 5);
-      if (recentLeads.length === 0) {
-        recentList.innerHTML = '<li>No leads yet</li>';
-      } else {
-        recentList.innerHTML = recentLeads
-          .map((lead: any) => {
-            const date = new Date(lead.created_at).toLocaleDateString();
-            return `<li>${lead.contact_name || 'Unknown'} - ${lead.project_type || 'Project'} - ${date}</li>`;
-          })
-          .join('');
-      }
-    }
-
-    // Update leads table
-    const tableBody = document.getElementById('leads-table-body');
-    if (tableBody && data.leads) {
-      if (data.leads.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">No leads found</td></tr>';
-      } else {
-        tableBody.innerHTML = data.leads
-          .map((lead: any) => {
-            const date = new Date(lead.created_at).toLocaleDateString();
-            const statusClass =
-              lead.status === 'pending'
-                ? 'status-pending'
-                : lead.status === 'active'
-                  ? 'status-active'
-                  : 'status-completed';
-            const showActivateBtn = lead.status === 'pending';
-            // Sanitize user data to prevent XSS
-            const safeContactName = SanitizationUtils.escapeHtml(lead.contact_name || '-');
-            const safeCompanyName = SanitizationUtils.escapeHtml(lead.company_name || '-');
-            const safeEmail = SanitizationUtils.escapeHtml(lead.email || '-');
-            const safeProjectType = SanitizationUtils.escapeHtml(lead.project_type || '-');
-            const safeBudgetRange = SanitizationUtils.escapeHtml(lead.budget_range || '-');
-            const safeStatus = SanitizationUtils.escapeHtml(lead.status || 'pending');
-            return `
-            <tr data-lead-id="${lead.id}">
-              <td>${date}</td>
-              <td>${safeContactName}</td>
-              <td>${safeCompanyName}</td>
-              <td>${safeEmail}</td>
-              <td>${safeProjectType}</td>
-              <td>${safeBudgetRange}</td>
-              <td>
-                <span class="status-badge ${statusClass}">${safeStatus}</span>
-                ${showActivateBtn ? `<button class="action-btn action-convert activate-lead-btn" data-id="${lead.id}" onclick="event.stopPropagation()" style="margin-left: 0.5rem;">Activate</button>` : ''}
-              </td>
-            </tr>
-          `;
-          })
-          .join('');
-
-        // Add click handlers to rows
-        const rows = tableBody.querySelectorAll('tr[data-lead-id]');
-        rows.forEach((row) => {
-          row.addEventListener('click', (e) => {
-            if ((e.target as HTMLElement).tagName === 'BUTTON') return;
-            const leadId = parseInt((row as HTMLElement).dataset.leadId || '0');
-            this.showLeadDetails(leadId);
-          });
-        });
-
-        // Add click handlers for activate buttons
-        const activateBtns = tableBody.querySelectorAll('.activate-lead-btn');
-        activateBtns.forEach((btn) => {
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const id = (btn as HTMLElement).dataset.id;
-            if (id && confirm('Activate this lead as a project?')) {
-              this.activateLead(parseInt(id));
-            }
-          });
-        });
-      }
-    }
-  }
+  // NOTE: updateLeadsDisplay moved to admin-leads module
 
   private async loadContactSubmissions(): Promise<void> {
     const token =
@@ -1117,104 +1015,7 @@ class AdminDashboard {
     await projectsModule.loadProjects(this.moduleContext);
   }
 
-  private updateProjectsDisplay(data: { leads: any[]; stats: any }): void {
-    // Filter to only show non-pending projects (actual projects vs leads)
-    const projects = (data.leads || []).filter(
-      (p: any) => p.status !== 'pending' || p.project_name
-    );
-
-    // Update stats
-    const projectsTotal = document.getElementById('projects-total');
-    const projectsActive = document.getElementById('projects-active');
-    const projectsCompleted = document.getElementById('projects-completed');
-    const projectsOnHold = document.getElementById('projects-on-hold');
-
-    const activeCount = projects.filter(
-      (p: any) => p.status === 'active' || p.status === 'in_progress'
-    ).length;
-    const completedCount = projects.filter((p: any) => p.status === 'completed').length;
-    const onHoldCount = projects.filter((p: any) => p.status === 'on_hold').length;
-
-    if (projectsTotal) projectsTotal.textContent = projects.length.toString();
-    if (projectsActive) projectsActive.textContent = activeCount.toString();
-    if (projectsCompleted) projectsCompleted.textContent = completedCount.toString();
-    if (projectsOnHold) projectsOnHold.textContent = onHoldCount.toString();
-
-    // Update projects table
-    const tableBody = document.getElementById('projects-table-body');
-    if (tableBody) {
-      if (projects.length === 0) {
-        tableBody.innerHTML =
-          '<tr><td colspan="7" class="loading-row">No projects yet. Convert leads to start projects.</td></tr>';
-      } else {
-        tableBody.innerHTML = projects
-          .map((project: any) => {
-            return `
-            <tr data-project-id="${project.id}">
-              <td>${project.project_name || project.description?.substring(0, 30) || 'Untitled Project'}</td>
-              <td>${project.contact_name || '-'}<br><small>${project.company_name || ''}</small></td>
-              <td>${this.formatProjectType(project.project_type)}</td>
-              <td>${project.budget_range || '-'}</td>
-              <td>${project.timeline || '-'}</td>
-              <td>
-                <select class="project-status-select status-select" data-id="${project.id}" onclick="event.stopPropagation()">
-                  <option value="pending" ${project.status === 'pending' ? 'selected' : ''}>Pending</option>
-                  <option value="active" ${project.status === 'active' ? 'selected' : ''}>Active</option>
-                  <option value="in_progress" ${project.status === 'in_progress' ? 'selected' : ''}>In Progress</option>
-                  <option value="on_hold" ${project.status === 'on_hold' ? 'selected' : ''}>On Hold</option>
-                  <option value="completed" ${project.status === 'completed' ? 'selected' : ''}>Completed</option>
-                  <option value="cancelled" ${project.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                </select>
-              </td>
-              <td>
-                <button class="action-btn action-edit" data-id="${project.id}" onclick="event.stopPropagation()">View</button>
-              </td>
-            </tr>
-          `;
-          })
-          .join('');
-
-        // Add click handlers for rows
-        const rows = tableBody.querySelectorAll('tr[data-project-id]');
-        rows.forEach((row) => {
-          row.addEventListener('click', (e) => {
-            if (
-              (e.target as HTMLElement).tagName === 'SELECT' ||
-              (e.target as HTMLElement).tagName === 'BUTTON'
-            ) {return;}
-            const projectId = parseInt((row as HTMLElement).dataset.projectId || '0');
-            this.showProjectDetails(projectId);
-          });
-        });
-
-        // Add change handlers for status selects
-        const statusSelects = tableBody.querySelectorAll('.project-status-select');
-        statusSelects.forEach((select) => {
-          select.addEventListener('change', (e) => {
-            e.stopPropagation();
-            const target = e.target as HTMLSelectElement;
-            const id = target.dataset.id;
-            const newStatus = target.value;
-            if (id) {
-              this.updateProjectStatus(parseInt(id), newStatus);
-            }
-          });
-        });
-
-        // Add click handlers for view buttons
-        const viewBtns = tableBody.querySelectorAll('.action-btn.action-edit');
-        viewBtns.forEach((btn) => {
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const id = (btn as HTMLElement).dataset.id;
-            if (id) {
-              this.showProjectDetails(parseInt(id));
-            }
-          });
-        });
-      }
-    }
-  }
+  // NOTE: updateProjectsDisplay moved to admin-projects module
 
   private async updateProjectStatus(id: number, status: string): Promise<void> {
     const token =
@@ -2049,6 +1850,11 @@ class AdminDashboard {
     }
 
     if (dropzone) {
+      // Make dropzone keyboard accessible
+      dropzone.setAttribute('tabindex', '0');
+      dropzone.setAttribute('role', 'button');
+      dropzone.setAttribute('aria-label', 'File upload dropzone - press Enter or Space to browse files, or drag and drop files here');
+
       dropzone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropzone.classList.add('dragover');
@@ -2063,6 +1869,14 @@ class AdminDashboard {
         dropzone.classList.remove('dragover');
         if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
           this.uploadFiles(e.dataTransfer.files);
+        }
+      });
+
+      // Keyboard support - Enter or Space triggers file browser
+      dropzone.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          fileInput?.click();
         }
       });
     }
@@ -2783,180 +2597,10 @@ class AdminDashboard {
     await analyticsModule.loadAnalyticsData(this.moduleContext);
   }
 
-  private async getAnalyticsData(): Promise<AnalyticsData> {
-    try {
-      // Try to get data from main app via parent window
-      if (window.opener?.NBW_DEBUG) {
-        const debug = window.opener.NBW_DEBUG;
-        if (debug.getVisitorData) {
-          return await debug.getVisitorData();
-        }
-      }
+  // NOTE: Analytics helper methods (getAnalyticsData, formatAnalyticsData, formatPageUrl, formatInteractionType)
+  // have been moved to admin-analytics module for code splitting
 
-      // Try to get data from current window
-      if (window.NBW_DEBUG?.getVisitorData) {
-        return (await window.NBW_DEBUG.getVisitorData()) as AnalyticsData;
-      }
-
-      // Try to access visitor tracking service directly
-      const { container } = await import('../../core/container');
-      const visitorService = (await container.resolve('VisitorTrackingService')) as {
-        exportData?: () => Promise<RawVisitorData>;
-      };
-      if (visitorService?.exportData) {
-        const data = await visitorService.exportData();
-        return this.formatAnalyticsData(data);
-      }
-    } catch (error) {
-      console.warn('[AdminDashboard] Could not get live analytics data:', error);
-    }
-
-    return {};
-  }
-
-  private formatAnalyticsData(rawData: RawVisitorData): AnalyticsData {
-    // Format raw visitor data into admin dashboard format
-    if (!rawData || !rawData.sessions) return {};
-
-    const sessions = rawData.sessions || [];
-    const pageViews = rawData.pageViews || [];
-    const interactions = rawData.interactions || [];
-
-    // Calculate popular pages
-    const pageViewCounts: Record<string, number> = {};
-    pageViews.forEach((pv) => {
-      pageViewCounts[pv.url] = (pageViewCounts[pv.url] || 0) + 1;
-    });
-
-    const popularPages = Object.entries(pageViewCounts)
-      .sort(([, a], [, b]) => (b as number) - (a as number))
-      .slice(0, 5)
-      .map(([url, count]) => ({
-        label: this.formatPageUrl(url),
-        value: `${count} views`
-      }));
-
-    // Calculate device breakdown
-    const deviceCounts: Record<string, number> = {};
-    sessions.forEach((session) => {
-      const deviceType = (session.deviceInfo as { type?: string })?.type;
-      if (deviceType) {
-        deviceCounts[deviceType] = (deviceCounts[deviceType] || 0) + 1;
-      }
-    });
-
-    const totalSessions = sessions.length;
-    const deviceBreakdown = Object.entries(deviceCounts).map(([device, count]) => ({
-      label: device.charAt(0).toUpperCase() + device.slice(1),
-      value: `${Math.round(((count as number) / totalSessions) * 100)}%`
-    }));
-
-    // Calculate engagement events
-    const interactionCounts: Record<string, number> = {};
-    interactions.forEach((interaction) => {
-      const key = interaction.type || 'Unknown';
-      interactionCounts[key] = (interactionCounts[key] || 0) + 1;
-    });
-
-    const engagementEvents = Object.entries(interactionCounts).map(([type, count]) => ({
-      label: this.formatInteractionType(type),
-      value: count.toString()
-    }));
-
-    return {
-      popularPages: popularPages.length > 0 ? popularPages : undefined,
-      deviceBreakdown: deviceBreakdown.length > 0 ? deviceBreakdown : undefined,
-      engagementEvents: engagementEvents.length > 0 ? engagementEvents : undefined,
-      geoDistribution: undefined // Would need geolocation data
-    };
-  }
-
-  private formatPageUrl(url: string): string {
-    // Convert URLs to readable page names
-    const urlMap: Record<string, string> = {
-      '/': 'Homepage',
-      '/art': 'Art Portfolio',
-      '/codes': 'Codes Section',
-      '/contact': 'Contact',
-      '/about': 'About'
-    };
-
-    return urlMap[url] || url;
-  }
-
-  private formatInteractionType(type: string): string {
-    // Convert interaction types to readable labels
-    const typeMap: Record<string, string> = {
-      'business-card-flip': 'Business Card Flips',
-      'contact-form-submit': 'Contact Form Submissions',
-      'external-link-click': 'External Link Clicks',
-      'download-click': 'Download Clicks',
-      'scroll-depth': 'Scroll Depth Events'
-    };
-
-    return typeMap[type] || type;
-  }
-
-  private async loadVisitorsData(): Promise<void> {
-    // Mock visitor data
-    const visitors = [
-      {
-        id: 'v_001',
-        firstVisit: '2024-08-30 14:23',
-        lastVisit: '2024-08-31 09:15',
-        sessions: 3,
-        pageViews: 12,
-        location: 'San Francisco, CA',
-        device: 'Desktop'
-      },
-      {
-        id: 'v_002',
-        firstVisit: '2024-08-31 08:45',
-        lastVisit: '2024-08-31 08:52',
-        sessions: 1,
-        pageViews: 5,
-        location: 'Toronto, ON',
-        device: 'Mobile'
-      }
-    ];
-
-    this.populateVisitorsTable(visitors);
-  }
-
-  private async loadLeadsData(): Promise<void> {
-    try {
-      const token = AdminAuth.getToken();
-      if (!token) {
-        console.error('[AdminDashboard] No auth token for leads request');
-        return;
-      }
-
-      const response = await fetch('/api/admin/leads', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch leads: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      // Update stats
-      this.updateElement('total-leads', String(data.stats?.total || 0));
-      this.updateElement('pending-leads', String(data.stats?.pending || 0));
-      this.updateElement('active-leads', String(data.stats?.active || 0));
-      this.updateElement('completed-leads', String(data.stats?.completed || 0));
-
-      // Populate table
-      this.populateLeadsTable(data.leads || []);
-    } catch (error) {
-      console.error('[AdminDashboard] Error loading leads:', error);
-      this.populateLeadsTable([]);
-    }
-  }
+  // NOTE: loadVisitorsData and loadLeadsData have been moved to respective modules
 
   private populateLeadsTable(
     leads: Array<{
