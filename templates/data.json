@@ -38,12 +38,6 @@
         "eyebrow": "03",
         "disabled": true,
         "comingSoon": true
-      },
-      {
-        "id": "client-portal",
-        "text": "client portal",
-        "href": "/client/landing",
-        "eyebrow": "04"
       }
     ]
   },
@@ -61,14 +55,6 @@
       "bodyClass": "projects-page",
       "mainClass": "projects-main",
       "scriptSrc": "/src/main.ts"
-    },
-    "clientLanding": {
-      "title": "Client Portal - No Bhad Codes",
-      "description": "Client portal for project management, updates, and communication",
-      "bodyClass": "client-landing-page",
-      "mainClass": "",
-      "scriptSrc": "/src/main.ts",
-      "robotsMeta": "noindex, nofollow"
     },
     "clientPortal": {
       "title": "Client Portal Dashboard - No Bhad Codes",

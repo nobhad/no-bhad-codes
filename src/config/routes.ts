@@ -14,7 +14,6 @@ export const ROUTES = {
 
   // Client area
   CLIENT: {
-    LANDING: '/client/landing',
     PORTAL: '/client/portal',
     INTAKE: '/client/intake',
     SET_PASSWORD: '/client/set-password'

@@ -403,11 +403,11 @@ class AdminDashboard {
       document.getElementById('logout-btn') || document.getElementById('btn-logout');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
-        // Clear auth data and redirect to client landing
+        // Clear auth data and redirect to home page
         sessionStorage.removeItem('clientAuth');
         sessionStorage.removeItem('client_auth_token');
         sessionStorage.removeItem('clientAuthToken');
-        window.location.href = '/client/landing';
+        window.location.href = '/';
       });
     }
 
@@ -3275,22 +3275,33 @@ class AdminDashboard {
 
     tbody.innerHTML = visitors
       .map(
-        (visitor) => `
+        (visitor) => {
+          // Sanitize all visitor data to prevent XSS
+          const safeId = SanitizationUtils.escapeHtml(String(visitor.id));
+          const safeFirstVisit = SanitizationUtils.escapeHtml(visitor.firstVisit);
+          const safeLastVisit = SanitizationUtils.escapeHtml(visitor.lastVisit);
+          const safeSessions = SanitizationUtils.escapeHtml(String(visitor.sessions));
+          const safePageViews = SanitizationUtils.escapeHtml(String(visitor.pageViews));
+          const safeLocation = SanitizationUtils.escapeHtml(visitor.location);
+          const safeDevice = SanitizationUtils.escapeHtml(visitor.device);
+
+          return `
       <tr>
-        <td>${visitor.id}</td>
-        <td>${visitor.firstVisit}</td>
-        <td>${visitor.lastVisit}</td>
-        <td>${visitor.sessions}</td>
-        <td>${visitor.pageViews}</td>
-        <td>${visitor.location}</td>
-        <td>${visitor.device}</td>
+        <td>${safeId}</td>
+        <td>${safeFirstVisit}</td>
+        <td>${safeLastVisit}</td>
+        <td>${safeSessions}</td>
+        <td>${safePageViews}</td>
+        <td>${safeLocation}</td>
+        <td>${safeDevice}</td>
         <td>
-          <button class="btn btn-secondary btn-sm" onclick="viewVisitorDetails('${visitor.id}')">
+          <button class="btn btn-secondary btn-sm" onclick="viewVisitorDetails('${safeId}')">
             View
           </button>
         </td>
       </tr>
-    `
+    `;
+        }
       )
       .join('');
   }

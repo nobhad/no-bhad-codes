@@ -411,10 +411,12 @@ router.post(
 
     // Send welcome email
     try {
+      // Note: Login URL no longer includes email in query string for privacy
+      // Client will enter email on the login page (portal login is now on home page)
       await emailService.sendWelcomeEmail(newClient.email, {
         name: newClient.contact_name || 'Client',
         companyName: newClient.company_name,
-        loginUrl: `${process.env.CLIENT_PORTAL_URL || 'https://nobhadcodes.com/client/portal.html'}?email=${encodeURIComponent(newClient.email)}`,
+        loginUrl: process.env.CLIENT_PORTAL_URL || 'https://nobhadcodes.com',
         supportEmail: process.env.SUPPORT_EMAIL || 'support@nobhadcodes.com',
       });
 
@@ -461,7 +463,7 @@ router.put(
 
     // Build update query dynamically
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: (string | number)[] = [];
 
     if (company_name !== undefined) {
       updates.push('company_name = ?');

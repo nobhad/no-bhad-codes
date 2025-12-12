@@ -312,25 +312,6 @@ export class Application {
         }
       },
       {
-        name: 'ClientLandingModule',
-        type: 'dom',
-        factory: async () => {
-          // Only load client landing on client landing pages
-          const currentPath = window.location.pathname;
-          if (currentPath.includes('/client/landing')) {
-            const { ClientLandingModule } = await import('../features/client/client-landing');
-            return new ClientLandingModule();
-          }
-          // Return a dummy module for other pages
-          return {
-            init: async () => {},
-            destroy: () => {},
-            isInitialized: true,
-            name: 'ClientLandingModule'
-          };
-        }
-      },
-      {
         name: 'ClientPortalModule',
         type: 'dom',
         factory: async () => {
@@ -637,7 +618,6 @@ export class Application {
     // Determine current page type
     const currentPath = window.location.pathname;
     const isClientPortal = currentPath.includes('/client/portal');
-    const isClientLanding = currentPath.includes('/client/landing');
     const isClientIntake = currentPath.includes('/client/intake');
     const isAdminPage = currentPath.includes('/admin');
     const isHomePage = currentPath === '/' || currentPath === '/index.html';
@@ -657,14 +637,6 @@ export class Application {
     // Modules for Client Portal dashboard
     const clientPortalModules = ['ThemeModule', 'ClientPortalModule'];
 
-    // Modules for Client Landing page (login/intake selection)
-    const clientLandingModules = [
-      'ThemeModule',
-      'NavigationModule',
-      'FooterModule',
-      'ClientLandingModule'
-    ];
-
     // Modules for Client Intake form
     const clientIntakeModules = ['ThemeModule', 'NavigationModule', 'FooterModule'];
 
@@ -675,8 +647,6 @@ export class Application {
     let baseCoreModules: string[];
     if (isClientPortal) {
       baseCoreModules = clientPortalModules;
-    } else if (isClientLanding) {
-      baseCoreModules = clientLandingModules;
     } else if (isClientIntake) {
       baseCoreModules = clientIntakeModules;
     } else if (isAdminPage) {

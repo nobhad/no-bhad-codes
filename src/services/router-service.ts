@@ -97,12 +97,6 @@ export class RouterService extends BaseService {
     });
 
     // Client pages - no section navigation needed
-    this.routes.set('/client/landing', {
-      path: '/client/landing',
-      section: '',
-      title: 'Client Portal - No Bhad Codes'
-    });
-
     this.routes.set('/client/intake', {
       path: '/client/intake',
       section: '',

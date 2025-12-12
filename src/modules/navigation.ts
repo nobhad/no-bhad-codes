@@ -184,7 +184,7 @@ export class NavigationModule extends BaseModule {
                 }
               }, 100);
             } else {
-              // For non-hash links (like /client/landing), navigate explicitly
+              // For non-hash links, navigate explicitly
               event.preventDefault();
               this.closeMenu();
 
@@ -413,8 +413,7 @@ export class NavigationModule extends BaseModule {
             eyebrow: '03',
             disabled: true,
             comingSoon: true
-          },
-          { id: 'client-portal', text: 'client portal', href: '/client/landing', eyebrow: '04' }
+          }
         ];
       }
 

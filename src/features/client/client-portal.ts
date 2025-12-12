@@ -2573,8 +2573,8 @@ export class ClientPortalModule extends BaseModule {
     sessionStorage.removeItem('clientEmail');
     sessionStorage.removeItem('clientName');
 
-    // Redirect to client landing page
-    window.location.href = '/client/landing';
+    // Redirect to home page
+    window.location.href = '/';
   }
 
   /**
