@@ -116,6 +116,7 @@
   justify-content: center;
   box-sizing: border-box;
   padding: 0;
+  padding-right: 1rem;
   overflow: visible;
 }
 
@@ -319,6 +320,24 @@ input:-webkit-autofill:active {
 
 .submit-button.form-sent svg {
   display: none !important;
+}
+
+/* Loading state - spin the arrow */
+.submit-button.loading {
+  pointer-events: none;
+}
+
+.submit-button.loading svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .submit-button svg {

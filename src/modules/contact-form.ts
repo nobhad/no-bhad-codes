@@ -392,11 +392,9 @@ export class ContactFormModule extends BaseModule {
 
     if (isLoading) {
       this.submitButton.disabled = true;
-      this.submitButton.textContent = 'Sending...';
       this.submitButton.classList.add('loading');
     } else {
       this.submitButton.disabled = false;
-      this.submitButton.textContent = 'Let\'s Talk';
       this.submitButton.classList.remove('loading');
     }
   }
