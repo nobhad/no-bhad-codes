@@ -59,6 +59,15 @@ export interface PageView {
 export interface Session {
   id: string;
   startTime: number;
+  lastActivity?: number;
+  pageViews?: number;
+  totalTimeOnSite?: number;
+  bounced?: boolean;
+  referrer?: string;
+  userAgent?: string;
+  screenResolution?: string;
+  language?: string;
+  timezone?: string;
   [key: string]: unknown;
 }
 

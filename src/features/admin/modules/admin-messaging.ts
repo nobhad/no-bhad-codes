@@ -18,6 +18,10 @@ export function getSelectedThreadId(): number | null {
   return selectedThreadId;
 }
 
+export function getSelectedClientId(): number | null {
+  return selectedClientId;
+}
+
 export async function loadClientThreads(ctx: AdminDashboardContext): Promise<void> {
   const token = ctx.getAuthToken();
   if (!token) return;

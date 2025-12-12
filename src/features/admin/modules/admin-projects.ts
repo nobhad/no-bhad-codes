@@ -283,7 +283,7 @@ function populateProjectDetailView(project: any): void {
   if (settingProgress) settingProgress.value = (project.progress || 0).toString();
 }
 
-function setupProjectDetailTabs(ctx: AdminDashboardContext): void {
+function setupProjectDetailTabs(_ctx: AdminDashboardContext): void {
   const tabBtns = document.querySelectorAll('.pd-tab-btn');
   const tabContents = document.querySelectorAll('.pd-tab-content');
 
