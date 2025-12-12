@@ -76,15 +76,16 @@ The Client Portal is a dedicated dashboard for clients to manage their projects,
 
 ```
 src/features/client/
-├── client-portal.ts      # Main portal module (~2400 lines)
+├── client-portal.ts      # Main portal module (~3000 lines)
 ├── client-intake.ts      # Intake form handling
-└── client-landing.ts     # Landing page logic
+└── terminal-intake.ts    # Terminal-style intake form
 
 templates/pages/
 └── client-portal.ejs     # Portal HTML template
 
 src/styles/pages/
-└── client-portal.css     # Portal-specific styles
+├── client-portal.css     # Portal-specific styles
+└── terminal-intake.css   # Terminal intake styles
 
 server/routes/
 ├── uploads.ts            # File upload API endpoints

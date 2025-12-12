@@ -8,11 +8,21 @@
  * Provides centralized state with subscriptions and type safety.
  */
 
+export interface WorkItem {
+  id: string | number;
+  title: string;
+  description?: string;
+  category?: string;
+  image?: string;
+  url?: string;
+  tags?: string[];
+}
+
 export type StateListener<T> = (newState: T, previousState: T) => void;
 export type StateSelector<T, U> = (state: T) => U;
 export type StateAction<_T = unknown> = {
   type: string;
-  payload?: any;
+  payload?: unknown;
   meta?: {
     timestamp: number;
     source?: string;
@@ -42,7 +52,7 @@ export interface AppState {
   // Works State
   currentChannel: number;
   channelsLoaded: boolean;
-  worksData: any[] | null;
+  worksData: WorkItem[] | null;
 
   // Form State
   contactFormVisible: boolean;
@@ -66,8 +76,10 @@ export class StateManager<T = AppState> {
   private listeners = new Map<string, StateListener<T>[]>();
   private selectors = new Map<
     string,
-    { selector: StateSelector<T, any>; lastValue: any; listeners: Function[] }
+
+    { selector: StateSelector<T, any>; lastValue: any; listeners: ((value: any) => void)[] }
   >();
+
   private computed = new Map<string, ComputedProperty<T, any>>();
   private reducers = new Map<string, StateReducer<T>>();
   private middleware: StateMiddleware<T>[] = [];
@@ -231,7 +243,7 @@ export class StateManager<T = AppState> {
       const wildcardListener = listener!;
       const wrappedListener: StateListener<T> = (newState, prevState) => {
         // Call listener for any property that changed
-        Object.keys(newState as any).forEach((key) => {
+        Object.keys(newState as object).forEach((key) => {
           const k = key as K;
           if (newState[k] !== prevState[k]) {
             wildcardListener(newState[k], prevState[k], k);
@@ -370,7 +382,7 @@ export class StateManager<T = AppState> {
     globalListeners.forEach((listener) => listener(newState, previousState));
 
     // Property-specific listeners
-    Object.keys(newState as any).forEach((key) => {
+    Object.keys(newState as object).forEach((key) => {
       if (newState[key as keyof T] !== previousState[key as keyof T]) {
         const propertyListeners = this.listeners.get(key) || [];
         propertyListeners.forEach((listener) => listener(newState, previousState));
@@ -600,11 +612,19 @@ export function createStateManager<T = AppState>(
   return new StateManager<T>(initialState, options);
 }
 
+// Navigator with Network Information API
+interface NavigatorWithConnection {
+  connection?: {
+    effectiveType?: 'slow-2g' | '2g' | '3g' | '4g';
+    addEventListener: (type: string, listener: () => void) => void;
+  };
+}
+
 // Enhanced connection detection
 const getConnectionType = (): 'slow-2g' | '2g' | '3g' | '4g' | 'unknown' => {
-  const { connection } = navigator as any;
-  if (connection?.effectiveType) {
-    return connection.effectiveType;
+  const nav = navigator as NavigatorWithConnection;
+  if (nav.connection?.effectiveType) {
+    return nav.connection.effectiveType;
   }
   return 'unknown';
 };
@@ -668,16 +688,16 @@ appState.addMiddleware(loggingMiddleware);
 appState.addMiddleware(errorHandlingMiddleware);
 
 // Built-in reducers
-appState.addReducer('SET_THEME', (state, action) => ({
-  theme: action.payload
+appState.addReducer('SET_THEME', (_state, action) => ({
+  theme: (action.payload as 'light' | 'dark') ?? 'light'
 }));
 
 appState.addReducer('TOGGLE_NAV', (state) => ({
   navOpen: !state.navOpen
 }));
 
-appState.addReducer('SET_CURRENT_SECTION', (state, action) => ({
-  currentSection: action.payload
+appState.addReducer('SET_CURRENT_SECTION', (_state, action) => ({
+  currentSection: (action.payload as string | null) ?? null
 }));
 
 appState.addReducer('COMPLETE_INTRO', (_state) => ({
@@ -685,8 +705,8 @@ appState.addReducer('COMPLETE_INTRO', (_state) => ({
   introAnimating: false
 }));
 
-appState.addReducer('SET_CONTACT_FORM_VISIBLE', (state, action) => ({
-  contactFormVisible: action.payload
+appState.addReducer('SET_CONTACT_FORM_VISIBLE', (_state, action) => ({
+  contactFormVisible: (action.payload as boolean) ?? false
 }));
 
 appState.addReducer('CLEAR_ERROR', (_state) => ({
@@ -717,7 +737,8 @@ window.addEventListener('offline', () => {
 
 // Connection change listener
 if ('connection' in navigator) {
-  (navigator as any).connection.addEventListener('change', () => {
+  const nav = navigator as NavigatorWithConnection;
+  nav.connection?.addEventListener('change', () => {
     appState.dispatch({
       type: 'CONNECTION_TYPE_CHANGED',
       payload: { connectionType: getConnectionType() }
@@ -726,10 +747,12 @@ if ('connection' in navigator) {
 }
 
 // Reducers for network events
-appState.addReducer('NETWORK_STATUS_CHANGED', (state, action) => ({
-  online: action.payload.online
-}));
+appState.addReducer('NETWORK_STATUS_CHANGED', (_state, action) => {
+  const payload = action.payload as { online: boolean } | undefined;
+  return { online: payload?.online ?? true };
+});
 
-appState.addReducer('CONNECTION_TYPE_CHANGED', (state, action) => ({
-  connectionType: action.payload.connectionType
-}));
+appState.addReducer('CONNECTION_TYPE_CHANGED', (_state, action) => {
+  const payload = action.payload as { connectionType: 'slow-2g' | '2g' | '3g' | '4g' | 'unknown' } | undefined;
+  return { connectionType: payload?.connectionType ?? 'unknown' };
+});

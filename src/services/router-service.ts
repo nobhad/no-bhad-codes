@@ -131,18 +131,6 @@ export class RouterService extends BaseService {
   private setupEventListeners(): void {
     window.addEventListener('popstate', this.handlePopState);
     window.addEventListener('hashchange', this.handleHashChange);
-
-    // Disabled global link interception - let browser handle navigation normally
-    // document.addEventListener('click', (e) => {
-    //   const link = (e.target as HTMLElement)?.closest('a[href^="#"], a[href^="/"]');
-    //   if (link && !link.hasAttribute('data-external')) {
-    //     e.preventDefault();
-    //     const href = link.getAttribute('href');
-    //     if (href) {
-    //       this.navigate(href);
-    //     }
-    //   }
-    // });
   }
 
   /**

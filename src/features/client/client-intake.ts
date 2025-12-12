@@ -582,7 +582,7 @@ export class ClientIntakeModule extends BaseModule {
     }, 5000);
   }
 
-  private showSuccessMessage(result: any): void {
+  private showSuccessMessage(result: { intake?: { id?: string | number; projectType?: string } }): void {
     // Replace form content with success message
     this.container.innerHTML = `
       <div class="success-container" style="text-align: center; padding: 2rem;">

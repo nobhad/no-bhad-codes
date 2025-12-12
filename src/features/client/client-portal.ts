@@ -14,6 +14,48 @@ import { gsap } from 'gsap';
 import { APP_CONSTANTS } from '../../config/constants';
 import 'emoji-picker-element';
 
+/** Portal file from API */
+interface PortalFile {
+  id: string | number;
+  originalName: string;
+  filename?: string;
+  mimetype: string;
+  size: number;
+  uploadedBy: string;
+  uploadedAt: string;
+  projectId?: string;
+  projectName?: string;
+}
+
+/** Portal invoice from API */
+interface PortalInvoice {
+  id: string | number;
+  invoice_number: string;
+  amount_total: number;
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+  created_at: string;
+  due_date?: string;
+  paid_date?: string;
+  project_name?: string;
+}
+
+/** Project from API with preview URL */
+interface PortalProject {
+  id: string | number;
+  name: string;
+  status: ClientProjectStatus;
+  preview_url?: string;
+}
+
+/** Message from API */
+interface PortalMessage {
+  id: string | number;
+  sender_type: 'client' | 'admin' | 'system';
+  sender_name?: string;
+  message: string;
+  created_at: string;
+}
+
 export class ClientPortalModule extends BaseModule {
   private isLoggedIn = false;
   private currentProject: ClientProject | null = null;
@@ -1002,7 +1044,7 @@ export class ClientPortalModule extends BaseModule {
 
     timelineContainer.innerHTML = '';
 
-    this.currentProject.updates.forEach((update: any) => {
+    this.currentProject.updates.forEach((update) => {
       const updateElement = document.createElement('div');
       updateElement.className = 'timeline-item';
       // Sanitize user data to prevent XSS
@@ -1116,7 +1158,7 @@ export class ClientPortalModule extends BaseModule {
   /**
    * Render the files list
    */
-  private renderFilesList(container: HTMLElement, files: any[]): void {
+  private renderFilesList(container: HTMLElement, files: PortalFile[]): void {
     if (files.length === 0) {
       container.innerHTML =
         '<p class="no-files">No files uploaded yet. Drag and drop files above to upload.</p>';
@@ -1592,7 +1634,7 @@ export class ClientPortalModule extends BaseModule {
    * Render demo invoices for demo mode
    */
   private renderDemoInvoices(container: HTMLElement): void {
-    const demoInvoices = [
+    const demoInvoices: PortalInvoice[] = [
       {
         id: 1,
         invoice_number: 'INV-2025-001',
@@ -1625,7 +1667,7 @@ export class ClientPortalModule extends BaseModule {
   /**
    * Render invoices list
    */
-  private renderInvoicesList(container: HTMLElement, invoices: any[]): void {
+  private renderInvoicesList(container: HTMLElement, invoices: PortalInvoice[]): void {
     // Remove existing invoice items but keep the h3
     const existingItems = container.querySelectorAll('.invoice-item');
     existingItems.forEach((item) => item.remove());
@@ -1805,7 +1847,7 @@ export class ClientPortalModule extends BaseModule {
 
     messagesContainer.innerHTML = '';
 
-    this.currentProject.messages.forEach((message: any) => {
+    this.currentProject.messages.forEach((message) => {
       const messageElement = document.createElement('div');
       messageElement.className = `message message-${message.senderRole}`;
       // Sanitize user data to prevent XSS
@@ -1985,7 +2027,7 @@ export class ClientPortalModule extends BaseModule {
    * Render demo messages
    */
   private renderDemoMessages(container: HTMLElement): void {
-    const demoMessages = [
+    const demoMessages: PortalMessage[] = [
       {
         id: 1,
         sender_type: 'admin',
@@ -2007,7 +2049,7 @@ export class ClientPortalModule extends BaseModule {
   /**
    * Render messages list
    */
-  private renderMessages(container: HTMLElement, messages: any[]): void {
+  private renderMessages(container: HTMLElement, messages: PortalMessage[]): void {
     if (messages.length === 0) {
       container.innerHTML = '<div class="no-messages"><p>No messages in this thread yet.</p></div>';
       return;
@@ -2054,7 +2096,7 @@ export class ClientPortalModule extends BaseModule {
 
     try {
       let url: string;
-      let body: any;
+      let body: { message: string; subject?: string };
 
       if (this.currentThreadId) {
         // Send to existing thread
@@ -2669,7 +2711,7 @@ export class ClientPortalModule extends BaseModule {
       const projects = data.projects || [];
 
       // Find a project with a preview URL
-      const projectWithPreview = projects.find((p: any) => p.preview_url);
+      const projectWithPreview = projects.find((p: PortalProject) => p.preview_url);
 
       if (projectWithPreview && projectWithPreview.preview_url) {
         const previewUrl = projectWithPreview.preview_url;

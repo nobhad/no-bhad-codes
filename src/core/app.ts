@@ -588,7 +588,7 @@ export class Application {
   /**
    * Register routes for home page sections
    */
-  private registerHomePageRoutes(routerService: any): void {
+  private registerHomePageRoutes(routerService: { addRoute: (route: { path: string; section: string; title: string }) => void }): void {
     // Register routes for home page sections
     routerService.addRoute({
       path: '#about',

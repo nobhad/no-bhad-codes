@@ -8,10 +8,11 @@
  * for better decoupling and testability.
  */
 
-export type ServiceFactory<T = any> = (...args: any[]) => T | Promise<T>;
-export type ServiceInstance<T = any> = T;
 
-export interface ServiceDefinition<T = any> {
+export type ServiceFactory<T = unknown> = (...args: any[]) => T | Promise<T>;
+export type ServiceInstance<T = unknown> = T;
+
+export interface ServiceDefinition<T = unknown> {
   factory: ServiceFactory<T>;
   singleton: boolean;
   dependencies?: string[];
@@ -21,7 +22,7 @@ export interface ServiceDefinition<T = any> {
 export class Container {
   private services = new Map<string, ServiceDefinition>();
   private resolving = new Set<string>(); // Track circular dependencies
-  private pending = new Map<string, Promise<any>>(); // Track pending resolutions
+  private pending = new Map<string, Promise<unknown>>(); // Track pending resolutions
 
   /**
    * Register a service
