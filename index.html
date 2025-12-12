@@ -106,6 +106,22 @@
     <!-- Portal Backdrop -->
     <div class="portal-backdrop" id="portal-backdrop"></div>
 
+    <!-- Intake Modal Backdrop -->
+    <div class="intake-modal-backdrop" id="intake-modal-backdrop"></div>
+
+    <!-- Intake Modal -->
+    <div class="intake-modal" id="intake-modal">
+      <button class="intake-modal-close" id="intake-modal-close" aria-label="Close intake form">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div class="intake-modal-container">
+        <!-- Terminal intake will be rendered here -->
+      </div>
+    </div>
+
     <!-- Portal Dropdown -->
     <div class="portal-dropdown" id="portal-dropdown">
       <div class="portal-dropdown-header">Client Login</div>
@@ -407,7 +423,7 @@
         <div class="contact-options">
           <p>
             <span class="contact-option-label">Message me here</span>,
-            fill out a project <a href="/client/landing" class="contact-option-link">intake form</a>,
+            fill out a project <a href="#" class="contact-option-link" id="open-intake-link">intake form</a>,
             or <a href="mailto:nobhaduri@gmail.com" class="contact-option-link">email me</a>.
           </p>
         </div>
@@ -487,7 +503,7 @@
             <!-- Right column: submit button -->
             <div class="contact-right">
               <button class="submit-button" type="submit" tabindex="5" aria-label="Submit contact form">
-                <span>SENT!</span>
+                <span>LET'S TALK</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bow-arrow-icon lucide-bow-arrow" aria-hidden="true">
                   <path d="M17 3h4v4"/>
                   <path d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"/>
@@ -721,7 +737,70 @@
             forgotForm.querySelector('.dropdown-submit').classList.remove('valid');
           }
         });
+
       })();
+
+    </script>
+    <script type="module">
+      // Intake modal functionality (module script for dynamic imports)
+      document.addEventListener('DOMContentLoaded', function() {
+        const intakeModal = document.getElementById('intake-modal');
+        const intakeBackdrop = document.getElementById('intake-modal-backdrop');
+        const intakeClose = document.getElementById('intake-modal-close');
+        const intakeContainer = intakeModal ? intakeModal.querySelector('.intake-modal-container') : null;
+        const openIntakeLink = document.getElementById('open-intake-link');
+        let terminalModule = null;
+
+        async function openIntakeModal() {
+          intakeModal.classList.add('open');
+          intakeBackdrop.classList.add('open');
+          document.body.style.overflow = 'hidden';
+
+          // Initialize terminal if not already done
+          if (!terminalModule && intakeContainer) {
+            try {
+              const module = await import('./src/features/client/terminal-intake.ts');
+              const { TerminalIntakeModule } = module;
+              terminalModule = new TerminalIntakeModule(intakeContainer, { isModal: true });
+              await terminalModule.init();
+            } catch (error) {
+              console.error('[IntakeModal] Failed to initialize:', error);
+              intakeContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: #ff4444; background: #1e1e1e; height: 100%; display: flex; flex-direction: column; justify-content: center;"><h2>Unable to load intake form</h2><p>Please try refreshing the page or <a href="/client/intake" style="color: #00ff41;">visit the intake page directly</a>.</p></div>';
+            }
+          }
+        }
+
+        function closeIntakeModal() {
+          intakeModal.classList.remove('open');
+          intakeBackdrop.classList.remove('open');
+          document.body.style.overflow = '';
+        }
+
+        // Open modal from "intake form" link
+        if (openIntakeLink) {
+          openIntakeLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            openIntakeModal();
+          });
+        }
+
+        // Close button
+        if (intakeClose) {
+          intakeClose.addEventListener('click', closeIntakeModal);
+        }
+
+        // Close on backdrop click
+        if (intakeBackdrop) {
+          intakeBackdrop.addEventListener('click', closeIntakeModal);
+        }
+
+        // Close on escape
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && intakeModal && intakeModal.classList.contains('open')) {
+            closeIntakeModal();
+          }
+        });
+      });
     </script>
   </body>
 </html>

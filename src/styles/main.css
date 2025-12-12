@@ -84,6 +84,12 @@
 /* Client intake form */
 @import "./pages/client-intake.css";
 
+/* Terminal intake form */
+@import "./pages/terminal-intake.css";
+
+/* Client portal section on main page */
+@import "./pages/client-portal-section.css";
+
 /* ============================================
  * 5. THEME INTEGRATION
  * ============================================ */

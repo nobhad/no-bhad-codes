@@ -870,16 +870,14 @@ body[data-page="client-landing"] .client-login .client-content {
 }
 
 /* Dark mode: keep border black and darker shadows */
-[data-theme="dark"] .portal-card,
-.dark-mode .portal-card {
+html[data-theme="dark"] .portal-card {
   border: 4px solid #000000 !important;
   box-shadow:
     6px 6px 12px rgba(0, 0, 0, 0.5),
     12px 12px 24px rgba(0, 0, 0, 0.4);
 }
 
-[data-theme="dark"] .portal-card:hover,
-.dark-mode .portal-card:hover {
+html[data-theme="dark"] .portal-card:hover {
   box-shadow:
     8px 8px 16px rgba(0, 0, 0, 0.55),
     16px 16px 32px rgba(0, 0, 0, 0.45);
@@ -896,8 +894,7 @@ body[data-page="client-landing"] .client-login .client-content {
 }
 
 /* Dark mode: keep header border black */
-[data-theme="dark"] .portal-card-header,
-.dark-mode .portal-card-header {
+html[data-theme="dark"] .portal-card-header {
   border-bottom-color: #000000;
 }
 
@@ -938,8 +935,7 @@ body[data-page="client-landing"] .client-login .client-content {
 }
 
 /* Dark mode: avatar should be almost white */
-[data-theme="dark"] .portal-card-avatar img,
-.dark-mode .portal-card-avatar img {
+html[data-theme="dark"] .portal-card-avatar img {
   filter: brightness(0) invert(1) brightness(0.9); /* Almost white */
 }
 
@@ -967,8 +963,7 @@ body[data-page="client-landing"] .client-login .client-content {
 }
 
 /* Dark mode: login form container border black */
-[data-theme="dark"] .login-form,
-.dark-mode .login-form {
+html[data-theme="dark"] .login-form {
   border-color: #000000 !important;
 }
 
@@ -1574,10 +1569,10 @@ body[data-page="client-landing"] .client-login .client-content {
 }
 
 /* ===============================================
-   INTAKE MODAL - FULL SCREEN OVERLAY
+   INTAKE MODAL - FULL SCREEN OVERLAY (Client Landing Page Only)
    =============================================== */
 
-.intake-modal {
+body[data-page="client-landing"] .intake-modal {
   display: none;
   position: fixed;
   top: 0;
@@ -1591,19 +1586,19 @@ body[data-page="client-landing"] .client-login .client-content {
   padding: 2rem;
 }
 
-.intake-modal.open {
+body[data-page="client-landing"] .intake-modal.open {
   display: flex;
 }
 
 /* Prevent any transition on modal open - should appear instantly */
-.intake-modal,
-.intake-modal-content,
-.intake-modal-content .terminal-intake,
-.intake-modal-content .terminal-window {
+body[data-page="client-landing"] .intake-modal,
+body[data-page="client-landing"] .intake-modal-content,
+body[data-page="client-landing"] .intake-modal-content .terminal-intake,
+body[data-page="client-landing"] .intake-modal-content .terminal-window {
   transition: none;
 }
 
-.intake-modal-content {
+body[data-page="client-landing"] .intake-modal-content {
   width: 50vw;
   min-width: 50vw;
   height: 85vh;
@@ -1616,11 +1611,11 @@ body[data-page="client-landing"] .client-login .client-content {
 
 /* Mobile: full screen */
 @media (max-width: 1024px) {
-  .intake-modal {
+  body[data-page="client-landing"] .intake-modal {
     padding: 0;
   }
 
-  .intake-modal-content {
+  body[data-page="client-landing"] .intake-modal-content {
     width: 100%;
     height: 100%;
     max-width: 100%;
@@ -1628,15 +1623,15 @@ body[data-page="client-landing"] .client-login .client-content {
     border-radius: 0;
   }
 
-  .intake-modal-content .terminal-window {
+  body[data-page="client-landing"] .intake-modal-content .terminal-window {
     border-radius: 0;
     border: none;
   }
 }
 
 /* Ensure all children fill the modal content width */
-.intake-modal-content .terminal-intake-container,
-.intake-modal-content .terminal-intake {
+body[data-page="client-landing"] .intake-modal-content .terminal-intake-container,
+body[data-page="client-landing"] .intake-modal-content .terminal-intake {
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -1644,7 +1639,7 @@ body[data-page="client-landing"] .client-login .client-content {
   flex-direction: column;
 }
 
-.intake-modal-content .terminal-window {
+body[data-page="client-landing"] .intake-modal-content .terminal-window {
   flex: 1;
   min-height: 0;
   max-height: 100%;
@@ -1652,7 +1647,7 @@ body[data-page="client-landing"] .client-login .client-content {
   flex-direction: column;
 }
 
-.intake-modal-content .terminal-chat {
+body[data-page="client-landing"] .intake-modal-content .terminal-chat {
   flex: 1;
   min-height: 0;
   max-height: none; /* Override the calc() max-height */
@@ -1660,7 +1655,7 @@ body[data-page="client-landing"] .client-login .client-content {
 }
 
 /* Minimized state - small bar at bottom left */
-.intake-modal.minimized {
+body[data-page="client-landing"] .intake-modal.minimized {
   align-items: flex-end;
   justify-content: flex-start;
   padding: 0;
@@ -1668,7 +1663,7 @@ body[data-page="client-landing"] .client-login .client-content {
   pointer-events: none;
 }
 
-.intake-modal.minimized .intake-modal-content {
+body[data-page="client-landing"] .intake-modal.minimized .intake-modal-content {
   max-width: 350px;
   height: auto;
   max-height: none;
@@ -1680,26 +1675,26 @@ body[data-page="client-landing"] .client-login .client-content {
   cursor: pointer;
 }
 
-.intake-modal.minimized .terminal-intake {
+body[data-page="client-landing"] .intake-modal.minimized .terminal-intake {
   height: auto;
   min-height: auto;
 }
 
-.intake-modal.minimized .terminal-window {
+body[data-page="client-landing"] .intake-modal.minimized .terminal-window {
   flex: none;
   max-height: none;
 }
 
 /* Hide everything except header when minimized */
-.intake-modal.minimized .terminal-progress,
-.intake-modal.minimized .terminal-login-info,
-.intake-modal.minimized .terminal-chat,
-.intake-modal.minimized .terminal-input-area {
+body[data-page="client-landing"] .intake-modal.minimized .terminal-progress,
+body[data-page="client-landing"] .intake-modal.minimized .terminal-login-info,
+body[data-page="client-landing"] .intake-modal.minimized .terminal-chat,
+body[data-page="client-landing"] .intake-modal.minimized .terminal-input-area {
   display: none;
 }
 
 /* Fullscreen state */
-.intake-modal.fullscreen .intake-modal-content {
+body[data-page="client-landing"] .intake-modal.fullscreen .intake-modal-content {
   max-width: 100%;
   max-height: 100%;
   width: 100%;
