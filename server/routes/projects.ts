@@ -65,18 +65,53 @@ router.get(
     let params: any[] = [];
 
     if (req.user!.type === 'admin') {
-      // Admin can see all projects
+      // Admin can see all projects with stats in single query (fixes N+1)
       query = `
-      SELECT 
-        p.*, c.company_name, c.contact_name, c.email as client_email
+      SELECT
+        p.*,
+        c.company_name,
+        c.contact_name,
+        c.email as client_email,
+        COALESCE(f_stats.file_count, 0) as file_count,
+        COALESCE(m_stats.message_count, 0) as message_count,
+        COALESCE(m_stats.unread_count, 0) as unread_count
       FROM projects p
       JOIN clients c ON p.client_id = c.id
+      LEFT JOIN (
+        SELECT project_id, COUNT(*) as file_count
+        FROM files
+        GROUP BY project_id
+      ) f_stats ON p.id = f_stats.project_id
+      LEFT JOIN (
+        SELECT project_id,
+               COUNT(*) as message_count,
+               SUM(CASE WHEN is_read = 0 THEN 1 ELSE 0 END) as unread_count
+        FROM messages
+        GROUP BY project_id
+      ) m_stats ON p.id = m_stats.project_id
       ORDER BY p.created_at DESC
     `;
     } else {
-      // Client can only see their own projects
+      // Client can only see their own projects with stats in single query (fixes N+1)
       query = `
-      SELECT p.* FROM projects p
+      SELECT
+        p.*,
+        COALESCE(f_stats.file_count, 0) as file_count,
+        COALESCE(m_stats.message_count, 0) as message_count,
+        COALESCE(m_stats.unread_count, 0) as unread_count
+      FROM projects p
+      LEFT JOIN (
+        SELECT project_id, COUNT(*) as file_count
+        FROM files
+        GROUP BY project_id
+      ) f_stats ON p.id = f_stats.project_id
+      LEFT JOIN (
+        SELECT project_id,
+               COUNT(*) as message_count,
+               SUM(CASE WHEN is_read = 0 THEN 1 ELSE 0 END) as unread_count
+        FROM messages
+        GROUP BY project_id
+      ) m_stats ON p.id = m_stats.project_id
       WHERE p.client_id = ?
       ORDER BY p.created_at DESC
     `;
@@ -85,23 +120,17 @@ router.get(
 
     const projects = await db.all(query, params);
 
-    // Get project statistics for each project
+    // Format stats as nested object for API consistency
     for (const project of projects) {
-      const stats = await db.get(
-        `
-      SELECT 
-        COUNT(f.id) as file_count,
-        COUNT(m.id) as message_count,
-        COUNT(CASE WHEN m.is_read = 0 THEN 1 END) as unread_count
-      FROM projects p
-      LEFT JOIN files f ON p.id = f.project_id
-      LEFT JOIN messages m ON p.id = m.project_id
-      WHERE p.id = ?
-    `,
-        [project.id]
-      );
-
-      project.stats = stats;
+      project.stats = {
+        file_count: project.file_count,
+        message_count: project.message_count,
+        unread_count: project.unread_count
+      };
+      // Remove flat properties to avoid duplication
+      delete project.file_count;
+      delete project.message_count;
+      delete project.unread_count;
     }
 
     res.json({ projects });

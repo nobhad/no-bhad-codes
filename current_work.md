@@ -226,7 +226,7 @@ Fixed incorrect domain `nobhadcodes.com` to `nobhad.codes` and standardized all 
   - Added `WorkItem`, `NavigatorWithConnection` interfaces to state.ts
   - Added `PortalFile`, `PortalInvoice`, `PortalProject`, `PortalMessage` interfaces to client-portal.ts
   - Typed reducers with proper payload casting
-- [ ] Fix N+1 query in `server/routes/projects.ts:87-104`
+- [x] Fix N+1 query in `server/routes/projects.ts:87-104` - FIXED (subquery JOINs)
 - [x] Standardize API response format across all endpoints - Created `server/utils/response.ts`, updated `auth.ts`
 - [ ] Add HTTPS enforcement in production
 - [ ] Split `admin-dashboard.ts` (3000+ lines)
@@ -850,7 +850,7 @@ Other Changes:
 
 ### Code Quality
 - [x] Replace 50+ instances of `any` type with proper interfaces - MOSTLY DONE (some remain in app.ts for dynamic typing)
-- [ ] Fix N+1 query in `server/routes/projects.ts:87-104`
+- [x] Fix N+1 query in `server/routes/projects.ts:87-104` - FIXED (subquery JOINs)
 - [x] Standardize API response format across all endpoints - Created `server/utils/response.ts`
 - [ ] Add HTTPS enforcement in production
 
