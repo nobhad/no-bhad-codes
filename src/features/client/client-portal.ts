@@ -13,48 +13,19 @@ import type { ClientProject, ClientProjectStatus } from '../../types/client';
 import { gsap } from 'gsap';
 import { APP_CONSTANTS } from '../../config/constants';
 import 'emoji-picker-element';
-
-/** Portal file from API */
-interface PortalFile {
-  id: string | number;
-  originalName: string;
-  filename?: string;
-  mimetype: string;
-  size: number;
-  uploadedBy: string;
-  uploadedAt: string;
-  projectId?: string;
-  projectName?: string;
-}
-
-/** Portal invoice from API */
-interface PortalInvoice {
-  id: string | number;
-  invoice_number: string;
-  amount_total: number;
-  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
-  created_at: string;
-  due_date?: string;
-  paid_date?: string;
-  project_name?: string;
-}
-
-/** Project from API with preview URL */
-interface PortalProject {
-  id: string | number;
-  name: string;
-  status: ClientProjectStatus;
-  preview_url?: string;
-}
-
-/** Message from API */
-interface PortalMessage {
-  id: string | number;
-  sender_type: 'client' | 'admin' | 'system';
-  sender_name?: string;
-  message: string;
-  created_at: string;
-}
+import type {
+  ClientPortalContext,
+  PortalFile,
+  PortalInvoice,
+  PortalMessage,
+  PortalProject
+} from './portal-types';
+import {
+  loadFilesModule,
+  loadInvoicesModule as _loadInvoicesModule,
+  loadMessagesModule as _loadMessagesModule,
+  loadSettingsModule as _loadSettingsModule
+} from './modules';
 
 export class ClientPortalModule extends BaseModule {
   private isLoggedIn = false;
@@ -78,8 +49,28 @@ export class ClientPortalModule extends BaseModule {
   private projectsList: HTMLElement | null = null;
   private projectDetails: HTMLElement | null = null;
 
+  /** Context object for module communication */
+  private moduleContext: ClientPortalContext;
+
   constructor() {
     super('client-portal');
+    this.moduleContext = this.createModuleContext();
+  }
+
+  /** Create module context for passing to child modules */
+  private createModuleContext(): ClientPortalContext {
+    return {
+      getAuthToken: () => sessionStorage.getItem('client_auth_token'),
+      isDemo: () => {
+        const token = sessionStorage.getItem('client_auth_token');
+        return !token || token.startsWith('demo_token_');
+      },
+      showNotification: (message: string, type?: 'success' | 'error' | 'info') => {
+        this.showSuccessMessage(message);
+      },
+      formatDate: (dateString: string) => this.formatDate(dateString),
+      escapeHtml: (text: string) => this.escapeHtml(text)
+    };
   }
 
   protected override async onInit(): Promise<void> {
@@ -1082,41 +1073,11 @@ export class ClientPortalModule extends BaseModule {
   private static readonly MESSAGES_API_BASE = '/api/messages';
 
   /**
-   * Load files from API and render the list
+   * Load files from API and render the list (delegates to module)
    */
   private async loadFiles(): Promise<void> {
-    const filesContainer = document.getElementById('files-list');
-    if (!filesContainer) return;
-
-    // Show loading state
-    filesContainer.innerHTML = '<p class="loading-files">Loading files...</p>';
-
-    try {
-      const token = sessionStorage.getItem('client_auth_token');
-
-      // Use demo data if no token (demo mode)
-      if (!token || token.startsWith('demo_token_')) {
-        this.renderDemoFiles(filesContainer);
-        return;
-      }
-
-      const response = await fetch(`${ClientPortalModule.FILES_API_BASE}/client`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch files');
-      }
-
-      const data = await response.json();
-      this.renderFilesList(filesContainer, data.files || []);
-    } catch (error) {
-      console.error('Error loading files:', error);
-      // Fall back to demo data on error
-      this.renderDemoFiles(filesContainer);
-    }
+    const filesModule = await loadFilesModule();
+    await filesModule.loadFiles(this.moduleContext);
   }
 
   /**
