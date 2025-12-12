@@ -66,14 +66,14 @@
 }
 
 /* Responsive business card container sizes */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .business-card-container {
     width: 420px;
     height: 239.9px;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 479px) {
   .business-card-container {
     width: 350px;
     height: 199.8px;
@@ -427,7 +427,7 @@
 /* ==========================================
    RESPONSIVE DESIGN
    ========================================== */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .business-card-container,
   .intro-animation-container {
     /* Fixed mobile size to prevent CLS - maintaining exact aspect ratio */
@@ -464,7 +464,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 479px) {
   .business-card-container,
   .intro-animation-container {
     /* Fixed small screen size to prevent CLS - maintaining exact aspect ratio */

@@ -31,7 +31,7 @@
 }
 
 /* Mobile: Footer scrolls with content instead of fixed */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .footer {
     position: static !important;
     bottom: auto !important;

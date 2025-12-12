@@ -3156,7 +3156,7 @@ html[data-theme="dark"] .login-form label {
   }
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 767px) {
   .overview-grid {
     grid-template-columns: 1fr;
   }
@@ -3186,7 +3186,7 @@ html[data-theme="dark"] .login-form label {
   }
 }
 
-@media screen and (max-width: 480px) {
+@media screen and (max-width: 479px) {
   .dashboard-layout {
     padding: 0;
   }
@@ -3226,7 +3226,7 @@ html[data-theme="dark"] .login-form label {
 }
 
 /* Mobile styles - hamburger menu instead of collapsible sidebar */
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 767px) {
   /* Show hamburger menu button */
   .mobile-menu-toggle {
     display: flex;
@@ -3578,7 +3578,7 @@ html[data-theme="dark"] .login-form label {
   min-height: 400px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .portal-intake .terminal-chat {
     max-height: calc(100vh - 400px);
     min-height: 300px;

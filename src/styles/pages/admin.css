@@ -1302,7 +1302,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .admin-nav {
     padding: var(--space-3) var(--space-4);
   }
@@ -1344,7 +1344,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 479px) {
   .auth-container {
     margin: var(--space-4);
     padding: var(--space-6);
@@ -1784,7 +1784,7 @@
 }
 
 /* Responsive adjustments for project detail */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .project-detail-header {
     flex-direction: column;
   }
@@ -1803,7 +1803,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 479px) {
   .project-detail-meta {
     grid-template-columns: 1fr;
   }

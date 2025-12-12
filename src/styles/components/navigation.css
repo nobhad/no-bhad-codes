@@ -1617,7 +1617,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 /* Mobile adjustments for portal dropdown */
-@media screen and (max-width: 480px) {
+@media screen and (max-width: 479px) {
   .portal-dropdown {
     position: fixed;
     top: auto;
@@ -1756,7 +1756,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 /* Mobile adjustments */
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 767px) {
   .intake-modal {
     width: 100vw;
     height: 100vh;

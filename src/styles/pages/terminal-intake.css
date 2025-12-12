@@ -546,7 +546,7 @@ input.terminal-input:focus {
    RESPONSIVE
    ============================================================================ */
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   body[data-page="client-intake"] #main-content {
     padding: 0;
     margin: 0;
@@ -592,7 +592,7 @@ input.terminal-input:focus {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 479px) {
   .terminal-header {
     padding: 6px 12px;
   }
