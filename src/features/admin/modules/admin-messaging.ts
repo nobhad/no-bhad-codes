@@ -29,6 +29,9 @@ export async function loadClientThreads(ctx: AdminDashboardContext): Promise<voi
   const clientSelect = document.getElementById('admin-client-select') as HTMLSelectElement;
   if (!clientSelect) return;
 
+  // Add ARIA label for accessibility
+  clientSelect.setAttribute('aria-label', 'Select a client conversation');
+
   try {
     const response = await fetch('/api/messages/threads', {
       headers: { Authorization: `Bearer ${token}` }
@@ -110,6 +113,11 @@ export async function loadThreadMessages(
     document.getElementById('admin-messages-thread') ||
     document.getElementById('admin-messages-container');
   if (!container) return;
+
+  // Add ARIA attributes for accessibility - live region for screen readers
+  container.setAttribute('role', 'log');
+  container.setAttribute('aria-label', 'Message conversation');
+  container.setAttribute('aria-live', 'polite');
 
   container.innerHTML =
     '<div style="text-align: center; padding: 2rem;">Loading messages...</div>';
@@ -238,12 +246,28 @@ export function setupMessagingListeners(ctx: AdminDashboardContext): void {
   // Send button
   const sendBtn = document.getElementById('admin-send-message');
   if (sendBtn) {
+    // Add ARIA label for accessibility
+    sendBtn.setAttribute('aria-label', 'Send message');
     sendBtn.addEventListener('click', () => sendMessage(ctx));
   }
 
   // Enter key to send
   const input = document.getElementById('admin-message-text') as HTMLInputElement;
   if (input) {
+    // Add ARIA attributes for accessibility
+    input.setAttribute('aria-label', 'Type your message');
+    input.setAttribute('aria-describedby', 'message-hint');
+
+    // Add hidden hint for screen readers
+    if (!document.getElementById('message-hint')) {
+      const hint = document.createElement('span');
+      hint.id = 'message-hint';
+      hint.className = 'sr-only';
+      hint.textContent = 'Press Enter to send, Shift+Enter for new line';
+      hint.style.cssText = 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;';
+      input.parentElement?.appendChild(hint);
+    }
+
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();

@@ -628,24 +628,9 @@ class AdminDashboard {
   }
 
   private async loadLeads(): Promise<void> {
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
-
-    try {
-      const response = await fetch('/api/admin/leads', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        this.updateLeadsDisplay(data);
-      }
-    } catch (error) {
-      console.error('[AdminDashboard] Failed to load leads:', error);
-    }
+    // Delegate to leads module for code splitting
+    const leadsModule = await loadLeadsModule();
+    await leadsModule.loadLeads(this.moduleContext);
   }
 
   private updateLeadsDisplay(data: { leads: any[]; stats: any }): void {
@@ -1127,25 +1112,9 @@ class AdminDashboard {
   }
 
   private async loadProjects(): Promise<void> {
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
-
-    try {
-      const response = await fetch('/api/admin/leads', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        this.projectsData = data.leads || [];
-        this.updateProjectsDisplay(data);
-      }
-    } catch (error) {
-      console.error('[AdminDashboard] Failed to load projects:', error);
-    }
+    // Delegate to projects module for code splitting
+    const projectsModule = await loadProjectsModule();
+    await projectsModule.loadProjects(this.moduleContext);
   }
 
   private updateProjectsDisplay(data: { leads: any[]; stats: any }): void {
@@ -2286,29 +2255,9 @@ class AdminDashboard {
   }
 
   private async loadClientThreads(): Promise<void> {
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
-
-    const clientSelect = document.getElementById('admin-client-select') as HTMLSelectElement;
-    if (!clientSelect) return;
-
-    try {
-      const response = await fetch('/api/messages/threads', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        this.populateClientDropdown(data.threads || []);
-      } else {
-        console.error('[AdminDashboard] Failed to load threads');
-      }
-    } catch (error) {
-      console.error('[AdminDashboard] Failed to load threads:', error);
-    }
+    // Delegate to messaging module for code splitting
+    const messagingModule = await loadMessagingModule();
+    await messagingModule.loadClientThreads(this.moduleContext);
   }
 
   private populateClientDropdown(threads: any[]): void {
@@ -2829,83 +2778,9 @@ class AdminDashboard {
   }
 
   private async loadAnalyticsData(): Promise<void> {
-    try {
-      const analyticsData = await this.getAnalyticsData();
-
-      // Update with real data if available, otherwise use mock data
-      this.populateDataList(
-        'popular-pages',
-        analyticsData.popularPages || [
-          { label: 'Homepage', value: '2,145 views' },
-          { label: 'Art Portfolio', value: '856 views' },
-          { label: 'Codes Section', value: '634 views' },
-          { label: 'Contact', value: '423 views' },
-          { label: 'About', value: '312 views' }
-        ]
-      );
-
-      this.populateDataList(
-        'device-breakdown',
-        analyticsData.deviceBreakdown || [
-          { label: 'Desktop', value: '45%' },
-          { label: 'Mobile', value: '38%' },
-          { label: 'Tablet', value: '17%' }
-        ]
-      );
-
-      this.populateDataList(
-        'geo-distribution',
-        analyticsData.geoDistribution || [
-          { label: 'United States', value: '42%' },
-          { label: 'Canada', value: '18%' },
-          { label: 'United Kingdom', value: '12%' },
-          { label: 'Germany', value: '8%' },
-          { label: 'Other', value: '20%' }
-        ]
-      );
-
-      this.populateDataList(
-        'engagement-events',
-        analyticsData.engagementEvents || [
-          { label: 'Business Card Flips', value: '456' },
-          { label: 'Contact Form Submissions', value: '23' },
-          { label: 'External Link Clicks', value: '187' },
-          { label: 'Download Clicks', value: '34' }
-        ]
-      );
-    } catch (error) {
-      console.error('[AdminDashboard] Error loading analytics data:', error);
-
-      // Fallback to mock data
-      this.populateDataList('popular-pages', [
-        { label: 'Homepage', value: '2,145 views' },
-        { label: 'Art Portfolio', value: '856 views' },
-        { label: 'Codes Section', value: '634 views' },
-        { label: 'Contact', value: '423 views' },
-        { label: 'About', value: '312 views' }
-      ]);
-
-      this.populateDataList('device-breakdown', [
-        { label: 'Desktop', value: '45%' },
-        { label: 'Mobile', value: '38%' },
-        { label: 'Tablet', value: '17%' }
-      ]);
-
-      this.populateDataList('geo-distribution', [
-        { label: 'United States', value: '42%' },
-        { label: 'Canada', value: '18%' },
-        { label: 'United Kingdom', value: '12%' },
-        { label: 'Germany', value: '8%' },
-        { label: 'Other', value: '20%' }
-      ]);
-
-      this.populateDataList('engagement-events', [
-        { label: 'Business Card Flips', value: '456' },
-        { label: 'Contact Form Submissions', value: '23' },
-        { label: 'External Link Clicks', value: '187' },
-        { label: 'Download Clicks', value: '34' }
-      ]);
-    }
+    // Delegate to analytics module for code splitting
+    const analyticsModule = await loadAnalyticsModule();
+    await analyticsModule.loadAnalyticsData(this.moduleContext);
   }
 
   private async getAnalyticsData(): Promise<AnalyticsData> {

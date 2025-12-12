@@ -235,7 +235,7 @@ Fixed incorrect domain `nobhadcodes.com` to `nobhad.codes` and standardized all 
 
 ### Accessibility (from audit)
 
-- [ ] Add ARIA labels to messaging module buttons/icons
+- [x] Add ARIA labels to messaging module buttons/icons - DONE
 - [ ] Add keyboard support to business card flip
 - [ ] Make file upload dropzone keyboard accessible
 
@@ -862,7 +862,7 @@ Other Changes:
 - [ ] Lazy load code-protection-service when disabled
 
 ### Accessibility
-- [ ] Add ARIA labels to messaging module buttons/icons
+- [x] Add ARIA labels to messaging module buttons/icons - DONE
 - [ ] Add keyboard support to business card flip
 - [ ] Make file upload dropzone keyboard accessible
 
