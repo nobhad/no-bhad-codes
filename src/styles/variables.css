@@ -95,157 +95,18 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --bp-2xl: 1400px;
 }
 
-/* Light Theme (Default) */
-:root,
-html[data-theme="light"] {
-  --color-neutral-300: #e0e0e0;
-  --color-dark: #333333;
-  --color-primary: #00ff41;
-  --color-primary-rgb: 0, 255, 65;
-  --color-neutral-100: #f8f9fa;
-  --color-neutral-200: #e0e0e0;
-  --color-neutral-800: #343a40;
-  --color-shadow: rgba(0, 0, 0, 0.2);
-
-  /* Semantic Colors - Status */
-  --color-success: #10b981;
-  --color-success-dark: #047857;
-  --color-success-light: #d1fae5;
-  --color-warning: #fbbf24;
-  --color-warning-dark: #d97706;
-  --color-warning-light: #fef3c7;
-  --color-error: #dc2626;
-  --color-error-dark: #991b1b;
-  --color-error-light: #fee2e2;
-  --color-info: #3b82f6;
-  --color-info-dark: #1d4ed8;
-  --color-info-light: #dbeafe;
-
-  /* Accent Colors */
-  --color-accent-gold: #ffd700;
-  --color-accent-amber: #fbbf24;
-
-  /* Base Colors */
-  --color-black: #000000;
-  --color-white: #ffffff;
-  --color-text-primary: #333333;
-  --color-text-secondary: #666666;
-  --color-text-muted: #999999;
-
-  /* Border Colors */
-  --color-border: #000000;
-  --color-border-light: #e0e0e0;
-
-  /* Status Badge Colors - Pending/Warning */
-  --color-status-pending-bg: #fef3cd;
-  --color-status-pending-text: #92400e;
-  --color-status-pending-border: #f59e0b;
-
-  /* Status Badge Colors - In Progress */
-  --color-status-progress-bg: #dbeafe;
-  --color-status-progress-text: #1e40af;
-  --color-status-progress-border: #3b82f6;
-
-  /* Status Badge Colors - In Review */
-  --color-status-review-bg: #ede9fe;
-  --color-status-review-text: #6b21a8;
-  --color-status-review-border: #8b5cf6;
-
-  /* Status Badge Colors - Completed */
-  --color-status-completed-bg: #d1fae5;
-  --color-status-completed-text: #065f46;
-  --color-status-completed-border: #10b981;
-
-  /* Status Badge Colors - On Hold/Neutral */
-  --color-status-hold-bg: #f3f4f6;
-  --color-status-hold-text: #374151;
-  --color-status-hold-border: #6b7280;
-
-  /* Danger/Delete Colors */
-  --color-danger: #ef4444;
-  --color-danger-dark: #ff4757;
-
-  /* Terminal Theme Colors */
-  --color-terminal-bg: #0a0a0a;
-  --color-terminal-bg-light: #1a1a1a;
-  --color-terminal-bg-panel: #1e1e1e;
-  --color-terminal-bg-input: #111111;
-  --color-terminal-bg-hover: #222222;
-  --color-terminal-bg-dark: #333333;
-  --color-terminal-border: #3d3d3d;
-  --color-terminal-border-dark: #000000;
-  --color-terminal-green: #00ff00;
-  --color-terminal-green-dark: #00aa00;
-  --color-terminal-blue: #00aaff;
-  --color-terminal-red: #ff4444;
-  --color-terminal-pink: #ff0066;
-  --color-terminal-text: #ffffff;
-  --color-terminal-text-muted: #888888;
-  --color-terminal-text-dim: #666666;
-  --color-terminal-text-dimmer: #555555;
-  --color-terminal-scrollbar: #3d3d3d;
-  --color-terminal-scrollbar-hover: #555555;
-  /* macOS window buttons */
-  --color-mac-close: #ff5f56;
-  --color-mac-minimize: #ffbd2e;
-  --color-mac-maximize: #27ca40;
-
-  /* Skeleton Loading Colors */
-  --color-skeleton-base: #2a2a2a;
-  --color-skeleton-highlight: #3a3a3a;
-
-  /* Text Animation SVG Colors (Light Mode) */
-  --color-svg-text-left: #333333;
-  --color-svg-text-right: #222222;
-
-  /* Business Card Colors (Always Light for Print) */
-  --color-card-bg: #ffffff;
-  --color-card-bg-gradient-end: #f8f9fa;
-  --color-card-text: #333333;
-
-  /* Admin Dashboard Colors */
-  --color-admin-bg-start: #1e293b;
-  --color-admin-bg-end: #334155;
-  --color-admin-purple: #a855f7;
-
-  /* Status Colors - Additional */
-  --color-status-blue: #3b82f6;
-  --color-status-gray: #9ca3af;
-  --color-status-gray-dark: #6b7280;
-  --color-danger-bg: #dc2626;
-  --color-danger-hover: #b91c1c;
-
-  /* Form Variables */
-  --fg: #333333;
-  --form-input-border: #333333;
-  --form-input-placeholder: #666666;
-  --form-btn-bg: #333333;
-  --form-btn-fg: #ffffff;
-  --form-btn-shadow: rgba(0, 0, 0, 0.2);
-}
-
-/* Dark Theme - Updated for menu panels */
-html[data-theme="dark"] {
-  --color-neutral-300: #2a2a2a;
-  --color-dark: #e0e0e0;
-  --color-primary: #00ff41;
-  --color-neutral-100: #3a3a3a;
-  --color-neutral-200: #3a3a3a;
-  --color-neutral-800: #f0f0f0;
-  --color-shadow: rgba(0, 0, 0, 1);
-
-  /* Form Variables */
-  --fg: #e0e0e0;
-  --form-input-border: #e0e0e0;
-  --form-input-placeholder: #999999;
-  --form-btn-bg: #e0e0e0;
-  --form-btn-fg: #2a2a2a;
-  --form-btn-shadow: rgba(0, 0, 0, 0.3);
-
-  /* Text Animation SVG Colors (Dark Mode) */
-  --color-svg-text-left: #d5d5d5;
-  --color-svg-text-right: #9a9a9a;
-}
+/* ============================================
+ * COLOR VARIABLES
+ * ============================================
+ * NOTE: Color definitions have been consolidated into
+ * src/design-system/tokens/colors.css
+ *
+ * Legacy variable names (--color-neutral-*, --fg, --bg, etc.)
+ * are available as aliases in colors.css for backwards compatibility.
+ *
+ * New code should use semantic color tokens:
+ * - --color-bg-primary, --color-text-primary, etc.
+ * ============================================ */
 
 /* Base Styles with Improved Responsiveness */
 * {

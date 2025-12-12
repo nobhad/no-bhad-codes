@@ -1181,6 +1181,8 @@ html[data-theme="dark"] .login-form label {
 }
 
 .form-textarea {
+  width: 100%;
+  box-sizing: border-box;
   padding: 1rem;
   border: 2px solid var(--color-dark);
   background: var(--color-neutral-100);
@@ -1541,11 +1543,6 @@ html[data-theme="dark"] .login-form label {
   margin: 0;
   color: var(--color-dark);
   text-align: left;
-}
-
-.form-textarea {
-  width: 100%;
-  box-sizing: border-box;
 }
 
 /* Content Wrapper */

@@ -155,3 +155,152 @@ html[data-theme="dark"] {
     --color-border-primary: #ffffff;
   }
 }
+
+/* ============================================
+ * LEGACY VARIABLE ALIASES
+ * ============================================
+ * These aliases maintain backwards compatibility
+ * with the legacy variables.css naming convention.
+ * New code should use the semantic tokens above.
+ */
+
+:root,
+html[data-theme="light"] {
+  /* Legacy neutral colors → gray scale */
+  --color-neutral-100: var(--color-gray-100);
+  --color-neutral-200: var(--color-gray-200);
+  --color-neutral-300: #e0e0e0; /* Light theme background */
+  --color-neutral-400: var(--color-gray-400);
+  --color-neutral-500: var(--color-gray-500);
+  --color-neutral-600: var(--color-gray-600);
+  --color-neutral-800: var(--color-gray-800);
+
+  /* Legacy semantic colors */
+  --color-dark: #333333;
+  --color-primary: var(--color-brand-primary);
+  --color-primary-rgb: var(--color-brand-primary-rgb);
+  --color-border: #000000;
+  --color-border-light: #e0e0e0;
+  --color-shadow: rgba(0, 0, 0, 0.2);
+
+  /* Legacy foreground/background */
+  --fg: #333333;
+  --bg: #e0e0e0;
+
+  /* Legacy base colors */
+  --color-black: #000000;
+  --color-white: #ffffff;
+
+  /* Legacy status colors */
+  --color-success: #10b981;
+  --color-success-dark: #047857;
+  --color-success-light: #d1fae5;
+  --color-warning: #fbbf24;
+  --color-warning-dark: #d97706;
+  --color-warning-light: #fef3c7;
+  --color-error: #dc2626;
+  --color-error-dark: #991b1b;
+  --color-error-light: #fee2e2;
+  --color-info: #3b82f6;
+  --color-info-dark: #1d4ed8;
+  --color-info-light: #dbeafe;
+  --color-danger: #ef4444;
+  --color-danger-dark: #ff4757;
+  --color-danger-bg: #dc2626;
+  --color-danger-hover: #b91c1c;
+
+  /* Legacy accent colors */
+  --color-accent-gold: #ffd700;
+  --color-accent-amber: #fbbf24;
+
+  /* Legacy status badge colors */
+  --color-status-pending-bg: #fef3cd;
+  --color-status-pending-text: #92400e;
+  --color-status-pending-border: #f59e0b;
+  --color-status-progress-bg: #dbeafe;
+  --color-status-progress-text: #1e40af;
+  --color-status-progress-border: #3b82f6;
+  --color-status-review-bg: #ede9fe;
+  --color-status-review-text: #6b21a8;
+  --color-status-review-border: #8b5cf6;
+  --color-status-completed-bg: #d1fae5;
+  --color-status-completed-text: #065f46;
+  --color-status-completed-border: #10b981;
+  --color-status-hold-bg: #f3f4f6;
+  --color-status-hold-text: #374151;
+  --color-status-hold-border: #6b7280;
+  --color-status-blue: #3b82f6;
+  --color-status-gray: #9ca3af;
+  --color-status-gray-dark: #6b7280;
+
+  /* Terminal colors - saloni-garg inspired (matrix green on black) */
+  --color-terminal-bg: #000000;
+  --color-terminal-bg-light: #0d0d0d;
+  --color-terminal-bg-panel: #0a0a0a;
+  --color-terminal-bg-input: #050505;
+  --color-terminal-bg-hover: #1a1a1a;
+  --color-terminal-bg-dark: #222222;
+  --color-terminal-border: #2a2a2a;
+  --color-terminal-border-dark: #000000;
+  --color-terminal-green: #7ff709;
+  --color-terminal-green-dark: #5cb800;
+  --color-terminal-blue: #268bd2;
+  --color-terminal-cyan: #88def2;
+  --color-terminal-red: #ff4444;
+  --color-terminal-pink: #ec4891;
+  --color-terminal-text: #e0e8f0;
+  --color-terminal-text-muted: #808080;
+  --color-terminal-text-dim: #606060;
+  --color-terminal-text-dimmer: #404040;
+  --color-terminal-scrollbar: #2a2a2a;
+  --color-terminal-scrollbar-hover: #3a3a3a;
+
+  /* Legacy macOS window button colors */
+  --color-mac-close: #ff5f56;
+  --color-mac-minimize: #ffbd2e;
+  --color-mac-maximize: #27ca40;
+
+  /* Legacy skeleton loading */
+  --color-skeleton-base: #2a2a2a;
+  --color-skeleton-highlight: #3a3a3a;
+
+  /* Legacy SVG text colors */
+  --color-svg-text-left: #333333;
+  --color-svg-text-right: #222222;
+
+  /* Legacy business card colors */
+  --color-card-bg: #ffffff;
+  --color-card-bg-gradient-end: #f8f9fa;
+  --color-card-text: #333333;
+
+  /* Legacy admin colors */
+  --color-admin-bg-start: #1e293b;
+  --color-admin-bg-end: #334155;
+  --color-admin-purple: #a855f7;
+
+  /* Legacy form variables */
+  --form-input-border: #333333;
+  --form-input-placeholder: #666666;
+  --form-btn-bg: #333333;
+  --form-btn-fg: #ffffff;
+  --form-btn-shadow: rgba(0, 0, 0, 0.2);
+}
+
+/* Dark theme legacy aliases */
+html[data-theme="dark"] {
+  --color-neutral-300: #2a2a2a;
+  --color-neutral-100: #3a3a3a;
+  --color-neutral-200: #3a3a3a;
+  --color-neutral-800: #f0f0f0;
+  --color-dark: #e0e0e0;
+  --color-shadow: rgba(0, 0, 0, 1);
+  --fg: #e0e0e0;
+  --bg: #2a2a2a;
+  --form-input-border: #e0e0e0;
+  --form-input-placeholder: #999999;
+  --form-btn-bg: #e0e0e0;
+  --form-btn-fg: #2a2a2a;
+  --form-btn-shadow: rgba(0, 0, 0, 0.3);
+  --color-svg-text-left: #d5d5d5;
+  --color-svg-text-right: #9a9a9a;
+}

@@ -186,9 +186,6 @@ main section:not(.business-card-section) {
 
 .about-content p,
 .about-text-wrapper p {
-  font-size: clamp(0.85rem, 2vw, 1rem);
-  line-height: 1.6;
-  color: var(--fg);
   margin-bottom: 1rem;
 }
 
@@ -220,9 +217,7 @@ main section:not(.business-card-section) {
 }
 
 .tech-list {
-  font-size: clamp(0.8rem, 1.8vw, 0.9rem);
-  line-height: 1.5;
-  color: var(--color-neutral-600);
+  color: var(--fg);
 }
 
 .closing-statement {

@@ -479,11 +479,27 @@ main,
     overflow: hidden;
   }
 
+  /* Text animation section - full viewport on mobile */
+  .text-animation-section {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+  }
+
   /* About section - becomes a container for two visual sections on mobile */
   .about-section {
     min-height: auto;
     flex: 0 0 auto;
     padding: 0;
+    margin: 0;
   }
 
   /* About content wrapper - stack children as separate visual sections */
@@ -495,19 +511,20 @@ main,
     max-width: 100%;
   }
 
-  /* About text section - full viewport */
+  /* About text section - full viewport on mobile */
   .about-section .about-text-wrapper {
     min-height: 100vh;
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
     padding: 2rem 1rem;
+    margin: 0;
   }
 
   .about-section .about-text-wrapper h2 {
     text-align: left;
-    margin-bottom: 2rem;
   }
 
   .about-section .about-text-wrapper p {
@@ -515,7 +532,7 @@ main,
     margin-bottom: 1rem;
   }
 
-  /* Tech stack viewport - full viewport, centers the compact tech-stack box */
+  /* Tech stack viewport - full viewport on mobile */
   .about-section .tech-stack-viewport {
     min-height: 100vh;
     min-height: 100dvh;
@@ -523,8 +540,8 @@ main,
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    scroll-snap-align: start;
-    padding: 1rem;
+    padding: 2rem 1rem;
+    margin: 0;
   }
 
   /* Tech stack box - compact, centered in viewport */
@@ -537,16 +554,24 @@ main,
     padding: 1.5rem;
   }
 
-  .about-section .tech-stack h3 {
-    text-align: left;
-    margin-bottom: 1rem;
+  /* UNIFORM SECTION HEADINGS ON MOBILE */
+  .about-section h2,
+  .about-section .about-text-wrapper h2,
+  .about-section .tech-stack h3,
+  .about-section .tech-stack-viewport .tech-stack h3,
+  .contact-section h2 {
+    font-size: clamp(1.5rem, 6vw, 2.5rem) !important;
+    font-family: var(--font--acme) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    line-height: 1.2 !important;
+    margin-bottom: 1.5rem !important;
+    color: var(--fg) !important;
   }
 
   .about-section .tech-list {
     max-width: 85vw;
-    line-height: 1.6;
     text-align: justify;
-    font-size: 0.9rem;
   }
 
   /* Contact section - natural height */
@@ -556,13 +581,9 @@ main,
     padding: 2rem 1rem;
   }
 
-  .contact-section h2 {
-    margin-bottom: 1.5rem;
-  }
-
   /* Other sections that might exist */
   .hero-section,
-  main > section:not(.business-card-section):not(.about-section):not(.contact-section) {
+  main > section:not(.business-card-section):not(.text-animation-section):not(.about-section):not(.contact-section) {
     min-height: auto;
     flex: 0 0 auto;
   }

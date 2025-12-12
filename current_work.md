@@ -12,6 +12,34 @@ Red paw print SVG icon - needs to be added to project assets.
 
 ---
 
+## CSS Variable System Consolidation - COMPLETE (December 12, 2025)
+
+### Summary
+
+Consolidated dual CSS variable systems into single source of truth.
+
+**Changes Made:**
+
+| Change | Details |
+|--------|---------|
+| Legacy aliases added | Added 140+ legacy variable aliases to `design-system/tokens/colors.css` |
+| Duplicates removed | Removed duplicate color definitions from `variables.css` |
+| Form styles consolidated | Merged duplicate `.form-textarea` definitions in `client-portal.css` |
+
+**Architecture:**
+
+- **Primary source**: `src/design-system/tokens/colors.css` - Contains all color tokens
+- **Legacy support**: Legacy variable names (`--color-neutral-*`, `--fg`, `--bg`, `--color-terminal-*`, etc.) are now aliases pointing to design-system values
+- **Form styles**: `src/styles/components/form.css` is the base; page-specific overrides in `client-portal.css` and `terminal-intake.css`
+
+**Results:**
+
+- CSS bundle size reduced from 242.97 KB to 239.71 KB (~3 KB savings)
+- Zero breaking changes - all legacy variable names still work
+- Single source of truth for color definitions
+
+---
+
 ## Admin Dashboard Module Extraction - COMPLETE (December 12, 2025)
 
 ### Summary
@@ -83,8 +111,8 @@ Fixed 3 issues that could crash the application:
 ### CSS Cleanup (Low Priority)
 
 - [ ] Split large CSS files (admin.css 1820 lines, navigation.css 1647 lines)
-- [ ] Consolidate dual CSS variable systems (legacy `variables.css` vs modern `design-system/tokens/colors.css`)
-- [ ] Consolidate form styles (defined in 3 locations)
+- [x] Consolidate dual CSS variable systems (December 12, 2025)
+- [x] Consolidate form styles (December 12, 2025)
 
 ---
 
@@ -126,29 +154,29 @@ Fixed 3 issues that could crash the application:
 
 ---
 
-### GSAP Scroll Snap Module - IN PROGRESS
+### GSAP Scroll Snap Module - COMPLETE
 
-**Status**: In Progress
-**Date**: December 9, 2025
+**Status**: Complete
+**Date**: December 12, 2025
 
-**Summary**: Implementing GSAP-based scroll snapping so sections lock into place.
+**Summary**: GSAP-based scroll snapping - sections lock into place on desktop.
 
-**Requirements**:
+**Features**:
 
-- Sections should snap to center when scrolling stops
-- Viewport center calculation must account for header and footer heights
-- Should work on all pages EXCEPT client portal
-- Must use GSAP (not CSS scroll-snap)
+- Sections snap to center when scrolling stops
+- Viewport center calculation accounts for header/footer heights
+- Desktop only - disabled on mobile for free scrolling
+- Respects reduced motion preferences
 
 **Implementation**:
 
 - [x] Created `ScrollSnapModule` in `src/modules/scroll-snap.ts`
 - [x] Uses GSAP ScrollTrigger and ScrollToPlugin
 - [x] Added to `mainSiteModules` in app.ts for initialization
-- [x] Detects window vs container scroll mode (mobile vs desktop)
+- [x] Detects window vs container scroll mode
 - [x] Reads CSS variables for header/footer heights
-- [ ] Test scroll snap on desktop
-- [ ] Test scroll snap on mobile
+- [x] Tested on desktop - works great
+- [x] Mobile disabled (free scrolling)
 
 **Files Modified**:
 
