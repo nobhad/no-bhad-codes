@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Container } from '@/core/container';
+import { Container } from '../../../src/core/container';
 
 // Mock service classes
 class MockService {

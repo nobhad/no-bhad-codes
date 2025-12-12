@@ -8,8 +8,8 @@
  */
 
 import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
-import { DataService } from '@/services/data-service';
-import portfolioData from '@tests/mocks/portfolio.json';
+import { DataService } from '../../../src/services/data-service';
+import portfolioData from '../../mocks/portfolio.json';
 
 // Mock fetch
 global.fetch = vi.fn() as Mock;

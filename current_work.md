@@ -319,7 +319,7 @@ Fixed incorrect domain `nobhadcodes.com` to `nobhad.codes` and standardized all 
 
 - [x] Remove `.js` extensions from test imports (8 files fixed - December 12, 2025)
 - [x] Consolidate duplicate setup files - removed unused `tests/setup.ts` and `tests/setup/global.ts` (December 12, 2025)
-- [ ] Standardize import patterns (aliased `@/` vs relative paths)
+- [x] Standardize import patterns - converted 4 test files from `@/` to relative paths (December 12, 2025)
 
 ---
 

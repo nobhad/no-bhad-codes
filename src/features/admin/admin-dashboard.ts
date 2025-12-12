@@ -2074,32 +2074,7 @@ class AdminDashboard {
     await messagingModule.loadClientThreads(this.moduleContext);
   }
 
-  private populateClientDropdown(threads: any[]): void {
-    const clientSelect = document.getElementById('admin-client-select') as HTMLSelectElement;
-    if (!clientSelect) return;
-
-    // Clear existing options (except the default)
-    clientSelect.innerHTML = '<option value="">-- Select a client --</option>';
-
-    if (threads.length === 0) {
-      const option = document.createElement('option');
-      option.value = '';
-      option.textContent = 'No conversations yet';
-      option.disabled = true;
-      clientSelect.appendChild(option);
-      return;
-    }
-
-    threads.forEach((thread: any) => {
-      const option = document.createElement('option');
-      option.value = `${thread.client_id}:${thread.id}`;
-      const clientName =
-        thread.contact_name || thread.company_name || thread.client_name || 'Unknown Client';
-      const unreadText = thread.unread_count > 0 ? ` (${thread.unread_count} unread)` : '';
-      option.textContent = `${clientName} - ${thread.subject || 'No subject'}${unreadText}`;
-      clientSelect.appendChild(option);
-    });
-  }
+  // NOTE: populateClientDropdown moved to admin-messaging module
 
   private selectThread(clientId: number, threadId: number, _clientName: string): void {
     this.selectedClientId = clientId;
@@ -2600,68 +2575,7 @@ class AdminDashboard {
   // NOTE: Analytics helper methods (getAnalyticsData, formatAnalyticsData, formatPageUrl, formatInteractionType)
   // have been moved to admin-analytics module for code splitting
 
-  // NOTE: loadVisitorsData and loadLeadsData have been moved to respective modules
-
-  private populateLeadsTable(
-    leads: Array<{
-      id: number;
-      created_at: string;
-      contact_name: string;
-      company_name: string;
-      email: string;
-      project_type: string;
-      budget_range: string;
-      timeline: string;
-      status: string;
-    }>
-  ): void {
-    const tbody = document.getElementById('leads-table-body');
-    if (!tbody) return;
-
-    if (leads.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" class="empty-row">No intake submissions yet</td></tr>';
-      return;
-    }
-
-    tbody.innerHTML = leads
-      .map((lead) => {
-        const date = new Date(lead.created_at).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        });
-        const statusClass =
-          lead.status === 'pending'
-            ? 'status-pending'
-            : lead.status === 'active' || lead.status === 'in_progress'
-              ? 'status-active'
-              : lead.status === 'completed'
-                ? 'status-completed'
-                : '';
-
-        // Sanitize user data to prevent XSS
-        const safeContactName = SanitizationUtils.escapeHtml(lead.contact_name || '-');
-        const safeCompanyName = SanitizationUtils.escapeHtml(lead.company_name || '-');
-        const safeEmail = SanitizationUtils.escapeHtml(lead.email || '-');
-        const safeBudgetRange = SanitizationUtils.escapeHtml(lead.budget_range || '-');
-        const safeTimeline = SanitizationUtils.escapeHtml(lead.timeline || '-');
-        const safeStatus = SanitizationUtils.escapeHtml(lead.status || 'pending');
-
-        return `
-          <tr>
-            <td>${date}</td>
-            <td>${safeContactName}</td>
-            <td>${safeCompanyName}</td>
-            <td><a href="mailto:${safeEmail}">${safeEmail}</a></td>
-            <td>${this.formatProjectType(lead.project_type)}</td>
-            <td>${safeBudgetRange}</td>
-            <td>${safeTimeline}</td>
-            <td><span class="status-badge ${statusClass}">${safeStatus}</span></td>
-          </tr>
-        `;
-      })
-      .join('');
-  }
+  // NOTE: loadVisitorsData, loadLeadsData, and populateLeadsTable moved to respective modules
 
   private formatProjectType(type: string): string {
     const typeMap: Record<string, string> = {
@@ -2858,42 +2772,7 @@ class AdminDashboard {
       .join('');
   }
 
-  private populateVisitorsTable(visitors: VisitorInfo[]): void {
-    const tbody = document.querySelector('#visitors-table tbody');
-    if (!tbody) return;
-
-    tbody.innerHTML = visitors
-      .map(
-        (visitor) => {
-          // Sanitize all visitor data to prevent XSS
-          const safeId = SanitizationUtils.escapeHtml(String(visitor.id));
-          const safeFirstVisit = SanitizationUtils.escapeHtml(visitor.firstVisit);
-          const safeLastVisit = SanitizationUtils.escapeHtml(visitor.lastVisit);
-          const safeSessions = SanitizationUtils.escapeHtml(String(visitor.sessions));
-          const safePageViews = SanitizationUtils.escapeHtml(String(visitor.pageViews));
-          const safeLocation = SanitizationUtils.escapeHtml(visitor.location);
-          const safeDevice = SanitizationUtils.escapeHtml(visitor.device);
-
-          return `
-      <tr>
-        <td>${safeId}</td>
-        <td>${safeFirstVisit}</td>
-        <td>${safeLastVisit}</td>
-        <td>${safeSessions}</td>
-        <td>${safePageViews}</td>
-        <td>${safeLocation}</td>
-        <td>${safeDevice}</td>
-        <td>
-          <button class="btn btn-secondary btn-sm" onclick="viewVisitorDetails('${safeId}')">
-            View
-          </button>
-        </td>
-      </tr>
-    `;
-        }
-      )
-      .join('');
-  }
+  // NOTE: populateVisitorsTable moved to admin-analytics module
 
   private populateSystemStatus(status: ApplicationStatus): void {
     const container = document.getElementById('app-status');

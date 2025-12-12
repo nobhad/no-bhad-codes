@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { BaseModule } from '@/modules/base';
+import { BaseModule } from '../../../src/modules/base';
 
 // Create a concrete test class since BaseModule is meant to be extended
 class TestModule extends BaseModule {
