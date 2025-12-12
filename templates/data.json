@@ -77,7 +77,7 @@
       "description": "Start your project with our comprehensive intake form to help us understand your needs",
       "bodyClass": "client-intake-page",
       "mainClass": "intake-main",
-      "scriptSrc": "/src/features/client/client-intake.ts",
+      "scriptSrc": "/src/features/client/terminal-intake.ts",
       "robotsMeta": "noindex, nofollow"
     }
   }

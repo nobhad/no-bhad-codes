@@ -11,7 +11,10 @@ The Terminal Intake Form is an AI chat-style project intake system that collects
 
 ### Components
 
-- `src/features/client/terminal-intake.ts` - Main module (2,542 lines)
+- `src/features/client/terminal-intake.ts` - Main module (~1,450 lines)
+- `src/features/client/terminal-intake-types.ts` - TypeScript interfaces (~50 lines)
+- `src/features/client/terminal-intake-data.ts` - Question definitions (~470 lines)
+- `src/features/client/terminal-intake-ui.ts` - UI utilities and rendering (~500 lines)
 - `src/styles/pages/terminal-intake.css` - Terminal styling
 
 ### Key Interfaces

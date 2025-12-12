@@ -81,9 +81,6 @@
 /* Projects page */
 @import "./pages/projects.css";
 
-/* Client intake form */
-@import "./pages/client-intake.css";
-
 /* Terminal intake form */
 @import "./pages/terminal-intake.css";
 

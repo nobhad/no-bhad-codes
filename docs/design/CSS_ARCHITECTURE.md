@@ -587,7 +587,7 @@ src/styles/
 └── pages/
     ├── client-portal.css  # Client Portal specific
     ├── client.css         # Client landing page
-    ├── client-intake.css  # Client intake form
+    ├── terminal-intake.css # Terminal-style intake form
     ├── client-dashboard.css # Client dashboard
     ├── projects.css       # Projects page
     ├── admin.css          # Admin dashboard

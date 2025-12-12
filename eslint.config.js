@@ -39,6 +39,7 @@ const commonGlobals = {
   HTMLAnchorElement: 'readonly',
   HTMLDivElement: 'readonly',
   HTMLIFrameElement: 'readonly',
+  HTMLCanvasElement: 'readonly',
   ShadowRoot: 'readonly',
   EventListener: 'readonly',
   NodeJS: 'readonly',

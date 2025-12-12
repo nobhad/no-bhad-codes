@@ -15,15 +15,6 @@ The main client dashboard module providing:
 - **Settings**: Profile, password, notifications, and billing
 - **New Project**: Submit new project requests
 
-### Client Intake (`client-intake.ts`)
-
-Progressive intake form for new client onboarding:
-
-- **Multi-step form**: Project type, budget, timeline
-- **Auto-save**: Saves progress to localStorage
-- **GSAP animations**: Smooth section transitions
-- **Validation**: Real-time field validation
-
 ### Terminal Intake (`terminal-intake.ts`)
 
 Terminal-style intake form with conversational UI:
@@ -33,15 +24,18 @@ Terminal-style intake form with conversational UI:
 - **Arrow navigation**: Press Up to go back
 - **Review summary**: See all answers before submission
 - **Conditional questions**: Dynamic flow based on answers
+- **Session persistence**: Resume interrupted sessions
 
 ## File Structure
 
 ```text
 src/features/client/
-├── client-portal.ts      # Main portal dashboard (~3,000 lines)
-├── client-intake.ts      # Progressive intake form (~640 lines)
-├── terminal-intake.ts    # Terminal-style intake (~2,500 lines)
-└── README.md             # This file
+├── client-portal.ts          # Main portal dashboard (~3,000 lines)
+├── terminal-intake.ts        # Terminal-style intake (~1,450 lines)
+├── terminal-intake-types.ts  # Type definitions (~50 lines)
+├── terminal-intake-data.ts   # Questions and options (~470 lines)
+├── terminal-intake-ui.ts     # UI utilities (~500 lines)
+└── README.md                 # This file
 ```
 
 ## Entry Points
@@ -49,8 +43,8 @@ src/features/client/
 | Module | HTML Entry | URL |
 |--------|-----------|-----|
 | Client Portal | `client/portal.html` | `/client/portal.html` |
-| Client Intake | `client/intake.html` | `/client/intake.html` |
-| Terminal Intake | `client/intake.html` | `/client/intake.html` (modal) |
+| Terminal Intake | `client/intake.html` | `/client/intake.html` |
+| Intake Modal | `index.html` | `/` (via modal) |
 
 ## Development
 
@@ -82,10 +76,12 @@ Password: demo123
 - **File Uploads**: `/api/uploads/*`
 - **Authentication**: `/api/auth/*`
 - **Invoices**: `/api/invoices/*`
+- **Intake Submission**: `/api/intake`
 
 ## Related Documentation
 
 - [Client Portal Feature](../../../docs/features/CLIENT_PORTAL.md)
+- [Terminal Intake Feature](../../../docs/features/TERMINAL_INTAKE.md)
 - [Messages Feature](../../../docs/features/MESSAGES.md)
 - [Files Feature](../../../docs/features/FILES.md)
 - [Invoices Feature](../../../docs/features/INVOICES.md)
@@ -96,13 +92,11 @@ Password: demo123
 
 ### File Size
 
-The modules in this directory exceed the 300-line guideline:
+The `client-portal.ts` module exceeds the 300-line guideline:
 
 | File | Lines | Status |
 |------|-------|--------|
 | `client-portal.ts` | ~3,000 | Needs splitting |
-| `terminal-intake.ts` | ~2,500 | Needs splitting |
-| `client-intake.ts` | ~640 | Needs splitting |
 
 **Planned refactor**: Split into smaller modules by concern (messaging, files, invoices, etc.)
 
