@@ -195,3 +195,11 @@ export function getProtectionConfig(): CodeProtectionConfig {
     return PROTECTION_PRESETS.development;
   }
 }
+
+/**
+ * Check if protection is enabled for the current environment
+ * Used to skip loading CodeProtectionService when disabled
+ */
+export function isProtectionEnabled(): boolean {
+  return getProtectionConfig().enabled;
+}

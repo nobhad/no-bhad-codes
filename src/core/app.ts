@@ -481,6 +481,12 @@ export class Application {
    * Initialize application
    */
   async init(): Promise<void> {
+    // Enforce HTTPS in production
+    if (this.shouldEnforceHttps()) {
+      this.redirectToHttps();
+      return; // Stop initialization, page will redirect
+    }
+
     if (this.isInitialized) {
       console.warn('[Application] Already initialized');
       return;
@@ -564,8 +570,13 @@ export class Application {
       services.push('ContactService');
     }
 
-    // CodeProtectionService for all pages
-    services.push('CodeProtectionService');
+    // CodeProtectionService only when protection is enabled
+    const { isProtectionEnabled } = await import('../config/protection.config');
+    if (isProtectionEnabled()) {
+      services.push('CodeProtectionService');
+    } else {
+      console.log('[Application] CodeProtectionService skipped (protection disabled)');
+    }
 
     for (const serviceName of services) {
       try {
@@ -776,6 +787,39 @@ export class Application {
         ])
       )
     };
+  }
+
+  /**
+   * Check if HTTPS should be enforced
+   * Only enforces in production (not localhost/development)
+   */
+  private shouldEnforceHttps(): boolean {
+    if (typeof window === 'undefined') return false;
+
+    const { protocol, hostname } = window.location;
+
+    // Skip enforcement in development environments
+    const isDevelopment =
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname.startsWith('192.168.') ||
+      hostname.startsWith('10.') ||
+      hostname.endsWith('.local');
+
+    if (isDevelopment) return false;
+
+    // Enforce HTTPS if currently on HTTP
+    return protocol === 'http:';
+  }
+
+  /**
+   * Redirect to HTTPS version of current URL
+   */
+  private redirectToHttps(): void {
+    const { href } = window.location;
+    const httpsUrl = href.replace(/^http:/, 'https:');
+    console.log('[Application] Redirecting to HTTPS:', httpsUrl);
+    window.location.replace(httpsUrl);
   }
 }
 

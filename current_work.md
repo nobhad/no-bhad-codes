@@ -69,9 +69,10 @@ Fixed 3 issues that could crash the application:
 
 ### Code Quality
 
-- [ ] Add HTTPS enforcement in production
-- [ ] Split `client-portal.ts` (3,084 lines - exceeds 300 guideline)
-- [ ] Lazy load code-protection-service when disabled
+- [x] Add HTTPS enforcement in production (December 12, 2025)
+- [x] Split `client-portal.ts` - reduced from 3,084 to 2,381 lines (December 12, 2025)
+- [x] Lazy load code-protection-service when disabled (December 12, 2025)
+- [x] Configure Redis caching (December 12, 2025)
 
 ### Feature Organization
 
@@ -255,7 +256,7 @@ Fixed 3 issues that could crash the application:
 | Total Issues Found | 108 | ~100 fixed |
 | Critical Issues | 0 | ALL FIXED |
 | Hardcoded Colors | 0 remaining | ALL FIXED |
-| Oversized Files | 1 remaining | client-portal.ts (3,084) |
+| Oversized Files | 1 remaining | client-portal.ts (2,381 - reduced 23%) |
 | Backend Hardcoded Values | 0 remaining | ALL FIXED |
 | CSS Variables Added | 50+ new tokens | Complete |
 | Lint Warnings | 0 | ALL FIXED |
@@ -275,19 +276,25 @@ Run `npm run dev:full` to start both frontend and backend
 
 ## Known Issues
 
-### Redis Caching Disabled
+### Redis Caching - CONFIGURED
 
-**Status**: Deferred (not needed for development)
+**Status**: FIXED (December 12, 2025)
 
-**Issue**: Redis connection errors when starting the server.
+**Solution**: Redis is now installed and running via Homebrew.
 
-**Current Solution**: `REDIS_ENABLED` environment variable check - when not set to `true`, Redis initialization is skipped entirely.
+**Configuration** (in `.env`):
 
-**To Enable Redis Later (Production):**
+```text
+REDIS_ENABLED=true
+REDIS_HOST=localhost
+REDIS_PORT=6379
+```
 
-1. Install Redis: `brew install redis` (macOS)
-2. Start Redis: `brew services start redis`
-3. Add to `.env`: `REDIS_ENABLED=true`
+**Commands**:
+
+- Start: `brew services start redis`
+- Stop: `brew services stop redis`
+- Status: `redis-cli ping` (should return PONG)
 
 ---
 
@@ -313,7 +320,7 @@ Run `npm run dev:full` to start both frontend and backend
 
 | File | Purpose |
 |------|---------|
-| `src/features/client/client-portal.ts` | Main client portal module (~3,084 lines) |
+| `src/features/client/client-portal.ts` | Main client portal module (~2,381 lines) |
 | `src/features/client/terminal-intake.ts` | Terminal intake main module (~1,446 lines) |
 | `src/features/admin/admin-dashboard.ts` | Admin dashboard module (~3,032 lines) |
 | `server/routes/uploads.ts` | File upload API endpoints |

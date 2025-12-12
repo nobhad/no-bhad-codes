@@ -13,18 +13,12 @@ import type { ClientProject, ClientProjectStatus } from '../../types/client';
 import { gsap } from 'gsap';
 import { APP_CONSTANTS } from '../../config/constants';
 import 'emoji-picker-element';
-import type {
-  ClientPortalContext,
-  PortalFile,
-  PortalInvoice,
-  PortalMessage,
-  PortalProject
-} from './portal-types';
+import type { ClientPortalContext, PortalFile, PortalProject } from './portal-types';
 import {
   loadFilesModule,
-  loadInvoicesModule as _loadInvoicesModule,
-  loadMessagesModule as _loadMessagesModule,
-  loadSettingsModule as _loadSettingsModule
+  loadInvoicesModule,
+  loadMessagesModule,
+  loadSettingsModule
 } from './modules';
 
 export class ClientPortalModule extends BaseModule {
@@ -1560,263 +1554,14 @@ export class ClientPortalModule extends BaseModule {
   // =====================================================
 
   /**
-   * Load invoices from API and render the list
+   * Load invoices - delegates to invoices module
    */
   private async loadInvoices(): Promise<void> {
-    const invoicesContainer = document.querySelector('.invoices-list');
-    const summaryOutstanding = document.querySelector('.summary-card:first-child .summary-value');
-    const summaryPaid = document.querySelector('.summary-card:last-child .summary-value');
-
-    if (!invoicesContainer) return;
-
-    // Show loading state
-    const invoiceItems = invoicesContainer.querySelectorAll('.invoice-item');
-    invoiceItems.forEach((item) => item.remove());
-
-    try {
-      const token = sessionStorage.getItem('client_auth_token');
-
-      // Use demo data if no token (demo mode)
-      if (!token || token.startsWith('demo_token_')) {
-        this.renderDemoInvoices(invoicesContainer as HTMLElement);
-        return;
-      }
-
-      const response = await fetch(`${ClientPortalModule.INVOICES_API_BASE}/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch invoices');
-      }
-
-      const data = await response.json();
-
-      // Update summary cards
-      if (summaryOutstanding && data.summary) {
-        summaryOutstanding.textContent = this.formatCurrency(data.summary.totalOutstanding);
-      }
-      if (summaryPaid && data.summary) {
-        summaryPaid.textContent = this.formatCurrency(data.summary.totalPaid);
-      }
-
-      this.renderInvoicesList(invoicesContainer as HTMLElement, data.invoices || []);
-    } catch (error) {
-      console.error('Error loading invoices:', error);
-      this.renderDemoInvoices(invoicesContainer as HTMLElement);
-    }
+    const invoicesModule = await loadInvoicesModule();
+    await invoicesModule.loadInvoices(this.moduleContext);
   }
 
-  /**
-   * Render demo invoices for demo mode
-   */
-  private renderDemoInvoices(container: HTMLElement): void {
-    const demoInvoices: PortalInvoice[] = [
-      {
-        id: 1,
-        invoice_number: 'INV-2025-001',
-        created_at: '2025-11-30T10:00:00Z',
-        due_date: '2025-12-30T10:00:00Z',
-        amount_total: 2500.0,
-        status: 'sent',
-        project_name: 'Website Redesign'
-      },
-      {
-        id: 2,
-        invoice_number: 'INV-2025-002',
-        created_at: '2025-11-15T10:00:00Z',
-        due_date: '2025-12-15T10:00:00Z',
-        amount_total: 1500.0,
-        status: 'paid',
-        project_name: 'Brand Identity'
-      }
-    ];
-
-    // Update summary with demo data
-    const summaryOutstanding = document.querySelector('.summary-card:first-child .summary-value');
-    const summaryPaid = document.querySelector('.summary-card:last-child .summary-value');
-    if (summaryOutstanding) summaryOutstanding.textContent = '$2,500.00';
-    if (summaryPaid) summaryPaid.textContent = '$1,500.00';
-
-    this.renderInvoicesList(container, demoInvoices);
-  }
-
-  /**
-   * Render invoices list
-   */
-  private renderInvoicesList(container: HTMLElement, invoices: PortalInvoice[]): void {
-    // Remove existing invoice items but keep the h3
-    const existingItems = container.querySelectorAll('.invoice-item');
-    existingItems.forEach((item) => item.remove());
-
-    // Remove no invoices message if exists
-    const noInvoicesMsg = container.querySelector('.no-invoices-message');
-    if (noInvoicesMsg) noInvoicesMsg.remove();
-
-    if (invoices.length === 0) {
-      const noInvoices = document.createElement('p');
-      noInvoices.className = 'no-invoices-message';
-      noInvoices.textContent =
-        'No invoices yet. Your first invoice will appear here once your project begins.';
-      container.appendChild(noInvoices);
-      return;
-    }
-
-    invoices.forEach((invoice) => {
-      const invoiceElement = document.createElement('div');
-      invoiceElement.className = 'invoice-item';
-      invoiceElement.dataset.invoiceId = String(invoice.id);
-
-      const statusClass = this.getInvoiceStatusClass(invoice.status);
-      const statusLabel = this.getInvoiceStatusLabel(invoice.status);
-
-      invoiceElement.innerHTML = `
-        <div class="invoice-info">
-          <span class="invoice-number">${this.escapeHtml(invoice.invoice_number)}</span>
-          <span class="invoice-date">${this.formatDate(invoice.created_at)}</span>
-          <span class="invoice-project">${this.escapeHtml(invoice.project_name || 'Project')}</span>
-        </div>
-        <div class="invoice-amount">${this.formatCurrency(invoice.amount_total)}</div>
-        <span class="invoice-status ${statusClass}">${statusLabel}</span>
-        <div class="invoice-actions">
-          <button class="btn btn-outline btn-sm btn-preview-invoice"
-                  data-invoice-id="${invoice.id}">Preview</button>
-          <button class="btn btn-outline btn-sm btn-download-invoice"
-                  data-invoice-id="${invoice.id}"
-                  data-invoice-number="${this.escapeHtml(invoice.invoice_number)}">Download</button>
-        </div>
-      `;
-
-      container.appendChild(invoiceElement);
-    });
-
-    this.attachInvoiceActionListeners(container);
-  }
-
-  /**
-   * Get CSS class for invoice status
-   */
-  private getInvoiceStatusClass(status: string): string {
-    const statusMap: Record<string, string> = {
-      draft: 'status-draft',
-      sent: 'status-pending',
-      viewed: 'status-pending',
-      partial: 'status-partial',
-      paid: 'status-paid',
-      overdue: 'status-overdue',
-      cancelled: 'status-cancelled'
-    };
-    return statusMap[status] || 'status-pending';
-  }
-
-  /**
-   * Get display label for invoice status
-   */
-  private getInvoiceStatusLabel(status: string): string {
-    const labelMap: Record<string, string> = {
-      draft: 'Draft',
-      sent: 'Pending',
-      viewed: 'Viewed',
-      partial: 'Partial',
-      paid: 'Paid',
-      overdue: 'Overdue',
-      cancelled: 'Cancelled'
-    };
-    return labelMap[status] || 'Pending';
-  }
-
-  /**
-   * Format currency value
-   */
-  private formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount || 0);
-  }
-
-  /**
-   * Attach event listeners to invoice action buttons
-   */
-  private attachInvoiceActionListeners(container: HTMLElement): void {
-    // Preview buttons
-    container.querySelectorAll('.btn-preview-invoice').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        const invoiceId = (e.currentTarget as HTMLElement).dataset.invoiceId;
-        if (invoiceId) {
-          this.previewInvoice(parseInt(invoiceId));
-        }
-      });
-    });
-
-    // Download buttons
-    container.querySelectorAll('.btn-download-invoice').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        const invoiceId = (e.currentTarget as HTMLElement).dataset.invoiceId;
-        const invoiceNumber = (e.currentTarget as HTMLElement).dataset.invoiceNumber || 'invoice';
-        if (invoiceId) {
-          this.downloadInvoice(parseInt(invoiceId), invoiceNumber);
-        }
-      });
-    });
-  }
-
-  /**
-   * Preview invoice (open in new tab or modal)
-   */
-  private previewInvoice(invoiceId: number): void {
-    const token = sessionStorage.getItem('client_auth_token');
-
-    if (!token || token.startsWith('demo_token_')) {
-      alert('Invoice preview not available in demo mode.');
-      return;
-    }
-
-    // Open invoice in new tab (can be enhanced with a modal later)
-    const url = `${ClientPortalModule.INVOICES_API_BASE}/${invoiceId}`;
-    window.open(url, '_blank');
-  }
-
-  /**
-   * Download invoice as PDF
-   */
-  private async downloadInvoice(invoiceId: number, invoiceNumber: string): Promise<void> {
-    const token = sessionStorage.getItem('client_auth_token');
-
-    if (!token || token.startsWith('demo_token_')) {
-      alert('Invoice download not available in demo mode.');
-      return;
-    }
-
-    try {
-      // Fetch PDF from the backend endpoint
-      const response = await fetch(`${ClientPortalModule.INVOICES_API_BASE}/${invoiceId}/pdf`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to download invoice');
-      }
-
-      // Get blob and create download link
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `invoice-${invoiceNumber}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error downloading invoice:', error);
-      alert('Failed to download invoice. Please try again.');
-    }
-  }
+  // NOTE: Invoice rendering methods moved to portal-invoices module
 
   private loadMessages(): void {
     if (!this.currentProject) return;
@@ -1935,226 +1680,28 @@ export class ClientPortalModule extends BaseModule {
     if (this.loginSection) this.loginSection.style.display = 'block';
   }
 
-  /** Current message thread ID */
-  private currentThreadId: number | null = null;
+  // =====================================================
+  // MESSAGING - Delegates to portal-messages module
+  // =====================================================
 
   /**
-   * Load messages from API
+   * Load messages from API - delegates to messages module
    */
   private async loadMessagesFromAPI(): Promise<void> {
-    const messagesContainer = document.getElementById('messages-list');
-    if (!messagesContainer) return;
-
-    const token = sessionStorage.getItem('client_auth_token');
-
-    if (!token || token.startsWith('demo_token_')) {
-      // Demo mode - show demo messages
-      this.renderDemoMessages(messagesContainer);
-      return;
-    }
-
-    try {
-      // Get message threads first
-      const threadsResponse = await fetch(`${ClientPortalModule.MESSAGES_API_BASE}/threads`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (!threadsResponse.ok) {
-        throw new Error('Failed to load message threads');
-      }
-
-      const threadsData = await threadsResponse.json();
-      const threads = threadsData.threads || [];
-
-      if (threads.length === 0) {
-        messagesContainer.innerHTML = `
-          <div class="no-messages">
-            <p>No messages yet. Start a conversation!</p>
-          </div>
-        `;
-        return;
-      }
-
-      // Get the first (most recent) thread's messages
-      const thread = threads[0];
-      this.currentThreadId = thread.id;
-
-      const messagesResponse = await fetch(
-        `${ClientPortalModule.MESSAGES_API_BASE}/threads/${thread.id}/messages`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (!messagesResponse.ok) {
-        throw new Error('Failed to load messages');
-      }
-
-      const messagesData = await messagesResponse.json();
-      this.renderMessages(messagesContainer, messagesData.messages || []);
-
-      // Mark messages as read
-      await fetch(`${ClientPortalModule.MESSAGES_API_BASE}/threads/${thread.id}/read`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-    } catch (error) {
-      console.error('Error loading messages:', error);
-      this.renderDemoMessages(messagesContainer);
-    }
+    const messagesModule = await loadMessagesModule();
+    await messagesModule.loadMessagesFromAPI(this.moduleContext);
   }
 
   /**
-   * Render demo messages
-   */
-  private renderDemoMessages(container: HTMLElement): void {
-    const demoMessages: PortalMessage[] = [
-      {
-        id: 1,
-        sender_type: 'admin',
-        sender_name: 'Support',
-        message: 'Welcome to your client portal! Feel free to send us any questions.',
-        created_at: new Date(Date.now() - 86400000).toISOString()
-      },
-      {
-        id: 2,
-        sender_type: 'client',
-        sender_name: 'You',
-        message: 'Thanks! Looking forward to working together.',
-        created_at: new Date(Date.now() - 3600000).toISOString()
-      }
-    ];
-    this.renderMessages(container, demoMessages);
-  }
-
-  /**
-   * Render messages list
-   */
-  private renderMessages(container: HTMLElement, messages: PortalMessage[]): void {
-    if (messages.length === 0) {
-      container.innerHTML = '<div class="no-messages"><p>No messages in this thread yet.</p></div>';
-      return;
-    }
-
-    container.innerHTML = messages
-      .map(
-        (msg) => `
-        <div class="message message-${msg.sender_type === 'client' ? 'sent' : 'received'}">
-          <div class="message-header">
-            <span class="message-sender">${this.escapeHtml(msg.sender_name || 'Unknown')}</span>
-            <span class="message-time">${this.formatDate(msg.created_at)}</span>
-          </div>
-          <div class="message-content">${this.escapeHtml(msg.message)}</div>
-        </div>
-      `
-      )
-      .join('');
-
-    // Scroll to bottom
-    container.scrollTop = container.scrollHeight;
-  }
-
-  /**
-   * Send a message
+   * Send a message - delegates to messages module
    */
   private async sendMessage(event: Event): Promise<void> {
     event.preventDefault();
-
-    const messageInput = document.getElementById('message-input') as HTMLTextAreaElement;
-    if (!messageInput) return;
-
-    const message = messageInput.value.trim();
-    if (!message) return;
-
-    const token = sessionStorage.getItem('client_auth_token');
-
-    // Demo mode - add message locally (not saved, resets on refresh)
-    if (!token || token.startsWith('demo_token_')) {
-      this.addDemoMessage(message);
-      messageInput.value = '';
-      return;
-    }
-
-    try {
-      let url: string;
-      let body: { message: string; subject?: string };
-
-      if (this.currentThreadId) {
-        // Send to existing thread
-        url = `${ClientPortalModule.MESSAGES_API_BASE}/threads/${this.currentThreadId}/messages`;
-        body = { message };
-      } else {
-        // Create new inquiry thread
-        url = `${ClientPortalModule.MESSAGES_API_BASE}/inquiry`;
-        body = { subject: 'General Inquiry', message };
-      }
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(body)
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to send message');
-      }
-
-      const data = await response.json();
-
-      // If new thread created, save the ID
-      if (data.threadId) {
-        this.currentThreadId = data.threadId;
-      }
-
-      // Clear input
-      messageInput.value = '';
-
-      // Reload messages
-      this.loadMessagesFromAPI();
-    } catch (error) {
-      console.error('Error sending message:', error);
-      alert(error instanceof Error ? error.message : 'Failed to send message. Please try again.');
-    }
+    const messagesModule = await loadMessagesModule();
+    await messagesModule.sendMessage(this.moduleContext);
   }
 
-  /**
-   * Add a demo message locally (for demo mode only, resets on refresh)
-   */
-  private addDemoMessage(message: string): void {
-    const messagesThread = document.getElementById('messages-thread');
-    if (!messagesThread) return;
-
-    const now = new Date();
-    const timeString = `${now.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    })} at ${now.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    })}`;
-
-    const messageHTML = `
-      <div class="message message-sent">
-        <div class="message-content">
-          <div class="message-header">
-            <span class="message-sender">You</span>
-            <span class="message-time">${timeString}</span>
-          </div>
-          <div class="message-body">${this.escapeHtml(message)}</div>
-        </div>
-        <div class="message-avatar" data-name="You">
-          <div class="avatar-placeholder">YOU</div>
-        </div>
-      </div>
-    `;
-
-    messagesThread.insertAdjacentHTML('beforeend', messageHTML);
-    messagesThread.scrollTop = messagesThread.scrollHeight;
-  }
+  // NOTE: Message rendering methods moved to portal-messages module
 
   private handleTabClick(event: Event): void {
     event.preventDefault();
@@ -2754,274 +2301,52 @@ export class ClientPortalModule extends BaseModule {
     }
   }
 
-  private setupSettingsForms(): void {
-    // Contact Info Form
-    const contactForm = document.getElementById('contact-info-form');
-    if (contactForm) {
-      contactForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await this.saveContactInfo(new FormData(contactForm as HTMLFormElement));
-      });
-    }
-
-    // Billing Address Form
-    const billingForm = document.getElementById('billing-address-form');
-    if (billingForm) {
-      billingForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await this.saveBillingAddress(new FormData(billingForm as HTMLFormElement));
-      });
-    }
-
-    // Notification Preferences Form
-    const notificationForm = document.getElementById('notification-prefs-form');
-    if (notificationForm) {
-      notificationForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await this.saveNotificationPrefs(new FormData(notificationForm as HTMLFormElement));
-      });
-    }
-
-    // Billing View Forms
-    const billingViewForm = document.getElementById('billing-view-form');
-    if (billingViewForm) {
-      billingViewForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await this.saveBillingViewAddress(new FormData(billingViewForm as HTMLFormElement));
-      });
-    }
-
-    const taxInfoForm = document.getElementById('tax-info-form');
-    if (taxInfoForm) {
-      taxInfoForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await this.saveTaxInfo(new FormData(taxInfoForm as HTMLFormElement));
-      });
-    }
+  /**
+   * Setup settings forms - delegates to settings module
+   */
+  private async setupSettingsForms(): Promise<void> {
+    const settingsModule = await loadSettingsModule();
+    settingsModule.setupSettingsForms(this.moduleContext);
   }
 
-  private loadUserSettings(): void {
-    // Load user data from sessionStorage or API
-    const userData = {
-      name: this.currentUser || 'User',
-      email: this.currentUser || '',
-      company: 'Company Name',
-      phone: '',
-      secondaryEmail: '',
-      billing: {
-        address1: '',
-        address2: '',
-        city: '',
-        state: '',
-        zip: '',
-        country: ''
-      }
-    };
+  // =====================================================
+  // SETTINGS - Delegates to portal-settings module
+  // =====================================================
 
-    // Populate contact info
-    const nameInput = document.getElementById('contact-name') as HTMLInputElement;
-    const emailInput = document.getElementById('contact-email') as HTMLInputElement;
-    const companyInput = document.getElementById('contact-company') as HTMLInputElement;
-    const phoneInput = document.getElementById('contact-phone') as HTMLInputElement;
-    const secondaryEmailInput = document.getElementById(
-      'contact-secondary-email'
-    ) as HTMLInputElement;
-
-    if (nameInput) nameInput.value = userData.name;
-    if (emailInput) emailInput.value = userData.email;
-    if (companyInput) companyInput.value = userData.company;
-    if (phoneInput) phoneInput.value = userData.phone;
-    if (secondaryEmailInput) secondaryEmailInput.value = userData.secondaryEmail;
-
-    // Populate billing address
-    const address1Input = document.getElementById('billing-address1') as HTMLInputElement;
-    const address2Input = document.getElementById('billing-address2') as HTMLInputElement;
-    const cityInput = document.getElementById('billing-city') as HTMLInputElement;
-    const stateInput = document.getElementById('billing-state') as HTMLInputElement;
-    const zipInput = document.getElementById('billing-zip') as HTMLInputElement;
-    const countryInput = document.getElementById('billing-country') as HTMLInputElement;
-
-    if (address1Input) address1Input.value = userData.billing.address1;
-    if (address2Input) address2Input.value = userData.billing.address2;
-    if (cityInput) cityInput.value = userData.billing.city;
-    if (stateInput) stateInput.value = userData.billing.state;
-    if (zipInput) zipInput.value = userData.billing.zip;
-    if (countryInput) countryInput.value = userData.billing.country;
+  /**
+   * Load user settings - delegates to settings module
+   */
+  private async loadUserSettings(): Promise<void> {
+    const settingsModule = await loadSettingsModule();
+    settingsModule.loadUserSettings(this.currentUser);
   }
 
-  private loadBillingSettings(): void {
-    // Load billing data from sessionStorage or API
-    const savedBillingData = sessionStorage.getItem('client_billing_address');
-    const savedTaxData = sessionStorage.getItem('client_tax_info');
-
-    const billingData = savedBillingData
-      ? JSON.parse(savedBillingData)
-      : {
-        address1: '',
-        address2: '',
-        city: '',
-        state: '',
-        zip: '',
-        country: ''
-      };
-
-    const taxData = savedTaxData
-      ? JSON.parse(savedTaxData)
-      : {
-        taxId: '',
-        businessName: ''
-      };
-
-    // Populate billing address form
-    const address1Input = document.getElementById('billing-view-address1') as HTMLInputElement;
-    const address2Input = document.getElementById('billing-view-address2') as HTMLInputElement;
-    const cityInput = document.getElementById('billing-view-city') as HTMLInputElement;
-    const stateInput = document.getElementById('billing-view-state') as HTMLInputElement;
-    const zipInput = document.getElementById('billing-view-zip') as HTMLInputElement;
-    const countryInput = document.getElementById('billing-view-country') as HTMLInputElement;
-
-    if (address1Input) address1Input.value = billingData.address1;
-    if (address2Input) address2Input.value = billingData.address2;
-    if (cityInput) cityInput.value = billingData.city;
-    if (stateInput) stateInput.value = billingData.state;
-    if (zipInput) zipInput.value = billingData.zip;
-    if (countryInput) countryInput.value = billingData.country;
-
-    // Populate tax info form
-    const taxIdInput = document.getElementById('tax-id') as HTMLInputElement;
-    const businessNameInput = document.getElementById('business-name') as HTMLInputElement;
-
-    if (taxIdInput) taxIdInput.value = taxData.taxId;
-    if (businessNameInput) businessNameInput.value = taxData.businessName;
+  /**
+   * Load billing settings - delegates to settings module
+   */
+  private async loadBillingSettings(): Promise<void> {
+    const settingsModule = await loadSettingsModule();
+    settingsModule.loadBillingSettings();
   }
 
-  private loadContactSettings(): void {
-    // Load contact data from sessionStorage or API
-    const savedContactData = sessionStorage.getItem('client_contact_info');
-
-    const contactData = savedContactData
-      ? JSON.parse(savedContactData)
-      : {
-        name: this.currentUser || 'User',
-        email: this.currentUser || '',
-        company: '',
-        phone: '',
-        secondaryEmail: ''
-      };
-
-    // Populate contact form
-    const nameInput = document.getElementById('contact-view-name') as HTMLInputElement;
-    const emailInput = document.getElementById('contact-view-email') as HTMLInputElement;
-    const companyInput = document.getElementById('contact-view-company') as HTMLInputElement;
-    const phoneInput = document.getElementById('contact-view-phone') as HTMLInputElement;
-    const secondaryEmailInput = document.getElementById(
-      'contact-view-secondary-email'
-    ) as HTMLInputElement;
-
-    if (nameInput) nameInput.value = contactData.name;
-    if (emailInput) emailInput.value = contactData.email;
-    if (companyInput) companyInput.value = contactData.company;
-    if (phoneInput) phoneInput.value = contactData.phone;
-    if (secondaryEmailInput) secondaryEmailInput.value = contactData.secondaryEmail;
+  /**
+   * Load contact settings - delegates to settings module
+   */
+  private async loadContactSettings(): Promise<void> {
+    const settingsModule = await loadSettingsModule();
+    settingsModule.loadContactSettings(this.currentUser);
   }
 
-  private loadNotificationSettings(): void {
-    // Load notification preferences from sessionStorage
-    const savedNotifications = sessionStorage.getItem('client_notification_prefs');
-    const savedFrequency = sessionStorage.getItem('client_notification_frequency');
-
-    const notificationPrefs = savedNotifications
-      ? JSON.parse(savedNotifications)
-      : ['project-updates', 'invoices', 'messages', 'milestones'];
-
-    const frequencyData = savedFrequency
-      ? JSON.parse(savedFrequency)
-      : {
-        frequency: 'immediate',
-        quietStart: '',
-        quietEnd: ''
-      };
-
-    // Set checkbox values
-    const checkboxes = document.querySelectorAll(
-      '#email-notifications-form input[type="checkbox"]'
-    );
-    checkboxes.forEach((checkbox) => {
-      const cb = checkbox as HTMLInputElement;
-      cb.checked = notificationPrefs.includes(cb.value);
-    });
-
-    // Set frequency settings
-    const frequencySelect = document.getElementById('notification-frequency') as HTMLSelectElement;
-    const quietStartInput = document.getElementById('quiet-hours-start') as HTMLInputElement;
-    const quietEndInput = document.getElementById('quiet-hours-end') as HTMLInputElement;
-
-    if (frequencySelect) frequencySelect.value = frequencyData.frequency;
-    if (quietStartInput) quietStartInput.value = frequencyData.quietStart;
-    if (quietEndInput) quietEndInput.value = frequencyData.quietEnd;
+  /**
+   * Load notification settings - delegates to settings module
+   */
+  private async loadNotificationSettings(): Promise<void> {
+    const settingsModule = await loadSettingsModule();
+    settingsModule.loadNotificationSettings();
   }
 
-  private async saveContactInfo(formData: FormData): Promise<void> {
-    const data = Object.fromEntries(formData);
-    console.log('Saving contact info:', data);
-
-    // Save to sessionStorage for now
-    sessionStorage.setItem('client_contact_info', JSON.stringify(data));
-
-    // Show success message
-    this.showSuccessMessage('Contact information saved successfully!');
-  }
-
-  private async saveBillingAddress(formData: FormData): Promise<void> {
-    const data = Object.fromEntries(formData);
-    console.log('Saving billing address:', data);
-
-    // Save to sessionStorage for now
-    sessionStorage.setItem('client_billing_address', JSON.stringify(data));
-
-    // Show success message
-    this.showSuccessMessage('Billing address saved successfully!');
-  }
-
-  private async saveNotificationPrefs(formData: FormData): Promise<void> {
-    const checkboxes = formData.getAll('notifications');
-    const prefs = {
-      projectUpdates: checkboxes.includes('project-updates'),
-      invoices: checkboxes.includes('invoices'),
-      messages: checkboxes.includes('messages'),
-      milestones: checkboxes.includes('milestones')
-    };
-
-    console.log('Saving notification preferences:', prefs);
-
-    // Save to sessionStorage for now
-    sessionStorage.setItem('client_notification_prefs', JSON.stringify(prefs));
-
-    // Show success message
-    this.showSuccessMessage('Notification preferences saved successfully!');
-  }
-
-  private async saveBillingViewAddress(formData: FormData): Promise<void> {
-    const data = Object.fromEntries(formData);
-    console.log('Saving billing view address:', data);
-
-    // Save to sessionStorage for now
-    sessionStorage.setItem('client_billing_view_address', JSON.stringify(data));
-
-    // Show success message
-    this.showSuccessMessage('Billing address updated successfully!');
-  }
-
-  private async saveTaxInfo(formData: FormData): Promise<void> {
-    const data = Object.fromEntries(formData);
-    console.log('Saving tax info:', data);
-
-    // Save to sessionStorage for now
-    sessionStorage.setItem('client_tax_info', JSON.stringify(data));
-
-    // Show success message
-    this.showSuccessMessage('Tax information saved successfully!');
-  }
+  // NOTE: Settings save methods moved to portal-settings module
+  // The setupViewFormHandlers method now delegates to the module
 
   private showSuccessMessage(message: string): void {
     // Create success message element
