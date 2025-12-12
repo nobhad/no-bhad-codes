@@ -10,11 +10,19 @@
 
 import { AdminSecurity } from './admin-security';
 import type { PerformanceMetrics, PerformanceAlert } from '../../services/performance-service';
-import { Chart, registerables } from 'chart.js';
 import { SanitizationUtils } from '../../utils/sanitization-utils';
 
-// Register all Chart.js components
-Chart.register(...registerables);
+// Chart.js is loaded dynamically to reduce initial bundle size
+let Chart: typeof import('chart.js').Chart | null = null;
+
+async function loadChartJS(): Promise<typeof import('chart.js').Chart> {
+  if (!Chart) {
+    const chartModule = await import('chart.js');
+    chartModule.Chart.register(...chartModule.registerables);
+    Chart = chartModule.Chart;
+  }
+  return Chart;
+}
 
 // Type definitions
 interface PerformanceReport {
@@ -304,7 +312,7 @@ class AdminAuth {
 class AdminDashboard {
   private currentTab = 'overview';
   private refreshInterval: NodeJS.Timeout | null = null;
-  private charts: Map<string, Chart> = new Map();
+  private charts: Map<string, { destroy: () => void }> = new Map();
 
   // Store data for detail views
   private leadsData: any[] = [];
@@ -3142,11 +3150,14 @@ class AdminDashboard {
   }
 
   /**
-   * Create or update a Chart.js chart
+   * Create or update a Chart.js chart (loads Chart.js dynamically)
    */
-  private loadChart(containerId: string, chartType: 'visitors' | 'sources'): void {
+  private async loadChart(containerId: string, chartType: 'visitors' | 'sources'): Promise<void> {
     const container = document.getElementById(containerId);
     if (!container) return;
+
+    // Load Chart.js dynamically
+    const ChartJS = await loadChartJS();
 
     // Destroy existing chart if it exists
     const existingChart = this.charts.get(containerId);
@@ -3162,11 +3173,11 @@ class AdminDashboard {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let chart: Chart;
+    let chart: InstanceType<typeof ChartJS>;
 
     if (chartType === 'visitors') {
       // Line chart for visitor trends
-      chart = new Chart(ctx, {
+      chart = new ChartJS(ctx, {
         type: 'line',
         data: {
           labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -3218,7 +3229,7 @@ class AdminDashboard {
       });
     } else {
       // Doughnut chart for traffic sources
-      chart = new Chart(ctx, {
+      chart = new ChartJS(ctx, {
         type: 'doughnut',
         data: {
           labels: ['Direct', 'Search', 'Social', 'Referral', 'Email'],

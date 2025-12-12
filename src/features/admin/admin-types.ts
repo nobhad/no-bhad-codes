@@ -1,0 +1,206 @@
+/**
+ * ===============================================
+ * ADMIN DASHBOARD TYPES
+ * ===============================================
+ * @file src/features/admin/admin-types.ts
+ *
+ * Type definitions for admin dashboard modules.
+ */
+
+import type { PerformanceMetrics, PerformanceAlert } from '../../services/performance-service';
+
+// Performance types
+export interface PerformanceReport {
+  score: number;
+  metrics: PerformanceMetrics;
+  alerts: PerformanceAlert[];
+  recommendations: string[];
+}
+
+export interface PerformanceMetricDisplay {
+  value: string;
+  status: string;
+}
+
+export interface PerformanceMetricsDisplay {
+  lcp: PerformanceMetricDisplay;
+  fid: PerformanceMetricDisplay;
+  cls: PerformanceMetricDisplay;
+  ttfb: PerformanceMetricDisplay;
+  score: number;
+  grade: string;
+  bundleSize?: {
+    total: string;
+    main: string;
+    vendor: string;
+  };
+  alerts?: string[];
+}
+
+// Analytics types
+export interface AnalyticsDataItem {
+  label: string;
+  value: string | number;
+}
+
+export interface AnalyticsData {
+  popularPages?: AnalyticsDataItem[];
+  deviceBreakdown?: AnalyticsDataItem[];
+  geoDistribution?: AnalyticsDataItem[];
+  engagementEvents?: AnalyticsDataItem[];
+}
+
+export interface PageView {
+  url: string;
+  timestamp: number;
+  [key: string]: unknown;
+}
+
+export interface Session {
+  id: string;
+  startTime: number;
+  [key: string]: unknown;
+}
+
+export interface Interaction {
+  type: string;
+  timestamp: number;
+  [key: string]: unknown;
+}
+
+export interface RawVisitorData {
+  sessions?: Session[];
+  pageViews?: PageView[];
+  interactions?: Interaction[];
+  [key: string]: unknown;
+}
+
+// System status types
+export interface StatusItem {
+  status: string;
+  [key: string]: unknown;
+}
+
+export interface ApplicationStatus {
+  modules: Record<string, StatusItem>;
+  services: Record<string, StatusItem>;
+}
+
+// Visitor types
+export interface VisitorInfo {
+  id: string;
+  firstVisit: string;
+  lastVisit: string;
+  sessions: number;
+  pageViews: number;
+  location: string;
+  device: string;
+}
+
+// Lead types
+export interface Lead {
+  id: number;
+  company_name: string;
+  contact_name: string;
+  email: string;
+  phone?: string;
+  status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost';
+  source?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Contact submission types
+export interface ContactSubmission {
+  id: number;
+  name: string;
+  email: string;
+  company?: string;
+  phone?: string;
+  message: string;
+  status: 'new' | 'read' | 'responded' | 'archived';
+  created_at: string;
+}
+
+// Project types
+export interface Project {
+  id: number;
+  name: string;
+  client_id: number;
+  client_name?: string;
+  status: 'planning' | 'in_progress' | 'review' | 'completed' | 'on_hold';
+  start_date?: string;
+  end_date?: string;
+  budget?: number;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectMilestone {
+  id: number;
+  project_id: number;
+  title: string;
+  description?: string;
+  due_date: string;
+  is_completed: boolean;
+  completed_at?: string;
+}
+
+export interface ProjectFile {
+  id: number;
+  project_id: number;
+  filename: string;
+  original_name: string;
+  mime_type: string;
+  size: number;
+  uploaded_by: string;
+  created_at: string;
+}
+
+export interface ProjectInvoice {
+  id: number;
+  project_id: number;
+  invoice_number: string;
+  amount_total: number;
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+  due_date: string;
+  created_at: string;
+}
+
+// Message types
+export interface MessageThread {
+  id: number;
+  subject: string;
+  client_id: number;
+  client_name?: string;
+  status: 'active' | 'closed' | 'archived';
+  last_message_at: string;
+  unread_count: number;
+}
+
+export interface Message {
+  id: number;
+  thread_id: number;
+  sender_type: 'client' | 'admin' | 'system';
+  sender_name: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+// API response types
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+// Dashboard context passed to modules
+export interface AdminDashboardContext {
+  getAuthToken: () => string | null;
+  showNotification: (message: string, type: 'success' | 'error' | 'info') => void;
+  refreshData: () => Promise<void>;
+}

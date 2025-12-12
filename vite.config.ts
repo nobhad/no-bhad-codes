@@ -1,6 +1,7 @@
 import { defineConfig, Plugin } from 'vite';
 import { resolve } from 'path';
 import { ViteEjsPlugin } from 'vite-plugin-ejs';
+import { createObfuscationPlugin } from './src/utils/obfuscation-plugin';
 
 /**
  * Custom plugin to handle MPA routing in development
@@ -148,6 +149,22 @@ export default defineConfig({
         year: new Date().getFullYear(),
         nodeEnv: process.env.NODE_ENV || 'development',
         isDev: process.env.NODE_ENV !== 'production',
+      },
+    }),
+
+    // Code obfuscation for production builds (uses javascript-obfuscator)
+    createObfuscationPlugin({
+      enabled: process.env.NODE_ENV === 'production',
+      level: 'standard', // Options: basic, standard, advanced, maximum
+      encryptionKey: process.env.OBFUSCATION_KEY,
+      features: {
+        minifyHTML: true,
+        obfuscateJS: true,
+        obfuscateCSS: false,
+        encryptStrings: true,
+        antiDebugTraps: false, // Enable for anti-debugging protection
+        fakeSourceMaps: false,
+        polymorphicCode: false,
       },
     }),
   ],
