@@ -65,62 +65,8 @@ interface PerformanceMetricsDisplay {
   alerts?: string[];
 }
 
-interface AnalyticsDataItem {
-  label: string;
-  value: string | number;
-}
-
-interface AnalyticsData {
-  popularPages?: AnalyticsDataItem[];
-  deviceBreakdown?: AnalyticsDataItem[];
-  geoDistribution?: AnalyticsDataItem[];
-  engagementEvents?: AnalyticsDataItem[];
-}
-
-interface PageView {
-  url: string;
-  timestamp: number;
-  [key: string]: unknown;
-}
-
-interface Session {
-  id: string;
-  startTime: number;
-  [key: string]: unknown;
-}
-
-interface Interaction {
-  type: string;
-  timestamp: number;
-  [key: string]: unknown;
-}
-
-interface RawVisitorData {
-  sessions?: Session[];
-  pageViews?: PageView[];
-  interactions?: Interaction[];
-  [key: string]: unknown;
-}
-
-interface StatusItem {
-  status: string;
-  [key: string]: unknown;
-}
-
-interface ApplicationStatus {
-  modules: Record<string, StatusItem>;
-  services: Record<string, StatusItem>;
-}
-
-interface VisitorInfo {
-  id: string;
-  firstVisit: string;
-  lastVisit: string;
-  sessions: number;
-  pageViews: number;
-  location: string;
-  device: string;
-}
+// NOTE: AnalyticsData, RawVisitorData, ApplicationStatus, VisitorInfo
+// types are defined in admin-types.ts and used by modules
 
 // Admin authentication and session management using JWT backend
 class AdminAuth {
@@ -2796,7 +2742,7 @@ class AdminDashboard {
 
   private showNotification(message: string, type: 'success' | 'error' | 'info'): void {
     // Log notification to console
-    const logFn = type === 'error' ? console.error : type === 'info' ? console.info : console.log;
+    const logFn = type === 'error' ? console.error : console.log;
     logFn(`[AdminDashboard] ${type.toUpperCase()}: ${message}`);
 
     // Show alert for important messages (errors)

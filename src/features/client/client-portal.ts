@@ -65,8 +65,13 @@ export class ClientPortalModule extends BaseModule {
         const token = sessionStorage.getItem('client_auth_token');
         return !token || token.startsWith('demo_token_');
       },
-      showNotification: (message: string, type?: 'success' | 'error' | 'info') => {
-        this.showSuccessMessage(message);
+      showNotification: (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+        if (type === 'error') {
+          console.error('[ClientPortal]', message);
+          alert(message); // Show error prominently
+        } else {
+          this.showSuccessMessage(message);
+        }
       },
       formatDate: (dateString: string) => this.formatDate(dateString),
       escapeHtml: (text: string) => this.escapeHtml(text)
