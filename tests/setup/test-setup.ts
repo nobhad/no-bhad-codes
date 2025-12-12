@@ -110,7 +110,7 @@ process.env.NODE_ENV = 'test';
 process.env.LOG_LEVEL = 'error'; // Reduce log noise during tests
 
 // Mock environment configuration
-vi.mock('../../server/config/environment.js', () => ({
+vi.mock('../../server/config/environment', () => ({
   default: {
     NODE_ENV: 'test',
     LOG_LEVEL: 'error',

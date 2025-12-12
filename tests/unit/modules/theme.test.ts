@@ -31,7 +31,7 @@ Object.defineProperty(document, 'dispatchEvent', {
 const mockState = { theme: 'light' as 'light' | 'dark', navOpen: false };
 const mockSubscribers: Array<(newValue: any, oldValue: any, key: string) => void> = [];
 
-vi.mock('../../../src/core/state.js', () => ({
+vi.mock('../../../src/core/state', () => ({
   StateManager: vi.fn().mockImplementation(() => ({
     setState: vi.fn((updates: any) => {
       const oldState = { ...mockState };

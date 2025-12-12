@@ -11,7 +11,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 
 // Mock dependencies before importing the module
-vi.mock('../../../src/services/logger.js', () => ({
+vi.mock('../../../src/services/logger', () => ({
   logger: {
     info: vi.fn(),
     error: vi.fn(),
@@ -20,7 +20,7 @@ vi.mock('../../../src/services/logger.js', () => ({
   },
 }));
 
-vi.mock('../../../src/utils/sanitization-utils.js', () => ({
+vi.mock('../../../src/utils/sanitization-utils', () => ({
   SanitizationUtils: {
     sanitizeText: vi.fn((text: string) => text?.trim() || ''),
     sanitizeEmail: vi.fn((email: string) => email?.toLowerCase().trim() || ''),
@@ -38,12 +38,12 @@ class MockContactService {
   getConfig = vi.fn().mockReturnValue({ backend: 'netlify' });
 }
 
-vi.mock('../../../src/services/contact-service.js', () => ({
+vi.mock('../../../src/services/contact-service', () => ({
   ContactService: MockContactService,
 }));
 
 describe('ContactFormModule', () => {
-  let ContactFormModule: typeof import('../../../src/modules/contact-form.js').ContactFormModule;
+  let ContactFormModule: typeof import('../../../src/modules/contact-form').ContactFormModule;
   let container: HTMLElement;
   let contactModule: InstanceType<typeof ContactFormModule>;
 
@@ -54,7 +54,7 @@ describe('ContactFormModule', () => {
     vi.resetModules();
 
     // Import after mocks
-    const module = await import('../../../src/modules/contact-form.js');
+    const module = await import('../../../src/modules/contact-form');
     ContactFormModule = module.ContactFormModule;
 
     // Create test container with typical contact form structure

@@ -2,6 +2,53 @@
 
 ---
 
+## Admin Modules Integration & Codebase Cleanup - COMPLETE
+
+### Admin Dashboard Code Splitting - RESOLVED
+
+Integrated orphaned admin modules into `admin-dashboard.ts` for proper code splitting:
+
+**Modules Now Active:**
+
+- `src/features/admin/modules/admin-leads.ts` - Lead management (10.39 KB)
+- `src/features/admin/modules/admin-contacts.ts` - Contact submissions (9.55 KB)
+- `src/features/admin/modules/admin-projects.ts` - Project management (23.17 KB)
+- `src/features/admin/modules/admin-messaging.ts` - Client messaging (10.05 KB)
+- `src/features/admin/modules/admin-analytics.ts` - Analytics/performance (20.76 KB)
+- `src/features/admin/modules/index.ts` - Barrel file with dynamic loaders
+
+**Changes to admin-dashboard.ts:**
+
+- Added imports for module loaders from `./modules`
+- Created `moduleContext` property implementing `AdminDashboardContext`
+- Updated `loadTabData()` to use dynamic module imports
+- Updated `loadDashboardData()` to use analytics module
+- Added `showNotification()` method for module callbacks
+
+**Result:** Modules are now dynamically loaded for each tab, enabling proper code splitting.
+
+### Unused Code Cleanup - RESOLVED
+
+**Deleted Files:**
+
+- `archive/` folder (6 files) - Retired client landing page files
+- `src/modules/portfolio-carousel.ts` - Never imported
+- `src/services/error-tracking.ts` - Never registered/used
+- `src/config/routes.ts` - All exports unused
+- `public/images/avatar_cyan.svg` - Not referenced
+- `public/images/avatar_shadow_icon.svg` - Not referenced
+- `public/images/avatar_shadow_layer.svg` - Not referenced
+- `public/images/avatar_shadow_layer.ai` - Source file, not needed
+- `public/images/avatar-hover.svg` - Not referenced
+- `public/images/favicon_shadow.svg` - Not referenced
+
+**Verification:**
+
+- TypeScript: 0 errors
+- Build: Successful (39 JS chunks obfuscated)
+
+---
+
 ## Assets to Add
 
 ### paw.svg
@@ -93,7 +140,7 @@ Fixed incorrect domain `nobhadcodes.com` to `nobhad.codes` and standardized all 
 - `client/intake.html` - Updated contact email
 - `templates/pages/client-intake.ejs` - Updated contact email
 - `templates/pages/client-portal.ejs` - Updated preview URL
-- `archive/client-landing-template.ejs` - Updated contact email
+- ~~`archive/client-landing-template.ejs`~~ - Removed (archive directory deleted December 12, 2025)
 
 **Documentation (bulk sed replacement):**
 - `docs/API_DOCUMENTATION.md`
@@ -252,26 +299,26 @@ Fixed incorrect domain `nobhadcodes.com` to `nobhad.codes` and standardized all 
 
 - [x] Remove commented code block in `router-service.ts:135-145` (10 lines) - REMOVED
 - [x] Delete `tests/unit/components/ErrorBoundary.test.ts` - Already deleted (file doesn't exist)
-- [ ] Clean up `/archive/` directory if not needed (5 retired files)
+- [x] Clean up `/archive/` directory - removed 6 retired files (December 12, 2025)
 
-#### Code Organization - Oversized Files (4)
+#### Code Organization - Oversized Files (2 remaining)
 
-- [ ] Split `admin-dashboard.ts` (3,553 lines - exceeds 300 guideline by 3,253)
-- [ ] Split `client-portal.ts` (3,029 lines - exceeds by 2,729)
-- [ ] Split `terminal-intake.ts` (2,542 lines - exceeds by 2,242)
-- [ ] Split `client-intake.ts` (643 lines - exceeds by 343)
+- [ ] Split `admin-dashboard.ts` (3,564 lines - exceeds 300 guideline by 3,264)
+- [ ] Split `client-portal.ts` (3,071 lines - exceeds by 2,771)
+- [x] Split `terminal-intake.ts` - DONE (December 12, 2025) - Split into 4 files totaling 2,466 lines
+- [x] Remove `client-intake.ts` - DONE (December 12, 2025) - Legacy file deleted
 
 #### Feature Organization (4)
 
 - [ ] Make `TerminalIntakeModule` extend `BaseModule` (currently breaks pattern)
 - [ ] Organize 14 flat modules into subdirectories by concern (UI, animation, utilities)
-- [ ] Register client intake modules in app.ts initialization
+- [x] Register client intake modules in app.ts initialization - N/A (terminal-intake auto-initializes)
 - [ ] Document cross-feature dependencies
 
 #### Test Suite (3)
 
-- [ ] Remove `.js` extensions from test imports (20+ files affected)
-- [ ] Consolidate duplicate setup files (`tests/setup.ts` vs `tests/setup/test-setup.ts`)
+- [x] Remove `.js` extensions from test imports (8 files fixed - December 12, 2025)
+- [x] Consolidate duplicate setup files - removed unused `tests/setup.ts` and `tests/setup/global.ts` (December 12, 2025)
 - [ ] Standardize import patterns (aliased `@/` vs relative paths)
 
 ---
@@ -312,7 +359,7 @@ Fixed incorrect domain `nobhadcodes.com` to `nobhad.codes` and standardized all 
 1. **CSS**: 80+ hardcoded colors, dual variable systems causing confusion
 2. **API**: Inconsistent response formats, scattered rate limiting configs
 3. **Files**: 4 files exceed 300-line guideline (admin-dashboard: 3,553 lines)
-4. **Tests**: 20+ files use incorrect `.js` import extensions
+4. **Tests**: ~~20+ files use incorrect `.js` import extensions~~ FIXED - 8 files corrected (December 12, 2025)
 
 **Verification**:
 
@@ -802,15 +849,16 @@ Other Changes:
 ## 🟡 MEDIUM PRIORITY FIXES
 
 ### Code Quality
-- [ ] Replace 50+ instances of `any` type with proper interfaces
+- [x] Replace 50+ instances of `any` type with proper interfaces - MOSTLY DONE (some remain in app.ts for dynamic typing)
 - [ ] Fix N+1 query in `server/routes/projects.ts:87-104`
 - [x] Standardize API response format across all endpoints - Created `server/utils/response.ts`
 - [ ] Add HTTPS enforcement in production
 
 ### Performance - FILE SPLITTING
-- [ ] Split `admin-dashboard.ts` (3,553 lines - exceeds 300 guideline by 3,253)
-- [ ] Split `client-portal.ts` (3,029 lines - exceeds by 2,729)
-- [ ] Split `terminal-intake.ts` (2,542 lines - exceeds by 2,242)
+- [ ] Split `admin-dashboard.ts` (3,564 lines - exceeds 300 guideline by 3,264)
+- [ ] Split `client-portal.ts` (3,071 lines - exceeds by 2,771)
+- [x] Split `terminal-intake.ts` - DONE (December 12, 2025) - Now 1,446 lines + 3 helper files
+- [x] Remove `client-intake.ts` - DONE (December 12, 2025) - Legacy file deleted
 - [ ] Lazy load code-protection-service when disabled
 
 ### Accessibility
@@ -945,14 +993,16 @@ Other Changes:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| Total Issues Found | 108 | ~92 fixed |
+| Total Issues Found | 108 | ~95 fixed |
 | Critical Issues | 0 | ALL FIXED |
 | Quick Wins Completed | 5 | Done |
 | Auth Refactor | Complete | response.ts, auth-constants.ts created |
 | Hardcoded Colors | 0 remaining | ALL FIXED (200+ replaced) |
-| Oversized Files | 4 | Split needed (low priority) |
+| Oversized Files | 2 remaining | admin-dashboard.ts (3,564), client-portal.ts (3,071) |
 | Backend Hardcoded Values | 0 remaining | ALL FIXED |
 | CSS Variables Added | 50+ new tokens | Complete |
+| Lint Warnings | 0 | ALL FIXED (December 12, 2025) |
+| TypeScript Errors | 0 | Clean |
 
 ### Development Server
 
@@ -1687,7 +1737,10 @@ Client Landing Page:
 
 | File | Purpose |
 |------|---------|
-| `src/features/client/client-portal.ts` | Main client portal module (~2400 lines) |
+| `src/features/client/client-portal.ts` | Main client portal module (~3,071 lines) |
+| `src/features/client/terminal-intake.ts` | Terminal intake main module (~1,446 lines) |
+| `src/features/client/terminal-intake-*.ts` | Terminal intake helper modules (types, data, ui) |
+| `src/features/admin/admin-dashboard.ts` | Admin dashboard module (~3,564 lines) |
 | `server/routes/uploads.ts` | File upload API endpoints |
 | `server/routes/clients.ts` | Client profile/settings API |
 | `server/routes/projects.ts` | Project/request API |

@@ -11,6 +11,16 @@
 import { AdminSecurity } from './admin-security';
 import type { PerformanceMetrics, PerformanceAlert } from '../../services/performance-service';
 import { SanitizationUtils } from '../../utils/sanitization-utils';
+import type { AdminDashboardContext } from './admin-types';
+
+// Dynamic module loaders for code splitting
+import {
+  loadLeadsModule,
+  loadContactsModule,
+  loadProjectsModule,
+  loadMessagingModule,
+  loadAnalyticsModule
+} from './modules';
 
 // Chart.js is loaded dynamically to reduce initial bundle size
 let Chart: typeof import('chart.js').Chart | null = null;
@@ -319,7 +329,18 @@ class AdminDashboard {
   private contactsData: any[] = [];
   private projectsData: any[] = [];
 
+  // Module context for code-split modules
+  private moduleContext: AdminDashboardContext;
+
   constructor() {
+    // Initialize module context
+    this.moduleContext = {
+      getAuthToken: () =>
+        sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken'),
+      showNotification: (message: string, type: 'success' | 'error' | 'info') =>
+        this.showNotification(message, type),
+      refreshData: () => this.loadDashboardData()
+    };
     this.init();
   }
 
@@ -2550,24 +2571,21 @@ class AdminDashboard {
 
     this.currentTab = tabName;
 
-    // Load tab-specific data
+    // Load tab-specific data (modules handle all tab data loading)
     this.loadTabData(tabName);
-
-    // Special handling for messages tab
-    if (tabName === 'messages') {
-      this.loadClientThreads();
-    }
   }
 
   private async loadDashboardData(): Promise<void> {
     this.showLoading(true);
 
     try {
+      // Load analytics module for initial dashboard data
+      const analyticsModule = await loadAnalyticsModule();
       await Promise.all([
-        this.loadOverviewData(),
-        this.loadPerformanceData(),
-        this.loadAnalyticsData(),
-        this.loadVisitorsData(),
+        analyticsModule.loadOverviewData(this.moduleContext),
+        analyticsModule.loadPerformanceData(this.moduleContext),
+        analyticsModule.loadAnalyticsData(this.moduleContext),
+        analyticsModule.loadVisitorsData(this.moduleContext),
         this.loadSystemData()
       ]);
     } catch (error) {
@@ -2583,19 +2601,60 @@ class AdminDashboard {
     try {
       switch (tabName) {
       case 'overview':
-        await this.loadOverviewData();
+        // Use analytics module for overview data
+        {
+          const analyticsModule = await loadAnalyticsModule();
+          await analyticsModule.loadOverviewData(this.moduleContext);
+        }
         break;
       case 'performance':
-        await this.loadPerformanceData();
+        // Use analytics module for performance data
+        {
+          const analyticsModule = await loadAnalyticsModule();
+          await analyticsModule.loadPerformanceData(this.moduleContext);
+        }
         break;
       case 'analytics':
-        await this.loadAnalyticsData();
+        // Use analytics module for analytics data
+        {
+          const analyticsModule = await loadAnalyticsModule();
+          await analyticsModule.loadAnalyticsData(this.moduleContext);
+        }
         break;
       case 'visitors':
-        await this.loadVisitorsData();
+        // Use analytics module for visitors data
+        {
+          const analyticsModule = await loadAnalyticsModule();
+          await analyticsModule.loadVisitorsData(this.moduleContext);
+        }
         break;
       case 'leads':
-        await this.loadLeadsData();
+        // Use leads module
+        {
+          const leadsModule = await loadLeadsModule();
+          await leadsModule.loadLeads(this.moduleContext);
+        }
+        break;
+      case 'contacts':
+        // Use contacts module
+        {
+          const contactsModule = await loadContactsModule();
+          await contactsModule.loadContacts(this.moduleContext);
+        }
+        break;
+      case 'projects':
+        // Use projects module
+        {
+          const projectsModule = await loadProjectsModule();
+          await projectsModule.loadProjects(this.moduleContext);
+        }
+        break;
+      case 'messages':
+        // Use messaging module
+        {
+          const messagingModule = await loadMessagingModule();
+          await messagingModule.loadClientThreads(this.moduleContext);
+        }
         break;
       case 'system':
         await this.loadSystemData();
@@ -3415,6 +3474,17 @@ class AdminDashboard {
       } else {
         loading.classList.add('hidden');
       }
+    }
+  }
+
+  private showNotification(message: string, type: 'success' | 'error' | 'info'): void {
+    // Log notification to console
+    const logFn = type === 'error' ? console.error : type === 'info' ? console.info : console.log;
+    logFn(`[AdminDashboard] ${type.toUpperCase()}: ${message}`);
+
+    // Show alert for important messages (errors)
+    if (type === 'error') {
+      alert(message);
     }
   }
 

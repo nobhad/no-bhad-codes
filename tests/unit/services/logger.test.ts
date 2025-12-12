@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { LogLevel } from '../../../server/services/logger.js';
+import { LogLevel } from '../../../server/services/logger';
 
 // Note: Full integration tests of LoggerService require proper environment setup
 // These unit tests focus on testing the public API and log level filtering
@@ -30,7 +30,7 @@ describe('LogLevel', () => {
 });
 
 describe('LoggerService', () => {
-  let LoggerService: typeof import('../../../server/services/logger.js').LoggerService;
+  let LoggerService: typeof import('../../../server/services/logger').LoggerService;
   let logger: InstanceType<typeof LoggerService>;
 
   beforeEach(async () => {
@@ -64,7 +64,7 @@ describe('LoggerService', () => {
     }));
 
     // Mock environment config
-    vi.mock('../../../server/config/environment.js', () => ({
+    vi.mock('../../../server/config/environment', () => ({
       default: {
         LOG_LEVEL: 'debug',
         LOG_FILE: './logs/test.log',
@@ -76,7 +76,7 @@ describe('LoggerService', () => {
     }));
 
     // Import after mocks are set up
-    const module = await import('../../../server/services/logger.js');
+    const module = await import('../../../server/services/logger');
     LoggerService = module.LoggerService;
     logger = new LoggerService();
   });

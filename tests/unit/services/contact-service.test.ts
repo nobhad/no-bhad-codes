@@ -9,10 +9,10 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { ContactService, ContactFormData } from '../../../src/services/contact-service.js';
+import { ContactService, ContactFormData } from '../../../src/services/contact-service';
 
 // Mock the SanitizationUtils module
-vi.mock('../../../src/utils/sanitization-utils.js', () => ({
+vi.mock('../../../src/utils/sanitization-utils', () => ({
   SanitizationUtils: {
     sanitizeText: vi.fn((text: string) => text?.trim() || ''),
     sanitizeEmail: vi.fn((email: string) => email?.toLowerCase().trim() || ''),

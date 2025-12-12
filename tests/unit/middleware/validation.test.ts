@@ -13,10 +13,10 @@ import {
   ApiValidator,
   validateRequest,
   ValidationSchemas,
-} from '../../../server/middleware/validation.js';
+} from '../../../server/middleware/validation';
 
 // Mock logger
-vi.mock('../../../server/services/logger.js', () => ({
+vi.mock('../../../server/services/logger', () => ({
   logger: {
     info: vi.fn(),
     error: vi.fn(),

@@ -15,10 +15,10 @@ import {
   InsertQueryBuilder,
   UpdateQueryBuilder,
   DeleteQueryBuilder,
-} from '../../../server/database/query-builder.js';
+} from '../../../server/database/query-builder';
 
 // Mock logger
-vi.mock('../../../server/services/logger.js', () => ({
+vi.mock('../../../server/services/logger', () => ({
   logger: {
     info: vi.fn(),
     error: vi.fn(),
