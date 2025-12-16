@@ -262,15 +262,15 @@ export async function addMessageWithTyping(
   chatContainer.appendChild(messageEl);
   scrollToBottom(chatContainer);
 
-  // Type out the content
+  // Type out the content - faster typing for snappier feel
   const text = message.content;
   for (let i = 0; i < text.length; i++) {
     textSpan.textContent += text[i];
     scrollToBottom(chatContainer);
-    await delay(15 + Math.random() * 10);
+    await delay(8 + Math.random() * 4);
   }
 
-  await delay(1000);
+  await delay(400);
   cursorBlink.kill();
   cursor.remove();
 
@@ -348,14 +348,14 @@ export async function addSystemMessageWithTyping(
   chatContainer.appendChild(messageEl);
   scrollToBottom(chatContainer);
 
-  // Faster typing for system messages
+  // Fast typing for system messages - snappier terminal feel
   for (let i = 0; i < content.length; i++) {
     textSpan.textContent += content[i];
     if (i % 20 === 0) scrollToBottom(chatContainer);
-    await delay(8 + Math.random() * 5);
+    await delay(4 + Math.random() * 3);
   }
 
-  await delay(500);
+  await delay(300);
   cursorBlink.kill();
   cursor.remove();
 

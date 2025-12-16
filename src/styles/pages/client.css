@@ -1583,7 +1583,7 @@ body[data-page="client-landing"] .intake-modal {
   z-index: 1000;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  padding: 0.5rem;
 }
 
 body[data-page="client-landing"] .intake-modal.open {
@@ -1601,12 +1601,14 @@ body[data-page="client-landing"] .intake-modal-content .terminal-window {
 body[data-page="client-landing"] .intake-modal-content {
   width: 50vw;
   min-width: 50vw;
-  height: 85vh;
-  max-height: 85vh;
-  overflow: hidden; /* No scrolling on the modal content wrapper */
+  height: 98vh;
+  max-height: 98vh;
+  overflow: visible; /* Allow glow to show outside bounds */
   display: flex;
   flex-direction: column;
   flex-shrink: 0; /* Prevent flex shrinking */
+  padding: 10px; /* Space for glow */
+  box-sizing: border-box;
 }
 
 /* Mobile: full screen */

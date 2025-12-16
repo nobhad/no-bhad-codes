@@ -34,6 +34,13 @@ import {
   capitalizeWords,
   delay
 } from './terminal-intake-ui';
+import {
+  formatHelpText,
+  formatStatusText,
+  isCommand,
+  parseCommand,
+  commandExists
+} from './terminal-intake-commands';
 
 // Re-export types for external consumers
 export type { TerminalIntakeOptions } from './terminal-intake-types';
@@ -56,6 +63,10 @@ export class TerminalIntakeModule {
   private confirmedCompany = false;
 
   private static STORAGE_KEY = 'terminalIntakeProgress';
+
+  // Command history for arrow key navigation
+  private inputHistory: string[] = [];
+  private historyIndex = -1;
 
   constructor(container: HTMLElement, options: TerminalIntakeOptions = {}) {
     this.container = container;
@@ -234,6 +245,40 @@ export class TerminalIntakeModule {
       }
     });
 
+    // Escape key toggles fullscreen
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('intakeModal');
+        if (modal?.classList.contains('open')) {
+          modal.classList.toggle('fullscreen');
+        }
+      }
+    });
+
+    // Arrow key command history navigation
+    this.inputElement?.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp' && this.inputHistory.length > 0) {
+        e.preventDefault();
+        if (this.historyIndex > 0) {
+          this.historyIndex--;
+        } else if (this.historyIndex === -1) {
+          this.historyIndex = this.inputHistory.length - 1;
+        }
+        this.inputElement!.value = this.inputHistory[this.historyIndex] || '';
+      }
+
+      if (e.key === 'ArrowDown' && this.inputHistory.length > 0) {
+        e.preventDefault();
+        if (this.historyIndex < this.inputHistory.length - 1) {
+          this.historyIndex++;
+          this.inputElement!.value = this.inputHistory[this.historyIndex] || '';
+        } else {
+          this.historyIndex = this.inputHistory.length;
+          this.inputElement!.value = '';
+        }
+      }
+    });
+
     if (this.inputElement) {
       setupCustomInputCursor(this.inputElement);
     }
@@ -378,27 +423,28 @@ export class TerminalIntakeModule {
       cursor.style.display = 'none';
     }
 
-    await delay(200);
+    await delay(100);
 
     if (this.chatContainer) {
       await showAvatarIntro(this.chatContainer);
     }
-    await delay(300);
+    await delay(150);
 
+    // Faster boot sequence for snappier terminal feel
     await this.addBootMessageLocal('Bootstrapping...');
-    await delay(300);
+    await delay(150);
 
     await this.addBootMessageLocal('  ✓ Loading intake module');
-    await delay(200);
+    await delay(100);
 
     await this.addBootMessageLocal('  ✓ Initializing question flow');
-    await delay(200);
+    await delay(100);
 
     await this.addBootMessageLocal('  ✓ Ready to collect project details');
-    await delay(400);
+    await delay(200);
 
     await this.addBootMessageLocal('');
-    await delay(300);
+    await delay(150);
 
     if (this.clientData) {
       await this.handleExistingClientData();
@@ -431,7 +477,7 @@ export class TerminalIntakeModule {
   private async askCompanyConfirmation(): Promise<void> {
     const companyName = this.clientData?.company || '';
     if (this.chatContainer) {
-      await showTypingIndicator(this.chatContainer, 500);
+      await showTypingIndicator(this.chatContainer, 300);
     }
 
     this.addMessage({
@@ -514,7 +560,7 @@ export class TerminalIntakeModule {
 
   private async askIfForCompany(): Promise<void> {
     if (this.chatContainer) {
-      await showTypingIndicator(this.chatContainer, 500);
+      await showTypingIndicator(this.chatContainer, 300);
     }
 
     this.addMessage({
@@ -598,7 +644,7 @@ export class TerminalIntakeModule {
 
   private async askForCompanyName(): Promise<void> {
     if (this.chatContainer) {
-      await showTypingIndicator(this.chatContainer, 500);
+      await showTypingIndicator(this.chatContainer, 300);
     }
 
     this.addMessage({
@@ -784,7 +830,7 @@ export class TerminalIntakeModule {
     }
 
     if (!skipTyping && this.chatContainer) {
-      await showTypingIndicator(this.chatContainer, 600);
+      await showTypingIndicator(this.chatContainer, 350);
     }
 
     const message: ChatMessage = {
@@ -850,6 +896,14 @@ export class TerminalIntakeModule {
   private async handleUserInput(): Promise<void> {
     if (this.isProcessing) return;
 
+    const inputValue = this.inputElement?.value.trim() || '';
+
+    // Check for CLI commands (start with /)
+    if (isCommand(inputValue)) {
+      await this.handleCommand(inputValue);
+      return;
+    }
+
     const question = this.getCurrentQuestion();
     if (!question) return;
 
@@ -862,16 +916,16 @@ export class TerminalIntakeModule {
         .map((v) => question.options?.find((o) => o.value === v)?.label || v)
         .join(', ');
     } else if (question.type === 'select') {
-      const inputValue = this.inputElement?.value.trim();
-      if (!inputValue || !question.options) return;
+      const selectInput = this.inputElement?.value.trim();
+      if (!selectInput || !question.options) return;
 
-      const numericInput = parseInt(inputValue, 10);
+      const numericInput = parseInt(selectInput, 10);
       let matchedOption: { value: string; label: string } | undefined;
 
       if (!isNaN(numericInput) && numericInput >= 1 && numericInput <= question.options.length) {
         matchedOption = question.options[numericInput - 1];
       } else {
-        const lowerInput = inputValue.toLowerCase();
+        const lowerInput = selectInput.toLowerCase();
         matchedOption = question.options.find(
           (opt) =>
             opt.label.toLowerCase().includes(lowerInput) ||
@@ -890,13 +944,107 @@ export class TerminalIntakeModule {
       value = matchedOption.value;
       displayValue = matchedOption.label;
     } else {
-      const inputValue = this.inputElement?.value.trim();
-      if (!inputValue) return;
-      value = sanitizeInput(inputValue);
-      displayValue = sanitizeInput(inputValue);
+      const textInput = this.inputElement?.value.trim();
+      if (!textInput) return;
+      value = sanitizeInput(textInput);
+      displayValue = sanitizeInput(textInput);
     }
 
     await this.processAnswer(value, displayValue);
+  }
+
+  /**
+   * Handle CLI commands (starting with /)
+   */
+  private async handleCommand(input: string): Promise<void> {
+    const { command } = parseCommand(input);
+
+    // Show the command in chat
+    this.addMessage({ type: 'user', content: input });
+
+    // Add to history
+    this.inputHistory.push(input);
+    this.historyIndex = this.inputHistory.length;
+
+    // Clear input
+    if (this.inputElement) {
+      this.inputElement.value = '';
+    }
+
+    // Check if command exists
+    if (!commandExists(command)) {
+      this.addMessage({
+        type: 'error',
+        content: `Command not found: /${command}. Type /help for available commands.`
+      });
+      return;
+    }
+
+    // Handle each command
+    switch (command) {
+    case 'help':
+      this.addMessage({ type: 'system', content: formatHelpText() });
+      break;
+
+    case 'clear':
+      if (this.chatContainer) {
+        // Keep the login info, clear everything else
+        const loginInfo = this.chatContainer.querySelector('.terminal-login-info');
+        this.chatContainer.innerHTML = '';
+        if (loginInfo) {
+          this.chatContainer.appendChild(loginInfo.cloneNode(true));
+        }
+      }
+      break;
+
+    case 'restart':
+      this.clearProgress();
+      this.currentQuestionIndex = 0;
+      this.intakeData = {};
+      this.messages = [];
+      this.inputHistory = [];
+      this.historyIndex = -1;
+      if (this.chatContainer) {
+        this.chatContainer.innerHTML = '';
+      }
+      await this.startConversation();
+      break;
+
+    case 'back':
+      if (this.currentQuestionIndex > 0) {
+        await this.goBackToQuestion(this.currentQuestionIndex - 1);
+      } else {
+        this.addMessage({
+          type: 'error',
+          content: 'Already at the first question.'
+        });
+      }
+      break;
+
+    case 'skip':
+      // Only allow skip for optional questions (none currently, but infrastructure ready)
+      this.addMessage({
+        type: 'error',
+        content: 'This question is required and cannot be skipped.'
+      });
+      break;
+
+    case 'status': {
+      const answeredFields = Object.keys(this.intakeData);
+      const totalQuestions = getBaseQuestionCount();
+      this.addMessage({
+        type: 'system',
+        content: formatStatusText(this.currentQuestionIndex, totalQuestions, answeredFields)
+      });
+      break;
+    }
+
+    default:
+      this.addMessage({
+        type: 'error',
+        content: `Unknown command: /${command}`
+      });
+    }
   }
 
   private async processAnswer(value: string | string[], displayValue: string): Promise<void> {
@@ -922,6 +1070,10 @@ export class TerminalIntakeModule {
       content: displayValue,
       questionIndex: this.currentQuestionIndex
     });
+
+    // Add to command history for arrow key navigation
+    this.inputHistory.push(displayValue);
+    this.historyIndex = this.inputHistory.length;
 
     if (question.field) {
       this.intakeData[question.field] = value;
@@ -1027,7 +1179,7 @@ export class TerminalIntakeModule {
 
   private async showReviewAndConfirm(): Promise<void> {
     if (this.chatContainer) {
-      await showTypingIndicator(this.chatContainer, 800);
+      await showTypingIndicator(this.chatContainer, 400);
 
       await addMessageWithTyping(
         this.chatContainer,
@@ -1253,7 +1405,7 @@ export class TerminalIntakeModule {
     if (this.sendButton) this.sendButton.disabled = true;
 
     if (this.chatContainer) {
-      await showTypingIndicator(this.chatContainer, 1000);
+      await showTypingIndicator(this.chatContainer, 500);
     }
     this.addMessage({
       type: 'ai',
@@ -1261,7 +1413,7 @@ export class TerminalIntakeModule {
     });
 
     if (this.chatContainer) {
-      await showTypingIndicator(this.chatContainer, 1500);
+      await showTypingIndicator(this.chatContainer, 700);
     }
 
     try {
