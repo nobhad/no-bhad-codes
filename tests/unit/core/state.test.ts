@@ -269,9 +269,9 @@ describe('StateManager', () => {
       stateManager.setState('redoKey', 'value2');
       stateManager.undo();
 
-      // Redo is not fully implemented (returns false)
+      // Redo restores the undone state
       const redoResult = stateManager.redo();
-      expect(redoResult).toBe(false);
+      expect(redoResult).toBe(true);
     });
   });
 
