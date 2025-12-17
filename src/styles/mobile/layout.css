@@ -30,15 +30,19 @@
     height: auto;
     min-height: auto;
     flex: 1;
-    overflow: visible;
-    scroll-snap-type: y proximity;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
   }
 
   section {
-    min-height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
     height: auto;
     padding: 1rem;
-    scroll-snap-align: none;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
     flex: 0 0 auto;
   }
 
@@ -93,34 +97,41 @@
     align-items: center;
     padding: 0;
     margin: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
   }
 
-  /* About section - becomes a container for two visual sections on mobile */
+  /* About section - full viewport with scroll snap */
   .about-section {
-    min-height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
     flex: 0 0 auto;
-    padding: 0;
+    padding: 2rem 1rem;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
   }
 
-  /* About content wrapper - stack children as separate visual sections */
+  /* About content wrapper */
   .about-section .about-content {
     display: flex;
     flex-direction: column;
     padding: 0;
     gap: 0;
-    max-width: 100%;
+    max-width: 95vw;
   }
 
-  /* About text section - full viewport on mobile */
+  /* About text wrapper - centered in section */
   .about-section .about-text-wrapper {
-    min-height: 100vh;
-    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
-    padding: 2rem 1rem;
+    align-items: flex-start;
+    padding: 0;
     margin: 0;
   }
 
@@ -162,6 +173,7 @@
     min-height: 100dvh;
     padding: 2rem 1rem;
     scroll-snap-align: start;
+    scroll-snap-stop: always;
   }
 
   .tech-stack-desktop {
@@ -183,11 +195,18 @@
     text-align: justify;
   }
 
-  /* Contact section - natural height */
+  /* Contact section - full viewport with scroll snap */
   .contact-section {
-    min-height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
     flex: 0 0 auto;
     padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
   }
 
   /* ==========================================
