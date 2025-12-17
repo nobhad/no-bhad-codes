@@ -207,6 +207,15 @@ main section:not(.business-card-section) {
   margin-top: 0.5rem;
 }
 
+/* Tech stack heading visibility - desktop shows h3, mobile shows h2 */
+.tech-stack-heading-mobile {
+  display: none; /* Hidden on desktop, shown via mobile/layout.css */
+}
+
+.tech-stack-heading-desktop {
+  display: block; /* Shown on desktop, hidden via mobile/layout.css */
+}
+
 /* Contact section styling - h2 styles defined in pages/contact.css */
 
 .tech-stack {

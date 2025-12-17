@@ -161,8 +161,7 @@
 
   .about-section h2,
   .about-section .about-text-wrapper h2,
-  .about-section .tech-stack h3,
-  .about-section .tech-stack-viewport .tech-stack h3,
+  .about-section .tech-stack-heading-mobile,
   .contact-section h2 {
     font-size: clamp(2rem, 8vw, 3.5rem) !important;
     font-family: var(--font--acme) !important;
@@ -171,6 +170,15 @@
     line-height: 1.2 !important;
     margin-bottom: 1.5rem !important;
     color: var(--fg) !important;
+  }
+
+  /* Show mobile h2, hide desktop h3 for tech stack */
+  .tech-stack-heading-mobile {
+    display: block !important;
+  }
+
+  .tech-stack-heading-desktop {
+    display: none !important;
   }
 
   .about-section .tech-list {
