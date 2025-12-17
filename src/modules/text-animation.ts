@@ -41,7 +41,7 @@ export class TextAnimationModule extends BaseModule {
     super('TextAnimationModule', { debug: true, ...options });
 
     this.containerSelector = options.containerSelector || '.hero-section';
-    this.duration = options.duration || 2;
+    this.duration = options.duration || 5;
   }
 
   override async init(): Promise<void> {
@@ -92,7 +92,8 @@ export class TextAnimationModule extends BaseModule {
     });
 
     // Hold duration at start and end (for both scroll directions)
-    const holdDuration = 2;
+    // Higher value = more scroll distance before/after animation plays
+    const holdDuration = 6;
 
     // Add hold at the start for reverse scroll
     this.timeline.to({}, { duration: holdDuration });

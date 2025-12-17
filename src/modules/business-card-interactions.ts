@@ -188,11 +188,13 @@ export class BusinessCardInteractions extends BaseModule {
     if (isContactCard && isMobile) {
       // Mobile contact card: wait for scroll-snap to complete
       this.setupScrollSnapDetection();
+    } else if (isContactCard) {
+      // Contact card on desktop: flip every time section is scrolled into view
+      this.setupContactCardScrollFlip();
     } else {
-      // Desktop (both cards) or mobile main card: flip when visible
-      // Contact card on desktop uses higher threshold since it's further down the page
-      const threshold = isContactCard ? 0.5 : 0.3;
-      const delay = isContactCard ? 500 : 300;
+      // Main card: flip once when visible
+      const threshold = 0.3;
+      const delay = 300;
 
       const observer = new IntersectionObserver(
         (entries) => {
@@ -209,6 +211,53 @@ export class BusinessCardInteractions extends BaseModule {
       );
       observer.observe(this.businessCard);
     }
+  }
+
+  /**
+   * Setup scroll-triggered flip for contact card (flips every time section enters)
+   */
+  private setupContactCardScrollFlip() {
+    if (!this.businessCard) return;
+
+    const contactSection = document.querySelector('.contact-section');
+    if (!contactSection) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Section entering viewport - flip to front if showing back
+            if (this.isFlipped) {
+              setTimeout(() => {
+                this.flipCard('right');
+              }, 300);
+            }
+          } else {
+            // Section leaving viewport - reset to back
+            if (!this.isFlipped && !this.isAnimating) {
+              this.resetToBack();
+            }
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(contactSection);
+  }
+
+  /**
+   * Reset card to show back (for re-entry flip animation)
+   */
+  private resetToBack() {
+    if (!this.businessCardInner) return;
+
+    this.log('Resetting card to back for re-entry');
+    this.isFlipped = true;
+    this.currentRotationY = 180;
+
+    gsap.set(this.businessCardInner, {
+      rotationY: 180
+    });
   }
 
   /**
