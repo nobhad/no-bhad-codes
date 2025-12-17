@@ -201,7 +201,7 @@ label {
   cursor: pointer;
   font-family: inherit;
   text-shadow: 0 2px 4px var(--color-shadow);
-  box-shadow: 0 4px 8px var(--color-shadow);
+  box-shadow: 0 10px 30px var(--color-shadow);
   transition: background-color 0.3s ease;
   text-transform: uppercase;
   box-sizing: border-box;

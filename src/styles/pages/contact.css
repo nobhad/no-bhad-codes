@@ -304,7 +304,7 @@ input:-webkit-autofill:active {
   height: 120px;
   border-radius: 64px;
   border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   background-color: var(--fg);
   cursor: pointer;
   opacity: 1;
@@ -410,6 +410,10 @@ html[data-theme="dark"] .input-item textarea {
 
 html[data-theme="dark"] .submit-button svg {
   stroke: var(--color-neutral-300);
+}
+
+html[data-theme="dark"] .submit-button {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75);
 }
 
 html[data-theme="dark"] label.text-small {
