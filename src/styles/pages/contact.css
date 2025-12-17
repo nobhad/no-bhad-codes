@@ -479,6 +479,53 @@ html[data-theme="dark"] label.text-small {
   width: 100%;
 }
 
+/* Temporary field error popup - fixed position, outside layout */
+.field-error-popup {
+  position: fixed;
+  background-color: var(--color-danger, #ef4444);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 9999;
+  pointer-events: none;
+  animation: popup-fade-in 0.2s ease-out;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.field-error-popup.fade-out {
+  animation: popup-fade-out 0.3s ease-out forwards;
+}
+
+@keyframes popup-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+@keyframes popup-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.9);
+  }
+}
+
+/* Field with error - red outline */
+.field-has-error {
+  outline: 2px solid var(--color-danger, #ef4444) !important;
+}
+
 .contact-form .form-input.error,
 .contact-form .form-textarea.error,
 .contact-form input.error,
@@ -666,18 +713,6 @@ html[data-theme="dark"] label.text-small {
     padding-right: 1rem;
   }
 
-  /* Form validation message below submit button */
-  .form-message {
-    order: 4;
-    width: 100%;
-    text-align: left;
-    margin-top: 1rem;
-  }
-
-  /* Reserved space for form message - prevents layout shift */
-  .contact-form-column {
-    padding-bottom: 5rem; /* Always reserve space for error messages */
-  }
 
   .submit-button {
     width: 70px;

@@ -348,17 +348,63 @@ export class ContactFormModule extends BaseModule {
   }
 
   /**
-   * Show validation errors
+   * Show validation errors as temporary inline messages on fields
    */
   private showValidationErrors(errors: string[]) {
     this.clearAllErrors();
 
     errors.forEach((error) => {
       this.log('Validation error:', error);
-    });
 
-    // Join with newline - showFormMessage uses textContent so HTML won't render
-    this.showFormMessage(errors.join('\n'), 'error');
+      // Map error message to field
+      let fieldSelector = '';
+      if (error.toLowerCase().includes('name')) {
+        fieldSelector = 'input[name="Name"]';
+      } else if (error.toLowerCase().includes('email')) {
+        fieldSelector = 'input[name="Email"]';
+      } else if (error.toLowerCase().includes('message')) {
+        fieldSelector = 'textarea[name="Message"]';
+      }
+
+      if (fieldSelector) {
+        const field = this.form?.querySelector(fieldSelector) as HTMLElement;
+        if (field) {
+          this.showTemporaryFieldError(field, error);
+        }
+      }
+    });
+  }
+
+  /**
+   * Show a temporary popup error on a field
+   */
+  private showTemporaryFieldError(field: HTMLElement, message: string) {
+    // Add error class for red outline
+    field.classList.add('field-has-error');
+
+    // Get field position for popup placement
+    const rect = field.getBoundingClientRect();
+
+    // Create popup element - fixed position, outside layout
+    const popup = document.createElement('div');
+    popup.className = 'field-error-popup';
+    popup.textContent = message;
+
+    // Position popup over the field (fixed positioning)
+    popup.style.position = 'fixed';
+    popup.style.top = `${rect.top + rect.height / 2}px`;
+    popup.style.left = `${rect.left + 16}px`;
+    popup.style.transform = 'translateY(-50%)';
+
+    // Append to body, not form (completely outside layout)
+    document.body.appendChild(popup);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+      field.classList.remove('field-has-error');
+      popup.classList.add('fade-out');
+      setTimeout(() => popup.remove(), 300);
+    }, 3000);
   }
 
   /**
