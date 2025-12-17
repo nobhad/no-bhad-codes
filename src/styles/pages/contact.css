@@ -604,11 +604,7 @@ html[data-theme="dark"] label.text-small {
   }
 
   .contact-card-column {
-    width: auto;
-    order: 1;
-    align-items: center;
-    justify-content: center;
-    padding-top: 0;
+    display: none; /* Hide business card in contact section on mobile */
   }
 
   .contact-form-column {

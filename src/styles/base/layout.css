@@ -583,6 +583,25 @@ main,
     padding: 2rem 1rem;
   }
 
+  /* MOBILE SECTION REORDERING:
+     Business card section appears between tech stack and contact */
+  .about-section {
+    order: 1;
+  }
+
+  .business-card-section {
+    order: 2;
+  }
+
+  .contact-section {
+    order: 3;
+  }
+
+  /* Hide text animation section on mobile */
+  .text-animation-section {
+    display: none !important;
+  }
+
   /* Other sections that might exist */
   .hero-section,
   main > section:not(.business-card-section):not(.text-animation-section):not(.about-section):not(.contact-section) {
