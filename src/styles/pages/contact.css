@@ -649,7 +649,7 @@ html[data-theme="dark"] label.text-small {
   /* Stack two-column layout vertically on mobile */
   .contact-layout {
     flex-direction: column;
-    gap: 2rem;
+    gap: 1rem;
   }
 
   .contact-card-column {
