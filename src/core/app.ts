@@ -663,6 +663,8 @@ export class Application {
       'ThemeModule',
       'SectionCardRenderer', // Section business card renderer
       'SectionCardInteractions', // Section business card interactions
+      'ContactCardRenderer', // Contact section business card renderer
+      'ContactCardInteractions', // Contact section business card interactions
       'NavigationModule',
       'ContactFormModule',
       'ScrollSnapModule', // GSAP scroll snapping for sections
