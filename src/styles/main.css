@@ -207,12 +207,12 @@ main section:not(.business-card-section) {
   margin-top: 0.5rem;
 }
 
-/* Tech stack heading visibility - desktop shows h3, mobile shows h2 */
-.tech-stack-heading-mobile {
+/* Tech stack section visibility - desktop vs mobile */
+.tech-stack-section {
   display: none; /* Hidden on desktop, shown via mobile/layout.css */
 }
 
-.tech-stack-heading-desktop {
+.tech-stack-desktop {
   display: block; /* Shown on desktop, hidden via mobile/layout.css */
 }
 

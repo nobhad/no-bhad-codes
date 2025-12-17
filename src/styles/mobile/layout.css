@@ -133,27 +133,7 @@
     margin-bottom: 1rem;
   }
 
-  /* Tech stack viewport - full viewport on mobile */
-  .about-section .tech-stack-viewport {
-    min-height: 100vh;
-    min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem 1rem;
-    margin: 0;
-  }
-
-  /* Tech stack box - compact, centered in viewport */
-  .about-section .tech-stack {
-    min-height: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 1.5rem;
-  }
+  /* Desktop tech-stack inside about-section is hidden on mobile via .tech-stack-desktop */
 
   /* ==========================================
      UNIFORM SECTION HEADINGS ON MOBILE
@@ -161,7 +141,7 @@
 
   .about-section h2,
   .about-section .about-text-wrapper h2,
-  .about-section .tech-stack-heading-mobile,
+  .tech-stack-section h2,
   .contact-section h2 {
     font-size: clamp(2rem, 8vw, 3.5rem) !important;
     font-family: var(--font--acme) !important;
@@ -172,15 +152,32 @@
     color: var(--fg) !important;
   }
 
-  /* Show mobile h2, hide desktop h3 for tech stack */
-  .tech-stack-heading-mobile {
-    display: block !important;
+  /* Show mobile tech-stack section, hide desktop version */
+  .tech-stack-section {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 2rem 1rem;
+    scroll-snap-align: start;
   }
 
-  .tech-stack-heading-desktop {
+  .tech-stack-desktop {
     display: none !important;
   }
 
+  /* Tech stack box styling on mobile */
+  .tech-stack-section .tech-stack {
+    background-color: var(--color-neutral-100);
+    padding: 1.5rem 2rem;
+    border-radius: 8px;
+    border: 2px solid var(--color-neutral-400);
+    max-width: 90vw;
+  }
+
+  .tech-stack-section .tech-list,
   .about-section .tech-list {
     max-width: 85vw;
     text-align: justify;
@@ -195,19 +192,23 @@
 
   /* ==========================================
      MOBILE SECTION REORDERING
-     Business card section appears between tech stack and contact
+     Flow: About -> Tech Stack -> Business Card -> Contact
      ========================================== */
 
   .about-section {
     order: 1;
   }
 
-  .business-card-section {
+  .tech-stack-section {
     order: 2;
   }
 
-  .contact-section {
+  .business-card-section {
     order: 3;
+  }
+
+  .contact-section {
+    order: 4;
   }
 
   /* Other sections that might exist */
