@@ -182,26 +182,30 @@ export class BusinessCardInteractions extends BaseModule {
   private setupInitialFlipOnVisible() {
     if (!this.businessCard) return;
 
-    // Check if this is the contact card (needs to wait for scroll-snap to complete)
     const isContactCard = this.businessCard.id === 'contact-business-card';
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
 
-    if (isContactCard) {
-      // For contact card: wait for scroll-snap to complete
+    if (isContactCard && isMobile) {
+      // Mobile contact card: wait for scroll-snap to complete
       this.setupScrollSnapDetection();
     } else {
-      // For main card: flip when visible
+      // Desktop (both cards) or mobile main card: flip when visible
+      // Contact card on desktop uses higher threshold since it's further down the page
+      const threshold = isContactCard ? 0.5 : 0.3;
+      const delay = isContactCard ? 500 : 300;
+
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting && this.isFlipped) {
               setTimeout(() => {
                 this.flipCard('right');
-              }, 300);
+              }, delay);
               observer.disconnect();
             }
           });
         },
-        { threshold: 0.3 }
+        { threshold }
       );
       observer.observe(this.businessCard);
     }

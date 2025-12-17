@@ -663,9 +663,18 @@ main,
   justify-content: flex-start;
   align-items: center;
   padding: 0;
+  scroll-snap-align: none !important; /* Never snap to this */
+  scroll-snap-stop: normal;
 }
 
-/* Loop spacer sections - position at ends */
+/* Loop spacer sections - position at ends, never snap */
+#loop-spacer,
+#loop-spacer-bottom,
+.loop-spacer-section {
+  scroll-snap-align: none !important; /* Never snap to spacers */
+  scroll-snap-stop: normal;
+}
+
 #loop-spacer {
   order: -1; /* Top spacer: before business card when active */
 }

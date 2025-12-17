@@ -91,6 +91,11 @@ export class TextAnimationModule extends BaseModule {
       paused: true
     });
 
+    // Add a 1-second hold at the start for reverse scroll (desktop only)
+    if (!isMobile) {
+      this.timeline.to({}, { duration: 1 });
+    }
+
     // Add skew animation to timeline
     this.timeline.fromTo(
       [leftGroup, rightGroup],
@@ -127,6 +132,11 @@ export class TextAnimationModule extends BaseModule {
         (i % 3) * 0.1
       );
     });
+
+    // Add a 1-second hold at the end (empty tween creates pause after animation completes)
+    if (!isMobile) {
+      this.timeline.to({}, { duration: 1 });
+    }
 
     // Both mobile and desktop use scroll-driven animation
     this.scrollTrigger = ScrollTrigger.create({

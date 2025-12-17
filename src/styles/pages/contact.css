@@ -27,13 +27,9 @@
     overflow: visible;
   }
 
-  /* Contact heading - aligns with form left edge */
+  /* Contact heading - margin-bottom inherited from main.css shared rule */
   .contact-section h2 {
-    margin-bottom: 2rem;
-    margin-left: 0;
-    margin-right: 0;
     width: 100%;
-    align-self: stretch;
     text-align: left;
   }
 
@@ -46,9 +42,11 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 1.5rem 3rem;
+    gap: 0 3rem; /* Row gap 0, column gap 3rem - h2 margin provides spacing */
     width: 100%;
     align-items: flex-start;
+    margin-top: 0;
+    padding-top: 0;
   }
 
   /* Left column - business card */
@@ -69,10 +67,12 @@
     order: 2;
   }
 
-  /* Contact options - full width above columns */
-  .contact-options {
+  /* Contact options paragraph - full width above columns */
+  p.contact-options {
     flex: 0 0 100%;
     order: -1;
+    margin: 0;
+    padding: 0;
   }
 
   /* ==========================================
@@ -619,8 +619,60 @@ html[data-theme="dark"] label.text-small {
   }
 }
 
-/* Responsive - Larger Mobile */
-@media screen and (max-width: 1100px) {
+/* Responsive - Stacked layout (when columns wrap) */
+@media screen and (min-width: 768px) and (max-width: 1100px) {
+  /* Use Flexbox column for stacked layout with reordering */
+  .contact-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start; /* Override center - align content at top */
+    flex: 0 0 auto; /* Don't grow to fill viewport */
+    min-height: auto;
+    height: auto;
+    gap: 0;
+  }
+
+  /* Flatten contact-layout so its children participate in flex ordering */
+  .contact-layout {
+    display: contents;
+  }
+
+  /* Order: 1=card, 2=h2, 3=options, 4=form */
+  .contact-card-column {
+    order: 1;
+    flex: 0 0 auto; /* Don't grow or shrink */
+    width: auto;
+    display: flex;
+    align-items: center;
+    align-self: center; /* Center the business card horizontally */
+    justify-content: center;
+    margin-bottom: 4rem; /* Space after business card */
+  }
+
+  .contact-section h2 {
+    order: 2;
+    flex: 0 0 auto; /* Don't grow or shrink */
+    width: 100%;
+    text-align: left;
+  }
+
+  /* Contact options paragraph - directly below h2 */
+  p.contact-options {
+    order: 3;
+    flex: 0 0 auto; /* Don't grow or shrink */
+    text-align: left;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .contact-form-column {
+    order: 4;
+    flex: 0 0 auto; /* Don't grow or shrink */
+    width: 100%;
+  }
+
   .contact-left {
     width: 70%;
   }

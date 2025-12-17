@@ -184,8 +184,9 @@ body {
     visibility: visible;
   }
 
-  /* About section specific styling */
-  .about-section h2 {
+  /* Section heading shared styling - About and Contact */
+  .about-section h2,
+  .contact-section h2 {
     margin-bottom: 1.5rem;
     text-align: left;
     width: 100%;
