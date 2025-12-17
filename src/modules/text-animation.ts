@@ -40,7 +40,7 @@ export class TextAnimationModule extends BaseModule {
   constructor(options: TextAnimationOptions = {}) {
     super('TextAnimationModule', { debug: true, ...options });
 
-    this.containerSelector = options.containerSelector || '.text-animation-section';
+    this.containerSelector = options.containerSelector || '.hero-section';
     this.duration = options.duration || 2;
   }
 
@@ -81,15 +81,10 @@ export class TextAnimationModule extends BaseModule {
       return;
     }
 
-    // Detect mobile vs desktop for scroll container
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
     const scrollContainer = document.querySelector('main');
 
-    // On mobile, use window scroll (no scroller option)
-    // On desktop, use the main container which has position:fixed and overflow:auto
-    const useWindowScroll = isMobile || !scrollContainer;
-
-    this.log(`Using ${useWindowScroll ? 'window' : 'container'} scroll for animation`);
+    this.log(`Setting up animation for ${isMobile ? 'mobile' : 'desktop'}`);
 
     // Create master timeline with all animations
     this.timeline = gsap.timeline({
@@ -110,9 +105,9 @@ export class TextAnimationModule extends BaseModule {
         skewY: (i: number) => [-15, 30][i],
         scaleX: (i: number) => [0.85, 0.6][i],
         x: -200,
-        ease: 'none' // Linear for smooth scrubbing
+        ease: 'none'
       },
-      0 // Start at beginning
+      0
     );
 
     // Add text slide-in animations at same time
@@ -127,37 +122,36 @@ export class TextAnimationModule extends BaseModule {
           duration: this.duration,
           xPercent: 0,
           x: 575,
-          ease: 'none' // Linear for smooth scrubbing
+          ease: 'none'
         },
-        (i % 3) * 0.1 // Slight stagger
+        (i % 3) * 0.1
       );
     });
 
-    // Set up ScrollTrigger with scrub - animation tied directly to scroll
+    // Both mobile and desktop use scroll-driven animation
     this.scrollTrigger = ScrollTrigger.create({
       trigger: this.container,
-      scroller: useWindowScroll ? undefined : scrollContainer,
-      start: 'top top',
-      end: '+=100%', // Pin for 100vh of scrolling
-      pin: true,
-      pinSpacing: true,
-      scrub: 0.5, // Smooth scrubbing - animation follows scroll with slight smoothing
+      scroller: scrollContainer || undefined,
+      start: isMobile ? 'top bottom' : 'top top',
+      end: isMobile ? 'bottom top' : '+=100%',
+      pin: !isMobile,
+      pinSpacing: !isMobile,
+      scrub: isMobile ? 1 : 0.5,
       animation: this.timeline,
       onEnter: () => {
-        this.log('Section pinned - scroll-driven animation active');
+        this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation active`);
       },
       onLeave: () => {
-        this.log('Section unpinned - animation complete');
+        this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation complete`);
       },
       onEnterBack: () => {
-        this.log('Section re-entered - animation reversing');
+        this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation reversing`);
       },
       onLeaveBack: () => {
-        this.log('Section left backwards');
+        this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Section left backwards`);
       }
     });
-
-    this.log('Text animation initialized - tied to scroll behavior');
+    this.log(`Animation initialized - scroll-driven on ${isMobile ? 'mobile' : 'desktop'}`);
   }
 
   /**

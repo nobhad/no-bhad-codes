@@ -30,6 +30,7 @@ export class NavigationModule extends BaseModule {
   private menuLinks: NodeListOf<Element> | null = null;
   private bgPanels: NodeListOf<Element> | null = null;
   private menuButtonTexts: NodeListOf<Element> | null = null;
+  private logoLink: HTMLElement | null = null;
 
   // Animation timelines
   private mainTimeline: gsap.core.Timeline | null = null;
@@ -88,6 +89,7 @@ export class NavigationModule extends BaseModule {
     this.menuLinks = this.getElements('menuLinks', '.menu-link', false);
     this.bgPanels = this.getElements('bgPanels', '.bg-panel', false);
     this.menuButtonTexts = this.getElements('menuButtonTexts', '.menu-button-text p', false);
+    this.logoLink = this.getElement('logoLink', '.nav-logo-row', false) as HTMLElement | null;
   }
 
   /**
@@ -212,6 +214,14 @@ export class NavigationModule extends BaseModule {
         this.closeMenu();
       }
     });
+
+    // Logo link - always go to top of home page
+    if (this.logoLink) {
+      this.logoLink.addEventListener('click', (event: Event) => {
+        event.preventDefault();
+        window.location.href = '/';
+      });
+    }
   }
 
   /**

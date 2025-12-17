@@ -116,6 +116,26 @@ section {
   min-height: 0;
 }
 
+/* DESKTOP SECTION ORDERING - Business card first visually
+   (HTML has hero first for mobile, CSS reorders for desktop) */
+@media screen and (min-width: 768px) {
+  .business-card-section {
+    order: 1;
+  }
+
+  .hero-section {
+    order: 2;
+  }
+
+  .about-section {
+    order: 3;
+  }
+
+  .contact-section {
+    order: 4;
+  }
+}
+
 /* ============================================
  * CONTAINER SYSTEM
  * ============================================ */
@@ -345,12 +365,10 @@ main,
   visibility: visible !important;
 }
 
-/* Desktop: Show header with transparent background during intro animation */
+/* Desktop: Hide header during intro animation */
 .intro-loading .header {
-  opacity: 1 !important;
-  visibility: visible !important;
-  background-color: transparent !important;
-  background: transparent !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
 /* Desktop: Show header after intro completes */
@@ -414,7 +432,203 @@ main,
   }
 }
 
-/* Mobile styles moved to /src/styles/mobile/layout.css */
+@media screen and (max-width: 767px) {
+  /* Mobile: Normal document flow with header/footer scrolling with content */
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  main {
+    position: static;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    flex: 1;
+    overflow: visible;
+    scroll-snap-type: y proximity;
+  }
+
+  section {
+    min-height: auto;
+    height: auto;
+    padding: 1rem;
+    scroll-snap-align: none;
+    flex: 0 0 auto;
+  }
+
+  .section-content {
+    max-width: 95vw;
+    padding: 0.5rem;
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+  }
+
+  .about-content {
+    max-width: 95vw;
+    gap: 0.8rem;
+  }
+
+  /* MOBILE SECTION LAYOUT:
+     1. Intro (business card) - full viewport, centered
+     2. About - full viewport with about text (before tech stack)
+     3. Tech Stack - full viewport
+     4. Contact - natural height with footer visible
+  */
+
+  /* Intro/Business card section - exact viewport height minus header and footer, card centered */
+  .business-card-section {
+    height: calc(100vh - var(--header-height) - var(--footer-height));
+    height: calc(100dvh - var(--header-height) - var(--footer-height)); /* Dynamic viewport height for mobile browsers */
+    min-height: calc(100vh - var(--header-height) - var(--footer-height));
+    min-height: calc(100dvh - var(--header-height) - var(--footer-height));
+    max-height: calc(100vh - var(--header-height) - var(--footer-height));
+    max-height: calc(100dvh - var(--header-height) - var(--footer-height));
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    scroll-snap-align: start;
+    overflow: hidden;
+  }
+
+  /* Text animation section - full viewport on mobile */
+  .text-animation-section {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* About section - becomes a container for two visual sections on mobile */
+  .about-section {
+    min-height: auto;
+    flex: 0 0 auto;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* About content wrapper - stack children as separate visual sections */
+  .about-section .about-content {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    gap: 0;
+    max-width: 100%;
+  }
+
+  /* About text section - full viewport on mobile */
+  .about-section .about-text-wrapper {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1rem;
+    margin: 0;
+  }
+
+  .about-section .about-text-wrapper h2 {
+    text-align: left;
+  }
+
+  .about-section .about-text-wrapper p {
+    max-width: 90vw;
+    margin-bottom: 1rem;
+  }
+
+  /* Tech stack viewport - full viewport on mobile */
+  .about-section .tech-stack-viewport {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1rem;
+    margin: 0;
+  }
+
+  /* Tech stack box - compact, centered in viewport */
+  .about-section .tech-stack {
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+  }
+
+  /* UNIFORM SECTION HEADINGS ON MOBILE */
+  .about-section h2,
+  .about-section .about-text-wrapper h2,
+  .about-section .tech-stack h3,
+  .about-section .tech-stack-viewport .tech-stack h3,
+  .contact-section h2 {
+    font-size: clamp(1.5rem, 6vw, 2.5rem) !important;
+    font-family: var(--font--acme) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    line-height: 1.2 !important;
+    margin-bottom: 1.5rem !important;
+    color: var(--fg) !important;
+  }
+
+  .about-section .tech-list {
+    max-width: 85vw;
+    text-align: justify;
+  }
+
+  /* Contact section - natural height */
+  .contact-section {
+    min-height: auto;
+    flex: 0 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  /* Other sections that might exist */
+  .hero-section,
+  main > section:not(.business-card-section):not(.text-animation-section):not(.about-section):not(.contact-section) {
+    min-height: auto;
+    flex: 0 0 auto;
+  }
+
+  .container,
+  .page-content {
+    max-width: 95vw;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  section {
+    padding: 0.75rem;
+  }
+
+  .section-content {
+    max-width: 98vw;
+    padding: 0.25rem;
+  }
+
+  .container,
+  .page-content {
+    max-width: 98vw;
+  }
+}
 
 /* ============================================
  * INFINITE SCROLL LOOP SPACER & TRIGGER ZONE
@@ -439,6 +653,7 @@ main,
 
 /* Loop trigger zone - scrollable space after contact */
 .loop-trigger-zone {
+  order: 99; /* Always last */
   height: 100vh;
   min-height: 100vh;
   width: 100%;
@@ -450,7 +665,30 @@ main,
   padding: 0;
 }
 
-/* Mobile loop spacer styles in /src/styles/mobile/layout.css */
+/* Loop spacer sections - position at ends */
+#loop-spacer {
+  order: -1; /* Top spacer: before business card when active */
+}
+
+#loop-spacer-bottom {
+  order: 100; /* Bottom spacer: after everything when active */
+}
+
+/* Mobile: Hide trigger zone and spacer */
+@media screen and (max-width: 767px) {
+  .loop-spacer-section,
+  .loop-spacer-section.active {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+  }
+
+  .loop-trigger-zone {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+  }
+}
 
 /* ============================================
  * TEXT ANIMATION SECTION STYLES
@@ -483,4 +721,16 @@ main,
 
 /* Dark mode: colors automatically switch via CSS variables */
 
-/* Mobile text animation styles in /src/styles/mobile/layout.css */
+/* Mobile adjustments for text animation */
+@media screen and (max-width: 767px) {
+  .text-animation-svg {
+    max-width: 100%;
+    padding: 0;
+    transform: scale(1.5);
+    transform-origin: center center;
+  }
+
+  .text-animation-svg text {
+    font-size: 120px;
+  }
+}

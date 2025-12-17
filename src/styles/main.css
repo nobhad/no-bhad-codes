@@ -148,72 +148,70 @@ body {
 }
 
 /* ============================================
- * 8. SPECIALIZED SECTION STYLES
+ * 8. SPECIALIZED SECTION STYLES - DESKTOP ONLY
  * ============================================ */
 
-/* Business card section specific positioning */
-.business-card-section {
-  flex: 1 0 100%;
-  position: relative;
-  z-index: 1;
-  background: var(--color-neutral-300);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  overflow: visible;
-  margin-top: 0;
-  scroll-snap-align: start;
-  padding: 1rem;
-}
+@media screen and (min-width: 768px) {
+  /* Business card section specific positioning */
+  .business-card-section {
+    flex: 1 0 100%;
+    position: relative;
+    z-index: 1;
+    background: var(--color-neutral-300);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
+    margin-top: 0;
+    padding: 1rem;
+    min-height: calc(100vh - var(--header-height) - var(--footer-height));
+    height: calc(100vh - var(--header-height) - var(--footer-height));
+  }
 
-/* Scroll arrow positioning */
-.business-card-section .scroll-arrow-intro {
-  position: fixed;
-  bottom: calc(var(--footer-height) + 1rem);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-}
+  /* Scroll arrow positioning */
+  .business-card-section .scroll-arrow-intro {
+    position: fixed;
+    bottom: calc(var(--footer-height) + 1rem);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+  }
 
-/* Intro animation container - GSAP controls animations */
-#intro-animation-container {
-  /* Opacity/visibility controlled by GSAP */
-}
+  /* Show all sections immediately */
+  main section:not(.business-card-section) {
+    opacity: 1;
+    visibility: visible;
+  }
 
-/* Show all sections immediately */
-main section:not(.business-card-section) {
-  opacity: 1;
-  visibility: visible;
-}
+  /* About section specific styling */
+  .about-section h2 {
+    margin-bottom: 1.5rem;
+    text-align: left;
+    width: 100%;
+  }
 
-/* About section specific styling */
-.about-section h2 {
-  margin-bottom: 1.5rem;
-  text-align: left;
-  width: 100%;
-}
+  .about-content p,
+  .about-text-wrapper p {
+    margin-bottom: 1rem;
+  }
 
-.about-content p,
-.about-text-wrapper p {
-  margin-bottom: 1rem;
-}
+  .about-text-wrapper {
+    margin-bottom: 1rem;
+  }
 
-.about-text-wrapper {
-  margin-bottom: 1rem;
-}
+  .tech-stack-viewport {
+    margin-top: 0.5rem;
+  }
 
-.tech-stack-viewport {
-  margin-top: 0.5rem;
-}
+  /* Tech stack section visibility - desktop only */
+  .tech-stack-section {
+    display: none; /* Hidden on desktop, shown via mobile/layout.css */
+  }
 
-/* Tech stack section visibility - desktop vs mobile */
-.tech-stack-section {
-  display: none; /* Hidden on desktop, shown via mobile/layout.css */
-}
-
-.tech-stack-desktop {
-  display: block; /* Shown on desktop, hidden via mobile/layout.css */
+  .tech-stack-desktop {
+    display: block; /* Shown on desktop, hidden via mobile/layout.css */
+  }
 }
 
 /* Contact section styling - h2 styles defined in pages/contact.css */

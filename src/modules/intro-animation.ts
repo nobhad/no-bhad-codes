@@ -256,13 +256,14 @@ export class IntroAnimationModule extends BaseModule {
    * Run paw morph animation (desktop only)
    */
   private async runMorphAnimation(): Promise<void> {
-    // Scroll to top
-    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-    if (currentScroll < 100) {
-      window.scrollTo(0, 0);
-      document.body.scrollTop = 0;
-      document.documentElement.scrollTop = 0;
+    // Scroll to top - reset both window and main container
+    const mainContainer = document.querySelector('main') as HTMLElement;
+    if (mainContainer) {
+      mainContainer.scrollTop = 0;
     }
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
 
     // Get overlay elements
     this.morphOverlay = document.getElementById('intro-morph-overlay');
@@ -582,12 +583,14 @@ export class IntroAnimationModule extends BaseModule {
       morphOverlay.classList.add('hidden');
     }
 
-    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-    if (currentScroll < 100) {
-      window.scrollTo(0, 0);
-      document.body.scrollTop = 0;
-      document.documentElement.scrollTop = 0;
+    // Scroll to top - reset both window and main container
+    const mainContainer = document.querySelector('main') as HTMLElement;
+    if (mainContainer) {
+      mainContainer.scrollTop = 0;
     }
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
 
     const cardInner = document.getElementById('business-card-inner');
 
@@ -661,11 +664,14 @@ export class IntroAnimationModule extends BaseModule {
       businessCard.style.opacity = '1';
     }
 
-    // Scroll to top if near top
-    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-    if (currentScroll < 100) {
-      window.scrollTo(0, 0);
+    // Scroll to top - reset both window and main container
+    const mainContainer = document.querySelector('main') as HTMLElement;
+    if (mainContainer) {
+      mainContainer.scrollTop = 0;
     }
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
 
     // Add intro-finished after transition completes
     setTimeout(() => {

@@ -278,7 +278,7 @@ export class Application {
             const { ScrollSnapModule } = await import('../modules/scroll-snap');
             return new ScrollSnapModule({
               containerSelector: 'main',
-              sectionSelector: '.business-card-section, .text-animation-section, .about-section, .contact-section, .hero-section, .page-section, main > section',
+              sectionSelector: '.business-card-section, .hero-section, .about-section, .contact-section, .page-section, main > section',
               snapDuration: 0.6,
               snapDelay: 150
             });

@@ -5,25 +5,24 @@
 /* =====================================================
    1. NAVIGATION-SPECIFIC CSS CUSTOM PROPERTIES
    ===================================================== */
+
+/* Navigation variables scoped to navigation components only */
+/* NOTE: Design system variables (--size-container, --gap, etc.) are defined in /design-system/index.css */
 :root {
-  /* Navigation-Specific Variables */
-  --size-container: 75rem;
-  --container-padding: 1.5rem;
-  --gap: 1.5rem;
-  --section-padding: 6rem;
+  /* Animation curves - navigation specific */
   --cubic-menu: cubic-bezier(0.65, 0.05, 0, 1);
   --cubic-default: cubic-bezier(0.65, 0.05, 0, 1);
   --menu-padding: 2rem;
 
-  /* Font Variables */
+  /* Font Variables - navigation specific */
   --font-family-acme: "Acme", sans-serif;
 
-  /* Enhanced font-proportional spacing system */
-  --base-gap: clamp(0.5rem, 1.5vw, 0.8rem);
+  /* Enhanced font-proportional spacing system - navigation specific */
+  --nav-base-gap: clamp(0.5rem, 1.5vw, 0.8rem);
   --menu-multiplier: 0.15;
   --list-multiplier: 0.12;
 
-  /* Font sizes - Made smaller */
+  /* Font sizes - navigation menu specific */
   --menu-heading-size: clamp(2.5rem, 6vw, 4rem);
   --menu-button-size: clamp(2rem, 4vw, 2.5rem);
   --theme-button-size: clamp(2rem, 4vw, 2.5rem);
@@ -33,13 +32,13 @@
   --menu-width-tablet: 32rem;
   --menu-width-mobile: 100vw;
   --menu-border-radius: 1.25rem;
-  --menu-height: 100vh; /* Full viewport height for main menu */
+  --menu-height: 100vh;
 
-  /* Calculated font-proportional gaps */
-  --menu-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--menu-multiplier)));
-  --list-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
+  /* Calculated font-proportional gaps - navigation specific */
+  --menu-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--menu-multiplier)));
+  --list-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
 
-  /* Shadow color */
+  /* Shadow color - navigation specific */
   --color-shadow: rgba(0, 0, 0, 0.5);
 }
 
@@ -124,7 +123,7 @@ li {
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  color: inherit;
+  color: var(--fg, #000000);
   font-weight: 600;
   font-size: 20px;
   pointer-events: auto;
@@ -136,6 +135,17 @@ li {
   position: relative;
   /* Smooth color transition for theme changes - matches body transition speed */
   transition: color 0.2s ease;
+  /* Prevent blue tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav-logo-row:hover,
+.nav-logo-row:active,
+.nav-logo-row:visited,
+.nav-logo-row:focus {
+  color: var(--fg, #000000);
+  text-decoration: none;
+  outline: none;
 }
 
 .nav-logo__wordmark {
@@ -651,12 +661,12 @@ html[data-theme="dark"] .coming-soon-banner {
 /* Tablet Styles */
 @media screen and (max-width: 991px) {
   :root {
-    --base-gap: clamp(0.35rem, 1.2vw, 0.7rem);
+    --nav-base-gap: clamp(0.35rem, 1.2vw, 0.7rem);
     --menu-multiplier: 0.14;
     --list-multiplier: 0.11;
 
-    --menu-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--menu-multiplier)));
-    --list-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
+    --menu-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--menu-multiplier)));
+    --list-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
   }
 
   .menu {
@@ -679,7 +689,7 @@ html[data-theme="dark"] .coming-soon-banner {
 /* Mobile Styles */
 @media screen and (max-width: 767px) {
   :root {
-    --base-gap: clamp(0.3rem, 1vw, 0.6rem);
+    --nav-base-gap: clamp(0.3rem, 1vw, 0.6rem);
     --menu-padding: clamp(0.75rem, 3vw, 1.5rem);
     --menu-heading-size: clamp(5rem, 18vw, 8rem); /* Larger menu headings on mobile */
     --menu-button-size: clamp(2.2rem, 5vw, 2.8rem);
@@ -688,8 +698,8 @@ html[data-theme="dark"] .coming-soon-banner {
     --menu-multiplier: 0.13;
     --list-multiplier: 0.1;
 
-    --menu-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--menu-multiplier)));
-    --list-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
+    --menu-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--menu-multiplier)));
+    --list-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
   }
 
   /* Mobile: Header scrolls with content instead of fixed */
@@ -770,7 +780,7 @@ html[data-theme="dark"] .coming-soon-banner {
 /* Extra Small Mobile */
 @media screen and (max-width: 479px) {
   :root {
-    --base-gap: clamp(0.25rem, 0.8vw, 0.5rem);
+    --nav-base-gap: clamp(0.25rem, 0.8vw, 0.5rem);
     --menu-padding: clamp(0.5rem, 2vw, 1rem);
     --menu-heading-size: clamp(1.8rem, 5vw, 3.5rem);
     --theme-button-size: clamp(2rem, 4vw, 2.5rem);
@@ -779,8 +789,8 @@ html[data-theme="dark"] .coming-soon-banner {
     --menu-multiplier: 0.12;
     --list-multiplier: 0.09;
 
-    --menu-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--menu-multiplier)));
-    --list-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
+    --menu-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--menu-multiplier)));
+    --list-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
   }
 
   .menu {
@@ -801,15 +811,15 @@ html[data-theme="dark"] .coming-soon-banner {
 /* Large Screens */
 @media screen and (min-width: 1200px) {
   :root {
-    --base-gap: 0.9rem;
+    --nav-base-gap: 0.9rem;
     --menu-padding: 2.5rem;
     --menu-heading-size: 5.5rem;
 
     --menu-multiplier: 0.12;
     --list-multiplier: 0.09;
 
-    --menu-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--menu-multiplier)));
-    --list-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
+    --menu-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--menu-multiplier)));
+    --list-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
   }
 
   .menu {
@@ -820,15 +830,15 @@ html[data-theme="dark"] .coming-soon-banner {
 /* Ultra-wide Screens */
 @media screen and (min-width: 1600px) {
   :root {
-    --base-gap: 1.1rem;
+    --nav-base-gap: 1.1rem;
     --menu-padding: 3rem;
     --menu-heading-size: 6rem;
 
     --menu-multiplier: 0.13;
     --list-multiplier: 0.1;
 
-    --menu-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--menu-multiplier)));
-    --list-gap: max(var(--base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
+    --menu-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--menu-multiplier)));
+    --list-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
   }
 }
 

@@ -318,12 +318,39 @@
     </nav>
 
     <!-- Main Content -->
+    <!-- SECTION ORDER: Business Card -> Hero -> About -> Tech Stack -> Contact -->
     <main id="main-content">
       <!-- LOOP SPACER - Hidden initially, shown after infinite scroll loop -->
       <!-- This creates space so the business card can scroll up from below viewport -->
       <section id="loop-spacer" class="loop-spacer-section" aria-hidden="true"></section>
 
-      <!-- BUSINESS CARD INTRO - First section shown on load -->
+      <!-- HERO SECTION (order: 2) -->
+      <section id="hero" class="hero-section">
+        <svg viewBox="0 0 1280 720" class="text-animation-svg">
+          <defs>
+            <mask id="maskLeft">
+              <rect x="-50%" width="100%" height="100%" fill="#fff"/>
+            </mask>
+            <mask id="maskRight">
+              <rect x="50%" width="100%" height="100%" fill="#fff"/>
+            </mask>
+          </defs>
+          <g font-size="150" class="text-animation-group" transform="translate(0, 110)">
+            <g mask="url(#maskLeft)" class="text-left">
+              <text y="120">NO</text>
+              <text y="250">BHAD</text>
+              <text y="380">CODES</text>
+            </g>
+            <g mask="url(#maskRight)" class="text-right">
+              <text y="120">NO</text>
+              <text y="250">BHAD</text>
+              <text y="380">CODES</text>
+            </g>
+          </g>
+        </svg>
+      </section>
+
+      <!-- BUSINESS CARD INTRO SECTION (order: 1 - First on page load) -->
       <section id="intro" class="business-card-section">
         <div class="business-card-container">
           <div id="business-card" class="business-card">
@@ -353,33 +380,7 @@
         </div>
       </section>
 
-      <!-- ANIMATED TEXT SECTION -->
-      <section id="text-animation" class="text-animation-section">
-        <svg viewBox="0 0 1280 720" class="text-animation-svg">
-          <defs>
-            <mask id="maskLeft">
-              <rect x="-50%" width="100%" height="100%" fill="#fff"/>
-            </mask>
-            <mask id="maskRight">
-              <rect x="50%" width="100%" height="100%" fill="#fff"/>
-            </mask>
-          </defs>
-          <g font-size="150" class="text-animation-group" transform="translate(0, 110)">
-            <g mask="url(#maskLeft)" class="text-left">
-              <text y="120">NO</text>
-              <text y="250">BHAD</text>
-              <text y="380">CODES</text>
-            </g>
-            <g mask="url(#maskRight)" class="text-right">
-              <text y="120">NO</text>
-              <text y="250">BHAD</text>
-              <text y="380">CODES</text>
-            </g>
-          </g>
-        </svg>
-      </section>
-
-      <!-- ABOUT SECTION -->
+      <!-- ABOUT SECTION (order: 3) -->
       <section id="about" class="about-section">
         <div class="about-content">
           <div class="about-text-wrapper">
@@ -420,7 +421,7 @@
         </div>
       </section>
 
-      <!-- TECH STACK SECTION - MOBILE ONLY (for scroll snap) -->
+      <!-- TECH STACK SECTION - MOBILE ONLY (order: 4) -->
       <section id="tech-stack" class="tech-stack-section">
         <h2>tech stack</h2>
         <div class="tech-stack">
@@ -435,7 +436,7 @@
         </div>
       </section>
 
-      <!-- CONTACT SECTION -->
+      <!-- CONTACT SECTION (order: 5) -->
       <section id="contact" class="contact-section">
         <h2>contact</h2>
 

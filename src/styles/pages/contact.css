@@ -3,155 +3,164 @@
  * @description Contact form styles matching Sal Costa's design
  * @author Noelle Bhaduri
  * GSAP animations for form elements
+ *
+ * DESKTOP ONLY (min-width: 768px) - Mobile styles in /src/styles/mobile/contact.css
  **/
 
-/* Contact Section - 80% viewport width (desktop) */
-.contact-section {
-  align-items: flex-start;
-  width: 80vw;
-  max-width: 80vw;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 0;
-  padding-right: 0;
-  box-sizing: border-box;
-  overflow: visible;
-}
-
-/* Contact heading - aligns with form left edge */
-.contact-section h2 {
-  margin-bottom: 2rem;
-  margin-left: 0;
-  margin-right: 0;
-  width: 100%;
-  align-self: stretch;
-  text-align: left;
-}
-
 /* ==========================================
-   TWO-COLUMN LAYOUT
+   DESKTOP LAYOUT (min-width: 768px)
+   Mobile layout in /src/styles/mobile/contact.css
    ========================================== */
 
-/* Contact layout - two-column container */
-.contact-layout {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 1.5rem 3rem;
-  width: 100%;
-  align-items: flex-start;
+@media screen and (min-width: 768px) {
+  /* Contact Section - 80% viewport width (desktop) */
+  .contact-section {
+    justify-content: center; /* Vertical centering in viewport */
+    align-items: flex-start; /* Content aligned left within section */
+    width: 80vw;
+    max-width: 80vw;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 0;
+    padding-right: 0;
+    box-sizing: border-box;
+    overflow: visible;
+  }
+
+  /* Contact heading - aligns with form left edge */
+  .contact-section h2 {
+    margin-bottom: 2rem;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    align-self: stretch;
+    text-align: left;
+  }
+
+  /* ==========================================
+     TWO-COLUMN LAYOUT - DESKTOP ONLY
+     ========================================== */
+
+  /* Contact layout - two-column container */
+  .contact-layout {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1.5rem 3rem;
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  /* Left column - business card */
+  .contact-card-column {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    order: 1;
+    padding-top: 1rem;
+  }
+
+  /* Right column - contact form */
+  .contact-form-column {
+    flex: 1 1 auto;
+    min-width: 300px;
+    order: 2;
+  }
+
+  /* Contact options - full width above columns */
+  .contact-options {
+    flex: 0 0 100%;
+    order: -1;
+  }
+
+  /* ==========================================
+     CONTACT BUSINESS CARD - DESKTOP ONLY
+     ========================================== */
+
+  /* Contact business card - same size as main card */
+  .contact-business-card {
+    width: var(--business-card-large-width, 525px);
+    height: var(--business-card-large-height, 293.8px);
+    min-width: var(--business-card-large-width, 525px);
+    min-height: var(--business-card-large-height, 293.8px);
+    max-width: var(--business-card-large-width, 525px);
+    max-height: var(--business-card-large-height, 293.8px);
+  }
+
+  /* Ensure contact business card is interactive */
+  .contact-business-card .business-card {
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .contact-business-card .business-card-inner {
+    pointer-events: auto;
+  }
+
+  /* Form Container - same width as h2 for perfect alignment */
+  .contact-form {
+    width: 100%;
+    align-self: stretch;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background-color: transparent;
+    box-sizing: border-box;
+    box-shadow: none;
+    overflow: visible;
+    display: block;
+  }
+
+  /* Top row: inputs + submit button side by side */
+  .contact-row {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    gap: 2rem;
+    margin-top: 1rem;
+    box-sizing: border-box;
+  }
+
+  /* Left column: name, company, email inputs */
+  .contact-left {
+    flex: 0 0 70%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+    box-sizing: border-box;
+    padding: 0;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  /* Right column: submit button */
+  .contact-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 0;
+    padding-right: 1rem;
+    overflow: visible;
+  }
+
+  /* Bottom row: message textarea full width */
+  .contact-message-row {
+    width: 100%;
+    margin-top: 1rem;
+    box-sizing: border-box;
+  }
 }
 
-/* Left column - business card */
-.contact-card-column {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  order: 1;
-  padding-top: 1rem; /* Align with first form input (matches .contact-row margin-top) */
-}
-
-/* Right column - contact form */
-.contact-form-column {
-  flex: 1 1 auto;
-  min-width: 300px;
-  order: 2;
-}
-
-/* Contact options - full width above columns */
-.contact-options {
-  flex: 0 0 100%;
-  order: -1;
-}
-
-/* Contact options links - bold and underlined */
+/* Contact options links - extra bold and underlined (shared) */
 .contact-option-link {
-  font-weight: 600;
+  font-weight: 800;
   text-decoration: underline;
-}
-
-/* ==========================================
-   CONTACT BUSINESS CARD
-   ========================================== */
-
-/* Contact business card - same size as main card */
-.contact-business-card {
-  /* Use large card size (same as main card) */
-  width: var(--business-card-large-width, 525px);
-  height: var(--business-card-large-height, 293.8px);
-  min-width: var(--business-card-large-width, 525px);
-  min-height: var(--business-card-large-height, 293.8px);
-  max-width: var(--business-card-large-width, 525px);
-  max-height: var(--business-card-large-height, 293.8px);
-}
-
-/* Ensure contact business card is interactive */
-.contact-business-card .business-card {
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-.contact-business-card .business-card-inner {
-  pointer-events: auto;
-}
-
-/* Form Container - same width as h2 for perfect alignment */
-.contact-form {
-  width: 100%;
-  align-self: stretch;
-  margin: 0;
-  padding: 0;
-  border: none;
-  border-radius: 0;
-  background-color: transparent;
-  box-sizing: border-box;
-  box-shadow: none;
-  overflow: visible;
-  display: block;
-}
-
-/* Top row: inputs + submit button side by side */
-.contact-row {
-  display: flex;
-  align-items: stretch;
-  width: 100%;
-  gap: 2rem;
-  margin-top: 1rem;
-  box-sizing: border-box;
-}
-
-/* Left column: name, company, email inputs */
-.contact-left {
-  flex: 0 0 70%;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  align-items: flex-start;
-  box-sizing: border-box;
-  padding: 0;
-  min-height: auto;
-  overflow: visible;
-}
-
-/* Right column: submit button */
-.contact-right {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  padding: 0;
-  padding-right: 1rem;
-  overflow: visible;
-}
-
-/* Bottom row: message textarea full width */
-.contact-message-row {
-  width: 100%;
-  margin-top: 1rem;
-  box-sizing: border-box;
 }
 
 /* SAL'S EXACT - Input wrapper */

@@ -294,7 +294,7 @@ html[data-theme="dark"] .client-portal-section .btn.btn-primary {
 }
 
 /* Responsive - Mobile */
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 767px) {
   .portal-login-fields {
     max-width: 100%;
   }

@@ -19,7 +19,7 @@
     max-width: 100% !important;
     padding: 1rem !important;
     align-items: flex-start !important;
-    justify-content: flex-start !important;
+    justify-content: center !important; /* Vertically center content */
   }
 
   .contact-section h2 {

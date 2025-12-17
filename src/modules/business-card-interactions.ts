@@ -163,7 +163,100 @@ export class BusinessCardInteractions extends BaseModule {
       transformStyle: 'preserve-3d'
     });
 
+    // Start with back showing (rotated 180 degrees)
+    this.currentRotationY = 180;
+    this.isFlipped = true;
+    gsap.set(this.businessCardInner, {
+      rotationY: 180
+    });
+
+    // Flip to front when card becomes visible
+    this.setupInitialFlipOnVisible();
+
     this.log('Card interaction setup completed');
+  }
+
+  /**
+   * Setup observer to flip card when it becomes visible
+   */
+  private setupInitialFlipOnVisible() {
+    if (!this.businessCard) return;
+
+    // Check if this is the contact card (needs to wait for scroll-snap to complete)
+    const isContactCard = this.businessCard.id === 'contact-business-card';
+
+    if (isContactCard) {
+      // For contact card: wait for scroll-snap to complete
+      this.setupScrollSnapDetection();
+    } else {
+      // For main card: flip when visible
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && this.isFlipped) {
+              setTimeout(() => {
+                this.flipCard('right');
+              }, 300);
+              observer.disconnect();
+            }
+          });
+        },
+        { threshold: 0.3 }
+      );
+      observer.observe(this.businessCard);
+    }
+  }
+
+  /**
+   * Detect when scroll-snap completes on contact section
+   */
+  private setupScrollSnapDetection() {
+    const scrollContainer = document.querySelector('main');
+    const contactSection = document.querySelector('.contact-section');
+
+    if (!scrollContainer || !contactSection) return;
+
+    // Capture references for use in nested functions (TypeScript narrowing)
+    const container = scrollContainer;
+    const section = contactSection;
+    const self = this;
+
+    let scrollTimeout: number | null = null;
+    let hasFlipped = false;
+
+    // Using function declarations for hoisting (avoids use-before-define)
+    function checkIfSnapped() {
+      if (hasFlipped || !self.isFlipped) return;
+
+      const rect = section.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      // Check if contact section is snapped (top aligned with container top, with small tolerance)
+      const isSnapped = Math.abs(rect.top - containerRect.top) < 50;
+
+      if (isSnapped) {
+        hasFlipped = true;
+        setTimeout(() => {
+          self.flipCard('right');
+        }, 200);
+        container.removeEventListener('scroll', onScroll);
+        container.removeEventListener('scrollend', onScrollEnd);
+      }
+    }
+
+    function onScroll() {
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      scrollTimeout = window.setTimeout(checkIfSnapped, 150);
+    }
+
+    function onScrollEnd() {
+      checkIfSnapped();
+    }
+
+    container.addEventListener('scroll', onScroll, { passive: true });
+    container.addEventListener('scrollend', onScrollEnd, { passive: true });
   }
 
   /**
