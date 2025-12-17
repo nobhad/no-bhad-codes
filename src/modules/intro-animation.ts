@@ -24,13 +24,13 @@ gsap.registerPlugin(MorphSVGPlugin);
 const PAW_SVG = `/images/coyote_paw.svg?v=${Date.now()}`;
 
 // SVG card position/dimensions (from coyote_paw.svg Card_Outline)
-// Card rect: x="2008.59" y="1345.63" width="1352.31" height="772.75"
-const SVG_CARD_X = 2008.59;
-const SVG_CARD_Y = 1345.63;
-const SVG_CARD_WIDTH = 1352.31;
-const _SVG_CARD_HEIGHT = 772.75;
-const _SVG_VIEWBOX_WIDTH = 3363.4;   // Full viewBox width
-const _SVG_VIEWBOX_HEIGHT = 2253.12; // Full viewBox height
+// Card rect: x="1250.15" y="1029.85" width="1062.34" height="591.3"
+const SVG_CARD_X = 1250.15;
+const SVG_CARD_Y = 1029.85;
+const SVG_CARD_WIDTH = 1062.34;
+const _SVG_CARD_HEIGHT = 591.3;
+const _SVG_VIEWBOX_WIDTH = 2316.99;  // Full viewBox width
+const _SVG_VIEWBOX_HEIGHT = 1801.19; // Full viewBox height
 
 // Extracted SVG style colors
 interface SvgStyleColors {
