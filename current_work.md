@@ -198,6 +198,7 @@ Fixed 3 issues that could crash the application:
 **Concerns**:
 
 - [ ] **Infinite scroll needs to work on mobile** - Currently disabled, needs implementation
+- [ ] **Loop-trigger-zone awkward space** - Need to figure out what content/design to fill the gap between contact section and loop trigger
 
 **Options to Consider**:
 
