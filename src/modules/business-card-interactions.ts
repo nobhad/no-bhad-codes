@@ -225,39 +225,17 @@ export class BusinessCardInteractions extends BaseModule {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Section entering viewport - flip to front if showing back
-            if (this.isFlipped) {
-              setTimeout(() => {
-                this.flipCard('right');
-              }, 300);
-            }
-          } else {
-            // Section leaving viewport - reset to back
-            if (!this.isFlipped && !this.isAnimating) {
-              this.resetToBack();
-            }
+          if (entry.isIntersecting && !this.isAnimating) {
+            // Section entering viewport - flip from whatever side it's on
+            setTimeout(() => {
+              this.flipCard('right');
+            }, 300);
           }
         });
       },
       { threshold: 0.3 }
     );
     observer.observe(contactSection);
-  }
-
-  /**
-   * Reset card to show back (for re-entry flip animation)
-   */
-  private resetToBack() {
-    if (!this.businessCardInner) return;
-
-    this.log('Resetting card to back for re-entry');
-    this.isFlipped = true;
-    this.currentRotationY = 180;
-
-    gsap.set(this.businessCardInner, {
-      rotationY: 180
-    });
   }
 
   /**
