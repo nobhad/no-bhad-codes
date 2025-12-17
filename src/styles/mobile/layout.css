@@ -13,37 +13,42 @@
  * ============================================ */
 
 @media screen and (max-width: 767px) {
-  /* Mobile: Normal document flow with header/footer scrolling with content */
+  /* Mobile: Fixed viewport scroll container for scroll snap */
   body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden; /* Prevent body scroll - main is the scroll container */
   }
 
   main {
-    position: static;
-    top: auto;
-    bottom: auto;
-    left: auto;
-    right: auto;
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    bottom: var(--footer-height);
     width: 100%;
-    height: auto;
-    min-height: auto;
-    flex: 1;
-    overflow-y: auto;
+    height: calc(100vh - var(--header-height) - var(--footer-height));
+    height: calc(100dvh - var(--header-height) - var(--footer-height));
+    overflow-y: scroll; /* This is the scroll container */
     overflow-x: hidden;
     scroll-snap-type: y mandatory;
     -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
   }
 
   section {
-    min-height: 100vh;
-    min-height: 100dvh;
-    height: auto;
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
     padding: 1rem;
     scroll-snap-align: center;
     scroll-snap-stop: always;
-    flex: 0 0 auto;
+    flex: 0 0 100%;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .section-content {
@@ -58,22 +63,18 @@
   }
 
   /* ==========================================
-     MOBILE SECTION LAYOUT
-     1. Intro (business card) - full viewport, centered
-     2. About - full viewport with about text (before tech stack)
-     3. Tech Stack - full viewport
-     4. Contact - natural height with footer visible
+     MOBILE SECTION LAYOUT (scroll snap enabled)
+     Order: About -> Tech Stack -> Business Card -> Contact
+     Each section fills exactly one viewport height
+     Text animation section is hidden on mobile
      ========================================== */
 
-  /* Intro/Business card section - exact viewport height minus header, card centered */
+  /* Intro/Business card section - fills scroll container, card centered */
   .business-card-section {
-    height: calc(100vh - var(--header-height));
-    height: calc(100dvh - var(--header-height)); /* Dynamic viewport height for mobile browsers */
-    min-height: calc(100vh - var(--header-height));
-    min-height: calc(100dvh - var(--header-height));
-    max-height: calc(100vh - var(--header-height));
-    max-height: calc(100dvh - var(--header-height));
-    flex: 0 0 auto;
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
+    flex: 0 0 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -81,32 +82,22 @@
     padding: 0;
     margin: 0;
     scroll-snap-align: center;
+    scroll-snap-stop: always;
     overflow: hidden;
   }
 
-  /* Text animation section - full viewport on mobile */
+  /* Text animation section - hidden on mobile (too complex for mobile viewport) */
   .text-animation-section {
-    height: 100vh;
-    height: 100dvh;
-    min-height: 100vh;
-    min-height: 100dvh;
-    flex: 0 0 auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 0;
-    margin: 0;
-    scroll-snap-align: center;
-    scroll-snap-stop: always;
+    display: none !important;
   }
 
-  /* About section - full viewport with scroll snap */
+  /* About section - fills scroll container with scroll snap */
   .about-section {
-    min-height: 100vh;
-    min-height: 100dvh;
-    flex: 0 0 auto;
-    padding: 2rem 1rem;
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
+    flex: 0 0 100%;
+    padding: 1rem;
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -114,6 +105,8 @@
     align-items: center;
     scroll-snap-align: center;
     scroll-snap-stop: always;
+    overflow: hidden;
+    box-sizing: border-box;
   }
 
   /* About content wrapper */
@@ -123,6 +116,7 @@
     padding: 0;
     gap: 0;
     max-width: 95vw;
+    width: 100%;
   }
 
   /* About text wrapper - centered in section */
@@ -159,7 +153,7 @@
     font-weight: 700 !important;
     text-transform: uppercase !important;
     line-height: 1.2 !important;
-    margin-bottom: 1.5rem !important;
+    margin-bottom: 0.75rem !important;
     color: var(--fg) !important;
   }
 
@@ -169,11 +163,15 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    min-height: 100dvh;
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
+    flex: 0 0 100%;
     padding: 2rem 1rem;
     scroll-snap-align: center;
     scroll-snap-stop: always;
+    overflow: hidden;
+    box-sizing: border-box;
   }
 
   .tech-stack-desktop {
@@ -195,18 +193,21 @@
     text-align: justify;
   }
 
-  /* Contact section - full viewport with scroll snap */
+  /* Contact section - fills scroll container with scroll snap */
   .contact-section {
-    min-height: 100vh;
-    min-height: 100dvh;
-    flex: 0 0 auto;
-    padding: 2rem 1rem;
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
+    flex: 0 0 100%;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-start;
     scroll-snap-align: center;
     scroll-snap-stop: always;
+    overflow: hidden;
+    box-sizing: border-box;
   }
 
   /* ==========================================
@@ -230,11 +231,9 @@
     order: 4;
   }
 
-  /* Other sections that might exist */
-  .hero-section,
-  main > section:not(.business-card-section):not(.text-animation-section):not(.about-section):not(.contact-section) {
-    min-height: auto;
-    flex: 0 0 auto;
+  /* Other sections that might exist - hide them on mobile */
+  .hero-section {
+    display: none !important;
   }
 
   .container,

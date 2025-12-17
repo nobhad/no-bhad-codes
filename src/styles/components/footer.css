@@ -30,12 +30,13 @@
   color: var(--color-dark);
 }
 
-/* Mobile: Footer scrolls with content instead of fixed */
+/* Mobile: Footer stays fixed at bottom for scroll snap layout */
 @media (max-width: 767px) {
   .footer {
-    position: static !important;
-    bottom: auto !important;
-    left: auto !important;
-    right: auto !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 50;
   }
 }

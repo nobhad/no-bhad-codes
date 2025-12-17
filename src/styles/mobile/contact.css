@@ -4,103 +4,153 @@
  * ===============================================
  * @file src/styles/mobile/contact.css
  *
- * Mobile-specific contact form overrides (max-width: 800px)
- * Separated from desktop styles for maintainability.
+ * Mobile-specific contact form overrides (max-width: 767px)
+ * Matches breakpoint in mobile/layout.css
  */
 
 /* ============================================
- * MOBILE CONTACT (max-width: 800px)
+ * MOBILE CONTACT (max-width: 767px)
  * ============================================ */
 
-@media screen and (max-width: 800px) {
-  /* Remove 80vw restriction on mobile */
+@media screen and (max-width: 767px) {
+  /* Override desktop contact section styles */
   .contact-section {
     width: 100% !important;
     max-width: 100% !important;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    overflow: visible !important;
-    padding-bottom: 2rem !important;
+    padding: 1rem !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
   }
 
-  /* Stack two-column layout vertically on mobile */
-  .contact-layout {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .contact-card-column {
-    display: none; /* Hide business card in contact section on mobile */
-  }
-
-  .contact-form-column {
+  .contact-section h2 {
+    margin-bottom: 0.5rem !important;
     width: 100%;
-    order: 3;
-  }
-
-  .contact-options {
     text-align: left;
-    order: 2; /* Between card (1) and form (3) on mobile */
-    margin-bottom: 0;
   }
 
-  /* Contact business card - match intro card exactly */
-  .contact-business-card {
-    width: 420px;
-    height: 235px;
-    min-width: 420px;
-    min-height: 235px;
-    max-width: 420px;
-    max-height: 235px;
-    margin: 0;
+  /* Contact layout - simple block layout on mobile */
+  .contact-layout {
+    display: block !important;
+    width: 100% !important;
   }
 
+  /* Contact form column - display block, full width */
+  .contact-form-column {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  /* Hide business card on mobile */
+  .contact-card-column {
+    display: none !important;
+  }
+
+  /* Contact form - flex column for ordering */
   .contact-form {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    height: auto;
-    min-height: auto;
-    position: relative;
+    width: 100%;
+    gap: 0;
   }
 
+  /* Use display:contents to flatten structure, allowing order to work */
   .contact-row {
     display: contents;
   }
 
+  /* Input fields container */
   .contact-left {
+    display: block;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
     order: 1;
   }
 
+  /* Message textarea */
   .contact-message-row {
-    margin-top: 0;
+    display: block;
+    width: 100%;
     order: 2;
+    margin-top: 0; /* Override desktop margin-top: 1rem */
   }
 
-  /* Move button container to after message */
-  .contact-right {
+  /* Stack all input wrappers vertically - uniform 0.5rem spacing */
+  .input-wrapper {
+    display: block;
     width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Top form field spacing */
+  .contact-left .input-wrapper:first-child {
+    margin-top: 1rem;
+  }
+
+  .input-item {
+    display: block;
+    width: 100%;
+    position: relative; /* Needed for absolute label positioning */
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    animation: none;
+  }
+
+  /* Smaller input fields on mobile */
+  .input-item input {
+    display: block;
+    height: 45px;
+    font-size: 0.95rem;
+    padding: 0.6rem 0.8rem 0;
+    border-radius: 0 16px 16px 16px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .input-item textarea {
+    display: block;
+    min-height: 200px !important;
+    height: 200px !important;
+    font-size: 0.95rem;
+    padding: 0.8rem 0.8rem 0.4rem;
+    border-radius: 0 16px 16px 16px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Labels positioned inside inputs */
+  label.text-small {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 0.75rem;
+    margin: 0.25rem 0 0 0.5rem;
+    z-index: 3;
+  }
+
+  /* Submit button container styling */
+  .contact-right {
     display: flex;
     justify-content: flex-end;
-    order: 3;
-    padding-right: 1rem;
+    width: 100%;
+    order: 3; /* Ensures it's after textarea */
   }
 
+  /* Smaller submit button on mobile */
   .submit-button {
-    width: 70px;
-    height: 70px;
+    width: 55px;
+    height: 55px;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    animation: none;
   }
 
   .submit-button svg {
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
   }
 
-  /* Disable transform on mobile for better UX */
+  /* Disable hover transform on mobile */
   input:hover,
   input:focus,
   input:focus-visible,
@@ -113,7 +163,7 @@
   textarea:hover + label,
   textarea:focus + label,
   textarea:focus-visible + label {
-    transform: translate(0);
+    transform: translate(0) !important;
   }
 }
 
@@ -122,14 +172,23 @@
  * ============================================ */
 
 @media screen and (max-width: 479px) {
-  /* Contact business card - match intro card exactly */
-  .contact-business-card {
-    width: 350px;
-    height: 195.8px;
-    min-width: 350px;
-    min-height: 195.8px;
-    max-width: 350px;
-    max-height: 195.8px;
-    margin: 0;
+  .input-item input {
+    height: 42px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .input-item textarea {
+    min-height: 100px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .submit-button {
+    width: 50px !important;
+    height: 50px !important;
+  }
+
+  .submit-button svg {
+    width: 24px !important;
+    height: 24px !important;
   }
 }
