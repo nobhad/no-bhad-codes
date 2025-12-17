@@ -205,6 +205,31 @@ export class Application {
         dependencies: ['SectionCardRenderer']
       },
       {
+        name: 'ContactCardRenderer',
+        type: 'dom',
+        factory: async () => {
+          const { BusinessCardRenderer } = await import('../modules/business-card-renderer');
+          return new BusinessCardRenderer({
+            businessCardId: 'contact-business-card',
+            businessCardInnerId: 'contact-business-card-inner',
+            frontSelector: '#contact-business-card .business-card-front',
+            backSelector: '#contact-business-card .business-card-back',
+            containerSelector: '#contact-card-container'
+          });
+        }
+      },
+      {
+        name: 'ContactCardInteractions',
+        type: 'dom',
+        factory: async () => {
+          const { BusinessCardInteractions } =
+            await import('../modules/business-card-interactions');
+          const renderer = await container.resolve('ContactCardRenderer');
+          return new BusinessCardInteractions(renderer as any);
+        },
+        dependencies: ['ContactCardRenderer']
+      },
+      {
         name: 'NavigationModule',
         type: 'dom',
         factory: async () => {

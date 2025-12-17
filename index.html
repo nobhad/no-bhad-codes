@@ -431,117 +431,155 @@
           </p>
         </div>
 
-        <form class="contact-form" method="post" name="contact-form" novalidate aria-label="Contact form" autocomplete="off" data-form-type="other" data-1p-ignore data-lpignore="true" data-bwignore>
-          <!-- Honeypot field for bot detection -->
-          <input name="bot-field" style="display: none" aria-hidden="true" tabindex="-1" autocomplete="off" />
+        <!-- Two-column layout -->
+        <div class="contact-layout">
+          <!-- LEFT COLUMN: Contact Form -->
+          <div class="contact-form-column">
+            <form class="contact-form" method="post" name="contact-form" novalidate aria-label="Contact form" autocomplete="off" data-form-type="other" data-1p-ignore data-lpignore="true" data-bwignore>
+              <!-- Honeypot field for bot detection -->
+              <input name="bot-field" style="display: none" aria-hidden="true" tabindex="-1" autocomplete="off" />
 
-          <!-- Top row: inputs + submit button -->
-          <div class="contact-row">
-            <!-- Left column: name, company, email -->
-            <div class="contact-left">
-              <div class="input-wrapper">
-                <div class="input-item">
-                  <input
-                    id="name"
-                    placeholder="..."
-                    required
-                    autocomplete="name"
-                    tabindex="1"
-                    type="text"
-                    name="Name"
-                    maxlength="256"
-                    aria-label="Name"
-                    aria-required="true"
-                    data-required="true"
-                    data-1p-ignore
-                    data-lpignore="true"
-                    data-bwignore
-                  />
-                  <label class="text-small" for="name">Name</label>
+              <!-- Top row: inputs + submit button -->
+              <div class="contact-row">
+                <!-- Left column: name, company, email -->
+                <div class="contact-left">
+                  <div class="input-wrapper">
+                    <div class="input-item">
+                      <input
+                        id="name"
+                        placeholder="..."
+                        required
+                        autocomplete="name"
+                        tabindex="1"
+                        type="text"
+                        name="Name"
+                        maxlength="256"
+                        aria-label="Name"
+                        aria-required="true"
+                        data-required="true"
+                        data-1p-ignore
+                        data-lpignore="true"
+                        data-bwignore
+                      />
+                      <label class="text-small" for="name">Name</label>
+                    </div>
+                  </div>
+
+                  <div class="input-wrapper">
+                    <div class="input-item">
+                      <input
+                        id="company"
+                        placeholder="..."
+                        autocomplete="organization"
+                        tabindex="2"
+                        type="text"
+                        name="Company-Name"
+                        maxlength="256"
+                        aria-label="Company (optional)"
+                        data-1p-ignore
+                        data-lpignore="true"
+                        data-bwignore
+                      />
+                      <label class="text-small" for="company">Company (optional)</label>
+                    </div>
+                  </div>
+
+                  <div class="input-wrapper">
+                    <div class="input-item">
+                      <input
+                        id="email"
+                        placeholder="..."
+                        required
+                        autocomplete="email"
+                        tabindex="3"
+                        type="email"
+                        name="Email"
+                        maxlength="256"
+                        aria-label="Email"
+                        aria-required="true"
+                        data-required="true"
+                        data-1p-ignore
+                        data-lpignore="true"
+                        data-bwignore
+                      />
+                      <label class="text-small" for="email">Email</label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right column: submit button -->
+                <div class="contact-right">
+                  <button class="submit-button" type="submit" tabindex="5" aria-label="Submit contact form">
+                    <span></span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bow-arrow-icon lucide-bow-arrow" aria-hidden="true">
+                      <path d="M17 3h4v4"/>
+                      <path d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"/>
+                      <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05"/>
+                      <path d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z"/>
+                      <path d="M9.707 14.293 21 3"/>
+                    </svg>
+                  </button>
                 </div>
               </div>
 
-              <div class="input-wrapper">
-                <div class="input-item">
-                  <input
-                    id="company"
-                    placeholder="..."
-                    autocomplete="organization"
-                    tabindex="2"
-                    type="text"
-                    name="Company-Name"
-                    maxlength="256"
-                    aria-label="Company (optional)"
-                    data-1p-ignore
-                    data-lpignore="true"
-                    data-bwignore
-                  />
-                  <label class="text-small" for="company">Company (optional)</label>
+              <!-- Bottom row: message textarea spanning full width -->
+              <div class="contact-message-row">
+                <div class="input-wrapper">
+                  <div class="input-item">
+                    <textarea
+                      id="message"
+                      name="Message"
+                      placeholder="..."
+                      required
+                      rows="4"
+                      tabindex="4"
+                      maxlength="1000"
+                      aria-label="Message"
+                      aria-required="true"
+                      data-required="true"
+                      data-1p-ignore
+                      data-lpignore="true"
+                      data-bwignore
+                    ></textarea>
+                    <label class="text-small" for="message">Message</label>
+                  </div>
                 </div>
               </div>
-
-              <div class="input-wrapper">
-                <div class="input-item">
-                  <input
-                    id="email"
-                    placeholder="..."
-                    required
-                    autocomplete="email"
-                    tabindex="3"
-                    type="email"
-                    name="Email"
-                    maxlength="256"
-                    aria-label="Email"
-                    aria-required="true"
-                    data-required="true"
-                    data-1p-ignore
-                    data-lpignore="true"
-                    data-bwignore
-                  />
-                  <label class="text-small" for="email">Email</label>
-                </div>
-              </div>
-            </div>
-
-            <!-- Right column: submit button -->
-            <div class="contact-right">
-              <button class="submit-button" type="submit" tabindex="5" aria-label="Submit contact form">
-                <span></span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bow-arrow-icon lucide-bow-arrow" aria-hidden="true">
-                  <path d="M17 3h4v4"/>
-                  <path d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"/>
-                  <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05"/>
-                  <path d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z"/>
-                  <path d="M9.707 14.293 21 3"/>
-                </svg>
-              </button>
-            </div>
+            </form>
           </div>
 
-          <!-- Bottom row: message textarea spanning full width -->
-          <div class="contact-message-row">
-            <div class="input-wrapper">
-              <div class="input-item">
-                <textarea
-                  id="message"
-                  name="Message"
-                  placeholder="..."
-                  required
-                  rows="4"
-                  tabindex="4"
-                  maxlength="1000"
-                  aria-label="Message"
-                  aria-required="true"
-                  data-required="true"
-                  data-1p-ignore
-                  data-lpignore="true"
-                  data-bwignore
-                ></textarea>
-                <label class="text-small" for="message">Message</label>
+          <!-- RIGHT COLUMN: Business Card + Text -->
+          <div class="contact-card-column">
+            <!-- Business Card (copy from intro section) -->
+            <div id="contact-card-container" class="business-card-container contact-business-card">
+              <div id="contact-business-card" class="business-card" data-card-id="contact">
+                <div id="contact-business-card-inner" class="business-card-inner">
+                  <!-- FRONT OF CARD -->
+                  <div class="business-card-front">
+                    <img
+                      src="/images/business-card_front.svg"
+                      alt="Business Card Front"
+                      class="card-svg"
+                      width="525"
+                      height="293.8"
+                    />
+                  </div>
+                  <!-- BACK OF CARD -->
+                  <div class="business-card-back">
+                    <img
+                      src="/images/business-card_back.svg"
+                      alt="Avatar"
+                      class="card-svg"
+                      width="525"
+                      height="293.8"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
+
           </div>
-        </form>
+        </div>
       </section>
 
       <!-- LOOP TRIGGER ZONE - Empty space after contact so it can scroll out -->

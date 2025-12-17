@@ -5,11 +5,11 @@
  * GSAP animations for form elements
  **/
 
-/* Contact Section - match about section width */
+/* Contact Section - 80% viewport width */
 .contact-section {
   align-items: flex-start !important;
-  width: min(1000px, 90vw) !important;
-  max-width: min(1000px, 90vw) !important;
+  width: 80vw !important;
+  max-width: 80vw !important;
   margin-left: auto !important;
   margin-right: auto !important;
   padding-left: 0 !important;
@@ -26,6 +26,37 @@
   width: 100%;
   align-self: stretch;
   text-align: left;
+}
+
+/* ==========================================
+   TWO-COLUMN LAYOUT
+   ========================================== */
+
+/* Contact layout - two-column container */
+.contact-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 3rem;
+  width: 100%;
+  align-items: stretch;
+}
+
+/* Left column - business card */
+.contact-card-column {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  order: 1;
+  padding-top: 1rem; /* Align with first form input (matches .contact-row margin-top) */
+}
+
+/* Right column - contact form */
+.contact-form-column {
+  flex: 1 1 60%;
+  min-width: 0;
+  order: 2;
 }
 
 /* Contact options intro text */
@@ -54,6 +85,31 @@
 .contact-option-link:hover,
 .contact-option-link:focus {
   color: var(--color-primary, #00ff41);
+}
+
+/* ==========================================
+   CONTACT BUSINESS CARD
+   ========================================== */
+
+/* Contact business card - same size as main card */
+.contact-business-card {
+  /* Use large card size (same as main card) */
+  width: var(--business-card-large-width, 525px);
+  height: var(--business-card-large-height, 293.8px);
+  min-width: var(--business-card-large-width, 525px);
+  min-height: var(--business-card-large-height, 293.8px);
+  max-width: var(--business-card-large-width, 525px);
+  max-height: var(--business-card-large-height, 293.8px);
+}
+
+/* Ensure contact business card is interactive */
+.contact-business-card .business-card {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.contact-business-card .business-card-inner {
+  pointer-events: auto;
 }
 
 /* Form Container - same width as h2 for perfect alignment */
@@ -531,6 +587,37 @@ html[data-theme="dark"] label.text-small {
 
 /* Responsive - Mobile */
 @media screen and (max-width: 800px) {
+  /* Stack two-column layout vertically on mobile */
+  .contact-layout {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .contact-form-column {
+    width: 100%;
+    order: 1;
+  }
+
+  .contact-card-column {
+    width: 100%;
+    order: 2;
+    align-items: center;
+  }
+
+  .contact-options {
+    text-align: left;
+  }
+
+  /* Contact business card - same responsive size as main card */
+  .contact-business-card {
+    width: var(--business-card-medium-width, 420px);
+    height: var(--business-card-medium-height, 235px);
+    min-width: var(--business-card-medium-width, 420px);
+    min-height: var(--business-card-medium-height, 235px);
+    max-width: var(--business-card-medium-width, 420px);
+    max-height: var(--business-card-medium-height, 235px);
+  }
+
   .contact-form {
     display: flex;
     flex-direction: column;
@@ -587,6 +674,19 @@ html[data-theme="dark"] label.text-small {
   textarea:focus + label,
   textarea:focus-visible + label {
     transform: translate(0);
+  }
+}
+
+/* Responsive - Small Mobile */
+@media screen and (max-width: 479px) {
+  /* Contact business card - same responsive size as main card */
+  .contact-business-card {
+    width: var(--business-card-small-width, 350px);
+    height: var(--business-card-small-height, 195.8px);
+    min-width: var(--business-card-small-width, 350px);
+    min-height: var(--business-card-small-height, 195.8px);
+    max-width: var(--business-card-small-width, 350px);
+    max-height: var(--business-card-small-height, 195.8px);
   }
 }
 
