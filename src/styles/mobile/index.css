@@ -1,0 +1,12 @@
+/**
+ * ===============================================
+ * MOBILE STYLES INDEX
+ * ===============================================
+ * @file src/styles/mobile/index.css
+ *
+ * Central import for all mobile-specific styles.
+ * Import this file AFTER desktop styles in main.css.
+ */
+
+@import './layout.css';
+@import './contact.css';

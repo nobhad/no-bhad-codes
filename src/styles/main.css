@@ -91,7 +91,14 @@
 @import "./pages/client-portal-section.css";
 
 /* ============================================
- * 5. THEME INTEGRATION
+ * 5. MOBILE OVERRIDES
+ * ============================================ */
+
+/* Mobile-specific styles (imported last to override desktop) */
+@import "./mobile/index.css";
+
+/* ============================================
+ * 6. THEME INTEGRATION
  * ============================================ */
 
 /* Theme-specific overrides */

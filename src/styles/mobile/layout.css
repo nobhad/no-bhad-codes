@@ -1,0 +1,268 @@
+/**
+ * ===============================================
+ * MOBILE LAYOUT STYLES
+ * ===============================================
+ * @file src/styles/mobile/layout.css
+ *
+ * Mobile-specific layout overrides (max-width: 767px)
+ * Separated from desktop styles for maintainability.
+ */
+
+/* ============================================
+ * MOBILE LAYOUT (max-width: 767px)
+ * ============================================ */
+
+@media screen and (max-width: 767px) {
+  /* Mobile: Normal document flow with header/footer scrolling with content */
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  main {
+    position: static;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    flex: 1;
+    overflow: visible;
+    scroll-snap-type: y proximity;
+  }
+
+  section {
+    min-height: auto;
+    height: auto;
+    padding: 1rem;
+    scroll-snap-align: none;
+    flex: 0 0 auto;
+  }
+
+  .section-content {
+    max-width: 95vw;
+    padding: 0.5rem;
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+  }
+
+  .about-content {
+    max-width: 95vw;
+    gap: 0.8rem;
+  }
+
+  /* ==========================================
+     MOBILE SECTION LAYOUT
+     1. Intro (business card) - full viewport, centered
+     2. About - full viewport with about text (before tech stack)
+     3. Tech Stack - full viewport
+     4. Contact - natural height with footer visible
+     ========================================== */
+
+  /* Intro/Business card section - exact viewport height minus header, card centered */
+  .business-card-section {
+    height: calc(100vh - var(--header-height));
+    height: calc(100dvh - var(--header-height)); /* Dynamic viewport height for mobile browsers */
+    min-height: calc(100vh - var(--header-height));
+    min-height: calc(100dvh - var(--header-height));
+    max-height: calc(100vh - var(--header-height));
+    max-height: calc(100dvh - var(--header-height));
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    scroll-snap-align: start;
+    overflow: hidden;
+  }
+
+  /* Text animation section - full viewport on mobile */
+  .text-animation-section {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* About section - becomes a container for two visual sections on mobile */
+  .about-section {
+    min-height: auto;
+    flex: 0 0 auto;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* About content wrapper - stack children as separate visual sections */
+  .about-section .about-content {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    gap: 0;
+    max-width: 100%;
+  }
+
+  /* About text section - full viewport on mobile */
+  .about-section .about-text-wrapper {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1rem;
+    margin: 0;
+  }
+
+  .about-section .about-text-wrapper h2 {
+    text-align: left;
+  }
+
+  .about-section .about-text-wrapper p {
+    max-width: 90vw;
+    margin-bottom: 1rem;
+  }
+
+  /* Tech stack viewport - full viewport on mobile */
+  .about-section .tech-stack-viewport {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1rem;
+    margin: 0;
+  }
+
+  /* Tech stack box - compact, centered in viewport */
+  .about-section .tech-stack {
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+  }
+
+  /* ==========================================
+     UNIFORM SECTION HEADINGS ON MOBILE
+     ========================================== */
+
+  .about-section h2,
+  .about-section .about-text-wrapper h2,
+  .about-section .tech-stack h3,
+  .about-section .tech-stack-viewport .tech-stack h3,
+  .contact-section h2 {
+    font-size: clamp(2rem, 8vw, 3.5rem) !important;
+    font-family: var(--font--acme) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    line-height: 1.2 !important;
+    margin-bottom: 1.5rem !important;
+    color: var(--fg) !important;
+  }
+
+  .about-section .tech-list {
+    max-width: 85vw;
+    text-align: justify;
+  }
+
+  /* Contact section - natural height */
+  .contact-section {
+    min-height: auto;
+    flex: 0 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  /* ==========================================
+     MOBILE SECTION REORDERING
+     Business card section appears between tech stack and contact
+     ========================================== */
+
+  .about-section {
+    order: 1;
+  }
+
+  .business-card-section {
+    order: 2;
+  }
+
+  .contact-section {
+    order: 3;
+  }
+
+  /* Other sections that might exist */
+  .hero-section,
+  main > section:not(.business-card-section):not(.text-animation-section):not(.about-section):not(.contact-section) {
+    min-height: auto;
+    flex: 0 0 auto;
+  }
+
+  .container,
+  .page-content {
+    max-width: 95vw;
+  }
+
+  /* ==========================================
+     MOBILE LOOP SPACER & TRIGGER ZONE
+     ========================================== */
+
+  .loop-spacer-section,
+  .loop-spacer-section.active {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+  }
+
+  .loop-trigger-zone {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+  }
+
+  /* ==========================================
+     MOBILE TEXT ANIMATION
+     ========================================== */
+
+  .text-animation-svg {
+    max-width: 100%;
+    padding: 0;
+    transform: scale(1.5);
+    transform-origin: center center;
+  }
+
+  .text-animation-svg text {
+    font-size: 120px;
+  }
+}
+
+/* ============================================
+ * SMALL MOBILE (max-width: 479px)
+ * ============================================ */
+
+@media screen and (max-width: 479px) {
+  section {
+    padding: 0.75rem;
+  }
+
+  .section-content {
+    max-width: 98vw;
+    padding: 0.25rem;
+  }
+
+  .container,
+  .page-content {
+    max-width: 98vw;
+  }
+}
