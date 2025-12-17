@@ -597,10 +597,6 @@ main,
     order: 3;
   }
 
-  /* Hide text animation section on mobile */
-  .text-animation-section {
-    display: none !important;
-  }
 
   /* Other sections that might exist */
   .hero-section,
