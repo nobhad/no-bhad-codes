@@ -169,6 +169,7 @@
     line-height: 1.2 !important;
     margin-bottom: 0.75rem !important;
     color: var(--fg) !important;
+    text-align: left !important;
   }
 
   /* Show mobile tech-stack section, hide desktop version */
@@ -176,7 +177,7 @@
     display: flex !important;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Left-align content */
     height: 100%;
     min-height: 100%;
     max-height: 100%;

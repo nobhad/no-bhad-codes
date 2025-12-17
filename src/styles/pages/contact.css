@@ -650,6 +650,15 @@ html[data-theme="dark"] label.text-small {
     margin-bottom: 4rem; /* Space after business card */
   }
 
+  /* Ensure business card stays full size in stacked layout */
+  .contact-business-card {
+    width: var(--business-card-large-width, 525px);
+    height: var(--business-card-large-height, 293.8px);
+    min-width: var(--business-card-large-width, 525px);
+    min-height: var(--business-card-large-height, 293.8px);
+    transform: scale(1);
+  }
+
   .contact-section h2 {
     order: 2;
     flex: 0 0 auto; /* Don't grow or shrink */
