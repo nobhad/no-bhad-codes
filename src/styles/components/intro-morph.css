@@ -96,6 +96,15 @@ html:not(.intro-complete) .header {
   background: transparent !important;
 }
 
+/* Hide portal dropdown during intro animation */
+.intro-loading .portal-dropdown,
+html:not(.intro-complete) .portal-dropdown {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 /* Mobile: Hide morph animation, use simple card flip instead */
 @media screen and (max-width: 767px) {
   .intro-morph-overlay {
