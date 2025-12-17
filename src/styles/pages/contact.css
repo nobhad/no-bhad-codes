@@ -39,7 +39,7 @@
   flex-wrap: wrap;
   gap: 1.5rem 3rem;
   width: 100%;
-  align-items: stretch;
+  align-items: flex-start;
 }
 
 /* Left column - business card */
@@ -47,7 +47,7 @@
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
   order: 1;
   padding-top: 1rem; /* Align with first form input (matches .contact-row margin-top) */
@@ -55,9 +55,15 @@
 
 /* Right column - contact form */
 .contact-form-column {
-  flex: 1 1 60%;
-  min-width: 0;
+  flex: 1 1 auto;
+  min-width: 300px;
   order: 2;
+}
+
+/* Contact options - full width above columns */
+.contact-options {
+  flex: 0 0 100%;
+  order: -1;
 }
 
 /* Contact options links - bold and underlined */
