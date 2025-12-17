@@ -36,7 +36,8 @@
 .contact-layout {
   display: flex;
   flex-direction: row;
-  gap: 3rem;
+  flex-wrap: wrap;
+  gap: 1.5rem 3rem;
   width: 100%;
   align-items: stretch;
 }
@@ -61,9 +62,10 @@
 
 /* Contact options intro text */
 .contact-options {
-  width: 100%;
-  margin-bottom: 1.5rem;
+  flex: 0 0 100%; /* Take full width to appear on own row */
+  margin-bottom: 0;
   text-align: left;
+  order: -1; /* Appear above both columns on desktop */
 }
 
 .contact-options p {
@@ -587,35 +589,48 @@ html[data-theme="dark"] label.text-small {
 
 /* Responsive - Mobile */
 @media screen and (max-width: 800px) {
+  /* Remove 80vw restriction on mobile */
+  .contact-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
   /* Stack two-column layout vertically on mobile */
   .contact-layout {
     flex-direction: column;
     gap: 2rem;
   }
 
-  .contact-form-column {
-    width: 100%;
+  .contact-card-column {
+    width: auto;
     order: 1;
+    align-items: center;
+    justify-content: center;
+    padding-top: 0;
   }
 
-  .contact-card-column {
+  .contact-form-column {
     width: 100%;
-    order: 2;
-    align-items: center;
+    order: 3;
   }
 
   .contact-options {
     text-align: left;
+    order: 2; /* Between card (1) and form (3) on mobile */
+    margin-bottom: 0;
   }
 
-  /* Contact business card - same responsive size as main card */
+  /* Contact business card - match intro card exactly */
   .contact-business-card {
-    width: var(--business-card-medium-width, 420px);
-    height: var(--business-card-medium-height, 235px);
-    min-width: var(--business-card-medium-width, 420px);
-    min-height: var(--business-card-medium-height, 235px);
-    max-width: var(--business-card-medium-width, 420px);
-    max-height: var(--business-card-medium-height, 235px);
+    width: 420px;
+    height: 235px;
+    min-width: 420px;
+    min-height: 235px;
+    max-width: 420px;
+    max-height: 235px;
+    margin: 0;
   }
 
   .contact-form {
@@ -679,14 +694,15 @@ html[data-theme="dark"] label.text-small {
 
 /* Responsive - Small Mobile */
 @media screen and (max-width: 479px) {
-  /* Contact business card - same responsive size as main card */
+  /* Contact business card - match intro card exactly */
   .contact-business-card {
-    width: var(--business-card-small-width, 350px);
-    height: var(--business-card-small-height, 195.8px);
-    min-width: var(--business-card-small-width, 350px);
-    min-height: var(--business-card-small-height, 195.8px);
-    max-width: var(--business-card-small-width, 350px);
-    max-height: var(--business-card-small-height, 195.8px);
+    width: 350px;
+    height: 195.8px;
+    min-width: 350px;
+    min-height: 195.8px;
+    max-width: 350px;
+    max-height: 195.8px;
+    margin: 0;
   }
 }
 
