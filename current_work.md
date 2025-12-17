@@ -195,6 +195,10 @@ Fixed 3 issues that could crash the application:
 
 **Problem**: After loop, business card starts centered and scrolls up - doesn't feel seamless.
 
+**Concerns**:
+
+- [ ] **Infinite scroll needs to work on mobile** - Currently disabled, needs implementation
+
 **Options to Consider**:
 
 1. Clone ending content at top
@@ -290,6 +294,17 @@ Fixed 3 issues that could crash the application:
 
 - `src/modules/intro-animation.ts`
 - `src/styles/components/business-card.css`
+
+---
+
+### Hero Section Animation - HOLD NEEDED
+
+**Status**: Concern
+**Date**: December 17, 2025
+
+**Concern**: Hero section animation needs a HOLD on mobile.
+
+**Notes**: The hero section (text animation) needs to pause/hold during the animation sequence on mobile.
 
 ---
 
