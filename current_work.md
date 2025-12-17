@@ -298,14 +298,22 @@ Fixed 3 issues that could crash the application:
 
 ---
 
-### Hero Section Animation - HOLD NEEDED
+### Hero Section Animation - PARTIALLY FIXED
 
-**Status**: Concern
+**Status**: Partially Fixed (Known Issue Remains)
 **Date**: December 17, 2025
 
-**Concern**: Hero section animation needs a HOLD on mobile.
+**Fixes Applied**:
+- Enabled pinning on all screen sizes so animation completes before scrolling resumes
+- Increased scroll distance to 400% for slower animation playback
+- Scaled down text on mobile from 2.5 to 2.2 for better proportions
 
-**Notes**: The hero section (text animation) needs to pause/hold during the animation sequence on mobile.
+**Known Issue**:
+- [ ] Animation still slightly jumpy on mobile - needs further investigation
+
+**Files Modified**:
+- `src/modules/text-animation.ts`
+- `src/styles/mobile/layout.css`
 
 ---
 

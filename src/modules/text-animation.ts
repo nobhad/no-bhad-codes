@@ -138,15 +138,15 @@ export class TextAnimationModule extends BaseModule {
     // Add hold at the end (creates pause after animation completes)
     this.timeline.to({}, { duration: holdDuration });
 
-    // Both mobile and desktop use scroll-driven animation
+    // Both mobile and desktop use scroll-driven animation with pinning
     this.scrollTrigger = ScrollTrigger.create({
       trigger: this.container,
       scroller: scrollContainer || undefined,
-      start: isMobile ? 'top bottom' : 'top top',
-      end: isMobile ? 'bottom top' : '+=100%',
-      pin: !isMobile,
-      pinSpacing: !isMobile,
-      scrub: isMobile ? 1 : 0.5,
+      start: 'top top',
+      end: '+=400%',  // Scroll 4x viewport height for full animation
+      pin: true,
+      pinSpacing: true,
+      scrub: 1,
       animation: this.timeline,
       onEnter: () => {
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation active`);

@@ -75,10 +75,11 @@ export class ScrollSnapModule extends BaseModule {
   override async init(): Promise<void> {
     await super.init();
 
-    // MOBILE: Disable scroll snap completely - free scrolling on mobile
-    const isMobile = window.matchMedia('(max-width: 767px)').matches;
-    if (isMobile) {
-      this.log('Mobile detected - scroll snap disabled');
+    // STACKED/MOBILE: Disable scroll snap completely - free scrolling on stacked/mobile layouts
+    // Use 1300px to match CSS stacked layout breakpoint
+    const isStackedOrMobile = window.matchMedia('(max-width: 1300px)').matches;
+    if (isStackedOrMobile) {
+      this.log('Stacked/mobile layout detected - scroll snap disabled');
       return;
     }
 

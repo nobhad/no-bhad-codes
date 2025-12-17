@@ -624,66 +624,72 @@ html[data-theme="dark"] label.text-small {
 }
 
 /* Responsive - Stacked layout (when columns wrap) */
-@media screen and (min-width: 768px) and (max-width: 1100px) {
+@media screen and (min-width: 768px) and (max-width: 1300px) {
+  /* Ensure hero section matches desktop behavior for proper pinning */
+  .hero-section {
+    min-height: calc(100vh - var(--header-height) - var(--footer-height)) !important;
+    height: calc(100vh - var(--header-height) - var(--footer-height)) !important;
+    flex: 1 0 100% !important;
+  }
   /* Use Flexbox column for stacked layout with reordering */
   .contact-section {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start; /* Override center - align content at top */
-    flex: 0 0 auto; /* Don't grow to fill viewport */
-    min-height: auto;
-    height: auto;
-    gap: 0;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important; /* Override center - align content at top */
+    flex: 0 0 auto !important; /* Don't grow to fill viewport */
+    min-height: auto !important;
+    height: auto !important;
+    gap: 0 !important;
   }
 
   /* Flatten contact-layout so its children participate in flex ordering */
   .contact-layout {
-    display: contents;
+    display: contents !important;
   }
 
   /* Order: 1=card, 2=h2, 3=options, 4=form */
   .contact-card-column {
-    order: 1;
-    flex: 0 0 auto; /* Don't grow or shrink */
-    width: auto;
-    display: flex;
-    align-items: center;
-    align-self: center; /* Center the business card horizontally */
-    justify-content: center;
-    margin-bottom: 4rem; /* Space after business card */
+    order: 1 !important;
+    flex: 0 0 auto !important; /* Don't grow or shrink */
+    width: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    align-self: center !important; /* Center the business card horizontally */
+    justify-content: center !important;
+    margin-bottom: 4rem !important; /* Space after business card */
   }
 
   /* Ensure business card stays full size in stacked layout */
   .contact-business-card {
-    width: var(--business-card-large-width, 525px);
-    height: var(--business-card-large-height, 293.8px);
-    min-width: var(--business-card-large-width, 525px);
-    min-height: var(--business-card-large-height, 293.8px);
-    transform: scale(1);
+    width: var(--business-card-large-width, 525px) !important;
+    height: var(--business-card-large-height, 293.8px) !important;
+    min-width: var(--business-card-large-width, 525px) !important;
+    min-height: var(--business-card-large-height, 293.8px) !important;
+    transform: scale(1) !important;
   }
 
   .contact-section h2 {
-    order: 2;
-    flex: 0 0 auto; /* Don't grow or shrink */
-    width: 100%;
-    text-align: left;
+    order: 2 !important;
+    flex: 0 0 auto !important; /* Don't grow or shrink */
+    width: 100% !important;
+    text-align: left !important;
   }
 
   /* Contact options paragraph - directly below h2 */
   p.contact-options {
-    order: 3;
-    flex: 0 0 auto; /* Don't grow or shrink */
-    text-align: left;
-    width: 100%;
-    margin: 0;
-    padding: 0;
+    order: 3 !important;
+    flex: 0 0 auto !important; /* Don't grow or shrink */
+    text-align: left !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .contact-form-column {
-    order: 4;
-    flex: 0 0 auto; /* Don't grow or shrink */
-    width: 100%;
+    order: 4 !important;
+    flex: 0 0 auto !important; /* Don't grow or shrink */
+    width: 100% !important;
   }
 
   .contact-left {
