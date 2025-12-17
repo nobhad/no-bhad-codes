@@ -95,12 +95,12 @@
     animation: none;
   }
 
-  /* Smaller input fields on mobile */
+  /* Smaller input fields on mobile - extra top padding for label */
   .input-item input {
     display: block;
-    height: 45px;
+    height: 50px;
     font-size: 0.95rem;
-    padding: 0.6rem 0.8rem 0;
+    padding: 1.4rem 0.8rem 0.4rem;
     border-radius: 0 16px 16px 16px;
     width: 100%;
     box-sizing: border-box;
@@ -111,7 +111,7 @@
     min-height: 200px !important;
     height: 200px !important;
     font-size: 0.95rem;
-    padding: 0.8rem 0.8rem 0.4rem;
+    padding: 1.4rem 0.8rem 0.4rem;
     border-radius: 0 16px 16px 16px;
     width: 100%;
     box-sizing: border-box;
