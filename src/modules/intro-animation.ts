@@ -21,9 +21,9 @@ import type { ModuleOptions } from '../types/modules';
 gsap.registerPlugin(MorphSVGPlugin);
 
 // SVG file containing all paw variations (cache bust with timestamp)
-const PAW_SVG = `/images/intro_paw.svg?v=${Date.now()}`;
+const PAW_SVG = `/images/coyote_paw.svg?v=${Date.now()}`;
 
-// SVG card position/dimensions (from intro_paw.svg Card_Outline)
+// SVG card position/dimensions (from coyote_paw.svg Card_Outline)
 // Card rect: x="2008.59" y="1345.63" width="1352.31" height="772.75"
 const SVG_CARD_X = 2008.59;
 const SVG_CARD_Y = 1345.63;

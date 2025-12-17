@@ -2,7 +2,7 @@
  * @file css/business-card.css
  * @description Styles for the interactive business card component
  * @author Noelle Bhaduri
- * @version 2.2.0 - Updated to exact 14.58:8.33 inch aspect ratio
+ * @version 2.3.0 - Updated to exact 1070.7:599.1 SVG aspect ratio (1.7872)
  *
  * @details
  * - Restored working business card styling with variables
@@ -11,19 +11,19 @@
  * - GSAP-ready initial states
  * - Invisible container wrapper
  * - Card always maintains white background from light theme
- * - EXACT aspect ratio: 14.58:8.33 inches = 1.7506:1
+ * - EXACT aspect ratio: 1070.7:599.1 SVG = 1.7872:1
  */
 
 /* ==========================================
    BUSINESS CARD ASPECT RATIO VARIABLES
    ========================================== */
 :root {
-  /* Standard business card dimensions: 14.58" x 8.33" */
-  --business-card-width-inches: 14.58;
-  --business-card-height-inches: 8.33;
+  /* SVG viewBox dimensions: 1070.7 x 599.1 */
+  --business-card-width-svg: 1070.7;
+  --business-card-height-svg: 599.1;
 
-  /* Exact aspect ratio: 14.58 ÷ 8.33 = 1.7506 */
-  --business-card-aspect-ratio: 1.7506;
+  /* Exact aspect ratio: 1070.7 ÷ 599.1 = 1.7872 */
+  --business-card-aspect-ratio: 1.7872;
 
   /* Responsive base dimensions */
   --business-card-base-width: 35vw;
@@ -35,22 +35,22 @@
   --business-card-large-width: 525px;
   --business-card-large-height: calc(
     var(--business-card-large-width) / var(--business-card-aspect-ratio)
-  ); /* 299.7px */
+  ); /* 293.8px */
 
   --business-card-medium-width: 420px;
   --business-card-medium-height: calc(
     var(--business-card-medium-width) / var(--business-card-aspect-ratio)
-  ); /* 239.9px */
+  ); /* 235px */
 
   --business-card-small-width: 350px;
   --business-card-small-height: calc(
     var(--business-card-small-width) / var(--business-card-aspect-ratio)
-  ); /* 199.8px */
+  ); /* 195.8px */
 
   --business-card-tiny-width: 280px;
   --business-card-tiny-height: calc(
     var(--business-card-tiny-width) / var(--business-card-aspect-ratio)
-  ); /* 159.9px */
+  ); /* 156.7px */
 }
 
 /* ==========================================
@@ -60,7 +60,7 @@
 /* Reserve space for business card to prevent CLS */
 .business-card-container {
   width: 525px;
-  height: 299.7px;
+  height: 293.8px;
   margin: 0 auto;
   contain: layout style size;
 }
@@ -69,14 +69,14 @@
 @media (max-width: 767px) {
   .business-card-container {
     width: 420px;
-    height: 239.9px;
+    height: 235px;
   }
 }
 
 @media (max-width: 479px) {
   .business-card-container {
     width: 350px;
-    height: 199.8px;
+    height: 195.8px;
   }
 }
 
@@ -92,14 +92,14 @@
   opacity: 1 !important;
   visibility: visible !important;
 
-  /* Business card aspect ratio: 14.58:8.33 inches = 1.7506:1 (exact ratio) */
+  /* Business card aspect ratio: 1070.7:599.1 = 1.7872:1 (exact SVG ratio) */
   /* Fixed dimensions to prevent CLS - maintaining exact aspect ratio */
   width: 525px;
-  height: 299.7px; /* 525 ÷ 1.7506 = 299.7 */
+  height: 293.8px; /* 525 ÷ 1.7872 = 293.8 */
   min-width: 525px;
-  min-height: 299.7px;
+  min-height: 293.8px;
   max-width: 525px;
-  max-height: 299.7px;
+  max-height: 293.8px;
 
   /* Flex layout */
   flex-direction: column;
@@ -190,14 +190,14 @@
   /* 3D perspective for flip animations */
   perspective: 1000px;
 
-  /* Business card aspect ratio: 14.58:8.33 inches = 1.7506:1 (exact ratio) */
+  /* Business card aspect ratio: 1070.7:599.1 = 1.7872:1 (exact SVG ratio) */
   /* Fixed dimensions to prevent CLS - maintaining exact aspect ratio */
   width: 525px;
-  height: 299.7px; /* 525 ÷ 1.7506 = 299.7 */
+  height: 293.8px; /* 525 ÷ 1.7872 = 293.8 */
   min-width: 525px;
-  min-height: 299.7px;
+  min-height: 293.8px;
   max-width: 525px;
-  max-height: 299.7px;
+  max-height: 293.8px;
 
   /* Disable user selection to prevent blue highlights */
   -webkit-touch-callout: none;
@@ -432,11 +432,11 @@
   .intro-animation-container {
     /* Fixed mobile size to prevent CLS - maintaining exact aspect ratio */
     width: 420px;
-    height: 239.9px; /* 420 ÷ 1.7506 = 239.9 */
+    height: 235px; /* 420 ÷ 1.7872 = 235 */
     min-width: 420px;
-    min-height: 239.9px;
+    min-height: 235px;
     max-width: 420px;
-    max-height: 239.9px;
+    max-height: 235px;
   }
 
   .business-card-front,
@@ -469,11 +469,11 @@
   .intro-animation-container {
     /* Fixed small screen size to prevent CLS - maintaining exact aspect ratio */
     width: 350px;
-    height: 199.8px; /* 350 ÷ 1.7506 = 199.8 */
+    height: 195.8px; /* 350 ÷ 1.7872 = 195.8 */
     min-width: 350px;
-    min-height: 199.8px;
+    min-height: 195.8px;
     max-width: 350px;
-    max-height: 199.8px;
+    max-height: 195.8px;
   }
 
   .business-card-front,

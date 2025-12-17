@@ -64,7 +64,7 @@ html[data-theme="dark"] .intro-morph-overlay {
 }
 
 /*
- * SVG class styles - must match intro_paw.svg <style> block exactly:
+ * SVG class styles - must match coyote_paw.svg <style> block exactly:
  * .cls-1 { fill: none; }
  * .cls-2 { fill: #231f20; }
  * .cls-3 { fill: #fff; stroke: #000; stroke-miterlimit: 10; stroke-width: 3px; }
