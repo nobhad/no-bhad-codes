@@ -203,6 +203,12 @@ p {
  * LINK STYLES
  * ============================================ */
 
+/* Links in paragraphs - bold and underlined */
+p a {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 .text-link {
   text-decoration: none;
   position: relative;
