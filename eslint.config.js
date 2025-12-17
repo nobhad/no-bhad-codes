@@ -44,6 +44,9 @@ const commonGlobals = {
   EventListener: 'readonly',
   NodeJS: 'readonly',
   NodeListOf: 'readonly',
+  DOMParser: 'readonly',
+  SVGSVGElement: 'readonly',
+  SVGPathElement: 'readonly',
 
   // Browser Performance and related APIs
   performance: 'readonly',

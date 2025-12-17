@@ -118,6 +118,66 @@ Fixed 3 issues that could crash the application:
 
 ## Active Work
 
+### GSAP MorphSVG Intro Animation - IN PROGRESS
+
+**Status**: In Progress
+**Date**: December 15, 2025
+**Branch**: `feature/intro-animation-svgs`
+
+**Summary**: Implementing a paw print morph animation for the intro sequence using GSAP MorphSVG plugin.
+
+**SVG Assets** (saved in `public/images/`):
+
+| File | ViewBox | Contains |
+|------|---------|----------|
+| `intro_paw_1.svg` | 0 0 1969.78 1562.3 | Card group + paw1 path |
+| `intro_paw_2.svg` | 0 0 1969.86 1204.74 | Card group + Paw2 path |
+
+**SVG Structure Analysis**:
+
+- Both SVGs contain identical card content (`<g id="card">`) positioned at x≈915, y=600.24
+- Card dimensions: 1050x600 (matches `business-card_front.svg`)
+- Each SVG has a unique paw path (`#paw1` / `#Paw2`) for morphing
+- Card text includes: "Noelle Bhaduri", "Have Brain Will Travel", contact info
+
+**Implementation Plan**:
+
+1. **Create Intro Overlay Container**
+   - Full-screen SVG container for animation
+   - Position card content to align with actual business card element
+   - Use CSS to ensure perfect alignment
+
+2. **Load GSAP MorphSVG Plugin**
+   - Import MorphSVG from GSAP premium plugins
+   - Register with GSAP core
+
+3. **Morph Animation Sequence**
+   - Display paw1 initially
+   - Morph paw1 → paw2 (or reverse)
+   - Card remains stationary during morph
+   - After morph, fade out overlay to reveal actual business card
+
+4. **Alignment Strategy**
+   - Calculate business card position on screen
+   - Apply transform to SVG container to match
+   - Card in SVG must perfectly overlay the real card
+
+5. **Cleanup**
+   - Remove overlay after animation completes
+   - Hand off to existing card flip animation
+
+**Files to Modify**:
+
+- `src/modules/intro-animation.ts` - Add morph animation logic
+- `src/styles/components/intro-animation.css` (new) - Overlay styles
+- `index.html` - Add overlay container if needed
+
+**Dependencies**:
+
+- GSAP MorphSVG plugin (premium - requires license/Club membership)
+
+---
+
 ### Infinite Scroll Implementation - IN PROGRESS
 
 **Status**: In Progress
