@@ -198,15 +198,17 @@ export class ScrollSnapModule extends BaseModule {
       return;
     }
 
-    // Check if we're in or near the loop-trigger-zone - let infinite scroll handle it
+    // Check if we're mostly IN the loop-trigger-zone - let infinite scroll handle it
+    // Only skip snapping when loop-trigger-zone center is visible in viewport
     const loopTriggerZone = document.querySelector('.loop-trigger-zone');
     if (loopTriggerZone) {
       const zoneRect = loopTriggerZone.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
 
-      // If loop-trigger-zone is visible in viewport, skip snapping
-      if (zoneRect.top < viewportHeight && zoneRect.bottom > 0) {
-        this.log('Near loop-trigger-zone, skipping snap to let infinite scroll work');
+      // Only skip snap if the loop-trigger-zone center is visible in viewport
+      const zoneCenter = zoneRect.top + zoneRect.height / 2;
+      if (zoneCenter > 0 && zoneCenter < viewportHeight) {
+        this.log('In loop-trigger-zone, skipping snap to let infinite scroll work');
         this.lastScrollTop = currentScrollTop;
         return;
       }

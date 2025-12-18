@@ -31,6 +31,7 @@ import invoicesRouter from './routes/invoices.js';
 import uploadsRouter from './routes/uploads.js';
 import intakeRouter from './routes/intake.js';
 import apiRouter from './routes/api.js';
+import analyticsRouter from './routes/analytics.js';
 import { setupSwagger } from './config/swagger.js';
 import { logger } from './middleware/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -147,6 +148,7 @@ app.use('/api/messages', messagesRouter);
 app.use('/api/invoices', invoicesRouter);
 app.use('/api/uploads', uploadsRouter);
 app.use('/api/intake', intakeRouter);
+app.use('/api/analytics', analyticsRouter);
 app.use('/api', apiRouter); // General API routes (contact, health, etc.)
 
 // 404 handler

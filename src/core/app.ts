@@ -117,6 +117,10 @@ export class Application {
       'VisitorTrackingService',
       async () => {
         const { VisitorTrackingService } = await import('../services/visitor-tracking');
+        // Use API endpoint - Railway in production, localhost in dev
+        const apiUrl = import.meta.env.PROD
+          ? 'https://no-bhad-codes-production.up.railway.app'
+          : 'http://localhost:4001';
         return new VisitorTrackingService({
           enableTracking: true,
           respectDoNotTrack: true,
@@ -129,7 +133,8 @@ export class Application {
           trackDownloads: true,
           trackExternalLinks: true,
           batchSize: 10,
-          flushInterval: 30
+          flushInterval: 30,
+          endpoint: `${apiUrl}/api/analytics/track`
         });
       },
       { singleton: true }

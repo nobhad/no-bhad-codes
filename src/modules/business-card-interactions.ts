@@ -222,24 +222,32 @@ export class BusinessCardInteractions extends BaseModule {
     const contactSection = document.querySelector('.contact-section');
     if (!contactSection) return;
 
+    // Track whether section has left viewport so we can flip on re-entry
+    let wasOutOfView = true;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && !this.isAnimating) {
+          if (entry.isIntersecting && wasOutOfView && !this.isAnimating) {
             // Section entering viewport - flip from whatever side it's on
+            wasOutOfView = false;
             setTimeout(() => {
               this.flipCard('right');
             }, 300);
+          } else if (!entry.isIntersecting) {
+            // Section left viewport - allow flip on next entry
+            wasOutOfView = true;
           }
         });
       },
-      { threshold: 0.3 }
+      { threshold: 0.5 }
     );
     observer.observe(contactSection);
   }
 
   /**
-   * Detect when scroll-snap completes on contact section
+   * Detect when scroll-snap completes on contact section (mobile)
+   * Flips each time the section is snapped into view
    */
   private setupScrollSnapDetection() {
     const scrollContainer = document.querySelector('main');
@@ -253,11 +261,11 @@ export class BusinessCardInteractions extends BaseModule {
     const self = this;
 
     let scrollTimeout: number | null = null;
-    let hasFlipped = false;
+    let wasSnapped = false;
 
     // Using function declarations for hoisting (avoids use-before-define)
     function checkIfSnapped() {
-      if (hasFlipped || !self.isFlipped) return;
+      if (self.isAnimating) return;
 
       const rect = section.getBoundingClientRect();
       const containerRect = container.getBoundingClientRect();
@@ -265,13 +273,15 @@ export class BusinessCardInteractions extends BaseModule {
       // Check if contact section is snapped (top aligned with container top, with small tolerance)
       const isSnapped = Math.abs(rect.top - containerRect.top) < 50;
 
-      if (isSnapped) {
-        hasFlipped = true;
+      if (isSnapped && !wasSnapped) {
+        // Section just snapped into view - flip the card
+        wasSnapped = true;
         setTimeout(() => {
           self.flipCard('right');
         }, 200);
-        container.removeEventListener('scroll', onScroll);
-        container.removeEventListener('scrollend', onScrollEnd);
+      } else if (!isSnapped) {
+        // Section is not snapped - allow flip on next snap
+        wasSnapped = false;
       }
     }
 
