@@ -4,6 +4,162 @@ This file contains completed work from December 2025. Items are moved here from 
 
 ---
 
+## HttpOnly Cookie Auth Migration - COMPLETE (December 17, 2025)
+
+**Summary**: Migrated all authentication from sessionStorage tokens to HttpOnly cookies for XSS protection.
+
+**Security Improvement**:
+
+- JWT tokens now stored in HttpOnly cookies (not accessible via JavaScript)
+- Prevents XSS attacks from stealing auth tokens
+- Server middleware supports both cookies and Authorization header (backward compatible)
+
+**Server Changes**:
+
+| File | Change |
+|------|--------|
+| `server/app.ts` | Added `cookie-parser` middleware |
+| `server/utils/auth-constants.ts` | Added `COOKIE_CONFIG` with secure cookie options |
+| `server/routes/auth.ts` | Set HttpOnly cookies on login, clear on logout |
+| `server/middleware/auth.ts` | Read from cookies OR Authorization header |
+
+**Client Changes**:
+
+| File | Change |
+|------|--------|
+| `src/services/auth-service.ts` | Removed token storage, added `credentials: 'include'` |
+| `src/features/client/client-portal.ts` | Changed to `client_auth_mode` (demo/authenticated), credentials: include |
+| `src/features/client/modules/portal-files.ts` | Updated fetch calls with credentials: include |
+| `src/features/client/modules/portal-messages.ts` | Updated fetch calls with credentials: include |
+| `src/features/client/modules/portal-invoices.ts` | Updated fetch calls with credentials: include |
+| `src/features/admin/admin-dashboard.ts` | Replaced token checks with authMode, credentials: include |
+| `src/features/admin/admin-types.ts` | Added `isDemo()` method to AdminDashboardContext |
+| `src/features/admin/modules/admin-projects.ts` | Changed to ctx.isDemo() checks, credentials: include |
+| `src/features/admin/modules/admin-messaging.ts` | Changed to ctx.isDemo() checks, credentials: include |
+| `src/features/admin/modules/admin-contacts.ts` | Changed to ctx.isDemo() checks, credentials: include |
+| `src/features/admin/modules/admin-leads.ts` | Changed to ctx.isDemo() checks, credentials: include |
+
+**Cookie Configuration**: httpOnly, sameSite: strict, secure in production. User tokens: 7 days, Admin tokens: 1 hour.
+
+---
+
+## Visitor Tracking System - COMPLETE (December 17, 2025)
+
+**Summary**: Full visitor tracking system with server-side persistence and admin API.
+
+**Client-Side (`src/services/visitor-tracking.ts`)**:
+
+- Session-based visitor tracking with unique visitor IDs
+- Page view tracking with time-on-page and scroll depth
+- Interaction event tracking (clicks, forms, downloads, business card)
+- Respects Do Not Track (DNT) browser setting
+- Requires cookie consent before tracking
+- Batched event sending (10 events or 30s interval)
+
+**Server-Side (`server/routes/analytics.ts`)**:
+
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/analytics/track` | POST | Public | Receive tracking events |
+| `/api/analytics/summary` | GET | Admin | Dashboard metrics |
+| `/api/analytics/realtime` | GET | Admin | Live visitor data |
+| `/api/analytics/sessions` | GET | Admin | List sessions (paginated) |
+| `/api/analytics/sessions/:id` | GET | Admin | Session details |
+| `/api/analytics/export` | GET | Admin | Export data as JSON |
+| `/api/analytics/data` | DELETE | Admin | Clear old data |
+
+**Database Tables**: `visitor_sessions`, `page_views`, `interaction_events`, `analytics_daily_summary`
+
+---
+
+## Hero Section Animation Fix - COMPLETE (December 17, 2025)
+
+**Summary**: Mobile text animation now works smoothly without pinning conflicts.
+
+**Mobile Configuration**:
+
+- Pinning: Disabled (conflicts with mobile fixed scroll container)
+- Scroll-snap: Disabled entirely (fights with GSAP ScrollTrigger)
+- Start position: `center center`
+- Scrub: 1.5 (smoother touch scrolling)
+- 2-second hold at animation end (blocks scrolling at 98%/2% progress)
+
+**Files Modified**: `src/modules/text-animation.ts`, `src/styles/mobile/layout.css`
+
+---
+
+## Infinite Scroll Implementation - COMPLETE (December 17, 2025)
+
+**Summary**: Infinite scroll loops back to top when reaching bottom. Desktop only - explicitly disabled on mobile.
+
+**Implementation**:
+
+- Created `InfiniteScrollModule` in `src/modules/infinite-scroll.ts`
+- Triple mobile protection (matchMedia, innerWidth checks, isEnabled flag)
+- Instant jump back to top (no overlay/fade)
+- Added empty buffer section after contact for smoother transition
+
+**Files Modified**: `src/modules/infinite-scroll.ts`, `src/core/app.ts`, `src/styles/base/layout.css`, `index.html`
+
+---
+
+## GSAP Scroll Snap Module - COMPLETE (December 12, 2025)
+
+**Summary**: GSAP-based scroll snapping - sections lock into place on desktop.
+
+**Features**:
+
+- Sections snap to center when scrolling stops
+- Viewport center calculation accounts for header/footer heights
+- Desktop only - disabled on mobile for free scrolling
+- Respects reduced motion preferences
+
+**Files Modified**: `src/modules/scroll-snap.ts`, `src/core/app.ts`
+
+---
+
+## CSS Variable System Consolidation - COMPLETE (December 12, 2025)
+
+**Summary**: Consolidated dual CSS variable systems into single source of truth.
+
+**Changes Made**:
+
+- Added 140+ legacy variable aliases to `design-system/tokens/colors.css`
+- Removed duplicate color definitions from `variables.css`
+- Merged duplicate `.form-textarea` definitions in `client-portal.css`
+
+**Results**: CSS bundle size reduced from 242.97 KB to 239.71 KB (~3 KB savings). Zero breaking changes.
+
+---
+
+## Admin Dashboard Module Extraction - COMPLETE (December 12, 2025)
+
+**Summary**: Extracted 3 new modules from admin-dashboard.ts and replaced mock data with real data fetching.
+
+**New Modules Created**:
+
+| Module | Lines | Purpose |
+|--------|-------|---------|
+| `admin-overview.ts` | 239 | Real visitor tracking data from localStorage |
+| `admin-performance.ts` | 388 | Real Core Web Vitals from browser Performance API |
+| `admin-system-status.ts` | 341 | Real service/module health checks |
+
+**Build Results**: `admin-dashboard.js`: 93.03 KB (down from 95.02 KB)
+
+---
+
+## Critical Error Handling Fixes - COMPLETE (December 12, 2025)
+
+Fixed 3 issues that could crash the application:
+
+| Issue | File | Fix |
+|-------|------|-----|
+| Contact service throws error | `contact-service.ts:141` | Graceful error return |
+| StateManager redo() not implemented | `state.ts:553-580` | Full redo stack implementation |
+| Admin export unknown type | `admin-dashboard.ts:2917` | Graceful notification |
+
+---
+
 ## Code Quality Improvements & Security - COMPLETE (December 12, 2025)
 
 ### Summary
