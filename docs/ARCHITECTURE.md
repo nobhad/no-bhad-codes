@@ -1324,10 +1324,10 @@ npm run audit              # Security audit
 
 | File | Issue | Status |
 |------|-------|--------|
-| `src/modules/navigation.ts` | 15+ console.log calls, untracked event listeners | Pending |
+| `src/modules/navigation.ts` | 15+ console.log calls, untracked event listeners | FIXED |
 | `src/modules/intro-animation.ts` | 400+ lines, hardcoded SVG paths | Pending |
-| `src/services/code-protection-service.ts` | Event listener cleanup issues | Pending |
-| `src/features/admin/admin-security.ts` | localStorage for auth data | Pending |
+| `src/services/code-protection-service.ts` | Event listener cleanup issues | FIXED |
+| `src/features/admin/admin-security.ts` | localStorage for auth data | PARTIAL (client portal uses HttpOnly cookies) |
 
 ### Files Exceeding Size Guidelines (300 lines)
 
@@ -1348,11 +1348,46 @@ The server code (`/server/`) is **production-ready** with excellent architecture
 - SQLite with connection pooling and migrations
 - Redis caching support
 - Sentry error tracking integration
+- **HttpOnly cookie authentication** (XSS-protected token storage)
 
-Minor cleanup needed:
+### Authentication Architecture (Updated December 17, 2025)
 
-- Remove dead code: `simple-auth-server.ts`
-- Consolidate logging: `middleware/logger.ts` uses console.log
+The system uses **HttpOnly cookies** for secure JWT token storage:
+
+```
+┌─────────────┐     POST /api/auth/login      ┌─────────────┐
+│   Client    │ ──────────────────────────────▶│   Server    │
+│   Browser   │                                │             │
+│             │◀────────────────────────────── │             │
+└─────────────┘   Set-Cookie: auth_token=JWT  └─────────────┘
+                  (HttpOnly, Secure, SameSite)
+
+┌─────────────┐     GET /api/protected        ┌─────────────┐
+│   Client    │ ──────────────────────────────▶│   Server    │
+│   Browser   │   Cookie: auth_token=JWT      │             │
+│             │   (sent automatically)        │             │
+└─────────────┘                               └─────────────┘
+```
+
+**Key Files:**
+
+| File | Purpose |
+|------|---------|
+| `server/utils/auth-constants.ts` | Cookie configuration (COOKIE_CONFIG) |
+| `server/middleware/auth.ts` | Token verification from cookie or header |
+| `server/routes/auth.ts` | Login/logout endpoints set/clear cookies |
+| `src/services/auth-service.ts` | Client-side auth state (no token access) |
+
+**Security Features:**
+
+- `httpOnly: true` - JavaScript cannot access the token
+- `secure: true` (production) - Only sent over HTTPS
+- `sameSite: 'strict'` - CSRF protection
+- Shorter expiry for admin tokens (1 hour vs 7 days)
+
+**Remaining Work:**
+
+- Admin dashboard modules still use Authorization headers (lower priority)
 
 ### CSS Architecture Status
 

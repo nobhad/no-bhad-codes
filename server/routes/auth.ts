@@ -20,6 +20,7 @@ import {
   JWT_CONFIG,
   TIME_MS,
   RATE_LIMIT_CONFIG,
+  COOKIE_CONFIG,
   validatePassword,
 } from '../utils/auth-constants.js';
 import {
@@ -178,7 +179,10 @@ router.post(
       req
     );
 
-    // Return user data (without password) and token
+    // Set HttpOnly cookie with auth token
+    res.cookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, token, COOKIE_CONFIG.USER_OPTIONS);
+
+    // Return user data (without password) - token is in HttpOnly cookie
     return sendSuccess(res, {
       user: {
         id: client.id,
@@ -189,7 +193,6 @@ router.post(
         status: client.status,
         isAdmin: Boolean(client.is_admin),
       },
-      token,
       expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY,
     }, 'Login successful');
   })
@@ -365,8 +368,13 @@ router.post(
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/logout', authenticateToken, (req, res) => {
-  // In a more sophisticated setup, you might want to blacklist the token
-  // For now, we'll just return success and let the client remove the token
+  // Clear the HttpOnly auth cookie
+  res.clearCookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/',
+  });
   return sendSuccess(res, undefined, 'Logout successful');
 });
 
@@ -750,8 +758,10 @@ router.post(
     // Log successful admin login
     await auditLogger.logLogin(0, adminEmail, 'admin', req);
 
+    // Set HttpOnly cookie with admin auth token
+    res.cookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, token, COOKIE_CONFIG.ADMIN_OPTIONS);
+
     return sendSuccess(res, {
-      token,
       expiresIn: JWT_CONFIG.ADMIN_TOKEN_EXPIRY,
     }, 'Admin login successful');
   })
@@ -976,6 +986,9 @@ router.post(
     // Log successful magic link login
     await auditLogger.logLogin(client.id, client.email, 'client', req, { method: 'magic_link' });
 
+    // Set HttpOnly cookie with auth token
+    res.cookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, jwtToken, COOKIE_CONFIG.USER_OPTIONS);
+
     return sendSuccess(res, {
       user: {
         id: client.id,
@@ -986,7 +999,6 @@ router.post(
         status: client.status,
         isAdmin: Boolean(client.is_admin),
       },
-      token: jwtToken,
       expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY,
     }, 'Login successful');
   })

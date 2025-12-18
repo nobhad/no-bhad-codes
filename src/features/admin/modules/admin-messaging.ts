@@ -23,8 +23,7 @@ export function getSelectedClientId(): number | null {
 }
 
 export async function loadClientThreads(ctx: AdminDashboardContext): Promise<void> {
-  const token = ctx.getAuthToken();
-  if (!token) return;
+  if (ctx.isDemo()) return;
 
   const clientSelect = document.getElementById('admin-client-select') as HTMLSelectElement;
   if (!clientSelect) return;
@@ -34,7 +33,7 @@ export async function loadClientThreads(ctx: AdminDashboardContext): Promise<voi
 
   try {
     const response = await fetch('/api/messages/threads', {
-      headers: { Authorization: `Bearer ${token}` }
+      credentials: 'include'
     });
 
     if (response.ok) {
@@ -106,8 +105,7 @@ export async function loadThreadMessages(
   threadId: number,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  const token = ctx.getAuthToken();
-  if (!token) return;
+  if (ctx.isDemo()) return;
 
   const container =
     document.getElementById('admin-messages-thread') ||
@@ -124,7 +122,7 @@ export async function loadThreadMessages(
 
   try {
     const response = await fetch(`/api/messages/threads/${threadId}/messages`, {
-      headers: { Authorization: `Bearer ${token}` }
+      credentials: 'include'
     });
 
     if (response.ok) {
@@ -134,7 +132,7 @@ export async function loadThreadMessages(
       // Mark messages as read
       await fetch(`/api/messages/threads/${threadId}/read`, {
         method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` }
+        credentials: 'include'
       });
     } else {
       container.innerHTML =
@@ -210,8 +208,7 @@ export async function sendMessage(ctx: AdminDashboardContext): Promise<void> {
   const input = document.getElementById('admin-message-text') as HTMLInputElement;
   if (!input || !input.value.trim() || !selectedThreadId) return;
 
-  const token = ctx.getAuthToken();
-  if (!token) return;
+  if (ctx.isDemo()) return;
 
   const message = input.value.trim();
   input.value = '';
@@ -220,10 +217,8 @@ export async function sendMessage(ctx: AdminDashboardContext): Promise<void> {
   try {
     const response = await fetch(`/api/messages/threads/${selectedThreadId}/messages`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ message })
     });
 

@@ -35,16 +35,14 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext): Promise<voi
   const messagesContainer = document.getElementById('messages-list');
   if (!messagesContainer) return;
 
-  const token = ctx.getAuthToken();
-
-  if (!token || ctx.isDemo()) {
+  if (ctx.isDemo()) {
     renderDemoMessages(messagesContainer, ctx);
     return;
   }
 
   try {
     const threadsResponse = await fetch(`${MESSAGES_API_BASE}/threads`, {
-      headers: { Authorization: `Bearer ${token}` }
+      credentials: 'include' // Include HttpOnly cookies
     });
 
     if (!threadsResponse.ok) {
@@ -67,7 +65,7 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext): Promise<voi
     currentThreadId = thread.id;
 
     const messagesResponse = await fetch(`${MESSAGES_API_BASE}/threads/${thread.id}/messages`, {
-      headers: { Authorization: `Bearer ${token}` }
+      credentials: 'include' // Include HttpOnly cookies
     });
 
     if (!messagesResponse.ok) {
@@ -79,7 +77,7 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext): Promise<voi
 
     await fetch(`${MESSAGES_API_BASE}/threads/${thread.id}/read`, {
       method: 'PUT',
-      headers: { Authorization: `Bearer ${token}` }
+      credentials: 'include' // Include HttpOnly cookies
     });
   } catch (error) {
     console.error('Error loading messages:', error);
@@ -150,9 +148,7 @@ export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
   const message = messageInput.value.trim();
   if (!message) return;
 
-  const token = ctx.getAuthToken();
-
-  if (!token || ctx.isDemo()) {
+  if (ctx.isDemo()) {
     addDemoMessage(message, ctx);
     messageInput.value = '';
     return;
@@ -173,9 +169,9 @@ export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
+        'Content-Type': 'application/json'
       },
+      credentials: 'include', // Include HttpOnly cookies
       body: JSON.stringify(body)
     });
 

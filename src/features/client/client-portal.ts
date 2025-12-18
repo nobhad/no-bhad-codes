@@ -54,10 +54,10 @@ export class ClientPortalModule extends BaseModule {
   /** Create module context for passing to child modules */
   private createModuleContext(): ClientPortalContext {
     return {
-      getAuthToken: () => sessionStorage.getItem('client_auth_token'),
+      getAuthToken: () => sessionStorage.getItem('client_auth_mode'),
       isDemo: () => {
-        const token = sessionStorage.getItem('client_auth_token');
-        return !token || token.startsWith('demo_token_');
+        const mode = sessionStorage.getItem('client_auth_mode');
+        return mode === 'demo';
       },
       showNotification: (message: string, type: 'success' | 'error' | 'info' = 'success') => {
         if (type === 'error') {
@@ -383,9 +383,9 @@ export class ClientPortalModule extends BaseModule {
    * Submit new project request
    */
   private async submitProjectRequest(): Promise<void> {
-    const token = sessionStorage.getItem('client_auth_token');
+    const authMode = sessionStorage.getItem('client_auth_mode');
 
-    if (!token || token.startsWith('demo_token_')) {
+    if (!authMode || authMode === 'demo') {
       alert(
         'Project requests cannot be submitted in demo mode. Please log in with a real account.'
       );
@@ -408,9 +408,9 @@ export class ClientPortalModule extends BaseModule {
       const response = await fetch(`${ClientPortalModule.PROJECTS_API_BASE}/request`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include', // Include HttpOnly cookies
         body: JSON.stringify({
           name,
           projectType,
@@ -448,9 +448,9 @@ export class ClientPortalModule extends BaseModule {
    * Save profile settings
    */
   private async saveProfileSettings(): Promise<void> {
-    const token = sessionStorage.getItem('client_auth_token');
+    const authMode = sessionStorage.getItem('client_auth_mode');
 
-    if (!token || token.startsWith('demo_token_')) {
+    if (!authMode || authMode === 'demo') {
       alert('Settings cannot be saved in demo mode. Please log in with a real account.');
       return;
     }
@@ -469,9 +469,9 @@ export class ClientPortalModule extends BaseModule {
       const profileResponse = await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include', // Include HttpOnly cookies
         body: JSON.stringify({
           contact_name: contactName,
           company_name: companyName,
@@ -499,9 +499,9 @@ export class ClientPortalModule extends BaseModule {
         const passwordResponse = await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/password`, {
           method: 'PUT',
           headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
+            'Content-Type': 'application/json'
           },
+          credentials: 'include', // Include HttpOnly cookies
           body: JSON.stringify({
             currentPassword,
             newPassword
@@ -530,9 +530,9 @@ export class ClientPortalModule extends BaseModule {
    * Save notification settings
    */
   private async saveNotificationSettings(): Promise<void> {
-    const token = sessionStorage.getItem('client_auth_token');
+    const authMode = sessionStorage.getItem('client_auth_mode');
 
-    if (!token || token.startsWith('demo_token_')) {
+    if (!authMode || authMode === 'demo') {
       alert('Settings cannot be saved in demo mode. Please log in with a real account.');
       return;
     }
@@ -552,9 +552,9 @@ export class ClientPortalModule extends BaseModule {
       const response = await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/notifications`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include', // Include HttpOnly cookies
         body: JSON.stringify(settings)
       });
 
@@ -576,9 +576,9 @@ export class ClientPortalModule extends BaseModule {
    * Save billing settings
    */
   private async saveBillingSettings(): Promise<void> {
-    const token = sessionStorage.getItem('client_auth_token');
+    const authMode = sessionStorage.getItem('client_auth_mode');
 
-    if (!token || token.startsWith('demo_token_')) {
+    if (!authMode || authMode === 'demo') {
       alert('Settings cannot be saved in demo mode. Please log in with a real account.');
       return;
     }
@@ -597,9 +597,9 @@ export class ClientPortalModule extends BaseModule {
       const response = await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/billing`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include', // Include HttpOnly cookies
         body: JSON.stringify(billing)
       });
 
@@ -739,14 +739,16 @@ export class ClientPortalModule extends BaseModule {
         const response = await fetch(`${ClientPortalModule.API_BASE}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', // Include HttpOnly cookies
           body: JSON.stringify(credentials)
         });
 
         if (response.ok) {
           const data = await response.json();
 
-          // Store authentication token
-          sessionStorage.setItem('client_auth_token', data.token);
+          // Store auth mode and user info (token is in HttpOnly cookie)
+          sessionStorage.setItem('client_auth_mode', 'authenticated');
+          sessionStorage.setItem('client_auth_user', JSON.stringify(data.user));
 
           this.isLoggedIn = true;
           this.currentUser = data.user.email;
@@ -777,7 +779,6 @@ export class ClientPortalModule extends BaseModule {
 
           // Demo mode fallback - simulate successful login
           const mockUserData = {
-            token: `demo_token_${Date.now()}`,
             user: {
               id: 1,
               email: credentials.email,
@@ -788,7 +789,9 @@ export class ClientPortalModule extends BaseModule {
             }
           };
 
-          sessionStorage.setItem('client_auth_token', mockUserData.token);
+          // Store demo mode flag (no real token needed - demo data only)
+          sessionStorage.setItem('client_auth_mode', 'demo');
+          sessionStorage.setItem('client_auth_user', JSON.stringify(mockUserData.user));
           this.isLoggedIn = true;
           this.currentUser = mockUserData.user.email;
 
@@ -1261,10 +1264,10 @@ export class ClientPortalModule extends BaseModule {
    * Preview a file - opens in modal or new tab
    */
   private previewFile(fileId: number, mimetype: string): void {
-    const token = sessionStorage.getItem('client_auth_token');
+    const authMode = sessionStorage.getItem('client_auth_mode');
 
     // For demo mode, show a demo message
-    if (!token || token.startsWith('demo_token_')) {
+    if (!authMode || authMode === 'demo') {
       alert('Preview not available in demo mode. Please log in to preview files.');
       return;
     }
@@ -1283,10 +1286,10 @@ export class ClientPortalModule extends BaseModule {
    * Download a file
    */
   private downloadFile(fileId: number, filename: string): void {
-    const token = sessionStorage.getItem('client_auth_token');
+    const authMode = sessionStorage.getItem('client_auth_mode');
 
     // For demo mode, show a demo message
-    if (!token || token.startsWith('demo_token_')) {
+    if (!authMode || authMode === 'demo') {
       alert('Download not available in demo mode. Please log in to download files.');
       return;
     }
@@ -1306,10 +1309,10 @@ export class ClientPortalModule extends BaseModule {
    * Delete a file
    */
   private async deleteFile(fileId: number, filename: string): Promise<void> {
-    const token = sessionStorage.getItem('client_auth_token');
+    const authMode = sessionStorage.getItem('client_auth_mode');
 
     // For demo mode, show a demo message
-    if (!token || token.startsWith('demo_token_')) {
+    if (!authMode || authMode === 'demo') {
       alert('Delete not available in demo mode. Please log in to delete files.');
       return;
     }
@@ -1322,9 +1325,7 @@ export class ClientPortalModule extends BaseModule {
     try {
       const response = await fetch(`${ClientPortalModule.FILES_API_BASE}/file/${fileId}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        credentials: 'include' // Include HttpOnly cookies
       });
 
       if (!response.ok) {
@@ -1432,10 +1433,10 @@ export class ClientPortalModule extends BaseModule {
    * Upload files to the server
    */
   private async uploadFiles(files: File[]): Promise<void> {
-    const token = sessionStorage.getItem('client_auth_token');
+    const authMode = sessionStorage.getItem('client_auth_mode');
 
     // Demo mode check
-    if (!token || token.startsWith('demo_token_')) {
+    if (!authMode || authMode === 'demo') {
       alert('File upload not available in demo mode. Please log in to upload files.');
       return;
     }
@@ -1473,9 +1474,7 @@ export class ClientPortalModule extends BaseModule {
 
       const response = await fetch(`${ClientPortalModule.FILES_API_BASE}/multiple`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
+        credentials: 'include', // Include HttpOnly cookies
         body: formData
       });
 
@@ -1661,8 +1660,9 @@ export class ClientPortalModule extends BaseModule {
   }
 
   private logout(): void {
-    // Clear authentication token
-    sessionStorage.removeItem('client_auth_token');
+    // Clear authentication data
+    sessionStorage.removeItem('client_auth_mode');
+    sessionStorage.removeItem('client_auth_user');
 
     this.isLoggedIn = false;
     this.currentProject = null;
@@ -1759,20 +1759,18 @@ export class ClientPortalModule extends BaseModule {
   }
 
   private async checkExistingAuth(): Promise<void> {
-    const token = sessionStorage.getItem('client_auth_token');
-    if (!token) return;
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode) return;
 
-    // Skip auth check for demo tokens
-    if (token.startsWith('demo_token_')) {
-      console.log('[ClientPortal] Demo token detected, skipping auth check');
+    // Skip auth check for demo mode
+    if (authMode === 'demo') {
+      console.log('[ClientPortal] Demo mode detected, skipping auth check');
       return;
     }
 
     try {
       const response = await fetch(`${ClientPortalModule.API_BASE}/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        credentials: 'include' // Include HttpOnly cookies
       });
 
       if (response.ok) {
@@ -1786,14 +1784,16 @@ export class ClientPortalModule extends BaseModule {
         });
         this.showDashboard();
       } else {
-        // Token is invalid, remove it
-        sessionStorage.removeItem('client_auth_token');
+        // Auth is invalid, clear it
+        sessionStorage.removeItem('client_auth_mode');
+        sessionStorage.removeItem('client_auth_user');
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      // Don't remove token on network errors - might just be backend down
+      // Don't remove auth on network errors - might just be backend down
       if (!(error instanceof TypeError)) {
-        sessionStorage.removeItem('client_auth_token');
+        sessionStorage.removeItem('client_auth_mode');
+        sessionStorage.removeItem('client_auth_user');
       }
     }
   }
@@ -2136,7 +2136,8 @@ export class ClientPortalModule extends BaseModule {
     // Clear all auth data from sessionStorage
     sessionStorage.removeItem('clientAuth');
     sessionStorage.removeItem('clientAuthToken');
-    sessionStorage.removeItem('client_auth_token');
+    sessionStorage.removeItem('client_auth_mode');
+    sessionStorage.removeItem('client_auth_user');
     sessionStorage.removeItem('clientPortalAuth');
     sessionStorage.removeItem('clientEmail');
     sessionStorage.removeItem('clientName');
@@ -2214,9 +2215,9 @@ export class ClientPortalModule extends BaseModule {
 
     if (!iframe) return;
 
-    const token = sessionStorage.getItem('client_auth_token');
+    const authMode = sessionStorage.getItem('client_auth_mode');
 
-    if (!token || token.startsWith('demo_token_')) {
+    if (!authMode || authMode === 'demo') {
       // Demo mode - show placeholder
       iframe.src = '';
       if (urlDisplay) urlDisplay.textContent = 'Preview not available in demo mode';
@@ -2226,7 +2227,7 @@ export class ClientPortalModule extends BaseModule {
     try {
       // Get client's projects to find one with a preview URL
       const response = await fetch(`${ClientPortalModule.PROJECTS_API_BASE}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        credentials: 'include' // Include HttpOnly cookies
       });
 
       if (!response.ok) {

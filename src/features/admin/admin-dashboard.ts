@@ -285,7 +285,11 @@ class AdminDashboard {
     // Initialize module context
     this.moduleContext = {
       getAuthToken: () =>
-        sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken'),
+        sessionStorage.getItem('client_auth_mode'),
+      isDemo: () => {
+        const mode = sessionStorage.getItem('client_auth_mode');
+        return mode === 'demo';
+      },
       showNotification: (message: string, type: 'success' | 'error' | 'info') =>
         this.showNotification(message, type),
       refreshData: () => this.loadDashboardData()
@@ -585,15 +589,12 @@ class AdminDashboard {
   // NOTE: updateLeadsDisplay moved to admin-leads module
 
   private async loadContactSubmissions(): Promise<void> {
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') return;
 
     try {
       const response = await fetch('/api/admin/contact-submissions', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -690,17 +691,16 @@ class AdminDashboard {
   }
 
   private async updateContactStatus(id: number, status: string): Promise<void> {
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') return;
 
     try {
       const response = await fetch(`/api/admin/contact-submissions/${id}/status`, {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ status })
       });
 
@@ -834,9 +834,8 @@ class AdminDashboard {
   }
 
   private async inviteLead(leadId: number, email: string): Promise<void> {
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') return;
 
     const inviteBtn = document.getElementById('invite-lead-btn') as HTMLButtonElement;
     if (inviteBtn) {
@@ -848,9 +847,9 @@ class AdminDashboard {
       const response = await fetch(`/api/admin/leads/${leadId}/invite`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        credentials: 'include'
       });
 
       const data = await response.json();
@@ -967,17 +966,16 @@ class AdminDashboard {
   // NOTE: updateProjectsDisplay moved to admin-projects module
 
   private async updateProjectStatus(id: number, status: string): Promise<void> {
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') return;
 
     try {
       const response = await fetch(`/api/projects/${id}`, {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ status })
       });
 
@@ -1197,9 +1195,8 @@ class AdminDashboard {
   private async saveProjectSettings(): Promise<void> {
     if (!this.currentProjectId) return;
 
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') return;
 
     const name = (document.getElementById('pd-setting-name') as HTMLInputElement)?.value;
     const status = (document.getElementById('pd-setting-status') as HTMLSelectElement)?.value;
@@ -1211,9 +1208,9 @@ class AdminDashboard {
       const response = await fetch(`/api/projects/${this.currentProjectId}`, {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
           project_name: name,
           status,
@@ -1246,9 +1243,8 @@ class AdminDashboard {
     const messagesThread = document.getElementById('pd-messages-thread');
     if (!messagesThread) return;
 
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) {
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') {
       messagesThread.innerHTML =
         '<p class="empty-state">Authentication required to view messages.</p>';
       return;
@@ -1264,7 +1260,7 @@ class AdminDashboard {
       }
 
       const response = await fetch(`/api/messages?client_id=${project.client_id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -1314,9 +1310,8 @@ class AdminDashboard {
     const messageInput = document.getElementById('pd-message-input') as HTMLTextAreaElement;
     if (!messageInput || !messageInput.value.trim()) return;
 
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') return;
 
     const project = this.projectsData.find((p: any) => p.id === this.currentProjectId);
     if (!project || !project.client_id) {
@@ -1328,9 +1323,9 @@ class AdminDashboard {
       const response = await fetch('/api/messages', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
           client_id: project.client_id,
           content: messageInput.value.trim(),
@@ -1358,16 +1353,15 @@ class AdminDashboard {
     const filesList = document.getElementById('pd-files-list');
     if (!filesList) return;
 
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) {
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') {
       filesList.innerHTML = '<p class="empty-state">Authentication required to view files.</p>';
       return;
     }
 
     try {
       const response = await fetch(`/api/files?project_id=${projectId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -1424,16 +1418,15 @@ class AdminDashboard {
     const milestonesList = document.getElementById('pd-milestones-list');
     if (!milestonesList) return;
 
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) {
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') {
       milestonesList.innerHTML = '<p class="empty-state">Authentication required.</p>';
       return;
     }
 
     try {
       const response = await fetch(`/api/projects/${projectId}/milestones`, {
-        headers: { Authorization: `Bearer ${token}` }
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -1503,17 +1496,16 @@ class AdminDashboard {
   private async addMilestone(title: string, description: string, dueDate: string): Promise<void> {
     if (!this.currentProjectId) return;
 
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') return;
 
     try {
       const response = await fetch(`/api/projects/${this.currentProjectId}/milestones`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
           title,
           description: description || null,
@@ -1540,9 +1532,8 @@ class AdminDashboard {
   public async toggleMilestone(milestoneId: number, isCompleted: boolean): Promise<void> {
     if (!this.currentProjectId) return;
 
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') return;
 
     try {
       const response = await fetch(
@@ -1550,9 +1541,9 @@ class AdminDashboard {
         {
           method: 'PUT',
           headers: {
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify({ is_completed: isCompleted })
         }
       );
@@ -1572,16 +1563,15 @@ class AdminDashboard {
     if (!this.currentProjectId) return;
     if (!confirm('Are you sure you want to delete this milestone?')) return;
 
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') return;
 
     try {
       const response = await fetch(
         `/api/projects/${this.currentProjectId}/milestones/${milestoneId}`,
         {
           method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` }
+          credentials: 'include'
         }
       );
 
@@ -1606,16 +1596,15 @@ class AdminDashboard {
 
     if (!invoicesList) return;
 
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) {
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') {
       invoicesList.innerHTML = '<p class="empty-state">Authentication required.</p>';
       return;
     }
 
     try {
       const response = await fetch(`/api/invoices/project/${projectId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -1709,17 +1698,16 @@ class AdminDashboard {
   ): Promise<void> {
     if (!this.currentProjectId) return;
 
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') return;
 
     try {
       const response = await fetch('/api/invoices', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
           projectId: this.currentProjectId,
           clientId,
@@ -1753,14 +1741,13 @@ class AdminDashboard {
    * Send an invoice to the client (exposed globally for onclick)
    */
   public async sendInvoice(invoiceId: number): Promise<void> {
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') return;
 
     try {
       const response = await fetch(`/api/invoices/${invoiceId}/send`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` }
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -1837,9 +1824,8 @@ class AdminDashboard {
   private async uploadFiles(files: FileList): Promise<void> {
     if (!this.currentProjectId) return;
 
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') return;
 
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
@@ -1849,7 +1835,7 @@ class AdminDashboard {
     try {
       const response = await fetch(`/api/projects/${this.currentProjectId}/files`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
         body: formData
       });
 
@@ -2046,9 +2032,8 @@ class AdminDashboard {
   }
 
   private async loadThreadMessages(threadId: number): Promise<void> {
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') return;
 
     // Try new container ID first, then old one
     const container =
@@ -2062,9 +2047,7 @@ class AdminDashboard {
     try {
       // Backend endpoint: /api/messages/threads/:threadId/messages
       const response = await fetch(`/api/messages/threads/${threadId}/messages`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -2074,9 +2057,7 @@ class AdminDashboard {
         // Mark messages as read
         await fetch(`/api/messages/threads/${threadId}/read`, {
           method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          credentials: 'include'
         });
       } else {
         container.innerHTML =
@@ -2159,9 +2140,8 @@ class AdminDashboard {
     const input = document.getElementById('admin-message-text') as HTMLInputElement;
     if (!input || !input.value.trim() || !this.selectedThreadId) return;
 
-    const token =
-      sessionStorage.getItem('client_auth_token') || sessionStorage.getItem('clientAuthToken');
-    if (!token) return;
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') return;
 
     const message = input.value.trim();
     input.value = '';
@@ -2171,9 +2151,9 @@ class AdminDashboard {
       const response = await fetch(`/api/messages/threads/${this.selectedThreadId}/messages`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ message }) // Backend expects 'message' field
       });
 

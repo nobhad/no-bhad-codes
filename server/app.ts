@@ -13,6 +13,7 @@ import { Sentry } from './instrument.js';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import dotenv from 'dotenv';
@@ -93,6 +94,9 @@ app.use(
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Cookie parsing middleware (for HttpOnly auth cookies)
+app.use(cookieParser());
 
 // Global input sanitization - sanitize all request body, query, and params
 // to prevent XSS and script injection attacks

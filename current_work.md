@@ -15,7 +15,7 @@ Full codebase review completed across all TypeScript and CSS files.
 | `src/modules/navigation.ts` | 15+ console.log calls, untracked event listeners | CRITICAL | FIXED |
 | `src/modules/intro-animation.ts` | 400+ lines, hardcoded SVG paths | CRITICAL | Pending |
 | `src/services/code-protection-service.ts` | Event listener cleanup will fail, memory leaks | CRITICAL | FIXED |
-| `src/features/admin/admin-security.ts` | localStorage for auth data, bypassable devtools detection | CRITICAL | PARTIAL (client portal migrated to HttpOnly cookies) |
+| `src/features/admin/admin-security.ts` | localStorage for auth data, bypassable devtools detection | CRITICAL | FIXED (all modules migrated to HttpOnly cookies) |
 
 ### Files Needing Attention
 
@@ -158,8 +158,8 @@ Fixed 3 issues that could crash the application:
 - [x] Remove 15+ console.log calls from `navigation.ts` (December 17, 2025)
 - [x] Fix event listener cleanup in `code-protection-service.ts` (December 17, 2025)
 - [x] Migrate client portal auth to HttpOnly cookies (December 17, 2025)
+- [x] Migrate admin auth to HttpOnly cookies (December 17, 2025)
 - [ ] Refactor `intro-animation.ts` - extract hardcoded SVG paths to config
-- [ ] Migrate admin auth to HttpOnly cookies (remaining admin modules)
 
 ### Features
 
@@ -198,10 +198,10 @@ Fixed 3 issues that could crash the application:
 
 ### HttpOnly Cookie Auth Migration - COMPLETE (December 17, 2025)
 
-**Status**: Complete (Client Portal)
+**Status**: COMPLETE (All Modules)
 **Date**: December 17, 2025
 
-**Summary**: Migrated client portal authentication from sessionStorage tokens to HttpOnly cookies for XSS protection.
+**Summary**: Migrated all authentication from sessionStorage tokens to HttpOnly cookies for XSS protection.
 
 **Security Improvement**:
 
@@ -227,6 +227,12 @@ Fixed 3 issues that could crash the application:
 | `src/features/client/modules/portal-files.ts` | Updated fetch calls with credentials: include |
 | `src/features/client/modules/portal-messages.ts` | Updated fetch calls with credentials: include |
 | `src/features/client/modules/portal-invoices.ts` | Updated fetch calls with credentials: include |
+| `src/features/admin/admin-dashboard.ts` | Replaced token checks with authMode, credentials: include |
+| `src/features/admin/admin-types.ts` | Added `isDemo()` method to AdminDashboardContext |
+| `src/features/admin/modules/admin-projects.ts` | Changed to ctx.isDemo() checks, credentials: include |
+| `src/features/admin/modules/admin-messaging.ts` | Changed to ctx.isDemo() checks, credentials: include |
+| `src/features/admin/modules/admin-contacts.ts` | Changed to ctx.isDemo() checks, credentials: include |
+| `src/features/admin/modules/admin-leads.ts` | Changed to ctx.isDemo() checks, credentials: include |
 
 **Cookie Configuration**:
 
@@ -249,10 +255,6 @@ COOKIE_CONFIG = {
   },
 }
 ```
-
-**Remaining Work**:
-
-- Admin dashboard modules still use Authorization headers (lower priority)
 
 ---
 
@@ -401,7 +403,7 @@ if (!this.isEnabled) return;
 **Concerns**:
 
 - [x] ~~Infinite scroll needs to work on mobile~~ - Intentionally disabled, conflicts with GSAP
-- [ ] **Loop-trigger-zone awkward space** - Need to figure out what content/design to fill the gap
+- [ ] **Loop-trigger-zone awkward space** - Plan: Add decorative content (pattern, gradient, or brand element) to fill the 100vh gap
 
 **Files Modified**:
 

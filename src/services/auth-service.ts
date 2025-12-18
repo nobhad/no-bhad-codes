@@ -2,8 +2,9 @@
  * ===============================================
  * AUTHENTICATION SERVICE
  * ===============================================
- * Handles client authentication, token management,
- * and API communication with the backend.
+ * Handles client authentication using HttpOnly cookies.
+ * Tokens are stored in secure HttpOnly cookies (set by server),
+ * not in JavaScript-accessible storage.
  */
 
 import { BaseService } from './base-service';
@@ -25,7 +26,6 @@ interface AuthUser {
 interface LoginResponse {
   message: string;
   user: AuthUser;
-  token: string;
   expiresIn: string;
 }
 
@@ -36,30 +36,29 @@ interface ApiError {
 }
 
 export class AuthService extends BaseService {
-  private token: string | null = null;
   private user: AuthUser | null = null;
   private refreshTimer: number | null = null;
+  private isAuth: boolean = false;
 
   constructor() {
     super('auth-service');
-    this.loadStoredAuth();
+    this.loadStoredUser();
   }
 
   /**
-   * Load authentication data from sessionStorage
+   * Load user data from sessionStorage (not token - that's in HttpOnly cookie)
    */
-  private loadStoredAuth(): void {
+  private loadStoredUser(): void {
     try {
-      const storedToken = sessionStorage.getItem('auth_token');
       const storedUser = sessionStorage.getItem('auth_user');
 
-      if (storedToken && storedUser) {
-        this.token = storedToken;
+      if (storedUser) {
         this.user = JSON.parse(storedUser);
+        this.isAuth = true;
         this.scheduleTokenRefresh();
       }
     } catch (error) {
-      console.error('Error loading stored auth:', error);
+      console.error('Error loading stored user:', error);
       this.clearAuthData();
     }
   }
@@ -74,6 +73,7 @@ export class AuthService extends BaseService {
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include', // Include HttpOnly cookies
         body: JSON.stringify(credentials)
       });
 
@@ -89,11 +89,10 @@ export class AuthService extends BaseService {
 
       const loginData = data as LoginResponse;
 
-      // Store authentication data
-      this.token = loginData.token;
+      // Store user data (token is now in HttpOnly cookie set by server)
       this.user = loginData.user;
+      this.isAuth = true;
 
-      sessionStorage.setItem('auth_token', loginData.token);
       sessionStorage.setItem('auth_user', JSON.stringify(loginData.user));
 
       // Schedule token refresh
@@ -114,13 +113,11 @@ export class AuthService extends BaseService {
    */
   async logout(): Promise<void> {
     try {
-      if (this.token) {
-        // Notify server of logout
+      if (this.isAuth) {
+        // Notify server of logout (server clears HttpOnly cookie)
         await fetch(authEndpoints.logout, {
           method: 'POST',
-          headers: {
-            Authorization: `Bearer ${this.token}`
-          }
+          credentials: 'include' // Include HttpOnly cookies
         });
       }
     } catch (error) {
@@ -134,10 +131,9 @@ export class AuthService extends BaseService {
    * Clear authentication data
    */
   private clearAuthData(): void {
-    this.token = null;
     this.user = null;
+    this.isAuth = false;
 
-    sessionStorage.removeItem('auth_token');
     sessionStorage.removeItem('auth_user');
 
     if (this.refreshTimer) {
@@ -150,7 +146,7 @@ export class AuthService extends BaseService {
    * Check if user is authenticated
    */
   isAuthenticated(): boolean {
-    return this.token !== null && this.user !== null;
+    return this.isAuth && this.user !== null;
   }
 
   /**
@@ -161,26 +157,18 @@ export class AuthService extends BaseService {
   }
 
   /**
-   * Get authentication token
-   */
-  getToken(): string | null {
-    return this.token;
-  }
-
-  /**
    * Refresh authentication token
+   * Note: Token is in HttpOnly cookie, server handles refresh
    */
   async refreshToken(): Promise<boolean> {
-    if (!this.token) {
+    if (!this.isAuth) {
       return false;
     }
 
     try {
       const response = await fetch(authEndpoints.refresh, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.token}`
-        }
+        credentials: 'include' // Include HttpOnly cookies
       });
 
       if (!response.ok) {
@@ -188,10 +176,7 @@ export class AuthService extends BaseService {
         return false;
       }
 
-      const data = await response.json();
-      this.token = data.token;
-      sessionStorage.setItem('auth_token', data.token);
-
+      // Server sets new HttpOnly cookie, we just schedule next refresh
       this.scheduleTokenRefresh();
       return true;
     } catch (error) {
@@ -221,16 +206,14 @@ export class AuthService extends BaseService {
    * Validate current token with server
    */
   async validateToken(): Promise<boolean> {
-    if (!this.token) {
+    if (!this.isAuth) {
       return false;
     }
 
     try {
       const response = await fetch(authEndpoints.validate, {
         method: 'GET',
-        headers: {
-          Authorization: `Bearer ${this.token}`
-        }
+        credentials: 'include' // Include HttpOnly cookies
       });
 
       if (!response.ok) {
@@ -250,16 +233,14 @@ export class AuthService extends BaseService {
    * Get user profile data
    */
   async getProfile(): Promise<AuthUser | null> {
-    if (!this.token) {
+    if (!this.isAuth) {
       return null;
     }
 
     try {
       const response = await fetch(authEndpoints.profile, {
         method: 'GET',
-        headers: {
-          Authorization: `Bearer ${this.token}`
-        }
+        credentials: 'include' // Include HttpOnly cookies
       });
 
       if (!response.ok) {
@@ -281,7 +262,7 @@ export class AuthService extends BaseService {
    * Initialize authentication state on app start
    */
   async initialize(): Promise<void> {
-    if (this.token) {
+    if (this.isAuth) {
       const isValid = await this.validateToken();
       if (!isValid) {
         this.clearAuthData();
@@ -300,6 +281,7 @@ export class AuthService extends BaseService {
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include', // Include HttpOnly cookies
         body: JSON.stringify({ email })
       });
 
@@ -333,6 +315,7 @@ export class AuthService extends BaseService {
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include', // Include HttpOnly cookies
         body: JSON.stringify({ token })
       });
 
@@ -345,11 +328,10 @@ export class AuthService extends BaseService {
         };
       }
 
-      // Store authentication data
-      this.token = data.token;
+      // Store user data (token is now in HttpOnly cookie set by server)
       this.user = data.user;
+      this.isAuth = true;
 
-      sessionStorage.setItem('auth_token', data.token);
       sessionStorage.setItem('auth_user', JSON.stringify(data.user));
 
       // Schedule token refresh

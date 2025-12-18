@@ -20,17 +20,13 @@ export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
   if (!filesContainer) return;
 
   try {
-    const token = ctx.getAuthToken();
-
-    if (!token || ctx.isDemo()) {
+    if (ctx.isDemo()) {
       renderDemoFiles(filesContainer as HTMLElement, ctx);
       return;
     }
 
     const response = await fetch(`${FILES_API_BASE}/client`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      credentials: 'include' // Include HttpOnly cookies
     });
 
     if (!response.ok) {
@@ -261,15 +257,10 @@ async function deleteFile(
     return;
   }
 
-  const token = ctx.getAuthToken();
-  if (!token) return;
-
   try {
     const response = await fetch(`${FILES_API_BASE}/file/${fileId}`, {
       method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      credentials: 'include' // Include HttpOnly cookies
     });
 
     if (!response.ok) {
@@ -399,9 +390,6 @@ async function uploadFiles(files: File[], ctx: ClientPortalContext): Promise<voi
     `;
   }
 
-  const token = ctx.getAuthToken();
-  if (!token) return;
-
   try {
     const formData = new FormData();
     files.forEach((file) => {
@@ -410,9 +398,7 @@ async function uploadFiles(files: File[], ctx: ClientPortalContext): Promise<voi
 
     const response = await fetch(`${FILES_API_BASE}/multiple`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
+      credentials: 'include', // Include HttpOnly cookies
       body: formData
     });
 

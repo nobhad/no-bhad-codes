@@ -28,14 +28,11 @@ export function getLeadsData(): Lead[] {
 }
 
 export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
-  const token = ctx.getAuthToken();
-  if (!token) return;
+  if (ctx.isDemo()) return;
 
   try {
     const response = await fetch('/api/admin/leads', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      credentials: 'include'
     });
 
     if (response.ok) {
@@ -190,16 +187,13 @@ export async function activateLead(
   leadId: number,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  const token = ctx.getAuthToken();
-  if (!token) return;
+  if (ctx.isDemo()) return;
 
   try {
     const response = await fetch(`/api/admin/leads/${leadId}/activate`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
     });
 
     if (response.ok) {
@@ -220,16 +214,13 @@ export async function inviteLead(
   email: string,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  const token = ctx.getAuthToken();
-  if (!token) return;
+  if (ctx.isDemo()) return;
 
   try {
     const response = await fetch(`/api/admin/leads/${leadId}/invite`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ email })
     });
 

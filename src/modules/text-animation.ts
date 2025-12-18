@@ -151,7 +151,7 @@ export class TextAnimationModule extends BaseModule {
     const setScrollSnap = (_enabled: boolean) => {
       // No-op on mobile - keep scroll-snap disabled
       if (isMobile) {
-        return; // Do nothing on mobile
+        // Do nothing on mobile
       }
     };
 

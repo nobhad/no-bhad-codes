@@ -3,10 +3,12 @@
  * AUTHENTICATION MIDDLEWARE
  * ===============================================
  * JWT token verification and user authentication
+ * Supports both HttpOnly cookies and Authorization header
  */
 
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
+import { COOKIE_CONFIG } from '../utils/auth-constants.js';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -17,8 +19,12 @@ interface AuthenticatedRequest extends Request {
 }
 
 export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  // Try Authorization header first (for API consumers), then HttpOnly cookie
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  const headerToken = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  const cookieToken = req.cookies?.[COOKIE_CONFIG.AUTH_TOKEN_NAME];
+
+  const token = headerToken || cookieToken;
 
   if (!token) {
     return res.status(401).json({

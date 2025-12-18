@@ -54,12 +54,11 @@ export function setCurrentProjectId(id: number | null): void {
 }
 
 export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
-  const token = ctx.getAuthToken();
-  if (!token) return;
+  if (ctx.isDemo()) return;
 
   try {
     const response = await fetch('/api/admin/leads', {
-      headers: { Authorization: `Bearer ${token}` }
+      credentials: 'include'
     });
 
     if (response.ok) {
@@ -189,16 +188,15 @@ export async function updateProjectStatus(
   status: string,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  const token = ctx.getAuthToken();
-  if (!token) return;
+  if (ctx.isDemo()) return;
 
   try {
     const response = await fetch(`/api/projects/${id}`, {
       method: 'PUT',
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
+      credentials: 'include',
       body: JSON.stringify({ status })
     });
 
@@ -332,15 +330,14 @@ export async function loadProjectMessages(
   projectId: number,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  const token = ctx.getAuthToken();
-  if (!token) return;
+  if (ctx.isDemo()) return;
 
   const container = document.getElementById('pd-messages-list');
   if (!container) return;
 
   try {
     const response = await fetch(`/api/projects/${projectId}/messages`, {
-      headers: { Authorization: `Bearer ${token}` }
+      credentials: 'include'
     });
 
     if (response.ok) {
@@ -386,15 +383,14 @@ export async function loadProjectFiles(
   projectId: number,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  const token = ctx.getAuthToken();
-  if (!token) return;
+  if (ctx.isDemo()) return;
 
   const container = document.getElementById('pd-files-list');
   if (!container) return;
 
   try {
     const response = await fetch(`/api/projects/${projectId}/files`, {
-      headers: { Authorization: `Bearer ${token}` }
+      credentials: 'include'
     });
 
     if (response.ok) {
@@ -454,15 +450,14 @@ export async function loadProjectMilestones(
   projectId: number,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  const token = ctx.getAuthToken();
-  if (!token) return;
+  if (ctx.isDemo()) return;
 
   const container = document.getElementById('pd-milestones-list');
   if (!container) return;
 
   try {
     const response = await fetch(`/api/projects/${projectId}/milestones`, {
-      headers: { Authorization: `Bearer ${token}` }
+      credentials: 'include'
     });
 
     if (response.ok) {
@@ -524,16 +519,15 @@ export async function toggleMilestone(
   isCompleted: boolean,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  const token = ctx.getAuthToken();
-  if (!token || !currentProjectId) return;
+  if (ctx.isDemo() || !currentProjectId) return;
 
   try {
     const response = await fetch(`/api/projects/${currentProjectId}/milestones/${milestoneId}`, {
       method: 'PUT',
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
+      credentials: 'include',
       body: JSON.stringify({ is_completed: isCompleted })
     });
 
@@ -552,15 +546,14 @@ export async function loadProjectInvoices(
   projectId: number,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  const token = ctx.getAuthToken();
-  if (!token) return;
+  if (ctx.isDemo()) return;
 
   const container = document.getElementById('pd-invoices-list');
   if (!container) return;
 
   try {
     const response = await fetch(`/api/projects/${projectId}/invoices`, {
-      headers: { Authorization: `Bearer ${token}` }
+      credentials: 'include'
     });
 
     if (response.ok) {

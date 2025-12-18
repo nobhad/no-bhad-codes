@@ -132,6 +132,32 @@ export const SESSION_CONFIG = {
 } as const;
 
 /**
+ * Cookie configuration for HttpOnly auth tokens
+ */
+export const COOKIE_CONFIG = {
+  /** Cookie name for auth token */
+  AUTH_TOKEN_NAME: 'auth_token',
+
+  /** Cookie options for user tokens */
+  USER_OPTIONS: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict' as const,
+    maxAge: TIME_MS.WEEK, // 7 days
+    path: '/',
+  },
+
+  /** Cookie options for admin tokens (shorter lived) */
+  ADMIN_OPTIONS: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict' as const,
+    maxAge: TIME_MS.HOUR, // 1 hour
+    path: '/',
+  },
+} as const;
+
+/**
  * Password validation regex
  * Requires: 1 uppercase, 1 lowercase, 1 number, 1 special char
  */

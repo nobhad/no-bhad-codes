@@ -26,17 +26,13 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
   invoiceItems.forEach((item) => item.remove());
 
   try {
-    const token = ctx.getAuthToken();
-
-    if (!token || ctx.isDemo()) {
+    if (ctx.isDemo()) {
       renderDemoInvoices(invoicesContainer as HTMLElement, ctx);
       return;
     }
 
     const response = await fetch(`${INVOICES_API_BASE}/me`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      credentials: 'include' // Include HttpOnly cookies
     });
 
     if (!response.ok) {
@@ -238,14 +234,9 @@ async function downloadInvoice(
     return;
   }
 
-  const token = ctx.getAuthToken();
-  if (!token) return;
-
   try {
     const response = await fetch(`${INVOICES_API_BASE}/${invoiceId}/pdf`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      credentials: 'include' // Include HttpOnly cookies
     });
 
     if (!response.ok) {

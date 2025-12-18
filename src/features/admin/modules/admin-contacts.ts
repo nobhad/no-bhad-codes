@@ -28,14 +28,11 @@ export function getContactsData(): ContactSubmission[] {
 }
 
 export async function loadContacts(ctx: AdminDashboardContext): Promise<void> {
-  const token = ctx.getAuthToken();
-  if (!token) return;
+  if (ctx.isDemo()) return;
 
   try {
     const response = await fetch('/api/admin/contact-submissions', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      credentials: 'include'
     });
 
     if (response.ok) {
@@ -176,16 +173,13 @@ export async function updateContactStatus(
   status: string,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  const token = ctx.getAuthToken();
-  if (!token) return;
+  if (ctx.isDemo()) return;
 
   try {
     const response = await fetch(`/api/admin/contact-submissions/${id}/status`, {
       method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ status })
     });
 
