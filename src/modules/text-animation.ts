@@ -155,38 +155,44 @@ export class TextAnimationModule extends BaseModule {
       }
     };
 
-    // Mobile: 2 second hold at animation end (both directions)
+    // 2 second hold at animation boundaries (both mobile and desktop)
     let isHolding = false;
     let hasTriggeredEndHold = false;
     let hasTriggeredStartHold = false;
     const HOLD_DURATION = 2000; // 2 seconds
 
     const triggerHold = (direction: 'end' | 'start') => {
-      if (!isMobile || isHolding) return;
+      if (isHolding) return;
 
       isHolding = true;
-      this.log(`Mobile: Starting ${HOLD_DURATION}ms hold at ${direction}`);
+      this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Starting ${HOLD_DURATION}ms hold at ${direction}`);
 
-      // Prevent ALL scrolling on mobile during hold
-      if (scrollContainer) {
+      // Prevent scrolling during hold
+      if (isMobile && scrollContainer) {
         const container = scrollContainer as HTMLElement;
         container.style.overflow = 'hidden';
         container.style.touchAction = 'none';
         document.body.style.overflow = 'hidden';
         document.body.style.touchAction = 'none';
+      } else {
+        // Desktop: prevent window scroll
+        document.body.style.overflow = 'hidden';
       }
 
       setTimeout(() => {
         isHolding = false;
-        if (scrollContainer) {
+        if (isMobile && scrollContainer) {
           const container = scrollContainer as HTMLElement;
           container.style.overflow = '';
           container.style.overflowY = 'scroll';
           container.style.touchAction = '';
           document.body.style.overflow = '';
           document.body.style.touchAction = '';
+        } else {
+          // Desktop: restore window scroll
+          document.body.style.overflow = '';
         }
-        this.log('Mobile: Hold complete, scroll re-enabled');
+        this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Hold complete, scroll re-enabled`);
 
         // Reset triggers after hold completes
         if (direction === 'end') hasTriggeredEndHold = false;
@@ -207,18 +213,16 @@ export class TextAnimationModule extends BaseModule {
       scrub: scrubValue,
       animation: this.timeline,
       onUpdate: (self) => {
-        // Mobile: trigger hold at animation boundaries
-        if (isMobile) {
-          // At end of animation (progress >= 0.98)
-          if (self.progress >= 0.98 && !hasTriggeredEndHold && self.direction === 1) {
-            hasTriggeredEndHold = true;
-            triggerHold('end');
-          }
-          // At start of animation when scrolling backwards (progress <= 0.02)
-          if (self.progress <= 0.02 && !hasTriggeredStartHold && self.direction === -1) {
-            hasTriggeredStartHold = true;
-            triggerHold('start');
-          }
+        // Trigger hold at animation boundaries (both mobile and desktop)
+        // At end of animation (progress >= 0.98) when scrolling down
+        if (self.progress >= 0.98 && !hasTriggeredEndHold && self.direction === 1) {
+          hasTriggeredEndHold = true;
+          triggerHold('end');
+        }
+        // At start of animation when scrolling backwards (progress <= 0.02)
+        if (self.progress <= 0.02 && !hasTriggeredStartHold && self.direction === -1) {
+          hasTriggeredStartHold = true;
+          triggerHold('start');
         }
       },
       onEnter: () => {
