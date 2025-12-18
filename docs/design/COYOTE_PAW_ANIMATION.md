@@ -30,37 +30,36 @@ The SVG overlay fades out, revealing the actual business card element underneath
 
 **File**: `public/images/coyote_paw.svg`
 
-**ViewBox**: `0 0 2316.99 1801.19`
+**ViewBox**: `0 0 2331.11 1798.56`
 
-### Element IDs
+### Element IDs (Group Structure)
 
 | ID | Description | Animation Role |
 |----|-------------|----------------|
-| `_1_Morph_Above_Card_-_Fingers_` | Fingers position 1 (clutching) | Morph start state |
-| `_2_Morph_Above_Card_-_Fingers_` | Fingers position 2 (releasing) | Morph intermediate |
-| `_3_Morph_Above_Card_-_Fingers_` | Fingers position 3 (fully open) | Morph end state |
-| `_Arm_-_Align_Perfectly_with_Card_` | Arm connecting to hand | Retracts with paw |
-| `_2_Morph_Behind_Card_-_Thumb_Filler_` | Thumb filler behind card | Retracts with paw |
-| `_3_Morph_Behind_Card_-_Thumb_Palm_` | Thumb and palm behind card | Retracts with paw |
-| `Business_Card` | Card outline and text | Static, fades out |
+| `Arm_Base` | Group containing arm path | Retracts with paw |
+| `Position_1` | Fingers in clutching position | Initial state, contains morph source |
+| `Position_2` | Fingers releasing + thumb | Morph target (releasing) |
+| `Position_3` | Fingers fully open + thumb | Morph target (fully open) |
+| `Card` | Business card group | Static, fades out |
+| `_1_Morph_Above_Card_-_Fingers_` | Finger A path (inside Position_1) | Morphs to positions 2 → 3 |
+| `_FInger_A_-_Above_Card_-2` | Finger A path (inside Position_2) | Morph target |
+| `_FInger_A_-_Above_Card_-3` | Finger A path (inside Position_3) | Morph target |
 
 ### CSS Classes in SVG
 
 | Class | Usage |
 |-------|-------|
-| `.cls-1` | Card rectangle (white fill, stroke) |
-| `.cls-2` | Card outline stroke |
-| `.cls-3` | Text fill (#231f20) |
+| `.cls-1` | Text fill (#231f20) |
+| `.cls-2` | Card rectangle (stroke) |
+| `.cls-3` | Paw outline stroke |
 
 ## Layer Order (Bottom to Top)
 
-1. Thumb filler (behind card, in pawGroup)
-2. Thumb/palm (behind card, in pawGroup)
-3. Business card (static, stays in place)
-4. Arm (above card, in fingersGroup - stays connected to fingers)
-5. Fingers (above card, in fingersGroup - morphs between positions)
+1. Arm base (behind everything)
+2. Position groups (contain fingers + thumb)
+3. Business card (static, stays in place on top)
 
-**Note**: The arm is grouped with the fingers (not with the thumb/palm) so it stays visually connected to the fingers during the retraction animation.
+**Note**: The position groups are crossfaded during animation while Finger A morphs between shapes using GSAP MorphSVGPlugin.
 
 ## Card Alignment
 
@@ -69,8 +68,8 @@ The SVG is scaled and positioned to align precisely with the actual business car
 **Card Position in SVG**:
 
 ```text
-x: 1250.15
-y: 1029.85
+x: 1256.15
+y: 1031.85
 width: 1062.34
 height: 591.3
 ```
@@ -144,7 +143,7 @@ When updating `coyote_paw.svg`:
 3. Update constants in `intro-animation.ts` if card position changes:
 
 ```typescript
-const SVG_CARD_X = 1250.15;
-const SVG_CARD_Y = 1029.85;
+const SVG_CARD_X = 1256.15;
+const SVG_CARD_Y = 1031.85;
 const SVG_CARD_WIDTH = 1062.34;
 ```

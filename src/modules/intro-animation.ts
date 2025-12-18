@@ -31,9 +31,9 @@ gsap.registerPlugin(MorphSVGPlugin);
 const PAW_SVG = `/images/coyote_paw.svg?v=${Date.now()}`;
 
 // SVG card position/dimensions (from coyote_paw.svg Card_Outline)
-// Card rect: x="1250.15" y="1029.85" width="1062.34" height="591.3"
-const SVG_CARD_X = 1250.15;
-const SVG_CARD_Y = 1029.85;
+// Card rect: x="1256.15" y="1031.85" width="1062.34" height="591.3"
+const SVG_CARD_X = 1256.15;
+const SVG_CARD_Y = 1031.85;
 const SVG_CARD_WIDTH = 1062.34;
 const _SVG_CARD_HEIGHT = 591.3;
 const _SVG_VIEWBOX_WIDTH = 2316.99;  // Full viewBox width
@@ -142,21 +142,20 @@ export class IntroAnimationModule extends BaseModule {
     const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
 
     // Get paw elements using actual IDs from coyote_paw.svg
-    const fingers1 = svgDoc.getElementById('_1_Morph_Above_Card_-_Fingers_');
-    const fingers2 = svgDoc.getElementById('_2_Morph_Above_Card_-_Fingers_');
-    const fingers3 = svgDoc.getElementById('_3_Morph_Above_Card_-_Fingers_');
-    const arm = svgDoc.getElementById('_Arm_-_Align_Perfectly_with_Card_');
-    const thumbFiller = svgDoc.getElementById('_2_Morph_Behind_Card_-_Thumb_Filler_');
-    const thumbPalm = svgDoc.getElementById('_3_Morph_Behind_Card_-_Thumb_Palm_');
-    const businessCardGroup = svgDoc.getElementById('Business_Card');
+    // New structure: Arm_Base, Position_1, Position_2, Position_3, Card groups
+    const armBase = svgDoc.getElementById('Arm_Base');
+    const position1 = svgDoc.getElementById('Position_1');
+    const position2 = svgDoc.getElementById('Position_2');
+    const position3 = svgDoc.getElementById('Position_3');
+    const cardGroup = svgDoc.getElementById('Card');
 
-    if (!fingers1 || !fingers2) {
-      this.error('Finger morph paths not found in SVG');
+    if (!position1 || !position2) {
+      this.error('Position groups not found in SVG');
       this.runCardFlip();
       return;
     }
 
-    this.log('Loaded SVG elements: fingers1, fingers2, arm, thumbFiller, thumbPalm, businessCard');
+    this.log('Loaded SVG elements: armBase, position1, position2, position3, cardGroup');
 
     // Get business card screen position for pixel-perfect alignment
     const cardRect = businessCard.getBoundingClientRect();
@@ -187,83 +186,51 @@ export class IntroAnimationModule extends BaseModule {
     transformWrapper.setAttribute('id', 'intro-layers-wrapper');
     transformWrapper.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${scale})`);
 
-    // Create separate group for paw elements that go BEHIND card (will retract)
+    // Create group for elements that will retract together
     const pawGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     pawGroup.setAttribute('id', 'paw-retract-group');
 
     // Layer order (bottom to top):
-    // 1. Thumb filler (behind card, in pawGroup)
-    // 2. Thumb/palm (behind card, in pawGroup)
-    // 3. Business card (static, stays in place)
-    // 4. Arm (above card, in fingersGroup - stays connected to fingers)
-    // 5. Fingers (above card, in fingersGroup - crossfade between positions)
+    // 1. Arm base (behind everything)
+    // 2. Position groups (crossfade between 1, 2, 3)
+    // 3. Business card (static, stays in place - added last so it's on top)
 
-    // Add thumb filler behind card
-    if (thumbFiller) {
-      const clonedThumbFiller = thumbFiller.cloneNode(true) as Element;
-      pawGroup.appendChild(clonedThumbFiller);
+    // Add arm base (behind card)
+    if (armBase) {
+      const clonedArm = armBase.cloneNode(true) as Element;
+      clonedArm.setAttribute('id', 'arm-group');
+      pawGroup.appendChild(clonedArm);
     }
 
-    // Add thumb/palm behind card
-    if (thumbPalm) {
-      const clonedThumbPalm = thumbPalm.cloneNode(true) as Element;
-      pawGroup.appendChild(clonedThumbPalm);
+    // Add position 1 (clutching) - visible initially
+    const clonedPos1 = position1.cloneNode(true) as Element;
+    clonedPos1.setAttribute('id', 'position-1');
+    pawGroup.appendChild(clonedPos1);
+
+    // Add position 2 (releasing) - hidden initially
+    const clonedPos2 = position2.cloneNode(true) as Element;
+    clonedPos2.setAttribute('id', 'position-2');
+    clonedPos2.setAttribute('opacity', '0');
+    pawGroup.appendChild(clonedPos2);
+
+    // Add position 3 (fully open) - hidden initially
+    let clonedPos3: Element | null = null;
+    if (position3) {
+      clonedPos3 = position3.cloneNode(true) as Element;
+      clonedPos3.setAttribute('id', 'position-3');
+      clonedPos3.setAttribute('opacity', '0');
+      pawGroup.appendChild(clonedPos3);
     }
 
-    // NOTE: Arm is added to fingersGroup instead (above card, with fingers)
-    // so it stays visually connected to the fingers at the top
-
-    // Add paw group to wrapper (thumb, palm - behind card)
+    // Add paw group to wrapper
     transformWrapper.appendChild(pawGroup);
 
-    // Add business card group (stays in place, above paw body but below fingers)
-    // Apply inline styles since CSS classes from source SVG don't transfer
-    if (businessCardGroup) {
-      const clonedCard = businessCardGroup.cloneNode(true) as Element;
+    // Add business card group (stays in place, on top of paw)
+    if (cardGroup) {
+      const clonedCard = cardGroup.cloneNode(true) as Element;
       clonedCard.setAttribute('id', 'svg-business-card');
-
-      // Fix card outline - white fill with dark stroke (cls-1 style)
-      const cardOutline = clonedCard.querySelector('rect');
-      if (cardOutline) {
-        cardOutline.setAttribute('fill', '#fff');
-        cardOutline.setAttribute('stroke', '#231f20');
-        cardOutline.setAttribute('stroke-width', '9');
-        cardOutline.setAttribute('stroke-miterlimit', '10');
-      }
-
-      // Fix text paths - black fill (cls-3 style)
-      const textPaths = clonedCard.querySelectorAll('path.cls-3, g path');
-      textPaths.forEach(path => {
-        path.setAttribute('fill', '#231f20');
-      });
-
       transformWrapper.appendChild(clonedCard);
     }
-
-    // Create separate group for fingers AND arm (will retract together, rendered on top of card)
-    // The arm connects to fingers at the top, so they must be in the same group
-    const fingersGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    fingersGroup.setAttribute('id', 'fingers-retract-group');
-
-    // Add arm to fingers group FIRST (so it renders behind fingers but above card)
-    // This keeps the arm visually connected to the fingers at the top
-    if (arm) {
-      const clonedArmForFingers = arm.cloneNode(true) as Element;
-      clonedArmForFingers.setAttribute('id', 'arm-above-card');
-      fingersGroup.appendChild(clonedArmForFingers);
-    }
-
-    // Add fingers position 1 - this will be morphed through positions 2 and 3
-    const clonedFingers = fingers1.cloneNode(true) as SVGPathElement;
-    clonedFingers.setAttribute('id', 'fingers-morphing');
-    fingersGroup.appendChild(clonedFingers);
-
-    // Get the 'd' attribute paths for morph targets
-    const fingers2PathData = fingers2.getAttribute('d');
-    const fingers3PathData = fingers3?.getAttribute('d');
-
-    // Add fingers group to wrapper (on top of everything)
-    transformWrapper.appendChild(fingersGroup);
 
     // Copy styles from source SVG to ensure classes work
     const sourceStyles = svgDoc.querySelector('style');
@@ -298,31 +265,77 @@ export class IntroAnimationModule extends BaseModule {
     const retractDuration = 0.5; // Paw sliding off screen
     const fadeEase = 'power2.inOut';
 
-    // Phase 1: CLUTCHING - paw gripping the card (fingers position 1 visible)
+    // Get finger paths from each position for morphing
+    // Position 1: Fingers are in groups, need to select path inside
+    const fingerA1 = clonedPos1.querySelector('#_1_Morph_Above_Card_-_Fingers_') as SVGPathElement;
+    const fingerB1 = clonedPos1.querySelector('[id="_FInger_B_-_Above_Card_"] path') as SVGPathElement;
+    const fingerC1 = clonedPos1.querySelector('[id="_FInger_C-_Above_Card_"] path') as SVGPathElement;
+
+    // Position 2: Paths have direct IDs
+    const fingerA2 = position2.querySelector('#_FInger_A_-_Above_Card_-2') as SVGPathElement;
+    const fingerB2 = position2.querySelector('#_FInger_B-_Above_Card_') as SVGPathElement;
+    const fingerC2 = position2.querySelector('#_FInger_C_-_Above_Card_') as SVGPathElement;
+
+    // Position 3: Paths have direct IDs
+    const fingerA3 = position3?.querySelector('#_FInger_A_-_Above_Card_-3') as SVGPathElement;
+    const fingerB3 = position3?.querySelector('#_FInger_B-_Above_Card_-2') as SVGPathElement;
+    const fingerC3 = position3?.querySelector('#_FInger_C_-_Above_Card_-2') as SVGPathElement;
+
+    // Get path data for morph targets
+    const fingerA2PathData = fingerA2?.getAttribute('d');
+    const fingerA3PathData = fingerA3?.getAttribute('d');
+    const fingerB2PathData = fingerB2?.getAttribute('d');
+    const fingerB3PathData = fingerB3?.getAttribute('d');
+    const fingerC2PathData = fingerC2?.getAttribute('d');
+    const fingerC3PathData = fingerC3?.getAttribute('d');
+
+    // Phase 1: CLUTCHING - paw gripping the card (position 1 visible)
     this.timeline.to({}, { duration: clutchHold });
 
-    // Phase 2: RELEASING - morph fingers from position 1 → 2
-    if (fingers2PathData) {
-      this.timeline.to(clonedFingers, {
-        morphSVG: {
-          shape: fingers2PathData,
-          shapeIndex: 'auto'
-        },
+    // Phase 2: RELEASING - morph all fingers from position 1 → 2
+    if (fingerA1 && fingerA2PathData) {
+      this.timeline.to(fingerA1, {
+        morphSVG: { shape: fingerA2PathData, shapeIndex: 'auto' },
         duration: releaseDuration,
         ease: fadeEase
       });
     }
+    if (fingerB1 && fingerB2PathData) {
+      this.timeline.to(fingerB1, {
+        morphSVG: { shape: fingerB2PathData, shapeIndex: 'auto' },
+        duration: releaseDuration,
+        ease: fadeEase
+      }, '<'); // Same time as finger A
+    }
+    if (fingerC1 && fingerC2PathData) {
+      this.timeline.to(fingerC1, {
+        morphSVG: { shape: fingerC2PathData, shapeIndex: 'auto' },
+        duration: releaseDuration,
+        ease: fadeEase
+      }, '<'); // Same time as finger A
+    }
 
-    // Phase 3: FULLY OPEN - morph fingers from position 2 → 3
-    if (fingers3PathData) {
-      this.timeline.to(clonedFingers, {
-        morphSVG: {
-          shape: fingers3PathData,
-          shapeIndex: 'auto'
-        },
+    // Phase 3: FULLY OPEN - morph all fingers from position 2 → 3
+    if (fingerA1 && fingerA3PathData) {
+      this.timeline.to(fingerA1, {
+        morphSVG: { shape: fingerA3PathData, shapeIndex: 'auto' },
         duration: openDuration,
         ease: 'power1.out'
       });
+    }
+    if (fingerB1 && fingerB3PathData) {
+      this.timeline.to(fingerB1, {
+        morphSVG: { shape: fingerB3PathData, shapeIndex: 'auto' },
+        duration: openDuration,
+        ease: 'power1.out'
+      }, '<');
+    }
+    if (fingerC1 && fingerC3PathData) {
+      this.timeline.to(fingerC1, {
+        morphSVG: { shape: fingerC3PathData, shapeIndex: 'auto' },
+        duration: openDuration,
+        ease: 'power1.out'
+      }, '<');
     }
 
     // Brief hold showing fully released paw
@@ -330,21 +343,12 @@ export class IntroAnimationModule extends BaseModule {
 
     // Phase 4: RETRACTION - paw slides diagonally up and left off screen
     // The arm comes from top-left, so it retracts back that direction
-    // Both pawGroup (thumb, palm, arm) and fingersGroup retract together
     this.timeline.to(pawGroup, {
       x: -1000,
       y: -800,
       duration: retractDuration,
       ease: 'power2.in'
     });
-
-    // Fingers retract at the same time as the rest of the paw
-    this.timeline.to(fingersGroup, {
-      x: -1000,
-      y: -800,
-      duration: retractDuration,
-      ease: 'power2.in'
-    }, '<'); // '<' = same time as previous
 
     // Fade out the SVG card as paw retracts, reveal actual business card
     this.timeline.to('#svg-business-card', {
