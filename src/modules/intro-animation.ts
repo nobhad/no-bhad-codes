@@ -39,22 +39,11 @@ const _SVG_CARD_HEIGHT = 591.3;
 const _SVG_VIEWBOX_WIDTH = 2316.99;  // Full viewBox width
 const _SVG_VIEWBOX_HEIGHT = 1801.19; // Full viewBox height
 
-// Extracted SVG style colors
-interface SvgStyleColors {
-  textFill: string;       // cls-2 fill
-  cardFill: string;       // cls-3 fill
-  cardStroke: string;     // cls-3 stroke
-  cardStrokeWidth: string;
-}
-
 export class IntroAnimationModule extends BaseModule {
   private timeline: gsap.core.Timeline | null = null;
   private isComplete = false;
   private skipHandler: ((event: KeyboardEvent) => void) | null = null;
   private morphOverlay: HTMLElement | null = null;
-  private pawPaths: string[] = [];
-  private whiteFillPaths: string[] = [];
-  private svgColors: SvgStyleColors | null = null;
 
   constructor(options: ModuleOptions = {}) {
     super('IntroAnimationModule', { debug: true, ...options });
@@ -112,155 +101,8 @@ export class IntroAnimationModule extends BaseModule {
   }
 
   /**
-   * Load paw paths from SVG - returns both black fill and white fill paths
-   * SVG structure: paw group contains _Black_Fill_ (no class) then _White_Fill_ (cls-2)
-   */
-  private async loadPawPaths(url: string, pathId: string): Promise<{ black: string | null; white: string | null }> {
-    try {
-      const response = await fetch(url);
-      const svgText = await response.text();
-
-      const parser = new DOMParser();
-      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
-
-      const pawGroup = svgDoc.getElementById(pathId);
-      let blackPath: string | null = null;
-      let whitePath: string | null = null;
-
-      if (pawGroup) {
-        // Get _Black_Fill_ path (no class attribute)
-        const directChildren = pawGroup.children;
-        for (let i = 0; i < directChildren.length; i++) {
-          const child = directChildren[i];
-          if (child.tagName.toLowerCase() === 'path' && !child.hasAttribute('class')) {
-            blackPath = child.getAttribute('d');
-            break;
-          }
-        }
-
-        // Get _White_Fill_ path (cls-2 for paw1, cls-3 for paw2)
-        let whiteEl = pawGroup.querySelector('path.cls-2');
-        if (!whiteEl) {
-          whiteEl = pawGroup.querySelector('path.cls-3');
-        }
-        if (whiteEl) {
-          whitePath = whiteEl.getAttribute('d');
-        }
-
-        this.log(`Loaded ${pathId}: black=${!!blackPath}, white=${!!whitePath}`);
-      }
-
-      return { black: blackPath, white: whitePath };
-    } catch (error) {
-      this.error(`Failed to load paw paths: ${url}`, error);
-      return { black: null, white: null };
-    }
-  }
-
-  /**
-   * Extract style colors from SVG's <style> block
-   * Parses cls-2 (text) and cls-3 (card) definitions
-   */
-  private async extractSvgStyles(url: string): Promise<SvgStyleColors | null> {
-    try {
-      const response = await fetch(url);
-      const svgText = await response.text();
-
-      const parser = new DOMParser();
-      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
-
-      const styleElement = svgDoc.querySelector('style');
-      if (!styleElement) {
-        this.error('No style element found in SVG');
-        return null;
-      }
-
-      const styleText = styleElement.textContent || '';
-
-      // Extract cls-2 fill (text color)
-      const cls2Match = styleText.match(/\.cls-2\s*\{[^}]*fill:\s*([^;}\s]+)/);
-      const textFill = cls2Match ? cls2Match[1].trim() : '#231f20';
-
-      // Extract cls-3 fill and stroke (card)
-      const cls3Match = styleText.match(/\.cls-3\s*\{([^}]*)\}/);
-      let cardFill = '#fff';
-      let cardStroke = '#000';
-      let cardStrokeWidth = '3';
-
-      if (cls3Match) {
-        const cls3Content = cls3Match[1];
-        const fillMatch = cls3Content.match(/fill:\s*([^;}\s]+)/);
-        const strokeMatch = cls3Content.match(/stroke:\s*([^;}\s]+)/);
-        const strokeWidthMatch = cls3Content.match(/stroke-width:\s*([^;}\s]+)/);
-
-        if (fillMatch) cardFill = fillMatch[1].trim();
-        if (strokeMatch) cardStroke = strokeMatch[1].trim();
-        if (strokeWidthMatch) cardStrokeWidth = strokeWidthMatch[1].replace('px', '').trim();
-      }
-
-      this.log('Extracted SVG colors:', { textFill, cardFill, cardStroke, cardStrokeWidth });
-
-      return { textFill, cardFill, cardStroke, cardStrokeWidth };
-    } catch (error) {
-      this.error(`Failed to extract SVG styles: ${url}`, error);
-      return null;
-    }
-  }
-
-  /**
-   * Load static content from SVG (card outline + text) - these do NOT morph
-   * Card outline from: _No_Morph_Outline_ > Card_Outline (cls-2)
-   * Text from: _No_Morph_Text_on_Top_ (cls-1 paths)
-   */
-  private async loadStaticContent(url: string): Promise<{ outline: string | null; text: string | null }> {
-    try {
-      const response = await fetch(url);
-      const svgText = await response.text();
-
-      const parser = new DOMParser();
-      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
-
-      let outlineHtml: string | null = null;
-      let textHtml: string | null = null;
-
-      // Load card outline from _No_Morph_Outline_ group
-      const outlineGroup = svgDoc.getElementById('_No_Morph_Outline_');
-      if (outlineGroup) {
-        const cardOutline = outlineGroup.querySelector('#Card_Outline');
-        if (cardOutline) {
-          // Outline only - no fill, just black stroke
-          cardOutline.setAttribute('fill', 'none');
-          cardOutline.setAttribute('stroke', '#000');
-          cardOutline.setAttribute('stroke-width', '5');
-          cardOutline.setAttribute('stroke-miterlimit', '10');
-          outlineHtml = cardOutline.outerHTML;
-          this.log('Loaded card outline from _No_Morph_Outline_ (stroke only)');
-        }
-      }
-
-      // Load text from _No_Morph_Text_on_Top_ group
-      const textGroup = svgDoc.getElementById('_No_Morph_Text_on_Top_');
-      if (textGroup) {
-        // Get all cls-1 paths (text) and force black fill
-        const textPaths = textGroup.querySelectorAll('path.cls-1');
-        const textElements: string[] = [];
-        textPaths.forEach(el => {
-          el.setAttribute('style', 'fill: #000');
-          textElements.push(el.outerHTML);
-        });
-        textHtml = textElements.join('');
-        this.log(`Loaded ${textPaths.length} text paths from _No_Morph_Text_on_Top_`);
-      }
-
-      return { outline: outlineHtml, text: textHtml };
-    } catch (error) {
-      this.error(`Failed to load static content: ${url}`, error);
-      return { outline: null, text: null };
-    }
-  }
-
-  /**
    * Run paw morph animation (desktop only)
+   * Animation: fingers morph from position 1 → 2, then paw retracts diagonally up
    */
   private async runMorphAnimation(): Promise<void> {
     // Scroll to top - reset both window and main container
@@ -292,45 +134,32 @@ export class IntroAnimationModule extends BaseModule {
       return;
     }
 
-    // Load SVG and extract morphing paths
+    // Load SVG and extract elements
     this.log('Loading SVG file...');
     const response = await fetch(PAW_SVG);
     const svgText = await response.text();
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
 
-    // Get paw groups for morphing
-    const paw1Group = svgDoc.getElementById('paw1');
-    const paw2Group = svgDoc.getElementById('paw2');
-    const outlineGroup = svgDoc.getElementById('_No_Morph_Outline_');
-    const textGroup = svgDoc.getElementById('_No_Morph_Text_on_Top_');
+    // Get paw elements using actual IDs from coyote_paw.svg
+    const fingers1 = svgDoc.getElementById('_1_Morph_Above_Card_-_Fingers_');
+    const fingers2 = svgDoc.getElementById('_2_Morph_Above_Card_-_Fingers_');
+    const fingers3 = svgDoc.getElementById('_3_Morph_Above_Card_-_Fingers_');
+    const arm = svgDoc.getElementById('_Arm_-_Align_Perfectly_with_Card_');
+    const thumbFiller = svgDoc.getElementById('_2_Morph_Behind_Card_-_Thumb_Filler_');
+    const thumbPalm = svgDoc.getElementById('_3_Morph_Behind_Card_-_Thumb_Palm_');
+    const businessCardGroup = svgDoc.getElementById('Business_Card');
 
-    if (!paw1Group || !paw2Group) {
-      this.error('paw groups not found in SVG');
+    if (!fingers1 || !fingers2) {
+      this.error('Finger morph paths not found in SVG');
       this.runCardFlip();
       return;
     }
 
-    // Extract BLACK fill paths (no class attribute)
-    const paw1Black = paw1Group.querySelector('path:not([class])');
-    const paw2Black = paw2Group.querySelector('path:not([class])');
-
-    // Extract WHITE fill paths (cls-2 or cls-3)
-    const paw1White = paw1Group.querySelector('path.cls-2') || paw1Group.querySelector('path.cls-3');
-    const paw2White = paw2Group.querySelector('path.cls-2') || paw2Group.querySelector('path.cls-3');
-
-    if (!paw1Black || !paw2Black) {
-      this.error('Black fill paths not found');
-      this.runCardFlip();
-      return;
-    }
-
-    this.log('Loaded: paw1 black+white, paw2 black+white, outline, text');
+    this.log('Loaded SVG elements: fingers1, fingers2, arm, thumbFiller, thumbPalm, businessCard');
 
     // Get business card screen position for pixel-perfect alignment
     const cardRect = businessCard.getBoundingClientRect();
-
-    // Get the card front element for accurate dimensions
     const cardFront = businessCard.querySelector('.business-card-front') as HTMLElement;
     const actualCardRect = cardFront ? cardFront.getBoundingClientRect() : cardRect;
 
@@ -341,71 +170,112 @@ export class IntroAnimationModule extends BaseModule {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     morphSvg.setAttribute('viewBox', `0 0 ${viewportWidth} ${viewportHeight}`);
-    morphSvg.setAttribute('preserveAspectRatio', 'none'); // We handle scaling ourselves
+    morphSvg.setAttribute('preserveAspectRatio', 'none');
 
     // Calculate translation: position scaled SVG card to match screen card position
     const translateX = actualCardRect.left - (SVG_CARD_X * scale);
     const translateY = actualCardRect.top - (SVG_CARD_Y * scale);
 
-    this.log('Alignment:', {
-      cardRect: actualCardRect,
-      scale,
-      translateX,
-      translateY
-    });
-
-    // Create wrapper for all layers
-    const transformWrapper = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    transformWrapper.setAttribute('id', 'intro-layers-wrapper');
-    transformWrapper.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${scale})`);
+    this.log('Alignment:', { scale, translateX, translateY });
 
     // Remove existing placeholder elements from morphSvg
     morphSvg.removeChild(morphCardGroup);
     morphSvg.removeChild(morphPaw);
 
-    // Create morphing elements in correct order (bottom to top):
-    // 1. BLACK fill (morphs)
-    // 2. WHITE fill (morphs)
-    // 3. OUTLINE (static)
-    // 4. TEXT (static)
+    // Create wrapper for all layers - this will be animated for the retraction
+    const transformWrapper = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    transformWrapper.setAttribute('id', 'intro-layers-wrapper');
+    transformWrapper.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${scale})`);
 
-    // 1. BLACK FILL - clone paw1's black, will morph to paw2's black
-    const blackFillEl = paw1Black.cloneNode(true) as SVGPathElement;
-    blackFillEl.setAttribute('id', 'morph-black');
-    transformWrapper.appendChild(blackFillEl);
-    console.log('Layer 1: BLACK fill (morphs)');
+    // Create separate group for paw elements that go BEHIND card (will retract)
+    const pawGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    pawGroup.setAttribute('id', 'paw-retract-group');
 
-    // 2. WHITE FILL - clone paw1's white, will morph to paw2's white
-    let whiteFillEl: SVGPathElement | null = null;
-    if (paw1White) {
-      whiteFillEl = paw1White.cloneNode(true) as SVGPathElement;
-      whiteFillEl.setAttribute('id', 'morph-white');
-      transformWrapper.appendChild(whiteFillEl);
-      console.log('Layer 2: WHITE fill (morphs)');
+    // Layer order (bottom to top):
+    // 1. Thumb filler (behind card, in pawGroup)
+    // 2. Thumb/palm (behind card, in pawGroup)
+    // 3. Business card (static, stays in place)
+    // 4. Arm (above card, in fingersGroup - stays connected to fingers)
+    // 5. Fingers (above card, in fingersGroup - crossfade between positions)
+
+    // Add thumb filler behind card
+    if (thumbFiller) {
+      const clonedThumbFiller = thumbFiller.cloneNode(true) as Element;
+      pawGroup.appendChild(clonedThumbFiller);
     }
 
-    // 3. OUTLINE (static)
-    if (outlineGroup) {
-      const clonedOutline = outlineGroup.cloneNode(true) as Element;
-      transformWrapper.appendChild(clonedOutline);
-      console.log('Layer 3: OUTLINE (static)');
+    // Add thumb/palm behind card
+    if (thumbPalm) {
+      const clonedThumbPalm = thumbPalm.cloneNode(true) as Element;
+      pawGroup.appendChild(clonedThumbPalm);
     }
 
-    // 4. TEXT (static, top)
-    if (textGroup) {
-      const clonedText = textGroup.cloneNode(true) as Element;
-      transformWrapper.appendChild(clonedText);
-      console.log('Layer 4: TEXT (static, top)');
+    // NOTE: Arm is added to fingersGroup instead (above card, with fingers)
+    // so it stays visually connected to the fingers at the top
+
+    // Add paw group to wrapper (thumb, palm - behind card)
+    transformWrapper.appendChild(pawGroup);
+
+    // Add business card group (stays in place, above paw body but below fingers)
+    // Apply inline styles since CSS classes from source SVG don't transfer
+    if (businessCardGroup) {
+      const clonedCard = businessCardGroup.cloneNode(true) as Element;
+      clonedCard.setAttribute('id', 'svg-business-card');
+
+      // Fix card outline - white fill with dark stroke (cls-1 style)
+      const cardOutline = clonedCard.querySelector('rect');
+      if (cardOutline) {
+        cardOutline.setAttribute('fill', '#fff');
+        cardOutline.setAttribute('stroke', '#231f20');
+        cardOutline.setAttribute('stroke-width', '9');
+        cardOutline.setAttribute('stroke-miterlimit', '10');
+      }
+
+      // Fix text paths - black fill (cls-3 style)
+      const textPaths = clonedCard.querySelectorAll('path.cls-3, g path');
+      textPaths.forEach(path => {
+        path.setAttribute('fill', '#231f20');
+      });
+
+      transformWrapper.appendChild(clonedCard);
+    }
+
+    // Create separate group for fingers AND arm (will retract together, rendered on top of card)
+    // The arm connects to fingers at the top, so they must be in the same group
+    const fingersGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    fingersGroup.setAttribute('id', 'fingers-retract-group');
+
+    // Add arm to fingers group FIRST (so it renders behind fingers but above card)
+    // This keeps the arm visually connected to the fingers at the top
+    if (arm) {
+      const clonedArmForFingers = arm.cloneNode(true) as Element;
+      clonedArmForFingers.setAttribute('id', 'arm-above-card');
+      fingersGroup.appendChild(clonedArmForFingers);
+    }
+
+    // Add fingers position 1 - this will be morphed through positions 2 and 3
+    const clonedFingers = fingers1.cloneNode(true) as SVGPathElement;
+    clonedFingers.setAttribute('id', 'fingers-morphing');
+    fingersGroup.appendChild(clonedFingers);
+
+    // Get the 'd' attribute paths for morph targets
+    const fingers2PathData = fingers2.getAttribute('d');
+    const fingers3PathData = fingers3?.getAttribute('d');
+
+    // Add fingers group to wrapper (on top of everything)
+    transformWrapper.appendChild(fingersGroup);
+
+    // Copy styles from source SVG to ensure classes work
+    const sourceStyles = svgDoc.querySelector('style');
+    if (sourceStyles) {
+      const clonedStyles = sourceStyles.cloneNode(true) as Element;
+      morphSvg.insertBefore(clonedStyles, morphSvg.firstChild);
     }
 
     // Add wrapper to SVG
     morphSvg.appendChild(transformWrapper);
 
-    this.log('SVG layers: black(morph) → white(morph) → outline → text');
-
-    // Store paths for morphing
-    const paw2BlackPath = paw2Black.getAttribute('d');
-    const paw2WhitePath = paw2White?.getAttribute('d');
+    this.log('SVG layers assembled: thumbFiller → thumbPalm → card → arm + fingers');
 
     // Hide actual business card during morph animation
     businessCard.style.opacity = '0';
@@ -414,56 +284,85 @@ export class IntroAnimationModule extends BaseModule {
     this.skipHandler = this.handleKeyPress;
     document.addEventListener('keydown', this.skipHandler);
 
-    // Create morph animation timeline
+    // Create animation timeline
     this.timeline = gsap.timeline({
       onComplete: () => this.completeMorphAnimation()
     });
 
     const header = document.querySelector('.header') as HTMLElement;
 
-    // Timeline: show paw1, morph to paw2, then fade out
-    const morphDuration = 1.0;
-    const morphEase = 'power2.inOut';
+    // Animation timing
+    const clutchHold = 0.6;      // Hold while clutching
+    const releaseDuration = 0.5; // Fingers opening (1→2)
+    const openDuration = 0.4;    // Fingers fully open (2→3)
+    const retractDuration = 0.5; // Paw sliding off screen
+    const fadeEase = 'power2.inOut';
 
-    // Initial pause showing paw1
-    this.timeline.to({}, { duration: 0.8 });
+    // Phase 1: CLUTCHING - paw gripping the card (fingers position 1 visible)
+    this.timeline.to({}, { duration: clutchHold });
 
-    // Morph BLACK fill: paw1 → paw2
-    if (paw2BlackPath) {
-      this.timeline.to(blackFillEl, {
+    // Phase 2: RELEASING - morph fingers from position 1 → 2
+    if (fingers2PathData) {
+      this.timeline.to(clonedFingers, {
         morphSVG: {
-          shape: paw2BlackPath,
+          shape: fingers2PathData,
           shapeIndex: 'auto'
         },
-        duration: morphDuration,
-        ease: morphEase
+        duration: releaseDuration,
+        ease: fadeEase
       });
     }
 
-    // Morph WHITE fill: paw1 → paw2 (at same time as black)
-    if (whiteFillEl && paw2WhitePath) {
-      this.timeline.to(whiteFillEl, {
+    // Phase 3: FULLY OPEN - morph fingers from position 2 → 3
+    if (fingers3PathData) {
+      this.timeline.to(clonedFingers, {
         morphSVG: {
-          shape: paw2WhitePath,
+          shape: fingers3PathData,
           shapeIndex: 'auto'
         },
-        duration: morphDuration,
-        ease: morphEase
-      }, '<'); // '<' = same time as previous
+        duration: openDuration,
+        ease: 'power1.out'
+      });
     }
 
-    // Brief hold showing paw2
-    this.timeline.to({}, { duration: 0.6 });
+    // Brief hold showing fully released paw
+    this.timeline.to({}, { duration: 0.2 });
 
-    // Fade out overlay
-    this.timeline.to(this.morphOverlay, {
+    // Phase 4: RETRACTION - paw slides diagonally up and left off screen
+    // The arm comes from top-left, so it retracts back that direction
+    // Both pawGroup (thumb, palm, arm) and fingersGroup retract together
+    this.timeline.to(pawGroup, {
+      x: -1000,
+      y: -800,
+      duration: retractDuration,
+      ease: 'power2.in'
+    });
+
+    // Fingers retract at the same time as the rest of the paw
+    this.timeline.to(fingersGroup, {
+      x: -1000,
+      y: -800,
+      duration: retractDuration,
+      ease: 'power2.in'
+    }, '<'); // '<' = same time as previous
+
+    // Fade out the SVG card as paw retracts, reveal actual business card
+    this.timeline.to('#svg-business-card', {
       opacity: 0,
-      duration: 0.5,
+      duration: retractDuration * 0.6,
       ease: 'power2.out',
       onComplete: () => {
         // Show the actual business card
         businessCard.style.opacity = '1';
+      }
+    }, '<0.1'); // Slight delay so card doesn't disappear too early
 
+    // Fade out overlay completely
+    this.timeline.to(this.morphOverlay, {
+      opacity: 0,
+      duration: 0.4,
+      ease: 'power2.out',
+      onComplete: () => {
         // Remove intro-loading class
         document.documentElement.classList.remove('intro-loading');
         document.documentElement.classList.add('intro-complete');
