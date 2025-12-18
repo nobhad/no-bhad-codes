@@ -9,7 +9,7 @@
     "dev:server": "tsx server/app.ts",
     "dev:full": "concurrently --kill-others \"npm run dev\" \"npm run dev:server\"",
     "dev:quiet": "concurrently --kill-others -r \"npm run dev 2>/dev/null\" \"npm run dev:server\"",
-    "build": "vite build",
+    "build": "DISABLE_PROMO=true vite build",
     "build:server": "tsc server/**/*.ts --outDir dist/server --target ES2020 --module ES2020 --moduleResolution node",
     "preview": "vite preview",
     "lint": "eslint 'src/**/*.{js,ts}'",
