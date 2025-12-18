@@ -1,17 +1,21 @@
 # CSS Architecture
 
+**Last Updated:** December 17, 2025
+
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Standardized Components](#standardized-components)
-3. [CSS Variables](#css-variables)
-4. [Theme System](#theme-system)
-5. [Client Portal Classes](#client-portal-classes)
-6. [Utility Classes](#utility-classes)
-7. [Responsive Design](#responsive-design)
-8. [Naming Conventions](#naming-conventions)
-9. [File Organization](#file-organization)
-10. [Best Practices](#best-practices)
+2. [Design System](#design-system)
+3. [Standardized Components](#standardized-components)
+4. [CSS Variables](#css-variables)
+5. [Theme System](#theme-system)
+6. [Client Portal Classes](#client-portal-classes)
+7. [Utility Classes](#utility-classes)
+8. [Responsive Design](#responsive-design)
+9. [Naming Conventions](#naming-conventions)
+10. [File Organization](#file-organization)
+11. [Best Practices](#best-practices)
+12. [Known Issues](#known-issues)
 
 ---
 
@@ -19,7 +23,85 @@
 
 The project uses a CSS variable-based architecture for consistent theming across light and dark modes. The Client Portal uses the `cp-` prefix for portal-specific classes to avoid conflicts with main site styles.
 
-**Main stylesheet:** `src/styles/pages/client-portal.css` (3050 lines)
+**Design System:** `src/design-system/` (11 files, ~2,300 lines)
+**Styles Directory:** `src/styles/` (25 files, ~4,200 lines)
+
+---
+
+## Design System
+
+The design system provides the foundational tokens for the entire application.
+
+### Token Architecture
+
+| Token File | Lines | Purpose |
+|------------|-------|---------|
+| `tokens/colors.css` | 307 | Complete color system with semantic tokens |
+| `tokens/typography.css` | 284 | Type scale with fluid `clamp()` values |
+| `tokens/spacing.css` | 438 | Spacing scale and utility classes |
+| `tokens/animations.css` | 408 | Duration, easing, and keyframes |
+| `tokens/shadows.css` | 219 | Elevation system with component shadows |
+| `tokens/borders.css` | ~50 | Border radius values |
+| `tokens/breakpoints.css` | ~30 | Responsive breakpoints |
+| `tokens/z-index.css` | ~20 | Stacking context tokens |
+
+### Color Token System
+
+**Semantic Color Tokens** (Recommended usage):
+
+```css
+/* Background colors */
+--color-bg-primary
+--color-bg-secondary
+--color-bg-tertiary
+
+/* Text colors */
+--color-text-primary
+--color-text-secondary
+--color-text-tertiary
+
+/* Interactive colors */
+--color-interactive-primary
+--color-interactive-primary-hover
+
+/* Border colors */
+--color-border-primary
+--color-border-focus
+
+/* Status colors */
+--color-success-500
+--color-error-500
+--color-warning-500
+--color-info-500
+```
+
+**Brand Colors**:
+
+```css
+--color-brand-primary: #00ff41   /* Matrix green */
+--color-brand-secondary
+--color-brand-accent
+```
+
+### Import Order
+
+```css
+/* Design system must be imported first */
+@import './design-system/index.css';
+
+/* Then base styles */
+@import './styles/base/reset.css';
+@import './styles/base/typography.css';
+
+/* Then components */
+@import './styles/components/form.css';
+
+/* Then pages */
+@import './styles/pages/client-portal.css';
+
+/* Finally mobile overrides */
+@import './styles/mobile/index.css';
+```
 
 ---
 
@@ -674,9 +756,58 @@ box-shadow:
 
 ---
 
+## Known Issues
+
+**As of December 17, 2025 Code Review**
+
+### Inconsistent Token Usage
+
+The token system is well-designed but not consistently used across all files:
+
+| File | Issue |
+|------|-------|
+| `components/form.css` | Contains hardcoded colors (`rgba(0, 255, 65, 0.25)`) |
+| `pages/contact.css` | Multiple hardcoded hex values (`#fffbee`, `#ef4444`) |
+| `base/reset.css` | Line 183 uses `#00ff41` instead of token |
+| `base/typography.css` | Line 236 uses `#00ff41` instead of token |
+
+### Oversized Files
+
+| File | Lines | Recommendation |
+|------|-------|----------------|
+| `components/navigation.css` | 900+ | Split into nav-base, nav-animations, nav-mobile |
+| `components/form.css` | 374 | Split into form-fields, form-buttons, form-validation |
+| `pages/admin.css` | 1820+ | Split by admin section |
+
+### Legacy Variables
+
+The legacy variable system (`--fg`, `--bg`, `--color-neutral-*`) is still in active use alongside the new semantic tokens. These should be migrated:
+
+```css
+/* Legacy (to be migrated) */
+--fg
+--bg
+--color-neutral-100 through --color-neutral-800
+
+/* Semantic (preferred) */
+--color-text-primary
+--color-bg-primary
+--color-gray-100 through --color-gray-900
+```
+
+### Duplicate Patterns
+
+Focus state styling appears in 5+ locations and should be consolidated:
+
+- `base/reset.css:183`
+- `components/form.css:112-115`
+- `pages/contact.css:279`
+
+---
+
 ## Related Documentation
 
-- [Client Portal](./CLIENT_PORTAL.md) - Uses these styles
-- [Messages](./MESSAGES.md) - Emoji picker styling
-- [Settings](./SETTINGS.md) - Settings grid layout
-- [All Feature Docs](./README.md) - Feature-specific styling
+- [Client Portal](../features/CLIENT_PORTAL.md) - Uses these styles
+- [Messages](../features/MESSAGES.md) - Emoji picker styling
+- [Settings](../features/SETTINGS.md) - Settings grid layout
+- [All Feature Docs](../features/README.md) - Feature-specific styling
