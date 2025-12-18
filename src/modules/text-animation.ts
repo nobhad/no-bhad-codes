@@ -143,10 +143,10 @@ export class TextAnimationModule extends BaseModule {
       trigger: this.container,
       scroller: scrollContainer || undefined,
       start: 'top top',
-      end: '+=400%',  // Scroll 4x viewport height for full animation
+      end: '+=200%',  // Scroll 2x viewport height for full animation
       pin: true,
       pinSpacing: true,
-      scrub: 1,
+      scrub: 0.5,
       animation: this.timeline,
       onEnter: () => {
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation active`);
