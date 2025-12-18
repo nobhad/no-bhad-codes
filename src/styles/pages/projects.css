@@ -352,14 +352,10 @@
    ANIMATIONS - ALL CONTROLLED BY GSAP
    =============================================== */
 
-/* @keyframes spin - REMOVED: Use GSAP createSpinner() instead */
-
 /* Fade in animation for project cards */
 .project-card {
   /* Animation controlled by GSAP - see gsap-animations.ts fadeInUp() */
 }
-
-/* @keyframes fadeInUp - REMOVED: Use GSAP fadeInUp() instead */
 
 /* ===============================================
    RESPONSIVE DESIGN

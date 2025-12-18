@@ -10,6 +10,13 @@
  * - Mobile: Simple card flip (no morph overlay)
  * - Enter key skips animation
  * - Header fades in after animation completes
+ *
+ * TODO: [Code Review Dec 2025] This file is 400+ lines.
+ *       Consider extracting SVG loading/parsing into a separate
+ *       utility module (e.g., svg-loader.ts).
+ *
+ * NOTE: SVG constants below are extracted from coyote_paw.svg
+ *       Card_Outline rect. Update these if the SVG changes.
  */
 
 import { BaseModule } from './base';

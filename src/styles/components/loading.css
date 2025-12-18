@@ -31,8 +31,6 @@
   /* Animation controlled by GSAP - see gsap-animations.ts createStaticAnimation() */
 }
 
-/* @keyframes static-animation - REMOVED: Use GSAP createStaticAnimation() instead */
-
 /* Channel switch spinner */
 .channel-spinner {
   width: 60px;
@@ -42,8 +40,6 @@
   border-radius: 50%;
   /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
 }
-
-/* @keyframes channel-spin - REMOVED: Use GSAP createSpinner() instead */
 
 /* Channel number display during switch */
 .channel-switch-indicator {
@@ -65,8 +61,6 @@
   /* Animation controlled by GSAP - see gsap-animations.ts createBlink() */
 }
 
-/* @keyframes blink - REMOVED: Use GSAP createBlink() instead */
-
 /* Loading bar for content */
 .content-loading-bar {
   position: absolute;
@@ -82,8 +76,6 @@
 .content-loading-bar.active {
   /* Animation controlled by GSAP - see gsap-animations.ts animateLoadingProgress() */
 }
-
-/* @keyframes loading-progress - REMOVED: Use GSAP animateLoadingProgress() instead */
 
 /* Skeleton loader for channel content */
 .channel-skeleton {
@@ -115,10 +107,6 @@
 .skeleton-text:nth-child(3) {
   width: 60%;
 }
-
-/* @keyframes skeleton-shimmer - REMOVED: Use GSAP createSkeletonShimmer() instead */
-
-/* @keyframes skeleton-pulse - REMOVED: Use GSAP createSkeletonPulse() instead */
 
 /* Reduced motion support - GSAP respects this via gsap.matchMedia() */
 @media (prefers-reduced-motion: reduce) {

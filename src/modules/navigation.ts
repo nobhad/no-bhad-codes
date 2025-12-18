@@ -7,6 +7,9 @@
  *
  * Enhanced navigation module with client-side routing support.
  * Handles menu animations, theme switching, and route-aware navigation.
+ *
+ * TODO: [Code Review Dec 2025] Track event listeners added in
+ *       setupLinkHandlers() for proper cleanup in onDestroy().
  */
 
 import { BaseModule } from './base';
@@ -59,14 +62,14 @@ export class NavigationModule extends BaseModule {
   }
 
   protected override async onInit(): Promise<void> {
-    console.log('[NavigationModule] Starting initialization...');
+    this.log('Starting initialization...');
 
     // Detect touch device
     this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    console.log('[NavigationModule] Touch device:', this.isTouchDevice);
+    this.log('Touch device:', this.isTouchDevice);
 
     await this.cacheElements();
-    console.log('[NavigationModule] Elements cached, RouterService:', !!this.routerService);
+    this.log('Elements cached, RouterService:', !!this.routerService);
     this.setupEventListeners();
     this.setupStateSubscriptions();
     this.setupAnimations();
@@ -76,7 +79,7 @@ export class NavigationModule extends BaseModule {
     // Initialize submenu functionality
     this.submenuModule = new SubmenuModule({ debug: this.options.debug || false });
     await this.submenuModule.init();
-    console.log('[NavigationModule] Initialization complete');
+    this.log('Initialization complete');
   }
 
   /**
@@ -107,22 +110,16 @@ export class NavigationModule extends BaseModule {
 
     // Menu links - only handle submenu toggles and close menu on valid link clicks
     if (this.menuLinks) {
-      console.log(
-        '[NavigationModule] Setting up click handlers for',
-        this.menuLinks.length,
-        'menu links'
-      );
+      this.log('Setting up click handlers for', this.menuLinks.length, 'menu links');
 
       // Setup touch handling for mobile - tap once to animate, tap again to navigate
       if (this.isTouchDevice) {
         this.setupTouchHandlers();
       }
 
-      this.menuLinks.forEach((link, index) => {
+      this.menuLinks.forEach((link) => {
         const linkHref = (link as HTMLAnchorElement).getAttribute('href');
-        console.log('[NavigationModule] Link', index, 'href:', linkHref);
         this.addEventListener(link as Element, 'click', (event: Event) => {
-          console.log('[NavigationModule] Click handler fired for:', linkHref);
 
           // On touch devices, handle tap-to-animate behavior
           if (this.isTouchDevice && !link.classList.contains('touch-active')) {
@@ -155,20 +152,12 @@ export class NavigationModule extends BaseModule {
               const isHomePage =
                 currentPath === '/' || currentPath === '/index.html' || currentPath === '';
 
-              console.log(
-                '[NavigationModule] Hash link clicked:',
-                href,
-                'isHomePage:',
-                isHomePage,
-                'hasRouter:',
-                !!this.routerService
-              );
+              this.log('Hash link clicked:', href, 'isHomePage:', isHomePage);
 
               // Small delay to let menu close animation start
               setTimeout(() => {
                 if (isHomePage) {
                   // If already on home page, just scroll to section
-                  console.log('[NavigationModule] Navigating to section:', href);
                   if (this.routerService) {
                     this.routerService.navigate(href, { smooth: true });
                   } else {
@@ -181,7 +170,6 @@ export class NavigationModule extends BaseModule {
                   }
                 } else {
                   // If on another page, navigate to home page with hash
-                  console.log('[NavigationModule] Redirecting to home with hash:', `/${href}`);
                   window.location.href = `/${href}`;
                 }
               }, 100);

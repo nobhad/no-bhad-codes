@@ -302,14 +302,10 @@ body[data-page="client-intake"] .terminal-window {
   /* Animation controlled by GSAP - see gsap-animations.ts createCursorBlink() */
 }
 
-/* @keyframes cursor-blink - REMOVED: Use GSAP createCursorBlink() instead */
-
 /* Hide the dots, we're using cursor instead */
 .typing-indicator span {
   display: none;
 }
-
-/* @keyframes blink - REMOVED: Use GSAP createBlink() instead */
 
 /* ============================================================================
    INPUT AREA
@@ -350,8 +346,6 @@ input.terminal-input {
 .terminal-input-area input::placeholder {
   color: var(--color-terminal-text-dimmer);
 }
-
-/* @keyframes caret-blink - REMOVED: Use GSAP createCursorBlink() instead */
 
 /* Hide native caret - using custom block cursor instead */
 .terminal-input,
@@ -675,5 +669,3 @@ html[data-theme="light"] .terminal-intake {
   pointer-events: none;
   mix-blend-mode: overlay;
 }
-
-/* @keyframes avatar-flicker - REMOVED: Use GSAP createAvatarFlicker() instead */

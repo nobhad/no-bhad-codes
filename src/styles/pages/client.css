@@ -1427,8 +1427,6 @@ html[data-theme="dark"] .login-form {
    ANIMATIONS - ALL CONTROLLED BY GSAP
    =============================================== */
 
-/* @keyframes spin - REMOVED: Use GSAP createSpinner() instead */
-
 /* ===============================================
    RESPONSIVE - MATCHES MAIN PAGE BREAKPOINTS
    =============================================== */

@@ -5,6 +5,14 @@
  * @file src/admin/admin-security.ts
  *
  * Additional security measures for the admin dashboard.
+ *
+ * SECURITY NOTE: [Code Review Dec 2025]
+ * - localStorage is used for rate limiting data (login attempts).
+ *   This is client-side only and can be bypassed. For production,
+ *   consider server-side rate limiting with proper IP tracking.
+ * - DevTools detection (detectDevTools) is easily bypassed and
+ *   should not be relied upon for actual security.
+ * - This module provides defense-in-depth, not primary security.
  */
 
 export class AdminSecurity {

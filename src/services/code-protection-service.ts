@@ -25,6 +25,12 @@
  * This service provides runtime protection features, but most are disabled
  * by default as they are user-hostile and easily bypassed.
  * Use build-time obfuscation instead.
+ *
+ * NOTE: [Code Review Dec 2025] teardownProtection() properly removes
+ *       event listeners using stored handler references. However,
+ *       Function.prototype.toString override in setupAntiDebugging()
+ *       is not restored on teardown. This is acceptable since protection
+ *       is disabled by default and anti-debugging is user-hostile.
  */
 
 export interface CodeProtectionConfig {

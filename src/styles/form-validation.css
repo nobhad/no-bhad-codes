@@ -56,8 +56,6 @@
   /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
 }
 
-/* @keyframes spin - REMOVED: Use GSAP createSpinner() instead */
-
 /* ===============================================
    FORM COMPLETION VALIDATION
    =============================================== */
