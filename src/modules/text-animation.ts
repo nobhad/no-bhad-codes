@@ -155,48 +155,57 @@ export class TextAnimationModule extends BaseModule {
       }
     };
 
-    // 2 second hold at animation boundaries (both mobile and desktop)
+    // Hold at animation boundaries (both mobile and desktop)
     let isHolding = false;
-    let hasTriggeredEndHold = false;
-    let hasTriggeredStartHold = false;
-    const HOLD_DURATION = 2000; // 2 seconds
+    const HOLD_DURATION = 100; // 0.1 seconds
 
-    const triggerHold = (direction: 'end' | 'start') => {
+    // Store original styles to restore after hold
+    let savedContainerStyles: { overflow: string; overflowY: string; touchAction: string } | null = null;
+    let savedBodyStyles: { overflow: string; touchAction: string } | null = null;
+
+    const triggerHold = (position: 'start' | 'end') => {
       if (isHolding) return;
 
       isHolding = true;
-      this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Starting ${HOLD_DURATION}ms hold at ${direction}`);
+      this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Starting ${HOLD_DURATION}ms hold at ${position}`);
 
-      // Prevent scrolling during hold
+      // Mobile: block container scroll. Desktop: block body scroll only
       if (isMobile && scrollContainer) {
         const container = scrollContainer as HTMLElement;
+        savedContainerStyles = {
+          overflow: container.style.overflow,
+          overflowY: container.style.overflowY,
+          touchAction: container.style.touchAction
+        };
         container.style.overflow = 'hidden';
         container.style.touchAction = 'none';
-        document.body.style.overflow = 'hidden';
-        document.body.style.touchAction = 'none';
-      } else {
-        // Desktop: prevent window scroll
-        document.body.style.overflow = 'hidden';
       }
+
+      savedBodyStyles = {
+        overflow: document.body.style.overflow,
+        touchAction: document.body.style.touchAction
+      };
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
 
       setTimeout(() => {
         isHolding = false;
-        if (isMobile && scrollContainer) {
-          const container = scrollContainer as HTMLElement;
-          container.style.overflow = '';
-          container.style.overflowY = 'scroll';
-          container.style.touchAction = '';
-          document.body.style.overflow = '';
-          document.body.style.touchAction = '';
-        } else {
-          // Desktop: restore window scroll
-          document.body.style.overflow = '';
-        }
-        this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Hold complete, scroll re-enabled`);
 
-        // Reset triggers after hold completes
-        if (direction === 'end') hasTriggeredEndHold = false;
-        if (direction === 'start') hasTriggeredStartHold = false;
+        // Restore container styles (mobile only)
+        if (isMobile && scrollContainer && savedContainerStyles) {
+          const container = scrollContainer as HTMLElement;
+          container.style.overflow = savedContainerStyles.overflow;
+          container.style.overflowY = savedContainerStyles.overflowY;
+          container.style.touchAction = savedContainerStyles.touchAction;
+        }
+
+        // Restore body styles
+        if (savedBodyStyles) {
+          document.body.style.overflow = savedBodyStyles.overflow;
+          document.body.style.touchAction = savedBodyStyles.touchAction;
+        }
+
+        this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Hold complete, scroll re-enabled`);
       }, HOLD_DURATION);
     };
 
@@ -212,19 +221,6 @@ export class TextAnimationModule extends BaseModule {
       pinSpacing: !isMobile,
       scrub: scrubValue,
       animation: this.timeline,
-      onUpdate: (self) => {
-        // Trigger hold at animation boundaries (both mobile and desktop)
-        // At end of animation (progress >= 0.98) when scrolling down
-        if (self.progress >= 0.98 && !hasTriggeredEndHold && self.direction === 1) {
-          hasTriggeredEndHold = true;
-          triggerHold('end');
-        }
-        // At start of animation when scrolling backwards (progress <= 0.02)
-        if (self.progress <= 0.02 && !hasTriggeredStartHold && self.direction === -1) {
-          hasTriggeredStartHold = true;
-          triggerHold('start');
-        }
-      },
       onEnter: () => {
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation active`);
         setScrollSnap(false);
@@ -232,14 +228,19 @@ export class TextAnimationModule extends BaseModule {
       onLeave: () => {
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation complete`);
         setScrollSnap(true);
+        // Hold AFTER animation completes (scrolling down)
+        triggerHold('end');
       },
       onEnterBack: () => {
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation reversing`);
         setScrollSnap(false);
       },
       onLeaveBack: () => {
+        console.log('>>> onLeaveBack FIRED <<<', { isMobile, isHolding });
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Section left backwards`);
         setScrollSnap(true);
+        // Hold AFTER reverse animation completes (scrolling up)
+        triggerHold('start');
       }
     });
     this.log(`Animation initialized - scroll-driven on ${isMobile ? 'mobile' : 'desktop'}`);
