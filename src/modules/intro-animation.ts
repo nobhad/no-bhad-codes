@@ -5,15 +5,108 @@
  * @file src/modules/intro-animation.ts
  * @extends BaseModule
  *
- * DESIGN:
- * - Desktop: Paw morph animation with aligned business card
- * - Mobile: Simple card flip (no morph overlay)
- * - Enter key skips animation
- * - Header fades in after animation completes
+ * OVERVIEW:
+ * This module creates a stylized coyote paw intro animation where
+ * the paw clutches a business card, releases it with morphing fingers,
+ * and retracts diagonally off-screen, leaving the card in place.
  *
- * TODO: [Code Review Dec 2025] This file is 400+ lines.
- *       Consider extracting SVG loading/parsing into a separate
- *       utility module (e.g., svg-loader.ts).
+ * DESIGN:
+ * - Desktop: Full paw morph animation with SVG path morphing
+ * - Mobile: Simple card flip fallback (no paw overlay)
+ * - Enter key skips animation at any point
+ * - Header fades in after animation completes
+ * - Animation only plays once per session (stored in sessionStorage)
+ *
+ * ANIMATION SEQUENCE (Desktop):
+ * ┌─────────────────────────────────────────────────────────────────┐
+ * │ Phase 0: ENTRY (0.8s)                                           │
+ * │   - Paw + card enter from top-left (-800, -600)                 │
+ * │   - Animate to center position (0, 0)                           │
+ * │   - All layers move together: behindCardGroup, aboveCardGroup,  │
+ * │     and svg-business-card                                       │
+ * ├─────────────────────────────────────────────────────────────────┤
+ * │ Phase 1: CLUTCH HOLD (0.8s)                                     │
+ * │   - Paw grips the card motionless                               │
+ * │   - Fingers visible in Position 1 (clutching)                   │
+ * │   - Thumb is hidden (not visible until release)                 │
+ * ├─────────────────────────────────────────────────────────────────┤
+ * │ Phase 2: FINGER RELEASE (0.5s)                                  │
+ * │   - All fingers morph simultaneously: Position 1 → Position 2  │
+ * │   - Thumb appears instantly (opacity 0 → 1) behind card         │
+ * │   - Fingers are still over the card during this phase           │
+ * ├─────────────────────────────────────────────────────────────────┤
+ * │ Phase 3: RETRACTION + FINAL MORPH (1.6s)                        │
+ * │   - Starts 0.02s after Phase 2 completes                        │
+ * │   - Paw retracts diagonally to top-left (-1500, -1200)          │
+ * │   - All fingers morph: Position 2 → Position 3 (fully open)    │
+ * │   - Finger A: 0.08s, Finger B: 0.08s, Finger C: 0.2s            │
+ * │   - Morphs complete while fingers still visible over card       │
+ * ├─────────────────────────────────────────────────────────────────┤
+ * │ Phase 4: COMPLETION                                             │
+ * │   - Paw fully exits off-screen (no fade, just movement)         │
+ * │   - Actual business card remains visible underneath             │
+ * │   - Overlay becomes non-interactive (pointer-events: none)      │
+ * │   - Header fades in                                             │
+ * │   - intro-complete class added to document                      │
+ * └─────────────────────────────────────────────────────────────────┘
+ *
+ * SVG STRUCTURE (coyote_paw.svg):
+ * The SVG contains multiple position states for morphing:
+ *
+ *   Arm_Base     - The arm/forearm (behind card, retracts with paw)
+ *   Position_1   - Fingers A, B, C in clutching position (NO thumb)
+ *   Position_2   - Fingers A, B, C releasing + Thumb appears
+ *   Position_3   - Fingers A, B, C fully open + Thumb
+ *   Card         - Business card rectangle (stays in place)
+ *
+ * LAYER ORDER (bottom to top):
+ *   1. behindCardGroup (retracts)
+ *      - Arm_Base
+ *      - Thumb (from Position_2, starts hidden)
+ *   2. svg-business-card (stays in place, then hidden)
+ *   3. aboveCardGroup (retracts)
+ *      - Fingers from Position_1 (morph during animation)
+ *
+ * FINGER PATH IDs:
+ *   Position 1 (morph source):
+ *     - Finger A: #_1_Morph_Above_Card_-_Fingers_
+ *     - Finger B: #_FInger_B_-_Above_Card_ (group) → path inside
+ *     - Finger C: #_FInger_C-_Above_Card_ (group) → path inside
+ *
+ *   Position 2 (morph target):
+ *     - Finger A: #_FInger_A_-_Above_Card_-2
+ *     - Finger B: #_FInger_B-_Above_Card_
+ *     - Finger C: #_FInger_C_-_Above_Card_
+ *     - Thumb:    #_Thumb_Behind_Card_
+ *
+ *   Position 3 (morph target):
+ *     - Finger A: #_FInger_A_-_Above_Card_-3
+ *     - Finger B: #_FInger_B-_Above_Card_-2
+ *     - Finger C: #_FInger_C_-_Above_Card_-2
+ *     - Thumb:    #_Thumb_Behind_Card_-2
+ *
+ * ALIGNMENT:
+ * The SVG is scaled and positioned to align perfectly with the actual
+ * business card element on the page. The alignment formula:
+ *
+ *   scale = actualCardRect.width / SVG_CARD_WIDTH
+ *   translateX = actualCardRect.left - (SVG_CARD_X * scale)
+ *   translateY = actualCardRect.top - (SVG_CARD_Y * scale)
+ *
+ * SKIP CONDITIONS:
+ * The animation is skipped when:
+ *   1. sessionStorage.getItem('introShown') === 'true'
+ *   2. prefers-reduced-motion: reduce is set
+ *   3. Required SVG elements not found (falls back to card flip)
+ *   4. User presses Enter key during animation
+ *
+ * DEPENDENCIES:
+ *   - GSAP Core: Animation timeline and transforms
+ *   - MorphSVGPlugin: SVG path morphing (GSAP premium plugin)
+ *
+ * RELATED FILES:
+ *   - public/images/coyote_paw.svg - SVG artwork with all positions
+ *   - docs/design/COYOTE_PAW_ANIMATION.md - Design documentation
  *
  * NOTE: SVG constants below are extracted from coyote_paw.svg
  *       Card_Outline rect. Update these if the SVG changes.
@@ -24,39 +117,75 @@ import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import type { ModuleOptions } from '../types/modules';
 
-// Register MorphSVG plugin
+// Register MorphSVG plugin with GSAP
 gsap.registerPlugin(MorphSVGPlugin);
 
-// SVG file containing all paw variations (cache bust with timestamp)
+// ============================================================================
+// SVG CONSTANTS
+// ============================================================================
+// These values are extracted from coyote_paw.svg and must be updated
+// if the SVG card position or dimensions change.
+// ============================================================================
+
+/** SVG file path with cache-busting timestamp */
 const PAW_SVG = `/images/coyote_paw.svg?v=${Date.now()}`;
 
-// SVG card position/dimensions (from coyote_paw.svg Card_Outline)
-// Card rect: x="1256.15" y="1031.85" width="1062.34" height="591.3"
+/** X position of card rectangle in SVG coordinates */
 const SVG_CARD_X = 1256.15;
+
+/** Y position of card rectangle in SVG coordinates */
 const SVG_CARD_Y = 1031.85;
+
+/** Width of card rectangle in SVG coordinates */
 const SVG_CARD_WIDTH = 1062.34;
+
+/** Height of card rectangle in SVG coordinates (unused but kept for reference) */
 const _SVG_CARD_HEIGHT = 591.3;
-const _SVG_VIEWBOX_WIDTH = 2316.99;  // Full viewBox width
-const _SVG_VIEWBOX_HEIGHT = 1801.19; // Full viewBox height
+
+/** Full SVG viewBox width (unused but kept for reference) */
+const _SVG_VIEWBOX_WIDTH = 2316.99;
+
+/** Full SVG viewBox height (unused but kept for reference) */
+const _SVG_VIEWBOX_HEIGHT = 1801.19;
+
+// ============================================================================
+// INTRO ANIMATION MODULE CLASS
+// ============================================================================
 
 export class IntroAnimationModule extends BaseModule {
+  /** GSAP timeline controlling the animation sequence */
   private timeline: gsap.core.Timeline | null = null;
+
+  /** Flag indicating if animation has completed or been skipped */
   private isComplete = false;
+
+  /** Keyboard event handler for Enter key skip functionality */
   private skipHandler: ((event: KeyboardEvent) => void) | null = null;
+
+  /** Reference to the overlay element containing the SVG animation */
   private morphOverlay: HTMLElement | null = null;
 
   constructor(options: ModuleOptions = {}) {
     super('IntroAnimationModule', { debug: true, ...options });
 
-    // Bind methods
+    // Bind methods to maintain correct 'this' context
     this.handleSkip = this.handleSkip.bind(this);
     this.handleKeyPress = this.handleKeyPress.bind(this);
   }
 
+  /**
+   * Initialize the intro animation module
+   *
+   * Checks device type, session state, and motion preferences before
+   * deciding which animation to run (or whether to skip entirely).
+   */
   override async init(): Promise<void> {
     await super.init();
 
-    // MOBILE: Ensure header is visible from the very start (no intro effect on header)
+    // ========================================================================
+    // MOBILE HEADER FIX
+    // On mobile, ensure header is visible from the start (no intro effect)
+    // ========================================================================
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
     if (isMobile) {
       const header = document.querySelector('.header') as HTMLElement;
@@ -70,7 +199,10 @@ export class IntroAnimationModule extends BaseModule {
       }
     }
 
-    // Check if intro has already been shown this session
+    // ========================================================================
+    // SESSION CHECK
+    // Skip animation if already shown this browser session
+    // ========================================================================
     const introShown = sessionStorage.getItem('introShown');
     if (introShown === 'true') {
       this.log('Intro already shown this session - skipping');
@@ -78,7 +210,10 @@ export class IntroAnimationModule extends BaseModule {
       return;
     }
 
-    // Check for reduced motion preference
+    // ========================================================================
+    // REDUCED MOTION CHECK
+    // Respect user's motion preferences for accessibility
+    // ========================================================================
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) {
       this.log('Reduced motion preferred - skipping animation');
@@ -86,12 +221,15 @@ export class IntroAnimationModule extends BaseModule {
       return;
     }
 
+    // ========================================================================
+    // RUN APPROPRIATE ANIMATION
+    // Desktop: Full paw morph animation
+    // Mobile: Simple card flip fallback
+    // ========================================================================
     try {
       if (isMobile) {
-        // Mobile: Simple card flip only
         this.runCardFlip();
       } else {
-        // Desktop: Paw morph animation
         await this.runMorphAnimation();
       }
     } catch (error) {
@@ -101,11 +239,26 @@ export class IntroAnimationModule extends BaseModule {
   }
 
   /**
-   * Run paw morph animation (desktop only)
-   * Animation: fingers morph from position 1 → 2, then paw retracts diagonally up
+   * Run the full paw morph animation (desktop only)
+   *
+   * This is the main animation method that:
+   * 1. Loads and parses the SVG file
+   * 2. Assembles layers in correct z-order
+   * 3. Aligns SVG card with actual business card
+   * 4. Creates GSAP timeline with all animation phases
+   * 5. Executes the animation sequence
+   *
+   * Animation phases:
+   * - Entry: Paw enters from top-left
+   * - Clutch: Paw holds card motionless
+   * - Release: Fingers morph from position 1 to 2
+   * - Retract: Paw exits while fingers morph to position 3
    */
   private async runMorphAnimation(): Promise<void> {
-    // Scroll to top - reset both window and main container
+    // ========================================================================
+    // SCROLL RESET
+    // Ensure page is at top before animation starts
+    // ========================================================================
     const mainContainer = document.querySelector('main') as HTMLElement;
     if (mainContainer) {
       mainContainer.scrollTop = 0;
@@ -114,7 +267,10 @@ export class IntroAnimationModule extends BaseModule {
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
 
-    // Get overlay elements
+    // ========================================================================
+    // GET OVERLAY ELEMENTS
+    // These are placeholder elements in the HTML that we'll populate
+    // ========================================================================
     this.morphOverlay = document.getElementById('intro-morph-overlay');
     const morphSvg = document.getElementById('intro-morph-svg') as SVGSVGElement | null;
     const morphPaw = document.getElementById('morph-paw');
@@ -126,7 +282,10 @@ export class IntroAnimationModule extends BaseModule {
       return;
     }
 
-    // Get the actual business card element for alignment
+    // ========================================================================
+    // GET BUSINESS CARD FOR ALIGNMENT
+    // We need to align the SVG card with the actual DOM element
+    // ========================================================================
     const businessCard = document.getElementById('business-card');
     if (!businessCard) {
       this.log('Business card element not found, falling back to card flip');
@@ -134,15 +293,20 @@ export class IntroAnimationModule extends BaseModule {
       return;
     }
 
-    // Load SVG and extract elements
+    // ========================================================================
+    // LOAD AND PARSE SVG
+    // Fetch the SVG file and parse it into a DOM structure
+    // ========================================================================
     this.log('Loading SVG file...');
     const response = await fetch(PAW_SVG);
     const svgText = await response.text();
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
 
-    // Get paw elements using actual IDs from coyote_paw.svg
-    // New structure: Arm_Base, Position_1, Position_2, Position_3, Card groups
+    // ========================================================================
+    // EXTRACT SVG ELEMENTS
+    // Get references to the key groups in the SVG structure
+    // ========================================================================
     const armBase = svgDoc.getElementById('Arm_Base');
     const position1 = svgDoc.getElementById('Position_1');
     const position2 = svgDoc.getElementById('Position_2');
@@ -157,131 +321,180 @@ export class IntroAnimationModule extends BaseModule {
 
     this.log('Loaded SVG elements: armBase, position1, position2, position3, cardGroup');
 
-    // Get business card screen position for pixel-perfect alignment
+    // ========================================================================
+    // CALCULATE ALIGNMENT
+    // Scale and position SVG to match the actual business card on screen
+    // ========================================================================
     const cardRect = businessCard.getBoundingClientRect();
     const cardFront = businessCard.querySelector('.business-card-front') as HTMLElement;
     const actualCardRect = cardFront ? cardFront.getBoundingClientRect() : cardRect;
 
-    // Calculate uniform scale based on card width (proportions preserved)
+    // Uniform scale based on card width (preserves aspect ratio)
     const scale = actualCardRect.width / SVG_CARD_WIDTH;
 
-    // ViewBox matches viewport - we'll scale content uniformly with transform
+    // Set viewBox to match viewport for proper positioning
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     morphSvg.setAttribute('viewBox', `0 0 ${viewportWidth} ${viewportHeight}`);
     morphSvg.setAttribute('preserveAspectRatio', 'none');
 
-    // Calculate translation: position scaled SVG card to match screen card position
+    // Calculate translation to align SVG card with screen position
     const translateX = actualCardRect.left - (SVG_CARD_X * scale);
     const translateY = actualCardRect.top - (SVG_CARD_Y * scale);
 
     this.log('Alignment:', { scale, translateX, translateY });
 
-    // Remove existing placeholder elements from morphSvg
+    // ========================================================================
+    // PREPARE SVG CONTAINER
+    // Remove placeholder elements, we'll add our own structure
+    // ========================================================================
     morphSvg.removeChild(morphCardGroup);
     morphSvg.removeChild(morphPaw);
 
-    // Create wrapper for all layers - this will be animated for the retraction
+    // ========================================================================
+    // CREATE LAYER STRUCTURE
+    // Build the SVG layer hierarchy for proper z-ordering
+    //
+    // Layer order (bottom to top):
+    //   1. behindCardGroup - Arm and thumb (behind card, retracts)
+    //   2. svg-business-card - Card graphic (stays in place)
+    //   3. aboveCardGroup - Fingers (above card, retracts)
+    // ========================================================================
+
+    // Main wrapper with transform for scaling and positioning
     const transformWrapper = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     transformWrapper.setAttribute('id', 'intro-layers-wrapper');
     transformWrapper.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${scale})`);
 
-    // Create group for elements that will retract together
-    const pawGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    pawGroup.setAttribute('id', 'paw-retract-group');
+    // Group for elements BEHIND the card (arm + thumb)
+    const behindCardGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    behindCardGroup.setAttribute('id', 'behind-card-group');
 
-    // Layer order (bottom to top):
-    // 1. Arm base (behind everything)
-    // 2. Position groups (crossfade between 1, 2, 3)
-    // 3. Business card (static, stays in place - added last so it's on top)
+    // Group for elements ABOVE the card (fingers)
+    const aboveCardGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    aboveCardGroup.setAttribute('id', 'above-card-group');
 
-    // Add arm base (behind card)
+    // ========================================================================
+    // ASSEMBLE BEHIND-CARD LAYER
+    // ========================================================================
+
+    // Add arm base (behind card, retracts with paw)
     if (armBase) {
       const clonedArm = armBase.cloneNode(true) as Element;
       clonedArm.setAttribute('id', 'arm-group');
-      pawGroup.appendChild(clonedArm);
+      behindCardGroup.appendChild(clonedArm);
     }
 
-    // Add position 1 (clutching) - visible initially
-    const clonedPos1 = position1.cloneNode(true) as Element;
-    clonedPos1.setAttribute('id', 'position-1');
-    pawGroup.appendChild(clonedPos1);
-
-    // Add position 2 (releasing) - hidden initially
-    const clonedPos2 = position2.cloneNode(true) as Element;
-    clonedPos2.setAttribute('id', 'position-2');
-    clonedPos2.setAttribute('opacity', '0');
-    pawGroup.appendChild(clonedPos2);
-
-    // Add position 3 (fully open) - hidden initially
-    let clonedPos3: Element | null = null;
-    if (position3) {
-      clonedPos3 = position3.cloneNode(true) as Element;
-      clonedPos3.setAttribute('id', 'position-3');
-      clonedPos3.setAttribute('opacity', '0');
-      pawGroup.appendChild(clonedPos3);
+    // Add thumb from Position 2 (behind card, starts hidden)
+    // Thumb appears instantly when fingers start releasing
+    const thumbElement = position2.querySelector('#_Thumb_Behind_Card_');
+    let clonedThumb: Element | null = null;
+    if (thumbElement) {
+      clonedThumb = thumbElement.cloneNode(true) as Element;
+      clonedThumb.setAttribute('id', 'thumb-behind-card');
+      (clonedThumb as SVGSVGElement).style.opacity = '0'; // Hidden initially
+      behindCardGroup.appendChild(clonedThumb);
     }
 
-    // Add paw group to wrapper
-    transformWrapper.appendChild(pawGroup);
+    // Add behind-card group to wrapper (layer 1)
+    transformWrapper.appendChild(behindCardGroup);
 
-    // Add business card group (stays in place, on top of paw)
+    // ========================================================================
+    // ASSEMBLE CARD LAYER
+    // ========================================================================
+
+    // Add business card graphic (stays in place, layer 2)
     if (cardGroup) {
       const clonedCard = cardGroup.cloneNode(true) as Element;
       clonedCard.setAttribute('id', 'svg-business-card');
       transformWrapper.appendChild(clonedCard);
     }
 
-    // Copy styles from source SVG to ensure classes work
+    // ========================================================================
+    // ASSEMBLE ABOVE-CARD LAYER
+    // ========================================================================
+
+    // Add fingers from Position 1 (above card, visible initially)
+    // These will morph to Position 2, then Position 3
+    const clonedPos1 = position1.cloneNode(true) as Element;
+    clonedPos1.setAttribute('id', 'position-1');
+    aboveCardGroup.appendChild(clonedPos1);
+
+    // Add above-card group to wrapper (layer 3 - top)
+    transformWrapper.appendChild(aboveCardGroup);
+
+    // ========================================================================
+    // COPY SVG STYLES
+    // Ensure CSS classes from source SVG work in our assembled structure
+    // ========================================================================
     const sourceStyles = svgDoc.querySelector('style');
     if (sourceStyles) {
       const clonedStyles = sourceStyles.cloneNode(true) as Element;
       morphSvg.insertBefore(clonedStyles, morphSvg.firstChild);
     }
 
-    // Add wrapper to SVG
+    // Add completed wrapper to the SVG element
     morphSvg.appendChild(transformWrapper);
 
-    this.log('SVG layers assembled: thumbFiller → thumbPalm → card → arm + fingers');
+    this.log('SVG layers assembled: arm → thumb → card → fingers');
 
-    // Hide actual business card during morph animation
-    businessCard.style.opacity = '0';
+    // ========================================================================
+    // BUSINESS CARD VISIBILITY
+    // Keep actual business card visible underneath SVG
+    // This prevents flash when SVG card is hidden at end
+    // ========================================================================
+    // (No hiding needed - card stays visible)
 
-    // Setup Enter key to skip animation
+    // ========================================================================
+    // SETUP SKIP HANDLER
+    // Allow user to skip animation by pressing Enter
+    // ========================================================================
     this.skipHandler = this.handleKeyPress;
     document.addEventListener('keydown', this.skipHandler);
 
-    // Create animation timeline
+    // ========================================================================
+    // CREATE ANIMATION TIMELINE
+    // Main GSAP timeline that orchestrates all animation phases
+    // ========================================================================
     this.timeline = gsap.timeline({
       onComplete: () => this.completeMorphAnimation()
     });
 
     const header = document.querySelector('.header') as HTMLElement;
 
-    // Animation timing
-    const clutchHold = 0.6;      // Hold while clutching
-    const releaseDuration = 0.5; // Fingers opening (1→2)
-    const openDuration = 0.4;    // Fingers fully open (2→3)
-    const retractDuration = 0.5; // Paw sliding off screen
+    // ========================================================================
+    // ANIMATION TIMING CONSTANTS
+    // All durations in seconds
+    // ========================================================================
+    const entryDuration = 0.8;   // Phase 0: Paw + card entering from top-left
+    const clutchHold = 0.8;      // Phase 1: Hold while clutching (motionless)
+    const releaseDuration = 0.5; // Phase 2: Fingers morphing 1→2
+    const _openDuration = 0.6;   // Phase 3: Fingers morphing 2→3 (unused, individual timings below)
+    const retractDuration = 1.6; // Phase 3: Paw sliding off screen
     const fadeEase = 'power2.inOut';
 
-    // Get finger paths from each position for morphing
-    // Position 1: Fingers are in groups, need to select path inside
+    // ========================================================================
+    // GET FINGER PATH REFERENCES
+    // We need references to finger paths in each position for morphing
+    // ========================================================================
+
+    // Position 1: Fingers in clutching pose (morph SOURCE)
+    // Note: Some fingers are in groups, need to select path inside
     const fingerA1 = clonedPos1.querySelector('#_1_Morph_Above_Card_-_Fingers_') as SVGPathElement;
     const fingerB1 = clonedPos1.querySelector('[id="_FInger_B_-_Above_Card_"] path') as SVGPathElement;
     const fingerC1 = clonedPos1.querySelector('[id="_FInger_C-_Above_Card_"] path') as SVGPathElement;
 
-    // Position 2: Paths have direct IDs
+    // Position 2: Fingers releasing (morph TARGET 1)
     const fingerA2 = position2.querySelector('#_FInger_A_-_Above_Card_-2') as SVGPathElement;
     const fingerB2 = position2.querySelector('#_FInger_B-_Above_Card_') as SVGPathElement;
     const fingerC2 = position2.querySelector('#_FInger_C_-_Above_Card_') as SVGPathElement;
 
-    // Position 3: Paths have direct IDs
+    // Position 3: Fingers fully open (morph TARGET 2)
     const fingerA3 = position3?.querySelector('#_FInger_A_-_Above_Card_-3') as SVGPathElement;
     const fingerB3 = position3?.querySelector('#_FInger_B-_Above_Card_-2') as SVGPathElement;
     const fingerC3 = position3?.querySelector('#_FInger_C_-_Above_Card_-2') as SVGPathElement;
 
-    // Get path data for morph targets
+    // Extract path data (the 'd' attribute) for morph targets
     const fingerA2PathData = fingerA2?.getAttribute('d');
     const fingerA3PathData = fingerA3?.getAttribute('d');
     const fingerB2PathData = fingerB2?.getAttribute('d');
@@ -289,10 +502,50 @@ export class IntroAnimationModule extends BaseModule {
     const fingerC2PathData = fingerC2?.getAttribute('d');
     const fingerC3PathData = fingerC3?.getAttribute('d');
 
-    // Phase 1: CLUTCHING - paw gripping the card (position 1 visible)
+    // ========================================================================
+    // PHASE 0: ENTRY
+    // Paw and card enter from top-left, animate to center
+    // ========================================================================
+
+    // Set initial position off-screen (top-left corner)
+    gsap.set(behindCardGroup, { x: -800, y: -600 });
+    gsap.set(aboveCardGroup, { x: -800, y: -600 });
+    gsap.set('#svg-business-card', { x: -800, y: -600 });
+
+    // Animate all layers to center position (0, 0)
+    // All three animations run simultaneously with '<' position marker
+    this.timeline.to(behindCardGroup, {
+      x: 0,
+      y: 0,
+      duration: entryDuration,
+      ease: 'power2.out'
+    });
+    this.timeline.to(aboveCardGroup, {
+      x: 0,
+      y: 0,
+      duration: entryDuration,
+      ease: 'power2.out'
+    }, '<'); // '<' means start at same time as previous
+    this.timeline.to('#svg-business-card', {
+      x: 0,
+      y: 0,
+      duration: entryDuration,
+      ease: 'power2.out'
+    }, '<');
+
+    // ========================================================================
+    // PHASE 1: CLUTCH HOLD
+    // Paw grips the card motionless
+    // ========================================================================
     this.timeline.to({}, { duration: clutchHold });
 
-    // Phase 2: RELEASING - morph all fingers from position 1 → 2
+    // ========================================================================
+    // PHASE 2: FINGER RELEASE (Position 1 → Position 2)
+    // All fingers morph simultaneously while still over the card
+    // Thumb appears instantly when release begins
+    // ========================================================================
+
+    // Finger A: Position 1 → 2
     if (fingerA1 && fingerA2PathData) {
       this.timeline.to(fingerA1, {
         morphSVG: { shape: fingerA2PathData, shapeIndex: 'auto' },
@@ -300,90 +553,121 @@ export class IntroAnimationModule extends BaseModule {
         ease: fadeEase
       });
     }
+
+    // Finger B: Position 1 → 2 (simultaneous with A)
     if (fingerB1 && fingerB2PathData) {
       this.timeline.to(fingerB1, {
         morphSVG: { shape: fingerB2PathData, shapeIndex: 'auto' },
         duration: releaseDuration,
         ease: fadeEase
-      }, '<'); // Same time as finger A
+      }, '<');
     }
+
+    // Finger C: Position 1 → 2 (simultaneous with A and B)
     if (fingerC1 && fingerC2PathData) {
       this.timeline.to(fingerC1, {
         morphSVG: { shape: fingerC2PathData, shapeIndex: 'auto' },
         duration: releaseDuration,
         ease: fadeEase
-      }, '<'); // Same time as finger A
+      }, '<');
     }
 
-    // Phase 3: FULLY OPEN - morph all fingers from position 2 → 3
+    // Thumb: Appear instantly when fingers start releasing
+    // No fade - instant visibility change
+    if (clonedThumb) {
+      this.timeline.set(clonedThumb, { opacity: 1 }, '<');
+    }
+
+    // ========================================================================
+    // PHASE 3: RETRACTION + FINAL MORPH
+    // Paw retracts diagonally to top-left while fingers complete morphing
+    // ========================================================================
+
+    // Start retraction 0.02s after Phase 2 completes
+    // Retract to (-1500, -1200) - far off-screen to prevent any flash
+    this.timeline.to(behindCardGroup, {
+      x: -1500,
+      y: -1200,
+      duration: retractDuration,
+      ease: 'power2.in' // Accelerate as it exits
+    }, '+=0.02');
+
+    // Above-card group retracts simultaneously
+    this.timeline.to(aboveCardGroup, {
+      x: -1500,
+      y: -1200,
+      duration: retractDuration,
+      ease: 'power2.in'
+    }, '<');
+
+    // ========================================================================
+    // FINAL FINGER MORPHS (Position 2 → Position 3)
+    // All fingers morph to fully open position during retraction
+    // Individual timings for natural feel:
+    //   - Finger A: 0.08s (fastest)
+    //   - Finger B: 0.08s (fast)
+    //   - Finger C: 0.2s (slowest, trails behind)
+    // ========================================================================
+
+    // Finger A: Position 2 → 3 (during retraction)
     if (fingerA1 && fingerA3PathData) {
       this.timeline.to(fingerA1, {
         morphSVG: { shape: fingerA3PathData, shapeIndex: 'auto' },
-        duration: openDuration,
+        duration: 0.08,
         ease: 'power1.out'
-      });
+      }, '<');
     }
+
+    // Finger B: Position 2 → 3 (during retraction)
     if (fingerB1 && fingerB3PathData) {
       this.timeline.to(fingerB1, {
         morphSVG: { shape: fingerB3PathData, shapeIndex: 'auto' },
-        duration: openDuration,
+        duration: 0.08,
         ease: 'power1.out'
       }, '<');
     }
+
+    // Finger C: Position 2 → 3 (during retraction, slightly slower)
     if (fingerC1 && fingerC3PathData) {
       this.timeline.to(fingerC1, {
         morphSVG: { shape: fingerC3PathData, shapeIndex: 'auto' },
-        duration: openDuration,
+        duration: 0.2,
         ease: 'power1.out'
       }, '<');
     }
 
-    // Brief hold showing fully released paw
-    this.timeline.to({}, { duration: 0.2 });
+    // ========================================================================
+    // PHASE 4: COMPLETION
+    // After retraction, update classes and animate header
+    // IMPORTANT: No hiding of elements to prevent flash
+    // The paw simply exits off-screen naturally
+    // ========================================================================
+    this.timeline.call(() => {
+      // Remove loading state, add complete state
+      document.documentElement.classList.remove('intro-loading');
+      document.documentElement.classList.add('intro-complete');
 
-    // Phase 4: RETRACTION - paw slides diagonally up and left off screen
-    // The arm comes from top-left, so it retracts back that direction
-    this.timeline.to(pawGroup, {
-      x: -1000,
-      y: -800,
-      duration: retractDuration,
-      ease: 'power2.in'
-    });
-
-    // Fade out the SVG card as paw retracts, reveal actual business card
-    this.timeline.to('#svg-business-card', {
-      opacity: 0,
-      duration: retractDuration * 0.6,
-      ease: 'power2.out',
-      onComplete: () => {
-        // Show the actual business card
-        businessCard.style.opacity = '1';
+      // Make overlay non-interactive but don't change visibility
+      // This prevents any flash from hiding/showing elements
+      if (this.morphOverlay) {
+        this.morphOverlay.style.pointerEvents = 'none';
       }
-    }, '<0.1'); // Slight delay so card doesn't disappear too early
 
-    // Fade out overlay completely
-    this.timeline.to(this.morphOverlay, {
-      opacity: 0,
-      duration: 0.4,
-      ease: 'power2.out',
-      onComplete: () => {
-        // Remove intro-loading class
-        document.documentElement.classList.remove('intro-loading');
-        document.documentElement.classList.add('intro-complete');
-
-        // Fade in header content
-        if (header) {
-          this.animateHeaderIn(header);
-        }
+      // Fade in header content
+      if (header) {
+        this.animateHeaderIn(header);
       }
     });
   }
 
   /**
-   * Complete morph animation and clean up
+   * Complete the morph animation and clean up
+   *
+   * Called when the GSAP timeline completes. Hides the overlay
+   * and triggers the common intro completion logic.
    */
   private completeMorphAnimation(): void {
-    // Hide overlay completely
+    // Hide overlay completely after animation finishes
     if (this.morphOverlay) {
       this.morphOverlay.style.visibility = 'hidden';
     }
@@ -392,18 +676,23 @@ export class IntroAnimationModule extends BaseModule {
   }
 
   /**
-   * Animate header content in (desktop only)
+   * Animate header content fading in
+   *
+   * Uses a proxy object to animate opacity across all header children,
+   * then removes inline styles to restore CSS control.
+   *
+   * @param header - The header element to animate
    */
   private animateHeaderIn(header: HTMLElement): void {
     const headerChildren = header.children;
 
-    // Set initial state
+    // Set initial state - invisible but in layout
     Array.from(headerChildren).forEach((child) => {
       (child as HTMLElement).style.setProperty('opacity', '0', 'important');
       (child as HTMLElement).style.setProperty('visibility', 'visible', 'important');
     });
 
-    // Animate with proxy
+    // Animate using a proxy object for clean updates
     const proxy = { opacity: 0 };
     gsap.to(proxy, {
       opacity: 1,
@@ -419,6 +708,7 @@ export class IntroAnimationModule extends BaseModule {
         });
       },
       onComplete: () => {
+        // Remove inline styles to restore CSS control
         Array.from(headerChildren).forEach((child) => {
           (child as HTMLElement).style.removeProperty('opacity');
           (child as HTMLElement).style.removeProperty('visibility');
@@ -428,7 +718,10 @@ export class IntroAnimationModule extends BaseModule {
   }
 
   /**
-   * Skip intro immediately (for returning visitors in same session)
+   * Skip intro immediately without any animation
+   *
+   * Used for returning visitors (same session) and users
+   * who prefer reduced motion. Sets all final states directly.
    */
   private skipIntroImmediately(): void {
     this.isComplete = true;
@@ -449,6 +742,7 @@ export class IntroAnimationModule extends BaseModule {
       businessCard.style.opacity = '1';
     }
 
+    // Reset card to front-facing position (no flip)
     const cardInner = document.getElementById('business-card-inner');
     if (cardInner) {
       cardInner.style.transition = 'none';
@@ -464,7 +758,9 @@ export class IntroAnimationModule extends BaseModule {
   }
 
   /**
-   * Handle keyboard input (Enter to skip)
+   * Handle keyboard input for skip functionality
+   *
+   * @param event - Keyboard event
    */
   private handleKeyPress(event: KeyboardEvent): void {
     if (event.key === 'Enter' && !this.isComplete) {
@@ -474,6 +770,9 @@ export class IntroAnimationModule extends BaseModule {
 
   /**
    * Skip to end of animation
+   *
+   * Jumps the timeline to 100% progress, triggering all
+   * onComplete callbacks immediately.
    */
   private handleSkip(): void {
     if (this.timeline && !this.isComplete) {
@@ -485,15 +784,19 @@ export class IntroAnimationModule extends BaseModule {
 
   /**
    * Run card flip animation (mobile fallback)
+   *
+   * A simpler animation for mobile devices that doesn't use
+   * the paw overlay. Shows the card back briefly, then flips
+   * to reveal the front.
    */
   private runCardFlip(): void {
-    // Hide morph overlay on mobile
+    // Hide morph overlay on mobile (not used)
     const morphOverlay = document.getElementById('intro-morph-overlay');
     if (morphOverlay) {
       morphOverlay.classList.add('hidden');
     }
 
-    // Scroll to top - reset both window and main container
+    // Scroll to top
     const mainContainer = document.querySelector('main') as HTMLElement;
     if (mainContainer) {
       mainContainer.scrollTop = 0;
@@ -511,7 +814,7 @@ export class IntroAnimationModule extends BaseModule {
 
     const cardContainer = cardInner.parentElement;
 
-    // Set initial state - showing back
+    // Set initial state - showing back of card
     cardInner.style.transition = 'none';
     cardInner.style.transform = 'rotateY(180deg)';
 
@@ -555,6 +858,12 @@ export class IntroAnimationModule extends BaseModule {
 
   /**
    * Complete the intro and clean up
+   *
+   * Common completion logic for all animation paths:
+   * - Sets sessionStorage to prevent replay
+   * - Ensures all content is visible
+   * - Cleans up event listeners
+   * - Updates app state
    */
   private completeIntro(): void {
     if (this.isComplete) return;
@@ -574,7 +883,7 @@ export class IntroAnimationModule extends BaseModule {
       businessCard.style.opacity = '1';
     }
 
-    // Scroll to top - reset both window and main container
+    // Scroll to top
     const mainContainer = document.querySelector('main') as HTMLElement;
     if (mainContainer) {
       mainContainer.scrollTop = 0;
@@ -583,7 +892,7 @@ export class IntroAnimationModule extends BaseModule {
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
 
-    // Add intro-finished after transition completes
+    // Add intro-finished class after transition completes
     setTimeout(() => {
       document.documentElement.classList.add('intro-finished');
     }, 600);
@@ -594,14 +903,16 @@ export class IntroAnimationModule extends BaseModule {
       this.skipHandler = null;
     }
 
-    // Update app state
+    // Update app state if available
     if (typeof window !== 'undefined' && (window as any).NBW_STATE) {
       (window as any).NBW_STATE.setState({ introAnimating: false });
     }
   }
 
   /**
-   * Get current status
+   * Get current module status
+   *
+   * @returns Status object with completion state and timeline progress
    */
   override getStatus() {
     return {
@@ -613,6 +924,9 @@ export class IntroAnimationModule extends BaseModule {
 
   /**
    * Cleanup method
+   *
+   * Kills the GSAP timeline and removes event listeners
+   * when the module is destroyed.
    */
   override async destroy(): Promise<void> {
     if (this.timeline) {
