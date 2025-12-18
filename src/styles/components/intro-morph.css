@@ -35,10 +35,10 @@
   visibility: hidden;
 }
 
-/* Dark theme support */
-html[data-theme="dark"] .intro-morph-overlay {
-  background-color: var(--color-dark);
-}
+/* Dark theme support - uses --color-neutral-300 which is theme-aware:
+ * Light: #e0e0e0 (matches light mode page background)
+ * Dark: #2a2a2a (matches dark mode page background)
+ * No override needed since base rule uses the theme-aware variable */
 
 /* SVG Container - absolute positioning, no viewBox scaling */
 .intro-morph-svg {

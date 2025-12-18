@@ -658,9 +658,31 @@ const getConnectionType = (): 'slow-2g' | '2g' | '3g' | '4g' | 'unknown' => {
   return 'unknown';
 };
 
+/**
+ * Get initial theme based on priority:
+ * 1. User's explicit preference (localStorage)
+ * 2. System preference (prefers-color-scheme)
+ * 3. Default to 'light'
+ */
+const getInitialTheme = (): 'light' | 'dark' => {
+  // Check for user's explicit preference in localStorage
+  const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+  if (savedTheme === 'light' || savedTheme === 'dark') {
+    return savedTheme;
+  }
+
+  // Check system preference
+  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return 'dark';
+  }
+
+  // Default to light
+  return 'light';
+};
+
 // Default initial state
 const initialState: AppState = {
-  theme: (localStorage.getItem('theme') as 'light' | 'dark') || 'light',
+  theme: getInitialTheme(),
   navOpen: false,
   currentSection: null,
   introComplete: false,
@@ -774,6 +796,20 @@ if ('connection' in navigator) {
     });
   });
 }
+
+// System theme preference change listener
+// Only auto-update if user hasn't set an explicit preference
+const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+darkModeMediaQuery.addEventListener('change', (e) => {
+  // Only respond to system changes if user hasn't set explicit preference
+  const savedTheme = localStorage.getItem('theme');
+  if (!savedTheme) {
+    appState.dispatch({
+      type: 'SET_THEME',
+      payload: e.matches ? 'dark' : 'light'
+    });
+  }
+});
 
 // Reducers for network events
 appState.addReducer('NETWORK_STATUS_CHANGED', (_state, action) => {
