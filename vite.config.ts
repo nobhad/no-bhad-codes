@@ -153,6 +153,7 @@ export default defineConfig({
     }),
 
     // Code obfuscation for production builds (uses javascript-obfuscator)
+    // NOTE: encryptStrings disabled - breaks Rollup dynamic import placeholders
     createObfuscationPlugin({
       enabled: process.env.NODE_ENV === 'production',
       level: 'standard', // Options: basic, standard, advanced, maximum
@@ -161,7 +162,7 @@ export default defineConfig({
         minifyHTML: true,
         obfuscateJS: true,
         obfuscateCSS: false,
-        encryptStrings: true,
+        encryptStrings: false, // DISABLED: breaks dynamic imports (visitor-tracking-!~{00f}~.js)
         antiDebugTraps: false, // Enable for anti-debugging protection
         fakeSourceMaps: false,
         polymorphicCode: false,
