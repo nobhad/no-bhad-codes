@@ -119,8 +119,22 @@ export class ContactAnimationModule extends BaseModule {
     });
 
     // ========================================================================
-    // LEFT SIDE FIRST - Heading, contact options, card
+    // SECTION CENTERS AND SETTLES
     // ========================================================================
+    this.timeline.from(this.container, {
+      y: 50,
+      opacity: 0.8,
+      duration: 0.4,
+      ease: 'back.out(1.5)'
+    });
+
+    // Brief pause while section is centered
+    this.timeline.to({}, { duration: 0.3 });
+
+    // ========================================================================
+    // LEFT SIDE - All elements slide in together
+    // ========================================================================
+    const leftLabel = 'leftSlide';
 
     // Heading slides in from left
     if (heading) {
@@ -129,7 +143,7 @@ export class ContactAnimationModule extends BaseModule {
         opacity: 0,
         duration: TEXT_DURATION,
         ease: 'power2.out'
-      });
+      }, leftLabel);
     }
 
     // Contact options slides in from left
@@ -139,7 +153,7 @@ export class ContactAnimationModule extends BaseModule {
         opacity: 0,
         duration: TEXT_DURATION,
         ease: 'power2.out'
-      }, '-=0.5');
+      }, leftLabel);
     }
 
     // Card column slides in from left
@@ -149,7 +163,7 @@ export class ContactAnimationModule extends BaseModule {
         opacity: 0,
         duration: CARD_DURATION,
         ease: 'power3.out'
-      }, '-=0.4');
+      }, leftLabel);
     }
 
     // Business card slides in from left with 3D rotation
@@ -160,7 +174,7 @@ export class ContactAnimationModule extends BaseModule {
         rotateY: 15,
         duration: CARD_DURATION,
         ease: 'power3.out'
-      }, '<');
+      }, leftLabel);
 
       // Setup click handler for manual card flip
       this.setupCardClickHandler(businessCard as HTMLElement);
@@ -330,11 +344,20 @@ export class ContactAnimationModule extends BaseModule {
       // Button rolls back into place, spinning as it rolls (like a wheel)
       // Rotation must end at original position: +180 (knock) - 540 (roll) = -360 (full circle back to start)
       if (submitButton) {
+        // Roll most of the way
+        this.timeline.to(submitButton, {
+          x: 20,
+          rotation: '-=500',
+          duration: 1.8,
+          ease: 'linear'
+        });
+
+        // Snap into final position
         this.timeline.to(submitButton, {
           x: 0,
-          rotation: '-=540', // 1.5 rotations to end arrow in correct position
-          duration: 2,
-          ease: 'linear' // Linear so spin matches movement
+          rotation: '-=40',
+          duration: 0.15,
+          ease: 'back.out(2)'
         });
       }
     }
@@ -348,12 +371,12 @@ export class ContactAnimationModule extends BaseModule {
     this.scrollTrigger = ScrollTrigger.create({
       trigger: this.container,
       scroller: scrollContainer || undefined,
-      start: 'top 90%', // Start when top of section hits 90% down viewport (earlier trigger)
+      start: 'top center', // Start when section is centered in viewport
       end: 'bottom top',
       toggleActions: 'play none none reverse', // play on enter, reverse on leave back
       animation: this.timeline,
       onEnter: () => {
-        this.log('Contact section entered viewport - playing animation');
+        this.log('Contact section centered in viewport - playing animation');
       },
       onLeaveBack: () => {
         this.log('Contact section left viewport backwards');
