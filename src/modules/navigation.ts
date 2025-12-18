@@ -180,7 +180,6 @@ export class NavigationModule extends BaseModule {
 
               // Small delay to let menu close animation start, then navigate
               setTimeout(() => {
-                console.log('[NavigationModule] Navigating to:', href);
                 window.location.href = href;
               }, 100);
             }
@@ -501,7 +500,7 @@ export class NavigationModule extends BaseModule {
       }
     });
 
-    console.log('[NavigationModule] Touch handlers initialized');
+    this.log('Touch handlers initialized');
   }
 
   /**
@@ -514,8 +513,6 @@ export class NavigationModule extends BaseModule {
     // Set new active link
     link.classList.add('touch-active');
     this.activeTouchLink = link;
-
-    console.log('[NavigationModule] Touch-active set on:', (link as HTMLAnchorElement).href);
   }
 
   /**
