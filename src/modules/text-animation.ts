@@ -91,14 +91,15 @@ export class TextAnimationModule extends BaseModule {
       paused: true
     });
 
-    // Hold duration at start and end (for both scroll directions)
+    // Hold durations - keep minimal, actual pause is time-based (2 sec)
     // Higher value = more scroll distance before/after animation plays
-    const holdDuration = 6;
+    const startHold = isMobile ? 2 : 6;
+    const endHold = isMobile ? 2 : 6;
 
     // Add hold at the start for reverse scroll
-    this.timeline.to({}, { duration: holdDuration });
+    this.timeline.to({}, { duration: startHold });
 
-    // Add skew animation to timeline
+    // Add skew animation to timeline (same animation for mobile and desktop)
     this.timeline.fromTo(
       [leftGroup, rightGroup],
       {
@@ -136,29 +137,105 @@ export class TextAnimationModule extends BaseModule {
     });
 
     // Add hold at the end (creates pause after animation completes)
-    this.timeline.to({}, { duration: holdDuration });
+    // Mobile: longer rest period before transitioning to next section
+    this.timeline.to({}, { duration: endHold });
 
     // Both mobile and desktop use scroll-driven animation with pinning
+    const scrollDistance = isMobile ? '+=200%' : '+=200%';
+
+    // Mobile needs smoother scrub for touch scrolling
+    const scrubValue = isMobile ? 1.5 : 0.5;
+
+    // MOBILE: Keep scroll-snap disabled entirely to prevent conflicts
+    // Scroll-snap fights with GSAP and causes jumping/looping behavior
+    const setScrollSnap = (_enabled: boolean) => {
+      // No-op on mobile - keep scroll-snap disabled
+      if (isMobile) {
+        return; // Do nothing on mobile
+      }
+    };
+
+    // Mobile: 2 second hold at animation end (both directions)
+    let isHolding = false;
+    let hasTriggeredEndHold = false;
+    let hasTriggeredStartHold = false;
+    const HOLD_DURATION = 2000; // 2 seconds
+
+    const triggerHold = (direction: 'end' | 'start') => {
+      if (!isMobile || isHolding) return;
+
+      isHolding = true;
+      this.log(`Mobile: Starting ${HOLD_DURATION}ms hold at ${direction}`);
+
+      // Prevent ALL scrolling on mobile during hold
+      if (scrollContainer) {
+        const container = scrollContainer as HTMLElement;
+        container.style.overflow = 'hidden';
+        container.style.touchAction = 'none';
+        document.body.style.overflow = 'hidden';
+        document.body.style.touchAction = 'none';
+      }
+
+      setTimeout(() => {
+        isHolding = false;
+        if (scrollContainer) {
+          const container = scrollContainer as HTMLElement;
+          container.style.overflow = '';
+          container.style.overflowY = 'scroll';
+          container.style.touchAction = '';
+          document.body.style.overflow = '';
+          document.body.style.touchAction = '';
+        }
+        this.log('Mobile: Hold complete, scroll re-enabled');
+
+        // Reset triggers after hold completes
+        if (direction === 'end') hasTriggeredEndHold = false;
+        if (direction === 'start') hasTriggeredStartHold = false;
+      }, HOLD_DURATION);
+    };
+
+    // Mobile: start when centered, Desktop: start at top
+    const startPosition = isMobile ? 'center center' : 'top top';
+
     this.scrollTrigger = ScrollTrigger.create({
       trigger: this.container,
       scroller: scrollContainer || undefined,
-      start: 'top top',
-      end: '+=200%',  // Scroll 2x viewport height for full animation
-      pin: true,
-      pinSpacing: true,
-      scrub: 0.5,
+      start: startPosition,
+      end: scrollDistance,
+      pin: !isMobile, // Disable pinning on mobile - causes scroll issues
+      pinSpacing: !isMobile,
+      scrub: scrubValue,
       animation: this.timeline,
+      onUpdate: (self) => {
+        // Mobile: trigger hold at animation boundaries
+        if (isMobile) {
+          // At end of animation (progress >= 0.98)
+          if (self.progress >= 0.98 && !hasTriggeredEndHold && self.direction === 1) {
+            hasTriggeredEndHold = true;
+            triggerHold('end');
+          }
+          // At start of animation when scrolling backwards (progress <= 0.02)
+          if (self.progress <= 0.02 && !hasTriggeredStartHold && self.direction === -1) {
+            hasTriggeredStartHold = true;
+            triggerHold('start');
+          }
+        }
+      },
       onEnter: () => {
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation active`);
+        setScrollSnap(false);
       },
       onLeave: () => {
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation complete`);
+        setScrollSnap(true);
       },
       onEnterBack: () => {
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation reversing`);
+        setScrollSnap(false);
       },
       onLeaveBack: () => {
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Section left backwards`);
+        setScrollSnap(true);
       }
     });
     this.log(`Animation initialized - scroll-driven on ${isMobile ? 'mobile' : 'desktop'}`);

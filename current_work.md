@@ -10,12 +10,12 @@ Full codebase review completed across all TypeScript and CSS files.
 
 ### Critical Issues Found
 
-| File | Issue | Severity |
-|------|-------|----------|
-| `src/modules/navigation.ts` | 15+ console.log calls, untracked event listeners | CRITICAL |
-| `src/modules/intro-animation.ts` | 400+ lines, hardcoded SVG paths | CRITICAL |
-| `src/services/code-protection-service.ts` | Event listener cleanup will fail, memory leaks | CRITICAL |
-| `src/features/admin/admin-security.ts` | localStorage for auth data, bypassable devtools detection | CRITICAL |
+| File | Issue | Severity | Status |
+|------|-------|----------|--------|
+| `src/modules/navigation.ts` | 15+ console.log calls, untracked event listeners | CRITICAL | FIXED |
+| `src/modules/intro-animation.ts` | 400+ lines, hardcoded SVG paths | CRITICAL | Pending |
+| `src/services/code-protection-service.ts` | Event listener cleanup will fail, memory leaks | CRITICAL | FIXED |
+| `src/features/admin/admin-security.ts` | localStorage for auth data, bypassable devtools detection | CRITICAL | PARTIAL (client portal migrated to HttpOnly cookies) |
 
 ### Files Needing Attention
 
@@ -145,14 +145,21 @@ Fixed 3 issues that could crash the application:
 
 ---
 
+## Concerns
+
+- [ ] Intro animation not displaying with coyote paw
+
+---
+
 ## TODOs
 
 ### Critical (From Code Review - December 17, 2025)
 
 - [x] Remove 15+ console.log calls from `navigation.ts` (December 17, 2025)
 - [x] Fix event listener cleanup in `code-protection-service.ts` (December 17, 2025)
+- [x] Migrate client portal auth to HttpOnly cookies (December 17, 2025)
 - [ ] Refactor `intro-animation.ts` - extract hardcoded SVG paths to config
-- [ ] Improve `admin-security.ts` - localStorage is not secure for auth data
+- [ ] Migrate admin auth to HttpOnly cookies (remaining admin modules)
 
 ### Features
 
@@ -188,6 +195,66 @@ Fixed 3 issues that could crash the application:
 ---
 
 ## Active Work
+
+### HttpOnly Cookie Auth Migration - COMPLETE (December 17, 2025)
+
+**Status**: Complete (Client Portal)
+**Date**: December 17, 2025
+
+**Summary**: Migrated client portal authentication from sessionStorage tokens to HttpOnly cookies for XSS protection.
+
+**Security Improvement**:
+
+- JWT tokens now stored in HttpOnly cookies (not accessible via JavaScript)
+- Prevents XSS attacks from stealing auth tokens
+- Server middleware supports both cookies and Authorization header (backward compatible)
+
+**Server Changes**:
+
+| File | Change |
+|------|--------|
+| `server/app.ts` | Added `cookie-parser` middleware |
+| `server/utils/auth-constants.ts` | Added `COOKIE_CONFIG` with secure cookie options |
+| `server/routes/auth.ts` | Set HttpOnly cookies on login, clear on logout |
+| `server/middleware/auth.ts` | Read from cookies OR Authorization header |
+
+**Client Changes**:
+
+| File | Change |
+|------|--------|
+| `src/services/auth-service.ts` | Removed token storage, added `credentials: 'include'` |
+| `src/features/client/client-portal.ts` | Changed to `client_auth_mode` (demo/authenticated), credentials: include |
+| `src/features/client/modules/portal-files.ts` | Updated fetch calls with credentials: include |
+| `src/features/client/modules/portal-messages.ts` | Updated fetch calls with credentials: include |
+| `src/features/client/modules/portal-invoices.ts` | Updated fetch calls with credentials: include |
+
+**Cookie Configuration**:
+
+```typescript
+COOKIE_CONFIG = {
+  AUTH_TOKEN_NAME: 'auth_token',
+  USER_OPTIONS: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 7 days,
+    path: '/',
+  },
+  ADMIN_OPTIONS: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 1 hour,
+    path: '/',
+  },
+}
+```
+
+**Remaining Work**:
+
+- Admin dashboard modules still use Authorization headers (lower priority)
+
+---
 
 ### Visitor Tracking System - COMPLETE (December 17, 2025)
 
@@ -301,41 +368,44 @@ Fixed 3 issues that could crash the application:
 
 ---
 
-### Infinite Scroll Implementation - IN PROGRESS
+### Infinite Scroll Implementation - DESKTOP ONLY (December 17, 2025)
 
-**Status**: In Progress
-**Date**: December 11, 2025
+**Status**: Complete (Desktop Only)
+**Date**: December 17, 2025
 
-**Summary**: Implementing infinite scroll that loops back to the top when reaching the bottom of the page.
+**Summary**: Infinite scroll loops back to top when reaching bottom. Desktop only - explicitly disabled on mobile.
 
 **Current Implementation**:
 
 - Created `InfiniteScrollModule` in `src/modules/infinite-scroll.ts`
-- Desktop only (disabled on mobile)
+- **Desktop only** - triple protection ensures disabled on mobile
 - Detects when user scrolls to bottom of main container
 - Instant jump back to top (no overlay/fade)
 - Added empty buffer section after contact for smoother transition
 
-**Problem**: After loop, business card starts centered and scrolls up - doesn't feel seamless.
+**Mobile Protection** (added December 17, 2025):
+
+```typescript
+// In init():
+const isMobile = window.matchMedia('(max-width: 767px)').matches || window.innerWidth <= 767;
+if (isMobile) {
+  this.isEnabled = false;
+  return;
+}
+
+// In handleScroll(), loopToStart(), loopToEnd():
+if (window.innerWidth <= 767) return;
+if (!this.isEnabled) return;
+```
 
 **Concerns**:
 
-- [ ] **Infinite scroll needs to work on mobile** - Currently disabled, needs implementation
-- [ ] **Loop-trigger-zone awkward space** - Need to figure out what content/design to fill the gap between contact section and loop trigger
-
-**Options to Consider**:
-
-1. Clone ending content at top
-2. Start scrolled partway down after loop
-3. Add buffer section at TOP
-4. Reverse scroll direction
-5. Fade transition on business card only
-
-**Current Approach**: Trying Option 2 first.
+- [x] ~~Infinite scroll needs to work on mobile~~ - Intentionally disabled, conflicts with GSAP
+- [ ] **Loop-trigger-zone awkward space** - Need to figure out what content/design to fill the gap
 
 **Files Modified**:
 
-- `src/modules/infinite-scroll.ts`
+- `src/modules/infinite-scroll.ts` - Triple mobile protection
 - `src/core/app.ts`
 - `src/styles/base/layout.css`
 - `index.html`
@@ -421,22 +491,45 @@ Fixed 3 issues that could crash the application:
 
 ---
 
-### Hero Section Animation - PARTIALLY FIXED
+### Hero Section Animation - FIXED (December 17, 2025)
 
-**Status**: Partially Fixed (Known Issue Remains)
+**Status**: Fixed
 **Date**: December 17, 2025
 
-**Fixes Applied**:
-- Enabled pinning on all screen sizes so animation completes before scrolling resumes
-- Increased scroll distance to 400% for slower animation playback
-- Scaled down text on mobile from 2.5 to 2.2 for better proportions
+**Summary**: Mobile text animation now works smoothly without pinning conflicts.
 
-**Known Issue**:
-- [ ] Animation still slightly jumpy on mobile - needs further investigation
+**Mobile Configuration**:
+
+| Setting | Value | Reason |
+|---------|-------|--------|
+| Pinning | Disabled | Conflicts with mobile fixed scroll container |
+| Scroll-snap | Disabled entirely | Fights with GSAP ScrollTrigger |
+| Start position | `center center` | Animation starts when text is centered in viewport |
+| Scroll distance | `+=200%` | Same as desktop |
+| Scrub | 1.5 | Smoother touch scrolling (desktop: 0.5) |
+| Hold durations | 2 (start/end) | Brief pause before/after animation |
+
+**2-Second Hold at Animation End**:
+- Triggers when animation progress reaches 98% (end) or 2% (start)
+- Blocks scrolling with `touch-action: none` and `overflow: hidden`
+- Works in both scroll directions
+
+**CSS Changes** (`src/styles/mobile/layout.css`):
+
+```css
+main {
+  scroll-snap-type: none; /* Disabled for GSAP compatibility */
+}
+
+.hero-section {
+  scroll-snap-align: none; /* GSAP controls this section */
+}
+```
 
 **Files Modified**:
-- `src/modules/text-animation.ts`
-- `src/styles/mobile/layout.css`
+
+- `src/modules/text-animation.ts` - Mobile-specific animation config
+- `src/styles/mobile/layout.css` - Disabled scroll-snap, centering fixes
 
 ---
 

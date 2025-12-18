@@ -57,9 +57,11 @@ export class InfiniteScrollModule extends BaseModule {
     await super.init();
 
     // MOBILE: Disable infinite scroll completely
-    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    // Check both media query AND actual viewport width for reliability
+    const isMobile = window.matchMedia('(max-width: 767px)').matches || window.innerWidth <= 767;
     if (isMobile) {
-      this.log('Mobile detected - infinite scroll disabled');
+      this.log(`Mobile detected (viewport: ${window.innerWidth}px) - infinite scroll disabled`);
+      this.isEnabled = false; // Force disable
       return;
     }
 
@@ -120,7 +122,9 @@ export class InfiniteScrollModule extends BaseModule {
    * Handle scroll events to detect bottom or top
    */
   private handleScroll(): void {
-    if (!this.container || this.isTransitioning) return;
+    // Double-check mobile - never run on mobile
+    if (window.innerWidth <= 767) return;
+    if (!this.container || this.isTransitioning || !this.isEnabled) return;
 
     const scrollTop = this.container.scrollTop;
     const scrollHeight = this.container.scrollHeight;
@@ -166,7 +170,9 @@ export class InfiniteScrollModule extends BaseModule {
    * 3. User scrolls naturally, card comes up from below
    */
   private loopToStart(): void {
-    if (!this.container || this.isTransitioning) return;
+    // Never loop on mobile
+    if (window.innerWidth <= 767) return;
+    if (!this.container || this.isTransitioning || !this.isEnabled) return;
 
     this.isTransitioning = true;
     this.log('Looping to start...');
@@ -206,7 +212,9 @@ export class InfiniteScrollModule extends BaseModule {
    * 4. User scrolls up naturally, contact comes down from above
    */
   private loopToEnd(): void {
-    if (!this.container || this.isTransitioning) return;
+    // Never loop on mobile
+    if (window.innerWidth <= 767) return;
+    if (!this.container || this.isTransitioning || !this.isEnabled) return;
 
     this.isTransitioning = true;
     this.log('Looping to end...');
