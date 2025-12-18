@@ -209,16 +209,16 @@ export class TextAnimationModule extends BaseModule {
       }, HOLD_DURATION);
     };
 
-    // Mobile: start when centered, Desktop: start at top
-    const startPosition = isMobile ? 'center center' : 'top top';
+    // Mobile: start at top, Desktop: start at top
+    const startPosition = 'top top';
 
     this.scrollTrigger = ScrollTrigger.create({
       trigger: this.container,
       scroller: scrollContainer || undefined,
       start: startPosition,
       end: scrollDistance,
-      pin: !isMobile, // Disable pinning on mobile - causes scroll issues
-      pinSpacing: !isMobile,
+      pin: true, // Pin on both mobile and desktop so animation completes before scroll continues
+      pinSpacing: true,
       scrub: scrubValue,
       animation: this.timeline,
       onEnter: () => {
