@@ -26,10 +26,13 @@
  * by default as they are user-hostile and easily bypassed.
  * Use build-time obfuscation instead.
  *
- * NOTE: [Code Review Dec 2025] teardownProtection() properly removes
- *       event listeners using stored handler references. However,
+ * NOTE: teardownProtection() properly cleans up:
+ *       - Event listeners (stored handler references)
+ *       - MutationObserver (disconnected)
+ *       - Console.log override (restored)
+ *       - Protection intervals (cleared)
  *       Function.prototype.toString override in setupAntiDebugging()
- *       is not restored on teardown. This is acceptable since protection
+ *       is not restored on teardown - acceptable since protection
  *       is disabled by default and anti-debugging is user-hostile.
  */
 
@@ -86,6 +89,10 @@ export class CodeProtectionService {
   private devToolsOpen = false;
   private debuggerDetected = false;
   private integrityCompromised = false;
+
+  // Cleanup references
+  private domObserver: MutationObserver | null = null;
+  private originalConsoleLog: typeof console.log | null = null;
 
   constructor(config: Partial<CodeProtectionConfig> = {}) {
     // Default to non-hostile protection only
@@ -209,7 +216,8 @@ export class CodeProtectionService {
   private setupDevToolsBlocking(): void {
     // Method 1: Console message detection
     let consoleCount = 0;
-    const originalLog = console.log;
+    this.originalConsoleLog = console.log;
+    const originalLog = this.originalConsoleLog;
     console.log = (...args) => {
       consoleCount++;
       if (consoleCount > 2 && !this.devToolsOpen) {
@@ -366,7 +374,12 @@ export class CodeProtectionService {
    * DOM mutation protection
    */
   private setupDomProtection(): void {
-    const observer = new MutationObserver((mutations) => {
+    // Disconnect existing observer if any
+    if (this.domObserver) {
+      this.domObserver.disconnect();
+    }
+
+    this.domObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         // Detect suspicious DOM modifications
         if (mutation.type === 'childList') {
@@ -384,7 +397,7 @@ export class CodeProtectionService {
       });
     });
 
-    observer.observe(document.documentElement, {
+    this.domObserver.observe(document.documentElement, {
       childList: true,
       subtree: true,
       attributes: true
@@ -543,6 +556,18 @@ export class CodeProtectionService {
   private teardownProtection(): void {
     // Restore original console
     Object.assign(console, this.originalConsole);
+
+    // Restore console.log if it was overridden by devtools blocking
+    if (this.originalConsoleLog) {
+      console.log = this.originalConsoleLog;
+      this.originalConsoleLog = null;
+    }
+
+    // Disconnect DOM mutation observer
+    if (this.domObserver) {
+      this.domObserver.disconnect();
+      this.domObserver = null;
+    }
 
     // Remove protection elements
     const protectionElement = document.getElementById('__protection_element__');
