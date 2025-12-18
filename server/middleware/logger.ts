@@ -6,6 +6,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+import { logger as loggerService } from '../services/logger.js';
 
 // Remove sensitive data from logged request bodies
 const sanitizeBody = (body: any): any => {
@@ -32,22 +33,25 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 
   // Log request
   const hasBody = req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0;
-  console.log(`🔄 ${req.method} ${req.path}`, {
-    timestamp: new Date().toISOString(),
-    ip: req.ip,
-    userAgent: req.get('User-Agent'),
-    ...(hasBody && {
-      body: sanitizeBody(req.body),
-    }),
+  loggerService.info(`${req.method} ${req.path}`, {
+    category: 'request',
+    metadata: {
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      ...(hasBody && { body: sanitizeBody(req.body) }),
+    },
   });
 
   // Override res.json to log response
   const originalJson = res.json;
   res.json = function (body) {
     const duration = Date.now() - startTime;
-    const statusColor = res.statusCode >= 400 ? '🔴' : res.statusCode >= 300 ? '🟡' : '🟢';
+    const logMethod = res.statusCode >= 400 ? 'warn' : 'info';
 
-    console.log(`${statusColor} ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`);
+    loggerService[logMethod](`${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`, {
+      category: 'response',
+      metadata: { statusCode: res.statusCode, duration },
+    });
 
     return originalJson.call(this, body);
   };

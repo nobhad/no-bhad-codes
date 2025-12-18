@@ -5,6 +5,23 @@
  * @file server/routes/analytics.ts
  *
  * Visitor tracking and analytics API endpoints.
+ *
+ * ENDPOINTS:
+ * - POST /api/analytics/track     - Receive tracking events (public)
+ * - GET  /api/analytics/summary   - Get analytics summary (admin)
+ * - GET  /api/analytics/realtime  - Get realtime visitor data (admin)
+ * - GET  /api/analytics/sessions  - List visitor sessions (admin)
+ * - GET  /api/analytics/export    - Export analytics data (admin)
+ * - DELETE /api/analytics/data    - Clear old analytics data (admin)
+ *
+ * TABLES USED:
+ * - visitor_sessions    - Session data with device/browser info
+ * - page_views          - Individual page view events
+ * - interaction_events  - User interaction events
+ *
+ * RATE LIMITS:
+ * - Tracking endpoint: 100 requests/minute per IP
+ * - Admin endpoints: 30 requests/minute per IP
  */
 
 import { Router, Request, Response } from 'express';
@@ -420,6 +437,217 @@ router.delete(
         metadata: { error },
       });
       res.status(500).json({ error: 'Failed to clear analytics data' });
+    }
+  }
+);
+
+/**
+ * GET /api/analytics/sessions
+ * List visitor sessions with pagination (admin only)
+ *
+ * Query params:
+ * - page: Page number (default: 1)
+ * - limit: Results per page (default: 50, max: 100)
+ * - days: Filter sessions from last N days (default: 7)
+ *
+ * Response:
+ * - sessions: Array of session objects
+ * - pagination: { page, limit, total, totalPages }
+ */
+router.get(
+  '/sessions',
+  adminRateLimit,
+  authenticateToken,
+  requireAdmin,
+  async (req: Request, res: Response) => {
+    try {
+      const db = getDatabase();
+      const { page = 1, limit = 50, days = 7 } = req.query;
+
+      const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+      const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 50));
+      const daysNum = Math.min(365, Math.max(1, parseInt(days as string, 10) || 7));
+      const offset = (pageNum - 1) * limitNum;
+
+      // Get total count
+      const countResult = await db.get(
+        `SELECT COUNT(*) as total FROM visitor_sessions
+         WHERE start_time >= datetime('now', '-${daysNum} days')`
+      );
+      const total = countResult?.total || 0;
+
+      // Get sessions
+      const sessions = await db.all(
+        `SELECT
+          session_id,
+          visitor_id,
+          start_time,
+          last_activity,
+          page_views,
+          total_time_on_site,
+          bounced,
+          referrer,
+          device_type,
+          browser,
+          os,
+          country,
+          city
+        FROM visitor_sessions
+        WHERE start_time >= datetime('now', '-${daysNum} days')
+        ORDER BY start_time DESC
+        LIMIT ? OFFSET ?`,
+        [limitNum, offset]
+      );
+
+      res.json({
+        sessions,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total,
+          totalPages: Math.ceil(total / limitNum),
+        },
+      });
+    } catch (error) {
+      logger.error('Failed to get sessions list', {
+        category: 'analytics',
+        metadata: { error },
+      });
+      res.status(500).json({ error: 'Failed to get sessions list' });
+    }
+  }
+);
+
+/**
+ * GET /api/analytics/sessions/:sessionId
+ * Get detailed session information (admin only)
+ *
+ * Response:
+ * - session: Session object with full details
+ * - pageViews: Array of page views in this session
+ * - interactions: Array of interactions in this session
+ */
+router.get(
+  '/sessions/:sessionId',
+  adminRateLimit,
+  authenticateToken,
+  requireAdmin,
+  async (req: Request, res: Response) => {
+    try {
+      const db = getDatabase();
+      const { sessionId } = req.params;
+
+      // Get session
+      const session = await db.get(
+        'SELECT * FROM visitor_sessions WHERE session_id = ?',
+        [sessionId]
+      );
+
+      if (!session) {
+        return res.status(404).json({ error: 'Session not found' });
+      }
+
+      // Get page views
+      const pageViews = await db.all(
+        `SELECT url, title, timestamp, time_on_page, scroll_depth, interactions
+         FROM page_views
+         WHERE session_id = ?
+         ORDER BY timestamp ASC`,
+        [sessionId]
+      );
+
+      // Get interactions
+      const interactions = await db.all(
+        `SELECT event_type, element, timestamp, url, data
+         FROM interaction_events
+         WHERE session_id = ?
+         ORDER BY timestamp ASC`,
+        [sessionId]
+      );
+
+      res.json({
+        session,
+        pageViews,
+        interactions,
+      });
+    } catch (error) {
+      logger.error('Failed to get session details', {
+        category: 'analytics',
+        metadata: { error },
+      });
+      res.status(500).json({ error: 'Failed to get session details' });
+    }
+  }
+);
+
+/**
+ * GET /api/analytics/export
+ * Export analytics data as JSON (admin only)
+ *
+ * Query params:
+ * - days: Export data from last N days (default: 30, max: 365)
+ * - format: Export format ('json' only for now)
+ *
+ * Response:
+ * - JSON file download with sessions, page views, and interactions
+ */
+router.get(
+  '/export',
+  adminRateLimit,
+  authenticateToken,
+  requireAdmin,
+  async (req: Request, res: Response) => {
+    try {
+      const db = getDatabase();
+      const { days = 30 } = req.query;
+      const daysNum = Math.min(365, Math.max(1, parseInt(days as string, 10) || 30));
+
+      // Get all data for export
+      const sessions = await db.all(
+        `SELECT * FROM visitor_sessions
+         WHERE start_time >= datetime('now', '-${daysNum} days')
+         ORDER BY start_time DESC`
+      );
+
+      const pageViews = await db.all(
+        `SELECT * FROM page_views
+         WHERE timestamp >= datetime('now', '-${daysNum} days')
+         ORDER BY timestamp DESC`
+      );
+
+      const interactions = await db.all(
+        `SELECT * FROM interaction_events
+         WHERE timestamp >= datetime('now', '-${daysNum} days')
+         ORDER BY timestamp DESC`
+      );
+
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        daysIncluded: daysNum,
+        summary: {
+          totalSessions: sessions.length,
+          totalPageViews: pageViews.length,
+          totalInteractions: interactions.length,
+        },
+        sessions,
+        pageViews,
+        interactions,
+      };
+
+      // Set headers for file download
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="analytics-export-${new Date().toISOString().split('T')[0]}.json"`
+      );
+
+      res.json(exportData);
+    } catch (error) {
+      logger.error('Failed to export analytics data', {
+        category: 'analytics',
+        metadata: { error },
+      });
+      res.status(500).json({ error: 'Failed to export analytics data' });
     }
   }
 );

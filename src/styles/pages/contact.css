@@ -332,11 +332,11 @@ input:-webkit-autofill:active {
 }
 
 .submit-button.form-valid span {
-  color: #000;
+  color: var(--color-black, #000);
 }
 
 .submit-button.form-valid svg {
-  stroke: #000;
+  stroke: var(--color-black, #000);
 }
 
 /* Sent state - show SENT! text */
@@ -346,7 +346,7 @@ input:-webkit-autofill:active {
 
 .submit-button.form-sent span {
   display: block !important;
-  color: #000;
+  color: var(--color-black, #000);
   font-family: var(--font-family-display, 'Acme', sans-serif);
   font-size: 1.5rem;
   font-weight: 700;
@@ -479,7 +479,7 @@ html[data-theme="dark"] label.text-small {
 .field-error-popup {
   position: fixed;
   background-color: var(--color-danger, #ef4444);
-  color: #fff;
+  color: var(--color-white, #fff);
   padding: 0.5rem 1rem;
   border-radius: 4px;
   font-size: 0.875rem;

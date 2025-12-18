@@ -9,10 +9,27 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import type { Project, ProjectMilestone, ProjectFile, ProjectInvoice, AdminDashboardContext } from '../admin-types';
+import type { ProjectMilestone, ProjectFile, ProjectInvoice, AdminDashboardContext, Message } from '../admin-types';
+
+/** Lead/Project data from admin leads API */
+interface LeadProject {
+  id: number;
+  project_name?: string;
+  contact_name?: string;
+  company_name?: string;
+  email?: string;
+  project_type?: string;
+  budget_range?: string;
+  timeline?: string;
+  status: 'pending' | 'active' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
+  description?: string;
+  features?: string;
+  progress?: number;
+  created_at?: string;
+}
 
 interface ProjectsData {
-  leads: Project[];
+  leads: LeadProject[];
   stats: {
     total: number;
     active: number;
@@ -21,10 +38,10 @@ interface ProjectsData {
   };
 }
 
-let projectsData: Project[] = [];
+let projectsData: LeadProject[] = [];
 let currentProjectId: number | null = null;
 
-export function getProjectsData(): Project[] {
+export function getProjectsData(): LeadProject[] {
   return projectsData;
 }
 
@@ -57,7 +74,7 @@ export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
 
 function updateProjectsDisplay(data: ProjectsData, ctx: AdminDashboardContext): void {
   const projects = (data.leads || []).filter(
-    (p: any) => p.status !== 'pending' || p.project_name
+    (p) => p.status !== 'pending' || p.project_name
   );
 
   // Update stats
@@ -67,10 +84,10 @@ function updateProjectsDisplay(data: ProjectsData, ctx: AdminDashboardContext): 
   const projectsOnHold = document.getElementById('projects-on-hold');
 
   const activeCount = projects.filter(
-    (p: any) => p.status === 'active' || p.status === 'in_progress'
+    (p) => p.status === 'active' || p.status === 'in_progress'
   ).length;
-  const completedCount = projects.filter((p: any) => p.status === 'completed').length;
-  const onHoldCount = projects.filter((p: any) => p.status === 'on_hold').length;
+  const completedCount = projects.filter((p) => p.status === 'completed').length;
+  const onHoldCount = projects.filter((p) => p.status === 'on_hold').length;
 
   if (projectsTotal) projectsTotal.textContent = projects.length.toString();
   if (projectsActive) projectsActive.textContent = activeCount.toString();
@@ -80,7 +97,7 @@ function updateProjectsDisplay(data: ProjectsData, ctx: AdminDashboardContext): 
   renderProjectsTable(projects, ctx);
 }
 
-function renderProjectsTable(projects: any[], ctx: AdminDashboardContext): void {
+function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext): void {
   const tableBody = document.getElementById('projects-table-body');
   if (!tableBody) return;
 
@@ -91,7 +108,7 @@ function renderProjectsTable(projects: any[], ctx: AdminDashboardContext): void 
   }
 
   tableBody.innerHTML = projects
-    .map((project: any) => {
+    .map((project) => {
       const safeName = SanitizationUtils.escapeHtml(
         project.project_name || project.description?.substring(0, 30) || 'Untitled Project'
       );
@@ -202,7 +219,7 @@ export function showProjectDetails(
   ctx: AdminDashboardContext,
   switchTab?: (tab: string) => void
 ): void {
-  const project = projectsData.find((p: any) => p.id === projectId);
+  const project = projectsData.find((p) => p.id === projectId);
   if (!project) return;
 
   currentProjectId = projectId;
@@ -222,7 +239,7 @@ export function showProjectDetails(
   loadProjectInvoices(projectId, ctx);
 }
 
-function populateProjectDetailView(project: any): void {
+function populateProjectDetailView(project: LeadProject): void {
   const titleEl = document.getElementById('project-detail-title');
   if (titleEl) titleEl.textContent = project.project_name || 'Project Details';
 
@@ -338,7 +355,7 @@ export async function loadProjectMessages(
   }
 }
 
-function renderProjectMessages(messages: any[], container: HTMLElement): void {
+function renderProjectMessages(messages: Message[], container: HTMLElement): void {
   if (messages.length === 0) {
     container.innerHTML = '<p class="empty-state">No messages yet. Start the conversation!</p>';
     return;

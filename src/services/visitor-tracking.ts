@@ -6,35 +6,111 @@
  *
  * Privacy-compliant visitor tracking and analytics service.
  * Tracks user interactions, page views, and engagement metrics.
+ *
+ * FEATURES:
+ * - Session-based visitor tracking with unique visitor IDs
+ * - Page view tracking with time-on-page and scroll depth
+ * - Interaction event tracking (clicks, forms, downloads)
+ * - Business card specific interaction tracking
+ * - Respects Do Not Track (DNT) browser setting
+ * - Requires cookie consent before tracking
+ * - Batched event sending to reduce API calls
+ * - Local storage fallback for offline analysis
+ *
+ * STORAGE:
+ * - localStorage: nbw_visitor_id (persistent visitor ID)
+ * - localStorage: nbw_tracking_events (event backup, max 1000)
+ * - sessionStorage: nbw_session_id (current session ID)
+ * - sessionStorage: nbw_session (current session data)
+ *
+ * PRIVACY:
+ * - No PII collected (no names, emails, exact IPs)
+ * - Respects navigator.doNotTrack setting
+ * - Requires tracking_consent cookie to enable
+ * - Data can be cleared via clearData() method
+ *
+ * @example
+ * ```typescript
+ * const tracker = new VisitorTrackingService({
+ *   endpoint: '/api/analytics/track',
+ *   enableTracking: true,
+ *   respectDoNotTrack: true,
+ * });
+ * await tracker.init();
+ * ```
  */
 
+/**
+ * Visitor session data structure
+ * Represents a single browsing session for a visitor
+ */
 export interface VisitorSession {
+  /** Unique session identifier (generated per browser session) */
   sessionId: string;
+  /** Persistent visitor identifier (stored in localStorage) */
   visitorId: string;
+  /** Session start timestamp (Unix ms) */
   startTime: number;
+  /** Last activity timestamp (Unix ms) */
   lastActivity: number;
+  /** Total page views in this session */
   pageViews: number;
+  /** Total time spent on site (ms) */
   totalTimeOnSite: number;
+  /** True if visitor left without meaningful interaction */
   bounced: boolean;
+  /** HTTP referrer URL */
   referrer: string;
+  /** Browser user agent string */
   userAgent: string;
+  /** Screen resolution (e.g., "1920x1080") */
   screenResolution: string;
+  /** Browser language (e.g., "en-US") */
   language: string;
+  /** Visitor timezone (e.g., "America/New_York") */
   timezone: string;
 }
 
+/**
+ * Page view event data
+ * Tracked for each page visited during a session
+ */
 export interface PageView {
+  /** Session this page view belongs to */
   sessionId: string;
+  /** Full URL of the page */
   url: string;
+  /** Page title from document.title */
   title: string;
+  /** Page view start timestamp (Unix ms) */
   timestamp: number;
+  /** Time spent on page (ms), populated on page exit */
   timeOnPage?: number;
+  /** Maximum scroll depth reached (0-100%) */
   scrollDepth: number;
+  /** Number of interactions on this page */
   interactions: number;
 }
 
+/**
+ * User interaction event
+ * Tracks clicks, scrolls, form interactions, etc.
+ */
 export interface InteractionEvent {
+  /** Session this interaction belongs to */
   sessionId: string;
+  /**
+   * Type of interaction:
+   * - click: General click event
+   * - scroll: Scroll milestone reached (25%, 50%, 75%, 100%)
+   * - hover: Hover over important element
+   * - form: Form field interaction
+   * - download: File download initiated
+   * - external_link: External link clicked
+   * - business_card: Business card interaction
+   * - navigation: Navigation menu interaction
+   * - contact: Contact form interaction
+   */
   type:
     | 'click'
     | 'scroll'
@@ -45,36 +121,67 @@ export interface InteractionEvent {
     | 'business_card'
     | 'navigation'
     | 'contact';
+  /** Element description (e.g., "button#submit", "a.nav-link") */
   element: string;
+  /** Event timestamp (Unix ms) */
   timestamp: number;
-  data?: Record<string, any>;
+  /** Additional event data (file URL, scroll depth, etc.) */
+  data?: Record<string, unknown>;
+  /** URL where interaction occurred */
   url: string;
 }
 
+/**
+ * Calculated engagement metrics from stored events
+ * Used for local analytics display
+ */
 export interface EngagementMetrics {
+  /** Average time spent on site per session (ms) */
   averageTimeOnSite: number;
+  /** Percentage of sessions that bounced (0-100) */
   bounceRate: number;
+  /** Average number of pages viewed per session */
   pagesPerSession: number;
+  /** Top 10 most viewed pages */
   topPages: Array<{ url: string; views: number; avgTime: number }>;
+  /** Top 10 most common interactions */
   topInteractions: Array<{ type: string; element: string; count: number }>;
+  /** Device type breakdown (desktop, mobile, tablet) */
   deviceTypes: Record<string, number>;
+  /** Traffic source breakdown */
   referrers: Record<string, number>;
 }
 
+/**
+ * Configuration options for VisitorTrackingService
+ */
 export interface VisitorTrackingConfig {
+  /** Master switch to enable/disable all tracking */
   enableTracking: boolean;
+  /** If true, disable tracking when navigator.doNotTrack === '1' */
   respectDoNotTrack: boolean;
+  /** If true, require 'tracking_consent=true' cookie to enable */
   cookieConsent: boolean;
-  sessionTimeout: number; // minutes
+  /** Session timeout in minutes (default: 30) */
+  sessionTimeout: number;
+  /** Track scroll depth milestones (25%, 50%, 75%, 100%) */
   trackScrollDepth: boolean;
+  /** Track all click events */
   trackClicks: boolean;
+  /** Track business card flip/click interactions */
   trackBusinessCardInteractions: boolean;
+  /** Track form submissions */
   trackFormSubmissions: boolean;
+  /** Track file download clicks */
   trackDownloads: boolean;
+  /** Track external link clicks */
   trackExternalLinks: boolean;
-  endpoint?: string; // For sending data to analytics backend
+  /** Server endpoint to send tracking data (e.g., '/api/analytics/track') */
+  endpoint?: string;
+  /** Number of events to batch before sending (default: 10) */
   batchSize: number;
-  flushInterval: number; // seconds
+  /** Interval in seconds between automatic flushes (default: 30) */
+  flushInterval: number;
 }
 
 export class VisitorTrackingService {

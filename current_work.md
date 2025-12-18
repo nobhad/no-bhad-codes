@@ -46,8 +46,8 @@ Full codebase review completed across all TypeScript and CSS files.
 **Issues**:
 
 - ~~`simple-auth-server.ts` appears to be dead code~~ REMOVED (December 17, 2025)
-- `middleware/logger.ts` uses console.log instead of logger service
-- `config/swagger.ts` has hardcoded brand colors
+- ~~`middleware/logger.ts` uses console.log~~ FIXED - uses logger service (December 17, 2025)
+- ~~`config/swagger.ts` has hardcoded brand colors~~ OK - uses env vars with fallbacks
 
 ### Recommendations
 
@@ -167,7 +167,7 @@ Fixed 3 issues that could crash the application:
 - [x] Configure Redis caching (December 12, 2025)
 - [ ] Split `app.ts` (992 lines) into smaller modules
 - [ ] Split `state.ts` (788 lines) into domain-specific state managers
-- [ ] Remove `any` types from `admin-projects.ts`
+- [x] Remove `any` types from `admin-projects.ts` (December 17, 2025)
 - [x] Remove dead code: `simple-auth-server.ts` (December 17, 2025)
 
 ### Feature Organization
@@ -180,7 +180,7 @@ Fixed 3 issues that could crash the application:
 
 - [ ] Split `navigation.css` (900+ lines) into nav-base, nav-animations, nav-mobile
 - [ ] Split `form.css` (374 lines) into form-fields, form-buttons, form-validation
-- [ ] Migrate hardcoded colors in `form.css`, `contact.css` to CSS tokens
+- [x] Migrate hardcoded colors in `form.css`, `contact.css` to CSS tokens (December 17, 2025)
 - [ ] Remove legacy `--fg`, `--bg` variables - migrate to semantic tokens
 - [x] Consolidate dual CSS variable systems (December 12, 2025)
 - [x] Consolidate form styles (December 12, 2025)
@@ -188,6 +188,58 @@ Fixed 3 issues that could crash the application:
 ---
 
 ## Active Work
+
+### Visitor Tracking System - COMPLETE (December 17, 2025)
+
+**Status**: Complete
+**Date**: December 17, 2025
+
+**Summary**: Full visitor tracking system with server-side persistence and admin API.
+
+**Client-Side (`src/services/visitor-tracking.ts`)**:
+
+- Session-based visitor tracking with unique visitor IDs
+- Page view tracking with time-on-page and scroll depth
+- Interaction event tracking (clicks, forms, downloads, business card)
+- Respects Do Not Track (DNT) browser setting
+- Requires cookie consent before tracking
+- Batched event sending (10 events or 30s interval)
+- Local storage fallback for offline analysis
+
+**Server-Side (`server/routes/analytics.ts`)**:
+
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/analytics/track` | POST | Public | Receive tracking events |
+| `/api/analytics/summary` | GET | Admin | Dashboard metrics |
+| `/api/analytics/realtime` | GET | Admin | Live visitor data |
+| `/api/analytics/sessions` | GET | Admin | List sessions (paginated) |
+| `/api/analytics/sessions/:id` | GET | Admin | Session details |
+| `/api/analytics/export` | GET | Admin | Export data as JSON |
+| `/api/analytics/data` | DELETE | Admin | Clear old data |
+
+**Database Tables**:
+
+| Table | Purpose |
+|-------|---------|
+| `visitor_sessions` | Session data with device/browser/location info |
+| `page_views` | Individual page view events |
+| `interaction_events` | User interaction events |
+| `analytics_daily_summary` | Pre-aggregated daily metrics |
+
+**Files Created/Modified**:
+
+- `server/database/migrations/014_visitor_tracking.sql` - Database schema
+- `server/routes/analytics.ts` - API endpoints
+- `server/app.ts` - Route registration
+- `src/services/visitor-tracking.ts` - Enhanced documentation
+- `src/core/app.ts` - Added server endpoint configuration
+
+**Dependencies Added**:
+
+- `ua-parser-js` - User agent parsing for device/browser detection
+
+---
 
 ### GSAP MorphSVG Intro Animation - IN PROGRESS
 
@@ -505,6 +557,8 @@ REDIS_PORT=6379
 | `src/features/client/client-portal.ts` | Main client portal module (~2,381 lines) |
 | `src/features/client/terminal-intake.ts` | Terminal intake main module (~1,446 lines) |
 | `src/features/admin/admin-dashboard.ts` | Admin dashboard module (~3,032 lines) |
+| `src/services/visitor-tracking.ts` | Client-side visitor tracking (~760 lines) |
+| `server/routes/analytics.ts` | Analytics API endpoints (~655 lines) |
 | `server/routes/uploads.ts` | File upload API endpoints |
 | `server/routes/clients.ts` | Client profile/settings API |
 | `server/routes/projects.ts` | Project/request API |
