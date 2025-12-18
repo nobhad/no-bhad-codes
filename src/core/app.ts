@@ -348,6 +348,25 @@ export class Application {
         }
       },
       {
+        name: 'ContactAnimationModule',
+        type: 'dom',
+        factory: async () => {
+          // Only load contact animation on index/home page
+          const currentPath = window.location.pathname;
+          if (currentPath === '/' || currentPath === '/index.html') {
+            const { ContactAnimationModule } = await import('../modules/contact-animation');
+            return new ContactAnimationModule();
+          }
+          // Return a dummy module for other pages
+          return {
+            init: async () => {},
+            destroy: () => {},
+            isInitialized: true,
+            name: 'ContactAnimationModule'
+          };
+        }
+      },
+      {
         name: 'ClientPortalModule',
         type: 'dom',
         factory: async () => {
@@ -675,12 +694,13 @@ export class Application {
       'SectionCardRenderer', // Section business card renderer
       'SectionCardInteractions', // Section business card interactions
       'ContactCardRenderer', // Contact section business card renderer
-      'ContactCardInteractions', // Contact section business card interactions
+      // ContactCardInteractions removed - flip controlled by ContactAnimationModule
       'NavigationModule',
       'ContactFormModule',
       'ScrollSnapModule', // GSAP scroll snapping for sections
       'InfiniteScrollModule', // Infinite looping scroll
-      'TextAnimationModule' // GSAP text animation for home page
+      'TextAnimationModule', // GSAP text animation for home page
+      'ContactAnimationModule' // GSAP contact section animation (desktop only)
     ];
 
     // Modules for Client Portal dashboard
