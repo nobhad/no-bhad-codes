@@ -105,9 +105,10 @@ html:not(.intro-complete) .portal-dropdown {
   pointer-events: none !important;
 }
 
-/* Mobile: Hide morph animation, use simple card flip instead */
+/* Mobile: Overlay is initially hidden via CSS, JS will show it when mobile animation runs */
 @media screen and (max-width: 767px) {
   .intro-morph-overlay {
+    /* Start hidden - JS will override these for mobile paw animation */
     display: none;
     opacity: 0;
     visibility: hidden;

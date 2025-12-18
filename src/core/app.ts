@@ -172,6 +172,12 @@ export class Application {
           // Only load intro animation on index/home page
           const currentPath = window.location.pathname;
           if (currentPath === '/' || currentPath === '/index.html') {
+            // Use separate modules for mobile and desktop
+            const isMobile = window.matchMedia('(max-width: 767px)').matches;
+            if (isMobile) {
+              const { MobileIntroAnimationModule } = await import('../modules/intro-animation-mobile');
+              return new MobileIntroAnimationModule();
+            }
             const { IntroAnimationModule } = await import('../modules/intro-animation');
             return new IntroAnimationModule();
           }
