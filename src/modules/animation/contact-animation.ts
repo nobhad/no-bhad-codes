@@ -136,89 +136,81 @@ export class ContactAnimationModule extends BaseModule {
     const submitButton = this.container.querySelector('button[type="submit"]') ||
                          this.container.querySelector('.contact-submit');
 
-    // Name field slides in from right
+    // Name field slides in from off-screen right
     if (nameField) {
       this.timeline.from(nameField, {
-        x: 100,
-        opacity: 0,
-        duration: FORM_DURATION,
+        x: '100vw',
+        duration: 1,
         ease: 'power2.out'
-      }, '-=0.3');
+      });
     }
 
-    // Company field slides in from right
+    // Company field slides in from off-screen right (staggered)
     if (companyField) {
       this.timeline.from(companyField, {
-        x: 100,
-        opacity: 0,
-        duration: FORM_DURATION,
+        x: '100vw',
+        duration: 1,
         ease: 'power2.out'
-      }, '-=0.4');
+      }, '-=0.7');
     }
 
-    // Email field slides in from right
+    // Email field slides in from off-screen right (staggered)
     if (emailField) {
       this.timeline.from(emailField, {
-        x: 100,
-        opacity: 0,
-        duration: FORM_DURATION,
+        x: '100vw',
+        duration: 1,
         ease: 'power2.out'
-      }, '-=0.4');
+      }, '-=0.7');
     }
 
-    // Message field slides in from right
+    // Message field slides in from off-screen right (staggered)
     if (messageField) {
       this.timeline.from(messageField, {
-        x: 100,
-        opacity: 0,
-        duration: FORM_DURATION,
+        x: '100vw',
+        duration: 1,
         ease: 'power2.out'
-      }, '-=0.4');
+      }, '-=0.7');
     }
 
-    // Submit button slides in fast from off-screen right and overshoots to hit form fields
-    if (submitButton) {
+    // ========================================================================
+    // BUMP SEQUENCE - Button hits fields, fields snap back and knock button away
+    // ========================================================================
+    const formFields = [nameField, companyField, emailField].filter(Boolean);
+
+    if (submitButton && formFields.length > 0) {
+      // 1. Button rolls in from off-screen and hits the fields
+      gsap.set(submitButton, { transformOrigin: 'center center' });
       this.timeline.fromTo(submitButton,
-        {
-          x: '100vw'
-        },
-        {
-          x: -BUTTON_OVERSHOOT,
-          duration: 0.6,
-          ease: 'power3.in'
-        }, '-=0.4');
-    }
+        { x: '100vw', rotation: -720 },
+        { x: -BUTTON_OVERSHOOT, rotation: 0, duration: 1.2, ease: 'none' }
+      );
 
-    // ========================================================================
-    // BUMP EFFECT - Form fields react to button impact
-    // Company field (middle) gets hit the hardest
-    // ========================================================================
-    if (submitButton) {
+      // 2. All three fields bump left on impact - company moves more
       const bumpLabel = 'bump';
-
-      // Name field - light bump
       if (nameField) {
         this.timeline.to(nameField, {
-          x: -BUMP_DISTANCE * 0.5,
+          x: -BUMP_DISTANCE * 2,
+          duration: BUMP_DURATION,
+          ease: 'power2.out'
+        }, bumpLabel);
+      }
+      if (companyField) {
+        this.timeline.to(companyField, {
+          x: -BUMP_DISTANCE * 3,
+          duration: BUMP_DURATION,
+          ease: 'power2.out'
+        }, bumpLabel);
+      }
+      if (emailField) {
+        this.timeline.to(emailField, {
+          x: -BUMP_DISTANCE * 2,
           duration: BUMP_DURATION,
           ease: 'power2.out'
         }, bumpLabel);
       }
 
-      // Company field - travels left to physically hit the business card
-      if (companyField && businessCard) {
-        // Calculate distance to reach the card (with buffer so it just touches)
-        const companyRect = (companyField as HTMLElement).getBoundingClientRect();
-        const cardRect = (businessCard as HTMLElement).getBoundingClientRect();
-        const distanceToCard = companyRect.left - cardRect.right + 50; // Generous buffer
-
-        this.timeline.to(companyField, {
-          x: -Math.max(distanceToCard * 0.6, BUMP_DISTANCE), // Travel less far left
-          duration: BUMP_DURATION * 1.5,
-          ease: 'power2.out'
-        }, bumpLabel);
-
-        // Trigger flip when company field hits card (at end of bump)
+      // Trigger card flip on impact
+      if (businessCard) {
         this.timeline.call(() => {
           if (this.hasFlippedCard) return;
           this.hasFlippedCard = true;
@@ -230,85 +222,55 @@ export class ContactAnimationModule extends BaseModule {
               duration: 0.8,
               ease: 'power2.inOut',
               onComplete: () => {
-                // Disable click-to-flip after card is flipped to front
                 this.disableCardFlip();
               }
             });
           }
-        });
+        }, [], '-=0.1');
       }
 
-      // Email field - medium bump
-      if (emailField) {
-        this.timeline.to(emailField, {
-          x: -BUMP_DISTANCE * 0.7,
-          duration: BUMP_DURATION,
-          ease: 'power2.out'
-        }, bumpLabel);
-      }
-
-      // Button starts bouncing back
-      this.timeline.to(submitButton, {
-        x: 0,
-        duration: 0.3,
-        ease: 'power2.out'
-      });
-
-      // Name and email fields bounce back normally
+      // 3. Name and email snap back with elastic
       this.timeline.to([nameField, emailField].filter(Boolean), {
         x: 0,
         duration: 0.5,
-        ease: 'elastic.out(1, 0.5)',
+        ease: 'elastic.out(0.8, 0.6)',
         stagger: 0.03
-      }, '-=0.2');
+      });
 
-      // Company field bounces back and gently nudges the button
+      // 4. Company field snaps back further (overshoots to hit button)
       if (companyField) {
         this.timeline.to(companyField, {
-          x: BUMP_DISTANCE * 0.4, // Gentle nudge right
-          duration: 0.35,
-          ease: 'power2.out'
-        }, '-=0.4');
+          keyframes: [
+            { x: BUMP_DISTANCE * 1.5, duration: 0.15, ease: 'power2.out' },
+            { x: 0, duration: 0.4, ease: 'elastic.out(0.5, 0.8)' }
+          ]
+        }, '-=0.5');
       }
 
-      // Button gets knocked to right (less forceful)
-      if (submitButton) {
-        this.timeline.to(submitButton, {
-          x: '50vw',
-          rotation: '+=180', // Half spin as it flies
-          duration: 0.5,
-          ease: 'power2.out'
-        }, '-=0.2');
-      }
+      // 5. Button gets knocked off screen by company field
+      this.timeline.to(submitButton, {
+        x: '100vw',
+        rotation: '+=360',
+        duration: 0.6,
+        ease: 'power2.out'
+      }, '-=0.5');
 
-      // Company field settles back to normal (subtle)
-      if (companyField) {
-        this.timeline.to(companyField, {
-          x: 0,
-          duration: 0.5,
-          ease: 'power2.out'
-        }, '-=0.3');
-      }
+      // 6. Button rolls back onto screen
+      // Rotation math: +360 (knocked) - 340 (roll) - 20 (snap) = 0
+      this.timeline.to(submitButton, {
+        x: 20,
+        rotation: '-=340',
+        duration: 1.5,
+        ease: 'power1.out'
+      });
 
-      // Button rolls back into place, spinning as it rolls (like a wheel)
-      // Rotation must end at original position: +180 (knock) - 540 (roll) = -360 (full circle back to start)
-      if (submitButton) {
-        // Roll most of the way
-        this.timeline.to(submitButton, {
-          x: 20,
-          rotation: '-=500',
-          duration: 1.8,
-          ease: 'linear'
-        });
-
-        // Snap into final position
-        this.timeline.to(submitButton, {
-          x: 0,
-          rotation: '-=40',
-          duration: 0.15,
-          ease: 'back.out(2)'
-        });
-      }
+      // 7. Button snaps into final position
+      this.timeline.to(submitButton, {
+        x: 0,
+        rotation: '-=20',
+        duration: 0.15,
+        ease: 'back.out(2)'
+      });
     }
 
     // ========================================================================
@@ -320,7 +282,7 @@ export class ContactAnimationModule extends BaseModule {
     this.scrollTrigger = ScrollTrigger.create({
       trigger: this.container,
       scroller: scrollContainer || undefined,
-      start: 'top top', // Pin when section reaches top of viewport
+      start: 'center center', // Pin when section is centered in viewport
       end: '+=100%', // Pin for duration of animation (100vh of scroll distance)
       pin: true,
       pinSpacing: true,
