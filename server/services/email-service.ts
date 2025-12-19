@@ -574,9 +574,8 @@ export const emailService = {
     return { success: true, message: 'Intake confirmation logged for development' };
   },
 
-  async sendEmail(data: any): Promise<EmailResult> {
-    console.log('Sending email:', data);
-    return { success: true, message: 'Email logged for development' };
+  async sendEmail(data: EmailContent): Promise<EmailResult> {
+    return sendEmail(data);
   },
 
   /**
