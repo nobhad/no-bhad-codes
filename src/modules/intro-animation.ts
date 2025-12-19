@@ -15,7 +15,7 @@
  * - Mobile: Simple card flip fallback (no paw overlay)
  * - Enter key skips animation at any point
  * - Header fades in after animation completes
- * - Animation only plays once per session (stored in sessionStorage)
+ * - Animation replays if 20+ minutes since last view (stored in localStorage)
  *
  * ANIMATION SEQUENCE (Desktop):
  * ┌─────────────────────────────────────────────────────────────────┐
@@ -95,7 +95,7 @@
  *
  * SKIP CONDITIONS:
  * The animation is skipped when:
- *   1. sessionStorage.getItem('introShown') === 'true'
+ *   1. Less than 20 minutes since last animation (timestamp in localStorage)
  *   2. prefers-reduced-motion: reduce is set
  *   3. Required SVG elements not found (falls back to card flip)
  *   4. User presses Enter key during animation
@@ -147,6 +147,12 @@ const _SVG_VIEWBOX_WIDTH = 2316.99;
 
 /** Full SVG viewBox height (unused but kept for reference) */
 const _SVG_VIEWBOX_HEIGHT = 1801.19;
+
+/** Time in milliseconds before intro animation replays (20 minutes) */
+const INTRO_REPLAY_INTERVAL = 20 * 60 * 1000;
+
+/** LocalStorage key for intro animation timestamp */
+const INTRO_TIMESTAMP_KEY = 'introAnimationTimestamp';
 
 // ============================================================================
 // INTRO ANIMATION MODULE CLASS
@@ -200,14 +206,18 @@ export class IntroAnimationModule extends BaseModule {
     }
 
     // ========================================================================
-    // SESSION CHECK
-    // Skip animation if already shown this browser session
+    // TIME-BASED CHECK
+    // Skip animation if shown within the last 20 minutes
     // ========================================================================
-    const introShown = sessionStorage.getItem('introShown');
-    if (introShown === 'true') {
-      this.log('Intro already shown this session - skipping');
-      this.skipIntroImmediately();
-      return;
+    const lastIntroTimestamp = localStorage.getItem(INTRO_TIMESTAMP_KEY);
+    if (lastIntroTimestamp) {
+      const timeSinceLastIntro = Date.now() - parseInt(lastIntroTimestamp, 10);
+      if (timeSinceLastIntro < INTRO_REPLAY_INTERVAL) {
+        this.log(`Intro shown ${Math.round(timeSinceLastIntro / 1000 / 60)} min ago - skipping (replays after 20 min)`);
+        this.skipIntroImmediately();
+        return;
+      }
+      this.log('20+ minutes since last intro - playing animation');
     }
 
     // ========================================================================
@@ -870,8 +880,8 @@ export class IntroAnimationModule extends BaseModule {
 
     this.isComplete = true;
 
-    // Mark intro as shown for this session
-    sessionStorage.setItem('introShown', 'true');
+    // Store timestamp for 20-minute replay logic
+    localStorage.setItem(INTRO_TIMESTAMP_KEY, String(Date.now()));
 
     // Ensure main page content is visible
     document.documentElement.classList.remove('intro-loading');

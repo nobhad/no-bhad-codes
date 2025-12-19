@@ -185,25 +185,20 @@
   z-index: 10;
 }
 
-/* Contact text on card */
+/* Contact text on card - always black on white card background */
 .contact-card-text {
-  color: var(--fg);
+  color: #000000;
   font-size: 1.4rem;
   line-height: 1.8;
   text-align: center;
   margin: 0;
 }
 
-/* Label text styling */
-.contact-card-label {
-  font-weight: 700;
-}
-
-/* Links on card */
+/* Links on card - always black on white card background */
 .contact-card-link {
   font-weight: 800;
   text-decoration: underline;
-  color: var(--fg);
+  color: #000000;
   transition: color 0.2s ease;
 }
 
