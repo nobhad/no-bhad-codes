@@ -367,7 +367,7 @@ input:-webkit-autofill:active {
   border-radius: 64px;
   border: none;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  background-color: var(--color-bg-inverse);
+  background-color: var(--color-brand-primary);
   cursor: pointer;
   opacity: 1;
   transform: translate(0);
@@ -443,7 +443,7 @@ input:-webkit-autofill:active {
   height: 64px;
   transform: rotate(0deg);
   fill: none;
-  stroke: var(--bg, #fffbee);
+  stroke: var(--color-black, #000);
   transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 3.5), stroke 0.4s;
 }
 
@@ -471,7 +471,7 @@ html[data-theme="dark"] .input-item textarea {
 }
 
 html[data-theme="dark"] .submit-button svg {
-  stroke: var(--color-neutral-300);
+  stroke: var(--color-black, #000);
 }
 
 html[data-theme="dark"] .submit-button {

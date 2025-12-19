@@ -59,6 +59,7 @@ Red paw print SVG icon - needs to be added to project assets.
 
 - [x] Intro animation not displaying with coyote paw - **COMPLETE** (December 18)
 - [ ] **Loop-trigger-zone awkward space** - Plan: Add decorative content (pattern, gradient, or brand element) to fill the 100vh gap
+- [ ] **Contact form emails not being received** - Needs investigation
 
 ---
 
@@ -112,7 +113,7 @@ Red paw print SVG icon - needs to be added to project assets.
 ### Contact Section Animation - COMPLETE
 
 **Status**: Complete
-**Date**: December 18, 2025
+**Date**: December 19, 2025
 
 **Completed Features**:
 
@@ -123,6 +124,9 @@ Red paw print SVG icon - needs to be added to project assets.
 - Card intake link opens modal (not new page)
 - Error toasts positioned to right of form fields (desktop)
 - Contact options paragraph hidden on desktop (info on card instead)
+- **Mobile**: Submit button rolls in from left with GSAP animation
+- **Mobile**: Green accent background on submit button
+- **Mobile**: Bolder icon stroke (2.5) for visibility
 
 ---
 

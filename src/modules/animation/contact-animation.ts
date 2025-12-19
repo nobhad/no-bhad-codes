@@ -63,15 +63,6 @@ export class ContactAnimationModule extends BaseModule {
     await super.init();
 
     // ========================================================================
-    // DESKTOP ONLY CHECK
-    // ========================================================================
-    const isMobile = window.matchMedia('(max-width: 767px)').matches;
-    if (isMobile) {
-      this.log('Mobile detected - skipping contact animation');
-      return;
-    }
-
-    // ========================================================================
     // REDUCED MOTION CHECK
     // ========================================================================
     if (this.reducedMotion) {
@@ -79,7 +70,15 @@ export class ContactAnimationModule extends BaseModule {
       return;
     }
 
-    this.setupAnimation();
+    // ========================================================================
+    // MOBILE VS DESKTOP ANIMATION
+    // ========================================================================
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    if (isMobile) {
+      this.setupMobileAnimation();
+    } else {
+      this.setupAnimation();
+    }
   }
 
   /**
@@ -294,6 +293,58 @@ export class ContactAnimationModule extends BaseModule {
     });
 
     this.log('Contact animation initialized (desktop only)');
+  }
+
+  /**
+   * Set up mobile-specific contact animation
+   * Button rolls in from left side of screen
+   */
+  private setupMobileAnimation(): void {
+    this.container = document.querySelector('.contact-section') as HTMLElement;
+    if (!this.container) {
+      this.log('Contact section not found');
+      return;
+    }
+
+    const submitButton = this.container.querySelector('.submit-button');
+    if (!submitButton) {
+      this.log('Submit button not found for mobile animation');
+      return;
+    }
+
+    // Set initial state - off screen to the left
+    const buttonRect = submitButton.getBoundingClientRect();
+    const offScreenX = -(buttonRect.left + buttonRect.width + 50);
+    gsap.set(submitButton, {
+      x: offScreenX,
+      rotation: -360,
+      transformOrigin: 'center center'
+    });
+
+    // Trigger animation when button's container area comes into view
+    const buttonContainer = submitButton.closest('.contact-right') || submitButton.parentElement;
+    const triggerElement = buttonContainer || submitButton;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            gsap.to(submitButton, {
+              x: 0,
+              rotation: 0,
+              duration: 0.8,
+              ease: 'power2.out'
+            });
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(triggerElement);
+
+    this.log('Contact animation initialized (mobile)');
   }
 
   /**

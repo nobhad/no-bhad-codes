@@ -13,6 +13,11 @@
  * ============================================ */
 
 @media screen and (max-width: 767px) {
+  /* Mobile-only line breaks */
+  br.mobile-only {
+    display: block !important;
+  }
+
   /* Override desktop contact section styles */
   .contact-section {
     width: 100% !important;
@@ -148,19 +153,20 @@
     margin-top: 0.75rem;
   }
 
-  /* Smaller submit button on mobile */
+  /* Smaller submit button on mobile - GSAP handles animation */
   .submit-button {
-    width: 55px;
-    height: 55px;
+    width: 55px !important;
+    height: 55px !important;
+    min-width: 55px;
+    min-height: 55px;
     opacity: 1;
     visibility: visible;
-    transform: none;
-    animation: none;
   }
 
   .submit-button svg {
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
+    stroke-width: 2.5;
   }
 
   /* Disable hover transform on mobile */
