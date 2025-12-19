@@ -390,11 +390,11 @@ export class ContactFormModule extends BaseModule {
     popup.className = 'field-error-popup';
     popup.textContent = message;
 
-    // Position popup over the field (fixed positioning)
+    // Position popup at right end of field (fixed positioning)
     popup.style.position = 'fixed';
     popup.style.top = `${rect.top + rect.height / 2}px`;
-    popup.style.left = `${rect.left + 16}px`;
-    popup.style.transform = 'translateY(-50%)';
+    popup.style.left = `${rect.right - 16}px`;
+    popup.style.transform = 'translate(-100%, -50%)';
 
     // Append to body, not form (completely outside layout)
     document.body.appendChild(popup);

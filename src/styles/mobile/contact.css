@@ -144,6 +144,8 @@
     justify-content: flex-end;
     width: 100%;
     order: 3; /* Ensures it's after textarea */
+    padding-right: 1rem;
+    margin-top: 0.75rem;
   }
 
   /* Smaller submit button on mobile */
@@ -191,6 +193,10 @@
   .input-item textarea {
     min-height: 100px !important;
     font-size: 0.9rem !important;
+  }
+
+  .contact-right {
+    margin-top: 0.25rem;
   }
 
   .submit-button {
