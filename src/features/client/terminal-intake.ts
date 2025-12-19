@@ -22,6 +22,8 @@ import {
   renderTerminalHTML,
   showAvatarIntro,
   addBootMessage,
+  addBootstrapMessage,
+  stopBootstrapPulsing,
   showTypingIndicator,
   createMessageElement,
   addMessageWithTyping,
@@ -133,9 +135,15 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private async askToResume(savedProgress: SavedProgress): Promise<void> {
-    await this.addBootMessageLocal('Bootstrapping...');
+    let bootstrapElement: HTMLElement | null = null;
+    if (this.chatContainer) {
+      bootstrapElement = addBootstrapMessage(this.chatContainer);
+    }
     await delay(300);
     await this.addBootMessageLocal('  ✓ Previous session detected');
+    if (bootstrapElement) {
+      stopBootstrapPulsing(bootstrapElement);
+    }
     await delay(400);
 
     this.addMessage({
@@ -433,17 +441,25 @@ export class TerminalIntakeModule extends BaseModule {
     }
     await delay(150);
 
-    // Faster boot sequence for snappier terminal feel
-    await this.addBootMessageLocal('Bootstrapping...');
-    await delay(150);
+    // Boot sequence with animated dots
+    let bootstrapElement: HTMLElement | null = null;
+    if (this.chatContainer) {
+      bootstrapElement = addBootstrapMessage(this.chatContainer);
+    }
+    await delay(1000);
 
     await this.addBootMessageLocal('  ✓ Loading intake module');
-    await delay(100);
+    await delay(700);
 
     await this.addBootMessageLocal('  ✓ Initializing question flow');
-    await delay(100);
+    await delay(700);
 
     await this.addBootMessageLocal('  ✓ Ready to collect project details');
+
+    // Stop pulsing dots
+    if (bootstrapElement) {
+      stopBootstrapPulsing(bootstrapElement);
+    }
     await delay(200);
 
     await this.addBootMessageLocal('');

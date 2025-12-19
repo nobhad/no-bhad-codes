@@ -99,33 +99,17 @@ export async function showAvatarIntro(chatContainer: HTMLElement): Promise<void>
       // Add class for styling
       svgElement.classList.add('terminal-avatar-img');
 
-      // Get only paths in visible Layer_1 (not hidden Layer_2/Layer_3)
-      const layer1 = svgElement.querySelector('#Layer_1');
-      const paths = layer1 ? layer1.querySelectorAll('path') : svgElement.querySelectorAll('path');
-      paths.forEach(path => {
-        path.style.opacity = '0';
-      });
-
       // Insert the SVG into the wrapper
       wrapper.appendChild(svgElement);
 
-      // Fade in the container
+      // Fade in the container with the full SVG
       gsap.to(avatarContainer, {
         opacity: 1,
-        duration: 0.3,
+        duration: 0.5,
         ease: 'power2.out'
       });
 
-      // Animate each path with stagger for "line by line" effect
-      gsap.to(paths, {
-        opacity: 1,
-        duration: 0.4,
-        stagger: 0.15,
-        ease: 'power2.out'
-      });
-
-      // Wait for all path animations to complete
-      await delay(300 + (paths.length * 150) + 400);
+      await delay(500);
     }
   } catch {
     // Fallback to img tag if fetch fails
@@ -148,6 +132,47 @@ export function addBootMessage(chatContainer: HTMLElement, text: string): void {
   line.textContent = text;
   chatContainer.appendChild(line);
   scrollToBottom(chatContainer);
+}
+
+/** Store for active bootstrap animation timeline */
+let bootstrapTimeline: gsap.core.Timeline | null = null;
+
+/**
+ * Add bootstrapping message with animated dots using GSAP
+ * Returns the element so dots can be stopped later
+ */
+export function addBootstrapMessage(chatContainer: HTMLElement): HTMLElement {
+  const line = document.createElement('div');
+  line.className = 'boot-line';
+  line.innerHTML = 'Bootstrapping<span class="pulsing-dots"><span>.</span><span>.</span><span>.</span></span>';
+  chatContainer.appendChild(line);
+  scrollToBottom(chatContainer);
+
+  // Get dot spans and set initial state
+  const dots = line.querySelectorAll('.pulsing-dots span');
+  gsap.set(dots, { opacity: 0 });
+
+  // Create repeating timeline: . -> .. -> ... -> (pause) -> reset
+  // 800ms cycle for natural pacing
+  bootstrapTimeline = gsap.timeline({ repeat: -1, repeatDelay: 0.2 });
+  bootstrapTimeline
+    .to(dots[0], { opacity: 1, duration: 0.01 }, 0)
+    .to(dots[1], { opacity: 1, duration: 0.01 }, 0.2)
+    .to(dots[2], { opacity: 1, duration: 0.01 }, 0.4)
+    .to(dots, { opacity: 0, duration: 0.01 }, 0.6);
+
+  return line;
+}
+
+/**
+ * Stop pulsing dots on bootstrapping message
+ */
+export function stopBootstrapPulsing(element: HTMLElement): void {
+  if (bootstrapTimeline) {
+    bootstrapTimeline.kill();
+    bootstrapTimeline = null;
+  }
+  element.textContent = 'Bootstrapping...';
 }
 
 /**

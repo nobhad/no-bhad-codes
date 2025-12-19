@@ -71,25 +71,28 @@ body[data-page="client-intake"] .terminal-window {
   height: 12px;
   border-radius: 50%;
   border: none;
-  cursor: pointer;
-  transition: transform 0.1s ease, filter 0.1s ease;
+  cursor: default;
 }
 
-.terminal-btn:hover {
+.terminal-btn.close:hover {
   transform: scale(1.1);
   filter: brightness(1.1);
 }
 
-.terminal-btn:active {
+.terminal-btn.close:active {
   transform: scale(0.95);
 }
 
 .terminal-btn.close {
   background: var(--color-mac-close);
+  cursor: pointer;
+  transition: transform 0.1s ease, filter 0.1s ease;
 }
+
 .terminal-btn.minimize {
   background: var(--color-mac-minimize);
 }
+
 .terminal-btn.maximize {
   background: var(--color-mac-maximize);
 }
@@ -109,8 +112,8 @@ body[data-page="client-intake"] .terminal-window {
 .terminal-login-info {
   padding: 0 0 12px 0;
   color: var(--color-terminal-text-muted);
-  font-size: 15px;
-  font-family: "Courier New", Consolas, "Liberation Mono", monospace;
+  font-size: 16px;
+  line-height: 1.6;
   background: transparent;
 }
 
@@ -216,6 +219,7 @@ body[data-page="client-intake"] .terminal-window {
 /* AI Messages - bright green with ❯ prompt (saloni-garg style) */
 .chat-message.ai .message-content {
   color: var(--color-terminal-green);
+  font-size: 17px;
   line-height: 1.6;
 }
 
@@ -278,9 +282,8 @@ body[data-page="client-intake"] .terminal-window {
 
 .boot-line {
   color: var(--color-terminal-text-muted);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.6;
-  font-family: "Courier New", Consolas, "Liberation Mono", monospace;
 }
 
 .boot-line:empty {
