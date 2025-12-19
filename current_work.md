@@ -244,16 +244,18 @@ Run `npm run dev:full` to start both frontend and backend
 
 ---
 
-### Terminal Intake SVG Animation
+### Terminal Intake SVG Animation - FIXED
 
-**Status**: Known
+**Status**: Fixed (December 18, 2025)
 
-**Issue**: The SVG should animate line-by-line (typewriter style) instead of appearing all at once.
+**Issue**: The avatar SVG should animate path-by-path instead of appearing all at once.
 
-**Next Steps**:
+**Resolution**: Modified `showAvatarIntro()` in terminal-intake-ui.ts to:
 
-- [ ] Implement line-by-line reveal animation for terminal SVG
-- [ ] Use GSAP for animation timing
+- Fetch and inline the SVG (instead of using img tag)
+- Set all paths to opacity 0 initially
+- Use GSAP stagger animation to reveal each path one at a time
+- Fallback to img tag if fetch fails
 
 ---
 

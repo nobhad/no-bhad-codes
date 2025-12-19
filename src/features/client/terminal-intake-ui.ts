@@ -70,27 +70,72 @@ export function renderTerminalHTML(isModal: boolean): string {
 
 /**
  * Show the avatar introduction animation
+ * Draws the SVG path-by-path for a "line by line" effect
  */
 export async function showAvatarIntro(chatContainer: HTMLElement): Promise<void> {
   const avatarContainer = document.createElement('div');
   avatarContainer.className = 'terminal-avatar-intro';
-  avatarContainer.innerHTML = `
-    <div class="terminal-avatar-wrapper">
-      <img src="/images/avatar.svg" alt="No Bhad Codes" class="terminal-avatar-img" />
-    </div>
-  `;
+
+  // Create wrapper for the inline SVG
+  const wrapper = document.createElement('div');
+  wrapper.className = 'terminal-avatar-wrapper';
+  avatarContainer.appendChild(wrapper);
 
   avatarContainer.style.opacity = '0';
   chatContainer.appendChild(avatarContainer);
   scrollToBottom(chatContainer);
 
-  gsap.to(avatarContainer, {
-    opacity: 1,
-    duration: 0.5,
-    ease: 'power2.out'
-  });
+  // Fetch and inline the SVG for path animation
+  try {
+    const response = await fetch('/images/avatar.svg');
+    const svgText = await response.text();
 
-  await delay(500);
+    // Parse the SVG
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+    const svgElement = svgDoc.querySelector('svg');
+
+    if (svgElement) {
+      // Add class for styling
+      svgElement.classList.add('terminal-avatar-img');
+
+      // Get all paths and set initial opacity to 0
+      const paths = svgElement.querySelectorAll('path');
+      paths.forEach(path => {
+        path.style.opacity = '0';
+      });
+
+      // Insert the SVG into the wrapper
+      wrapper.appendChild(svgElement);
+
+      // Fade in the container
+      gsap.to(avatarContainer, {
+        opacity: 1,
+        duration: 0.3,
+        ease: 'power2.out'
+      });
+
+      // Animate each path with stagger for "line by line" effect
+      gsap.to(paths, {
+        opacity: 1,
+        duration: 0.4,
+        stagger: 0.15,
+        ease: 'power2.out'
+      });
+
+      // Wait for all path animations to complete
+      await delay(300 + (paths.length * 150) + 400);
+    }
+  } catch {
+    // Fallback to img tag if fetch fails
+    wrapper.innerHTML = '<img src="/images/avatar.svg" alt="No Bhad Codes" class="terminal-avatar-img" />';
+    gsap.to(avatarContainer, {
+      opacity: 1,
+      duration: 0.5,
+      ease: 'power2.out'
+    });
+    await delay(500);
+  }
 }
 
 /**

@@ -653,7 +653,13 @@ html[data-theme="light"] .terminal-intake {
   height: auto;
   filter: brightness(0) invert(1) brightness(0.8) contrast(1.1);
   display: block;
-  /* Animation controlled by GSAP - see gsap-animations.ts createAvatarFlicker() */
+  /* Animation controlled by GSAP - see terminal-intake-ui.ts showAvatarIntro() */
+}
+
+/* Inline SVG path styling for line-by-line animation */
+svg.terminal-avatar-img path {
+  fill: #231f20;
+  /* Opacity animated by GSAP for line-by-line reveal */
 }
 
 /* Grainy overlay - only on the avatar SVG */
