@@ -85,7 +85,7 @@ body[data-page="client-intake"] .terminal-window {
 
 .terminal-title {
   color: var(--color-terminal-text-muted);
-  font-size: 13px;
+  font-size: 14px;
   flex: 1;
   text-align: center;
   font-family: inherit;
@@ -98,7 +98,7 @@ body[data-page="client-intake"] .terminal-window {
 .terminal-login-info {
   padding: 0 0 12px 0;
   color: var(--color-terminal-text-muted);
-  font-size: 13px;
+  font-size: 15px;
   font-family: "Courier New", Consolas, "Liberation Mono", monospace;
   background: transparent;
 }
@@ -232,7 +232,7 @@ body[data-page="client-intake"] .terminal-window {
 /* System Messages - summary/review styling */
 .chat-message.system .message-content {
   color: var(--color-terminal-green);
-  font-size: 13px;
+  font-size: 15px;
   font-style: normal;
   white-space: pre-wrap;
   word-break: break-word;
@@ -267,7 +267,7 @@ body[data-page="client-intake"] .terminal-window {
 
 .boot-line {
   color: var(--color-terminal-text-muted);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.6;
   font-family: "Courier New", Consolas, "Liberation Mono", monospace;
 }
@@ -335,7 +335,7 @@ input.terminal-input {
   border: none !important;
   color: var(--color-terminal-text) !important;
   font-family: "Courier New", Consolas, "Liberation Mono", monospace !important;
-  font-size: 14px;
+  font-size: 16px;
   outline: none !important;
   caret-color: transparent !important;
   box-shadow: none !important;
@@ -383,7 +383,7 @@ input.terminal-input:focus {
   visibility: hidden;
   white-space: pre;
   font-family: "Courier New", Consolas, "Liberation Mono", monospace;
-  font-size: 14px;
+  font-size: 16px;
   pointer-events: none;
 }
 
@@ -447,7 +447,7 @@ input.terminal-input:focus {
   color: var(--color-terminal-blue);
   padding: 2px 0;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   transition: color 0.2s;
   text-align: left;
@@ -488,7 +488,7 @@ input.terminal-input:focus {
   color: var(--color-terminal-bg) !important;
   padding: 8px 16px !important;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   text-align: left;
@@ -517,7 +517,7 @@ input.terminal-input:focus {
 
 .progress-label {
   color: var(--color-terminal-text-muted);
-  font-size: 12px;
+  font-size: 14px;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -543,7 +543,7 @@ input.terminal-input:focus {
 
 .progress-percent {
   color: var(--color-terminal-green);
-  font-size: 12px;
+  font-size: 14px;
   min-width: 40px;
   text-align: right;
 }
@@ -604,7 +604,7 @@ input.terminal-input:focus {
   }
 
   .terminal-title {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .terminal-input-area {

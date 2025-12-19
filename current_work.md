@@ -1,4 +1,4 @@
-# Current Work - December 17, 2025
+# Current Work - December 18, 2025
 
 ---
 
@@ -62,7 +62,7 @@ Red paw print SVG icon - needs to be added to project assets.
 
 ## Concerns
 
-- [ ] Intro animation not displaying with coyote paw
+- [x] Intro animation not displaying with coyote paw - **COMPLETE** (December 18)
 - [ ] **Loop-trigger-zone awkward space** - Plan: Add decorative content (pattern, gradient, or brand element) to fill the 100vh gap
 
 ---
@@ -98,30 +98,36 @@ Red paw print SVG icon - needs to be added to project assets.
 
 ## Active Work
 
-### GSAP MorphSVG Intro Animation - IN PROGRESS
+### GSAP MorphSVG Intro Animation - COMPLETE
 
-**Status**: In Progress
-**Date**: December 15, 2025
+**Status**: Complete
+**Date**: December 18, 2025
 **Branch**: `feature/intro-animation-svgs`
 
-**Summary**: Implementing a paw print morph animation for the intro sequence using GSAP MorphSVG plugin.
+**Summary**: Paw morph animation for intro sequence using GSAP MorphSVG plugin.
 
-**SVG Assets** (saved in `public/images/`):
+**Completed Features**:
 
-| File | ViewBox | Contains |
-|------|---------|----------|
-| `intro_paw_1.svg` | 0 0 1969.78 1562.3 | Card group + paw1 path |
-| `intro_paw_2.svg` | 0 0 1969.86 1204.74 | Card group + Paw2 path |
+- Desktop: Full coyote paw morph animation with finger morphing
+- Mobile: Card flip fallback (no paw overlay)
+- Enter key skips animation
+- Replays after 20 minutes since last view (localStorage timestamp)
+- Header fades in after animation completes
 
-**Implementation Plan**:
+### Contact Section Animation - COMPLETE
 
-1. Create Intro Overlay Container
-2. Load GSAP MorphSVG Plugin
-3. Morph Animation Sequence (paw1 → paw2)
-4. Alignment Strategy (overlay real card)
-5. Cleanup and handoff to card flip
+**Status**: Complete
+**Date**: December 18, 2025
 
-**Dependencies**: GSAP MorphSVG plugin (premium)
+**Completed Features**:
+
+- Contact section pins during animation playback
+- Form fields slide in from right with staggered timing
+- Submit button slides in, bumps fields, triggers card flip
+- Business card shows blank front with contact options text
+- Card intake link opens modal (not new page)
+- Error toasts positioned to right of form fields (desktop)
+- Contact options paragraph hidden on desktop (info on card instead)
 
 ---
 
@@ -140,21 +146,12 @@ Red paw print SVG icon - needs to be added to project assets.
 
 ---
 
-### Mobile Intro Animation - Card Flip - IN PROGRESS
+### Mobile Intro Animation - COMPLETE
 
-**Goal**: On mobile, the business card should show back first, then flip to front.
+**Status**: Complete
+**Date**: December 18, 2025
 
-**Implementation**: Complete - card flips from back to front on mobile, header visible immediately.
-
----
-
-### Desktop Card Alignment - KNOWN ISSUE
-
-**Status**: Known Issue (DO NOT FIX YET)
-
-**Concern**: Card alignment is off on desktop during intro animation.
-
-**Notes**: Focus is on mobile fixes first. Will address desktop alignment after mobile is working.
+**Implementation**: Card flips from back to front on mobile, header visible immediately.
 
 ---
 
@@ -168,7 +165,7 @@ Red paw print SVG icon - needs to be added to project assets.
 
 ## System Status
 
-**Last Updated**: December 17, 2025
+**Last Updated**: December 18, 2025
 
 ### Build Status
 
@@ -181,7 +178,7 @@ Red paw print SVG icon - needs to be added to project assets.
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| Critical Issues | 1 | intro-animation.ts pending |
+| Critical Issues | 0 | All resolved |
 | Files Needing Attention | 6 | Large files / code quality |
 | CSS Token Usage | Inconsistent | Hardcoded values remain |
 | Server Code | Excellent | Production-ready |
@@ -216,16 +213,21 @@ Run `npm run dev:full` to start both frontend and backend
 
 ---
 
-### Intake Form Text Size
+### Intake Form Text Size - FIXED
 
-**Status**: Known
+**Status**: Fixed (December 18, 2025)
 
-**Issue**: Text in the terminal intake form is too small for older users.
+**Issue**: Text in the terminal intake form was too small for older users.
 
-**Next Steps**:
+**Resolution**: Increased font sizes throughout terminal intake:
 
-- [ ] Increase base font size for intake form inputs and labels
-- [ ] Ensure minimum 16px font size on mobile (prevents iOS zoom)
+- Title: 13px → 14px
+- Login info: 13px → 15px
+- System messages: 13px → 15px
+- Boot lines: 14px → 15px
+- Input fields: 14px → 16px (prevents iOS zoom)
+- Options: 14px → 16px
+- Progress: 12px → 14px
 
 ---
 
