@@ -187,7 +187,7 @@
 
 /* Contact text on card - always black on white card background */
 .contact-card-text {
-  color: #000000;
+  color: var(--color-black);
   font-size: 1.4rem;
   line-height: 1.8;
   text-align: center;
@@ -198,7 +198,7 @@
 .contact-card-link {
   font-weight: 800;
   text-decoration: underline;
-  color: #000000;
+  color: var(--color-black);
   transition: color 0.2s ease;
 }
 

@@ -248,7 +248,7 @@ export class TerminalIntakeModule {
     // Escape key toggles fullscreen
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        const modal = document.getElementById('intakeModal');
+        const modal = document.getElementById('intake-modal');
         if (modal?.classList.contains('open')) {
           modal.classList.toggle('fullscreen');
         }
@@ -285,7 +285,7 @@ export class TerminalIntakeModule {
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
-        const modal = document.getElementById('intakeModal');
+        const modal = document.getElementById('intake-modal');
         const isModalClosed = modal && !modal.classList.contains('open');
         if (isModalClosed) return;
 
@@ -315,7 +315,7 @@ export class TerminalIntakeModule {
         }
       }
 
-      const modal = document.getElementById('intakeModal');
+      const modal = document.getElementById('intake-modal');
       if (modal && !modal.classList.contains('open')) return;
 
       const question = this.getCurrentQuestion();
@@ -350,7 +350,7 @@ export class TerminalIntakeModule {
     document.addEventListener('keydown', (e) => {
       if (this.isProcessing) return;
 
-      const modal = document.getElementById('intakeModal');
+      const modal = document.getElementById('intake-modal');
       if (modal && !modal.classList.contains('open')) return;
 
       if (e.key !== 'ArrowUp') return;
@@ -377,19 +377,23 @@ export class TerminalIntakeModule {
   private bindModalControls(): void {
     const closeBtn = this.container.querySelector('#terminalClose');
     closeBtn?.addEventListener('click', () => {
-      const modal = document.getElementById('intakeModal');
+      const modal = document.getElementById('intake-modal');
+      const backdrop = document.getElementById('intake-modal-backdrop');
       if (modal) {
         modal.classList.remove('open', 'minimized', 'fullscreen');
         document.body.style.overflow = '';
         (window as typeof globalThis & { terminalIntakeInitialized?: boolean }).terminalIntakeInitialized = false;
-        const container = document.querySelector('#intakeModal .terminal-intake-container');
+        const container = document.querySelector('#intake-modal .terminal-intake-container');
         if (container) container.innerHTML = '';
+      }
+      if (backdrop) {
+        backdrop.classList.remove('open');
       }
     });
 
     const minimizeBtn = this.container.querySelector('#terminalMinimize');
     minimizeBtn?.addEventListener('click', () => {
-      const modal = document.getElementById('intakeModal');
+      const modal = document.getElementById('intake-modal');
       if (modal) {
         modal.classList.remove('fullscreen');
         modal.classList.toggle('minimized');
@@ -398,7 +402,7 @@ export class TerminalIntakeModule {
 
     const maximizeBtn = this.container.querySelector('#terminalMaximize');
     maximizeBtn?.addEventListener('click', () => {
-      const modal = document.getElementById('intakeModal');
+      const modal = document.getElementById('intake-modal');
       if (modal) {
         modal.classList.remove('minimized');
         modal.classList.toggle('fullscreen');
@@ -409,7 +413,7 @@ export class TerminalIntakeModule {
     header?.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (!target.classList.contains('terminal-btn')) {
-        const modal = document.getElementById('intakeModal');
+        const modal = document.getElementById('intake-modal');
         if (modal?.classList.contains('minimized')) {
           modal.classList.remove('minimized');
         }

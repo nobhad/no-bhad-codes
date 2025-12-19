@@ -1,4 +1,4 @@
-# Current Work - December 18, 2025
+# Current Work - December 19, 2025
 
 ---
 
@@ -165,7 +165,7 @@ Red paw print SVG icon - needs to be added to project assets.
 
 ## System Status
 
-**Last Updated**: December 18, 2025
+**Last Updated**: December 19, 2025
 
 ### Build Status
 
@@ -240,7 +240,9 @@ Run `npm run dev:full` to start both frontend and backend
 **Resolution**:
 
 - Buttons already use Mac-style (red/yellow/green) on the left side
-- Red close button already wired to close the modal
+- Fixed modal ID mismatch (`intakeModal` vs `intake-modal`) in terminal-intake.ts
+- Red close button now properly closes the modal and backdrop
+- Removed X close button from modal (using Mac-style buttons only)
 - Added hover/active states for better visual feedback
 
 ---
