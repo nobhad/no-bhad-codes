@@ -89,9 +89,9 @@
  * The SVG is scaled and positioned to align perfectly with the actual
  * business card element on the page. The alignment formula:
  *
- *   scale = actualCardRect.width / SVG_CARD_WIDTH
- *   translateX = actualCardRect.left - (SVG_CARD_X * scale)
- *   translateY = actualCardRect.top - (SVG_CARD_Y * scale)
+ *   scale = actualCardRect.width / SVG_CARD.width
+ *   translateX = actualCardRect.left - (SVG_CARD.x * scale)
+ *   translateY = actualCardRect.top - (SVG_CARD.y * scale)
  *
  * SKIP CONDITIONS:
  * The animation is skipped when:
@@ -116,43 +116,23 @@ import { BaseModule } from './base';
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import type { ModuleOptions } from '../types/modules';
+import {
+  SVG_PATH,
+  SVG_CARD,
+  SVG_ELEMENT_IDS,
+  DOM_ELEMENT_IDS,
+  REPLAY_CONFIG
+} from '../config/intro-animation-config';
 
 // Register MorphSVG plugin with GSAP
 gsap.registerPlugin(MorphSVGPlugin);
 
 // ============================================================================
-// SVG CONSTANTS
-// ============================================================================
-// These values are extracted from coyote_paw.svg and must be updated
-// if the SVG card position or dimensions change.
+// DERIVED CONSTANTS
 // ============================================================================
 
 /** SVG file path with cache-busting timestamp */
-const PAW_SVG = `/images/coyote_paw.svg?v=${Date.now()}`;
-
-/** X position of card rectangle in SVG coordinates */
-const SVG_CARD_X = 1256.15;
-
-/** Y position of card rectangle in SVG coordinates */
-const SVG_CARD_Y = 1031.85;
-
-/** Width of card rectangle in SVG coordinates */
-const SVG_CARD_WIDTH = 1062.34;
-
-/** Height of card rectangle in SVG coordinates (unused but kept for reference) */
-const _SVG_CARD_HEIGHT = 591.3;
-
-/** Full SVG viewBox width (unused but kept for reference) */
-const _SVG_VIEWBOX_WIDTH = 2316.99;
-
-/** Full SVG viewBox height (unused but kept for reference) */
-const _SVG_VIEWBOX_HEIGHT = 1801.19;
-
-/** Time in milliseconds before intro animation replays (20 minutes) */
-const INTRO_REPLAY_INTERVAL = 20 * 60 * 1000;
-
-/** LocalStorage key for intro animation timestamp */
-const INTRO_TIMESTAMP_KEY = 'introAnimationTimestamp';
+const PAW_SVG = `${SVG_PATH}?v=${Date.now()}`;
 
 // ============================================================================
 // INTRO ANIMATION MODULE CLASS
@@ -209,10 +189,10 @@ export class IntroAnimationModule extends BaseModule {
     // TIME-BASED CHECK
     // Skip animation if shown within the last 20 minutes
     // ========================================================================
-    const lastIntroTimestamp = localStorage.getItem(INTRO_TIMESTAMP_KEY);
+    const lastIntroTimestamp = localStorage.getItem(REPLAY_CONFIG.timestampKey);
     if (lastIntroTimestamp) {
       const timeSinceLastIntro = Date.now() - parseInt(lastIntroTimestamp, 10);
-      if (timeSinceLastIntro < INTRO_REPLAY_INTERVAL) {
+      if (timeSinceLastIntro < REPLAY_CONFIG.replayInterval) {
         this.log(`Intro shown ${Math.round(timeSinceLastIntro / 1000 / 60)} min ago - skipping (replays after 20 min)`);
         this.skipIntroImmediately();
         return;
@@ -281,10 +261,10 @@ export class IntroAnimationModule extends BaseModule {
     // GET OVERLAY ELEMENTS
     // These are placeholder elements in the HTML that we'll populate
     // ========================================================================
-    this.morphOverlay = document.getElementById('intro-morph-overlay');
-    const morphSvg = document.getElementById('intro-morph-svg') as SVGSVGElement | null;
-    const morphPaw = document.getElementById('morph-paw');
-    const morphCardGroup = document.getElementById('morph-card-group');
+    this.morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
+    const morphSvg = document.getElementById(DOM_ELEMENT_IDS.morphSvg) as SVGSVGElement | null;
+    const morphPaw = document.getElementById(DOM_ELEMENT_IDS.morphPaw);
+    const morphCardGroup = document.getElementById(DOM_ELEMENT_IDS.morphCardGroup);
 
     if (!this.morphOverlay || !morphSvg || !morphPaw || !morphCardGroup) {
       this.log('Morph overlay elements not found, falling back to card flip');
@@ -296,7 +276,7 @@ export class IntroAnimationModule extends BaseModule {
     // GET BUSINESS CARD FOR ALIGNMENT
     // We need to align the SVG card with the actual DOM element
     // ========================================================================
-    const businessCard = document.getElementById('business-card');
+    const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
     if (!businessCard) {
       this.log('Business card element not found, falling back to card flip');
       this.runCardFlip();
@@ -317,11 +297,11 @@ export class IntroAnimationModule extends BaseModule {
     // EXTRACT SVG ELEMENTS
     // Get references to the key groups in the SVG structure
     // ========================================================================
-    const armBase = svgDoc.getElementById('Arm_Base');
-    const position1 = svgDoc.getElementById('Position_1');
-    const position2 = svgDoc.getElementById('Position_2');
-    const position3 = svgDoc.getElementById('Position_3');
-    const cardGroup = svgDoc.getElementById('Card');
+    const armBase = svgDoc.getElementById(SVG_ELEMENT_IDS.armBase);
+    const position1 = svgDoc.getElementById(SVG_ELEMENT_IDS.position1);
+    const position2 = svgDoc.getElementById(SVG_ELEMENT_IDS.position2);
+    const position3 = svgDoc.getElementById(SVG_ELEMENT_IDS.position3);
+    const cardGroup = svgDoc.getElementById(SVG_ELEMENT_IDS.cardGroup);
 
     if (!position1 || !position2) {
       this.error('Position groups not found in SVG');
@@ -340,7 +320,7 @@ export class IntroAnimationModule extends BaseModule {
     const actualCardRect = cardFront ? cardFront.getBoundingClientRect() : cardRect;
 
     // Uniform scale based on card width (preserves aspect ratio)
-    const scale = actualCardRect.width / SVG_CARD_WIDTH;
+    const scale = actualCardRect.width / SVG_CARD.width;
 
     // Set viewBox to match viewport for proper positioning
     const viewportWidth = window.innerWidth;
@@ -349,8 +329,8 @@ export class IntroAnimationModule extends BaseModule {
     morphSvg.setAttribute('preserveAspectRatio', 'none');
 
     // Calculate translation to align SVG card with screen position
-    const translateX = actualCardRect.left - (SVG_CARD_X * scale);
-    const translateY = actualCardRect.top - (SVG_CARD_Y * scale);
+    const translateX = actualCardRect.left - (SVG_CARD.x * scale);
+    const translateY = actualCardRect.top - (SVG_CARD.y * scale);
 
     this.log('Alignment:', { scale, translateX, translateY });
 
@@ -397,7 +377,7 @@ export class IntroAnimationModule extends BaseModule {
 
     // Add thumb from Position 2 (behind card, starts hidden)
     // Thumb appears instantly when fingers start releasing
-    const thumbElement = position2.querySelector('#_Thumb_Behind_Card_');
+    const thumbElement = position2.querySelector(`#${SVG_ELEMENT_IDS.thumb2}`);
     let clonedThumb: Element | null = null;
     if (thumbElement) {
       clonedThumb = thumbElement.cloneNode(true) as Element;
@@ -490,19 +470,19 @@ export class IntroAnimationModule extends BaseModule {
 
     // Position 1: Fingers in clutching pose (morph SOURCE)
     // Note: Some fingers are in groups, need to select path inside
-    const fingerA1 = clonedPos1.querySelector('#_1_Morph_Above_Card_-_Fingers_') as SVGPathElement;
-    const fingerB1 = clonedPos1.querySelector('[id="_FInger_B_-_Above_Card_"] path') as SVGPathElement;
-    const fingerC1 = clonedPos1.querySelector('[id="_FInger_C-_Above_Card_"] path') as SVGPathElement;
+    const fingerA1 = clonedPos1.querySelector(`#${SVG_ELEMENT_IDS.fingerA1}`) as SVGPathElement;
+    const fingerB1 = clonedPos1.querySelector(`[id="${SVG_ELEMENT_IDS.fingerB1Container}"] path`) as SVGPathElement;
+    const fingerC1 = clonedPos1.querySelector(`[id="${SVG_ELEMENT_IDS.fingerC1Container}"] path`) as SVGPathElement;
 
     // Position 2: Fingers releasing (morph TARGET 1)
-    const fingerA2 = position2.querySelector('#_FInger_A_-_Above_Card_-2') as SVGPathElement;
-    const fingerB2 = position2.querySelector('#_FInger_B-_Above_Card_') as SVGPathElement;
-    const fingerC2 = position2.querySelector('#_FInger_C_-_Above_Card_') as SVGPathElement;
+    const fingerA2 = position2.querySelector(`#${SVG_ELEMENT_IDS.fingerA2}`) as SVGPathElement;
+    const fingerB2 = position2.querySelector(`#${SVG_ELEMENT_IDS.fingerB2}`) as SVGPathElement;
+    const fingerC2 = position2.querySelector(`#${SVG_ELEMENT_IDS.fingerC2}`) as SVGPathElement;
 
     // Position 3: Fingers fully open (morph TARGET 2)
-    const fingerA3 = position3?.querySelector('#_FInger_A_-_Above_Card_-3') as SVGPathElement;
-    const fingerB3 = position3?.querySelector('#_FInger_B-_Above_Card_-2') as SVGPathElement;
-    const fingerC3 = position3?.querySelector('#_FInger_C_-_Above_Card_-2') as SVGPathElement;
+    const fingerA3 = position3?.querySelector(`#${SVG_ELEMENT_IDS.fingerA3}`) as SVGPathElement;
+    const fingerB3 = position3?.querySelector(`#${SVG_ELEMENT_IDS.fingerB3}`) as SVGPathElement;
+    const fingerC3 = position3?.querySelector(`#${SVG_ELEMENT_IDS.fingerC3}`) as SVGPathElement;
 
     // Extract path data (the 'd' attribute) for morph targets
     const fingerA2PathData = fingerA2?.getAttribute('d');
@@ -737,7 +717,7 @@ export class IntroAnimationModule extends BaseModule {
     this.isComplete = true;
 
     // Hide morph overlay
-    const morphOverlay = document.getElementById('intro-morph-overlay');
+    const morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
     if (morphOverlay) {
       morphOverlay.classList.add('hidden');
     }
@@ -747,13 +727,13 @@ export class IntroAnimationModule extends BaseModule {
     document.documentElement.classList.add('intro-complete', 'intro-finished');
 
     // Make sure card is visible
-    const businessCard = document.getElementById('business-card');
+    const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
     if (businessCard) {
       businessCard.style.opacity = '1';
     }
 
     // Reset card to front-facing position (no flip)
-    const cardInner = document.getElementById('business-card-inner');
+    const cardInner = document.getElementById(DOM_ELEMENT_IDS.businessCardInner);
     if (cardInner) {
       cardInner.style.transition = 'none';
       cardInner.style.transform = 'rotateY(0deg)';
@@ -801,7 +781,7 @@ export class IntroAnimationModule extends BaseModule {
    */
   private runCardFlip(): void {
     // Hide morph overlay on mobile (not used)
-    const morphOverlay = document.getElementById('intro-morph-overlay');
+    const morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
     if (morphOverlay) {
       morphOverlay.classList.add('hidden');
     }
@@ -815,7 +795,7 @@ export class IntroAnimationModule extends BaseModule {
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
 
-    const cardInner = document.getElementById('business-card-inner');
+    const cardInner = document.getElementById(DOM_ELEMENT_IDS.businessCardInner);
 
     if (!cardInner) {
       this.completeIntro();
@@ -881,14 +861,14 @@ export class IntroAnimationModule extends BaseModule {
     this.isComplete = true;
 
     // Store timestamp for 20-minute replay logic
-    localStorage.setItem(INTRO_TIMESTAMP_KEY, String(Date.now()));
+    localStorage.setItem(REPLAY_CONFIG.timestampKey, String(Date.now()));
 
     // Ensure main page content is visible
     document.documentElement.classList.remove('intro-loading');
     document.documentElement.classList.add('intro-complete');
 
     // Ensure business card is visible
-    const businessCard = document.getElementById('business-card');
+    const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
     if (businessCard) {
       businessCard.style.opacity = '1';
     }
