@@ -131,18 +131,16 @@ Red paw print SVG icon - needs to be added to project assets.
 
 ---
 
-### Client Portal Auth Container - IN PROGRESS
+### Client Portal Auth Container - COMPLETE
 
-**Status**: In Progress
-**Date**: December 9, 2025
+**Status**: Complete
+**Date**: December 19, 2025
 
 **Summary**: Restructured client portal login page with unified auth container design.
 
-**Known Issues**:
+**Resolved Issues**:
 
-| Issue | Priority | Notes |
-|-------|----------|-------|
-| VH calculations not accounting for footer | Medium | Client portal layout uses VH but doesn't subtract footer height properly |
+- VH calculations now account for footer height using `calc(100vh - var(--footer-height))`
 
 ---
 
@@ -155,9 +153,10 @@ Red paw print SVG icon - needs to be added to project assets.
 
 ---
 
-### Mobile Navigation Styling - IN PROGRESS
+### Mobile Navigation Styling - COMPLETE
 
-**Status**: Fixes applied, awaiting verification.
+**Status**: Complete (code reviewed)
+**Date**: December 19, 2025
 
 **Files Modified**: `src/styles/components/navigation.css`
 
@@ -199,17 +198,17 @@ Run `npm run dev:full` to start both frontend and backend
 
 ## Known Issues
 
-### DataService Portfolio Load Error
+### DataService Portfolio Load Error - FIXED
 
-**Status**: Known
+**Status**: Fixed (December 19, 2025)
 
-**Issue**: Console error when loading main page - DataService trying to fetch JSON from URL that returns HTML.
+**Issue**: Console error when loading main page - DataService trying to fetch JSON with wrong schema.
 
-**Next Steps**:
+**Resolution**:
 
-- [ ] Verify the portfolio JSON endpoint exists on the server
-- [ ] Add proper 404 handling to return JSON error responses
-- [ ] Add fallback data in DataService when fetch fails
+- Updated `public/data/portfolio.json` to match `PortfolioData` interface
+- Added navigation, profile, and contact sections
+- DataService now loads data successfully without fallback
 
 ---
 
@@ -259,6 +258,22 @@ Run `npm run dev:full` to start both frontend and backend
 - Set all paths to opacity 0 initially
 - Use GSAP stagger animation to reveal each path one at a time
 - Fallback to img tag if fetch fails
+
+---
+
+### CSS Hardcoded Values Cleanup - FIXED
+
+**Status**: Fixed (December 19, 2025)
+
+**Issue**: Hardcoded `#000` color values throughout CSS files.
+
+**Resolution**:
+
+- Replaced 24 instances in `admin.css` (status badges, tabs)
+- Replaced 2 instances in `navigation.css` (dropdown buttons)
+- Replaced 1 instance in `client-portal-section.css` (toggle button)
+- Replaced 2 instances in `contact.css` (card text)
+- All now use `var(--color-black)` CSS variable
 
 ---
 

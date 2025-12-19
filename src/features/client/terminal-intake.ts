@@ -9,6 +9,7 @@
  */
 
 import { getContactEmail } from '../../config/branding';
+import { BaseModule } from '../../modules/base';
 import type {
   IntakeQuestion,
   IntakeData,
@@ -45,8 +46,8 @@ import {
 // Re-export types for external consumers
 export type { TerminalIntakeOptions } from './terminal-intake-types';
 
-export class TerminalIntakeModule {
-  private container: HTMLElement;
+export class TerminalIntakeModule extends BaseModule {
+  private terminalContainer: HTMLElement;
   private chatContainer: HTMLElement | null = null;
   private inputElement: HTMLInputElement | null = null;
   private sendButton: HTMLButtonElement | null = null;
@@ -69,13 +70,13 @@ export class TerminalIntakeModule {
   private historyIndex = -1;
 
   constructor(container: HTMLElement, options: TerminalIntakeOptions = {}) {
-    this.container = container;
+    super('TerminalIntake', { debug: false });
+    this.terminalContainer = container;
     this.isModal = options.isModal ?? false;
     this.clientData = options.clientData;
   }
 
-  async init(): Promise<void> {
-    console.log('[TerminalIntake] Initializing...');
+  protected override async onInit(): Promise<void> {
     this.render();
     this.bindEvents();
 
@@ -85,18 +86,16 @@ export class TerminalIntakeModule {
     } else {
       await this.startConversation();
     }
-
-    console.log('[TerminalIntake] Initialized successfully');
   }
 
   renderOnly(): void {
-    console.log('[TerminalIntake] Rendering only (no animations)...');
+    this.log('Rendering only (no animations)...');
     this.render();
     this.bindEvents();
   }
 
   startAnimations(): void {
-    console.log('[TerminalIntake] Starting animations...');
+    this.log('Starting animations...');
     const savedProgress = this.loadProgress();
     if (savedProgress && savedProgress.currentQuestionIndex > 0) {
       this.askToResume(savedProgress);
@@ -124,7 +123,7 @@ export class TerminalIntakeModule {
         }
       }
     } catch (e) {
-      console.error('[TerminalIntake] Error loading progress:', e);
+      this.error('Error loading progress:', e);
     }
     return null;
   }
@@ -226,13 +225,13 @@ export class TerminalIntakeModule {
   }
 
   private render(): void {
-    this.container.innerHTML = renderTerminalHTML(this.isModal);
+    this.terminalContainer.innerHTML = renderTerminalHTML(this.isModal);
 
-    this.chatContainer = this.container.querySelector('#terminalChat');
-    this.inputElement = this.container.querySelector('#terminalInput');
-    this.sendButton = this.container.querySelector('#terminalSend');
-    this.progressFill = this.container.querySelector('#progressFill');
-    this.progressPercent = this.container.querySelector('#progressPercent');
+    this.chatContainer = this.terminalContainer.querySelector('#terminalChat');
+    this.inputElement = this.terminalContainer.querySelector('#terminalInput');
+    this.sendButton = this.terminalContainer.querySelector('#terminalSend');
+    this.progressFill = this.terminalContainer.querySelector('#progressFill');
+    this.progressPercent = this.terminalContainer.querySelector('#progressPercent');
   }
 
   private bindEvents(): void {
@@ -375,7 +374,7 @@ export class TerminalIntakeModule {
   }
 
   private bindModalControls(): void {
-    const closeBtn = this.container.querySelector('#terminalClose');
+    const closeBtn = this.terminalContainer.querySelector('#terminalClose');
     closeBtn?.addEventListener('click', () => {
       const modal = document.getElementById('intake-modal');
       const backdrop = document.getElementById('intake-modal-backdrop');
@@ -391,7 +390,7 @@ export class TerminalIntakeModule {
       }
     });
 
-    const minimizeBtn = this.container.querySelector('#terminalMinimize');
+    const minimizeBtn = this.terminalContainer.querySelector('#terminalMinimize');
     minimizeBtn?.addEventListener('click', () => {
       const modal = document.getElementById('intake-modal');
       if (modal) {
@@ -400,7 +399,7 @@ export class TerminalIntakeModule {
       }
     });
 
-    const maximizeBtn = this.container.querySelector('#terminalMaximize');
+    const maximizeBtn = this.terminalContainer.querySelector('#terminalMaximize');
     maximizeBtn?.addEventListener('click', () => {
       const modal = document.getElementById('intake-modal');
       if (modal) {
@@ -409,7 +408,7 @@ export class TerminalIntakeModule {
       }
     });
 
-    const header = this.container.querySelector('.terminal-header');
+    const header = this.terminalContainer.querySelector('.terminal-header');
     header?.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (!target.classList.contains('terminal-btn')) {
@@ -1432,7 +1431,7 @@ export class TerminalIntakeModule {
         submittedAt: new Date().toISOString()
       };
 
-      console.log('[TerminalIntake] Submitting data:', submitData);
+      this.log('Submitting data:', submitData);
 
       const response = await fetch('/api/intake', {
         method: 'POST',
@@ -1442,7 +1441,7 @@ export class TerminalIntakeModule {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('[TerminalIntake] Server error response:', errorText);
+        this.error('Server error response:', errorText);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -1469,7 +1468,7 @@ Thank you for choosing No Bhad Codes!
 
       this.updateProgress(100);
     } catch (error) {
-      console.error('[TerminalIntake] Submission error:', error);
+      this.error('Submission error:', error);
       this.addMessage({
         type: 'error',
         content: `Failed to submit your request. Please try again or contact ${getContactEmail('fallback')}`
