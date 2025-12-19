@@ -13,7 +13,7 @@ Full codebase review completed across all TypeScript and CSS files.
 | File | Issue | Severity | Status |
 |------|-------|----------|--------|
 | `src/modules/navigation.ts` | 15+ console.log calls, untracked event listeners | CRITICAL | FIXED |
-| `src/modules/intro-animation.ts` | 400+ lines, hardcoded SVG paths | CRITICAL | Pending |
+| `src/modules/intro-animation.ts` | 400+ lines, hardcoded SVG paths | CRITICAL | FIXED |
 | `src/services/code-protection-service.ts` | Event listener cleanup will fail, memory leaks | CRITICAL | FIXED |
 | `src/features/admin/admin-security.ts` | localStorage for auth data, bypassable devtools detection | CRITICAL | FIXED (all modules migrated to HttpOnly cookies) |
 
@@ -34,10 +34,8 @@ Full codebase review completed across all TypeScript and CSS files.
 
 **Issues**:
 
-- Hardcoded colors in `form.css`, `contact.css` despite token availability
 - `navigation.css` at 900+ lines needs splitting
 - `form.css` at 374 lines handles too many concerns
-- Legacy variable system (`--fg`, `--bg`) still in active use alongside new tokens
 
 ### Server Code Review
 
@@ -92,7 +90,7 @@ Red paw print SVG icon - needs to be added to project assets.
 
 - [ ] Split `navigation.css` (1792 lines) into nav-base, nav-animations, nav-mobile
 - [ ] Split `form.css` (374 lines) into form-fields, form-buttons, form-validation
-- [ ] Remove legacy `--fg`, `--bg` variables - migrate to semantic tokens (65+ instances)
+- [x] Remove legacy `--fg`, `--bg` variables - migrate to semantic tokens (65+ instances) - **COMPLETE** (December 19)
 
 ---
 
@@ -179,7 +177,7 @@ Red paw print SVG icon - needs to be added to project assets.
 |--------|-------|--------|
 | Critical Issues | 0 | All resolved |
 | Files Needing Attention | 6 | Large files / code quality |
-| CSS Token Usage | Inconsistent | Hardcoded values remain |
+| CSS Token Usage | Consistent | Legacy --fg/--bg migrated |
 | Server Code | Excellent | Production-ready |
 | Lint Warnings | 0 | Clean |
 | TypeScript Errors | 0 | Clean |
@@ -274,6 +272,24 @@ Run `npm run dev:full` to start both frontend and backend
 - Replaced 1 instance in `client-portal-section.css` (toggle button)
 - Replaced 2 instances in `contact.css` (card text)
 - All now use `var(--color-black)` CSS variable
+
+---
+
+### Legacy CSS Variable Migration - FIXED
+
+**Status**: Fixed (December 19, 2025)
+
+**Issue**: Legacy `--fg` and `--bg` CSS variables still in use across 65+ instances.
+
+**Resolution**:
+
+- Migrated all usages to semantic design system tokens
+- Text colors: `--fg` → `--color-text-primary`
+- Border colors: `--fg` → `--color-border`
+- Inverted backgrounds: `--fg` → `--color-bg-inverse`
+- Inverted text: `--bg` → `--color-text-inverse`
+- Removed legacy variable definitions from design tokens
+- Files updated: 11 CSS files across components, pages, and base layers
 
 ---
 
