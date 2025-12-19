@@ -151,7 +151,7 @@ router.post(
         try {
           await emailService.sendEmail({
             to: adminEmail,
-            subject: `Contact Form: ${subjectLine}`,
+            subject: 'NEW: Contact Form Submission',
           text: `
 New contact form submission:
 
@@ -166,7 +166,7 @@ Request ID: ${requestId}
 Received: ${new Date().toISOString()}
           `.trim(),
           html: `
-<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0;">
   <h2 style="color: #333;">New Contact Form Submission</h2>
 
   <table style="width: 100%; border-collapse: collapse;">

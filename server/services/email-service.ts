@@ -283,7 +283,7 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
       <title>New Project Intake</title>
       <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 700px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 700px; margin: 0; padding: 20px; }
         .header { background: #00ff41; color: #000; padding: 20px; text-align: center; }
         .content { padding: 20px; background: #f9f9f9; }
         .section { margin-bottom: 20px; }
