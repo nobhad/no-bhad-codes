@@ -175,11 +175,12 @@ export class ContactAnimationModule extends BaseModule {
     const formFields = [nameField, companyField, emailField].filter(Boolean);
 
     if (submitButton && formFields.length > 0) {
-      // 1. Button rolls in from off-screen and hits the fields
+      // 1. Button rolls in from off-screen and hits the fields (starts earlier, overlapping with fields)
       gsap.set(submitButton, { transformOrigin: 'center center' });
       this.timeline.fromTo(submitButton,
         { x: '100vw', rotation: -720 },
-        { x: -BUTTON_OVERSHOOT, rotation: 0, duration: 1.2, ease: 'none' }
+        { x: -BUTTON_OVERSHOOT, rotation: 0, duration: 1.2, ease: 'none' },
+        '-=1.2'
       );
 
       // 2. All three fields bump left on impact - company moves more
