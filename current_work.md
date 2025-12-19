@@ -59,7 +59,7 @@ Red paw print SVG icon - needs to be added to project assets.
 
 - [x] Intro animation not displaying with coyote paw - **COMPLETE** (December 18)
 - [ ] **Loop-trigger-zone awkward space** - Plan: Add decorative content (pattern, gradient, or brand element) to fill the 100vh gap
-- [ ] **Contact form emails not being received** - Needs investigation
+- [x] **Contact form emails not being received** - FIXED: Simplified SMTP_FROM format in .env (removed quotes and display name)
 
 ---
 
