@@ -1,0 +1,150 @@
+/**
+ * ===============================================
+ * NAVIGATION - ANIMATIONS
+ * ===============================================
+ * @file src/styles/components/nav-animations.css
+ *
+ * Animation states and effects including:
+ * - Open/Close State Animations
+ * - Hover Effects & Rolling Text
+ * - GSAP Integration Support
+ * - Touch-Active States
+ */
+
+/* =====================================================
+   13. OPEN STATE ANIMATIONS
+   ===================================================== */
+.nav[data-nav="open"] .overlay {
+  opacity: 1;
+  visibility: visible;
+}
+
+.nav[data-nav="open"] .menu {
+  transform: translateX(0);
+}
+
+/* GSAP handles bg-panel animations */
+
+.nav[data-nav="open"] .menu-link-heading {
+  transform: translateY(0);
+}
+
+/* Eyebrows always visible now - no need for open state opacity change */
+
+.nav[data-nav="open"] .menu-details {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* When menu is open, swap the text positions */
+/* Menu button text animation handled by GSAP */
+
+/* Icon rotation when menu opens */
+.nav[data-nav="open"] .menu-button-icon {
+  transform: rotate(45deg);
+}
+
+/* =====================================================
+   15. HOVER EFFECTS - UPDATED FOR ROLLING ANIMATION
+   ===================================================== */
+@media (hover: hover) {
+  .menu-button:hover .icon-wrap {
+    transform: rotate(90deg);
+  }
+
+  .theme-button:hover .icon-wrap {
+    transform: scale(1.1);
+  }
+
+  /* Rolling hover effect for menu items */
+  .menu-link:hover .menu-link-heading {
+    transform: translateY(-100%); /* Move original text up and out */
+  }
+
+  .menu-link:hover .menu-link-heading::before {
+    transform: translateY(-100%); /* Move duplicate text up into view */
+  }
+
+  .menu-link:hover .menu-link-bg {
+    transform: scale(1, 1);
+  }
+
+  .text-link:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* =====================================================
+   CLOSED STATE - SMOOTH TEXT ANIMATION SUPPORT
+   ===================================================== */
+.nav[data-nav="closed"] .menu-link-heading {
+  /* Allow GSAP to control these during close animation */
+  transform: none;
+  transition: none;
+}
+
+.nav[data-nav="closed"] .menu-link-heading::before {
+  transform: translateY(0) !important;
+  transition: none !important;
+}
+
+/* Ensure text elements are positioned for smooth animation */
+.menu-link-heading {
+  transform-origin: center center; /* For smooth scaling/movement */
+}
+
+/* =====================================================
+   15. HOVER EFFECTS - DISABLE DURING CLOSE
+   ===================================================== */
+@media (hover: hover) {
+  .menu-button:hover .icon-wrap {
+    transform: rotate(90deg);
+  }
+
+  .theme-button:hover .icon-wrap {
+    transform: scale(1.1);
+  }
+
+  /* Rolling hover effects when menu is open */
+  .nav[data-nav="open"] .menu-link:hover .menu-link-heading {
+    transform: translateY(-100%);
+  }
+
+  .nav[data-nav="open"] .menu-link:hover .menu-link-heading::before {
+    transform: translateY(-100%);
+  }
+
+  .nav[data-nav="open"] .menu-link:hover .menu-link-bg {
+    transform: scale(1, 1);
+  }
+
+  /* COMPLETELY DISABLE hover effects when menu is closing */
+  .nav[data-nav="closed"] .menu-link:hover .menu-link-heading,
+  .nav[data-nav="closed"] .menu-link:hover .menu-link-heading::before {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .text-link:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* =====================================================
+   MOBILE TOUCH - Tap-to-animate via JavaScript
+   .touch-active class added on first tap, removed on second tap or tap elsewhere
+   ===================================================== */
+
+/* Touch-active state - triggers hover animation on mobile */
+.menu-link.touch-active .menu-link-heading {
+  transform: translateY(-100%);
+}
+
+.menu-link.touch-active .menu-link-heading::before {
+  transform: translateY(-100%);
+}
+
+.menu-link.touch-active .menu-link-bg {
+  transform: scale(1, 1);
+}
+

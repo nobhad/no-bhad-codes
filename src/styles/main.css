@@ -39,10 +39,15 @@
  * ============================================ */
 
 /* Form system */
-@import "./components/form.css";
+@import "./components/form-fields.css";
+@import "./components/form-buttons.css";
+@import "./components/form-validation.css";
 
 /* Navigation system */
-@import "./components/navigation.css";
+@import "./components/nav-base.css";
+@import "./components/nav-animations.css";
+@import "./components/nav-responsive.css";
+@import "./components/nav-portal.css";
 
 /* Business card component */
 @import "./components/business-card.css";

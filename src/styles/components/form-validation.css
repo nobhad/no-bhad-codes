@@ -1,0 +1,26 @@
+/**
+ * ===============================================
+ * FORM VALIDATION
+ * ===============================================
+ * @file src/styles/components/form-validation.css
+ *
+ * Validation states and error message styling.
+ */
+
+/* ============================================
+ * VALIDATION STATES
+ * ============================================ */
+
+/* Error messages */
+.error-message,
+.login-error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 0.875rem;
+  display: none;
+}
+
+.error-message.show,
+.login-error.show {
+  display: block;
+}
