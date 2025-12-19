@@ -71,6 +71,17 @@ body[data-page="client-intake"] .terminal-window {
   height: 12px;
   border-radius: 50%;
   border: none;
+  cursor: pointer;
+  transition: transform 0.1s ease, filter 0.1s ease;
+}
+
+.terminal-btn:hover {
+  transform: scale(1.1);
+  filter: brightness(1.1);
+}
+
+.terminal-btn:active {
+  transform: scale(0.95);
 }
 
 .terminal-btn.close {

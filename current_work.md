@@ -231,16 +231,17 @@ Run `npm run dev:full` to start both frontend and backend
 
 ---
 
-### Terminal Intake Close Button
+### Terminal Intake Close Button - FIXED
 
-**Status**: Known
+**Status**: Fixed (December 18, 2025)
 
-**Issue**: Close button should use the design from the mockup and be positioned on the LEFT side.
+**Issue**: Close button should use Mac-style traffic lights on the left.
 
-**Next Steps**:
+**Resolution**:
 
-- [ ] Move close button from right to left side
-- [ ] Update button styling to match design mockup
+- Buttons already use Mac-style (red/yellow/green) on the left side
+- Red close button already wired to close the modal
+- Added hover/active states for better visual feedback
 
 ---
 
