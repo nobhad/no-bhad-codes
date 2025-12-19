@@ -131,8 +131,8 @@ export const ANIMATION_POSITIONS = {
 // ============================================================================
 
 export const REPLAY_CONFIG = {
-  /** Time in milliseconds before intro animation replays (20 minutes) */
-  replayInterval: 20 * 60 * 1000,
+  /** Time in milliseconds before intro animation replays (10 minutes) */
+  replayInterval: 10 * 60 * 1000,
   /** LocalStorage key for intro animation timestamp */
   timestampKey: 'introAnimationTimestamp'
 } as const;

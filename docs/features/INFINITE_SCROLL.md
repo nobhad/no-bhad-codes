@@ -73,7 +73,7 @@ interface InfiniteScrollOptions {
 ### Example Usage
 
 ```typescript
-import { InfiniteScrollModule } from './modules/infinite-scroll';
+import { InfiniteScrollModule } from './modules/animation/infinite-scroll';
 
 const infiniteScroll = new InfiniteScrollModule({
   containerSelector: 'main',

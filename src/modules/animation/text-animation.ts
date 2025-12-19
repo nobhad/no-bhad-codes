@@ -12,10 +12,10 @@
  * - Respects reduced motion preferences
  */
 
-import { BaseModule } from './base';
+import { BaseModule } from '../core/base';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import type { ModuleOptions } from '../types/modules';
+import type { ModuleOptions } from '../../types/modules';
 
 // Register ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);

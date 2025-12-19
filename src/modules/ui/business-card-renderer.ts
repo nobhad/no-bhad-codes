@@ -15,8 +15,8 @@
  * ===============================================
  */
 
-import { BaseModule } from './base';
-import type { ModuleOptions } from '../types/modules';
+import { BaseModule } from '../core/base';
+import type { ModuleOptions } from '../../types/modules';
 
 interface BusinessCardConfig {
   businessCardId?: string;

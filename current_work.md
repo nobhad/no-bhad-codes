@@ -80,8 +80,8 @@ Red paw print SVG icon - needs to be added to project assets.
 ### Feature Organization
 
 - [x] Make `TerminalIntakeModule` extend `BaseModule` - **COMPLETE** (December 19)
-- [ ] Organize 14 flat modules into subdirectories by concern (UI, animation, utilities)
-- [ ] Document cross-feature dependencies
+- [x] Organize 14 flat modules into subdirectories by concern (UI, animation, utilities) - **COMPLETE** (December 19)
+- [x] Document cross-feature dependencies - **COMPLETE** (December 19)
 
 ### CSS Cleanup
 

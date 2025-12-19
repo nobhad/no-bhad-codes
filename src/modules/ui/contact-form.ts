@@ -11,14 +11,14 @@
  * ===============================================
  */
 
-import { BaseModule } from './base';
+import { BaseModule } from '../core/base';
 import {
   ContactService,
   type ContactFormData,
   type ContactBackend
-} from '../services/contact-service';
-import { SanitizationUtils } from '../utils/sanitization-utils';
-import type { ModuleOptions } from '../types/modules';
+} from '../../services/contact-service';
+import { SanitizationUtils } from '../../utils/sanitization-utils';
+import type { ModuleOptions } from '../../types/modules';
 
 export interface ContactFormModuleOptions extends ModuleOptions {
   backend?: ContactBackend;

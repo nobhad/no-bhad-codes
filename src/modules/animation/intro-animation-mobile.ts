@@ -33,10 +33,10 @@
  * - public/images/coyote_paw.svg - SVG artwork
  */
 
-import { BaseModule } from './base';
+import { BaseModule } from '../core/base';
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
-import type { ModuleOptions } from '../types/modules';
+import type { ModuleOptions } from '../../types/modules';
 
 // Register MorphSVG plugin with GSAP
 gsap.registerPlugin(MorphSVGPlugin);

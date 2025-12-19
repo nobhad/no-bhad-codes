@@ -13,7 +13,7 @@ import './styles/main.css';
 // Only initialize essential modules for client portal
 import { container } from './core/container';
 import { ClientPortalModule } from './features/client/client-portal';
-import { NavigationModule } from './modules/navigation';
+import { NavigationModule } from './modules/ui/navigation';
 
 class ClientPortalApp {
   private isInitialized = false;
@@ -32,7 +32,7 @@ class ClientPortalApp {
     container.register(
       'ThemeModule',
       async () => {
-        const { ThemeModule } = await import('./modules/theme');
+        const { ThemeModule } = await import('./modules/utilities/theme');
         return new ThemeModule();
       },
       { singleton: true }

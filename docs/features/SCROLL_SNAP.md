@@ -80,7 +80,7 @@ sectionSelector: '.business-card-section, .about-section, .contact-section'
 ### Example Usage
 
 ```typescript
-import { ScrollSnapModule } from './modules/scroll-snap';
+import { ScrollSnapModule } from './modules/animation/scroll-snap';
 
 const scrollSnap = new ScrollSnapModule({
   containerSelector: 'main',

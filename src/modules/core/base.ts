@@ -21,7 +21,7 @@
  * ===============================================
  */
 
-import type { ModuleOptions, ModuleStatus, EventHandler } from '../types/modules';
+import type { ModuleOptions, ModuleStatus, EventHandler } from '../../types/modules';
 
 export class BaseModule {
   protected name: string;

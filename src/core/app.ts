@@ -161,7 +161,7 @@ export class Application {
         name: 'ThemeModule',
         type: 'dom',
         factory: async () => {
-          const { ThemeModule } = await import('../modules/theme');
+          const { ThemeModule } = await import('../modules/utilities/theme');
           return new ThemeModule({ debug: this.debug });
         }
       },
@@ -175,10 +175,10 @@ export class Application {
             // Use separate modules for mobile and desktop
             const isMobile = window.matchMedia('(max-width: 767px)').matches;
             if (isMobile) {
-              const { MobileIntroAnimationModule } = await import('../modules/intro-animation-mobile');
+              const { MobileIntroAnimationModule } = await import('../modules/animation/intro-animation-mobile');
               return new MobileIntroAnimationModule();
             }
-            const { IntroAnimationModule } = await import('../modules/intro-animation');
+            const { IntroAnimationModule } = await import('../modules/animation/intro-animation');
             return new IntroAnimationModule();
           }
           // Return a dummy module that does nothing for other pages
@@ -194,7 +194,7 @@ export class Application {
         name: 'SectionCardRenderer',
         type: 'dom',
         factory: async () => {
-          const { BusinessCardRenderer } = await import('../modules/business-card-renderer');
+          const { BusinessCardRenderer } = await import('../modules/ui/business-card-renderer');
           return new BusinessCardRenderer({
             businessCardId: 'business-card',
             businessCardInnerId: 'business-card-inner',
@@ -209,7 +209,7 @@ export class Application {
         type: 'dom',
         factory: async () => {
           const { BusinessCardInteractions } =
-            await import('../modules/business-card-interactions');
+            await import('../modules/ui/business-card-interactions');
           const renderer = await container.resolve('SectionCardRenderer');
           return new BusinessCardInteractions(renderer as any);
         },
@@ -219,7 +219,7 @@ export class Application {
         name: 'ContactCardRenderer',
         type: 'dom',
         factory: async () => {
-          const { BusinessCardRenderer } = await import('../modules/business-card-renderer');
+          const { BusinessCardRenderer } = await import('../modules/ui/business-card-renderer');
           return new BusinessCardRenderer({
             businessCardId: 'contact-business-card',
             businessCardInnerId: 'contact-business-card-inner',
@@ -234,7 +234,7 @@ export class Application {
         type: 'dom',
         factory: async () => {
           const { BusinessCardInteractions } =
-            await import('../modules/business-card-interactions');
+            await import('../modules/ui/business-card-interactions');
           const renderer = await container.resolve('ContactCardRenderer');
           return new BusinessCardInteractions(renderer as any);
         },
@@ -244,7 +244,7 @@ export class Application {
         name: 'NavigationModule',
         type: 'dom',
         factory: async () => {
-          const { NavigationModule } = await import('../modules/navigation');
+          const { NavigationModule } = await import('../modules/ui/navigation');
           const routerService = await container.resolve('RouterService');
           const dataService = await container.resolve('DataService');
           return new NavigationModule({
@@ -259,7 +259,7 @@ export class Application {
         name: 'ContactFormModule',
         type: 'dom',
         factory: async () => {
-          const { ContactFormModule } = await import('../modules/contact-form');
+          const { ContactFormModule } = await import('../modules/ui/contact-form');
           const _contactService = await container.resolve('ContactService');
           // Always use custom backend - Vercel proxies /api/* to Railway
           return new ContactFormModule({
@@ -273,7 +273,7 @@ export class Application {
         name: 'FooterModule',
         type: 'dom',
         factory: async () => {
-          const { FooterModule } = await import('../modules/footer');
+          const { FooterModule } = await import('../modules/ui/footer');
           return new FooterModule();
         }
       },
@@ -286,7 +286,7 @@ export class Application {
           const isClientPortal = currentPath.includes('/client');
 
           if (!isClientPortal) {
-            const { ScrollSnapModule } = await import('../modules/scroll-snap');
+            const { ScrollSnapModule } = await import('../modules/animation/scroll-snap');
             return new ScrollSnapModule({
               containerSelector: 'main',
               sectionSelector: '.business-card-section, .hero-section, .about-section, .contact-section, .page-section, main > section',
@@ -312,7 +312,7 @@ export class Application {
           const isHomePage = currentPath === '/' || currentPath === '/index.html';
 
           if (isHomePage) {
-            const { InfiniteScrollModule } = await import('../modules/infinite-scroll');
+            const { InfiniteScrollModule } = await import('../modules/animation/infinite-scroll');
             return new InfiniteScrollModule({
               containerSelector: 'main',
               lastSectionSelector: '.contact-section',
@@ -335,7 +335,7 @@ export class Application {
           // Only load text animation on index/home page
           const currentPath = window.location.pathname;
           if (currentPath === '/' || currentPath === '/index.html') {
-            const { TextAnimationModule } = await import('../modules/text-animation');
+            const { TextAnimationModule } = await import('../modules/animation/text-animation');
             return new TextAnimationModule();
           }
           // Return a dummy module for other pages
@@ -354,7 +354,7 @@ export class Application {
           // Only load contact animation on index/home page
           const currentPath = window.location.pathname;
           if (currentPath === '/' || currentPath === '/index.html') {
-            const { ContactAnimationModule } = await import('../modules/contact-animation');
+            const { ContactAnimationModule } = await import('../modules/animation/contact-animation');
             return new ContactAnimationModule();
           }
           // Return a dummy module for other pages

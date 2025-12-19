@@ -9,8 +9,8 @@
  * Manages open/close state and handles click interactions.
  */
 
-import { BaseModule } from './base';
-import type { ModuleOptions } from '../types/modules';
+import { BaseModule } from '../core/base';
+import type { ModuleOptions } from '../../types/modules';
 
 export class SubmenuModule extends BaseModule {
   private submenuToggles: NodeListOf<Element> | null = null;

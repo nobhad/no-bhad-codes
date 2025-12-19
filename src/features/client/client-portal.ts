@@ -8,7 +8,7 @@
  * and project management interface.
  */
 
-import { BaseModule } from '../../modules/base';
+import { BaseModule } from '../../modules/core/base';
 import type { ClientProject, ClientProjectStatus } from '../../types/client';
 import { gsap } from 'gsap';
 import { APP_CONSTANTS } from '../../config/constants';

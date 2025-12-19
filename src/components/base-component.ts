@@ -8,7 +8,7 @@
  * Extends BaseModule with component-specific features.
  */
 
-import { BaseModule } from '../modules/base';
+import { BaseModule } from '../modules/core/base';
 import { appState } from '../core/state';
 import type { ModuleOptions } from '../types/modules';
 

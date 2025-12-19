@@ -9,9 +9,9 @@
  * Converted to new architecture with dependency injection.
  */
 
-import { BaseModule } from './base';
-import { appState } from '../core/state';
-import type { ModuleOptions } from '../types/modules';
+import { BaseModule } from '../core/base';
+import { appState } from '../../core/state';
+import type { ModuleOptions } from '../../types/modules';
 
 export class ThemeModule extends BaseModule {
   private themeButton: HTMLElement | null = null;

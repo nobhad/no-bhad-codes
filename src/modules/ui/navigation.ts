@@ -12,13 +12,13 @@
  *       setupLinkHandlers() for proper cleanup in onDestroy().
  */
 
-import { BaseModule } from './base';
-import { appState } from '../core/state';
-import type { RouterService } from '../services/router-service';
-import type { DataService } from '../services/data-service';
+import { BaseModule } from '../core/base';
+import { appState } from '../../core/state';
+import type { RouterService } from '../../services/router-service';
+import type { DataService } from '../../services/data-service';
 import { SubmenuModule } from './submenu';
 import { gsap } from 'gsap';
-import type { ModuleOptions } from '../types/modules';
+import type { ModuleOptions } from '../../types/modules';
 
 export interface NavigationModuleOptions extends ModuleOptions {
   routerService?: RouterService;

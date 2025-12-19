@@ -9,7 +9,7 @@
  */
 
 import { getContactEmail } from '../../config/branding';
-import { BaseModule } from '../../modules/base';
+import { BaseModule } from '../../modules/core/base';
 import type {
   IntakeQuestion,
   IntakeData,

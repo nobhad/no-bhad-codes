@@ -7,7 +7,7 @@
  * Handles dynamic copyright year updates and other footer functionality
  */
 
-import { BaseModule } from './base';
+import { BaseModule } from '../core/base';
 
 export class FooterModule extends BaseModule {
   private currentYearElement: HTMLElement | null = null;

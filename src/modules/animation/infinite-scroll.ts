@@ -17,9 +17,9 @@
  * DESKTOP ONLY - disabled on mobile for better UX.
  */
 
-import { BaseModule } from './base';
+import { BaseModule } from '../core/base';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import type { ModuleOptions } from '../types/modules';
+import type { ModuleOptions } from '../../types/modules';
 
 interface InfiniteScrollOptions extends ModuleOptions {
   /** Selector for the scroll container (default: 'main') */

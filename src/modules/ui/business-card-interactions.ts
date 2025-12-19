@@ -15,10 +15,10 @@
  * ===============================================
  */
 
-import { BaseModule } from './base';
+import { BaseModule } from '../core/base';
 import type { BusinessCardRenderer } from './business-card-renderer';
 import { gsap } from 'gsap';
-import type { ModuleOptions } from '../types/modules';
+import type { ModuleOptions } from '../../types/modules';
 
 export class BusinessCardInteractions extends BaseModule {
   // Renderer reference

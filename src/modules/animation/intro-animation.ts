@@ -112,17 +112,17 @@
  *       Card_Outline rect. Update these if the SVG changes.
  */
 
-import { BaseModule } from './base';
+import { BaseModule } from '../core/base';
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
-import type { ModuleOptions } from '../types/modules';
+import type { ModuleOptions } from '../../types/modules';
 import {
   SVG_PATH,
   SVG_CARD,
   SVG_ELEMENT_IDS,
   DOM_ELEMENT_IDS,
   REPLAY_CONFIG
-} from '../config/intro-animation-config';
+} from '../../config/intro-animation-config';
 
 // Register MorphSVG plugin with GSAP
 gsap.registerPlugin(MorphSVGPlugin);
