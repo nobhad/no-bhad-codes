@@ -284,22 +284,20 @@ export class ContactAnimationModule extends BaseModule {
     // ========================================================================
     const scrollContainer = document.querySelector('main');
 
+    // Pause the timeline initially - we'll play it on trigger
+    this.timeline.pause();
+
     this.scrollTrigger = ScrollTrigger.create({
       trigger: this.container,
       scroller: scrollContainer || undefined,
-      start: 'center center', // Pin when section is centered in viewport
-      end: '+=100%', // Pin for duration of animation (100vh of scroll distance)
-      pin: true,
-      pinSpacing: true,
-      animation: this.timeline,
+      start: 'top 80%', // Trigger when section top is 80% down viewport
       onEnter: () => {
-        this.log('Contact section pinned - playing animation');
-      },
-      onLeave: () => {
-        this.log('Contact section unpinned - animation complete');
+        this.log('Contact section visible - playing animation');
+        this.timeline?.play();
       },
       onLeaveBack: () => {
         this.log('Contact section left viewport backwards');
+        this.timeline?.reverse();
       }
     });
 
