@@ -71,10 +71,21 @@ export class ContactAnimationModule extends BaseModule {
     }
 
     // ========================================================================
-    // MOBILE VS DESKTOP ANIMATION
+    // DETECT LAYOUT: Check if button is below message field (mobile layout)
     // ========================================================================
-    const isMobile = window.matchMedia('(max-width: 767px)').matches;
-    if (isMobile) {
+    const messageField = document.querySelector('#message')?.closest('.input-item') ||
+                         document.querySelector('.contact-message-row');
+    const submitButton = document.querySelector('.submit-button');
+
+    let isButtonBelowMessage = false;
+    if (messageField && submitButton) {
+      const messageRect = messageField.getBoundingClientRect();
+      const buttonRect = submitButton.getBoundingClientRect();
+      // Button is below if its top is at or below the message field's bottom
+      isButtonBelowMessage = buttonRect.top >= messageRect.bottom - 10;
+    }
+
+    if (isButtonBelowMessage) {
       this.setupMobileAnimation();
     } else {
       this.setupAnimation();
@@ -177,9 +188,9 @@ export class ContactAnimationModule extends BaseModule {
       // 1. Button rolls in from off-screen and hits the fields (starts earlier, overlapping with fields)
       gsap.set(submitButton, { transformOrigin: 'center center' });
       this.timeline.fromTo(submitButton,
-        { x: '100vw', rotation: -720 },
-        { x: -BUTTON_OVERSHOOT, rotation: 0, duration: 1.2, ease: 'none' },
-        '-=1.2'
+        { x: '100vw', rotation: 1440 },
+        { x: -BUTTON_OVERSHOOT, rotation: 0, duration: 2, ease: 'none' },
+        '-=2'
       );
 
       // 2. All three fields bump left on impact - company moves more
@@ -244,16 +255,16 @@ export class ContactAnimationModule extends BaseModule {
       // 5. Button gets knocked off screen by company field
       this.timeline.to(submitButton, {
         x: '100vw',
-        rotation: '+=360',
+        rotation: '+=720',
         duration: 0.6,
         ease: 'power2.out'
       }, '-=0.5');
 
       // 6. Button rolls back onto screen
-      // Rotation math: +360 (knocked) - 340 (roll) - 20 (snap) = 0
+      // Rotation math: +720 (knocked) - 700 (roll) - 20 (snap) = 0
       this.timeline.to(submitButton, {
         x: 20,
-        rotation: '-=340',
+        rotation: '-=700',
         duration: 1.5,
         ease: 'power1.out'
       });
@@ -312,12 +323,16 @@ export class ContactAnimationModule extends BaseModule {
       return;
     }
 
-    // Set initial state - off screen to the left
+    // Set initial state - start at left side of form, roll to right (final position)
     const buttonRect = submitButton.getBoundingClientRect();
-    const offScreenX = -(buttonRect.left + buttonRect.width + 50);
+    const formContainer = this.container?.querySelector('.contact-form') || this.container;
+    const formRect = formContainer?.getBoundingClientRect();
+    // Calculate distance from button's current position to left edge of form
+    const distanceToFormLeft = formRect ? buttonRect.left - formRect.left + buttonRect.width : buttonRect.left;
+    // 3 full rotations for rolling effect
     gsap.set(submitButton, {
-      x: offScreenX,
-      rotation: -360,
+      x: -distanceToFormLeft,
+      rotation: -1080,
       transformOrigin: 'center center'
     });
 
@@ -332,7 +347,7 @@ export class ContactAnimationModule extends BaseModule {
             gsap.to(submitButton, {
               x: 0,
               rotation: 0,
-              duration: 0.8,
+              duration: 2.5,
               ease: 'power2.out'
             });
             observer.disconnect();

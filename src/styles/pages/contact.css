@@ -374,6 +374,12 @@ input:-webkit-autofill:active {
   transition: background-color 0.4s, box-shadow 0.4s;
 }
 
+.submit-button:focus,
+.submit-button:focus-visible {
+  outline: 3px solid var(--color-black, #000);
+  outline-offset: 3px;
+}
+
 .submit-button.leaving {
   opacity: 1;
   transform: translate(0);
@@ -420,22 +426,9 @@ input:-webkit-autofill:active {
   display: none !important;
 }
 
-/* Loading state - spin the arrow */
+/* Loading state - disable interaction */
 .submit-button.loading {
   pointer-events: none;
-}
-
-.submit-button.loading svg {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .submit-button svg {
@@ -445,12 +438,19 @@ input:-webkit-autofill:active {
   fill: none;
   stroke: var(--color-black, #000);
   transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 3.5), stroke 0.4s;
+  overflow: visible;
 }
 
-.submit-button:hover svg,
-.submit-button:focus svg {
-  transform: rotate(360deg);
+/* Arrow group for fly animation */
+.submit-button svg .arrow-group {
+  transform-origin: center center;
 }
+
+.submit-button svg .bow-group {
+  transform-origin: center center;
+}
+
+/* No spin on hover - arrow animation handled by GSAP on submit */
 
 /* Arrow pointing to invalid fields */
 .submit-button.point-to-name svg,
@@ -476,6 +476,12 @@ html[data-theme="dark"] .submit-button svg {
 
 html[data-theme="dark"] .submit-button {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75);
+}
+
+html[data-theme="dark"] .submit-button:focus,
+html[data-theme="dark"] .submit-button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
 }
 
 html[data-theme="dark"] label.text-small {
