@@ -568,15 +568,22 @@
             <div id="contact-card-container" class="business-card-container contact-business-card">
               <div id="contact-business-card" class="business-card" data-card-id="contact">
                 <div id="contact-business-card-inner" class="business-card-inner">
-                  <!-- FRONT OF CARD -->
-                  <div class="business-card-front">
+                  <!-- FRONT OF CARD - Blank with contact options -->
+                  <div class="business-card-front contact-card-front">
                     <img
-                      src="/images/business-card_front.svg"
+                      src="/images/business-card_blank.svg"
                       alt="Business Card Front"
                       class="card-svg"
                       width="525"
                       height="293.8"
                     />
+                    <div class="contact-card-content">
+                      <p class="contact-card-text">
+                        <span class="contact-card-label">Message me here</span>,
+                        fill out a project <a href="#" class="contact-card-link" id="card-intake-link">intake form</a>,
+                        or <a href="mailto:nobhaduri@gmail.com" class="contact-card-link">email me</a>.
+                      </p>
+                    </div>
                   </div>
                   <!-- BACK OF CARD -->
                   <div class="business-card-back">
@@ -855,6 +862,16 @@
         if (openIntakeLink) {
           openIntakeLink.addEventListener('click', function(e) {
             e.preventDefault();
+            openIntakeModal();
+          });
+        }
+
+        // Open modal from card intake link
+        const cardIntakeLink = document.getElementById('card-intake-link');
+        if (cardIntakeLink) {
+          cardIntakeLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation(); // Prevent card flip
             openIntakeModal();
           });
         }

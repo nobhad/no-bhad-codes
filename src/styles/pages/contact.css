@@ -67,12 +67,9 @@
     order: 2;
   }
 
-  /* Contact options paragraph - full width above columns */
+  /* Contact options paragraph - hidden on desktop (info is on card instead) */
   p.contact-options {
-    flex: 0 0 100%;
-    order: -1;
-    margin: 0;
-    padding: 0;
+    display: none;
   }
 
   /* ==========================================
@@ -163,6 +160,58 @@
   text-decoration: underline;
 }
 
+/* ==========================================
+   CONTACT CARD FRONT - TEXT OVERLAY
+   ========================================== */
+
+/* Contact card front with text overlay */
+.contact-card-front {
+  position: relative;
+}
+
+/* Text content overlay on blank card */
+.contact-card-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-sizing: border-box;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+/* Contact text on card */
+.contact-card-text {
+  color: var(--fg);
+  font-size: 1.4rem;
+  line-height: 1.8;
+  text-align: center;
+  margin: 0;
+}
+
+/* Label text styling */
+.contact-card-label {
+  font-weight: 700;
+}
+
+/* Links on card */
+.contact-card-link {
+  font-weight: 800;
+  text-decoration: underline;
+  color: var(--fg);
+  transition: color 0.2s ease;
+}
+
+.contact-card-link:hover,
+.contact-card-link:focus {
+  color: var(--color-primary, #00ff41);
+}
+
 /* SAL'S EXACT - Input wrapper */
 .input-wrapper {
   overflow: visible;
@@ -179,6 +228,24 @@
   display: flex;
   flex-direction: column;
   transform: translateY(0);
+  position: relative;
+}
+
+/* Error toast - positioned to the right of input fields (desktop) */
+.input-item .field-error,
+.input-item .error-message {
+  position: absolute;
+  right: -180px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-danger, #ef4444);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  z-index: 10;
 }
 
 .input-item.leaving {
@@ -676,14 +743,9 @@ html[data-theme="dark"] label.text-small {
     text-align: left !important;
   }
 
-  /* Contact options paragraph - directly below h2 */
+  /* Contact options paragraph - hidden on desktop (info is on card instead) */
   p.contact-options {
-    order: 3 !important;
-    flex: 0 0 auto !important; /* Don't grow or shrink */
-    text-align: left !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    display: none !important;
   }
 
   .contact-form-column {

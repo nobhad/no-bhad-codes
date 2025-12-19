@@ -95,6 +95,17 @@
     animation: none;
   }
 
+  /* Error toast on mobile - positioned below the field */
+  .input-item .field-error,
+  .input-item .error-message {
+    position: relative !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+    margin-top: 0.5rem;
+    display: inline-block;
+  }
+
   /* Smaller input fields on mobile - extra top padding for label */
   .input-item input {
     display: block;

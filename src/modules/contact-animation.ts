@@ -31,14 +31,8 @@ gsap.registerPlugin(ScrollTrigger);
 // ANIMATION CONSTANTS
 // ============================================================================
 
-/** Duration for main text animations */
-const TEXT_DURATION = 0.8;
-
 /** Duration for form fade-in */
 const FORM_DURATION = 0.6;
-
-/** Duration for card slide-in */
-const CARD_DURATION = 1.0;
 
 /** Duration for bump effect */
 const BUMP_DURATION = 0.12;
@@ -102,9 +96,6 @@ export class ContactAnimationModule extends BaseModule {
     }
 
     // Get animatable elements
-    const heading = this.container.querySelector('h2');
-    const contactOptions = this.container.querySelector('.contact-options');
-    const cardColumn = this.container.querySelector('.contact-card-column');
     const businessCard = this.container.querySelector('#contact-business-card');
 
     // ========================================================================
@@ -119,62 +110,16 @@ export class ContactAnimationModule extends BaseModule {
     });
 
     // ========================================================================
-    // SECTION CENTERS AND SETTLES
+    // LEFT SIDE - Already visible, no entry animation
+    // Just set up the business card with back showing
     // ========================================================================
-    this.timeline.from(this.container, {
-      y: 50,
-      opacity: 0.8,
-      duration: 0.4,
-      ease: 'back.out(1.5)'
-    });
-
-    // Brief pause while section is centered
-    this.timeline.to({}, { duration: 0.3 });
-
-    // ========================================================================
-    // LEFT SIDE - All elements slide in together
-    // ========================================================================
-    const leftLabel = 'leftSlide';
-
-    // Heading slides in from left
-    if (heading) {
-      this.timeline.from(heading, {
-        x: -100,
-        opacity: 0,
-        duration: TEXT_DURATION,
-        ease: 'power2.out'
-      }, leftLabel);
-    }
-
-    // Contact options slides in from left
-    if (contactOptions) {
-      this.timeline.from(contactOptions, {
-        x: -100,
-        opacity: 0,
-        duration: TEXT_DURATION,
-        ease: 'power2.out'
-      }, leftLabel);
-    }
-
-    // Card column slides in from left
-    if (cardColumn) {
-      this.timeline.from(cardColumn, {
-        x: -100,
-        opacity: 0,
-        duration: CARD_DURATION,
-        ease: 'power3.out'
-      }, leftLabel);
-    }
-
-    // Business card slides in from left with 3D rotation
     if (businessCard) {
-      this.timeline.from(businessCard, {
-        x: -50,
-        opacity: 0,
-        rotateY: 15,
-        duration: CARD_DURATION,
-        ease: 'power3.out'
-      }, leftLabel);
+      const cardInner = businessCard.querySelector('.business-card-inner') as HTMLElement;
+
+      // Start with back showing (rotated 180)
+      if (cardInner) {
+        gsap.set(cardInner, { rotationY: 180 });
+      }
 
       // Setup click handler for manual card flip
       this.setupCardClickHandler(businessCard as HTMLElement);
@@ -283,7 +228,11 @@ export class ContactAnimationModule extends BaseModule {
             gsap.to(cardInner, {
               rotationY: '+=180',
               duration: 0.8,
-              ease: 'power2.inOut'
+              ease: 'power2.inOut',
+              onComplete: () => {
+                // Disable click-to-flip after card is flipped to front
+                this.disableCardFlip();
+              }
             });
           }
         });
@@ -363,20 +312,24 @@ export class ContactAnimationModule extends BaseModule {
     }
 
     // ========================================================================
-    // CREATE SCROLL TRIGGER
-    // Triggers animation when contact section scrolls into view
+    // CREATE SCROLL TRIGGER WITH PINNING
+    // Pins contact section while animation plays
     // ========================================================================
     const scrollContainer = document.querySelector('main');
 
     this.scrollTrigger = ScrollTrigger.create({
       trigger: this.container,
       scroller: scrollContainer || undefined,
-      start: 'top center', // Start when section is centered in viewport
-      end: 'bottom top',
-      toggleActions: 'play none none reverse', // play on enter, reverse on leave back
+      start: 'top top', // Pin when section reaches top of viewport
+      end: '+=100%', // Pin for duration of animation (100vh of scroll distance)
+      pin: true,
+      pinSpacing: true,
       animation: this.timeline,
       onEnter: () => {
-        this.log('Contact section centered in viewport - playing animation');
+        this.log('Contact section pinned - playing animation');
+      },
+      onLeave: () => {
+        this.log('Contact section unpinned - animation complete');
       },
       onLeaveBack: () => {
         this.log('Contact section left viewport backwards');
@@ -462,6 +415,19 @@ export class ContactAnimationModule extends BaseModule {
     card.addEventListener('click', this.cardClickHandler);
     card.addEventListener('mousemove', this.cardMouseMoveHandler);
     card.addEventListener('mouseleave', this.cardMouseLeaveHandler);
+  }
+
+  /**
+   * Disable click-to-flip on the card (called after animation flips card to front)
+   * Tilt effects remain active
+   */
+  private disableCardFlip(): void {
+    if (this.businessCardEl && this.cardClickHandler) {
+      this.businessCardEl.removeEventListener('click', this.cardClickHandler);
+      this.businessCardEl.style.cursor = 'default';
+      this.cardClickHandler = null;
+      this.log('Card flip disabled - card is now showing front');
+    }
   }
 
   /**
