@@ -82,7 +82,7 @@ export class ContactService extends BaseService {
     try {
       this.log('Submitting contact form...', { backend: this.config.backend });
 
-      // Rate limiting check
+      // Rate limiting check (5 submissions per 5 minutes)
       const clientIdentifier = this.getClientIdentifier(formData);
       if (!SanitizationUtils.checkRateLimit(clientIdentifier, 5, 300000)) {
         SanitizationUtils.logSecurityViolation(
@@ -92,8 +92,8 @@ export class ContactService extends BaseService {
         );
         return {
           success: false,
-          message: 'Too many requests. Please wait a few minutes before trying again.',
-          error: 'Rate limit exceeded'
+          message: 'Whoa, slow down! You\'ve sent too many messages. Please wait 5 minutes before trying again.',
+          error: 'rate_limit'
         };
       }
 
@@ -149,10 +149,20 @@ export class ContactService extends BaseService {
       }
     } catch (error) {
       this.error('Form submission failed:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      // Provide user-friendly error messages based on error type
+      let userMessage = 'Unable to send message. Please try again.';
+      if (errorMessage.includes('fetch') || errorMessage.includes('network') || errorMessage.includes('Failed to fetch')) {
+        userMessage = 'Network error. Please check your connection and try again.';
+      } else if (errorMessage.includes('404') || errorMessage.includes('Netlify')) {
+        userMessage = 'Form service unavailable. Please email nobhaduri@gmail.com directly.';
+      }
+
       return {
         success: false,
-        message: 'Failed to submit form. Please try again later.',
-        error: error instanceof Error ? error.message : String(error)
+        message: userMessage,
+        error: errorMessage
       };
     }
   }

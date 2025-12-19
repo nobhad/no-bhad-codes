@@ -19,6 +19,7 @@ import {
 } from '../../services/contact-service';
 import { SanitizationUtils } from '../../utils/sanitization-utils';
 import type { ModuleOptions } from '../../types/modules';
+import { gsap } from 'gsap';
 
 export interface ContactFormModuleOptions extends ModuleOptions {
   backend?: ContactBackend;
@@ -300,16 +301,11 @@ export class ContactFormModule extends BaseModule {
       if (result.success) {
         this.form?.reset();
         this.clearAllErrors();
-        // Update button to show "SENT!"
-        if (this.submitButton) {
-          this.submitButton.classList.add('form-sent');
-          const buttonSpan = this.submitButton.querySelector('span');
-          if (buttonSpan) {
-            buttonSpan.textContent = 'SENT!';
-          }
-        }
+        // Play arrow animation then show "SENT!"
+        await this.playArrowFlyAnimation();
       } else {
-        throw new Error(result.error || 'Failed to send message');
+        // Show the actual error message from the service
+        this.showFormMessage(result.message, 'error');
       }
     } catch (error) {
       this.error('Form submission failed:', error);
@@ -530,6 +526,85 @@ export class ContactFormModule extends BaseModule {
     // EmailJS integration would go here
     // This requires EmailJS SDK and proper configuration
     return { success: false, error: 'EmailJS not configured' };
+  }
+
+  /**
+   * Play the arrow fly animation on successful form submission
+   */
+  private playArrowFlyAnimation(): Promise<void> {
+    return new Promise((resolve) => {
+      if (!this.submitButton) {
+        resolve();
+        return;
+      }
+
+      const svg = this.submitButton.querySelector('svg');
+      const arrowGroup = this.submitButton.querySelector('.arrow-group');
+      const bowGroup = this.submitButton.querySelector('.bow-group');
+      const buttonSpan = this.submitButton.querySelector('span');
+
+      if (!svg || !arrowGroup) {
+        // Fallback: just show SENT! if SVG structure not found
+        this.submitButton.classList.add('form-sent');
+        if (buttonSpan) {
+          buttonSpan.textContent = 'SENT!';
+        }
+        resolve();
+        return;
+      }
+
+      // Ensure SVG can overflow
+      svg.style.overflow = 'visible';
+      this.submitButton.style.overflow = 'visible';
+
+      // Create timeline for sequenced animation
+      const tl = gsap.timeline({
+        onComplete: () => {
+          // Show "SENT!" after animation
+          this.submitButton?.classList.add('form-sent');
+          if (buttonSpan) {
+            buttonSpan.textContent = 'SENT!';
+          }
+          // Fade in the span
+          gsap.fromTo(buttonSpan,
+            { opacity: 0, scale: 0.5 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.7)' }
+          );
+          resolve();
+        }
+      });
+
+      // Phase 1: Pull back the arrow (toward bottom-left)
+      tl.to(arrowGroup, {
+        x: -4,
+        y: 4,
+        duration: 0.4,
+        ease: 'power2.out'
+      });
+
+      // Phase 2: Quick tension hold (pull back a bit more)
+      tl.to(arrowGroup, {
+        x: -6,
+        y: 6,
+        duration: 0.15,
+        ease: 'power1.in'
+      });
+
+      // Phase 3: Arrow flies off along diagonal (to top-right, off screen)
+      tl.to(arrowGroup, {
+        x: 300,
+        y: -300,
+        duration: 0.5,
+        ease: 'power2.in'
+      });
+
+      // Phase 4: Fade out the bow
+      tl.to(bowGroup, {
+        opacity: 0,
+        duration: 0.2,
+        ease: 'power1.out'
+      }, '-=0.2');
+    });
   }
 
   /**
