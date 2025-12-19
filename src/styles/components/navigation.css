@@ -1365,7 +1365,7 @@ html[data-theme="dark"] .bg-panel.second {
   right: 20px;
   width: 320px;
   background: var(--color-neutral-300, #e0e0e0);
-  border: 3px solid var(--fg);
+  border: 3px solid var(--color-border);
   padding: 1.5rem;
   z-index: 10001;
   opacity: 0;
@@ -1391,7 +1391,7 @@ html[data-theme="dark"] .bg-panel.second {
   left: var(--caret-left, 20px);
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
-  border-bottom: 10px solid var(--fg);
+  border-bottom: 10px solid var(--color-border);
 }
 
 .portal-dropdown::after {
@@ -1422,7 +1422,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   display: flex;
   width: 100%;
   height: 44px;
-  border: 2px solid var(--fg);
+  border: 2px solid var(--color-border);
   border-radius: 24px;
   margin-bottom: 1rem;
   box-sizing: border-box;
@@ -1440,17 +1440,17 @@ html[data-theme="dark"] .portal-dropdown-header {
   font-weight: normal;
   line-height: 40px;
   text-transform: uppercase;
-  color: var(--fg);
+  color: var(--color-text-primary);
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .portal-dropdown .portal-toggle-btn:first-child {
-  border-right: 1px solid var(--fg);
+  border-right: 1px solid var(--color-border);
 }
 
 .portal-dropdown .portal-toggle-btn:last-child {
-  border-left: 1px solid var(--fg);
+  border-left: 1px solid var(--color-border);
 }
 
 .portal-dropdown .portal-toggle-btn:hover:not(.active) {
@@ -1458,7 +1458,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 .portal-dropdown .portal-toggle-btn.active {
-  background: var(--fg);
+  background: var(--color-bg-inverse);
   color: var(--color-neutral-300, #e0e0e0);
 }
 
@@ -1475,7 +1475,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 .portal-dropdown .dropdown-input {
   width: 100%;
   height: 48px;
-  background: var(--fg);
+  background: var(--color-bg-inverse);
   border: none;
   border-radius: 24px;
   padding: 0 1rem;
@@ -1508,7 +1508,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   border: none;
   cursor: pointer;
   padding: 0.25rem;
-  color: var(--bg);
+  color: var(--color-text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1535,7 +1535,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 .portal-dropdown .dropdown-submit {
   width: 100%;
   height: 48px;
-  background: var(--fg);
+  background: var(--color-bg-inverse);
   color: var(--color-neutral-300, #e0e0e0);
   border: none;
   border-radius: 24px;
@@ -1549,7 +1549,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 
 .portal-dropdown .dropdown-submit:hover,
 .portal-dropdown .dropdown-submit:focus {
-  background: var(--fg);
+  background: var(--color-bg-inverse);
   color: var(--color-neutral-300, #e0e0e0);
 }
 
@@ -1572,7 +1572,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   display: block;
   margin-top: 0.75rem;
   font-size: 0.8rem;
-  color: var(--fg);
+  color: var(--color-text-primary);
   text-decoration: underline;
   text-underline-offset: 2px;
   text-align: center;
@@ -1595,7 +1595,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 /* Magic link info */
 .portal-dropdown .magic-info {
   font-size: 0.75rem;
-  color: var(--fg);
+  color: var(--color-text-primary);
   opacity: 0.7;
   margin-top: 0.5rem;
   text-align: center;
@@ -1604,7 +1604,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 /* Forgot password info */
 .portal-dropdown .forgot-info {
   font-size: 0.85rem;
-  color: var(--fg);
+  color: var(--color-text-primary);
   margin-bottom: 1rem;
   text-align: left;
   line-height: 1.4;
@@ -1620,7 +1620,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 
 .portal-dropdown .reset-sent-message {
   font-size: 0.85rem;
-  color: var(--fg);
+  color: var(--color-text-primary);
   text-align: center;
   line-height: 1.5;
   margin-bottom: 1rem;

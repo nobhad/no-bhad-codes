@@ -275,9 +275,9 @@ label.text-small {
 .input-item input,
 .input-item textarea {
   border: none;
-  background-color: var(--fg);
-  caret-color: var(--bg, #fffbee);
-  color: var(--bg, #fffbee);
+  background-color: var(--color-bg-inverse);
+  caret-color: var(--color-text-inverse);
+  color: var(--color-text-inverse);
   font-family: inherit;
   font-size: 1.2rem;
   font-weight: 600;
@@ -348,10 +348,10 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:focus-visible,
 input:-webkit-autofill:active {
-  color: var(--bg, #fffbee) !important;
-  -webkit-text-fill-color: var(--bg, #fffbee) !important;
-  box-shadow: 0 0 0 100px var(--fg) inset !important;
-  -webkit-box-shadow: 0 0 0px 100px var(--fg) inset !important;
+  color: var(--color-text-inverse) !important;
+  -webkit-text-fill-color: var(--color-text-inverse) !important;
+  box-shadow: 0 0 0 100px var(--color-bg-inverse) inset !important;
+  -webkit-box-shadow: 0 0 0px 100px var(--color-bg-inverse) inset !important;
 }
 
 /* Submit button - SAL'S circular design */
@@ -367,7 +367,7 @@ input:-webkit-autofill:active {
   border-radius: 64px;
   border: none;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  background-color: var(--fg);
+  background-color: var(--color-bg-inverse);
   cursor: pointer;
   opacity: 1;
   transform: translate(0);
@@ -506,14 +506,14 @@ html[data-theme="dark"] label.text-small {
 
 .email-box > span {
   font-size: clamp(0.75rem, 2vw, 0.875rem);
-  color: var(--fg);
+  color: var(--color-text-primary);
   opacity: 0.7;
 }
 
 .email-box .a-wrapper a {
   font-size: clamp(0.875rem, 2.5vw, 1rem);
   font-weight: 600;
-  color: var(--fg);
+  color: var(--color-text-primary);
   text-decoration: underline;
   text-underline-offset: 3px;
   transition: color 0.2s ease;
@@ -605,7 +605,7 @@ html[data-theme="dark"] label.text-small {
 
 .form-message.success {
   background-color: transparent;
-  color: var(--fg);
+  color: var(--color-text-primary);
   border: none;
 }
 

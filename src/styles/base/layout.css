@@ -586,7 +586,7 @@ main,
     text-transform: uppercase !important;
     line-height: 1.2 !important;
     margin-bottom: 1.5rem !important;
-    color: var(--fg) !important;
+    color: var(--color-text-primary) !important;
   }
 
   .about-section .tech-list {

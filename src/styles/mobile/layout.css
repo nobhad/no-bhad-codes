@@ -196,7 +196,7 @@
     text-transform: uppercase !important;
     line-height: 1.2 !important;
     margin-bottom: 0.75rem !important;
-    color: var(--fg) !important;
+    color: var(--color-text-primary) !important;
     text-align: left !important;
   }
 

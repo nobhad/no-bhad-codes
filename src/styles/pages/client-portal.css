@@ -406,7 +406,7 @@
   border-radius: clamp(6px, 1.5vw, 12px);
   font-size: clamp(0.875rem, 2vw, 1rem);
   background-color: var(--color-neutral-100);
-  color: var(--fg);
+  color: var(--color-text-primary);
   font-family: inherit;
   box-sizing: border-box;
   transition: all 0.2s ease;
@@ -432,7 +432,7 @@
   text-transform: uppercase;
   box-sizing: border-box;
   background-color: var(--color-neutral-300);
-  color: var(--fg);
+  color: var(--color-text-primary);
   margin-top: clamp(8px, 2vw, 16px);
 }
 
@@ -455,7 +455,7 @@
 
 /* Dark theme adjustments */
 html[data-theme="dark"] .client-login h1 {
-  color: var(--fg);
+  color: var(--color-text-primary);
 }
 
 html[data-theme="dark"] .login-form {

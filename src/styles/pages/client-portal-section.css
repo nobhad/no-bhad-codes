@@ -47,7 +47,7 @@
 
 .portal-intro p {
   font-size: clamp(1rem, 2.5vw, 1.25rem);
-  color: var(--fg);
+  color: var(--color-text-primary);
   line-height: 1.6;
 }
 
@@ -57,7 +57,7 @@
   width: 100%;
   max-width: 400px;
   height: 60px;
-  border: 3px solid var(--fg);
+  border: 3px solid var(--color-border);
   margin-bottom: 1rem;
   box-sizing: border-box;
 }
@@ -73,17 +73,17 @@
   font-weight: normal;
   line-height: 54px;
   text-transform: uppercase;
-  color: var(--fg);
+  color: var(--color-text-primary);
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .portal-toggle-btn:first-child {
-  border-right: 1.5px solid var(--fg);
+  border-right: 1.5px solid var(--color-border);
 }
 
 .portal-toggle-btn:last-child {
-  border-left: 1.5px solid var(--fg);
+  border-left: 1.5px solid var(--color-border);
 }
 
 .portal-toggle-btn:hover:not(.active) {
@@ -171,7 +171,7 @@
 .client-portal-section .portal-login-submit button,
 .client-portal-section button[type="submit"] {
   background-color: var(--color-border) !important;
-  color: var(--bg, var(--color-neutral-300)) !important;
+  color: var(--color-text-inverse) !important;
   border: 3px solid var(--color-border) !important;
   border-radius: 0 !important;
   height: 60px !important;
@@ -205,8 +205,8 @@
 
 /* Dark mode button */
 html[data-theme="dark"] .client-portal-section .btn.btn-primary {
-  background-color: var(--fg);
-  color: var(--bg, var(--color-neutral-300));
+  background-color: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
 }
 
 /* Password toggle in portal */
@@ -219,7 +219,7 @@ html[data-theme="dark"] .client-portal-section .btn.btn-primary {
   border: none;
   cursor: pointer;
   padding: 0.25rem;
-  color: var(--bg, #fffbee);
+  color: var(--color-text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -258,7 +258,7 @@ html[data-theme="dark"] .client-portal-section .btn.btn-primary {
 /* Magic link info text */
 .portal-magic-info {
   font-size: 0.9rem;
-  color: var(--fg);
+  color: var(--color-text-primary);
   opacity: 0.7;
   margin-top: 0.5rem;
   text-align: left;
@@ -281,7 +281,7 @@ html[data-theme="dark"] .client-portal-section .btn.btn-primary {
 
 
 .portal-link {
-  color: var(--fg);
+  color: var(--color-text-primary);
   text-decoration: underline;
   text-underline-offset: 3px;
   font-size: 0.9rem;

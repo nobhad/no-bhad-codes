@@ -229,20 +229,20 @@ body {
 .tech-stack h3 {
   font-size: clamp(1rem, 2.5vw, 1.2rem);
   margin-bottom: 0.5rem;
-  color: var(--fg);
+  color: var(--color-text-primary);
   font-weight: 600;
   text-align: left;
 }
 
 .tech-list {
-  color: var(--fg);
+  color: var(--color-text-primary);
 }
 
 .closing-statement {
   font-weight: 600;
   text-align: left;
   font-size: clamp(0.9rem, 2.2vw, 1.1rem);
-  color: var(--color-primary, var(--fg));
+  color: var(--color-primary, var(--color-text-primary));
 }
 
 /* ============================================
