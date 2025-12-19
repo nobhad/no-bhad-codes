@@ -590,50 +590,50 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   text-transform: capitalize;
-  border: 2px solid #000;
-  color: #000;
+  border: 2px solid var(--color-black);
+  color: var(--color-black);
 }
 
 .status-badge.status-pending {
   background: var(--color-warning);
-  border-color: #000;
-  color: #000;
+  border-color: var(--color-black);
+  color: var(--color-black);
 }
 
 .status-badge.status-active {
   background: var(--color-status-blue);
-  border-color: #000;
-  color: #000;
+  border-color: var(--color-black);
+  color: var(--color-black);
 }
 
 .status-badge.status-completed {
   background: var(--color-success);
-  border-color: #000;
-  color: #000;
+  border-color: var(--color-black);
+  color: var(--color-black);
 }
 
 .status-badge.status-new {
   background: var(--color-status-blue);
-  border-color: #000;
-  color: #000;
+  border-color: var(--color-black);
+  color: var(--color-black);
 }
 
 .status-badge.status-read {
   background: var(--color-status-gray);
-  border-color: #000;
-  color: #000;
+  border-color: var(--color-black);
+  color: var(--color-black);
 }
 
 .status-badge.status-replied {
   background: var(--color-success);
-  border-color: #000;
-  color: #000;
+  border-color: var(--color-black);
+  color: var(--color-black);
 }
 
 .status-badge.status-archived {
   background: var(--color-status-gray-dark);
-  border-color: #000;
-  color: #000;
+  border-color: var(--color-black);
+  color: var(--color-black);
 }
 
 /* Admin Table Card - Consistent styling for data tables */
@@ -958,21 +958,21 @@
 .status-badge.status-in_progress,
 .status-badge.status-in-progress {
   background: var(--color-status-blue);
-  border-color: #000;
-  color: #000;
+  border-color: var(--color-black);
+  color: var(--color-black);
 }
 
 .status-badge.status-on_hold,
 .status-badge.status-on-hold {
   background: var(--color-warning);
-  border-color: #000;
-  color: #000;
+  border-color: var(--color-black);
+  color: var(--color-black);
 }
 
 .status-badge.status-cancelled {
   background: var(--color-danger);
-  border-color: #000;
-  color: #000;
+  border-color: var(--color-black);
+  color: var(--color-black);
 }
 
 /* Action buttons in tables */
@@ -1470,10 +1470,10 @@
 }
 
 .pd-tab-btn.active {
-  color: #000;
+  color: var(--color-black);
   background: var(--color-brand-primary);
-  border-color: #000;
-  border-bottom: 3px solid #000;
+  border-color: var(--color-black);
+  border-bottom: 3px solid var(--color-black);
   margin-bottom: -3px;
   font-weight: var(--font-weight-bold);
 }

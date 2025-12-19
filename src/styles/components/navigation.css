@@ -1556,14 +1556,14 @@ html[data-theme="dark"] .portal-dropdown-header {
 /* Valid state - all requirements met */
 .portal-dropdown .dropdown-submit.valid {
   background: var(--color-primary, #00ff41);
-  color: #000;
+  color: var(--color-black);
   opacity: 1;
 }
 
 .portal-dropdown .dropdown-submit.valid:hover,
 .portal-dropdown .dropdown-submit.valid:focus {
   background: var(--color-primary, #00ff41);
-  color: #000;
+  color: var(--color-black);
   filter: brightness(1.1);
 }
 

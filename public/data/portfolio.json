@@ -1,5 +1,28 @@
 {
   "projects": [],
-  "skills": [],
-  "experience": []
+  "categories": [],
+  "navigation": {
+    "main": [
+      { "id": "home", "title": "home", "path": "/", "eyebrow": "00" },
+      { "id": "about", "title": "about", "path": "#about", "eyebrow": "01" },
+      { "id": "contact", "title": "contact", "path": "#contact", "eyebrow": "02" }
+    ]
+  },
+  "profile": {
+    "name": "Noelle Bhaduri",
+    "title": "Web Developer",
+    "location": "Boston, MA",
+    "bio": "",
+    "techStack": [],
+    "tagline": "no bhad codes",
+    "social": {
+      "email": "nobhaduri@gmail.com"
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "intro": "Get in touch",
+    "businessSizes": [],
+    "helpOptions": []
+  }
 }

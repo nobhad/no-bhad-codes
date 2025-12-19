@@ -289,8 +289,8 @@
 }
 
 .client-portal-main .dashboard-container {
-  min-height: 100vh;
-  height: 100vh;
+  min-height: calc(100vh - var(--footer-height));
+  height: calc(100vh - var(--footer-height));
 }
 
 /* Client Portal Login Section */
@@ -1568,8 +1568,8 @@ html[data-theme="dark"] .login-form label {
 .dashboard-container {
   display: flex;
   width: 100%;
-  min-height: 100vh;
-  height: 100vh;
+  min-height: calc(100vh - var(--footer-height));
+  height: calc(100vh - var(--footer-height));
 }
 
 /* Content Area */

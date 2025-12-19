@@ -92,7 +92,7 @@
 
 .portal-toggle-btn.active {
   background: var(--color-primary, #00ff41);
-  color: #000;
+  color: var(--color-black);
 }
 
 /* Portal Login Form - matches contact form structure */
