@@ -165,8 +165,8 @@ export class InfiniteScrollModule extends BaseModule {
 
   /**
    * Loop back to start
-   * 1. Activate top spacer (adds 100vh before business card)
-   * 2. Jump to top (user sees spacer, card is below viewport)
+   * 1. Activate top spacer (adds 30vh before business card)
+   * 2. Jump to top (user sees spacer, card is slightly below center)
    * 3. User scrolls naturally, card comes up from below
    */
   private loopToStart(): void {

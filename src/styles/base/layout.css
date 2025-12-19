@@ -643,28 +643,23 @@ main,
 }
 
 /* When active - real scrollable space before business card */
+/* Reduced from 100vh to 30vh - card starts slightly below center, scrolls up */
 .loop-spacer-section.active {
   display: block;
-  height: 100vh;
-  min-height: 100vh;
+  height: 30vh;
+  min-height: 30vh;
   width: 100%;
   background: var(--color-body-bg);
 }
 
-/* Loop trigger zone - scrollable space after contact */
+/* Loop trigger zone - small buffer after contact for scroll detection */
 .loop-trigger-zone {
-  order: 99; /* Always last */
-  height: 100vh;
-  min-height: 100vh;
+  order: 99;
+  height: 10vh;
+  min-height: 10vh;
   width: 100%;
   background: var(--color-body-bg);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 0;
-  scroll-snap-align: none !important; /* Never snap to this */
-  scroll-snap-stop: normal;
+  scroll-snap-align: none !important;
 }
 
 /* Loop spacer sections - position at ends, never snap */
