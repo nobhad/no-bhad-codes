@@ -99,8 +99,9 @@ export async function showAvatarIntro(chatContainer: HTMLElement): Promise<void>
       // Add class for styling
       svgElement.classList.add('terminal-avatar-img');
 
-      // Get all paths and set initial opacity to 0
-      const paths = svgElement.querySelectorAll('path');
+      // Get only paths in visible Layer_1 (not hidden Layer_2/Layer_3)
+      const layer1 = svgElement.querySelector('#Layer_1');
+      const paths = layer1 ? layer1.querySelectorAll('path') : svgElement.querySelectorAll('path');
       paths.forEach(path => {
         path.style.opacity = '0';
       });

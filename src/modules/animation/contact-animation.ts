@@ -31,9 +31,6 @@ gsap.registerPlugin(ScrollTrigger);
 // ANIMATION CONSTANTS
 // ============================================================================
 
-/** Duration for form fade-in */
-const FORM_DURATION = 0.6;
-
 /** Duration for bump effect */
 const BUMP_DURATION = 0.12;
 
@@ -220,10 +217,7 @@ export class ContactAnimationModule extends BaseModule {
             gsap.to(cardInner, {
               rotationY: '+=180',
               duration: 0.8,
-              ease: 'power2.inOut',
-              onComplete: () => {
-                this.disableCardFlip();
-              }
+              ease: 'power2.inOut'
             });
           }
         }, [], '-=0.1');
@@ -320,14 +314,34 @@ export class ContactAnimationModule extends BaseModule {
     card.style.cursor = 'pointer';
 
     // Click handler for flip (direction based on click position)
+    // Only flips when clicking corners/edges, not when clicking text/links
     this.cardClickHandler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+
+      // Don't flip if clicking on links - let links work normally
+      if (target.tagName === 'A' || target.closest('a')) {
+        return;
+      }
+
+      // Check if click is in a corner zone (outside center 60% of card)
+      const rect = card.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+      const cornerZone = 0.2; // 20% from each edge is "corner"
+
+      const inCenterX = clickX > rect.width * cornerZone && clickX < rect.width * (1 - cornerZone);
+      const inCenterY = clickY > rect.height * cornerZone && clickY < rect.height * (1 - cornerZone);
+
+      // If click is in center area (not in corner zones), don't flip
+      if (inCenterX && inCenterY) {
+        return;
+      }
+
       e.preventDefault();
       e.stopPropagation();
 
-      // Determine flip direction based on click position
-      const rect = card.getBoundingClientRect();
-      const clickX = e.clientX;
-      const cardCenterX = rect.left + rect.width / 2;
+      // Determine flip direction based on which side of card was clicked
+      const cardCenterX = rect.width / 2;
       const flipDirection = clickX < cardCenterX ? -180 : 180;
 
       gsap.to(cardInner, {
@@ -336,7 +350,7 @@ export class ContactAnimationModule extends BaseModule {
         ease: 'power2.inOut'
       });
 
-      this.log(`Contact card flipped ${flipDirection > 0 ? 'right' : 'left'} via click`);
+      this.log(`Contact card flipped ${flipDirection > 0 ? 'right' : 'left'} via corner click`);
     };
 
     // Mouse move handler for tilt effect
@@ -377,19 +391,6 @@ export class ContactAnimationModule extends BaseModule {
     card.addEventListener('click', this.cardClickHandler);
     card.addEventListener('mousemove', this.cardMouseMoveHandler);
     card.addEventListener('mouseleave', this.cardMouseLeaveHandler);
-  }
-
-  /**
-   * Disable click-to-flip on the card (called after animation flips card to front)
-   * Tilt effects remain active
-   */
-  private disableCardFlip(): void {
-    if (this.businessCardEl && this.cardClickHandler) {
-      this.businessCardEl.removeEventListener('click', this.cardClickHandler);
-      this.businessCardEl.style.cursor = 'default';
-      this.cardClickHandler = null;
-      this.log('Card flip disabled - card is now showing front');
-    }
   }
 
   /**
