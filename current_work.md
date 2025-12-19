@@ -71,7 +71,7 @@ Red paw print SVG icon - needs to be added to project assets.
 
 ### Critical
 
-- [ ] Refactor `intro-animation.ts` - extract hardcoded SVG paths to config
+- [x] Refactor `intro-animation.ts` - extract hardcoded SVG paths to config - **COMPLETE** (December 19)
 
 ### Features
 
@@ -84,15 +84,15 @@ Red paw print SVG icon - needs to be added to project assets.
 
 ### Feature Organization
 
-- [ ] Make `TerminalIntakeModule` extend `BaseModule` (currently breaks pattern)
+- [x] Make `TerminalIntakeModule` extend `BaseModule` - **COMPLETE** (December 19)
 - [ ] Organize 14 flat modules into subdirectories by concern (UI, animation, utilities)
 - [ ] Document cross-feature dependencies
 
 ### CSS Cleanup
 
-- [ ] Split `navigation.css` (900+ lines) into nav-base, nav-animations, nav-mobile
+- [ ] Split `navigation.css` (1792 lines) into nav-base, nav-animations, nav-mobile
 - [ ] Split `form.css` (374 lines) into form-fields, form-buttons, form-validation
-- [ ] Remove legacy `--fg`, `--bg` variables - migrate to semantic tokens
+- [ ] Remove legacy `--fg`, `--bg` variables - migrate to semantic tokens (65+ instances)
 
 ---
 
