@@ -19,11 +19,10 @@
   }
 
   /* Override desktop contact section styles - match other mobile sections */
+  /* NOTE: height/min-height/max-height are set in layout.css for scroll-snap */
   .contact-section {
     width: 100% !important;
     max-width: 100% !important;
-    height: auto !important;
-    min-height: auto !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: flex-start !important;
@@ -64,7 +63,7 @@
     width: 100%;
     margin: 0 0 0.75rem;
     text-align: left;
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
 
   /* Contact form - flex column for ordering, full width */
@@ -283,7 +282,8 @@
   }
 
   .contact-right {
-    margin-top: 0.75rem;
+    margin-top: 0.5rem;
+    padding-bottom: 0.5rem; /* Space for button shadow */
   }
 
   .submit-button {
@@ -294,5 +294,14 @@
   .submit-button svg {
     width: 24px !important;
     height: 24px !important;
+  }
+
+  /* Reduce spacing between form fields on very small screens */
+  .input-wrapper {
+    margin-bottom: 0.35rem;
+  }
+
+  .contact-left .input-wrapper:first-child {
+    margin-top: 0.75rem;
   }
 }

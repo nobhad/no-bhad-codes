@@ -99,15 +99,15 @@
 /* Responsive business card container sizes */
 @media (max-width: 767px) {
   .business-card-container {
-    width: 420px;
-    height: 235px;
+    width: 380px;
+    height: 212.6px; /* 380 ÷ 1.7872 = 212.6 */
   }
 }
 
 @media (max-width: 479px) {
   .business-card-container {
-    width: 350px;
-    height: 195.8px;
+    width: 315px;
+    height: 176.3px; /* 315 ÷ 1.7872 = 176.3 */
   }
 }
 
@@ -462,12 +462,12 @@
   .business-card-container,
   .intro-animation-container {
     /* Fixed mobile size to prevent CLS - maintaining exact aspect ratio */
-    width: 420px;
-    height: 235px; /* 420 ÷ 1.7872 = 235 */
-    min-width: 420px;
-    min-height: 235px;
-    max-width: 420px;
-    max-height: 235px;
+    width: 380px;
+    height: 212.6px; /* 380 ÷ 1.7872 = 212.6 */
+    min-width: 380px;
+    min-height: 212.6px;
+    max-width: 380px;
+    max-height: 212.6px;
   }
 
   .business-card-front,
@@ -499,12 +499,12 @@
   .business-card-container,
   .intro-animation-container {
     /* Fixed small screen size to prevent CLS - maintaining exact aspect ratio */
-    width: 350px;
-    height: 195.8px; /* 350 ÷ 1.7872 = 195.8 */
-    min-width: 350px;
-    min-height: 195.8px;
-    max-width: 350px;
-    max-height: 195.8px;
+    width: 315px;
+    height: 176.3px; /* 315 ÷ 1.7872 = 176.3 */
+    min-width: 315px;
+    min-height: 176.3px;
+    max-width: 315px;
+    max-height: 176.3px;
   }
 
   .business-card-front,

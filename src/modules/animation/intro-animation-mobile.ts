@@ -37,6 +37,7 @@ import { BaseModule } from '../core/base';
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import type { ModuleOptions } from '../../types/modules';
+import { SVG_PATH, SVG_CARD, REPLAY_CONFIG } from '../../config/intro-animation-config';
 
 // Register MorphSVG plugin with GSAP
 gsap.registerPlugin(MorphSVGPlugin);
@@ -47,17 +48,8 @@ gsap.registerPlugin(MorphSVGPlugin);
 // Uses the SAME SVG as desktop, scaled to match mobile card size.
 // ============================================================================
 
-/** SVG file path (same as desktop) */
-const PAW_SVG = `/images/coyote_paw.svg?v=${Date.now()}`;
-
-/** X position of card rectangle in SVG coordinates */
-const SVG_CARD_X = 1256.15;
-
-/** Y position of card rectangle in SVG coordinates */
-const SVG_CARD_Y = 1031.85;
-
-/** Width of card rectangle in SVG coordinates */
-const SVG_CARD_WIDTH = 1062.34;
+/** SVG file path with cache-busting timestamp */
+const PAW_SVG = `${SVG_PATH}?v=${Date.now()}`;
 
 // ============================================================================
 // MOBILE INTRO ANIMATION MODULE CLASS
@@ -93,13 +85,18 @@ export class MobileIntroAnimationModule extends BaseModule {
     this.log('Mobile intro animation initializing...');
 
     // ========================================================================
-    // SESSION CHECK
+    // TIME-BASED CHECK
+    // Skip animation if shown within the replay interval (uses same config as desktop)
     // ========================================================================
-    const introShown = sessionStorage.getItem('introShown');
-    if (introShown === 'true') {
-      this.log('Intro already shown this session - skipping');
-      this.skipIntroImmediately();
-      return;
+    const lastIntroTimestamp = localStorage.getItem(REPLAY_CONFIG.timestampKey);
+    if (lastIntroTimestamp) {
+      const timeSinceLastIntro = Date.now() - parseInt(lastIntroTimestamp, 10);
+      if (timeSinceLastIntro < REPLAY_CONFIG.replayInterval) {
+        this.log(`Intro shown ${Math.round(timeSinceLastIntro / 1000 / 60)} min ago - skipping (replays after ${REPLAY_CONFIG.replayInterval / 60000} min)`);
+        this.skipIntroImmediately();
+        return;
+      }
+      this.log('Replay interval passed - playing animation');
     }
 
     // ========================================================================
@@ -200,17 +197,17 @@ export class MobileIntroAnimationModule extends BaseModule {
     const cardFront = businessCard.querySelector('.business-card-front') as HTMLElement;
     const actualCardRect = cardFront ? cardFront.getBoundingClientRect() : cardRect;
 
-    // Scale based on mobile card width
-    const scale = actualCardRect.width / SVG_CARD_WIDTH;
+    // Scale based on mobile card width (using shared config)
+    const scale = actualCardRect.width / SVG_CARD.width;
 
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     morphSvg.setAttribute('viewBox', `0 0 ${viewportWidth} ${viewportHeight}`);
     morphSvg.setAttribute('preserveAspectRatio', 'none');
 
-    // Align SVG card with actual card position
-    const translateX = actualCardRect.left - (SVG_CARD_X * scale);
-    const translateY = actualCardRect.top - (SVG_CARD_Y * scale);
+    // Align SVG card with actual card position (using shared config)
+    const translateX = actualCardRect.left - (SVG_CARD.x * scale);
+    const translateY = actualCardRect.top - (SVG_CARD.y * scale);
 
     this.log('Mobile alignment:', { scale, translateX, translateY, viewportWidth, viewportHeight });
 
@@ -537,7 +534,9 @@ export class MobileIntroAnimationModule extends BaseModule {
     if (this.isComplete) return;
 
     this.isComplete = true;
-    sessionStorage.setItem('introShown', 'true');
+
+    // Store timestamp for replay logic (same as desktop)
+    localStorage.setItem(REPLAY_CONFIG.timestampKey, String(Date.now()));
 
     document.documentElement.classList.remove('intro-loading');
     document.documentElement.classList.add('intro-complete');
