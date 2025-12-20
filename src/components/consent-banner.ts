@@ -353,12 +353,13 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
 
       .consent-banner__btn--secondary {
         background: var(--color-neutral-100, #f5f5f5);
-        color: var(--color-gray-700, #404040);
+        color: #404040;
         border-color: #000000;
       }
 
       .consent-banner__btn--secondary:hover {
         background: var(--color-gray-200, #e5e5e5);
+        color: #404040;
         border-color: #000000;
       }
 

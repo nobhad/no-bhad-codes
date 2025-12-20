@@ -896,19 +896,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     await app.init();
 
-    // Restore scroll position after init
+    // Restore scroll position after init (skip if position is in spacer area)
     const savedPos = sessionStorage.getItem('scrollPosition');
+    sessionStorage.removeItem('scrollPosition'); // Clear after reading to prevent stale positions
     if (savedPos) {
       const scrollContainer = document.querySelector('main');
       const pos = parseInt(savedPos, 10);
-      // Small delay to ensure layout is ready
-      requestAnimationFrame(() => {
-        if (scrollContainer) {
-          scrollContainer.scrollTop = pos;
-        } else {
-          window.scrollTo(0, pos);
-        }
-      });
+      // Only restore if position is reasonable (not in spacer area at very top)
+      const minValidPos = 50; // Skip if saved position is too close to top (spacer area)
+      if (pos > minValidPos) {
+        requestAnimationFrame(() => {
+          if (scrollContainer) {
+            scrollContainer.scrollTop = pos;
+          } else {
+            window.scrollTo(0, pos);
+          }
+        });
+      }
     }
   } catch (error) {
     console.error('[Application] Startup failed:', error);

@@ -132,9 +132,9 @@ export class ContactAnimationModule extends BaseModule {
     const submitButton = this.container.querySelector('button[type="submit"]') ||
                          this.container.querySelector('.contact-submit');
 
-    // Get dimensions for uniform sizing
-    const inputFieldWidth = nameField ? (nameField as HTMLElement).offsetWidth : 300;
+    // Get dimensions for animation
     const inputFieldHeight = 60;
+    const compressedHeight = 20; // Fields drop at this height, then expand
 
     // Measure FINAL section height before any transforms (fields at natural size)
     const finalSectionHeight = this.container.offsetHeight;
@@ -142,25 +142,18 @@ export class ContactAnimationModule extends BaseModule {
     // Clip the form container so stacked fields don't overflow above
     const formContainer = this.container.querySelector('.contact-form') ||
                           this.container.querySelector('.contact-form-column');
+
+    // Container dimensions already locked at start - just set overflow
     if (formContainer) gsap.set(formContainer, { overflow: 'hidden' });
 
-    // Lock section to final height so it doesn't shrink during animation
+    // Lock section to final height during animation
     gsap.set(this.container, { minHeight: finalSectionHeight });
 
-    // Calculate offset from each field to name's position (to stack them all there)
-    const getOffsetToName = (el: Element | null | undefined) => {
-      if (!el || !nameField) return 0;
-      const elRect = (el as HTMLElement).getBoundingClientRect();
-      const nameRect = (nameField as HTMLElement).getBoundingClientRect();
-      return nameRect.top - elRect.top;
-    };
-
-    const companyToName = getOffsetToName(companyField);
-
     // Message field - capture final dimensions before resizing
-    const textarea = messageField?.querySelector('textarea');
+    const textarea = messageField?.querySelector('textarea') as HTMLTextAreaElement | null;
     const wrapper = messageField?.querySelector('.input-wrapper') || messageField;
     const finalTextareaHeight = textarea ? textarea.offsetHeight : 130;
+    const finalMessageFieldHeight = messageField ? (messageField as HTMLElement).offsetHeight : 180;
 
     // Set up z-index - name on TOP of stack (highest z-index)
     if (nameField) gsap.set(nameField, { zIndex: 5, position: 'relative' });
@@ -169,98 +162,140 @@ export class ContactAnimationModule extends BaseModule {
     if (messageField) gsap.set(messageField, { zIndex: 2, position: 'relative' });
     if (submitButton) gsap.set(submitButton, { zIndex: 1, opacity: 0, scale: 0.8 });
 
-    // Calculate offsets between adjacent fields
-    const getOffsetBetween = (el: Element | null | undefined, prev: Element | null | undefined) => {
-      if (!el || !prev) return 0;
-      const elRect = (el as HTMLElement).getBoundingClientRect();
-      const prevRect = (prev as HTMLElement).getBoundingClientRect();
-      return prevRect.top - elRect.top;
-    };
-    const emailToCompany = getOffsetBetween(emailField, companyField);
-    const messageToEmail = getOffsetBetween(messageField, emailField);
+    // Get all labels and inputs to hide text initially
+    const nameLabel = nameField?.querySelector('label');
+    const companyLabel = companyField?.querySelector('label');
+    const emailLabel = emailField?.querySelector('label');
+    const messageLabel = messageField?.querySelector('label');
 
-    // Set initial positions - all fields hidden behind the one above
-    // Company behind name (at name's position)
-    if (companyField) gsap.set(companyField, { y: companyToName, width: inputFieldWidth, visibility: 'hidden' });
-    // Email behind company (at company's final position)
-    if (emailField) gsap.set(emailField, { y: emailToCompany, width: inputFieldWidth, visibility: 'hidden' });
-    // Message behind email (at email's final position)
-    if (messageField) {
-      if (textarea) gsap.set(textarea, { height: inputFieldHeight, minHeight: inputFieldHeight, overflow: 'hidden' });
-      if (wrapper) gsap.set(wrapper, { height: inputFieldHeight, overflow: 'hidden' });
-      gsap.set(messageField, { y: messageToEmail, height: inputFieldHeight, overflow: 'hidden', width: inputFieldWidth, visibility: 'hidden' });
-    }
+    const nameInput = nameField?.querySelector('input') as HTMLInputElement | null;
+    const companyInput = companyField?.querySelector('input') as HTMLInputElement | null;
+    const emailInput = emailField?.querySelector('input') as HTMLInputElement | null;
 
-    // 1. Name drops from above (starts off-screen)
+    // Store placeholder text to restore later
+    const namePlaceholder = nameInput?.placeholder || '';
+    const companyPlaceholder = companyInput?.placeholder || '';
+    const emailPlaceholder = emailInput?.placeholder || '';
+    const messagePlaceholder = textarea?.placeholder || '';
+
+    // Set initial positions - all fields at compressed height (no width animation to prevent layout shift)
+    const allFields = [nameField, companyField, emailField, messageField].filter(Boolean);
+
+    // Calculate slide distance for drop animation
+    const formContainerRect = formContainer?.getBoundingClientRect();
+    const slideDistance = formContainerRect ? formContainerRect.height + 50 : 300;
+
     if (nameField) {
-      gsap.set(nameField, { y: -100 });
-      this.timeline.to(nameField, {
-        y: 0,
-        duration: 0.6,
-        ease: 'power3.out'
+      if (nameInput) {
+        gsap.set(nameInput, { height: compressedHeight });
+        nameInput.placeholder = '';
+      }
+      if (nameLabel) gsap.set(nameLabel, { opacity: 0 });
+      gsap.set(nameField, {
+        height: compressedHeight,
+        overflow: 'hidden',
+        y: -slideDistance,
+        opacity: 0
       });
     }
-
-    // 2. Company appears from behind name and drops to its position
     if (companyField) {
-      this.timeline.set(companyField, { visibility: 'visible' });
-      this.timeline.to(companyField, {
-        y: 0,
-        width: 'auto',
-        duration: 0.5,
-        ease: 'power3.out'
+      if (companyInput) {
+        gsap.set(companyInput, { height: compressedHeight });
+        companyInput.placeholder = '';
+      }
+      if (companyLabel) gsap.set(companyLabel, { opacity: 0 });
+      gsap.set(companyField, {
+        height: compressedHeight,
+        overflow: 'hidden',
+        y: -slideDistance,
+        opacity: 0
       });
     }
-
-    // 3. Email appears from behind company and drops to its position
     if (emailField) {
-      this.timeline.set(emailField, { visibility: 'visible' });
-      this.timeline.to(emailField, {
-        y: 0,
-        width: 'auto',
-        duration: 0.5,
-        ease: 'power3.out'
+      if (emailInput) {
+        gsap.set(emailInput, { height: compressedHeight });
+        emailInput.placeholder = '';
+      }
+      if (emailLabel) gsap.set(emailLabel, { opacity: 0 });
+      gsap.set(emailField, {
+        height: compressedHeight,
+        overflow: 'hidden',
+        y: -slideDistance,
+        opacity: 0
       });
     }
-
-    // 4. Message appears from behind email and drops to its position
     if (messageField) {
-      this.timeline.set(messageField, { visibility: 'visible' });
-      this.timeline.to(messageField, {
-        y: 0,
-        duration: 0.5,
-        ease: 'power3.out'
-      });
-
-      // Then grow to final size (height and width)
-      this.timeline.to(messageField, {
-        width: '100%',
-        height: 'auto',
-        overflow: 'visible',
-        duration: 0.4,
-        ease: 'power2.out'
-      });
-
       if (textarea) {
-        this.timeline.to(textarea, {
-          height: finalTextareaHeight,
-          minHeight: finalTextareaHeight,
-          overflow: 'visible',
-          duration: 0.4,
-          ease: 'power2.out'
-        }, '<');
+        gsap.set(textarea, { height: compressedHeight, minHeight: compressedHeight, overflow: 'hidden' });
+        textarea.placeholder = '';
       }
-      if (wrapper) {
-        this.timeline.to(wrapper, {
-          height: 'auto',
-          overflow: 'visible',
-          duration: 0.4,
-          ease: 'power2.out'
-        }, '<');
+      if (wrapper) gsap.set(wrapper, { height: compressedHeight, overflow: 'hidden' });
+      if (messageLabel) gsap.set(messageLabel, { opacity: 0 });
+      gsap.set(messageField, {
+        height: compressedHeight,
+        overflow: 'hidden',
+        y: -slideDistance,
+        opacity: 0
+      });
+    }
+
+    // Organic expansion - smooth, natural motion
+    const liquidEase = 'sine.inOut';
+    const expandDuration = 0.8;
+
+    // 1. All fields slide down together (CSS gaps maintained)
+    if (allFields.length > 0) {
+      this.timeline.to(allFields, {
+        y: 0,
+        opacity: 1,
+        duration: 0.6,
+        ease: 'power2.out',
+        stagger: 0.05 // Slight stagger for organic feel
+      });
+    }
+
+    // 2. All fields expand height simultaneously (no width animation to prevent layout shift)
+    const inputFields = [nameField, companyField, emailField].filter(Boolean);
+    const inputElements = [nameInput, companyInput, emailInput].filter(Boolean);
+
+    if (inputFields.length > 0) {
+      this.timeline.to(inputFields, {
+        height: inputFieldHeight,
+        overflow: 'visible',
+        duration: expandDuration,
+        ease: liquidEase
+      });
+      if (inputElements.length > 0) {
+        this.timeline.to(inputElements, { height: inputFieldHeight, duration: expandDuration, ease: liquidEase }, '<');
       }
     }
 
-    // 5. Submit button appears after form fields are in place
+    // Message field expands height with the others
+    if (messageField) {
+      this.timeline.to(messageField, {
+        height: finalMessageFieldHeight,
+        overflow: 'visible',
+        duration: expandDuration,
+        ease: liquidEase
+      }, '<');
+      if (textarea) this.timeline.to(textarea, { height: finalTextareaHeight, minHeight: finalTextareaHeight, overflow: 'visible', duration: expandDuration, ease: liquidEase }, '<');
+      if (wrapper) this.timeline.to(wrapper, { height: finalTextareaHeight, overflow: 'visible', duration: expandDuration, ease: liquidEase }, '<');
+    }
+
+    // 5. Show ALL labels and placeholders at the same time after all fields expanded
+    const allLabels = [nameLabel, companyLabel, emailLabel, messageLabel].filter(Boolean);
+    if (allLabels.length > 0) {
+      this.timeline.to(allLabels, { opacity: 1, duration: 0.3, ease: 'power2.out' });
+    }
+    // Restore all placeholders simultaneously
+    this.timeline.call(() => {
+      if (nameInput) nameInput.placeholder = namePlaceholder;
+      if (companyInput) companyInput.placeholder = companyPlaceholder;
+      if (emailInput) emailInput.placeholder = emailPlaceholder;
+      if (textarea) textarea.placeholder = messagePlaceholder;
+    }, [], '<');
+
+    // 6. Submit button appears after form fields are in place
     if (submitButton) {
       this.timeline.to(submitButton, {
         opacity: 1,
@@ -270,11 +305,13 @@ export class ContactAnimationModule extends BaseModule {
       });
     }
 
-    // Restore overflow and section height after animation
+    // Restore overflow, section height, and clear inline widths after animation
     if (formContainer) {
       this.timeline.set(formContainer, { overflow: 'visible' });
     }
     this.timeline.set(this.container, { minHeight: 'auto' });
+
+    // Keep all container dimensions locked permanently - do not clear
 
     // ========================================================================
     // BUSINESS CARD - Flip after form elements settle
