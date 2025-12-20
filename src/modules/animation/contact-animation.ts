@@ -7,25 +7,24 @@
  *
  * DESIGN:
  * - DESKTOP ONLY - No animation on mobile
- * - Uses GSAP ScrollTrigger for scroll-driven animations
- * - Animates text elements as contact section enters viewport
+ * - Triggered by PageTransitionModule navigation events (virtual pages)
+ * - Animates elements when navigating TO contact page
  * - Staggered reveal animation for visual interest
  *
  * ANIMATION SEQUENCE:
- * 1. Section enters viewport from bottom
- * 2. Heading slides up and fades in
- * 3. Contact options text slides up with stagger
- * 4. Form elements fade in
- * 5. Business card slides in from right
+ * 1. Navigate to contact page (hash #/contact)
+ * 2. h2 "contact" drops in from above
+ * 3. Contact options text drops in (overlapped)
+ * 4. Business card column drops in
+ * 5. Form fields cascade: appear → expand height → expand width
+ * 6. Labels and placeholders fade in
+ * 7. Submit button appears
+ * 8. Business card flips from back to front
  */
 
 import { BaseModule } from '../core/base';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { ModuleOptions } from '../../types/modules';
-
-// Register ScrollTrigger
-gsap.registerPlugin(ScrollTrigger);
 
 // ============================================================================
 // CONTACT ANIMATION MODULE CLASS
@@ -34,7 +33,6 @@ gsap.registerPlugin(ScrollTrigger);
 export class ContactAnimationModule extends BaseModule {
   private container: HTMLElement | null = null;
   private timeline: gsap.core.Timeline | null = null;
-  private scrollTrigger: ScrollTrigger | null = null;
   private hasFlippedCard = false;
   private cardClickHandler: ((e: MouseEvent) => void) | null = null;
   private cardMouseMoveHandler: ((e: MouseEvent) => void) | null = null;
@@ -90,7 +88,13 @@ export class ContactAnimationModule extends BaseModule {
     }
 
     // Get animatable elements
+    const heading = this.container.querySelector('h2');
+    const contactOptions = this.container.querySelector('.contact-options');
     const businessCard = this.container.querySelector('#contact-business-card');
+    const cardColumn = this.container.querySelector('.contact-card-column');
+
+    // Debug: log what elements were found
+    this.log(`Elements found - h2: ${!!heading}, contactOptions: ${!!contactOptions}, card: ${!!businessCard}, cardColumn: ${!!cardColumn}`);
 
     // ========================================================================
     // CREATE ANIMATION TIMELINE
@@ -104,13 +108,43 @@ export class ContactAnimationModule extends BaseModule {
     });
 
     // ========================================================================
-    // LEFT SIDE - Already visible, no entry animation
-    // Just set up the business card with back showing
+    // PHASE 1: h2 and card drop in TOGETHER
     // ========================================================================
+    const dropDistance = 50;
+    const dropDuration = 0.6;
+
+    // h2 drops in
+    if (heading) {
+      this.timeline.fromTo(heading,
+        { y: -dropDistance, opacity: 0 },
+        { y: 0, opacity: 1, duration: dropDuration, ease: 'power2.out' },
+        0
+      );
+    }
+
+    // Contact options drops in with h2 (if exists - mobile only)
+    if (contactOptions) {
+      this.timeline.fromTo(contactOptions,
+        { y: -dropDistance, opacity: 0 },
+        { y: 0, opacity: 1, duration: dropDuration, ease: 'power2.out' },
+        0
+      );
+    }
+
+    // Card column drops in at same time as h2
+    if (cardColumn) {
+      this.timeline.fromTo(cardColumn,
+        { y: -dropDistance, opacity: 0 },
+        { y: 0, opacity: 1, duration: dropDuration, ease: 'power2.out' },
+        0
+      );
+    }
+
+    // Business card setup
     if (businessCard) {
       const cardInner = businessCard.querySelector('.business-card-inner') as HTMLElement;
 
-      // Start with back showing (rotated 180)
+      // Start with back showing (rotated 180) - set immediately
       if (cardInner) {
         gsap.set(cardInner, { rotationY: 180 });
       }
@@ -120,7 +154,7 @@ export class ContactAnimationModule extends BaseModule {
     }
 
     // ========================================================================
-    // RIGHT SIDE NEXT - Form fields one at a time
+    // PHASE 3: Form fields cascade animation
     // ========================================================================
     const nameField = this.container.querySelector('#name')?.closest('.input-item');
     const companyField = this.container.querySelector('#company')?.closest('.input-item');
@@ -247,6 +281,7 @@ export class ContactAnimationModule extends BaseModule {
 
     const totalDuration = 2.5; // Total animation duration
     const stagger = 0.3; // Stagger between each field
+    const formStartTime = dropDuration; // Form starts AFTER h2/card drop completes
 
     // All fields animate together with stagger
     const allFieldWrappers = [nameField, companyField, emailField, messageField].filter(
@@ -258,16 +293,17 @@ export class ContactAnimationModule extends BaseModule {
     // WIDTH: startWidth → inputFullWidth (all together)
 
     // Phase 1: All fields appear (height 0 → compressed) with stagger
+    // Starts AFTER h2/card drop animation
     allFieldWrappers.forEach((field, i) => {
       this.timeline?.to(field, {
         height: compressedHeight,
         duration: 0.4,
         ease: 'sine.out'
-      }, i * stagger);
+      }, formStartTime + i * stagger);
     });
 
     // Phase 2: All fields expand height together (compressed → full) - starts after first field appears
-    const expandStart = stagger; // Start when second field begins appearing
+    const expandStart = formStartTime + stagger; // Start when second field begins appearing
 
     // Input fields expand to inputFieldHeight
     if (nameField) {
@@ -337,13 +373,13 @@ export class ContactAnimationModule extends BaseModule {
       }, '<');
     }
 
-    // WIDTH: One continuous expansion for ALL fields together (runs throughout)
+    // WIDTH: One continuous expansion for ALL fields together (runs throughout form phase)
     // Input fields expand to 460px
     this.timeline.to([nameField, companyField, emailField].filter(Boolean), {
       width: inputFullWidth,
       duration: totalDuration * 0.8,
       ease: 'sine.inOut'
-    }, 0);
+    }, formStartTime);
 
     // Message field expands to 640px
     if (messageField) {
@@ -351,15 +387,15 @@ export class ContactAnimationModule extends BaseModule {
         width: 640,
         duration: totalDuration * 0.8,
         ease: 'sine.inOut'
-      }, 0);
+      }, formStartTime);
     }
 
     // 6. Labels and placeholders fade in early (during field expansion)
     const allLabels = [nameLabel, companyLabel, emailLabel, messageLabel].filter(Boolean);
     const allInputsWithPlaceholders = [nameInput, companyInput, emailInput, textarea].filter(Boolean);
 
-    // Start text fade-in during field expansion (at 0.8s into animation)
-    const textFadeStart = 0.8;
+    // Start text fade-in during field expansion
+    const textFadeStart = formStartTime + 0.8;
 
     if (allLabels.length > 0) {
       this.timeline.to(allLabels, { opacity: 1, duration: 0.6, ease: 'power1.out' }, textFadeStart);
@@ -393,47 +429,66 @@ export class ContactAnimationModule extends BaseModule {
 
     // ========================================================================
     // BUSINESS CARD - Flip AFTER form and button animation is 100% complete
+    // Card flip starts after: dropDuration (0.6) + totalDuration (2.5) + button (0.7) = ~3.8s
     // ========================================================================
-    if (businessCard) {
-      this.timeline.call(() => {
-        if (this.hasFlippedCard) return;
-        this.hasFlippedCard = true;
+    const cardFlipStart = formStartTime + totalDuration + 0.5;
 
-        const cardInner = businessCard?.querySelector('.business-card-inner') as HTMLElement;
-        if (cardInner) {
-          gsap.to(cardInner, {
-            rotationY: '+=180',
-            duration: 0.8,
-            ease: 'power2.inOut'
-          });
-        }
-      }, [], '+=0.15');
+    if (businessCard) {
+      const cardInner = businessCard.querySelector('.business-card-inner') as HTMLElement;
+      if (cardInner) {
+        this.timeline.to(cardInner, {
+          rotationY: '+=180',
+          duration: 0.8,
+          ease: 'power2.inOut',
+          onStart: () => {
+            this.hasFlippedCard = true;
+          }
+        }, cardFlipStart);
+      }
     }
 
     // ========================================================================
-    // CREATE SCROLL TRIGGER WITH PINNING
-    // Pins contact section while animation plays
+    // TRIGGER: Listen for page navigation events (virtual pages)
     // ========================================================================
-    const scrollContainer = document.querySelector('main');
 
-    // Pause the timeline initially - we'll play it on trigger
+    // Pause the timeline initially - we'll play it on navigation
     this.timeline.pause();
 
-    this.scrollTrigger = ScrollTrigger.create({
-      trigger: this.container,
-      scroller: scrollContainer || undefined,
-      start: 'top 25%', // Trigger when section is well into view
-      onEnter: () => {
-        this.log('Contact section visible - playing animation');
-        this.timeline?.play();
-      },
-      onLeaveBack: () => {
-        this.log('Contact section left viewport backwards');
-        this.timeline?.reverse();
-      }
-    });
+    // Listen for page navigation events from PageTransitionModule
+    this.on('PageTransitionModule:page-changed', ((event: CustomEvent) => {
+      const { to, from } = event.detail || {};
+      this.log(`Page changed event received - from: ${from}, to: ${to}`);
 
-    this.log('Contact animation initialized (desktop only)');
+      if (to === 'contact') {
+        this.log('Navigated to contact - playing animation');
+        this.log(`Timeline exists: ${!!this.timeline}, duration: ${this.timeline?.duration()}`);
+        this.timeline?.restart();
+      } else if (from === 'contact') {
+        this.log('Navigated away from contact - playing out animation');
+        // Play reverse animation, then hide section when done
+        this.timeline?.reverse();
+
+        // Hide section after reverse animation completes
+        const reverseDuration = this.timeline?.duration() || 1;
+        setTimeout(() => {
+          if (this.container) {
+            this.container.classList.add('page-hidden');
+            this.container.classList.remove('page-active');
+            gsap.set(this.container, { visibility: 'hidden' });
+          }
+        }, reverseDuration * 1000);
+      }
+    }) as EventListener);
+
+    // Also check if we're already on contact page (direct navigation)
+    const currentHash = window.location.hash;
+    if (currentHash === '#/contact' || currentHash === '#contact') {
+      this.log('Already on contact page - playing animation');
+      // Small delay to ensure page transition completes first
+      setTimeout(() => this.timeline?.play(), 100);
+    }
+
+    this.log('Contact animation initialized (virtual pages mode)');
   }
 
   /**
@@ -581,8 +636,7 @@ export class ContactAnimationModule extends BaseModule {
     return {
       ...super.getStatus(),
       hasContainer: !!this.container,
-      hasTimeline: !!this.timeline,
-      hasScrollTrigger: !!this.scrollTrigger
+      hasTimeline: !!this.timeline
     };
   }
 
@@ -601,11 +655,6 @@ export class ContactAnimationModule extends BaseModule {
       if (this.cardMouseLeaveHandler) {
         this.businessCardEl.removeEventListener('mouseleave', this.cardMouseLeaveHandler);
       }
-    }
-
-    if (this.scrollTrigger) {
-      this.scrollTrigger.kill();
-      this.scrollTrigger = null;
     }
 
     if (this.timeline) {

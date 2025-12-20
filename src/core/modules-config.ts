@@ -141,26 +141,29 @@ export function registerModules(debug: boolean = false): void {
       name: 'ScrollSnapModule',
       type: 'dom',
       factory: async () => {
-        // Load scroll snap on all pages EXCEPT client portal
+        // Load scroll snap on all pages EXCEPT client portal and desktop home (uses virtual pages)
         const currentPath = window.location.pathname;
         const isClientPortal = currentPath.includes('/client');
+        const isHomePage = currentPath === '/' || currentPath === '/index.html';
+        const isDesktop = window.matchMedia('(min-width: 768px)').matches;
 
-        if (!isClientPortal) {
-          const { ScrollSnapModule } = await import('../modules/animation/scroll-snap');
-          return new ScrollSnapModule({
-            containerSelector: 'main',
-            sectionSelector: '.business-card-section, .hero-section, .about-section, .contact-section, .page-section, main > section',
-            snapDuration: 0.6,
-            snapDelay: 150
-          });
+        // Desktop home page uses virtual pages instead of scroll snap
+        if (isClientPortal || (isHomePage && isDesktop)) {
+          return {
+            init: async () => {},
+            destroy: () => {},
+            isInitialized: true,
+            name: 'ScrollSnapModule'
+          };
         }
-        // Return a dummy module for client portal pages
-        return {
-          init: async () => {},
-          destroy: () => {},
-          isInitialized: true,
-          name: 'ScrollSnapModule'
-        };
+
+        const { ScrollSnapModule } = await import('../modules/animation/scroll-snap');
+        return new ScrollSnapModule({
+          containerSelector: 'main',
+          sectionSelector: '.business-card-section, .hero-section, .about-section, .contact-section, .page-section, main > section',
+          snapDuration: 0.6,
+          snapDelay: 150
+        });
       }
     },
     // InfiniteScrollModule disabled - removed in favor of standard page scroll
@@ -219,6 +222,50 @@ export function registerModules(debug: boolean = false): void {
           destroy: () => {},
           isInitialized: true,
           name: 'SectionTransitionsModule'
+        };
+      }
+    },
+    {
+      name: 'PageTransitionModule',
+      type: 'dom',
+      factory: async () => {
+        // Only load page transitions on index/home page AND desktop
+        const currentPath = window.location.pathname;
+        const isHomePage = currentPath === '/' || currentPath === '/index.html';
+        const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+
+        if (isHomePage && isDesktop) {
+          const { PageTransitionModule } = await import('../modules/animation/page-transition');
+          return new PageTransitionModule({ debug });
+        }
+        // Return a dummy module for other pages or mobile
+        return {
+          init: async () => {},
+          destroy: () => {},
+          isInitialized: true,
+          name: 'PageTransitionModule'
+        };
+      }
+    },
+    {
+      name: 'AboutHeroModule',
+      type: 'dom',
+      factory: async () => {
+        // Only load about hero on index/home page AND desktop
+        const currentPath = window.location.pathname;
+        const isHomePage = currentPath === '/' || currentPath === '/index.html';
+        const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+
+        if (isHomePage && isDesktop) {
+          const { AboutHeroModule } = await import('../modules/animation/about-hero');
+          return new AboutHeroModule({ debug });
+        }
+        // Return a dummy module for other pages or mobile
+        return {
+          init: async () => {},
+          destroy: () => {},
+          isInitialized: true,
+          name: 'AboutHeroModule'
         };
       }
     },
@@ -293,11 +340,13 @@ export function getMainSiteModules(): string[] {
     // ContactCardInteractions removed - flip controlled by ContactAnimationModule
     'NavigationModule',
     'ContactFormModule',
-    'ScrollSnapModule',
+    'ScrollSnapModule', // Disabled on desktop home - virtual pages instead
     // 'InfiniteScrollModule', // Disabled - using standard page scroll
     'TextAnimationModule',
     'ContactAnimationModule',
-    'SectionTransitionsModule'
+    'SectionTransitionsModule',
+    'PageTransitionModule', // Desktop only - virtual pages like salcosta.dev
+    'AboutHeroModule' // Desktop only - mouse-following text animation on about page
   ];
 }
 
