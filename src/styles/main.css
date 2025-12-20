@@ -110,12 +110,12 @@
  * ============================================ */
 
 :root {
-  /* Blur-in/drop-in transition timings */
-  --blur-amount: 8px;
-  --drop-distance: 30px;
-  --transition-enter: 0.6s;
-  --transition-exit: 0.4s;
-  --stagger-delay: 0.1s;
+  /* Blur-in/drop-in transition timings - subtle and fast */
+  --blur-amount: 4px;
+  --drop-distance: 20px;
+  --transition-enter: 0.3s;
+  --transition-exit: 0.2s;
+  --stagger-delay: 0.05s;
 }
 
 /* ============================================

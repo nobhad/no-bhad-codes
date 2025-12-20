@@ -22,12 +22,12 @@ import type { ModuleOptions } from '../../types/modules';
 // Register ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
 
-// Animation constants (using CSS variable values)
-const BLUR_AMOUNT = 8;
-const DROP_DISTANCE = 30;
-const ENTER_DURATION = 0.6;
-const EXIT_DURATION = 0.4;
-const STAGGER_DELAY = 0.1;
+// Animation constants - subtle and fast
+const BLUR_AMOUNT = 4;
+const DROP_DISTANCE = 20;
+const ENTER_DURATION = 0.3;
+const EXIT_DURATION = 0.2;
+const STAGGER_DELAY = 0.05;
 const EASE_IN = 'power2.out';
 const EASE_OUT = 'power2.in';
 

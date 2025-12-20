@@ -27,9 +27,9 @@ import type { ModuleOptions } from '../../types/modules';
 // Register ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
 
-// Blur-in animation constants
-const BLUR_AMOUNT = 8;
-const BLUR_DURATION = 0.6;
+// Blur-in animation constants - subtle and fast
+const BLUR_AMOUNT = 4;
+const BLUR_DURATION = 0.3;
 
 // ============================================================================
 // CONTACT ANIMATION MODULE CLASS
@@ -465,7 +465,7 @@ export class ContactAnimationModule extends BaseModule {
 
   /**
    * Set up mobile-specific contact animation
-   * Button rolls in from left side of screen
+   * Mobile: No animations - everything visible immediately
    */
   private setupMobileAnimation(): void {
     this.container = document.querySelector('.contact-section') as HTMLElement;
@@ -474,49 +474,33 @@ export class ContactAnimationModule extends BaseModule {
       return;
     }
 
-    const submitButton = this.container.querySelector('.submit-button');
-    if (!submitButton) {
-      this.log('Submit button not found for mobile animation');
-      return;
-    }
-
-    // Set initial state - start at left side of form, roll to right (final position)
-    const buttonRect = submitButton.getBoundingClientRect();
-    const formContainer = this.container?.querySelector('.contact-form') || this.container;
-    const formRect = formContainer?.getBoundingClientRect();
-    // Calculate distance from button's current position to left edge of form
-    const distanceToFormLeft = formRect ? buttonRect.left - formRect.left + buttonRect.width : buttonRect.left;
-    // 3 full rotations for rolling effect
-    gsap.set(submitButton, {
-      x: -distanceToFormLeft,
-      rotation: -1080,
-      transformOrigin: 'center center'
+    // Mobile: Ensure everything is visible immediately - no animations
+    gsap.set(this.container, {
+      opacity: 1,
+      filter: 'none',
+      visibility: 'visible'
     });
 
-    // Trigger animation when button's container area comes into view
-    const buttonContainer = submitButton.closest('.contact-right') || submitButton.parentElement;
-    const triggerElement = buttonContainer || submitButton;
+    // Make sure all form fields are visible
+    const allFields = this.container.querySelectorAll('.input-item, .input-wrapper');
+    gsap.set(allFields, {
+      opacity: 1,
+      visibility: 'visible',
+      transform: 'none'
+    });
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            gsap.to(submitButton, {
-              x: 0,
-              rotation: 0,
-              duration: 2.5,
-              ease: 'power2.out'
-            });
-            observer.disconnect();
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
+    // Make sure button is visible
+    const submitButton = this.container.querySelector('.submit-button');
+    if (submitButton) {
+      gsap.set(submitButton, {
+        opacity: 1,
+        visibility: 'visible',
+        x: 0,
+        rotation: 0
+      });
+    }
 
-    observer.observe(triggerElement);
-
-    this.log('Contact animation initialized (mobile)');
+    this.log('Contact animation initialized (mobile - no animations)');
   }
 
   /**

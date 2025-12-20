@@ -20,9 +20,9 @@ import type { ModuleOptions } from '../../types/modules';
 // Register ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
 
-// Blur-in animation constants
-const BLUR_AMOUNT = 8;
-const BLUR_DURATION = 0.6;
+// Blur-in animation constants - subtle and fast
+const BLUR_AMOUNT = 4;
+const BLUR_DURATION = 0.3;
 
 interface TextAnimationOptions extends ModuleOptions {
   /** Selector for the animation container */

@@ -130,17 +130,15 @@
     display: block;
   }
 
-  /* Top row: inputs + submit button side by side - CSS Grid (NO FLEX) */
+  /* Input fields row - just the 3 text inputs */
   .contact-row {
-    display: grid;
-    grid-template-columns: 460px 120px;
-    gap: 2rem;
+    display: block;
     width: auto;
     margin-top: 1rem;
     box-sizing: border-box;
   }
 
-  /* Left column: name, company, email inputs - CSS Grid (NO FLEX) */
+  /* Input fields container: name, company, email - CSS Grid (NO FLEX) */
   .contact-left {
     display: grid;
     grid-template-columns: 460px;
@@ -150,17 +148,18 @@
     overflow: visible;
   }
 
-  /* Right column: submit button - CSS Grid (NO FLEX) */
+  /* Submit button container - positioned below message, right-aligned */
   .contact-right {
-    display: grid;
-    place-items: center;
+    display: flex;
+    justify-content: flex-end;
     box-sizing: border-box;
-    margin: 0 0 0 0;
+    margin: 1.5rem 0 0 0;
     padding: 0;
     overflow: visible;
+    width: 640px;
   }
 
-  /* Bottom row: message textarea - starts same width as input fields */
+  /* Message textarea row */
   .contact-message-row {
     width: 640px;
     margin-top: 1.5rem;
