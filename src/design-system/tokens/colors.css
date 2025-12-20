@@ -104,7 +104,7 @@ html[data-theme="dark"] {
   --color-bg-primary: var(--color-gray-950);
   --color-bg-secondary: var(--color-gray-900);
   --color-bg-tertiary: var(--color-gray-800);
-  --color-bg-inverse: var(--color-gray-50);
+  --color-bg-inverse: var(--color-gray-200); /* Soft white instead of bright white */
   --color-bg-overlay: rgba(0, 0, 0, 0.7);
 
   /* Surface Colors */
@@ -297,4 +297,8 @@ html[data-theme="dark"] {
   --form-btn-shadow: rgba(0, 0, 0, 0.3);
   --color-svg-text-left: #d5d5d5;
   --color-svg-text-right: #9a9a9a;
+
+  /* Business card - soft white */
+  --color-card-bg: var(--color-gray-200);
+  --color-card-bg-gradient-end: var(--color-gray-300);
 }

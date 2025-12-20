@@ -356,10 +356,26 @@ export class ContactAnimationModule extends BaseModule {
       }, 0);
     }
 
-    // 6. Labels, placeholders, and button all fade in together (overlapped with message expand)
+    // 6. Labels and placeholders fade in early (during field expansion)
     const allLabels = [nameLabel, companyLabel, emailLabel, messageLabel].filter(Boolean);
     const allInputsWithPlaceholders = [nameInput, companyInput, emailInput, textarea].filter(Boolean);
 
+    // Start text fade-in during field expansion (at 0.8s into animation)
+    const textFadeStart = 0.8;
+
+    if (allLabels.length > 0) {
+      this.timeline.to(allLabels, { opacity: 1, duration: 0.6, ease: 'power1.out' }, textFadeStart);
+    }
+
+    if (allInputsWithPlaceholders.length > 0) {
+      this.timeline.to(allInputsWithPlaceholders, {
+        '--placeholder-opacity': 1,
+        duration: 0.6,
+        ease: 'power1.out'
+      }, textFadeStart);
+    }
+
+    // Button appears after fields are mostly expanded
     if (submitButton) {
       this.timeline.to(submitButton, {
         opacity: 1,
@@ -367,18 +383,6 @@ export class ContactAnimationModule extends BaseModule {
         duration: 0.6,
         ease: 'back.out(1.5)'
       }, '+=0.1');
-    }
-
-    if (allLabels.length > 0) {
-      this.timeline.to(allLabels, { opacity: 1, duration: 1, ease: 'power1.out' }, '<');
-    }
-
-    if (allInputsWithPlaceholders.length > 0) {
-      this.timeline.to(allInputsWithPlaceholders, {
-        '--placeholder-opacity': 1,
-        duration: 1,
-        ease: 'power1.out'
-      }, '<');
     }
 
     // Restore overflow, section height, and clear inline widths after animation
