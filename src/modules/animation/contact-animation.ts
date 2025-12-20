@@ -154,6 +154,7 @@ export class ContactAnimationModule extends BaseModule {
     const wrapper = messageField?.querySelector('.input-wrapper') || messageField;
     const finalTextareaHeight = textarea ? textarea.offsetHeight : 130;
     const finalMessageFieldHeight = messageField ? (messageField as HTMLElement).offsetHeight : 180;
+    const finalMessageFieldWidth = messageField ? (messageField as HTMLElement).offsetWidth : 460;
 
     // Set up z-index - name on TOP of stack (highest z-index)
     if (nameField) gsap.set(nameField, { zIndex: 5, position: 'relative' });
@@ -185,124 +186,191 @@ export class ContactAnimationModule extends BaseModule {
     const formContainerRect = formContainer?.getBoundingClientRect();
     const slideDistance = formContainerRect ? formContainerRect.height + 50 : 300;
 
+    // Get gap between fields from CSS (default 1.5rem = 24px)
+    const fieldGap = 24;
+    const rowHeight = inputFieldHeight + fieldGap; // 60 + 24 = 84px per row
+
+    // Shared border-radius for all fields during cascade
+    const fieldBorderRadius = '0 50px 50px 50px';
+
+    // All fields start at height 0 (hidden), then grow to compressed, then to full
+    // NO y transforms - let grid handle gaps naturally
     if (nameField) {
-      if (nameInput) {
-        gsap.set(nameInput, { height: compressedHeight });
-        nameInput.placeholder = '';
-      }
-      if (nameLabel) gsap.set(nameLabel, { opacity: 0 });
       gsap.set(nameField, {
-        height: compressedHeight,
+        height: 0,
         overflow: 'hidden',
-        y: -slideDistance,
-        opacity: 0
+        borderRadius: fieldBorderRadius
       });
+      if (nameInput) gsap.set(nameInput, {
+        height: compressedHeight,
+        '--placeholder-opacity': 0
+      });
+      if (nameLabel) gsap.set(nameLabel, { opacity: 0 });
     }
     if (companyField) {
-      if (companyInput) {
-        gsap.set(companyInput, { height: compressedHeight });
-        companyInput.placeholder = '';
-      }
-      if (companyLabel) gsap.set(companyLabel, { opacity: 0 });
       gsap.set(companyField, {
-        height: compressedHeight,
+        height: 0,
         overflow: 'hidden',
-        y: -slideDistance,
-        opacity: 0
+        borderRadius: fieldBorderRadius
       });
+      if (companyInput) gsap.set(companyInput, {
+        height: compressedHeight,
+        '--placeholder-opacity': 0
+      });
+      if (companyLabel) gsap.set(companyLabel, { opacity: 0 });
     }
     if (emailField) {
-      if (emailInput) {
-        gsap.set(emailInput, { height: compressedHeight });
-        emailInput.placeholder = '';
-      }
-      if (emailLabel) gsap.set(emailLabel, { opacity: 0 });
       gsap.set(emailField, {
-        height: compressedHeight,
+        height: 0,
         overflow: 'hidden',
-        y: -slideDistance,
-        opacity: 0
+        borderRadius: fieldBorderRadius
       });
+      if (emailInput) gsap.set(emailInput, {
+        height: compressedHeight,
+        '--placeholder-opacity': 0
+      });
+      if (emailLabel) gsap.set(emailLabel, { opacity: 0 });
     }
     if (messageField) {
-      if (textarea) {
-        gsap.set(textarea, { height: compressedHeight, minHeight: compressedHeight, overflow: 'hidden' });
-        textarea.placeholder = '';
-      }
-      if (wrapper) gsap.set(wrapper, { height: compressedHeight, overflow: 'hidden' });
-      if (messageLabel) gsap.set(messageLabel, { opacity: 0 });
+      const inputWidth = (nameField as HTMLElement)?.offsetWidth || 460;
       gsap.set(messageField, {
-        height: compressedHeight,
+        height: 0,
+        width: inputWidth,
         overflow: 'hidden',
-        y: -slideDistance,
-        opacity: 0
+        borderRadius: fieldBorderRadius
       });
+      if (textarea) gsap.set(textarea, {
+        height: compressedHeight,
+        minHeight: compressedHeight,
+        '--placeholder-opacity': 0
+      });
+      if (wrapper && wrapper !== messageField) {
+        gsap.set(wrapper, {
+          height: compressedHeight,
+          overflow: 'hidden'
+        });
+      }
+      if (messageLabel) gsap.set(messageLabel, { opacity: 0 });
     }
 
-    // Organic expansion - smooth, natural motion
-    const liquidEase = 'sine.inOut';
-    const expandDuration = 0.8;
+    const appearDuration = 0.6;
+    const expandDuration = 0.5;
+    const overlap = '-=0.4'; // Overlap animations for smoothness
 
-    // 1. All fields slide down together (CSS gaps maintained)
-    if (allFields.length > 0) {
-      this.timeline.to(allFields, {
-        y: 0,
-        opacity: 1,
-        duration: 0.6,
-        ease: 'power2.out',
-        stagger: 0.05 // Slight stagger for organic feel
-      });
+    // 1. NAME appears (height 0 → compressed)
+    if (nameField) {
+      this.timeline.to(nameField, { height: compressedHeight, duration: appearDuration, ease: 'power1.out' });
     }
 
-    // 2. All fields expand height simultaneously (no width animation to prevent layout shift)
-    const inputFields = [nameField, companyField, emailField].filter(Boolean);
-    const inputElements = [nameInput, companyInput, emailInput].filter(Boolean);
-
-    if (inputFields.length > 0) {
-      this.timeline.to(inputFields, {
+    // 2. COMPANY appears → NAME expands (overlapped)
+    if (companyField) {
+      this.timeline.to(companyField, { height: compressedHeight, duration: appearDuration, ease: 'power1.out' }, overlap);
+    }
+    if (nameField && nameInput) {
+      this.timeline.to(nameField, {
         height: inputFieldHeight,
         overflow: 'visible',
+        clearProps: 'borderRadius',
         duration: expandDuration,
-        ease: liquidEase
-      });
-      if (inputElements.length > 0) {
-        this.timeline.to(inputElements, { height: inputFieldHeight, duration: expandDuration, ease: liquidEase }, '<');
-      }
+        ease: 'power1.inOut'
+      }, '<');
+      this.timeline.to(nameInput, {
+        height: inputFieldHeight,
+        duration: expandDuration,
+        ease: 'power1.inOut'
+      }, '<');
     }
 
-    // Message field expands height with the others
+    // 3. EMAIL appears → COMPANY expands (overlapped)
+    if (emailField) {
+      this.timeline.to(emailField, { height: compressedHeight, duration: appearDuration, ease: 'power1.out' }, overlap);
+    }
+    if (companyField && companyInput) {
+      this.timeline.to(companyField, {
+        height: inputFieldHeight,
+        overflow: 'visible',
+        clearProps: 'borderRadius',
+        duration: expandDuration,
+        ease: 'power1.inOut'
+      }, '<');
+      this.timeline.to(companyInput, {
+        height: inputFieldHeight,
+        duration: expandDuration,
+        ease: 'power1.inOut'
+      }, '<');
+    }
+
+    // 4. MESSAGE appears → EMAIL expands (overlapped)
+    if (messageField) {
+      this.timeline.to(messageField, { height: compressedHeight, duration: appearDuration, ease: 'power1.out' }, overlap);
+    }
+    if (emailField && emailInput) {
+      this.timeline.to(emailField, {
+        height: inputFieldHeight,
+        overflow: 'visible',
+        clearProps: 'borderRadius',
+        duration: expandDuration,
+        ease: 'power1.inOut'
+      }, '<');
+      this.timeline.to(emailInput, {
+        height: inputFieldHeight,
+        duration: expandDuration,
+        ease: 'power1.inOut'
+      }, '<');
+    }
+
+    // 5. MESSAGE expands
     if (messageField) {
       this.timeline.to(messageField, {
         height: finalMessageFieldHeight,
+        width: 640,
         overflow: 'visible',
+        clearProps: 'borderRadius',
         duration: expandDuration,
-        ease: liquidEase
+        ease: 'power1.inOut'
+      }, overlap);
+    }
+    if (textarea) {
+      this.timeline.to(textarea, {
+        height: finalTextareaHeight,
+        minHeight: finalTextareaHeight,
+        duration: expandDuration,
+        ease: 'power1.inOut'
       }, '<');
-      if (textarea) this.timeline.to(textarea, { height: finalTextareaHeight, minHeight: finalTextareaHeight, overflow: 'visible', duration: expandDuration, ease: liquidEase }, '<');
-      if (wrapper) this.timeline.to(wrapper, { height: finalTextareaHeight, overflow: 'visible', duration: expandDuration, ease: liquidEase }, '<');
+    }
+    if (wrapper && wrapper !== messageField) {
+      this.timeline.to(wrapper, {
+        height: 'auto',
+        overflow: 'visible',
+        clearProps: 'borderRadius',
+        duration: expandDuration,
+        ease: 'power1.inOut'
+      }, '<');
     }
 
-    // 5. Show ALL labels and placeholders at the same time after all fields expanded
+    // 6. Labels, placeholders, and button all fade in together (overlapped with message expand)
     const allLabels = [nameLabel, companyLabel, emailLabel, messageLabel].filter(Boolean);
-    if (allLabels.length > 0) {
-      this.timeline.to(allLabels, { opacity: 1, duration: 0.3, ease: 'power2.out' });
-    }
-    // Restore all placeholders simultaneously
-    this.timeline.call(() => {
-      if (nameInput) nameInput.placeholder = namePlaceholder;
-      if (companyInput) companyInput.placeholder = companyPlaceholder;
-      if (emailInput) emailInput.placeholder = emailPlaceholder;
-      if (textarea) textarea.placeholder = messagePlaceholder;
-    }, [], '<');
+    const allInputsWithPlaceholders = [nameInput, companyInput, emailInput, textarea].filter(Boolean);
 
-    // 6. Submit button appears after form fields are in place
     if (submitButton) {
       this.timeline.to(submitButton, {
         opacity: 1,
         scale: 1,
-        duration: 0.4,
+        duration: 0.6,
         ease: 'back.out(1.5)'
-      });
+      }, '+=0.1');
+    }
+
+    if (allLabels.length > 0) {
+      this.timeline.to(allLabels, { opacity: 1, duration: 1, ease: 'power1.out' }, '<');
+    }
+
+    if (allInputsWithPlaceholders.length > 0) {
+      this.timeline.to(allInputsWithPlaceholders, {
+        '--placeholder-opacity': 1,
+        duration: 1,
+        ease: 'power1.out'
+      }, '<');
     }
 
     // Restore overflow, section height, and clear inline widths after animation
@@ -314,7 +382,7 @@ export class ContactAnimationModule extends BaseModule {
     // Keep all container dimensions locked permanently - do not clear
 
     // ========================================================================
-    // BUSINESS CARD - Flip after form elements settle
+    // BUSINESS CARD - Flip AFTER form and button animation is 100% complete
     // ========================================================================
     if (businessCard) {
       this.timeline.call(() => {
@@ -329,7 +397,7 @@ export class ContactAnimationModule extends BaseModule {
             ease: 'power2.inOut'
           });
         }
-      }, [], '-=0.2');
+      }, [], '+=0.15');
     }
 
     // ========================================================================

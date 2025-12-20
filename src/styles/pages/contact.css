@@ -155,7 +155,7 @@
     overflow: visible;
   }
 
-  /* Bottom row: message textarea - wider than input fields */
+  /* Bottom row: message textarea - starts same width as input fields */
   .contact-message-row {
     width: 640px;
     margin-top: 1.5rem;
@@ -254,7 +254,7 @@
 
 .input-item.leaving {
   transform: translateY(0);
-  animation: drop-out 0.5s cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
+  animation: drop-out 1.2s cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
 }
 
 /* Animation delays for staggered effect */
@@ -275,8 +275,7 @@ label.text-small {
   z-index: 3;
   transform: translate(0);
   color: rgba(var(--bg-rgb, 255, 251, 238), 1);
-  opacity: 0.5;
-  transition: transform 0.2s cubic-bezier(0.3, 0.9, 0.3, 0.9);
+  opacity: 0;
   pointer-events: none;
   font-size: 1rem;
 }
@@ -292,12 +291,7 @@ label.text-small {
   font-size: 1.2rem;
   font-weight: 600;
   box-sizing: border-box;
-  transition: background-color 0.4s,
-              box-shadow 0.4s,
-              -webkit-box-shadow 0.4s,
-              transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-              color 2s,
-              -webkit-text-fill-color 2s;
+  --placeholder-opacity: 0;
 }
 
 /* Input field dimensions */
@@ -324,7 +318,7 @@ label.text-small {
 input::placeholder,
 textarea::placeholder {
   color: rgba(var(--bg-rgb, 255, 251, 238), 1);
-  opacity: 0.5;
+  opacity: var(--placeholder-opacity, 0);
 }
 
 /* Hover/Focus behavior - label and input transform */
@@ -350,8 +344,7 @@ input:focus-visible + label,
 textarea:hover + label,
 textarea:focus + label,
 textarea:focus-visible + label {
-  opacity: 1;
-  transition: opacity 2s ease 0.4s, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  opacity: 0.5;
 }
 
 /* Placeholder opacity change on hover/focus */
@@ -361,8 +354,7 @@ input:focus-visible::placeholder,
 textarea:hover::placeholder,
 textarea:focus::placeholder,
 textarea:focus-visible::placeholder {
-  opacity: 1;
-  transition: opacity 2s ease 0.4s;
+  opacity: 0.5;
 }
 
 /* Focus outline */
@@ -518,13 +510,11 @@ html[data-theme="dark"] .submit-button:focus-visible {
 
 html[data-theme="dark"] label.text-small {
   color: var(--color-neutral-300);
-  opacity: 0.5;
 }
 
 html[data-theme="dark"] input::placeholder,
 html[data-theme="dark"] textarea::placeholder {
   color: var(--color-neutral-300);
-  opacity: 0.5;
 }
 
 /* Email alternative box */
