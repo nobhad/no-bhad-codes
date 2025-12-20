@@ -351,6 +351,28 @@ export class IntroAnimationModule extends BaseModule {
     //   3. aboveCardGroup - Fingers (above card, retracts)
     // ========================================================================
 
+    // ========================================================================
+    // ADD CARD SHADOW FILTER
+    // Drop shadow matching the business card CSS: 0 10px 30px rgba(0,0,0,0.3)
+    // ========================================================================
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    filter.setAttribute('id', 'card-shadow');
+    filter.setAttribute('x', '-50%');
+    filter.setAttribute('y', '-50%');
+    filter.setAttribute('width', '200%');
+    filter.setAttribute('height', '200%');
+
+    const dropShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
+    dropShadow.setAttribute('dx', '0');
+    dropShadow.setAttribute('dy', '10');
+    dropShadow.setAttribute('stdDeviation', '15');
+    dropShadow.setAttribute('flood-color', 'rgba(0, 0, 0, 0.3)');
+
+    filter.appendChild(dropShadow);
+    defs.appendChild(filter);
+    morphSvg.appendChild(defs);
+
     // Main wrapper with transform for scaling and positioning
     const transformWrapper = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     transformWrapper.setAttribute('id', 'intro-layers-wrapper');
@@ -359,10 +381,12 @@ export class IntroAnimationModule extends BaseModule {
     // Group for elements BEHIND the card (arm + thumb)
     const behindCardGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     behindCardGroup.setAttribute('id', 'behind-card-group');
+    behindCardGroup.setAttribute('filter', 'url(#card-shadow)');
 
     // Group for elements ABOVE the card (fingers)
     const aboveCardGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     aboveCardGroup.setAttribute('id', 'above-card-group');
+    aboveCardGroup.setAttribute('filter', 'url(#card-shadow)');
 
     // ========================================================================
     // ASSEMBLE BEHIND-CARD LAYER
@@ -397,6 +421,7 @@ export class IntroAnimationModule extends BaseModule {
     if (cardGroup) {
       const clonedCard = cardGroup.cloneNode(true) as Element;
       clonedCard.setAttribute('id', 'svg-business-card');
+      clonedCard.setAttribute('filter', 'url(#card-shadow)');
       transformWrapper.appendChild(clonedCard);
     }
 
