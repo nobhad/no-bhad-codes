@@ -155,6 +155,13 @@ body {
   background: var(--color-neutral-500, #5f6368);
 }
 
+/* Mobile: Scrollbar track matches page background */
+@media screen and (max-width: 767px) {
+  ::-webkit-scrollbar-track {
+    background: var(--color-body-bg);
+  }
+}
+
 /* ============================================
  * 8. SPECIALIZED SECTION STYLES - DESKTOP ONLY
  * ============================================ */

@@ -163,31 +163,8 @@ export function registerModules(debug: boolean = false): void {
         };
       }
     },
-    {
-      name: 'InfiniteScrollModule',
-      type: 'dom',
-      factory: async () => {
-        // Load infinite scroll on home page only
-        const currentPath = window.location.pathname;
-        const isHomePage = currentPath === '/' || currentPath === '/index.html';
-
-        if (isHomePage) {
-          const { InfiniteScrollModule } = await import('../modules/animation/infinite-scroll');
-          return new InfiniteScrollModule({
-            containerSelector: 'main',
-            lastSectionSelector: '.contact-section',
-            enabled: true
-          });
-        }
-        // Return a dummy module for other pages
-        return {
-          init: async () => {},
-          destroy: () => {},
-          isInitialized: true,
-          name: 'InfiniteScrollModule'
-        };
-      }
-    },
+    // InfiniteScrollModule disabled - removed in favor of standard page scroll
+    // See current_work.md for details
     {
       name: 'TextAnimationModule',
       type: 'dom',
@@ -298,7 +275,7 @@ export function getMainSiteModules(): string[] {
     'NavigationModule',
     'ContactFormModule',
     'ScrollSnapModule',
-    'InfiniteScrollModule',
+    // 'InfiniteScrollModule', // Disabled - using standard page scroll
     'TextAnimationModule',
     'ContactAnimationModule'
   ];

@@ -4,6 +4,271 @@ This file contains completed work from December 2025. Items are moved here from 
 
 ---
 
+## Documentation Review - COMPLETE (December 19, 2025)
+
+**Summary**: Comprehensive documentation review and update to ensure all docs are current.
+
+**Files Updated**:
+
+- `docs/ARCHITECTURE.md` - Updated codebase health section with December 19 refactoring (app.ts, state.ts, navigation.css splits)
+- `docs/features/INTRO_ANIMATION.md` - Updated status to Complete, added shadow feature, December 2025 changelog
+- `docs/API_DOCUMENTATION.md` - Updated all authentication endpoints for HttpOnly cookie-based auth
+
+---
+
+## Code Quality Refactoring - COMPLETE (December 19, 2025)
+
+### app.ts Split
+
+**Before**: 992 lines
+**After**: 4 files
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/core/app.ts` | 452 | Core Application class |
+| `src/core/services-config.ts` | 125 | Service registrations |
+| `src/core/modules-config.ts` | 326 | Module definitions |
+| `src/core/debug.ts` | 155 | Development helpers |
+
+### state.ts Split
+
+**Before**: 824 lines
+**After**: 4 files in `src/core/state/`
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `state/types.ts` | 67 | Type definitions |
+| `state/state-manager.ts` | 491 | Generic StateManager class |
+| `state/app-state.ts` | 172 | App instance, middleware, reducers |
+| `state/index.ts` | 22 | Re-exports for backward compatibility |
+
+### navigation.css Split
+
+**Before**: 1792 lines
+**After**: 4 files
+
+- `nav-base.css` - Base navigation styles
+- `nav-animations.css` - Animation keyframes and transitions
+- `nav-responsive.css` - Mobile/responsive styles
+- `nav-portal.css` - Client portal navigation
+
+### form.css Split
+
+**Before**: 374 lines
+**After**: 3 files
+
+- `form-fields.css` - Input fields, textareas, selects
+- `form-buttons.css` - Button styles
+- `form-validation.css` - Validation states, error messages
+
+### Module Organization
+
+- Made `TerminalIntakeModule` extend `BaseModule`
+- Organized 14 flat modules into subdirectories by concern (UI, animation, utilities)
+- Documented cross-feature dependencies
+- Moved `intro-animation.ts` to `src/modules/animation/intro-animation.ts`
+
+---
+
+## CSS Variable Migration - COMPLETE (December 19, 2025)
+
+### Legacy Variable Migration
+
+Migrated 65+ instances of legacy `--fg`/`--bg` variables to semantic tokens:
+
+- Text colors: `--fg` → `--color-text-primary`
+- Border colors: `--fg` → `--color-border`
+- Inverted backgrounds: `--fg` → `--color-bg-inverse`
+- Inverted text: `--bg` → `--color-text-inverse`
+
+Files updated: 11 CSS files across components, pages, and base layers.
+
+### Hardcoded Color Cleanup
+
+Replaced 27 instances of hardcoded `#000` with `var(--color-black)`:
+
+- 24 instances in `admin.css` (status badges, tabs)
+- 2 instances in `navigation.css` (dropdown buttons)
+- 1 instance in `client-portal-section.css` (toggle button)
+
+---
+
+## Contact Section Layout - COMPLETE (December 19, 2025)
+
+**Summary**: Refactored contact layout for dynamic sizing and equal column widths.
+
+**Changes**:
+
+- Equal width columns (`1fr 1fr`) instead of fixed pixel values
+- Business card uses dynamic sizing with `aspect-ratio` instead of fixed dimensions
+- Layout centered with `place-content: center center`
+- Increased gap between form and card (`clamp(4rem, 8vw, 6rem)`)
+- All overflow set to visible to prevent card/shadow clipping
+
+---
+
+## Contact Section Animation - COMPLETE (December 19, 2025)
+
+**Completed Features**:
+
+- Contact section pins during animation playback
+- Form fields slide in from right with staggered timing
+- Submit button slides in, bumps fields, triggers card flip
+- Business card shows blank front with contact options text
+- Card intake link opens modal (not new page)
+- Error toasts positioned to right of form fields (desktop)
+- Contact options paragraph hidden on desktop (info on card instead)
+- **Mobile**: Submit button rolls in from left with GSAP animation
+- **Mobile**: Green accent background on submit button
+- **Mobile**: Bolder icon stroke (2.5) for visibility
+
+---
+
+## Individual Section Height Styling - COMPLETE (December 19, 2025)
+
+**Summary**: Refactored shared section min-height rule from layout.css into individual section rules.
+
+**Files Modified**:
+
+- `src/styles/base/layout.css` - Removed shared min-height, added base flex properties
+- `src/styles/pages/about.css` - Created new file with about-section height and layout
+- `src/styles/pages/contact.css` - Added individual height rule for contact-section
+- `src/styles/components/business-card.css` - Added section height rule for business-card-section
+- `src/styles/main.css` - Added about.css import, removed duplicated section rules
+
+---
+
+## GSAP MorphSVG Intro Animation - COMPLETE (December 18-19, 2025)
+
+**Branch**: `feature/intro-animation-svgs`
+
+**Summary**: Paw morph animation for intro sequence using GSAP MorphSVG plugin.
+
+**Completed Features**:
+
+- Desktop: Full coyote paw morph animation with finger morphing
+- Mobile: Card flip fallback (no paw overlay)
+- Enter key skips animation
+- Replays after 20 minutes since last view (localStorage timestamp)
+- Header fades in after animation completes
+- **Drop shadow on paw and card** - SVG filter with feDropShadow matching business card style
+- SVG paths externalized to `coyotePawConfig` object
+
+**Files Modified**:
+
+- `src/modules/animation/intro-animation.ts` - Main animation module
+- `src/styles/components/intro-morph.css` - Overlay styles
+
+---
+
+## Client Portal Auth Container - COMPLETE (December 19, 2025)
+
+**Summary**: Restructured client portal login page with unified auth container design.
+
+**Resolved Issues**:
+
+- VH calculations now account for footer height using `calc(100vh - var(--footer-height))`
+
+---
+
+## Mobile Navigation Styling - COMPLETE (December 19, 2025)
+
+**Files Modified**: `src/styles/components/navigation.css`
+
+---
+
+## DataService Portfolio Load Error - FIXED (December 19, 2025)
+
+**Issue**: Console error when loading main page - DataService trying to fetch JSON with wrong schema.
+
+**Resolution**:
+
+- Updated `public/data/portfolio.json` to match `PortfolioData` interface
+- Added navigation, profile, and contact sections
+- DataService now loads data successfully without fallback
+
+---
+
+## Intake Form Text Size - FIXED (December 18, 2025)
+
+**Issue**: Text in the terminal intake form was too small for older users.
+
+**Resolution**: Increased font sizes throughout terminal intake:
+
+- Title: 13px → 14px
+- Login info: 13px → 15px
+- System messages: 13px → 15px
+- Boot lines: 14px → 15px
+- Input fields: 14px → 16px (prevents iOS zoom)
+- Options: 14px → 16px
+- Progress: 12px → 14px
+
+---
+
+## Terminal Intake Close Button - FIXED (December 18, 2025)
+
+**Issue**: Close button should use Mac-style traffic lights on the left.
+
+**Resolution**:
+
+- Buttons already use Mac-style (red/yellow/green) on the left side
+- Fixed modal ID mismatch (`intakeModal` vs `intake-modal`) in terminal-intake.ts
+- Red close button now properly closes the modal and backdrop
+- Removed X close button from modal (using Mac-style buttons only)
+- Added hover/active states for better visual feedback
+
+---
+
+## Terminal Intake SVG Animation - FIXED (December 18, 2025)
+
+**Issue**: The avatar SVG should animate path-by-path instead of appearing all at once.
+
+**Resolution**: Modified `showAvatarIntro()` in terminal-intake-ui.ts to:
+
+- Fetch and inline the SVG (instead of using img tag)
+- Set all paths to opacity 0 initially
+- Use GSAP stagger animation to reveal each path one at a time
+- Fallback to img tag if fetch fails
+
+---
+
+## Comprehensive Code Review - COMPLETE (December 17-19, 2025)
+
+### Summary
+
+Full codebase review completed across all TypeScript and CSS files.
+
+### Critical Issues - ALL FIXED
+
+| File | Issue | Status |
+|------|-------|--------|
+| `src/modules/navigation.ts` | 15+ console.log calls, untracked event listeners | FIXED |
+| `src/modules/animation/intro-animation.ts` | 400+ lines, hardcoded SVG paths | FIXED (refactored, SVG paths in config) |
+| `src/services/code-protection-service.ts` | Event listener cleanup issues | FIXED |
+| `src/features/admin/admin-security.ts` | localStorage for auth data | FIXED (all modules migrated to HttpOnly cookies) |
+
+### Files Split (December 19)
+
+| Original File | Lines | Result |
+|---------------|-------|--------|
+| `src/core/app.ts` | 992 | Split into 4 files |
+| `src/core/state.ts` | 824 | Split into 4 files |
+| `src/styles/components/navigation.css` | 1792 | Split into 4 files |
+| `src/styles/components/form.css` | 374 | Split into 3 files |
+
+### CSS Architecture
+
+- Token system now consistently used
+- Hardcoded `#000` values migrated to `var(--color-black)` (27 instances)
+- Legacy `--fg`/`--bg` variables migrated to semantic tokens (65+ instances)
+- CSS files split into modular components
+
+### Server Code Status
+
+Excellent - production-ready with HttpOnly cookie authentication.
+
+---
+
 ## HttpOnly Cookie Auth Migration - COMPLETE (December 17, 2025)
 
 **Summary**: Migrated all authentication from sessionStorage tokens to HttpOnly cookies for XSS protection.

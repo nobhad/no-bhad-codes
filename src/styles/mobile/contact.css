@@ -18,13 +18,18 @@
     display: block !important;
   }
 
-  /* Override desktop contact section styles */
+  /* Override desktop contact section styles - match other mobile sections */
   .contact-section {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 1rem !important;
+    height: auto !important;
+    min-height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
     align-items: flex-start !important;
-    justify-content: center !important; /* Vertically center content */
+    justify-content: flex-start !important;
+    padding: 1rem !important;
+    box-sizing: border-box !important;
   }
 
   .contact-section h2 {
@@ -33,16 +38,19 @@
     text-align: left;
   }
 
-  /* Contact layout - simple block layout on mobile */
+  /* Contact layout - simple block layout on mobile, full width */
   .contact-layout {
     display: block !important;
     width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
-  /* Contact form column - display block, full width */
+  /* Contact form column - display block, full width of parent */
   .contact-form-column {
     display: block !important;
     width: 100% !important;
+    padding: 0 !important;
   }
 
   /* Hide business card on mobile */
@@ -50,12 +58,23 @@
     display: none !important;
   }
 
-  /* Contact form - flex column for ordering */
+  /* Show contact options on mobile (hidden on desktop where card shows them) */
+  p.contact-options {
+    display: block !important;
+    width: 100%;
+    margin: 0 0 0.75rem;
+    text-align: left;
+    font-size: 0.9rem;
+  }
+
+  /* Contact form - flex column for ordering, full width */
   .contact-form {
     display: flex;
     flex-direction: column;
-    width: 100%;
+    width: 100% !important;
     gap: 0;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   /* Use display:contents to flatten structure, allowing order to work */
@@ -63,26 +82,31 @@
     display: contents;
   }
 
-  /* Input fields container */
+  /* Input fields container - full width */
   .contact-left {
     display: block;
-    width: 100%;
+    width: 100% !important;
     order: 1;
+    padding: 0 !important;
   }
 
-  /* Message textarea */
+  /* Message textarea - full width */
   .contact-message-row {
     display: block;
-    width: 100%;
+    width: 100% !important;
     order: 2;
     margin-top: 0; /* Override desktop margin-top: 1rem */
+    padding: 0 !important;
   }
 
-  /* Stack all input wrappers vertically - uniform 0.5rem spacing */
+  /* Stack all input wrappers vertically - full width, no horizontal margins */
   .input-wrapper {
     display: block;
-    width: 100%;
+    width: 100% !important;
     margin-bottom: 0.5rem;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 0 !important;
   }
 
   /* Top form field spacing */
@@ -92,12 +116,29 @@
 
   .input-item {
     display: block;
-    width: 100%;
+    width: 100% !important;
     position: relative; /* Needed for absolute label positioning */
-    opacity: 1;
-    visibility: visible;
-    transform: none;
-    animation: none;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    animation: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    transition: none !important;
+  }
+
+  /* Disable all animations on form fields - only button animates */
+  .input-item.entering,
+  .input-item.leaving {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  .input-wrapper {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
   }
 
   /* Error toast on mobile - positioned below the field */
@@ -111,29 +152,31 @@
     display: inline-block;
   }
 
-  /* Smaller input fields on mobile - extra top padding for label */
+  /* Input fields on mobile - full width with pinched corner style */
   .input-item input {
     display: block;
     height: 50px;
     font-size: 0.95rem;
     padding: 1.4rem 0.8rem 0.4rem;
-    border-radius: 0 16px 16px 16px;
-    width: 100%;
+    border-radius: 0 16px 16px 16px; /* Pinched top-left corner */
+    width: 100% !important;
+    max-width: 100% !important;
     box-sizing: border-box;
   }
 
   .input-item textarea {
     display: block;
-    min-height: 200px !important;
-    height: 200px !important;
+    min-height: 180px !important;
+    height: 180px !important;
     font-size: 0.95rem;
     padding: 1.4rem 0.8rem 0.4rem;
-    border-radius: 0 16px 16px 16px;
-    width: 100%;
+    border-radius: 0 16px 16px 16px; /* Pinched top-left corner */
+    width: 100% !important;
+    max-width: 100% !important;
     box-sizing: border-box;
   }
 
-  /* Labels positioned inside inputs */
+  /* Labels positioned inside inputs - visible on mobile */
   label.text-small {
     position: absolute;
     top: 0;
@@ -141,16 +184,33 @@
     font-size: 0.75rem;
     margin: 0.25rem 0 0 0.5rem;
     z-index: 3;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: none;
   }
 
-  /* Submit button container styling */
+  /* Show placeholder text on mobile */
+  .input-item input,
+  .input-item textarea {
+    --placeholder-opacity: 1 !important;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    opacity: 0.6 !important;
+  }
+
+  /* Submit button container styling - right aligned, below textarea */
   .contact-right {
-    display: flex;
+    display: flex !important;
     justify-content: flex-end;
-    width: 100%;
+    width: 100% !important;
     order: 3; /* Ensures it's after textarea */
-    padding-right: 1rem;
-    margin-top: 0.75rem;
+    padding: 0 !important;
+    margin-top: 1rem;
+    box-sizing: border-box;
+    position: relative !important;
+    z-index: 20;
   }
 
   /* Smaller submit button on mobile - GSAP handles animation */
@@ -161,6 +221,8 @@
     min-height: 55px;
     opacity: 1;
     visibility: visible;
+    position: relative !important;
+    z-index: 20;
   }
 
   .submit-button svg {
@@ -184,6 +246,21 @@
   textarea:focus-visible + label {
     transform: translate(0) !important;
   }
+
+  /* Email alternative box - full width, left aligned, no animation */
+  .email-box {
+    width: 100%;
+    margin: 1rem 0 0;
+    text-align: left;
+    opacity: 1 !important;
+    filter: none !important;
+    animation: none !important;
+  }
+
+  .email-box.leaving {
+    animation: none !important;
+    opacity: 1 !important;
+  }
 }
 
 /* ============================================
@@ -194,15 +271,19 @@
   .input-item input {
     height: 42px !important;
     font-size: 0.9rem !important;
+    width: 100% !important;
+    border-radius: 0 12px 12px 12px !important; /* Smaller radius on small screens */
   }
 
   .input-item textarea {
-    min-height: 100px !important;
+    min-height: 120px !important;
     font-size: 0.9rem !important;
+    width: 100% !important;
+    border-radius: 0 12px 12px 12px !important; /* Smaller radius on small screens */
   }
 
   .contact-right {
-    margin-top: 0.25rem;
+    margin-top: 0.75rem;
   }
 
   .submit-button {

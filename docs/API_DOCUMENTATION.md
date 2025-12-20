@@ -4,13 +4,16 @@
 
 The No Bhad Codes API provides a RESTful interface for client management, project tracking, and administrative operations. All endpoints use JSON for request and response payloads unless otherwise specified.
 
-**Base URL:** `https://nobhad.codes/api`  
-**Authentication:** Bearer token (JWT)  
+**Base URL:** `https://nobhad.codes/api`
+**Authentication:** HttpOnly Cookie (JWT) - see below
 **Content-Type:** `application/json`
 
 ## Authentication
 
+**Updated December 19, 2025:** All authentication now uses HttpOnly cookies for enhanced security.
+
 ### JWT Token Structure
+
 ```typescript
 interface JWTPayload {
   id: number;           // User ID
@@ -21,10 +24,33 @@ interface JWTPayload {
 }
 ```
 
-### Authorization Header
+### Cookie-Based Authentication (Primary Method)
+
+The API uses HttpOnly cookies for secure token storage. Tokens are automatically sent with requests:
+
+```http
+Cookie: auth_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Cookie Properties:**
+
+| Property | Value | Purpose |
+|----------|-------|---------|
+| `httpOnly` | `true` | Prevents JavaScript access (XSS protection) |
+| `secure` | `true` (production) | Only sent over HTTPS |
+| `sameSite` | `strict` | CSRF protection |
+| `path` | `/api` | Scoped to API routes |
+| `maxAge` | 1h (admin) / 7d (client) | Token expiration |
+
+### Authorization Header (Fallback)
+
+For API clients that cannot use cookies, Bearer token authentication is still supported:
+
 ```http
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
+
+**Note:** Cookie authentication takes precedence when both are present.
 
 ## Error Responses
 
@@ -60,9 +86,11 @@ interface ErrorResponse {
 ## Authentication Endpoints
 
 ### POST `/auth/login`
-Authenticate user credentials and receive JWT token.
+
+Authenticate user credentials. JWT token is set as an HttpOnly cookie.
 
 **Request:**
+
 ```json
 {
   "email": "client@example.com",
@@ -70,7 +98,14 @@ Authenticate user credentials and receive JWT token.
 }
 ```
 
-**Response:**
+**Response Headers:**
+
+```http
+Set-Cookie: auth_token=eyJhbGciOiJIUzI1NiIs...; HttpOnly; Secure; SameSite=Strict; Path=/api; Max-Age=604800
+```
+
+**Response Body:**
+
 ```json
 {
   "message": "Login successful",
@@ -80,22 +115,32 @@ Authenticate user credentials and receive JWT token.
     "type": "client",
     "company_name": "Acme Corp"
   },
-  "token": "eyJhbGciOiJIUzI1NiIs...",
-  "expiresIn": "24h"
+  "expiresIn": "7d"
 }
 ```
 
+**Note:** The JWT token is NOT returned in the response body. It is set as an HttpOnly cookie that the browser automatically includes in subsequent requests.
+
 **Error Responses:**
+
 - `400` - Invalid email format
 - `401` - Invalid credentials
 - `429` - Too many login attempts
 
 ### POST `/auth/logout`
-Invalidate current authentication token.
 
-**Headers:** `Authorization: Bearer <token>`
+Invalidate current authentication token by clearing the HttpOnly cookie.
 
-**Response:**
+**Authentication:** Cookie or Bearer token
+
+**Response Headers:**
+
+```http
+Set-Cookie: auth_token=; HttpOnly; Secure; SameSite=Strict; Path=/api; Max-Age=0
+```
+
+**Response Body:**
+
 ```json
 {
   "message": "Logged out successfully"
@@ -103,15 +148,23 @@ Invalidate current authentication token.
 ```
 
 ### POST `/auth/refresh`
-Refresh JWT token before expiration.
 
-**Headers:** `Authorization: Bearer <token>`
+Refresh JWT token before expiration. New token is set as HttpOnly cookie.
 
-**Response:**
+**Authentication:** Cookie or Bearer token
+
+**Response Headers:**
+
+```http
+Set-Cookie: auth_token=eyJhbGciOiJIUzI1NiIs...; HttpOnly; Secure; SameSite=Strict; Path=/api; Max-Age=604800
+```
+
+**Response Body:**
+
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIs...",
-  "expiresIn": "24h"
+  "message": "Token refreshed",
+  "expiresIn": "7d"
 }
 ```
 
@@ -138,16 +191,25 @@ Request a magic link for passwordless login.
 - Rate limited: 3 requests per 15 minutes per IP
 
 ### POST `/auth/verify-magic-link`
-Verify magic link token and authenticate user.
+
+Verify magic link token and authenticate user. JWT token is set as HttpOnly cookie.
 
 **Request:**
+
 ```json
 {
   "token": "abc123def456..."
 }
 ```
 
-**Response (Success):**
+**Response Headers:**
+
+```http
+Set-Cookie: auth_token=eyJhbGciOiJIUzI1NiIs...; HttpOnly; Secure; SameSite=Strict; Path=/api; Max-Age=604800
+```
+
+**Response Body (Success):**
+
 ```json
 {
   "success": true,
@@ -158,12 +220,14 @@ Verify magic link token and authenticate user.
     "name": "John Smith",
     "companyName": "Acme Corp"
   },
-  "token": "eyJhbGciOiJIUzI1NiIs...",
   "expiresIn": "7d"
 }
 ```
 
+**Note:** The JWT token is NOT returned in the response body. It is set as an HttpOnly cookie.
+
 **Error Responses:**
+
 - `400` - Invalid or expired token
 - `401` - Account inactive
 

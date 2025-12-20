@@ -1,7 +1,7 @@
 # Intro Animation - Coyote Paw
 
-**Status:** In Development
-**Last Updated:** December 2024
+**Status:** Complete
+**Last Updated:** December 19, 2025
 
 ## Overview
 
@@ -121,7 +121,7 @@ const SVG_VIEWBOX_HEIGHT = 1801.19;
 ### Module Architecture
 
 ```text
-src/modules/intro-animation.ts
+src/modules/animation/intro-animation.ts
 |
 |-- IntroAnimationModule (extends BaseModule)
     |
@@ -258,7 +258,7 @@ this.timeline
 
 | File | Purpose |
 |------|---------|
-| `src/modules/intro-animation.ts` | Main animation module |
+| `src/modules/animation/intro-animation.ts` | Main animation module (refactored Dec 19, 2025) |
 | `src/styles/components/intro-morph.css` | Overlay and morph styles |
 | `public/images/coyote_paw.svg` | SVG asset with all paw variations |
 | `index.html` | HTML structure for overlay |
@@ -499,6 +499,22 @@ constructor(options: ModuleOptions = {}) {
 ---
 
 ## Change Log
+
+### December 19, 2025
+
+- **Status: COMPLETE** - Animation feature fully implemented
+- **Drop shadow added** - SVG `<feDropShadow>` filter applied to paw and card elements
+  - Shadow scales dynamically with SVG transform for consistent sizing
+  - Matches business card shadow style (`box-shadow: 0 10px 30px var(--color-shadow)`)
+- **Module relocated** - Moved from `src/modules/intro-animation.ts` to `src/modules/animation/intro-animation.ts`
+- **SVG paths externalized** - Hardcoded SVG paths extracted to `coyotePawConfig` object
+- **Replay timing** - Animation replays after 20 minutes since last view (localStorage timestamp)
+- **Header integration** - Header fades in after animation completes
+
+### December 18, 2025
+
+- **Mobile card flip** - Card flip fallback for mobile (no paw overlay)
+- **Enter key skip** - Press Enter to skip animation at any time
 
 ### December 2024
 

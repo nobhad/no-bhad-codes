@@ -58,9 +58,16 @@ no-bhad-codes/
 │   │
 │   ├── 🏗️ CORE ARCHITECTURE
 │   │   ├── core/
-│   │   │   ├── app.ts               # Application controller
+│   │   │   ├── app.ts               # Application controller (refactored Dec 19)
+│   │   │   ├── services-config.ts   # Service registrations
+│   │   │   ├── modules-config.ts    # Module definitions
+│   │   │   ├── debug.ts             # Development helpers
 │   │   │   ├── container.ts         # Dependency injection
-│   │   │   └── state.ts             # Global state management
+│   │   │   └── state/               # State management (refactored Dec 19)
+│   │   │       ├── index.ts         # Re-exports
+│   │   │       ├── types.ts         # Type definitions
+│   │   │       ├── state-manager.ts # Generic StateManager class
+│   │   │       └── app-state.ts     # App instance, middleware, reducers
 │   │   │
 │   │   ├── 🎯 FEATURES (Domain-Driven)
 │   │   │   ├── admin/               # Admin management
@@ -1318,26 +1325,32 @@ npm run audit              # Security audit
 
 ## 🔍 CODEBASE HEALTH
 
-**Last Code Review: December 17, 2025**
+**Last Code Review: December 19, 2025**
 
 ### Critical Issues
 
 | File | Issue | Status |
 |------|-------|--------|
 | `src/modules/navigation.ts` | 15+ console.log calls, untracked event listeners | FIXED |
-| `src/modules/intro-animation.ts` | 400+ lines, hardcoded SVG paths | Pending |
+| `src/modules/animation/intro-animation.ts` | 400+ lines, hardcoded SVG paths | FIXED (refactored Dec 19, SVG paths in config) |
 | `src/services/code-protection-service.ts` | Event listener cleanup issues | FIXED |
-| `src/features/admin/admin-security.ts` | localStorage for auth data | PARTIAL (client portal uses HttpOnly cookies) |
+| `src/features/admin/admin-security.ts` | localStorage for auth data | FIXED (all modules migrated to HttpOnly cookies) |
 
 ### Files Exceeding Size Guidelines (300 lines)
 
-| File | Lines | Recommendation |
-|------|-------|----------------|
-| `src/core/app.ts` | 992 | Split into domain-specific controllers |
-| `src/core/state.ts` | 788 | Split into domain-specific state managers |
-| `src/services/visitor-tracking.ts` | 730 | Split by tracking concern |
-| `src/features/admin/admin-dashboard.ts` | 600+ | Continue module extraction |
-| `styles/components/navigation.css` | 900+ | Split into nav-base, nav-animations |
+| File | Lines | Status |
+|------|-------|--------|
+| `src/core/app.ts` | 452 | FIXED - Split Dec 19 (was 992 lines, now 4 files) |
+| `src/core/state/` | 4 files | FIXED - Split Dec 19 (was 824 lines in state.ts) |
+| `src/services/visitor-tracking.ts` | 730 | Pending - Split by tracking concern |
+| `src/features/admin/admin-dashboard.ts` | 600+ | Pending - Continue module extraction |
+| `src/styles/components/nav-*.css` | 4 files | FIXED - Split Dec 19 (was 1792 lines) |
+
+**December 19, 2025 Refactoring Summary:**
+
+- `app.ts` (992 lines) → `app.ts` (452), `services-config.ts` (125), `modules-config.ts` (326), `debug.ts` (155)
+- `state.ts` (824 lines) → `state/types.ts` (67), `state/state-manager.ts` (491), `state/app-state.ts` (172), `state/index.ts` (22)
+- `navigation.css` (1792 lines) → `nav-base.css`, `nav-animations.css`, `nav-responsive.css`, `nav-portal.css`
 
 ### Server Code Status
 
@@ -1389,12 +1402,13 @@ The system uses **HttpOnly cookies** for secure JWT token storage:
 
 - Admin dashboard modules still use Authorization headers (lower priority)
 
-### CSS Architecture Status
+### CSS Architecture Status (Updated December 19, 2025)
 
-Token system is excellent but inconsistently used:
+Token system is excellent and now consistently used:
 
-- Some files still use hardcoded colors instead of tokens
-- Legacy variable system (`--fg`, `--bg`) needs migration to semantic tokens
+- ✅ Hardcoded `#000` values migrated to `var(--color-black)` (27 instances)
+- ✅ Legacy `--fg`/`--bg` variables migrated to semantic tokens (65+ instances)
+- ✅ CSS files split into modular components
 - See `/docs/design/CSS_ARCHITECTURE.md` for detailed findings
 
 ---
