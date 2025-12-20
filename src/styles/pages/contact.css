@@ -27,25 +27,20 @@
    ========================================== */
 
 @media screen and (min-width: 768px) {
-  /* Contact Section - full viewport height, 80% width (desktop) - CSS Grid (NO FLEX) */
+  /* Contact Section - full viewport height, centered content (desktop) - CSS Grid (NO FLEX) */
   .contact-section {
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     height: calc(100vh - var(--header-height) - var(--footer-height));
     display: grid;
-    place-content: center start; /* Vertical center, horizontal start */
-    width: 80vw;
-    max-width: 80vw;
-    margin-left: auto;
-    margin-right: auto;
+    place-content: center center; /* Vertical and horizontal center */
+    width: 100%;
     padding: clamp(1rem, 4vw, 2rem);
-    padding-left: 0;
-    padding-right: 0;
     box-sizing: border-box;
     position: relative;
     overflow: visible;
   }
 
-  /* Contact heading - margin-bottom inherited from main.css shared rule */
+  /* Contact heading - aligns with form left edge */
   .contact-section h2 {
     width: 100%;
     text-align: left;
@@ -56,29 +51,31 @@
      ========================================== */
 
   /* Contact layout - two-column container using CSS Grid (NO FLEX) */
-  /* Fixed columns prevent layout shifts during animation */
+  /* Equal width columns, centered in section */
   .contact-layout {
     display: grid;
-    /* Fixed pixel columns - NEVER wrap */
-   grid-template-columns: 7fr 3fr;
-   gap:3rem;
-    width: 100%;
+    /* Equal width columns */
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(4rem, 8vw, 6rem);
     align-items: start;
-    margin-top: 0;
+    width: clamp(600px, 80vw, 1100px);
     padding-top: 0;
     /* Fixed height prevents layout shifts during animation */
     min-height: var(--contact-layout-height);
     height: var(--contact-layout-height);
+    overflow: visible;
   }
 
   /* Left column - contact form */
   .contact-form-column {
-    min-width: 300px;
+    width: 100%;
   }
 
   /* Right column - business card */
   .contact-card-column {
     padding-top: 1rem;
+    justify-self: start;
+    overflow: visible;
   }
 
   /* Contact options paragraph - hidden on desktop (info is on card instead) */
@@ -90,24 +87,32 @@
      CONTACT BUSINESS CARD - DESKTOP ONLY
      ========================================== */
 
-  /* Contact business card - same size as main card */
+  /* Contact business card - dynamic sizing based on container */
   .contact-business-card {
-    width: var(--business-card-large-width, 525px);
-    height: var(--business-card-large-height, 293.8px);
-    min-width: var(--business-card-large-width, 525px);
-    min-height: var(--business-card-large-height, 293.8px);
-    max-width: var(--business-card-large-width, 525px);
-    max-height: var(--business-card-large-height, 293.8px);
+    width: clamp(280px, 100%, 400px);
+    aspect-ratio: var(--business-card-aspect-ratio, 1.787);
+    height: auto;
+    overflow: visible;
   }
 
-  /* Ensure contact business card is interactive */
+  /* Ensure contact business card fills container and is interactive */
   .contact-business-card .business-card {
+    width: 100%;
+    height: 100%;
     cursor: pointer;
     pointer-events: auto;
   }
 
   .contact-business-card .business-card-inner {
+    width: 100%;
+    height: 100%;
     pointer-events: auto;
+  }
+
+  .contact-business-card .business-card-front,
+  .contact-business-card .business-card-back {
+    width: 100%;
+    height: 100%;
   }
 
   /* Form Container - same width as h2 for perfect alignment */

@@ -365,15 +365,15 @@ export class IntroAnimationModule extends BaseModule {
     filter.setAttribute('height', '200%');
 
     // Shadow values in SVG units (will be scaled by transform)
-    // Target: 10px offset, 30px blur at final rendered size
-    const shadowOffsetY = 10 / scale;
-    const shadowBlur = 15 / scale;
+    // Match business card: box-shadow: 0 10px 30px var(--color-shadow)
+    const shadowOffsetY = 12 / scale;
+    const shadowBlur = 18 / scale;
 
     const dropShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
     dropShadow.setAttribute('dx', '0');
     dropShadow.setAttribute('dy', String(shadowOffsetY));
     dropShadow.setAttribute('stdDeviation', String(shadowBlur));
-    dropShadow.setAttribute('flood-color', 'rgba(0, 0, 0, 0.3)');
+    dropShadow.setAttribute('flood-color', 'rgba(0, 0, 0, 0.5)');
 
     filter.appendChild(dropShadow);
     defs.appendChild(filter);
