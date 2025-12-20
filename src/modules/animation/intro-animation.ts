@@ -354,6 +354,7 @@ export class IntroAnimationModule extends BaseModule {
     // ========================================================================
     // ADD CARD SHADOW FILTER
     // Drop shadow matching the business card CSS: 0 10px 30px rgba(0,0,0,0.3)
+    // Scale values inversely to match the applied transform
     // ========================================================================
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
@@ -363,10 +364,15 @@ export class IntroAnimationModule extends BaseModule {
     filter.setAttribute('width', '200%');
     filter.setAttribute('height', '200%');
 
+    // Shadow values in SVG units (will be scaled by transform)
+    // Target: 10px offset, 30px blur at final rendered size
+    const shadowOffsetY = 10 / scale;
+    const shadowBlur = 15 / scale;
+
     const dropShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
     dropShadow.setAttribute('dx', '0');
-    dropShadow.setAttribute('dy', '10');
-    dropShadow.setAttribute('stdDeviation', '15');
+    dropShadow.setAttribute('dy', String(shadowOffsetY));
+    dropShadow.setAttribute('stdDeviation', String(shadowBlur));
     dropShadow.setAttribute('flood-color', 'rgba(0, 0, 0, 0.3)');
 
     filter.appendChild(dropShadow);
