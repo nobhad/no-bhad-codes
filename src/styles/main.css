@@ -106,6 +106,19 @@
 @import "./mobile/index.css";
 
 /* ============================================
+ * SECTION TRANSITION VARIABLES
+ * ============================================ */
+
+:root {
+  /* Blur-in/drop-in transition timings */
+  --blur-amount: 8px;
+  --drop-distance: 30px;
+  --transition-enter: 0.6s;
+  --transition-exit: 0.4s;
+  --stagger-delay: 0.1s;
+}
+
+/* ============================================
  * 6. THEME INTEGRATION
  * ============================================ */
 

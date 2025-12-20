@@ -257,7 +257,12 @@ export class NavigationModule extends BaseModule {
 
     // Set nav state
     this.nav.setAttribute('data-nav', 'open');
+    document.body.classList.add('nav-open');
     document.body.style.overflow = 'hidden';
+
+    // Get portal button for mobile animation
+    const portalButton = document.querySelector('.portal-button') as HTMLElement;
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
 
     // Create opening animation exactly like working version 9.0
     const tl = gsap.timeline();
@@ -284,6 +289,17 @@ export class NavigationModule extends BaseModule {
         { yPercent: 0, autoAlpha: 1, stagger: 0.04, duration: 0.5 },
         '<+=0.25'
       );
+
+    // On mobile, show portal button after panels pass (at 0.25s)
+    if (isMobile && portalButton) {
+      tl.to(portalButton, {
+        opacity: 1,
+        visibility: 'visible',
+        pointerEvents: 'auto',
+        duration: 0.2,
+        ease: 'power2.out'
+      }, 0.25);
+    }
   }
 
   /**
@@ -293,6 +309,19 @@ export class NavigationModule extends BaseModule {
     if (!this.nav) return;
 
     this.log('Closing menu');
+
+    // Hide portal button immediately when closing (on mobile)
+    document.body.classList.remove('nav-open');
+    const portalButton = document.querySelector('.portal-button') as HTMLElement;
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+
+    if (isMobile && portalButton) {
+      gsap.set(portalButton, {
+        opacity: 0,
+        visibility: 'hidden',
+        pointerEvents: 'none'
+      });
+    }
 
     // Create closing animation matching working version 9.0
     const tl = gsap.timeline({

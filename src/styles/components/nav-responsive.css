@@ -61,6 +61,13 @@
     --list-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
   }
 
+  /* Portal button hidden on mobile by default, visibility controlled by JS */
+  .portal-button {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   /* Mobile: Header scrolls with content instead of fixed */
   .header {
     position: static;

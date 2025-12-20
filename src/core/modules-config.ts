@@ -204,6 +204,25 @@ export function registerModules(debug: boolean = false): void {
       }
     },
     {
+      name: 'SectionTransitionsModule',
+      type: 'dom',
+      factory: async () => {
+        // Only load section transitions on index/home page
+        const currentPath = window.location.pathname;
+        if (currentPath === '/' || currentPath === '/index.html') {
+          const { SectionTransitionsModule } = await import('../modules/animation/section-transitions');
+          return new SectionTransitionsModule();
+        }
+        // Return a dummy module for other pages
+        return {
+          init: async () => {},
+          destroy: () => {},
+          isInitialized: true,
+          name: 'SectionTransitionsModule'
+        };
+      }
+    },
+    {
       name: 'ClientPortalModule',
       type: 'dom',
       factory: async () => {
@@ -277,7 +296,8 @@ export function getMainSiteModules(): string[] {
     'ScrollSnapModule',
     // 'InfiniteScrollModule', // Disabled - using standard page scroll
     'TextAnimationModule',
-    'ContactAnimationModule'
+    'ContactAnimationModule',
+    'SectionTransitionsModule'
   ];
 }
 

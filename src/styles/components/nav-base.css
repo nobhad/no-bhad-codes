@@ -304,7 +304,7 @@ li {
 .menu-link {
   padding-top: 0.75em;
   padding-bottom: 0.75em;
-  padding-left: var(--menu-padding);
+  padding-left: var(--container-padding);
   padding-right: var(--menu-padding); /* Add right padding for proper spacing */
   gap: 0.75em; /* Use gap instead of grid-column/row-gap for flexbox */
   width: 100%;
@@ -558,7 +558,7 @@ html[data-theme="dark"] .coming-soon-banner {
    11. MENU DETAILS & CONTENT
    ===================================================== */
 .menu-details {
-  padding-left: var(--menu-padding);
+  padding-left: var(--container-padding);
   grid-column-gap: 1.25em;
   grid-row-gap: 1.25em;
   flex-flow: column;

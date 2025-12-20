@@ -269,14 +269,45 @@
 
   .about-section {
     order: 3;
+    /* Force visibility on mobile - override any JS-set opacity */
+    opacity: 1 !important;
+    filter: none !important;
+    visibility: visible !important;
+  }
+
+  /* Force visibility on about section children on mobile */
+  .about-section .about-text-wrapper,
+  .about-section .about-text-wrapper h2,
+  .about-section .about-text-wrapper p,
+  .about-section .tech-stack {
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
   }
 
   .tech-stack-section {
     order: 4;
+    /* Force visibility on mobile */
+    opacity: 1 !important;
+    filter: none !important;
+    visibility: visible !important;
+  }
+
+  /* Force visibility on tech-stack section children on mobile */
+  .tech-stack-section h2,
+  .tech-stack-section .tech-stack,
+  .tech-stack-section .tech-list {
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
   }
 
   .contact-section {
     order: 5;
+    /* Force visibility on mobile */
+    opacity: 1 !important;
+    filter: none !important;
+    visibility: visible !important;
   }
 
   .container,
