@@ -33,7 +33,7 @@
     height: calc(100dvh - var(--header-height) - var(--footer-height));
     overflow-y: scroll; /* This is the scroll container */
     overflow-x: hidden;
-    scroll-snap-type: y mandatory; /* Pin sections - one at a time */
+    /* NO CSS scroll-snap - GSAP handles all scroll behavior */
     -webkit-overflow-scrolling: touch;
     display: flex;
     flex-direction: column;
@@ -44,8 +44,7 @@
     min-height: 100%;
     max-height: 100%;
     padding: 1rem;
-    scroll-snap-align: center;
-    scroll-snap-stop: always;
+    /* NO CSS scroll-snap - GSAP handles all scroll behavior */
     flex: 0 0 100%;
     box-sizing: border-box;
     overflow: hidden;
@@ -82,12 +81,10 @@
     place-items: center !important;
     padding: 0;
     margin: 0;
-    scroll-snap-align: center;
-    scroll-snap-stop: always;
     overflow: hidden;
   }
 
-  /* Hero section - GSAP controls this section, disable scroll-snap */
+  /* Hero section - GSAP controls this section */
   .hero-section {
     height: 100%;
     min-height: 100%;
@@ -97,8 +94,6 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    scroll-snap-align: none; /* GSAP ScrollTrigger controls this section */
-    scroll-snap-stop: normal;
     overflow: hidden;
     box-sizing: border-box;
   }
@@ -131,7 +126,7 @@
     margin: auto;
   }
 
-  /* About section - fills scroll container with scroll snap */
+  /* About section - fills scroll container */
   .about-section {
     height: 100%;
     min-height: 100%;
@@ -143,8 +138,6 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    scroll-snap-align: center;
-    scroll-snap-stop: always;
     overflow: hidden;
     box-sizing: border-box;
   }
@@ -209,8 +202,6 @@
     max-height: 100%;
     flex: 0 0 100%;
     padding: 2rem 1rem;
-    scroll-snap-align: center;
-    scroll-snap-stop: always;
     overflow: hidden;
     box-sizing: border-box;
   }
@@ -248,8 +239,6 @@
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
-    scroll-snap-align: center;
-    scroll-snap-stop: always;
     overflow: visible; /* Allow button shadow to show */
     box-sizing: border-box;
   }
