@@ -508,7 +508,7 @@ main,
      4. Contact - natural height with footer visible
   */
 
-  /* Intro/Business card section - exact viewport height minus header and footer, card centered */
+  /* Intro/Business card section - exact viewport height minus header and footer, card centered - CSS Grid (NO FLEX) */
   .business-card-section {
     height: calc(100vh - var(--header-height) - var(--footer-height));
     height: calc(100dvh - var(--header-height) - var(--footer-height)); /* Dynamic viewport height for mobile browsers */
@@ -516,11 +516,8 @@ main,
     min-height: calc(100dvh - var(--header-height) - var(--footer-height));
     max-height: calc(100vh - var(--header-height) - var(--footer-height));
     max-height: calc(100dvh - var(--header-height) - var(--footer-height));
-    flex: 0 0 auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    place-items: center;
     padding: 0;
     margin: 0;
     scroll-snap-align: start;

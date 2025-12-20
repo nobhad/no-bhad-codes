@@ -19,14 +19,12 @@
    ========================================== */
 
 @media screen and (min-width: 768px) {
-  /* Business card section - full viewport height, centered content */
+  /* Business card section - full viewport height, centered content - CSS Grid (NO FLEX) */
   .business-card-section {
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     height: calc(100vh - var(--header-height) - var(--footer-height));
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    place-items: center;
     padding: 1rem;
     box-sizing: border-box;
     width: 100%;
