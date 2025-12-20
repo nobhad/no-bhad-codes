@@ -146,20 +146,6 @@ export class TextAnimationModule extends BaseModule {
     // Mobile needs smoother scrub for touch scrolling
     const scrubValue = isMobile ? 1.5 : 0.5;
 
-    // Toggle scroll-snap on main container to prevent conflicts with GSAP pinning
-    const setScrollSnap = (enabled: boolean) => {
-      if (isMobile && scrollContainer) {
-        const main = scrollContainer as HTMLElement;
-        if (enabled) {
-          main.style.scrollSnapType = 'y mandatory';
-          this.log('Mobile: Scroll-snap re-enabled');
-        } else {
-          main.style.scrollSnapType = 'none';
-          this.log('Mobile: Scroll-snap disabled for hero animation');
-        }
-      }
-    };
-
     // Hold at animation boundaries (both mobile and desktop)
     let isHolding = false;
     const HOLD_DURATION = 100; // 0.1 seconds
@@ -228,22 +214,17 @@ export class TextAnimationModule extends BaseModule {
       animation: this.timeline,
       onEnter: () => {
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation active`);
-        setScrollSnap(false);
       },
       onLeave: () => {
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation complete`);
-        setScrollSnap(true);
         // Hold AFTER animation completes (scrolling down)
         triggerHold('end');
       },
       onEnterBack: () => {
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation reversing`);
-        setScrollSnap(false);
       },
       onLeaveBack: () => {
-        console.log('>>> onLeaveBack FIRED <<<', { isMobile, isHolding });
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Section left backwards`);
-        setScrollSnap(true);
         // Hold AFTER reverse animation completes (scrolling up)
         triggerHold('start');
       }
