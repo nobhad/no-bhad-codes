@@ -27,10 +27,6 @@ import type { ModuleOptions } from '../../types/modules';
 // Register ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
 
-// Blur-in animation constants - subtle and fast
-const BLUR_AMOUNT = 4;
-const BLUR_DURATION = 0.3;
-
 // ============================================================================
 // CONTACT ANIMATION MODULE CLASS
 // ============================================================================
@@ -93,12 +89,6 @@ export class ContactAnimationModule extends BaseModule {
       return;
     }
 
-    // Set initial blur state for section (desktop blur-in effect)
-    gsap.set(this.container, {
-      opacity: 0,
-      filter: `blur(${BLUR_AMOUNT}px)`
-    });
-
     // Get animatable elements
     const businessCard = this.container.querySelector('#contact-business-card');
 
@@ -111,14 +101,6 @@ export class ContactAnimationModule extends BaseModule {
       onComplete: () => {
         this.log('Contact animation complete');
       }
-    });
-
-    // Blur-in the section container first
-    this.timeline.to(this.container, {
-      opacity: 1,
-      filter: 'blur(0px)',
-      duration: BLUR_DURATION,
-      ease: 'power2.out'
     });
 
     // ========================================================================
@@ -448,15 +430,6 @@ export class ContactAnimationModule extends BaseModule {
       onLeaveBack: () => {
         this.log('Contact section left viewport backwards');
         this.timeline?.reverse();
-        // Blur-out when leaving
-        if (this.container) {
-          gsap.to(this.container, {
-            opacity: 0,
-            filter: `blur(${BLUR_AMOUNT}px)`,
-            duration: BLUR_DURATION * 0.7,
-            ease: 'power2.in'
-          });
-        }
       }
     });
 

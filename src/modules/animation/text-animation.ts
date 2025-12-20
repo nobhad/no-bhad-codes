@@ -20,10 +20,6 @@ import type { ModuleOptions } from '../../types/modules';
 // Register ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
 
-// Blur-in animation constants - subtle and fast
-const BLUR_AMOUNT = 4;
-const BLUR_DURATION = 0.3;
-
 interface TextAnimationOptions extends ModuleOptions {
   /** Selector for the animation container */
   containerSelector?: string;
@@ -74,15 +70,6 @@ export class TextAnimationModule extends BaseModule {
     if (!this.svg) {
       this.warn('SVG element not found');
       return;
-    }
-
-    // Set initial blur state for blur-in effect (desktop only)
-    const isMobileCheck = window.matchMedia('(max-width: 767px)').matches;
-    if (!isMobileCheck) {
-      gsap.set(this.svg, {
-        opacity: 0,
-        filter: `blur(${BLUR_AMOUNT}px)`
-      });
     }
 
     const leftGroup = this.svg.querySelector('.text-left') as Element;
@@ -242,57 +229,21 @@ export class TextAnimationModule extends BaseModule {
       onEnter: () => {
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation active`);
         setScrollSnap(false);
-        // Blur-in effect when section enters (desktop only)
-        if (!isMobile && this.svg) {
-          gsap.to(this.svg, {
-            opacity: 1,
-            filter: 'blur(0px)',
-            duration: BLUR_DURATION,
-            ease: 'power2.out'
-          });
-        }
       },
       onLeave: () => {
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation complete`);
         setScrollSnap(true);
-        // Blur-out when leaving section (desktop only)
-        if (!isMobile && this.svg) {
-          gsap.to(this.svg, {
-            opacity: 0,
-            filter: `blur(${BLUR_AMOUNT}px)`,
-            duration: BLUR_DURATION * 0.7,
-            ease: 'power2.in'
-          });
-        }
         // Hold AFTER animation completes (scrolling down)
         triggerHold('end');
       },
       onEnterBack: () => {
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Animation reversing`);
         setScrollSnap(false);
-        // Blur-in when entering back (desktop only)
-        if (!isMobile && this.svg) {
-          gsap.to(this.svg, {
-            opacity: 1,
-            filter: 'blur(0px)',
-            duration: BLUR_DURATION,
-            ease: 'power2.out'
-          });
-        }
       },
       onLeaveBack: () => {
         console.log('>>> onLeaveBack FIRED <<<', { isMobile, isHolding });
         this.log(`${isMobile ? 'Mobile' : 'Desktop'}: Section left backwards`);
         setScrollSnap(true);
-        // Blur-out when leaving back (desktop only)
-        if (!isMobile && this.svg) {
-          gsap.to(this.svg, {
-            opacity: 0,
-            filter: `blur(${BLUR_AMOUNT}px)`,
-            duration: BLUR_DURATION * 0.7,
-            ease: 'power2.in'
-          });
-        }
         // Hold AFTER reverse animation completes (scrolling up)
         triggerHold('start');
       }
