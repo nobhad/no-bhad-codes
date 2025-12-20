@@ -47,6 +47,9 @@ const commonGlobals = {
   DOMParser: 'readonly',
   SVGSVGElement: 'readonly',
   SVGPathElement: 'readonly',
+  SVGElement: 'readonly',
+  SVGTextElement: 'readonly',
+  WheelEvent: 'readonly',
 
   // Browser Performance and related APIs
   performance: 'readonly',

@@ -244,12 +244,16 @@ export class Application {
 
   /**
    * Register routes for home page sections
+   * Uses salcosta-style hash routing: #/, #/about, #/contact
    */
   private registerHomePageRoutes(routerService: { addRoute: (route: { path: string; section: string; title: string }) => void }): void {
-    routerService.addRoute({ path: '#about', section: 'about', title: 'About - No Bhad Codes' });
-    routerService.addRoute({ path: '#contact', section: 'contact', title: 'Contact - No Bhad Codes' });
+    // Salcosta-style hash routes
+    routerService.addRoute({ path: '#/', section: 'intro', title: 'No Bhad Codes - Professional Web Development' });
+    routerService.addRoute({ path: '#/about', section: 'about', title: 'About - No Bhad Codes' });
+    routerService.addRoute({ path: '#/contact', section: 'contact', title: 'Contact - No Bhad Codes' });
+    // Root path
     routerService.addRoute({ path: '/', section: 'intro', title: 'No Bhad Codes - Professional Web Development' });
-    console.log('[Application] Home page routes registered');
+    console.log('[Application] Home page routes registered (salcosta-style)');
   }
 
   /**

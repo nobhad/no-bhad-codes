@@ -157,13 +157,16 @@ export class NavigationModule extends BaseModule {
               // Small delay to let menu close animation start
               setTimeout(() => {
                 if (isHomePage) {
-                  // If already on home page, just scroll to section
+                  // If already on home page, navigate via router
                   if (this.routerService) {
                     this.routerService.navigate(href, { smooth: true });
                   } else {
                     // Fallback: scroll directly to element
-                    const targetId = href.replace('#', '');
-                    const targetElement = document.getElementById(targetId);
+                    // Handle salcosta-style hashes: #/about -> about
+                    const targetId = href.replace('#/', '').replace('#', '');
+                    const targetElement =
+                      document.getElementById(targetId) ||
+                      document.querySelector(`.${targetId}-section`);
                     if (targetElement) {
                       targetElement.scrollIntoView({ behavior: 'smooth' });
                     }
@@ -343,6 +346,7 @@ export class NavigationModule extends BaseModule {
 
   /**
    * Setup routes with router service
+   * Uses salcosta-style hash routing: #/, #/about, #/contact
    */
   private setupRoutes(): void {
     if (!this.routerService) return;
@@ -350,6 +354,12 @@ export class NavigationModule extends BaseModule {
     const routes = [
       {
         path: '/',
+        section: 'intro',
+        title: 'No Bhad Codes - Portfolio',
+        onEnter: () => this.onSectionEnter('home')
+      },
+      {
+        path: '#/',
         section: 'intro',
         title: 'No Bhad Codes - Portfolio',
         onEnter: () => this.onSectionEnter('home')
@@ -367,13 +377,13 @@ export class NavigationModule extends BaseModule {
         onEnter: () => this.onSectionEnter('client')
       },
       {
-        path: '#about',
+        path: '#/about',
         section: 'about',
         title: 'About - No Bhad Codes',
         onEnter: () => this.onSectionEnter('about')
       },
       {
-        path: '#contact',
+        path: '#/contact',
         section: 'contact',
         title: 'Contact - No Bhad Codes',
         onEnter: () => this.onSectionEnter('contact')
@@ -427,11 +437,12 @@ export class NavigationModule extends BaseModule {
       }
 
       // Ultimate fallback: use minimal hardcoded data (only if nothing else works)
+      // Using salcosta-style hash routing: #/, #/about, #/contact
       if (navigationItems.length === 0) {
         navigationItems = [
-          { id: 'home', text: 'home', href: '/', eyebrow: '00' },
-          { id: 'about', text: 'about', href: '#about', eyebrow: '01' },
-          { id: 'contact', text: 'contact', href: '#contact', eyebrow: '02' },
+          { id: 'home', text: 'home', href: '#/', eyebrow: '00' },
+          { id: 'about', text: 'about', href: '#/about', eyebrow: '01' },
+          { id: 'contact', text: 'contact', href: '#/contact', eyebrow: '02' },
           {
             id: 'portfolio',
             text: 'portfolio',
@@ -595,10 +606,13 @@ export class NavigationModule extends BaseModule {
 
   /**
    * Programmatically navigate to section
+   * Uses salcosta-style hash routing: #/, #/about, #/contact
    */
   navigateToSection(sectionId: string): void {
     if (this.routerService) {
-      this.routerService.navigate(`#${sectionId}`);
+      // Use salcosta-style hash format
+      const hash = sectionId === 'intro' || sectionId === 'home' ? '#/' : `#/${sectionId}`;
+      this.routerService.navigate(hash);
     }
   }
 

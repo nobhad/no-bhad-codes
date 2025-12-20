@@ -396,8 +396,13 @@ export class PageTransitionModule extends BaseModule {
       targetPage.element.classList.remove('page-hidden');
       targetPage.element.classList.add('page-active');
 
-      // Animate in target page
-      await this.animateIn(targetPage);
+      // Special handling for entering intro page - play coyote paw entry animation
+      if (pageId === 'intro') {
+        await this.playIntroEntryAnimation();
+      } else {
+        // Animate in target page (skip for intro - handled by entry animation)
+        await this.animateIn(targetPage);
+      }
 
       // Hide old page (if not intro, already hidden above)
       if (currentPage && currentPage.element && this.currentPageId !== 'intro') {
@@ -439,6 +444,34 @@ export class PageTransitionModule extends BaseModule {
       }
     } catch (error) {
       this.log('IntroAnimationModule not available for exit animation:', error);
+    }
+  }
+
+  /**
+   * Play the coyote paw entry animation when entering the intro page
+   */
+  private async playIntroEntryAnimation(): Promise<void> {
+    try {
+      const introModule = await container.resolve('IntroAnimationModule') as IntroAnimationModule;
+      if (introModule && typeof introModule.playEntryAnimation === 'function') {
+        this.log('Playing intro entry animation');
+        await introModule.playEntryAnimation();
+        this.log('Intro entry animation complete');
+      } else {
+        // Fallback: just show the card and nav
+        this.log('playEntryAnimation not available, showing card directly');
+        const businessCard = document.getElementById('business-card');
+        const introNav = document.querySelector('.intro-nav') as HTMLElement;
+        if (businessCard) businessCard.style.opacity = '1';
+        if (introNav) introNav.style.opacity = '1';
+      }
+    } catch (error) {
+      this.log('IntroAnimationModule not available for entry animation:', error);
+      // Fallback: just show the card and nav
+      const businessCard = document.getElementById('business-card');
+      const introNav = document.querySelector('.intro-nav') as HTMLElement;
+      if (businessCard) businessCard.style.opacity = '1';
+      if (introNav) introNav.style.opacity = '1';
     }
   }
 

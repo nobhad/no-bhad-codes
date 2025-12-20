@@ -186,21 +186,6 @@ export class IntroAnimationModule extends BaseModule {
     }
 
     // ========================================================================
-    // TIME-BASED CHECK
-    // Skip animation if shown within the last 20 minutes
-    // ========================================================================
-    const lastIntroTimestamp = localStorage.getItem(REPLAY_CONFIG.timestampKey);
-    if (lastIntroTimestamp) {
-      const timeSinceLastIntro = Date.now() - parseInt(lastIntroTimestamp, 10);
-      if (timeSinceLastIntro < REPLAY_CONFIG.replayInterval) {
-        this.log(`Intro shown ${Math.round(timeSinceLastIntro / 1000 / 60)} min ago - skipping (replays after 20 min)`);
-        this.skipIntroImmediately();
-        return;
-      }
-      this.log('20+ minutes since last intro - playing animation');
-    }
-
-    // ========================================================================
     // REDUCED MOTION CHECK
     // Respect user's motion preferences for accessibility
     // ========================================================================
@@ -776,6 +761,11 @@ export class IntroAnimationModule extends BaseModule {
       header.style.removeProperty('opacity');
       header.style.removeProperty('visibility');
     }
+
+    // Dispatch completion event for PageTransitionModule
+    // This enables virtual page transitions even when intro is skipped
+    this.dispatchEvent('complete');
+    this.log('Intro skipped - dispatched complete event');
   }
 
   /**
@@ -885,6 +875,7 @@ export class IntroAnimationModule extends BaseModule {
    * - Ensures all content is visible
    * - Cleans up event listeners
    * - Updates app state
+   * - Dispatches 'complete' event for PageTransitionModule
    */
   private completeIntro(): void {
     if (this.isComplete) return;
@@ -928,6 +919,774 @@ export class IntroAnimationModule extends BaseModule {
     if (typeof window !== 'undefined' && (window as any).NBW_STATE) {
       (window as any).NBW_STATE.setState({ introAnimating: false });
     }
+
+    // Dispatch completion event for PageTransitionModule
+    // This enables virtual page transitions after intro completes
+    this.dispatchEvent('complete');
+    this.log('Intro complete - dispatched complete event');
+  }
+
+  /**
+   * Play exit animation (reverse of intro)
+   * Called when transitioning away from the home/intro page
+   *
+   * Animation sequence:
+   * 1. Links fade out
+   * 2. Paw enters from off-screen
+   * 3. Fingers morph to clutching position
+   * 4. Paw grabs card
+   * 5. Paw + card exit together
+   *
+   * @returns Promise that resolves when animation completes
+   */
+  async playExitAnimation(): Promise<void> {
+    console.log('[IntroAnimation] playExitAnimation called');
+
+    // Skip on mobile - no paw animation
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    if (isMobile) {
+      this.log('Mobile - skipping exit animation');
+      console.log('[IntroAnimation] Mobile detected - skipping');
+      return;
+    }
+
+    // Skip if reduced motion preferred
+    if (this.reducedMotion) {
+      this.log('Reduced motion - skipping exit animation');
+      console.log('[IntroAnimation] Reduced motion - skipping');
+      return;
+    }
+
+    this.log('Playing exit animation (reverse intro)');
+    console.log('[IntroAnimation] Starting exit animation');
+
+    // Get overlay and SVG elements
+    this.morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
+    const morphSvg = document.getElementById(DOM_ELEMENT_IDS.morphSvg) as SVGSVGElement | null;
+
+    console.log('[IntroAnimation] morphOverlay:', this.morphOverlay);
+    console.log('[IntroAnimation] morphSvg:', morphSvg);
+
+    if (!this.morphOverlay || !morphSvg) {
+      this.log('Morph overlay not found, skipping exit animation');
+      console.log('[IntroAnimation] FAILED: Overlay or SVG not found');
+      return;
+    }
+
+    // Get business card for alignment
+    const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
+    console.log('[IntroAnimation] businessCard:', businessCard);
+    if (!businessCard) {
+      this.log('Business card not found');
+      console.log('[IntroAnimation] FAILED: Business card not found');
+      return;
+    }
+
+    // Get intro nav for fade out
+    const introNav = document.querySelector('.intro-nav') as HTMLElement;
+    console.log('[IntroAnimation] introNav:', introNav);
+
+    // Load SVG (async, before Promise)
+    console.log('[IntroAnimation] Loading SVG from:', PAW_SVG);
+    const response = await fetch(PAW_SVG);
+    const svgText = await response.text();
+    console.log('[IntroAnimation] SVG loaded, length:', svgText.length);
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+
+    // Get SVG elements
+    const armBase = svgDoc.getElementById(SVG_ELEMENT_IDS.armBase);
+    const position1 = svgDoc.getElementById(SVG_ELEMENT_IDS.position1);
+    const position2 = svgDoc.getElementById(SVG_ELEMENT_IDS.position2);
+    const position3 = svgDoc.getElementById(SVG_ELEMENT_IDS.position3);
+    const cardGroup = svgDoc.getElementById(SVG_ELEMENT_IDS.cardGroup);
+
+    console.log('[IntroAnimation] SVG elements found:',
+      { armBase: !!armBase, position1: !!position1, position2: !!position2, position3: !!position3, cardGroup: !!cardGroup });
+
+    if (!position1 || !position2 || !position3) {
+      this.log('Position groups not found');
+      console.log('[IntroAnimation] FAILED: Position groups missing');
+      return;
+    }
+
+    return new Promise((resolve) => {
+
+      // Calculate alignment
+      const cardRect = businessCard.getBoundingClientRect();
+      const cardFront = businessCard.querySelector('.business-card-front') as HTMLElement;
+      const actualCardRect = cardFront ? cardFront.getBoundingClientRect() : cardRect;
+      const scale = actualCardRect.width / SVG_CARD.width;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const translateX = actualCardRect.left - (SVG_CARD.x * scale);
+      const translateY = actualCardRect.top - (SVG_CARD.y * scale);
+
+      // Clear and rebuild SVG
+      morphSvg.innerHTML = '';
+      morphSvg.setAttribute('viewBox', `0 0 ${viewportWidth} ${viewportHeight}`);
+      morphSvg.setAttribute('preserveAspectRatio', 'none');
+
+      // Add shadow filter
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+      filter.setAttribute('id', 'card-shadow');
+      filter.setAttribute('x', '-50%');
+      filter.setAttribute('y', '-50%');
+      filter.setAttribute('width', '200%');
+      filter.setAttribute('height', '200%');
+      const shadowOffsetY = 12 / scale;
+      const shadowBlur = 18 / scale;
+      const dropShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
+      dropShadow.setAttribute('dx', '0');
+      dropShadow.setAttribute('dy', String(shadowOffsetY));
+      dropShadow.setAttribute('stdDeviation', String(shadowBlur));
+      dropShadow.setAttribute('flood-color', 'rgba(0, 0, 0, 0.5)');
+      filter.appendChild(dropShadow);
+      defs.appendChild(filter);
+      morphSvg.appendChild(defs);
+
+      // ========================================================================
+      // CREATE LAYER STRUCTURE - IDENTICAL TO INTRO ANIMATION
+      // ========================================================================
+
+      // Main wrapper with transform for scaling and positioning
+      const transformWrapper = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      transformWrapper.setAttribute('id', 'exit-layers-wrapper');
+      transformWrapper.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${scale})`);
+
+      // Group for elements BEHIND the card (arm + thumb) - SAME AS INTRO
+      const behindCardGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      behindCardGroup.setAttribute('id', 'behind-card-group');
+      // NOTE: No filter on behindCardGroup - filters can cause stacking context issues
+      // The arm/thumb don't need shadows as prominently as fingers
+
+      // Group for elements ABOVE the card (fingers) - SAME AS INTRO
+      const aboveCardGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      aboveCardGroup.setAttribute('id', 'above-card-group');
+      aboveCardGroup.setAttribute('filter', 'url(#card-shadow)');
+
+      // ========================================================================
+      // ASSEMBLE BEHIND-CARD LAYER - SAME AS INTRO
+      // ========================================================================
+
+      // Add arm base (behind card, retracts with paw)
+      if (armBase) {
+        const clonedArm = armBase.cloneNode(true) as Element;
+        clonedArm.setAttribute('id', 'arm-group');
+        behindCardGroup.appendChild(clonedArm);
+      }
+
+      // Add thumb from Position 3 (open hand position) for exit animation
+      // Starts VISIBLE (paw is off-screen, no overlap with card)
+      // Will HIDE before paw reaches card position
+      const thumbElement = position3.querySelector(`#${SVG_ELEMENT_IDS.thumb3}`);
+      let clonedThumb: Element | null = null;
+      if (thumbElement) {
+        clonedThumb = thumbElement.cloneNode(true) as Element;
+        clonedThumb.setAttribute('id', 'thumb-behind-card');
+        (clonedThumb as SVGSVGElement).style.opacity = '1'; // Visible initially (paw off-screen)
+        behindCardGroup.appendChild(clonedThumb);
+      }
+
+      // Add behind-card group to wrapper (layer 1)
+      transformWrapper.appendChild(behindCardGroup);
+
+      // ========================================================================
+      // ASSEMBLE CARD LAYER - SAME AS INTRO
+      // ========================================================================
+
+      // Add business card graphic (layer 2)
+      if (cardGroup) {
+        const clonedCard = cardGroup.cloneNode(true) as Element;
+        clonedCard.setAttribute('id', 'svg-business-card');
+        clonedCard.setAttribute('filter', 'url(#card-shadow)');
+
+        // Ensure card has solid white fill background to hide thumb behind it
+        const cardRect = clonedCard.querySelector('rect');
+        if (cardRect) {
+          cardRect.setAttribute('fill', '#ffffff');
+          cardRect.setAttribute('fill-opacity', '1');
+        }
+
+        transformWrapper.appendChild(clonedCard);
+      }
+
+      // ========================================================================
+      // ASSEMBLE ABOVE-CARD LAYER
+      // For EXIT: Start from Position 3 (open), morph to Position 1 (clutching)
+      // This is the REVERSE of intro which starts Position 1 and morphs to Position 3
+      // ========================================================================
+
+      // Add fingers from Position 3 (above card, visible initially)
+      // These will morph: Position 3 → Position 2 → Position 1
+      // IMPORTANT: Remove thumb from cloned position3 - thumb is in behindCardGroup
+      const clonedPos3 = position3.cloneNode(true) as Element;
+      clonedPos3.setAttribute('id', 'position-3-exit');
+
+      // Remove thumb from this clone - it should only be in behindCardGroup
+      const thumbInPos3 = clonedPos3.querySelector(`#${SVG_ELEMENT_IDS.thumb3}`);
+      if (thumbInPos3) {
+        thumbInPos3.remove();
+      }
+
+      aboveCardGroup.appendChild(clonedPos3);
+
+      // Add above-card group to wrapper (layer 3 - top)
+      transformWrapper.appendChild(aboveCardGroup);
+
+      // ========================================================================
+      // COPY SVG STYLES - SAME AS INTRO
+      // ========================================================================
+      const sourceStyles = svgDoc.querySelector('style');
+      if (sourceStyles) {
+        const clonedStyles = sourceStyles.cloneNode(true) as Element;
+        morphSvg.insertBefore(clonedStyles, morphSvg.firstChild);
+      }
+
+      // Add completed wrapper to the SVG element
+      morphSvg.appendChild(transformWrapper);
+
+      // Show overlay (we know morphOverlay is not null from earlier check)
+      const overlay = this.morphOverlay!;
+      console.log('[IntroAnimation] Showing overlay');
+      overlay.style.visibility = 'visible';
+      overlay.style.pointerEvents = 'auto';
+      overlay.classList.remove('hidden');
+      overlay.style.display = 'block';
+      overlay.style.opacity = '1';
+
+      // Hide actual business card (SVG card will show instead)
+      console.log('[IntroAnimation] Hiding business card');
+      businessCard.style.opacity = '0';
+
+      // Get finger paths for morphing
+      const fingerA3 = clonedPos3.querySelector(`#${SVG_ELEMENT_IDS.fingerA3}`) as SVGPathElement;
+      const fingerB3 = clonedPos3.querySelector(`#${SVG_ELEMENT_IDS.fingerB3}`) as SVGPathElement;
+      const fingerC3 = clonedPos3.querySelector(`#${SVG_ELEMENT_IDS.fingerC3}`) as SVGPathElement;
+
+      console.log('[IntroAnimation] Exit - Finger elements from Position 3:',
+        { fingerA3: !!fingerA3, fingerB3: !!fingerB3, fingerC3: !!fingerC3 });
+
+      const fingerA2 = position2.querySelector(`#${SVG_ELEMENT_IDS.fingerA2}`) as SVGPathElement;
+      const fingerB2 = position2.querySelector(`#${SVG_ELEMENT_IDS.fingerB2}`) as SVGPathElement;
+      const fingerC2 = position2.querySelector(`#${SVG_ELEMENT_IDS.fingerC2}`) as SVGPathElement;
+
+      console.log('[IntroAnimation] Exit - Finger elements from Position 2:',
+        { fingerA2: !!fingerA2, fingerB2: !!fingerB2, fingerC2: !!fingerC2 });
+
+      const fingerA1 = position1.querySelector(`#${SVG_ELEMENT_IDS.fingerA1}`) as SVGPathElement;
+      const fingerB1 = position1.querySelector(`[id="${SVG_ELEMENT_IDS.fingerB1Container}"] path`) as SVGPathElement;
+      const fingerC1 = position1.querySelector(`[id="${SVG_ELEMENT_IDS.fingerC1Container}"] path`) as SVGPathElement;
+
+      console.log('[IntroAnimation] Exit - Finger elements from Position 1:',
+        { fingerA1: !!fingerA1, fingerB1: !!fingerB1, fingerC1: !!fingerC1 });
+
+      const fingerA2PathData = fingerA2?.getAttribute('d');
+      const fingerA1PathData = fingerA1?.getAttribute('d');
+      const fingerB2PathData = fingerB2?.getAttribute('d');
+      const fingerB1PathData = fingerB1?.getAttribute('d');
+      const fingerC2PathData = fingerC2?.getAttribute('d');
+      const fingerC1PathData = fingerC1?.getAttribute('d');
+
+      console.log('[IntroAnimation] Exit - Path data found:',
+        { A2: !!fingerA2PathData, A1: !!fingerA1PathData, B2: !!fingerB2PathData, B1: !!fingerB1PathData, C2: !!fingerC2PathData, C1: !!fingerC1PathData });
+
+      // Create exit timeline
+      console.log('[IntroAnimation] Creating exit timeline');
+      const exitTimeline = gsap.timeline({
+        onStart: () => {
+          console.log('[IntroAnimation] Exit timeline started');
+        },
+        onComplete: () => {
+          console.log('[IntroAnimation] Exit timeline complete');
+          // Hide overlay after animation
+          if (this.morphOverlay) {
+            this.morphOverlay.style.visibility = 'hidden';
+            this.morphOverlay.style.pointerEvents = 'none';
+          }
+          resolve();
+        }
+      });
+
+      // ========================================================================
+      // ANIMATION TIMING CONSTANTS - MATCHED TO INTRO (but reversed)
+      // ========================================================================
+      const linkFadeDuration = 0.3;           // New for exit (links fade out first)
+      const pawEntryDuration = 1.6;           // Matches intro retractDuration
+      const clutchHold = 0.8;                 // Matches intro clutchHold
+      const releaseDuration = 0.5;            // Matches intro releaseDuration (for morph 2→1)
+      const exitDuration = 0.8;               // Matches intro entryDuration
+      const fadeEase = 'power2.inOut';
+
+      // ========================================================================
+      // SET INITIAL POSITIONS
+      // Card is visible at center, paw is off-screen where intro retraction ended
+      // ========================================================================
+      gsap.set(behindCardGroup, { x: -1500, y: -1200 });
+      gsap.set(aboveCardGroup, { x: -1500, y: -1200 });
+      gsap.set('#svg-business-card', { x: 0, y: 0 });
+
+      // ========================================================================
+      // PHASE 0: FADE OUT NAV LINKS (new for exit)
+      // ========================================================================
+      if (introNav) {
+        exitTimeline.to(introNav, {
+          opacity: 0,
+          duration: linkFadeDuration,
+          ease: 'power2.out'
+        });
+      }
+
+      // ========================================================================
+      // PHASE 1: PAW ENTERS (REVERSE of intro Phase 3 retraction)
+      // Paw enters from where intro retraction ended
+      // Fingers stay OPEN (pos 3) during most of entry
+      // Thumb HIDES before paw reaches card (to avoid overlap issue)
+      // ========================================================================
+      exitTimeline.to(behindCardGroup, {
+        x: 0,
+        y: 0,
+        duration: pawEntryDuration,
+        ease: 'power2.out'  // Reverse of intro's power2.in
+      });
+      exitTimeline.to(aboveCardGroup, {
+        x: 0,
+        y: 0,
+        duration: pawEntryDuration,
+        ease: 'power2.out'
+      }, '<');
+
+      // Hide thumb BEFORE paw reaches card position (at 80% of entry)
+      // This prevents thumb from ever appearing over the card
+      if (clonedThumb) {
+        exitTimeline.to(clonedThumb, {
+          opacity: 0,
+          duration: 0.1
+        }, `-=${pawEntryDuration * 0.3}`);  // Hide at ~70% through entry
+      }
+
+      // ========================================================================
+      // PHASE 1b: MORPH 3→2 at END of entry (reverse of intro's 2→3 at START of retraction)
+      // In intro, morph happens when paw is NEAR card (just started retracting)
+      // In exit (reverse), morph happens when paw is NEAR card (almost done entering)
+      // ========================================================================
+      // Start morph near end of entry (pawEntryDuration - 0.2s)
+      if (fingerA3 && fingerA2PathData) {
+        exitTimeline.to(fingerA3, {
+          morphSVG: { shape: fingerA2PathData, shapeIndex: 'auto' },
+          duration: 0.08,
+          ease: 'power1.out'
+        }, `-=${0.2}`);  // Start 0.2s before entry ends
+      }
+      if (fingerB3 && fingerB2PathData) {
+        exitTimeline.to(fingerB3, {
+          morphSVG: { shape: fingerB2PathData, shapeIndex: 'auto' },
+          duration: 0.08,
+          ease: 'power1.out'
+        }, '<');
+      }
+      if (fingerC3 && fingerC2PathData) {
+        exitTimeline.to(fingerC3, {
+          morphSVG: { shape: fingerC2PathData, shapeIndex: 'auto' },
+          duration: 0.2,
+          ease: 'power1.out'
+        }, '<');
+      }
+
+      // ========================================================================
+      // PHASE 2: MORPH 2→1 (REVERSE of intro Phase 2)
+      // Fingers close to clutching position
+      // Thumb already hidden from Phase 1
+      // ========================================================================
+
+      // Morph 2→1 (reverse of intro's 1→2)
+      if (fingerA3 && fingerA1PathData) {
+        exitTimeline.to(fingerA3, {
+          morphSVG: { shape: fingerA1PathData, shapeIndex: 'auto' },
+          duration: releaseDuration,  // 0.5s - matches intro
+          ease: fadeEase
+        }, '<');
+      }
+      if (fingerB3 && fingerB1PathData) {
+        exitTimeline.to(fingerB3, {
+          morphSVG: { shape: fingerB1PathData, shapeIndex: 'auto' },
+          duration: releaseDuration,
+          ease: fadeEase
+        }, '<');
+      }
+      if (fingerC3 && fingerC1PathData) {
+        exitTimeline.to(fingerC3, {
+          morphSVG: { shape: fingerC1PathData, shapeIndex: 'auto' },
+          duration: releaseDuration,
+          ease: fadeEase
+        }, '<');
+      }
+
+      // ========================================================================
+      // PHASE 3: CLUTCH HOLD (REVERSE of intro Phase 1)
+      // Paw grips the card motionless - same duration as intro
+      // ========================================================================
+      exitTimeline.to({}, { duration: clutchHold });
+
+      // ========================================================================
+      // PHASE 4: EXIT (REVERSE of intro Phase 0)
+      // Paw + card exit together to where intro entry started
+      // ========================================================================
+      exitTimeline.to(behindCardGroup, {
+        x: -800,
+        y: -600,
+        duration: exitDuration,
+        ease: 'power2.in'  // Reverse of intro's power2.out
+      });
+      exitTimeline.to(aboveCardGroup, {
+        x: -800,
+        y: -600,
+        duration: exitDuration,
+        ease: 'power2.in'
+      }, '<');
+      exitTimeline.to('#svg-business-card', {
+        x: -800,
+        y: -600,
+        duration: exitDuration,
+        ease: 'power2.in'
+      }, '<');
+
+      this.log('Exit animation started');
+    });
+  }
+
+  /**
+   * Play entry animation (same as intro)
+   * Called when transitioning TO the home/intro page
+   *
+   * Animation sequence:
+   * 1. Paw + card enter from off-screen
+   * 2. Paw clutches card motionless
+   * 3. Fingers release (morph 1 → 2)
+   * 4. Paw retracts while fingers open (morph 2 → 3)
+   * 5. Nav links fade in
+   *
+   * @returns Promise that resolves when animation completes
+   */
+  async playEntryAnimation(): Promise<void> {
+    // Skip on mobile - no paw animation
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    if (isMobile) {
+      this.log('Mobile - skipping entry animation');
+      // Just show card and nav
+      const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
+      const introNav = document.querySelector('.intro-nav') as HTMLElement;
+      if (businessCard) businessCard.style.opacity = '1';
+      if (introNav) introNav.style.opacity = '1';
+      return;
+    }
+
+    // Skip if reduced motion preferred
+    if (this.reducedMotion) {
+      this.log('Reduced motion - skipping entry animation');
+      const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
+      const introNav = document.querySelector('.intro-nav') as HTMLElement;
+      if (businessCard) businessCard.style.opacity = '1';
+      if (introNav) introNav.style.opacity = '1';
+      return;
+    }
+
+    this.log('Playing entry animation (paw brings card in)');
+
+    // Get overlay and SVG elements
+    this.morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
+    const morphSvg = document.getElementById(DOM_ELEMENT_IDS.morphSvg) as SVGSVGElement | null;
+
+    if (!this.morphOverlay || !morphSvg) {
+      this.log('Morph overlay not found, showing card directly');
+      const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
+      const introNav = document.querySelector('.intro-nav') as HTMLElement;
+      if (businessCard) businessCard.style.opacity = '1';
+      if (introNav) introNav.style.opacity = '1';
+      return;
+    }
+
+    // Get business card for alignment
+    const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
+    if (!businessCard) {
+      this.log('Business card not found');
+      return;
+    }
+
+    // Get intro nav for fade in at end
+    const introNav = document.querySelector('.intro-nav') as HTMLElement;
+
+    // Hide nav initially
+    if (introNav) {
+      gsap.set(introNav, { opacity: 0 });
+    }
+
+    // Load SVG
+    const response = await fetch(PAW_SVG);
+    const svgText = await response.text();
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+
+    // Get SVG elements
+    const armBase = svgDoc.getElementById(SVG_ELEMENT_IDS.armBase);
+    const position1 = svgDoc.getElementById(SVG_ELEMENT_IDS.position1);
+    const position2 = svgDoc.getElementById(SVG_ELEMENT_IDS.position2);
+    const position3 = svgDoc.getElementById(SVG_ELEMENT_IDS.position3);
+    const cardGroup = svgDoc.getElementById(SVG_ELEMENT_IDS.cardGroup);
+
+    if (!position1 || !position2) {
+      this.log('Position groups not found');
+      if (businessCard) businessCard.style.opacity = '1';
+      if (introNav) gsap.set(introNav, { opacity: 1 });
+      return;
+    }
+
+    return new Promise((resolve) => {
+      // Calculate alignment
+      const cardRect = businessCard.getBoundingClientRect();
+      const cardFront = businessCard.querySelector('.business-card-front') as HTMLElement;
+      const actualCardRect = cardFront ? cardFront.getBoundingClientRect() : cardRect;
+      const scale = actualCardRect.width / SVG_CARD.width;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const translateX = actualCardRect.left - (SVG_CARD.x * scale);
+      const translateY = actualCardRect.top - (SVG_CARD.y * scale);
+
+      // Clear and rebuild SVG
+      morphSvg.innerHTML = '';
+      morphSvg.setAttribute('viewBox', `0 0 ${viewportWidth} ${viewportHeight}`);
+      morphSvg.setAttribute('preserveAspectRatio', 'none');
+
+      // Add shadow filter
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+      filter.setAttribute('id', 'card-shadow');
+      filter.setAttribute('x', '-50%');
+      filter.setAttribute('y', '-50%');
+      filter.setAttribute('width', '200%');
+      filter.setAttribute('height', '200%');
+      const shadowOffsetY = 12 / scale;
+      const shadowBlur = 18 / scale;
+      const dropShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
+      dropShadow.setAttribute('dx', '0');
+      dropShadow.setAttribute('dy', String(shadowOffsetY));
+      dropShadow.setAttribute('stdDeviation', String(shadowBlur));
+      dropShadow.setAttribute('flood-color', 'rgba(0, 0, 0, 0.5)');
+      filter.appendChild(dropShadow);
+      defs.appendChild(filter);
+      morphSvg.appendChild(defs);
+
+      // Create layer structure
+      const transformWrapper = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      transformWrapper.setAttribute('id', 'entry-layers-wrapper');
+      transformWrapper.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${scale})`);
+
+      const behindCardGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      behindCardGroup.setAttribute('id', 'behind-card-group');
+      behindCardGroup.setAttribute('filter', 'url(#card-shadow)');
+
+      const aboveCardGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      aboveCardGroup.setAttribute('id', 'above-card-group');
+      aboveCardGroup.setAttribute('filter', 'url(#card-shadow)');
+
+      // Add arm
+      if (armBase) {
+        const clonedArm = armBase.cloneNode(true) as Element;
+        clonedArm.setAttribute('id', 'arm-group');
+        behindCardGroup.appendChild(clonedArm);
+      }
+
+      // Add thumb (hidden initially, appears during release)
+      const thumbElement = position2.querySelector(`#${SVG_ELEMENT_IDS.thumb2}`);
+      let clonedThumb: Element | null = null;
+      if (thumbElement) {
+        clonedThumb = thumbElement.cloneNode(true) as Element;
+        clonedThumb.setAttribute('id', 'thumb-behind-card');
+        (clonedThumb as SVGElement).style.opacity = '0';
+        behindCardGroup.appendChild(clonedThumb);
+      }
+
+      transformWrapper.appendChild(behindCardGroup);
+
+      // Add card
+      if (cardGroup) {
+        const clonedCard = cardGroup.cloneNode(true) as Element;
+        clonedCard.setAttribute('id', 'svg-business-card');
+        clonedCard.setAttribute('filter', 'url(#card-shadow)');
+        transformWrapper.appendChild(clonedCard);
+      }
+
+      // Add fingers from Position 1 (clutching)
+      const clonedPos1 = position1.cloneNode(true) as Element;
+      clonedPos1.setAttribute('id', 'position-1-entry');
+      aboveCardGroup.appendChild(clonedPos1);
+
+      transformWrapper.appendChild(aboveCardGroup);
+
+      // Copy styles
+      const sourceStyles = svgDoc.querySelector('style');
+      if (sourceStyles) {
+        const clonedStyles = sourceStyles.cloneNode(true) as Element;
+        morphSvg.insertBefore(clonedStyles, morphSvg.firstChild);
+      }
+
+      morphSvg.appendChild(transformWrapper);
+
+      // Show overlay
+      const overlay = this.morphOverlay!;
+      overlay.style.visibility = 'visible';
+      overlay.style.pointerEvents = 'auto';
+      overlay.classList.remove('hidden');
+
+      // Hide actual business card (SVG card will show instead)
+      businessCard.style.opacity = '0';
+
+      // Get finger paths for morphing
+      const fingerA1 = clonedPos1.querySelector(`#${SVG_ELEMENT_IDS.fingerA1}`) as SVGPathElement;
+      const fingerB1 = clonedPos1.querySelector(`[id="${SVG_ELEMENT_IDS.fingerB1Container}"] path`) as SVGPathElement;
+      const fingerC1 = clonedPos1.querySelector(`[id="${SVG_ELEMENT_IDS.fingerC1Container}"] path`) as SVGPathElement;
+
+      const fingerA2 = position2.querySelector(`#${SVG_ELEMENT_IDS.fingerA2}`) as SVGPathElement;
+      const fingerB2 = position2.querySelector(`#${SVG_ELEMENT_IDS.fingerB2}`) as SVGPathElement;
+      const fingerC2 = position2.querySelector(`#${SVG_ELEMENT_IDS.fingerC2}`) as SVGPathElement;
+
+      const fingerA3 = position3?.querySelector(`#${SVG_ELEMENT_IDS.fingerA3}`) as SVGPathElement;
+      const fingerB3 = position3?.querySelector(`#${SVG_ELEMENT_IDS.fingerB3}`) as SVGPathElement;
+      const fingerC3 = position3?.querySelector(`#${SVG_ELEMENT_IDS.fingerC3}`) as SVGPathElement;
+
+      const fingerA2PathData = fingerA2?.getAttribute('d');
+      const fingerA3PathData = fingerA3?.getAttribute('d');
+      const fingerB2PathData = fingerB2?.getAttribute('d');
+      const fingerB3PathData = fingerB3?.getAttribute('d');
+      const fingerC2PathData = fingerC2?.getAttribute('d');
+      const fingerC3PathData = fingerC3?.getAttribute('d');
+
+      // Create entry timeline
+      const entryTimeline = gsap.timeline({
+        onComplete: () => {
+          // Hide overlay after animation
+          if (this.morphOverlay) {
+            this.morphOverlay.style.visibility = 'hidden';
+            this.morphOverlay.style.pointerEvents = 'none';
+          }
+          // Show actual business card
+          businessCard.style.opacity = '1';
+          resolve();
+        }
+      });
+
+      // Animation timings
+      const entryDuration = 0.8;
+      const clutchHold = 0.5;
+      const releaseDuration = 0.4;
+      const retractDuration = 1.2;
+      const linkFadeDuration = 0.4;
+
+      // Set initial positions - paw + card off-screen
+      gsap.set(behindCardGroup, { x: -800, y: -600 });
+      gsap.set(aboveCardGroup, { x: -800, y: -600 });
+      gsap.set('#svg-business-card', { x: -800, y: -600 });
+
+      // Phase 1: Paw + card enter from off-screen
+      entryTimeline.to(behindCardGroup, {
+        x: 0,
+        y: 0,
+        duration: entryDuration,
+        ease: 'power2.out'
+      });
+      entryTimeline.to(aboveCardGroup, {
+        x: 0,
+        y: 0,
+        duration: entryDuration,
+        ease: 'power2.out'
+      }, '<');
+      entryTimeline.to('#svg-business-card', {
+        x: 0,
+        y: 0,
+        duration: entryDuration,
+        ease: 'power2.out'
+      }, '<');
+
+      // Phase 2: Clutch hold
+      entryTimeline.to({}, { duration: clutchHold });
+
+      // Phase 3: Fingers release (morph 1 → 2)
+      if (fingerA1 && fingerA2PathData) {
+        entryTimeline.to(fingerA1, {
+          morphSVG: { shape: fingerA2PathData, shapeIndex: 'auto' },
+          duration: releaseDuration,
+          ease: 'power2.inOut'
+        });
+      }
+      if (fingerB1 && fingerB2PathData) {
+        entryTimeline.to(fingerB1, {
+          morphSVG: { shape: fingerB2PathData, shapeIndex: 'auto' },
+          duration: releaseDuration,
+          ease: 'power2.inOut'
+        }, '<');
+      }
+      if (fingerC1 && fingerC2PathData) {
+        entryTimeline.to(fingerC1, {
+          morphSVG: { shape: fingerC2PathData, shapeIndex: 'auto' },
+          duration: releaseDuration,
+          ease: 'power2.inOut'
+        }, '<');
+      }
+
+      // Show thumb when fingers release
+      if (clonedThumb) {
+        entryTimeline.set(clonedThumb, { opacity: 1 }, '<');
+      }
+
+      // Phase 4: Paw retracts while fingers open (morph 2 → 3)
+      entryTimeline.to(behindCardGroup, {
+        x: -1500,
+        y: -1200,
+        duration: retractDuration,
+        ease: 'power2.in'
+      }, '+=0.02');
+      entryTimeline.to(aboveCardGroup, {
+        x: -1500,
+        y: -1200,
+        duration: retractDuration,
+        ease: 'power2.in'
+      }, '<');
+
+      // Fingers open during retraction
+      if (fingerA1 && fingerA3PathData) {
+        entryTimeline.to(fingerA1, {
+          morphSVG: { shape: fingerA3PathData, shapeIndex: 'auto' },
+          duration: 0.08,
+          ease: 'power1.out'
+        }, '<');
+      }
+      if (fingerB1 && fingerB3PathData) {
+        entryTimeline.to(fingerB1, {
+          morphSVG: { shape: fingerB3PathData, shapeIndex: 'auto' },
+          duration: 0.08,
+          ease: 'power1.out'
+        }, '<');
+      }
+      if (fingerC1 && fingerC3PathData) {
+        entryTimeline.to(fingerC1, {
+          morphSVG: { shape: fingerC3PathData, shapeIndex: 'auto' },
+          duration: 0.2,
+          ease: 'power1.out'
+        }, '<');
+      }
+
+      // Phase 5: Fade in nav links at end
+      if (introNav) {
+        entryTimeline.to(introNav, {
+          opacity: 1,
+          duration: linkFadeDuration,
+          ease: 'power2.out'
+        }, '-=0.3');
+      }
+
+      this.log('Entry animation started');
+    });
   }
 
   /**

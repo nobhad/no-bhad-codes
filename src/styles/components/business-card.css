@@ -19,7 +19,7 @@
    ========================================== */
 
 @media screen and (min-width: 768px) {
-  /* Business card section - full viewport height, centered content - CSS Grid (NO FLEX) */
+  /* Business card section - full viewport height, card centered (ignoring nav height) */
   .business-card-section {
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     height: calc(100vh - var(--header-height) - var(--footer-height));
@@ -33,6 +33,14 @@
     background: var(--color-neutral-300);
     z-index: 1;
     margin-top: 0;
+  }
+
+  /* Nav positioned absolutely below card - doesn't affect card centering */
+  .business-card-section .intro-nav {
+    position: absolute;
+    top: calc(50% + 293.8px / 2 + 1rem);
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   /* Scroll arrow positioning */
@@ -610,4 +618,79 @@ html[data-theme="dark"] .intro-card-element {
 
 html[data-theme="dark"] .business-card-container {
   background: radial-gradient(circle at center, rgba(255, 255, 255, 0.02), transparent);
+}
+
+/* ==========================================
+   INTRO NAVIGATION LINKS
+   Aligned with "HAVE BRAIN" and "WILL TRAVEL" on business card
+   ========================================== */
+
+/* Navigation container below business card - matches card width with padding */
+.intro-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 525px;
+  max-width: 525px;
+  margin-top: 1rem;
+  padding: 1.5rem 1.5rem;
+  box-sizing: border-box;
+}
+
+/* Navigation links - positioned to align with card text */
+.intro-nav-link {
+  font-family: var(--font--acme), "Acme", sans-serif;
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: 0.10em;
+  color: var(--color-text);
+  text-decoration: none;
+  padding: 1rem 0;
+  transition: color var(--transition-fast) var(--cubic-default),
+              opacity var(--transition-fast) var(--cubic-default);
+  position: relative;
+}
+
+.intro-nav-link:hover {
+  color: var(--color-primary);
+  opacity: 0.9;
+}
+
+.intro-nav-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* Hide separator - using space-between instead */
+.intro-nav-separator {
+  display: none;
+}
+
+/* Mobile adjustments - match card container width */
+@media (max-width: 767px) {
+  .intro-nav {
+    width: 380px;
+    max-width: 380px;
+    margin-top: 0.75rem;
+    padding: 0.5rem 1.25rem;
+  }
+
+  .intro-nav-link {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 479px) {
+  .intro-nav {
+    width: 315px;
+    max-width: 315px;
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .intro-nav-link {
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+  }
 }

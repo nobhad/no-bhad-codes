@@ -1,0 +1,283 @@
+/**
+ * ===============================================
+ * PAGE TRANSITIONS CSS
+ * ===============================================
+ * @file src/styles/components/page-transitions.css
+ *
+ * Virtual pages layout and transition styles.
+ * Salcosta-style full-viewport page architecture.
+ * Desktop only - mobile uses scroll behavior.
+ */
+
+/* ============================================
+ * CSS VARIABLES FOR TRANSITIONS
+ * ============================================ */
+
+:root {
+  --page-transition-duration-in: 0.5s;
+  --page-transition-duration-out: 0.4s;
+  --page-transition-stagger: 0.1s;
+  --page-transition-ease: cubic-bezier(0.3, 0.9, 0.3, 0.9);
+  --page-blur-amount: 8px;
+}
+
+/* ============================================
+ * VIRTUAL PAGE LAYOUT (Desktop Only)
+ * ============================================ */
+
+@media screen and (min-width: 768px) {
+  /* Main container for virtual pages */
+  main[data-virtual-pages] {
+    position: fixed;
+    top: var(--header-height);
+    bottom: var(--footer-height);
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: calc(100vh - var(--header-height) - var(--footer-height));
+    height: calc(100dvh - var(--header-height) - var(--footer-height));
+    overflow: hidden;
+  }
+
+  /* Virtual page sections - card centered, nav positioned absolutely */
+  main[data-virtual-pages] > section[data-page]:not(.tech-stack-section):not(.contact-section):not(.about-section):not(.business-card-section) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  /* Business card section - needs overflow visible for nav links below card */
+  main[data-virtual-pages] > .business-card-section[data-page] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    overflow: visible;
+    box-sizing: border-box;
+  }
+
+  /* Intro nav positioned absolutely below centered card */
+  main[data-virtual-pages] > .business-card-section .intro-nav {
+    position: absolute;
+    top: calc(50% + 293.8px / 2 + 1rem);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    pointer-events: auto;
+  }
+
+  /* Ensure nav links are clickable */
+  main[data-virtual-pages] > .business-card-section .intro-nav-link {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  /* About section - grid centered for content, hero is overlay */
+  main[data-virtual-pages] > .about-section[data-page] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: clamp(1rem, 4vw, 2rem);
+  }
+
+  /* Hero overlay - fills entire about section viewport */
+  main[data-virtual-pages] > .about-section .about-hero-desktop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--color-neutral-300);
+    z-index: 10;
+    cursor: pointer;
+  }
+
+  /* Hero revealed state */
+  main[data-virtual-pages] > .about-section .about-hero-desktop.hero-revealed {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* Text animation SVG in hero - large and centered */
+  main[data-virtual-pages] > .about-section .about-hero-desktop .text-animation-svg {
+    width: 90%;
+    max-width: 1200px;
+    height: auto;
+    max-height: 80vh;
+  }
+
+  /* About content centered in viewport */
+  main[data-virtual-pages] > .about-section .about-content {
+    max-width: min(1000px, 90vw);
+    overflow: hidden;
+  }
+
+  /* Contact section - uses CSS Grid for proper h2/form alignment */
+  main[data-virtual-pages] > .contact-section[data-page] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-content: center center;
+    overflow: visible;
+    box-sizing: border-box;
+  }
+
+  /* Tech stack section is mobile-only - keep hidden on desktop */
+  main[data-virtual-pages] > .tech-stack-section {
+    display: none !important;
+  }
+
+  /* Hero section with text animation - handled separately, not a virtual page */
+  /* It's tied to the intro and controlled by TextAnimationModule */
+  main[data-virtual-pages] > .hero-section {
+    display: none !important;
+  }
+
+  /* Hidden page state */
+  section.page-hidden {
+    display: none !important;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* Active page state */
+  section.page-active {
+    display: flex;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* Page content wrapper for animations */
+  section[data-page] > * {
+    will-change: transform, opacity, filter;
+  }
+
+  /* Disable scroll on body when virtual pages active */
+  body.virtual-pages-active {
+    overflow: hidden;
+  }
+}
+
+/* ============================================
+ * TRANSITION STATES
+ * ============================================ */
+
+/* Blur-in animation (entering) */
+.page-entering {
+  opacity: 0;
+  filter: blur(var(--page-blur-amount));
+}
+
+.page-entering.page-enter-active {
+  opacity: 1;
+  filter: blur(0);
+  transition:
+    opacity var(--page-transition-duration-in) var(--page-transition-ease),
+    filter var(--page-transition-duration-in) var(--page-transition-ease);
+}
+
+/* Blur-out animation (leaving) */
+.page-leaving {
+  opacity: 1;
+  filter: blur(0);
+}
+
+.page-leaving.page-leave-active {
+  opacity: 0;
+  filter: blur(var(--page-blur-amount));
+  transition:
+    opacity var(--page-transition-duration-out) var(--page-transition-ease),
+    filter var(--page-transition-duration-out) var(--page-transition-ease);
+}
+
+/* ============================================
+ * DROP-IN/OUT ANIMATIONS FOR CHILDREN
+ * ============================================ */
+
+/* Child elements drop-in (from top) */
+.page-child-entering {
+  transform: translateY(-105%);
+}
+
+.page-child-entering.page-child-enter-active {
+  transform: translateY(0);
+  transition: transform var(--page-transition-duration-in) var(--page-transition-ease);
+}
+
+/* Child elements drop-out (to bottom) */
+.page-child-leaving {
+  transform: translateY(0);
+}
+
+.page-child-leaving.page-child-leave-active {
+  transform: translateY(105%);
+  transition: transform var(--page-transition-duration-out) var(--page-transition-ease);
+}
+
+/* ============================================
+ * REDUCED MOTION
+ * ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --page-transition-duration-in: 0s;
+    --page-transition-duration-out: 0s;
+    --page-transition-stagger: 0s;
+    --page-blur-amount: 0;
+  }
+
+  .page-entering,
+  .page-leaving,
+  .page-child-entering,
+  .page-child-leaving {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ============================================
+ * MOBILE FALLBACK (scroll-based)
+ * ============================================ */
+
+@media screen and (max-width: 767px) {
+  /* Disable virtual page layout on mobile */
+  main[data-virtual-pages] {
+    position: static;
+    overflow-y: auto;
+  }
+
+  /* Reset section positioning on mobile */
+  main[data-virtual-pages] > section[data-page] {
+    position: relative;
+    height: auto;
+    min-height: 100%;
+  }
+
+  /* Don't use page-hidden class on mobile */
+  section.page-hidden {
+    display: flex !important;
+    visibility: visible;
+  }
+}

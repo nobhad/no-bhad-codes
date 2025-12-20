@@ -64,6 +64,9 @@
 /* Intro morph animation */
 @import "./components/intro-morph.css";
 
+/* Page transitions (virtual pages) */
+@import "./components/page-transitions.css";
+
 /* Form validation (specialized) */
 @import "./form-validation.css";
 
