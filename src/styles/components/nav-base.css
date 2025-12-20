@@ -439,6 +439,42 @@ html[data-theme="dark"] .coming-soon-banner {
   /* Remove opacity: 0 and transition to make eyebrows always visible like Osmo UI */
 }
 
+/* Social Icons in text links */
+.social-icon {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  vertical-align: middle;
+  margin-right: 0.35em;
+}
+
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+}
+
+/* Underline hover effect for text links */
+@media (hover: hover) {
+  .text-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--color-primary);
+    transform-origin: right center;
+    transform: scaleX(0);
+    transition: transform 0.4s var(--cubic-default);
+  }
+
+  .text-link:hover::after {
+    transform-origin: left center;
+    transform: scaleX(1);
+  }
+}
+
 .submenu-carrot {
   order: 2;
 }
