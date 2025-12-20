@@ -884,10 +884,32 @@ export class Application {
 // Create and export global application instance
 export const app = new Application();
 
+// Save scroll position before page unload
+window.addEventListener('beforeunload', () => {
+  const scrollContainer = document.querySelector('main');
+  const scrollPos = scrollContainer ? scrollContainer.scrollTop : window.scrollY;
+  sessionStorage.setItem('scrollPosition', String(scrollPos));
+});
+
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     await app.init();
+
+    // Restore scroll position after init
+    const savedPos = sessionStorage.getItem('scrollPosition');
+    if (savedPos) {
+      const scrollContainer = document.querySelector('main');
+      const pos = parseInt(savedPos, 10);
+      // Small delay to ensure layout is ready
+      requestAnimationFrame(() => {
+        if (scrollContainer) {
+          scrollContainer.scrollTop = pos;
+        } else {
+          window.scrollTo(0, pos);
+        }
+      });
+    }
   } catch (error) {
     console.error('[Application] Startup failed:', error);
   }

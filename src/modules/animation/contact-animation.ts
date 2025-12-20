@@ -27,18 +27,7 @@ import type { ModuleOptions } from '../../types/modules';
 // Register ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
 
-// ============================================================================
-// ANIMATION CONSTANTS
-// ============================================================================
-
-/** Duration for bump effect */
-const BUMP_DURATION = 0.12;
-
-/** How far button overshoots to hit form fields */
-const BUTTON_OVERSHOOT = 50;
-
-/** How far form fields shift on impact */
-const BUMP_DISTANCE = 15;
+// Animation constants removed - simplified animation
 
 // ============================================================================
 // CONTACT ANIMATION MODULE CLASS
@@ -143,139 +132,160 @@ export class ContactAnimationModule extends BaseModule {
     const submitButton = this.container.querySelector('button[type="submit"]') ||
                          this.container.querySelector('.contact-submit');
 
-    // Name field slides in from off-screen right
-    if (nameField) {
-      this.timeline.from(nameField, {
-        x: '100vw',
-        duration: 1,
-        ease: 'power2.out'
-      });
-    }
+    // Clip the form container so stacked fields don't overflow above
+    const formContainer = this.container.querySelector('.contact-form') ||
+                          this.container.querySelector('.contact-form-column');
+    if (formContainer) gsap.set(formContainer, { overflow: 'hidden' });
 
-    // Company field slides in from off-screen right (staggered)
-    if (companyField) {
-      this.timeline.from(companyField, {
-        x: '100vw',
-        duration: 1,
-        ease: 'power2.out'
-      }, '-=0.7');
-    }
+    // Get dimensions for uniform sizing
+    const inputFieldWidth = nameField ? (nameField as HTMLElement).offsetWidth : 300;
+    const inputFieldHeight = 60;
 
-    // Email field slides in from off-screen right (staggered)
-    if (emailField) {
-      this.timeline.from(emailField, {
-        x: '100vw',
-        duration: 1,
-        ease: 'power2.out'
-      }, '-=0.7');
-    }
+    // Calculate offset from each field to name's position (to stack them all there)
+    const getOffsetToName = (el: Element | null | undefined) => {
+      if (!el || !nameField) return 0;
+      const elRect = (el as HTMLElement).getBoundingClientRect();
+      const nameRect = (nameField as HTMLElement).getBoundingClientRect();
+      return nameRect.top - elRect.top;
+    };
 
-    // Message field slides in from off-screen right (staggered)
+    const companyToName = getOffsetToName(companyField);
+
+    // Message field - capture final dimensions before resizing
+    const textarea = messageField?.querySelector('textarea');
+    const wrapper = messageField?.querySelector('.input-wrapper') || messageField;
+    const finalTextareaHeight = textarea ? textarea.offsetHeight : 130;
+
+    // Set up z-index - name on TOP of stack (highest z-index)
+    if (nameField) gsap.set(nameField, { zIndex: 5, position: 'relative' });
+    if (companyField) gsap.set(companyField, { zIndex: 4, position: 'relative' });
+    if (emailField) gsap.set(emailField, { zIndex: 3, position: 'relative' });
+    if (messageField) gsap.set(messageField, { zIndex: 2, position: 'relative' });
+    if (submitButton) gsap.set(submitButton, { zIndex: 1, opacity: 0, scale: 0.8 });
+
+    // Calculate offsets between adjacent fields
+    const getOffsetBetween = (el: Element | null | undefined, prev: Element | null | undefined) => {
+      if (!el || !prev) return 0;
+      const elRect = (el as HTMLElement).getBoundingClientRect();
+      const prevRect = (prev as HTMLElement).getBoundingClientRect();
+      return prevRect.top - elRect.top;
+    };
+    const emailToCompany = getOffsetBetween(emailField, companyField);
+    const messageToEmail = getOffsetBetween(messageField, emailField);
+
+    // Set initial positions - all fields hidden behind the one above
+    // Company behind name (at name's position)
+    if (companyField) gsap.set(companyField, { y: companyToName, width: inputFieldWidth, visibility: 'hidden' });
+    // Email behind company (at company's final position)
+    if (emailField) gsap.set(emailField, { y: emailToCompany, width: inputFieldWidth, visibility: 'hidden' });
+    // Message behind email (at email's final position)
     if (messageField) {
-      this.timeline.from(messageField, {
-        x: '100vw',
-        duration: 1,
+      if (textarea) gsap.set(textarea, { height: inputFieldHeight, minHeight: inputFieldHeight, overflow: 'hidden' });
+      if (wrapper) gsap.set(wrapper, { height: inputFieldHeight, overflow: 'hidden' });
+      gsap.set(messageField, { y: messageToEmail, height: inputFieldHeight, overflow: 'hidden', width: inputFieldWidth, visibility: 'hidden' });
+    }
+
+    // 1. Name drops from above (starts off-screen)
+    if (nameField) {
+      gsap.set(nameField, { y: -100 });
+      this.timeline.to(nameField, {
+        y: 0,
+        duration: 0.6,
+        ease: 'power3.out'
+      });
+    }
+
+    // 2. Company appears from behind name and drops to its position
+    if (companyField) {
+      this.timeline.set(companyField, { visibility: 'visible' });
+      this.timeline.to(companyField, {
+        y: 0,
+        width: 'auto',
+        duration: 0.5,
+        ease: 'power3.out'
+      });
+    }
+
+    // 3. Email appears from behind company and drops to its position
+    if (emailField) {
+      this.timeline.set(emailField, { visibility: 'visible' });
+      this.timeline.to(emailField, {
+        y: 0,
+        width: 'auto',
+        duration: 0.5,
+        ease: 'power3.out'
+      });
+    }
+
+    // 4. Message appears from behind email and drops to its position
+    if (messageField) {
+      this.timeline.set(messageField, { visibility: 'visible' });
+      this.timeline.to(messageField, {
+        y: 0,
+        duration: 0.5,
+        ease: 'power3.out'
+      });
+
+      // Then grow to final size (height and width)
+      this.timeline.to(messageField, {
+        width: '100%',
+        height: 'auto',
+        overflow: 'visible',
+        duration: 0.4,
         ease: 'power2.out'
-      }, '-=0.7');
+      });
+
+      if (textarea) {
+        this.timeline.to(textarea, {
+          height: finalTextareaHeight,
+          minHeight: finalTextareaHeight,
+          overflow: 'visible',
+          duration: 0.4,
+          ease: 'power2.out'
+        }, '<');
+      }
+      if (wrapper) {
+        this.timeline.to(wrapper, {
+          height: 'auto',
+          overflow: 'visible',
+          duration: 0.4,
+          ease: 'power2.out'
+        }, '<');
+      }
+    }
+
+    // 5. Submit button appears after form fields are in place
+    if (submitButton) {
+      this.timeline.to(submitButton, {
+        opacity: 1,
+        scale: 1,
+        duration: 0.4,
+        ease: 'back.out(1.5)'
+      });
+    }
+
+    // Restore overflow after animation
+    if (formContainer) {
+      this.timeline.set(formContainer, { overflow: 'visible' });
     }
 
     // ========================================================================
-    // BUMP SEQUENCE - Button hits fields, fields snap back and knock button away
+    // BUSINESS CARD - Flip after form elements settle
     // ========================================================================
-    const formFields = [nameField, companyField, emailField].filter(Boolean);
+    if (businessCard) {
+      this.timeline.call(() => {
+        if (this.hasFlippedCard) return;
+        this.hasFlippedCard = true;
 
-    if (submitButton && formFields.length > 0) {
-      // 1. Button rolls in from off-screen and hits the fields (starts earlier, overlapping with fields)
-      gsap.set(submitButton, { transformOrigin: 'center center' });
-      this.timeline.fromTo(submitButton,
-        { x: '100vw', rotation: 1440 },
-        { x: -BUTTON_OVERSHOOT, rotation: 0, duration: 2, ease: 'none' },
-        '-=2'
-      );
-
-      // 2. All three fields bump left on impact - company moves more
-      const bumpLabel = 'bump';
-      if (nameField) {
-        this.timeline.to(nameField, {
-          x: -BUMP_DISTANCE * 2,
-          duration: BUMP_DURATION,
-          ease: 'power2.out'
-        }, bumpLabel);
-      }
-      if (companyField) {
-        this.timeline.to(companyField, {
-          x: -BUMP_DISTANCE * 3,
-          duration: BUMP_DURATION,
-          ease: 'power2.out'
-        }, bumpLabel);
-      }
-      if (emailField) {
-        this.timeline.to(emailField, {
-          x: -BUMP_DISTANCE * 2,
-          duration: BUMP_DURATION,
-          ease: 'power2.out'
-        }, bumpLabel);
-      }
-
-      // Trigger card flip on impact
-      if (businessCard) {
-        this.timeline.call(() => {
-          if (this.hasFlippedCard) return;
-          this.hasFlippedCard = true;
-
-          const cardInner = businessCard?.querySelector('.business-card-inner') as HTMLElement;
-          if (cardInner) {
-            gsap.to(cardInner, {
-              rotationY: '+=180',
-              duration: 0.8,
-              ease: 'power2.inOut'
-            });
-          }
-        }, [], '-=0.1');
-      }
-
-      // 3. Name and email snap back with elastic
-      this.timeline.to([nameField, emailField].filter(Boolean), {
-        x: 0,
-        duration: 0.5,
-        ease: 'elastic.out(0.8, 0.6)',
-        stagger: 0.03
-      });
-
-      // 4. Company field snaps back further (overshoots to hit button)
-      if (companyField) {
-        this.timeline.to(companyField, {
-          keyframes: [
-            { x: BUMP_DISTANCE * 1.5, duration: 0.15, ease: 'power2.out' },
-            { x: 0, duration: 0.4, ease: 'elastic.out(0.5, 0.8)' }
-          ]
-        }, '-=0.5');
-      }
-
-      // 5. Button gets knocked off screen by company field
-      this.timeline.to(submitButton, {
-        x: '100vw',
-        rotation: '+=720',
-        duration: 0.6,
-        ease: 'power2.out'
-      }, '-=0.5');
-
-      // 6. Button rolls back onto screen
-      // Rotation math: +720 (knocked) - 700 (roll) - 20 (snap) = 0
-      this.timeline.to(submitButton, {
-        x: 20,
-        rotation: '-=700',
-        duration: 1.5,
-        ease: 'power1.out'
-      });
-
-      // 7. Button snaps into final position
-      this.timeline.to(submitButton, {
-        x: 0,
-        rotation: '-=20',
-        duration: 0.15,
-        ease: 'back.out(2)'
-      });
+        const cardInner = businessCard?.querySelector('.business-card-inner') as HTMLElement;
+        if (cardInner) {
+          gsap.to(cardInner, {
+            rotationY: '+=180',
+            duration: 0.8,
+            ease: 'power2.inOut'
+          });
+        }
+      }, [], '-=0.2');
     }
 
     // ========================================================================
@@ -290,7 +300,7 @@ export class ContactAnimationModule extends BaseModule {
     this.scrollTrigger = ScrollTrigger.create({
       trigger: this.container,
       scroller: scrollContainer || undefined,
-      start: 'top 80%', // Trigger when section top is 80% down viewport
+      start: 'top 25%', // Trigger when section is well into view
       onEnter: () => {
         this.log('Contact section visible - playing animation');
         this.timeline?.play();
