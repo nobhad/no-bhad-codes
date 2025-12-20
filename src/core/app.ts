@@ -1,17 +1,25 @@
 /**
  * ===============================================
- * APPLICATION CONTROLLER - NEW ARCHITECTURE
+ * APPLICATION CONTROLLER
  * ===============================================
  * @file src/core/app.ts
  *
- * Modern application controller using dependency injection,
+ * Main application controller using dependency injection,
  * state management, and lazy loading.
  */
 
 import { container } from './container';
 import { appState } from './state';
-import { componentStore, ComponentRegistry, createConsentBanner, ConsentBanner } from '../components';
-import type { ModuleDefinition } from '../types/modules';
+import { ComponentRegistry, createConsentBanner, ConsentBanner } from '../components';
+import { registerServices } from './services-config';
+import {
+  registerModules,
+  getMainSiteModules,
+  getClientPortalModules,
+  getClientIntakeModules,
+  getAdminModules
+} from './modules-config';
+import { setupDebugHelpers } from './debug';
 
 // Type definitions
 interface ServiceInstance {
@@ -26,510 +34,15 @@ interface ModuleInstance {
   [key: string]: unknown;
 }
 
-// CSS imports moved to main.ts entry point
-
 export class Application {
   private modules = new Map<string, ModuleInstance>();
   private services = new Map<string, ServiceInstance>();
   private isInitialized = false;
-  private debug = false; // Disable debug to prevent flashing in development
+  private debug = false;
 
   constructor() {
-    this.setupServices();
-    this.setupModules();
-  }
-
-  /**
-   * Register core services
-   */
-  private setupServices(): void {
-    // Register component store as a service
-    container.singleton('ComponentStore', async () => componentStore);
-
-    // Register component registry utilities
-    container.singleton('ComponentRegistry', async () => ComponentRegistry);
-
-    // Register router service
-    container.register(
-      'RouterService',
-      async () => {
-        const { RouterService } = await import('../services/router-service');
-        return new RouterService({
-          defaultRoute: '/',
-          smoothScrolling: true,
-          scrollOffset: 80,
-          transitionDuration: 600
-        });
-      },
-      { singleton: true }
-    );
-
-    // Register data service
-    container.register(
-      'DataService',
-      async () => {
-        const { DataService } = await import('../services/data-service');
-        return new DataService();
-      },
-      { singleton: true }
-    );
-
-    // Register contact service
-    container.register(
-      'ContactService',
-      async () => {
-        const { ContactService } = await import('../services/contact-service');
-        return new ContactService({
-          backend: 'netlify' // Can be configured based on environment
-        });
-      },
-      { singleton: true }
-    );
-
-    // Register performance service
-    container.register(
-      'PerformanceService',
-      async () => {
-        const { PerformanceService } = await import('../services/performance-service');
-        return new PerformanceService({
-          lcp: 2500,
-          fid: 100,
-          cls: 0.1,
-          bundleSize: 600 * 1024,
-          ttfb: 200
-        });
-      },
-      { singleton: true }
-    );
-
-    // Register bundle analyzer service
-    container.register(
-      'BundleAnalyzerService',
-      async () => {
-        const { BundleAnalyzerService } = await import('../services/bundle-analyzer');
-        return new BundleAnalyzerService();
-      },
-      { singleton: true }
-    );
-
-    // Register visitor tracking service
-    container.register(
-      'VisitorTrackingService',
-      async () => {
-        const { VisitorTrackingService } = await import('../services/visitor-tracking');
-        // Use API endpoint - Railway in production, localhost in dev
-        const apiUrl = import.meta.env.PROD
-          ? 'https://no-bhad-codes-production.up.railway.app'
-          : 'http://localhost:4001';
-        return new VisitorTrackingService({
-          enableTracking: true,
-          respectDoNotTrack: true,
-          cookieConsent: true,
-          sessionTimeout: 30,
-          trackScrollDepth: true,
-          trackClicks: true,
-          trackBusinessCardInteractions: true,
-          trackFormSubmissions: true,
-          trackDownloads: true,
-          trackExternalLinks: true,
-          batchSize: 10,
-          flushInterval: 30,
-          endpoint: `${apiUrl}/api/analytics/track`
-        });
-      },
-      { singleton: true }
-    );
-
-    // Register code protection service (uses config)
-    container.register(
-      'CodeProtectionService',
-      async () => {
-        const { CodeProtectionService } = await import('../services/code-protection-service');
-        const { getProtectionConfig } = await import('../config/protection.config');
-        return new CodeProtectionService(getProtectionConfig());
-      },
-      { singleton: true }
-    );
-  }
-
-  /**
-   * Register modules with lazy loading
-   */
-  private setupModules(): void {
-    const modules: ModuleDefinition[] = [
-      {
-        name: 'ThemeModule',
-        type: 'dom',
-        factory: async () => {
-          const { ThemeModule } = await import('../modules/utilities/theme');
-          return new ThemeModule({ debug: this.debug });
-        }
-      },
-      {
-        name: 'IntroAnimationModule',
-        type: 'dom',
-        factory: async () => {
-          // Only load intro animation on index/home page
-          const currentPath = window.location.pathname;
-          if (currentPath === '/' || currentPath === '/index.html') {
-            // Use separate modules for mobile and desktop
-            const isMobile = window.matchMedia('(max-width: 767px)').matches;
-            if (isMobile) {
-              const { MobileIntroAnimationModule } = await import('../modules/animation/intro-animation-mobile');
-              return new MobileIntroAnimationModule();
-            }
-            const { IntroAnimationModule } = await import('../modules/animation/intro-animation');
-            return new IntroAnimationModule();
-          }
-          // Return a dummy module that does nothing for other pages
-          return {
-            init: async () => {},
-            destroy: () => {},
-            isInitialized: true,
-            name: 'IntroAnimationModule'
-          };
-        }
-      },
-      {
-        name: 'SectionCardRenderer',
-        type: 'dom',
-        factory: async () => {
-          const { BusinessCardRenderer } = await import('../modules/ui/business-card-renderer');
-          return new BusinessCardRenderer({
-            businessCardId: 'business-card',
-            businessCardInnerId: 'business-card-inner',
-            frontSelector: '#business-card .business-card-front',
-            backSelector: '#business-card .business-card-back',
-            containerSelector: '.business-card-container'
-          });
-        }
-      },
-      {
-        name: 'SectionCardInteractions',
-        type: 'dom',
-        factory: async () => {
-          const { BusinessCardInteractions } =
-            await import('../modules/ui/business-card-interactions');
-          const renderer = await container.resolve('SectionCardRenderer');
-          return new BusinessCardInteractions(renderer as any);
-        },
-        dependencies: ['SectionCardRenderer']
-      },
-      {
-        name: 'ContactCardRenderer',
-        type: 'dom',
-        factory: async () => {
-          const { BusinessCardRenderer } = await import('../modules/ui/business-card-renderer');
-          return new BusinessCardRenderer({
-            businessCardId: 'contact-business-card',
-            businessCardInnerId: 'contact-business-card-inner',
-            frontSelector: '#contact-business-card .business-card-front',
-            backSelector: '#contact-business-card .business-card-back',
-            containerSelector: '#contact-card-container'
-          });
-        }
-      },
-      {
-        name: 'ContactCardInteractions',
-        type: 'dom',
-        factory: async () => {
-          const { BusinessCardInteractions } =
-            await import('../modules/ui/business-card-interactions');
-          const renderer = await container.resolve('ContactCardRenderer');
-          return new BusinessCardInteractions(renderer as any);
-        },
-        dependencies: ['ContactCardRenderer']
-      },
-      {
-        name: 'NavigationModule',
-        type: 'dom',
-        factory: async () => {
-          const { NavigationModule } = await import('../modules/ui/navigation');
-          const routerService = await container.resolve('RouterService');
-          const dataService = await container.resolve('DataService');
-          return new NavigationModule({
-            debug: this.debug,
-            routerService: routerService as any,
-            dataService: dataService as any
-          });
-        },
-        dependencies: ['RouterService', 'DataService']
-      },
-      {
-        name: 'ContactFormModule',
-        type: 'dom',
-        factory: async () => {
-          const { ContactFormModule } = await import('../modules/ui/contact-form');
-          const _contactService = await container.resolve('ContactService');
-          // Always use custom backend - Vercel proxies /api/* to Railway
-          return new ContactFormModule({
-            backend: 'custom',
-            endpoint: '/api/contact'
-          });
-        },
-        dependencies: ['ContactService']
-      },
-      {
-        name: 'FooterModule',
-        type: 'dom',
-        factory: async () => {
-          const { FooterModule } = await import('../modules/ui/footer');
-          return new FooterModule();
-        }
-      },
-      {
-        name: 'ScrollSnapModule',
-        type: 'dom',
-        factory: async () => {
-          // Load scroll snap on all pages EXCEPT client portal
-          const currentPath = window.location.pathname;
-          const isClientPortal = currentPath.includes('/client');
-
-          if (!isClientPortal) {
-            const { ScrollSnapModule } = await import('../modules/animation/scroll-snap');
-            return new ScrollSnapModule({
-              containerSelector: 'main',
-              sectionSelector: '.business-card-section, .hero-section, .about-section, .contact-section, .page-section, main > section',
-              snapDuration: 0.6,
-              snapDelay: 150
-            });
-          }
-          // Return a dummy module for client portal pages
-          return {
-            init: async () => {},
-            destroy: () => {},
-            isInitialized: true,
-            name: 'ScrollSnapModule'
-          };
-        }
-      },
-      {
-        name: 'InfiniteScrollModule',
-        type: 'dom',
-        factory: async () => {
-          // Load infinite scroll on home page only
-          const currentPath = window.location.pathname;
-          const isHomePage = currentPath === '/' || currentPath === '/index.html';
-
-          if (isHomePage) {
-            const { InfiniteScrollModule } = await import('../modules/animation/infinite-scroll');
-            return new InfiniteScrollModule({
-              containerSelector: 'main',
-              lastSectionSelector: '.contact-section',
-              enabled: true
-            });
-          }
-          // Return a dummy module for other pages
-          return {
-            init: async () => {},
-            destroy: () => {},
-            isInitialized: true,
-            name: 'InfiniteScrollModule'
-          };
-        }
-      },
-      {
-        name: 'TextAnimationModule',
-        type: 'dom',
-        factory: async () => {
-          // Only load text animation on index/home page
-          const currentPath = window.location.pathname;
-          if (currentPath === '/' || currentPath === '/index.html') {
-            const { TextAnimationModule } = await import('../modules/animation/text-animation');
-            return new TextAnimationModule();
-          }
-          // Return a dummy module for other pages
-          return {
-            init: async () => {},
-            destroy: () => {},
-            isInitialized: true,
-            name: 'TextAnimationModule'
-          };
-        }
-      },
-      {
-        name: 'ContactAnimationModule',
-        type: 'dom',
-        factory: async () => {
-          // Only load contact animation on index/home page
-          const currentPath = window.location.pathname;
-          if (currentPath === '/' || currentPath === '/index.html') {
-            const { ContactAnimationModule } = await import('../modules/animation/contact-animation');
-            return new ContactAnimationModule();
-          }
-          // Return a dummy module for other pages
-          return {
-            init: async () => {},
-            destroy: () => {},
-            isInitialized: true,
-            name: 'ContactAnimationModule'
-          };
-        }
-      },
-      {
-        name: 'ClientPortalModule',
-        type: 'dom',
-        factory: async () => {
-          // Only load client portal on client portal pages
-          const currentPath = window.location.pathname;
-          if (currentPath.includes('/client') && currentPath.includes('/portal')) {
-            const { ClientPortalModule } = await import('../features/client/client-portal');
-            return new ClientPortalModule();
-          }
-          // Return a dummy module for other pages
-          return {
-            init: async () => {},
-            destroy: () => {},
-            isInitialized: true,
-            name: 'ClientPortalModule'
-          };
-        }
-      },
-      {
-        name: 'AdminDashboardModule',
-        type: 'dom',
-        factory: async () => {
-          // Only load admin dashboard on admin pages
-          const currentPath = window.location.pathname;
-          if (currentPath.includes('/admin')) {
-            const { AdminDashboard } = await import('../features/admin/admin-dashboard');
-            const _adminDashboard = new AdminDashboard();
-            return {
-              init: async () => {
-                /* AdminDashboard initializes itself */
-              },
-              destroy: () => {
-                /* AdminDashboard handles its own cleanup */
-              },
-              isInitialized: true,
-              name: 'AdminDashboardModule'
-            };
-          }
-          // Return a dummy module for other pages
-          return {
-            init: async () => {},
-            destroy: () => {},
-            isInitialized: true,
-            name: 'AdminDashboardModule'
-          };
-        }
-      }
-    ];
-
-    // Register modules in container
-    modules.forEach((module) => {
-      container.register(module.name, module.factory, {
-        singleton: true,
-        dependencies: module.dependencies || []
-      });
-    });
-  }
-
-  /**
-   * Initialize consent banner AFTER intro animation completes
-   * This ensures users see the intro animation first, then the consent banner
-   */
-  private async initConsentBanner(): Promise<void> {
-    if (typeof window === 'undefined') return;
-
-    try {
-      if (!ConsentBanner.hasExistingConsent()) {
-        // Wait for intro animation to complete before showing consent banner
-        // Check if we're on the home page with intro animation
-        const currentPath = window.location.pathname;
-        const isHomePage = currentPath === '/' || currentPath === '/index.html';
-
-        if (isHomePage) {
-          // Wait for intro animation to complete (listen for intro-complete class)
-          await this.waitForIntroComplete();
-        }
-
-        // Create a wrapper element for the consent banner (don't mount to body directly!)
-        let consentWrapper = document.getElementById('consent-banner-wrapper');
-        if (!consentWrapper) {
-          consentWrapper = document.createElement('div');
-          consentWrapper.id = 'consent-banner-wrapper';
-          document.body.appendChild(consentWrapper);
-        }
-
-        // Show consent banner after intro animation
-        const _consentBanner = await createConsentBanner(
-          {
-            position: 'bottom',
-            theme: 'light',
-            showDetailsLink: true,
-            autoHide: false,
-            companyName: 'No Bhad Codes',
-            onAccept: async () => {
-              // Initialize visitor tracking when consent is given
-              try {
-                const trackingService = (await container.resolve('VisitorTrackingService')) as any;
-                await trackingService.init();
-              } catch (error) {
-                console.error('[Application] Failed to initialize visitor tracking:', error);
-              }
-            },
-            onDecline: () => {
-              console.log('[Application] Visitor tracking declined');
-            }
-          },
-          consentWrapper
-        );
-      } else {
-        // If consent already exists, we'll initialize tracking later in main init
-        console.log(
-          '[Application] Existing consent found, will initialize tracking after services'
-        );
-      }
-    } catch (error) {
-      console.error('[Application] Failed to initialize consent banner:', error);
-    }
-  }
-
-  /**
-   * Wait for intro animation to fully complete
-   * Waits for intro-finished class (added at the very end of animation)
-   */
-  private waitForIntroComplete(): Promise<void> {
-    return new Promise((resolve) => {
-      const html = document.documentElement;
-
-      // Check if intro is already fully finished
-      if (html.classList.contains('intro-finished')) {
-        // 2 seconds after header animation completes
-        setTimeout(resolve, 2000);
-        return;
-      }
-
-      // If no intro-loading class, intro isn't running
-      if (!html.classList.contains('intro-loading')) {
-        setTimeout(resolve, 10000);
-        return;
-      }
-
-      // Set up observer to watch for intro-finished class (not intro-complete)
-      const observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-            // Only trigger on intro-finished (the final class added after all animations)
-            if (html.classList.contains('intro-finished')) {
-              observer.disconnect();
-              // 2 seconds after header animation completes
-              setTimeout(resolve, 2000);
-              return;
-            }
-          }
-        }
-      });
-
-      observer.observe(html, { attributes: true });
-
-      // Timeout fallback
-      setTimeout(() => {
-        observer.disconnect();
-        resolve();
-      }, 20000);
-    });
+    registerServices();
+    registerModules(this.debug);
   }
 
   /**
@@ -539,7 +52,7 @@ export class Application {
     // Enforce HTTPS in production
     if (this.shouldEnforceHttps()) {
       this.redirectToHttps();
-      return; // Stop initialization, page will redirect
+      return;
     }
 
     if (this.isInitialized) {
@@ -551,8 +64,7 @@ export class Application {
 
     try {
       // Initialize consent banner FIRST (non-blocking)
-      // This ensures users see something immediately
-      this.initConsentBanner(); // Don't await - let it load in parallel
+      this.initConsentBanner();
 
       // Initialize core services first
       await this.initializeServices();
@@ -567,14 +79,10 @@ export class Application {
       if (typeof window !== 'undefined') {
         const consentStatus = ConsentBanner.getConsentStatus?.();
         if (consentStatus === 'accepted') {
-          const trackingService = (await container.resolve(
-            'VisitorTrackingService'
-          )) as ServiceInstance;
+          const trackingService = (await container.resolve('VisitorTrackingService')) as ServiceInstance;
           await trackingService.init?.();
         }
       }
-
-      // Dashboards moved to admin.html page - no popups on main site
 
       this.isInitialized = true;
       console.log('[Application] Initialization complete');
@@ -593,7 +101,6 @@ export class Application {
           sectionRenderer.enableAfterIntro();
         }
 
-        // Setup sticky footer content visibility
         this.setupStickyFooter();
       }, 3000);
     } catch (error) {
@@ -603,15 +110,102 @@ export class Application {
   }
 
   /**
+   * Initialize consent banner AFTER intro animation completes
+   */
+  private async initConsentBanner(): Promise<void> {
+    if (typeof window === 'undefined') return;
+
+    try {
+      if (!ConsentBanner.hasExistingConsent()) {
+        const currentPath = window.location.pathname;
+        const isHomePage = currentPath === '/' || currentPath === '/index.html';
+
+        if (isHomePage) {
+          await this.waitForIntroComplete();
+        }
+
+        let consentWrapper = document.getElementById('consent-banner-wrapper');
+        if (!consentWrapper) {
+          consentWrapper = document.createElement('div');
+          consentWrapper.id = 'consent-banner-wrapper';
+          document.body.appendChild(consentWrapper);
+        }
+
+        await createConsentBanner(
+          {
+            position: 'bottom',
+            theme: 'light',
+            showDetailsLink: true,
+            autoHide: false,
+            companyName: 'No Bhad Codes',
+            onAccept: async () => {
+              try {
+                const trackingService = (await container.resolve('VisitorTrackingService')) as ServiceInstance;
+                await trackingService.init?.();
+              } catch (error) {
+                console.error('[Application] Failed to initialize visitor tracking:', error);
+              }
+            },
+            onDecline: () => {
+              console.log('[Application] Visitor tracking declined');
+            }
+          },
+          consentWrapper
+        );
+      } else {
+        console.log('[Application] Existing consent found, will initialize tracking after services');
+      }
+    } catch (error) {
+      console.error('[Application] Failed to initialize consent banner:', error);
+    }
+  }
+
+  /**
+   * Wait for intro animation to fully complete
+   */
+  private waitForIntroComplete(): Promise<void> {
+    return new Promise((resolve) => {
+      const html = document.documentElement;
+
+      if (html.classList.contains('intro-finished')) {
+        setTimeout(resolve, 2000);
+        return;
+      }
+
+      if (!html.classList.contains('intro-loading')) {
+        setTimeout(resolve, 10000);
+        return;
+      }
+
+      const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            if (html.classList.contains('intro-finished')) {
+              observer.disconnect();
+              setTimeout(resolve, 2000);
+              return;
+            }
+          }
+        }
+      });
+
+      observer.observe(html, { attributes: true });
+
+      setTimeout(() => {
+        observer.disconnect();
+        resolve();
+      }, 20000);
+    });
+  }
+
+  /**
    * Initialize core services
    */
   private async initializeServices(): Promise<void> {
-    // Determine page type to conditionally load services
     const currentPath = window.location.pathname;
     const isClientPage = currentPath.includes('/client/');
     const isAdminPage = currentPath.includes('/admin');
 
-    // Base services for all pages
     const services: string[] = [
       'VisitorTrackingService',
       'PerformanceService',
@@ -619,13 +213,11 @@ export class Application {
       'RouterService'
     ];
 
-    // Only load DataService on main site pages (not client/admin pages)
     if (!isClientPage && !isAdminPage) {
       services.push('DataService');
       services.push('ContactService');
     }
 
-    // CodeProtectionService only when protection is enabled
     const { isProtectionEnabled } = await import('../config/protection.config');
     if (isProtectionEnabled()) {
       services.push('CodeProtectionService');
@@ -641,7 +233,6 @@ export class Application {
         this.services.set(serviceName, service);
         console.log(`[Application] ${serviceName} initialized`);
 
-        // After RouterService is initialized, register routes for home page sections
         if (serviceName === 'RouterService') {
           this.registerHomePageRoutes(service as any);
         }
@@ -655,25 +246,9 @@ export class Application {
    * Register routes for home page sections
    */
   private registerHomePageRoutes(routerService: { addRoute: (route: { path: string; section: string; title: string }) => void }): void {
-    // Register routes for home page sections
-    routerService.addRoute({
-      path: '#about',
-      section: 'about',
-      title: 'About - No Bhad Codes'
-    });
-
-    routerService.addRoute({
-      path: '#contact',
-      section: 'contact',
-      title: 'Contact - No Bhad Codes'
-    });
-
-    routerService.addRoute({
-      path: '/',
-      section: 'intro',
-      title: 'No Bhad Codes - Professional Web Development'
-    });
-
+    routerService.addRoute({ path: '#about', section: 'about', title: 'About - No Bhad Codes' });
+    routerService.addRoute({ path: '#contact', section: 'contact', title: 'Contact - No Bhad Codes' });
+    routerService.addRoute({ path: '/', section: 'intro', title: 'No Bhad Codes - Professional Web Development' });
     console.log('[Application] Home page routes registered');
   }
 
@@ -681,55 +256,27 @@ export class Application {
    * Initialize modules
    */
   private async initializeModules(): Promise<void> {
-    // Determine current page type
     const currentPath = window.location.pathname;
     const isClientPortal = currentPath.includes('/client/portal');
     const isClientIntake = currentPath.includes('/client/intake');
     const isAdminPage = currentPath.includes('/admin');
     const isHomePage = currentPath === '/' || currentPath === '/index.html';
 
-    // Core modules for the main site (home page)
-    const mainSiteModules = [
-      'ThemeModule',
-      'SectionCardRenderer', // Section business card renderer
-      'SectionCardInteractions', // Section business card interactions
-      'ContactCardRenderer', // Contact section business card renderer
-      // ContactCardInteractions removed - flip controlled by ContactAnimationModule
-      'NavigationModule',
-      'ContactFormModule',
-      'ScrollSnapModule', // GSAP scroll snapping for sections
-      'InfiniteScrollModule', // Infinite looping scroll
-      'TextAnimationModule', // GSAP text animation for home page
-      'ContactAnimationModule' // GSAP contact section animation (desktop only)
-    ];
-
-    // Modules for Client Portal dashboard
-    const clientPortalModules = ['ThemeModule', 'ClientPortalModule'];
-
-    // Modules for Client Intake form
-    const clientIntakeModules = ['ThemeModule', 'NavigationModule', 'FooterModule'];
-
-    // Modules for Admin Dashboard only
-    const adminModules = ['ThemeModule', 'AdminDashboardModule'];
-
-    // Select appropriate modules based on page type
     let baseCoreModules: string[];
     if (isClientPortal) {
-      baseCoreModules = clientPortalModules;
+      baseCoreModules = getClientPortalModules();
     } else if (isClientIntake) {
-      baseCoreModules = clientIntakeModules;
+      baseCoreModules = getClientIntakeModules();
     } else if (isAdminPage) {
-      baseCoreModules = adminModules;
+      baseCoreModules = getAdminModules();
     } else {
-      baseCoreModules = mainSiteModules;
+      baseCoreModules = getMainSiteModules();
     }
 
-    // Build final module list
     const coreModuleList = [...baseCoreModules];
 
-    // Only add intro animation on index/home page
     if (isHomePage) {
-      coreModuleList.splice(1, 0, 'IntroAnimationModule'); // Insert after ThemeModule
+      coreModuleList.splice(1, 0, 'IntroAnimationModule');
     }
 
     for (const moduleName of coreModuleList) {
@@ -765,22 +312,19 @@ export class Application {
   async hotReload(): Promise<void> {
     console.log('[Application] Hot reloading...');
 
-    // Destroy all modules
     for (const [_name, module] of this.modules) {
       if (module.destroy) {
         await module.destroy();
       }
     }
 
-    // Clear containers
     this.modules.clear();
     this.services.clear();
     container.clear();
 
-    // Reinitialize
     this.isInitialized = false;
-    this.setupServices();
-    this.setupModules();
+    registerServices();
+    registerModules(this.debug);
     await this.init();
   }
 
@@ -795,8 +339,6 @@ export class Application {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
-
-      // Check if user has scrolled to bottom (with small threshold)
       const isAtBottom = scrollTop + windowHeight >= documentHeight - 10;
 
       if (isAtBottom) {
@@ -806,10 +348,7 @@ export class Application {
       }
     };
 
-    // Listen for scroll events
     window.addEventListener('scroll', checkScrollPosition, { passive: true });
-
-    // Check initial position
     checkScrollPosition();
   }
 
@@ -825,10 +364,7 @@ export class Application {
       modules: Object.fromEntries(
         Array.from(this.modules.entries()).map(([name, module]) => [
           name,
-          typeof module === 'object' &&
-          module &&
-          'getStatus' in module &&
-          typeof module.getStatus === 'function'
+          typeof module === 'object' && module && 'getStatus' in module && typeof module.getStatus === 'function'
             ? module.getStatus()
             : { loaded: true }
         ])
@@ -836,10 +372,7 @@ export class Application {
       services: Object.fromEntries(
         Array.from(this.services.entries()).map(([name, service]) => [
           name,
-          typeof service === 'object' &&
-          service &&
-          'getStatus' in service &&
-          typeof service.getStatus === 'function'
+          typeof service === 'object' && service && 'getStatus' in service && typeof service.getStatus === 'function'
             ? service.getStatus()
             : { loaded: true }
         ])
@@ -849,14 +382,11 @@ export class Application {
 
   /**
    * Check if HTTPS should be enforced
-   * Only enforces in production (not localhost/development)
    */
   private shouldEnforceHttps(): boolean {
     if (typeof window === 'undefined') return false;
 
     const { protocol, hostname } = window.location;
-
-    // Skip enforcement in development environments
     const isDevelopment =
       hostname === 'localhost' ||
       hostname === '127.0.0.1' ||
@@ -865,8 +395,6 @@ export class Application {
       hostname.endsWith('.local');
 
     if (isDevelopment) return false;
-
-    // Enforce HTTPS if currently on HTTP
     return protocol === 'http:';
   }
 
@@ -896,14 +424,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     await app.init();
 
-    // Restore scroll position after init (skip if position is in spacer area)
+    // Restore scroll position after init
     const savedPos = sessionStorage.getItem('scrollPosition');
-    sessionStorage.removeItem('scrollPosition'); // Clear after reading to prevent stale positions
+    sessionStorage.removeItem('scrollPosition');
     if (savedPos) {
       const scrollContainer = document.querySelector('main');
       const pos = parseInt(savedPos, 10);
-      // Only restore if position is reasonable (not in spacer area at very top)
-      const minValidPos = 50; // Skip if saved position is too close to top (spacer area)
+      const minValidPos = 50;
       if (pos > minValidPos) {
         requestAnimationFrame(() => {
           if (scrollContainer) {
@@ -919,130 +446,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// Type definitions for window globals
-declare global {
-  interface Window {
-    NBW_APP?: Application;
-    NBW_STATE?: typeof appState;
-    NBW_CONTAINER?: typeof container;
-    NBW_DEBUG?: {
-      app: Application;
-      state: typeof appState;
-      container: typeof container;
-      components: typeof componentStore;
-      getStatus(): unknown;
-      getComponentStats(): unknown;
-      getPerformanceReport(): Promise<unknown>;
-      getBundleAnalysis(): Promise<unknown>;
-      getVisitorData(): Promise<unknown>;
-      hotReload(): Promise<void>;
-      testBusinessCard(): void;
-    };
-  }
-}
-
-// Development helpers
+// Setup development helpers
 if (typeof window !== 'undefined') {
-  window.NBW_APP = app;
-  window.NBW_STATE = appState;
-  window.NBW_CONTAINER = container;
-  window.NBW_DEBUG = {
-    app,
-    state: appState,
-    container,
-    components: componentStore,
-    getStatus: () => app.getStatus(),
-    getComponentStats: () => ComponentRegistry.getStats(),
-    getPerformanceReport: async () => {
-      const perfService = (await container.resolve('PerformanceService')) as ServiceInstance & {
-        generateReport?: () => unknown;
-      };
-      return perfService.generateReport?.();
-    },
-    getBundleAnalysis: async () => {
-      const bundleService = (await container.resolve(
-        'BundleAnalyzerService'
-      )) as ServiceInstance & { analyzeBundles?: () => Promise<unknown> };
-      return bundleService.analyzeBundles?.();
-    },
-    getVisitorData: async () => {
-      try {
-        const trackingService = (await container.resolve(
-          'VisitorTrackingService'
-        )) as ServiceInstance & { exportData?: () => Promise<unknown> };
-        return trackingService.exportData
-          ? trackingService.exportData()
-          : { error: 'Export method not available' };
-      } catch (_error) {
-        return { error: 'Visitor tracking not initialized or consented' };
-      }
-    },
-    hotReload: () => app.hotReload(),
-    testBusinessCard: () => {
-      console.log('=== BUSINESS CARD DEBUG TEST ===');
-      console.log('Overlay elements:', {
-        overlayContainer: !!document.getElementById('overlay-business-card-container'),
-        overlayCard: !!document.getElementById('overlay-business-card'),
-        overlayInner: !!document.getElementById('overlay-business-card-inner')
-      });
-      console.log('Section elements:', {
-        sectionCard: !!document.getElementById('business-card'),
-        sectionInner: !!document.getElementById('business-card-inner'),
-        sectionContainer: !!document.querySelector('.business-card-container')
-      });
-
-      const renderer = app.getModule('SectionCardRenderer');
-      const interactions = app.getModule('SectionCardInteractions');
-
-      console.log('SectionCardRenderer:', {
-        exists: !!renderer,
-        status:
-          renderer &&
-          typeof renderer === 'object' &&
-          'getStatus' in renderer &&
-          typeof renderer.getStatus === 'function'
-            ? renderer.getStatus()
-            : 'No status method'
-      });
-      console.log('SectionCardInteractions:', {
-        exists: !!interactions,
-        status:
-          interactions &&
-          typeof interactions === 'object' &&
-          'getStatus' in interactions &&
-          typeof interactions.getStatus === 'function'
-            ? interactions.getStatus()
-            : 'No status method'
-      });
-
-      if (
-        renderer &&
-        'getCardElements' in renderer &&
-        typeof renderer.getCardElements === 'function'
-      ) {
-        console.log('Renderer elements:', renderer.getCardElements());
-      }
-
-      console.log(
-        'All business card elements:',
-        Array.from(
-          document.querySelectorAll('[id*="business-card"], [class*="business-card"]')
-        ).map((el) => ({
-          tag: el.tagName,
-          id: el.id,
-          classes: el.className
-        }))
-      );
-
-      // Test clicking on section card
-      const sectionCard = document.getElementById('business-card');
-      if (sectionCard) {
-        console.log('Section card click listeners:', sectionCard.onclick);
-        console.log('Section card style:', {
-          cursor: sectionCard.style.cursor,
-          pointerEvents: sectionCard.style.pointerEvents
-        });
-      }
-    }
-  };
+  setupDebugHelpers(app);
 }

@@ -19,14 +19,14 @@ Full codebase review completed across all TypeScript and CSS files.
 
 ### Files Needing Attention
 
-| File | Issue | Lines |
-|------|-------|-------|
-| `src/core/app.ts` | Exceeds size guidelines, hardcoded values | 992 |
-| `src/core/state.ts` | Large file, complex state management | 788 |
-| `src/services/visitor-tracking.ts` | Large file | 730 |
-| `src/features/admin/admin-dashboard.ts` | Type duplication, mixed concerns | 600+ |
-| `src/features/admin/admin-performance.ts` | Hardcoded thresholds, excessive type casting | 393 |
-| `src/features/admin/admin-projects.ts` | Extensive `any` type usage | 150+ |
+| File | Issue | Lines | Status |
+|------|-------|-------|--------|
+| `src/core/app.ts` | Exceeds size guidelines | 992 | FIXED - Split into 4 files |
+| `src/core/state.ts` | Large file, complex state management | 824 | FIXED - Split into 4 files |
+| `src/services/visitor-tracking.ts` | Large file | 730 | |
+| `src/features/admin/admin-dashboard.ts` | Type duplication, mixed concerns | 600+ | |
+| `src/features/admin/admin-performance.ts` | Hardcoded thresholds, excessive type casting | 393 | |
+| `src/features/admin/admin-projects.ts` | Extensive `any` type usage | 150+ | |
 
 ### CSS Architecture Review
 
@@ -40,8 +40,9 @@ Full codebase review completed across all TypeScript and CSS files.
 
 ### Recommendations
 
-1. **Short-term**: Split intro-animation.ts into smaller modules
-2. **Short-term**: Migrate hardcoded CSS values to tokens
+1. ~~**Short-term**: Split intro-animation.ts into smaller modules~~ - COMPLETE
+2. ~~**Short-term**: Migrate hardcoded CSS values to tokens~~ - COMPLETE
+3. **Next**: Split remaining large files (visitor-tracking.ts, admin-dashboard.ts)
 
 ---
 
@@ -58,7 +59,7 @@ Red paw print SVG icon - needs to be added to project assets.
 ## Concerns
 
 - [x] Intro animation not displaying with coyote paw - **COMPLETE** (December 18)
-- [ ] **Loop-trigger-zone awkward space** - Plan: Add decorative content (pattern, gradient, or brand element) to fill the 100vh gap
+- [ ] **Loop-trigger-zone awkward space** - Plan: Remove infinite scroll entirely, use page-style blur-in transitions (see TODOs > Features)
 - [x] **Contact form emails not being received** - FIXED: `emailService.sendEmail()` was a stub that logged to console instead of calling the actual nodemailer function
 
 ---
@@ -71,12 +72,26 @@ Red paw print SVG icon - needs to be added to project assets.
 
 ### Features
 
+- [ ] **Replace infinite scroll with page-style transitions** (salcosta.dev style)
+  - Disable InfiniteScrollModule in app.ts
+  - Remove spacer elements from index.html (#loop-spacer, #loop-spacer-bottom, #loop-trigger-zone)
+  - Remove spacer CSS from layout.css
+  - Add blur-in/drop-in transitions to sections as they scroll into view
+  - Reference: `docs/design/salcosta/SALCOSTA_DESIGN_ANALYSIS.md`
 - [ ] Add animated section between about and contact to balance spacing
 
 ### Code Quality
 
-- [ ] Split `app.ts` (992 lines) into smaller modules
-- [ ] Split `state.ts` (788 lines) into domain-specific state managers
+- [x] Split `app.ts` (992 lines) into smaller modules - **COMPLETE** (December 19)
+  - `app.ts`: 452 lines (core Application class)
+  - `services-config.ts`: 125 lines (service registrations)
+  - `modules-config.ts`: 326 lines (module definitions)
+  - `debug.ts`: 155 lines (dev helpers)
+- [x] Split `state.ts` (824 lines) into modular files - **COMPLETE** (December 19)
+  - `state/types.ts`: 67 lines (type definitions)
+  - `state/state-manager.ts`: 491 lines (generic StateManager class)
+  - `state/app-state.ts`: 172 lines (app instance, middleware, reducers)
+  - `state/index.ts`: 22 lines (re-exports)
 
 ### Feature Organization
 
@@ -121,7 +136,7 @@ Red paw print SVG icon - needs to be added to project assets.
 ### GSAP MorphSVG Intro Animation - COMPLETE
 
 **Status**: Complete
-**Date**: December 18, 2025
+**Date**: December 18-19, 2025
 **Branch**: `feature/intro-animation-svgs`
 
 **Summary**: Paw morph animation for intro sequence using GSAP MorphSVG plugin.
@@ -133,6 +148,7 @@ Red paw print SVG icon - needs to be added to project assets.
 - Enter key skips animation
 - Replays after 20 minutes since last view (localStorage timestamp)
 - Header fades in after animation completes
+- **Drop shadow on paw and card** - SVG filter with feDropShadow matching business card style (December 19)
 
 ### Contact Section Animation - COMPLETE
 
@@ -151,6 +167,21 @@ Red paw print SVG icon - needs to be added to project assets.
 - **Mobile**: Submit button rolls in from left with GSAP animation
 - **Mobile**: Green accent background on submit button
 - **Mobile**: Bolder icon stroke (2.5) for visibility
+
+### Contact Section Layout - COMPLETE
+
+**Status**: Complete
+**Date**: December 19, 2025
+
+**Summary**: Refactored contact layout for dynamic sizing and equal column widths.
+
+**Changes**:
+
+- Equal width columns (`1fr 1fr`) instead of fixed pixel values
+- Business card uses dynamic sizing with `aspect-ratio` instead of fixed dimensions
+- Layout centered with `place-content: center center`
+- Increased gap between form and card (`clamp(4rem, 8vw, 6rem)`)
+- All overflow set to visible to prevent card/shadow clipping
 
 ---
 
@@ -193,7 +224,7 @@ Red paw print SVG icon - needs to be added to project assets.
 
 - **TypeScript**: 0 errors
 - **ESLint**: 0 errors
-- **Tests**: 259 passing (all tests pass)
+- **Tests**: 195 passing (all tests pass)
 - **Build**: Success
 
 ### Codebase Health

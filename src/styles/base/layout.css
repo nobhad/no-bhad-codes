@@ -79,18 +79,18 @@ main {
 /* Base section layout - individual heights defined in respective CSS files:
  * - .business-card-section: components/business-card.css
  * - .about-section: pages/about.css
- * - .contact-section: pages/contact.css
+ * - .contact-section: pages/contact.css (EXCLUDED - uses CSS Grid, not Flex)
+ * - .tech-stack-section: pages/about.css (EXCLUDED - mobile only, hidden on desktop)
  * - .hero-section: pages/hero.css (if exists)
  * - .text-animation-section: layout.css (below)
  */
 .business-card-section,
 .text-animation-section,
 .about-section,
-.contact-section,
 .hero-section,
 .client-login,
 .page-section,
-main > section {
+main > section:not(.contact-section):not(.tech-stack-section) {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -101,6 +101,15 @@ main > section {
   width: 100%;
   position: relative;
   overflow: hidden;
+}
+
+/* Contact section base - uses CSS Grid for centering (defined in pages/contact.css) */
+.contact-section {
+  padding: clamp(1rem, 4vw, 2rem);
+  box-sizing: border-box;
+  flex: 1 0 100%;
+  width: 100%;
+  position: relative;
 }
 
 /* Text animation section - full viewport height */

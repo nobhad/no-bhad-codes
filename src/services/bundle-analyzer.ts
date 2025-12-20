@@ -310,7 +310,7 @@ export class BundleAnalyzerService {
     // In production, this could parse source maps
     // For development, we'll estimate based on bundle name
     if (url.includes('main')) {
-      return ['src/main.ts', 'src/core/app.ts', 'src/core/state.ts'];
+      return ['src/main.ts', 'src/core/app.ts', 'src/core/state/index.ts'];
     }
     if (url.includes('vendor')) {
       return ['node_modules/gsap'];
