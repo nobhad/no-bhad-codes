@@ -132,14 +132,20 @@ export class ContactAnimationModule extends BaseModule {
     const submitButton = this.container.querySelector('button[type="submit"]') ||
                          this.container.querySelector('.contact-submit');
 
+    // Get dimensions for uniform sizing
+    const inputFieldWidth = nameField ? (nameField as HTMLElement).offsetWidth : 300;
+    const inputFieldHeight = 60;
+
+    // Measure FINAL section height before any transforms (fields at natural size)
+    const finalSectionHeight = this.container.offsetHeight;
+
     // Clip the form container so stacked fields don't overflow above
     const formContainer = this.container.querySelector('.contact-form') ||
                           this.container.querySelector('.contact-form-column');
     if (formContainer) gsap.set(formContainer, { overflow: 'hidden' });
 
-    // Get dimensions for uniform sizing
-    const inputFieldWidth = nameField ? (nameField as HTMLElement).offsetWidth : 300;
-    const inputFieldHeight = 60;
+    // Lock section to final height so it doesn't shrink during animation
+    gsap.set(this.container, { minHeight: finalSectionHeight });
 
     // Calculate offset from each field to name's position (to stack them all there)
     const getOffsetToName = (el: Element | null | undefined) => {
@@ -264,10 +270,11 @@ export class ContactAnimationModule extends BaseModule {
       });
     }
 
-    // Restore overflow after animation
+    // Restore overflow and section height after animation
     if (formContainer) {
       this.timeline.set(formContainer, { overflow: 'visible' });
     }
+    this.timeline.set(this.container, { minHeight: 'auto' });
 
     // ========================================================================
     // BUSINESS CARD - Flip after form elements settle

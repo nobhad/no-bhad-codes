@@ -8,22 +8,42 @@
  **/
 
 /* ==========================================
+   CONTACT FORM LAYOUT VARIABLES
+   ========================================== */
+
+:root {
+  /* Contact form field heights */
+  --contact-input-height: 60px;
+  --contact-textarea-height: 155px;
+  --contact-field-gap: 1rem;
+  --contact-row-gap: 1rem;
+  /* Total layout height: 3 inputs + gaps + textarea + row gap + buffer */
+  --contact-layout-height: 420px;
+}
+
+/* ==========================================
    DESKTOP LAYOUT (min-width: 768px)
    Mobile layout in /src/styles/mobile/contact.css
    ========================================== */
 
 @media screen and (min-width: 768px) {
-  /* Contact Section - 80% viewport width (desktop) */
+  /* Contact Section - full viewport height, 80% width (desktop) */
   .contact-section {
+    min-height: calc(100vh - var(--header-height) - var(--footer-height));
+    height: auto;
+    display: flex;
+    flex-direction: column;
     justify-content: center; /* Vertical centering in viewport */
     align-items: flex-start; /* Content aligned left within section */
     width: 80vw;
     max-width: 80vw;
     margin-left: auto;
     margin-right: auto;
+    padding: clamp(1rem, 4vw, 2rem);
     padding-left: 0;
     padding-right: 0;
     box-sizing: border-box;
+    position: relative;
     overflow: visible;
   }
 
@@ -38,6 +58,7 @@
      ========================================== */
 
   /* Contact layout - two-column container */
+  /* Fixed height prevents layout shifts during animation */
   .contact-layout {
     display: flex;
     flex-direction: row;
@@ -47,6 +68,9 @@
     align-items: flex-start;
     margin-top: 0;
     padding-top: 0;
+    /* Fixed height prevents layout shifts during animation */
+    min-height: var(--contact-layout-height);
+    height: var(--contact-layout-height);
   }
 
   /* Left column - contact form */

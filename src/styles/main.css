@@ -71,6 +71,9 @@
  * 4. PAGE-SPECIFIC LAYER
  * ============================================ */
 
+/* About page */
+@import "./pages/about.css";
+
 /* Contact page */
 @import "./pages/contact.css";
 
@@ -157,66 +160,17 @@ body {
  * ============================================ */
 
 @media screen and (min-width: 768px) {
-  /* Business card section specific positioning */
-  .business-card-section {
-    flex: 1 0 100%;
-    position: relative;
-    z-index: 1;
-    background: var(--color-neutral-300);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    overflow: visible;
-    margin-top: 0;
-    padding: 1rem;
-    min-height: calc(100vh - var(--header-height) - var(--footer-height));
-    height: calc(100vh - var(--header-height) - var(--footer-height));
-  }
-
-  /* Scroll arrow positioning */
-  .business-card-section .scroll-arrow-intro {
-    position: fixed;
-    bottom: calc(var(--footer-height) + 1rem);
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-  }
-
   /* Show all sections immediately */
   main section:not(.business-card-section) {
     opacity: 1;
     visibility: visible;
   }
 
-  /* Section heading shared styling - About and Contact */
-  .about-section h2,
+  /* Contact section heading styling */
   .contact-section h2 {
     margin-bottom: 1.5rem;
     text-align: left;
     width: 100%;
-  }
-
-  .about-content p,
-  .about-text-wrapper p {
-    margin-bottom: 1rem;
-  }
-
-  .about-text-wrapper {
-    margin-bottom: 1rem;
-  }
-
-  .tech-stack-viewport {
-    margin-top: 0.5rem;
-  }
-
-  /* Tech stack section visibility - desktop only */
-  .tech-stack-section {
-    display: none; /* Hidden on desktop, shown via mobile/layout.css */
-  }
-
-  .tech-stack-desktop {
-    display: block; /* Shown on desktop, hidden via mobile/layout.css */
   }
 }
 

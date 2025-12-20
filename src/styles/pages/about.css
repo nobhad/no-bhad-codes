@@ -1,0 +1,73 @@
+/**
+ * @file about.css
+ * @description About section styles - individual section height and layout
+ * @author Noelle Bhaduri
+ *
+ * DESKTOP ONLY (min-width: 768px) - Mobile styles in /src/styles/mobile/layout.css
+ **/
+
+/* ==========================================
+   DESKTOP LAYOUT (min-width: 768px)
+   ========================================== */
+
+@media screen and (min-width: 768px) {
+  /* About Section - full viewport height, centered content */
+  .about-section {
+    min-height: calc(100vh - var(--header-height) - var(--footer-height));
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: clamp(1rem, 4vw, 2rem);
+    box-sizing: border-box;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* About content container - max width constrained */
+  .about-content {
+    max-width: min(1000px, 90vw);
+    width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  /* Section heading */
+  .about-section h2 {
+    margin-bottom: 1.5rem;
+    text-align: left;
+    width: 100%;
+  }
+
+  /* About text wrapper */
+  .about-text-wrapper {
+    margin-bottom: 1rem;
+  }
+
+  .about-content p,
+  .about-text-wrapper p {
+    margin-bottom: 1rem;
+  }
+
+  /* Tech stack viewport */
+  .tech-stack-viewport {
+    margin-top: 0.5rem;
+  }
+
+  /* Tech stack section visibility - hidden on desktop */
+  .tech-stack-section {
+    display: none;
+  }
+
+  .tech-stack-desktop {
+    display: block;
+  }
+}

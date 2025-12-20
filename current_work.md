@@ -59,7 +59,7 @@ Red paw print SVG icon - needs to be added to project assets.
 
 - [x] Intro animation not displaying with coyote paw - **COMPLETE** (December 18)
 - [ ] **Loop-trigger-zone awkward space** - Plan: Add decorative content (pattern, gradient, or brand element) to fill the 100vh gap
-- [x] **Contact form emails not being received** - FIXED: Simplified SMTP_FROM format in .env (removed quotes and display name)
+- [x] **Contact form emails not being received** - FIXED: `emailService.sendEmail()` was a stub that logged to console instead of calling the actual nodemailer function
 
 ---
 
@@ -93,6 +93,30 @@ Red paw print SVG icon - needs to be added to project assets.
 ---
 
 ## Active Work
+
+### Individual Section Height Styling - COMPLETE
+
+**Status**: Complete
+**Date**: December 19, 2025
+
+**Summary**: Refactored shared section min-height rule from layout.css into individual section rules in their respective CSS files.
+
+**Files Modified**:
+
+- `src/styles/base/layout.css` - Removed shared min-height, added base flex properties
+- `src/styles/pages/about.css` - Created new file with about-section height and layout
+- `src/styles/pages/contact.css` - Added individual height rule for contact-section
+- `src/styles/components/business-card.css` - Added section height rule for business-card-section
+- `src/styles/main.css` - Added about.css import, removed duplicated section rules
+
+**Benefits**:
+
+- Each section now has its own height definition in its respective CSS file
+- Easier to modify individual section heights without affecting others
+- Better separation of concerns
+- Sections maintain centering via shared flex properties
+
+---
 
 ### GSAP MorphSVG Intro Animation - COMPLETE
 

@@ -76,7 +76,13 @@ main {
  * SECTION SYSTEM
  * ============================================ */
 
-/* Universal section centering - based on main page pattern */
+/* Base section layout - individual heights defined in respective CSS files:
+ * - .business-card-section: components/business-card.css
+ * - .about-section: pages/about.css
+ * - .contact-section: pages/contact.css
+ * - .hero-section: pages/hero.css (if exists)
+ * - .text-animation-section: layout.css (below)
+ */
 .business-card-section,
 .text-animation-section,
 .about-section,
@@ -85,7 +91,6 @@ main {
 .client-login,
 .page-section,
 main > section {
-  min-height: calc(100vh - var(--header-height) - var(--footer-height));
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -96,9 +101,32 @@ main > section {
   width: 100%;
   position: relative;
   overflow: hidden;
-  /* Disabled scroll-snap to fix scroll jumping issues */
-  /* scroll-snap-align: start; */
-  /* scroll-snap-stop: always; */
+}
+
+/* Text animation section - full viewport height */
+@media screen and (min-width: 768px) {
+  .text-animation-section {
+    min-height: calc(100vh - var(--header-height) - var(--footer-height));
+    height: auto;
+  }
+
+  /* Hero section - full viewport height */
+  .hero-section {
+    min-height: calc(100vh - var(--header-height) - var(--footer-height));
+    height: auto;
+  }
+
+  /* Client login - full viewport height */
+  .client-login {
+    min-height: calc(100vh - var(--header-height) - var(--footer-height));
+    height: auto;
+  }
+
+  /* Generic page section - full viewport height */
+  .page-section {
+    min-height: calc(100vh - var(--header-height) - var(--footer-height));
+    height: auto;
+  }
 }
 
 /* Section base styles - fill main content area */
