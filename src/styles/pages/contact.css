@@ -130,33 +130,36 @@
     display: block;
   }
 
-  /* Input fields row - just the 3 text inputs */
+  /* Top row: inputs on left, submit button on right - CSS Grid */
   .contact-row {
-    display: block;
+    display: grid;
+    grid-template-columns: 460px auto;
+    gap: 2rem;
     width: auto;
     margin-top: 1rem;
     box-sizing: border-box;
+    align-items: center; /* Align button to center (Company row) */
   }
 
-  /* Input fields container: name, company, email - CSS Grid (NO FLEX) */
+  /* Input fields container: name, company, email - CSS Grid */
   .contact-left {
     display: grid;
-    grid-template-columns: 460px;
+    grid-template-columns: 1fr;
     gap: 1.5rem;
     box-sizing: border-box;
     padding: 0;
     overflow: visible;
   }
 
-  /* Submit button container - positioned below message, right-aligned */
+  /* Submit button container - right side of row */
   .contact-right {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
+    align-items: flex-end;
     box-sizing: border-box;
-    margin: 1.5rem 0 0 0;
+    margin: 0;
     padding: 0;
     overflow: visible;
-    width: 640px;
   }
 
   /* Message textarea row */
