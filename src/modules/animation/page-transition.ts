@@ -18,6 +18,8 @@ import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
 import { container } from '../../core/container';
 import type { IntroAnimationModule } from './intro-animation';
+import { debounce } from '../../utils/gsap-utilities';
+import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
 
 // Animation timing constants (from salcosta.dev analysis)
 const ANIMATION_DURATION_IN = 0.5;
@@ -60,6 +62,12 @@ export class PageTransitionModule extends BaseModule {
 
     this.containerSelector = options.containerSelector || '#main-content';
     this.enableOnMobile = options.enableOnMobile || false;
+
+    // Create debounced resize handler for performance
+    this.debouncedHandleResize = debounce(
+      this.handleResize.bind(this),
+      ANIMATION_CONSTANTS.PERFORMANCE.THROTTLE_RESIZE
+    );
   }
 
   override async init(): Promise<void> {
@@ -231,8 +239,10 @@ export class PageTransitionModule extends BaseModule {
     // Listen for hash changes
     window.addEventListener('hashchange', this.handleHashChange.bind(this));
 
-    // Listen for resize to toggle mobile behavior
-    window.addEventListener('resize', this.handleResize.bind(this));
+    // Listen for resize to toggle mobile behavior (debounced for performance)
+    if (this.debouncedHandleResize) {
+      window.addEventListener('resize', this.debouncedHandleResize);
+    }
 
     // Setup click handlers for navigation links
     this.setupNavLinkHandlers();
@@ -337,8 +347,11 @@ export class PageTransitionModule extends BaseModule {
     return hashToPage[path] || null;
   }
 
+  /** Debounced resize handler to prevent excessive calls */
+  private debouncedHandleResize: (() => void) | null = null;
+
   /**
-   * Handle window resize
+   * Handle window resize (with debouncing for performance)
    */
   private handleResize(): void {
     const wasMobile = this.isMobile;
@@ -726,10 +739,17 @@ export class PageTransitionModule extends BaseModule {
 
   /**
    * Cleanup on destroy
+   * 
+   * PERFORMANCE: Ensures all event listeners are properly removed
+   * to prevent memory leaks.
    */
   override async destroy(): Promise<void> {
+    // Remove event listeners to prevent memory leaks
     window.removeEventListener('hashchange', this.handleHashChange.bind(this));
-    window.removeEventListener('resize', this.handleResize.bind(this));
+    if (this.debouncedHandleResize) {
+      window.removeEventListener('resize', this.debouncedHandleResize);
+    }
+    this.debouncedHandleResize = null;
 
     // Clear all page styling
     this.pages.forEach((page) => {

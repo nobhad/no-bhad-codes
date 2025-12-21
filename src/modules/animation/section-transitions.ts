@@ -18,6 +18,8 @@ import { BaseModule } from '../core/base';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { ModuleOptions } from '../../types/modules';
+import { debounce } from '../../utils/gsap-utilities';
+import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
 
 // Register ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
@@ -41,6 +43,7 @@ export class SectionTransitionsModule extends BaseModule {
   private scrollTriggers: ScrollTrigger[] = [];
   private sectionTimelines: gsap.core.Timeline[] = [];
   private resizeHandler: (() => void) | null = null;
+  private debouncedHandleResize: (() => void) | null = null;
   private isSetup = false;
 
   // Section configuration
@@ -57,6 +60,12 @@ export class SectionTransitionsModule extends BaseModule {
 
   constructor(options: ModuleOptions = {}) {
     super('SectionTransitionsModule', { debug: true, ...options });
+
+    // Create debounced resize handler for performance
+    this.debouncedHandleResize = debounce(
+      this.handleResize.bind(this),
+      ANIMATION_CONSTANTS.PERFORMANCE.THROTTLE_RESIZE
+    );
   }
 
   override async init(): Promise<void> {
@@ -68,9 +77,10 @@ export class SectionTransitionsModule extends BaseModule {
       return;
     }
 
-    // Setup resize handler
-    this.resizeHandler = this.handleResize.bind(this);
-    window.addEventListener('resize', this.resizeHandler);
+    // Setup resize handler (debounced for performance)
+    if (this.debouncedHandleResize) {
+      window.addEventListener('resize', this.debouncedHandleResize);
+    }
 
     // Initial setup based on viewport
     this.handleResize();
@@ -257,13 +267,17 @@ export class SectionTransitionsModule extends BaseModule {
 
   /**
    * Cleanup on destroy
+   * 
+   * PERFORMANCE: Ensures all event listeners are properly removed
+   * to prevent memory leaks.
    */
   override async destroy(): Promise<void> {
-    // Remove resize listener
-    if (this.resizeHandler) {
-      window.removeEventListener('resize', this.resizeHandler);
-      this.resizeHandler = null;
+    // Remove resize listener to prevent memory leaks
+    if (this.debouncedHandleResize) {
+      window.removeEventListener('resize', this.debouncedHandleResize);
+      this.debouncedHandleResize = null;
     }
+    this.resizeHandler = null;
 
     // Kill transitions
     this.killTransitions();

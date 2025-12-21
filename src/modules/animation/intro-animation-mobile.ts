@@ -203,7 +203,7 @@ export class MobileIntroAnimationModule extends BaseModule {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     morphSvg.setAttribute('viewBox', `0 0 ${viewportWidth} ${viewportHeight}`);
-    morphSvg.setAttribute('preserveAspectRatio', 'none');
+    morphSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
     // Align SVG card with actual card position (using shared config)
     const translateX = actualCardRect.left - (SVG_CARD.x * scale);

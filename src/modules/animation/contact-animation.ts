@@ -26,6 +26,7 @@ import { BaseModule } from '../core/base';
 import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
 import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
+import { throttle } from '../../utils/gsap-utilities';
 
 // ============================================================================
 // CONTACT ANIMATION MODULE CLASS
@@ -788,9 +789,9 @@ export class ContactAnimationModule extends BaseModule {
       this.log(`Contact card flipped ${flipDirection > 0 ? 'right' : 'left'} via corner click`);
     };
 
-    // Mouse move handler for tilt effect
+    // Mouse move handler for tilt effect (throttled for performance)
     const maxTiltAngle = 12;
-    this.cardMouseMoveHandler = (e: MouseEvent) => {
+    const handleMouseMove = (e: MouseEvent) => {
       const rect = card.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
@@ -809,6 +810,12 @@ export class ContactAnimationModule extends BaseModule {
         ease: 'power2.out'
       });
     };
+
+    // Throttle mousemove handler for performance
+    this.cardMouseMoveHandler = throttle(
+      handleMouseMove,
+      ANIMATION_CONSTANTS.PERFORMANCE.THROTTLE_MOUSE_MOVE
+    );
 
     // Mouse leave handler to reset tilt
     this.cardMouseLeaveHandler = () => {

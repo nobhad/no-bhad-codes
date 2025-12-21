@@ -309,7 +309,7 @@ export class IntroAnimationModule extends BaseModule {
 
     // ========================================================================
     // LOAD AND PARSE SVG
-    // Use extracted SVG builder module
+    // Use extracted SVG builder module (with caching)
     // ========================================================================
     this.log('Loading SVG file...');
     const svgDoc = await SvgBuilder.fetchAndParseSvg(PAW_SVG);
@@ -320,9 +320,9 @@ export class IntroAnimationModule extends BaseModule {
 
     // ========================================================================
     // EXTRACT SVG ELEMENTS
-    // Use extracted SVG builder module
+    // Use extracted SVG builder module (with caching)
     // ========================================================================
-    const elements = SvgBuilder.extractSvgElements(svgDoc);
+    const elements = SvgBuilder.extractSvgElements(svgDoc, PAW_SVG);
 
     if (!elements.position1 || !elements.position2) {
       this.error('Position groups not found in SVG');
@@ -394,7 +394,8 @@ export class IntroAnimationModule extends BaseModule {
     const pathData = SvgBuilder.getCompleteMorphPathData(
       fingerRefs,
       elements.position2,
-      elements.position3
+      elements.position3,
+      PAW_SVG // Cache key for path data
     );
 
     // ========================================================================
@@ -778,7 +779,7 @@ export class IntroAnimationModule extends BaseModule {
       // Clear and rebuild SVG
       morphSvg.innerHTML = '';
       morphSvg.setAttribute('viewBox', `0 0 ${viewportWidth} ${viewportHeight}`);
-      morphSvg.setAttribute('preserveAspectRatio', 'none');
+      morphSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
       // Add shadow filter
       const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
@@ -1244,7 +1245,7 @@ export class IntroAnimationModule extends BaseModule {
       // Clear and rebuild SVG
       morphSvg.innerHTML = '';
       morphSvg.setAttribute('viewBox', `0 0 ${viewportWidth} ${viewportHeight}`);
-      morphSvg.setAttribute('preserveAspectRatio', 'none');
+      morphSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
       // Add shadow filter
       const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
@@ -1532,8 +1533,12 @@ export class IntroAnimationModule extends BaseModule {
    *
    * Kills the GSAP timeline and removes event listeners
    * when the module is destroyed.
+   * 
+   * PERFORMANCE: Ensures all event listeners are properly removed
+   * to prevent memory leaks.
    */
   override async destroy(): Promise<void> {
+    // Kill all timelines to prevent memory leaks
     if (this.timeline) {
       this.timeline.kill();
       this.timeline = null;
@@ -1549,10 +1554,15 @@ export class IntroAnimationModule extends BaseModule {
       this.entryTimeline = null;
     }
 
+    // Remove event listeners to prevent memory leaks
     if (this.skipHandler) {
       document.removeEventListener('keydown', this.skipHandler);
       this.skipHandler = null;
     }
+
+    // Clear cached SVG text
+    this.cachedSvgText = null;
+    this.morphOverlay = null;
 
     await super.destroy();
   }

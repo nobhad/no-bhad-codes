@@ -35,10 +35,10 @@ export const SVG_CARD = {
 } as const;
 
 export const SVG_VIEWBOX = {
-  /** Full SVG viewBox width */
-  width: 2316.99,
-  /** Full SVG viewBox height */
-  height: 1801.19
+  /** Full SVG viewBox width - matches coyote_paw.svg */
+  width: 2331.1,
+  /** Full SVG viewBox height - matches coyote_paw.svg */
+  height: 1798.6
 } as const;
 
 // ============================================================================

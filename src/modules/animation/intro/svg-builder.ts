@@ -5,13 +5,19 @@
  * @file src/modules/animation/intro/svg-builder.ts
  *
  * SVG construction and assembly utilities for intro animation
+ *
+ * PERFORMANCE OPTIMIZATIONS:
+ * - Caches parsed SVG documents to avoid re-parsing
+ * - Caches element references to avoid repeated DOM queries
+ * - Caches path data to avoid repeated attribute reads
  */
 
 /* global Document, SVGGElement */
 
 import {
   SVG_CARD,
-  SVG_ELEMENT_IDS
+  SVG_ELEMENT_IDS,
+  SVG_VIEWBOX
 } from '../../../config/intro-animation-config';
 import { ANIMATION_CONSTANTS, calculateShadowOffset } from '../../../config/animation-constants';
 import type {
@@ -24,27 +30,64 @@ import type {
   CompleteMorphPathData
 } from './intro-types';
 
+// ============================================================================
+// CACHING
+// ============================================================================
+
+/** Cache for parsed SVG documents keyed by SVG path */
+const svgDocumentCache = new Map<string, Document>();
+
+/** Cache for extracted SVG elements keyed by SVG path */
+const svgElementsCache = new Map<string, SVGElements>();
+
+/** Cache for path data keyed by SVG path */
+const pathDataCache = new Map<string, CompleteMorphPathData>();
+
 /**
- * Fetch and parse SVG file
+ * Fetch and parse SVG file (with caching)
  */
 export async function fetchAndParseSvg(svgPath: string): Promise<Document> {
+  // Check cache first
+  if (svgDocumentCache.has(svgPath)) {
+    return svgDocumentCache.get(svgPath)!;
+  }
+
   const response = await fetch(svgPath);
   const svgText = await response.text();
   const parser = new DOMParser();
-  return parser.parseFromString(svgText, 'image/svg+xml');
+  const doc = parser.parseFromString(svgText, 'image/svg+xml');
+
+  // Cache the parsed document
+  svgDocumentCache.set(svgPath, doc);
+
+  return doc;
 }
 
 /**
- * Extract SVG elements from parsed document
+ * Clear SVG caches (useful for testing or memory management)
  */
-export function extractSvgElements(svgDoc: Document): SVGElements {
+export function clearSvgCaches(): void {
+  svgDocumentCache.clear();
+  svgElementsCache.clear();
+  pathDataCache.clear();
+}
+
+/**
+ * Extract SVG elements from parsed document (with caching)
+ */
+export function extractSvgElements(svgDoc: Document, svgPath?: string): SVGElements {
+  // Use cache if available and svgPath provided
+  if (svgPath && svgElementsCache.has(svgPath)) {
+    return svgElementsCache.get(svgPath)!;
+  }
+
   const armBase = svgDoc.getElementById(SVG_ELEMENT_IDS.armBase);
   const position1 = svgDoc.getElementById(SVG_ELEMENT_IDS.position1);
   const position2 = svgDoc.getElementById(SVG_ELEMENT_IDS.position2);
   const position3 = svgDoc.getElementById(SVG_ELEMENT_IDS.position3);
   const cardGroup = svgDoc.getElementById(SVG_ELEMENT_IDS.cardGroup);
 
-  return {
+  const elements: SVGElements = {
     armBase,
     position1,
     position2,
@@ -54,6 +97,13 @@ export function extractSvgElements(svgDoc: Document): SVGElements {
     svgCardY: SVG_CARD.y,
     svgCardWidth: SVG_CARD.width
   };
+
+  // Cache if svgPath provided
+  if (svgPath) {
+    svgElementsCache.set(svgPath, elements);
+  }
+
+  return elements;
 }
 
 /**
@@ -69,11 +119,12 @@ export function calculateSvgAlignment(
   // Uniform scale based on card width (preserves aspect ratio)
   const scale = actualCardRect.width / SVG_CARD.width;
 
-  // Set viewBox to match viewport for proper positioning
+  // Viewport dimensions (still needed for return value)
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
 
   // Calculate translation to align SVG card with screen position
+  // This uses SVG coordinates scaled by the card scale factor
   const translateX = actualCardRect.left - (SVG_CARD.x * scale);
   const translateY = actualCardRect.top - (SVG_CARD.y * scale);
 
@@ -260,12 +311,29 @@ export function getFingerPathReferences(
 }
 
 /**
- * Extract path data from finger references
+ * Extract path data from finger references (with caching)
+ * Path data is cached to avoid repeated attribute reads
  */
 export function getFingerPathData(
-  fingerRefs: FingerPathReferences
+  fingerRefs: FingerPathReferences,
+  cacheKey?: string
 ): FingerPathData {
-  return {
+  // Check cache if cacheKey provided
+  if (cacheKey) {
+    const cached = pathDataCache.get(cacheKey);
+    if (cached) {
+      return {
+        a2: cached.a2,
+        a3: cached.a3,
+        b2: cached.b2,
+        b3: cached.b3,
+        c2: cached.c2,
+        c3: cached.c3
+      };
+    }
+  }
+
+  const pathData: FingerPathData = {
     a2: fingerRefs.fingerA2?.getAttribute('d') || null,
     a3: fingerRefs.fingerA3?.getAttribute('d') || null,
     b2: fingerRefs.fingerB2?.getAttribute('d') || null,
@@ -273,22 +341,38 @@ export function getFingerPathData(
     c2: fingerRefs.fingerC2?.getAttribute('d') || null,
     c3: fingerRefs.fingerC3?.getAttribute('d') || null
   };
+
+  return pathData;
 }
 
 /**
- * Extract thumb path data
+ * Extract thumb path data (with caching)
  */
 export function getThumbPathData(
   position2: Element,
-  position3: Element | null
+  position3: Element | null,
+  cacheKey?: string
 ): ThumbPathData {
+  // Check cache if cacheKey provided
+  if (cacheKey) {
+    const cached = pathDataCache.get(cacheKey);
+    if (cached) {
+      return {
+        thumb2: cached.thumb2,
+        thumb3: cached.thumb3
+      };
+    }
+  }
+
   const thumb2 = position2.querySelector(`#${SVG_ELEMENT_IDS.thumb2}`) as SVGPathElement;
   const thumb3 = position3?.querySelector(`#${SVG_ELEMENT_IDS.thumb3}`) as SVGPathElement;
 
-  return {
+  const thumbData: ThumbPathData = {
     thumb2: thumb2?.getAttribute('d') || null,
     thumb3: thumb3?.getAttribute('d') || null
   };
+
+  return thumbData;
 }
 
 /**
@@ -303,9 +387,9 @@ export function assembleAllLayers(
   clonedPos1: Element | null;
   clonedThumb: Element | null;
 } {
-  // Set viewport
-  morphSvg.setAttribute('viewBox', `0 0 ${alignment.viewportWidth} ${alignment.viewportHeight}`);
-  morphSvg.setAttribute('preserveAspectRatio', 'none');
+  // Use original SVG viewBox to maintain correct proportions
+  morphSvg.setAttribute('viewBox', `0 0 ${SVG_VIEWBOX.width} ${SVG_VIEWBOX.height}`);
+  morphSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
   // Create shadow filter
   createShadowFilter(morphSvg, alignment.scale);
@@ -336,18 +420,31 @@ export function assembleAllLayers(
 }
 
 /**
- * Get complete morph path data (fingers + thumb)
+ * Get complete morph path data (fingers + thumb) with caching
  */
 export function getCompleteMorphPathData(
   fingerRefs: FingerPathReferences,
   position2: Element,
-  position3: Element | null
+  position3: Element | null,
+  cacheKey?: string
 ): CompleteMorphPathData {
-  const fingerData = getFingerPathData(fingerRefs);
-  const thumbData = getThumbPathData(position2, position3);
+  // Check cache if cacheKey provided
+  if (cacheKey && pathDataCache.has(cacheKey)) {
+    return pathDataCache.get(cacheKey)!;
+  }
 
-  return {
+  const fingerData = getFingerPathData(fingerRefs, cacheKey);
+  const thumbData = getThumbPathData(position2, position3, cacheKey);
+
+  const completeData: CompleteMorphPathData = {
     ...fingerData,
     ...thumbData
   };
+
+  // Cache if cacheKey provided
+  if (cacheKey) {
+    pathDataCache.set(cacheKey, completeData);
+  }
+
+  return completeData;
 }
