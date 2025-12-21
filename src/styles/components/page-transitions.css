@@ -201,6 +201,22 @@
     display: flex;
     visibility: visible;
     pointer-events: auto;
+    z-index: 100; /* Ensure active page is on top */
+  }
+
+  /* Hidden pages should be below */
+  section.page-hidden {
+    z-index: 1;
+  }
+
+  /* Intro page should allow other pages to appear on top */
+  section#intro,
+  section.business-card-section {
+    z-index: 10;
+  }
+
+  section#intro.page-active {
+    z-index: 50; /* Lower than other active pages */
   }
 
   /* Page content wrapper for animations */
