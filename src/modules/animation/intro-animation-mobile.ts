@@ -588,7 +588,9 @@ export class MobileIntroAnimationModule extends BaseModule {
     }
 
     // Dispatch complete event for PageTransitionModule
+    console.log('[MobileIntro] Dispatching complete event');
     this.dispatchEvent('complete');
+    console.log('[MobileIntro] Complete event dispatched');
 
     this.log('Mobile intro animation complete');
   }

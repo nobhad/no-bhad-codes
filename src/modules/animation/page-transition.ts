@@ -266,11 +266,13 @@ export class PageTransitionModule extends BaseModule {
   private setupNavLinkHandlers(): void {
     // Find all nav links that should trigger page transitions
     const navLinks = document.querySelectorAll('[data-nav-link], a[href^="#/"]');
+    console.log('[PageTransition] Found nav links:', navLinks.length);
 
     navLinks.forEach((link) => {
       link.addEventListener('click', (event: Event) => {
         const anchor = link as HTMLAnchorElement;
         const href = anchor.getAttribute('href');
+        console.log('[PageTransition] Link clicked:', href, 'introComplete:', this.introComplete);
 
         if (!href || !href.startsWith('#')) return;
 
@@ -288,6 +290,7 @@ export class PageTransitionModule extends BaseModule {
         }
 
         const pageId = this.getPageIdFromHash(href);
+        console.log('[PageTransition] Nav link clicked:', href, '-> pageId:', pageId, 'introComplete:', this.introComplete);
         this.log(`Nav link clicked: ${href} -> pageId: ${pageId}`);
 
         if (pageId) {
@@ -408,6 +411,7 @@ export class PageTransitionModule extends BaseModule {
    */
   private listenForIntroComplete(): void {
     const handleIntroComplete = (() => {
+      console.log('[PageTransition] INTRO COMPLETE EVENT RECEIVED');
       this.introComplete = true;
       this.log('Intro complete - page transitions enabled');
       this.dispatchEvent('ready');
@@ -415,22 +419,28 @@ export class PageTransitionModule extends BaseModule {
 
     // Listen for intro complete event (desktop)
     this.on('IntroAnimationModule:complete', handleIntroComplete);
+    console.log('[PageTransition] Listening for IntroAnimationModule:complete');
 
     // Listen for mobile intro complete event
     this.on('MobileIntroAnimationModule:complete', handleIntroComplete);
+    console.log('[PageTransition] Listening for MobileIntroAnimationModule:complete');
 
     // Also check if intro is already complete (in case we init late)
     const introOverlay = document.getElementById('intro-morph-overlay');
     if (introOverlay && introOverlay.style.display === 'none') {
+      console.log('[PageTransition] Intro already complete (overlay hidden)');
       this.introComplete = true;
       this.log('Intro already complete');
     }
 
     // Check if intro-complete class is set (works for both desktop and mobile)
     if (document.documentElement.classList.contains('intro-complete')) {
+      console.log('[PageTransition] Intro already complete (class found)');
       this.introComplete = true;
       this.log('Intro already complete (from class)');
     }
+
+    console.log('[PageTransition] Initial introComplete state:', this.introComplete);
 
     // Fallback: enable after timeout if no intro event
     setTimeout(() => {
@@ -446,22 +456,29 @@ export class PageTransitionModule extends BaseModule {
    * Transition to a page with animations
    */
   async transitionTo(pageId: string): Promise<void> {
+    console.log('[PageTransition] transitionTo called:', pageId, 'current:', this.currentPageId, 'isMobile:', this.isMobile, 'enableOnMobile:', this.enableOnMobile);
+
     // Skip if already on this page or transitioning
     if (pageId === this.currentPageId) {
+      console.log('[PageTransition] Already on page, skipping');
       this.log(`Already on page: ${pageId}, skipping transition`);
       return;
     }
 
     if (this.isTransitioning) {
+      console.log('[PageTransition] Already transitioning, skipping');
       this.warn(`Transition already in progress, ignoring request to ${pageId}`);
       return;
     }
 
     // Skip on mobile
     if (this.isMobile && !this.enableOnMobile) {
+      console.log('[PageTransition] Mobile without enableOnMobile, skipping');
       this.log('Mobile mode - skipping page transition');
       return;
     }
+
+    console.log('[PageTransition] Starting transition to:', pageId);
 
     const targetPage = this.pages.get(pageId);
     const currentPage = this.pages.get(this.currentPageId);
