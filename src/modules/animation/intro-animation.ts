@@ -1266,9 +1266,9 @@ export class IntroAnimationModule extends BaseModule {
             this.morphOverlay.style.pointerEvents = 'none';
           }
           // Restore about-hero-desktop visibility
-          const aboutHero = document.querySelector('.about-hero-desktop') as HTMLElement;
-          if (aboutHero) {
-            aboutHero.style.visibility = '';
+          const aboutHeroEl = document.querySelector('.about-hero-desktop') as HTMLElement;
+          if (aboutHeroEl) {
+            aboutHeroEl.style.visibility = '';
           }
           // Remove paw-exit class and restore intro-complete
           document.documentElement.classList.remove('paw-exit');
