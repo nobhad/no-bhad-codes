@@ -19,6 +19,7 @@ import { BaseModule } from '../core/base';
 import type { BusinessCardRenderer } from './business-card-renderer';
 import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
+import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
 
 export class BusinessCardInteractions extends BaseModule {
   // Renderer reference
@@ -31,13 +32,13 @@ export class BusinessCardInteractions extends BaseModule {
   private isEnabled = false;
   private currentRotationY = 0; // Track actual rotation value for directional flips
 
-  // Animation configuration
-  private cardFlipDuration = 0.8;
-  private tiltDuration = 0.3;
-  private hoverLiftHeight = 10; // pixels to lift on hover
-  private maxTiltAngle = 12; // maximum tilt angle in degrees
-  private globalTiltAngle = 3; // subtle global mouse following
-  private magneticRange = 200; // range for magnetic attraction effect
+  // Animation configuration (from centralized constants)
+  private cardFlipDuration: number = ANIMATION_CONSTANTS.DURATIONS.CARD_FLIP;
+  private tiltDuration: number = ANIMATION_CONSTANTS.DURATIONS.CARD_TILT;
+  private hoverLiftHeight: number = ANIMATION_CONSTANTS.DIMENSIONS.CARD_HOVER_LIFT;
+  private maxTiltAngle: number = ANIMATION_CONSTANTS.DIMENSIONS.CARD_MAX_TILT;
+  private globalTiltAngle: number = ANIMATION_CONSTANTS.DIMENSIONS.CARD_GLOBAL_TILT;
+  private magneticRange: number = ANIMATION_CONSTANTS.DIMENSIONS.CARD_MAGNETIC_RANGE;
 
   // Cached elements from renderer
   private businessCard: HTMLElement | null = null;
@@ -588,8 +589,8 @@ export class BusinessCardInteractions extends BaseModule {
 
     if (prefersReducedMotion.matches) {
       this.log('User prefers reduced motion - disabling animations');
-      this.cardFlipDuration = 0.1;
-      this.tiltDuration = 0.1;
+      this.cardFlipDuration = ANIMATION_CONSTANTS.DURATIONS.FAST;
+      this.tiltDuration = ANIMATION_CONSTANTS.DURATIONS.FAST;
       this.hoverLiftHeight = 2;
       this.maxTiltAngle = 2;
       this.globalTiltAngle = 1; // minimal global following

@@ -148,6 +148,7 @@ import {
   DOM_ELEMENT_IDS,
   REPLAY_CONFIG
 } from '../../config/intro-animation-config';
+import { ANIMATION_CONSTANTS, calculateShadowOffset } from '../../config/animation-constants';
 
 // Register MorphSVG plugin with GSAP
 gsap.registerPlugin(MorphSVGPlugin);
@@ -387,14 +388,14 @@ export class IntroAnimationModule extends BaseModule {
 
     // Shadow values in SVG units (will be scaled by transform)
     // Match business card: box-shadow: 0 10px 30px var(--color-shadow)
-    const shadowOffsetY = 12 / scale;
-    const shadowBlur = 18 / scale;
+    // Use centralized shadow calculation helper
+    const shadow = calculateShadowOffset(1 / scale);
 
     const dropShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
     dropShadow.setAttribute('dx', '0');
-    dropShadow.setAttribute('dy', String(shadowOffsetY));
-    dropShadow.setAttribute('stdDeviation', String(shadowBlur));
-    dropShadow.setAttribute('flood-color', 'rgba(0, 0, 0, 0.5)');
+    dropShadow.setAttribute('dy', String(shadow.base));
+    dropShadow.setAttribute('stdDeviation', String(shadow.blur));
+    dropShadow.setAttribute('flood-color', ANIMATION_CONSTANTS.COLORS.SHADOW_DEFAULT);
 
     filter.appendChild(dropShadow);
     defs.appendChild(filter);
@@ -1099,13 +1100,12 @@ export class IntroAnimationModule extends BaseModule {
       filter.setAttribute('y', '-50%');
       filter.setAttribute('width', '200%');
       filter.setAttribute('height', '200%');
-      const shadowOffsetY = 12 / scale;
-      const shadowBlur = 18 / scale;
+      const shadow = calculateShadowOffset(1 / scale);
       const dropShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
       dropShadow.setAttribute('dx', '0');
-      dropShadow.setAttribute('dy', String(shadowOffsetY));
-      dropShadow.setAttribute('stdDeviation', String(shadowBlur));
-      dropShadow.setAttribute('flood-color', 'rgba(0, 0, 0, 0.5)');
+      dropShadow.setAttribute('dy', String(shadow.base));
+      dropShadow.setAttribute('stdDeviation', String(shadow.blur));
+      dropShadow.setAttribute('flood-color', ANIMATION_CONSTANTS.COLORS.SHADOW_DEFAULT);
       filter.appendChild(dropShadow);
       defs.appendChild(filter);
       morphSvg.appendChild(defs);
@@ -1166,10 +1166,10 @@ export class IntroAnimationModule extends BaseModule {
         clonedCard.setAttribute('id', 'svg-business-card');
         clonedCard.setAttribute('filter', 'url(#card-shadow)');
 
-        // Ensure card has solid white fill background to hide thumb behind it
+        // Ensure card has solid fill background to hide thumb behind it
         const cardRectElement = clonedCard.querySelector('rect');
         if (cardRectElement) {
-          cardRectElement.setAttribute('fill', '#ffffff');
+          cardRectElement.setAttribute('fill', ANIMATION_CONSTANTS.COLORS.CARD_FILL);
           cardRectElement.setAttribute('fill-opacity', '1');
         }
 
@@ -1566,13 +1566,12 @@ export class IntroAnimationModule extends BaseModule {
       filter.setAttribute('y', '-50%');
       filter.setAttribute('width', '200%');
       filter.setAttribute('height', '200%');
-      const shadowOffsetY = 12 / scale;
-      const shadowBlur = 18 / scale;
+      const shadow = calculateShadowOffset(1 / scale);
       const dropShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
       dropShadow.setAttribute('dx', '0');
-      dropShadow.setAttribute('dy', String(shadowOffsetY));
-      dropShadow.setAttribute('stdDeviation', String(shadowBlur));
-      dropShadow.setAttribute('flood-color', 'rgba(0, 0, 0, 0.5)');
+      dropShadow.setAttribute('dy', String(shadow.base));
+      dropShadow.setAttribute('stdDeviation', String(shadow.blur));
+      dropShadow.setAttribute('flood-color', ANIMATION_CONSTANTS.COLORS.SHADOW_DEFAULT);
       filter.appendChild(dropShadow);
       defs.appendChild(filter);
       morphSvg.appendChild(defs);

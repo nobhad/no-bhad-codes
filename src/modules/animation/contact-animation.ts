@@ -25,6 +25,7 @@
 import { BaseModule } from '../core/base';
 import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
+import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
 
 // ============================================================================
 // CONTACT ANIMATION MODULE CLASS
@@ -110,8 +111,8 @@ export class ContactAnimationModule extends BaseModule {
     // ========================================================================
     // PHASE 1: h2 and card drop in TOGETHER
     // ========================================================================
-    const dropDistance = 50;
-    const dropDuration = 0.6;
+    const dropDistance = ANIMATION_CONSTANTS.DIMENSIONS.CONTACT_DROP_DISTANCE;
+    const dropDuration = ANIMATION_CONSTANTS.DURATIONS.FORM_FIELD_DROP;
 
     // h2 drops in
     if (heading) {
@@ -164,9 +165,9 @@ export class ContactAnimationModule extends BaseModule {
     const submitButton = this.container.querySelector('button[type="submit"]') ||
                          this.container.querySelector('.contact-submit');
 
-    // Get dimensions for animation
-    const inputFieldHeight = 60;
-    const compressedHeight = 20; // Fields drop at this height, then expand
+    // Get dimensions for animation (from centralized constants)
+    const inputFieldHeight = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_HEIGHT;
+    const compressedHeight = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_COMPRESSED;
 
     // Measure FINAL section height before any transforms (fields at natural size)
     const finalSectionHeight = this.container.offsetHeight;
@@ -206,8 +207,8 @@ export class ContactAnimationModule extends BaseModule {
 
     // Shared border-radius for all fields during cascade
     const fieldBorderRadius = '0 50px 50px 50px';
-    const startWidth = 150;
-    const inputFullWidth = 460;
+    const startWidth = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_WIDTH_START;
+    const inputFullWidth = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_WIDTH_FULL;
 
     // All fields start at height 0 and narrow width
     // Each field will dynamically match the width of the field above when it appears
@@ -279,8 +280,8 @@ export class ContactAnimationModule extends BaseModule {
       if (messageLabel) gsap.set(messageLabel, { opacity: 0 });
     }
 
-    const totalDuration = 2.5; // Total animation duration
-    const stagger = 0.3; // Stagger between each field
+    const totalDuration = ANIMATION_CONSTANTS.SEQUENCES.CONTACT_FORM.TOTAL_DURATION;
+    const stagger = ANIMATION_CONSTANTS.SEQUENCES.CONTACT_FORM.FIELD_STAGGER;
     const formStartTime = dropDuration; // Form starts AFTER h2/card drop completes
 
     // All fields animate together with stagger
@@ -566,7 +567,7 @@ export class ContactAnimationModule extends BaseModule {
     const heading = this.container.querySelector('h2');
     const contactOptions = this.container.querySelector('.contact-options');
     const cardColumn = this.container.querySelector('.contact-card-column');
-    const dropDistance = 50;
+    const dropDistance = ANIMATION_CONSTANTS.DIMENSIONS.CONTACT_DROP_DISTANCE;
 
     if (heading) {
       gsap.set(heading, { y: -dropDistance, opacity: 0 });
@@ -587,8 +588,8 @@ export class ContactAnimationModule extends BaseModule {
 
     // Reset form fields to initial animation state
     const fieldBorderRadius = '0 50px 50px 50px';
-    const startWidth = 150;
-    const compressedHeight = 20;
+    const startWidth = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_WIDTH_START;
+    const compressedHeight = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_COMPRESSED;
 
     const nameField = this.container.querySelector('#name')?.closest('.input-item');
     const companyField = this.container.querySelector('#company')?.closest('.input-item');

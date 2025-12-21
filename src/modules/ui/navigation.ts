@@ -19,6 +19,7 @@ import type { DataService } from '../../services/data-service';
 import { SubmenuModule } from './submenu';
 import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
+import { pulseGlow } from '../../utils/gsap-utilities';
 
 export interface NavigationModuleOptions extends ModuleOptions {
   routerService?: RouterService;
@@ -507,6 +508,8 @@ export class NavigationModule extends BaseModule {
             banner.className = 'coming-soon-banner';
             banner.textContent = 'Coming Soon';
             menuLink.appendChild(banner);
+            // Apply GSAP pulse-glow animation (replaces CSS keyframe)
+            pulseGlow(banner);
           }
         } else if (comingSoonBanner) {
           comingSoonBanner.remove();
