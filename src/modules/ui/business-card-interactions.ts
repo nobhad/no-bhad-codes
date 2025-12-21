@@ -159,8 +159,12 @@ export class BusinessCardInteractions extends BaseModule {
       perspective: 1000
     });
 
+    // Clear CSS transition to prevent conflict with GSAP animations
+    // CSS has: transition: transform var(--transition-slow) var(--cubic-default)
+    // This fights with GSAP rotationY animations
     gsap.set(this.businessCardInner, {
-      transformStyle: 'preserve-3d'
+      transformStyle: 'preserve-3d',
+      transition: 'none'
     });
 
     // Start with front showing (no auto-flip)

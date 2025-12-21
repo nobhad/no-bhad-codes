@@ -601,9 +601,9 @@ export class ContactAnimationModule extends BaseModule {
     this.businessCardEl = card;
     this.businessCardInner = cardInner;
 
-    // Setup 3D perspective
+    // Setup 3D perspective and clear CSS transition to prevent GSAP conflicts
     gsap.set(card, { perspective: 1000 });
-    gsap.set(cardInner, { transformStyle: 'preserve-3d' });
+    gsap.set(cardInner, { transformStyle: 'preserve-3d', transition: 'none' });
 
     // Make card clickable
     card.style.cursor = 'pointer';
