@@ -391,6 +391,34 @@ li {
   transform: scale3d(1, 0, 1) !important;
 }
 
+/* =====================================================
+   8.6. CURRENT PAGE LINK - Blurred & Dimmed
+   ===================================================== */
+.menu-link.current,
+.menu-link[aria-current="page"] {
+  filter: blur(2px);
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+.menu-link.current .menu-link-heading,
+.menu-link[aria-current="page"] .menu-link-heading {
+  color: var(--color-text-secondary);
+}
+
+/* Hide hover effects on current page link */
+.menu-link.current .menu-link-bg,
+.menu-link[aria-current="page"] .menu-link-bg {
+  display: none;
+}
+
+/* More blur on hover (if somehow focusable) */
+.menu-link.current:hover,
+.menu-link[aria-current="page"]:hover {
+  filter: blur(4px);
+}
+
 /* Coming Soon Banner */
 .coming-soon-banner {
   position: absolute;

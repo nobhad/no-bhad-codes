@@ -274,6 +274,37 @@ p a:focus::before {
   position: relative;
 }
 
+/* Icon links - shrink on hover for tactile feedback */
+.icon-link,
+a.icon-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+/* Disable underline animation on icon links */
+.icon-link::before,
+a.icon-link::before {
+  display: none;
+}
+
+.icon-link svg,
+a.icon-link svg {
+  fill: var(--color-text-primary, currentColor);
+  transition: 
+    fill var(--transition-theme, 0.4s),
+    transform var(--transition-mouse, 0.2s) cubic-bezier(0.3, 0.9, 0.3, 0.9);
+}
+
+.icon-link:hover svg,
+.icon-link:focus-visible svg,
+a.icon-link:hover svg,
+a.icon-link:focus-visible svg {
+  transform: scale(0.9);
+}
+
 @media (hover: hover) {
   .text-link:hover {
     color: var(--color-brand-primary, #00ff41);
