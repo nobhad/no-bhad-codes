@@ -29,6 +29,12 @@
   visibility: hidden;
 }
 
+/* During paw exit animation - position below header so header stays visible */
+.paw-exit .intro-morph-overlay {
+  top: var(--header-height);
+  height: calc(100vh - var(--header-height));
+}
+
 /* Hidden state for when animation hasn't started or is skipped */
 .intro-morph-overlay.hidden {
   opacity: 0;

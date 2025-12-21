@@ -252,6 +252,16 @@ export class PageTransitionModule extends BaseModule {
         // Prevent default to handle navigation ourselves
         event.preventDefault();
 
+        // Immediately hide the intro-nav links when clicked (before exit animation)
+        const introNav = anchor.closest('.intro-nav') as HTMLElement;
+        if (introNav) {
+          gsap.to(introNav, {
+            opacity: 0,
+            duration: 0.15,
+            ease: 'power2.out'
+          });
+        }
+
         const pageId = this.getPageIdFromHash(href);
         this.log(`Nav link clicked: ${href} -> pageId: ${pageId}`);
 
@@ -418,8 +428,10 @@ export class PageTransitionModule extends BaseModule {
     this.isTransitioning = true;
     this.log(`Transitioning: ${this.currentPageId} -> ${pageId}`);
 
-    // Show transition overlay (covers main content area only, not header/footer)
-    this.showTransitionOverlay();
+    // Show transition overlay - skip for intro (uses intro-morph-overlay instead)
+    if (this.currentPageId !== 'intro') {
+      this.showTransitionOverlay();
+    }
 
     try {
       // Special handling for leaving intro page - play coyote paw exit animation

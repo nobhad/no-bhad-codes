@@ -157,6 +157,9 @@ export class IntroAnimationModule extends BaseModule {
   /** Reference to the overlay element containing the SVG animation */
   private morphOverlay: HTMLElement | null = null;
 
+  /** Cached SVG content to avoid re-fetching on exit/entry animations */
+  private cachedSvgText: string | null = null;
+
   constructor(options: ModuleOptions = {}) {
     super('IntroAnimationModule', { debug: true, ...options });
 
@@ -277,10 +280,12 @@ export class IntroAnimationModule extends BaseModule {
     // ========================================================================
     // LOAD AND PARSE SVG
     // Fetch the SVG file and parse it into a DOM structure
+    // Cache the SVG text for reuse in exit/entry animations
     // ========================================================================
     this.log('Loading SVG file...');
     const response = await fetch(PAW_SVG);
     const svgText = await response.text();
+    this.cachedSvgText = svgText; // Cache for exit/entry animations
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
 
@@ -1013,11 +1018,18 @@ export class IntroAnimationModule extends BaseModule {
     const introNav = document.querySelector('.intro-nav') as HTMLElement;
     console.log('[IntroAnimation] introNav:', introNav);
 
-    // Load SVG (async, before Promise)
-    console.log('[IntroAnimation] Loading SVG from:', PAW_SVG);
-    const response = await fetch(PAW_SVG);
-    const svgText = await response.text();
-    console.log('[IntroAnimation] SVG loaded, length:', svgText.length);
+    // Use cached SVG if available, otherwise fetch
+    let svgText: string;
+    if (this.cachedSvgText) {
+      console.log('[IntroAnimation] Using cached SVG');
+      svgText = this.cachedSvgText;
+    } else {
+      console.log('[IntroAnimation] Loading SVG from:', PAW_SVG);
+      const response = await fetch(PAW_SVG);
+      svgText = await response.text();
+      this.cachedSvgText = svgText;
+    }
+    console.log('[IntroAnimation] SVG ready, length:', svgText.length);
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
 
@@ -1175,7 +1187,9 @@ export class IntroAnimationModule extends BaseModule {
       morphSvg.appendChild(transformWrapper);
 
       // Add paw-exit class so overlay doesn't cover header/footer
+      // Remove intro-complete/intro-finished so CSS doesn't hide the overlay
       document.documentElement.classList.add('paw-exit');
+      document.documentElement.classList.remove('intro-complete', 'intro-finished');
 
       // Show overlay (we know morphOverlay is not null from earlier check)
       const overlay = this.morphOverlay!;
@@ -1189,6 +1203,12 @@ export class IntroAnimationModule extends BaseModule {
       // Hide actual business card (SVG card will show instead)
       console.log('[IntroAnimation] Hiding business card');
       businessCard.style.opacity = '0';
+
+      // Hide about-hero-desktop so its text doesn't show through during exit
+      const aboutHero = document.querySelector('.about-hero-desktop') as HTMLElement;
+      if (aboutHero) {
+        aboutHero.style.visibility = 'hidden';
+      }
 
       // Get finger paths for morphing
       const fingerA3 = clonedPos3.querySelector(`#${SVG_ELEMENT_IDS.fingerA3}`) as SVGPathElement;
@@ -1245,8 +1265,14 @@ export class IntroAnimationModule extends BaseModule {
             this.morphOverlay.style.visibility = 'hidden';
             this.morphOverlay.style.pointerEvents = 'none';
           }
-          // Remove paw-exit class
+          // Restore about-hero-desktop visibility
+          const aboutHero = document.querySelector('.about-hero-desktop') as HTMLElement;
+          if (aboutHero) {
+            aboutHero.style.visibility = '';
+          }
+          // Remove paw-exit class and restore intro-complete
           document.documentElement.classList.remove('paw-exit');
+          document.documentElement.classList.add('intro-complete');
           resolve();
         }
       });
@@ -1255,11 +1281,10 @@ export class IntroAnimationModule extends BaseModule {
       // ========================================================================
       // ANIMATION TIMING CONSTANTS - MATCHED TO INTRO (but reversed)
       // ========================================================================
-      const linkFadeDuration = 0.3;           // New for exit (links fade out first)
-      const pawEntryDuration = 1.6;           // Matches intro retractDuration
-      const clutchHold = 0.8;                 // Matches intro clutchHold
-      const releaseDuration = 0.5;            // Matches intro releaseDuration (for morph 2→1)
-      const exitDuration = 0.8;               // Matches intro entryDuration
+      const pawEntryDuration = 0.8;           // Fast paw entry (was 1.6)
+      const clutchHold = 0.4;                 // Brief hold (was 0.8)
+      const releaseDuration = 0.3;            // Quick morph (was 0.5)
+      const exitDuration = 0.6;               // Fast exit (was 0.8)
       const fadeEase = 'power2.inOut';
 
       // ========================================================================
@@ -1270,16 +1295,7 @@ export class IntroAnimationModule extends BaseModule {
       gsap.set(aboveCardGroup, { x: -1500, y: -1200 });
       gsap.set('#svg-business-card', { x: 0, y: 0 });
 
-      // ========================================================================
-      // PHASE 0: FADE OUT NAV LINKS (new for exit)
-      // ========================================================================
-      if (introNav) {
-        this.exitTimeline.to(introNav, {
-          opacity: 0,
-          duration: linkFadeDuration,
-          ease: 'power2.out'
-        });
-      }
+      // Nav links already faded by page-transition click handler - no need to fade here
 
       // ========================================================================
       // PHASE 1: PAW ENTERS (REVERSE of intro Phase 3 retraction)
@@ -1383,24 +1399,24 @@ export class IntroAnimationModule extends BaseModule {
       this.exitTimeline.to({}, { duration: clutchHold });
 
       // ========================================================================
-      // PHASE 4: EXIT (REVERSE of intro Phase 0)
-      // Paw + card exit together to where intro entry started
+      // PHASE 4: EXIT (Paw + card fully exit off-screen)
+      // Move far off-screen so nothing is visible
       // ========================================================================
       this.exitTimeline.to(behindCardGroup, {
-        x: -800,
-        y: -600,
+        x: -1500,
+        y: -1200,
         duration: exitDuration,
-        ease: 'power2.in'  // Reverse of intro's power2.out
+        ease: 'power2.in'
       });
       this.exitTimeline.to(aboveCardGroup, {
-        x: -800,
-        y: -600,
+        x: -1500,
+        y: -1200,
         duration: exitDuration,
         ease: 'power2.in'
       }, '<');
       this.exitTimeline.to('#svg-business-card', {
-        x: -800,
-        y: -600,
+        x: -1500,
+        y: -1200,
         duration: exitDuration,
         ease: 'power2.in'
       }, '<');
@@ -1475,9 +1491,15 @@ export class IntroAnimationModule extends BaseModule {
       gsap.set(introNav, { opacity: 0 });
     }
 
-    // Load SVG
-    const response = await fetch(PAW_SVG);
-    const svgText = await response.text();
+    // Use cached SVG if available, otherwise fetch
+    let svgText: string;
+    if (this.cachedSvgText) {
+      svgText = this.cachedSvgText;
+    } else {
+      const response = await fetch(PAW_SVG);
+      svgText = await response.text();
+      this.cachedSvgText = svgText;
+    }
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
 
