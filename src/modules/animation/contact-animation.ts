@@ -75,6 +75,8 @@ export class ContactAnimationModule extends BaseModule {
    * Set up the contact section animation
    */
   private setupAnimation(): void {
+    this.log('Setting up DESKTOP contact form animation...');
+
     this.container = document.querySelector('.contact-section') as HTMLElement;
     if (!this.container) {
       this.log('Contact section not found');
