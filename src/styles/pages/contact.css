@@ -366,21 +366,8 @@
   z-index: 10;
 }
 
-.input-item.leaving {
-  transform: translateY(0);
-  animation: drop-out 1.2s cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
-}
-
-/* Animation delays for staggered effect */
-.input-item.index-0 { animation-delay: 0.5s; }
-.input-item.index-1 { animation-delay: 0.6s; }
-.input-item.index-2 { animation-delay: 0.7s; }
-.input-item.index-3 { animation-delay: 0.8s; }
-
-.input-item.index-0.leaving { animation-delay: 0.1s; }
-.input-item.index-1.leaving { animation-delay: 0.15s; }
-.input-item.index-2.leaving { animation-delay: 0.2s; }
-.input-item.index-3.leaving { animation-delay: 0.25s; }
+/* LEGACY CSS ANIMATION CLASSES REMOVED - GSAP handles all animations
+ * .input-item.leaving and stagger delays now controlled by contact-animation.ts */
 
 /* Label styling */
 label.text-small {
@@ -451,24 +438,24 @@ textarea:focus-visible + label {
   transform: translate(15px) scale(1.02);
 }
 
-/* Label opacity change on hover/focus */
+/* Label opacity on hover/focus - keep at animated value (1) or default to 0.5 if not animated */
 input:hover + label,
 input:focus + label,
 input:focus-visible + label,
 textarea:hover + label,
 textarea:focus + label,
 textarea:focus-visible + label {
-  opacity: 0.5;
+  opacity: 1;
 }
 
-/* Placeholder opacity change on hover/focus */
+/* Placeholder opacity - respect animated value (defaults to 0.5 on hover if not animated) */
 input:hover::placeholder,
 input:focus::placeholder,
 input:focus-visible::placeholder,
 textarea:hover::placeholder,
 textarea:focus::placeholder,
 textarea:focus-visible::placeholder {
-  opacity: 0.5;
+  opacity: var(--placeholder-opacity, 0.5);
 }
 
 /* Focus outline */
@@ -518,11 +505,7 @@ input:-webkit-autofill:active {
   outline-offset: 3px;
 }
 
-.submit-button.leaving {
-  opacity: 1;
-  transform: translate(0);
-  animation: submit-button-slide-out 0.8s forwards;
-}
+/* .submit-button.leaving animation removed - GSAP handles this in contact-animation.ts */
 
 /* Submit button text - hidden by default */
 .submit-button span {
@@ -631,21 +614,14 @@ html[data-theme="dark"] textarea::placeholder {
   color: var(--color-neutral-300);
 }
 
-/* Email alternative box */
+/* Email alternative box - opacity controlled by GSAP */
 .email-box {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+  /* Initial state - GSAP handles animation */
   opacity: 0;
-  filter: blur(8px);
-  animation: blur-in 0.5s 1.2s forwards;
-}
-
-.email-box.leaving {
-  opacity: 1;
-  filter: blur(0px);
-  animation: blur-out 0.5s forwards;
 }
 
 .email-box .a-wrapper {
@@ -763,68 +739,9 @@ html[data-theme="dark"] textarea::placeholder {
   border: none;
 }
 
-/* Keyframe Animations */
-@keyframes drop-in {
-  0% {
-    transform: translateY(-105%);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-
-@keyframes drop-out {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(105%);
-  }
-}
-
-@keyframes blur-in {
-  0% {
-    opacity: 0;
-    filter: blur(8px);
-  }
-  100% {
-    opacity: 1;
-    filter: blur(0px);
-  }
-}
-
-@keyframes blur-out {
-  0% {
-    opacity: 1;
-    filter: blur(0px);
-  }
-  100% {
-    opacity: 0;
-    filter: blur(8px);
-  }
-}
-
-@keyframes submit-button-slide-in {
-  0% {
-    opacity: 0;
-    transform: translate(800px);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(0);
-  }
-}
-
-@keyframes submit-button-slide-out {
-  0% {
-    opacity: 1;
-    transform: translate(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(800px);
-  }
-}
+/* LEGACY KEYFRAMES REMOVED - All animations now handled by GSAP in contact-animation.ts
+ * Removed: drop-in, drop-out, blur-in, blur-out, submit-button-slide-in, submit-button-slide-out
+ * GSAP provides better performance and control for complex animations */
 
 /* Fixed widths - no responsive changes on desktop */
 
