@@ -77,6 +77,18 @@ export function calculateSvgAlignment(
   const translateX = actualCardRect.left - (SVG_CARD.x * scale);
   const translateY = actualCardRect.top - (SVG_CARD.y * scale);
 
+  console.log('[SVG Alignment] Business card position:', {
+    cardWidth: actualCardRect.width,
+    cardLeft: actualCardRect.left,
+    cardTop: actualCardRect.top,
+    svgCardX: SVG_CARD.x,
+    svgCardY: SVG_CARD.y,
+    svgCardWidth: SVG_CARD.width,
+    scale,
+    translateX,
+    translateY
+  });
+
   return {
     scale,
     translateX,
