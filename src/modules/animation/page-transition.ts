@@ -600,8 +600,8 @@ export class PageTransitionModule extends BaseModule {
    */
   private async playIntroExitAnimation(): Promise<void> {
     try {
-      // Try mobile module first, then desktop
-      const moduleName = this.isMobile ? 'MobileIntroAnimationModule' : 'IntroAnimationModule';
+      // Both desktop and mobile are registered as 'IntroAnimationModule'
+      const moduleName = 'IntroAnimationModule';
       console.log('[PageTransition] Resolving intro module:', moduleName);
       const introModule = await container.resolve(moduleName) as IntroAnimationModule;
       if (introModule && typeof introModule.playExitAnimation === 'function') {
