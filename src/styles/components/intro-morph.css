@@ -89,24 +89,6 @@
   stroke-width: 5px;
 }
 
-/* Header transparent during intro animation ONLY */
-.intro-loading .header {
-  background-color: transparent !important;
-  background: transparent !important;
-}
-
-/* Header content invisible during intro animation ONLY */
-.intro-loading .header > * {
-  opacity: 0 !important;
-}
-
-/* Hide portal dropdown during intro animation ONLY */
-.intro-loading .portal-dropdown {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
 
 /* Mobile: Overlay is initially hidden via CSS, JS will show it when mobile animation runs */
 @media screen and (max-width: 767px) {
