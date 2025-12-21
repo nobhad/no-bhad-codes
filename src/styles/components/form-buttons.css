@@ -36,8 +36,8 @@
 .btn-primary,
 .form-button,
 .login-btn {
-  background-color: var(--color-neutral-300);
-  color: var(--color-text-primary);
+  background-color: var(--color-brand-primary);
+  color: var(--color-white);
 }
 
 /* Valid/Active button state */

@@ -431,26 +431,9 @@
   transition: background-color 0.3s ease;
   text-transform: uppercase;
   box-sizing: border-box;
-  background-color: var(--color-neutral-300);
-  color: var(--color-text-primary);
+  background-color: var(--color-brand-primary);
+  color: var(--color-white);
   margin-top: clamp(8px, 2vw, 16px);
-}
-
-.login-form .btn:hover {
-  background-color: var(--color-primary);
-  color: var(--color-dark);
-}
-
-/* Form validation - button changes to accent color when all fields filled */
-.login-form .btn.form-valid {
-  background-color: var(--color-primary) !important;
-  color: var(--color-dark) !important;
-  /* Keep original border color - don't change it */
-}
-
-.login-form .btn.form-valid:hover {
-  background-color: var(--color-primary) !important;
-  color: var(--color-dark) !important;
 }
 
 /* Dark theme adjustments */
