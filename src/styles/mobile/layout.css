@@ -84,8 +84,13 @@
     justify-self: center !important;
   }
 
-  /* Hero section - hidden on mobile */
-  .hero-section {
+  /* Hero sections - hidden on mobile */
+  .hero-section,
+  .page-hero-desktop,
+  .about-hero-desktop,
+  .contact-hero-desktop,
+  .projects-hero-desktop,
+  .portfolio-hero-desktop {
     display: none !important;
   }
 
