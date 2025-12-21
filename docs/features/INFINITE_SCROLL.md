@@ -1,5 +1,7 @@
 # Infinite Scroll Module
 
+> **⚠️ DEPRECATED:** This module is no longer active. Infinite scroll was removed in favor of standard page scrolling with virtual page transitions. See `src/core/modules-config.ts` line 169 for details.
+
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -27,7 +29,7 @@ The Infinite Scroll module creates a seamless looping scroll experience on the m
 
 **File:** `src/modules/infinite-scroll.ts`
 
-**Last Updated:** December 2024
+**Last Updated:** December 20, 2025 (Marked as deprecated)
 
 ---
 

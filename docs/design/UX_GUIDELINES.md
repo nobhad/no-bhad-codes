@@ -20,7 +20,7 @@
 
 This document defines the user experience standards for the project. All UI implementations must follow these guidelines to ensure consistency and usability.
 
-**Last Updated:** December 2024
+**Last Updated:** December 20, 2025
 
 ---
 
@@ -177,9 +177,13 @@ box-shadow:
 
 ### Color Usage
 
-- **Primary action**: `var(--color-primary)` (#00ff41)
-- **Text**: `var(--color-dark)` or `var(--color-text-primary)`
-- **Backgrounds**: `var(--color-neutral-100)` through `var(--color-neutral-300)`
+**Theme-Aware Primary Colors:**
+
+- **Light Mode Primary**: `var(--color-brand-primary)` (#dc2626 - Crimson red)
+- **Dark Mode Primary**: `var(--color-brand-primary)` (#00ff41 - Matrix green)
+- **Text**: `var(--color-text-primary)`, `var(--color-text-secondary)`, `var(--color-text-tertiary)`
+- **Backgrounds**: `var(--color-bg-primary)`, `var(--color-bg-secondary)`, `var(--color-bg-tertiary)`
+- **Interactive**: `var(--color-interactive-primary)` with hover and active variants
 - **Never hardcode colors** - always use CSS variables
 
 ---

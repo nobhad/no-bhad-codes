@@ -1,20 +1,37 @@
-# Current Work - December 19, 2025
+# Current Work - December 20, 2025
 
 ---
 
-## Assets to Add
+## Recent Updates (December 20, 2025)
 
-### paw.svg
+### Documentation Overhaul - COMPLETE
 
-Red paw print SVG icon - needs to be added to project assets.
+- ✅ Updated all design documentation dates to December 20, 2025
+- ✅ Documented crimson (#dc2626) as light mode primary brand color
+- ✅ Documented matrix green (#00ff41) as dark mode primary brand color
+- ✅ Marked INFINITE_SCROLL.md as deprecated (module disabled in favor of virtual page transitions)
+- ✅ Updated CSS_ARCHITECTURE.md with current color system
+- ✅ Updated UX_GUIDELINES.md with theme-aware color usage
+- ✅ Updated ANIMATIONS.md date
 
-**Note:** Contains hardcoded color `#d11818` - should be updated to use CSS variable or `currentColor` for theme compatibility.
+### Color System Update
+
+**Current Brand Colors:**
+
+- **Light Mode**: Crimson red (#dc2626) for primary actions and interactive elements
+- **Dark Mode**: Matrix green (#00ff41) for primary actions and interactive elements
+- Theme-aware color tokens properly configured in `src/design-system/tokens/colors.css`
 
 ---
 
-## Concerns
+## Completed Work
 
-- [ ] **Loop-trigger-zone awkward space** - Plan: Remove infinite scroll entirely, use page-style blur-in transitions (see TODOs > Features)
+### ✅ Infinite Scroll Removal
+
+- InfiniteScrollModule disabled in modules-config.ts (line 169)
+- Replaced with virtual page transitions (PageTransitionModule)
+- Uses standard page scrolling with blur-in transitions
+- Documentation marked as deprecated
 
 ---
 
@@ -22,12 +39,6 @@ Red paw print SVG icon - needs to be added to project assets.
 
 ### Features
 
-- [ ] **Replace infinite scroll with page-style transitions** (salcosta.dev style)
-  - Disable InfiniteScrollModule in app.ts
-  - Remove spacer elements from index.html (#loop-spacer, #loop-spacer-bottom, #loop-trigger-zone)
-  - Remove spacer CSS from layout.css
-  - Add blur-in/drop-in transitions to sections as they scroll into view
-  - Reference: `docs/design/salcosta/SALCOSTA_DESIGN_ANALYSIS.md`
 - [ ] Add animated section between about and contact to balance spacing
 
 ### Code Quality (Pending)

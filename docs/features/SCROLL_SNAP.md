@@ -27,7 +27,7 @@ The Scroll Snap module provides GSAP-powered section snapping for the main site.
 
 **File:** `src/modules/scroll-snap.ts`
 
-**Last Updated:** December 2024
+**Last Updated:** December 20, 2025
 
 ---
 

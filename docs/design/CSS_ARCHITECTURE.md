@@ -75,12 +75,18 @@ The design system provides the foundational tokens for the entire application.
 --color-info-500
 ```
 
-**Brand Colors**:
+**Brand Colors** (Theme-Aware):
 
 ```css
+/* Light Mode */
+--color-brand-primary: #dc2626   /* Crimson red */
+--color-brand-primary-rgb: 220, 38, 38
+--color-brand-secondary: #ff6b6b
+--color-brand-accent: #ffd93d
+
+/* Dark Mode */
 --color-brand-primary: #00ff41   /* Matrix green */
---color-brand-secondary
---color-brand-accent
+--color-brand-primary-rgb: 0, 255, 65
 ```
 
 ### Import Order

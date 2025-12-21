@@ -96,17 +96,10 @@ html:not(.intro-complete) .header {
   background: transparent !important;
 }
 
-/* Header content invisible during intro and exit animations (paw visible through) */
+/* Header content invisible during intro animation ONLY (not exit) */
 .intro-loading .header > *,
-html:not(.intro-complete) .header > *,
-.intro-exit .header > * {
+html:not(.intro-complete) .header > * {
   opacity: 0 !important;
-}
-
-/* Header bg transparent during exit animation */
-.intro-exit .header {
-  background-color: transparent !important;
-  background: transparent !important;
 }
 
 /* Hide portal dropdown during intro animation */
