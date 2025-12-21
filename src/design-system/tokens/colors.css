@@ -14,8 +14,8 @@
    * ============================================ */
 
   /* Brand Colors */
-  --color-brand-primary: #00ff41;
-  --color-brand-primary-rgb: 0, 255, 65;
+  --color-brand-primary: #dc2626; /* Crimson red for light mode */
+  --color-brand-primary-rgb: 220, 38, 38;
   --color-brand-secondary: #ff6b6b;
   --color-brand-accent: #ffd93d;
 
@@ -76,8 +76,8 @@
 
   /* Interactive Colors */
   --color-interactive-primary: var(--color-brand-primary);
-  --color-interactive-primary-hover: #00cc33;
-  --color-interactive-primary-active: #00aa2a;
+  --color-interactive-primary-hover: #b91c1c; /* Darker red for hover */
+  --color-interactive-primary-active: #991b1b; /* Even darker red for active */
   --color-interactive-secondary: var(--color-gray-700);
   --color-interactive-secondary-hover: var(--color-gray-800);
   --color-interactive-secondary-active: var(--color-gray-900);
@@ -85,7 +85,7 @@
   /* State Colors */
   --color-state-hover: rgba(0, 0, 0, 0.05);
   --color-state-active: rgba(0, 0, 0, 0.1);
-  --color-state-selected: rgba(0, 255, 65, 0.1);
+  --color-state-selected: rgba(220, 38, 38, 0.1); /* Crimson red for light mode */
   --color-state-disabled: var(--color-gray-300);
 
   /* Shadow Colors */
@@ -100,6 +100,10 @@
  * ============================================ */
 
 html[data-theme="dark"] {
+  /* Brand Colors - Green for dark mode */
+  --color-brand-primary: #00ff41; /* Green for dark mode */
+  --color-brand-primary-rgb: 0, 255, 65;
+
   /* Background Colors */
   --color-bg-primary: var(--color-gray-950);
   --color-bg-secondary: var(--color-gray-900);
@@ -124,6 +128,11 @@ html[data-theme="dark"] {
   --color-border-primary: var(--color-gray-700);
   --color-border-secondary: var(--color-gray-800);
   --color-border-tertiary: var(--color-gray-900);
+
+  /* Interactive Colors - Green for dark mode */
+  --color-interactive-primary: var(--color-brand-primary);
+  --color-interactive-primary-hover: #00cc33; /* Darker green for hover */
+  --color-interactive-primary-active: #00aa2a; /* Even darker green for active */
 
   /* State Colors */
   --color-state-hover: rgba(255, 255, 255, 0.05);

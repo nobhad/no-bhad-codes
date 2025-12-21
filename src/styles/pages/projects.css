@@ -111,14 +111,14 @@
   color: var(--color-bg);
   border-color: var(--color-primary);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 255, 65, 0.2);
+  box-shadow: 0 4px 12px rgba(var(--color-brand-primary-rgb), 0.2);
 }
 
 .filter-btn.active {
   background: var(--color-primary);
   color: var(--color-bg);
   border-color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(0, 255, 65, 0.2);
+  box-shadow: 0 2px 8px rgba(var(--color-brand-primary-rgb), 0.2);
 }
 
 .filter-count {
@@ -208,7 +208,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 255, 65, 0.9);
+  background: rgba(var(--color-brand-primary-rgb), 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -433,15 +433,15 @@
    =============================================== */
 
 [data-theme="dark"] .projects-hero {
-  background: linear-gradient(135deg, var(--color-bg) 0%, rgba(0, 255, 65, 0.02) 100%);
+  background: linear-gradient(135deg, var(--color-bg) 0%, rgba(var(--color-brand-primary-rgb), 0.02) 100%);
 }
 
 [data-theme="dark"] .filter-btn:hover {
-  box-shadow: 0 4px 12px rgba(0, 255, 65, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--color-brand-primary-rgb), 0.3);
 }
 
 [data-theme="dark"] .filter-btn.active {
-  box-shadow: 0 2px 8px rgba(0, 255, 65, 0.3);
+  box-shadow: 0 2px 8px rgba(var(--color-brand-primary-rgb), 0.3);
 }
 
 [data-theme="dark"] .project-card:hover {

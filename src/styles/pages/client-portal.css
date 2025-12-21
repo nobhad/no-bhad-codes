@@ -2082,12 +2082,12 @@ html[data-theme="dark"] .login-form label {
 }
 
 .account-item:hover {
-  background-color: rgba(0, 255, 65, 0.08);
+  background-color: rgba(var(--color-brand-primary-rgb), 0.08);
   transform: translateX(2px);
 }
 
 .account-item.active {
-  background-color: rgba(0, 255, 65, 0.12);
+  background-color: rgba(var(--color-brand-primary-rgb), 0.12);
   border-left-color: var(--color-primary);
   transform: translateX(4px);
 }

@@ -1749,7 +1749,7 @@
 #pd-upload-dropzone:hover,
 #pd-upload-dropzone.dragover {
   border-color: var(--color-brand-primary);
-  background: rgba(0, 255, 65, 0.05);
+  background: rgba(var(--color-brand-primary-rgb), 0.05);
 }
 
 #pd-upload-dropzone p {

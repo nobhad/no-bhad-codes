@@ -68,7 +68,7 @@
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease;
-  border: 1px solid rgba(0, 255, 65, 0.1);
+  border: 1px solid rgba(var(--color-brand-primary-rgb), 0.1);
 }
 
 .portfolio-item:hover {
@@ -120,7 +120,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 8px rgba(0, 255, 65, 0.3);
+  box-shadow: 0 2px 8px rgba(var(--color-brand-primary-rgb), 0.3);
 }
 
 /* Carousel Controls */
@@ -151,7 +151,7 @@
   background: var(--color-primary);
   color: var(--color-neutral-100);
   transform: scale(1.05);
-  box-shadow: 0 4px 16px rgba(0, 255, 65, 0.3);
+  box-shadow: 0 4px 16px rgba(var(--color-brand-primary-rgb), 0.3);
 }
 
 .carousel-btn:disabled {
@@ -191,7 +191,7 @@
 .indicator.active {
   background: var(--color-primary);
   transform: scale(1.2);
-  box-shadow: 0 0 12px rgba(0, 255, 65, 0.5);
+  box-shadow: 0 0 12px rgba(var(--color-brand-primary-rgb), 0.5);
 }
 
 /* Call to Action */
@@ -208,7 +208,7 @@
 /* Dark Theme Support */
 html[data-theme="dark"] .portfolio-item {
   background: var(--color-neutral-200);
-  border-color: rgba(0, 255, 65, 0.2);
+  border-color: rgba(var(--color-brand-primary-rgb), 0.2);
 }
 
 html[data-theme="dark"] .portfolio-item h3,
