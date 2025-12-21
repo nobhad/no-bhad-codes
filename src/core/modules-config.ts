@@ -248,24 +248,25 @@ export function registerModules(debug: boolean = false): void {
       }
     },
     {
-      name: 'AboutHeroModule',
+      name: 'PageHeroModule',
       type: 'dom',
       factory: async () => {
-        // Only load about hero on index/home page AND desktop
+        // Only load page hero on index/home page AND desktop
+        // Unified hero animation for about and contact pages
         const currentPath = window.location.pathname;
         const isHomePage = currentPath === '/' || currentPath === '/index.html';
         const isDesktop = window.matchMedia('(min-width: 768px)').matches;
 
         if (isHomePage && isDesktop) {
-          const { AboutHeroModule } = await import('../modules/animation/about-hero');
-          return new AboutHeroModule({ debug });
+          const { PageHeroModule } = await import('../modules/animation/page-hero');
+          return new PageHeroModule({ debug });
         }
         // Return a dummy module for other pages or mobile
         return {
           init: async () => {},
           destroy: () => {},
           isInitialized: true,
-          name: 'AboutHeroModule'
+          name: 'PageHeroModule'
         };
       }
     },
@@ -346,7 +347,7 @@ export function getMainSiteModules(): string[] {
     'ContactAnimationModule',
     'SectionTransitionsModule',
     'PageTransitionModule', // Desktop only - virtual pages like salcosta.dev
-    'AboutHeroModule' // Desktop only - mouse-following text animation on about page
+    'PageHeroModule' // Desktop only - unified hero animation for about and contact pages
   ];
 }
 

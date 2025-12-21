@@ -448,45 +448,76 @@ export class ContactAnimationModule extends BaseModule {
     }
 
     // ========================================================================
-    // TRIGGER: Listen for page navigation events (virtual pages)
+    // TRIGGER: Listen for hero reveal events (after wheel animation completes)
     // ========================================================================
 
-    // Pause the timeline initially - we'll play it on navigation
+    // Pause the timeline initially - we'll play it when hero is revealed
     this.timeline.pause();
 
-    // Listen for page navigation events from PageTransitionModule
+    // Listen for PageHeroModule reveal event - this fires after hero animation completes
+    this.on('PageHeroModule:revealed', ((event: CustomEvent) => {
+      const { pageId } = event.detail || {};
+      this.log(`Hero revealed event received - pageId: ${pageId}`);
+
+      if (pageId === 'contact') {
+        this.log('Contact hero revealed - playing form animation');
+        this.playFormAnimation();
+      }
+    }) as EventListener);
+
+    // Listen for page navigation away from contact
     this.on('PageTransitionModule:page-changed', ((event: CustomEvent) => {
       const { to, from } = event.detail || {};
-      this.log(`Page changed event received - from: ${from}, to: ${to}`);
 
+      if (from === 'contact') {
+        this.log('Navigated away from contact - playing out animation');
+        this.playOutAnimation();
+      }
+
+      // Reset animation state when entering contact (hero will handle reveal)
       if (to === 'contact') {
-        this.log('Navigated to contact - playing animation');
-        // Make sure container is visible before playing
+        this.log('Navigated to contact - preparing for hero animation');
+        // Make container visible but hide form content (hero is on top)
         if (this.container) {
           this.container.classList.remove('page-hidden');
           this.container.classList.add('page-active');
-          // Clear inline styles and show
           this.container.style.display = '';
           this.container.style.visibility = '';
           this.container.style.opacity = '';
           gsap.set(this.container, { visibility: 'visible', opacity: 1 });
         }
-        this.timeline?.restart();
-      } else if (from === 'contact') {
-        this.log('Navigated away from contact - playing out animation');
-        this.playOutAnimation();
+        // Reset animated elements to initial state for next animation
+        this.resetAnimatedElements();
       }
     }) as EventListener);
 
     // Also check if we're already on contact page (direct navigation)
+    // In this case, wait for hero reveal event instead of playing immediately
     const currentHash = window.location.hash;
     if (currentHash === '#/contact' || currentHash === '#contact') {
-      this.log('Already on contact page - playing animation');
-      // Small delay to ensure page transition completes first
-      setTimeout(() => this.timeline?.play(), 100);
+      this.log('Already on contact page - waiting for hero reveal');
+      // Hero module will trigger the reveal event when ready
     }
 
-    this.log('Contact animation initialized (virtual pages mode)');
+    this.log('Contact animation initialized (waiting for hero reveal)');
+  }
+
+  /**
+   * Play the form animation after hero reveal
+   */
+  private playFormAnimation(): void {
+    if (!this.container || !this.timeline) return;
+
+    // Make sure container is visible
+    this.container.classList.remove('page-hidden');
+    this.container.classList.add('page-active');
+    this.container.style.display = '';
+    this.container.style.visibility = '';
+    this.container.style.opacity = '';
+    gsap.set(this.container, { visibility: 'visible', opacity: 1 });
+
+    // Play the animation
+    this.timeline.restart();
   }
 
   /**
