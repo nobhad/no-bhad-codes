@@ -112,158 +112,11 @@
 
 /* ============================================
  * KEYFRAME DEFINITIONS
+ * ============================================
+ * NOTE: CSS keyframes have been migrated to GSAP utilities
+ * See: src/utils/gsap-utilities.ts for all animation functions
+ * This codebase follows a GSAP-first animation approach
  * ============================================ */
-
-@keyframes fadeIn {
-  from {
-    opacity: var(--opacity-0);
-  }
-  to {
-    opacity: var(--opacity-100);
-  }
-}
-
-@keyframes fadeOut {
-  from {
-    opacity: var(--opacity-100);
-  }
-  to {
-    opacity: var(--opacity-0);
-  }
-}
-
-@keyframes slideInFromTop {
-  from {
-    opacity: var(--opacity-0);
-    transform: translateY(-100%);
-  }
-  to {
-    opacity: var(--opacity-100);
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInFromBottom {
-  from {
-    opacity: var(--opacity-0);
-    transform: translateY(100%);
-  }
-  to {
-    opacity: var(--opacity-100);
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInFromLeft {
-  from {
-    opacity: var(--opacity-0);
-    transform: translateX(-100%);
-  }
-  to {
-    opacity: var(--opacity-100);
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInFromRight {
-  from {
-    opacity: var(--opacity-0);
-    transform: translateX(100%);
-  }
-  to {
-    opacity: var(--opacity-100);
-    transform: translateX(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: var(--opacity-0);
-    transform: scale(var(--scale-0));
-  }
-  to {
-    opacity: var(--opacity-100);
-    transform: scale(var(--scale-100));
-  }
-}
-
-@keyframes scaleOut {
-  from {
-    opacity: var(--opacity-100);
-    transform: scale(var(--scale-100));
-  }
-  to {
-    opacity: var(--opacity-0);
-    transform: scale(var(--scale-0));
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(var(--rotate-0));
-  }
-  to {
-    transform: rotate(var(--rotate-360));
-  }
-}
-
-@keyframes pulse {
-  from {
-    opacity: var(--opacity-100);
-  }
-  to {
-    opacity: var(--opacity-50);
-  }
-}
-
-@keyframes bounce {
-  0%,
-  20%,
-  53%,
-  80%,
-  100% {
-    transform: translateY(0);
-  }
-  40%,
-  43% {
-    transform: translateY(-30px);
-  }
-  70% {
-    transform: translateY(-15px);
-  }
-  90% {
-    transform: translateY(-4px);
-  }
-}
-
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  10%,
-  30%,
-  50%,
-  70%,
-  90% {
-    transform: translateX(-10px);
-  }
-  20%,
-  40%,
-  60%,
-  80% {
-    transform: translateX(10px);
-  }
-}
-
-@keyframes flip {
-  0% {
-    transform: rotateY(0);
-  }
-  100% {
-    transform: rotateY(var(--rotate-180));
-  }
-}
 
 /* ============================================
  * ANIMATION UTILITY CLASSES
@@ -306,46 +159,14 @@
   animation-timing-function: var(--easing-elastic);
 }
 
-/* Animation utilities */
-.animate-fade-in {
-  animation: fadeIn var(--duration-slow) var(--easing-decelerated);
-}
-.animate-fade-out {
-  animation: fadeOut var(--duration-normal) var(--easing-accelerated);
-}
-.animate-slide-in-top {
-  animation: slideInFromTop var(--duration-slow) var(--easing-decelerated);
-}
-.animate-slide-in-bottom {
-  animation: slideInFromBottom var(--duration-slow) var(--easing-decelerated);
-}
-.animate-slide-in-left {
-  animation: slideInFromLeft var(--duration-slow) var(--easing-decelerated);
-}
-.animate-slide-in-right {
-  animation: slideInFromRight var(--duration-slow) var(--easing-decelerated);
-}
-.animate-scale-in {
-  animation: scaleIn var(--duration-slow) var(--easing-bounce);
-}
-.animate-scale-out {
-  animation: scaleOut var(--duration-normal) var(--easing-accelerated);
-}
-.animate-spin {
-  animation: spin var(--animation-spinner);
-}
-.animate-pulse {
-  animation: pulse var(--animation-pulse);
-}
-.animate-bounce {
-  animation: bounce 1s var(--easing-smooth) infinite;
-}
-.animate-shake {
-  animation: shake 0.5s var(--easing-smooth);
-}
-.animate-flip {
-  animation: flip var(--animation-card-flip);
-}
+/* Animation utilities
+ * NOTE: Animation utility classes have been migrated to GSAP
+ * Use GSAP animation functions from src/utils/gsap-utilities.ts instead
+ * Example:
+ *   import { fadeIn, slideIn } from '../utils/gsap-utilities';
+ *   fadeIn('.element');
+ *   slideIn('.element', 'top');
+ */
 
 /* Hover animations */
 .hover-scale:hover {
@@ -388,7 +209,10 @@
  * ACCESSIBILITY CONSIDERATIONS
  * ============================================ */
 
-/* Respect reduced motion preferences */
+/* Respect reduced motion preferences
+ * NOTE: GSAP animations check for prefers-reduced-motion in JavaScript
+ * See individual animation modules for reduced-motion handling
+ */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -397,11 +221,5 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-
-  /* Keep essential animations but make them faster */
-  .animate-fade-in,
-  .animate-fade-out {
-    animation-duration: 0.01ms;
   }
 }

@@ -38,7 +38,7 @@
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  /* GSAP handles overlay transition - see page-transition.ts */
 }
 
 /* Active state during transitions */
@@ -227,9 +227,7 @@
 .page-entering.page-enter-active {
   opacity: 1;
   filter: blur(0);
-  transition:
-    opacity var(--page-transition-duration-in) var(--page-transition-ease),
-    filter var(--page-transition-duration-in) var(--page-transition-ease);
+  /* GSAP handles page enter transition - see page-transition.ts */
 }
 
 /* Blur-out animation (leaving) */
@@ -241,9 +239,7 @@
 .page-leaving.page-leave-active {
   opacity: 0;
   filter: blur(var(--page-blur-amount));
-  transition:
-    opacity var(--page-transition-duration-out) var(--page-transition-ease),
-    filter var(--page-transition-duration-out) var(--page-transition-ease);
+  /* GSAP handles page leave transition - see page-transition.ts */
 }
 
 /* ============================================
@@ -257,7 +253,7 @@
 
 .page-child-entering.page-child-enter-active {
   transform: translateY(0);
-  transition: transform var(--page-transition-duration-in) var(--page-transition-ease);
+  /* GSAP handles child enter transition - see page-transition.ts */
 }
 
 /* Child elements drop-out (to bottom) */
@@ -267,7 +263,7 @@
 
 .page-child-leaving.page-child-leave-active {
   transform: translateY(105%);
-  transition: transform var(--page-transition-duration-out) var(--page-transition-ease);
+  /* GSAP handles child leave transition - see page-transition.ts */
 }
 
 /* ============================================

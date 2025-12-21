@@ -393,16 +393,7 @@ li {
   font-family: monospace;
   text-shadow: none;
   box-shadow: 0 2px 8px rgba(var(--color-brand-primary-rgb), 0.3);
-  animation: pulse-glow 2s ease-in-out infinite alternate;
-}
-
-@keyframes pulse-glow {
-  from {
-    box-shadow: 0 2px 8px rgba(var(--color-brand-primary-rgb), 0.3);
-  }
-  to {
-    box-shadow: 0 2px 16px rgba(var(--color-brand-primary-rgb), 0.6);
-  }
+  /* GSAP handles pulse-glow animation - see navigation.ts */
 }
 
 /* Dark theme adjustments for coming soon banner */
