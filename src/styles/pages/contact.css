@@ -168,7 +168,7 @@
     will-change: transform;
   }
 
-  /* Contact content wrapper - initially hidden, fades in after hero reveal */
+  /* Contact content wrapper - GSAP controls visibility */
   .contact-content {
     width: 100%;
     height: 100%;
@@ -176,13 +176,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    /* Start invisible - PageHeroModule will fade in after hero animation */
-    opacity: 0;
-  }
-
-  /* When hero is revealed, content becomes visible (GSAP controls actual fade) */
-  .contact-hero-desktop.hero-revealed + .contact-content {
-    opacity: 1;
+    /* DO NOT set opacity in CSS - GSAP controls it in PageHeroModule */
   }
 }
 
@@ -431,13 +425,13 @@
 /* LEGACY CSS ANIMATION CLASSES REMOVED - GSAP handles all animations
  * .input-item.leaving and stagger delays now controlled by contact-animation.ts */
 
-/* Label styling */
+/* Label styling - use inverse text color for proper contrast */
 label.text-small {
   margin: 0.25rem 0 0 1rem;
   position: absolute;
   z-index: 3;
   transform: translate(0);
-  color: rgba(var(--bg-rgb, 255, 251, 238), 1);
+  color: var(--color-text-inverse);
   opacity: 0;
   pointer-events: none;
   font-size: 1rem;
@@ -477,10 +471,10 @@ label.text-small {
   padding: 1.5rem 1rem 0.5rem 1.5rem;
 }
 
-/* Placeholder styling */
-input::placeholder,
-textarea::placeholder {
-  color: rgba(var(--bg-rgb, 255, 251, 238), 1);
+/* Placeholder styling - use same color as input text for proper contrast */
+.input-item input::placeholder,
+.input-item textarea::placeholder {
+  color: var(--color-text-inverse);
   opacity: var(--placeholder-opacity, 0);
 }
 
@@ -511,12 +505,12 @@ textarea:focus-visible + label {
 }
 
 /* Placeholder opacity - respect animated value (defaults to 0.5 on hover if not animated) */
-input:hover::placeholder,
-input:focus::placeholder,
-input:focus-visible::placeholder,
-textarea:hover::placeholder,
-textarea:focus::placeholder,
-textarea:focus-visible::placeholder {
+.input-item input:hover::placeholder,
+.input-item input:focus::placeholder,
+.input-item input:focus-visible::placeholder,
+.input-item textarea:hover::placeholder,
+.input-item textarea:focus::placeholder,
+.input-item textarea:focus-visible::placeholder {
   opacity: var(--placeholder-opacity, 0.5);
 }
 
@@ -667,14 +661,7 @@ html[data-theme="dark"] .submit-button:focus-visible {
   outline-offset: 3px;
 }
 
-html[data-theme="dark"] label.text-small {
-  color: var(--color-neutral-300);
-}
-
-html[data-theme="dark"] input::placeholder,
-html[data-theme="dark"] textarea::placeholder {
-  color: var(--color-neutral-300);
-}
+/* Dark mode label and placeholder color overrides removed - using --color-text-inverse for automatic theme adaptation */
 
 /* Email alternative box - opacity controlled by GSAP */
 .email-box {
