@@ -321,6 +321,10 @@
 
   /* NEVER round corners */
   border-radius: 0;
+
+  /* Performance: GPU-accelerated 3D transforms */
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 /* ==========================================

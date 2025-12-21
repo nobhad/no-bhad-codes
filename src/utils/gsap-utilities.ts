@@ -56,6 +56,52 @@ export function fadeOut(
 }
 
 /**
+ * Blur in animation - elements come into focus like camera lens
+ * @param target - Element(s) to animate
+ * @param duration - Animation duration in seconds (default: 0.5s)
+ * @param blurAmount - Blur amount in pixels (default: 8px)
+ * @param options - Additional GSAP options
+ * @returns GSAP Tween
+ */
+export function blurIn(
+  target: gsap.TweenTarget,
+  duration = 0.5,
+  blurAmount = 8,
+  options: gsap.TweenVars = {}
+) {
+  return gsap.from(target, {
+    opacity: 0,
+    filter: `blur(${blurAmount}px)`,
+    duration,
+    ease: 'cubic-bezier(0.3, 0.9, 0.3, 0.9)',
+    ...options
+  });
+}
+
+/**
+ * Blur out animation - elements blur out of focus
+ * @param target - Element(s) to animate
+ * @param duration - Animation duration in seconds (default: 0.5s)
+ * @param blurAmount - Blur amount in pixels (default: 8px)
+ * @param options - Additional GSAP options
+ * @returns GSAP Tween
+ */
+export function blurOut(
+  target: gsap.TweenTarget,
+  duration = 0.5,
+  blurAmount = 8,
+  options: gsap.TweenVars = {}
+) {
+  return gsap.to(target, {
+    opacity: 0,
+    filter: `blur(${blurAmount}px)`,
+    duration,
+    ease: 'cubic-bezier(0.3, 0.9, 0.3, 0.9)',
+    ...options
+  });
+}
+
+/**
  * Slide in from direction (replaces CSS slideInFrom* keyframes)
  * @param target - Element(s) to animate
  * @param direction - Direction to slide from
@@ -266,6 +312,56 @@ export function pulseGlow(
 // ============================================
 // PERFORMANCE UTILITIES
 // ============================================
+
+/**
+ * Set will-change on element(s) for animation optimization
+ * @param target - Element(s) to optimize
+ * @param properties - CSS properties to hint (default: 'transform, opacity')
+ */
+export function setWillChange(
+  target: gsap.TweenTarget,
+  properties = 'transform, opacity'
+): void {
+  const elements = gsap.utils.toArray(target) as HTMLElement[];
+  elements.forEach(el => {
+    if (el && el.style) {
+      el.style.willChange = properties;
+    }
+  });
+}
+
+/**
+ * Clear will-change after animation completes
+ * Call this in onComplete to free GPU memory
+ * @param target - Element(s) to clear
+ */
+export function clearWillChange(target: gsap.TweenTarget): void {
+  const elements = gsap.utils.toArray(target) as HTMLElement[];
+  elements.forEach(el => {
+    if (el && el.style) {
+      el.style.willChange = 'auto';
+    }
+  });
+}
+
+/**
+ * Wrap animation with automatic will-change handling
+ * Sets will-change before animation, clears after
+ * @param target - Element(s) to animate
+ * @param animationFn - Animation function to wrap
+ * @param properties - will-change properties (default: 'transform, opacity')
+ * @returns The animation tween
+ */
+export function withWillChange(
+  target: gsap.TweenTarget,
+  animationFn: () => gsap.core.Tween,
+  properties = 'transform, opacity'
+): gsap.core.Tween {
+  setWillChange(target, properties);
+  const tween = animationFn();
+  tween.eventCallback('onComplete', () => clearWillChange(target));
+  return tween;
+}
 
 /**
  * Throttle utility for event handlers

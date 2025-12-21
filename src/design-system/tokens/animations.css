@@ -20,6 +20,24 @@
   --duration-slowest: 800ms;
 
   /* ============================================
+   * SEMANTIC TIMING TOKENS
+   * ============================================
+   * Provides semantic timing for different use cases
+   */
+
+  /* Theme color transitions (slower for smooth color changes) */
+  --transition-theme: 0.4s;
+
+  /* Mouse/hover interactions (fast for responsive feel) */
+  --transition-mouse: 0.2s;
+
+  /* Standard animation length (most common duration) */
+  --transition-length: 0.5s;
+
+  /* Dramatic entrance animations (longer for impact) */
+  --transition-long: 0.8s;
+
+  /* ============================================
    * EASING TOKENS
    * ============================================ */
 
@@ -41,6 +59,12 @@
   /* Spring-like animations */
   --easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
   --easing-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Spring easing (overshoot for hover interactions) */
+  --easing-spring: cubic-bezier(0.25, 0.1, 0.25, 3.5);
+
+  /* Smooth easing (standard animations) */
+  --easing-smooth-sal: cubic-bezier(0.3, 0.9, 0.3, 0.9);
 
   /* ============================================
    * COMPONENT-SPECIFIC ANIMATIONS
@@ -113,7 +137,36 @@
 /* ============================================
  * KEYFRAME DEFINITIONS
  * ============================================
- * NOTE: CSS keyframes have been migrated to GSAP utilities
+ * Blur transition keyframes
+ * Elements come into focus like a camera lens
+ * ============================================ */
+
+@keyframes blur-in {
+  0% {
+    opacity: 0;
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+@keyframes blur-out {
+  0% {
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(8px);
+  }
+}
+
+/* ============================================
+ * ADDITIONAL KEYFRAMES
+ * ============================================
+ * NOTE: Most CSS keyframes have been migrated to GSAP utilities
  * See: src/utils/gsap-utilities.ts for all animation functions
  * This codebase follows a GSAP-first animation approach
  * ============================================ */
@@ -203,6 +256,55 @@
 }
 .transition-transform {
   transition: transform var(--duration-normal) var(--easing-smooth);
+}
+
+/* Semantic transition utilities */
+.transition-theme {
+  transition: 
+    color var(--transition-theme),
+    background-color var(--transition-theme),
+    border-color var(--transition-theme);
+}
+
+.transition-mouse {
+  transition: transform var(--transition-mouse) var(--easing-smooth-sal);
+}
+
+/* ============================================
+ * WILL-CHANGE UTILITIES (Performance)
+ * ============================================
+ * Hints browser to optimize for upcoming animations.
+ * Use sparingly - apply before animation, remove after.
+ * ============================================ */
+
+.will-animate {
+  will-change: transform, opacity, filter;
+}
+
+.will-animate-transform {
+  will-change: transform;
+}
+
+.will-animate-opacity {
+  will-change: opacity;
+}
+
+.will-animate-filter {
+  will-change: filter;
+}
+
+/* Combined for complex animations */
+.will-animate-all {
+  will-change: transform, opacity, filter, background-color;
+}
+
+/* Blur transition utilities */
+.animate-blur-in {
+  animation: blur-in var(--transition-length) var(--easing-smooth-sal) forwards;
+}
+
+.animate-blur-out {
+  animation: blur-out var(--transition-length) var(--easing-smooth-sal) forwards;
 }
 
 /* ============================================
