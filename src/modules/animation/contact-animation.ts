@@ -487,67 +487,82 @@ export class ContactAnimationModule extends BaseModule {
 
   /**
    * Play quick out animation when leaving contact page
-   * Uses a fast fade + slide up instead of reversing the complex timeline
+   * Immediately hides contact section to prevent overlap with other pages
    */
   private playOutAnimation(): void {
     if (!this.container) return;
 
-    // Kill any running timeline
-    this.timeline?.pause();
+    // Kill any running timeline immediately
+    this.timeline?.kill();
 
-    // Get elements for out animation
+    // IMMEDIATELY hide the container to prevent overlap with other pages
+    this.container.classList.add('page-hidden');
+    this.container.classList.remove('page-active');
+    gsap.set(this.container, { visibility: 'hidden', opacity: 0 });
+
+    // Reset all animated elements to their natural state for next visit
+    this.resetAnimatedElements();
+
+    this.log('Contact page hidden');
+  }
+
+  /**
+   * Reset all animated elements to their natural state
+   * Called when leaving contact page so next visit starts fresh
+   */
+  private resetAnimatedElements(): void {
+    if (!this.container) return;
+
+    // Reset heading
     const heading = this.container.querySelector('h2');
+    if (heading) {
+      gsap.set(heading, { clearProps: 'all' });
+    }
+
+    // Reset card column
     const cardColumn = this.container.querySelector('.contact-card-column');
+    if (cardColumn) {
+      gsap.set(cardColumn, { clearProps: 'all' });
+    }
+
+    // Reset form column
     const formColumn = this.container.querySelector('.contact-form-column') ||
                        this.container.querySelector('.contact-form');
+    if (formColumn) {
+      gsap.set(formColumn, { clearProps: 'all' });
+    }
 
-    // Quick out animation - everything slides up and fades
-    const outTl = gsap.timeline({
-      onComplete: () => {
-        if (this.container) {
-          this.container.classList.add('page-hidden');
-          this.container.classList.remove('page-active');
-          gsap.set(this.container, { visibility: 'hidden' });
-        }
-        this.log('Out animation complete');
+    // Reset all form fields
+    const allFields = this.container.querySelectorAll('.input-item');
+    allFields.forEach(field => {
+      gsap.set(field, { clearProps: 'all' });
+      const input = field.querySelector('input, textarea');
+      if (input) {
+        gsap.set(input, { clearProps: 'all' });
+      }
+      const label = field.querySelector('label');
+      if (label) {
+        gsap.set(label, { clearProps: 'all' });
       }
     });
 
-    const outDuration = 0.4;
-    const outEase = 'power2.in';
-
-    // All elements slide up and fade out together
-    if (heading) {
-      outTl.to(heading, {
-        y: -50,
-        opacity: 0,
-        duration: outDuration,
-        ease: outEase
-      }, 0);
+    // Reset submit button
+    const submitButton = this.container.querySelector('.submit-button, button[type="submit"]');
+    if (submitButton) {
+      gsap.set(submitButton, { clearProps: 'all' });
     }
 
-    if (cardColumn) {
-      outTl.to(cardColumn, {
-        y: -50,
-        opacity: 0,
-        duration: outDuration,
-        ease: outEase
-      }, 0);
+    // Reset business card
+    const businessCard = this.container.querySelector('#contact-business-card');
+    if (businessCard) {
+      const cardInner = businessCard.querySelector('.business-card-inner');
+      if (cardInner) {
+        gsap.set(cardInner, { rotationY: 0 });
+      }
     }
 
-    if (formColumn) {
-      outTl.to(formColumn, {
-        y: -50,
-        opacity: 0,
-        duration: outDuration,
-        ease: outEase
-      }, 0);
-    }
-
-    // Don't fade the whole container - just hide it after elements animate out
-    // This prevents affecting nav/header
-
-    this.addTimeline(outTl);
+    this.hasFlippedCard = false;
+    this.log('Contact elements reset');
   }
 
   /**
