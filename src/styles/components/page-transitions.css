@@ -62,9 +62,17 @@ section.page-hidden {
 
 /* Active page state */
 section.page-active {
-  visibility: visible;
-  pointer-events: auto;
+  display: block !important; /* Override page-hidden's display: none !important */
+  visibility: visible !important;
+  pointer-events: auto !important;
+  opacity: 1 !important; /* Override page-hidden's opacity: 0 */
   z-index: 100; /* Ensure active page is on top */
+}
+
+/* Contact section needs grid display when active - more specific selector */
+section.contact-section.page-active,
+main[data-virtual-pages] > section.contact-section.page-active {
+  display: grid;
 }
 
 /* About section scroll - ensure scrolling on mobile */
@@ -89,6 +97,28 @@ section.business-card-section {
 section#intro.page-active,
 section.business-card-section.page-active {
   z-index: 50 !important; /* Lower than other active pages, visible during transitions */
+}
+
+/* CRITICAL: Force hide intro page when page-hidden is present, even with !important rules */
+section#intro.page-hidden,
+section.business-card-section.page-hidden {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+}
+
+/* Also hide intro children when page is hidden */
+section#intro.page-hidden .business-card-container,
+section#intro.page-hidden .business-card,
+section#intro.page-hidden .intro-nav,
+section.business-card-section.page-hidden .business-card-container,
+section.business-card-section.page-hidden .business-card,
+section.business-card-section.page-hidden .intro-nav {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
 }
 
 /* ============================================
@@ -125,21 +155,31 @@ section.business-card-section.page-active {
 
   /* Business card section - needs overflow visible for nav links below card */
   main[data-virtual-pages] > .business-card-section[data-page] {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: grid;
-    place-items: center;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
     overflow: visible;
     box-sizing: border-box;
+  }
+
+  /* Business card container - centered in viewport height */
+  main[data-virtual-pages] > .business-card-section[data-page] > .business-card-container {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    display: block !important;
   }
 
   /* Intro nav positioned absolutely below centered card */
   main[data-virtual-pages] > .business-card-section .intro-nav {
     position: absolute;
-    top: calc(50% + 293.8px / 2 + 1rem);
+    top: calc(50% + 294.19px / 2 + 1rem);
     left: 50%;
     transform: translateX(-50%);
     z-index: 100;
@@ -213,6 +253,7 @@ section.business-card-section.page-active {
     place-content: center center;
     overflow: visible;
     box-sizing: border-box;
+    padding: clamp(1rem, 4vw, 2rem);
   }
 
   /* Tech stack section is mobile-only - keep hidden on desktop */

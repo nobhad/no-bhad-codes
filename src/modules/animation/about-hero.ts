@@ -154,7 +154,8 @@ export class AboutHeroModule extends BaseHeroAnimation {
 
       if (to === 'about') {
         this.isOnAboutPage = true;
-        this.resetHero();
+        // Remove hero reset transition - show hero instantly
+        this.resetHeroInstant();
         // Start listening for wheel events
         window.addEventListener('wheel', this.handleWheel, { passive: false });
       } else if (from === 'about') {
@@ -167,7 +168,8 @@ export class AboutHeroModule extends BaseHeroAnimation {
     // Check if we're starting on about page
     if (window.location.hash === '#/about') {
       this.isOnAboutPage = true;
-      this.resetHero();
+      // Remove hero reset transition - show hero instantly
+      this.resetHeroInstant();
       window.addEventListener('wheel', this.handleWheel, { passive: false });
     }
   }
@@ -249,6 +251,66 @@ export class AboutHeroModule extends BaseHeroAnimation {
         return { groupTimeline, textTimeline };
       }
     );
+  }
+
+  /**
+   * Reset hero instantly without transition animation
+   */
+  private resetHeroInstant(): void {
+    if (!this.hero || !this.svg) return;
+
+    this.isRevealed = false;
+    this.targetProgress = 0; // Reset to start
+
+    // Kill existing timelines
+    if (this.groupTimeline) {
+      this.groupTimeline.kill();
+    }
+    if (this.textTimeline) {
+      this.textTimeline.kill();
+    }
+
+    // Reset hero visibility - show instantly without fade
+    gsap.set(this.hero, {
+      opacity: 1,
+      visibility: 'visible',
+      pointerEvents: 'auto'
+    });
+
+    // Reset content
+    if (this.aboutContent) {
+      gsap.set(this.aboutContent, { opacity: 0 });
+    }
+
+    // Reset SVG group transforms
+    if (this.leftGroup && this.rightGroup) {
+      gsap.set([this.leftGroup, this.rightGroup], {
+        svgOrigin: '640 500',
+        clearProps: 'skewY,scaleX,x'
+      });
+    }
+
+    // Reset text elements
+    if (this.textElements) {
+      this.textElements.forEach((text) => {
+        gsap.set(text, {
+          clearProps: 'xPercent,x'
+        });
+      });
+    }
+
+    // Recreate the animation timelines
+    if (this.leftGroup && this.rightGroup && this.textElements) {
+      const { groupTimeline, textTimeline } = this.createTimelines(
+        this.leftGroup,
+        this.rightGroup,
+        this.textElements
+      );
+      this.groupTimeline = groupTimeline;
+      this.textTimeline = textTimeline;
+    }
+
+    this.log('Hero reset instantly (no transition)');
   }
 
   /**

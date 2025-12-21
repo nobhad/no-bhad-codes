@@ -179,7 +179,23 @@ body {
 }
 
 /* ============================================
- * 8. SPECIALIZED SECTION STYLES - DESKTOP ONLY
+ * 8. HERO TEXT ANIMATIONS - DISABLED
+ * ============================================ */
+
+/* Hide all hero text animation elements */
+.page-hero-desktop,
+.about-hero-desktop,
+.contact-hero-desktop,
+.projects-hero-desktop,
+.portfolio-hero-desktop {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ============================================
+ * 9. SPECIALIZED SECTION STYLES - DESKTOP ONLY
  * ============================================ */
 
 @media screen and (min-width: 768px) {

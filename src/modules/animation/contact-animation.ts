@@ -499,20 +499,13 @@ export class ContactAnimationModule extends BaseModule {
         this.playOutAnimation();
       }
 
-      // Reset animation state when entering contact (hero will handle reveal)
+      // Reset animation state when entering contact
+      // Note: PageTransitionModule handles visibility - don't interfere
       if (to === 'contact') {
-        this.log('Navigated to contact - preparing for hero animation');
-        // Make container visible but hide form content (hero is on top)
-        if (this.container) {
-          this.container.classList.remove('page-hidden');
-          this.container.classList.add('page-active');
-          this.container.style.display = '';
-          this.container.style.visibility = '';
-          this.container.style.opacity = '';
-          gsap.set(this.container, { visibility: 'visible', opacity: 1 });
-        }
+        this.log('Navigated to contact - resetting animation state');
         // Reset animated elements to initial state for next animation
         this.resetAnimatedElements();
+        // Don't manipulate container visibility - PageTransitionModule handles it
       }
     }) as EventListener);
 
@@ -546,13 +539,8 @@ export class ContactAnimationModule extends BaseModule {
     this.log('Playing form animation...');
     this.log(`Timeline state: paused=${this.timeline.paused()}, progress=${this.timeline.progress()}`);
 
-    // Make sure container is visible
-    this.container.classList.remove('page-hidden');
-    this.container.classList.add('page-active');
-    this.container.style.display = '';
-    this.container.style.visibility = '';
-    this.container.style.opacity = '';
-    gsap.set(this.container, { visibility: 'visible', opacity: 1 });
+    // Don't manipulate container visibility - PageTransitionModule handles it
+    // Only ensure contact-content is visible for animation
 
     // Also make the contact-content visible (in case hero didn't fade it in)
     const contactContent = this.container.querySelector('.contact-content');
@@ -581,13 +569,8 @@ export class ContactAnimationModule extends BaseModule {
     // Kill any running timeline immediately
     this.timeline?.kill();
 
-    // IMMEDIATELY hide the container to prevent overlap with other pages
-    // Use both class AND inline style to ensure it's hidden
-    this.container.classList.add('page-hidden');
-    this.container.classList.remove('page-active');
-    this.container.style.display = 'none';
-    this.container.style.visibility = 'hidden';
-    this.container.style.opacity = '0';
+    // Don't manipulate container visibility - PageTransitionModule handles it
+    // Only reset animated elements for next visit
 
     // Reset all animated elements to their natural state for next visit
     this.resetAnimatedElements();

@@ -153,10 +153,10 @@ export class PageHeroModule extends BaseHeroAnimation {
         this.activePageId = null;
       }
 
-      // If we're entering a page with hero, reset and start
+      // If we're entering a page with hero, reset instantly (no transition) and start
       if (to && this.heroes.has(to)) {
         this.activePageId = to;
-        this.resetHero(to);
+        this.resetHeroInstant(to);
         window.addEventListener('wheel', this.handleWheelBound, { passive: false });
       }
     }) as EventListener);
@@ -183,7 +183,7 @@ export class PageHeroModule extends BaseHeroAnimation {
 
     if (initialPage && this.heroes.has(initialPage)) {
       this.activePageId = initialPage;
-      this.resetHero(initialPage);
+      this.resetHeroInstant(initialPage);
       window.addEventListener('wheel', this.handleWheelBound, { passive: false });
     }
   }
@@ -267,6 +267,65 @@ export class PageHeroModule extends BaseHeroAnimation {
         return { groupTimeline, textTimeline };
       }
     );
+  }
+
+  /**
+   * Reset hero instantly without transition animation
+   */
+  private resetHeroInstant(pageId: string): void {
+    const instance = this.heroes.get(pageId);
+    if (!instance) return;
+
+    instance.isRevealed = false;
+    instance.targetProgress = 0;
+
+    // Kill existing timelines
+    if (instance.groupTimeline) {
+      instance.groupTimeline.kill();
+    }
+    if (instance.textTimeline) {
+      instance.textTimeline.kill();
+    }
+
+    // Reset hero visibility - show instantly without fade
+    gsap.set(instance.hero, {
+      opacity: 1,
+      visibility: 'visible',
+      pointerEvents: 'auto'
+    });
+
+    // Reset content
+    if (instance.content) {
+      gsap.set(instance.content, { opacity: 0 });
+    }
+
+    // Reset SVG group transforms
+    if (instance.leftGroup && instance.rightGroup) {
+      gsap.set([instance.leftGroup, instance.rightGroup], {
+        svgOrigin: '640 500',
+        clearProps: 'skewY,scaleX,x'
+      });
+    }
+
+    // Reset text elements
+    if (instance.textElements) {
+      instance.textElements.forEach((text) => {
+        gsap.set(text, {
+          clearProps: 'xPercent,x'
+        });
+      });
+    }
+
+    // Recreate the animation timelines
+    const { groupTimeline, textTimeline } = this.createTimelines(
+      instance.leftGroup,
+      instance.rightGroup,
+      instance.textElements
+    );
+    instance.groupTimeline = groupTimeline;
+    instance.textTimeline = textTimeline;
+
+    this.log(`Hero reset instantly (no transition) for ${pageId}`);
   }
 
   /**

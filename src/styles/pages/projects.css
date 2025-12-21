@@ -20,6 +20,15 @@
    HERO SECTION
    =============================================== */
 
+/* projects-hero-desktop - DISABLED - hero animations removed */
+.projects-hero-desktop,
+.page-hero-desktop[data-hero-page="projects"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 .projects-hero {
   padding: 4rem 0 2rem;
   text-align: center;
@@ -353,13 +362,19 @@
    =============================================== */
 
 /* Fade in animation for project cards */
-.project-card {
-  /* Animation controlled by GSAP - see gsap-animations.ts fadeInUp() */
-}
+/* Animation controlled by GSAP - see gsap-animations.ts fadeInUp() */
 
 /* ===============================================
    RESPONSIVE DESIGN
    =============================================== */
+
+/* Hide all page-hero-desktop elements (hero text animations) */
+.page-hero-desktop {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
 
 @media (max-width: 767px) {
   .projects-hero {

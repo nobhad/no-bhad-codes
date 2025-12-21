@@ -107,8 +107,11 @@ export class PageTransitionModule extends BaseModule {
 
     if (!this.container) {
       this.warn(`Container "${this.containerSelector}" not found`);
+      console.error(`[PageTransition] Container "${this.containerSelector}" not found`);
       return;
     }
+
+    console.log('[PageTransition] Container found:', this.container);
 
     // Define page configurations
     // Note: hero sections are NOT virtual pages
@@ -169,9 +172,11 @@ export class PageTransitionModule extends BaseModule {
           ...config,
           element: element as HTMLElement
         });
-        this.log(`Cached page: ${config.id}`);
+        this.log(`Cached page: ${config.id}`, element);
+        console.log(`[PageTransition] Cached page: ${config.id}`, element);
       } else {
         this.warn(`Page element not found for: ${config.id}`);
+        console.error(`[PageTransition] Page element not found for: ${config.id}. Tried: #${config.id}, .${config.id}-section, section#${config.id}`);
       }
     });
 
@@ -510,7 +515,8 @@ export class PageTransitionModule extends BaseModule {
     this.log(`Transitioning: ${this.currentPageId} -> ${pageId}`);
 
     // Show transition overlay - skip for intro (uses intro-morph-overlay instead)
-    if (this.currentPageId !== 'intro') {
+    // Also skip overlay when transitioning TO intro (to see fade out)
+    if (this.currentPageId !== 'intro' && pageId !== 'intro') {
       this.showTransitionOverlay();
     }
 
@@ -524,6 +530,30 @@ export class PageTransitionModule extends BaseModule {
       } else if (currentPage && currentPage.element) {
         // Blur out non-intro pages
         console.log('[PageTransition] Animating out current page:', this.currentPageId);
+
+        // Ensure target page (intro) is completely hidden during fade out
+        // Do this BEFORE starting the animation to prevent flash
+        if (pageId === 'intro' && targetPage && targetPage.element) {
+          // Force hide with inline styles to ensure it stays hidden
+          gsap.set(targetPage.element, {
+            display: 'none',
+            visibility: 'hidden',
+            opacity: 0,
+            zIndex: -1,
+            pointerEvents: 'none'
+          });
+          targetPage.element.classList.add('page-hidden');
+          targetPage.element.classList.remove('page-active');
+          // Also hide any children to prevent flash
+          const introChildren = targetPage.element.querySelectorAll('.business-card-container, .business-card, .intro-nav');
+          if (introChildren.length > 0) {
+            gsap.set(introChildren, {
+              opacity: 0,
+              visibility: 'hidden'
+            });
+          }
+        }
+
         await this.animateOut(currentPage);
         console.log('[PageTransition] AnimateOut complete');
       }
@@ -537,8 +567,32 @@ export class PageTransitionModule extends BaseModule {
 
       // Step 3: Show target page AFTER current is fully hidden
       console.log('[PageTransition] Showing target page:', pageId);
-      targetPage.element.classList.remove('page-hidden');
-      targetPage.element.classList.add('page-active');
+      console.log('[PageTransition] Target page element:', targetPage.element);
+      console.log('[PageTransition] Target page classes before:', targetPage.element.classList.toString());
+
+      // For intro page, keep page-hidden until entry animation starts
+      if (pageId !== 'intro') {
+        // CRITICAL: Remove page-hidden FIRST to allow display to work
+        // page-hidden has display: none !important which overrides inline styles
+        targetPage.element.classList.remove('page-hidden');
+        targetPage.element.classList.add('page-active');
+        console.log('[PageTransition] Target page classes after:', targetPage.element.classList.toString());
+
+        // Force display to ensure it shows
+        // Contact section needs grid, others need block
+        const displayValue = pageId === 'contact' ? 'grid' : 'block';
+        console.log('[PageTransition] Setting display to:', displayValue);
+        gsap.set(targetPage.element, {
+          display: displayValue,
+          visibility: 'visible',
+          opacity: 0 // Will be animated to 1 in animateIn
+        });
+        console.log('[PageTransition] Element computed display:', window.getComputedStyle(targetPage.element).display);
+      } else if (targetPage && targetPage.element) {
+        // For intro, keep page-hidden class - entry animation will remove it
+        // This prevents any flash from CSS page-active visibility rules
+        // Don't remove page-hidden or add page-active yet
+      }
       console.log('[PageTransition] Target page classes updated');
       // Clear any inline styles from previous hide (for skipAnimation pages)
       if (targetPage.skipAnimation) {
@@ -547,10 +601,18 @@ export class PageTransitionModule extends BaseModule {
         targetPage.element.style.opacity = '';
       }
 
-      // Animate in target page (including intro - all pages use blur/fade)
-      console.log('[PageTransition] About to animate in:', pageId);
-      await this.animateIn(targetPage);
-      console.log('[PageTransition] AnimateIn complete for:', pageId);
+      // Animate in target page
+      if (pageId === 'intro') {
+        // Play intro entry animation (coyote paw)
+        console.log('[PageTransition] Entering intro, playing entry animation');
+        await this.playIntroEntryAnimation();
+        console.log('[PageTransition] Entry animation complete');
+      } else {
+        // Regular blur/fade animation for other pages
+        console.log('[PageTransition] About to animate in:', pageId);
+        await this.animateIn(targetPage);
+        console.log('[PageTransition] AnimateIn complete for:', pageId);
+      }
 
       // Update state
       this.currentPageId = pageId;
@@ -615,6 +677,28 @@ export class PageTransitionModule extends BaseModule {
    */
   private async playIntroEntryAnimation(): Promise<void> {
     try {
+      const introPage = this.pages.get('intro');
+      if (introPage && introPage.element) {
+        // Clear inline styles that were hiding the intro page
+        gsap.set(introPage.element, { clearProps: 'display,visibility,opacity,zIndex,pointerEvents' });
+        // Also clear children styles
+        const introChildren = introPage.element.querySelectorAll('.business-card-container, .business-card, .intro-nav');
+        if (introChildren.length > 0) {
+          gsap.set(introChildren, { clearProps: 'opacity,visibility,display' });
+        }
+
+        // Use double requestAnimationFrame to ensure browser has processed style clears
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+        // NOW remove page-hidden and add page-active - do this in the same frame as animation start
+        // The CSS rule will handle the transition from hidden to visible
+        introPage.element.classList.remove('page-hidden');
+        introPage.element.classList.add('page-active');
+
+        // One more frame to ensure class changes are applied
+        await new Promise(resolve => requestAnimationFrame(resolve));
+      }
+
       const introModule = await container.resolve('IntroAnimationModule') as IntroAnimationModule;
       if (introModule && typeof introModule.playEntryAnimation === 'function') {
         this.log('Playing intro entry animation');
@@ -673,11 +757,21 @@ export class PageTransitionModule extends BaseModule {
 
     const children = this.getAnimatableChildren(page);
 
+    // Ensure page element is visible and on top during animation
+    // This prevents it from being hidden by page-hidden class or other pages
+    gsap.set(page.element, {
+      display: 'block',
+      visibility: 'visible',
+      zIndex: 200 // High z-index to ensure it's on top during fade out
+    });
+
     return new Promise((resolve) => {
       const tl = gsap.timeline({
         onComplete: () => {
           // Clean up .leaving classes after animation
           staggerItems.forEach(item => item.classList.remove('leaving'));
+          // Reset z-index after animation
+          gsap.set(page.element, { zIndex: 'auto' });
           resolve();
         }
       });
@@ -687,25 +781,51 @@ export class PageTransitionModule extends BaseModule {
       if (children.length > 0) {
         console.log('[PageTransition] animateOut - animating', children.length, 'children, useFadeOnly:', useFadeOnly);
         if (useFadeOnly) {
-          // Step 1: Blur children FIRST while still visible
-          tl.to(children, {
-            filter: `blur(${BLUR_AMOUNT}px)`,
-            webkitFilter: `blur(${BLUR_AMOUNT}px)`,
-            duration: 0.4,
-            stagger: STAGGER_DELAY * 0.5,
-            ease: 'power2.in'
-          }, 0);
+          // Mobile non-intro pages: blur in (longer), then fade out (shorter) - reverse of enter
+          const isMobileNonIntro = this.isMobile && this.enableOnMobile && page.id !== 'intro';
 
-          // Step 2: Brief pause - blur lingers
-          tl.to({}, { duration: 0.2 });
+          if (isMobileNonIntro) {
+            // Step 1: Blur children FIRST (longer duration for mobile)
+            tl.to(children, {
+              filter: `blur(${BLUR_AMOUNT}px)`,
+              webkitFilter: `blur(${BLUR_AMOUNT}px)`,
+              duration: 0.6, // Longer blur on mobile
+              stagger: STAGGER_DELAY * 0.5,
+              ease: 'power2.in'
+            }, 0);
 
-          // Step 3: THEN fade out (while blurred)
-          tl.to(children, {
-            opacity: 0,
-            duration: 0.3,
-            stagger: STAGGER_DELAY,
-            ease: 'power2.in'
-          });
+            // Step 2: Brief pause - blur lingers
+            tl.to({}, { duration: 0.1 });
+
+            // Step 3: THEN fade out (shorter duration - reverse of enter)
+            tl.to(children, {
+              opacity: 0,
+              duration: 0.25, // Shorter fade on mobile
+              stagger: STAGGER_DELAY,
+              ease: 'power2.in'
+            });
+          } else {
+            // Desktop or intro: original timing
+            // Step 1: Blur children FIRST while still visible
+            tl.to(children, {
+              filter: `blur(${BLUR_AMOUNT}px)`,
+              webkitFilter: `blur(${BLUR_AMOUNT}px)`,
+              duration: 0.4,
+              stagger: STAGGER_DELAY * 0.5,
+              ease: 'power2.in'
+            }, 0);
+
+            // Step 2: Brief pause - blur lingers
+            tl.to({}, { duration: 0.2 });
+
+            // Step 3: THEN fade out (while blurred)
+            tl.to(children, {
+              opacity: 0,
+              duration: 0.3,
+              stagger: STAGGER_DELAY,
+              ease: 'power2.in'
+            });
+          }
         } else {
           // Drop out children with stagger
           tl.to(children, {
@@ -719,12 +839,23 @@ export class PageTransitionModule extends BaseModule {
         console.log('[PageTransition] animateOut - no children found for page');
       }
 
-      // Fade out container after children animation starts
-      tl.to(page.element, {
-        opacity: 0,
-        duration: 0.2,
-        ease: 'power2.in'
-      }, ANIMATION_DURATION_OUT - 0.1);
+      // Fade out container - for mobile non-intro, fade out after blur completes
+      const isMobileNonIntro = this.isMobile && this.enableOnMobile && page.id !== 'intro';
+      if (isMobileNonIntro && useFadeOnly) {
+        // Fade out container after blur and fade of children
+        tl.to(page.element, {
+          opacity: 0,
+          duration: 0.2,
+          ease: 'power2.in'
+        }, '-=0.1'); // Start slightly before children fade completes
+      } else {
+        // Desktop: fade out container after children animation starts
+        tl.to(page.element, {
+          opacity: 0,
+          duration: 0.2,
+          ease: 'power2.in'
+        }, ANIMATION_DURATION_OUT - 0.1);
+      }
 
       this.addTimeline(tl);
     });
@@ -760,15 +891,21 @@ export class PageTransitionModule extends BaseModule {
     console.log('[PageTransition] animateIn - isMobile:', isMobile, 'useFadeOnly:', useFadeOnly);
 
     // Set initial state
+    // Contact section needs grid display, others need block
+    const displayValue = page.id === 'contact' ? 'grid' : 'block';
     gsap.set(page.element, {
       opacity: 0,
-      visibility: 'visible'
+      visibility: 'visible',
+      display: displayValue
     });
 
     // For fade-only: children start invisible AND blurred (blur on children works on mobile)
     // For drop-in: children start above
     if (children.length > 0) {
       if (useFadeOnly) {
+        // Mobile non-intro pages: ensure children start blurred and invisible
+        // This resets any existing opacity that might have been set by other modules (e.g., AboutHeroModule)
+
         // Apply blur to children (works on mobile scrollable sections)
         gsap.set(children, {
           opacity: 0,
@@ -787,11 +924,24 @@ export class PageTransitionModule extends BaseModule {
           if (children.length > 0 && useFadeOnly) {
             gsap.set(children, { filter: 'none', webkitFilter: 'none' });
           }
+          // Ensure page element is fully visible after animation
+          const finalDisplayValue = page.id === 'contact' ? 'grid' : 'block';
+          gsap.set(page.element, { 
+            display: finalDisplayValue,
+            opacity: 1,
+            visibility: 'visible'
+          });
           resolve();
         }
       });
 
       // Fade in container
+      // Ensure display is set correctly for contact (grid) vs others (block)
+      const pageDisplayValue = page.id === 'contact' ? 'grid' : 'block';
+      tl.set(page.element, {
+        display: pageDisplayValue,
+        visibility: 'visible'
+      });
       tl.to(page.element, {
         opacity: 1,
         duration: 0.15,
@@ -801,26 +951,53 @@ export class PageTransitionModule extends BaseModule {
       // Animate children
       if (children.length > 0) {
         if (useFadeOnly) {
-          // Step 1: Fade in children while KEEPING blur (blur visible during fade)
-          tl.to(children, {
-            opacity: 1,
-            // Keep blur at BLUR_AMOUNT - don't change it yet
-            duration: 0.4,
-            stagger: STAGGER_DELAY,
-            ease: 'power2.out'
-          }, 0);
+          // Mobile non-intro pages: fade in blurred (shorter), then blur clears (longer)
+          const isMobileNonIntro = this.isMobile && this.enableOnMobile && page.id !== 'intro';
 
-          // Step 2: Brief pause - blur lingers after fade complete
-          tl.to({}, { duration: 0.3 });
+          if (isMobileNonIntro) {
+            // Step 1: Fade in children while KEEPING blur (shorter fade duration for mobile)
+            tl.to(children, {
+              opacity: 1,
+              // Keep blur at BLUR_AMOUNT - don't change it yet
+              duration: 0.3, // Shorter fade on mobile
+              stagger: STAGGER_DELAY,
+              ease: 'power2.out'
+            }, 0);
 
-          // Step 3: NOW remove the blur (content comes into focus)
-          tl.to(children, {
-            filter: 'blur(0px)',
-            webkitFilter: 'blur(0px)',
-            duration: 0.5,
-            stagger: STAGGER_DELAY * 0.5,
-            ease: 'power2.out'
-          });
+            // Step 2: Brief pause - blur lingers after fade complete
+            tl.to({}, { duration: 0.2 });
+
+            // Step 3: NOW remove the blur (longer duration - blur lasts longer than fade)
+            tl.to(children, {
+              filter: 'blur(0px)',
+              webkitFilter: 'blur(0px)',
+              duration: 0.7, // Longer blur clear on mobile
+              stagger: STAGGER_DELAY * 0.5,
+              ease: 'power2.out'
+            });
+          } else {
+            // Desktop or intro: original timing
+            // Step 1: Fade in children while KEEPING blur (blur visible during fade)
+            tl.to(children, {
+              opacity: 1,
+              // Keep blur at BLUR_AMOUNT - don't change it yet
+              duration: 0.4,
+              stagger: STAGGER_DELAY,
+              ease: 'power2.out'
+            }, 0);
+
+            // Step 2: Brief pause - blur lingers after fade complete
+            tl.to({}, { duration: 0.3 });
+
+            // Step 3: NOW remove the blur (content comes into focus)
+            tl.to(children, {
+              filter: 'blur(0px)',
+              webkitFilter: 'blur(0px)',
+              duration: 0.5,
+              stagger: STAGGER_DELAY * 0.5,
+              ease: 'power2.out'
+            });
+          }
         } else {
           // Drop in children with stagger
           tl.to(children, {

@@ -130,8 +130,12 @@
    Same animation as about hero (page-hero.ts)
    ========================================== */
 
-/* contact-hero-desktop - shown on all screen sizes for consistent experience */
+/* contact-hero-desktop - DISABLED - hero animations removed */
 .contact-hero-desktop {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
   /* Mobile: Show hero overlay - same as desktop */
   position: absolute;
   top: 0;
@@ -216,12 +220,20 @@
     overflow: hidden; /* Hide hero overflow during animation */
   }
 
+  /* Contact content wrapper - contains h2 and layout */
+  .contact-content {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
   /* Contact heading - aligns with form left edge */
   .contact-content h2 {
     width: 100%;
     text-align: left;
     letter-spacing: 0.10em;
-
+    margin: 0 0 1.5rem 0;
+    padding: 0;
   }
 
   /* ==========================================
@@ -236,7 +248,7 @@
     grid-template-columns: 1fr 1fr;
     gap: clamp(4rem, 8vw, 6rem);
     align-items: start;
-    width: clamp(600px, 80vw, 1100px);
+    width: 100%;
     padding-top: 0;
     /* Fixed height prevents layout shifts during animation */
     min-height: var(--contact-layout-height);
