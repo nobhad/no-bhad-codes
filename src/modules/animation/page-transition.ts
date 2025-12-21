@@ -219,8 +219,12 @@ export class PageTransitionModule extends BaseModule {
     // Listen for router navigation events
     this.on('router:navigate', ((event: CustomEvent) => {
       const { pageId } = event.detail || {};
+      this.log(`Router navigate event received - pageId: ${pageId}, introComplete: ${this.introComplete}`);
       if (pageId && this.introComplete) {
+        this.log(`Starting transition to: ${pageId}`);
         this.transitionTo(pageId);
+      } else if (!this.introComplete) {
+        this.warn(`Navigation blocked - intro not complete yet`);
       }
     }) as EventListener);
 
@@ -408,12 +412,19 @@ export class PageTransitionModule extends BaseModule {
    */
   async transitionTo(pageId: string): Promise<void> {
     // Skip if already on this page or transitioning
-    if (pageId === this.currentPageId || this.isTransitioning) {
+    if (pageId === this.currentPageId) {
+      this.log(`Already on page: ${pageId}, skipping transition`);
+      return;
+    }
+
+    if (this.isTransitioning) {
+      this.warn(`Transition already in progress, ignoring request to ${pageId}`);
       return;
     }
 
     // Skip on mobile
     if (this.isMobile && !this.enableOnMobile) {
+      this.log(`Mobile mode - skipping page transition`);
       return;
     }
 
