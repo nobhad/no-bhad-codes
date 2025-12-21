@@ -70,18 +70,28 @@
 
   /* Intro/Business card section - exact viewport height minus header and footer, card centered */
   .business-card-section {
-    height: calc(100vh - var(--header-height) - var(--footer-height));
-    height: calc(100dvh - var(--header-height) - var(--footer-height));
-    min-height: calc(100vh - var(--header-height) - var(--footer-height));
-    min-height: calc(100dvh - var(--header-height) - var(--footer-height));
-    max-height: calc(100vh - var(--header-height) - var(--footer-height));
-    max-height: calc(100dvh - var(--header-height) - var(--footer-height));
+    height: calc(100vh - var(--header-height) - var(--footer-height)) !important;
+    height: calc(100dvh - var(--header-height) - var(--footer-height)) !important;
+    min-height: calc(100vh - var(--header-height) - var(--footer-height)) !important;
+    min-height: calc(100dvh - var(--header-height) - var(--footer-height)) !important;
+    max-height: calc(100vh - var(--header-height) - var(--footer-height)) !important;
+    max-height: calc(100dvh - var(--header-height) - var(--footer-height)) !important;
     /* Use CSS Grid for guaranteed centering */
     display: grid !important;
     place-items: center !important;
-    padding: 0;
-    margin: 0;
+    align-content: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
     overflow: hidden;
+    position: relative;
+  }
+  
+  /* Ensure card container is centered vertically */
+  .business-card-section .business-card-container {
+    margin: 0 auto !important;
+    align-self: center !important;
+    justify-self: center !important;
   }
 
   /* Hero section - GSAP controls this section */
