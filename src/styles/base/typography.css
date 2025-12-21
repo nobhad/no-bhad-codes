@@ -203,37 +203,80 @@ p {
  * LINK STYLES
  * ============================================ */
 
-/* Links in paragraphs - bold and underlined */
+/* Links in paragraphs - bold with animated underline */
 p a {
   font-weight: 600;
-  text-decoration: underline;
+  text-decoration: none;
+  position: relative;
+  color: var(--color-brand-primary, currentColor);
+  padding: 0 2px;
+  white-space: nowrap;
 }
 
+/* Animated underline - scales from right to left on hover */
+p a::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 33%;
+  border-radius: 4px 0 4px 4px;
+  background-color: currentColor;
+  opacity: 0.3;
+  bottom: 10%;
+  left: 0;
+  transform-origin: right;
+  transform: scaleX(0);
+  transition: transform var(--transition-length, 0.5s) cubic-bezier(0.3, 0.9, 0.3, 0.9);
+}
+
+p a:hover::before,
+p a:focus::before {
+  transform-origin: left;
+  transform: scaleX(1);
+}
+
+/* Text link class - same animated underline effect */
 .text-link {
   text-decoration: none;
   position: relative;
   color: inherit;
-  transition: color 0.3s ease;
+  padding: 0 2px;
+  white-space: nowrap;
+  transition: color var(--transition-mouse, 0.2s) cubic-bezier(0.3, 0.9, 0.3, 0.9);
 }
 
-.text-link::after {
+.text-link::before {
   content: "";
   position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 2px;
+  width: 100%;
+  height: 33%;
+  border-radius: 4px 0 4px 4px;
   background-color: currentColor;
-  transition: width 0.3s ease;
+  opacity: 0.3;
+  bottom: 10%;
+  left: 0;
+  transform-origin: right;
+  transform: scaleX(0);
+  transition: transform var(--transition-length, 0.5s) cubic-bezier(0.3, 0.9, 0.3, 0.9);
 }
 
-.text-link:hover::after {
-  width: 100%;
+.text-link:hover::before,
+.text-link:focus::before {
+  transform-origin: left;
+  transform: scaleX(1);
+}
+
+/* Animated link wrapper - contains overflow for links in lists/nav */
+.a-wrapper {
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  position: relative;
 }
 
 @media (hover: hover) {
   .text-link:hover {
-    color: var(--color-primary, #00ff41);
+    color: var(--color-brand-primary, #00ff41);
   }
 }
 

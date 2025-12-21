@@ -211,7 +211,7 @@ li {
 .overlay {
   z-index: 0;
   cursor: pointer;
-  background-color: rgba(19, 19, 19, 0.4);
+  background-color: rgba(var(--bg-rgb, 25, 25, 25), 0.7);
   width: 100vw;
   height: 100vh;
   position: fixed;
@@ -219,6 +219,22 @@ li {
   left: 0;
   opacity: 0;
   visibility: hidden;
+  /* Backdrop blur for depth */
+  -webkit-backdrop-filter: blur(0px);
+  backdrop-filter: blur(0px);
+  transition: 
+    opacity var(--transition-length, 0.5s) cubic-bezier(0.3, 0.9, 0.3, 0.9),
+    visibility var(--transition-length, 0.5s),
+    backdrop-filter var(--transition-length, 0.5s);
+}
+
+/* Visible state with blur */
+.nav[data-nav="open"] .overlay,
+.overlay.visible {
+  opacity: 1;
+  visibility: visible;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 /* =====================================================
