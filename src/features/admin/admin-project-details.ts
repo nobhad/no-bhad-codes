@@ -8,7 +8,6 @@
  */
 
 import { SanitizationUtils } from '../../utils/sanitization-utils';
-import type { AdminDashboardContext } from './admin-types';
 
 export interface ProjectDetailsHandler {
   showProjectDetails(projectId: number, projectsData: any[], switchTab: (tab: string) => void, loadProjects: () => Promise<void>, formatProjectType: (type: string) => string, inviteLead: (leadId: number, email: string) => Promise<void>): void;
@@ -201,7 +200,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const resendInviteBtn = document.getElementById('btn-resend-invite');
     if (resendInviteBtn && this.inviteLeadFn) {
       resendInviteBtn.addEventListener('click', () => {
-        if (this.currentProjectId) {
+        if (this.currentProjectId && this.inviteLeadFn) {
           const project = this.projectsData.find((p: any) => p.id === this.currentProjectId);
           if (project && project.email) {
             this.inviteLeadFn(this.currentProjectId, project.email);

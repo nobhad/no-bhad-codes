@@ -17,7 +17,7 @@ import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
 import { container } from '../../core/container';
 import type { IntroAnimationModule } from './intro-animation';
-import { debounce, blurIn, blurOut } from '../../utils/gsap-utilities';
+import { debounce } from '../../utils/gsap-utilities';
 import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
 
 // Animation timing constants
@@ -125,6 +125,18 @@ export class PageTransitionModule extends BaseModule {
         title: 'About - No Bhad Codes',
         // Note: .about-hero-desktop is an overlay animated separately by AboutHeroModule
         childSelectors: ['.about-content', '.about-text-wrapper', 'h2', 'p', '.tech-stack-desktop']
+      },
+      {
+        id: 'projects',
+        route: '#/projects',
+        title: 'Projects - No Bhad Codes',
+        childSelectors: ['.projects-content', 'h2', '.wip-sign-container', '.wip-sign']
+      },
+      {
+        id: 'portfolio',
+        route: '#/portfolio',
+        title: 'Portfolio - No Bhad Codes',
+        childSelectors: ['.portfolio-content', 'h2', '.wip-sign-container', '.wip-sign']
       },
       {
         id: 'contact',

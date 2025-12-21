@@ -13,13 +13,13 @@
  * ============================================ */
 
 @media screen and (max-width: 767px) {
-  /* Mobile: Fixed viewport scroll container for scroll snap */
+  /* Mobile: Virtual pages mode - same as desktop */
   body {
     margin: 0;
     padding: 0;
     height: 100vh;
     height: 100dvh;
-    overflow: hidden; /* Prevent body scroll - main is the scroll container */
+    overflow: hidden;
   }
 
   main {
@@ -31,23 +31,21 @@
     width: 100%;
     height: calc(100vh - var(--header-height) - var(--footer-height));
     height: calc(100dvh - var(--header-height) - var(--footer-height));
-    overflow-y: scroll; /* This is the scroll container */
-    overflow-x: hidden;
-    /* NO CSS scroll-snap - GSAP handles all scroll behavior */
+    overflow: hidden; /* Changed from scroll - virtual pages mode */
     -webkit-overflow-scrolling: touch;
-    display: flex;
-    flex-direction: column;
   }
 
+  /* Virtual pages - positioned absolutely like desktop */
   section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
     height: 100%;
-    min-height: 100%;
-    max-height: 100%;
     padding: 1rem;
-    /* NO CSS scroll-snap - GSAP handles all scroll behavior */
-    flex: 0 0 100%;
     box-sizing: border-box;
-    overflow: hidden;
+    overflow-y: auto; /* Allow scrolling within section if content overflows */
+    -webkit-overflow-scrolling: touch;
   }
 
   .section-content {
@@ -62,20 +60,13 @@
   }
 
   /* ==========================================
-     MOBILE SECTION LAYOUT (scroll snap enabled)
-     Order: About -> Tech Stack -> Business Card -> Contact
-     Each section fills exactly one viewport height
-     Text animation section is hidden on mobile
+     MOBILE SECTION LAYOUT (virtual pages mode)
+     Each section fills viewport and is positioned absolutely
+     PageTransitionModule controls visibility with opacity/transforms
      ========================================== */
 
-  /* Intro/Business card section - exact viewport height minus header and footer, card centered */
+  /* Intro/Business card section - centered card */
   .business-card-section {
-    height: calc(100vh - var(--header-height) - var(--footer-height)) !important;
-    height: calc(100dvh - var(--header-height) - var(--footer-height)) !important;
-    min-height: calc(100vh - var(--header-height) - var(--footer-height)) !important;
-    min-height: calc(100dvh - var(--header-height) - var(--footer-height)) !important;
-    max-height: calc(100vh - var(--header-height) - var(--footer-height)) !important;
-    max-height: calc(100dvh - var(--header-height) - var(--footer-height)) !important;
     /* Use CSS Grid for guaranteed centering */
     display: grid !important;
     place-items: center !important;
@@ -84,9 +75,8 @@
     padding: 0 !important;
     margin: 0 !important;
     overflow: hidden;
-    position: relative;
   }
-  
+
   /* Ensure card container is centered vertically */
   .business-card-section .business-card-container {
     margin: 0 auto !important;
@@ -96,10 +86,6 @@
 
   /* Hero section - GSAP controls this section */
   .hero-section {
-    height: 100%;
-    min-height: 100%;
-    max-height: 100%;
-    flex: 0 0 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -136,20 +122,15 @@
     margin: auto;
   }
 
-  /* About section - matches desktop layout with hero overlay support */
+  /* About section - virtual pages mode */
   .about-section {
-    min-height: calc(100vh - var(--header-height) - var(--footer-height));
-    min-height: calc(100dvh - var(--header-height) - var(--footer-height));
-    height: auto;
-    max-height: none;
-    flex: 0 0 auto;
     padding: 1.5rem 1rem;
     margin: 0;
     display: grid;
     place-items: center;
-    overflow: visible;
+    overflow-y: auto; /* Allow scrolling if content overflows */
+    -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
-    position: relative; /* For hero overlay positioning */
   }
 
   /* About content wrapper - matches desktop layout */
@@ -258,8 +239,8 @@
   }
 
   /* ==========================================
-     MOBILE SECTION ORDERING
-     Same as desktop: Business Card -> Hero -> About -> Tech Stack -> Contact
+     MOBILE SECTION ORDERING - Virtual Pages Mode
+     PageTransitionModule controls visibility
      ========================================== */
 
   .business-card-section {
@@ -272,30 +253,12 @@
 
   .about-section {
     order: 3;
-    /* Force visibility on mobile - override any JS-set opacity */
-    opacity: 1 !important;
-    filter: none !important;
-    visibility: visible !important;
-  }
-
-  /* Force visibility on about section children on mobile */
-  .about-section .about-text-wrapper,
-  .about-section .about-text-wrapper h2,
-  .about-section .about-text-wrapper p,
-  .about-section .tech-stack {
-    opacity: 1 !important;
-    transform: none !important;
-    visibility: visible !important;
   }
 
   /* tech-stack-section is hidden on mobile - no ordering needed */
 
   .contact-section {
     order: 5;
-    /* Force visibility on mobile */
-    opacity: 1 !important;
-    filter: none !important;
-    visibility: visible !important;
   }
 
   .container,

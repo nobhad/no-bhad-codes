@@ -229,16 +229,15 @@ export function registerModules(debug: boolean = false): void {
       name: 'PageTransitionModule',
       type: 'dom',
       factory: async () => {
-        // Only load page transitions on index/home page AND desktop
+        // Load page transitions on index/home page (mobile + desktop)
         const currentPath = window.location.pathname;
         const isHomePage = currentPath === '/' || currentPath === '/index.html';
-        const isDesktop = window.matchMedia('(min-width: 768px)').matches;
 
-        if (isHomePage && isDesktop) {
+        if (isHomePage) {
           const { PageTransitionModule } = await import('../modules/animation/page-transition');
-          return new PageTransitionModule({ debug });
+          return new PageTransitionModule({ debug, enableOnMobile: true });
         }
-        // Return a dummy module for other pages or mobile
+        // Return a dummy module for other pages
         return {
           init: async () => {},
           destroy: () => {},

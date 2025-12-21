@@ -237,27 +237,27 @@ export class MobileIntroAnimationModule extends BaseModule {
     if (cardGroup) {
       const clonedCard = cardGroup.cloneNode(true) as Element;
       clonedCard.setAttribute('id', 'svg-business-card');
-      
+
       // Ensure card has solid fill background to hide thumb behind it
       const cardRectElement = clonedCard.querySelector('rect');
       if (cardRectElement) {
         cardRectElement.setAttribute('fill', '#ffffff');
         cardRectElement.setAttribute('fill-opacity', '1');
       }
-      
+
       transformWrapper.appendChild(clonedCard);
     }
 
     // Add fingers
     const clonedPos1 = position1.cloneNode(true) as Element;
     clonedPos1.setAttribute('id', 'position-1');
-    
+
     // Remove thumb from this clone - it should only be in behindCardGroup
     const thumbInPos1 = clonedPos1.querySelector('#_Thumb_Behind_Card_-1');
     if (thumbInPos1) {
       thumbInPos1.remove();
     }
-    
+
     aboveCardGroup.appendChild(clonedPos1);
 
     transformWrapper.appendChild(aboveCardGroup);

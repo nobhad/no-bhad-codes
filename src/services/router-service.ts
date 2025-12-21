@@ -98,6 +98,18 @@ export class RouterService extends BaseService {
       title: 'About - No Bhad Codes'
     });
 
+    this.routes.set('#/projects', {
+      path: '#/projects',
+      section: 'projects',
+      title: 'Projects - No Bhad Codes'
+    });
+
+    this.routes.set('#/portfolio', {
+      path: '#/portfolio',
+      section: 'portfolio',
+      title: 'Portfolio - No Bhad Codes'
+    });
+
     this.routes.set('#/contact', {
       path: '#/contact',
       section: 'contact',
@@ -121,6 +133,18 @@ export class RouterService extends BaseService {
       path: '#about',
       section: 'about',
       title: 'About - No Bhad Codes'
+    });
+
+    this.routes.set('#projects', {
+      path: '#projects',
+      section: 'projects',
+      title: 'Projects - No Bhad Codes'
+    });
+
+    this.routes.set('#portfolio', {
+      path: '#portfolio',
+      section: 'portfolio',
+      title: 'Portfolio - No Bhad Codes'
     });
 
     this.routes.set('#contact', {
@@ -231,8 +255,7 @@ export class RouterService extends BaseService {
 
   /**
    * Navigate to a section
-   * Desktop: Dispatches event for PageTransitionModule (virtual pages)
-   * Mobile: Uses scroll-based navigation
+   * Uses virtual pages with PageTransitionModule on all devices
    */
   async navigateToSection(sectionId: string, options: { smooth?: boolean } = {}): Promise<void> {
     console.log('[RouterService] navigateToSection called with sectionId:', sectionId);
@@ -252,18 +275,17 @@ export class RouterService extends BaseService {
 
     console.log('[RouterService] Found section:', section);
 
-    // Check if we're on desktop (virtual pages mode)
-    const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+    // Use virtual pages on all devices
     const hasVirtualPages = document.querySelector('main[data-virtual-pages]');
 
-    if (isDesktop && hasVirtualPages) {
-      // Desktop: Dispatch event for PageTransitionModule
-      console.log('[RouterService] Desktop mode - dispatching navigate event for virtual pages');
+    if (hasVirtualPages) {
+      // Dispatch event for PageTransitionModule (works on mobile + desktop)
+      console.log('[RouterService] Dispatching navigate event for virtual pages');
       this.dispatchNavigationEvent('navigate', { pageId: sectionId });
     } else {
-      // Mobile: Use scroll-based navigation
+      // Fallback to scroll-based navigation if virtual pages not enabled
       const shouldSmooth = options.smooth ?? this.config.smoothScrolling;
-      console.log('[RouterService] Mobile mode - using scrollIntoView, smooth:', shouldSmooth);
+      console.log('[RouterService] Fallback - using scrollIntoView, smooth:', shouldSmooth);
 
       try {
         section.scrollIntoView({
