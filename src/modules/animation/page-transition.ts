@@ -135,21 +135,22 @@ export class PageTransitionModule extends BaseModule {
         id: 'projects',
         route: '#/projects',
         title: 'Projects - No Bhad Codes',
-        childSelectors: ['.projects-content', 'h2', '.wip-sign-container', '.wip-sign']
+        childSelectors: ['.projects-content', 'h2', '.wip-sign-container', '.wip-sign'],
+        useFadeOnly: true
       },
       {
         id: 'portfolio',
         route: '#/portfolio',
         title: 'Portfolio - No Bhad Codes',
-        childSelectors: ['.portfolio-content', 'h2', '.wip-sign-container', '.wip-sign']
+        childSelectors: ['.portfolio-content', 'h2', '.wip-sign-container', '.wip-sign'],
+        useFadeOnly: true
       },
       {
         id: 'contact',
         route: '#/contact',
         title: 'Contact - No Bhad Codes',
-        // ContactAnimationModule handles all animations for contact
-        childSelectors: [],
-        skipAnimation: true
+        childSelectors: ['.contact-content', 'h2', '.contact-form'],
+        useFadeOnly: true
       }
     ];
 
@@ -544,29 +545,10 @@ export class PageTransitionModule extends BaseModule {
         targetPage.element.style.opacity = '';
       }
 
-      // Special handling for entering intro page - just show card and nav (no animation)
-      if (pageId === 'intro') {
-        this.log('Returning to intro page - showing card directly');
-        const businessCard = document.getElementById('business-card');
-        const introNav = document.querySelector('.intro-nav') as HTMLElement;
-        if (businessCard) {
-          gsap.set(businessCard, { opacity: 1, visibility: 'visible' });
-        }
-        if (introNav) {
-          gsap.set(introNav, { opacity: 1, visibility: 'visible' });
-        }
-      } else {
-        // Animate in target page (skip for intro - handled above)
-        console.log('[PageTransition] About to animate in:', pageId);
-        console.log('[PageTransition] Target element:', targetPage.element);
-        console.log('[PageTransition] Target element computed display:', window.getComputedStyle(targetPage.element).display);
-        console.log('[PageTransition] Target element computed opacity:', window.getComputedStyle(targetPage.element).opacity);
-        console.log('[PageTransition] Target element computed z-index:', window.getComputedStyle(targetPage.element).zIndex);
-        await this.animateIn(targetPage);
-        console.log('[PageTransition] AnimateIn complete for:', pageId);
-        console.log('[PageTransition] After animate - display:', window.getComputedStyle(targetPage.element).display);
-        console.log('[PageTransition] After animate - opacity:', window.getComputedStyle(targetPage.element).opacity);
-      }
+      // Animate in target page (including intro - all pages use blur/fade)
+      console.log('[PageTransition] About to animate in:', pageId);
+      await this.animateIn(targetPage);
+      console.log('[PageTransition] AnimateIn complete for:', pageId);
 
       // Update state
       this.currentPageId = pageId;
@@ -660,20 +642,28 @@ export class PageTransitionModule extends BaseModule {
    * Adds .leaving class to CSS-animated elements for staggered exits
    */
   private async animateOut(page: PageConfig): Promise<void> {
-    if (!page.element) return;
+    console.log('[PageTransition] animateOut called for page:', page.id);
+
+    if (!page.element) {
+      console.log('[PageTransition] animateOut - no element, returning');
+      return;
+    }
 
     // Skip animation if page handles its own (e.g., contact)
     // Don't hide - let the page module handle its own out animation
     if (page.skipAnimation) {
+      console.log('[PageTransition] animateOut - skipAnimation true, returning');
       return;
     }
 
     if (this.reducedMotion) {
+      console.log('[PageTransition] animateOut - reducedMotion, instant hide');
       gsap.set(page.element, { opacity: 0, visibility: 'hidden' });
       return;
     }
 
     const useFadeOnly = page.useFadeOnly === true;
+    console.log('[PageTransition] animateOut - useFadeOnly:', useFadeOnly);
 
     // Add .leaving class to CSS-animated stagger items for exit animations
     const staggerItems = page.element.querySelectorAll('.stagger-item, .stagger-blur, .intro-nav-link, .input-item, .p-wrapper p, .heading-wrapper h2');
@@ -690,18 +680,26 @@ export class PageTransitionModule extends BaseModule {
         }
       });
 
-      // Blur out the page
+      // Two-step blur animation: blur first (visible), then fade out
+      // Step 1: Blur while still visible (so blur effect is seen)
       tl.to(page.element, {
-        opacity: 0,
         filter: `blur(${BLUR_AMOUNT}px)`,
         duration: ANIMATION_DURATION_OUT,
         ease: EASE_CURVE
       });
 
-      // Animate children out - fade-only or drop-out based on config
+      // Step 2: Quickly fade out
+      tl.to(page.element, {
+        opacity: 0,
+        duration: 0.15,
+        ease: 'power2.in'
+      });
+
+      // Animate children out - fade only (no blur) or drop-out based on config
       if (children.length > 0) {
+        console.log('[PageTransition] animateOut - animating', children.length, 'children, useFadeOnly:', useFadeOnly);
         if (useFadeOnly) {
-          // Fade out children (no Y movement)
+          // Fade out children (no blur, no Y movement) - starts immediately
           tl.to(children, {
             opacity: 0,
             duration: ANIMATION_DURATION_OUT,
@@ -717,6 +715,8 @@ export class PageTransitionModule extends BaseModule {
             ease: EASE_CURVE
           }, 0);
         }
+      } else {
+        console.log('[PageTransition] animateOut - no children found for page');
       }
 
       this.addTimeline(tl);
@@ -728,25 +728,35 @@ export class PageTransitionModule extends BaseModule {
    * Uses fade-only for pages with useFadeOnly: true
    */
   private async animateIn(page: PageConfig): Promise<void> {
-    if (!page.element) return;
+    console.log('[PageTransition] animateIn called for page:', page.id);
+
+    if (!page.element) {
+      console.log('[PageTransition] animateIn - no element, returning');
+      return;
+    }
 
     // Skip animation if page handles its own (e.g., contact)
     if (page.skipAnimation || this.reducedMotion) {
+      console.log('[PageTransition] animateIn - skipAnimation or reducedMotion, instant show');
       gsap.set(page.element, { opacity: 1, visibility: 'visible', filter: 'none' });
       return;
     }
 
     const children = this.getAnimatableChildren(page);
     const useFadeOnly = page.useFadeOnly === true;
+    console.log('[PageTransition] animateIn - useFadeOnly:', useFadeOnly, 'children:', children.length);
 
     // Set initial state (blur-in)
+    console.log('[PageTransition] animateIn - setting initial blur:', BLUR_AMOUNT + 'px');
     gsap.set(page.element, {
       opacity: 0,
       filter: `blur(${BLUR_AMOUNT}px)`,
       visibility: 'visible'
     });
+    console.log('[PageTransition] animateIn - element filter after set:', window.getComputedStyle(page.element).filter);
 
     // For fade-only: children start invisible; for drop-in: children start above
+    // Note: blur only on container, not children (avoids blurring form inputs)
     if (children.length > 0) {
       if (useFadeOnly) {
         gsap.set(children, { opacity: 0 });
@@ -757,27 +767,38 @@ export class PageTransitionModule extends BaseModule {
 
     return new Promise((resolve) => {
       const tl = gsap.timeline({
-        onComplete: resolve
+        onComplete: () => {
+          // Clear filter property after animation
+          gsap.set(page.element, { filter: 'none' });
+          resolve();
+        }
       });
 
-      // Blur in the page - elements come into focus like camera lens
+      // Two-step blur animation: fade in blurred, then unblur
+      // Step 1: Quickly fade in while keeping blur (so blur is visible)
       tl.to(page.element, {
         opacity: 1,
+        duration: 0.15,
+        ease: 'power2.out'
+      });
+
+      // Step 2: Unblur - elements come into focus like camera lens
+      tl.to(page.element, {
         filter: 'blur(0px)',
         duration: ANIMATION_DURATION_IN,
         ease: EASE_CURVE
       });
 
-      // Animate children - fade-only or drop-in based on config
+      // Animate children - fade only (no blur on children to avoid form input issues)
       if (children.length > 0) {
         if (useFadeOnly) {
-          // Fade in children (no Y movement)
+          // Fade in children (no blur, no Y movement) - starts after fade-in
           tl.to(children, {
             opacity: 1,
             duration: ANIMATION_DURATION_IN,
             stagger: STAGGER_DELAY,
             ease: EASE_CURVE
-          }, STAGGER_DELAY);
+          }, 0.1); // Start shortly after container appears
         } else {
           // Drop in children with stagger
           tl.to(children, {

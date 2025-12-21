@@ -498,9 +498,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  width: 100vw;
   max-width: none;
   flex: 1;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
 }
 
 /* WIP sign SVG */
@@ -538,11 +540,13 @@
 
   .wip-sign-container {
     max-width: 100%;
-    width: 100%;
+    width: 100vw;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 0;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
   }
 
   .wip-sign {
@@ -560,6 +564,12 @@
   .projects-content {
     gap: 1.5rem;
     padding: 0;
+  }
+
+  .wip-sign-container {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
   }
 
   .wip-sign {

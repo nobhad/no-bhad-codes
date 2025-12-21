@@ -234,8 +234,9 @@ export class MobileIntroAnimationModule extends BaseModule {
     transformWrapper.appendChild(behindCardGroup);
 
     // Add card
+    let clonedCard: Element | null = null;
     if (cardGroup) {
-      const clonedCard = cardGroup.cloneNode(true) as Element;
+      clonedCard = cardGroup.cloneNode(true) as Element;
       clonedCard.setAttribute('id', 'svg-business-card');
 
       // Ensure card has solid fill background to hide thumb behind it
@@ -269,9 +270,21 @@ export class MobileIntroAnimationModule extends BaseModule {
       morphSvg.insertBefore(clonedStyles, morphSvg.firstChild);
     }
 
+    // ========================================================================
+    // CREATE SHADOW FILTER (same as desktop)
+    // ========================================================================
+    SvgBuilder.createShadowFilter(morphSvg, scale);
+
+    // Apply shadow filter to groups and card (same as desktop)
+    behindCardGroup.setAttribute('filter', 'url(#card-shadow)');
+    aboveCardGroup.setAttribute('filter', 'url(#card-shadow)');
+    if (clonedCard) {
+      clonedCard.setAttribute('filter', 'url(#card-shadow)');
+    }
+
     morphSvg.appendChild(transformWrapper);
 
-    this.log('SVG layers assembled for mobile');
+    this.log('SVG layers assembled for mobile with shadows');
 
     // ========================================================================
     // SETUP TAP-TO-SKIP
