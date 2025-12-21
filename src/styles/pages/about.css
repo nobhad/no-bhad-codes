@@ -43,6 +43,9 @@
     background: var(--color-neutral-300);
     z-index: 10;
     cursor: pointer;
+    /* Initially hidden - AboutHeroModule will show it when ready */
+    opacity: 0;
+    visibility: hidden;
   }
 
   /* Hero revealed state - hidden after animation */
