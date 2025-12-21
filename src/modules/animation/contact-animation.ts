@@ -492,11 +492,16 @@ export class ContactAnimationModule extends BaseModule {
     }) as EventListener);
 
     // Also check if we're already on contact page (direct navigation)
-    // In this case, wait for hero reveal event instead of playing immediately
     const currentHash = window.location.hash;
     if (currentHash === '#/contact' || currentHash === '#contact') {
       this.log('Already on contact page - waiting for hero reveal');
-      // Hero module will trigger the reveal event when ready
+      // Fallback: if hero doesn't reveal in 5 seconds, play form anyway
+      setTimeout(() => {
+        if (!this.timeline?.isActive()) {
+          this.log('Fallback: hero reveal timeout - playing form animation');
+          this.playFormAnimation();
+        }
+      }, 5000);
     }
 
     this.log('Contact animation initialized (waiting for hero reveal)');
@@ -515,6 +520,12 @@ export class ContactAnimationModule extends BaseModule {
     this.container.style.visibility = '';
     this.container.style.opacity = '';
     gsap.set(this.container, { visibility: 'visible', opacity: 1 });
+
+    // Also make the contact-content visible (in case hero didn't fade it in)
+    const contactContent = this.container.querySelector('.contact-content');
+    if (contactContent) {
+      gsap.set(contactContent, { opacity: 1 });
+    }
 
     // Play the animation
     this.timeline.restart();

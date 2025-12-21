@@ -239,6 +239,16 @@ export class PageHeroModule extends BaseModule {
       }
     }) as EventListener);
 
+    // Add click handlers to heroes for quick reveal (user can click to skip wheel animation)
+    this.heroes.forEach((instance, pageId) => {
+      instance.hero.addEventListener('click', () => {
+        if (!instance.isRevealed) {
+          this.log(`Hero clicked - revealing ${pageId}`);
+          this.revealContent(pageId);
+        }
+      });
+    });
+
     // Check if we're starting on a page with hero
     const hash = window.location.hash;
     let initialPage: string | null = null;
