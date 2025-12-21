@@ -40,6 +40,8 @@ interface SectionConfig {
 export class SectionTransitionsModule extends BaseModule {
   private scrollTriggers: ScrollTrigger[] = [];
   private sectionTimelines: gsap.core.Timeline[] = [];
+  private resizeHandler: (() => void) | null = null;
+  private isSetup = false;
 
   // Section configuration
   private sections: SectionConfig[] = [
@@ -60,20 +62,62 @@ export class SectionTransitionsModule extends BaseModule {
   override async init(): Promise<void> {
     await super.init();
 
-    // Desktop only
-    const isMobile = window.matchMedia('(max-width: 767px)').matches;
-    if (isMobile) {
-      this.log('Mobile detected - skipping section transitions');
-      return;
-    }
-
     // Skip if reduced motion is preferred
     if (this.reducedMotion) {
       this.log('Reduced motion preferred - skipping transitions');
       return;
     }
 
-    this.setupTransitions();
+    // Setup resize handler
+    this.resizeHandler = this.handleResize.bind(this);
+    window.addEventListener('resize', this.resizeHandler);
+
+    // Initial setup based on viewport
+    this.handleResize();
+  }
+
+  /**
+   * Handle viewport resize - enable/disable based on breakpoint
+   */
+  private handleResize(): void {
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+
+    if (isMobile && this.isSetup) {
+      // Switching to mobile - kill ScrollTriggers
+      this.log('Switching to mobile - killing ScrollTriggers');
+      this.killTransitions();
+    } else if (!isMobile && !this.isSetup) {
+      // Switching to desktop - setup transitions
+      this.log('Switching to desktop - setting up transitions');
+      this.setupTransitions();
+    }
+  }
+
+  /**
+   * Kill all transitions and reset elements
+   */
+  private killTransitions(): void {
+    // Kill all ScrollTriggers
+    this.scrollTriggers.forEach((trigger) => trigger.kill());
+    this.scrollTriggers = [];
+
+    // Kill all timelines
+    this.sectionTimelines.forEach((tl) => tl.kill());
+    this.sectionTimelines = [];
+
+    // Reset section elements to visible
+    this.sections.forEach((config) => {
+      const section = document.querySelector(config.selector) as HTMLElement;
+      if (section) {
+        gsap.set(section, { clearProps: 'all' });
+        const children = config.childSelectors
+          .map((sel) => section.querySelectorAll(sel))
+          .flatMap((nodeList) => Array.from(nodeList));
+        gsap.set(children, { clearProps: 'all' });
+      }
+    });
+
+    this.isSetup = false;
   }
 
   /**
@@ -195,6 +239,7 @@ export class SectionTransitionsModule extends BaseModule {
       this.log(`Transition set up for "${config.selector}"`);
     });
 
+    this.isSetup = true;
     this.log(`Section transitions initialized for ${this.sections.length} sections`);
   }
 
@@ -214,13 +259,14 @@ export class SectionTransitionsModule extends BaseModule {
    * Cleanup on destroy
    */
   override async destroy(): Promise<void> {
-    // Kill all ScrollTriggers
-    this.scrollTriggers.forEach((trigger) => trigger.kill());
-    this.scrollTriggers = [];
+    // Remove resize listener
+    if (this.resizeHandler) {
+      window.removeEventListener('resize', this.resizeHandler);
+      this.resizeHandler = null;
+    }
 
-    // Kill all timelines
-    this.sectionTimelines.forEach((tl) => tl.kill());
-    this.sectionTimelines = [];
+    // Kill transitions
+    this.killTransitions();
 
     await super.destroy();
   }
