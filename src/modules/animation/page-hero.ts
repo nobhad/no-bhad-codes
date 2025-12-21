@@ -354,11 +354,19 @@ export class PageHeroModule extends BaseModule {
     instance.groupTimeline.kill();
     instance.textTimeline.kill();
 
-    // Reset hero visibility
+    // Reset hero visibility - keep hidden initially
     gsap.set(instance.hero, {
-      opacity: 1,
+      opacity: 0,
       visibility: 'visible',
       pointerEvents: 'auto'
+    });
+
+    // Fade in hero after a small delay to ensure page transition completes
+    gsap.to(instance.hero, {
+      opacity: 1,
+      duration: 0.3,
+      delay: 0.1,
+      ease: 'power2.out'
     });
 
     // Reset content
