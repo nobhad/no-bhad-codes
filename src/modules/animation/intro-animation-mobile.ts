@@ -86,21 +86,6 @@ export class MobileIntroAnimationModule extends BaseModule {
     this.log('Mobile intro animation initializing...');
 
     // ========================================================================
-    // TIME-BASED CHECK
-    // Skip animation if shown within the replay interval (uses same config as desktop)
-    // ========================================================================
-    const lastIntroTimestamp = localStorage.getItem(REPLAY_CONFIG.timestampKey);
-    if (lastIntroTimestamp) {
-      const timeSinceLastIntro = Date.now() - parseInt(lastIntroTimestamp, 10);
-      if (timeSinceLastIntro < REPLAY_CONFIG.replayInterval) {
-        this.log(`Intro shown ${Math.round(timeSinceLastIntro / 1000 / 60)} min ago - skipping (replays after ${REPLAY_CONFIG.replayInterval / 60000} min)`);
-        this.skipIntroImmediately();
-        return;
-      }
-      this.log('Replay interval passed - playing animation');
-    }
-
-    // ========================================================================
     // REDUCED MOTION CHECK
     // ========================================================================
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -235,8 +220,9 @@ export class MobileIntroAnimationModule extends BaseModule {
       behindCardGroup.appendChild(clonedArm);
     }
 
-    // Add thumb (hidden initially)
-    const thumbElement = position2.querySelector('#_Thumb_Behind_Card_');
+    // Add thumb (hidden initially, appears at Phase 2)
+    // Use thumb from Position 1 to match desktop behavior
+    const thumbElement = position1.querySelector('#_Thumb_Behind_Card_-1');
     let clonedThumb: Element | null = null;
     if (thumbElement) {
       clonedThumb = thumbElement.cloneNode(true) as Element;
@@ -251,12 +237,27 @@ export class MobileIntroAnimationModule extends BaseModule {
     if (cardGroup) {
       const clonedCard = cardGroup.cloneNode(true) as Element;
       clonedCard.setAttribute('id', 'svg-business-card');
+      
+      // Ensure card has solid fill background to hide thumb behind it
+      const cardRectElement = clonedCard.querySelector('rect');
+      if (cardRectElement) {
+        cardRectElement.setAttribute('fill', '#ffffff');
+        cardRectElement.setAttribute('fill-opacity', '1');
+      }
+      
       transformWrapper.appendChild(clonedCard);
     }
 
     // Add fingers
     const clonedPos1 = position1.cloneNode(true) as Element;
     clonedPos1.setAttribute('id', 'position-1');
+    
+    // Remove thumb from this clone - it should only be in behindCardGroup
+    const thumbInPos1 = clonedPos1.querySelector('#_Thumb_Behind_Card_-1');
+    if (thumbInPos1) {
+      thumbInPos1.remove();
+    }
+    
     aboveCardGroup.appendChild(clonedPos1);
 
     transformWrapper.appendChild(aboveCardGroup);
@@ -317,6 +318,12 @@ export class MobileIntroAnimationModule extends BaseModule {
     const fingerC2PathData = fingerC2?.getAttribute('d');
     const fingerC3PathData = fingerC3?.getAttribute('d');
 
+    // Thumb path data for morphing
+    const thumb2 = position2.querySelector('#_Thumb_Behind_Card_') as SVGPathElement;
+    const thumb3 = position3?.querySelector('#_Thumb_Behind_Card_-3') as SVGPathElement;
+    const thumb2PathData = thumb2?.getAttribute('d');
+    const thumb3PathData = thumb3?.getAttribute('d');
+
     // ========================================================================
     // PHASE 0: ENTRY
     // ========================================================================
@@ -372,8 +379,14 @@ export class MobileIntroAnimationModule extends BaseModule {
       }, '<');
     }
 
-    if (clonedThumb) {
+    // Thumb appears and morphs 1→2 at Phase 2
+    if (clonedThumb && thumb2PathData) {
       this.timeline.set(clonedThumb, { opacity: 1 }, '<');
+      this.timeline.to(clonedThumb, {
+        morphSVG: { shape: thumb2PathData, shapeIndex: 'auto' },
+        duration: releaseDuration,
+        ease: fadeEase
+      }, '<');
     }
 
     // ========================================================================
@@ -411,6 +424,15 @@ export class MobileIntroAnimationModule extends BaseModule {
     if (fingerC1 && fingerC3PathData) {
       this.timeline.to(fingerC1, {
         morphSVG: { shape: fingerC3PathData, shapeIndex: 'auto' },
+        duration: 0.2,
+        ease: 'power1.out'
+      }, '<');
+    }
+
+    // Thumb morphs 2→3 during retraction
+    if (clonedThumb && thumb3PathData) {
+      this.timeline.to(clonedThumb, {
+        morphSVG: { shape: thumb3PathData, shapeIndex: 'auto' },
         duration: 0.2,
         ease: 'power1.out'
       }, '<');

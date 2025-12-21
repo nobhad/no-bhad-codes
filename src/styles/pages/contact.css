@@ -130,9 +130,23 @@
    Same animation as about hero (page-hero.ts)
    ========================================== */
 
-/* Hide contact-hero-desktop on mobile - it's desktop only */
+/* contact-hero-desktop - shown on all screen sizes for consistent experience */
 .contact-hero-desktop {
-  display: none;
+  /* Mobile: Show hero overlay - same as desktop */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--color-neutral-300);
+  z-index: 10;
+  cursor: default;
+  /* Initially hidden - PageHeroModule will show it when ready */
+  opacity: 0;
+  visibility: hidden;
 }
 
 @media screen and (min-width: 768px) {

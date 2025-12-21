@@ -485,6 +485,17 @@
     max-height: 211.52px;
   }
 
+  /* Contact business card - smaller and flexible sizing */
+  .contact-business-card .business-card-container {
+    width: 100% !important;
+    max-width: 260px !important;
+    height: auto !important;
+    min-width: unset !important;
+    min-height: unset !important;
+    max-height: unset !important;
+    aspect-ratio: 1.785;
+  }
+
   .business-card-front,
   .business-card-back {
     padding: 0; /* No padding - SVG fills entire area */
@@ -520,6 +531,11 @@
     min-height: 175.33px;
     max-width: 315px;
     max-height: 175.33px;
+  }
+
+  /* Contact business card - even smaller on very small screens */
+  .contact-business-card .business-card-container {
+    max-width: 220px !important;
   }
 
   .business-card-front,

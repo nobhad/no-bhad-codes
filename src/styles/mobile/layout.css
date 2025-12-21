@@ -126,33 +126,34 @@
     margin: auto;
   }
 
-  /* About section - fills scroll container */
+  /* About section - matches desktop layout with hero overlay support */
   .about-section {
-    height: 100%;
-    min-height: 100%;
-    max-height: 100%;
-    flex: 0 0 100%;
-    padding: 1rem;
+    min-height: calc(100vh - var(--header-height) - var(--footer-height));
+    min-height: calc(100dvh - var(--header-height) - var(--footer-height));
+    height: auto;
+    max-height: none;
+    flex: 0 0 auto;
+    padding: 1.5rem 1rem;
     margin: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
+    display: grid;
+    place-items: center;
+    overflow: visible;
     box-sizing: border-box;
+    position: relative; /* For hero overlay positioning */
   }
 
-  /* About content wrapper */
+  /* About content wrapper - matches desktop layout */
   .about-section .about-content {
     display: flex;
     flex-direction: column;
-    padding: 0;
-    gap: 0;
+    padding: 0 0.5rem;
+    gap: 1rem;
     max-width: 95vw;
     width: 100%;
+    align-items: flex-start;
   }
 
-  /* About text wrapper - centered in section */
+  /* About text wrapper - matches desktop */
   .about-section .about-text-wrapper {
     display: flex;
     flex-direction: column;
@@ -164,83 +165,86 @@
 
   .about-section .about-text-wrapper h2 {
     text-align: left;
+    margin-bottom: 1rem;
+    letter-spacing: 0.10em;
   }
 
   .about-section .about-text-wrapper p {
-    max-width: 90vw;
+    max-width: 100%;
     margin-bottom: 1rem;
   }
 
-  /* Desktop tech-stack inside about-section is hidden on mobile via .tech-stack-desktop */
-
   /* ==========================================
-     UNIFORM SECTION HEADINGS ON MOBILE
+     SECTION HEADINGS ON MOBILE - Match desktop style
      ========================================== */
 
   .about-section h2,
   .about-section .about-text-wrapper h2,
-  .tech-stack-section h2,
   .contact-section h2 {
-    font-size: clamp(2rem, 8vw, 3.5rem) !important;
+    font-size: clamp(2.5rem, 10vw, 4rem) !important;
     font-family: var(--font--acme) !important;
     font-weight: 700 !important;
     text-transform: uppercase !important;
-    line-height: 1.2 !important;
-    margin-bottom: 0.75rem !important;
+    line-height: 1.1 !important;
+    margin-bottom: 1.5rem !important;
     color: var(--color-text-primary) !important;
     text-align: left !important;
+    letter-spacing: 0.10em !important;
   }
 
-  /* Show mobile tech-stack section, hide desktop version */
+  /* Tech stack heading inside about section */
+  .tech-stack-desktop h3 {
+    font-size: clamp(1.25rem, 5vw, 1.75rem) !important;
+    font-family: var(--font--acme) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    margin-bottom: 0.75rem !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  /* Hide separate mobile tech-stack section - show inside about like desktop */
   .tech-stack-section {
-    display: flex !important;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start; /* Left-align content */
-    height: 100%;
-    min-height: 100%;
-    max-height: 100%;
-    flex: 0 0 100%;
-    padding: 2rem 1rem;
-    overflow: hidden;
-    box-sizing: border-box;
-  }
-
-  .tech-stack-desktop {
     display: none !important;
   }
 
-  /* Tech stack box styling on mobile */
-  .tech-stack-section .tech-stack {
+  /* Show tech-stack-desktop on mobile (matching desktop layout) */
+  .tech-stack-desktop {
+    display: block !important;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  /* Tech stack box styling on mobile - inside about section */
+  .tech-stack-desktop .tech-stack {
     background-color: var(--color-neutral-100);
-    padding: 1.5rem 2rem;
+    padding: 1rem 1.5rem;
     border-radius: 8px;
     border: 2px solid var(--color-neutral-400);
-    max-width: 90vw;
   }
 
-  .tech-stack-section .tech-list,
-  .about-section .tech-list {
-    max-width: 85vw;
+  /* Tech list styling on mobile */
+  .about-section .tech-list,
+  .tech-stack-desktop .tech-list {
+    max-width: 100%;
     text-align: justify;
+    font-size: 0.9rem;
   }
 
-  /* Contact section - fixed viewport height like other sections */
+  /* Contact section - auto height to fit form + business card (matching desktop layout) */
   .contact-section {
-    height: calc(100vh - var(--header-height) - var(--footer-height));
-    height: calc(100dvh - var(--header-height) - var(--footer-height));
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     min-height: calc(100dvh - var(--header-height) - var(--footer-height));
-    max-height: calc(100vh - var(--header-height) - var(--footer-height));
-    max-height: calc(100dvh - var(--header-height) - var(--footer-height));
+    height: auto;
+    max-height: none;
     flex: 0 0 auto;
-    padding: 1rem;
+    padding: 1.5rem 1rem;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
+    justify-content: flex-start;
+    align-items: center;
     overflow: visible; /* Allow button shadow to show */
     box-sizing: border-box;
+    position: relative; /* For hero overlay positioning */
   }
 
   /* ==========================================
@@ -274,22 +278,7 @@
     visibility: visible !important;
   }
 
-  .tech-stack-section {
-    order: 4;
-    /* Force visibility on mobile */
-    opacity: 1 !important;
-    filter: none !important;
-    visibility: visible !important;
-  }
-
-  /* Force visibility on tech-stack section children on mobile */
-  .tech-stack-section h2,
-  .tech-stack-section .tech-stack,
-  .tech-stack-section .tech-list {
-    opacity: 1 !important;
-    transform: none !important;
-    visibility: visible !important;
-  }
+  /* tech-stack-section is hidden on mobile - no ordering needed */
 
   .contact-section {
     order: 5;
@@ -322,17 +311,18 @@
   }
 
   /* ==========================================
-     MOBILE TEXT ANIMATION
+     MOBILE TEXT ANIMATION - Match desktop style
      ========================================== */
 
   .text-animation-svg {
-    width: 100%;
+    width: 90%;
+    max-width: 100%;
     height: auto;
     padding: 0;
     font-family: var(--font--acme), "Acme", sans-serif;
     font-weight: 700;
     display: block;
-    transform: scale(2.2);
+    transform: scale(1.8);
     transform-origin: center center;
   }
 
@@ -347,6 +337,15 @@
 
   .text-animation-svg .text-right {
     fill: var(--color-svg-text-right);
+  }
+
+  /* Hero section overlay SVG sizing */
+  .about-hero-desktop .text-animation-svg,
+  .contact-hero-desktop .text-animation-svg {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    transform: scale(1.5);
   }
 }
 

@@ -18,23 +18,33 @@
     display: block !important;
   }
 
-  /* Override desktop contact section styles - match other mobile sections */
-  /* NOTE: height/min-height/max-height are set in layout.css for scroll-snap */
+  /* Override desktop contact section styles - match desktop layout */
+  /* NOTE: height/min-height/max-height are set in layout.css */
   .contact-section {
     width: 100% !important;
     max-width: 100% !important;
     display: flex !important;
     flex-direction: column !important;
-    align-items: flex-start !important;
-    justify-content: center !important;
-    padding: 1rem !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 2rem 1rem !important;
     box-sizing: border-box !important;
   }
 
   .contact-section h2 {
-    margin-bottom: 0.5rem !important;
+    margin-bottom: 1rem !important;
     width: 100%;
+    max-width: 95vw;
     text-align: left;
+  }
+
+  /* Contact content wrapper */
+  .contact-content {
+    width: 100%;
+    max-width: 95vw;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   /* Contact layout - simple block layout on mobile, full width */
@@ -52,18 +62,53 @@
     padding: 0 !important;
   }
 
-  /* Hide business card on mobile */
+  /* Show business card on mobile - stacked below form like desktop structure */
   .contact-card-column {
-    display: none !important;
+    display: block !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin-top: 1rem;
+    overflow: visible;
   }
 
-  /* Show contact options on mobile (hidden on desktop where card shows them) */
+  /* Scale down business card for mobile - fit within viewport */
+  .contact-card-column .contact-business-card {
+    width: calc(100vw - 2rem);
+    max-width: 280px;
+    height: auto;
+    aspect-ratio: 1.785;
+    margin: 0 auto;
+  }
+
+  /* Ensure card container scales properly */
+  .contact-card-column .business-card-container {
+    width: 100% !important;
+    max-width: 280px !important;
+    height: auto !important;
+    min-width: unset !important;
+    min-height: unset !important;
+    max-height: unset !important;
+    aspect-ratio: 1.785;
+    margin: 0 auto;
+  }
+
+  /* Scale card inner elements */
+  .contact-card-column .business-card,
+  .contact-card-column .business-card-inner {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Smaller text on card for mobile */
+  .contact-card-column .contact-card-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    padding: 0.75rem;
+  }
+
+  /* Hide contact options on mobile - card shows this info (matching desktop) */
   p.contact-options {
-    display: block !important;
-    width: 100%;
-    margin: 0 0 0.75rem;
-    text-align: left;
-    font-size: 1rem;
+    display: none !important;
   }
 
   /* Contact form - flex column for ordering, full width */
@@ -151,13 +196,13 @@
     display: inline-block;
   }
 
-  /* Input fields on mobile - full width with pinched corner style */
+  /* Input fields on mobile - matching desktop rounded corner style */
   .input-item input {
     display: block;
-    height: 50px;
-    font-size: 0.95rem;
-    padding: 1.4rem 0.8rem 0.4rem;
-    border-radius: 0 16px 16px 16px; /* Pinched top-left corner */
+    height: 55px;
+    font-size: 1rem;
+    padding: 1.4rem 1rem 0.4rem 1.2rem;
+    border-radius: 0 40px 40px 40px; /* Match desktop rounded corners */
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box;
@@ -165,11 +210,11 @@
 
   .input-item textarea {
     display: block;
-    min-height: 180px !important;
-    height: 180px !important;
-    font-size: 0.95rem;
-    padding: 1.4rem 0.8rem 0.4rem;
-    border-radius: 0 16px 16px 16px; /* Pinched top-left corner */
+    min-height: 120px !important;
+    height: 120px !important;
+    font-size: 1rem;
+    padding: 1.4rem 1rem 0.5rem 1.2rem;
+    border-radius: 0 40px 40px 40px; /* Match desktop rounded corners */
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box;
@@ -212,22 +257,24 @@
     z-index: 20;
   }
 
-  /* Smaller submit button on mobile - GSAP handles animation */
+  /* Submit button on mobile - larger, matching desktop proportions */
   .submit-button {
-    width: 55px !important;
-    height: 55px !important;
-    min-width: 55px;
-    min-height: 55px;
+    width: 80px !important;
+    height: 80px !important;
+    min-width: 80px;
+    min-height: 80px;
     opacity: 1;
     visibility: visible;
     position: relative !important;
     z-index: 20;
+    border-radius: 50%;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
   }
 
   .submit-button svg {
-    width: 36px;
-    height: 36px;
-    stroke-width: 2.5;
+    width: 44px;
+    height: 44px;
+    stroke-width: 2;
   }
 
   /* Disable hover transform on mobile */
@@ -268,40 +315,55 @@
 
 @media screen and (max-width: 479px) {
   .input-item input {
-    height: 42px !important;
-    font-size: 0.9rem !important;
+    height: 50px !important;
+    font-size: 0.95rem !important;
     width: 100% !important;
-    border-radius: 0 12px 12px 12px !important; /* Smaller radius on small screens */
+    border-radius: 0 30px 30px 30px !important; /* Keep rounded style */
   }
 
   .input-item textarea {
-    min-height: 120px !important;
-    font-size: 0.9rem !important;
+    min-height: 100px !important;
+    font-size: 0.95rem !important;
     width: 100% !important;
-    border-radius: 0 12px 12px 12px !important; /* Smaller radius on small screens */
+    border-radius: 0 30px 30px 30px !important; /* Keep rounded style */
   }
 
   .contact-right {
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
     padding-bottom: 0.5rem; /* Space for button shadow */
   }
 
   .submit-button {
-    width: 50px !important;
-    height: 50px !important;
+    width: 70px !important;
+    height: 70px !important;
   }
 
   .submit-button svg {
-    width: 24px !important;
-    height: 24px !important;
+    width: 36px !important;
+    height: 36px !important;
   }
 
   /* Reduce spacing between form fields on very small screens */
   .input-wrapper {
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.5rem;
   }
 
   .contact-left .input-wrapper:first-child {
     margin-top: 0.75rem;
+  }
+
+  /* Smaller business card on very small screens */
+  .contact-card-column .contact-business-card {
+    max-width: 240px;
+  }
+
+  .contact-card-column .business-card-container {
+    max-width: 240px !important;
+  }
+
+  .contact-card-column .contact-card-text {
+    font-size: 0.75rem;
+    line-height: 1.3;
+    padding: 0.5rem;
   }
 }
