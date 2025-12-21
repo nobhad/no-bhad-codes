@@ -212,7 +212,7 @@
 .intro-card-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; /* Contain entire SVG including stroke */
   display: block;
   border-radius: 0; /* No rounding - SVG has its own black stroke border */
 }
