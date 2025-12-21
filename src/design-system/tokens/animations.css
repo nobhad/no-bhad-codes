@@ -164,6 +164,131 @@
 }
 
 /* ============================================
+ * DROP ANIMATION KEYFRAMES
+ * ============================================
+ * Choreographed entrance/exit animations
+ * Elements slide in from above, exit below
+ * ============================================ */
+
+@keyframes drop-in {
+  0% {
+    transform: translateY(-105%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes drop-out {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(105%);
+  }
+}
+
+/* Scale animations for dividers/lines */
+@keyframes scale-in-left {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes scale-out-left {
+  0% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(0);
+  }
+}
+
+/* ============================================
+ * STAGGERED ANIMATION SYSTEM
+ * ============================================
+ * Use .stagger-item.index-N for cascading entrances
+ * Add .leaving class for exit animations
+ * Entry: slower, more dramatic (100ms stagger)
+ * Exit: faster, tighter (50ms stagger)
+ * ============================================ */
+
+/* Base stagger item - hidden by default, animates in */
+.stagger-item {
+  overflow: hidden;
+}
+
+.stagger-item > * {
+  transform: translateY(-105%);
+  animation: drop-in var(--transition-length) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
+}
+
+/* Entry delays - slower, dramatic cascade (100ms apart) */
+.stagger-item.index-0 > * { animation-delay: 0.4s; }
+.stagger-item.index-1 > * { animation-delay: 0.5s; }
+.stagger-item.index-2 > * { animation-delay: 0.6s; }
+.stagger-item.index-3 > * { animation-delay: 0.7s; }
+.stagger-item.index-4 > * { animation-delay: 0.8s; }
+.stagger-item.index-5 > * { animation-delay: 0.9s; }
+.stagger-item.index-6 > * { animation-delay: 1.0s; }
+.stagger-item.index-7 > * { animation-delay: 1.1s; }
+
+/* Exit animations - faster, tighter cascade (50ms apart) */
+.stagger-item.leaving > * {
+  transform: translateY(0);
+  animation: drop-out var(--transition-length) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
+}
+
+.stagger-item.leaving.index-0 > * { animation-delay: 0.05s; }
+.stagger-item.leaving.index-1 > * { animation-delay: 0.1s; }
+.stagger-item.leaving.index-2 > * { animation-delay: 0.15s; }
+.stagger-item.leaving.index-3 > * { animation-delay: 0.2s; }
+.stagger-item.leaving.index-4 > * { animation-delay: 0.25s; }
+.stagger-item.leaving.index-5 > * { animation-delay: 0.3s; }
+.stagger-item.leaving.index-6 > * { animation-delay: 0.35s; }
+.stagger-item.leaving.index-7 > * { animation-delay: 0.4s; }
+
+/* Blur stagger variant */
+.stagger-blur {
+  opacity: 0;
+  filter: blur(8px);
+  animation: blur-in var(--transition-long) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
+}
+
+.stagger-blur.index-0 { animation-delay: 0.4s; }
+.stagger-blur.index-1 { animation-delay: 0.5s; }
+.stagger-blur.index-2 { animation-delay: 0.6s; }
+.stagger-blur.index-3 { animation-delay: 0.7s; }
+.stagger-blur.index-4 { animation-delay: 0.8s; }
+
+.stagger-blur.leaving {
+  opacity: 1;
+  filter: blur(0px);
+  animation: blur-out var(--transition-length) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
+}
+
+.stagger-blur.leaving.index-0 { animation-delay: 0.05s; }
+.stagger-blur.leaving.index-1 { animation-delay: 0.1s; }
+.stagger-blur.leaving.index-2 { animation-delay: 0.15s; }
+.stagger-blur.leaving.index-3 { animation-delay: 0.2s; }
+.stagger-blur.leaving.index-4 { animation-delay: 0.25s; }
+
+/* Divider/line animations */
+.stagger-divider {
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: scale-in-left var(--transition-long) cubic-bezier(0.3, 0.9, 0.3, 0.9) 0.4s forwards;
+}
+
+.stagger-divider.leaving {
+  transform: scaleX(1);
+  animation: scale-out-left var(--transition-length) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
+}
+
+/* ============================================
  * ADDITIONAL KEYFRAMES
  * ============================================
  * NOTE: Most CSS keyframes have been migrated to GSAP utilities

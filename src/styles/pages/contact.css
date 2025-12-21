@@ -402,13 +402,51 @@
   flex-direction: column;
 }
 
+/* Input item - wrapper for staggered animation */
+.input-wrapper {
+  overflow: hidden;
+}
+
 /* Input item */
 .input-item {
   display: flex;
   flex-direction: column;
-  transform: translateY(0);
   position: relative;
+  /* Staggered entrance animation */
+  transform: translateY(-105%);
+  animation: drop-in var(--transition-length) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
 }
+
+/* Staggered delays for form inputs */
+.input-wrapper:nth-child(1) .input-item,
+.input-item:nth-of-type(1) { animation-delay: 0.5s; }
+
+.input-wrapper:nth-child(2) .input-item,
+.input-item:nth-of-type(2) { animation-delay: 0.6s; }
+
+.input-wrapper:nth-child(3) .input-item,
+.input-item:nth-of-type(3) { animation-delay: 0.7s; }
+
+.input-wrapper:nth-child(4) .input-item,
+.input-item:nth-of-type(4) { animation-delay: 0.8s; }
+
+/* Exit animations for form inputs */
+.input-item.leaving {
+  transform: translateY(0);
+  animation: drop-out var(--transition-length) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
+}
+
+.input-wrapper:nth-child(1) .input-item.leaving,
+.input-item.leaving:nth-of-type(1) { animation-delay: 0.05s; }
+
+.input-wrapper:nth-child(2) .input-item.leaving,
+.input-item.leaving:nth-of-type(2) { animation-delay: 0.1s; }
+
+.input-wrapper:nth-child(3) .input-item.leaving,
+.input-item.leaving:nth-of-type(3) { animation-delay: 0.15s; }
+
+.input-wrapper:nth-child(4) .input-item.leaving,
+.input-item.leaving:nth-of-type(4) { animation-delay: 0.2s; }
 
 /* Error toast - positioned to the right of input fields (desktop) */
 .input-item .field-error,

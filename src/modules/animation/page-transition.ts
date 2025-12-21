@@ -583,6 +583,7 @@ export class PageTransitionModule extends BaseModule {
 
   /**
    * Animate page out (blur-out + drop-out)
+   * Adds .leaving class to CSS-animated elements for staggered exits
    */
   private async animateOut(page: PageConfig): Promise<void> {
     if (!page.element) return;
@@ -598,11 +599,19 @@ export class PageTransitionModule extends BaseModule {
       return;
     }
 
+    // Add .leaving class to CSS-animated stagger items for exit animations
+    const staggerItems = page.element.querySelectorAll('.stagger-item, .stagger-blur, .intro-nav-link, .input-item, .p-wrapper p, .heading-wrapper h2');
+    staggerItems.forEach(item => item.classList.add('leaving'));
+
     const children = this.getAnimatableChildren(page);
 
     return new Promise((resolve) => {
       const tl = gsap.timeline({
-        onComplete: resolve
+        onComplete: () => {
+          // Clean up .leaving classes after animation
+          staggerItems.forEach(item => item.classList.remove('leaving'));
+          resolve();
+        }
       });
 
       // Blur out the page

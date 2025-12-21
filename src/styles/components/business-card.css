@@ -645,12 +645,20 @@ html[data-theme="dark"] .business-card-container {
 }
 
 /* Navigation links - styled like H2 tags */
+/* Wrapper for staggered animation */
+.intro-nav-link-wrapper {
+  overflow: hidden;
+}
+
 .intro-nav-link {
   font-family: var(--font--acme), "Acme", sans-serif;
   font-size: clamp(1.5rem, 4vw, 3rem);
   font-weight: 400;
   line-height: 1.2;
   text-transform: uppercase;
+  /* Staggered entrance animation */
+  transform: translateY(-105%);
+  animation: drop-in var(--transition-length) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
   text-shadow: 0 2px 4px var(--color-shadow);
   letter-spacing: 0.10em;
   color: var(--color-text);
@@ -670,6 +678,33 @@ html[data-theme="dark"] .business-card-container {
   outline: 2px solid var(--color-primary);
   outline-offset: 4px;
   border-radius: 2px;
+}
+
+/* Staggered animation delays for nav links */
+.intro-nav-link:nth-child(1),
+.intro-nav-link-wrapper:nth-child(1) .intro-nav-link {
+  animation-delay: 0.8s;
+}
+
+.intro-nav-link:nth-child(2),
+.intro-nav-link-wrapper:nth-child(2) .intro-nav-link {
+  animation-delay: 0.9s;
+}
+
+/* Exit animations */
+.intro-nav-link.leaving {
+  transform: translateY(0);
+  animation: drop-out var(--transition-length) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
+}
+
+.intro-nav-link.leaving:nth-child(1),
+.intro-nav-link-wrapper:nth-child(1) .intro-nav-link.leaving {
+  animation-delay: 0.05s;
+}
+
+.intro-nav-link.leaving:nth-child(2),
+.intro-nav-link-wrapper:nth-child(2) .intro-nav-link.leaving {
+  animation-delay: 0.1s;
 }
 
 /* Hide separator - using space-between instead */

@@ -78,19 +78,68 @@
     gap: 1rem;
   }
 
-  /* Section heading */
+  /* Section heading - staggered entrance */
   .about-section h2 {
     margin-bottom: 1.5rem;
     text-align: left;
     width: 100%;
     letter-spacing: 0.10em;
-
   }
 
-  /* About text wrapper */
+  /* Heading wrapper for drop animation */
+  .heading-wrapper {
+    overflow: hidden;
+  }
+
+  .heading-wrapper h2 {
+    transform: translateY(-105%);
+    animation: drop-in var(--transition-length) cubic-bezier(0.3, 0.9, 0.3, 0.9) 0.4s forwards;
+  }
+
+  .heading-wrapper h2.leaving {
+    transform: translateY(0);
+    animation: drop-out var(--transition-length) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
+  }
+
+  /* About text wrapper - staggered paragraphs */
   .about-text-wrapper {
     margin-bottom: 1rem;
   }
+
+  /* Paragraph wrapper for drop animation */
+  .p-wrapper {
+    overflow: hidden;
+  }
+
+  .p-wrapper p {
+    transform: translateY(-105%);
+    animation: drop-in var(--transition-long) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
+  }
+
+  /* Staggered paragraph delays */
+  .p-wrapper:nth-child(1) p,
+  .p-wrapper.index-0 p { animation-delay: 0.5s; }
+
+  .p-wrapper:nth-child(2) p,
+  .p-wrapper.index-1 p { animation-delay: 0.6s; }
+
+  .p-wrapper:nth-child(3) p,
+  .p-wrapper.index-2 p { animation-delay: 0.7s; }
+
+  /* Exit animations */
+  .p-wrapper p.leaving {
+    transform: translateY(0);
+    animation: drop-out var(--transition-length) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
+  }
+
+  .p-wrapper:nth-child(1) p.leaving,
+  .p-wrapper.index-0 p.leaving { animation-delay: 0.05s; }
+
+  .p-wrapper:nth-child(2) p.leaving,
+  .p-wrapper.index-1 p.leaving { animation-delay: 0.1s; }
+
+  .p-wrapper:nth-child(3) p.leaving,
+  .p-wrapper.index-2 p.leaving { animation-delay: 0.15s; }
 
   .about-content p,
   .about-text-wrapper p {
