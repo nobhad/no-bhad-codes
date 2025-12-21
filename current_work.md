@@ -48,6 +48,34 @@ Comprehensive optimization of GSAP animations and page transitions:
 
 ---
 
+## Known Issues
+
+### Header White Flash in Dark Mode
+
+**Status:** Under Investigation
+**Priority:** Medium
+
+**Issue:** When clicking the home button to navigate back to the intro page in dark mode, the header area briefly flashes white.
+
+**Attempted Fixes:**
+
+- Added `.paw-exit .header` CSS rule with `opacity: 1`, `visibility: visible`, `transition: none` - did not resolve
+- Adding `background-color: var(--color-neutral-300)` to `html` element - testing needed
+
+**Root Cause (Suspected):**
+
+- Browser default white background showing during page transition
+- The `html` element doesn't have a background color set, so the white default shows briefly
+- The paw entry animation triggers class changes that may cause a brief repaint
+
+**Files to Investigate:**
+
+- `src/modules/animation/intro-animation.ts` - playEntryAnimation()
+- `src/modules/animation/page-transition.ts` - transitionTo()
+- `src/styles/main.css` - html/body background colors
+
+---
+
 ## Previous Updates (December 20, 2025)
 
 ### Documentation Overhaul - COMPLETE
