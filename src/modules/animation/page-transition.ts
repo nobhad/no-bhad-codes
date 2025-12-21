@@ -469,11 +469,19 @@ export class PageTransitionModule extends BaseModule {
         targetPage.element.style.opacity = '';
       }
 
-      // Special handling for entering intro page - play coyote paw entry animation
+      // Special handling for entering intro page - just show card and nav (no animation)
       if (pageId === 'intro') {
-        await this.playIntroEntryAnimation();
+        this.log('Returning to intro page - showing card directly');
+        const businessCard = document.getElementById('business-card');
+        const introNav = document.querySelector('.intro-nav') as HTMLElement;
+        if (businessCard) {
+          gsap.set(businessCard, { opacity: 1, visibility: 'visible' });
+        }
+        if (introNav) {
+          gsap.set(introNav, { opacity: 1, visibility: 'visible' });
+        }
       } else {
-        // Animate in target page (skip for intro - handled by entry animation)
+        // Animate in target page (skip for intro - handled above)
         await this.animateIn(targetPage);
       }
 
