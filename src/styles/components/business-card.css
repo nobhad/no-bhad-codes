@@ -57,12 +57,12 @@
    BUSINESS CARD ASPECT RATIO VARIABLES
    ========================================== */
 :root {
-  /* SVG viewBox dimensions: 1070.7 x 599.1 */
-  --business-card-width-svg: 1070.7;
-  --business-card-height-svg: 599.1;
+  /* SVG viewBox dimensions: 1071.3 x 600.3 (matches intro card in coyote_paw.svg) */
+  --business-card-width-svg: 1071.3;
+  --business-card-height-svg: 600.3;
 
-  /* Exact aspect ratio: 1070.7 ÷ 599.1 = 1.7872 */
-  --business-card-aspect-ratio: 1.7872;
+  /* Exact aspect ratio: 1071.3 ÷ 600.3 = 1.7846 */
+  --business-card-aspect-ratio: 1.7846;
 
   /* Responsive base dimensions */
   --business-card-base-width: 35vw;
@@ -74,22 +74,22 @@
   --business-card-large-width: 525px;
   --business-card-large-height: calc(
     var(--business-card-large-width) / var(--business-card-aspect-ratio)
-  ); /* 293.8px */
+  ); /* 294.2px */
 
   --business-card-medium-width: 420px;
   --business-card-medium-height: calc(
     var(--business-card-medium-width) / var(--business-card-aspect-ratio)
-  ); /* 235px */
+  ); /* 235.4px */
 
   --business-card-small-width: 350px;
   --business-card-small-height: calc(
     var(--business-card-small-width) / var(--business-card-aspect-ratio)
-  ); /* 195.8px */
+  ); /* 196.1px */
 
   --business-card-tiny-width: 280px;
   --business-card-tiny-height: calc(
     var(--business-card-tiny-width) / var(--business-card-aspect-ratio)
-  ); /* 156.7px */
+  ); /* 156.9px */
 }
 
 /* ==========================================

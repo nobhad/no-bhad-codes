@@ -504,6 +504,8 @@ export class ContactAnimationModule extends BaseModule {
     const currentHash = window.location.hash;
     if (currentHash === '#/contact' || currentHash === '#contact') {
       this.log('Already on contact page - waiting for hero reveal');
+      // Reset animated elements to initial state for animation
+      this.resetAnimatedElements();
       // Fallback: if hero doesn't reveal in 5 seconds, play form anyway
       setTimeout(() => {
         if (!this.timeline?.isActive()) {

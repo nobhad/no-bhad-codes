@@ -206,6 +206,8 @@
   .contact-content h2 {
     width: 100%;
     text-align: left;
+    letter-spacing: 0.10em;
+
   }
 
   /* ==========================================
