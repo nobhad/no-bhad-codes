@@ -466,9 +466,7 @@ html[data-theme="dark"] .coming-soon-banner {
   font-family: monospace;
   font-weight: 400;
   position: relative;
-  text-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.8),
-    0 1px 4px rgba(0, 0, 0, 0.6);
+  text-shadow: none;
   font-size: 0.875rem;
   flex-shrink: 0;
   /* Remove opacity: 0 and transition to make eyebrows always visible like Osmo UI */

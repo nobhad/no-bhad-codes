@@ -26,6 +26,14 @@
   font-display: optional; /* Better CLS - font won't cause layout shift */
 }
 
+@font-face {
+  font-family: "KCAcmeHandInked";
+  src: url("/fonts/KCAcmeHand/KCSimpleSans-Inked.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: optional;
+}
+
 /* ============================================
  * TYPOGRAPHY SCALE
  * ============================================ */

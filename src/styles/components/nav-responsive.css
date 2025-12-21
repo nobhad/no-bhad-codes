@@ -396,9 +396,7 @@
   font-family: monospace;
   font-weight: 400;
   position: static;
-  text-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.8),
-    0 1px 4px rgba(0, 0, 0, 0.6);
+  text-shadow: none;
   font-size: calc(var(--menu-heading-size) * 0.25); /* Proportional to submenu heading */
   flex-shrink: 0;
   margin-right: 1rem;
