@@ -710,13 +710,8 @@ export class IntroAnimationModule extends BaseModule {
   async playExitAnimation(): Promise<void> {
     console.log('[IntroAnimation] playExitAnimation called');
 
-    // Skip on mobile - no paw animation
-    const isMobile = window.matchMedia('(max-width: 767px)').matches;
-    if (isMobile) {
-      this.log('Mobile - skipping exit animation');
-      console.log('[IntroAnimation] Mobile detected - skipping');
-      return;
-    }
+    // Note: Mobile check removed - paw animation now works on both mobile and desktop
+    // MobileIntroAnimationModule delegates to this method for the exit animation
 
     // Skip if reduced motion preferred
     if (this.reducedMotion) {

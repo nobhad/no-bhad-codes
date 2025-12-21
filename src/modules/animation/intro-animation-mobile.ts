@@ -550,79 +550,66 @@ export class MobileIntroAnimationModule extends BaseModule {
   /**
    * Play exit animation when leaving intro page
    * Called by PageTransitionModule when navigating away from intro
+   *
+   * Uses the same paw animation as desktop by delegating to IntroAnimationModule
    */
   async playExitAnimation(): Promise<void> {
-    console.log('[MobileIntro] playExitAnimation called');
-    this.log('Playing mobile exit animation');
+    console.log('[MobileIntro] playExitAnimation called - delegating to desktop paw animation');
+    this.log('Playing paw exit animation (same as desktop)');
 
-    return new Promise((resolve) => {
-      // Get the intro elements
-      const businessCard = document.getElementById('business-card');
-      const introNav = document.querySelector('.intro-nav') as HTMLElement;
-      const businessCardSection = document.querySelector('.business-card-section') as HTMLElement;
+    try {
+      // Dynamically import the desktop IntroAnimationModule for the paw exit animation
+      const { IntroAnimationModule } = await import('./intro-animation');
 
-      console.log('[MobileIntro] Found elements:', {
-        businessCard: !!businessCard,
-        introNav: !!introNav,
-        businessCardSection: !!businessCardSection
-      });
+      // Create a temporary instance just for the exit animation
+      // The exit animation is self-contained and fetches what it needs from the DOM
+      const desktopModule = new IntroAnimationModule();
 
-      // Ensure section stays visible during animation by forcing z-index
-      if (businessCardSection) {
-        businessCardSection.style.zIndex = '1000';
-      }
+      // The desktop module's playExitAnimation has the full paw animation
+      // We pass through to it since it now works on both mobile and desktop
+      await desktopModule.playExitAnimation();
 
-      // Longer, more visible fade out animation
-      const exitTimeline = gsap.timeline({
-        onStart: () => {
-          console.log('[MobileIntro] Exit animation STARTED');
-        },
-        onComplete: () => {
-          console.log('[MobileIntro] Exit animation COMPLETE');
-          // Reset z-index after animation
-          if (businessCardSection) {
-            businessCardSection.style.zIndex = '';
+      console.log('[MobileIntro] Paw exit animation complete');
+      this.log('Paw exit animation complete');
+    } catch (error) {
+      console.error('[MobileIntro] Failed to load desktop exit animation:', error);
+      this.log('Failed to load paw animation, falling back to simple fade');
+
+      // Fallback to simple fade if paw animation fails
+      return new Promise((resolve) => {
+        const businessCard = document.getElementById('business-card');
+        const introNav = document.querySelector('.intro-nav') as HTMLElement;
+
+        const exitTimeline = gsap.timeline({
+          onComplete: () => {
+            this.log('Fallback exit animation complete');
+            resolve();
           }
-          this.log('Mobile exit animation complete');
+        });
+
+        if (businessCard) {
+          exitTimeline.to(businessCard, {
+            opacity: 0,
+            scale: 0.95,
+            duration: 0.8,
+            ease: 'power2.inOut'
+          });
+        }
+
+        if (introNav) {
+          exitTimeline.to(introNav, {
+            opacity: 0,
+            y: 20,
+            duration: 0.8,
+            ease: 'power2.inOut'
+          }, '<');
+        }
+
+        if (!businessCard && !introNav) {
           resolve();
         }
       });
-
-      // Fade out the business card and nav with longer duration
-      if (businessCard) {
-        console.log('[MobileIntro] Adding businessCard to exit timeline');
-        exitTimeline.to(businessCard, {
-          opacity: 0,
-          scale: 0.95,
-          duration: 0.8,
-          ease: 'power2.inOut'
-        });
-      } else {
-        console.warn('[MobileIntro] business-card element not found!');
-      }
-
-      if (introNav) {
-        console.log('[MobileIntro] Adding introNav to exit timeline');
-        exitTimeline.to(introNav, {
-          opacity: 0,
-          y: 20,
-          duration: 0.8,
-          ease: 'power2.inOut'
-        }, '<');
-      } else {
-        console.warn('[MobileIntro] intro-nav element not found!');
-      }
-
-      // If no elements found, resolve immediately
-      if (!businessCard && !introNav) {
-        console.error('[MobileIntro] NO ELEMENTS FOUND - resolving immediately');
-        resolve();
-        return;
-      }
-
-      this.addTimeline(exitTimeline);
-      console.log('[MobileIntro] Exit timeline created and playing');
-    });
+    }
   }
 
   /**
