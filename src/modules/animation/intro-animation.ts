@@ -50,6 +50,31 @@
  * │   - intro-complete class added to document                      │
  * └─────────────────────────────────────────────────────────────────┘
  *
+ * EXIT ANIMATION (when navigating away from intro page):
+ * ┌─────────────────────────────────────────────────────────────────┐
+ * │ DESIGN DECISIONS (INTENTIONAL):                                 │
+ * │   - Header/nav stays visible during exit (overlay below header) │
+ * │   - Nav links fade immediately on click (0.15s)                 │
+ * │   - SVG is cached after intro to eliminate fetch delay          │
+ * │   - about-hero-desktop hidden to prevent text showing through   │
+ * │   - Uses intro-morph-overlay, NOT page-transition-overlay       │
+ * ├─────────────────────────────────────────────────────────────────┤
+ * │ Phase 1: PAW ENTERS (0.8s)                                      │
+ * │   - Paw enters from off-screen (-1500, -1200)                   │
+ * │   - Fingers in Position 3 (open), morph to Position 2 near end  │
+ * ├─────────────────────────────────────────────────────────────────┤
+ * │ Phase 2: FINGER MORPH (0.3s)                                    │
+ * │   - Fingers morph: Position 2 → Position 1 (clutching)          │
+ * │   - Thumb fades out as it goes behind card                      │
+ * ├─────────────────────────────────────────────────────────────────┤
+ * │ Phase 3: CLUTCH HOLD (0.4s)                                     │
+ * │   - Paw grips card motionless                                   │
+ * ├─────────────────────────────────────────────────────────────────┤
+ * │ Phase 4: EXIT (0.6s)                                            │
+ * │   - Paw + card exit together to (-1500, -1200)                  │
+ * │   - Must fully exit viewport before animation completes         │
+ * └─────────────────────────────────────────────────────────────────┘
+ *
  * SVG STRUCTURE (coyote_paw.svg):
  * The SVG contains multiple position states for morphing:
  *
