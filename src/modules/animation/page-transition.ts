@@ -224,7 +224,7 @@ export class PageTransitionModule extends BaseModule {
         this.log(`Starting transition to: ${pageId}`);
         this.transitionTo(pageId);
       } else if (!this.introComplete) {
-        this.warn(`Navigation blocked - intro not complete yet`);
+        this.warn('Navigation blocked - intro not complete yet');
       }
     }) as EventListener);
 
@@ -424,7 +424,7 @@ export class PageTransitionModule extends BaseModule {
 
     // Skip on mobile
     if (this.isMobile && !this.enableOnMobile) {
-      this.log(`Mobile mode - skipping page transition`);
+      this.log('Mobile mode - skipping page transition');
       return;
     }
 

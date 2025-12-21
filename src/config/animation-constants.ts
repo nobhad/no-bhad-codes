@@ -28,7 +28,7 @@ export const ANIMATION_DURATIONS = {
   CONTACT_POPUP_FADE: 0.3,
   PAGE_TRANSITION_IN: 0.5,
   PAGE_TRANSITION_OUT: 0.4,
-  HEADER_FADE: 0.5,
+  HEADER_FADE: 0.5
 } as const;
 
 // ============================================
@@ -47,7 +47,7 @@ export const ANIMATION_EASING = {
   // Custom curves for specific animations
   PAGE_TRANSITION: 'power3.inOut',
   MORPH: 'power2.inOut',
-  HERO_REVEAL: 'power2.out',
+  HERO_REVEAL: 'power2.out'
 } as const;
 
 // ============================================
@@ -58,7 +58,7 @@ export const ANIMATION_COLORS = {
   SHADOW_DEFAULT: 'rgba(0, 0, 0, 0.5)',
   SHADOW_LIGHT: 'rgba(0, 0, 0, 0.3)',
   CARD_FILL: '#ffffff',
-  OVERLAY_BG: 'rgba(0, 0, 0, 0.8)',
+  OVERLAY_BG: 'rgba(0, 0, 0, 0.8)'
 } as const;
 
 // ============================================
@@ -82,7 +82,7 @@ export const ANIMATION_DIMENSIONS = {
   CONTACT_DROP_DISTANCE: 50, // pixels
 
   // Hero animation dimensions
-  HERO_CORNER_ZONE: 0.2, // 20% from edges
+  HERO_CORNER_ZONE: 0.2 // 20% from edges
 } as const;
 
 // ============================================
@@ -92,7 +92,7 @@ export const ANIMATION_DIMENSIONS = {
 export const ANIMATION_SEQUENCES = {
   CONTACT_FORM: {
     TOTAL_DURATION: 2.5,
-    FIELD_STAGGER: 0.3,
+    FIELD_STAGGER: 0.3
   },
 
   INTRO_MORPH: {
@@ -103,12 +103,12 @@ export const ANIMATION_SEQUENCES = {
     RETRACTION_DELAY: 0.02,
     FINGER_MORPH_A: 0.08,
     FINGER_MORPH_B: 0.08,
-    FINGER_MORPH_C: 0.2,
+    FINGER_MORPH_C: 0.2
   },
 
   HERO_ANIMATION: {
-    DURATION: 2, // timeline units
-  },
+    DURATION: 2 // timeline units
+  }
 } as const;
 
 // ============================================
@@ -118,7 +118,7 @@ export const ANIMATION_SEQUENCES = {
 export const ANIMATION_POSITIONS = {
   INTRO_ENTRY_START: { x: -800, y: -600 },
   INTRO_CENTER: { x: 0, y: 0 },
-  INTRO_RETRACTION_END: { x: -1500, y: -1200 },
+  INTRO_RETRACTION_END: { x: -1500, y: -1200 }
 } as const;
 
 // ============================================
@@ -132,7 +132,7 @@ export const ANIMATION_SHADOWS = {
 
   // Card shadow presets
   CARD_REST: '0 10px 30px rgba(0,0,0,0.3)',
-  CARD_HOVER: '0 15px 40px rgba(0,0,0,0.4)',
+  CARD_HOVER: '0 15px 40px rgba(0,0,0,0.4)'
 } as const;
 
 // ============================================
@@ -143,7 +143,7 @@ export const ANIMATION_PERFORMANCE = {
   THROTTLE_SCROLL: 16, // ~60fps
   THROTTLE_RESIZE: 100,
   THROTTLE_MOUSE_MOVE: 10,
-  DEBOUNCE_WHEEL: 50,
+  DEBOUNCE_WHEEL: 50
 } as const;
 
 // ============================================
@@ -158,7 +158,7 @@ export const ANIMATION_CONSTANTS = {
   SEQUENCES: ANIMATION_SEQUENCES,
   POSITIONS: ANIMATION_POSITIONS,
   SHADOWS: ANIMATION_SHADOWS,
-  PERFORMANCE: ANIMATION_PERFORMANCE,
+  PERFORMANCE: ANIMATION_PERFORMANCE
 } as const;
 
 // ============================================
@@ -173,7 +173,7 @@ export const ANIMATION_CONSTANTS = {
 export function calculateShadowOffset(multiplier: number = 1) {
   return {
     base: ANIMATION_SHADOWS.SHADOW_BASE_OFFSET * multiplier,
-    blur: ANIMATION_SHADOWS.SHADOW_BLUR_OFFSET * multiplier,
+    blur: ANIMATION_SHADOWS.SHADOW_BLUR_OFFSET * multiplier
   };
 }
 
@@ -184,6 +184,6 @@ export function calculateShadowOffset(multiplier: number = 1) {
  */
 export function getTimelineDefaults(ease: keyof typeof ANIMATION_EASING = 'SMOOTH') {
   return {
-    ease: ANIMATION_EASING[ease],
+    ease: ANIMATION_EASING[ease]
   };
 }

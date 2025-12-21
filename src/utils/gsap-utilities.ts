@@ -31,7 +31,7 @@ export function fadeIn(
     opacity: 0,
     duration,
     ease: ANIMATION_CONSTANTS.EASING.SMOOTH,
-    ...options,
+    ...options
   });
 }
 
@@ -51,7 +51,7 @@ export function fadeOut(
     opacity: 0,
     duration,
     ease: ANIMATION_CONSTANTS.EASING.SMOOTH,
-    ...options,
+    ...options
   });
 }
 
@@ -72,25 +72,25 @@ export function slideIn(
   const from: gsap.TweenVars = { opacity: 0 };
 
   switch (direction) {
-    case 'top':
-      from.y = '-100%';
-      break;
-    case 'bottom':
-      from.y = '100%';
-      break;
-    case 'left':
-      from.x = '-100%';
-      break;
-    case 'right':
-      from.x = '100%';
-      break;
+  case 'top':
+    from.y = '-100%';
+    break;
+  case 'bottom':
+    from.y = '100%';
+    break;
+  case 'left':
+    from.x = '-100%';
+    break;
+  case 'right':
+    from.x = '100%';
+    break;
   }
 
   return gsap.from(target, {
     ...from,
     duration,
     ease: ANIMATION_CONSTANTS.EASING.SMOOTH,
-    ...options,
+    ...options
   });
 }
 
@@ -111,7 +111,7 @@ export function scaleIn(
     scale: 0,
     duration,
     ease: ANIMATION_CONSTANTS.EASING.BACK,
-    ...options,
+    ...options
   });
 }
 
@@ -132,7 +132,7 @@ export function scaleOut(
     scale: 0,
     duration,
     ease: ANIMATION_CONSTANTS.EASING.SMOOTH,
-    ...options,
+    ...options
   });
 }
 
@@ -153,7 +153,7 @@ export function spin(
     duration,
     ease: ANIMATION_CONSTANTS.EASING.LINEAR,
     repeat: -1,
-    ...options,
+    ...options
   });
 }
 
@@ -175,7 +175,7 @@ export function pulse(
     ease: ANIMATION_CONSTANTS.EASING.SMOOTH,
     repeat: -1,
     yoyo: true,
-    ...options,
+    ...options
   });
 }
 
@@ -197,7 +197,7 @@ export function bounce(
     ease: ANIMATION_CONSTANTS.EASING.BOUNCE,
     repeat: -1,
     yoyo: true,
-    ...options,
+    ...options
   });
 }
 
@@ -219,7 +219,7 @@ export function shake(
     ease: ANIMATION_CONSTANTS.EASING.LINEAR,
     repeat: 9,
     yoyo: true,
-    ...options,
+    ...options
   });
 }
 
@@ -239,7 +239,7 @@ export function flip(
     rotationY: 180,
     duration,
     ease: ANIMATION_CONSTANTS.EASING.SMOOTH,
-    ...options,
+    ...options
   });
 }
 
@@ -259,7 +259,7 @@ export function pulseGlow(
     ease: ANIMATION_CONSTANTS.EASING.SMOOTH_IN_OUT,
     repeat: -1,
     yoyo: true,
-    ...options,
+    ...options
   });
 }
 
@@ -274,7 +274,7 @@ export function pulseGlow(
  * @param limit - Time limit in milliseconds
  * @returns Throttled function
  */
-export function throttle<T extends (...args: any[]) => void>(
+export function throttle<T extends(...args: any[]) => void>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
@@ -295,7 +295,7 @@ export function throttle<T extends (...args: any[]) => void>(
  * @param delay - Delay in milliseconds
  * @returns Debounced function
  */
-export function debounce<T extends (...args: any[]) => void>(
+export function debounce<T extends(...args: any[]) => void>(
   func: T,
   delay: number
 ): (...args: Parameters<T>) => void {

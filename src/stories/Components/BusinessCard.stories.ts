@@ -27,10 +27,10 @@ const createBusinessCard = (args: any) => {
       <div id="business-card" class="business-card${isFlipped ? ' flipped' : ''}">
         <div id="business-card-inner" class="business-card-inner${isFlipped ? ' flipped' : ''}">
           <div class="business-card-front">
-            <img src="/images/business-card_front.svg" alt="Business Card Front" class="card-svg" width="525" height="299.7">
+            <img src="/images/business-card_front.svg" alt="Business Card Front" class="card-svg" width="525" height="294.2">
           </div>
           <div class="business-card-back">
-            <img src="/images/business-card_back.svg" alt="Business Card Back" class="card-svg" width="525" height="299.7">
+            <img src="/images/business-card_back.svg" alt="Business Card Back" class="card-svg" width="525" height="294.2">
           </div>
         </div>
       </div>
@@ -98,10 +98,10 @@ export const InSection: Story = {
         <div id="business-card" class="business-card">
           <div id="business-card-inner" class="business-card-inner">
             <div class="business-card-front">
-              <img src="/images/business-card_front.svg" alt="Business Card Front" class="card-svg" width="525" height="299.7">
+              <img src="/images/business-card_front.svg" alt="Business Card Front" class="card-svg" width="525" height="294.2">
             </div>
             <div class="business-card-back">
-              <img src="/images/business-card_back.svg" alt="Business Card Back" class="card-svg" width="525" height="299.7">
+              <img src="/images/business-card_back.svg" alt="Business Card Back" class="card-svg" width="525" height="294.2">
             </div>
           </div>
         </div>
@@ -124,10 +124,10 @@ export const Interactive: Story = {
         <div id="interactive-card" class="business-card" onclick="flipCard()" style="cursor: pointer;">
           <div id="interactive-inner" class="business-card-inner">
             <div class="business-card-front">
-              <img src="/images/business-card_front.svg" alt="Business Card Front" class="card-svg" width="525" height="299.7">
+              <img src="/images/business-card_front.svg" alt="Business Card Front" class="card-svg" width="525" height="294.2">
             </div>
             <div class="business-card-back">
-              <img src="/images/business-card_back.svg" alt="Business Card Back" class="card-svg" width="525" height="299.7">
+              <img src="/images/business-card_back.svg" alt="Business Card Back" class="card-svg" width="525" height="294.2">
             </div>
           </div>
         </div>
