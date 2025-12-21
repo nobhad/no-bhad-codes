@@ -426,6 +426,12 @@ export class PageTransitionModule extends BaseModule {
       this.log('Intro already complete');
     }
 
+    // Check if intro-complete class is set (works for both desktop and mobile)
+    if (document.documentElement.classList.contains('intro-complete')) {
+      this.introComplete = true;
+      this.log('Intro already complete (from class)');
+    }
+
     // Fallback: enable after timeout if no intro event
     setTimeout(() => {
       if (!this.introComplete) {
@@ -433,7 +439,7 @@ export class PageTransitionModule extends BaseModule {
         this.log('Intro timeout - page transitions enabled');
         this.dispatchEvent('ready');
       }
-    }, 5000);
+    }, 2000); // Reduced from 5s to 2s for faster mobile fallback
   }
 
   /**
