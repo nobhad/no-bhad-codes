@@ -417,7 +417,7 @@ export class PageTransitionModule extends BaseModule {
     this.on('IntroAnimationModule:complete', handleIntroComplete);
 
     // Listen for mobile intro complete event
-    this.on('IntroAnimationMobileModule:complete', handleIntroComplete);
+    this.on('MobileIntroAnimationModule:complete', handleIntroComplete);
 
     // Also check if intro is already complete (in case we init late)
     const introOverlay = document.getElementById('intro-morph-overlay');
