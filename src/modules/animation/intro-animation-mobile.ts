@@ -587,6 +587,9 @@ export class MobileIntroAnimationModule extends BaseModule {
       (window as any).NBW_STATE.setState({ introAnimating: false });
     }
 
+    // Dispatch complete event for PageTransitionModule
+    this.dispatchEvent('complete');
+
     this.log('Mobile intro animation complete');
   }
 
