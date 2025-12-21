@@ -508,21 +508,28 @@ export class PageTransitionModule extends BaseModule {
     try {
       // Special handling for leaving intro page - play coyote paw exit animation
       if (this.currentPageId === 'intro') {
+        console.log('[PageTransition] Leaving intro, playing exit animation');
         await this.playIntroExitAnimation();
+        console.log('[PageTransition] Exit animation done');
       }
 
       // Animate out current page (skip for intro - already handled by exit animation)
       if (currentPage && currentPage.element && this.currentPageId !== 'intro') {
+        console.log('[PageTransition] Animating out current page:', this.currentPageId);
         await this.animateOut(currentPage);
+        console.log('[PageTransition] AnimateOut complete');
       } else if (currentPage && currentPage.element && this.currentPageId === 'intro') {
         // Just hide intro page immediately after exit animation
+        console.log('[PageTransition] Hiding intro page');
         currentPage.element.classList.add('page-hidden');
         currentPage.element.classList.remove('page-active');
       }
 
       // Show target page
+      console.log('[PageTransition] Showing target page:', pageId);
       targetPage.element.classList.remove('page-hidden');
       targetPage.element.classList.add('page-active');
+      console.log('[PageTransition] Target page classes updated');
       // Clear any inline styles from previous hide (for skipAnimation pages)
       if (targetPage.skipAnimation) {
         targetPage.element.style.display = '';
@@ -576,12 +583,15 @@ export class PageTransitionModule extends BaseModule {
       // Hide transition overlay after animation completes
       this.hideTransitionOverlay();
 
+      console.log('[PageTransition] Transition complete! Current page:', this.currentPageId);
     } catch (error) {
+      console.error('[PageTransition] Transition failed:', error);
       this.error('Transition failed:', error);
       // Hide overlay even on error
       this.hideTransitionOverlay();
     } finally {
       this.isTransitioning = false;
+      console.log('[PageTransition] isTransitioning set to false');
     }
   }
 
@@ -590,13 +600,21 @@ export class PageTransitionModule extends BaseModule {
    */
   private async playIntroExitAnimation(): Promise<void> {
     try {
-      const introModule = await container.resolve('IntroAnimationModule') as IntroAnimationModule;
+      // Try mobile module first, then desktop
+      const moduleName = this.isMobile ? 'MobileIntroAnimationModule' : 'IntroAnimationModule';
+      console.log('[PageTransition] Resolving intro module:', moduleName);
+      const introModule = await container.resolve(moduleName) as IntroAnimationModule;
       if (introModule && typeof introModule.playExitAnimation === 'function') {
+        console.log('[PageTransition] Playing intro exit animation');
         this.log('Playing intro exit animation');
         await introModule.playExitAnimation();
+        console.log('[PageTransition] Intro exit animation complete');
         this.log('Intro exit animation complete');
+      } else {
+        console.log('[PageTransition] Intro module has no playExitAnimation method');
       }
     } catch (error) {
+      console.log('[PageTransition] IntroAnimationModule not available:', error);
       this.log('IntroAnimationModule not available for exit animation:', error);
     }
   }
