@@ -48,6 +48,50 @@
 }
 
 /* ============================================
+ * PAGE STATE CLASSES (Mobile + Desktop)
+ * ============================================ */
+
+/* Hidden page state - completely hide non-active pages */
+section.page-hidden {
+  display: none !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Active page state */
+section.page-active {
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 100; /* Ensure active page is on top */
+}
+
+/* About section scroll - ensure scrolling on mobile */
+@media screen and (max-width: 767px) {
+  /* Force about section to be scrollable on mobile - highest specificity */
+  section#about.about-section.page-active,
+  section.about-section#about.page-active {
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+    overscroll-behavior-y: contain !important;
+  }
+}
+
+/* Intro page should allow other pages to appear on top */
+section#intro,
+section.business-card-section {
+  z-index: 10;
+}
+
+section#intro.page-active,
+section.business-card-section.page-active {
+  z-index: 50 !important; /* Lower than other active pages, visible during transitions */
+}
+
+/* ============================================
  * VIRTUAL PAGE LAYOUT (Desktop Only)
  * ============================================ */
 
@@ -182,41 +226,10 @@
     display: none !important;
   }
 
-  /* Hidden page state - completely hide non-active pages */
-  section.page-hidden {
-    display: none !important;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-
   /* Ensure about-hero is hidden when about section is hidden */
   section.page-hidden .about-hero-desktop {
     display: none !important;
     visibility: hidden !important;
-  }
-
-  /* Active page state */
-  section.page-active {
-    display: flex;
-    visibility: visible;
-    pointer-events: auto;
-    z-index: 100; /* Ensure active page is on top */
-  }
-
-  /* Hidden pages should be below */
-  section.page-hidden {
-    z-index: 1;
-  }
-
-  /* Intro page should allow other pages to appear on top */
-  section#intro,
-  section.business-card-section {
-    z-index: 10;
-  }
-
-  section#intro.page-active {
-    z-index: 50; /* Lower than other active pages */
   }
 
   /* Page content wrapper for animations */

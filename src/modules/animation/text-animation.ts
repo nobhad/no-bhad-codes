@@ -47,6 +47,14 @@ export class TextAnimationModule extends BaseModule {
   override async init(): Promise<void> {
     await super.init();
 
+    // Skip on mobile - hero section is hidden on mobile (display: none)
+    // and we don't want ScrollTrigger adding listeners to main that block touch scroll
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    if (isMobile) {
+      this.log('Mobile detected - text animation disabled (hero section hidden on mobile)');
+      return;
+    }
+
     // Skip if reduced motion is preferred
     if (this.reducedMotion) {
       this.log('Reduced motion preferred - disabling text animation');
