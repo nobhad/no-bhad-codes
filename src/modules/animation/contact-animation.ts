@@ -426,6 +426,14 @@ export class ContactAnimationModule extends BaseModule {
     }
     this.timeline.set(this.container, { minHeight: 'auto' });
 
+    // Set final state for placeholders and labels to ensure they stay visible
+    if (allLabels.length > 0) {
+      this.timeline.set(allLabels, { opacity: 1 });
+    }
+    if (allInputsWithPlaceholders.length > 0) {
+      this.timeline.set(allInputsWithPlaceholders, { '--placeholder-opacity': 1 });
+    }
+
     // Keep all container dimensions locked permanently - do not clear
 
     // ========================================================================
