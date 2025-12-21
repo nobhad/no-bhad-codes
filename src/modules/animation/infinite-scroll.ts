@@ -20,6 +20,8 @@
 import { BaseModule } from '../core/base';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { ModuleOptions } from '../../types/modules';
+import { throttle } from '../../utils/gsap-utilities';
+import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
 
 interface InfiniteScrollOptions extends ModuleOptions {
   /** Selector for the scroll container (default: 'main') */
@@ -45,12 +47,21 @@ export class InfiniteScrollModule extends BaseModule {
   private containerSelector: string;
   private lastSectionSelector: string;
 
+  // Throttled event handlers
+  private throttledHandleScroll: (() => void) | null = null;
+
   constructor(options: InfiniteScrollOptions = {}) {
     super('InfiniteScrollModule', { debug: true, ...options });
 
     this.containerSelector = options.containerSelector || 'main';
     this.lastSectionSelector = options.lastSectionSelector || '.contact-section';
     this.isEnabled = options.enabled !== false;
+
+    // Create throttled scroll handler (~60fps for smooth performance)
+    this.throttledHandleScroll = throttle(
+      this.handleScroll.bind(this),
+      ANIMATION_CONSTANTS.PERFORMANCE.THROTTLE_SCROLL
+    );
   }
 
   override async init(): Promise<void> {
@@ -112,10 +123,12 @@ export class InfiniteScrollModule extends BaseModule {
     // Log initial dimensions
     this.log(`Container dimensions: scrollHeight=${this.container.scrollHeight}, clientHeight=${this.container.clientHeight}, scrollTop=${this.container.scrollTop}`);
 
-    // Add scroll listener to detect when we hit the bottom
-    this.container.addEventListener('scroll', this.handleScroll.bind(this), { passive: true });
+    // Add throttled scroll listener to detect when we hit the bottom (~60fps)
+    if (this.throttledHandleScroll) {
+      this.container.addEventListener('scroll', this.throttledHandleScroll, { passive: true });
+    }
 
-    this.log('Infinite scroll initialized - scroll listener attached');
+    this.log('Infinite scroll initialized - throttled scroll listener attached');
   }
 
   /**
@@ -278,6 +291,12 @@ export class InfiniteScrollModule extends BaseModule {
    * Cleanup on destroy
    */
   override async destroy(): Promise<void> {
+    // Remove throttled scroll event listener
+    if (this.container && this.throttledHandleScroll) {
+      this.container.removeEventListener('scroll', this.throttledHandleScroll);
+    }
+
+    this.throttledHandleScroll = null;
     this.container = null;
     this.lastSection = null;
     this.topSpacer = null;
