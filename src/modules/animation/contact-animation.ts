@@ -103,8 +103,18 @@ export class ContactAnimationModule extends BaseModule {
     // Timeline is controlled by ScrollTrigger's toggleActions
     // ========================================================================
     this.timeline = gsap.timeline({
+      onStart: () => {
+        this.log('📢 CONTACT FORM ANIMATION STARTED');
+      },
+      onUpdate: () => {
+        // Log progress every 10%
+        const progress = Math.round(this.timeline!.progress() * 10) * 10;
+        if (progress % 20 === 0) {
+          this.log(`Animation progress: ${progress}%`);
+        }
+      },
       onComplete: () => {
-        this.log('Contact animation complete');
+        this.log('✅ CONTACT FORM ANIMATION COMPLETE');
       }
     });
 
@@ -317,7 +327,7 @@ export class ContactAnimationModule extends BaseModule {
       }, expandStart);
     }
     if (nameInput) {
-      this.timeline.to(nameInput, { height: inputFieldHeight, duration: 0.5, ease: 'sine.inOut' }, '<');
+      this.timeline.to(nameInput, { height: inputFieldHeight, opacity: 1, duration: 0.5, ease: 'sine.inOut' }, '<');
     }
 
     if (companyField) {
@@ -330,7 +340,7 @@ export class ContactAnimationModule extends BaseModule {
       }, expandStart + stagger);
     }
     if (companyInput) {
-      this.timeline.to(companyInput, { height: inputFieldHeight, duration: 0.5, ease: 'sine.inOut' }, '<');
+      this.timeline.to(companyInput, { height: inputFieldHeight, opacity: 1, duration: 0.5, ease: 'sine.inOut' }, '<');
     }
 
     if (emailField) {
@@ -343,7 +353,7 @@ export class ContactAnimationModule extends BaseModule {
       }, expandStart + stagger * 2);
     }
     if (emailInput) {
-      this.timeline.to(emailInput, { height: inputFieldHeight, duration: 0.5, ease: 'sine.inOut' }, '<');
+      this.timeline.to(emailInput, { height: inputFieldHeight, opacity: 1, duration: 0.5, ease: 'sine.inOut' }, '<');
     }
 
     // Message field expands to its final height
@@ -360,6 +370,7 @@ export class ContactAnimationModule extends BaseModule {
       this.timeline.to(textarea, {
         height: finalTextareaHeight,
         minHeight: finalTextareaHeight,
+        opacity: 1,
         duration: 0.5,
         ease: 'sine.inOut'
       }, '<');
@@ -461,7 +472,10 @@ export class ContactAnimationModule extends BaseModule {
     // ========================================================================
 
     // Pause the timeline initially - we'll play it when hero is revealed
+    this.log(`Timeline created with ${this.timeline.totalDuration()}s duration`);
+    this.log(`Timeline progress before pause: ${this.timeline.progress()}`);
     this.timeline.pause();
+    this.log(`Timeline paused - progress: ${this.timeline.progress()}, paused: ${this.timeline.paused()}`);
 
     // Listen for PageHeroModule reveal event - this fires after hero animation completes
     this.on('PageHeroModule:revealed', ((event: CustomEvent) => {
@@ -522,7 +536,13 @@ export class ContactAnimationModule extends BaseModule {
    * Play the form animation after hero reveal
    */
   private playFormAnimation(): void {
-    if (!this.container || !this.timeline) return;
+    if (!this.container || !this.timeline) {
+      this.warn('Cannot play form animation - container or timeline missing');
+      return;
+    }
+
+    this.log('Playing form animation...');
+    this.log(`Timeline state: paused=${this.timeline.paused()}, progress=${this.timeline.progress()}`);
 
     // Make sure container is visible
     this.container.classList.remove('page-hidden');
@@ -539,6 +559,7 @@ export class ContactAnimationModule extends BaseModule {
     }
 
     // Play the animation
+    this.log('Restarting timeline from beginning...');
     this.timeline.restart();
   }
 
@@ -572,6 +593,8 @@ export class ContactAnimationModule extends BaseModule {
    */
   private resetAnimatedElements(): void {
     if (!this.container) return;
+
+    this.log('Resetting all animated elements to initial state...');
 
     // Reset heading, contact options, and card column to pre-animation state (above viewport)
     const heading = this.container.querySelector('h2');
@@ -610,6 +633,10 @@ export class ContactAnimationModule extends BaseModule {
     // Reset all fields to height: 0, narrow width
     [nameField, companyField, emailField, messageField].forEach((field, i) => {
       if (!field) return;
+
+      const fieldName = field.querySelector('input, textarea')?.getAttribute('name') || `field-${i}`;
+      this.log(`Resetting ${fieldName} to collapsed state (height: 0, width: ${startWidth}px)`);
+
       gsap.set(field, {
         height: 0,
         width: startWidth,
@@ -623,7 +650,8 @@ export class ContactAnimationModule extends BaseModule {
       if (input) {
         gsap.set(input, {
           height: compressedHeight,
-          '--placeholder-opacity': 0
+          '--placeholder-opacity': 0,
+          opacity: 0
         });
         if (input.tagName === 'TEXTAREA') {
           gsap.set(input, { minHeight: compressedHeight });
