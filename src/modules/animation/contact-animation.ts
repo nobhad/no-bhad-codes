@@ -187,11 +187,17 @@ export class ContactAnimationModule extends BaseModule {
     // Lock section to final height during animation
     gsap.set(this.container, { minHeight: finalSectionHeight });
 
-    // Message field - capture final dimensions before resizing
+    // Message field - use CSS variable for reliable height
     const textarea = messageField?.querySelector('textarea') as HTMLTextAreaElement | null;
     const wrapper = messageField?.querySelector('.input-wrapper') || messageField;
-    const finalTextareaHeight = textarea ? textarea.offsetHeight : 130;
-    const finalMessageFieldHeight = messageField ? (messageField as HTMLElement).offsetHeight : 180;
+
+    // Get textarea height from CSS variable or use default
+    const rootStyles = window.getComputedStyle(document.documentElement);
+    const textareaHeightVar = rootStyles.getPropertyValue('--contact-textarea-height').trim();
+    const finalTextareaHeight = parseInt(textareaHeightVar, 10) || 155;
+    const finalMessageFieldHeight = finalTextareaHeight + 20; // Add padding
+
+    this.log(`Message field target height: ${finalTextareaHeight}px`);
 
     // Set up z-index - name on TOP of stack (highest z-index)
     if (nameField) gsap.set(nameField, { zIndex: 5, position: 'relative' });
