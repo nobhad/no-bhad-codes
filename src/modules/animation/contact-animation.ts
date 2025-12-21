@@ -465,6 +465,10 @@ export class ContactAnimationModule extends BaseModule {
         if (this.container) {
           this.container.classList.remove('page-hidden');
           this.container.classList.add('page-active');
+          // Clear inline styles and show
+          this.container.style.display = '';
+          this.container.style.visibility = '';
+          this.container.style.opacity = '';
           gsap.set(this.container, { visibility: 'visible', opacity: 1 });
         }
         this.timeline?.restart();
@@ -496,9 +500,12 @@ export class ContactAnimationModule extends BaseModule {
     this.timeline?.kill();
 
     // IMMEDIATELY hide the container to prevent overlap with other pages
+    // Use both class AND inline style to ensure it's hidden
     this.container.classList.add('page-hidden');
     this.container.classList.remove('page-active');
-    gsap.set(this.container, { visibility: 'hidden', opacity: 0 });
+    this.container.style.display = 'none';
+    this.container.style.visibility = 'hidden';
+    this.container.style.opacity = '0';
 
     // Reset all animated elements to their natural state for next visit
     this.resetAnimatedElements();

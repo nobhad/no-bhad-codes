@@ -439,6 +439,12 @@ export class PageTransitionModule extends BaseModule {
       // Show target page
       targetPage.element.classList.remove('page-hidden');
       targetPage.element.classList.add('page-active');
+      // Clear any inline styles from previous hide (for skipAnimation pages)
+      if (targetPage.skipAnimation) {
+        targetPage.element.style.display = '';
+        targetPage.element.style.visibility = '';
+        targetPage.element.style.opacity = '';
+      }
 
       // Special handling for entering intro page - play coyote paw entry animation
       if (pageId === 'intro') {
@@ -449,10 +455,16 @@ export class PageTransitionModule extends BaseModule {
       }
 
       // Hide old page (if not intro, already hidden above)
-      // Skip for pages with skipAnimation - they handle their own hiding
-      if (currentPage && currentPage.element && this.currentPageId !== 'intro' && !currentPage.skipAnimation) {
+      // ALWAYS hide the old page - even if it has skipAnimation
+      // Pages with skipAnimation handle their own animations but still need to be hidden
+      if (currentPage && currentPage.element && this.currentPageId !== 'intro') {
         currentPage.element.classList.add('page-hidden');
         currentPage.element.classList.remove('page-active');
+        // Force hide with inline styles for pages that handle their own animation
+        if (currentPage.skipAnimation) {
+          currentPage.element.style.display = 'none';
+          currentPage.element.style.visibility = 'hidden';
+        }
       }
 
       // Update state
