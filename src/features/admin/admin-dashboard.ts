@@ -87,6 +87,19 @@ class AdminDashboard {
   // Project details handler
   private projectDetails: AdminProjectDetails;
 
+  // Delegate currentProjectId to project details handler
+  private get currentProjectId(): number | null {
+    return this.projectDetails.getCurrentProjectId();
+  }
+
+  private set currentProjectId(value: number | null) {
+    // Note: Setting handled by projectDetails.showProjectDetails()
+    // This setter exists for compatibility with existing code
+    if (value === null) {
+      // Reset by switching tabs - handled in switchTab method
+    }
+  }
+
   constructor() {
     // Initialize module context
     this.moduleContext = {

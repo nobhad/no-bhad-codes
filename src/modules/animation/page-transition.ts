@@ -109,9 +109,8 @@ export class PageTransitionModule extends BaseModule {
     }
 
     // Define page configurations
-    // Note: hero and tech-stack sections are NOT virtual pages
+    // Note: hero sections are NOT virtual pages
     // - hero is handled by TextAnimationModule (scroll-driven)
-    // - tech-stack is mobile-only
     const pageConfigs: Omit<PageConfig, 'element'>[] = [
       {
         id: 'intro',
