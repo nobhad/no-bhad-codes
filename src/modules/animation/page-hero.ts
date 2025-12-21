@@ -19,7 +19,7 @@
  * - Text elements: xPercent -100 to 0, x 700 to 575 (slide in from left)
  */
 
-import { BaseModule } from '../core/base';
+import { BaseHeroAnimation } from './base-hero-animation';
 import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
 
@@ -43,42 +43,27 @@ interface HeroInstance {
   targetProgress: number;
 }
 
-export class PageHeroModule extends BaseModule {
+export class PageHeroModule extends BaseHeroAnimation {
   private heroes: Map<string, HeroInstance> = new Map();
   private activePageId: string | null = null;
-  private isMobile: boolean = false;
 
   // Configuration
   private heroSelector: string;
-  private duration: number;
 
   // Bound handlers
   private handleWheelBound: (e: WheelEvent) => void;
 
   constructor(options: PageHeroOptions = {}) {
-    super('PageHeroModule', { debug: true, ...options });
+    super('PageHeroModule', { duration: options.duration || 2, ...options });
 
     this.heroSelector = options.heroSelector || '.page-hero-desktop';
-    this.duration = options.duration || 2;
-
     this.handleWheelBound = this.handleWheel.bind(this);
   }
 
   override async init(): Promise<void> {
     await super.init();
 
-    // Check if mobile
-    this.isMobile = window.matchMedia('(max-width: 767px)').matches;
-
-    if (this.isMobile) {
-      this.log('Mobile detected - page hero disabled');
-      this.showAllContentImmediately();
-      return;
-    }
-
-    // Skip if reduced motion preferred
-    if (this.reducedMotion) {
-      this.log('Reduced motion preferred - showing content directly');
+    if (this.shouldSkipAnimation()) {
       this.showAllContentImmediately();
       return;
     }
@@ -128,7 +113,7 @@ export class PageHeroModule extends BaseModule {
         gsap.set(content, { opacity: 0 });
       }
 
-      // Create timelines
+      // Create timelines using base class method
       const { groupTimeline, textTimeline } = this.createTimelines(
         leftGroup,
         rightGroup,
@@ -153,69 +138,6 @@ export class PageHeroModule extends BaseModule {
     });
   }
 
-  /**
-   * Create animation timelines for a hero
-   * Using two separate timelines like the reference implementation
-   */
-  private createTimelines(
-    leftGroup: Element,
-    rightGroup: Element,
-    textElements: NodeListOf<SVGTextElement>
-  ): { groupTimeline: gsap.core.Timeline; textTimeline: gsap.core.Timeline } {
-    // Timeline 1: Group skew/transform animation
-    const groupTimeline = gsap.timeline({
-      paused: true,
-      defaults: {
-        duration: this.duration,
-        ease: 'power2.inOut'
-      }
-    });
-
-    groupTimeline.fromTo(
-      [leftGroup, rightGroup],
-      {
-        svgOrigin: '640 500',
-        skewY: (i: number) => [-30, 15][i],
-        scaleX: (i: number) => [0.6, 0.85][i],
-        x: 200
-      },
-      {
-        skewY: (i: number) => [-15, 30][i],
-        scaleX: (i: number) => [0.85, 0.6][i],
-        x: -200
-      }
-    );
-
-    // Start at 0 - text positioned all the way to the right
-    groupTimeline.progress(0);
-
-    // Timeline 2: Text slide-in animation
-    const textTimeline = gsap.timeline({ paused: true });
-
-    textElements.forEach((text, i) => {
-      textTimeline.add(
-        gsap.fromTo(
-          text,
-          {
-            xPercent: -100,
-            x: 700
-          },
-          {
-            duration: 1,
-            xPercent: 0,
-            x: 575,
-            ease: 'sine.inOut'
-          }
-        ),
-        (i % 3) * 0.2
-      );
-    });
-
-    // Start text timeline at 0
-    textTimeline.progress(0);
-
-    return { groupTimeline, textTimeline };
-  }
 
   /**
    * Setup event listeners
@@ -276,25 +198,22 @@ export class PageHeroModule extends BaseModule {
     const instance = this.heroes.get(this.activePageId);
     if (!instance || instance.isRevealed) return;
 
-    // Prevent default scroll
-    event.preventDefault();
+    // Use base class wheel handling
+    const progressRef = { value: instance.targetProgress };
+    this.handleWheelAnimation(
+      event,
+      instance.groupTimeline,
+      instance.textTimeline,
+      progressRef,
+      () => {
+        if (this.activePageId) {
+          this.revealContent(this.activePageId);
+        }
+      }
+    );
 
-    // Update target progress based on wheel delta
-    const delta = event.deltaY / 2000;
-    instance.targetProgress = Math.max(0, Math.min(1, instance.targetProgress + delta));
-
-    // Use GSAP to smoothly animate to target progress
-    gsap.to([instance.groupTimeline, instance.textTimeline], {
-      progress: instance.targetProgress,
-      duration: 0.5,
-      ease: 'power4',
-      overwrite: 'auto'
-    });
-
-    // Check if animation is complete (scrolled to end)
-    if (instance.targetProgress >= 0.95) {
-      this.revealContent(this.activePageId);
-    }
+    // Update instance progress (handleWheelAnimation modifies the object)
+    instance.targetProgress = progressRef.value;
   }
 
   /**
@@ -310,31 +229,12 @@ export class PageHeroModule extends BaseModule {
     // Stop wheel listener
     window.removeEventListener('wheel', this.handleWheelBound);
 
-    // Fade out hero, fade in content
-    const tl = gsap.timeline({
-      onComplete: () => {
-        instance.hero.classList.add('hero-revealed');
-        this.dispatchEvent('revealed', { pageId });
-      }
-    });
-
-    // Fade out the hero
-    tl.to(instance.hero, {
-      opacity: 0,
-      duration: 0.5,
-      ease: 'power2.out'
-    });
-
-    // Fade in the content
-    if (instance.content) {
-      tl.to(instance.content, {
-        opacity: 1,
-        duration: 0.5,
-        ease: 'power2.out'
-      }, '-=0.3');
-    }
-
-    this.addTimeline(tl);
+    // Use base class reveal method
+    super.revealHeroContent(
+      instance.hero,
+      instance.content,
+      () => this.dispatchEvent('revealed', { pageId })
+    );
   }
 
   /**
@@ -344,60 +244,29 @@ export class PageHeroModule extends BaseModule {
     const instance = this.heroes.get(pageId);
     if (!instance) return;
 
-    this.log(`Resetting hero for page: ${pageId}`);
-
     instance.isRevealed = false;
     instance.targetProgress = 0;
-    instance.hero.classList.remove('hero-revealed');
 
-    // Kill and recreate timelines
-    instance.groupTimeline.kill();
-    instance.textTimeline.kill();
-
-    // Reset hero visibility - keep hidden initially
-    gsap.set(instance.hero, {
-      opacity: 0,
-      visibility: 'visible',
-      pointerEvents: 'auto'
-    });
-
-    // Fade in hero after a small delay to ensure page transition completes
-    gsap.to(instance.hero, {
-      opacity: 1,
-      duration: 0.3,
-      delay: 0.1,
-      ease: 'power2.out'
-    });
-
-    // Reset content
-    if (instance.content) {
-      gsap.set(instance.content, { opacity: 0 });
-    }
-
-    // Reset SVG group transforms
-    gsap.set([instance.leftGroup, instance.rightGroup], {
-      svgOrigin: '640 500',
-      clearProps: 'skewY,scaleX,x'
-    });
-
-    // Reset text elements
-    instance.textElements.forEach((text) => {
-      gsap.set(text, {
-        clearProps: 'xPercent,x'
-      });
-    });
-
-    // Recreate the animation timelines
-    const { groupTimeline, textTimeline } = this.createTimelines(
+    // Use base class reset method
+    this.resetHeroAnimation(
+      instance.hero,
       instance.leftGroup,
       instance.rightGroup,
-      instance.textElements
+      instance.textElements,
+      instance.content,
+      instance.groupTimeline,
+      instance.textTimeline,
+      () => {
+        const { groupTimeline, textTimeline } = this.createTimelines(
+          instance.leftGroup,
+          instance.rightGroup,
+          instance.textElements
+        );
+        instance.groupTimeline = groupTimeline;
+        instance.textTimeline = textTimeline;
+        return { groupTimeline, textTimeline };
+      }
     );
-
-    instance.groupTimeline = groupTimeline;
-    instance.textTimeline = textTimeline;
-
-    this.log(`Hero reset complete for page: ${pageId}`);
   }
 
   /**

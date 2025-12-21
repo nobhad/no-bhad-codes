@@ -38,7 +38,7 @@
   /* Nav positioned absolutely below card - doesn't affect card centering */
   .business-card-section .intro-nav {
     position: absolute;
-    top: calc(50% + 294.32px / 2 + 1rem);
+    top: calc(50% + 294.19px / 2 + 1rem);
     left: 50%;
     transform: translateX(-50%);
   }
@@ -57,12 +57,12 @@
    BUSINESS CARD ASPECT RATIO VARIABLES
    ========================================== */
 :root {
-  /* PNG card dimensions: 4457 x 2498 pixels */
-  --business-card-width-svg: 4457;
-  --business-card-height-svg: 2498;
+  /* SVG card dimensions: 1069.5 x 599.3 pixels (business-card_front.svg viewBox) */
+  --business-card-width-svg: 1069.5;
+  --business-card-height-svg: 599.3;
 
-  /* Exact aspect ratio: 4457 ÷ 2498 = 1.78423 */
-  --business-card-aspect-ratio: 1.78423;
+  /* Exact aspect ratio: 1069.5 ÷ 599.3 = 1.784582 */
+  --business-card-aspect-ratio: 1.784582;
 
   /* Responsive base dimensions */
   --business-card-base-width: 35vw;
@@ -99,7 +99,7 @@
 /* Reserve space for business card to prevent CLS */
 .business-card-container {
   width: 525px;
-  height: 294.32px; /* 525 ÷ 1.78423 = 294.32 */
+  height: 294.19px; /* 525 ÷ 1.784582 = 294.19 (exact SVG aspect) */
   margin: 0 auto;
   contain: layout style size;
 }
@@ -131,14 +131,14 @@
   opacity: 1 !important;
   visibility: visible !important;
 
-  /* Business card aspect ratio: 4457:2498 = 1.78423:1 (PNG dimensions) */
+  /* Business card aspect ratio: 1069.5:599.3 = 1.784582:1 (SVG viewBox) */
   /* Fixed dimensions to prevent CLS - maintaining exact aspect ratio */
   width: 525px;
-  height: 294.32px; /* 525 ÷ 1.78423 = 294.32 */
+  height: 294.19px; /* 525 ÷ 1.784582 = 294.19 */
   min-width: 525px;
-  min-height: 292.26px;
+  min-height: 294.19px;
   max-width: 525px;
-  max-height: 292.26px;
+  max-height: 294.19px;
 
   /* Flex layout */
   flex-direction: column;
@@ -231,14 +231,14 @@
   /* 3D perspective for flip animations */
   perspective: 1000px;
 
-  /* Business card aspect ratio: 4457:2498 = 1.78423:1 (PNG dimensions) */
+  /* Business card aspect ratio: 1069.5:599.3 = 1.784582:1 (SVG viewBox) */
   /* Fixed dimensions to prevent CLS - maintaining exact aspect ratio */
   width: 525px;
-  height: 294.32px; /* 525 ÷ 1.78423 = 294.32 */
+  height: 294.19px; /* 525 ÷ 1.784582 = 294.19 */
   min-width: 525px;
-  min-height: 292.26px;
+  min-height: 294.19px;
   max-width: 525px;
-  max-height: 292.26px;
+  max-height: 294.19px;
 
   /* Disable user selection to prevent blue highlights */
   -webkit-touch-callout: none;

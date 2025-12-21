@@ -134,10 +134,10 @@ const createPage = (args: any) => {
               <div id="business-card" class="business-card">
                 <div id="business-card-inner" class="business-card-inner">
                   <div class="business-card-front">
-                    <img src="/images/business-card_front.svg" alt="Business Card Front" class="card-svg" width="525" height="294.2">
+                    <img src="/images/business-card_front.svg" alt="Business Card Front" class="card-svg" width="525" height="294.19">
                   </div>
                   <div class="business-card-back">
-                    <img src="/images/business-card_back.svg" alt="Avatar" class="card-svg" width="525" height="294.2">
+                    <img src="/images/business-card_back.svg" alt="Avatar" class="card-svg" width="525" height="294.19">
                   </div>
                 </div>
               </div>

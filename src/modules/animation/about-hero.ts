@@ -18,7 +18,7 @@
  * - Text elements: xPercent -100 to 0, x 700 to 575 (slide in from left)
  */
 
-import { BaseModule } from '../core/base';
+import { BaseHeroAnimation } from './base-hero-animation';
 import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
 
@@ -33,7 +33,7 @@ interface AboutHeroOptions extends ModuleOptions {
   duration?: number;
 }
 
-export class AboutHeroModule extends BaseModule {
+export class AboutHeroModule extends BaseHeroAnimation {
   private hero: HTMLElement | null = null;
   private svg: SVGElement | null = null;
   private aboutContent: HTMLElement | null = null;
@@ -41,7 +41,6 @@ export class AboutHeroModule extends BaseModule {
   private rightGroup: Element | null = null;
   private textElements: NodeListOf<SVGTextElement> | null = null;
   private isRevealed: boolean = false;
-  private isMobile: boolean = false;
 
   // Two timelines like the reference implementation
   private groupTimeline: gsap.core.Timeline | null = null;
@@ -52,18 +51,16 @@ export class AboutHeroModule extends BaseModule {
   private heroSelector: string;
   private svgSelector: string;
   private contentSelector: string;
-  private duration: number;
 
   // Wheel-driven progress
   private targetProgress: number = 0; // Start at 0 - text all the way to the right
 
   constructor(options: AboutHeroOptions = {}) {
-    super('AboutHeroModule', { debug: true, ...options });
+    super('AboutHeroModule', { duration: options.duration || 2, ...options });
 
     this.heroSelector = options.heroSelector || '.about-hero-desktop';
     this.svgSelector = options.svgSelector || '.text-animation-svg';
     this.contentSelector = options.contentSelector || '.about-content';
-    this.duration = options.duration || 2;
 
     // Bind methods
     this.handleWheel = this.handleWheel.bind(this);
@@ -72,23 +69,12 @@ export class AboutHeroModule extends BaseModule {
   override async init(): Promise<void> {
     await super.init();
 
-    // Check if mobile
-    this.isMobile = window.matchMedia('(max-width: 767px)').matches;
-
-    if (this.isMobile) {
-      this.log('Mobile detected - about hero disabled');
+    if (this.shouldSkipAnimation()) {
       // On mobile, make sure content is visible
-      const content = document.querySelector(this.contentSelector) as HTMLElement;
+      const content = document.querySelector(`.about-section ${this.contentSelector}`) as HTMLElement;
       if (content) {
         content.style.opacity = '1';
       }
-      return;
-    }
-
-    // Skip if reduced motion preferred
-    if (this.reducedMotion) {
-      this.log('Reduced motion preferred - showing content directly');
-      this.showContentImmediately();
       return;
     }
 
@@ -145,57 +131,15 @@ export class AboutHeroModule extends BaseModule {
       return;
     }
 
-    // Timeline 1: Group skew/transform animation (like tl in reference)
-    this.groupTimeline = gsap.timeline({
-      paused: true,
-      defaults: {
-        duration: this.duration,
-        ease: 'power2.inOut'
-      }
-    });
-
-    this.groupTimeline.fromTo(
-      [this.leftGroup, this.rightGroup],
-      {
-        svgOrigin: '640 500',
-        skewY: (i: number) => [-30, 15][i],
-        scaleX: (i: number) => [0.6, 0.85][i],
-        x: 200
-      },
-      {
-        skewY: (i: number) => [-15, 30][i],
-        scaleX: (i: number) => [0.85, 0.6][i],
-        x: -200
-      }
+    // Use base class method to create timelines
+    const { groupTimeline, textTimeline } = this.createTimelines(
+      this.leftGroup,
+      this.rightGroup,
+      this.textElements
     );
 
-    // Start at 0 - text positioned all the way to the right
-    this.groupTimeline.progress(0);
-
-    // Timeline 2: Text slide-in animation (like tl2 in reference)
-    this.textTimeline = gsap.timeline({ paused: true });
-
-    this.textElements.forEach((text, i) => {
-      this.textTimeline!.add(
-        gsap.fromTo(
-          text,
-          {
-            xPercent: -100,
-            x: 700
-          },
-          {
-            duration: 1,
-            xPercent: 0,
-            x: 575,
-            ease: 'sine.inOut'
-          }
-        ),
-        (i % 3) * 0.2
-      );
-    });
-
-    // Start text timeline at 0 - text all the way to the right
-    this.textTimeline.progress(0);
+    this.groupTimeline = groupTimeline;
+    this.textTimeline = textTimeline;
 
     this.log('Animation timelines setup complete');
   }
@@ -236,27 +180,18 @@ export class AboutHeroModule extends BaseModule {
     if (!this.isOnAboutPage || this.isRevealed) return;
     if (!this.groupTimeline || !this.textTimeline) return;
 
-    // Prevent default scroll
-    event.preventDefault();
+    // Use base class wheel handling
+    const progressRef = { value: this.targetProgress };
+    this.handleWheelAnimation(
+      event,
+      this.groupTimeline,
+      this.textTimeline,
+      progressRef,
+      () => this.revealContent()
+    );
 
-    // Update target progress based on wheel delta
-    // Normalize: smaller delta = smoother animation
-    const delta = event.deltaY / 2000;
-    this.targetProgress = Math.max(0, Math.min(1, this.targetProgress + delta));
-
-    // Use GSAP to smoothly animate to target progress (like reference)
-    // Use overwrite: 'auto' instead of true to prevent animation jumps on rapid wheel events
-    gsap.to([this.groupTimeline, this.textTimeline], {
-      progress: this.targetProgress,
-      duration: 0.5,
-      ease: 'power4',
-      overwrite: 'auto'
-    });
-
-    // Check if animation is complete (scrolled to end)
-    if (this.targetProgress >= 0.95) {
-      this.revealContent();
-    }
+    // Update progress (handleWheelAnimation modifies the object)
+    this.targetProgress = progressRef.value;
   }
 
   /**
@@ -266,50 +201,21 @@ export class AboutHeroModule extends BaseModule {
     if (this.isRevealed || !this.hero || !this.aboutContent) return;
 
     this.isRevealed = true;
-    this.log('Revealing about content');
 
     // Stop wheel listener
     window.removeEventListener('wheel', this.handleWheel);
 
-    // Fade out hero, fade in content
-    const tl = gsap.timeline({
-      onComplete: () => {
+    // Use base class reveal method
+    super.revealHeroContent(
+      this.hero,
+      this.aboutContent,
+      () => {
         this.hero?.classList.add('hero-revealed');
         this.dispatchEvent('revealed');
       }
-    });
-
-    // Fade out the hero
-    tl.to(this.hero, {
-      opacity: 0,
-      duration: 0.5,
-      ease: 'power2.out'
-    });
-
-    // Fade in the about content
-    tl.to(this.aboutContent, {
-      opacity: 1,
-      duration: 0.5,
-      ease: 'power2.out'
-    }, '-=0.3');
-
-    this.addTimeline(tl);
+    );
   }
 
-  /**
-   * Show content immediately (for reduced motion)
-   */
-  private showContentImmediately(): void {
-    const hero = document.querySelector(this.heroSelector) as HTMLElement;
-    const content = document.querySelector(`.about-section ${this.contentSelector}`) as HTMLElement;
-
-    if (hero) {
-      hero.style.display = 'none';
-    }
-    if (content) {
-      content.style.opacity = '1';
-    }
-  }
 
   /**
    * Reset hero to initial state (for page navigation)
@@ -317,63 +223,32 @@ export class AboutHeroModule extends BaseModule {
   resetHero(): void {
     if (!this.hero || !this.svg) return;
 
-    this.log('Resetting hero...');
-
     this.isRevealed = false;
-    this.targetProgress = 0.5; // Reset to midpoint
-    this.hero.classList.remove('hero-revealed');
+    this.targetProgress = 0; // Reset to start
 
-    // Kill existing timelines
-    if (this.groupTimeline) {
-      this.groupTimeline.kill();
-      this.groupTimeline = null;
-    }
-    if (this.textTimeline) {
-      this.textTimeline.kill();
-      this.textTimeline = null;
-    }
-
-    // Reset hero visibility - keep hidden initially
-    gsap.set(this.hero, {
-      opacity: 0,
-      visibility: 'visible',
-      pointerEvents: 'auto'
-    });
-
-    // Fade in hero after a small delay to ensure page transition completes
-    gsap.to(this.hero, {
-      opacity: 1,
-      duration: 0.3,
-      delay: 0.1,
-      ease: 'power2.out'
-    });
-
-    // Reset about content
-    if (this.aboutContent) {
-      gsap.set(this.aboutContent, { opacity: 0 });
-    }
-
-    // Reset SVG group transforms
-    if (this.leftGroup && this.rightGroup) {
-      gsap.set([this.leftGroup, this.rightGroup], {
-        svgOrigin: '640 500',
-        clearProps: 'skewY,scaleX,x'
-      });
-    }
-
-    // Reset text elements
-    if (this.textElements) {
-      this.textElements.forEach((text) => {
-        gsap.set(text, {
-          clearProps: 'xPercent,x'
-        });
-      });
-    }
-
-    // Recreate the animation timelines
-    this.setupAnimation();
-
-    this.log('Hero reset complete');
+    // Use base class reset method
+    this.resetHeroAnimation(
+      this.hero,
+      this.leftGroup,
+      this.rightGroup,
+      this.textElements,
+      this.aboutContent,
+      this.groupTimeline,
+      this.textTimeline,
+      () => {
+        if (!this.leftGroup || !this.rightGroup || !this.textElements) {
+          return { groupTimeline: this.groupTimeline!, textTimeline: this.textTimeline! };
+        }
+        const { groupTimeline, textTimeline } = this.createTimelines(
+          this.leftGroup!,
+          this.rightGroup!,
+          this.textElements!
+        );
+        this.groupTimeline = groupTimeline;
+        this.textTimeline = textTimeline;
+        return { groupTimeline, textTimeline };
+      }
+    );
   }
 
   /**

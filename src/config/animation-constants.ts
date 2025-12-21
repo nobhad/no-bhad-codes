@@ -28,7 +28,13 @@ export const ANIMATION_DURATIONS = {
   CONTACT_POPUP_FADE: 0.3,
   PAGE_TRANSITION_IN: 0.5,
   PAGE_TRANSITION_OUT: 0.4,
-  HEADER_FADE: 0.5
+  HEADER_FADE: 0.5,
+
+  // Semantic timing tokens
+  THEME_TRANSITION: 0.4,      // --transition-theme: 0.4s
+  MOUSE_INTERACTION: 0.2,      // --transition-mouse: 0.2s
+  STANDARD_LENGTH: 0.5,        // --transition-length: 0.5s
+  DRAMATIC_ENTRANCE: 0.8       // --transition-long: 0.8s
 } as const;
 
 // ============================================
@@ -47,7 +53,11 @@ export const ANIMATION_EASING = {
   // Custom curves for specific animations
   PAGE_TRANSITION: 'power3.inOut',
   MORPH: 'power2.inOut',
-  HERO_REVEAL: 'power2.out'
+  HERO_REVEAL: 'power2.out',
+
+  // Advanced easing curves
+  SPRING: 'cubic-bezier(0.25, 0.1, 0.25, 3.5)',      // Overshoot for hover interactions
+  SMOOTH_SAL: 'cubic-bezier(0.3, 0.9, 0.3, 0.9)'    // Standard smooth animations
 } as const;
 
 // ============================================

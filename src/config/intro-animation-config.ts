@@ -23,15 +23,27 @@ export const SVG_PATH = '/images/coyote_paw.svg';
 // if the SVG card position or dimensions change.
 // ============================================================================
 
+/**
+ * SVG_CARD represents the VISIBLE bounds of the card in coyote_paw.svg (including stroke).
+ *
+ * The card rectangle is at (1256.2, 1031.8) with size 1060.5 x 590.3.
+ * The stroke is 9px (4.5px on each side), so the visible bounds are:
+ * - x: 1256.2 - 4.5 = 1251.7
+ * - y: 1031.8 - 4.5 = 1027.3
+ * - width: 1060.5 + 9 = 1069.5
+ * - height: 590.3 + 9 = 599.3
+ *
+ * This matches business-card_front.svg viewBox (1069.5 x 599.3) for pixel-perfect alignment.
+ */
 export const SVG_CARD = {
-  /** X position of card rectangle in SVG coordinates */
-  x: 1256.2,
-  /** Y position of card rectangle in SVG coordinates */
-  y: 1031.8,
-  /** Width of card rectangle in SVG coordinates */
-  width: 1062.3,
-  /** Height of card rectangle in SVG coordinates */
-  height: 591.3
+  /** X position of visible card bounds (rectangle x - stroke/2) */
+  x: 1251.7,
+  /** Y position of visible card bounds (rectangle y - stroke/2) */
+  y: 1027.3,
+  /** Width of visible card bounds (rectangle width + stroke) */
+  width: 1069.5,
+  /** Height of visible card bounds (rectangle height + stroke) */
+  height: 599.3
 } as const;
 
 export const SVG_VIEWBOX = {

@@ -37,7 +37,8 @@ import { BaseModule } from '../core/base';
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import type { ModuleOptions } from '../../types/modules';
-import { SVG_PATH, SVG_CARD, REPLAY_CONFIG } from '../../config/intro-animation-config';
+import { SVG_PATH, SVG_VIEWBOX, REPLAY_CONFIG } from '../../config/intro-animation-config';
+import * as SvgBuilder from './intro/svg-builder';
 
 // Register MorphSVG plugin with GSAP
 gsap.registerPlugin(MorphSVGPlugin);
@@ -190,26 +191,23 @@ export class MobileIntroAnimationModule extends BaseModule {
     this.log('Loaded SVG elements');
 
     // ========================================================================
+    // SET SVG VIEWBOX FIRST (before alignment calculation)
+    // Must match SVG_VIEWBOX for calculateSvgAlignment() to work correctly
+    // ========================================================================
+    // Use original SVG viewBox to maintain correct proportions
+    morphSvg.setAttribute('viewBox', `0 0 ${SVG_VIEWBOX.width} ${SVG_VIEWBOX.height}`);
+    morphSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+    // ========================================================================
     // CALCULATE ALIGNMENT
     // Scale SVG to match mobile card size
     // ========================================================================
-    const cardRect = businessCard.getBoundingClientRect();
-    const cardFront = businessCard.querySelector('.business-card-front') as HTMLElement;
-    const actualCardRect = cardFront ? cardFront.getBoundingClientRect() : cardRect;
+    // Calculate pixel-perfect alignment using shared function
+    // This assumes viewBox is SVG_VIEWBOX (which we just set above)
+    const alignment = SvgBuilder.calculateSvgAlignment(businessCard);
+    const { scale, translateX, translateY, viewportWidth, viewportHeight } = alignment;
 
-    // Scale based on mobile card width (using shared config)
-    const scale = actualCardRect.width / SVG_CARD.width;
-
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    morphSvg.setAttribute('viewBox', `0 0 ${viewportWidth} ${viewportHeight}`);
-    morphSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-
-    // Align SVG card with actual card position (using shared config)
-    const translateX = actualCardRect.left - (SVG_CARD.x * scale);
-    const translateY = actualCardRect.top - (SVG_CARD.y * scale);
-
-    this.log('Mobile alignment:', { scale, translateX, translateY, viewportWidth, viewportHeight });
+    this.log('Mobile pixel-perfect alignment:', { scale, translateX, translateY, viewportWidth, viewportHeight });
 
     // ========================================================================
     // PREPARE SVG CONTAINER

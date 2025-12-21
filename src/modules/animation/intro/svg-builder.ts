@@ -107,38 +107,144 @@ export function extractSvgElements(svgDoc: Document, svgPath?: string): SVGEleme
 }
 
 /**
- * Calculate SVG alignment to match business card position
+ * Calculate SVG alignment to match business card position (pixel-perfect)
+ *
+ * @param businessCard - The business card element to align with
+ * @param overlayElement - Optional overlay element (uses its bounds instead of window)
+ *                         This is CRITICAL for exit animation where overlay has different size
  */
 export function calculateSvgAlignment(
-  businessCard: HTMLElement
+  businessCard: HTMLElement,
+  overlayElement?: HTMLElement | null
 ): SVGAlignment {
-  const cardRect = businessCard.getBoundingClientRect();
+  // Get the actual rendered SVG image element for pixel-perfect alignment
   const cardFront = businessCard.querySelector('.business-card-front') as HTMLElement;
-  const actualCardRect = cardFront ? cardFront.getBoundingClientRect() : cardRect;
+  const svgImage = cardFront?.querySelector('img.card-svg') as HTMLElement;
 
-  // Uniform scale based on card width (preserves aspect ratio)
-  const scale = actualCardRect.width / SVG_CARD.width;
+  // Use SVG image bounds if available, otherwise fall back to container
+  let elementRect: { width: number; height: number; left: number; top: number };
+  if (svgImage) {
+    elementRect = svgImage.getBoundingClientRect();
+  } else if (cardFront) {
+    elementRect = cardFront.getBoundingClientRect();
+  } else {
+    elementRect = businessCard.getBoundingClientRect();
+  }
 
-  // Viewport dimensions (still needed for return value)
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
+  // CRITICAL: Account for object-fit: contain behavior
+  // The SVG content is scaled to fit within the element while maintaining aspect ratio
+  // We need to calculate where the SVG content is actually rendered, not just the element box
+  const svgContentAspect = SVG_CARD.width / SVG_CARD.height;
+  const elementAspect = elementRect.width / elementRect.height;
 
-  // Calculate translation to align SVG card with screen position
-  // This uses SVG coordinates scaled by the card scale factor
-  const translateX = actualCardRect.left - (SVG_CARD.x * scale);
-  const translateY = actualCardRect.top - (SVG_CARD.y * scale);
+  let actualCardRect: { width: number; height: number; left: number; top: number };
 
-  console.log('[SVG Alignment] Business card position:', {
-    cardWidth: actualCardRect.width,
-    cardLeft: actualCardRect.left,
-    cardTop: actualCardRect.top,
-    svgCardX: SVG_CARD.x,
-    svgCardY: SVG_CARD.y,
-    svgCardWidth: SVG_CARD.width,
-    scale,
-    translateX,
-    translateY
-  });
+  if (svgContentAspect > elementAspect) {
+    // SVG is wider than element - width-constrained, letterboxed top/bottom
+    const contentWidth = elementRect.width;
+    const contentHeight = elementRect.width / svgContentAspect;
+    const paddingY = (elementRect.height - contentHeight) / 2;
+    actualCardRect = {
+      width: contentWidth,
+      height: contentHeight,
+      left: elementRect.left,
+      top: elementRect.top + paddingY
+    };
+  } else {
+    // SVG is taller than element - height-constrained, pillarboxed left/right
+    const contentHeight = elementRect.height;
+    const contentWidth = elementRect.height * svgContentAspect;
+    const paddingX = (elementRect.width - contentWidth) / 2;
+    actualCardRect = {
+      width: contentWidth,
+      height: contentHeight,
+      left: elementRect.left + paddingX,
+      top: elementRect.top
+    };
+  }
+
+  // Get viewport/overlay dimensions
+  // CRITICAL: During exit animation, overlay has different size (.paw-exit class)
+  // Use overlay bounds if provided, otherwise fall back to window dimensions
+  let viewportWidth: number;
+  let viewportHeight: number;
+  let overlayTop = 0;
+  let overlayLeft = 0;
+
+  if (overlayElement) {
+    const overlayRect = overlayElement.getBoundingClientRect();
+    viewportWidth = overlayRect.width;
+    viewportHeight = overlayRect.height;
+    overlayTop = overlayRect.top;
+    overlayLeft = overlayRect.left;
+  } else {
+    viewportWidth = window.innerWidth;
+    viewportHeight = window.innerHeight;
+  }
+
+  // Calculate how the SVG viewBox (with preserveAspectRatio) maps to viewport
+  // SVG viewBox: 2331.1 x 1798.6 (aspect ratio ≈ 1.296)
+  // Viewport: viewportWidth x viewportHeight (aspect ratio varies)
+  const svgAspectRatio = SVG_VIEWBOX.width / SVG_VIEWBOX.height;
+  const viewportAspectRatio = viewportWidth / viewportHeight;
+
+  // Calculate the actual display size of the SVG (after preserveAspectRatio scaling)
+  let svgDisplayWidth: number;
+  let svgDisplayHeight: number;
+  let svgDisplayX: number;
+  let svgDisplayY: number;
+
+  if (svgAspectRatio > viewportAspectRatio) {
+    // SVG is wider - fit to viewport width, letterbox top/bottom
+    svgDisplayWidth = viewportWidth;
+    svgDisplayHeight = viewportWidth / svgAspectRatio;
+    svgDisplayX = 0;
+    svgDisplayY = (viewportHeight - svgDisplayHeight) / 2;
+  } else {
+    // SVG is taller - fit to viewport height, pillarbox left/right
+    svgDisplayHeight = viewportHeight;
+    svgDisplayWidth = viewportHeight * svgAspectRatio;
+    svgDisplayX = (viewportWidth - svgDisplayWidth) / 2;
+    svgDisplayY = 0;
+  }
+
+  // Calculate scale: SVG viewBox units to viewport pixels (after preserveAspectRatio 'meet')
+  const viewBoxToPixelScale = svgDisplayWidth / SVG_VIEWBOX.width;
+
+  // Calculate scale factor: card width in SVG should match actual card width on screen
+  // After transform scale(s), SVG card width becomes SVG_CARD.width * s (in SVG coords)
+  // On screen: (SVG_CARD.width * s) * viewBoxToPixelScale should equal actualCardRect.width
+  // So: s = actualCardRect.width / (SVG_CARD.width * viewBoxToPixelScale)
+  const scale = actualCardRect.width / (SVG_CARD.width * viewBoxToPixelScale);
+
+  // Calculate translation for pixel-perfect alignment
+  // Transform order: translate(tx, ty) scale(s) applies: scale first, then translate
+  // After transform, SVG card at (SVG_CARD.x, SVG_CARD.y) becomes:
+  //   (SVG_CARD.x * s + tx, SVG_CARD.y * s + ty) in SVG coords
+  // On screen: (overlayLeft + svgDisplayX + (SVG_CARD.x * s + tx) * viewBoxToPixelScale, ...)
+  // We want this to equal (actualCardRect.left, actualCardRect.top)
+  //
+  // CRITICAL: Adjust for overlay offset when overlay is not at viewport origin (exit animation)
+  // actualCardRect is relative to viewport, but SVG is inside overlay which may be offset
+  const cardLeftRelativeToOverlay = actualCardRect.left - overlayLeft;
+  const cardTopRelativeToOverlay = actualCardRect.top - overlayTop;
+
+  // Solving: cardLeftRelativeToOverlay = svgDisplayX + (SVG_CARD.x * s + tx) * viewBoxToPixelScale
+  //          tx = (cardLeftRelativeToOverlay - svgDisplayX) / viewBoxToPixelScale - SVG_CARD.x * s
+  const translateX = (cardLeftRelativeToOverlay - svgDisplayX) / viewBoxToPixelScale - SVG_CARD.x * scale;
+  const translateY = (cardTopRelativeToOverlay - svgDisplayY) / viewBoxToPixelScale - SVG_CARD.y * scale;
+
+  console.log('[SVG Alignment] Pixel-perfect alignment:');
+  console.log('  elementUsed:', svgImage ? 'svg-image' : cardFront ? 'card-front' : 'business-card');
+  console.log('  overlayOffset:', overlayLeft.toFixed(2), ',', overlayTop.toFixed(2), overlayElement ? '(from overlay)' : '(none)');
+  console.log('  elementRect:', elementRect.width.toFixed(2), 'x', elementRect.height.toFixed(2), 'at', elementRect.left.toFixed(2), ',', elementRect.top.toFixed(2));
+  console.log('  contentRect:', actualCardRect.width.toFixed(2), 'x', actualCardRect.height.toFixed(2), 'at', actualCardRect.left.toFixed(2), ',', actualCardRect.top.toFixed(2));
+  console.log('  cardRelOverlay:', cardLeftRelativeToOverlay.toFixed(2), ',', cardTopRelativeToOverlay.toFixed(2));
+  console.log('  svgViewBox:', SVG_VIEWBOX.width, 'x', SVG_VIEWBOX.height, '(aspect:', svgAspectRatio.toFixed(4), ')');
+  console.log('  viewport/overlay:', viewportWidth, 'x', viewportHeight, '(aspect:', viewportAspectRatio.toFixed(4), ')');
+  console.log('  svgDisplay:', svgDisplayWidth.toFixed(2), 'x', svgDisplayHeight.toFixed(2), 'at', svgDisplayX.toFixed(2), ',', svgDisplayY.toFixed(2));
+  console.log('  transforms: scale=', scale.toFixed(6), 'translate=', translateX.toFixed(2), ',', translateY.toFixed(2));
+  console.log('  SVG_CARD:', SVG_CARD.x, ',', SVG_CARD.y, 'size:', SVG_CARD.width, 'x', SVG_CARD.height);
 
   return {
     scale,

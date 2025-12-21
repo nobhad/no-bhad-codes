@@ -143,7 +143,7 @@ import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import type { ModuleOptions } from '../../types/modules';
 import {
   SVG_PATH,
-  SVG_CARD,
+  SVG_VIEWBOX,
   SVG_ELEMENT_IDS,
   DOM_ELEMENT_IDS,
   REPLAY_CONFIG
@@ -297,6 +297,12 @@ export class IntroAnimationModule extends BaseModule {
     }
 
     // ========================================================================
+    // MAKE OVERLAY VISIBLE
+    // Remove 'hidden' class to make overlay visible before animation starts
+    // ========================================================================
+    this.morphOverlay.classList.remove('hidden');
+
+    // ========================================================================
     // GET BUSINESS CARD FOR ALIGNMENT
     // We need to align the SVG card with the actual DOM element
     // ========================================================================
@@ -335,8 +341,9 @@ export class IntroAnimationModule extends BaseModule {
     // ========================================================================
     // CALCULATE ALIGNMENT
     // Use extracted SVG builder module
+    // Pass overlay element to account for its position (during intro, overlay is full viewport)
     // ========================================================================
-    const alignment = SvgBuilder.calculateSvgAlignment(businessCard);
+    const alignment = SvgBuilder.calculateSvgAlignment(businessCard, this.morphOverlay);
     this.log('Alignment:', alignment);
 
     // ========================================================================
@@ -417,13 +424,27 @@ export class IntroAnimationModule extends BaseModule {
   /**
    * Complete the morph animation and clean up
    *
-   * Called when the GSAP timeline completes. Hides the overlay
-   * and triggers the common intro completion logic.
+   * Called when the GSAP timeline completes. Cross-fades the animated card
+   * with the static business card for pixel-perfect transition.
    */
   private completeMorphAnimation(): void {
-    // Hide overlay completely after animation finishes
+    const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
+
+    // Cross-fade: Show static card FIRST (while animated card still visible)
+    // This masks any sub-pixel differences between the two SVG renders
+    if (businessCard) {
+      businessCard.style.opacity = '1';
+    }
+
+    // Then hide the overlay after a brief delay so both cards overlap
     if (this.morphOverlay) {
-      this.morphOverlay.style.visibility = 'hidden';
+      // The cardLayer in the overlay is now covered by the static card
+      // Use a tiny delay to ensure the static card is fully rendered
+      gsap.delayedCall(0.05, () => {
+        if (this.morphOverlay) {
+          this.morphOverlay.style.visibility = 'hidden';
+        }
+      });
     }
 
     this.completeIntro();
@@ -766,20 +787,29 @@ export class IntroAnimationModule extends BaseModule {
 
     return new Promise((resolve) => {
 
-      // Calculate alignment
-      const cardRect = businessCard.getBoundingClientRect();
-      const cardFront = businessCard.querySelector('.business-card-front') as HTMLElement;
-      const actualCardRect = cardFront ? cardFront.getBoundingClientRect() : cardRect;
-      const scale = actualCardRect.width / SVG_CARD.width;
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      const translateX = actualCardRect.left - (SVG_CARD.x * scale);
-      const translateY = actualCardRect.top - (SVG_CARD.y * scale);
+      // ========================================================================
+      // CRITICAL: Add paw-exit class FIRST to get correct overlay dimensions
+      // The .paw-exit CSS changes overlay to: top: 60px, height: calc(100vh - 60px)
+      // We need alignment calculation to use these dimensions, not full viewport
+      // ========================================================================
+      document.documentElement.classList.add('paw-exit');
+      document.documentElement.classList.remove('intro-complete', 'intro-finished');
 
       // Clear and rebuild SVG
       morphSvg.innerHTML = '';
-      morphSvg.setAttribute('viewBox', `0 0 ${viewportWidth} ${viewportHeight}`);
+
+      // Set viewBox FIRST (before alignment calculation)
+      // Must match SVG_VIEWBOX for calculateSvgAlignment() to work correctly
+      morphSvg.setAttribute('viewBox', `0 0 ${SVG_VIEWBOX.width} ${SVG_VIEWBOX.height}`);
       morphSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+      // Force reflow so CSS changes take effect before we measure overlay dimensions
+      void this.morphOverlay!.offsetHeight;
+
+      // Calculate pixel-perfect alignment using shared function
+      // CRITICAL: Pass overlay element so alignment uses its actual dimensions (affected by .paw-exit)
+      const alignment = SvgBuilder.calculateSvgAlignment(businessCard, this.morphOverlay);
+      const { scale, translateX, translateY } = alignment;
 
       // Add shadow filter
       const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
@@ -900,22 +930,24 @@ export class IntroAnimationModule extends BaseModule {
       // Add completed wrapper to the SVG element
       morphSvg.appendChild(transformWrapper);
 
-      // Add paw-exit class so overlay doesn't cover header/footer
-      // Remove intro-complete/intro-finished so CSS doesn't hide the overlay
-      document.documentElement.classList.add('paw-exit');
-      document.documentElement.classList.remove('intro-complete', 'intro-finished');
+      // NOTE: paw-exit class was already added at the start (before alignment calculation)
+      // This ensures the overlay CSS dimensions are correct for pixel-perfect alignment
 
-      // Show overlay (we know morphOverlay is not null from earlier check)
+      // Show overlay FIRST (with animated card covering static card)
+      // This creates a brief overlap where both cards are visible
       const overlay = this.morphOverlay!;
-      console.log('[IntroAnimation] Showing overlay');
+      console.log('[IntroAnimation] Showing overlay (animated card will cover static card)');
       overlay.style.visibility = 'visible';
       overlay.style.pointerEvents = 'auto';
       overlay.classList.remove('hidden');
       overlay.style.display = 'block';
       overlay.style.opacity = '1';
 
-      // Hide actual business card (SVG card will show instead)
-      console.log('[IntroAnimation] Hiding business card');
+      // Force a repaint to ensure overlay is rendered before hiding static card
+      void overlay.offsetHeight;
+
+      // Now hide actual business card (it's covered by animated card anyway)
+      console.log('[IntroAnimation] Hiding business card (covered by animated card)');
       businessCard.style.opacity = '0';
 
       // Hide about-hero-desktop so its text doesn't show through during exit
@@ -1232,20 +1264,28 @@ export class IntroAnimationModule extends BaseModule {
     }
 
     return new Promise((resolve) => {
-      // Calculate alignment
-      const cardRect = businessCard.getBoundingClientRect();
-      const cardFront = businessCard.querySelector('.business-card-front') as HTMLElement;
-      const actualCardRect = cardFront ? cardFront.getBoundingClientRect() : cardRect;
-      const scale = actualCardRect.width / SVG_CARD.width;
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      const translateX = actualCardRect.left - (SVG_CARD.x * scale);
-      const translateY = actualCardRect.top - (SVG_CARD.y * scale);
+      // ========================================================================
+      // CRITICAL: Add paw-exit class FIRST to get correct overlay dimensions
+      // The .paw-exit CSS changes overlay to: top: 60px, height: calc(100vh - 60px)
+      // We need alignment calculation to use these dimensions, not full viewport
+      // ========================================================================
+      document.documentElement.classList.add('paw-exit');
 
       // Clear and rebuild SVG
       morphSvg.innerHTML = '';
-      morphSvg.setAttribute('viewBox', `0 0 ${viewportWidth} ${viewportHeight}`);
+
+      // Set viewBox FIRST (before alignment calculation)
+      // Must match SVG_VIEWBOX for calculateSvgAlignment() to work correctly
+      morphSvg.setAttribute('viewBox', `0 0 ${SVG_VIEWBOX.width} ${SVG_VIEWBOX.height}`);
       morphSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+      // Force reflow so CSS changes take effect before we measure overlay dimensions
+      void this.morphOverlay!.offsetHeight;
+
+      // Calculate pixel-perfect alignment using shared function
+      // CRITICAL: Pass overlay element so alignment uses its actual dimensions (affected by .paw-exit)
+      const alignment = SvgBuilder.calculateSvgAlignment(businessCard, this.morphOverlay);
+      const { scale, translateX, translateY } = alignment;
 
       // Add shadow filter
       const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
@@ -1330,16 +1370,19 @@ export class IntroAnimationModule extends BaseModule {
 
       morphSvg.appendChild(transformWrapper);
 
-      // Add paw-exit class so overlay doesn't cover header/footer
-      document.documentElement.classList.add('paw-exit');
+      // NOTE: paw-exit class was already added at the start (before alignment calculation)
+      // This ensures the overlay CSS dimensions are correct for pixel-perfect alignment
 
-      // Show overlay
+      // Show overlay FIRST (animated card will cover static card)
       const overlay = this.morphOverlay!;
       overlay.style.visibility = 'visible';
       overlay.style.pointerEvents = 'auto';
       overlay.classList.remove('hidden');
 
-      // Hide actual business card (SVG card will show instead)
+      // Force repaint to ensure overlay is rendered before hiding static card
+      void overlay.offsetHeight;
+
+      // Now hide actual business card (it's covered by animated card anyway)
       businessCard.style.opacity = '0';
 
       // Get finger paths for morphing
@@ -1375,16 +1418,20 @@ export class IntroAnimationModule extends BaseModule {
       }
       this.entryTimeline = gsap.timeline({
         onComplete: () => {
-          // Hide overlay after animation
-          if (this.morphOverlay) {
-            this.morphOverlay.style.visibility = 'hidden';
-            this.morphOverlay.style.pointerEvents = 'none';
-          }
-          // Remove paw-exit class
-          document.documentElement.classList.remove('paw-exit');
-          // Show actual business card
+          // Cross-fade: Show static card FIRST (while animated card still visible)
+          // This masks any sub-pixel differences between the two renders
           businessCard.style.opacity = '1';
-          resolve();
+
+          // Then hide overlay after a tiny delay so both cards overlap
+          gsap.delayedCall(0.05, () => {
+            if (this.morphOverlay) {
+              this.morphOverlay.style.visibility = 'hidden';
+              this.morphOverlay.style.pointerEvents = 'none';
+            }
+            // Remove paw-exit class
+            document.documentElement.classList.remove('paw-exit');
+            resolve();
+          });
         }
       });
       this.addTimeline(this.entryTimeline);
@@ -1533,7 +1580,7 @@ export class IntroAnimationModule extends BaseModule {
    *
    * Kills the GSAP timeline and removes event listeners
    * when the module is destroyed.
-   * 
+   *
    * PERFORMANCE: Ensures all event listeners are properly removed
    * to prevent memory leaks.
    */

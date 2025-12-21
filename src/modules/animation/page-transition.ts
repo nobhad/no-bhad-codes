@@ -6,8 +6,7 @@
  * @extends BaseModule
  *
  * DESIGN:
- * - Virtual pages architecture like salcosta.dev
- * - One full-viewport "page" visible at a time
+ * - Virtual pages architecture - one full-viewport "page" visible at a time
  * - Hash-based URLs: #/, #/about, #/contact
  * - GSAP blur-in/out + drop-in/out animations
  * - Desktop only - mobile keeps scroll behavior
@@ -18,14 +17,15 @@ import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
 import { container } from '../../core/container';
 import type { IntroAnimationModule } from './intro-animation';
-import { debounce } from '../../utils/gsap-utilities';
+import { debounce, blurIn, blurOut } from '../../utils/gsap-utilities';
 import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
 
-// Animation timing constants (from salcosta.dev analysis)
-const ANIMATION_DURATION_IN = 0.5;
-const ANIMATION_DURATION_OUT = 0.4;
+// Animation timing constants
+const ANIMATION_DURATION_IN = ANIMATION_CONSTANTS.DURATIONS.STANDARD_LENGTH; // 0.5s
+const ANIMATION_DURATION_OUT = ANIMATION_CONSTANTS.DURATIONS.NORMAL; // 0.3s (faster exit)
 const STAGGER_DELAY = 0.1;
-const EASE_CURVE = 'cubic-bezier(.3, .9, .3, .9)';
+const EASE_CURVE = ANIMATION_CONSTANTS.EASING.SMOOTH_SAL; // cubic-bezier(0.3, 0.9, 0.3, 0.9)
+const BLUR_AMOUNT = 8; // pixels
 
 interface PageConfig {
   id: string;
@@ -326,7 +326,7 @@ export class PageTransitionModule extends BaseModule {
    * #/contact -> contact
    */
   private getPageIdFromHash(hash: string): string | null {
-    // Handle salcosta-style hashes: #/, #/about, #/contact
+    // Handle hash-based routing: #/, #/about, #/contact
     if (!hash || hash === '#/' || hash === '#') {
       return 'intro';
     }
@@ -608,7 +608,7 @@ export class PageTransitionModule extends BaseModule {
       // Blur out the page
       tl.to(page.element, {
         opacity: 0,
-        filter: 'blur(8px)',
+        filter: `blur(${BLUR_AMOUNT}px)`,
         duration: ANIMATION_DURATION_OUT,
         ease: EASE_CURVE
       });
@@ -641,10 +641,10 @@ export class PageTransitionModule extends BaseModule {
 
     const children = this.getAnimatableChildren(page);
 
-    // Set initial state
+    // Set initial state (blur-in)
     gsap.set(page.element, {
       opacity: 0,
-      filter: 'blur(8px)',
+      filter: `blur(${BLUR_AMOUNT}px)`,
       visibility: 'visible'
     });
 
@@ -657,7 +657,7 @@ export class PageTransitionModule extends BaseModule {
         onComplete: resolve
       });
 
-      // Blur in the page
+      // Blur in the page - elements come into focus like camera lens
       tl.to(page.element, {
         opacity: 1,
         filter: 'blur(0px)',
@@ -739,7 +739,7 @@ export class PageTransitionModule extends BaseModule {
 
   /**
    * Cleanup on destroy
-   * 
+   *
    * PERFORMANCE: Ensures all event listeners are properly removed
    * to prevent memory leaks.
    */

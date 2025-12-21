@@ -267,7 +267,7 @@ export class SectionTransitionsModule extends BaseModule {
 
   /**
    * Cleanup on destroy
-   * 
+   *
    * PERFORMANCE: Ensures all event listeners are properly removed
    * to prevent memory leaks.
    */
