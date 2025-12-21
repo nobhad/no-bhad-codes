@@ -57,21 +57,14 @@ export class ContactAnimationModule extends BaseModule {
     }
 
     // ========================================================================
-    // DETECT LAYOUT: Check if button is below message field (mobile layout)
+    // DETECT LAYOUT: Check viewport width instead of element positioning
     // ========================================================================
-    const messageField = document.querySelector('#message')?.closest('.input-item') ||
-                         document.querySelector('.contact-message-row');
-    const submitButton = document.querySelector('.submit-button');
+    const viewportWidth = window.innerWidth;
+    const isMobile = viewportWidth < 768;
 
-    let isButtonBelowMessage = false;
-    if (messageField && submitButton) {
-      const messageRect = messageField.getBoundingClientRect();
-      const buttonRect = submitButton.getBoundingClientRect();
-      // Button is below if its top is at or below the message field's bottom
-      isButtonBelowMessage = buttonRect.top >= messageRect.bottom - 10;
-    }
+    this.log(`Viewport width: ${viewportWidth}px, isMobile: ${isMobile}`);
 
-    if (isButtonBelowMessage) {
+    if (isMobile) {
       this.setupMobileAnimation();
     } else {
       this.setupAnimation();
@@ -558,9 +551,15 @@ export class ContactAnimationModule extends BaseModule {
       gsap.set(contactContent, { opacity: 1 });
     }
 
-    // Play the animation
-    this.log('Restarting timeline from beginning...');
-    this.timeline.restart();
+    // CRITICAL: Ensure all fields are reset BEFORE playing animation
+    this.log('Force resetting fields before animation starts...');
+    this.resetAnimatedElements();
+
+    // Small delay to ensure reset completes before animation starts
+    requestAnimationFrame(() => {
+      this.log('Restarting timeline from beginning...');
+      this.timeline?.restart();
+    });
   }
 
   /**
