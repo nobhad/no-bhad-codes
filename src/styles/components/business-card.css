@@ -172,7 +172,7 @@
   transform-style: preserve-3d;
   /* CRITICAL: No CSS transitions - GSAP controls all animations */
   transition: none;
-  border-radius: 12px;
+  border-radius: 0; /* No rounding - SVG has black stroke border */
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 
   /* Prevent child elements from receiving pointer events during intro */
@@ -196,8 +196,8 @@
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
-  border-radius: 12px;
-  overflow: hidden;
+  border-radius: 0; /* No rounding - let SVG show its black stroke */
+  overflow: visible; /* Show full SVG including stroke */
 }
 
 .intro-card-face-front {
@@ -214,7 +214,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  border-radius: 12px;
+  border-radius: 0; /* No rounding - SVG has its own black stroke border */
 }
 
 /* ==========================================
