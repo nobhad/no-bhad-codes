@@ -22,6 +22,32 @@
 }
 
 /* ============================================
+ * PAGE TRANSITION OVERLAY
+ * Covers main content area only (between header and footer)
+ * Used during page transitions - NOT for intro animation
+ * ============================================ */
+
+.page-transition-overlay {
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  width: 100vw;
+  height: calc(100vh - var(--header-height) - var(--footer-height));
+  z-index: 500; /* Below header/footer (10000) but above content */
+  background-color: var(--color-neutral-300);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Active state during transitions */
+.page-transition-overlay.transitioning {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ============================================
  * VIRTUAL PAGE LAYOUT (Desktop Only)
  * ============================================ */
 
@@ -37,6 +63,7 @@
     height: calc(100vh - var(--header-height) - var(--footer-height));
     height: calc(100dvh - var(--header-height) - var(--footer-height));
     overflow: hidden;
+    background-color: var(--color-neutral-300); /* Solid background fill */
   }
 
   /* Virtual page sections - card centered, nav positioned absolutely */

@@ -142,6 +142,12 @@ export class IntroAnimationModule extends BaseModule {
   /** GSAP timeline controlling the animation sequence */
   private timeline: gsap.core.Timeline | null = null;
 
+  /** GSAP timeline for exit animation (paw grabs card and exits) */
+  private exitTimeline: gsap.core.Timeline | null = null;
+
+  /** GSAP timeline for entry animation (paw brings card back) */
+  private entryTimeline: gsap.core.Timeline | null = null;
+
   /** Flag indicating if animation has completed or been skipped */
   private isComplete = false;
 
@@ -1168,6 +1174,9 @@ export class IntroAnimationModule extends BaseModule {
       // Add completed wrapper to the SVG element
       morphSvg.appendChild(transformWrapper);
 
+      // Add paw-exit class so overlay doesn't cover header/footer
+      document.documentElement.classList.add('paw-exit');
+
       // Show overlay (we know morphOverlay is not null from earlier check)
       const overlay = this.morphOverlay!;
       console.log('[IntroAnimation] Showing overlay');
@@ -1176,9 +1185,6 @@ export class IntroAnimationModule extends BaseModule {
       overlay.classList.remove('hidden');
       overlay.style.display = 'block';
       overlay.style.opacity = '1';
-
-      // Add intro-exit class to hide header content during exit animation
-      document.documentElement.classList.add('intro-exit');
 
       // Hide actual business card (SVG card will show instead)
       console.log('[IntroAnimation] Hiding business card');
@@ -1222,9 +1228,13 @@ export class IntroAnimationModule extends BaseModule {
       console.log('[IntroAnimation] Exit - Path data found:',
         { A2: !!fingerA2PathData, A1: !!fingerA1PathData, B2: !!fingerB2PathData, B1: !!fingerB1PathData, C2: !!fingerC2PathData, C1: !!fingerC1PathData, thumb2: !!thumb2PathData, thumb1: !!thumb1PathData });
 
-      // Create exit timeline
+      // Create exit timeline (kill any existing one first to prevent memory leaks)
       console.log('[IntroAnimation] Creating exit timeline');
-      const exitTimeline = gsap.timeline({
+      if (this.exitTimeline) {
+        this.exitTimeline.kill();
+        this.exitTimeline = null;
+      }
+      this.exitTimeline = gsap.timeline({
         onStart: () => {
           console.log('[IntroAnimation] Exit timeline started');
         },
@@ -1235,11 +1245,12 @@ export class IntroAnimationModule extends BaseModule {
             this.morphOverlay.style.visibility = 'hidden';
             this.morphOverlay.style.pointerEvents = 'none';
           }
-          // Remove intro-exit class to restore header visibility
-          document.documentElement.classList.remove('intro-exit');
+          // Remove paw-exit class
+          document.documentElement.classList.remove('paw-exit');
           resolve();
         }
       });
+      this.addTimeline(this.exitTimeline);
 
       // ========================================================================
       // ANIMATION TIMING CONSTANTS - MATCHED TO INTRO (but reversed)
@@ -1263,7 +1274,7 @@ export class IntroAnimationModule extends BaseModule {
       // PHASE 0: FADE OUT NAV LINKS (new for exit)
       // ========================================================================
       if (introNav) {
-        exitTimeline.to(introNav, {
+        this.exitTimeline.to(introNav, {
           opacity: 0,
           duration: linkFadeDuration,
           ease: 'power2.out'
@@ -1276,13 +1287,13 @@ export class IntroAnimationModule extends BaseModule {
       // Fingers stay OPEN (pos 3) during most of entry
       // Thumb is always visible behind card layer
       // ========================================================================
-      exitTimeline.to(behindCardGroup, {
+      this.exitTimeline.to(behindCardGroup, {
         x: 0,
         y: 0,
         duration: pawEntryDuration,
         ease: 'power2.out'  // Reverse of intro's power2.in
       });
-      exitTimeline.to(aboveCardGroup, {
+      this.exitTimeline.to(aboveCardGroup, {
         x: 0,
         y: 0,
         duration: pawEntryDuration,
@@ -1298,21 +1309,21 @@ export class IntroAnimationModule extends BaseModule {
       // ========================================================================
       // Start morph near end of entry (pawEntryDuration - 0.2s)
       if (fingerA3 && fingerA2PathData) {
-        exitTimeline.to(fingerA3, {
+        this.exitTimeline.to(fingerA3, {
           morphSVG: { shape: fingerA2PathData, shapeIndex: 'auto' },
           duration: 0.08,
           ease: 'power1.out'
         }, `-=${0.2}`);  // Start 0.2s before entry ends
       }
       if (fingerB3 && fingerB2PathData) {
-        exitTimeline.to(fingerB3, {
+        this.exitTimeline.to(fingerB3, {
           morphSVG: { shape: fingerB2PathData, shapeIndex: 'auto' },
           duration: 0.08,
           ease: 'power1.out'
         }, '<');
       }
       if (fingerC3 && fingerC2PathData) {
-        exitTimeline.to(fingerC3, {
+        this.exitTimeline.to(fingerC3, {
           morphSVG: { shape: fingerC2PathData, shapeIndex: 'auto' },
           duration: 0.2,
           ease: 'power1.out'
@@ -1321,7 +1332,7 @@ export class IntroAnimationModule extends BaseModule {
 
       // Thumb: Position 3 → 2 (morphs with fingers)
       if (clonedThumb && thumb2PathData) {
-        exitTimeline.to(clonedThumb, {
+        this.exitTimeline.to(clonedThumb, {
           morphSVG: { shape: thumb2PathData, shapeIndex: 'auto' },
           duration: 0.2,
           ease: 'power1.out'
@@ -1335,21 +1346,21 @@ export class IntroAnimationModule extends BaseModule {
 
       // Morph 2→1 (reverse of intro's 1→2)
       if (fingerA3 && fingerA1PathData) {
-        exitTimeline.to(fingerA3, {
+        this.exitTimeline.to(fingerA3, {
           morphSVG: { shape: fingerA1PathData, shapeIndex: 'auto' },
           duration: releaseDuration,  // 0.5s - matches intro
           ease: fadeEase
         }, '<');
       }
       if (fingerB3 && fingerB1PathData) {
-        exitTimeline.to(fingerB3, {
+        this.exitTimeline.to(fingerB3, {
           morphSVG: { shape: fingerB1PathData, shapeIndex: 'auto' },
           duration: releaseDuration,
           ease: fadeEase
         }, '<');
       }
       if (fingerC3 && fingerC1PathData) {
-        exitTimeline.to(fingerC3, {
+        this.exitTimeline.to(fingerC3, {
           morphSVG: { shape: fingerC1PathData, shapeIndex: 'auto' },
           duration: releaseDuration,
           ease: fadeEase
@@ -1358,7 +1369,7 @@ export class IntroAnimationModule extends BaseModule {
 
       // Thumb: Position 2 → 1 (morphs with fingers)
       if (clonedThumb && thumb1PathData) {
-        exitTimeline.to(clonedThumb, {
+        this.exitTimeline.to(clonedThumb, {
           morphSVG: { shape: thumb1PathData, shapeIndex: 'auto' },
           duration: releaseDuration,
           ease: fadeEase
@@ -1369,25 +1380,25 @@ export class IntroAnimationModule extends BaseModule {
       // PHASE 3: CLUTCH HOLD (REVERSE of intro Phase 1)
       // Paw grips the card motionless - same duration as intro
       // ========================================================================
-      exitTimeline.to({}, { duration: clutchHold });
+      this.exitTimeline.to({}, { duration: clutchHold });
 
       // ========================================================================
       // PHASE 4: EXIT (REVERSE of intro Phase 0)
       // Paw + card exit together to where intro entry started
       // ========================================================================
-      exitTimeline.to(behindCardGroup, {
+      this.exitTimeline.to(behindCardGroup, {
         x: -800,
         y: -600,
         duration: exitDuration,
         ease: 'power2.in'  // Reverse of intro's power2.out
       });
-      exitTimeline.to(aboveCardGroup, {
+      this.exitTimeline.to(aboveCardGroup, {
         x: -800,
         y: -600,
         duration: exitDuration,
         ease: 'power2.in'
       }, '<');
-      exitTimeline.to('#svg-business-card', {
+      this.exitTimeline.to('#svg-business-card', {
         x: -800,
         y: -600,
         duration: exitDuration,
@@ -1584,6 +1595,9 @@ export class IntroAnimationModule extends BaseModule {
 
       morphSvg.appendChild(transformWrapper);
 
+      // Add paw-exit class so overlay doesn't cover header/footer
+      document.documentElement.classList.add('paw-exit');
+
       // Show overlay
       const overlay = this.morphOverlay!;
       overlay.style.visibility = 'visible';
@@ -1619,19 +1633,26 @@ export class IntroAnimationModule extends BaseModule {
       const thumb2PathData = thumb2?.getAttribute('d');
       const thumb3PathData = thumb3?.getAttribute('d');
 
-      // Create entry timeline
-      const entryTimeline = gsap.timeline({
+      // Create entry timeline (kill any existing one first to prevent memory leaks)
+      if (this.entryTimeline) {
+        this.entryTimeline.kill();
+        this.entryTimeline = null;
+      }
+      this.entryTimeline = gsap.timeline({
         onComplete: () => {
           // Hide overlay after animation
           if (this.morphOverlay) {
             this.morphOverlay.style.visibility = 'hidden';
             this.morphOverlay.style.pointerEvents = 'none';
           }
+          // Remove paw-exit class
+          document.documentElement.classList.remove('paw-exit');
           // Show actual business card
           businessCard.style.opacity = '1';
           resolve();
         }
       });
+      this.addTimeline(this.entryTimeline);
 
       // Animation timings
       const entryDuration = 0.8;
@@ -1646,19 +1667,19 @@ export class IntroAnimationModule extends BaseModule {
       gsap.set('#svg-business-card', { x: -800, y: -600 });
 
       // Phase 1: Paw + card enter from off-screen
-      entryTimeline.to(behindCardGroup, {
+      this.entryTimeline.to(behindCardGroup, {
         x: 0,
         y: 0,
         duration: entryDuration,
         ease: 'power2.out'
       });
-      entryTimeline.to(aboveCardGroup, {
+      this.entryTimeline.to(aboveCardGroup, {
         x: 0,
         y: 0,
         duration: entryDuration,
         ease: 'power2.out'
       }, '<');
-      entryTimeline.to('#svg-business-card', {
+      this.entryTimeline.to('#svg-business-card', {
         x: 0,
         y: 0,
         duration: entryDuration,
@@ -1666,25 +1687,25 @@ export class IntroAnimationModule extends BaseModule {
       }, '<');
 
       // Phase 2: Clutch hold
-      entryTimeline.to({}, { duration: clutchHold });
+      this.entryTimeline.to({}, { duration: clutchHold });
 
       // Phase 3: Fingers release (morph 1 → 2)
       if (fingerA1 && fingerA2PathData) {
-        entryTimeline.to(fingerA1, {
+        this.entryTimeline.to(fingerA1, {
           morphSVG: { shape: fingerA2PathData, shapeIndex: 'auto' },
           duration: releaseDuration,
           ease: 'power2.inOut'
         });
       }
       if (fingerB1 && fingerB2PathData) {
-        entryTimeline.to(fingerB1, {
+        this.entryTimeline.to(fingerB1, {
           morphSVG: { shape: fingerB2PathData, shapeIndex: 'auto' },
           duration: releaseDuration,
           ease: 'power2.inOut'
         }, '<');
       }
       if (fingerC1 && fingerC2PathData) {
-        entryTimeline.to(fingerC1, {
+        this.entryTimeline.to(fingerC1, {
           morphSVG: { shape: fingerC2PathData, shapeIndex: 'auto' },
           duration: releaseDuration,
           ease: 'power2.inOut'
@@ -1693,7 +1714,7 @@ export class IntroAnimationModule extends BaseModule {
 
       // Thumb: Position 1 → 2 (morphs with fingers)
       if (clonedThumb && thumb2PathData) {
-        entryTimeline.to(clonedThumb, {
+        this.entryTimeline.to(clonedThumb, {
           morphSVG: { shape: thumb2PathData, shapeIndex: 'auto' },
           duration: releaseDuration,
           ease: 'power2.inOut'
@@ -1701,13 +1722,13 @@ export class IntroAnimationModule extends BaseModule {
       }
 
       // Phase 4: Paw retracts while fingers open (morph 2 → 3)
-      entryTimeline.to(behindCardGroup, {
+      this.entryTimeline.to(behindCardGroup, {
         x: -1500,
         y: -1200,
         duration: retractDuration,
         ease: 'power2.in'
       }, '+=0.02');
-      entryTimeline.to(aboveCardGroup, {
+      this.entryTimeline.to(aboveCardGroup, {
         x: -1500,
         y: -1200,
         duration: retractDuration,
@@ -1716,21 +1737,21 @@ export class IntroAnimationModule extends BaseModule {
 
       // Fingers open during retraction
       if (fingerA1 && fingerA3PathData) {
-        entryTimeline.to(fingerA1, {
+        this.entryTimeline.to(fingerA1, {
           morphSVG: { shape: fingerA3PathData, shapeIndex: 'auto' },
           duration: 0.08,
           ease: 'power1.out'
         }, '<');
       }
       if (fingerB1 && fingerB3PathData) {
-        entryTimeline.to(fingerB1, {
+        this.entryTimeline.to(fingerB1, {
           morphSVG: { shape: fingerB3PathData, shapeIndex: 'auto' },
           duration: 0.08,
           ease: 'power1.out'
         }, '<');
       }
       if (fingerC1 && fingerC3PathData) {
-        entryTimeline.to(fingerC1, {
+        this.entryTimeline.to(fingerC1, {
           morphSVG: { shape: fingerC3PathData, shapeIndex: 'auto' },
           duration: 0.2,
           ease: 'power1.out'
@@ -1739,7 +1760,7 @@ export class IntroAnimationModule extends BaseModule {
 
       // Thumb: Position 2 → 3 (morphs during retraction)
       if (clonedThumb && thumb3PathData) {
-        entryTimeline.to(clonedThumb, {
+        this.entryTimeline.to(clonedThumb, {
           morphSVG: { shape: thumb3PathData, shapeIndex: 'auto' },
           duration: 0.2,
           ease: 'power1.out'
@@ -1748,7 +1769,7 @@ export class IntroAnimationModule extends BaseModule {
 
       // Phase 5: Fade in nav links at end
       if (introNav) {
-        entryTimeline.to(introNav, {
+        this.entryTimeline.to(introNav, {
           opacity: 1,
           duration: linkFadeDuration,
           ease: 'power2.out'
@@ -1782,6 +1803,16 @@ export class IntroAnimationModule extends BaseModule {
     if (this.timeline) {
       this.timeline.kill();
       this.timeline = null;
+    }
+
+    if (this.exitTimeline) {
+      this.exitTimeline.kill();
+      this.exitTimeline = null;
+    }
+
+    if (this.entryTimeline) {
+      this.entryTimeline.kill();
+      this.entryTimeline = null;
     }
 
     if (this.skipHandler) {

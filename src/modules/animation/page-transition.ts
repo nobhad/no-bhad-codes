@@ -48,6 +48,7 @@ export class PageTransitionModule extends BaseModule {
   private currentPageId: string = '';
   private isTransitioning: boolean = false;
   private introComplete: boolean = false;
+  private transitionOverlay: HTMLElement | null = null;
 
   // Configuration
   private containerSelector: string;
@@ -79,6 +80,7 @@ export class PageTransitionModule extends BaseModule {
     }
 
     this.setupPages();
+    this.setupTransitionOverlay();
     this.setupEventListeners();
 
     // Wait for intro animation to complete before enabling page transitions
@@ -173,6 +175,41 @@ export class PageTransitionModule extends BaseModule {
     });
 
     this.log(`Initial page from hash "${hash}": ${this.currentPageId}`);
+  }
+
+  /**
+   * Setup the transition overlay element
+   * Covers only the main content area (between header and footer)
+   */
+  private setupTransitionOverlay(): void {
+    // Check if overlay already exists
+    this.transitionOverlay = document.querySelector('.page-transition-overlay');
+
+    if (!this.transitionOverlay) {
+      // Create overlay element
+      this.transitionOverlay = document.createElement('div');
+      this.transitionOverlay.className = 'page-transition-overlay';
+      document.body.appendChild(this.transitionOverlay);
+      this.log('Created page transition overlay');
+    }
+  }
+
+  /**
+   * Show the transition overlay
+   */
+  private showTransitionOverlay(): void {
+    if (this.transitionOverlay) {
+      this.transitionOverlay.classList.add('transitioning');
+    }
+  }
+
+  /**
+   * Hide the transition overlay
+   */
+  private hideTransitionOverlay(): void {
+    if (this.transitionOverlay) {
+      this.transitionOverlay.classList.remove('transitioning');
+    }
   }
 
   /**
@@ -381,6 +418,9 @@ export class PageTransitionModule extends BaseModule {
     this.isTransitioning = true;
     this.log(`Transitioning: ${this.currentPageId} -> ${pageId}`);
 
+    // Show transition overlay (covers main content area only, not header/footer)
+    this.showTransitionOverlay();
+
     try {
       // Special handling for leaving intro page - play coyote paw exit animation
       if (this.currentPageId === 'intro') {
@@ -429,8 +469,13 @@ export class PageTransitionModule extends BaseModule {
         to: pageId
       });
 
+      // Hide transition overlay after animation completes
+      this.hideTransitionOverlay();
+
     } catch (error) {
       this.error('Transition failed:', error);
+      // Hide overlay even on error
+      this.hideTransitionOverlay();
     } finally {
       this.isTransitioning = false;
     }
@@ -650,6 +695,12 @@ export class PageTransitionModule extends BaseModule {
         page.element.classList.remove('page-active', 'page-hidden');
       }
     });
+
+    // Remove transition overlay
+    if (this.transitionOverlay && this.transitionOverlay.parentNode) {
+      this.transitionOverlay.parentNode.removeChild(this.transitionOverlay);
+    }
+    this.transitionOverlay = null;
 
     this.pages.clear();
     this.container = null;

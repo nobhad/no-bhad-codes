@@ -48,7 +48,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 100;
+  z-index: 10000; /* Above overlay (9999) so header is always visible */
 }
 
 /* Footer styles defined in components/footer.css */

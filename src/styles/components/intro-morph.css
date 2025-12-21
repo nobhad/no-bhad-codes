@@ -4,7 +4,7 @@
  * Uses GSAP MorphSVG for paw-to-paw morphing with aligned business card
  */
 
-/* Intro Morph Overlay - Full screen fixed overlay */
+/* Intro Morph Overlay - Covers full viewport during intro animation */
 .intro-morph-overlay {
   position: fixed;
   top: 0;
@@ -89,22 +89,19 @@
   stroke-width: 5px;
 }
 
-/* Header transparent during intro animation */
-.intro-loading .header,
-html:not(.intro-complete) .header {
+/* Header transparent during intro animation ONLY */
+.intro-loading .header {
   background-color: transparent !important;
   background: transparent !important;
 }
 
-/* Header content invisible during intro animation ONLY (not exit) */
-.intro-loading .header > *,
-html:not(.intro-complete) .header > * {
+/* Header content invisible during intro animation ONLY */
+.intro-loading .header > * {
   opacity: 0 !important;
 }
 
-/* Hide portal dropdown during intro animation */
-.intro-loading .portal-dropdown,
-html:not(.intro-complete) .portal-dropdown {
+/* Hide portal dropdown during intro animation ONLY */
+.intro-loading .portal-dropdown {
   display: none !important;
   opacity: 0 !important;
   visibility: hidden !important;
