@@ -486,7 +486,7 @@
   font-family: var(--font-family-acme);
   font-size: clamp(2.5rem, 8vw, 5rem);
   font-weight: 400;
-  text-align: center;
+  text-align: left;
   margin: 0;
   letter-spacing: 0.10em;
   color: var(--color-text-primary);
@@ -532,7 +532,7 @@
   }
 
   .projects-section h2 {
-    text-align: center;
+    text-align: left;
   }
 
   .wip-sign-container {
@@ -614,7 +614,7 @@
   }
 
   .portfolio-section h2 {
-    text-align: center;
+    text-align: left;
   }
 }
 
