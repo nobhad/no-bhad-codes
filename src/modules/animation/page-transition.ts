@@ -25,7 +25,7 @@ const ANIMATION_DURATION_IN = ANIMATION_CONSTANTS.DURATIONS.STANDARD_LENGTH; // 
 const ANIMATION_DURATION_OUT = ANIMATION_CONSTANTS.DURATIONS.NORMAL; // 0.3s (faster exit)
 const STAGGER_DELAY = 0.1;
 const EASE_CURVE = ANIMATION_CONSTANTS.EASING.SMOOTH_SAL; // cubic-bezier(0.3, 0.9, 0.3, 0.9)
-const BLUR_AMOUNT = 8; // pixels
+const BLUR_AMOUNT = 15; // pixels - increased for visibility
 
 interface PageConfig {
   id: string;
@@ -149,7 +149,9 @@ export class PageTransitionModule extends BaseModule {
         id: 'contact',
         route: '#/contact',
         title: 'Contact - No Bhad Codes',
-        childSelectors: ['.contact-content', 'h2', '.contact-form'],
+        // Only animate .contact-content wrapper (contains h2 and form)
+        // Don't select form separately to avoid double-blur on inputs
+        childSelectors: ['.contact-content'],
         useFadeOnly: true
       }
     ];
@@ -680,32 +682,30 @@ export class PageTransitionModule extends BaseModule {
         }
       });
 
-      // Two-step blur animation: blur first (visible), then fade out
-      // Step 1: Blur while still visible (so blur effect is seen)
-      tl.to(page.element, {
-        filter: `blur(${BLUR_AMOUNT}px)`,
-        duration: ANIMATION_DURATION_OUT,
-        ease: EASE_CURVE
-      });
-
-      // Step 2: Quickly fade out
-      tl.to(page.element, {
-        opacity: 0,
-        duration: 0.15,
-        ease: 'power2.in'
-      });
-
-      // Animate children out - fade only (no blur) or drop-out based on config
+      // Animate children out - blur + fade for useFadeOnly, drop-out otherwise
+      // Blur is applied to CHILDREN (not container) to work on mobile scrollable sections
       if (children.length > 0) {
         console.log('[PageTransition] animateOut - animating', children.length, 'children, useFadeOnly:', useFadeOnly);
         if (useFadeOnly) {
-          // Fade out children (no blur, no Y movement) - starts immediately
+          // Step 1: Blur children FIRST while still visible
+          tl.to(children, {
+            filter: `blur(${BLUR_AMOUNT}px)`,
+            webkitFilter: `blur(${BLUR_AMOUNT}px)`,
+            duration: 0.4,
+            stagger: STAGGER_DELAY * 0.5,
+            ease: 'power2.in'
+          }, 0);
+
+          // Step 2: Brief pause - blur lingers
+          tl.to({}, { duration: 0.2 });
+
+          // Step 3: THEN fade out (while blurred)
           tl.to(children, {
             opacity: 0,
-            duration: ANIMATION_DURATION_OUT,
+            duration: 0.3,
             stagger: STAGGER_DELAY,
-            ease: EASE_CURVE
-          }, 0);
+            ease: 'power2.in'
+          });
         } else {
           // Drop out children with stagger
           tl.to(children, {
@@ -718,6 +718,13 @@ export class PageTransitionModule extends BaseModule {
       } else {
         console.log('[PageTransition] animateOut - no children found for page');
       }
+
+      // Fade out container after children animation starts
+      tl.to(page.element, {
+        opacity: 0,
+        duration: 0.2,
+        ease: 'power2.in'
+      }, ANIMATION_DURATION_OUT - 0.1);
 
       this.addTimeline(tl);
     });
@@ -746,20 +753,28 @@ export class PageTransitionModule extends BaseModule {
     const useFadeOnly = page.useFadeOnly === true;
     console.log('[PageTransition] animateIn - useFadeOnly:', useFadeOnly, 'children:', children.length);
 
-    // Set initial state (blur-in)
-    console.log('[PageTransition] animateIn - setting initial blur:', BLUR_AMOUNT + 'px');
+    // On mobile, scrollable sections have -webkit-overflow-scrolling: touch which
+    // creates compositing layers that bypass filter effects on the container.
+    // Solution: Apply blur to CHILDREN instead of container on mobile.
+    const isMobile = this.isMobile;
+    console.log('[PageTransition] animateIn - isMobile:', isMobile, 'useFadeOnly:', useFadeOnly);
+
+    // Set initial state
     gsap.set(page.element, {
       opacity: 0,
-      filter: `blur(${BLUR_AMOUNT}px)`,
       visibility: 'visible'
     });
-    console.log('[PageTransition] animateIn - element filter after set:', window.getComputedStyle(page.element).filter);
 
-    // For fade-only: children start invisible; for drop-in: children start above
-    // Note: blur only on container, not children (avoids blurring form inputs)
+    // For fade-only: children start invisible AND blurred (blur on children works on mobile)
+    // For drop-in: children start above
     if (children.length > 0) {
       if (useFadeOnly) {
-        gsap.set(children, { opacity: 0 });
+        // Apply blur to children (works on mobile scrollable sections)
+        gsap.set(children, {
+          opacity: 0,
+          filter: `blur(${BLUR_AMOUNT}px)`,
+          webkitFilter: `blur(${BLUR_AMOUNT}px)` // Safari compatibility
+        });
       } else {
         gsap.set(children, { y: '-105%' });
       }
@@ -769,36 +784,43 @@ export class PageTransitionModule extends BaseModule {
       const tl = gsap.timeline({
         onComplete: () => {
           // Clear filter property after animation
-          gsap.set(page.element, { filter: 'none' });
+          if (children.length > 0 && useFadeOnly) {
+            gsap.set(children, { filter: 'none', webkitFilter: 'none' });
+          }
           resolve();
         }
       });
 
-      // Two-step blur animation: fade in blurred, then unblur
-      // Step 1: Quickly fade in while keeping blur (so blur is visible)
+      // Fade in container
       tl.to(page.element, {
         opacity: 1,
         duration: 0.15,
         ease: 'power2.out'
       });
 
-      // Step 2: Unblur - elements come into focus like camera lens
-      tl.to(page.element, {
-        filter: 'blur(0px)',
-        duration: ANIMATION_DURATION_IN,
-        ease: EASE_CURVE
-      });
-
-      // Animate children - fade only (no blur on children to avoid form input issues)
+      // Animate children
       if (children.length > 0) {
         if (useFadeOnly) {
-          // Fade in children (no blur, no Y movement) - starts after fade-in
+          // Step 1: Fade in children while KEEPING blur (blur visible during fade)
           tl.to(children, {
             opacity: 1,
-            duration: ANIMATION_DURATION_IN,
+            // Keep blur at BLUR_AMOUNT - don't change it yet
+            duration: 0.4,
             stagger: STAGGER_DELAY,
-            ease: EASE_CURVE
-          }, 0.1); // Start shortly after container appears
+            ease: 'power2.out'
+          }, 0);
+
+          // Step 2: Brief pause - blur lingers after fade complete
+          tl.to({}, { duration: 0.3 });
+
+          // Step 3: NOW remove the blur (content comes into focus)
+          tl.to(children, {
+            filter: 'blur(0px)',
+            webkitFilter: 'blur(0px)',
+            duration: 0.5,
+            stagger: STAGGER_DELAY * 0.5,
+            ease: 'power2.out'
+          });
         } else {
           // Drop in children with stagger
           tl.to(children, {
