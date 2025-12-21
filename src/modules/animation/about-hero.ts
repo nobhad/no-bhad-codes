@@ -333,11 +333,19 @@ export class AboutHeroModule extends BaseModule {
       this.textTimeline = null;
     }
 
-    // Reset hero visibility
+    // Reset hero visibility - keep hidden initially
     gsap.set(this.hero, {
-      opacity: 1,
+      opacity: 0,
       visibility: 'visible',
       pointerEvents: 'auto'
+    });
+
+    // Fade in hero after a small delay to ensure page transition completes
+    gsap.to(this.hero, {
+      opacity: 1,
+      duration: 0.3,
+      delay: 0.1,
+      ease: 'power2.out'
     });
 
     // Reset about content
