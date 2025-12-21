@@ -4,6 +4,65 @@
 
 ## Recent Updates (December 21, 2025)
 
+### Virtual Pages on Mobile & Projects/Portfolio Pages - COMPLETE
+
+Enabled virtual pages on mobile devices and created projects/portfolio pages with WIP sign.
+
+**Completed:**
+
+1. **Virtual Pages on Mobile**
+   - ✅ Enabled PageTransitionModule on mobile devices (`enableOnMobile: true`)
+   - ✅ Updated RouterService to use virtual pages on all devices (removed desktop-only check)
+   - ✅ Changed mobile layout from scroll-based to virtual pages (position: absolute)
+   - ✅ Mobile now matches desktop behavior with blur-in/blur-out page transitions
+
+2. **Projects and Portfolio Pages**
+   - ✅ Created projects section with WIP sign (wile_404_sign.svg)
+   - ✅ Created portfolio section with same WIP sign
+   - ✅ Added routes for #/projects and #/portfolio
+   - ✅ Registered pages in PageTransitionModule
+   - ✅ Layout: heading centered on top, large SVG below (1600px max-width)
+
+3. **Navigation Updates**
+   - ✅ Updated hamburger menu order: home (00), about (01), contact (02), projects (03)
+   - ✅ Removed portfolio from navigation (keeping only projects)
+   - ✅ Business card navigation: ABOUT, CONTACT
+
+4. **Visual Adjustments**
+   - ✅ Increased hero text size from 120px to 180px for better visibility
+   - ✅ Projects/portfolio heading: clamp(2.5rem, 8vw, 5rem) - smaller than before
+   - ✅ WIP sign SVG: max-width 1600px - much larger than before
+   - ✅ Vertical column layout (heading above, SVG below)
+
+**Technical Details:**
+
+- Mobile layout uses same virtual pages system as desktop
+- PageTransitionModule handles blur-in/blur-out transitions
+- RouterService dispatches navigate events for PageTransitionModule
+- Mobile sections positioned absolutely with overflow-y: auto for scrolling within pages
+- Dynamic viewport height (dvh) for mobile Safari compatibility
+
+**Files Created:**
+
+- `public/images/wile_404_sign.svg` - WIP/404 sign graphic
+- `public/images/wile_404_sign.png` - PNG version
+
+**Files Modified:**
+
+- `index.html` - Added projects and portfolio sections, updated navigation order
+- `src/core/modules-config.ts` - Enabled PageTransitionModule on mobile
+- `src/modules/animation/page-transition.ts` - Added projects/portfolio pages, removed unused imports
+- `src/services/router-service.ts` - Updated to use virtual pages on all devices
+- `src/styles/base/layout.css` - Increased hero text size to 180px
+- `src/styles/base/reset.css` - Added dvh fallback for mobile Safari
+- `src/styles/mobile/layout.css` - Changed from scroll to virtual pages (overflow: hidden)
+- `src/styles/pages/projects.css` - Created projects/portfolio sections with column layout
+- `src/features/admin/admin-project-details.ts` - Fixed unused import and TypeScript error
+
+**Commit:** `e80410c` - feat: enable virtual pages on mobile and add projects/portfolio pages
+
+---
+
 ### Phase 3: Code Organization - IN PROGRESS
 
 **Goal:** Split large files and extract duplicate logic to improve maintainability and code organization.
