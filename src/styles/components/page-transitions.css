@@ -287,27 +287,3 @@
   }
 }
 
-/* ============================================
- * MOBILE FALLBACK (scroll-based)
- * ============================================ */
-
-@media screen and (max-width: 767px) {
-  /* Disable virtual page layout on mobile */
-  main[data-virtual-pages] {
-    position: static;
-    overflow-y: auto;
-  }
-
-  /* Reset section positioning on mobile */
-  main[data-virtual-pages] > section[data-page] {
-    position: relative;
-    height: auto;
-    min-height: 100%;
-  }
-
-  /* Don't use page-hidden class on mobile */
-  section.page-hidden {
-    display: flex !important;
-    visibility: visible;
-  }
-}
