@@ -176,7 +176,10 @@ export class PageTransitionModule extends BaseModule {
   private initializePageStates(): void {
     // Determine initial page from URL hash
     const hash = window.location.hash;
-    const initialPageId = this.getPageIdFromHash(hash) || 'intro';
+    // On mobile, always start at intro (intro animation just completed)
+    const initialPageId = this.isMobile ? 'intro' : (this.getPageIdFromHash(hash) || 'intro');
+
+    console.log('[PageTransition] initializePageStates - hash:', hash, 'isMobile:', this.isMobile, 'initialPageId:', initialPageId);
 
     this.pages.forEach((page, id) => {
       if (!page.element) return;
@@ -193,6 +196,12 @@ export class PageTransitionModule extends BaseModule {
       }
     });
 
+    // Clear hash on mobile to match initial page
+    if (this.isMobile && hash && hash !== '#/' && hash !== '#') {
+      window.history.replaceState({}, '', '#/');
+    }
+
+    console.log('[PageTransition] Initial page set to:', this.currentPageId);
     this.log(`Initial page from hash "${hash}": ${this.currentPageId}`);
   }
 
