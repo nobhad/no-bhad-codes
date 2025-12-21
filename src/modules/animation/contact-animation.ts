@@ -514,62 +514,92 @@ export class ContactAnimationModule extends BaseModule {
   }
 
   /**
-   * Reset all animated elements to their natural state
-   * Called when leaving contact page so next visit starts fresh
+   * Reset all animated elements to their initial animation state
+   * Called when leaving contact page so next visit animation works correctly
    */
   private resetAnimatedElements(): void {
     if (!this.container) return;
 
-    // Reset heading
+    // Reset heading, contact options, and card column to pre-animation state (above viewport)
     const heading = this.container.querySelector('h2');
-    if (heading) {
-      gsap.set(heading, { clearProps: 'all' });
-    }
-
-    // Reset card column
+    const contactOptions = this.container.querySelector('.contact-options');
     const cardColumn = this.container.querySelector('.contact-card-column');
+    const dropDistance = 50;
+
+    if (heading) {
+      gsap.set(heading, { y: -dropDistance, opacity: 0 });
+    }
+    if (contactOptions) {
+      gsap.set(contactOptions, { y: -dropDistance, opacity: 0 });
+    }
     if (cardColumn) {
-      gsap.set(cardColumn, { clearProps: 'all' });
+      gsap.set(cardColumn, { y: -dropDistance, opacity: 0 });
     }
 
-    // Reset form column
-    const formColumn = this.container.querySelector('.contact-form-column') ||
-                       this.container.querySelector('.contact-form');
-    if (formColumn) {
-      gsap.set(formColumn, { clearProps: 'all' });
+    // Reset form container overflow
+    const formContainer = this.container.querySelector('.contact-form') ||
+                          this.container.querySelector('.contact-form-column');
+    if (formContainer) {
+      gsap.set(formContainer, { overflow: 'hidden' });
     }
 
-    // Reset all form fields
-    const allFields = this.container.querySelectorAll('.input-item');
-    allFields.forEach(field => {
-      gsap.set(field, { clearProps: 'all' });
+    // Reset form fields to initial animation state
+    const fieldBorderRadius = '0 50px 50px 50px';
+    const startWidth = 150;
+    const compressedHeight = 20;
+
+    const nameField = this.container.querySelector('#name')?.closest('.input-item');
+    const companyField = this.container.querySelector('#company')?.closest('.input-item');
+    const emailField = this.container.querySelector('#email')?.closest('.input-item');
+    const messageField = this.container.querySelector('#message')?.closest('.input-item') ||
+                         this.container.querySelector('textarea')?.closest('.input-item');
+
+    // Reset all fields to height: 0, narrow width
+    [nameField, companyField, emailField, messageField].forEach((field, i) => {
+      if (!field) return;
+      gsap.set(field, {
+        height: 0,
+        width: startWidth,
+        overflow: 'hidden',
+        borderRadius: fieldBorderRadius,
+        zIndex: 5 - i,
+        position: 'relative'
+      });
+
       const input = field.querySelector('input, textarea');
       if (input) {
-        gsap.set(input, { clearProps: 'all' });
+        gsap.set(input, {
+          height: compressedHeight,
+          '--placeholder-opacity': 0
+        });
+        if (input.tagName === 'TEXTAREA') {
+          gsap.set(input, { minHeight: compressedHeight });
+        }
       }
+
       const label = field.querySelector('label');
       if (label) {
-        gsap.set(label, { clearProps: 'all' });
+        gsap.set(label, { opacity: 0 });
       }
     });
 
     // Reset submit button
     const submitButton = this.container.querySelector('.submit-button, button[type="submit"]');
     if (submitButton) {
-      gsap.set(submitButton, { clearProps: 'all' });
+      gsap.set(submitButton, { zIndex: 1, opacity: 0, scale: 0.8 });
     }
 
-    // Reset business card
+    // Reset business card to back showing (rotated 180)
     const businessCard = this.container.querySelector('#contact-business-card');
     if (businessCard) {
       const cardInner = businessCard.querySelector('.business-card-inner');
       if (cardInner) {
-        gsap.set(cardInner, { rotationY: 0 });
+        gsap.set(cardInner, { rotationY: 180 });
       }
     }
 
     this.hasFlippedCard = false;
-    this.log('Contact elements reset');
+    this.log('Contact elements reset to initial animation state');
   }
 
   /**
