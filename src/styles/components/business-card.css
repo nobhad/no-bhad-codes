@@ -625,84 +625,44 @@ html[data-theme="dark"] .business-card-container {
    Aligned with "HAVE BRAIN" and "WILL TRAVEL" on business card
    ========================================== */
 
-/* ==========================================
-   INTRO NAVIGATION LINKS - DIETER RAMS PRINCIPLES
-   "Less, but better" - Minimal, functional, unobtrusive
-   ========================================== */
-
-/* OPTION 1: Minimal horizontal bar (ACTIVE) - Updated for 4 links */
+/* Navigation container below business card - matches card width with padding */
 .intro-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 525px;
   max-width: 525px;
-  margin-top: 3rem;
-  padding: 0 2rem;
-  box-sizing: border-box;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-/* OPTION 2: Ultra minimal - small, spaced */
-/* .intro-nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4rem;
-  width: 525px;
-  max-width: 525px;
-  margin-top: 3rem;
-  padding: 0;
+  margin-top: 1rem;
+  padding: 1.5rem 1.5rem;
   box-sizing: border-box;
 }
-.intro-nav-link {
-  font-size: 1rem !important;
-  text-transform: lowercase !important;
-  font-weight: 400 !important;
-  letter-spacing: 0.05em !important;
-  opacity: 0.7;
-  text-shadow: none !important;
-} */
 
-/* OPTION 3: Grid system alignment */
-/* .intro-nav {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  width: 525px;
-  max-width: 525px;
-  margin-top: 3rem;
-  padding: 0 3rem;
-  box-sizing: border-box;
-}
-.intro-nav-link {
-  text-align: center;
-} */
-
-/* Navigation links - Dieter Rams aesthetic */
+/* Navigation links - styled like H2 tags */
 .intro-nav-link {
   font-family: var(--font--acme), "Acme", sans-serif;
   font-size: clamp(1.5rem, 4vw, 3rem);
-  font-weight: inherit;
+  font-weight: 400;
   line-height: 1.2;
   text-transform: uppercase;
   text-shadow: 0 2px 4px var(--color-shadow);
+  letter-spacing: 0.10em;
   color: var(--color-text);
   text-decoration: none;
-  margin: 0;
-  padding: 0;
-  transition: opacity var(--transition-fast) var(--cubic-default);
+  padding: 1rem 0;
+  transition: color var(--transition-fast) var(--cubic-default),
+              opacity var(--transition-fast) var(--cubic-default);
   position: relative;
 }
 
 .intro-nav-link:hover {
-  opacity: 0.6;
+  color: var(--color-primary);
+  opacity: 0.9;
 }
 
 .intro-nav-link:focus-visible {
-  outline: 1px solid var(--color-text);
+  outline: 2px solid var(--color-primary);
   outline-offset: 4px;
+  border-radius: 2px;
 }
 
 /* Hide separator - using space-between instead */
@@ -710,20 +670,13 @@ html[data-theme="dark"] .business-card-container {
   display: none;
 }
 
-/* Ensure links don't wrap awkwardly */
-@media screen and (min-width: 768px) {
-  .intro-nav {
-    flex-wrap: nowrap;
-  }
-}
-
-/* Mobile adjustments */
+/* Mobile adjustments - match card container width */
 @media (max-width: 767px) {
   .intro-nav {
     width: 380px;
     max-width: 380px;
-    margin-top: 2rem;
-    padding: 0 2.5rem;
+    margin-top: 0.75rem;
+    padding: 0.5rem 1.25rem;
   }
 
   .intro-nav-link {
@@ -735,11 +688,12 @@ html[data-theme="dark"] .business-card-container {
   .intro-nav {
     width: 315px;
     max-width: 315px;
-    margin-top: 1.5rem;
-    padding: 0 2rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
   }
 
   .intro-nav-link {
     font-size: clamp(1.125rem, 6vw, 1.75rem);
+    letter-spacing: 0.12em;
   }
 }

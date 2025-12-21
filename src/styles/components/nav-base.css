@@ -141,7 +141,7 @@ li {
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  color: var(--color-text-primary);
+  color: var(--color-nav-text);
   font-weight: 600;
   font-size: 20px;
   pointer-events: auto;
@@ -161,7 +161,7 @@ li {
 .nav-logo-row:active,
 .nav-logo-row:visited,
 .nav-logo-row:focus {
-  color: var(--color-text-primary);
+  color: var(--color-nav-text);
   text-decoration: none;
   outline: none;
 }

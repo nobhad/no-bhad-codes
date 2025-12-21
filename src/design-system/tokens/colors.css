@@ -59,6 +59,9 @@
   --color-surface-tertiary: var(--color-gray-200);
   --color-surface-elevated: #ffffff;
 
+  /* Form Field Background */
+  --color-form-input-bg: #333333; /* rgb(51, 51, 51) - Dark gray background for form inputs in light mode */
+
   /* Text Colors */
   --color-text-primary: var(--color-gray-900);
   --color-text-secondary: var(--color-gray-700);
@@ -66,6 +69,9 @@
   --color-text-disabled: var(--color-gray-400);
   --color-text-inverse: #ffffff;
   --color-text-brand: var(--color-brand-primary);
+
+  /* Header/Navigation Specific Text Color */
+  --color-nav-text: #333333; /* rgb(51, 51, 51) - Medium dark gray for headers/nav */
 
   /* Border Colors */
   --color-border-primary: var(--color-gray-300);
@@ -123,6 +129,12 @@ html[data-theme="dark"] {
   --color-text-tertiary: var(--color-gray-400);
   --color-text-disabled: var(--color-gray-600);
   --color-text-inverse: var(--color-gray-900);
+
+  /* Header/Navigation Specific Text Color - Light text on dark bg */
+  --color-nav-text: var(--color-gray-100);
+
+  /* Form Field Background - Darker in dark mode */
+  --color-form-input-bg: var(--color-gray-900);
 
   /* Border Colors */
   --color-border-primary: var(--color-gray-700);
@@ -193,7 +205,7 @@ html[data-theme="light"] {
   --color-shadow: rgba(0, 0, 0, 0.2);
 
   /* Legacy base colors */
-  --color-black: #000000;
+  --color-black: var(--color-gray-900); /* Soft black instead of #000000 */
   --color-white: #ffffff;
 
   /* Legacy status colors */

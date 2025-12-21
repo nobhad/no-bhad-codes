@@ -45,8 +45,8 @@ input[type="radio"] {
   border: 2px solid var(--form-input-border);
   border-radius: clamp(6px, 1.5vw, 12px);
   font-size: clamp(0.75rem, 2vw, 1rem);
-  background-color: var(--color-neutral-100);
-  color: var(--color-text-primary);
+  background-color: var(--color-form-input-bg);
+  color: var(--color-text-inverse);
   font-family: inherit;
   box-sizing: border-box;
   transition: all 0.2s ease;

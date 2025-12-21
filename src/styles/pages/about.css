@@ -61,32 +61,49 @@
     will-change: transform;
   }
 
-  /* About content container */
+  /* About content container - centered in viewport */
   .about-content {
     max-width: min(1000px, 90vw);
     width: 100%;
     margin: 0 auto;
     padding: 1rem;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1rem;
   }
 
+  /* Section heading */
+  .about-section h2 {
+    margin-bottom: 1.5rem;
+    text-align: left;
+    width: 100%;
+  }
+
+  /* About text wrapper */
   .about-text-wrapper {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
   }
 
-  /* Tech stack box - grid-aligned, contained within column */
+  .about-content p,
+  .about-text-wrapper p {
+    margin-bottom: 1rem;
+  }
+
+  /* Tech stack viewport */
+  .tech-stack-viewport {
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+
+  /* Tech stack box - contain text within bounds */
   .tech-stack {
     position: relative;
     overflow: hidden;
     width: 100%;
     box-sizing: border-box;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .tech-stack h3 {
-    margin-bottom: 1rem;
   }
 
   .tech-stack .tech-list {
@@ -94,7 +111,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
-    flex: 1;
   }
 
   /* Tech stack section visibility - hidden on desktop */
