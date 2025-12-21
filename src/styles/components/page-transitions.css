@@ -163,6 +163,12 @@
     pointer-events: none;
   }
 
+  /* Ensure about-hero is hidden when about section is hidden */
+  section.page-hidden .about-hero-desktop {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
   /* Active page state */
   section.page-active {
     display: flex;

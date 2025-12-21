@@ -55,7 +55,7 @@ export class AboutHeroModule extends BaseModule {
   private duration: number;
 
   // Wheel-driven progress
-  private targetProgress: number = 0.5; // Start at midpoint like reference
+  private targetProgress: number = 0; // Start at 0 - text all the way to the right
 
   constructor(options: AboutHeroOptions = {}) {
     super('AboutHeroModule', { debug: true, ...options });
@@ -169,8 +169,8 @@ export class AboutHeroModule extends BaseModule {
       }
     );
 
-    // Start at midpoint (0.5) like reference: .play(.5)
-    this.groupTimeline.progress(0.5);
+    // Start at 0 - text positioned all the way to the right
+    this.groupTimeline.progress(0);
 
     // Timeline 2: Text slide-in animation (like tl2 in reference)
     this.textTimeline = gsap.timeline({ paused: true });
@@ -194,8 +194,8 @@ export class AboutHeroModule extends BaseModule {
       );
     });
 
-    // Start text timeline at midpoint too
-    this.textTimeline.progress(0.5);
+    // Start text timeline at 0 - text all the way to the right
+    this.textTimeline.progress(0);
 
     this.log('Animation timelines setup complete');
   }
