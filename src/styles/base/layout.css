@@ -422,6 +422,14 @@ main,
   transition: opacity 0s, visibility 0s !important;
 }
 
+/* During paw exit/entry animation, keep header visible without transitions */
+/* This prevents header flash when navigating back to home */
+.paw-exit .header {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: none !important;
+}
+
 /* Mobile: header and content always visible, no intro animation effects */
 @media screen and (max-width: 767px) {
   .header,
