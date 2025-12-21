@@ -172,6 +172,8 @@
   /* Left column - contact form */
   .contact-form-column {
     width: 100%;
+    position: relative;
+    z-index: 1; /* Form behind card */
   }
 
   /* Right column - business card */
@@ -179,6 +181,8 @@
     padding-top: 1rem;
     justify-self: start;
     overflow: visible;
+    position: relative;
+    z-index: 10; /* Card always in front of form */
   }
 
   /* Contact options paragraph - hidden on desktop (info is on card instead) */

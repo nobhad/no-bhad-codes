@@ -150,25 +150,29 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
-   * Initialize all pages - show intro, hide others
+   * Initialize all pages - show page matching current hash, hide others
    */
   private initializePageStates(): void {
+    // Determine initial page from URL hash
+    const hash = window.location.hash;
+    const initialPageId = this.getPageIdFromHash(hash) || 'intro';
+
     this.pages.forEach((page, id) => {
       if (!page.element) return;
 
-      if (id === 'intro') {
-        // Intro is visible by default
+      if (id === initialPageId) {
+        // Show the page matching the current URL
         page.element.classList.add('page-active');
         page.element.classList.remove('page-hidden');
-        this.currentPageId = 'intro';
+        this.currentPageId = id;
       } else {
-        // All other pages hidden initially
+        // Hide all other pages
         page.element.classList.add('page-hidden');
         page.element.classList.remove('page-active');
       }
     });
 
-    this.log(`Initial page: ${this.currentPageId}`);
+    this.log(`Initial page from hash "${hash}": ${this.currentPageId}`);
   }
 
   /**
@@ -405,7 +409,8 @@ export class PageTransitionModule extends BaseModule {
       }
 
       // Hide old page (if not intro, already hidden above)
-      if (currentPage && currentPage.element && this.currentPageId !== 'intro') {
+      // Skip for pages with skipAnimation - they handle their own hiding
+      if (currentPage && currentPage.element && this.currentPageId !== 'intro' && !currentPage.skipAnimation) {
         currentPage.element.classList.add('page-hidden');
         currentPage.element.classList.remove('page-active');
       }

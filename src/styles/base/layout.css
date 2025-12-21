@@ -402,10 +402,11 @@ main,
   visibility: visible !important;
 }
 
-/* Desktop: Hide header during intro animation */
+/* Desktop: Header visible during intro animation with transparent background */
+/* Background transparency handled in intro-morph.css */
 .intro-loading .header {
-  opacity: 0 !important;
-  visibility: hidden !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 /* Desktop: Show header after intro completes */

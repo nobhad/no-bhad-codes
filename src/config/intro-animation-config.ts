@@ -59,6 +59,7 @@ export const SVG_ELEMENT_IDS = {
   fingerA1: '_1_Morph_Above_Card_-_Fingers_',
   fingerB1Container: '_FInger_B_-_Above_Card_',
   fingerC1Container: '_FInger_C-_Above_Card_',
+  thumb1: '_Thumb_Behind_Card_-1',
 
   /** Finger elements - Position 2 (releasing) */
   fingerA2: '_FInger_A_-_Above_Card_-2',
@@ -70,7 +71,7 @@ export const SVG_ELEMENT_IDS = {
   fingerA3: '_FInger_A_-_Above_Card_-3',
   fingerB3: '_FInger_B-_Above_Card_-2',
   fingerC3: '_FInger_C_-_Above_Card_-2',
-  thumb3: '_Thumb_Behind_Card_-2'
+  thumb3: '_Thumb_Behind_Card_-3'
 } as const;
 
 // ============================================================================

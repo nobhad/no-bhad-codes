@@ -155,9 +155,10 @@
     display: none !important;
   }
 
-  /* Hidden page state */
+  /* Hidden page state - completely hide non-active pages */
   section.page-hidden {
     display: none !important;
+    opacity: 0;
     visibility: hidden;
     pointer-events: none;
   }

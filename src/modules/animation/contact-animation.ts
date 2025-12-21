@@ -461,22 +461,16 @@ export class ContactAnimationModule extends BaseModule {
 
       if (to === 'contact') {
         this.log('Navigated to contact - playing animation');
-        this.log(`Timeline exists: ${!!this.timeline}, duration: ${this.timeline?.duration()}`);
+        // Make sure container is visible before playing
+        if (this.container) {
+          this.container.classList.remove('page-hidden');
+          this.container.classList.add('page-active');
+          gsap.set(this.container, { visibility: 'visible', opacity: 1 });
+        }
         this.timeline?.restart();
       } else if (from === 'contact') {
         this.log('Navigated away from contact - playing out animation');
-        // Play reverse animation, then hide section when done
-        this.timeline?.reverse();
-
-        // Hide section after reverse animation completes
-        const reverseDuration = this.timeline?.duration() || 1;
-        setTimeout(() => {
-          if (this.container) {
-            this.container.classList.add('page-hidden');
-            this.container.classList.remove('page-active');
-            gsap.set(this.container, { visibility: 'hidden' });
-          }
-        }, reverseDuration * 1000);
+        this.playOutAnimation();
       }
     }) as EventListener);
 
@@ -489,6 +483,71 @@ export class ContactAnimationModule extends BaseModule {
     }
 
     this.log('Contact animation initialized (virtual pages mode)');
+  }
+
+  /**
+   * Play quick out animation when leaving contact page
+   * Uses a fast fade + slide up instead of reversing the complex timeline
+   */
+  private playOutAnimation(): void {
+    if (!this.container) return;
+
+    // Kill any running timeline
+    this.timeline?.pause();
+
+    // Get elements for out animation
+    const heading = this.container.querySelector('h2');
+    const cardColumn = this.container.querySelector('.contact-card-column');
+    const formColumn = this.container.querySelector('.contact-form-column') ||
+                       this.container.querySelector('.contact-form');
+
+    // Quick out animation - everything slides up and fades
+    const outTl = gsap.timeline({
+      onComplete: () => {
+        if (this.container) {
+          this.container.classList.add('page-hidden');
+          this.container.classList.remove('page-active');
+          gsap.set(this.container, { visibility: 'hidden' });
+        }
+        this.log('Out animation complete');
+      }
+    });
+
+    const outDuration = 0.4;
+    const outEase = 'power2.in';
+
+    // All elements slide up and fade out together
+    if (heading) {
+      outTl.to(heading, {
+        y: -50,
+        opacity: 0,
+        duration: outDuration,
+        ease: outEase
+      }, 0);
+    }
+
+    if (cardColumn) {
+      outTl.to(cardColumn, {
+        y: -50,
+        opacity: 0,
+        duration: outDuration,
+        ease: outEase
+      }, 0);
+    }
+
+    if (formColumn) {
+      outTl.to(formColumn, {
+        y: -50,
+        opacity: 0,
+        duration: outDuration,
+        ease: outEase
+      }, 0);
+    }
+
+    // Don't fade the whole container - just hide it after elements animate out
+    // This prevents affecting nav/header
+
+    this.addTimeline(outTl);
   }
 
   /**

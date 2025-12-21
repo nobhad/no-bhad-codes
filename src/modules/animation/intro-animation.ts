@@ -390,14 +390,14 @@ export class IntroAnimationModule extends BaseModule {
       behindCardGroup.appendChild(clonedArm);
     }
 
-    // Add thumb from Position 2 (behind card, starts hidden)
-    // Thumb appears instantly when fingers start releasing
-    const thumbElement = position2.querySelector(`#${SVG_ELEMENT_IDS.thumb2}`);
+    // Add thumb from Position 1 (behind card, always visible)
+    // Card's solid fill naturally hides it when overlapping
+    const thumbElement = position1.querySelector(`#${SVG_ELEMENT_IDS.thumb1}`);
     let clonedThumb: Element | null = null;
     if (thumbElement) {
       clonedThumb = thumbElement.cloneNode(true) as Element;
       clonedThumb.setAttribute('id', 'thumb-behind-card');
-      (clonedThumb as SVGSVGElement).style.opacity = '0'; // Hidden initially
+      // Thumb always visible - card layer occludes it naturally
       behindCardGroup.appendChild(clonedThumb);
     }
 
@@ -422,8 +422,16 @@ export class IntroAnimationModule extends BaseModule {
 
     // Add fingers from Position 1 (above card, visible initially)
     // These will morph to Position 2, then Position 3
+    // IMPORTANT: Remove thumb from clone - thumb is in behindCardGroup
     const clonedPos1 = position1.cloneNode(true) as Element;
     clonedPos1.setAttribute('id', 'position-1');
+
+    // Remove thumb from this clone - it should only be in behindCardGroup
+    const thumbInPos1 = clonedPos1.querySelector(`#${SVG_ELEMENT_IDS.thumb1}`);
+    if (thumbInPos1) {
+      thumbInPos1.remove();
+    }
+
     aboveCardGroup.appendChild(clonedPos1);
 
     // Add above-card group to wrapper (layer 3 - top)
@@ -500,6 +508,10 @@ export class IntroAnimationModule extends BaseModule {
     const fingerB3 = position3?.querySelector(`#${SVG_ELEMENT_IDS.fingerB3}`) as SVGPathElement;
     const fingerC3 = position3?.querySelector(`#${SVG_ELEMENT_IDS.fingerC3}`) as SVGPathElement;
 
+    // Thumb morph targets
+    const thumb2 = position2.querySelector(`#${SVG_ELEMENT_IDS.thumb2}`) as SVGPathElement;
+    const thumb3 = position3?.querySelector(`#${SVG_ELEMENT_IDS.thumb3}`) as SVGPathElement;
+
     // Extract path data (the 'd' attribute) for morph targets
     const fingerA2PathData = fingerA2?.getAttribute('d');
     const fingerA3PathData = fingerA3?.getAttribute('d');
@@ -507,6 +519,8 @@ export class IntroAnimationModule extends BaseModule {
     const fingerB3PathData = fingerB3?.getAttribute('d');
     const fingerC2PathData = fingerC2?.getAttribute('d');
     const fingerC3PathData = fingerC3?.getAttribute('d');
+    const thumb2PathData = thumb2?.getAttribute('d');
+    const thumb3PathData = thumb3?.getAttribute('d');
 
     // ========================================================================
     // PHASE 0: ENTRY
@@ -578,10 +592,13 @@ export class IntroAnimationModule extends BaseModule {
       }, '<');
     }
 
-    // Thumb: Appear instantly when fingers start releasing
-    // No fade - instant visibility change
-    if (clonedThumb) {
-      this.timeline.set(clonedThumb, { opacity: 1 }, '<');
+    // Thumb: Position 1 → 2 (morphs with fingers)
+    if (clonedThumb && thumb2PathData) {
+      this.timeline.to(clonedThumb, {
+        morphSVG: { shape: thumb2PathData, shapeIndex: 'auto' },
+        duration: releaseDuration,
+        ease: fadeEase
+      }, '<');
     }
 
     // ========================================================================
@@ -642,6 +659,15 @@ export class IntroAnimationModule extends BaseModule {
       }, '<');
     }
 
+    // Thumb: Position 2 → 3 (during retraction)
+    if (clonedThumb && thumb3PathData) {
+      this.timeline.to(clonedThumb, {
+        morphSVG: { shape: thumb3PathData, shapeIndex: 'auto' },
+        duration: 0.2,
+        ease: 'power1.out'
+      }, '<');
+    }
+
     // ========================================================================
     // PHASE 4: COMPLETION
     // After retraction, update classes and animate header
@@ -659,10 +685,8 @@ export class IntroAnimationModule extends BaseModule {
         this.morphOverlay.style.pointerEvents = 'none';
       }
 
-      // Fade in header content
-      if (header) {
-        this.animateHeaderIn(header);
-      }
+      // Header is now always visible with transparent bg during animation
+      // No need to fade in - just ensure it's visible
     });
   }
 
@@ -856,12 +880,11 @@ export class IntroAnimationModule extends BaseModule {
           document.documentElement.classList.remove('intro-loading');
           document.documentElement.classList.add('intro-complete');
 
-          const isMobile = window.matchMedia('(max-width: 767px)').matches;
-          if (isMobile && header) {
+          // Header is always visible with transparent bg during animation
+          // Just ensure any inline styles are removed
+          if (header) {
             header.style.removeProperty('opacity');
             header.style.removeProperty('visibility');
-          } else if (header) {
-            this.animateHeaderIn(header);
           }
         }
       });
@@ -1156,6 +1179,9 @@ export class IntroAnimationModule extends BaseModule {
       overlay.style.display = 'block';
       overlay.style.opacity = '1';
 
+      // Add intro-exit class to hide header content during exit animation
+      document.documentElement.classList.add('intro-exit');
+
       // Hide actual business card (SVG card will show instead)
       console.log('[IntroAnimation] Hiding business card');
       businessCard.style.opacity = '0';
@@ -1189,8 +1215,14 @@ export class IntroAnimationModule extends BaseModule {
       const fingerC2PathData = fingerC2?.getAttribute('d');
       const fingerC1PathData = fingerC1?.getAttribute('d');
 
+      // Thumb morph targets (reverse: 3→2→1)
+      const thumb2 = position2.querySelector(`#${SVG_ELEMENT_IDS.thumb2}`) as SVGPathElement;
+      const thumb1 = position1.querySelector(`#${SVG_ELEMENT_IDS.thumb1}`) as SVGPathElement;
+      const thumb2PathData = thumb2?.getAttribute('d');
+      const thumb1PathData = thumb1?.getAttribute('d');
+
       console.log('[IntroAnimation] Exit - Path data found:',
-        { A2: !!fingerA2PathData, A1: !!fingerA1PathData, B2: !!fingerB2PathData, B1: !!fingerB1PathData, C2: !!fingerC2PathData, C1: !!fingerC1PathData });
+        { A2: !!fingerA2PathData, A1: !!fingerA1PathData, B2: !!fingerB2PathData, B1: !!fingerB1PathData, C2: !!fingerC2PathData, C1: !!fingerC1PathData, thumb2: !!thumb2PathData, thumb1: !!thumb1PathData });
 
       // Create exit timeline
       console.log('[IntroAnimation] Creating exit timeline');
@@ -1205,6 +1237,8 @@ export class IntroAnimationModule extends BaseModule {
             this.morphOverlay.style.visibility = 'hidden';
             this.morphOverlay.style.pointerEvents = 'none';
           }
+          // Remove intro-exit class to restore header visibility
+          document.documentElement.classList.remove('intro-exit');
           resolve();
         }
       });
@@ -1242,7 +1276,7 @@ export class IntroAnimationModule extends BaseModule {
       // PHASE 1: PAW ENTERS (REVERSE of intro Phase 3 retraction)
       // Paw enters from where intro retraction ended
       // Fingers stay OPEN (pos 3) during most of entry
-      // Thumb HIDES before paw reaches card (to avoid overlap issue)
+      // Thumb is always visible behind card layer
       // ========================================================================
       exitTimeline.to(behindCardGroup, {
         x: 0,
@@ -1257,14 +1291,7 @@ export class IntroAnimationModule extends BaseModule {
         ease: 'power2.out'
       }, '<');
 
-      // Hide thumb BEFORE paw reaches card position (at 80% of entry)
-      // This prevents thumb from ever appearing over the card
-      if (clonedThumb) {
-        exitTimeline.to(clonedThumb, {
-          opacity: 0,
-          duration: 0.1
-        }, `-=${pawEntryDuration * 0.3}`);  // Hide at ~70% through entry
-      }
+      // Thumb stays visible - card's solid fill naturally hides it when overlapping
 
       // ========================================================================
       // PHASE 1b: MORPH 3→2 at END of entry (reverse of intro's 2→3 at START of retraction)
@@ -1294,10 +1321,18 @@ export class IntroAnimationModule extends BaseModule {
         }, '<');
       }
 
+      // Thumb: Position 3 → 2 (morphs with fingers)
+      if (clonedThumb && thumb2PathData) {
+        exitTimeline.to(clonedThumb, {
+          morphSVG: { shape: thumb2PathData, shapeIndex: 'auto' },
+          duration: 0.2,
+          ease: 'power1.out'
+        }, '<');
+      }
+
       // ========================================================================
       // PHASE 2: MORPH 2→1 (REVERSE of intro Phase 2)
-      // Fingers close to clutching position
-      // Thumb already hidden from Phase 1
+      // Fingers and thumb close to clutching position
       // ========================================================================
 
       // Morph 2→1 (reverse of intro's 1→2)
@@ -1318,6 +1353,15 @@ export class IntroAnimationModule extends BaseModule {
       if (fingerC3 && fingerC1PathData) {
         exitTimeline.to(fingerC3, {
           morphSVG: { shape: fingerC1PathData, shapeIndex: 'auto' },
+          duration: releaseDuration,
+          ease: fadeEase
+        }, '<');
+      }
+
+      // Thumb: Position 2 → 1 (morphs with fingers)
+      if (clonedThumb && thumb1PathData) {
+        exitTimeline.to(clonedThumb, {
+          morphSVG: { shape: thumb1PathData, shapeIndex: 'auto' },
           duration: releaseDuration,
           ease: fadeEase
         }, '<');
@@ -1497,13 +1541,14 @@ export class IntroAnimationModule extends BaseModule {
         behindCardGroup.appendChild(clonedArm);
       }
 
-      // Add thumb (hidden initially, appears during release)
-      const thumbElement = position2.querySelector(`#${SVG_ELEMENT_IDS.thumb2}`);
+      // Add thumb from Position 1 (always visible, behind card)
+      // MUST use thumb1 from Position 1 since we start in clutching position
+      const thumbElement = position1.querySelector(`#${SVG_ELEMENT_IDS.thumb1}`);
       let clonedThumb: Element | null = null;
       if (thumbElement) {
         clonedThumb = thumbElement.cloneNode(true) as Element;
         clonedThumb.setAttribute('id', 'thumb-behind-card');
-        (clonedThumb as SVGElement).style.opacity = '0';
+        // Thumb always visible - card layer occludes it naturally
         behindCardGroup.appendChild(clonedThumb);
       }
 
@@ -1518,8 +1563,16 @@ export class IntroAnimationModule extends BaseModule {
       }
 
       // Add fingers from Position 1 (clutching)
+      // IMPORTANT: Remove thumb from clone - thumb is in behindCardGroup
       const clonedPos1 = position1.cloneNode(true) as Element;
       clonedPos1.setAttribute('id', 'position-1-entry');
+
+      // Remove thumb from this clone - it should only be in behindCardGroup
+      const thumbInPos1 = clonedPos1.querySelector(`#${SVG_ELEMENT_IDS.thumb1}`);
+      if (thumbInPos1) {
+        thumbInPos1.remove();
+      }
+
       aboveCardGroup.appendChild(clonedPos1);
 
       transformWrapper.appendChild(aboveCardGroup);
@@ -1561,6 +1614,12 @@ export class IntroAnimationModule extends BaseModule {
       const fingerB3PathData = fingerB3?.getAttribute('d');
       const fingerC2PathData = fingerC2?.getAttribute('d');
       const fingerC3PathData = fingerC3?.getAttribute('d');
+
+      // Thumb morph targets (1→2→3)
+      const thumb2 = position2.querySelector(`#${SVG_ELEMENT_IDS.thumb2}`) as SVGPathElement;
+      const thumb3 = position3?.querySelector(`#${SVG_ELEMENT_IDS.thumb3}`) as SVGPathElement;
+      const thumb2PathData = thumb2?.getAttribute('d');
+      const thumb3PathData = thumb3?.getAttribute('d');
 
       // Create entry timeline
       const entryTimeline = gsap.timeline({
@@ -1634,9 +1693,13 @@ export class IntroAnimationModule extends BaseModule {
         }, '<');
       }
 
-      // Show thumb when fingers release
-      if (clonedThumb) {
-        entryTimeline.set(clonedThumb, { opacity: 1 }, '<');
+      // Thumb: Position 1 → 2 (morphs with fingers)
+      if (clonedThumb && thumb2PathData) {
+        entryTimeline.to(clonedThumb, {
+          morphSVG: { shape: thumb2PathData, shapeIndex: 'auto' },
+          duration: releaseDuration,
+          ease: 'power2.inOut'
+        }, '<');
       }
 
       // Phase 4: Paw retracts while fingers open (morph 2 → 3)
@@ -1671,6 +1734,15 @@ export class IntroAnimationModule extends BaseModule {
       if (fingerC1 && fingerC3PathData) {
         entryTimeline.to(fingerC1, {
           morphSVG: { shape: fingerC3PathData, shapeIndex: 'auto' },
+          duration: 0.2,
+          ease: 'power1.out'
+        }, '<');
+      }
+
+      // Thumb: Position 2 → 3 (morphs during retraction)
+      if (clonedThumb && thumb3PathData) {
+        entryTimeline.to(clonedThumb, {
+          morphSVG: { shape: thumb3PathData, shapeIndex: 'auto' },
           duration: 0.2,
           ease: 'power1.out'
         }, '<');
