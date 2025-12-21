@@ -35,6 +35,8 @@ interface PageConfig {
   childSelectors: string[];
   /** Skip PageTransition animations - let another module handle it */
   skipAnimation?: boolean;
+  /** Use fade-only animation (no drop-in/out Y movement) */
+  useFadeOnly?: boolean;
 }
 
 interface PageTransitionOptions extends ModuleOptions {
@@ -116,14 +118,18 @@ export class PageTransitionModule extends BaseModule {
         id: 'intro',
         route: '#/',
         title: 'No Bhad Codes',
-        childSelectors: ['.business-card-container', '.business-card', '.intro-nav']
+        // Intro uses fade animation only (no drop-in)
+        childSelectors: ['.business-card-container', '.business-card', '.intro-nav'],
+        useFadeOnly: true
       },
       {
         id: 'about',
         route: '#/about',
         title: 'About - No Bhad Codes',
         // Note: .about-hero-desktop is an overlay animated separately by AboutHeroModule
-        childSelectors: ['.about-content', '.about-text-wrapper', 'h2', 'p', '.tech-stack-desktop']
+        // Animate .about-content as single unit (includes tech-stack-desktop)
+        childSelectors: ['.about-content'],
+        useFadeOnly: true
       },
       {
         id: 'projects',
@@ -506,26 +512,27 @@ export class PageTransitionModule extends BaseModule {
     }
 
     try {
-      // Special handling for leaving intro page - play coyote paw exit animation
+      // Step 1: Animate out current page
       if (this.currentPageId === 'intro') {
+        // Play intro exit animation FIRST
         console.log('[PageTransition] Leaving intro, playing exit animation');
         await this.playIntroExitAnimation();
-        console.log('[PageTransition] Exit animation done');
-      }
-
-      // Animate out current page (skip for intro - already handled by exit animation)
-      if (currentPage && currentPage.element && this.currentPageId !== 'intro') {
+        console.log('[PageTransition] Exit animation complete');
+      } else if (currentPage && currentPage.element) {
+        // Blur out non-intro pages
         console.log('[PageTransition] Animating out current page:', this.currentPageId);
         await this.animateOut(currentPage);
         console.log('[PageTransition] AnimateOut complete');
-      } else if (currentPage && currentPage.element && this.currentPageId === 'intro') {
-        // Just hide intro page immediately after exit animation
-        console.log('[PageTransition] Hiding intro page');
+      }
+
+      // Step 2: Hide current page AFTER animation completes
+      if (currentPage && currentPage.element) {
+        console.log('[PageTransition] Hiding current page:', this.currentPageId);
         currentPage.element.classList.add('page-hidden');
         currentPage.element.classList.remove('page-active');
       }
 
-      // Show target page
+      // Step 3: Show target page AFTER current is fully hidden
       console.log('[PageTransition] Showing target page:', pageId);
       targetPage.element.classList.remove('page-hidden');
       targetPage.element.classList.add('page-active');
@@ -550,20 +557,15 @@ export class PageTransitionModule extends BaseModule {
         }
       } else {
         // Animate in target page (skip for intro - handled above)
+        console.log('[PageTransition] About to animate in:', pageId);
+        console.log('[PageTransition] Target element:', targetPage.element);
+        console.log('[PageTransition] Target element computed display:', window.getComputedStyle(targetPage.element).display);
+        console.log('[PageTransition] Target element computed opacity:', window.getComputedStyle(targetPage.element).opacity);
+        console.log('[PageTransition] Target element computed z-index:', window.getComputedStyle(targetPage.element).zIndex);
         await this.animateIn(targetPage);
-      }
-
-      // Hide old page (if not intro, already hidden above)
-      // ALWAYS hide the old page - even if it has skipAnimation
-      // Pages with skipAnimation handle their own animations but still need to be hidden
-      if (currentPage && currentPage.element && this.currentPageId !== 'intro') {
-        currentPage.element.classList.add('page-hidden');
-        currentPage.element.classList.remove('page-active');
-        // Force hide with inline styles for pages that handle their own animation
-        if (currentPage.skipAnimation) {
-          currentPage.element.style.display = 'none';
-          currentPage.element.style.visibility = 'hidden';
-        }
+        console.log('[PageTransition] AnimateIn complete for:', pageId);
+        console.log('[PageTransition] After animate - display:', window.getComputedStyle(targetPage.element).display);
+        console.log('[PageTransition] After animate - opacity:', window.getComputedStyle(targetPage.element).opacity);
       }
 
       // Update state
@@ -604,14 +606,19 @@ export class PageTransitionModule extends BaseModule {
       const moduleName = 'IntroAnimationModule';
       console.log('[PageTransition] Resolving intro module:', moduleName);
       const introModule = await container.resolve(moduleName) as IntroAnimationModule;
+      console.log('[PageTransition] Resolved module:', introModule);
+      console.log('[PageTransition] Module type:', typeof introModule);
+      console.log('[PageTransition] Has playExitAnimation:', typeof introModule?.playExitAnimation);
+
       if (introModule && typeof introModule.playExitAnimation === 'function') {
-        console.log('[PageTransition] Playing intro exit animation');
+        console.log('[PageTransition] >>> CALLING playExitAnimation NOW <<<');
         this.log('Playing intro exit animation');
         await introModule.playExitAnimation();
-        console.log('[PageTransition] Intro exit animation complete');
+        console.log('[PageTransition] >>> playExitAnimation FINISHED <<<');
         this.log('Intro exit animation complete');
       } else {
         console.log('[PageTransition] Intro module has no playExitAnimation method');
+        console.log('[PageTransition] Available methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(introModule)));
       }
     } catch (error) {
       console.log('[PageTransition] IntroAnimationModule not available:', error);
@@ -648,7 +655,8 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
-   * Animate page out (blur-out + drop-out)
+   * Animate page out (blur-out + optional drop-out)
+   * Uses fade-only for pages with useFadeOnly: true
    * Adds .leaving class to CSS-animated elements for staggered exits
    */
   private async animateOut(page: PageConfig): Promise<void> {
@@ -664,6 +672,8 @@ export class PageTransitionModule extends BaseModule {
       gsap.set(page.element, { opacity: 0, visibility: 'hidden' });
       return;
     }
+
+    const useFadeOnly = page.useFadeOnly === true;
 
     // Add .leaving class to CSS-animated stagger items for exit animations
     const staggerItems = page.element.querySelectorAll('.stagger-item, .stagger-blur, .intro-nav-link, .input-item, .p-wrapper p, .heading-wrapper h2');
@@ -688,14 +698,25 @@ export class PageTransitionModule extends BaseModule {
         ease: EASE_CURVE
       });
 
-      // Drop out children with stagger
+      // Animate children out - fade-only or drop-out based on config
       if (children.length > 0) {
-        tl.to(children, {
-          y: '105%',
-          duration: ANIMATION_DURATION_OUT,
-          stagger: STAGGER_DELAY,
-          ease: EASE_CURVE
-        }, 0);
+        if (useFadeOnly) {
+          // Fade out children (no Y movement)
+          tl.to(children, {
+            opacity: 0,
+            duration: ANIMATION_DURATION_OUT,
+            stagger: STAGGER_DELAY,
+            ease: EASE_CURVE
+          }, 0);
+        } else {
+          // Drop out children with stagger
+          tl.to(children, {
+            y: '105%',
+            duration: ANIMATION_DURATION_OUT,
+            stagger: STAGGER_DELAY,
+            ease: EASE_CURVE
+          }, 0);
+        }
       }
 
       this.addTimeline(tl);
@@ -703,7 +724,8 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
-   * Animate page in (blur-in + drop-in)
+   * Animate page in (blur-in + optional drop-in)
+   * Uses fade-only for pages with useFadeOnly: true
    */
   private async animateIn(page: PageConfig): Promise<void> {
     if (!page.element) return;
@@ -715,6 +737,7 @@ export class PageTransitionModule extends BaseModule {
     }
 
     const children = this.getAnimatableChildren(page);
+    const useFadeOnly = page.useFadeOnly === true;
 
     // Set initial state (blur-in)
     gsap.set(page.element, {
@@ -723,8 +746,13 @@ export class PageTransitionModule extends BaseModule {
       visibility: 'visible'
     });
 
+    // For fade-only: children start invisible; for drop-in: children start above
     if (children.length > 0) {
-      gsap.set(children, { y: '-105%' });
+      if (useFadeOnly) {
+        gsap.set(children, { opacity: 0 });
+      } else {
+        gsap.set(children, { y: '-105%' });
+      }
     }
 
     return new Promise((resolve) => {
@@ -740,14 +768,25 @@ export class PageTransitionModule extends BaseModule {
         ease: EASE_CURVE
       });
 
-      // Drop in children with stagger
+      // Animate children - fade-only or drop-in based on config
       if (children.length > 0) {
-        tl.to(children, {
-          y: 0,
-          duration: ANIMATION_DURATION_IN,
-          stagger: STAGGER_DELAY,
-          ease: EASE_CURVE
-        }, STAGGER_DELAY);
+        if (useFadeOnly) {
+          // Fade in children (no Y movement)
+          tl.to(children, {
+            opacity: 1,
+            duration: ANIMATION_DURATION_IN,
+            stagger: STAGGER_DELAY,
+            ease: EASE_CURVE
+          }, STAGGER_DELAY);
+        } else {
+          // Drop in children with stagger
+          tl.to(children, {
+            y: 0,
+            duration: ANIMATION_DURATION_IN,
+            stagger: STAGGER_DELAY,
+            ease: EASE_CURVE
+          }, STAGGER_DELAY);
+        }
       }
 
       this.addTimeline(tl);

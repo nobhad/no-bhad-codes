@@ -548,6 +548,84 @@ export class MobileIntroAnimationModule extends BaseModule {
   }
 
   /**
+   * Play exit animation when leaving intro page
+   * Called by PageTransitionModule when navigating away from intro
+   */
+  async playExitAnimation(): Promise<void> {
+    console.log('[MobileIntro] playExitAnimation called');
+    this.log('Playing mobile exit animation');
+
+    return new Promise((resolve) => {
+      // Get the intro elements
+      const businessCard = document.getElementById('business-card');
+      const introNav = document.querySelector('.intro-nav') as HTMLElement;
+      const businessCardSection = document.querySelector('.business-card-section') as HTMLElement;
+
+      console.log('[MobileIntro] Found elements:', {
+        businessCard: !!businessCard,
+        introNav: !!introNav,
+        businessCardSection: !!businessCardSection
+      });
+
+      // Ensure section stays visible during animation by forcing z-index
+      if (businessCardSection) {
+        businessCardSection.style.zIndex = '1000';
+      }
+
+      // Longer, more visible fade out animation
+      const exitTimeline = gsap.timeline({
+        onStart: () => {
+          console.log('[MobileIntro] Exit animation STARTED');
+        },
+        onComplete: () => {
+          console.log('[MobileIntro] Exit animation COMPLETE');
+          // Reset z-index after animation
+          if (businessCardSection) {
+            businessCardSection.style.zIndex = '';
+          }
+          this.log('Mobile exit animation complete');
+          resolve();
+        }
+      });
+
+      // Fade out the business card and nav with longer duration
+      if (businessCard) {
+        console.log('[MobileIntro] Adding businessCard to exit timeline');
+        exitTimeline.to(businessCard, {
+          opacity: 0,
+          scale: 0.95,
+          duration: 0.8,
+          ease: 'power2.inOut'
+        });
+      } else {
+        console.warn('[MobileIntro] business-card element not found!');
+      }
+
+      if (introNav) {
+        console.log('[MobileIntro] Adding introNav to exit timeline');
+        exitTimeline.to(introNav, {
+          opacity: 0,
+          y: 20,
+          duration: 0.8,
+          ease: 'power2.inOut'
+        }, '<');
+      } else {
+        console.warn('[MobileIntro] intro-nav element not found!');
+      }
+
+      // If no elements found, resolve immediately
+      if (!businessCard && !introNav) {
+        console.error('[MobileIntro] NO ELEMENTS FOUND - resolving immediately');
+        resolve();
+        return;
+      }
+
+      this.addTimeline(exitTimeline);
+      console.log('[MobileIntro] Exit timeline created and playing');
+    });
+  }
+
+  /**
    * Complete intro and cleanup
    */
   private completeIntro(): void {

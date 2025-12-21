@@ -44,8 +44,9 @@
     height: 100%;
     padding: 1rem;
     box-sizing: border-box;
-    overflow-y: auto; /* Allow scrolling within section if content overflows */
+    overflow-y: auto !important; /* Allow scrolling within section if content overflows */
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain; /* Prevent pull-to-refresh interfering */
   }
 
   .section-content {
@@ -74,7 +75,12 @@
     justify-content: center !important;
     padding: 0 !important;
     margin: 0 !important;
-    overflow: hidden;
+    overflow: hidden !important;
+  }
+
+  /* Ensure business card section stays on top during exit animation */
+  .business-card-section.page-active {
+    z-index: 50 !important; /* Same as intro */
   }
 
   /* Ensure card container is centered vertically */
@@ -94,26 +100,53 @@
     display: none !important;
   }
 
-  /* About section - virtual pages mode */
-  .about-section {
-    padding: 1.5rem 1rem;
-    margin: 0;
-    display: grid;
-    place-items: center;
-    overflow-y: auto; /* Allow scrolling if content overflows */
-    -webkit-overflow-scrolling: touch;
-    box-sizing: border-box;
+  /* About section - SCROLLABLE SECTION
+     The section itself scrolls, content inside grows naturally */
+  .about-section,
+  section.about-section,
+  section.about-section.page-active,
+  .about-section.page-active,
+  #about.about-section,
+  section#about {
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    overflow-y: scroll !important; /* SECTION scrolls */
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+    touch-action: pan-y !important;
+    box-sizing: border-box !important;
+    height: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
   }
 
-  /* About content wrapper - matches desktop layout */
+  /* About content wrapper - natural height, NO min-height constraint */
   .about-section .about-content {
-    display: flex;
-    flex-direction: column;
-    padding: 0 0.5rem;
-    gap: 1rem;
-    max-width: 95vw;
-    width: 100%;
-    align-items: flex-start;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 1.5rem 1rem 1rem 1rem !important;
+    padding-bottom: 50vh !important; /* FORCE overflow - half viewport padding */
+    gap: 1rem !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    min-height: unset !important;
+    height: auto !important;
+    box-sizing: border-box !important;
+    align-items: flex-start !important;
+    pointer-events: auto !important;
+  }
+
+  /* Ensure children don't block touch */
+  .about-section .about-content *,
+  .about-section .about-text-wrapper,
+  .about-section .tech-stack-desktop {
+    touch-action: pan-y !important;
+    pointer-events: auto !important;
   }
 
   /* About text wrapper - matches desktop */
@@ -175,6 +208,7 @@
     display: block !important;
     width: 100%;
     margin-top: 1rem;
+    margin-bottom: 3rem !important; /* Extra space at bottom to ensure scroll */
   }
 
   /* Tech stack box styling on mobile - inside about section */

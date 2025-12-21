@@ -62,53 +62,18 @@
     padding: 0 !important;
   }
 
-  /* Show business card on mobile - stacked below form like desktop structure */
+  /* HIDE business card column on mobile - show only h2, options, and form */
   .contact-card-column {
-    display: block !important;
-    width: 100% !important;
-    padding: 0 !important;
-    margin-top: 1rem;
-    overflow: visible;
-  }
-
-  /* Scale down business card for mobile - fit within viewport */
-  .contact-card-column .contact-business-card {
-    width: calc(100vw - 2rem);
-    max-width: 280px;
-    height: auto;
-    aspect-ratio: 1.785;
-    margin: 0 auto;
-  }
-
-  /* Ensure card container scales properly */
-  .contact-card-column .business-card-container {
-    width: 100% !important;
-    max-width: 280px !important;
-    height: auto !important;
-    min-width: unset !important;
-    min-height: unset !important;
-    max-height: unset !important;
-    aspect-ratio: 1.785;
-    margin: 0 auto;
-  }
-
-  /* Scale card inner elements */
-  .contact-card-column .business-card,
-  .contact-card-column .business-card-inner {
-    width: 100% !important;
-    height: 100% !important;
-  }
-
-  /* Smaller text on card for mobile */
-  .contact-card-column .contact-card-text {
-    font-size: 0.9rem;
-    line-height: 1.4;
-    padding: 0.75rem;
-  }
-
-  /* Hide contact options on mobile - card shows this info (matching desktop) */
-  p.contact-options {
     display: none !important;
+  }
+
+  /* SHOW contact options on mobile - user prefers this over card */
+  p.contact-options {
+    display: block !important;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    text-align: left;
   }
 
   /* Contact form - flex column for ordering, full width */
@@ -352,18 +317,5 @@
     margin-top: 0.75rem;
   }
 
-  /* Smaller business card on very small screens */
-  .contact-card-column .contact-business-card {
-    max-width: 240px;
-  }
-
-  .contact-card-column .business-card-container {
-    max-width: 240px !important;
-  }
-
-  .contact-card-column .contact-card-text {
-    font-size: 0.75rem;
-    line-height: 1.3;
-    padding: 0.5rem;
-  }
+  /* Card is hidden on mobile - no small screen rules needed */
 }
