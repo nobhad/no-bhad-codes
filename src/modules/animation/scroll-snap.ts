@@ -17,6 +17,8 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import type { ModuleOptions } from '../../types/modules';
+import { throttle, debounce } from '../../utils/gsap-utilities';
+import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
@@ -55,6 +57,10 @@ export class ScrollSnapModule extends BaseModule {
   private snapEase: string;
   private snapDelay: number;
 
+  // Throttled/debounced event handlers
+  private throttledHandleScroll: (() => void) | null = null;
+  private debouncedHandleResize: (() => void) | null = null;
+
   constructor(options: ScrollSnapOptions = {}) {
     super('ScrollSnapModule', { debug: true, ...options });
 
@@ -70,6 +76,16 @@ export class ScrollSnapModule extends BaseModule {
     this.handleScrollEnd = this.handleScrollEnd.bind(this);
     this.snapToClosestSection = this.snapToClosestSection.bind(this);
     this.handleResize = this.handleResize.bind(this);
+
+    // Create throttled/debounced handlers for performance
+    this.throttledHandleScroll = throttle(
+      this.handleScroll,
+      ANIMATION_CONSTANTS.PERFORMANCE.THROTTLE_SCROLL
+    );
+    this.debouncedHandleResize = debounce(
+      this.handleResize,
+      ANIMATION_CONSTANTS.PERFORMANCE.THROTTLE_RESIZE
+    );
   }
 
   override async init(): Promise<void> {
@@ -137,16 +153,18 @@ export class ScrollSnapModule extends BaseModule {
     this.useWindowScroll = !(isContainerFixed && hasOverflowScroll);
     this.log(`Using ${this.useWindowScroll ? 'window' : 'container'} scroll (container position: ${containerStyle.position}, overflow: ${containerStyle.overflowY})`);
 
-    // Set up scroll listener
-    this.scrollHandler = this.handleScroll;
-    if (this.useWindowScroll) {
+    // Set up throttled scroll listener (~60fps)
+    this.scrollHandler = this.throttledHandleScroll;
+    if (this.useWindowScroll && this.scrollHandler) {
       window.addEventListener('scroll', this.scrollHandler, { passive: true });
-    } else {
+    } else if (this.scrollHandler) {
       this.container.addEventListener('scroll', this.scrollHandler, { passive: true });
     }
 
-    // Handle window resize
-    window.addEventListener('resize', this.handleResize);
+    // Handle window resize with debouncing
+    if (this.debouncedHandleResize) {
+      window.addEventListener('resize', this.debouncedHandleResize);
+    }
 
     // Wait for intro animation to complete, then refresh ScrollTrigger
     // This ensures accurate measurements after all content is visible
@@ -499,8 +517,13 @@ export class ScrollSnapModule extends BaseModule {
   override async destroy(): Promise<void> {
     this.cleanupScrollSnap();
 
-    window.removeEventListener('resize', this.handleResize);
+    // Remove debounced resize listener
+    if (this.debouncedHandleResize) {
+      window.removeEventListener('resize', this.debouncedHandleResize);
+    }
 
+    this.throttledHandleScroll = null;
+    this.debouncedHandleResize = null;
     this.container = null;
     this.sections = [];
 
