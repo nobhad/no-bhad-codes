@@ -25,11 +25,11 @@ export const SVG_PATH = '/images/coyote_paw.svg';
 
 export const SVG_CARD = {
   /** X position of card rectangle in SVG coordinates */
-  x: 1256.15,
+  x: 1256.2,
   /** Y position of card rectangle in SVG coordinates */
-  y: 1031.85,
+  y: 1031.8,
   /** Width of card rectangle in SVG coordinates */
-  width: 1062.34,
+  width: 1062.3,
   /** Height of card rectangle in SVG coordinates */
   height: 591.3
 } as const;
