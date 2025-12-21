@@ -245,11 +245,12 @@ export class AboutHeroModule extends BaseModule {
     this.targetProgress = Math.max(0, Math.min(1, this.targetProgress + delta));
 
     // Use GSAP to smoothly animate to target progress (like reference)
+    // Use overwrite: 'auto' instead of true to prevent animation jumps on rapid wheel events
     gsap.to([this.groupTimeline, this.textTimeline], {
       progress: this.targetProgress,
       duration: 0.5,
       ease: 'power4',
-      overwrite: true
+      overwrite: 'auto'
     });
 
     // Check if animation is complete (scrolled to end)
