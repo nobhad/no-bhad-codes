@@ -474,8 +474,6 @@ export class IntroAnimationModule extends BaseModule {
       onComplete: () => this.completeMorphAnimation()
     });
 
-    const header = document.querySelector('.header') as HTMLElement;
-
     // ========================================================================
     // ANIMATION TIMING CONSTANTS
     // All durations in seconds
@@ -1126,10 +1124,10 @@ export class IntroAnimationModule extends BaseModule {
         clonedCard.setAttribute('filter', 'url(#card-shadow)');
 
         // Ensure card has solid white fill background to hide thumb behind it
-        const cardRect = clonedCard.querySelector('rect');
-        if (cardRect) {
-          cardRect.setAttribute('fill', '#ffffff');
-          cardRect.setAttribute('fill-opacity', '1');
+        const cardRectElement = clonedCard.querySelector('rect');
+        if (cardRectElement) {
+          cardRectElement.setAttribute('fill', '#ffffff');
+          cardRectElement.setAttribute('fill-opacity', '1');
         }
 
         transformWrapper.appendChild(clonedCard);
