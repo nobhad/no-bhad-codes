@@ -149,7 +149,7 @@
     align-items: center;
     background: var(--color-neutral-300);
     z-index: 10;
-    cursor: pointer;
+    cursor: default;
     /* Initially hidden - PageHeroModule will show it when ready */
     opacity: 0;
     visibility: hidden;
