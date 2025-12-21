@@ -59,7 +59,54 @@ Enabled virtual pages on mobile devices and created projects/portfolio pages wit
 - `src/styles/pages/projects.css` - Created projects/portfolio sections with column layout
 - `src/features/admin/admin-project-details.ts` - Fixed unused import and TypeScript error
 
-**Commit:** `e80410c` - feat: enable virtual pages on mobile and add projects/portfolio pages
+**Commits:**
+
+- `e80410c` - feat: enable virtual pages on mobile and add projects/portfolio pages
+- `541c52b` - fix: align projects/portfolio headings left on mobile
+- `06876b4` - docs: update current_work.md with virtual pages on mobile section
+- `f041bc5` - refactor: remove deprecated tech-stack section and section ordering
+
+---
+
+### Mobile Layout Cleanup - COMPLETE
+
+Removed deprecated mobile-specific sections and styles after implementing virtual pages.
+
+**Completed:**
+
+1. **Tech Stack Consolidation**
+   - ✅ Removed separate tech-stack-section (mobile-only duplicate)
+   - ✅ Tech stack now only appears within about section on all devices
+   - ✅ Simplified HTML structure - eliminated redundant content
+
+2. **Deprecated CSS Removal**
+   - ✅ Removed section ordering CSS (order: 1, 2, 3, 5)
+   - ✅ Section ordering not needed with virtual pages (position: absolute)
+   - ✅ Cleaned up mobile-specific overrides
+
+3. **Hero Section on Mobile**
+   - ✅ Hidden hero-section on mobile (display: none)
+   - ✅ Removed complex hero positioning CSS for mobile
+   - ✅ Simplified mobile layout without scroll-driven hero animation
+
+4. **Heading Alignment**
+   - ✅ Projects/portfolio headings aligned left on all devices (mobile and desktop)
+   - ✅ Consistent alignment across breakpoints
+
+**Files Modified:**
+
+- `index.html` - Removed tech-stack-section duplicate
+- `src/modules/animation/page-transition.ts` - Updated comment (removed tech-stack reference)
+- `src/styles/mobile/layout.css` - Removed section ordering, simplified hero styles
+- `src/styles/pages/projects.css` - Fixed heading alignment on mobile
+- `src/features/admin/admin-dashboard.ts` - Added currentProjectId getter/setter for compatibility
+
+**Result:**
+
+- ✅ Cleaner HTML structure without duplicate content
+- ✅ Simplified mobile CSS without deprecated positioning
+- ✅ Consistent UX across desktop and mobile with virtual pages
+- ✅ Eliminated confusion around separate mobile-only sections
 
 ---
 
