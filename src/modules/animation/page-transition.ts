@@ -548,16 +548,12 @@ export class PageTransitionModule extends BaseModule {
         targetPage.element.classList.add('page-active');
         console.log('[PageTransition] Target page classes after:', targetPage.element.classList.toString());
 
-        // Force display to ensure it shows
-        // Contact section needs grid, others need block
-        const displayValue = pageId === 'contact' ? 'grid' : 'block';
-        console.log('[PageTransition] Setting display to:', displayValue);
+        // CSS handles display via .page-active class rules
+        // Don't set display inline - let CSS rules handle it
         gsap.set(targetPage.element, {
-          display: displayValue,
           visibility: 'visible',
           opacity: 0 // Will be animated to 1 in animateIn
         });
-        console.log('[PageTransition] Element computed display:', window.getComputedStyle(targetPage.element).display);
       } else if (targetPage && targetPage.element) {
         // For intro, keep page-hidden class - entry animation will remove it
         // This prevents any flash from CSS page-active visibility rules
@@ -861,12 +857,12 @@ export class PageTransitionModule extends BaseModule {
     console.log('[PageTransition] animateIn - isMobile:', isMobile, 'useFadeOnly:', useFadeOnly);
 
     // Set initial state
-    // Contact section needs grid display, others need block
-    const displayValue = page.id === 'contact' ? 'grid' : 'block';
+    // CSS handles display via .page-active class - don't set inline
+    // This ensures CSS rules persist even if clearProps is called
     gsap.set(page.element, {
       opacity: 0,
-      visibility: 'visible',
-      display: displayValue
+      visibility: 'visible'
+      // display is handled by CSS .page-active rules
     });
 
     // For fade-only: children start invisible AND blurred (blur on children works on mobile)
@@ -895,22 +891,21 @@ export class PageTransitionModule extends BaseModule {
             gsap.set(children, { filter: 'none', webkitFilter: 'none' });
           }
           // Ensure page element is fully visible after animation
-          const finalDisplayValue = page.id === 'contact' ? 'grid' : 'block';
+          // CSS handles display via .page-active class
           gsap.set(page.element, {
-            display: finalDisplayValue,
             opacity: 1,
             visibility: 'visible'
+            // display is handled by CSS .page-active rules
           });
           resolve();
         }
       });
 
       // Fade in container
-      // Ensure display is set correctly for contact (grid) vs others (block)
-      const pageDisplayValue = page.id === 'contact' ? 'grid' : 'block';
+      // CSS handles display via .page-active class
       tl.set(page.element, {
-        display: pageDisplayValue,
         visibility: 'visible'
+        // display is handled by CSS .page-active rules
       });
       tl.to(page.element, {
         opacity: 1,

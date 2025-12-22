@@ -99,6 +99,57 @@ export async function showAvatarIntro(chatContainer: HTMLElement): Promise<void>
       // Add class for styling
       svgElement.classList.add('terminal-avatar-img');
 
+      // Process image elements to apply light color filter and identify eye
+      const images = svgElement.querySelectorAll('image');
+      let eyeImage: SVGImageElement | null = null; // eslint-disable-line no-undef
+
+      images.forEach((img) => {
+        // Parse transform to get position
+        const transform = img.getAttribute('transform') || '';
+
+        // Eye is typically positioned in upper center area
+        // Based on SVG: image at translate(118) is likely the eye (upper right, y=0)
+        if (transform.includes('translate(118)') || transform === 'translate(118)') {
+          // This is the eye - mark it
+          img.classList.add('eye-image');
+          eyeImage = img;
+        }
+      });
+
+      // Create overlay for eye if we found it
+      if (eyeImage) {
+        const eyeOverlay = document.createElement('div');
+        eyeOverlay.className = 'eye-overlay';
+
+        // Calculate position based on SVG viewBox (288x356)
+        // Eye image is at translate(118), width=103, height=159
+        const viewBoxWidth = 288;
+        const viewBoxHeight = 356;
+        const eyeX = 118;
+        const eyeY = 0;
+        const eyeWidth = 103;
+        const eyeHeight = 159;
+
+        // Calculate position and size as percentages of viewBox
+        const leftPercent = (eyeX / viewBoxWidth) * 100;
+        const topPercent = (eyeY / viewBoxHeight) * 100;
+        const widthPercent = (eyeWidth / viewBoxWidth) * 100;
+        const heightPercent = (eyeHeight / viewBoxHeight) * 100;
+
+        // Position relative to wrapper (which contains the SVG)
+        eyeOverlay.style.position = 'absolute';
+        eyeOverlay.style.left = `${leftPercent}%`;
+        eyeOverlay.style.top = `${topPercent}%`;
+        eyeOverlay.style.width = `${widthPercent}%`;
+        eyeOverlay.style.height = `${heightPercent}%`;
+        eyeOverlay.style.background = 'var(--color-terminal-bg-panel)';
+        eyeOverlay.style.borderRadius = '50%';
+        eyeOverlay.style.pointerEvents = 'none';
+        eyeOverlay.style.zIndex = '2';
+
+        wrapper.appendChild(eyeOverlay);
+      }
+
       // Insert the SVG into the wrapper
       wrapper.appendChild(svgElement);
 

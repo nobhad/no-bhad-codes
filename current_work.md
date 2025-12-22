@@ -4,6 +4,105 @@
 
 ## Recent Updates (December 22, 2025)
 
+### Font Loading and Section Visibility Fixes - COMPLETE
+
+Fixed Acme font not displaying and resolved about/contact sections not being visible.
+
+**Completed:**
+
+1. **Font Loading Root Cause Fix**
+   - ✅ Created `src/styles/base/fonts.css` with all `@font-face` definitions
+   - ✅ Imported `fonts.css` FIRST in `main.css` (before design system tokens)
+   - ✅ Removed `@font-face` from `typography.css` (moved to `fonts.css`)
+   - ✅ Changed `font-display` from `optional` to `swap` for both fonts
+   - ✅ **Root cause**: `@font-face` was defined AFTER design tokens that referenced "Acme"
+   - ✅ Browser couldn't find font when tokens were parsed, causing fallback to system font
+
+2. **Section Visibility Fixes**
+   - ✅ Fixed CSS specificity conflicts between base `section` rule and `.page-active` rules
+   - ✅ Removed inline `display` settings from GSAP (let CSS handle via `.page-active` class)
+   - ✅ Added `min-height: 100%` to virtual pages rules to override base `min-height: 0`
+   - ✅ Ensured contact/about sections use `display: grid` via CSS (not inline styles)
+   - ✅ **Root cause**: GSAP's `clearProps: 'all'` was clearing inline styles, and CSS rules weren't specific enough
+
+3. **CSS Architecture Improvements**
+   - ✅ Removed all `!important` flags from `.page-active` rules
+   - ✅ Used CSS specificity properly (`.contact-section.page-active` beats base `section` rule)
+   - ✅ CSS rules now persist even when GSAP clears inline styles
+   - ✅ Proper cascade: base `section` → `.page-active` → `.contact-section.page-active`
+
+**Files Created:**
+- `src/styles/base/fonts.css` - All `@font-face` definitions (imported first)
+
+**Files Modified:**
+- `src/styles/main.css` - Import `fonts.css` before design system tokens
+- `src/styles/base/typography.css` - Removed `@font-face` definitions (moved to `fonts.css`)
+- `src/styles/base/layout.css` - Added override rules for contact/about sections when active
+- `src/styles/components/page-transitions.css` - Fixed specificity, added `min-height: 100%`, removed `!important`
+- `src/modules/animation/page-transition.ts` - Removed inline `display` settings (let CSS handle it)
+
+**Result:**
+- ✅ Acme font displays correctly (registered before design tokens reference it)
+- ✅ About and contact sections visible when navigated to
+- ✅ CSS rules persist even when GSAP clears inline styles
+- ✅ No `!important` flags - proper CSS cascade used
+- ✅ Root causes fixed instead of workarounds
+
+---
+
+## Recent Updates (December 22, 2025)
+
+### Animation Header Visibility and CSS Refactoring - COMPLETE
+
+Refactored intro animations to keep header visible and removed all `!important` declarations by fixing root causes.
+
+**Completed:**
+
+1. **Header Visibility During Animations**
+   - ✅ Updated `animateHeaderIn` methods in both intro-animation.ts and intro-animation-mobile.ts
+   - ✅ Removed logic that hid header children with opacity: 0
+   - ✅ Header now stays visible throughout all animations
+   - ✅ Method now only removes inline styles that might hide header
+
+2. **Overlay Positioning**
+   - ✅ Updated intro-morph-overlay to cover main area only (not full viewport)
+   - ✅ Positioned below header: `top: var(--header-height)`
+   - ✅ Positioned above footer: `height: calc(100vh - var(--header-height) - var(--footer-height))`
+   - ✅ Header and footer remain visible during animations
+
+3. **Removed All !important Declarations**
+   - ✅ Removed `!important` from layout.css header visibility rules
+   - ✅ Removed `!important` from footer.css positioning and visibility rules
+   - ✅ Fixed root causes by setting proper base styles
+   - ✅ Used specific selectors (`.intro-loading .header`, etc.) instead of forcing with `!important`
+
+4. **CSS Architecture Improvements**
+   - ✅ Added base visibility to `.header`: `opacity: 1; visibility: visible;`
+   - ✅ Added base visibility to `.footer`: `opacity: 1; visibility: visible;`
+   - ✅ Used CSS cascade properly with specific selectors for intro states
+   - ✅ JavaScript no longer sets conflicting inline styles
+
+**Files Modified:**
+- `src/modules/animation/intro-animation.ts` - Removed header hiding logic from animateHeaderIn
+- `src/modules/animation/intro-animation-mobile.ts` - Removed header hiding logic from animateHeaderIn
+- `src/styles/base/layout.css` - Removed !important, added base styles, used specific selectors
+- `src/styles/components/footer.css` - Removed !important, added base styles and intro state selectors
+- `src/styles/components/intro-morph.css` - Updated overlay positioning to main area only
+
+**Commit:**
+- `8d1e3b8` - refactor: keep header visible and remove !important
+
+**Result:**
+- ✅ Header stays visible during all intro animations
+- ✅ Overlay covers only main content area (header/footer visible)
+- ✅ No `!important` declarations - proper CSS cascade used
+- ✅ Cleaner, more maintainable CSS architecture
+- ✅ Root causes fixed instead of forcing styles
+
+---
+
+## Recent Updates (December 22, 2025)
+
 ### Projects Page SVG Enhancements and UI Polish - COMPLETE
 
 Enhanced projects page SVG styling, fixed mobile alignment, and improved visual consistency across the site.
