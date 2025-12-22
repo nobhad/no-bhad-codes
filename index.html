@@ -141,9 +141,9 @@
 
       <!-- Password Form -->
       <form class="portal-dropdown-form form-active" id="portal-password-form" autocomplete="off">
-        <input type="email" class="dropdown-input" placeholder="Email" required autocomplete="email" />
+        <input type="email" id="portal-email" name="email" class="dropdown-input" placeholder="Email" required autocomplete="email" />
         <div class="password-field">
-          <input type="password" class="dropdown-input" placeholder="Password" required autocomplete="current-password" />
+          <input type="password" id="portal-password" name="password" class="dropdown-input" placeholder="Password" required autocomplete="current-password" />
           <button type="button" class="password-toggle" aria-label="Toggle password visibility">
             <svg class="password-icon-show" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             <svg class="password-icon-hide" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
@@ -156,7 +156,7 @@
       <!-- Forgot Password Form -->
       <form class="portal-dropdown-form" id="portal-forgot-form" autocomplete="off">
         <p class="forgot-info">Enter your email to receive a password reset link.</p>
-        <input type="email" class="dropdown-input" placeholder="Email" required autocomplete="email" />
+        <input type="email" id="portal-forgot-email" name="email" class="dropdown-input" placeholder="Email" required autocomplete="email" />
         <button type="submit" class="dropdown-submit">Send Reset Link</button>
         <button type="button" class="dropdown-link" id="back-to-login">Back to login</button>
       </form>
@@ -176,7 +176,7 @@
 
       <!-- Magic Link Form -->
       <form class="portal-dropdown-form" id="portal-magic-form" autocomplete="off">
-        <input type="email" class="dropdown-input" placeholder="Email" required autocomplete="email" />
+        <input type="email" id="portal-magic-email" name="email" class="dropdown-input" placeholder="Email" required autocomplete="email" />
         <button type="submit" class="dropdown-submit">Send Link</button>
         <p class="magic-info">A secure login link will be sent to your email.</p>
       </form>
@@ -1031,6 +1031,8 @@
           const passwordInput = passwordForm.querySelector('input[type="password"]');
           const submitBtn = passwordForm.querySelector('.dropdown-submit');
 
+          if (!emailInput || !passwordInput || !submitBtn) return;
+
           const emailValid = isValidEmail(emailInput.value.trim());
           const passwordValid = passwordInput.value.length >= 1;
 
@@ -1050,6 +1052,8 @@
           const emailInput = magicForm.querySelector('input[type="email"]');
           const submitBtn = magicForm.querySelector('.dropdown-submit');
 
+          if (!emailInput || !submitBtn) return;
+
           if (isValidEmail(emailInput.value.trim())) {
             submitBtn.classList.add('valid');
           } else {
@@ -1066,6 +1070,8 @@
           const emailInput = forgotForm.querySelector('input[type="email"]');
           const submitBtn = forgotForm.querySelector('.dropdown-submit');
 
+          if (!emailInput || !submitBtn) return;
+
           if (isValidEmail(emailInput.value.trim())) {
             submitBtn.classList.add('valid');
           } else {
@@ -1081,11 +1087,18 @@
         forgotForm.addEventListener('submit', function(e) {
           e.preventDefault();
           const emailInput = forgotForm.querySelector('input[type="email"]');
+          const submitBtn = forgotForm.querySelector('.dropdown-submit');
+          
+          if (!emailInput || !submitBtn) {
+            console.error('Forgot password form elements not found');
+            return;
+          }
+          
           if (isValidEmail(emailInput.value.trim())) {
             hideAllForms();
             resetSent.classList.add('form-active');
             emailInput.value = '';
-            forgotForm.querySelector('.dropdown-submit').classList.remove('valid');
+            submitBtn.classList.remove('valid');
           }
         });
 
@@ -1095,6 +1108,13 @@
           const emailInput = passwordForm.querySelector('input[type="email"]');
           const passwordInput = passwordForm.querySelector('input[type="password"]');
           const submitBtn = passwordForm.querySelector('.dropdown-submit');
+
+          // Validate inputs exist
+          if (!emailInput || !passwordInput || !submitBtn) {
+            console.error('Login form elements not found');
+            alert('Form error: Please refresh the page and try again.');
+            return;
+          }
 
           const email = emailInput.value.trim();
           const password = passwordInput.value;
@@ -1116,37 +1136,69 @@
             });
 
             if (response.ok) {
-              const data = await response.json();
+              const responseData = await response.json();
+              
+              // Backend returns { success: true, message: "...", data: { user: {...}, expiresIn: "7d" } }
+              const user = responseData.data?.user || responseData.user;
+              
+              if (!user) {
+                throw new Error('Invalid response format from server');
+              }
               
               // Store auth mode and user info
               sessionStorage.setItem('client_auth_mode', 'authenticated');
-              sessionStorage.setItem('client_auth_user', JSON.stringify(data.user));
+              sessionStorage.setItem('client_auth_user', JSON.stringify(user));
 
               // Close dropdown and redirect to portal
               dropdown.classList.remove('open');
               backdrop.classList.remove('open');
               window.location.href = '/client/portal';
             } else {
-              const errorData = await response.json();
-              // Show error (you might want to add an error element to the form)
-              alert(errorData.error || 'Login failed. Please check your credentials.');
+              // Handle HTTP error responses (401, 400, etc.)
+              let errorMessage = 'Login failed. Please check your credentials.';
+              try {
+                const errorData = await response.json();
+                errorMessage = errorData.error || errorMessage;
+              } catch (parseError) {
+                // If response isn't JSON, use status-based message
+                if (response.status === 401) {
+                  errorMessage = 'Invalid email or password. Please try again.';
+                } else if (response.status === 429) {
+                  errorMessage = 'Too many login attempts. Please try again later.';
+                } else {
+                  errorMessage = `Login failed (${response.status}). Please try again.`;
+                }
+              }
+              
+              // Show error to user
+              alert(errorMessage);
               submitBtn.disabled = false;
               submitBtn.textContent = 'Sign In';
             }
           } catch (error) {
-            console.error('Login error:', error);
-            // Fallback to demo mode if backend unavailable
-            sessionStorage.setItem('client_auth_mode', 'demo');
-            sessionStorage.setItem('client_auth_user', JSON.stringify({
-              id: 1,
-              email: email,
-              name: email.split('@')[0].replace(/[^a-zA-Z]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
-            }));
+            // Only catch network/connection errors (not HTTP errors)
+            console.error('Login network error:', error);
+            
+            // Check if it's actually a network error (no response) vs HTTP error
+            if (error instanceof TypeError && error.message.includes('fetch')) {
+              // Network error - backend unavailable, fallback to demo mode
+              sessionStorage.setItem('client_auth_mode', 'demo');
+              sessionStorage.setItem('client_auth_user', JSON.stringify({
+                id: 1,
+                email: email,
+                name: email.split('@')[0].replace(/[^a-zA-Z]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
+              }));
 
-            // Close dropdown and redirect to portal
-            dropdown.classList.remove('open');
-            backdrop.classList.remove('open');
-            window.location.href = '/client/portal';
+              // Close dropdown and redirect to portal
+              dropdown.classList.remove('open');
+              backdrop.classList.remove('open');
+              window.location.href = '/client/portal';
+            } else {
+              // Other error - show to user
+              alert('An unexpected error occurred. Please try again.');
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Sign In';
+            }
           }
         });
 
