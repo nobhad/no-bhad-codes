@@ -265,7 +265,7 @@ export class PageTransitionModule extends BaseModule {
         console.log('[PageTransition] router:navigate - already transitioning, ignoring');
         return;
       }
-      
+
       const { pageId } = event.detail || {};
       this.log(`Router navigate event received - pageId: ${pageId}, introComplete: ${this.introComplete}`);
       if (pageId && this.introComplete) {
@@ -295,75 +295,13 @@ export class PageTransitionModule extends BaseModule {
 
   /**
    * Setup click handlers for navigation links with data-nav-link attribute
-   * This ensures reliable page transitions for intro-nav and other nav links
+   * DISABLED: Navigation links now handled by Navigation module/router service
+   * Page transitions only triggered by hashchange events
    */
   private setupNavLinkHandlers(): void {
-    // Find all nav links that should trigger page transitions
-    const navLinks = document.querySelectorAll('[data-nav-link], a[href^="#/"]');
-    console.log('[PageTransition] Found nav links:', navLinks.length);
-
-    navLinks.forEach((link) => {
-      link.addEventListener('click', (event: Event) => {
-        const anchor = link as HTMLAnchorElement;
-        const href = anchor.getAttribute('href');
-        console.log('[PageTransition] Link clicked:', href, 'introComplete:', this.introComplete);
-
-        if (!href || !href.startsWith('#')) return;
-
-        // Prevent default to handle navigation ourselves
-        event.preventDefault();
-
-        // Immediately hide the intro-nav links when clicked (before exit animation)
-        const introNav = anchor.closest('.intro-nav') as HTMLElement;
-        if (introNav) {
-          gsap.to(introNav, {
-            opacity: 0,
-            duration: 0.15,
-            ease: 'power2.out'
-          });
-        }
-
-        const pageId = this.getPageIdFromHash(href);
-        console.log('[PageTransition] Nav link clicked:', href, '-> pageId:', pageId, 'introComplete:', this.introComplete, 'isTransitioning:', this.isTransitioning);
-        this.log(`Nav link clicked: ${href} -> pageId: ${pageId}`);
-
-        // Prevent loops - don't navigate if already transitioning or already on page
-        if (this.isTransitioning) {
-          console.log('[PageTransition] Nav link click - already transitioning, ignoring');
-          return;
-        }
-        
-        if (pageId === this.currentPageId) {
-          console.log('[PageTransition] Nav link click - already on page, ignoring');
-          return;
-        }
-
-        if (pageId) {
-          // Update the URL hash
-          window.history.pushState({ pageId }, '', href);
-
-          // Trigger the transition
-          if (this.introComplete) {
-            this.transitionTo(pageId);
-          } else {
-            this.log('Intro not complete, waiting...');
-            // Wait for intro to complete, then navigate
-            const checkIntro = setInterval(() => {
-              if (this.introComplete) {
-                clearInterval(checkIntro);
-                if (!this.isTransitioning && pageId !== this.currentPageId) {
-                  this.transitionTo(pageId);
-                }
-              }
-            }, 100);
-            // Timeout after 3 seconds
-            setTimeout(() => clearInterval(checkIntro), 3000);
-          }
-        }
-      });
-    });
-
-    this.log(`Setup click handlers for ${navLinks.length} nav links`);
+    // Navigation links are now handled by Navigation module and router service
+    // This prevents duplicate handlers and inconsistent transition behaviors
+    this.log('Nav link handlers disabled - navigation handled by Navigation module');
   }
 
   /**
@@ -371,7 +309,7 @@ export class PageTransitionModule extends BaseModule {
    */
   private handleHashChange(): void {
     if (!this.introComplete) return;
-    
+
     // Prevent loops - don't handle hashchange if already transitioning
     if (this.isTransitioning) {
       console.log('[PageTransition] handleHashChange - already transitioning, ignoring');
@@ -544,6 +482,32 @@ export class PageTransitionModule extends BaseModule {
     this.isTransitioning = true;
     this.log(`Transitioning: ${this.currentPageId} -> ${pageId}`);
 
+    // CRITICAL: Hide target page (intro) IMMEDIATELY to prevent flash
+    // Do this BEFORE anything else, even before showing overlay
+    if (pageId === 'intro' && targetPage && targetPage.element) {
+      // Force hide with inline styles and classes IMMEDIATELY
+      targetPage.element.classList.add('page-hidden');
+      targetPage.element.classList.remove('page-active');
+      gsap.set(targetPage.element, {
+        display: 'none',
+        visibility: 'hidden',
+        opacity: 0,
+        zIndex: -1,
+        pointerEvents: 'none',
+        immediateRender: true // Force immediate application
+      });
+      // Also hide any children immediately to prevent flash
+      const introChildren = targetPage.element.querySelectorAll('.business-card-container, .business-card, .intro-nav');
+      if (introChildren.length > 0) {
+        gsap.set(introChildren, {
+          opacity: 0,
+          visibility: 'hidden',
+          display: 'none',
+          immediateRender: true
+        });
+      }
+    }
+
     // Show transition overlay - skip for intro (uses intro-morph-overlay instead)
     // Also skip overlay when transitioning TO intro (to see fade out)
     if (this.currentPageId !== 'intro' && pageId !== 'intro') {
@@ -560,30 +524,6 @@ export class PageTransitionModule extends BaseModule {
       } else if (currentPage && currentPage.element) {
         // Blur out non-intro pages
         console.log('[PageTransition] Animating out current page:', this.currentPageId);
-
-        // Ensure target page (intro) is completely hidden during fade out
-        // Do this BEFORE starting the animation to prevent flash
-        if (pageId === 'intro' && targetPage && targetPage.element) {
-          // Force hide with inline styles to ensure it stays hidden
-          gsap.set(targetPage.element, {
-            display: 'none',
-            visibility: 'hidden',
-            opacity: 0,
-            zIndex: -1,
-            pointerEvents: 'none'
-          });
-          targetPage.element.classList.add('page-hidden');
-          targetPage.element.classList.remove('page-active');
-          // Also hide any children to prevent flash
-          const introChildren = targetPage.element.querySelectorAll('.business-card-container, .business-card, .intro-nav');
-          if (introChildren.length > 0) {
-            gsap.set(introChildren, {
-              opacity: 0,
-              visibility: 'hidden'
-            });
-          }
-        }
-
         await this.animateOut(currentPage);
         console.log('[PageTransition] AnimateOut complete');
       }

@@ -759,6 +759,15 @@ export class ClientPortalModule extends BaseModule {
             email: data.user.email,
             name: data.user.contactName || data.user.companyName || data.user.email.split('@')[0]
           });
+
+          // Redirect to client portal if not already there
+          const isOnPortalPage = document.body.getAttribute('data-page') === 'client-portal';
+          if (!isOnPortalPage) {
+            window.location.href = '/client/portal';
+            return;
+          }
+
+          // If already on portal page, try to show dashboard
           this.showDashboard();
           return;
         }
@@ -796,6 +805,15 @@ export class ClientPortalModule extends BaseModule {
           this.currentUser = mockUserData.user.email;
 
           await this.loadMockUserProjects(mockUserData.user);
+
+          // Redirect to client portal if not already there
+          const isOnPortalPage = document.body.getAttribute('data-page') === 'client-portal';
+          if (!isOnPortalPage) {
+            window.location.href = '/client/portal';
+            return;
+          }
+
+          // If already on portal page, try to show dashboard
           this.showDashboard();
           return;
         }

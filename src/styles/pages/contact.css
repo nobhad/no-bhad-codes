@@ -431,6 +431,8 @@
 /* Input item - wrapper for staggered animation */
 .input-wrapper {
   overflow: hidden;
+  padding: 2px; /* Prevent focus outline from being clipped */
+  box-sizing: border-box;
 }
 
 /* Input item */
@@ -547,21 +549,7 @@ label.text-small {
   opacity: var(--placeholder-opacity, 0);
 }
 
-/* Hover/Focus behavior - label and input transform */
-input:hover,
-input:focus,
-input:focus-visible,
-textarea:hover,
-textarea:focus,
-textarea:focus-visible,
-input:hover + label,
-input:focus + label,
-input:focus-visible + label,
-textarea:hover + label,
-textarea:focus + label,
-textarea:focus-visible + label {
-  transform: translate(15px) scale(1.02);
-}
+/* Hover/Focus behavior - label opacity only (no transform) */
 
 /* Label opacity on hover/focus - keep at animated value (1) or default to 0.5 if not animated */
 input:hover + label,
@@ -583,13 +571,13 @@ textarea:focus-visible + label {
   opacity: var(--placeholder-opacity, 0.5);
 }
 
-/* Focus outline */
-input:focus,
-textarea:focus,
-input:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid var(--color-primary, #00ff41);
-  box-shadow: none !important;
+/* Focus outline - follows border-radius using box-shadow */
+.input-item input:focus,
+.input-item input:focus-visible,
+.input-item textarea:focus,
+.input-item textarea:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px var(--color-primary, #00ff41) !important;
 }
 
 /* Autofill styling */
