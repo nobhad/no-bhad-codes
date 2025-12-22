@@ -555,9 +555,12 @@ export class MobileIntroAnimationModule extends BaseModule {
    * Called by PageTransitionModule when navigating away from intro
    *
    * Uses the same paw animation as desktop by delegating to IntroAnimationModule
+   * 
+   * NOTE: This animation is ONLY for the home page / business card section.
+   * It should NOT be used for any other pages or sections.
    */
   async playExitAnimation(): Promise<void> {
-    console.log('[MobileIntro] playExitAnimation called - delegating to desktop paw animation');
+    console.log('[MobileIntro] playExitAnimation called - ONLY for home page / business card section');
     this.log('Playing paw exit animation (same as desktop)');
 
     try {

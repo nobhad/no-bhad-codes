@@ -516,11 +516,22 @@ export class PageTransitionModule extends BaseModule {
 
     try {
       // Step 1: Animate out current page
+      // COYOTE PAW ANIMATION: ONLY for home page / business card section
       if (this.currentPageId === 'intro') {
-        // Play intro exit animation FIRST
-        console.log('[PageTransition] Leaving intro, playing exit animation');
-        await this.playIntroExitAnimation();
-        console.log('[PageTransition] Exit animation complete');
+        // Verify we're actually on the intro page with business card section
+        const businessCardSection = document.querySelector('#intro.business-card-section');
+        if (businessCardSection) {
+          // Play coyote paw exit animation (ONLY for home page / business card section)
+          console.log('[PageTransition] Leaving intro (business card section), playing coyote paw exit animation');
+          await this.playIntroExitAnimation();
+          console.log('[PageTransition] Coyote paw exit animation complete');
+        } else {
+          // Fallback: regular animation if business card section not found
+          console.log('[PageTransition] Business card section not found, using regular exit animation');
+          if (currentPage && currentPage.element) {
+            await this.animateOut(currentPage);
+          }
+        }
       } else if (currentPage && currentPage.element) {
         // Blur out non-intro pages
         console.log('[PageTransition] Animating out current page:', this.currentPageId);
@@ -549,10 +560,12 @@ export class PageTransitionModule extends BaseModule {
         console.log('[PageTransition] Target page classes after:', targetPage.element.classList.toString());
 
         // CSS handles display via .page-active class rules
-        // Don't set display inline - let CSS rules handle it
+        // But set display inline for contact/about to ensure grid is applied (overrides any previous block)
+        const displayValue = (pageId === 'contact' || pageId === 'about') ? 'grid' : undefined;
         gsap.set(targetPage.element, {
           visibility: 'visible',
-          opacity: 0 // Will be animated to 1 in animateIn
+          opacity: 0, // Will be animated to 1 in animateIn
+          ...(displayValue && { display: displayValue }) // Only set if contact/about
         });
       } else if (targetPage && targetPage.element) {
         // For intro, keep page-hidden class - entry animation will remove it
@@ -568,11 +581,20 @@ export class PageTransitionModule extends BaseModule {
       }
 
       // Animate in target page
+      // COYOTE PAW ANIMATION: ONLY for home page / business card section
       if (pageId === 'intro') {
-        // Play intro entry animation (coyote paw)
-        console.log('[PageTransition] Entering intro, playing entry animation');
-        await this.playIntroEntryAnimation();
-        console.log('[PageTransition] Entry animation complete');
+        // Verify we're actually entering the intro page with business card section
+        const businessCardSection = document.querySelector('#intro.business-card-section');
+        if (businessCardSection) {
+          // Play coyote paw entry animation (ONLY for home page / business card section)
+          console.log('[PageTransition] Entering intro (business card section), playing coyote paw entry animation');
+          await this.playIntroEntryAnimation();
+          console.log('[PageTransition] Coyote paw entry animation complete');
+        } else {
+          // Fallback: regular animation if business card section not found
+          console.log('[PageTransition] Business card section not found, using regular entry animation');
+          await this.animateIn(targetPage);
+        }
       } else {
         // Regular blur/fade animation for other pages
         console.log('[PageTransition] About to animate in:', pageId);
@@ -611,6 +633,8 @@ export class PageTransitionModule extends BaseModule {
 
   /**
    * Play the coyote paw exit animation when leaving the intro page
+   * NOTE: This animation is ONLY for the home page / business card section.
+   * It should NOT be used for any other pages or sections.
    */
   private async playIntroExitAnimation(): Promise<void> {
     try {
@@ -640,6 +664,8 @@ export class PageTransitionModule extends BaseModule {
 
   /**
    * Play the coyote paw entry animation when entering the intro page
+   * NOTE: This animation is ONLY for the home page / business card section.
+   * It should NOT be used for any other pages or sections.
    */
   private async playIntroEntryAnimation(): Promise<void> {
     try {
@@ -725,8 +751,10 @@ export class PageTransitionModule extends BaseModule {
 
     // Ensure page element is visible and on top during animation
     // This prevents it from being hidden by page-hidden class or other pages
+    // Use correct display value: grid for contact/about, block for others
+    const displayValue = (page.id === 'contact' || page.id === 'about') ? 'grid' : 'block';
     gsap.set(page.element, {
-      display: 'block',
+      display: displayValue,
       visibility: 'visible',
       zIndex: 200 // High z-index to ensure it's on top during fade out
     });
@@ -857,12 +885,13 @@ export class PageTransitionModule extends BaseModule {
     console.log('[PageTransition] animateIn - isMobile:', isMobile, 'useFadeOnly:', useFadeOnly);
 
     // Set initial state
-    // CSS handles display via .page-active class - don't set inline
-    // This ensures CSS rules persist even if clearProps is called
+    // For contact/about sections, set display: grid inline to ensure it's correct
+    // Other sections use CSS .page-active rules
+    const displayValue = (page.id === 'contact' || page.id === 'about') ? 'grid' : undefined;
     gsap.set(page.element, {
       opacity: 0,
-      visibility: 'visible'
-      // display is handled by CSS .page-active rules
+      visibility: 'visible',
+      ...(displayValue && { display: displayValue, minHeight: '100%' }) // Set grid and min-height for contact/about
     });
 
     // For fade-only: children start invisible AND blurred (blur on children works on mobile)
@@ -891,11 +920,12 @@ export class PageTransitionModule extends BaseModule {
             gsap.set(children, { filter: 'none', webkitFilter: 'none' });
           }
           // Ensure page element is fully visible after animation
-          // CSS handles display via .page-active class
+          // For contact/about, ensure display: grid and min-height are set
+          const finalDisplayValue = (page.id === 'contact' || page.id === 'about') ? 'grid' : undefined;
           gsap.set(page.element, {
             opacity: 1,
-            visibility: 'visible'
-            // display is handled by CSS .page-active rules
+            visibility: 'visible',
+            ...(finalDisplayValue && { display: finalDisplayValue, minHeight: '100%' }) // Ensure grid and min-height for contact/about
           });
           resolve();
         }

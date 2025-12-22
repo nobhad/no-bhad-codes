@@ -687,8 +687,13 @@ export class IntroAnimationModule extends BaseModule {
    *
    * @returns Promise that resolves when animation completes
    */
+  /**
+   * Play the coyote paw exit animation when leaving the home page / business card section
+   * NOTE: This animation is ONLY for the home page / business card section.
+   * It should NOT be used for any other pages or sections.
+   */
   async playExitAnimation(): Promise<void> {
-    console.log('[IntroAnimation] playExitAnimation called');
+    console.log('[IntroAnimation] playExitAnimation called - ONLY for home page / business card section');
 
     // Note: Mobile check removed - paw animation now works on both mobile and desktop
     // MobileIntroAnimationModule delegates to this method for the exit animation
@@ -1159,7 +1164,14 @@ export class IntroAnimationModule extends BaseModule {
    *
    * @returns Promise that resolves when animation completes
    */
+  /**
+   * Play the coyote paw entry animation when entering the home page / business card section
+   * NOTE: This animation is ONLY for the home page / business card section.
+   * It should NOT be used for any other pages or sections.
+   */
   async playEntryAnimation(): Promise<void> {
+    console.log('[IntroAnimation] playEntryAnimation called - ONLY for home page / business card section');
+    
     // Skip on mobile - no paw animation
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
     if (isMobile) {
