@@ -260,9 +260,20 @@ export class PageTransitionModule extends BaseModule {
   private setupEventListeners(): void {
     // Listen for router navigation events
     this.on('router:navigate', ((event: CustomEvent) => {
+      // Prevent loops - don't handle if already transitioning
+      if (this.isTransitioning) {
+        console.log('[PageTransition] router:navigate - already transitioning, ignoring');
+        return;
+      }
+      
       const { pageId } = event.detail || {};
       this.log(`Router navigate event received - pageId: ${pageId}, introComplete: ${this.introComplete}`);
       if (pageId && this.introComplete) {
+        // Skip if already on this page
+        if (pageId === this.currentPageId) {
+          console.log('[PageTransition] router:navigate - already on page, ignoring');
+          return;
+        }
         this.log(`Starting transition to: ${pageId}`);
         this.transitionTo(pageId);
       } else if (!this.introComplete) {
@@ -313,8 +324,19 @@ export class PageTransitionModule extends BaseModule {
         }
 
         const pageId = this.getPageIdFromHash(href);
-        console.log('[PageTransition] Nav link clicked:', href, '-> pageId:', pageId, 'introComplete:', this.introComplete);
+        console.log('[PageTransition] Nav link clicked:', href, '-> pageId:', pageId, 'introComplete:', this.introComplete, 'isTransitioning:', this.isTransitioning);
         this.log(`Nav link clicked: ${href} -> pageId: ${pageId}`);
+
+        // Prevent loops - don't navigate if already transitioning or already on page
+        if (this.isTransitioning) {
+          console.log('[PageTransition] Nav link click - already transitioning, ignoring');
+          return;
+        }
+        
+        if (pageId === this.currentPageId) {
+          console.log('[PageTransition] Nav link click - already on page, ignoring');
+          return;
+        }
 
         if (pageId) {
           // Update the URL hash
@@ -329,7 +351,9 @@ export class PageTransitionModule extends BaseModule {
             const checkIntro = setInterval(() => {
               if (this.introComplete) {
                 clearInterval(checkIntro);
-                this.transitionTo(pageId);
+                if (!this.isTransitioning && pageId !== this.currentPageId) {
+                  this.transitionTo(pageId);
+                }
               }
             }, 100);
             // Timeout after 3 seconds
@@ -347,6 +371,12 @@ export class PageTransitionModule extends BaseModule {
    */
   private handleHashChange(): void {
     if (!this.introComplete) return;
+    
+    // Prevent loops - don't handle hashchange if already transitioning
+    if (this.isTransitioning) {
+      console.log('[PageTransition] handleHashChange - already transitioning, ignoring');
+      return;
+    }
 
     const hash = window.location.hash;
     const pageId = this.getPageIdFromHash(hash);
@@ -926,7 +956,7 @@ export class PageTransitionModule extends BaseModule {
           }
           // Ensure page element is fully visible after animation
           const finalDisplayValue = page.id === 'contact' ? 'grid' : 'block';
-          gsap.set(page.element, { 
+          gsap.set(page.element, {
             display: finalDisplayValue,
             opacity: 1,
             visibility: 'visible'
