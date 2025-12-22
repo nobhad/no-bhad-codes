@@ -12,6 +12,13 @@
  */
 
 /* ============================================
+ * 0. FONT FACE DEFINITIONS (MUST BE FIRST)
+ * ============================================ */
+
+/* Font faces must be defined BEFORE any CSS references them */
+@import "./base/fonts.css";
+
+/* ============================================
  * 1. DESIGN SYSTEM FOUNDATION
  * ============================================ */
 

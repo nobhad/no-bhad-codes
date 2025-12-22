@@ -1,0 +1,37 @@
+/**
+ * ===============================================
+ * FONT FACE DEFINITIONS
+ * ===============================================
+ * @file src/styles/base/fonts.css
+ * 
+ * Font face declarations must be defined BEFORE
+ * any CSS that references them.
+ * 
+ * This file is imported FIRST in main.css to ensure
+ * fonts are available when design tokens reference them.
+ */
+
+/* ============================================
+ * ACME FONT
+ * ============================================ */
+
+@font-face {
+  font-family: "Acme";
+  src: url("/fonts/Acme/Acme-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap; /* Ensures font displays once loaded */
+}
+
+/* ============================================
+ * KC ACME HAND INKED FONT
+ * ============================================ */
+
+@font-face {
+  font-family: "KCAcmeHandInked";
+  src: url("/fonts/KCAcmeHand/KCSimpleSans-Inked.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap; /* Changed from optional to swap for consistency */
+}
+

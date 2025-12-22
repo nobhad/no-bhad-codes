@@ -75,6 +75,12 @@ main[data-virtual-pages] > section.contact-section.page-active {
   display: grid;
 }
 
+/* About section needs grid display when active - more specific selector */
+section.about-section.page-active,
+main[data-virtual-pages] > section.about-section.page-active {
+  display: grid !important;
+}
+
 /* About section scroll - ensure scrolling on mobile */
 @media screen and (max-width: 767px) {
   /* Force about section to be scrollable on mobile - highest specificity */
@@ -204,6 +210,14 @@ section.business-card-section.page-hidden .intro-nav {
     overflow: hidden;
     box-sizing: border-box;
     padding: clamp(1rem, 4vw, 2rem);
+  }
+
+  /* Ensure about section is visible when active - override page-hidden */
+  main[data-virtual-pages] > .about-section[data-page].page-active {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 
   /* Hero overlay - fills entire about section viewport */

@@ -12,27 +12,8 @@
  * FONT IMPORTS
  * ============================================ */
 
-/* Local font only - no external requests */
-
-/* ============================================
- * FONT FACE DEFINITIONS
- * ============================================ */
-
-@font-face {
-  font-family: "Acme";
-  src: url("/fonts/Acme/Acme-Regular.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: optional; /* Better CLS - font won't cause layout shift */
-}
-
-@font-face {
-  font-family: "KCAcmeHandInked";
-  src: url("/fonts/KCAcmeHand/KCSimpleSans-Inked.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: optional;
-}
+/* Font face definitions moved to fonts.css and imported first in main.css */
+/* This ensures @font-face is defined before design tokens reference fonts */
 
 /* ============================================
  * TYPOGRAPHY SCALE
