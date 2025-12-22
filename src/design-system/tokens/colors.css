@@ -16,8 +16,10 @@
   /* Brand Colors */
   --color-brand-primary: #dc2626; /* Crimson red for light mode */
   --color-brand-primary-rgb: 220, 38, 38;
-  --color-brand-secondary: #ff6b6b;
-  --color-brand-accent: #ffd93d;
+  --color-brand-secondary: #10b981; /* Green as secondary */
+  --color-brand-secondary-rgb: 16, 185, 129;
+  --color-brand-accent: #dc2626; /* Red as accent */
+  --color-brand-accent-rgb: 220, 38, 38;
 
   /* Neutral Palette - Gray Scale */
   --color-gray-50: #fafafa;
@@ -109,6 +111,10 @@ html[data-theme="dark"] {
   /* Brand Colors - Green for dark mode */
   --color-brand-primary: #00ff41; /* Green for dark mode */
   --color-brand-primary-rgb: 0, 255, 65;
+  --color-brand-secondary: #00ff41; /* Green as secondary */
+  --color-brand-secondary-rgb: 0, 255, 65;
+  --color-brand-accent: #dc2626; /* Red as accent */
+  --color-brand-accent-rgb: 220, 38, 38;
 
   /* Background Colors */
   --color-bg-primary: var(--color-gray-950);
@@ -200,6 +206,10 @@ html[data-theme="light"] {
   --color-dark: #333333;
   --color-primary: var(--color-brand-primary);
   --color-primary-rgb: var(--color-brand-primary-rgb);
+  --color-secondary: var(--color-brand-secondary);
+  --color-secondary-rgb: var(--color-brand-secondary-rgb);
+  --color-accent: var(--color-brand-accent);
+  --color-accent-rgb: var(--color-brand-accent-rgb);
   --color-border: #000000;
   --color-border-light: #e0e0e0;
   --color-shadow: rgba(0, 0, 0, 0.2);
@@ -310,6 +320,10 @@ html[data-theme="dark"] {
   --color-neutral-200: #3a3a3a;
   --color-neutral-800: #f0f0f0;
   --color-dark: #e0e0e0;
+  --color-secondary: var(--color-brand-secondary);
+  --color-secondary-rgb: var(--color-brand-secondary-rgb);
+  --color-accent: var(--color-brand-accent);
+  --color-accent-rgb: var(--color-brand-accent-rgb);
   --color-shadow: rgba(0, 0, 0, 1);
   --form-input-border: #e0e0e0;
   --form-input-placeholder: #999999;
