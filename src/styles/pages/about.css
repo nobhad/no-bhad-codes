@@ -69,6 +69,8 @@
     justify-content: center;
     align-items: flex-start;
     gap: 1rem;
+    /* Ensure content is vertically centered in viewport */
+    align-self: center;
   }
 
   /* Section heading - staggered entrance */
@@ -96,7 +98,7 @@
 
   /* About text wrapper - staggered paragraphs */
   .about-text-wrapper {
-    margin-bottom: 1rem;
+    margin-bottom: 0; /* Remove bottom margin - tech stack has its own margin-top */
   }
 
   /* Paragraph wrapper for drop animation */
@@ -139,9 +141,20 @@
     margin-bottom: 1rem;
   }
 
+  /* Remove bottom margin from last paragraph in text wrapper */
+  .about-text-wrapper p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Remove bottom margin from last element in about-content */
+  .about-content > *:last-child {
+    margin-bottom: 0;
+  }
+
   /* Tech stack viewport */
   .tech-stack-viewport {
     margin-top: 0.5rem;
+    margin-bottom: 0; /* Remove any bottom margin */
     width: 100%;
   }
 

@@ -666,20 +666,20 @@ html[data-theme="light"] .terminal-intake {
   width: 150px;
   height: auto;
   display: block;
-  /* Filter applied per-path below to allow eye to remain terminal bg color */
 }
 
-/* Inline SVG path styling for line-by-line animation */
-/* Body paths get inverted via filter to appear white */
-svg.terminal-avatar-img path.st0 {
-  fill: #231f20;
-  filter: brightness(0) invert(1) brightness(0.8) contrast(1.1);
+/* Target image elements within the SVG - apply light color filter to make them light (not black) */
+svg.terminal-avatar-img image {
+  filter: brightness(0) invert(1) brightness(0.9);
 }
 
-/* Eye paths - terminal bg color, NO filter inversion */
-svg.terminal-avatar-img path.st2 {
-  fill: var(--color-terminal-bg-panel);
-  filter: none;
+/* Eye image - style it to match terminal bg color */
+/* Terminal bg is #0a0a0a (very dark, almost black) */
+/* Make the eye image appear as this color by making it black */
+svg.terminal-avatar-img image.eye-image {
+  filter: brightness(0);
+  /* The terminal bg is so dark that black is close enough */
+  /* If exact match needed, we'd need a more complex filter, but this should work */
 }
 
 /* Grainy overlay - only on the avatar SVG */

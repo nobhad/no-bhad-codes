@@ -4,6 +4,50 @@
 
 ## Recent Updates (December 22, 2025)
 
+### Coyote Paw Animation Scope and Entry Animation Fix - COMPLETE
+
+Fixed coyote paw intro/exit animations to only play on home page and fixed entry animation not playing when navigating to home.
+
+**Completed:**
+
+1. **Scoped Coyote Paw Animations to Home Page Only**
+   - ✅ Added explicit documentation that animations are ONLY for home page / business card section
+   - ✅ Removed unnecessary element checks that were preventing animations
+   - ✅ Simplified logic: if `pageId === 'intro'`, play coyote paw animation
+   - ✅ Added clear comments in page-transition.ts, intro-animation.ts, and intro-animation-mobile.ts
+
+2. **Fixed Entry Animation Not Playing**
+   - ✅ Fixed entry animation to ensure overlay is accessible (removes `hidden` class)
+   - ✅ Creates SVG element if it doesn't exist during entry animation
+   - ✅ Added better console logging for debugging entry animation issues
+   - ✅ Ensures overlay is visible before attempting animation
+
+3. **Fixed Overlay Z-Index**
+   - ✅ Changed overlay z-index from 9999 to 50
+   - ✅ Overlay now appears above main content but below navigation (nav is 100)
+   - ✅ Matches design system z-index tokens
+
+**Files Modified:**
+- `src/modules/animation/page-transition.ts` - Simplified entry/exit logic, added logging, removed unnecessary checks
+- `src/modules/animation/intro-animation.ts` - Fixed entry animation to ensure overlay accessible, create SVG if missing
+- `src/modules/animation/intro-animation-mobile.ts` - Added documentation about scope
+- `src/styles/components/intro-morph.css` - Changed z-index from 9999 to 50
+
+**Commits:**
+- `1d2968f` - refactor: scope coyote paw animations to home page only
+- `774afe2` - fix: ensure coyote paw entry animation works and fix overlay z-index
+
+**Result:**
+- ✅ Coyote paw animations only play on home page / business card section
+- ✅ Entry animation works when navigating to home page
+- ✅ Overlay positioned correctly (above content, below nav)
+- ✅ Better debugging with console logs
+- ✅ Clear documentation about animation scope
+
+---
+
+## Recent Updates (December 22, 2025)
+
 ### Font Loading and Section Visibility Fixes - COMPLETE
 
 Fixed Acme font not displaying and resolved about/contact sections not being visible.

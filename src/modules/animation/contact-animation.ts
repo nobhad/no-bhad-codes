@@ -479,14 +479,25 @@ export class ContactAnimationModule extends BaseModule {
     this.timeline.pause();
     this.log(`Timeline paused - progress: ${this.timeline.progress()}, paused: ${this.timeline.paused()}`);
 
-    // Listen for PageHeroModule reveal event - this fires after hero animation completes
-    this.on('PageHeroModule:revealed', ((event: CustomEvent) => {
-      const { pageId } = event.detail || {};
-      this.log(`Hero revealed event received - pageId: ${pageId}`);
-
-      if (pageId === 'contact') {
-        this.log('Contact hero revealed - playing form animation');
-        this.playFormAnimation();
+    // Listen for page transition completion - this fires after blur/fade animation completes
+    // Form animations should start AFTER the page transition blur animation ends
+    this.on('PageTransitionModule:contact-page-ready', (() => {
+      this.log('Contact page blur animation complete - starting form animations');
+      this.playFormAnimation();
+    }) as EventListener);
+    
+    // Fallback: Also listen for page-changed event and wait a bit for blur to complete
+    // This handles cases where the event might not fire
+    this.on('PageTransitionModule:page-changed', ((event: CustomEvent) => {
+      const { to } = event.detail || {};
+      if (to === 'contact') {
+        // Wait for blur animation to complete (fade: 0.6s + pause: 0.4s + blur clear: 0.7s = ~1.7s)
+        setTimeout(() => {
+          if (!this.timeline?.isActive()) {
+            this.log('Fallback: Contact page ready - starting form animations');
+            this.playFormAnimation();
+          }
+        }, 1800); // Slightly longer than blur animation duration
       }
     }) as EventListener);
 
@@ -512,19 +523,19 @@ export class ContactAnimationModule extends BaseModule {
     // Also check if we're already on contact page (direct navigation)
     const currentHash = window.location.hash;
     if (currentHash === '#/contact' || currentHash === '#contact') {
-      this.log('Already on contact page - waiting for hero reveal');
+      this.log('Already on contact page - waiting for blur animation to complete');
       // Reset animated elements to initial state for animation
       this.resetAnimatedElements();
-      // Fallback: if hero doesn't reveal in 5 seconds, play form anyway
+      // Fallback: if blur animation doesn't complete, play form anyway after delay
       setTimeout(() => {
         if (!this.timeline?.isActive()) {
-          this.log('Fallback: hero reveal timeout - playing form animation');
+          this.log('Fallback: Contact page ready timeout - playing form animation');
           this.playFormAnimation();
         }
-      }, 5000);
+      }, 2000); // Wait for blur animation (fade: 0.6s + pause: 0.4s + blur clear: 0.7s = ~1.7s)
     }
 
-    this.log('Contact animation initialized (waiting for hero reveal)');
+    this.log('Contact animation initialized (waiting for blur animation to complete)');
   }
 
   /**

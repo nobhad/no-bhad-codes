@@ -33,7 +33,7 @@
   left: 0;
   width: 100vw;
   height: calc(100vh - var(--header-height) - var(--footer-height));
-  z-index: 500; /* Below header/footer (10000) but above content */
+  z-index: 50; /* Above main content (1) but below nav (100) */
   background-color: var(--color-neutral-300);
   opacity: 0;
   visibility: hidden;
@@ -90,14 +90,15 @@ section.about-section.page-active {
   z-index: 100;
 }
 
-/* Ensure virtual pages sections are visible when active - even higher specificity */
-main[data-virtual-pages] > section.contact-section.page-active,
-main[data-virtual-pages] > section.about-section.page-active {
-  display: grid;
-  visibility: visible;
-  opacity: 1;
-  pointer-events: auto;
-}
+  /* Ensure virtual pages sections are visible when active - even higher specificity */
+  main[data-virtual-pages] > section.contact-section.page-active,
+  main[data-virtual-pages] > section.about-section.page-active {
+    display: grid;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 100; /* Ensure active page is on top */
+  }
 
 /* About section scroll - ensure scrolling on mobile */
 @media screen and (max-width: 767px) {
@@ -165,7 +166,24 @@ section.business-card-section.page-hidden .intro-nav {
   }
 
   /* Virtual page sections - card centered, nav positioned absolutely */
-  main[data-virtual-pages] > section[data-page]:not(.tech-stack-section):not(.contact-section):not(.about-section):not(.business-card-section) {
+  /* Projects section - left aligned like about section */
+  main[data-virtual-pages] > .projects-section[data-page].page-active {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start; /* Left align like about section */
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: clamp(1rem, 4vw, 2rem);
+  }
+
+  /* Other virtual page sections - centered */
+  main[data-virtual-pages] > section[data-page]:not(.tech-stack-section):not(.contact-section):not(.about-section):not(.business-card-section):not(.projects-section) {
     position: absolute;
     top: 0;
     left: 0;
@@ -216,7 +234,7 @@ section.business-card-section.page-hidden .intro-nav {
     cursor: pointer;
   }
 
-  /* About section - grid centered for content, hero is overlay */
+  /* About section - grid centered for content */
   /* Only applies when page-active (not page-hidden) */
   main[data-virtual-pages] > .about-section[data-page].page-active {
     position: absolute;
@@ -235,40 +253,13 @@ section.business-card-section.page-hidden .intro-nav {
     pointer-events: auto;
   }
 
-  /* Hero overlay - fills entire about section viewport */
-  main[data-virtual-pages] > .about-section .about-hero-desktop {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: var(--color-neutral-300);
-    z-index: 10;
-    cursor: default;
-  }
-
-  /* Hero revealed state */
-  main[data-virtual-pages] > .about-section .about-hero-desktop.hero-revealed {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  /* Text animation SVG in hero - large and centered */
-  main[data-virtual-pages] > .about-section .about-hero-desktop .text-animation-svg {
-    width: 90%;
-    max-width: 1200px;
-    height: auto;
-    max-height: 80vh;
-  }
-
   /* About content centered in viewport */
   main[data-virtual-pages] > .about-section .about-content {
     max-width: min(1000px, 90vw);
     overflow: hidden;
+    /* Ensure content is centered vertically within the grid */
+    align-self: center;
+    justify-self: center;
   }
 
   /* Contact section - uses CSS Grid for proper h2/form alignment */
@@ -301,11 +292,6 @@ section.business-card-section.page-hidden .intro-nav {
     display: none !important;
   }
 
-  /* Ensure about-hero is hidden when about section is hidden */
-  section.page-hidden .about-hero-desktop {
-    display: none !important;
-    visibility: hidden !important;
-  }
 
   /* Page content wrapper for animations */
   section[data-page] > * {

@@ -56,7 +56,7 @@
  * │   - Header/nav stays visible during exit (overlay below header) │
  * │   - Nav links fade immediately on click (0.15s)                 │
  * │   - SVG is cached after intro to eliminate fetch delay          │
- * │   - about-hero-desktop hidden to prevent text showing through   │
+ * │   - Page content hidden during exit animation                    │
  * │   - Uses intro-morph-overlay, NOT page-transition-overlay       │
  * ├─────────────────────────────────────────────────────────────────┤
  * │ Phase 1: PAW ENTERS (0.8s)                                      │
@@ -930,11 +930,6 @@ export class IntroAnimationModule extends BaseModule {
       console.log('[IntroAnimation] Hiding business card (covered by animated card)');
       businessCard.style.opacity = '0';
 
-      // Hide about-hero-desktop so its text doesn't show through during exit
-      const aboutHero = document.querySelector('.about-hero-desktop') as HTMLElement;
-      if (aboutHero) {
-        aboutHero.style.visibility = 'hidden';
-      }
 
       // Get finger paths for morphing
       const fingerA3 = clonedPos3.querySelector(`#${SVG_ELEMENT_IDS.fingerA3}`) as SVGPathElement;
@@ -990,11 +985,6 @@ export class IntroAnimationModule extends BaseModule {
           if (this.morphOverlay) {
             this.morphOverlay.style.visibility = 'hidden';
             this.morphOverlay.style.pointerEvents = 'none';
-          }
-          // Restore about-hero-desktop visibility
-          const aboutHeroEl = document.querySelector('.about-hero-desktop') as HTMLElement;
-          if (aboutHeroEl) {
-            aboutHeroEl.style.visibility = '';
           }
           // Remove paw-exit class and restore intro-complete
           document.documentElement.classList.remove('paw-exit');
@@ -1213,7 +1203,7 @@ export class IntroAnimationModule extends BaseModule {
 
     // Ensure overlay is accessible (remove hidden class if present)
     this.morphOverlay.classList.remove('hidden');
-    
+
     // If SVG doesn't exist inside overlay, create it
     if (!morphSvg) {
       console.log('[IntroAnimation] SVG not found in overlay, creating it');
@@ -1225,7 +1215,7 @@ export class IntroAnimationModule extends BaseModule {
       morphSvg.setAttribute('class', 'intro-morph-svg');
       this.morphOverlay.appendChild(morphSvg);
     }
-    
+
     console.log('[IntroAnimation] Overlay and SVG found, proceeding with entry animation');
 
     // Get business card for alignment

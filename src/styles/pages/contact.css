@@ -768,6 +768,7 @@ html[data-theme="dark"] .submit-button:focus-visible {
 }
 
 /* Temporary field error popup - fixed position, outside layout */
+/* Z-index: Above content but below nav (nav is 100) */
 .field-error-popup {
   position: fixed;
   background-color: var(--color-danger, #ef4444);
@@ -776,7 +777,7 @@ html[data-theme="dark"] .submit-button:focus-visible {
   border-radius: 4px;
   font-size: 0.875rem;
   font-weight: 600;
-  z-index: 9999;
+  z-index: 50; /* Above main content (1) but below nav (100) */
   pointer-events: none;
   white-space: nowrap;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);

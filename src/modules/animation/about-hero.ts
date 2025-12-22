@@ -21,6 +21,7 @@
 import { BaseHeroAnimation } from './base-hero-animation';
 import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
+import { showAvatarIntro } from '../../features/client/terminal-intake-ui';
 
 interface AboutHeroOptions extends ModuleOptions {
   /** Selector for the hero container */
@@ -82,6 +83,7 @@ export class AboutHeroModule extends BaseHeroAnimation {
     if (this.hero && this.svg) {
       this.setupAnimation();
       this.setupEventListeners();
+      this.setupAvatar();
     }
 
     this.log('About hero module initialized');
@@ -142,6 +144,34 @@ export class AboutHeroModule extends BaseHeroAnimation {
     this.textTimeline = textTimeline;
 
     this.log('Animation timelines setup complete');
+  }
+
+  /**
+   * Setup terminal avatar in hero section
+   */
+  private async setupAvatar(): Promise<void> {
+    if (!this.hero) return;
+
+    // Create a container for the avatar if it doesn't exist
+    let avatarContainer = this.hero.querySelector('.about-hero-avatar') as HTMLElement;
+    if (!avatarContainer) {
+      avatarContainer = document.createElement('div');
+      avatarContainer.className = 'about-hero-avatar';
+      avatarContainer.style.cssText = `
+        position: absolute;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      `;
+      this.hero.appendChild(avatarContainer);
+    }
+
+    // Show the terminal avatar using the same function from terminal intake
+    await showAvatarIntro(avatarContainer);
   }
 
   /**

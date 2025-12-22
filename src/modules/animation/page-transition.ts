@@ -25,7 +25,7 @@ const ANIMATION_DURATION_IN = ANIMATION_CONSTANTS.DURATIONS.STANDARD_LENGTH; // 
 const ANIMATION_DURATION_OUT = ANIMATION_CONSTANTS.DURATIONS.NORMAL; // 0.3s (faster exit)
 const STAGGER_DELAY = 0.1;
 const EASE_CURVE = ANIMATION_CONSTANTS.EASING.SMOOTH_SAL; // cubic-bezier(0.3, 0.9, 0.3, 0.9)
-const BLUR_AMOUNT = 15; // pixels - increased for visibility
+const BLUR_AMOUNT = 20; // pixels - visible blur effect during fade animations
 
 interface PageConfig {
   id: string;
@@ -129,8 +129,7 @@ export class PageTransitionModule extends BaseModule {
         id: 'about',
         route: '#/about',
         title: 'About - No Bhad Codes',
-        // Note: .about-hero-desktop is an overlay animated separately by AboutHeroModule
-        // Animate .about-content as single unit (includes tech-stack-desktop)
+        // Animate .about-content as single unit (same pattern as projects and contact pages)
         childSelectors: ['.about-content'],
         useFadeOnly: true
       },
@@ -138,7 +137,8 @@ export class PageTransitionModule extends BaseModule {
         id: 'projects',
         route: '#/projects',
         title: 'Projects - No Bhad Codes',
-        childSelectors: ['.projects-content', 'h2', '.wip-sign-container', '.wip-sign'],
+        // Animate .projects-content as single unit (same pattern as about page)
+        childSelectors: ['.projects-content'],
         useFadeOnly: true
       },
       {
@@ -152,8 +152,7 @@ export class PageTransitionModule extends BaseModule {
         id: 'contact',
         route: '#/contact',
         title: 'Contact - No Bhad Codes',
-        // Only animate .contact-content wrapper (contains h2 and form)
-        // Don't select form separately to avoid double-blur on inputs
+        // Animate .contact-content as single unit (same pattern as about and projects pages)
         childSelectors: ['.contact-content'],
         useFadeOnly: true
       }
@@ -558,6 +557,23 @@ export class PageTransitionModule extends BaseModule {
           opacity: 0, // Will be animated to 1 in animateIn
           ...(displayValue && { display: displayValue }) // Only set if contact/about
         });
+
+        // Set initial blur state on children IMMEDIATELY (before animateIn)
+        // This ensures content is blurred from the start, matching about page behavior
+        if (targetPage.useFadeOnly) {
+          const children = this.getAnimatableChildren(targetPage);
+          console.log(`[PageTransition] Setting initial blur on ${children.length} children for page: ${pageId}`);
+          if (children.length > 0) {
+            gsap.set(children, {
+              opacity: 0,
+              filter: `blur(${BLUR_AMOUNT}px)`,
+              webkitFilter: `blur(${BLUR_AMOUNT}px)` // Safari compatibility
+            });
+            console.log(`[PageTransition] Initial blur set: opacity=0, blur=${BLUR_AMOUNT}px`);
+          } else {
+            console.warn(`[PageTransition] No children found for page: ${pageId}, selectors:`, targetPage.childSelectors);
+          }
+        }
       } else if (targetPage && targetPage.element) {
         // For intro, keep page-hidden class - entry animation will remove it
         // This prevents any flash from CSS page-active visibility rules
@@ -679,7 +695,7 @@ export class PageTransitionModule extends BaseModule {
       const introModule = await container.resolve('IntroAnimationModule') as IntroAnimationModule;
       console.log('[PageTransition] IntroAnimationModule resolved:', introModule);
       console.log('[PageTransition] Has playEntryAnimation:', typeof introModule?.playEntryAnimation);
-      
+
       if (introModule && typeof introModule.playEntryAnimation === 'function') {
         console.log('[PageTransition] >>> CALLING playEntryAnimation NOW <<<');
         this.log('Playing intro entry animation');
@@ -739,6 +755,16 @@ export class PageTransitionModule extends BaseModule {
     staggerItems.forEach(item => item.classList.add('leaving'));
 
     const children = this.getAnimatableChildren(page);
+
+    // Ensure children start in correct state (visible, no blur) before exit animation
+    // This ensures the reverse animation (blur then fade) works correctly
+    if (children.length > 0 && useFadeOnly) {
+      gsap.set(children, {
+        opacity: 1,
+        filter: 'blur(0px)',
+        webkitFilter: 'blur(0px)'
+      });
+    }
 
     // Ensure page element is visible and on top during animation
     // This prevents it from being hidden by page-hidden class or other pages
@@ -918,6 +944,14 @@ export class PageTransitionModule extends BaseModule {
             visibility: 'visible',
             ...(finalDisplayValue && { display: finalDisplayValue, minHeight: '100%' }) // Ensure grid and min-height for contact/about
           });
+          
+          // Dispatch event when contact page blur animation completes
+          // This allows ContactAnimationModule to start form animations
+          if (page.id === 'contact') {
+            this.dispatchEvent('contact-page-ready', { pageId: page.id });
+            console.log('[PageTransition] Contact page blur animation complete - form animations can start');
+          }
+          
           resolve();
         }
       });
@@ -964,22 +998,24 @@ export class PageTransitionModule extends BaseModule {
           } else {
             // Desktop or intro: original timing
             // Step 1: Fade in children while KEEPING blur (blur visible during fade)
+            // Content becomes visible (opacity 0→1) while blurred, so blur is visible
             tl.to(children, {
               opacity: 1,
               // Keep blur at BLUR_AMOUNT - don't change it yet
-              duration: 0.4,
+              // Blur is visible because opacity is > 0
+              duration: 0.6, // Longer fade to see blur effect clearly
               stagger: STAGGER_DELAY,
               ease: 'power2.out'
             }, 0);
 
-            // Step 2: Brief pause - blur lingers after fade complete
-            tl.to({}, { duration: 0.3 });
+            // Step 2: Pause - blur lingers after fade complete (blur is fully visible here)
+            tl.to({}, { duration: 0.4 }); // Longer pause to see the blur
 
             // Step 3: NOW remove the blur (content comes into focus)
             tl.to(children, {
               filter: 'blur(0px)',
               webkitFilter: 'blur(0px)',
-              duration: 0.5,
+              duration: 0.7, // Longer blur clear to make it more noticeable
               stagger: STAGGER_DELAY * 0.5,
               ease: 'power2.out'
             });

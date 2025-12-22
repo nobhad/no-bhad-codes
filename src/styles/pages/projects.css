@@ -476,7 +476,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start; /* Left align content like about section */
   padding: 2rem;
   box-sizing: border-box;
   overflow-y: auto;
@@ -484,11 +484,11 @@
   gap: 2rem;
 }
 
-/* Projects content wrapper */
+/* Projects content wrapper - matches about-content alignment */
 .projects-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start; /* Match about-content - left align content */
   justify-content: center;
   gap: 2rem;
   max-width: 1400px;
@@ -496,16 +496,18 @@
   padding: 1rem;
 }
 
-/* Projects heading */
+/* Projects heading - matches about section h2 styling */
+/* Desktop: uses base typography.css h2 size */
 .projects-section h2 {
-  font-family: var(--font-family-acme);
-  font-size: clamp(2.5rem, 8vw, 5rem);
-  font-weight: 400;
+  font-family: var(--font--acme);
+  font-size: clamp(1.5rem, 4vw, 3rem); /* Match base h2 from typography.css */
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
   text-align: left;
-  margin: 0;
+  width: 100%;
   letter-spacing: 0.10em;
   color: var(--color-text-primary);
-  flex-shrink: 0;
 }
 
 /* WIP sign container */
@@ -579,9 +581,19 @@
   }
 }
 
+/* Mobile: match about section h2 size from mobile/layout.css */
+@media screen and (max-width: 767px) {
+  .projects-section h2 {
+    font-size: clamp(2.5rem, 10vw, 4rem) !important;
+    font-family: var(--font--acme) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+  }
+}
+
 @media screen and (max-width: 479px) {
   .projects-section h2 {
-    font-size: clamp(2rem, 10vw, 3rem);
+    font-size: clamp(2.5rem, 10vw, 4rem) !important;
   }
 
   .projects-content {
