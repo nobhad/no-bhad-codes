@@ -516,22 +516,13 @@ export class PageTransitionModule extends BaseModule {
 
     try {
       // Step 1: Animate out current page
-      // COYOTE PAW ANIMATION: ONLY for home page / business card section
+      // COYOTE PAW ANIMATION: ONLY for home page / business card section (intro page)
       if (this.currentPageId === 'intro') {
-        // Verify we're actually on the intro page with business card section
-        const businessCardSection = document.querySelector('#intro.business-card-section');
-        if (businessCardSection) {
-          // Play coyote paw exit animation (ONLY for home page / business card section)
-          console.log('[PageTransition] Leaving intro (business card section), playing coyote paw exit animation');
-          await this.playIntroExitAnimation();
-          console.log('[PageTransition] Coyote paw exit animation complete');
-        } else {
-          // Fallback: regular animation if business card section not found
-          console.log('[PageTransition] Business card section not found, using regular exit animation');
-          if (currentPage && currentPage.element) {
-            await this.animateOut(currentPage);
-          }
-        }
+        // Play coyote paw exit animation (ONLY for home page / business card section)
+        // The intro page IS the home page with business card section
+        console.log('[PageTransition] Leaving intro (home page / business card section), playing coyote paw exit animation');
+        await this.playIntroExitAnimation();
+        console.log('[PageTransition] Coyote paw exit animation complete');
       } else if (currentPage && currentPage.element) {
         // Blur out non-intro pages
         console.log('[PageTransition] Animating out current page:', this.currentPageId);
@@ -581,20 +572,13 @@ export class PageTransitionModule extends BaseModule {
       }
 
       // Animate in target page
-      // COYOTE PAW ANIMATION: ONLY for home page / business card section
+      // COYOTE PAW ANIMATION: ONLY for home page / business card section (intro page)
       if (pageId === 'intro') {
-        // Verify we're actually entering the intro page with business card section
-        const businessCardSection = document.querySelector('#intro.business-card-section');
-        if (businessCardSection) {
-          // Play coyote paw entry animation (ONLY for home page / business card section)
-          console.log('[PageTransition] Entering intro (business card section), playing coyote paw entry animation');
-          await this.playIntroEntryAnimation();
-          console.log('[PageTransition] Coyote paw entry animation complete');
-        } else {
-          // Fallback: regular animation if business card section not found
-          console.log('[PageTransition] Business card section not found, using regular entry animation');
-          await this.animateIn(targetPage);
-        }
+        // Play coyote paw entry animation (ONLY for home page / business card section)
+        // The intro page IS the home page with business card section
+        console.log('[PageTransition] Entering intro (home page / business card section), playing coyote paw entry animation');
+        await this.playIntroEntryAnimation();
+        console.log('[PageTransition] Coyote paw entry animation complete');
       } else {
         // Regular blur/fade animation for other pages
         console.log('[PageTransition] About to animate in:', pageId);
@@ -691,13 +675,19 @@ export class PageTransitionModule extends BaseModule {
         await new Promise(resolve => requestAnimationFrame(resolve));
       }
 
+      console.log('[PageTransition] Resolving IntroAnimationModule for entry animation');
       const introModule = await container.resolve('IntroAnimationModule') as IntroAnimationModule;
+      console.log('[PageTransition] IntroAnimationModule resolved:', introModule);
+      console.log('[PageTransition] Has playEntryAnimation:', typeof introModule?.playEntryAnimation);
+      
       if (introModule && typeof introModule.playEntryAnimation === 'function') {
+        console.log('[PageTransition] >>> CALLING playEntryAnimation NOW <<<');
         this.log('Playing intro entry animation');
         await introModule.playEntryAnimation();
+        console.log('[PageTransition] >>> playEntryAnimation FINISHED <<<');
         this.log('Intro entry animation complete');
       } else {
-        // Fallback: just show the card and nav
+        console.log('[PageTransition] playEntryAnimation not available, showing card directly');
         this.log('playEntryAnimation not available, showing card directly');
         const businessCard = document.getElementById('business-card');
         const introNav = document.querySelector('.intro-nav') as HTMLElement;
@@ -705,6 +695,7 @@ export class PageTransitionModule extends BaseModule {
         if (introNav) introNav.style.opacity = '1';
       }
     } catch (error) {
+      console.error('[PageTransition] IntroAnimationModule not available for entry animation:', error);
       this.log('IntroAnimationModule not available for entry animation:', error);
       // Fallback: just show the card and nav
       const businessCard = document.getElementById('business-card');

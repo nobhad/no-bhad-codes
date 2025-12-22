@@ -1171,7 +1171,7 @@ export class IntroAnimationModule extends BaseModule {
    */
   async playEntryAnimation(): Promise<void> {
     console.log('[IntroAnimation] playEntryAnimation called - ONLY for home page / business card section');
-    
+
     // Skip on mobile - no paw animation
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
     if (isMobile) {
@@ -1198,9 +1198,11 @@ export class IntroAnimationModule extends BaseModule {
 
     // Get overlay and SVG elements
     this.morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
-    const morphSvg = document.getElementById(DOM_ELEMENT_IDS.morphSvg) as SVGSVGElement | null;
+    let morphSvg = document.getElementById(DOM_ELEMENT_IDS.morphSvg) as SVGSVGElement | null;
 
-    if (!this.morphOverlay || !morphSvg) {
+    // If overlay doesn't exist, we can't play the animation
+    if (!this.morphOverlay) {
+      console.log('[IntroAnimation] Morph overlay not found, showing card directly');
       this.log('Morph overlay not found, showing card directly');
       const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
       const introNav = document.querySelector('.intro-nav') as HTMLElement;
@@ -1208,6 +1210,23 @@ export class IntroAnimationModule extends BaseModule {
       if (introNav) introNav.style.opacity = '1';
       return;
     }
+
+    // Ensure overlay is accessible (remove hidden class if present)
+    this.morphOverlay.classList.remove('hidden');
+    
+    // If SVG doesn't exist inside overlay, create it
+    if (!morphSvg) {
+      console.log('[IntroAnimation] SVG not found in overlay, creating it');
+      this.log('SVG not found in overlay, creating it');
+      morphSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      morphSvg.setAttribute('id', DOM_ELEMENT_IDS.morphSvg);
+      morphSvg.setAttribute('width', '100%');
+      morphSvg.setAttribute('height', '100%');
+      morphSvg.setAttribute('class', 'intro-morph-svg');
+      this.morphOverlay.appendChild(morphSvg);
+    }
+    
+    console.log('[IntroAnimation] Overlay and SVG found, proceeding with entry animation');
 
     // Get business card for alignment
     const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
