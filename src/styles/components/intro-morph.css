@@ -4,13 +4,13 @@
  * Uses GSAP MorphSVG for paw-to-paw morphing with aligned business card
  */
 
-/* Intro Morph Overlay - Covers full viewport during intro animation */
+/* Intro Morph Overlay - Covers main area only (below header, above footer) */
 .intro-morph-overlay {
   position: fixed;
-  top: 0;
+  top: var(--header-height);
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: calc(100vh - var(--header-height) - var(--footer-height));
   z-index: 9999;
   background-color: var(--color-neutral-300);
   display: flex;
@@ -30,10 +30,10 @@
   visibility: hidden;
 }
 
-/* During paw exit animation - position below header so header stays visible */
+/* During paw exit animation - same positioning as default (main area only) */
 .paw-exit .intro-morph-overlay {
   top: var(--header-height);
-  height: calc(100vh - var(--header-height));
+  height: calc(100vh - var(--header-height) - var(--footer-height));
 }
 
 /* Hidden state for when animation hasn't started or is skipped */

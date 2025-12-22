@@ -108,9 +108,9 @@
  * ============================================ */
 
 html[data-theme="dark"] {
-  /* Brand Colors - Red as primary, Green as secondary */
-  --color-brand-primary: #dc2626; /* Red as primary in dark mode */
-  --color-brand-primary-rgb: 220, 38, 38;
+  /* Brand Colors - Green for dark mode */
+  --color-brand-primary: #00ff41; /* Green for dark mode */
+  --color-brand-primary-rgb: 0, 255, 65;
   --color-brand-secondary: #00ff41; /* Green as secondary */
   --color-brand-secondary-rgb: 0, 255, 65;
   --color-brand-accent: #dc2626; /* Red as accent */
@@ -147,15 +147,15 @@ html[data-theme="dark"] {
   --color-border-secondary: var(--color-gray-800);
   --color-border-tertiary: var(--color-gray-900);
 
-  /* Interactive Colors - Red as primary in dark mode */
+  /* Interactive Colors - Green for dark mode */
   --color-interactive-primary: var(--color-brand-primary);
-  --color-interactive-primary-hover: #b91c1c; /* Darker red for hover */
-  --color-interactive-primary-active: #991b1b; /* Even darker red for active */
+  --color-interactive-primary-hover: #00cc33; /* Darker green for hover */
+  --color-interactive-primary-active: #00aa2a; /* Even darker green for active */
 
   /* State Colors */
   --color-state-hover: rgba(255, 255, 255, 0.05);
   --color-state-active: rgba(255, 255, 255, 0.1);
-  --color-state-selected: rgba(220, 38, 38, 0.2); /* Red for dark mode */
+  --color-state-selected: rgba(0, 255, 65, 0.2);
 
   /* Shadow Colors */
   --color-shadow-sm: rgba(0, 0, 0, 0.2);

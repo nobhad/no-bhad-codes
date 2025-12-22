@@ -1,10 +1,10 @@
 /* Footer Component */
 
 .footer {
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   height: var(--footer-height, 40px);
   background: var(--color-neutral-300);
   padding: var(--spacing-sm) 0;
@@ -12,12 +12,21 @@
   color: var(--color-dark);
   text-align: center;
   z-index: 50; /* Below nav (100) so nav menu appears above footer */
-  display: flex !important;
+  display: flex;
   align-items: center;
   justify-content: center;
-  /* Override intro-loading hide - footer should always be visible */
-  opacity: 1 !important;
-  visibility: visible !important;
+  /* Base visibility - always visible by default */
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Ensure footer stays visible during intro states */
+.intro-loading .footer,
+.intro-complete .footer,
+.intro-complete.intro-finished .footer,
+.paw-exit .footer {
+  opacity: 1;
+  visibility: visible;
 }
 
 .footer-text {
@@ -33,11 +42,11 @@
 /* Mobile: Footer stays fixed at bottom for scroll snap layout */
 @media (max-width: 767px) {
   .footer {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
     z-index: 50; /* Below nav (100) so nav menu appears above footer */
-    background: transparent !important;
+    background: transparent;
   }
 }

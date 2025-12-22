@@ -453,43 +453,23 @@ export class IntroAnimationModule extends BaseModule {
   /**
    * Animate header content fading in
    *
-   * Uses a proxy object to animate opacity across all header children,
-   * then removes inline styles to restore CSS control.
+   * NOTE: Header is now kept visible during animations - no hiding/fading
+   * This method ensures any inline styles that might hide the header are removed.
    *
    * @param header - The header element to animate
    */
   private animateHeaderIn(header: HTMLElement): void {
     const headerChildren = header.children;
 
-    // Set initial state - invisible but in layout
+    // Keep header visible - remove any inline styles that might hide it
     Array.from(headerChildren).forEach((child) => {
-      (child as HTMLElement).style.setProperty('opacity', '0', 'important');
-      (child as HTMLElement).style.setProperty('visibility', 'visible', 'important');
+      (child as HTMLElement).style.removeProperty('opacity');
+      (child as HTMLElement).style.removeProperty('visibility');
     });
 
-    // Animate using a proxy object for clean updates
-    const proxy = { opacity: 0 };
-    gsap.to(proxy, {
-      opacity: 1,
-      duration: 1.0,
-      ease: 'power2.out',
-      onUpdate: () => {
-        Array.from(headerChildren).forEach((child) => {
-          (child as HTMLElement).style.setProperty(
-            'opacity',
-            String(proxy.opacity),
-            'important'
-          );
-        });
-      },
-      onComplete: () => {
-        // Remove inline styles to restore CSS control
-        Array.from(headerChildren).forEach((child) => {
-          (child as HTMLElement).style.removeProperty('opacity');
-          (child as HTMLElement).style.removeProperty('visibility');
-        });
-      }
-    });
+    // Also ensure header itself is visible
+    header.style.removeProperty('opacity');
+    header.style.removeProperty('visibility');
   }
 
   /**

@@ -60,25 +60,34 @@ section.page-hidden {
   z-index: 1;
 }
 
-/* Active page state */
-section.page-active {
-  display: block !important; /* Override page-hidden's display: none !important */
-  visibility: visible !important;
-  pointer-events: auto !important;
-  opacity: 1 !important; /* Override page-hidden's opacity: 0 */
+/* Active page state - when page-active is present, page-hidden is removed */
+/* Base rule for sections that use block display */
+section.page-active:not(.contact-section):not(.about-section):not(.business-card-section) {
+  display: block; /* Override base section { display: flex } from layout.css */
+  visibility: visible;
+  pointer-events: auto;
+  opacity: 1;
   z-index: 100; /* Ensure active page is on top */
 }
 
-/* Contact section needs grid display when active - more specific selector */
+/* Contact section needs grid display when active - higher specificity overrides base section rule */
 section.contact-section.page-active,
 main[data-virtual-pages] > section.contact-section.page-active {
-  display: grid;
+  display: grid; /* Override both base section { display: flex } and base .page-active { display: block } */
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 100;
 }
 
-/* About section needs grid display when active - more specific selector */
+/* About section needs grid display when active - higher specificity overrides base section rule */
 section.about-section.page-active,
 main[data-virtual-pages] > section.about-section.page-active {
-  display: grid !important;
+  display: grid; /* Override both base section { display: flex } and base .page-active { display: block } */
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 100;
 }
 
 /* About section scroll - ensure scrolling on mobile */
@@ -199,7 +208,8 @@ section.business-card-section.page-hidden .intro-nav {
   }
 
   /* About section - grid centered for content, hero is overlay */
-  main[data-virtual-pages] > .about-section[data-page] {
+  /* Only applies when page-active (not page-hidden) */
+  main[data-virtual-pages] > .about-section[data-page].page-active {
     position: absolute;
     top: 0;
     left: 0;
@@ -210,14 +220,9 @@ section.business-card-section.page-hidden .intro-nav {
     overflow: hidden;
     box-sizing: border-box;
     padding: clamp(1rem, 4vw, 2rem);
-  }
-
-  /* Ensure about section is visible when active - override page-hidden */
-  main[data-virtual-pages] > .about-section[data-page].page-active {
-    display: grid !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
   }
 
   /* Hero overlay - fills entire about section viewport */
@@ -257,7 +262,8 @@ section.business-card-section.page-hidden .intro-nav {
   }
 
   /* Contact section - uses CSS Grid for proper h2/form alignment */
-  main[data-virtual-pages] > .contact-section[data-page] {
+  /* Only applies when page-active (not page-hidden) */
+  main[data-virtual-pages] > .contact-section[data-page].page-active {
     position: absolute;
     top: 0;
     left: 0;
@@ -268,6 +274,9 @@ section.business-card-section.page-hidden .intro-nav {
     overflow: visible;
     box-sizing: border-box;
     padding: clamp(1rem, 4vw, 2rem);
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
   }
 
   /* Tech stack section is mobile-only - keep hidden on desktop */

@@ -480,32 +480,22 @@ export class MobileIntroAnimationModule extends BaseModule {
 
   /**
    * Animate header fading in
+   *
+   * NOTE: Header is now kept visible during animations - no hiding/fading
+   * This method ensures any inline styles that might hide the header are removed.
    */
   private animateHeaderIn(header: HTMLElement): void {
     const headerChildren = header.children;
 
+    // Keep header visible - remove any inline styles that might hide it
     Array.from(headerChildren).forEach((child) => {
-      (child as HTMLElement).style.setProperty('opacity', '0', 'important');
-      (child as HTMLElement).style.setProperty('visibility', 'visible', 'important');
+      (child as HTMLElement).style.removeProperty('opacity');
+      (child as HTMLElement).style.removeProperty('visibility');
     });
 
-    const proxy = { opacity: 0 };
-    gsap.to(proxy, {
-      opacity: 1,
-      duration: 1.0,
-      ease: 'power2.out',
-      onUpdate: () => {
-        Array.from(headerChildren).forEach((child) => {
-          (child as HTMLElement).style.setProperty('opacity', String(proxy.opacity), 'important');
-        });
-      },
-      onComplete: () => {
-        Array.from(headerChildren).forEach((child) => {
-          (child as HTMLElement).style.removeProperty('opacity');
-          (child as HTMLElement).style.removeProperty('visibility');
-        });
-      }
-    });
+    // Also ensure header itself is visible
+    header.style.removeProperty('opacity');
+    header.style.removeProperty('visibility');
   }
 
   /**

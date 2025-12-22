@@ -49,6 +49,9 @@
   left: 0;
   right: 0;
   z-index: 10000; /* Above overlay (9999) so header is always visible */
+  /* Base visibility - always visible by default */
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Footer styles defined in components/footer.css */
@@ -395,39 +398,37 @@ main {
   }
 }
 
-/* Default: ensure main and footer are ALWAYS visible */
-main,
-.footer {
-  opacity: 1 !important;
-  visibility: visible !important;
+/* Base visibility for main content - always visible by default */
+main {
+  opacity: 1;
+  visibility: visible;
 }
 
-/* Desktop: Header visible during intro animation with transparent background */
-/* Background transparency handled in intro-morph.css */
-.intro-loading .header {
-  opacity: 1 !important;
-  visibility: visible !important;
+/* Header visibility states - using specific selectors instead of !important */
+/* Base header is already visible (set in .header rule above) */
+.intro-loading .header,
+.intro-complete .header,
+.intro-complete.intro-finished .header,
+.paw-exit .header {
+  opacity: 1;
+  visibility: visible;
 }
 
-/* Desktop: Show header after intro completes */
+/* Header transitions - only during intro completion */
 .intro-complete .header {
-  opacity: 1 !important;
-  visibility: visible !important;
-  transition: opacity 0.5s ease-in-out !important;
+  transition: opacity 0.5s ease-in-out;
 }
 
 /* After intro finishes, disable opacity/visibility transitions to prevent flicker on navigation */
 /* But allow color transitions for smooth theme switching */
 .intro-complete.intro-finished .header {
-  transition: opacity 0s, visibility 0s !important;
+  transition: opacity 0s, visibility 0s;
 }
 
 /* During paw exit/entry animation, keep header visible without transitions */
 /* This prevents header flash when navigating back to home */
 .paw-exit .header {
-  opacity: 1 !important;
-  visibility: visible !important;
-  transition: none !important;
+  transition: none;
 }
 
 /* Mobile: header and content always visible, no intro animation effects */
@@ -436,8 +437,8 @@ main,
   .intro-loading .header,
   .intro-complete .header,
   .intro-complete.intro-finished .header {
-    opacity: 1 !important;
-    visibility: visible !important;
+    opacity: 1;
+    visibility: visible;
   }
 
   /* Ensure business card section is visible on mobile page load */
@@ -447,14 +448,14 @@ main,
   .intro-loading .business-card-inner,
   .intro-loading .business-card-front,
   .intro-loading .business-card-back {
-    opacity: 1 !important;
-    visibility: visible !important;
+    opacity: 1;
+    visibility: visible;
   }
 
   /* Ensure main content is visible */
   .intro-loading main {
-    opacity: 1 !important;
-    visibility: visible !important;
+    opacity: 1;
+    visibility: visible;
   }
 }
 
