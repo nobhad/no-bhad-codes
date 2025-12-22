@@ -1089,6 +1089,67 @@
           }
         });
 
+        // Password form submit - handle login
+        passwordForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const emailInput = passwordForm.querySelector('input[type="email"]');
+          const passwordInput = passwordForm.querySelector('input[type="password"]');
+          const submitBtn = passwordForm.querySelector('.dropdown-submit');
+
+          const email = emailInput.value.trim();
+          const password = passwordInput.value;
+
+          if (!email || !password) {
+            return; // Validation will handle this
+          }
+
+          // Show loading state
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Signing in...';
+
+          try {
+            const response = await fetch('/api/auth/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ email, password })
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              
+              // Store auth mode and user info
+              sessionStorage.setItem('client_auth_mode', 'authenticated');
+              sessionStorage.setItem('client_auth_user', JSON.stringify(data.user));
+
+              // Close dropdown and redirect to portal
+              dropdown.classList.remove('open');
+              backdrop.classList.remove('open');
+              window.location.href = '/client/portal';
+            } else {
+              const errorData = await response.json();
+              // Show error (you might want to add an error element to the form)
+              alert(errorData.error || 'Login failed. Please check your credentials.');
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Sign In';
+            }
+          } catch (error) {
+            console.error('Login error:', error);
+            // Fallback to demo mode if backend unavailable
+            sessionStorage.setItem('client_auth_mode', 'demo');
+            sessionStorage.setItem('client_auth_user', JSON.stringify({
+              id: 1,
+              email: email,
+              name: email.split('@')[0].replace(/[^a-zA-Z]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
+            }));
+
+            // Close dropdown and redirect to portal
+            dropdown.classList.remove('open');
+            backdrop.classList.remove('open');
+            window.location.href = '/client/portal';
+          }
+        });
+
       })();
 
     </script>

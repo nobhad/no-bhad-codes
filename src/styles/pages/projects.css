@@ -531,6 +531,14 @@
   transition: transform var(--transition-mouse) var(--easing-spring);
 }
 
+/* Desktop: Make SVG smaller */
+@media screen and (min-width: 768px) {
+  .wip-sign {
+    width: 60vw;
+    max-width: 800px;
+  }
+}
+
 .wip-sign:hover {
   transform: scale(1.02);
 }
