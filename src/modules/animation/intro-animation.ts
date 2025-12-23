@@ -199,6 +199,42 @@ export class IntroAnimationModule extends BaseModule {
   }
 
   /**
+   * Reset module state for clean re-entry
+   *
+   * Called before playing entry/exit animations to ensure
+   * the singleton module starts from a clean state.
+   */
+  resetState(): void {
+    // Kill all existing timelines
+    if (this.timeline) {
+      this.timeline.kill();
+      this.timeline = null;
+    }
+    if (this.exitTimeline) {
+      this.exitTimeline.kill();
+      this.exitTimeline = null;
+    }
+    if (this.entryTimeline) {
+      this.entryTimeline.kill();
+      this.entryTimeline = null;
+    }
+
+    // Reset completion flag - allows animation to run again
+    this.isComplete = false;
+
+    // Remove any event listeners
+    if (this.skipHandler) {
+      document.removeEventListener('keydown', this.skipHandler);
+      this.skipHandler = null;
+    }
+
+    // Note: Keep cachedSvgText to avoid re-fetching
+    // Note: Keep morphOverlay reference as it's a DOM element
+
+    this.log('State reset for clean re-entry');
+  }
+
+  /**
    * Initialize the intro animation module
    *
    * Checks device type, session state, and motion preferences before
@@ -738,6 +774,9 @@ export class IntroAnimationModule extends BaseModule {
       return;
     }
 
+    // Reset state for clean animation
+    this.resetState();
+
     this.log('Playing exit animation');
 
     this.morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
@@ -770,6 +809,10 @@ export class IntroAnimationModule extends BaseModule {
     }
 
     return new Promise((resolve) => {
+      // ========================================================================
+      // RESET STATE: Clean up any leftover classes from interrupted animations
+      // ========================================================================
+      document.documentElement.classList.remove('paw-exit', 'intro-complete', 'intro-finished');
 
       // ========================================================================
       // CRITICAL: Add paw-exit class FIRST to get correct overlay dimensions
@@ -777,7 +820,17 @@ export class IntroAnimationModule extends BaseModule {
       // We need alignment calculation to use these dimensions, not full viewport
       // ========================================================================
       document.documentElement.classList.add('paw-exit');
-      document.documentElement.classList.remove('intro-complete', 'intro-finished');
+
+      // Kill any existing tweens on SVG elements BEFORE clearing innerHTML
+      // This prevents GSAP from trying to animate elements that no longer exist
+      gsap.killTweensOf('#svg-business-card');
+      gsap.killTweensOf('#behind-card-group');
+      gsap.killTweensOf('#above-card-group');
+      gsap.killTweensOf('#arm-group');
+      gsap.killTweensOf('#thumb-behind-card');
+      gsap.killTweensOf('#position-1-entry');
+      gsap.killTweensOf('#position-3-exit');
+      gsap.killTweensOf(morphSvg.querySelectorAll('path'));
 
       // Clear and rebuild SVG
       morphSvg.innerHTML = '';
@@ -1007,31 +1060,9 @@ export class IntroAnimationModule extends BaseModule {
       gsap.set('#svg-business-card', { x: 0, y: 0 });
 
       // ========================================================================
-      // PHASE 0: FADE OUT NAV LINKS - smooth reverse of entry animation
-      // Entry uses: 1.2s, sine.inOut, stagger 0.15
-      // Exit uses: 0.6s, sine.inOut, stagger 0.1 (reversed)
+      // NOTE: Nav link fade-out is handled by page-transition.ts via CSS .leaving class
+      // Do NOT animate nav here to avoid conflicts with page-transition animations
       // ========================================================================
-      const introNav = document.querySelector('.intro-nav') as HTMLElement;
-      if (introNav) {
-        const navLinks = introNav.querySelectorAll('.intro-nav-link');
-        // Ensure starting state is visible (opacity 1)
-        gsap.set(introNav, { opacity: 1 });
-        if (navLinks.length > 0) {
-          gsap.set(navLinks, { opacity: 1 });
-          // Smooth reverse stagger fade - mirrors entry but faster
-          this.exitTimeline.to(navLinks, {
-            opacity: 0,
-            duration: 0.6,
-            ease: 'sine.inOut',
-            stagger: { each: 0.1, from: 'end' }
-          });
-        }
-        this.exitTimeline.to(introNav, {
-          opacity: 0,
-          duration: 0.5,
-          ease: 'sine.inOut'
-        }, '<');
-      }
 
       // ========================================================================
       // PHASE 1: PAW ENTERS (REVERSE of intro Phase 3 retraction)
@@ -1236,6 +1267,9 @@ export class IntroAnimationModule extends BaseModule {
    * @param bypassMobileCheck - If true, skip the mobile check (used by MobileIntroAnimationModule)
    */
   async playEntryAnimation(bypassMobileCheck = false): Promise<void> {
+    // Reset state for clean animation
+    this.resetState();
+
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
     console.log('[IntroAnimation] playEntryAnimation called, isMobile:', isMobile, 'bypassMobileCheck:', bypassMobileCheck);
 
@@ -1322,11 +1356,27 @@ export class IntroAnimationModule extends BaseModule {
 
     return new Promise((resolve) => {
       // ========================================================================
+      // RESET STATE: Clean up any leftover classes from interrupted animations
+      // ========================================================================
+      document.documentElement.classList.remove('paw-exit', 'intro-complete', 'intro-finished');
+
+      // ========================================================================
       // CRITICAL: Add paw-exit class FIRST to get correct overlay dimensions
       // The .paw-exit CSS changes overlay to: top: 60px, height: calc(100vh - 60px)
       // We need alignment calculation to use these dimensions, not full viewport
       // ========================================================================
       document.documentElement.classList.add('paw-exit');
+
+      // Kill any existing tweens on SVG elements BEFORE clearing innerHTML
+      // This prevents GSAP from trying to animate elements that no longer exist
+      gsap.killTweensOf('#svg-business-card');
+      gsap.killTweensOf('#behind-card-group');
+      gsap.killTweensOf('#above-card-group');
+      gsap.killTweensOf('#arm-group');
+      gsap.killTweensOf('#thumb-behind-card');
+      gsap.killTweensOf('#position-1-entry');
+      gsap.killTweensOf('#position-3-exit');
+      gsap.killTweensOf(morphSvg.querySelectorAll('path'));
 
       // Clear and rebuild SVG
       morphSvg.innerHTML = '';

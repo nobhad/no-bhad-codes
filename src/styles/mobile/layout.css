@@ -209,7 +209,6 @@
     display: block !important;
     width: 100%;
     margin-top: 1rem;
-    margin-bottom: 3rem !important; /* Extra space at bottom to ensure scroll */
   }
 
   /* Tech stack box styling on mobile - inside about section */
