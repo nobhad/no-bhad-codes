@@ -641,7 +641,7 @@ export class ContactAnimationModule extends BaseModule {
 
   /**
    * Set up mobile-specific contact animation
-   * Mobile: No animations - everything visible immediately
+   * Mobile: Submit button rolls in from right
    */
   private setupMobileAnimation(): void {
     this.container = document.querySelector('.contact-section') as HTMLElement;
@@ -650,7 +650,7 @@ export class ContactAnimationModule extends BaseModule {
       return;
     }
 
-    // Mobile: Ensure everything is visible immediately - no animations
+    // Mobile: Ensure content is visible
     gsap.set(this.container, {
       opacity: 1,
       filter: 'none',
@@ -665,18 +665,30 @@ export class ContactAnimationModule extends BaseModule {
       transform: 'none'
     });
 
-    // Make sure button is visible
-    const submitButton = this.container.querySelector('.submit-button');
+    // Submit button rolls in from right
+    const submitButton = this.container.querySelector('.submit-button') as HTMLElement;
     if (submitButton) {
+      // Set initial state: off-screen right with rotation
       gsap.set(submitButton, {
         opacity: 1,
         visibility: 'visible',
-        x: 0,
-        rotation: 0
+        x: window.innerWidth,
+        rotation: -360
       });
+
+      // Roll in animation
+      this.timeline = gsap.timeline({ delay: 0.3 });
+      this.timeline.to(submitButton, {
+        x: 0,
+        rotation: 0,
+        duration: 0.8,
+        ease: 'power2.out'
+      });
+
+      this.addTimeline(this.timeline);
     }
 
-    this.log('Contact animation initialized (mobile - no animations)');
+    this.log('Contact animation initialized (mobile - button roll in)');
   }
 
   /**
