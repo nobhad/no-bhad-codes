@@ -308,7 +308,6 @@ export class MobileIntroAnimationModule extends BaseModule {
     const clutchHold = 0.8;
     const releaseDuration = 0.5;
     const retractDuration = 1.6;
-    const fadeEase = 'power2.inOut';
 
     // ========================================================================
     // GET FINGER PATH REFERENCES

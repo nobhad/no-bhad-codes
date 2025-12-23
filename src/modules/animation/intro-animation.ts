@@ -1049,7 +1049,6 @@ export class IntroAnimationModule extends BaseModule {
       const clutchHold = 0.4;                 // Brief hold (was 0.8)
       const releaseDuration = 0.3;            // Quick morph (was 0.5)
       const exitDuration = 0.6;               // Fast exit (was 0.8)
-      const fadeEase = 'power2.inOut';
 
       // ========================================================================
       // SET INITIAL POSITIONS
