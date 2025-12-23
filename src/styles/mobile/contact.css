@@ -220,12 +220,12 @@
     z-index: 20;
   }
 
-  /* Submit button on mobile - larger, matching desktop proportions */
+  /* Submit button on mobile - smaller than desktop */
   .submit-button {
-    width: 80px !important;
-    height: 80px !important;
-    min-width: 80px;
-    min-height: 80px;
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px;
+    min-height: 60px;
     opacity: 1;
     visibility: visible;
     position: relative !important;
@@ -235,8 +235,8 @@
   }
 
   .submit-button svg {
-    width: 44px;
-    height: 44px;
+    width: 32px;
+    height: 32px;
     stroke-width: 2;
   }
 
@@ -297,13 +297,15 @@
   }
 
   .submit-button {
-    width: 70px !important;
-    height: 70px !important;
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px;
+    min-height: 50px;
   }
 
   .submit-button svg {
-    width: 36px !important;
-    height: 36px !important;
+    width: 28px !important;
+    height: 28px !important;
   }
 
   /* Reduce spacing between form fields on very small screens */
