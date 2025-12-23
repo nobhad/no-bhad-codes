@@ -666,22 +666,22 @@ export class IntroAnimationModule extends BaseModule {
       businessCard.style.opacity = '1';
     }
 
-    // Fade in intro nav with GSAP
+    // Fade in intro nav with GSAP - slow ease in
     const introNav = document.querySelector('.intro-nav') as HTMLElement;
     if (introNav) {
       gsap.to(introNav, {
         opacity: 1,
-        duration: 0.8,
-        ease: 'power2.out'
+        duration: 1.2,
+        ease: 'sine.inOut'
       });
-      // Also animate the individual nav links
+      // Also animate the individual nav links with stagger
       const navLinks = introNav.querySelectorAll('.intro-nav-link');
       if (navLinks.length > 0) {
         gsap.to(navLinks, {
           opacity: 1,
-          duration: 0.8,
-          ease: 'power2.out',
-          stagger: 0.1
+          duration: 1.2,
+          ease: 'sine.inOut',
+          stagger: 0.15
         });
       }
     }
@@ -1383,7 +1383,6 @@ export class IntroAnimationModule extends BaseModule {
       const clutchHold = 0.5;
       const releaseDuration = 0.4;
       const retractDuration = 1.2;
-      const linkFadeDuration = 0.4;
 
       // Set initial positions - paw + card off-screen
       gsap.set(behindCardGroup, { x: -800, y: -600 });
@@ -1495,18 +1494,18 @@ export class IntroAnimationModule extends BaseModule {
       if (introNav) {
         this.entryTimeline.to(introNav, {
           opacity: 1,
-          duration: linkFadeDuration,
-          ease: 'power2.out'
+          duration: 1.2,
+          ease: 'sine.inOut'
         }, '-=0.3');
 
-        // Also animate the individual nav link elements
+        // Also animate the individual nav link elements with stagger
         const navLinks = introNav.querySelectorAll('.intro-nav-link');
         if (navLinks.length > 0) {
           this.entryTimeline.to(navLinks, {
             opacity: 1,
-            duration: linkFadeDuration,
-            ease: 'power2.out',
-            stagger: 0.1
+            duration: 1.2,
+            ease: 'sine.inOut',
+            stagger: 0.15
           }, '<');
         }
       }
