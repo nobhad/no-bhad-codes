@@ -348,6 +348,7 @@ li {
   line-height: 0.9;
   position: relative;
   font-size: var(--menu-heading-size);
+  letter-spacing: 0.10em;
   display: inline-block;
   transform: translateY(-100%);
   transition: transform 0.4s var(--cubic-menu);
