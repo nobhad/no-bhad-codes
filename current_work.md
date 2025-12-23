@@ -4,9 +4,51 @@
 
 ## Recent Updates (December 22, 2025)
 
-### GSAP Animation Cleanup and Intro Nav Fix - COMPLETE
+### Contact Form Layout Fix - COMPLETE
 
-Cleaned up page transition code, removed excessive console.logs, and fixed intro nav link animations to use GSAP instead of CSS.
+Fixed contact form field widths for flex containers and resolved centering/clipping issues.
+
+**Completed:**
+
+1. **Form Field Fixed Widths**
+   - Added CSS variables: `--contact-input-width: 460px`, `--contact-textarea-width: 640px`
+   - Set explicit widths on `.input-item` elements (460px for inputs, 640px for message)
+   - Changed `.contact-row` and `.contact-left` from CSS Grid to Flexbox
+   - Added `flex-shrink: 0` to prevent fields from shrinking
+
+2. **Centering Fixes**
+   - Changed `.contact-section` overflow from `hidden` to `visible`
+   - Changed `.contact-content` width from `100%` to `auto` (sizes to content)
+   - Changed `.contact-layout` grid columns from `1fr 1fr` to `auto auto`
+   - Set `.contact-form-column` width to match widest element (640px)
+
+3. **Clipping Fixes**
+   - Merged duplicate `.input-wrapper` rules (removed conflicting `overflow: hidden`)
+   - Set `.input-wrapper` and `.input-item` to `overflow: visible`
+   - Removed legacy CSS animations from `.input-item` (GSAP handles all animations)
+
+4. **Animation Constants Sync**
+   - Added `FORM_MESSAGE_WIDTH_FULL: 640` constant to match CSS variable
+   - Updated `contact-animation.ts` to use constant instead of hardcoded value
+
+**Files Modified:**
+
+- `src/styles/pages/contact.css` - Fixed widths, flexbox layout, centering, overflow
+- `src/config/animation-constants.ts` - Added message width constant
+- `src/modules/animation/contact-animation.ts` - Use constant for message width
+
+**Result:**
+
+- Form fields have explicit fixed widths for flex containers
+- Contact section properly centered in viewport
+- No clipping of form fields or focus outlines
+- Animation values synced with CSS variables
+
+---
+
+### GSAP Animation Cleanup and Contact Blur Fix - COMPLETE
+
+Cleaned up page transition code, removed excessive console.logs, fixed intro nav link animations to use GSAP, and fixed contact section blur animation on entry.
 
 **Completed:**
 
@@ -23,12 +65,19 @@ Cleaned up page transition code, removed excessive console.logs, and fixed intro
    - Added `showIntroFallback()` helper for fallback display
    - Simplified `playExitAnimation()` and `playEntryAnimation()` methods
 
-3. **Contact Animation Cleanup**
-   - Removed emoji characters from log statements
-   - Removed verbose timeline progress logging
-   - Simplified `playFormAnimation()`, `playOutAnimation()`, `resetAnimatedElements()`
+3. **Contact Animation Blur Fix**
+   - Fixed contact section blur animation on entry
+   - h2, contactOptions, and cardColumn now blur in first (fade while blurred, then clear blur)
+   - Changed from drop animation to blur animation for these elements
+   - Form field cascade animation starts AFTER blur phase completes
+   - Updated `resetAnimatedElements()` to use blur state instead of y-transform
 
-4. **Intro Nav Links Animation Fix**
+4. **CSS Fixes for GSAP Blur Animation**
+   - Removed `opacity: 1` from `.page-active` CSS rules in page-transitions.css
+   - CSS was overriding GSAP's initial `opacity: 0` state for blur animations
+   - GSAP now has full control over opacity during blur transitions
+
+5. **Intro Nav Links Animation Fix**
    - Removed CSS `drop-in` animation from `.intro-nav-link` (was using CSS keyframes)
    - Changed to GSAP fade-in animation (opacity 0 -> 1, duration 0.8s)
    - Updated `completeIntro()` to fade in nav with GSAP
@@ -39,12 +88,14 @@ Cleaned up page transition code, removed excessive console.logs, and fixed intro
 
 - `src/modules/animation/page-transition.ts` - Cleaned up, extracted helpers, removed console.logs
 - `src/modules/animation/intro-animation.ts` - Cleaned up, added helpers, fixed nav fade
-- `src/modules/animation/contact-animation.ts` - Cleaned up, simplified methods
+- `src/modules/animation/contact-animation.ts` - Changed h2/card to blur animation, updated reset method
 - `src/styles/components/business-card.css` - Removed CSS animation, GSAP handles nav links
+- `src/styles/components/page-transitions.css` - Removed opacity:1 from page-active rules (GSAP controls opacity)
 
 **Result:**
 
 - Cleaner, more maintainable animation code
+- Contact section h2 and card blur in first, then form animation starts
 - Intro nav links fade in slowly via GSAP (not drop animation)
 - Coyote paw animation plays on initial load and when returning to home page
 - All pages (about/contact/projects) use same blur/fade transitions
@@ -664,7 +715,7 @@ Comprehensive optimization of GSAP animations and page transitions:
 
 ## System Status
 
-**Last Updated**: December 22, 2025 (GSAP animation cleanup and intro nav fix completed)
+**Last Updated**: December 22, 2025 (Contact form layout fix completed)
 
 ### Build Status
 
