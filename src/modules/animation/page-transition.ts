@@ -820,7 +820,6 @@ export class PageTransitionModule extends BaseModule {
           // This allows ContactAnimationModule to start form animations
           if (page.id === 'contact') {
             this.dispatchEvent('contact-page-ready', { pageId: page.id });
-            console.log('[PageTransition] Contact page blur animation complete - form animations can start');
           }
 
           resolve();

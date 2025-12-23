@@ -61,44 +61,39 @@ section.page-hidden {
 }
 
 /* Active page state - when page-active is present, page-hidden is removed */
+/* GSAP controls opacity for animated blur transitions - CSS only handles display/visibility */
 /* Base rule for sections that use block display */
 section.page-active:not(.contact-section):not(.about-section):not(.business-card-section) {
   display: block; /* Override base section { display: flex } from layout.css */
   visibility: visible;
   pointer-events: auto;
-  opacity: 1;
   z-index: 100;
 }
 
 /* Contact section needs grid display when active */
-/* Specificity: section.contact-section.page-active (0,2,1) > section (0,0,1) */
 section.contact-section.page-active {
   display: grid;
   visibility: visible;
-  opacity: 1;
   pointer-events: auto;
   z-index: 100;
 }
 
 /* About section needs grid display when active */
-/* Specificity: section.about-section.page-active (0,2,1) > section (0,0,1) */
 section.about-section.page-active {
   display: grid;
   visibility: visible;
-  opacity: 1;
   pointer-events: auto;
   z-index: 100;
 }
 
-  /* Ensure virtual pages sections are visible when active - even higher specificity */
-  main[data-virtual-pages] > section.contact-section.page-active,
-  main[data-virtual-pages] > section.about-section.page-active {
-    display: grid;
-    visibility: visible;
-    opacity: 1;
-    pointer-events: auto;
-    z-index: 100; /* Ensure active page is on top */
-  }
+/* Ensure virtual pages sections are visible when active */
+main[data-virtual-pages] > section.contact-section.page-active,
+main[data-virtual-pages] > section.about-section.page-active {
+  display: grid;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 100;
+}
 
 /* About section scroll - ensure scrolling on mobile */
 @media screen and (max-width: 767px) {
@@ -249,21 +244,19 @@ section.business-card-section.page-hidden .intro-nav {
     box-sizing: border-box;
     padding: clamp(1rem, 4vw, 2rem);
     visibility: visible;
-    opacity: 1;
     pointer-events: auto;
+    /* GSAP controls opacity for blur animation */
   }
 
   /* About content centered in viewport */
   main[data-virtual-pages] > .about-section .about-content {
     max-width: min(1000px, 90vw);
     overflow: hidden;
-    /* Ensure content is centered vertically within the grid */
     align-self: center;
     justify-self: center;
   }
 
   /* Contact section - uses CSS Grid for proper h2/form alignment */
-  /* Only applies when page-active (not page-hidden) */
   main[data-virtual-pages] > .contact-section[data-page].page-active {
     position: absolute;
     top: 0;
@@ -277,8 +270,8 @@ section.business-card-section.page-hidden .intro-nav {
     box-sizing: border-box;
     padding: clamp(1rem, 4vw, 2rem);
     visibility: visible;
-    opacity: 1;
     pointer-events: auto;
+    /* GSAP controls opacity for blur animation */
   }
 
   /* Tech stack section is mobile-only - keep hidden on desktop */

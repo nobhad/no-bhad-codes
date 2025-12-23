@@ -101,36 +101,70 @@ export class ContactAnimationModule extends BaseModule {
     });
 
     // ========================================================================
-    // PHASE 1: h2 and card drop in TOGETHER
+    // PHASE 1: h2 and card BLUR IN (fade in while blurred, then clear blur)
     // ========================================================================
-    const dropDistance = ANIMATION_CONSTANTS.DIMENSIONS.CONTACT_DROP_DISTANCE;
-    const dropDuration = ANIMATION_CONSTANTS.DURATIONS.FORM_FIELD_DROP;
+    const blurAmount = 8;
+    const blurFadeDuration = 0.6;
+    const blurClearDuration = 0.5;
+    const dropDuration = blurFadeDuration + 0.3 + blurClearDuration; // Total blur phase duration
 
-    // h2 drops in
+    // Set initial blur state
     if (heading) {
-      this.timeline.fromTo(heading,
-        { y: -dropDistance, opacity: 0 },
-        { y: 0, opacity: 1, duration: dropDuration, ease: 'power2.out' },
-        0
-      );
+      gsap.set(heading, { opacity: 0, filter: `blur(${blurAmount}px)` });
     }
-
-    // Contact options drops in with h2 (if exists - mobile only)
     if (contactOptions) {
-      this.timeline.fromTo(contactOptions,
-        { y: -dropDistance, opacity: 0 },
-        { y: 0, opacity: 1, duration: dropDuration, ease: 'power2.out' },
-        0
-      );
+      gsap.set(contactOptions, { opacity: 0, filter: `blur(${blurAmount}px)` });
+    }
+    if (cardColumn) {
+      gsap.set(cardColumn, { opacity: 0, filter: `blur(${blurAmount}px)` });
     }
 
-    // Card column drops in at same time as h2
+    // Fade in while blurred
+    if (heading) {
+      this.timeline.to(heading, {
+        opacity: 1,
+        duration: blurFadeDuration,
+        ease: 'power2.out'
+      }, 0);
+    }
+    if (contactOptions) {
+      this.timeline.to(contactOptions, {
+        opacity: 1,
+        duration: blurFadeDuration,
+        ease: 'power2.out'
+      }, 0);
+    }
     if (cardColumn) {
-      this.timeline.fromTo(cardColumn,
-        { y: -dropDistance, opacity: 0 },
-        { y: 0, opacity: 1, duration: dropDuration, ease: 'power2.out' },
-        0
-      );
+      this.timeline.to(cardColumn, {
+        opacity: 1,
+        duration: blurFadeDuration,
+        ease: 'power2.out'
+      }, 0);
+    }
+
+    // Pause then clear blur
+    this.timeline.to({}, { duration: 0.3 });
+
+    if (heading) {
+      this.timeline.to(heading, {
+        filter: 'blur(0px)',
+        duration: blurClearDuration,
+        ease: 'power2.out'
+      }, '>');
+    }
+    if (contactOptions) {
+      this.timeline.to(contactOptions, {
+        filter: 'blur(0px)',
+        duration: blurClearDuration,
+        ease: 'power2.out'
+      }, '<');
+    }
+    if (cardColumn) {
+      this.timeline.to(cardColumn, {
+        filter: 'blur(0px)',
+        duration: blurClearDuration,
+        ease: 'power2.out'
+      }, '<');
     }
 
     // Business card setup
@@ -536,19 +570,19 @@ export class ContactAnimationModule extends BaseModule {
   private resetAnimatedElements(): void {
     if (!this.container) return;
 
-    const dropDistance = ANIMATION_CONSTANTS.DIMENSIONS.CONTACT_DROP_DISTANCE;
+    const blurAmount = 8;
     const fieldBorderRadius = '0 50px 50px 50px';
     const startWidth = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_WIDTH_START;
     const compressedHeight = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_COMPRESSED;
 
-    // Reset header elements
+    // Reset header elements to blur state
     const heading = this.container.querySelector('h2');
     const contactOptions = this.container.querySelector('.contact-options');
     const cardColumn = this.container.querySelector('.contact-card-column');
 
-    if (heading) gsap.set(heading, { y: -dropDistance, opacity: 0 });
-    if (contactOptions) gsap.set(contactOptions, { y: -dropDistance, opacity: 0 });
-    if (cardColumn) gsap.set(cardColumn, { y: -dropDistance, opacity: 0 });
+    if (heading) gsap.set(heading, { opacity: 0, filter: `blur(${blurAmount}px)` });
+    if (contactOptions) gsap.set(contactOptions, { opacity: 0, filter: `blur(${blurAmount}px)` });
+    if (cardColumn) gsap.set(cardColumn, { opacity: 0, filter: `blur(${blurAmount}px)` });
 
     // Reset form container
     const formContainer = this.container.querySelector('.contact-form') ||
