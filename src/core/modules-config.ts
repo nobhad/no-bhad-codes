@@ -166,8 +166,6 @@ export function registerModules(debug: boolean = false): void {
         });
       }
     },
-    // InfiniteScrollModule disabled - removed in favor of standard page scroll
-    // See current_work.md for details
     {
       name: 'TextAnimationModule',
       type: 'dom',
@@ -318,7 +316,6 @@ export function getMainSiteModules(): string[] {
     'NavigationModule',
     'ContactFormModule',
     'ScrollSnapModule', // Disabled on desktop home - virtual pages instead
-    // 'InfiniteScrollModule', // Disabled - using standard page scroll
     'TextAnimationModule',
     'ContactAnimationModule',
     'SectionTransitionsModule',

@@ -20,8 +20,7 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 | Document | Description |
 |----------|-------------|
 | **[Intro Animation](./features/INTRO_ANIMATION.md)** | Coyote paw intro animation (desktop/mobile) |
-| **[Scroll Snap](./features/SCROLL_SNAP.md)** | GSAP-powered section snapping |
-| **[Infinite Scroll](./features/INFINITE_SCROLL.md)** | ~~Bidirectional infinite scroll~~ (DEPRECATED - replaced by virtual pages) |
+| **[Scroll Snap](./features/SCROLL_SNAP.md)** | GSAP-powered section snapping (mobile) |
 
 ### Design System
 

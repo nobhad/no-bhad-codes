@@ -1,6 +1,6 @@
 # Module Dependencies
 
-Last Updated: December 19, 2025
+Last Updated: December 23, 2025
 
 ## Overview
 
@@ -23,9 +23,10 @@ src/modules/
 │   ├── intro-animation.ts   # Desktop intro (GSAP MorphSVG)
 │   ├── intro-animation-mobile.ts # Mobile intro fallback
 │   ├── contact-animation.ts # Contact section animations
+│   ├── page-transition.ts   # Virtual page transitions
+│   ├── section-transitions.ts # Section reveal animations
 │   ├── text-animation.ts    # ScrollTrigger text effects
-│   ├── infinite-scroll.ts   # Infinite scroll loop
-│   └── scroll-snap.ts       # Section snap scrolling
+│   └── scroll-snap.ts       # Section snap scrolling (mobile only)
 └── utilities/
     └── theme.ts             # Dark/light theme toggle
 ```
@@ -38,7 +39,7 @@ All modules extend `BaseModule` from `core/base.ts`:
 
 ```text
 BaseModule (core/base.ts)
-    └── Extended by all 13 other modules
+    └── Extended by all 14 other modules
 ```
 
 ### External Service Dependencies
@@ -53,15 +54,16 @@ GSAP Library
     ├── intro-animation-mobile.ts
     ├── business-card-interactions.ts
     ├── contact-animation.ts
+    ├── page-transition.ts
+    ├── section-transitions.ts
     ├── text-animation.ts
-    ├── infinite-scroll.ts
     ├── scroll-snap.ts
     └── navigation.ts
 
 GSAP ScrollTrigger
     ├── contact-animation.ts
+    ├── section-transitions.ts
     ├── text-animation.ts
-    ├── infinite-scroll.ts
     └── scroll-snap.ts
 
 GSAP MorphSVGPlugin (premium)
@@ -121,9 +123,10 @@ business-card-interactions.ts
 | `intro-animation.ts` | Desktop paw morph intro | BaseModule, GSAP, MorphSVGPlugin, intro-animation-config |
 | `intro-animation-mobile.ts` | Mobile card flip intro | BaseModule, GSAP, MorphSVGPlugin |
 | `contact-animation.ts` | Contact section animations | BaseModule, GSAP, ScrollTrigger |
+| `page-transition.ts` | Virtual page transitions | BaseModule, GSAP |
+| `section-transitions.ts` | Section reveal animations | BaseModule, GSAP, ScrollTrigger |
 | `text-animation.ts` | Scroll-triggered text effects | BaseModule, GSAP, ScrollTrigger |
-| `infinite-scroll.ts` | Loop scroll at bottom | BaseModule, ScrollTrigger |
-| `scroll-snap.ts` | Section snap scrolling | BaseModule, GSAP, ScrollTrigger, ScrollToPlugin |
+| `scroll-snap.ts` | Section snap scrolling (mobile) | BaseModule, GSAP, ScrollTrigger, ScrollToPlugin |
 
 ### Utility Modules
 
@@ -139,18 +142,18 @@ Some modules have platform-specific behavior:
 |--------|---------|--------|
 | `intro-animation.ts` | Full morph animation | Skipped (uses mobile version) |
 | `intro-animation-mobile.ts` | Skipped | Card flip animation |
-| `scroll-snap.ts` | Active | Disabled |
-| `infinite-scroll.ts` | Active | Disabled |
+| `page-transition.ts` | Virtual page transitions | Disabled |
+| `scroll-snap.ts` | Disabled | Active |
 | `contact-animation.ts` | Active | Skipped |
 
 ## Indirect Dependencies
 
 Modules that affect each other indirectly:
 
-1. **scroll-snap.ts ↔ infinite-scroll.ts**: Scroll snap checks for loop-trigger-zone to skip snapping
-2. **text-animation.ts → scroll-snap.ts**: Text animations affect scroll events
-3. **intro-animation.ts → intro-animation-mobile.ts**: Desktop determines when to use mobile fallback
-4. **contact-animation.ts ↔ business-card-interactions.ts**: Both manage business cards in different sections
+1. **text-animation.ts → scroll-snap.ts**: Text animations affect scroll events
+2. **intro-animation.ts → intro-animation-mobile.ts**: Desktop determines when to use mobile fallback
+3. **contact-animation.ts ↔ business-card-interactions.ts**: Both manage business cards in different sections
+4. **page-transition.ts → section-transitions.ts**: Page transitions trigger section reveals
 
 ## Import Path Convention
 

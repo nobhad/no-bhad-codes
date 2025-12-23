@@ -4,6 +4,25 @@
 
 ## Recent Updates (December 23, 2025)
 
+### Deprecated Code Cleanup - COMPLETE
+
+Removed deprecated infinite scroll module and related code.
+
+**Deleted Files:**
+
+- `src/modules/animation/infinite-scroll.ts` - Deprecated module removed
+- `docs/features/INFINITE_SCROLL.md` - Documentation removed
+
+**Cleaned Up:**
+
+- Removed infinite scroll comments from `modules-config.ts`
+- Removed loop-trigger-zone checks from `scroll-snap.ts`
+- Removed loop-spacer/trigger-zone CSS from `mobile/layout.css`
+- Updated `MODULE_DEPENDENCIES.md` with current module list
+- Updated `docs/README.md` to remove INFINITE_SCROLL link
+
+---
+
 ### Comprehensive Documentation Update - COMPLETE
 
 Deep dive codebase analysis and documentation update across all /docs/ files.
@@ -15,7 +34,6 @@ Deep dive codebase analysis and documentation update across all /docs/ files.
 - Updated docs/README.md with current navigation and animation modules
 - Updated SYSTEM_SUMMARY.md with Animation System section
 - Updated ANIMATIONS.md, UX_GUIDELINES.md, INTRO_ANIMATION.md dates
-- Verified INFINITE_SCROLL.md has deprecation notice
 
 **Codebase Summary (from analysis):**
 
