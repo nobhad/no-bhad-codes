@@ -588,9 +588,11 @@ export class PageTransitionModule extends BaseModule {
    * Play the coyote paw entry animation when entering the intro page
    */
   private async playIntroEntryAnimation(): Promise<void> {
+    console.log('[PageTransition] playIntroEntryAnimation called');
     try {
       const introPage = this.pages.get('intro');
       if (introPage?.element) {
+        console.log('[PageTransition] Preparing intro page element');
         gsap.set(introPage.element, { clearProps: 'display,visibility,opacity,zIndex,pointerEvents' });
 
         const introChildren = introPage.element.querySelectorAll('.business-card-container, .business-card, .intro-nav');
@@ -604,15 +606,22 @@ export class PageTransitionModule extends BaseModule {
         introPage.element.classList.add('page-active');
 
         await new Promise(resolve => requestAnimationFrame(resolve));
+        console.log('[PageTransition] Intro page element ready');
       }
 
+      console.log('[PageTransition] Resolving IntroAnimationModule');
       const introModule = await container.resolve('IntroAnimationModule') as IntroAnimationModule;
+      console.log('[PageTransition] IntroAnimationModule resolved:', !!introModule);
       if (introModule && typeof introModule.playEntryAnimation === 'function') {
+        console.log('[PageTransition] Calling introModule.playEntryAnimation()');
         await introModule.playEntryAnimation();
+        console.log('[PageTransition] Entry animation complete');
       } else {
+        console.log('[PageTransition] No playEntryAnimation method, using fallback');
         this.showIntroPageFallback();
       }
-    } catch {
+    } catch (error) {
+      console.error('[PageTransition] Entry animation error:', error);
       this.log('IntroAnimationModule not available for entry animation');
       this.showIntroPageFallback();
     }
