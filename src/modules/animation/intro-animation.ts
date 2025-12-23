@@ -1218,10 +1218,25 @@ export class IntroAnimationModule extends BaseModule {
 
     this.log('Playing entry animation (paw)');
 
+    // Get elements first
+    const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
+    const introNav = document.querySelector('.intro-nav') as HTMLElement;
+
+    // CRITICAL: Hide static card and nav IMMEDIATELY to prevent flash
+    // The SVG animation will show the animated card instead
+    if (businessCard) {
+      businessCard.style.opacity = '0';
+    }
+    if (introNav) {
+      gsap.set(introNav, { opacity: 0 });
+    }
+
     this.morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
     let morphSvg = document.getElementById(DOM_ELEMENT_IDS.morphSvg) as SVGSVGElement | null;
 
     if (!this.morphOverlay) {
+      // Restore card if overlay not found
+      if (businessCard) businessCard.style.opacity = '1';
       this.showIntroFallback();
       return;
     }
@@ -1237,15 +1252,9 @@ export class IntroAnimationModule extends BaseModule {
       this.morphOverlay.appendChild(morphSvg);
     }
 
-    const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
     if (!businessCard) {
       this.log('Business card not found');
       return;
-    }
-
-    const introNav = document.querySelector('.intro-nav') as HTMLElement;
-    if (introNav) {
-      gsap.set(introNav, { opacity: 0 });
     }
 
     const svgText = await this.getSvgText();
@@ -1422,6 +1431,14 @@ export class IntroAnimationModule extends BaseModule {
           // Cross-fade: Show static card FIRST (while animated card still visible)
           // This masks any sub-pixel differences between the two renders
           businessCard.style.opacity = '1';
+          businessCard.style.visibility = 'visible';
+
+          // Also ensure business card container is visible
+          const cardContainer = document.querySelector('.business-card-container') as HTMLElement;
+          if (cardContainer) {
+            cardContainer.style.opacity = '1';
+            cardContainer.style.visibility = 'visible';
+          }
 
           // Then hide overlay after a tiny delay so both cards overlap
           gsap.delayedCall(0.05, () => {
@@ -1550,15 +1567,26 @@ export class IntroAnimationModule extends BaseModule {
       }
 
       // Phase 5: Fade in nav links at end
-      if (introNav) {
-        this.entryTimeline.to(introNav, {
+      // Re-query introNav in case it wasn't found earlier
+      const navElement = document.querySelector('.intro-nav') as HTMLElement;
+      if (navElement) {
+        // Ensure nav is visible but start with opacity 0
+        gsap.set(navElement, { visibility: 'visible', display: 'flex', opacity: 0 });
+
+        // Also set up nav links - visible but opacity 0
+        const navLinks = navElement.querySelectorAll('.intro-nav-link');
+        if (navLinks.length > 0) {
+          gsap.set(navLinks, { visibility: 'visible', opacity: 0 });
+        }
+
+        // Animate nav container
+        this.entryTimeline.to(navElement, {
           opacity: 1,
           duration: 1.2,
           ease: 'sine.inOut'
         }, '-=0.3');
 
-        // Also animate the individual nav link elements with stagger
-        const navLinks = introNav.querySelectorAll('.intro-nav-link');
+        // Animate individual nav links with stagger
         if (navLinks.length > 0) {
           this.entryTimeline.to(navLinks, {
             opacity: 1,

@@ -622,12 +622,25 @@ export class PageTransitionModule extends BaseModule {
       console.log('[PageTransition] introPage:', !!introPage, 'element:', !!introPage?.element);
 
       if (introPage?.element) {
+        // Clear props on the section itself but NOT on children
+        // The entry animation will handle showing the card and nav
         gsap.set(introPage.element, { clearProps: 'display,visibility,opacity,zIndex,pointerEvents' });
 
-        const introChildren = introPage.element.querySelectorAll('.business-card-container, .business-card, .intro-nav');
-        console.log('[PageTransition] Found introChildren:', introChildren.length);
-        if (introChildren.length > 0) {
-          gsap.set(introChildren, { clearProps: 'opacity,visibility,display' });
+        // Only clear display/visibility on containers, NOT opacity
+        // This prevents flash - entry animation controls opacity
+        const containers = introPage.element.querySelectorAll('.business-card-container');
+        if (containers.length > 0) {
+          gsap.set(containers, { clearProps: 'display,visibility' });
+        }
+
+        // Keep business card and nav hidden - entry animation will show them
+        const businessCard = introPage.element.querySelector('.business-card');
+        const introNav = introPage.element.querySelector('.intro-nav');
+        if (businessCard) {
+          gsap.set(businessCard, { opacity: 0 });
+        }
+        if (introNav) {
+          gsap.set(introNav, { opacity: 0 });
         }
 
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
