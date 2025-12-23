@@ -79,6 +79,12 @@ export class ContactAnimationModule extends BaseModule {
   private setupAnimation(): void {
     this.log('Setting up DESKTOP contact form animation...');
 
+    // Kill any existing timeline to prevent state accumulation
+    if (this.timeline) {
+      this.timeline.kill();
+      this.timeline = null;
+    }
+
     this.container = document.querySelector('.contact-section') as HTMLElement;
     if (!this.container) {
       this.log('Contact section not found');
@@ -561,7 +567,10 @@ export class ContactAnimationModule extends BaseModule {
    */
   private playOutAnimation(): void {
     if (!this.container) return;
-    this.timeline?.kill();
+    // Don't kill timeline - just pause it so it can be restarted
+    // Killing prevents restart() from working on re-entry
+    this.timeline?.pause();
+    this.timeline?.progress(0);
     this.resetAnimatedElements();
   }
 
@@ -644,6 +653,12 @@ export class ContactAnimationModule extends BaseModule {
    * Mobile: Submit button rolls in from right
    */
   private setupMobileAnimation(): void {
+    // Kill any existing timeline to prevent state accumulation
+    if (this.timeline) {
+      this.timeline.kill();
+      this.timeline = null;
+    }
+
     this.container = document.querySelector('.contact-section') as HTMLElement;
     if (!this.container) {
       this.log('Contact section not found');
