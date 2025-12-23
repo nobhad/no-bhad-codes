@@ -949,9 +949,31 @@ export class IntroAnimationModule extends BaseModule {
       const thumb2PathData = thumb2?.getAttribute('d');
       const thumb1PathData = thumb1?.getAttribute('d');
 
+      // Kill ALL timelines before starting exit animation
+      if (this.timeline) {
+        this.timeline.kill();
+        this.timeline = null;
+      }
       if (this.exitTimeline) {
         this.exitTimeline.kill();
         this.exitTimeline = null;
+      }
+      if (this.entryTimeline) {
+        this.entryTimeline.kill();
+        this.entryTimeline = null;
+      }
+
+      // Kill any existing tweens on elements to prevent conflicts
+      gsap.killTweensOf(behindCardGroup);
+      gsap.killTweensOf(aboveCardGroup);
+      gsap.killTweensOf('#svg-business-card');
+      const navForCleanup = document.querySelector('.intro-nav') as HTMLElement;
+      if (navForCleanup) {
+        gsap.killTweensOf(navForCleanup);
+        const navLinksForCleanup = navForCleanup.querySelectorAll('.intro-nav-link');
+        if (navLinksForCleanup.length > 0) {
+          gsap.killTweensOf(navLinksForCleanup);
+        }
       }
 
       this.exitTimeline = gsap.timeline({
@@ -984,7 +1006,32 @@ export class IntroAnimationModule extends BaseModule {
       gsap.set(aboveCardGroup, { x: -1500, y: -1200 });
       gsap.set('#svg-business-card', { x: 0, y: 0 });
 
-      // Nav links already faded by page-transition click handler - no need to fade here
+      // ========================================================================
+      // PHASE 0: FADE OUT NAV LINKS - smooth reverse of entry animation
+      // Entry uses: 1.2s, sine.inOut, stagger 0.15
+      // Exit uses: 0.6s, sine.inOut, stagger 0.1 (reversed)
+      // ========================================================================
+      const introNav = document.querySelector('.intro-nav') as HTMLElement;
+      if (introNav) {
+        const navLinks = introNav.querySelectorAll('.intro-nav-link');
+        // Ensure starting state is visible (opacity 1)
+        gsap.set(introNav, { opacity: 1 });
+        if (navLinks.length > 0) {
+          gsap.set(navLinks, { opacity: 1 });
+          // Smooth reverse stagger fade - mirrors entry but faster
+          this.exitTimeline.to(navLinks, {
+            opacity: 0,
+            duration: 0.6,
+            ease: 'sine.inOut',
+            stagger: { each: 0.1, from: 'end' }
+          });
+        }
+        this.exitTimeline.to(introNav, {
+          opacity: 0,
+          duration: 0.5,
+          ease: 'sine.inOut'
+        }, '<');
+      }
 
       // ========================================================================
       // PHASE 1: PAW ENTERS (REVERSE of intro Phase 3 retraction)
@@ -1421,11 +1468,33 @@ export class IntroAnimationModule extends BaseModule {
       const thumb2PathData = thumb2?.getAttribute('d');
       const thumb3PathData = thumb3?.getAttribute('d');
 
-      // Create entry timeline (kill any existing one first to prevent memory leaks)
+      // Kill ALL timelines before starting entry animation
+      if (this.timeline) {
+        this.timeline.kill();
+        this.timeline = null;
+      }
+      if (this.exitTimeline) {
+        this.exitTimeline.kill();
+        this.exitTimeline = null;
+      }
       if (this.entryTimeline) {
         this.entryTimeline.kill();
         this.entryTimeline = null;
       }
+
+      // Kill any existing tweens on elements to prevent conflicts
+      gsap.killTweensOf(behindCardGroup);
+      gsap.killTweensOf(aboveCardGroup);
+      gsap.killTweensOf('#svg-business-card');
+      const navElement = document.querySelector('.intro-nav') as HTMLElement;
+      if (navElement) {
+        gsap.killTweensOf(navElement);
+        const navLinksToKill = navElement.querySelectorAll('.intro-nav-link');
+        if (navLinksToKill.length > 0) {
+          gsap.killTweensOf(navLinksToKill);
+        }
+      }
+
       this.entryTimeline = gsap.timeline({
         onComplete: () => {
           // Cross-fade: Show static card FIRST (while animated card still visible)
@@ -1567,28 +1636,28 @@ export class IntroAnimationModule extends BaseModule {
       }
 
       // Phase 5: Fade in nav links at end
-      // Re-query introNav in case it wasn't found earlier
-      const navElement = document.querySelector('.intro-nav') as HTMLElement;
-      if (navElement) {
+      // Re-query nav in case it wasn't found earlier
+      const navForFadeIn = document.querySelector('.intro-nav') as HTMLElement;
+      if (navForFadeIn) {
         // Ensure nav is visible but start with opacity 0
-        gsap.set(navElement, { visibility: 'visible', display: 'flex', opacity: 0 });
+        gsap.set(navForFadeIn, { visibility: 'visible', display: 'flex', opacity: 0 });
 
         // Also set up nav links - visible but opacity 0
-        const navLinks = navElement.querySelectorAll('.intro-nav-link');
-        if (navLinks.length > 0) {
-          gsap.set(navLinks, { visibility: 'visible', opacity: 0 });
+        const navLinksForFadeIn = navForFadeIn.querySelectorAll('.intro-nav-link');
+        if (navLinksForFadeIn.length > 0) {
+          gsap.set(navLinksForFadeIn, { visibility: 'visible', opacity: 0 });
         }
 
         // Animate nav container
-        this.entryTimeline.to(navElement, {
+        this.entryTimeline.to(navForFadeIn, {
           opacity: 1,
           duration: 1.2,
           ease: 'sine.inOut'
         }, '-=0.3');
 
         // Animate individual nav links with stagger
-        if (navLinks.length > 0) {
-          this.entryTimeline.to(navLinks, {
+        if (navLinksForFadeIn.length > 0) {
+          this.entryTimeline.to(navLinksForFadeIn, {
             opacity: 1,
             duration: 1.2,
             ease: 'sine.inOut',
