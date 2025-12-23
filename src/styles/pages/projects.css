@@ -587,6 +587,8 @@
     max-width: none;
     margin: 0 auto;
     display: block;
+    /* Shift right to center the sign visually */
+    transform: translateX(8%);
   }
 }
 
@@ -622,6 +624,8 @@
     max-width: none;
     margin: 0 auto;
     display: block;
+    /* Shift right to center the sign visually */
+    transform: translateX(8%);
   }
 }
 
