@@ -208,6 +208,19 @@ export class IntroAnimationModule extends BaseModule {
     await super.init();
 
     // ========================================================================
+    // PAGE CHECK - ONLY RUN ON INTRO/HOME PAGE
+    // The coyote paw animation is ONLY for the home page / business card section
+    // Skip if we're on any other page (contact, about, projects, etc.)
+    // ========================================================================
+    const hash = window.location.hash;
+    const isIntroPage = !hash || hash === '#' || hash === '#/' || hash === '#/intro' || hash === '#/home';
+    if (!isIntroPage) {
+      this.log(`Not on intro page (hash: ${hash}) - skipping coyote paw animation`);
+      this.skipIntroImmediately();
+      return;
+    }
+
+    // ========================================================================
     // MOBILE HEADER FIX
     // On mobile, ensure header is visible from the start (no intro effect)
     // ========================================================================
@@ -504,6 +517,12 @@ export class IntroAnimationModule extends BaseModule {
       cardInner.style.transform = 'rotateY(0deg)';
     }
 
+    // Make intro nav visible immediately (GSAP handles animation)
+    const introNav = document.querySelector('.intro-nav') as HTMLElement;
+    if (introNav) {
+      gsap.set(introNav, { opacity: 1 });
+    }
+
     // Make header visible immediately
     const header = document.querySelector('.header') as HTMLElement;
     if (header) {
@@ -512,7 +531,6 @@ export class IntroAnimationModule extends BaseModule {
     }
 
     // Dispatch completion event for PageTransitionModule
-    // This enables virtual page transitions even when intro is skipped
     this.dispatchEvent('complete');
     this.log('Intro skipped - dispatched complete event');
   }
@@ -643,6 +661,16 @@ export class IntroAnimationModule extends BaseModule {
       businessCard.style.opacity = '1';
     }
 
+    // Fade in intro nav with GSAP
+    const introNav = document.querySelector('.intro-nav') as HTMLElement;
+    if (introNav) {
+      gsap.to(introNav, {
+        opacity: 1,
+        duration: 0.8,
+        ease: 'power2.out'
+      });
+    }
+
     // Scroll to top
     const mainContainer = document.querySelector('main') as HTMLElement;
     if (mainContainer) {
@@ -669,7 +697,6 @@ export class IntroAnimationModule extends BaseModule {
     }
 
     // Dispatch completion event for PageTransitionModule
-    // This enables virtual page transitions after intro completes
     this.dispatchEvent('complete');
     this.log('Intro complete - dispatched complete event');
   }
@@ -688,80 +715,42 @@ export class IntroAnimationModule extends BaseModule {
    * @returns Promise that resolves when animation completes
    */
   /**
-   * Play the coyote paw exit animation when leaving the home page / business card section
-   * NOTE: This animation is ONLY for the home page / business card section.
-   * It should NOT be used for any other pages or sections.
+   * Play the coyote paw exit animation when leaving the home page
    */
   async playExitAnimation(): Promise<void> {
-    console.log('[IntroAnimation] playExitAnimation called - ONLY for home page / business card section');
-
-    // Note: Mobile check removed - paw animation now works on both mobile and desktop
-    // MobileIntroAnimationModule delegates to this method for the exit animation
-
-    // Skip if reduced motion preferred
     if (this.reducedMotion) {
       this.log('Reduced motion - skipping exit animation');
-      console.log('[IntroAnimation] Reduced motion - skipping');
       return;
     }
 
-    this.log('Playing exit animation (reverse intro)');
-    console.log('[IntroAnimation] Starting exit animation');
+    this.log('Playing exit animation');
 
-    // Get overlay and SVG elements
     this.morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
     const morphSvg = document.getElementById(DOM_ELEMENT_IDS.morphSvg) as SVGSVGElement | null;
 
-    console.log('[IntroAnimation] morphOverlay:', this.morphOverlay);
-    console.log('[IntroAnimation] morphSvg:', morphSvg);
-
     if (!this.morphOverlay || !morphSvg) {
-      this.log('Morph overlay not found, skipping exit animation');
-      console.log('[IntroAnimation] FAILED: Overlay or SVG not found');
+      this.log('Morph overlay not found');
       return;
     }
 
-    // Get business card for alignment
     const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
-    console.log('[IntroAnimation] businessCard:', businessCard);
     if (!businessCard) {
       this.log('Business card not found');
-      console.log('[IntroAnimation] FAILED: Business card not found');
       return;
     }
 
-    // Get intro nav for fade out
-    const introNav = document.querySelector('.intro-nav') as HTMLElement;
-    console.log('[IntroAnimation] introNav:', introNav);
-
-    // Use cached SVG if available, otherwise fetch
-    let svgText: string;
-    if (this.cachedSvgText) {
-      console.log('[IntroAnimation] Using cached SVG');
-      svgText = this.cachedSvgText;
-    } else {
-      console.log('[IntroAnimation] Loading SVG from:', PAW_SVG);
-      const response = await fetch(PAW_SVG);
-      svgText = await response.text();
-      this.cachedSvgText = svgText;
-    }
-    console.log('[IntroAnimation] SVG ready, length:', svgText.length);
+    const svgText = await this.getSvgText();
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
 
-    // Get SVG elements
     const armBase = svgDoc.getElementById(SVG_ELEMENT_IDS.armBase);
     const position1 = svgDoc.getElementById(SVG_ELEMENT_IDS.position1);
     const position2 = svgDoc.getElementById(SVG_ELEMENT_IDS.position2);
     const position3 = svgDoc.getElementById(SVG_ELEMENT_IDS.position3);
     const cardGroup = svgDoc.getElementById(SVG_ELEMENT_IDS.cardGroup);
 
-    console.log('[IntroAnimation] SVG elements found:',
-      { armBase: !!armBase, position1: !!position1, position2: !!position2, position3: !!position3, cardGroup: !!cardGroup });
-
     if (!position1 || !position2 || !position3) {
       this.log('Position groups not found');
-      console.log('[IntroAnimation] FAILED: Position groups missing');
       return;
     }
 
@@ -910,48 +899,28 @@ export class IntroAnimationModule extends BaseModule {
       // Add completed wrapper to the SVG element
       morphSvg.appendChild(transformWrapper);
 
-      // NOTE: paw-exit class was already added at the start (before alignment calculation)
-      // This ensures the overlay CSS dimensions are correct for pixel-perfect alignment
-
-      // Show overlay FIRST (with animated card covering static card)
-      // This creates a brief overlap where both cards are visible
+      // Show overlay and hide business card
       const overlay = this.morphOverlay!;
-      console.log('[IntroAnimation] Showing overlay (animated card will cover static card)');
       overlay.style.visibility = 'visible';
       overlay.style.pointerEvents = 'auto';
       overlay.classList.remove('hidden');
       overlay.style.display = 'block';
       overlay.style.opacity = '1';
-
-      // Force a repaint to ensure overlay is rendered before hiding static card
       void overlay.offsetHeight;
-
-      // Now hide actual business card (it's covered by animated card anyway)
-      console.log('[IntroAnimation] Hiding business card (covered by animated card)');
       businessCard.style.opacity = '0';
-
 
       // Get finger paths for morphing
       const fingerA3 = clonedPos3.querySelector(`#${SVG_ELEMENT_IDS.fingerA3}`) as SVGPathElement;
       const fingerB3 = clonedPos3.querySelector(`#${SVG_ELEMENT_IDS.fingerB3}`) as SVGPathElement;
       const fingerC3 = clonedPos3.querySelector(`#${SVG_ELEMENT_IDS.fingerC3}`) as SVGPathElement;
 
-      console.log('[IntroAnimation] Exit - Finger elements from Position 3:',
-        { fingerA3: !!fingerA3, fingerB3: !!fingerB3, fingerC3: !!fingerC3 });
-
       const fingerA2 = position2.querySelector(`#${SVG_ELEMENT_IDS.fingerA2}`) as SVGPathElement;
       const fingerB2 = position2.querySelector(`#${SVG_ELEMENT_IDS.fingerB2}`) as SVGPathElement;
       const fingerC2 = position2.querySelector(`#${SVG_ELEMENT_IDS.fingerC2}`) as SVGPathElement;
 
-      console.log('[IntroAnimation] Exit - Finger elements from Position 2:',
-        { fingerA2: !!fingerA2, fingerB2: !!fingerB2, fingerC2: !!fingerC2 });
-
       const fingerA1 = position1.querySelector(`#${SVG_ELEMENT_IDS.fingerA1}`) as SVGPathElement;
       const fingerB1 = position1.querySelector(`[id="${SVG_ELEMENT_IDS.fingerB1Container}"] path`) as SVGPathElement;
       const fingerC1 = position1.querySelector(`[id="${SVG_ELEMENT_IDS.fingerC1Container}"] path`) as SVGPathElement;
-
-      console.log('[IntroAnimation] Exit - Finger elements from Position 1:',
-        { fingerA1: !!fingerA1, fingerB1: !!fingerB1, fingerC1: !!fingerC1 });
 
       const fingerA2PathData = fingerA2?.getAttribute('d');
       const fingerA1PathData = fingerA1?.getAttribute('d');
@@ -960,33 +929,22 @@ export class IntroAnimationModule extends BaseModule {
       const fingerC2PathData = fingerC2?.getAttribute('d');
       const fingerC1PathData = fingerC1?.getAttribute('d');
 
-      // Thumb morph targets (reverse: 3→2→1)
       const thumb2 = position2.querySelector(`#${SVG_ELEMENT_IDS.thumb2}`) as SVGPathElement;
       const thumb1 = position1.querySelector(`#${SVG_ELEMENT_IDS.thumb1}`) as SVGPathElement;
       const thumb2PathData = thumb2?.getAttribute('d');
       const thumb1PathData = thumb1?.getAttribute('d');
 
-      console.log('[IntroAnimation] Exit - Path data found:',
-        { A2: !!fingerA2PathData, A1: !!fingerA1PathData, B2: !!fingerB2PathData, B1: !!fingerB1PathData, C2: !!fingerC2PathData, C1: !!fingerC1PathData, thumb2: !!thumb2PathData, thumb1: !!thumb1PathData });
-
-      // Create exit timeline (kill any existing one first to prevent memory leaks)
-      console.log('[IntroAnimation] Creating exit timeline');
       if (this.exitTimeline) {
         this.exitTimeline.kill();
         this.exitTimeline = null;
       }
+
       this.exitTimeline = gsap.timeline({
-        onStart: () => {
-          console.log('[IntroAnimation] Exit timeline started');
-        },
         onComplete: () => {
-          console.log('[IntroAnimation] Exit timeline complete');
-          // Hide overlay after animation
           if (this.morphOverlay) {
             this.morphOverlay.style.visibility = 'hidden';
             this.morphOverlay.style.pointerEvents = 'none';
           }
-          // Remove paw-exit class and restore intro-complete
           document.documentElement.classList.remove('paw-exit');
           document.documentElement.classList.add('intro-complete');
           resolve();
@@ -1142,72 +1100,51 @@ export class IntroAnimationModule extends BaseModule {
   }
 
   /**
-   * Play entry animation (same as intro)
-   * Called when transitioning TO the home/intro page
-   *
-   * Animation sequence:
-   * 1. Paw + card enter from off-screen
-   * 2. Paw clutches card motionless
-   * 3. Fingers release (morph 1 → 2)
-   * 4. Paw retracts while fingers open (morph 2 → 3)
-   * 5. Nav links fade in
-   *
-   * @returns Promise that resolves when animation completes
+   * Get cached or fetch SVG text
    */
+  private async getSvgText(): Promise<string> {
+    if (this.cachedSvgText) {
+      return this.cachedSvgText;
+    }
+    const response = await fetch(PAW_SVG);
+    this.cachedSvgText = await response.text();
+    return this.cachedSvgText;
+  }
+
   /**
-   * Play the coyote paw entry animation when entering the home page / business card section
-   * NOTE: This animation is ONLY for the home page / business card section.
-   * It should NOT be used for any other pages or sections.
+   * Show intro page elements as fallback when animation unavailable
+   */
+  private showIntroFallback(): void {
+    const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
+    const introNav = document.querySelector('.intro-nav') as HTMLElement;
+    if (businessCard) businessCard.style.opacity = '1';
+    if (introNav) introNav.style.opacity = '1';
+  }
+
+  /**
+   * Play the coyote paw entry animation when entering the home page
    */
   async playEntryAnimation(): Promise<void> {
-    console.log('[IntroAnimation] playEntryAnimation called - ONLY for home page / business card section');
-
-    // Skip on mobile - no paw animation
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
-    if (isMobile) {
-      this.log('Mobile - skipping entry animation');
-      // Just show card and nav
-      const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
-      const introNav = document.querySelector('.intro-nav') as HTMLElement;
-      if (businessCard) businessCard.style.opacity = '1';
-      if (introNav) introNav.style.opacity = '1';
+    if (isMobile || this.reducedMotion) {
+      this.log('Skipping entry animation');
+      this.showIntroFallback();
       return;
     }
 
-    // Skip if reduced motion preferred
-    if (this.reducedMotion) {
-      this.log('Reduced motion - skipping entry animation');
-      const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
-      const introNav = document.querySelector('.intro-nav') as HTMLElement;
-      if (businessCard) businessCard.style.opacity = '1';
-      if (introNav) introNav.style.opacity = '1';
-      return;
-    }
+    this.log('Playing entry animation');
 
-    this.log('Playing entry animation (paw brings card in)');
-
-    // Get overlay and SVG elements
     this.morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
     let morphSvg = document.getElementById(DOM_ELEMENT_IDS.morphSvg) as SVGSVGElement | null;
 
-    // If overlay doesn't exist, we can't play the animation
     if (!this.morphOverlay) {
-      console.log('[IntroAnimation] Morph overlay not found, showing card directly');
-      this.log('Morph overlay not found, showing card directly');
-      const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
-      const introNav = document.querySelector('.intro-nav') as HTMLElement;
-      if (businessCard) businessCard.style.opacity = '1';
-      if (introNav) introNav.style.opacity = '1';
+      this.showIntroFallback();
       return;
     }
 
-    // Ensure overlay is accessible (remove hidden class if present)
     this.morphOverlay.classList.remove('hidden');
 
-    // If SVG doesn't exist inside overlay, create it
     if (!morphSvg) {
-      console.log('[IntroAnimation] SVG not found in overlay, creating it');
-      this.log('SVG not found in overlay, creating it');
       morphSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       morphSvg.setAttribute('id', DOM_ELEMENT_IDS.morphSvg);
       morphSvg.setAttribute('width', '100%');
@@ -1216,36 +1153,21 @@ export class IntroAnimationModule extends BaseModule {
       this.morphOverlay.appendChild(morphSvg);
     }
 
-    console.log('[IntroAnimation] Overlay and SVG found, proceeding with entry animation');
-
-    // Get business card for alignment
     const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
     if (!businessCard) {
       this.log('Business card not found');
       return;
     }
 
-    // Get intro nav for fade in at end
     const introNav = document.querySelector('.intro-nav') as HTMLElement;
-
-    // Hide nav initially
     if (introNav) {
       gsap.set(introNav, { opacity: 0 });
     }
 
-    // Use cached SVG if available, otherwise fetch
-    let svgText: string;
-    if (this.cachedSvgText) {
-      svgText = this.cachedSvgText;
-    } else {
-      const response = await fetch(PAW_SVG);
-      svgText = await response.text();
-      this.cachedSvgText = svgText;
-    }
+    const svgText = await this.getSvgText();
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
 
-    // Get SVG elements
     const armBase = svgDoc.getElementById(SVG_ELEMENT_IDS.armBase);
     const position1 = svgDoc.getElementById(SVG_ELEMENT_IDS.position1);
     const position2 = svgDoc.getElementById(SVG_ELEMENT_IDS.position2);
@@ -1254,8 +1176,7 @@ export class IntroAnimationModule extends BaseModule {
 
     if (!position1 || !position2) {
       this.log('Position groups not found');
-      if (businessCard) businessCard.style.opacity = '1';
-      if (introNav) gsap.set(introNav, { opacity: 1 });
+      this.showIntroFallback();
       return;
     }
 

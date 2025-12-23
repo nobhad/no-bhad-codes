@@ -4,6 +4,53 @@
 
 ## Recent Updates (December 22, 2025)
 
+### GSAP Animation Cleanup and Intro Nav Fix - COMPLETE
+
+Cleaned up page transition code, removed excessive console.logs, and fixed intro nav link animations to use GSAP instead of CSS.
+
+**Completed:**
+
+1. **Page Transition Cleanup**
+   - Removed 70+ console.log statements from page-transition.ts
+   - Extracted helper methods: `hideIntroPageImmediately()`, `prepareTargetPage()`, `showIntroPageFallback()`
+   - Simplified `transitionTo()` from ~200 lines to ~75 lines
+   - Consolidated `initializePageStates()` and `listenForIntroComplete()`
+   - Simplified `animateIn()` and `animateOut()` methods
+
+2. **Intro Animation Cleanup**
+   - Removed 30+ console.log statements from intro-animation.ts
+   - Added `getSvgText()` helper for cached SVG fetching
+   - Added `showIntroFallback()` helper for fallback display
+   - Simplified `playExitAnimation()` and `playEntryAnimation()` methods
+
+3. **Contact Animation Cleanup**
+   - Removed emoji characters from log statements
+   - Removed verbose timeline progress logging
+   - Simplified `playFormAnimation()`, `playOutAnimation()`, `resetAnimatedElements()`
+
+4. **Intro Nav Links Animation Fix**
+   - Removed CSS `drop-in` animation from `.intro-nav-link` (was using CSS keyframes)
+   - Changed to GSAP fade-in animation (opacity 0 -> 1, duration 0.8s)
+   - Updated `completeIntro()` to fade in nav with GSAP
+   - Updated `skipIntroImmediately()` to set nav visible with GSAP
+   - Entry animation already uses GSAP fade for nav links
+
+**Files Modified:**
+
+- `src/modules/animation/page-transition.ts` - Cleaned up, extracted helpers, removed console.logs
+- `src/modules/animation/intro-animation.ts` - Cleaned up, added helpers, fixed nav fade
+- `src/modules/animation/contact-animation.ts` - Cleaned up, simplified methods
+- `src/styles/components/business-card.css` - Removed CSS animation, GSAP handles nav links
+
+**Result:**
+
+- Cleaner, more maintainable animation code
+- Intro nav links fade in slowly via GSAP (not drop animation)
+- Coyote paw animation plays on initial load and when returning to home page
+- All pages (about/contact/projects) use same blur/fade transitions
+
+---
+
 ### Coyote Paw Animation Scope and Entry Animation Fix - COMPLETE
 
 Fixed coyote paw intro/exit animations to only play on home page and fixed entry animation not playing when navigating to home.
@@ -617,7 +664,7 @@ Comprehensive optimization of GSAP animations and page transitions:
 
 ## System Status
 
-**Last Updated**: December 22, 2025 (Projects page SVG enhancements and UI polish completed)
+**Last Updated**: December 22, 2025 (GSAP animation cleanup and intro nav fix completed)
 
 ### Build Status
 

@@ -41,6 +41,7 @@ export class ContactAnimationModule extends BaseModule {
   private cardMouseLeaveHandler: (() => void) | null = null;
   private businessCardEl: HTMLElement | null = null;
   private businessCardInner: HTMLElement | null = null;
+  private blurAnimationComplete = false; // Track if blur animation has completed
 
   constructor(options: ModuleOptions = {}) {
     super('ContactAnimationModule', { debug: true, ...options });
@@ -93,24 +94,9 @@ export class ContactAnimationModule extends BaseModule {
     // Debug: log what elements were found
     this.log(`Elements found - h2: ${!!heading}, contactOptions: ${!!contactOptions}, card: ${!!businessCard}, cardColumn: ${!!cardColumn}`);
 
-    // ========================================================================
-    // CREATE ANIMATION TIMELINE
-    // Using 'from' tweens so elements start visible and animate FROM hidden state
-    // Timeline is controlled by ScrollTrigger's toggleActions
-    // ========================================================================
     this.timeline = gsap.timeline({
-      onStart: () => {
-        this.log('📢 CONTACT FORM ANIMATION STARTED');
-      },
-      onUpdate: () => {
-        // Log progress every 10%
-        const progress = Math.round(this.timeline!.progress() * 10) * 10;
-        if (progress % 20 === 0) {
-          this.log(`Animation progress: ${progress}%`);
-        }
-      },
       onComplete: () => {
-        this.log('✅ CONTACT FORM ANIMATION COMPLETE');
+        this.log('Contact form animation complete');
       }
     });
 
@@ -469,175 +455,117 @@ export class ContactAnimationModule extends BaseModule {
       }
     }
 
-    // ========================================================================
-    // TRIGGER: Listen for hero reveal events (after wheel animation completes)
-    // ========================================================================
-
-    // Pause the timeline initially - we'll play it when hero is revealed
-    this.log(`Timeline created with ${this.timeline.totalDuration()}s duration`);
-    this.log(`Timeline progress before pause: ${this.timeline.progress()}`);
     this.timeline.pause();
-    this.log(`Timeline paused - progress: ${this.timeline.progress()}, paused: ${this.timeline.paused()}`);
 
-    // Listen for page transition completion - this fires after blur/fade animation completes
-    // Form animations should start AFTER the page transition blur animation ends
     this.on('PageTransitionModule:contact-page-ready', (() => {
-      this.log('Contact page blur animation complete - starting form animations');
+      this.blurAnimationComplete = true;
       this.playFormAnimation();
     }) as EventListener);
-    
-    // Fallback: Also listen for page-changed event and wait a bit for blur to complete
-    // This handles cases where the event might not fire
+
+    // Fallback listener
     this.on('PageTransitionModule:page-changed', ((event: CustomEvent) => {
       const { to } = event.detail || {};
-      if (to === 'contact') {
-        // Wait for blur animation to complete (fade: 0.6s + pause: 0.4s + blur clear: 0.7s = ~1.7s)
+      if (to === 'contact' && !this.blurAnimationComplete) {
         setTimeout(() => {
-          if (!this.timeline?.isActive()) {
-            this.log('Fallback: Contact page ready - starting form animations');
+          if (!this.blurAnimationComplete && !this.timeline?.isActive()) {
+            this.blurAnimationComplete = true;
             this.playFormAnimation();
           }
-        }, 1800); // Slightly longer than blur animation duration
+        }, 3000);
       }
     }) as EventListener);
 
-    // Listen for page navigation away from contact
     this.on('PageTransitionModule:page-changed', ((event: CustomEvent) => {
       const { to, from } = event.detail || {};
 
       if (from === 'contact') {
-        this.log('Navigated away from contact - playing out animation');
         this.playOutAnimation();
+        this.blurAnimationComplete = false;
       }
 
-      // Reset animation state when entering contact
-      // Note: PageTransitionModule handles visibility - don't interfere
       if (to === 'contact') {
-        this.log('Navigated to contact - resetting animation state');
-        // Reset animated elements to initial state for next animation
         this.resetAnimatedElements();
-        // Don't manipulate container visibility - PageTransitionModule handles it
+        this.blurAnimationComplete = false;
       }
     }) as EventListener);
 
-    // Also check if we're already on contact page (direct navigation)
     const currentHash = window.location.hash;
     if (currentHash === '#/contact' || currentHash === '#contact') {
-      this.log('Already on contact page - waiting for blur animation to complete');
-      // Reset animated elements to initial state for animation
       this.resetAnimatedElements();
-      // Fallback: if blur animation doesn't complete, play form anyway after delay
       setTimeout(() => {
-        if (!this.timeline?.isActive()) {
-          this.log('Fallback: Contact page ready timeout - playing form animation');
+        if (!this.blurAnimationComplete && !this.timeline?.isActive()) {
+          this.blurAnimationComplete = true;
           this.playFormAnimation();
         }
-      }, 2000); // Wait for blur animation (fade: 0.6s + pause: 0.4s + blur clear: 0.7s = ~1.7s)
+      }, 10000);
     }
 
-    this.log('Contact animation initialized (waiting for blur animation to complete)');
+    this.log('Contact animation initialized');
   }
 
   /**
-   * Play the form animation after hero reveal
+   * Play the form animation
    */
   private playFormAnimation(): void {
-    if (!this.container || !this.timeline) {
-      this.warn('Cannot play form animation - container or timeline missing');
-      return;
-    }
+    if (!this.container || !this.timeline) return;
 
-    this.log('Playing form animation...');
-    this.log(`Timeline state: paused=${this.timeline.paused()}, progress=${this.timeline.progress()}`);
-
-    // Don't manipulate container visibility - PageTransitionModule handles it
-    // Only ensure contact-content is visible for animation
-
-    // Also make the contact-content visible (in case hero didn't fade it in)
     const contactContent = this.container.querySelector('.contact-content');
     if (contactContent) {
       gsap.set(contactContent, { opacity: 1 });
     }
 
-    // CRITICAL: Ensure all fields are reset BEFORE playing animation
-    this.log('Force resetting fields before animation starts...');
     this.resetAnimatedElements();
 
-    // Small delay to ensure reset completes before animation starts
     requestAnimationFrame(() => {
-      this.log('Restarting timeline from beginning...');
       this.timeline?.restart();
     });
   }
 
   /**
-   * Play quick out animation when leaving contact page
-   * Immediately hides contact section to prevent overlap with other pages
+   * Play out animation when leaving contact page
    */
   private playOutAnimation(): void {
     if (!this.container) return;
-
-    // Kill any running timeline immediately
     this.timeline?.kill();
-
-    // Don't manipulate container visibility - PageTransitionModule handles it
-    // Only reset animated elements for next visit
-
-    // Reset all animated elements to their natural state for next visit
     this.resetAnimatedElements();
-
-    this.log('Contact page hidden');
   }
 
   /**
    * Reset all animated elements to their initial animation state
-   * Called when leaving contact page so next visit animation works correctly
    */
   private resetAnimatedElements(): void {
     if (!this.container) return;
 
-    this.log('Resetting all animated elements to initial state...');
-
-    // Reset heading, contact options, and card column to pre-animation state (above viewport)
-    const heading = this.container.querySelector('h2');
-    const contactOptions = this.container.querySelector('.contact-options');
-    const cardColumn = this.container.querySelector('.contact-card-column');
     const dropDistance = ANIMATION_CONSTANTS.DIMENSIONS.CONTACT_DROP_DISTANCE;
-
-    if (heading) {
-      gsap.set(heading, { y: -dropDistance, opacity: 0 });
-    }
-    if (contactOptions) {
-      gsap.set(contactOptions, { y: -dropDistance, opacity: 0 });
-    }
-    if (cardColumn) {
-      gsap.set(cardColumn, { y: -dropDistance, opacity: 0 });
-    }
-
-    // Reset form container overflow
-    const formContainer = this.container.querySelector('.contact-form') ||
-                          this.container.querySelector('.contact-form-column');
-    if (formContainer) {
-      gsap.set(formContainer, { overflow: 'hidden' });
-    }
-
-    // Reset form fields to initial animation state
     const fieldBorderRadius = '0 50px 50px 50px';
     const startWidth = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_WIDTH_START;
     const compressedHeight = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_COMPRESSED;
 
-    const nameField = this.container.querySelector('#name')?.closest('.input-item');
-    const companyField = this.container.querySelector('#company')?.closest('.input-item');
-    const emailField = this.container.querySelector('#email')?.closest('.input-item');
-    const messageField = this.container.querySelector('#message')?.closest('.input-item') ||
-                         this.container.querySelector('textarea')?.closest('.input-item');
+    // Reset header elements
+    const heading = this.container.querySelector('h2');
+    const contactOptions = this.container.querySelector('.contact-options');
+    const cardColumn = this.container.querySelector('.contact-card-column');
 
-    // Reset all fields to height: 0, narrow width
-    [nameField, companyField, emailField, messageField].forEach((field, i) => {
+    if (heading) gsap.set(heading, { y: -dropDistance, opacity: 0 });
+    if (contactOptions) gsap.set(contactOptions, { y: -dropDistance, opacity: 0 });
+    if (cardColumn) gsap.set(cardColumn, { y: -dropDistance, opacity: 0 });
+
+    // Reset form container
+    const formContainer = this.container.querySelector('.contact-form') ||
+                          this.container.querySelector('.contact-form-column');
+    if (formContainer) gsap.set(formContainer, { overflow: 'hidden' });
+
+    // Reset form fields
+    const fields = [
+      this.container.querySelector('#name')?.closest('.input-item'),
+      this.container.querySelector('#company')?.closest('.input-item'),
+      this.container.querySelector('#email')?.closest('.input-item'),
+      this.container.querySelector('#message')?.closest('.input-item') ||
+        this.container.querySelector('textarea')?.closest('.input-item')
+    ];
+
+    fields.forEach((field, i) => {
       if (!field) return;
-
-      const fieldName = field.querySelector('input, textarea')?.getAttribute('name') || `field-${i}`;
-      this.log(`Resetting ${fieldName} to collapsed state (height: 0, width: ${startWidth}px)`);
 
       gsap.set(field, {
         height: 0,
@@ -661,28 +589,19 @@ export class ContactAnimationModule extends BaseModule {
       }
 
       const label = field.querySelector('label');
-      if (label) {
-        gsap.set(label, { opacity: 0 });
-      }
+      if (label) gsap.set(label, { opacity: 0 });
     });
 
-    // Reset submit button
+    // Reset button
     const submitButton = this.container.querySelector('.submit-button, button[type="submit"]');
-    if (submitButton) {
-      gsap.set(submitButton, { zIndex: 1, opacity: 0, scale: 0.8 });
-    }
+    if (submitButton) gsap.set(submitButton, { zIndex: 1, opacity: 0, scale: 0.8 });
 
-    // Reset business card to back showing (rotated 180)
+    // Reset business card
     const businessCard = this.container.querySelector('#contact-business-card');
-    if (businessCard) {
-      const cardInner = businessCard.querySelector('.business-card-inner');
-      if (cardInner) {
-        gsap.set(cardInner, { rotationY: 180 });
-      }
-    }
+    const cardInner = businessCard?.querySelector('.business-card-inner');
+    if (cardInner) gsap.set(cardInner, { rotationY: 180 });
 
     this.hasFlippedCard = false;
-    this.log('Contact elements reset to initial animation state');
   }
 
   /**
