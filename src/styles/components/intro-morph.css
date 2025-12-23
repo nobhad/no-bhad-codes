@@ -60,7 +60,7 @@
 
 /* Paw path styling - solid black fill for paw silhouette */
 .morph-paw {
-  fill: #000;
+  fill: var(--color-black, #000);
   stroke: none;
   transform-origin: center center;
   will-change: transform, opacity;
@@ -86,14 +86,14 @@
 
 /* cls-2: Card text - dark fill */
 .morph-card-group .cls-2 {
-  fill: #231f20;
+  fill: var(--color-svg-text-right, #231f20);
 }
 
 /* cls-3: Card outline - white fill with black stroke */
 .morph-card-group .cls-3,
 #morph-card {
-  fill: #fff;
-  stroke: #000;
+  fill: var(--color-white, #fff);
+  stroke: var(--color-black, #000);
   stroke-miterlimit: 10;
   stroke-width: 5px;
 }

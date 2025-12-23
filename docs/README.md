@@ -15,12 +15,13 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 | **[Settings](./features/SETTINGS.md)** | Account, notifications, billing information |
 | **[New Project](./features/NEW_PROJECT.md)** | Project request form, validation |
 
-### Scroll & Animation Modules
+### Animation Modules
 
 | Document | Description |
 |----------|-------------|
-| **[Infinite Scroll](./features/INFINITE_SCROLL.md)** | Bidirectional infinite scroll looping |
+| **[Intro Animation](./features/INTRO_ANIMATION.md)** | Coyote paw intro animation (desktop/mobile) |
 | **[Scroll Snap](./features/SCROLL_SNAP.md)** | GSAP-powered section snapping |
+| **[Infinite Scroll](./features/INFINITE_SCROLL.md)** | ~~Bidirectional infinite scroll~~ (DEPRECATED - replaced by virtual pages) |
 
 ### Design System
 
@@ -159,21 +160,28 @@ class MyComponent extends BaseComponent<Props, State> {
 
 ### Navigation System
 
-**Current Navigation Structure:**
-- **Home** (00) - Main landing page
-- **Portfolio** (01) - Projects showcase
-- **Client** (02) - Client portal with dropdown submenu:
-  - Intake Form (01)
-  - Projects (02)
-- **About** (03) - About section  
-- **Contact** (04) - Contact form
+**Current Navigation Structure (Updated December 2025):**
 
-**Submenu Features:**
-- Smooth dropdown animations using max-height transitions
-- Brand color integration (#00ff41 primary green)
-- Click-outside-to-close functionality
-- Mobile responsive design
-- Theme system compatibility
+- **Home** (00) - Main landing page with business card
+- **About** (01) - About section with hero animation
+- **Contact** (02) - Contact form with cascade animations
+- **Projects** (03) - Projects showcase (WIP page)
+
+**Client Portal** (accessible via `/client/portal`):
+
+- Secure login with JWT authentication
+- Project dashboard and tracking
+- Messaging system
+- File management
+- Invoices
+
+**Navigation Features:**
+
+- Hash-based routing (`#/`, `#/about`, `#/contact`, `#/projects`)
+- Virtual page transitions with blur-in/blur-out animations
+- GSAP-powered animations (nav links fade in on intro)
+- Mobile hamburger menu
+- Theme system compatibility (crimson red light mode, matrix green dark mode)
 - Accessibility features (keyboard navigation, ARIA)
 
 ### Component Registration

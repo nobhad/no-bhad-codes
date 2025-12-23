@@ -101,6 +101,12 @@
   --color-shadow-md: rgba(0, 0, 0, 0.1);
   --color-shadow-lg: rgba(0, 0, 0, 0.15);
   --color-shadow-xl: rgba(0, 0, 0, 0.25);
+  --color-shadow-2xl: rgba(0, 0, 0, 0.3);
+  --color-shadow-3xl: rgba(0, 0, 0, 0.5);
+
+  /* Overlay Colors (for backdrops/modals) */
+  --color-overlay-light: rgba(0, 0, 0, 0.5);
+  --color-overlay-medium: rgba(0, 0, 0, 0.7);
 }
 
 /* ============================================
@@ -284,8 +290,13 @@ html[data-theme="light"] {
 
   /* Legacy macOS window button colors */
   --color-mac-close: #ff5f56;
+  --color-mac-close-rgb: 255, 95, 86;
   --color-mac-minimize: #ffbd2e;
   --color-mac-maximize: #27ca40;
+
+  /* RGB variants for rgba() usage */
+  --color-error-rgb: 239, 68, 68;
+  --color-success-rgb: 16, 185, 129;
 
   /* Legacy skeleton loading */
   --color-skeleton-base: #2a2a2a;

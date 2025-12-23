@@ -20,7 +20,7 @@ This document defines animation standards for the project. All animations must f
 
 **Token Source:** `/src/design-system/tokens/animations.css`
 
-**Last Updated:** December 20, 2025
+**Last Updated:** December 23, 2025
 
 ---
 

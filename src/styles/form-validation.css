@@ -6,7 +6,7 @@
 .form-select.error,
 .form-textarea.error {
   border-color: var(--color-error-500);
-  background-color: rgba(239, 68, 68, 0.05);
+  background-color: rgba(var(--color-error-rgb, 239, 68, 68), 0.05);
 }
 
 .field-error {
@@ -25,7 +25,7 @@
 }
 
 .form-message.success {
-  background-color: rgba(16, 185, 129, 0.1);
+  background-color: rgba(var(--color-success-rgb, 16, 185, 129), 0.1);
   border: 1px solid var(--color-success-500);
   color: var(--color-success-500);
 }

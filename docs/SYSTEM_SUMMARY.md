@@ -98,6 +98,44 @@ This document summarizes the comprehensive invoice generation and file upload sy
 - `src/features/client/client-portal.ts` - ~400 lines of file handling code
 - `eslint.config.js` - Added File, FileList, DataTransfer globals
 
+### 4. Animation System (December 2025)
+
+**Purpose**: Comprehensive GSAP-based animation system for portfolio site with intro, page transitions, and section reveals.
+
+**Key Achievements**:
+
+- Coyote paw intro animation with SVG morphing (desktop)
+- Mobile intro animation fallback
+- Virtual page transitions with blur-in/blur-out effects
+- Contact form cascade animations
+- Section reveal animations with ScrollTrigger
+- Performance optimization (caching, throttling, debouncing)
+
+**Technical Implementation**:
+
+- **Animation Engine**: GSAP 3.12.5 with ScrollTrigger plugin
+- **SVG Morphing**: 3 finger positions for paw animation
+- **Timeline Management**: Proper cleanup and kill methods
+- **Configuration**: Centralized `animation-constants.ts` (200+ lines)
+
+**Key Files**:
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/modules/animation/intro-animation.ts` | 350+ | Desktop intro (coyote paw) |
+| `src/modules/animation/intro-animation-mobile.ts` | 200+ | Mobile intro fallback |
+| `src/modules/animation/contact-animation.ts` | 280+ | Contact form animations |
+| `src/modules/animation/page-transition.ts` | 250+ | Virtual page transitions |
+| `src/config/animation-constants.ts` | 200+ | Centralized animation values |
+
+**Recent Improvements (December 22, 2025)**:
+
+- Removed CSS transitions conflicting with GSAP
+- Fixed intro nav links to use GSAP fade
+- Implemented contact section blur animation sequence
+- Added coyote paw entry animation for home navigation
+- SVG pixel-perfect alignment with preserveAspectRatio
+
 ## 🏗️ Architecture Highlights
 
 ### Database Integration
@@ -198,7 +236,7 @@ This document summarizes the comprehensive invoice generation and file upload sy
 
 ### Runtime Dependencies
 
-- **Node.js**: 18+ with TypeScript support
+- **Node.js**: 20.x with TypeScript support
 - **Database**: SQLite with foreign key support
 - **Storage**: File system access for uploads directory
 - **Memory**: 512MB minimum, 1GB recommended

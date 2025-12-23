@@ -1325,7 +1325,7 @@ npm run audit              # Security audit
 
 ## 🔍 CODEBASE HEALTH
 
-**Last Code Review: December 19, 2025**
+**Last Code Review: December 23, 2025**
 
 ### Critical Issues
 
@@ -1335,6 +1335,8 @@ npm run audit              # Security audit
 | `src/modules/animation/intro-animation.ts` | 400+ lines, hardcoded SVG paths | FIXED (refactored Dec 19, SVG paths in config) |
 | `src/services/code-protection-service.ts` | Event listener cleanup issues | FIXED |
 | `src/features/admin/admin-security.ts` | localStorage for auth data | FIXED (all modules migrated to HttpOnly cookies) |
+| Animation CSS conflicts | CSS transitions conflicting with GSAP | FIXED (Dec 22) |
+| Font loading issues | Acme font not displaying | FIXED (Dec 22, fonts.css imported first) |
 
 ### Files Exceeding Size Guidelines (300 lines)
 
@@ -1343,8 +1345,17 @@ npm run audit              # Security audit
 | `src/core/app.ts` | 452 | FIXED - Split Dec 19 (was 992 lines, now 4 files) |
 | `src/core/state/` | 4 files | FIXED - Split Dec 19 (was 824 lines in state.ts) |
 | `src/services/visitor-tracking.ts` | 730 | Pending - Split by tracking concern |
-| `src/features/admin/admin-dashboard.ts` | 600+ | Pending - Continue module extraction |
+| `src/features/admin/admin-dashboard.ts` | 2679 | Partial - Auth & project details extracted |
 | `src/styles/components/nav-*.css` | 4 files | FIXED - Split Dec 19 (was 1792 lines) |
+| `src/modules/animation/intro-animation.ts` | 1569 | Large but organized |
+
+**December 22, 2025 Animation Improvements:**
+
+- Removed CSS transitions conflicting with GSAP animations
+- Fixed intro nav links to use GSAP fade instead of CSS keyframes
+- Implemented contact section blur animation sequence
+- Added coyote paw entry animation for home page navigation
+- Created `fonts.css` for proper font loading order
 
 **December 19, 2025 Refactoring Summary:**
 
@@ -1402,13 +1413,16 @@ The system uses **HttpOnly cookies** for secure JWT token storage:
 
 - Admin dashboard modules still use Authorization headers (lower priority)
 
-### CSS Architecture Status (Updated December 19, 2025)
+### CSS Architecture Status (Updated December 23, 2025)
 
 Token system is excellent and now consistently used:
 
-- ✅ Hardcoded `#000` values migrated to `var(--color-black)` (27 instances)
-- ✅ Legacy `--fg`/`--bg` variables migrated to semantic tokens (65+ instances)
-- ✅ CSS files split into modular components
+- Hardcoded `#000` values migrated to `var(--color-black)` (27 instances)
+- Legacy `--fg`/`--bg` variables migrated to semantic tokens (65+ instances)
+- CSS files split into modular components
+- Navigation CSS split into 4 files (`nav-base`, `nav-animations`, `nav-responsive`, `nav-portal`)
+- Form CSS split into 3 files (`form-fields`, `form-buttons`, `form-validation`)
+- Created `fonts.css` for proper font loading (imported first)
 - See `/docs/design/CSS_ARCHITECTURE.md` for detailed findings
 
 ---

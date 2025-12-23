@@ -173,7 +173,7 @@
   /* CRITICAL: No CSS transitions - GSAP controls all animations */
   transition: none;
   border-radius: 0; /* No rounding - SVG has black stroke border */
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px var(--color-shadow-2xl);
 
   /* Prevent child elements from receiving pointer events during intro */
   pointer-events: none;
@@ -458,7 +458,7 @@
 .business-card-front:empty::before,
 .business-card-back:empty::before {
   content: "Business Card - Content Missing";
-  color: #999;
+  color: var(--color-text-tertiary);
   font-size: var(--font-size-sm);
   display: flex;
   align-items: center;
@@ -466,7 +466,7 @@
   width: 100%;
   height: 100%;
   background-color: var(--color-card-bg);
-  border: 2px dashed #ccc;
+  border: 2px dashed var(--color-border-secondary);
   border-radius: 0;
 }
 
@@ -632,11 +632,11 @@
 
 /* Dark Mode Enhancements - deeper shadow */
 html[data-theme="dark"] .business-card-inner {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75);
+  box-shadow: 0 8px 32px var(--color-shadow-xl);
 }
 
 html[data-theme="dark"] .intro-card-element {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75);
+  box-shadow: 0 8px 32px var(--color-shadow-xl);
 }
 
 html[data-theme="dark"] .business-card-container {

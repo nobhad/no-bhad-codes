@@ -74,7 +74,7 @@
   bottom: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-overlay-light);
   z-index: 10000;
   pointer-events: auto;
   isolation: isolate;
@@ -98,7 +98,7 @@
   visibility: hidden;
   transform: translateY(-10px);
   transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 40px var(--color-shadow-2xl);
   isolation: isolate;
 }
 
@@ -399,7 +399,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   bottom: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--color-overlay-medium);
   z-index: 20000;
   pointer-events: auto;
   /* Backdrop blur for depth */
@@ -425,7 +425,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   z-index: 20001 !important;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 60px var(--color-shadow-3xl);
   background-color: var(--color-terminal-bg);
 }
 
@@ -439,7 +439,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   top: 10px;
   right: 10px;
   z-index: 10;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-overlay-light);
   border: none;
   border-radius: 50%;
   width: 36px;
@@ -448,13 +448,13 @@ html[data-theme="dark"] .portal-dropdown-header {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #888;
+  color: var(--color-text-tertiary);
   transition: color 0.2s ease, background 0.2s ease;
 }
 
 .intake-modal-close:hover {
-  color: #fff;
-  background: rgba(255, 95, 86, 0.8);
+  color: var(--color-text-inverse);
+  background: rgba(var(--color-mac-close-rgb, 255, 95, 86), 0.8);
 }
 
 /* Container for terminal */

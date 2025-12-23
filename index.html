@@ -7,10 +7,36 @@
     <title>No Bhad Codes - Professional Web Development</title>
 
     <!-- All CSS moved to external stylesheets -->
-    <!-- Critical CSS for mobile - ensures header visible from first paint (same fixed as desktop) -->
+    <!-- Critical CSS - ensures correct visibility from first paint before external CSS loads -->
     <style>
+      /* CRITICAL: Intro overlay visible immediately on desktop */
+      @media screen and (min-width: 768px) {
+        .intro-morph-overlay {
+          position: fixed;
+          top: 60px; /* --header-height fallback */
+          left: 0;
+          width: 100vw;
+          height: calc(100vh - 60px - 40px); /* header + footer fallback */
+          z-index: 50;
+          background-color: #e0e0e0; /* --color-neutral-300 light mode fallback */
+          opacity: 1;
+          visibility: visible;
+        }
+        .intro-morph-overlay.hidden {
+          opacity: 0;
+          visibility: hidden;
+        }
+        /* Hide main content during intro */
+        .intro-loading main {
+          opacity: 0;
+          visibility: hidden;
+        }
+      }
+      /* CRITICAL: Header must be visible immediately on mobile */
       @media screen and (max-width: 767px) {
-        /* CRITICAL: Header must be visible immediately on mobile */
+        .intro-morph-overlay {
+          display: none;
+        }
         .header,
         .intro-loading .header {
           opacity: 1 !important;
@@ -106,8 +132,8 @@
     <script type="module" src="/src/main.ts"></script>
   </head>
   <body>
-    <!-- Intro Morph Animation Overlay -->
-    <div id="intro-morph-overlay" class="intro-morph-overlay hidden">
+    <!-- Intro Morph Animation Overlay - visible by default, hidden by JS when not on intro page -->
+    <div id="intro-morph-overlay" class="intro-morph-overlay">
       <svg id="intro-morph-svg" class="intro-morph-svg" viewBox="0 0 2316.99 1801.19" preserveAspectRatio="xMidYMid meet">
         <!-- Card group - content loaded dynamically from coyote_paw.svg -->
         <g id="morph-card-group" class="morph-card-group"></g>

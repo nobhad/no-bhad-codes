@@ -412,6 +412,21 @@ main {
   visibility: visible;
 }
 
+/* Desktop: Hide main content during intro animation (overlay covers it anyway) */
+/* This prevents any flash of content before overlay renders */
+@media screen and (min-width: 768px) {
+  .intro-loading main {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .intro-complete main,
+  .intro-finished main {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
 /* Header visibility states - using specific selectors instead of !important */
 /* Base header is already visible (set in .header rule above) */
 .intro-loading .header,

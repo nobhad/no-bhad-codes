@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** December 17, 2025
+**Last Updated:** December 23, 2025
 
 ## Table of Contents
 
@@ -85,8 +85,8 @@ The design system provides the foundational tokens for the entire application.
 --color-brand-accent: #ffd93d
 
 /* Dark Mode */
---color-brand-primary: #00ff41   /* Matrix green */
---color-brand-primary-rgb: 0, 255, 65
+--color-brand-primary: #dc2626   /* Crimson red (same as light mode) */
+--color-brand-primary-rgb: 220, 38, 38
 ```
 
 ### Import Order
@@ -330,17 +330,21 @@ Quick stats display:
 ```css
 :root,
 html[data-theme="light"] {
-  --color-neutral-100: #f8f9fa;
-  --color-neutral-200: #e0e0e0;
+  /* Brand colors - Crimson red */
+  --color-brand-primary: #dc2626;
+  --color-brand-primary-rgb: 220, 38, 38;
+
+  /* Legacy aliases (map to brand) */
+  --color-neutral-100: var(--color-gray-100);
+  --color-neutral-200: var(--color-gray-200);
   --color-neutral-300: #e0e0e0;
-  --color-neutral-800: #343a40;
+  --color-neutral-800: var(--color-gray-800);
   --color-dark: #333333;
-  --color-primary: #00ff41;
-  --color-primary-rgb: 0, 255, 65;
+  --color-primary: var(--color-brand-primary);
+  --color-primary-rgb: var(--color-brand-primary-rgb);
   --color-shadow: rgba(0, 0, 0, 0.2);
 
   /* Form Variables */
-  --fg: #333333;
   --form-input-border: #333333;
   --form-input-placeholder: #666666;
   --form-btn-bg: #333333;
@@ -353,16 +357,19 @@ html[data-theme="light"] {
 
 ```css
 html[data-theme="dark"] {
+  /* Brand colors - Crimson red (same as light mode) */
+  --color-brand-primary: #dc2626;
+  --color-brand-primary-rgb: 220, 38, 38;
+
+  /* Legacy aliases */
   --color-neutral-100: #3a3a3a;
   --color-neutral-200: #3a3a3a;
   --color-neutral-300: #2a2a2a;
   --color-neutral-800: #f0f0f0;
   --color-dark: #e0e0e0;
-  --color-primary: #00ff41;
   --color-shadow: rgba(0, 0, 0, 1);
 
   /* Form Variables */
-  --fg: #e0e0e0;
   --form-input-border: #e0e0e0;
   --form-input-placeholder: #999999;
   --form-btn-bg: #e0e0e0;
@@ -397,7 +404,18 @@ function loadTheme(): void {
 
 ### Prefix Convention
 
-All Client Portal specific classes use the `cp-` prefix to avoid conflicts with main site CSS (especially `projects.css`):
+The project uses distinct prefixes for different portal-related features:
+
+**Client Portal Dashboard (`cp-` prefix):**
+Classes for the authenticated client portal dashboard use the `cp-` prefix to avoid conflicts with main site CSS (especially `projects.css`).
+
+**Navigation Portal (`portal-` prefix):**
+Classes for the header portal dropdown (login/register toggle) use the `portal-` prefix. Located in `src/styles/components/nav-portal.css`.
+
+**Intake Modal (`intake-` prefix):**
+Classes for the terminal intake modal use the `intake-` prefix. Also in `nav-portal.css`.
+
+### Client Portal Dashboard Classes (`cp-`)
 
 | Class | Purpose |
 |-------|---------|
@@ -414,6 +432,26 @@ All Client Portal specific classes use the `cp-` prefix to avoid conflicts with 
 | `.cp-project-card` | Individual project card |
 | `.cp-password-wrapper` | Password field with toggle |
 | `.cp-password-toggle` | Password visibility button |
+
+### Navigation Portal Classes (`portal-`)
+
+| Class | Purpose |
+|-------|---------|
+| `.portal-button` | Header portal trigger button |
+| `.portal-backdrop` | Semi-transparent overlay behind dropdown |
+| `.portal-dropdown` | Login/register dropdown panel |
+| `.portal-dropdown-header` | Dropdown title area |
+| `.portal-toggle-btn` | Login/register tab toggle |
+| `.portal-dropdown-form` | Form container in dropdown |
+
+### Intake Modal Classes (`intake-`)
+
+| Class | Purpose |
+|-------|---------|
+| `.intake-modal-backdrop` | Full-screen modal overlay |
+| `.intake-modal` | Terminal intake modal container |
+| `.intake-modal-close` | Modal close button |
+| `.intake-modal-container` | Inner content wrapper |
 
 ### Shadow Utility Class
 
@@ -656,50 +694,77 @@ The `.cp-project-card` class was created because `.project-card` in `projects.cs
 
 ### Style File Structure
 
-```
+```text
 src/styles/
-├── main.css               # Main entry point (imports all modules)
-├── variables.css           # CSS variables and theme
-├── form-validation.css     # Form validation styles
+├── main.css                    # Main entry point (imports all modules)
+├── variables.css               # CSS variables and theme
+├── form-validation.css         # Form validation styles
 ├── base/
-│   ├── reset.css         # CSS reset
-│   ├── layout.css        # Layout utilities
-│   └── typography.css    # Typography styles (includes @font-face)
+│   ├── fonts.css              # @font-face definitions (imported first)
+│   ├── reset.css              # CSS reset
+│   ├── layout.css             # Layout utilities
+│   └── typography.css         # Typography styles
 ├── components/
-│   ├── form.css          # Form components
-│   ├── navigation.css    # Navigation styles
-│   ├── footer.css        # Footer styles
-│   ├── loading.css       # Loading indicators
+│   ├── form-fields.css        # Form input styling
+│   ├── form-buttons.css       # Button styles
+│   ├── form-validation.css    # Validation states
+│   ├── nav-base.css           # Navigation base styles
+│   ├── nav-animations.css     # Navigation animations
+│   ├── nav-responsive.css     # Navigation responsive/mobile
+│   ├── nav-portal.css         # Client portal navigation
+│   ├── footer.css             # Footer styles
+│   ├── loading.css            # Loading indicators
 │   ├── portfolio-carousel.css # Portfolio carousel
-│   └── business-card.css # Business card component
-└── pages/
-    ├── client-portal.css  # Client Portal specific
-    ├── client.css         # Client landing page
-    ├── terminal-intake.css # Terminal-style intake form
-    ├── client-dashboard.css # Client dashboard
-    ├── projects.css       # Projects page
-    ├── admin.css          # Admin dashboard
-    └── contact.css        # Contact page
+│   ├── business-card.css      # Business card component
+│   ├── intro-morph.css        # Intro animation overlay
+│   └── page-transitions.css   # Virtual page transition styles
+├── pages/
+│   ├── client-portal.css      # Client Portal specific
+│   ├── client.css             # Client landing page
+│   ├── terminal-intake.css    # Terminal-style intake form
+│   ├── client-dashboard.css   # Client dashboard
+│   ├── projects.css           # Projects page
+│   ├── admin.css              # Admin dashboard
+│   ├── contact.css            # Contact page
+│   └── about.css              # About page
+└── mobile/
+    ├── index.css              # Mobile orchestration
+    ├── layout.css             # Mobile layout overrides
+    └── contact.css            # Mobile contact styles
 ```
 
 ### Import Order
 
 ```css
-/* 1. Variables first */
+/* 1. Fonts first (must be before design system) */
+@import './base/fonts.css';
+
+/* 2. Design system tokens */
+@import '../design-system/index.css';
+
+/* 3. Variables and theme */
 @import './variables.css';
 
-/* 2. Base styles */
+/* 4. Base styles */
 @import './base/reset.css';
 @import './base/typography.css';
 @import './base/layout.css';
 
-/* 3. Components */
-@import './components/form.css';
-@import './components/navigation.css';
+/* 5. Components */
+@import './components/form-fields.css';
+@import './components/form-buttons.css';
+@import './components/nav-base.css';
+@import './components/nav-animations.css';
+/* ... other components */
 
-/* 4. Page-specific */
+/* 6. Page-specific */
 @import './pages/client-portal.css';
+
+/* 7. Mobile overrides (last) */
+@import './mobile/index.css';
 ```
+
+**Critical**: `fonts.css` must be imported FIRST so `@font-face` definitions are available when design system tokens reference font families.
 
 ---
 
@@ -764,50 +829,55 @@ box-shadow:
 
 ## Known Issues
 
-**As of December 17, 2025 Code Review**
+**Updated December 23, 2025**
 
-### Inconsistent Token Usage
+### Resolved Issues (December 19-22, 2025)
 
-The token system is well-designed but not consistently used across all files:
+The following issues from the December 17 code review have been addressed:
+
+| Issue | Status | Resolution |
+|-------|--------|------------|
+| Navigation CSS oversized (900+ lines) | FIXED | Split into `nav-base.css`, `nav-animations.css`, `nav-responsive.css`, `nav-portal.css` |
+| Form CSS oversized (374 lines) | FIXED | Split into `form-fields.css`, `form-buttons.css`, `form-validation.css` |
+| Legacy `--fg`/`--bg` variables | FIXED | Migrated 65+ instances to semantic tokens |
+| Hardcoded `#000` values | FIXED | Migrated 27 instances to `var(--color-black)` |
+| Font loading issues | FIXED | Created `fonts.css` with `@font-face` definitions (imported first) |
+
+### Remaining Issues
+
+#### Hardcoded Colors (Low Priority)
+
+Some files still contain hardcoded color values that could be tokenized:
 
 | File | Issue |
 |------|-------|
-| `components/form.css` | Contains hardcoded colors (`rgba(0, 255, 65, 0.25)`) |
-| `pages/contact.css` | Multiple hardcoded hex values (`#fffbee`, `#ef4444`) |
-| `base/reset.css` | Line 183 uses `#00ff41` instead of token |
-| `base/typography.css` | Line 236 uses `#00ff41` instead of token |
+| `pages/contact.css` | Some hex values for specific styling |
+| `pages/admin.css` | Admin-specific color overrides |
 
-### Oversized Files
+#### Legacy Variables Still in Use
 
-| File | Lines | Recommendation |
-|------|-------|----------------|
-| `components/navigation.css` | 900+ | Split into nav-base, nav-animations, nav-mobile |
-| `components/form.css` | 374 | Split into form-fields, form-buttons, form-validation |
-| `pages/admin.css` | 1820+ | Split by admin section |
-
-### Legacy Variables
-
-The legacy variable system (`--fg`, `--bg`, `--color-neutral-*`) is still in active use alongside the new semantic tokens. These should be migrated:
+The Client Portal (`cp-` prefixed classes) still uses legacy variable naming for backwards compatibility:
 
 ```css
-/* Legacy (to be migrated) */
---fg
---bg
+/* Still in use for Client Portal */
 --color-neutral-100 through --color-neutral-800
+--color-dark
 
-/* Semantic (preferred) */
+/* These work alongside semantic tokens */
 --color-text-primary
 --color-bg-primary
---color-gray-100 through --color-gray-900
 ```
 
-### Duplicate Patterns
+This is intentional to maintain Client Portal styling consistency.
 
-Focus state styling appears in 5+ locations and should be consolidated:
+### File Size Status
 
-- `base/reset.css:183`
-- `components/form.css:112-115`
-- `pages/contact.css:279`
+| File | Lines | Status |
+|------|-------|--------|
+| `pages/admin.css` | 1820+ | Could be split by section (low priority) |
+| `pages/client-portal.css` | 3050+ | Complex but organized by section |
+
+All navigation and form CSS files are now properly sized (<300 lines each).
 
 ---
 
