@@ -510,17 +510,11 @@
 }
 
 /* Projects heading - matches about section h2 styling */
-/* Desktop: uses base typography.css h2 size */
+/* Desktop: uses base typography.css h2 size and letter-spacing */
 .projects-section h2 {
-  font-family: var(--font--acme);
-  font-size: clamp(1.5rem, 4vw, 3rem); /* Match base h2 from typography.css */
-  font-weight: 700;
-  text-transform: uppercase;
   margin-bottom: 1.5rem;
   text-align: left;
   width: 100%;
-  letter-spacing: 0.10em;
-  color: var(--color-dark);
 }
 
 /* WIP sign container */
@@ -662,13 +656,9 @@
 
 /* Portfolio heading */
 .portfolio-section h2 {
-  font-family: var(--font-family-acme);
   font-size: clamp(2.5rem, 8vw, 5rem);
-  font-weight: 400;
   text-align: center;
   margin: 0;
-  letter-spacing: 0.10em;
-  color: var(--color-dark);
   flex-shrink: 0;
 }
 

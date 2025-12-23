@@ -224,15 +224,16 @@
 
   /* Contact content wrapper - contains h2 and layout */
   .contact-content {
-    width: auto; /* Size to content, not full width */
+    width: auto;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   /* Contact heading - aligns with form left edge */
   .contact-content h2 {
-    width: 100%;
     text-align: left;
-    letter-spacing: 0.10em;
     margin: 0 0 1.5rem 0;
     padding: 0;
   }
@@ -413,7 +414,7 @@
 /* Contact text on card - always black on white card background */
 .contact-card-text {
   color: var(--color-black);
-  font-size: 1.75rem;
+  font-size: 1.625rem;
   line-height: 1.6;
   text-align: left;
   margin: 0;
