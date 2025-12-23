@@ -29,7 +29,7 @@ const ANIMATION_DURATION_IN = ANIMATION_CONSTANTS.DURATIONS.STANDARD_LENGTH; // 
 const ANIMATION_DURATION_OUT = ANIMATION_CONSTANTS.DURATIONS.NORMAL; // 0.3s (faster exit)
 const STAGGER_DELAY = 0.1;
 const EASE_CURVE = ANIMATION_CONSTANTS.EASING.SMOOTH_SAL; // cubic-bezier(0.3, 0.9, 0.3, 0.9)
-const BLUR_AMOUNT = 10; // pixels - reduced from 20 for better GPU performance
+const BLUR_AMOUNT = 15; // pixels - visible blur without being too heavy
 
 interface PageConfig {
   id: string;
@@ -591,7 +591,14 @@ export class PageTransitionModule extends BaseModule {
     targetPage.element.classList.remove('page-hidden');
     targetPage.element.classList.add('page-active');
 
-    const displayValue = (pageId === 'contact' || pageId === 'about') ? 'grid' : undefined;
+    // Set correct display value for each page type
+    let displayValue: string | undefined;
+    if (pageId === 'contact' || pageId === 'about') {
+      displayValue = 'grid';
+    } else if (pageId === 'projects' || pageId === 'portfolio') {
+      displayValue = 'flex';
+    }
+
     gsap.set(targetPage.element, {
       visibility: 'visible',
       opacity: 0,
@@ -729,8 +736,15 @@ export class PageTransitionModule extends BaseModule {
 
     // Ensure page element is visible and on top during animation
     // This prevents it from being hidden by page-hidden class or other pages
-    // Use correct display value: grid for contact/about, block for others
-    const displayValue = (page.id === 'contact' || page.id === 'about') ? 'grid' : 'block';
+    // Use correct display value for each page type
+    let displayValue: string;
+    if (page.id === 'contact' || page.id === 'about') {
+      displayValue = 'grid';
+    } else if (page.id === 'projects' || page.id === 'portfolio') {
+      displayValue = 'flex';
+    } else {
+      displayValue = 'block';
+    }
     gsap.set(page.element, {
       display: displayValue,
       visibility: 'visible',
@@ -833,14 +847,18 @@ export class PageTransitionModule extends BaseModule {
     const children = this.getAnimatableChildren(page);
     const useFadeOnly = page.useFadeOnly === true;
 
-    // Set initial state
-    // For contact/about sections, set display: grid inline to ensure it's correct
-    // Other sections use CSS .page-active rules
-    const displayValue = (page.id === 'contact' || page.id === 'about') ? 'grid' : undefined;
+    // Set initial state with correct display value for each page type
+    let displayValue: string | undefined;
+    if (page.id === 'contact' || page.id === 'about') {
+      displayValue = 'grid';
+    } else if (page.id === 'projects' || page.id === 'portfolio') {
+      displayValue = 'flex';
+    }
+
     gsap.set(page.element, {
       opacity: 0,
       visibility: 'visible',
-      ...(displayValue && { display: displayValue, minHeight: '100%' }) // Set grid and min-height for contact/about
+      ...(displayValue && { display: displayValue, minHeight: '100%' })
     });
 
     // For fade-only: children start invisible AND blurred (blur on children works on mobile)
@@ -869,12 +887,17 @@ export class PageTransitionModule extends BaseModule {
             gsap.set(children, { filter: 'none', webkitFilter: 'none' });
           }
           // Ensure page element is fully visible after animation
-          // For contact/about, ensure display: grid and min-height are set
-          const finalDisplayValue = (page.id === 'contact' || page.id === 'about') ? 'grid' : undefined;
+          // Set correct display value for each page type
+          let finalDisplayValue: string | undefined;
+          if (page.id === 'contact' || page.id === 'about') {
+            finalDisplayValue = 'grid';
+          } else if (page.id === 'projects' || page.id === 'portfolio') {
+            finalDisplayValue = 'flex';
+          }
           gsap.set(page.element, {
             opacity: 1,
             visibility: 'visible',
-            ...(finalDisplayValue && { display: finalDisplayValue, minHeight: '100%' }) // Ensure grid and min-height for contact/about
+            ...(finalDisplayValue && { display: finalDisplayValue, minHeight: '100%' })
           });
 
           // Dispatch event when contact page blur animation completes

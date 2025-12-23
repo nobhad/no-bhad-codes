@@ -103,8 +103,8 @@ export const ANIMATION_DIMENSIONS = {
 
 export const ANIMATION_SEQUENCES = {
   CONTACT_FORM: {
-    TOTAL_DURATION: 2.5,
-    FIELD_STAGGER: 0.3
+    TOTAL_DURATION: 1.6, // Faster form animation (was 2.5)
+    FIELD_STAGGER: 0.12 // Tighter stagger (was 0.3)
   },
 
   INTRO_MORPH: {

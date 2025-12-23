@@ -108,12 +108,13 @@ export class ContactAnimationModule extends BaseModule {
 
     // ========================================================================
     // PHASE 1: h2 and card BLUR IN (fade in while blurred, then clear blur)
-    // Reduced blur amount for better GPU performance
+    // Reduced blur amount and faster timing for snappier feel
     // ========================================================================
-    const blurAmount = 6; // Reduced from 8px for better performance
-    const blurFadeDuration = 0.6;
-    const blurClearDuration = 0.5;
-    const dropDuration = blurFadeDuration + 0.3 + blurClearDuration; // Total blur phase duration
+    const blurAmount = 6;
+    const blurFadeDuration = 0.35; // Faster fade in (was 0.6)
+    const blurClearDuration = 0.3; // Faster blur clear (was 0.5)
+    const blurPause = 0.1; // Minimal pause (was 0.3)
+    const dropDuration = blurFadeDuration + blurPause + blurClearDuration; // Total blur phase duration
 
     // Set initial blur state with will-change hint for GPU acceleration
     if (heading) {
@@ -161,8 +162,8 @@ export class ContactAnimationModule extends BaseModule {
       }, 0);
     }
 
-    // Pause then clear blur
-    this.timeline.to({}, { duration: 0.3 });
+    // Brief pause then clear blur
+    this.timeline.to({}, { duration: blurPause });
 
     if (heading) {
       this.timeline.to(heading, {
