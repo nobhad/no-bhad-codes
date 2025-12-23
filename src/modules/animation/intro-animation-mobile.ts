@@ -188,8 +188,9 @@ export class MobileIntroAnimationModule extends BaseModule {
     // Scale SVG to match mobile card size
     // ========================================================================
     // Calculate pixel-perfect alignment using shared function
+    // CRITICAL: Pass overlay element so alignment accounts for header offset
     // This assumes viewBox is SVG_VIEWBOX (which we just set above)
-    const alignment = SvgBuilder.calculateSvgAlignment(businessCard);
+    const alignment = SvgBuilder.calculateSvgAlignment(businessCard, this.morphOverlay);
     const { scale, translateX, translateY, viewportWidth, viewportHeight } = alignment;
 
     this.log('Mobile pixel-perfect alignment:', { scale, translateX, translateY, viewportWidth, viewportHeight });
@@ -539,6 +540,16 @@ export class MobileIntroAnimationModule extends BaseModule {
       businessCard.style.opacity = '1';
     }
 
+    // Make intro nav visible immediately
+    const introNav = document.querySelector('.intro-nav') as HTMLElement;
+    if (introNav) {
+      gsap.set(introNav, { opacity: 1 });
+      const navLinks = introNav.querySelectorAll('.intro-nav-link');
+      if (navLinks.length > 0) {
+        gsap.set(navLinks, { opacity: 1 });
+      }
+    }
+
     const header = document.querySelector('.header') as HTMLElement;
     if (header) {
       header.style.removeProperty('opacity');
@@ -547,6 +558,90 @@ export class MobileIntroAnimationModule extends BaseModule {
         (child as HTMLElement).style.removeProperty('opacity');
         (child as HTMLElement).style.removeProperty('visibility');
       });
+    }
+
+    // Dispatch completion event
+    this.dispatchEvent('complete');
+  }
+
+  /**
+   * Play the entry animation when entering the home page
+   * Called by PageTransitionModule when navigating TO intro from another page
+   *
+   * Uses the same paw animation as desktop by delegating to IntroAnimationModule
+   */
+  async playEntryAnimation(): Promise<void> {
+    console.log('[MobileIntro] playEntryAnimation called - using paw animation');
+    this.log('Playing paw entry animation (same as desktop)');
+
+    try {
+      // Dynamically import the desktop IntroAnimationModule for the paw entry animation
+      const { IntroAnimationModule } = await import('./intro-animation');
+
+      // Create a temporary instance for the entry animation
+      const desktopModule = new IntroAnimationModule();
+
+      // Call the desktop entry animation with bypassMobileCheck=true
+      await desktopModule.playEntryAnimation(true);
+
+      console.log('[MobileIntro] Paw entry animation complete');
+      this.log('Paw entry animation complete');
+    } catch (error) {
+      console.error('[MobileIntro] Failed to load desktop entry animation:', error);
+      this.log('Failed to load paw animation, falling back to simple fade');
+
+      // Fallback to simple fade if paw animation fails
+      this.playEntryAnimationFallback();
+    }
+  }
+
+  /**
+   * Fallback entry animation if paw animation fails
+   */
+  private playEntryAnimationFallback(): void {
+    // Show the intro section
+    const introSection = document.querySelector('.business-card-section') as HTMLElement;
+    if (introSection) {
+      introSection.classList.remove('page-hidden');
+      introSection.classList.add('page-active');
+      gsap.set(introSection, {
+        clearProps: 'display,visibility,opacity,zIndex,pointerEvents',
+        display: 'grid',
+        visibility: 'visible',
+        opacity: 1
+      });
+    }
+
+    // Show business card with animation
+    const businessCard = document.getElementById('business-card');
+    if (businessCard) {
+      gsap.fromTo(businessCard,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.6, ease: 'power2.out' }
+      );
+    }
+
+    // Show intro nav with animation
+    const introNav = document.querySelector('.intro-nav') as HTMLElement;
+    if (introNav) {
+      gsap.set(introNav, { opacity: 0 });
+      gsap.to(introNav, {
+        opacity: 1,
+        duration: 1.2,
+        ease: 'sine.inOut',
+        delay: 0.3
+      });
+      const navLinks = introNav.querySelectorAll('.intro-nav-link');
+      if (navLinks.length > 0) {
+        gsap.set(navLinks, { opacity: 0 });
+        gsap.to(navLinks, {
+          opacity: 1,
+          duration: 1.2,
+          ease: 'sine.inOut',
+          stagger: 0.15,
+          delay: 0.3
+        });
+      }
     }
   }
 
@@ -635,6 +730,26 @@ export class MobileIntroAnimationModule extends BaseModule {
     const businessCard = document.getElementById('business-card');
     if (businessCard) {
       businessCard.style.opacity = '1';
+    }
+
+    // Fade in intro nav with GSAP - matching desktop timing
+    const introNav = document.querySelector('.intro-nav') as HTMLElement;
+    if (introNav) {
+      gsap.to(introNav, {
+        opacity: 1,
+        duration: 1.2,
+        ease: 'sine.inOut'
+      });
+      // Also animate the individual nav links with stagger
+      const navLinks = introNav.querySelectorAll('.intro-nav-link');
+      if (navLinks.length > 0) {
+        gsap.to(navLinks, {
+          opacity: 1,
+          duration: 1.2,
+          ease: 'sine.inOut',
+          stagger: 0.15
+        });
+      }
     }
 
     const mainContainer = document.querySelector('main') as HTMLElement;

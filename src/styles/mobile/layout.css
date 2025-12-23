@@ -75,7 +75,8 @@
     justify-content: center !important;
     padding: 0 !important;
     margin: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
+    position: relative !important;
   }
 
   /* Ensure business card section stays on top during exit animation */
@@ -83,11 +84,20 @@
     z-index: 50 !important; /* Same as intro */
   }
 
-  /* Ensure card container is centered vertically */
+  /* Card container centered in viewport */
   .business-card-section .business-card-container {
     margin: 0 auto !important;
     align-self: center !important;
     justify-self: center !important;
+  }
+
+  /* Intro nav positioned absolutely below centered card (like desktop) */
+  /* Card height on mobile is ~209px (380px width / 1.816 aspect ratio) */
+  .business-card-section .intro-nav {
+    position: absolute !important;
+    top: calc(50% + 105px + 0.75rem) !important; /* 50% + half card height + margin */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
   }
 
   /* Hero sections - hidden on mobile */
@@ -313,5 +323,10 @@
   .container,
   .page-content {
     max-width: 98vw;
+  }
+
+  /* Intro nav position for smaller card (315px width, ~173px height) */
+  .business-card-section .intro-nav {
+    top: calc(50% + 87px + 0.5rem) !important; /* 50% + half card height + margin */
   }
 }

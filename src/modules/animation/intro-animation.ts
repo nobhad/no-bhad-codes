@@ -1128,31 +1128,95 @@ export class IntroAnimationModule extends BaseModule {
 
   /**
    * Show intro page elements as fallback when animation unavailable
+   * On mobile, this includes fade-in animations matching desktop timing
    */
   private showIntroFallback(): void {
     const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
     const introNav = document.querySelector('.intro-nav') as HTMLElement;
-    if (businessCard) businessCard.style.opacity = '1';
-    if (introNav) {
-      introNav.style.opacity = '1';
-      // Also show the individual nav links
-      const navLinks = introNav.querySelectorAll('.intro-nav-link') as NodeListOf<HTMLElement>;
-      navLinks.forEach(link => link.style.opacity = '1');
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+
+    if (isMobile) {
+      // On mobile, animate the elements fading in - matching desktop timing
+      if (businessCard) {
+        gsap.fromTo(businessCard,
+          { opacity: 0 },
+          { opacity: 0.8, duration: 0.6, ease: 'power2.out' }
+        );
+        // Then ease to full opacity
+        gsap.to(businessCard, {
+          opacity: 1,
+          duration: 0.4,
+          delay: 0.6,
+          ease: 'sine.out'
+        });
+      }
+      if (introNav) {
+        // Match desktop: duration 1.2s, ease sine.inOut, stagger 0.15
+        gsap.set(introNav, { opacity: 0 });
+        gsap.to(introNav, {
+          opacity: 1,
+          duration: 1.2,
+          ease: 'sine.inOut',
+          delay: 0.3
+        });
+        // Also animate the individual nav links with stagger - exactly like desktop
+        const navLinks = introNav.querySelectorAll('.intro-nav-link');
+        if (navLinks.length > 0) {
+          gsap.set(navLinks, { opacity: 0 });
+          gsap.to(navLinks, {
+            opacity: 1,
+            duration: 1.2,
+            ease: 'sine.inOut',
+            stagger: 0.15,
+            delay: 0.3
+          });
+        }
+      }
+    } else {
+      // Desktop: just set opacity directly (no animation needed)
+      if (businessCard) businessCard.style.opacity = '1';
+      if (introNav) {
+        introNav.style.opacity = '1';
+        // Also show the individual nav links
+        const navLinks = introNav.querySelectorAll('.intro-nav-link') as NodeListOf<HTMLElement>;
+        navLinks.forEach(link => link.style.opacity = '1');
+      }
     }
   }
 
   /**
    * Play the coyote paw entry animation when entering the home page
+   * @param bypassMobileCheck - If true, skip the mobile check (used by MobileIntroAnimationModule)
    */
-  async playEntryAnimation(): Promise<void> {
+  async playEntryAnimation(bypassMobileCheck = false): Promise<void> {
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
-    if (isMobile || this.reducedMotion) {
-      this.log('Skipping entry animation');
+    console.log('[IntroAnimation] playEntryAnimation called, isMobile:', isMobile, 'bypassMobileCheck:', bypassMobileCheck);
+
+    if (!bypassMobileCheck && (isMobile || this.reducedMotion)) {
+      this.log('Mobile/reduced motion - showing intro page directly');
+
+      // On mobile, we need to make the intro page section visible first
+      const introSection = document.querySelector('.business-card-section') as HTMLElement;
+      console.log('[IntroAnimation] Found intro section:', !!introSection);
+
+      if (introSection) {
+        // Clear any hiding styles from exit animation
+        introSection.classList.remove('page-hidden');
+        introSection.classList.add('page-active');
+        gsap.set(introSection, {
+          clearProps: 'display,visibility,opacity,zIndex,pointerEvents',
+          display: 'grid',
+          visibility: 'visible',
+          opacity: 1
+        });
+        console.log('[IntroAnimation] Intro section shown');
+      }
+
       this.showIntroFallback();
       return;
     }
 
-    this.log('Playing entry animation');
+    this.log('Playing entry animation (paw)');
 
     this.morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
     let morphSvg = document.getElementById(DOM_ELEMENT_IDS.morphSvg) as SVGSVGElement | null;

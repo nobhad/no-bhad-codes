@@ -243,11 +243,25 @@ export class PageTransitionModule extends BaseModule {
   private setupEventListeners(): void {
     // Listen for router navigation events
     this.on('router:navigate', ((event: CustomEvent) => {
-      if (this.isTransitioning) return;
-
       const { pageId } = event.detail || {};
+      console.log('[PageTransition] router:navigate received', {
+        pageId,
+        currentPageId: this.currentPageId,
+        introComplete: this.introComplete,
+        isTransitioning: this.isTransitioning
+      });
+
+      if (this.isTransitioning) {
+        console.log('[PageTransition] Blocked - already transitioning');
+        return;
+      }
+
       if (pageId && this.introComplete) {
-        if (pageId === this.currentPageId) return;
+        if (pageId === this.currentPageId) {
+          console.log('[PageTransition] Blocked - same page');
+          return;
+        }
+        console.log('[PageTransition] Starting transition to:', pageId);
         this.transitionTo(pageId);
       } else if (!this.introComplete) {
         this.warn('Navigation blocked - intro not complete');
@@ -435,11 +449,21 @@ export class PageTransitionModule extends BaseModule {
    * Transition to a page with animations
    */
   async transitionTo(pageId: string): Promise<void> {
-    if (pageId === this.currentPageId || this.isTransitioning) return;
-    if (this.isMobile && !this.enableOnMobile) return;
+    console.log('[PageTransition] transitionTo called with:', pageId);
+
+    if (pageId === this.currentPageId || this.isTransitioning) {
+      console.log('[PageTransition] transitionTo early return - same page or transitioning');
+      return;
+    }
+    if (this.isMobile && !this.enableOnMobile) {
+      console.log('[PageTransition] transitionTo early return - mobile disabled');
+      return;
+    }
 
     const targetPage = this.pages.get(pageId);
     const currentPage = this.pages.get(this.currentPageId);
+
+    console.log('[PageTransition] targetPage:', !!targetPage, 'currentPage:', !!currentPage);
 
     if (!targetPage || !targetPage.element) {
       this.warn(`Target page not found: ${pageId}`);
@@ -447,7 +471,7 @@ export class PageTransitionModule extends BaseModule {
     }
 
     this.isTransitioning = true;
-    this.log(`Transitioning: ${this.currentPageId} -> ${pageId}`);
+    console.log('[PageTransition] Starting transition:', this.currentPageId, '->', pageId);
 
     // Hide intro page immediately to prevent flash during coyote paw animation
     if (pageId === 'intro') {
@@ -462,11 +486,13 @@ export class PageTransitionModule extends BaseModule {
 
     try {
       // Animate out current page
+      console.log('[PageTransition] Animating out current page:', this.currentPageId);
       if (this.currentPageId === 'intro') {
         await this.playIntroExitAnimation();
       } else if (currentPage && currentPage.element) {
         await this.animateOut(currentPage);
       }
+      console.log('[PageTransition] Animate out complete');
 
       // Hide current page after animation
       if (currentPage && currentPage.element) {
@@ -485,11 +511,13 @@ export class PageTransitionModule extends BaseModule {
       }
 
       // Animate in target page
+      console.log('[PageTransition] Animating in target page:', pageId);
       if (pageId === 'intro') {
         await this.playIntroEntryAnimation();
       } else {
         await this.animateIn(targetPage);
       }
+      console.log('[PageTransition] Animate in complete');
 
       // Update state
       this.currentPageId = pageId;
@@ -588,12 +616,16 @@ export class PageTransitionModule extends BaseModule {
    * Play the coyote paw entry animation when entering the intro page
    */
   private async playIntroEntryAnimation(): Promise<void> {
+    console.log('[PageTransition] playIntroEntryAnimation called');
     try {
       const introPage = this.pages.get('intro');
+      console.log('[PageTransition] introPage:', !!introPage, 'element:', !!introPage?.element);
+
       if (introPage?.element) {
         gsap.set(introPage.element, { clearProps: 'display,visibility,opacity,zIndex,pointerEvents' });
 
         const introChildren = introPage.element.querySelectorAll('.business-card-container, .business-card, .intro-nav');
+        console.log('[PageTransition] Found introChildren:', introChildren.length);
         if (introChildren.length > 0) {
           gsap.set(introChildren, { clearProps: 'opacity,visibility,display' });
         }
@@ -602,17 +634,25 @@ export class PageTransitionModule extends BaseModule {
 
         introPage.element.classList.remove('page-hidden');
         introPage.element.classList.add('page-active');
+        console.log('[PageTransition] Intro page classes updated');
 
         await new Promise(resolve => requestAnimationFrame(resolve));
       }
 
+      console.log('[PageTransition] Resolving IntroAnimationModule...');
       const introModule = await container.resolve('IntroAnimationModule') as IntroAnimationModule;
+      console.log('[PageTransition] IntroAnimationModule resolved:', !!introModule);
+
       if (introModule && typeof introModule.playEntryAnimation === 'function') {
+        console.log('[PageTransition] Calling introModule.playEntryAnimation()');
         await introModule.playEntryAnimation();
+        console.log('[PageTransition] playEntryAnimation complete');
       } else {
+        console.log('[PageTransition] Using fallback');
         this.showIntroPageFallback();
       }
-    } catch {
+    } catch (error) {
+      console.error('[PageTransition] playIntroEntryAnimation error:', error);
       this.log('IntroAnimationModule not available for entry animation');
       this.showIntroPageFallback();
     }
