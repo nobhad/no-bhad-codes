@@ -92,7 +92,7 @@ const createNavigation = (args: any) => {
     <style>
       /* Enhanced navigation hover states for Storybook demo */
       .nav[data-nav="open"] .menu-link:not(.disabled):hover {
-        color: var(--color-primary, #00ff41);
+        color: var(--color-primary, #dc2626);
         transition: color 0.3s ease;
       }
       
@@ -102,14 +102,14 @@ const createNavigation = (args: any) => {
       }
       
       .nav[data-nav="open"] .menu-link:not(.disabled):hover .eyebrow {
-        color: var(--color-primary, #00ff41);
+        color: var(--color-primary, #dc2626);
         transform: scale(1.1);
         transition: all 0.3s ease;
       }
       
       .nav[data-nav="open"] .menu-link:not(.disabled):hover .menu-link-bg {
         opacity: 0.1;
-        background-color: var(--color-primary, #00ff41);
+        background-color: var(--color-primary, #dc2626);
         transform: scaleX(1);
         transition: all 0.3s ease;
       }

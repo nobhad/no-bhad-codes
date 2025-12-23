@@ -643,7 +643,7 @@ export class ClientPortalModule extends BaseModule {
       left: 0;
       width: 0%;
       height: 100%;
-      background-color: #00ff41;
+      background-color: #dc2626;
       z-index: 0;
       pointer-events: none;
       border-radius: inherit;

@@ -39,7 +39,7 @@
 
 .portal-button:hover,
 .portal-button:focus {
-  color: var(--color-primary, #00ff41);
+  color: var(--color-primary, #dc2626);
 }
 
 .portal-button .icon-wrap {
@@ -217,7 +217,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 .portal-dropdown .dropdown-input:focus {
-  outline: 2px solid var(--color-primary, #00ff41);
+  outline: 2px solid var(--color-primary, #dc2626);
 }
 
 /* Password field wrapper */
@@ -242,7 +242,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 .portal-dropdown .password-toggle:hover {
-  color: var(--color-primary, #00ff41);
+  color: var(--color-primary, #dc2626);
 }
 
 .portal-dropdown .password-toggle .password-icon-hide {
@@ -281,14 +281,14 @@ html[data-theme="dark"] .portal-dropdown-header {
 
 /* Valid state - all requirements met */
 .portal-dropdown .dropdown-submit.valid {
-  background: var(--color-primary, #00ff41);
+  background: var(--color-primary, #dc2626);
   color: var(--color-black);
   opacity: 1;
 }
 
 .portal-dropdown .dropdown-submit.valid:hover,
 .portal-dropdown .dropdown-submit.valid:focus {
-  background: var(--color-primary, #00ff41);
+  background: var(--color-primary, #dc2626);
   color: var(--color-black);
   filter: brightness(1.1);
 }
@@ -305,7 +305,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 .portal-dropdown .dropdown-link:hover {
-  color: var(--color-primary, #00ff41);
+  color: var(--color-primary, #dc2626);
 }
 
 /* Button styled as link */
@@ -341,7 +341,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   display: flex;
   justify-content: center;
   margin-bottom: 1rem;
-  color: var(--color-primary, #00ff41);
+  color: var(--color-primary, #dc2626);
 }
 
 .portal-dropdown .reset-sent-message {

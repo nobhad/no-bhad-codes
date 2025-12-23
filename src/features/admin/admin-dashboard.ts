@@ -2354,7 +2354,7 @@ class AdminDashboard {
             {
               label: 'Visitors',
               data: [120, 190, 150, 220, 180, 250, 210],
-              borderColor: '#00ff41',
+              borderColor: '#dc2626',
               backgroundColor: 'rgba(0, 255, 65, 0.1)',
               tension: 0.4,
               fill: true
@@ -2405,7 +2405,7 @@ class AdminDashboard {
           datasets: [
             {
               data: [35, 30, 20, 10, 5],
-              backgroundColor: ['#00ff41', '#333333', '#666666', '#999999', '#cccccc'],
+              backgroundColor: ['#dc2626', '#333333', '#666666', '#999999', '#cccccc'],
               borderColor: '#ffffff',
               borderWidth: 2
             }

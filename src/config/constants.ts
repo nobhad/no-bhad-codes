@@ -61,7 +61,7 @@ export const APP_CONSTANTS = {
 
   // Theme colors (use CSS variables when possible, these are fallbacks)
   THEME: {
-    PRIMARY: 'var(--color-primary, #00ff41)',
+    PRIMARY: 'var(--color-primary, #dc2626)',
     SECONDARY: 'var(--color-secondary, #ff6b6b)',
     DARK: 'var(--color-dark, #000000)',
     LIGHT: 'var(--color-light, #ffffff)',

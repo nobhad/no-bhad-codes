@@ -91,7 +91,7 @@
 }
 
 .portal-toggle-btn.active {
-  background: var(--color-primary, #00ff41);
+  background: var(--color-primary, #dc2626);
   color: var(--color-black);
 }
 
@@ -196,9 +196,9 @@
 .client-portal-section .portal-login-submit button:focus,
 .client-portal-section button[type="submit"]:hover,
 .client-portal-section button[type="submit"]:focus {
-  background-color: var(--color-primary, #00ff41) !important;
+  background-color: var(--color-primary, #dc2626) !important;
   color: var(--color-black) !important;
-  border: 3px solid var(--color-primary, #00ff41) !important;
+  border: 3px solid var(--color-primary, #dc2626) !important;
   box-shadow: none !important;
   outline: none !important;
 }
@@ -227,7 +227,7 @@ html[data-theme="dark"] .client-portal-section .btn.btn-primary {
 }
 
 .client-portal-section .password-toggle:hover {
-  color: var(--color-primary, #00ff41);
+  color: var(--color-primary, #dc2626);
 }
 
 .client-portal-section .password-toggle .password-icon-hide {
@@ -290,7 +290,7 @@ html[data-theme="dark"] .client-portal-section .btn.btn-primary {
 
 .portal-link:hover,
 .portal-link:focus {
-  color: var(--color-primary, #00ff41);
+  color: var(--color-primary, #dc2626);
 }
 
 /* Responsive - Mobile */

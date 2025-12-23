@@ -219,25 +219,25 @@ export const HoverStates: Story = {
     <style>
       .menu-link-hover .menu-link-heading,
       .menu-link:hover .menu-link-heading {
-        color: var(--color-primary, #00ff41) !important;
+        color: var(--color-primary, #dc2626) !important;
         transform: translateX(10px);
       }
       
       .menu-link-active .menu-link-heading {
-        color: var(--color-primary, #00ff41) !important;
+        color: var(--color-primary, #dc2626) !important;
         transform: translateX(10px);
       }
       
       .menu-link-hover .menu-link-bg,
       .menu-link:hover .menu-link-bg {
         transform: scaleX(1);
-        background: var(--color-primary, #00ff41);
+        background: var(--color-primary, #dc2626);
         opacity: 0.1;
       }
       
       .menu-link-active .menu-link-bg {
         transform: scaleX(1);
-        background: var(--color-primary, #00ff41);
+        background: var(--color-primary, #dc2626);
         opacity: 0.2;
       }
     </style>

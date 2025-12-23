@@ -341,13 +341,13 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
       }
 
       .consent-banner__btn--primary {
-        background: var(--color-brand-primary, #00ff41);
+        background: var(--color-brand-primary, #dc2626);
         color: #000000;
         border-color: #000000;
       }
 
       .consent-banner__btn--primary:hover {
-        background: var(--color-interactive-primary-hover, #00cc33);
+        background: var(--color-interactive-primary-hover, #b91c1c);
         border-color: #000000;
       }
 
@@ -382,7 +382,7 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
       }
 
       .consent-banner__link:hover {
-        color: var(--color-brand-primary, #00ff41);
+        color: var(--color-brand-primary, #dc2626);
       }
 
       .consent-banner--dark .consent-banner__link {
@@ -390,7 +390,7 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
       }
 
       .consent-banner--dark .consent-banner__link:hover {
-        color: var(--color-brand-primary, #00ff41);
+        color: var(--color-brand-primary, #dc2626);
       }
 
       @keyframes slideIn {

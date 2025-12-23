@@ -429,7 +429,7 @@
 
 .contact-card-link:hover,
 .contact-card-link:focus {
-  color: var(--color-primary, #00ff41);
+  color: var(--color-primary, #dc2626);
 }
 
 /* Input wrapper - contains input + label */
@@ -553,7 +553,7 @@ textarea:focus-visible + label {
 .input-item textarea:focus,
 .input-item textarea:focus-visible {
   outline: none !important;
-  box-shadow: 0 0 0 2px var(--color-primary, #00ff41) !important;
+  box-shadow: 0 0 0 2px var(--color-primary, #dc2626) !important;
 }
 
 /* Autofill styling */
@@ -606,7 +606,7 @@ input:-webkit-autofill:active {
 
 /* Valid form state - green background */
 .submit-button.form-valid {
-  background-color: var(--color-brand-primary, #00ff41);
+  background-color: var(--color-brand-primary, #dc2626);
 }
 
 .submit-button.form-valid span {
@@ -619,7 +619,7 @@ input:-webkit-autofill:active {
 
 /* Sent state - show SENT! text */
 .submit-button.form-sent {
-  background-color: var(--color-brand-primary, #00ff41);
+  background-color: var(--color-brand-primary, #dc2626);
 }
 
 .submit-button.form-sent span {
@@ -727,7 +727,7 @@ html[data-theme="dark"] .submit-button:focus-visible {
 
 .email-box .a-wrapper a:hover,
 .email-box .a-wrapper a:focus {
-  color: var(--color-primary, #00ff41);
+  color: var(--color-primary, #dc2626);
 }
 
 /* Form Validation Styles */
