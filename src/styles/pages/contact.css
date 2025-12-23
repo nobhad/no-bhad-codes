@@ -116,9 +116,11 @@
    ========================================== */
 
 :root {
-  /* Contact form field heights */
+  /* Contact form field dimensions */
   --contact-input-height: 60px;
+  --contact-input-width: 460px;
   --contact-textarea-height: 155px;
+  --contact-textarea-width: 640px;
   --contact-field-gap: 1rem;
   --contact-row-gap: 1rem;
   /* Total layout height: 3 inputs + gaps + textarea + row gap + buffer */
@@ -324,10 +326,10 @@
     display: block;
   }
 
-  /* Top row: inputs on left, submit button on right - CSS Grid */
+  /* Top row: inputs on left, submit button on right - Flexbox */
   .contact-row {
-    display: grid;
-    grid-template-columns: 460px auto;
+    display: flex;
+    flex-direction: row;
     gap: 2rem;
     width: auto;
     margin-top: 1rem;
@@ -335,14 +337,22 @@
     align-items: center; /* Align button to center (Company row) */
   }
 
-  /* Input fields container: name, company, email - CSS Grid */
+  /* Input fields container: name, company, email - Flexbox column */
   .contact-left {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 1.5rem;
     box-sizing: border-box;
     padding: 0;
     overflow: visible;
+    width: var(--contact-input-width);
+    flex-shrink: 0; /* Don't shrink */
+  }
+
+  /* Input items in contact-left - fixed width */
+  .contact-left .input-item {
+    width: var(--contact-input-width);
+    flex-shrink: 0;
   }
 
   /* Submit button container - right side of row */
@@ -356,11 +366,17 @@
     overflow: visible;
   }
 
-  /* Message textarea row */
+  /* Message textarea row - fixed width */
   .contact-message-row {
-    width: 640px;
+    width: var(--contact-textarea-width);
     margin-top: 1.5rem;
     box-sizing: border-box;
+  }
+
+  /* Message input item - fixed width */
+  .contact-message-row .input-item {
+    width: var(--contact-textarea-width);
+    flex-shrink: 0;
   }
 }
 

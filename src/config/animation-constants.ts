@@ -76,11 +76,12 @@ export const ANIMATION_COLORS = {
 // ============================================
 
 export const ANIMATION_DIMENSIONS = {
-  // Form field dimensions
+  // Form field dimensions (must match CSS variables in contact.css)
   FORM_FIELD_HEIGHT: 60,
   FORM_FIELD_COMPRESSED: 20,
   FORM_FIELD_WIDTH_START: 150,
-  FORM_FIELD_WIDTH_FULL: 460,
+  FORM_FIELD_WIDTH_FULL: 460, // --contact-input-width
+  FORM_MESSAGE_WIDTH_FULL: 640, // --contact-textarea-width
 
   // Business card interaction dimensions
   CARD_HOVER_LIFT: 10, // pixels

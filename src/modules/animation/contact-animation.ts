@@ -415,10 +415,11 @@ export class ContactAnimationModule extends BaseModule {
       ease: 'sine.inOut'
     }, formStartTime);
 
-    // Message field expands to 640px
+    // Message field expands to full width (640px)
+    const messageFullWidth = ANIMATION_CONSTANTS.DIMENSIONS.FORM_MESSAGE_WIDTH_FULL;
     if (messageField) {
       this.timeline.to(messageField, {
-        width: 640,
+        width: messageFullWidth,
         duration: totalDuration * 0.8,
         ease: 'sine.inOut'
       }, formStartTime);
