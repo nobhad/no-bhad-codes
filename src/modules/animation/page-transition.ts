@@ -625,7 +625,12 @@ export class PageTransitionModule extends BaseModule {
     const businessCard = document.getElementById('business-card');
     const introNav = document.querySelector('.intro-nav') as HTMLElement;
     if (businessCard) businessCard.style.opacity = '1';
-    if (introNav) introNav.style.opacity = '1';
+    if (introNav) {
+      introNav.style.opacity = '1';
+      // Also show the individual nav links
+      const navLinks = introNav.querySelectorAll('.intro-nav-link') as NodeListOf<HTMLElement>;
+      navLinks.forEach(link => link.style.opacity = '1');
+    }
   }
 
   /**
