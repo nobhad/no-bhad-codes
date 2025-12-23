@@ -1118,7 +1118,12 @@ export class IntroAnimationModule extends BaseModule {
     const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
     const introNav = document.querySelector('.intro-nav') as HTMLElement;
     if (businessCard) businessCard.style.opacity = '1';
-    if (introNav) introNav.style.opacity = '1';
+    if (introNav) {
+      introNav.style.opacity = '1';
+      // Also show the individual nav links
+      const navLinks = introNav.querySelectorAll('.intro-nav-link') as NodeListOf<HTMLElement>;
+      navLinks.forEach(link => link.style.opacity = '1');
+    }
   }
 
   /**
@@ -1473,6 +1478,17 @@ export class IntroAnimationModule extends BaseModule {
           duration: linkFadeDuration,
           ease: 'power2.out'
         }, '-=0.3');
+
+        // Also animate the individual nav link elements
+        const navLinks = introNav.querySelectorAll('.intro-nav-link');
+        if (navLinks.length > 0) {
+          this.entryTimeline.to(navLinks, {
+            opacity: 1,
+            duration: linkFadeDuration,
+            ease: 'power2.out',
+            stagger: 0.1
+          }, '<');
+        }
       }
 
       this.log('Entry animation started');
