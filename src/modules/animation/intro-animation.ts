@@ -521,6 +521,11 @@ export class IntroAnimationModule extends BaseModule {
     const introNav = document.querySelector('.intro-nav') as HTMLElement;
     if (introNav) {
       gsap.set(introNav, { opacity: 1 });
+      // Also show the individual nav links
+      const navLinks = introNav.querySelectorAll('.intro-nav-link');
+      if (navLinks.length > 0) {
+        gsap.set(navLinks, { opacity: 1 });
+      }
     }
 
     // Make header visible immediately
@@ -669,6 +674,16 @@ export class IntroAnimationModule extends BaseModule {
         duration: 0.8,
         ease: 'power2.out'
       });
+      // Also animate the individual nav links
+      const navLinks = introNav.querySelectorAll('.intro-nav-link');
+      if (navLinks.length > 0) {
+        gsap.to(navLinks, {
+          opacity: 1,
+          duration: 0.8,
+          ease: 'power2.out',
+          stagger: 0.1
+        });
+      }
     }
 
     // Scroll to top
