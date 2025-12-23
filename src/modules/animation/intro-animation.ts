@@ -1145,10 +1145,8 @@ export class IntroAnimationModule extends BaseModule {
    * Play the coyote paw entry animation when entering the home page
    */
   async playEntryAnimation(): Promise<void> {
-    console.log('[IntroAnimation] playEntryAnimation called');
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
     if (isMobile || this.reducedMotion) {
-      console.log('[IntroAnimation] Skipping - mobile:', isMobile, 'reducedMotion:', this.reducedMotion);
       this.log('Skipping entry animation');
       this.showIntroFallback();
       return;
@@ -1158,16 +1156,13 @@ export class IntroAnimationModule extends BaseModule {
 
     this.morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
     let morphSvg = document.getElementById(DOM_ELEMENT_IDS.morphSvg) as SVGSVGElement | null;
-    console.log('[IntroAnimation] morphOverlay:', !!this.morphOverlay, 'morphSvg:', !!morphSvg);
 
     if (!this.morphOverlay) {
-      console.log('[IntroAnimation] No morphOverlay, using fallback');
       this.showIntroFallback();
       return;
     }
 
     this.morphOverlay.classList.remove('hidden');
-    console.log('[IntroAnimation] Removed hidden class from overlay');
 
     if (!morphSvg) {
       morphSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
