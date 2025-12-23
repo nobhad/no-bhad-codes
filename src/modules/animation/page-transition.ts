@@ -14,18 +14,22 @@
 
 import { BaseModule } from '../core/base';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { ModuleOptions } from '../../types/modules';
 import { container } from '../../core/container';
 import type { IntroAnimationModule } from './intro-animation';
 import { debounce } from '../../utils/gsap-utilities';
 import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
 
+// Register ScrollTrigger plugin
+gsap.registerPlugin(ScrollTrigger);
+
 // Animation timing constants
 const ANIMATION_DURATION_IN = ANIMATION_CONSTANTS.DURATIONS.STANDARD_LENGTH; // 0.5s
 const ANIMATION_DURATION_OUT = ANIMATION_CONSTANTS.DURATIONS.NORMAL; // 0.3s (faster exit)
 const STAGGER_DELAY = 0.1;
 const EASE_CURVE = ANIMATION_CONSTANTS.EASING.SMOOTH_SAL; // cubic-bezier(0.3, 0.9, 0.3, 0.9)
-const BLUR_AMOUNT = 20; // pixels - visible blur effect during fade animations
+const BLUR_AMOUNT = 10; // pixels - reduced from 20 for better GPU performance
 
 interface PageConfig {
   id: string;
@@ -533,6 +537,14 @@ export class PageTransitionModule extends BaseModule {
         to: pageId
       });
 
+      // Refresh ScrollTrigger after page transition completes
+      // This ensures scroll-based animations recalculate positions after content changes
+      // Use a small delay to ensure DOM has fully updated
+      requestAnimationFrame(() => {
+        ScrollTrigger.refresh();
+        this.log('ScrollTrigger refreshed after page transition');
+      });
+
       this.hideTransitionOverlay();
     } catch (error) {
       this.error('Transition failed:', error);
@@ -711,7 +723,7 @@ export class PageTransitionModule extends BaseModule {
       gsap.set(children, {
         opacity: 1,
         filter: 'blur(0px)',
-        webkitFilter: 'blur(0px)'
+        willChange: 'filter, opacity, transform' // GPU acceleration hint
       });
     }
 
@@ -742,47 +754,38 @@ export class PageTransitionModule extends BaseModule {
           const isMobileNonIntro = this.isMobile && this.enableOnMobile && page.id !== 'intro';
 
           if (isMobileNonIntro) {
-            // Step 1: Blur children FIRST (longer duration for mobile)
+            // Mobile: Simpler, faster fade without heavy blur
             tl.to(children, {
-              filter: `blur(${BLUR_AMOUNT}px)`,
-              webkitFilter: `blur(${BLUR_AMOUNT}px)`,
-              duration: 0.6, // Longer blur on mobile
-              stagger: STAGGER_DELAY * 0.5,
+              filter: `blur(${BLUR_AMOUNT * 0.5}px)`, // Half blur on mobile for performance
+              opacity: 0,
+              duration: 0.4,
+              stagger: STAGGER_DELAY * 0.3,
               ease: 'power2.in'
             }, 0);
-
-            // Step 2: Brief pause - blur lingers
-            tl.to({}, { duration: 0.1 });
-
-            // Step 3: THEN fade out (shorter duration - reverse of enter)
-            tl.to(children, {
-              opacity: 0,
-              duration: 0.25, // Shorter fade on mobile
-              stagger: STAGGER_DELAY,
-              ease: 'power2.in'
-            });
           } else {
-            // Desktop or intro: original timing
+            // Desktop: Smooth blur-then-fade sequence
             // Step 1: Blur children FIRST while still visible
             tl.to(children, {
               filter: `blur(${BLUR_AMOUNT}px)`,
-              webkitFilter: `blur(${BLUR_AMOUNT}px)`,
-              duration: 0.4,
+              duration: 0.35, // Slightly faster
               stagger: STAGGER_DELAY * 0.5,
-              ease: 'power2.in'
+              ease: 'sine.in' // Smoother blur easing
             }, 0);
 
             // Step 2: Brief pause - blur lingers
-            tl.to({}, { duration: 0.2 });
+            tl.to({}, { duration: 0.15 });
 
             // Step 3: THEN fade out (while blurred)
             tl.to(children, {
               opacity: 0,
-              duration: 0.3,
+              duration: 0.25,
               stagger: STAGGER_DELAY,
               ease: 'power2.in'
             });
           }
+
+          // Clean up will-change after animation completes
+          tl.set(children, { willChange: 'auto' });
         } else {
           // Drop out children with stagger
           tl.to(children, {

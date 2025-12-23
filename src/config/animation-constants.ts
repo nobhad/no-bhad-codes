@@ -53,6 +53,7 @@ export const ANIMATION_EASING = {
   // Custom curves for specific animations
   PAGE_TRANSITION: 'power3.inOut',
   MORPH: 'power2.inOut',
+  SVG_MORPH: 'none', // Linear easing for SVG path morphing - smoother vertex interpolation
   HERO_REVEAL: 'power2.out',
 
   // Advanced easing curves

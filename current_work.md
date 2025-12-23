@@ -4,6 +4,74 @@
 
 ## Recent Updates (December 23, 2025)
 
+### Animation Smoothness Deep Dive - COMPLETE
+
+Comprehensive optimization of GSAP animations for smoother, more seamless performance.
+
+**Optimizations Completed:**
+
+1. **SVG Morph Animations - Linear Easing**
+   - Changed SVG morphing from `power2.inOut`/`power1.out` to `linear` easing
+   - Linear easing provides smoother vertex interpolation for SVG paths
+   - Updated all morph animations in:
+     - `intro/morph-timeline.ts` (Phase 2 + Phase 3b morphs)
+     - `intro-animation.ts` (exit and entry animations)
+     - `intro-animation-mobile.ts` (Phase 2 + Phase 3 morphs)
+
+2. **GPU Acceleration with force3D**
+   - Added `force3D: true` to all SVG morphing animations
+   - Enables hardware-accelerated 3D transforms for smoother rendering
+   - Applied to all finger and thumb morphs across all animation modules
+
+3. **Blur Animation Optimization**
+   - Reduced `BLUR_AMOUNT` from 20px to 10px in `page-transition.ts` for better GPU performance
+   - Reduced blur from 8px to 6px in `contact-animation.ts`
+   - Changed blur easing from `power2.in` to `sine.in` for smoother blur effect
+
+4. **will-change GPU Hints**
+   - Added `willChange: 'filter, opacity, transform'` before blur animations
+   - Cleaned up will-change to 'auto' after animations complete
+   - Applied to: `page-transition.ts`, `contact-animation.ts`, `section-transitions.ts`
+
+5. **Layout Thrashing Fix**
+   - Batched DOM reads before DOM writes in `contact-animation.ts`
+   - Organized code into: DOM queries → Layout reads → Calculations → DOM writes
+   - Prevents forced reflow/repaint during animation setup
+
+6. **ScrollTrigger Refresh**
+   - Added `ScrollTrigger.refresh()` after page transitions complete in `page-transition.ts`
+   - Uses `requestAnimationFrame` to ensure DOM has updated before refresh
+   - Fixes scroll-based animations recalculating positions after content changes
+
+7. **Mobile Animation Timing**
+   - Mobile blur uses 50% of desktop blur amount (5px instead of 10px)
+   - Mobile animations use shorter durations (0.4s vs 0.7s for blur clear)
+   - Reduced stagger delays on mobile for faster perceived performance
+
+8. **New Animation Constant**
+   - Added `SVG_MORPH: 'none'` to `animation-constants.ts` for linear SVG easing
+   - Centralized easing constant for consistent SVG morphing behavior
+
+**Files Modified:**
+
+- `src/config/animation-constants.ts` - Added SVG_MORPH easing constant
+- `src/modules/animation/intro/morph-timeline.ts` - Linear easing + force3D
+- `src/modules/animation/intro-animation.ts` - Linear easing + force3D for exit/entry
+- `src/modules/animation/intro-animation-mobile.ts` - Linear easing + force3D
+- `src/modules/animation/page-transition.ts` - Reduced blur, will-change, ScrollTrigger refresh
+- `src/modules/animation/contact-animation.ts` - Reduced blur, will-change, layout thrashing fix
+- `src/modules/animation/section-transitions.ts` - will-change for blur animations
+
+**Result:**
+
+- Smoother SVG morphing with linear vertex interpolation
+- Better GPU utilization with force3D and will-change hints
+- Reduced layout thrashing for faster animation setup
+- Lighter blur for better mobile performance
+- ScrollTrigger properly refreshes after page transitions
+
+---
+
 ### Deprecated Code Cleanup - COMPLETE
 
 Removed deprecated infinite scroll module and related code.

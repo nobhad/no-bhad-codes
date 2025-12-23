@@ -368,12 +368,14 @@ export class MobileIntroAnimationModule extends BaseModule {
 
     // ========================================================================
     // PHASE 2: FINGER RELEASE (1→2)
+    // Using linear easing for smoother SVG vertex interpolation
     // ========================================================================
     if (fingerA1 && fingerA2PathData) {
       this.timeline.to(fingerA1, {
         morphSVG: { shape: fingerA2PathData, shapeIndex: 'auto' },
         duration: releaseDuration,
-        ease: fadeEase
+        ease: 'none', // Linear for smooth SVG morphing
+        force3D: true // GPU acceleration
       });
     }
 
@@ -381,7 +383,8 @@ export class MobileIntroAnimationModule extends BaseModule {
       this.timeline.to(fingerB1, {
         morphSVG: { shape: fingerB2PathData, shapeIndex: 'auto' },
         duration: releaseDuration,
-        ease: fadeEase
+        ease: 'none',
+        force3D: true
       }, '<');
     }
 
@@ -389,7 +392,8 @@ export class MobileIntroAnimationModule extends BaseModule {
       this.timeline.to(fingerC1, {
         morphSVG: { shape: fingerC2PathData, shapeIndex: 'auto' },
         duration: releaseDuration,
-        ease: fadeEase
+        ease: 'none',
+        force3D: true
       }, '<');
     }
 
@@ -399,7 +403,8 @@ export class MobileIntroAnimationModule extends BaseModule {
       this.timeline.to(clonedThumb, {
         morphSVG: { shape: thumb2PathData, shapeIndex: 'auto' },
         duration: releaseDuration,
-        ease: fadeEase
+        ease: 'none',
+        force3D: true
       }, '<');
     }
 
@@ -419,11 +424,13 @@ export class MobileIntroAnimationModule extends BaseModule {
     }, '<');
 
     // Final finger morphs (2→3)
+    // Using linear easing for smoother SVG vertex interpolation
     if (fingerA1 && fingerA3PathData) {
       this.timeline.to(fingerA1, {
         morphSVG: { shape: fingerA3PathData, shapeIndex: 'auto' },
         duration: 0.08,
-        ease: 'power1.out'
+        ease: 'none', // Linear for smooth SVG morphing
+        force3D: true
       }, '<');
     }
 
@@ -431,7 +438,8 @@ export class MobileIntroAnimationModule extends BaseModule {
       this.timeline.to(fingerB1, {
         morphSVG: { shape: fingerB3PathData, shapeIndex: 'auto' },
         duration: 0.08,
-        ease: 'power1.out'
+        ease: 'none',
+        force3D: true
       }, '<');
     }
 
@@ -439,7 +447,8 @@ export class MobileIntroAnimationModule extends BaseModule {
       this.timeline.to(fingerC1, {
         morphSVG: { shape: fingerC3PathData, shapeIndex: 'auto' },
         duration: 0.2,
-        ease: 'power1.out'
+        ease: 'none',
+        force3D: true
       }, '<');
     }
 
@@ -448,7 +457,8 @@ export class MobileIntroAnimationModule extends BaseModule {
       this.timeline.to(clonedThumb, {
         morphSVG: { shape: thumb3PathData, shapeIndex: 'auto' },
         duration: 0.2,
-        ease: 'power1.out'
+        ease: 'none',
+        force3D: true
       }, '<');
     }
 

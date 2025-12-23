@@ -108,21 +108,34 @@ export class ContactAnimationModule extends BaseModule {
 
     // ========================================================================
     // PHASE 1: h2 and card BLUR IN (fade in while blurred, then clear blur)
+    // Reduced blur amount for better GPU performance
     // ========================================================================
-    const blurAmount = 8;
+    const blurAmount = 6; // Reduced from 8px for better performance
     const blurFadeDuration = 0.6;
     const blurClearDuration = 0.5;
     const dropDuration = blurFadeDuration + 0.3 + blurClearDuration; // Total blur phase duration
 
-    // Set initial blur state
+    // Set initial blur state with will-change hint for GPU acceleration
     if (heading) {
-      gsap.set(heading, { opacity: 0, filter: `blur(${blurAmount}px)` });
+      gsap.set(heading, {
+        opacity: 0,
+        filter: `blur(${blurAmount}px)`,
+        willChange: 'filter, opacity' // GPU acceleration hint
+      });
     }
     if (contactOptions) {
-      gsap.set(contactOptions, { opacity: 0, filter: `blur(${blurAmount}px)` });
+      gsap.set(contactOptions, {
+        opacity: 0,
+        filter: `blur(${blurAmount}px)`,
+        willChange: 'filter, opacity'
+      });
     }
     if (cardColumn) {
-      gsap.set(cardColumn, { opacity: 0, filter: `blur(${blurAmount}px)` });
+      gsap.set(cardColumn, {
+        opacity: 0,
+        filter: `blur(${blurAmount}px)`,
+        willChange: 'filter, opacity'
+      });
     }
 
     // Fade in while blurred
@@ -173,6 +186,11 @@ export class ContactAnimationModule extends BaseModule {
       }, '<');
     }
 
+    // Clean up will-change after blur animations complete
+    this.timeline.set([heading, contactOptions, cardColumn].filter(Boolean), {
+      willChange: 'auto'
+    });
+
     // Business card setup
     if (businessCard) {
       const cardInner = businessCard.querySelector('.business-card-inner') as HTMLElement;
@@ -188,7 +206,10 @@ export class ContactAnimationModule extends BaseModule {
 
     // ========================================================================
     // PHASE 3: Form fields cascade animation
+    // PERFORMANCE: Batch all DOM reads before writes to prevent layout thrashing
     // ========================================================================
+
+    // === BATCH 1: DOM QUERIES (no layout forcing) ===
     const nameField = this.container.querySelector('#name')?.closest('.input-item');
     const companyField = this.container.querySelector('#company')?.closest('.input-item');
     const emailField = this.container.querySelector('#email')?.closest('.input-item');
@@ -196,35 +217,35 @@ export class ContactAnimationModule extends BaseModule {
                          this.container.querySelector('textarea')?.closest('.input-item');
     const submitButton = this.container.querySelector('button[type="submit"]') ||
                          this.container.querySelector('.contact-submit');
-
-    // Get dimensions for animation (from centralized constants)
-    const inputFieldHeight = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_HEIGHT;
-    const compressedHeight = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_COMPRESSED;
-
-    // Measure FINAL section height before any transforms (fields at natural size)
-    const finalSectionHeight = this.container.offsetHeight;
-
-    // Clip the form container so stacked fields don't overflow above
     const formContainer = this.container.querySelector('.contact-form') ||
                           this.container.querySelector('.contact-form-column');
-
-    // Container dimensions already locked at start - just set overflow
-    if (formContainer) gsap.set(formContainer, { overflow: 'hidden' });
-
-    // Lock section to final height during animation
-    gsap.set(this.container, { minHeight: finalSectionHeight });
-
-    // Message field - use CSS variable for reliable height
     const textarea = messageField?.querySelector('textarea') as HTMLTextAreaElement | null;
     const wrapper = messageField?.querySelector('.input-wrapper') || messageField;
+    const nameLabel = nameField?.querySelector('label');
+    const companyLabel = companyField?.querySelector('label');
+    const emailLabel = emailField?.querySelector('label');
+    const messageLabel = messageField?.querySelector('label');
+    const nameInput = nameField?.querySelector('input') as HTMLInputElement | null;
+    const companyInput = companyField?.querySelector('input') as HTMLInputElement | null;
+    const emailInput = emailField?.querySelector('input') as HTMLInputElement | null;
 
-    // Get textarea height from CSS variable or use default
+    // === BATCH 2: LAYOUT-FORCING READS (do all at once) ===
+    const finalSectionHeight = this.container.offsetHeight;
     const rootStyles = window.getComputedStyle(document.documentElement);
     const textareaHeightVar = rootStyles.getPropertyValue('--contact-textarea-height').trim();
+
+    // === BATCH 3: CALCULATIONS (no DOM access) ===
+    const inputFieldHeight = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_HEIGHT;
+    const compressedHeight = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_COMPRESSED;
     const finalTextareaHeight = parseInt(textareaHeightVar, 10) || 155;
     const finalMessageFieldHeight = finalTextareaHeight + 20; // Add padding
 
     this.log(`Message field target height: ${finalTextareaHeight}px`);
+
+    // === BATCH 4: DOM WRITES (all gsap.set calls together) ===
+    // Lock section to final height and set form container overflow
+    gsap.set(this.container, { minHeight: finalSectionHeight });
+    if (formContainer) gsap.set(formContainer, { overflow: 'hidden' });
 
     // Set up z-index - name on TOP of stack (highest z-index)
     if (nameField) gsap.set(nameField, { zIndex: 5, position: 'relative' });
@@ -232,16 +253,6 @@ export class ContactAnimationModule extends BaseModule {
     if (emailField) gsap.set(emailField, { zIndex: 3, position: 'relative' });
     if (messageField) gsap.set(messageField, { zIndex: 2, position: 'relative' });
     if (submitButton) gsap.set(submitButton, { zIndex: 1, opacity: 0, scale: 0.8 });
-
-    // Get all labels and inputs to hide text initially
-    const nameLabel = nameField?.querySelector('label');
-    const companyLabel = companyField?.querySelector('label');
-    const emailLabel = emailField?.querySelector('label');
-    const messageLabel = messageField?.querySelector('label');
-
-    const nameInput = nameField?.querySelector('input') as HTMLInputElement | null;
-    const companyInput = companyField?.querySelector('input') as HTMLInputElement | null;
-    const emailInput = emailField?.querySelector('input') as HTMLInputElement | null;
 
     // Shared border-radius for all fields during cascade
     const fieldBorderRadius = '0 50px 50px 50px';
@@ -580,19 +591,19 @@ export class ContactAnimationModule extends BaseModule {
   private resetAnimatedElements(): void {
     if (!this.container) return;
 
-    const blurAmount = 8;
+    const blurAmount = 6; // Reduced from 8px for better performance
     const fieldBorderRadius = '0 50px 50px 50px';
     const startWidth = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_WIDTH_START;
     const compressedHeight = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_COMPRESSED;
 
-    // Reset header elements to blur state
+    // Reset header elements to blur state with will-change for GPU acceleration
     const heading = this.container.querySelector('h2');
     const contactOptions = this.container.querySelector('.contact-options');
     const cardColumn = this.container.querySelector('.contact-card-column');
 
-    if (heading) gsap.set(heading, { opacity: 0, filter: `blur(${blurAmount}px)` });
-    if (contactOptions) gsap.set(contactOptions, { opacity: 0, filter: `blur(${blurAmount}px)` });
-    if (cardColumn) gsap.set(cardColumn, { opacity: 0, filter: `blur(${blurAmount}px)` });
+    if (heading) gsap.set(heading, { opacity: 0, filter: `blur(${blurAmount}px)`, willChange: 'filter, opacity' });
+    if (contactOptions) gsap.set(contactOptions, { opacity: 0, filter: `blur(${blurAmount}px)`, willChange: 'filter, opacity' });
+    if (cardColumn) gsap.set(cardColumn, { opacity: 0, filter: `blur(${blurAmount}px)`, willChange: 'filter, opacity' });
 
     // Reset form container
     const formContainer = this.container.querySelector('.contact-form') ||

@@ -1089,27 +1089,31 @@ export class IntroAnimationModule extends BaseModule {
       // PHASE 1b: MORPH 3→2 at END of entry (reverse of intro's 2→3 at START of retraction)
       // In intro, morph happens when paw is NEAR card (just started retracting)
       // In exit (reverse), morph happens when paw is NEAR card (almost done entering)
+      // Using linear easing for smoother SVG vertex interpolation
       // ========================================================================
       // Start morph near end of entry (pawEntryDuration - 0.2s)
       if (fingerA3 && fingerA2PathData) {
         this.exitTimeline.to(fingerA3, {
           morphSVG: { shape: fingerA2PathData, shapeIndex: 'auto' },
           duration: 0.08,
-          ease: 'power1.out'
+          ease: 'none', // Linear for smooth SVG morphing
+          force3D: true // GPU acceleration
         }, `-=${0.2}`);  // Start 0.2s before entry ends
       }
       if (fingerB3 && fingerB2PathData) {
         this.exitTimeline.to(fingerB3, {
           morphSVG: { shape: fingerB2PathData, shapeIndex: 'auto' },
           duration: 0.08,
-          ease: 'power1.out'
+          ease: 'none',
+          force3D: true
         }, '<');
       }
       if (fingerC3 && fingerC2PathData) {
         this.exitTimeline.to(fingerC3, {
           morphSVG: { shape: fingerC2PathData, shapeIndex: 'auto' },
           duration: 0.2,
-          ease: 'power1.out'
+          ease: 'none',
+          force3D: true
         }, '<');
       }
 
@@ -1118,13 +1122,15 @@ export class IntroAnimationModule extends BaseModule {
         this.exitTimeline.to(clonedThumb, {
           morphSVG: { shape: thumb2PathData, shapeIndex: 'auto' },
           duration: 0.2,
-          ease: 'power1.out'
+          ease: 'none',
+          force3D: true
         }, '<');
       }
 
       // ========================================================================
       // PHASE 2: MORPH 2→1 (REVERSE of intro Phase 2)
       // Fingers and thumb close to clutching position
+      // Using linear easing for smoother SVG vertex interpolation
       // ========================================================================
 
       // Morph 2→1 (reverse of intro's 1→2)
@@ -1132,21 +1138,24 @@ export class IntroAnimationModule extends BaseModule {
         this.exitTimeline.to(fingerA3, {
           morphSVG: { shape: fingerA1PathData, shapeIndex: 'auto' },
           duration: releaseDuration,  // 0.5s - matches intro
-          ease: fadeEase
+          ease: 'none', // Linear for smooth SVG morphing
+          force3D: true
         }, '<');
       }
       if (fingerB3 && fingerB1PathData) {
         this.exitTimeline.to(fingerB3, {
           morphSVG: { shape: fingerB1PathData, shapeIndex: 'auto' },
           duration: releaseDuration,
-          ease: fadeEase
+          ease: 'none',
+          force3D: true
         }, '<');
       }
       if (fingerC3 && fingerC1PathData) {
         this.exitTimeline.to(fingerC3, {
           morphSVG: { shape: fingerC1PathData, shapeIndex: 'auto' },
           duration: releaseDuration,
-          ease: fadeEase
+          ease: 'none',
+          force3D: true
         }, '<');
       }
 
@@ -1155,7 +1164,8 @@ export class IntroAnimationModule extends BaseModule {
         this.exitTimeline.to(clonedThumb, {
           morphSVG: { shape: thumb1PathData, shapeIndex: 'auto' },
           duration: releaseDuration,
-          ease: fadeEase
+          ease: 'none',
+          force3D: true
         }, '<');
       }
 
@@ -1608,25 +1618,29 @@ export class IntroAnimationModule extends BaseModule {
       this.entryTimeline.to({}, { duration: clutchHold });
 
       // Phase 3: Fingers release (morph 1 → 2)
+      // Using linear easing for smoother SVG vertex interpolation
       if (fingerA1 && fingerA2PathData) {
         this.entryTimeline.to(fingerA1, {
           morphSVG: { shape: fingerA2PathData, shapeIndex: 'auto' },
           duration: releaseDuration,
-          ease: 'power2.inOut'
+          ease: 'none', // Linear for smooth SVG morphing
+          force3D: true // GPU acceleration
         });
       }
       if (fingerB1 && fingerB2PathData) {
         this.entryTimeline.to(fingerB1, {
           morphSVG: { shape: fingerB2PathData, shapeIndex: 'auto' },
           duration: releaseDuration,
-          ease: 'power2.inOut'
+          ease: 'none',
+          force3D: true
         }, '<');
       }
       if (fingerC1 && fingerC2PathData) {
         this.entryTimeline.to(fingerC1, {
           morphSVG: { shape: fingerC2PathData, shapeIndex: 'auto' },
           duration: releaseDuration,
-          ease: 'power2.inOut'
+          ease: 'none',
+          force3D: true
         }, '<');
       }
 
@@ -1635,7 +1649,8 @@ export class IntroAnimationModule extends BaseModule {
         this.entryTimeline.to(clonedThumb, {
           morphSVG: { shape: thumb2PathData, shapeIndex: 'auto' },
           duration: releaseDuration,
-          ease: 'power2.inOut'
+          ease: 'none',
+          force3D: true
         }, '<');
       }
 
@@ -1654,25 +1669,29 @@ export class IntroAnimationModule extends BaseModule {
       }, '<');
 
       // Fingers open during retraction
+      // Using linear easing for smoother SVG vertex interpolation
       if (fingerA1 && fingerA3PathData) {
         this.entryTimeline.to(fingerA1, {
           morphSVG: { shape: fingerA3PathData, shapeIndex: 'auto' },
           duration: 0.08,
-          ease: 'power1.out'
+          ease: 'none', // Linear for smooth SVG morphing
+          force3D: true
         }, '<');
       }
       if (fingerB1 && fingerB3PathData) {
         this.entryTimeline.to(fingerB1, {
           morphSVG: { shape: fingerB3PathData, shapeIndex: 'auto' },
           duration: 0.08,
-          ease: 'power1.out'
+          ease: 'none',
+          force3D: true
         }, '<');
       }
       if (fingerC1 && fingerC3PathData) {
         this.entryTimeline.to(fingerC1, {
           morphSVG: { shape: fingerC3PathData, shapeIndex: 'auto' },
           duration: 0.2,
-          ease: 'power1.out'
+          ease: 'none',
+          force3D: true
         }, '<');
       }
 
@@ -1681,7 +1700,8 @@ export class IntroAnimationModule extends BaseModule {
         this.entryTimeline.to(clonedThumb, {
           morphSVG: { shape: thumb3PathData, shapeIndex: 'auto' },
           duration: 0.2,
-          ease: 'power1.out'
+          ease: 'none',
+          force3D: true
         }, '<');
       }
 

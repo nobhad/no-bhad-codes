@@ -154,18 +154,20 @@ export class SectionTransitionsModule extends BaseModule {
         return;
       }
 
-      // Set initial state: hidden with blur
+      // Set initial state: hidden with blur + will-change for GPU acceleration
       if (!config.skipBlur) {
         gsap.set(section, {
           opacity: 0,
-          filter: `blur(${BLUR_AMOUNT}px)`
+          filter: `blur(${BLUR_AMOUNT}px)`,
+          willChange: 'filter, opacity' // GPU acceleration hint
         });
       }
 
       // Set children initial state: translated up
       gsap.set(children, {
         y: -DROP_DISTANCE,
-        opacity: 0
+        opacity: 0,
+        willChange: 'transform, opacity'
       });
 
       // Create enter timeline
@@ -189,6 +191,10 @@ export class SectionTransitionsModule extends BaseModule {
         stagger: STAGGER_DELAY,
         ease: EASE_IN
       }, config.skipBlur ? 0 : 0.1);
+
+      // Clean up will-change after animation completes
+      enterTimeline.set(section, { willChange: 'auto' });
+      enterTimeline.set(children, { willChange: 'auto' });
 
       this.sectionTimelines.push(enterTimeline);
 

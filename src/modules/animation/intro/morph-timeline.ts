@@ -88,14 +88,15 @@ export function addFingerReleasePhase(
   clonedThumb: Element | null
 ): void {
   const duration = ANIMATION_CONSTANTS.SEQUENCES.INTRO_MORPH.FINGER_RELEASE;
-  const ease = ANIMATION_CONSTANTS.EASING.MORPH;
+  const ease = ANIMATION_CONSTANTS.EASING.SVG_MORPH; // Linear for smoother vertex interpolation
 
   // Finger A: Position 1 → 2
   if (fingerRefs.fingerA1 && pathData.a2) {
     timeline.to(fingerRefs.fingerA1, {
       morphSVG: { shape: pathData.a2, shapeIndex: 'auto' },
       duration,
-      ease
+      ease,
+      force3D: true // GPU acceleration for SVG transforms
     });
   }
 
@@ -104,7 +105,8 @@ export function addFingerReleasePhase(
     timeline.to(fingerRefs.fingerB1, {
       morphSVG: { shape: pathData.b2, shapeIndex: 'auto' },
       duration,
-      ease
+      ease,
+      force3D: true
     }, '<');
   }
 
@@ -113,7 +115,8 @@ export function addFingerReleasePhase(
     timeline.to(fingerRefs.fingerC1, {
       morphSVG: { shape: pathData.c2, shapeIndex: 'auto' },
       duration,
-      ease
+      ease,
+      force3D: true
     }, '<');
   }
 
@@ -122,7 +125,8 @@ export function addFingerReleasePhase(
     timeline.to(clonedThumb, {
       morphSVG: { shape: pathData.thumb2, shapeIndex: 'auto' },
       duration,
-      ease
+      ease,
+      force3D: true
     }, '<');
   }
 }
@@ -168,14 +172,15 @@ export function addFinalMorphPhase(
   const durationA = ANIMATION_CONSTANTS.SEQUENCES.INTRO_MORPH.FINGER_MORPH_A;
   const durationB = ANIMATION_CONSTANTS.SEQUENCES.INTRO_MORPH.FINGER_MORPH_B;
   const durationC = ANIMATION_CONSTANTS.SEQUENCES.INTRO_MORPH.FINGER_MORPH_C;
-  const ease = 'power1.out';
+  const ease = ANIMATION_CONSTANTS.EASING.SVG_MORPH; // Linear for smoother vertex interpolation
 
   // Finger A: Position 2 → 3 (during retraction)
   if (fingerRefs.fingerA1 && pathData.a3) {
     timeline.to(fingerRefs.fingerA1, {
       morphSVG: { shape: pathData.a3, shapeIndex: 'auto' },
       duration: durationA,
-      ease
+      ease,
+      force3D: true // GPU acceleration
     }, '<');
   }
 
@@ -184,7 +189,8 @@ export function addFinalMorphPhase(
     timeline.to(fingerRefs.fingerB1, {
       morphSVG: { shape: pathData.b3, shapeIndex: 'auto' },
       duration: durationB,
-      ease
+      ease,
+      force3D: true
     }, '<');
   }
 
@@ -193,7 +199,8 @@ export function addFinalMorphPhase(
     timeline.to(fingerRefs.fingerC1, {
       morphSVG: { shape: pathData.c3, shapeIndex: 'auto' },
       duration: durationC,
-      ease
+      ease,
+      force3D: true
     }, '<');
   }
 
@@ -202,7 +209,8 @@ export function addFinalMorphPhase(
     timeline.to(clonedThumb, {
       morphSVG: { shape: pathData.thumb3, shapeIndex: 'auto' },
       duration: durationC,
-      ease
+      ease,
+      force3D: true
     }, '<');
   }
 }
