@@ -242,6 +242,7 @@ li {
    6. MENU CONTAINER & BACKGROUND PANELS
    ===================================================== */
 .menu {
+  z-index: 125; /* Above overlay (115) so menu content isn't blurred */
   grid-column-gap: 5em;
   grid-row-gap: 5em;
   flex-flow: column;
