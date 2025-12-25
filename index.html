@@ -32,12 +32,9 @@
           visibility: hidden;
         }
       }
-      /* CRITICAL: Header background color must be set before CSS loads */
+      /* Header is transparent to show coyote paw animation through it */
       .header {
-        background-color: #e0e0e0; /* Light theme fallback */
-      }
-      html[data-theme="dark"] .header {
-        background-color: #2a2a2a; /* Dark theme fallback */
+        background-color: transparent;
       }
       /* CRITICAL: Header must be visible immediately on mobile */
       @media screen and (max-width: 767px) {
