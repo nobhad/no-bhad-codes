@@ -1,5 +1,10 @@
 /* Footer Component */
 
+/* Hide footer on client portal pages */
+[data-page="client-portal"] .footer {
+  display: none !important;
+}
+
 .footer {
   position: fixed;
   bottom: 0;

@@ -1,0 +1,33 @@
+/* =====================================================
+   CLIENT PORTAL - CSS ORCHESTRATOR
+   Import order matters: base components first, then views
+   ===================================================== */
+
+/* Base Components (cp- prefixed reusable classes) */
+@import './components.css';
+
+/* Layout & Structure */
+@import './layout.css';
+@import './sidebar.css';
+
+/* Authentication */
+@import './login.css';
+
+/* Dashboard Views */
+@import './dashboard.css';
+@import './files.css';
+@import './messages.css';
+@import './invoices.css';
+@import './settings.css';
+
+/* Project Navigation & Details */
+@import './projects.css';
+
+/* Content Views */
+@import './views.css';
+
+/* Responsive (tablet/desktop) */
+@import './responsive.css';
+
+/* Mobile (must be last) */
+@import './mobile.css';

@@ -1,0 +1,148 @@
+/* =====================================================
+   CLIENT PORTAL - INVOICES
+   Invoice summary, list, items, status badges
+   ===================================================== */
+
+/* Invoice Summary Grid */
+.invoice-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Summary Card */
+.summary-card {
+  background: var(--color-neutral-100);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--color-dark);
+}
+
+.summary-label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--color-neutral-600);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.summary-value {
+  display: block;
+  font-family: var(--font--acme);
+  font-size: 1.8rem;
+  color: var(--color-dark);
+}
+
+/* Invoices List Container */
+.invoices-list {
+  background: var(--color-neutral-100);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 8px;
+  padding: 1.5rem;
+  color: var(--color-dark);
+}
+
+.invoices-list h3 {
+  font-family: var(--font--acme);
+  font-size: 1.1rem;
+  margin: 0 0 1rem 0;
+  text-transform: uppercase;
+  color: var(--color-dark);
+}
+
+/* Invoice Item */
+.invoice-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--color-neutral-100);
+  border: 2px solid var(--color-neutral-300);
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Invoice Info */
+.invoice-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.invoice-number {
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+.invoice-date,
+.invoice-project {
+  font-size: 0.85rem;
+  color: var(--color-neutral-600);
+}
+
+/* Invoice Amount */
+.invoice-amount {
+  font-family: var(--font--acme);
+  font-size: 1.2rem;
+  color: var(--color-dark);
+}
+
+/* Invoice Status */
+.invoice-status {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-pending {
+  background: var(--color-warning);
+  color: var(--color-dark);
+}
+
+.status-paid {
+  background: var(--color-primary);
+  color: var(--color-dark);
+}
+
+.status-overdue {
+  background: var(--color-error);
+  color: var(--color-white);
+}
+
+.status-draft {
+  background: var(--color-neutral-200);
+  color: var(--color-dark);
+}
+
+/* Invoice Actions */
+.invoice-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* No Invoices Message */
+.no-invoices-message {
+  color: var(--color-neutral-600);
+  font-style: italic;
+  text-align: left;
+  padding: 1rem 0;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .invoice-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .invoice-item {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}

@@ -1,0 +1,281 @@
+/* =====================================================
+   CLIENT PORTAL - MESSAGES
+   Message thread, compose, emoji picker
+   ===================================================== */
+
+/* Messages Container */
+.messages-container {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-neutral-100);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 8px;
+  color: var(--color-dark);
+}
+
+/* Messages Thread */
+.messages-thread {
+  padding: 1.5rem;
+  min-height: 500px;
+  max-height: 700px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-bottom: 1px solid var(--color-neutral-300);
+}
+
+/* Individual Message */
+.message {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 85%;
+}
+
+.message-received {
+  align-self: flex-start;
+  flex-direction: row;
+  max-width: 100%;
+  width: 100%;
+}
+
+.message-sent {
+  align-self: flex-end;
+  flex-direction: row;
+  justify-content: flex-end;
+  max-width: 100%;
+  width: 100%;
+}
+
+.message-sent .message-content {
+  order: 1;
+}
+
+/* Message Avatar */
+.message-avatar {
+  flex-shrink: 0;
+}
+
+.message-avatar .avatar-img {
+  width: 56px;
+  height: 56px;
+}
+
+.message-sent .message-avatar {
+  order: 2;
+  flex-shrink: 0;
+}
+
+.message-avatar .avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-dark);
+  color: var(--color-neutral-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+/* Message Content */
+.message-content {
+  padding: 1rem 1.25rem;
+  border-radius: 18px;
+  border: 2px solid var(--color-dark);
+  background: var(--color-neutral-100);
+  line-height: 1.5;
+  color: var(--color-dark);
+  flex: 1;
+}
+
+.message-received .message-content {
+  border-bottom-left-radius: 4px;
+}
+
+.message-sent .message-content {
+  border-bottom-right-radius: 4px;
+}
+
+/* Message Header */
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  gap: 1rem;
+}
+
+.message-sender {
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+.message-time {
+  color: var(--color-neutral-600);
+}
+
+.message-body {
+  color: var(--color-dark);
+  line-height: 1.5;
+}
+
+/* System Message */
+.message-system {
+  background: var(--color-neutral-200);
+  border-left: 4px solid var(--color-primary);
+}
+
+/* Message Compose */
+.message-compose {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.message-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+}
+
+.message-input-wrapper .form-textarea {
+  flex: 1;
+  padding-right: 3rem;
+}
+
+/* Emoji Toggle */
+.emoji-toggle-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: var(--color-dark);
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.emoji-toggle-btn:hover {
+  opacity: 1;
+}
+
+/* Emoji Picker */
+.emoji-picker-wrapper {
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.emoji-picker-wrapper.hidden {
+  display: none;
+}
+
+.emoji-picker-wrapper emoji-picker {
+  width: 100%;
+  max-width: 400px;
+  --background: var(--color-neutral-100);
+  --border-color: var(--color-border);
+  --indicator-color: var(--color-primary);
+  --input-border-color: var(--color-dark);
+  --button-active-background: var(--color-primary);
+  --button-hover-background: var(--color-neutral-200);
+}
+
+/* Form Textarea */
+.form-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1rem;
+  border: 2px solid var(--color-dark);
+  background: var(--color-neutral-100);
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Messages View (alternate layout) */
+.messages-view {
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.messages-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--color-neutral-300);
+}
+
+.messages-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-dark);
+}
+
+.message-thread {
+  flex: 1;
+  min-height: 300px;
+  background: var(--color-neutral-200);
+  border: 2px solid var(--color-neutral-300);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.message-placeholder {
+  text-align: center;
+  color: var(--color-neutral-600);
+  padding: 3rem 1rem;
+}
+
+/* Messages List (in project view) */
+.messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 300px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 1rem;
+  background: var(--color-neutral-200);
+  border: 2px solid var(--color-neutral-300);
+}
+
+/* Message Form */
+.message-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--color-neutral-200);
+  border: 2px solid var(--color-neutral-300);
+}
+
+.message-form textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid var(--color-neutral-400);
+  background: var(--color-neutral-100);
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.message-form textarea:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.message-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.send-btn {
+  align-self: flex-end;
+}

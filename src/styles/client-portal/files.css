@@ -1,0 +1,210 @@
+/* =====================================================
+   CLIENT PORTAL - FILES
+   File upload, file lists, file management
+   ===================================================== */
+
+/* Files Upload Section */
+.files-upload-section {
+  background: var(--color-neutral-100);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  color: var(--color-dark);
+}
+
+.files-upload-section h3 {
+  font-family: var(--font--acme);
+  font-size: 1.1rem;
+  margin: 0 0 1rem 0;
+  text-transform: uppercase;
+  color: var(--color-dark);
+}
+
+/* Upload Dropzone */
+.upload-dropzone {
+  border: 2px dashed var(--color-neutral-400);
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  background: var(--color-neutral-50, var(--color-white));
+  color: var(--color-dark);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.upload-dropzone:hover {
+  border-color: var(--color-primary);
+  background: var(--color-neutral-100);
+}
+
+.upload-dropzone p {
+  margin: 0 0 1rem 0;
+  color: var(--color-neutral-600);
+}
+
+/* Files List Section */
+.files-list-section {
+  background: var(--color-neutral-100);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 8px;
+  padding: 1.5rem;
+  color: var(--color-dark);
+}
+
+.files-list-section h3 {
+  font-family: var(--font--acme);
+  font-size: 1.1rem;
+  margin: 0 0 1rem 0;
+  text-transform: uppercase;
+  color: var(--color-dark);
+}
+
+/* Files Filter */
+.files-filter {
+  margin-bottom: 1rem;
+}
+
+.files-filter .form-select {
+  max-width: 300px;
+}
+
+/* Files List */
+.files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* File Item */
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--color-neutral-100);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 6px;
+  color: var(--color-dark);
+  position: relative;
+  transition: border-color 0.2s ease;
+}
+
+.file-item:hover {
+  border-color: var(--color-neutral-400);
+}
+
+/* Trash icon in top right for deletable files */
+.file-delete-icon {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-neutral-500);
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.file-delete-icon:hover {
+  color: var(--color-error);
+  background-color: var(--color-error-light);
+}
+
+.file-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.file-name {
+  flex: 1;
+  font-weight: 500;
+  color: var(--color-dark);
+}
+
+.file-date {
+  font-size: 0.9rem;
+  color: var(--color-neutral-600);
+}
+
+.file-download {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-primary);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.file-download:hover {
+  background: var(--color-primary);
+  color: var(--color-dark);
+}
+
+/* Files View (alternate layout) */
+.files-view {
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.files-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-neutral-300);
+}
+
+.files-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-dark);
+}
+
+.files-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* File Section */
+.file-section {
+  background: var(--color-neutral-100);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.file-section-header {
+  padding: 1rem 1.5rem;
+  background: var(--color-neutral-200);
+  border-bottom: 1px solid var(--color-neutral-300);
+}
+
+.file-section-header h2 {
+  font-size: 1.2rem;
+  margin: 0;
+  color: var(--color-dark);
+}
+
+.file-list {
+  padding: 0;
+}
+
+.file-list .file-item {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-neutral-300);
+  transition: background-color 0.2s ease;
+}
+
+.file-list .file-item:last-child {
+  border-bottom: none;
+}
+
+/* No Files State */
+.no-files {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-neutral-600);
+  font-style: italic;
+}

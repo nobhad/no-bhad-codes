@@ -1,0 +1,490 @@
+/* =====================================================
+   CLIENT PORTAL - PROJECTS
+   Project navigation sidebar, items, detail views
+   ===================================================== */
+
+/* Projects Section */
+.projects-section {
+  flex: 1;
+  overflow: hidden;
+  padding: 0.5rem 0;
+}
+
+/* Projects Header */
+.projects-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0;
+  color: var(--color-dark);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  position: relative;
+}
+
+.projects-header:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.projects-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.section-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* File tree vertical line from folder to children */
+.projects-header::after {
+  content: "";
+  position: absolute;
+  left: 1rem;
+  top: 100%;
+  bottom: 0;
+  width: 1px;
+  background-color: var(--color-neutral-400);
+  height: 1rem;
+}
+
+/* Projects List */
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Project Folder */
+.project-folder {
+  margin-bottom: 0.5rem;
+}
+
+/* Project Item */
+.project-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 1rem 0.5rem 2.25rem;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-weight: 500;
+  color: var(--color-dark);
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
+
+.project-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.project-item.active {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: var(--color-dark);
+}
+
+.project-icon {
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.project-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Project Sub-items */
+.project-subitems {
+  margin-left: 1rem;
+  border-left: 1px solid var(--color-neutral-400);
+  padding-left: 1rem;
+  margin-top: 0.25rem;
+}
+
+.project-subitem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem 0.25rem 1rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: var(--color-neutral-600);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.project-subitem:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+  color: var(--color-dark);
+}
+
+.project-subitem.active {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--color-dark);
+  font-weight: 500;
+}
+
+.subitem-icon {
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.subitem-name {
+  font-size: 0.8rem;
+}
+
+/* Account Section */
+.account-section {
+  padding: 0.5rem 0;
+}
+
+/* Account Header */
+.account-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0;
+  color: var(--color-dark);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  user-select: none;
+}
+
+.account-header:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.account-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* File tree vertical line from account folder */
+.account-header::after {
+  content: "";
+  position: absolute;
+  left: 1rem;
+  top: 100%;
+  bottom: 0;
+  width: 1px;
+  background-color: var(--color-neutral-400);
+  height: 1rem;
+}
+
+/* Account List */
+.account-list {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition:
+    max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.25s ease;
+  max-height: 300px;
+  opacity: 1;
+}
+
+.account-list.collapsed {
+  max-height: 0;
+  opacity: 0;
+  transition:
+    max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.15s ease;
+}
+
+/* Account Item */
+.account-item {
+  width: 100%;
+  padding: 0.5rem 1rem 0.5rem 2.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  border-left: 3px solid transparent;
+  border-radius: 0 4px 4px 0;
+  margin-right: 8px;
+}
+
+.account-item:hover {
+  background-color: rgba(var(--color-brand-primary-rgb), 0.08);
+  transform: translateX(2px);
+}
+
+.account-item.active {
+  background-color: rgba(var(--color-brand-primary-rgb), 0.12);
+  border-left-color: var(--color-primary);
+  transform: translateX(4px);
+}
+
+/* File tree connector lines for account */
+.account-item::before {
+  content: "";
+  position: absolute;
+  left: 1.25rem;
+  top: 0;
+  bottom: 50%;
+  width: 1px;
+  background-color: var(--color-neutral-400);
+  opacity: 0.6;
+}
+
+.account-item::after {
+  content: "";
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  width: 0.75rem;
+  height: 1px;
+  background-color: var(--color-neutral-400);
+  opacity: 0.6;
+}
+
+.account-item-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.account-file-icon {
+  font-size: 14px;
+  color: var(--color-neutral-600);
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.account-item:hover .account-file-icon {
+  color: var(--color-primary);
+}
+
+.account-item.active .account-file-icon {
+  color: var(--color-primary);
+}
+
+.account-item-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.account-item-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-dark);
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+}
+
+/* No Projects State */
+.no-projects {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-neutral-600);
+}
+
+/* Project Details Panel */
+.project-details {
+  padding: 2rem;
+  overflow-y: auto;
+  background: var(--color-neutral-100);
+}
+
+/* Project Detail View */
+.project-detail-view {
+  display: none;
+  width: 100%;
+  height: 100%;
+  min-height: calc(100vh - var(--footer-height) - 4rem);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 2rem;
+}
+
+.project-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--color-neutral-300);
+}
+
+.project-title-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.project-title-section h1 {
+  font-family: var(--font--acme);
+  font-size: 2rem;
+  color: var(--color-dark);
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.project-status {
+  padding: 0.5rem 1rem;
+  background: var(--color-neutral-300);
+  color: var(--color-dark);
+  border: 2px solid var(--color-dark);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.project-meta {
+  display: flex;
+  gap: 2rem;
+  font-size: 0.9rem;
+  color: var(--color-neutral-600);
+}
+
+/* Project Tabs */
+.project-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 2rem;
+  border: 2px solid var(--color-dark);
+  overflow: hidden;
+}
+
+.project-tab {
+  flex: 1;
+  border: none;
+  border-right: 2px solid var(--color-dark);
+  padding: 1rem;
+}
+
+.project-tab:last-child {
+  border-right: none;
+}
+
+.project-tab.active {
+  background: var(--color-primary);
+  color: var(--color-dark);
+}
+
+/* Tab Content */
+.project-tab-content {
+  min-height: 400px;
+}
+
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+/* Overview Grid */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.overview-card {
+  background: var(--color-neutral-200);
+  border: 2px solid var(--color-neutral-300);
+  padding: 1.5rem;
+}
+
+.overview-card h3 {
+  font-family: var(--font--acme);
+  font-size: 1.2rem;
+  color: var(--color-dark);
+  margin: 0 0 1rem 0;
+  text-transform: uppercase;
+}
+
+.overview-card p {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--color-neutral-700);
+}
+
+/* Preview Container */
+.preview-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 200px);
+  background: var(--color-neutral-300);
+  border: 4px solid var(--color-border);
+  color: var(--color-dark);
+}
+
+.preview-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--color-neutral-200);
+  border-bottom: 2px solid var(--color-dark);
+  color: var(--color-dark);
+}
+
+.preview-url {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--color-neutral-100);
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--color-dark);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: var(--color-dark);
+}
+
+.url-icon {
+  display: flex;
+  align-items: center;
+  color: var(--color-dark);
+}
+
+.preview-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.preview-actions .btn-sm {
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-frame-wrapper {
+  flex: 1;
+  overflow: hidden;
+}
+
+.preview-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: var(--color-neutral-100);
+}
+
+.btn-preview.hidden {
+  display: none;
+}
+
+.btn-preview:not(.hidden) {
+  display: block;
+}

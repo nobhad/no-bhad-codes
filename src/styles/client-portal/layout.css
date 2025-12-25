@@ -1,0 +1,344 @@
+/* =====================================================
+   CLIENT PORTAL - LAYOUT
+   Dashboard structure, containers, page framework
+   ===================================================== */
+
+/* Footer is hidden via footer.css [data-page="client-portal"] selector */
+
+/* Client Portal Main Container */
+.client-portal-main {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  min-height: auto;
+}
+
+.client-portal-main .dashboard-container {
+  min-height: 100vh;
+  height: 100vh;
+}
+
+/* Client Dashboard Base */
+.client-dashboard {
+  min-height: 100vh;
+  height: 100vh;
+  background: var(--color-neutral-100);
+  margin: 0;
+  padding: 0;
+}
+
+/* Dashboard Layout - Flex Container */
+.dashboard-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Dashboard Container */
+.dashboard-container {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  height: 100vh;
+}
+
+/* Dashboard Content Area (right side) - Fixed light theme, unaffected by toggle */
+.dashboard-content {
+  flex: 1;
+  padding: clamp(1rem, 3vw, 2rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  min-width: 0;
+  height: 100vh;
+  min-height: 100vh;
+  background: var(--color-neutral-300) !important;
+  color: var(--color-dark) !important;
+}
+
+/* Force light theme colors for client portal - unaffected by theme toggle */
+[data-page="client-portal"] {
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e0e0e0;
+  --color-neutral-300: #e0e0e0;
+  --color-neutral-400: #bdbdbd;
+  --color-dark: #333333;
+  --color-text-primary: #333333;
+  --color-border: #333333;
+}
+
+/* Remove ALL shadows from client portal */
+[data-page="client-portal"] .btn,
+[data-page="client-portal"] .form-button,
+[data-page="client-portal"] .login-btn,
+[data-page="client-portal"] .btn-primary,
+[data-page="client-portal"] .btn-secondary,
+[data-page="client-portal"] .sidebar-buttons .btn,
+[data-page="client-portal"] .card,
+[data-page="client-portal"] .stat-card,
+[data-page="client-portal"] .summary-card,
+[data-page="client-portal"] .overview-card,
+[data-page="client-portal"] .content-section,
+[data-page="client-portal"] .messages-container,
+[data-page="client-portal"] .invoices-list,
+[data-page="client-portal"] .file-section,
+[data-page="client-portal"] .settings-section,
+[data-page="client-portal"] .project-item,
+[data-page="client-portal"] .auth-container,
+[data-page="client-portal"] .portal-card,
+[data-page="client-portal"] .portal-form-area .login-form,
+[data-page="client-portal"] .dynamic-content,
+[data-page="client-portal"] input[type="submit"],
+[data-page="client-portal"] h1,
+[data-page="client-portal"] h2,
+[data-page="client-portal"] h3,
+[data-page="client-portal"] h4,
+[data-page="client-portal"] h5,
+[data-page="client-portal"] h6,
+[data-page="client-portal"] .page-header h2,
+[data-page="client-portal"] .client-name {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* Remove card backgrounds */
+[data-page="client-portal"] .card,
+[data-page="client-portal"] .stat-card,
+[data-page="client-portal"] .summary-card,
+[data-page="client-portal"] .overview-card,
+[data-page="client-portal"] .cp-card,
+[data-page="client-portal"] .cp-stat,
+[data-page="client-portal"] .cp-project-card,
+[data-page="client-portal"] .content-section,
+[data-page="client-portal"] .timeline-content,
+[data-page="client-portal"] .update-item,
+[data-page="client-portal"] .content-item,
+[data-page="client-portal"] .settings-section,
+[data-page="client-portal"] .settings-form {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Content Wrapper */
+.content-wrapper {
+  width: 100%;
+}
+
+/* Content Area */
+.content-area {
+  padding: 2rem 0;
+  max-width: 100%;
+}
+
+/* Tab Content */
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Dashboard Header (hidden - standard header shown) */
+.dashboard-header {
+  display: none;
+}
+
+/* Page Header */
+.page-header {
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-header h1,
+.page-header h2 {
+  font-family: var(--font--acme);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  color: var(--color-dark);
+  margin: 0;
+  text-transform: uppercase;
+}
+
+/* Sidebar toggle in page header */
+.page-header .header-sidebar-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font--acme);
+  font-size: clamp(1.25rem, 3.5vw, 1.75rem);
+  color: var(--color-dark);
+}
+
+.page-header .header-sidebar-toggle:hover {
+  opacity: 0.8;
+}
+
+/* Arrow rotates when sidebar is collapsed */
+.sidebar.collapsed ~ .dashboard-content .page-header .header-sidebar-toggle {
+  transform: rotate(180deg);
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* Content Cards Grid */
+.content-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Generic Card */
+.card {
+  background: var(--color-neutral-200);
+  border: 2px solid var(--color-neutral-300);
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--color-primary);
+}
+
+.card h3 {
+  font-family: var(--font--acme);
+  font-size: 1.1rem;
+  color: var(--color-dark);
+  margin: 0 0 0.75rem 0;
+  text-transform: uppercase;
+}
+
+.card p {
+  color: var(--color-neutral-600);
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
+/* Portal Header */
+.portal-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: white;
+  border-bottom: 1px solid var(--color-neutral-300);
+}
+
+.header-primary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.header-divider {
+  width: 1px;
+  height: 1rem;
+  background: var(--color-neutral-300);
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Toggle Icon */
+.toggle-icon {
+  font-size: 1rem;
+  font-weight: bold;
+  transition: transform 0.3s ease;
+}
+
+/* Breadcrumb Navigation */
+.breadcrumb-nav {
+  flex: 1;
+}
+
+.breadcrumb-list {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+  font-size: 0.875rem;
+  color: var(--color-neutral-600);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.breadcrumb-link {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  text-decoration: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+.breadcrumb-link:hover {
+  color: var(--color-dark);
+}
+
+.breadcrumb-current {
+  color: var(--color-dark);
+  font-weight: 500;
+}
+
+.breadcrumb-separator {
+  color: var(--color-neutral-400);
+  font-size: 0.75rem;
+}
+
+/* Error States */
+.error-message {
+  padding: 1rem;
+  background: var(--color-error-light);
+  color: var(--color-error);
+  border: 2px solid var(--color-error);
+  text-align: center;
+  margin: 1rem 0;
+}
+
+/* Loading States */
+.login-btn.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-loader {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: 0.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

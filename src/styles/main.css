@@ -71,6 +71,9 @@
 /* Intro morph animation */
 @import "./components/intro-morph.css";
 
+/* Blob animation background */
+@import "./components/blob-animation.css";
+
 /* Page transitions (virtual pages) */
 @import "./components/page-transitions.css";
 
@@ -93,8 +96,8 @@
 /* Client portal */
 @import "./pages/client.css";
 
-/* Client portal login page */
-@import "./pages/client-portal.css";
+/* Client portal (modular) */
+@import "./client-portal/index.css";
 
 /* Client dashboard */
 @import "./pages/client-dashboard.css";

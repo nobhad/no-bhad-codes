@@ -1,0 +1,333 @@
+/* =====================================================
+   CLIENT PORTAL - SIDEBAR
+   Main navigation sidebar with collapse states
+   ===================================================== */
+
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  background: #333333;
+  border-right: none;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.2s ease;
+  position: relative;
+  height: 100vh;
+  min-height: 100vh;
+  z-index: 60;
+}
+
+.sidebar.collapsed {
+  width: 56px;
+  min-width: 56px;
+  border-right: none;
+}
+
+/* Sidebar Content */
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  gap: 2rem;
+}
+
+.sidebar.collapsed .sidebar-content {
+  display: none;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  border-top: none;
+}
+
+/* Avatar - Inverted colors */
+.sidebar-logo-img,
+.sidebar-collapsed-logo-img {
+  filter: invert(1);
+}
+
+/* Logout Button */
+.btn-logout {
+  width: 100%;
+}
+
+/* Sidebar Logo */
+.sidebar-logo {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 1rem;
+  position: relative;
+}
+
+.sidebar-logo-img {
+  width: 120px;
+  height: auto;
+  transition: transform 0.2s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.sidebar-logo:hover .sidebar-logo-img {
+  transform: scale(1.1);
+}
+
+/* Sidebar Buttons */
+.sidebar-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sidebar-buttons .btn {
+  width: 100%;
+  padding: 0.85rem 1.1rem;
+  font-size: 0.9rem;
+  text-align: center;
+  background: #e0e0e0;
+  color: #333333;
+  border: 2px solid #e0e0e0;
+}
+
+.sidebar-buttons .btn:hover {
+  background: var(--color-primary);
+  color: #333333;
+  border-color: var(--color-primary);
+}
+
+.sidebar-buttons .btn.active {
+  background: var(--color-primary);
+  color: #333333;
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle {
+  position: absolute;
+  top: 0.5rem;
+  right: -12px;
+  background: var(--color-neutral-200);
+  border: 2px solid var(--color-dark);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  transition: background 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+  background: var(--color-primary);
+}
+
+.sidebar-toggle .toggle-icon {
+  transition: transform 0.2s ease;
+}
+
+.sidebar.collapsed .sidebar-toggle .toggle-icon {
+  transform: rotate(180deg);
+}
+
+/* Collapsed State Logo */
+.sidebar-collapsed-logo {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-collapsed-logo {
+  display: flex;
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 36px;
+}
+
+.sidebar-collapsed-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Hide content when collapsed */
+.sidebar.collapsed .client-name,
+.sidebar.collapsed .project-name,
+.sidebar.collapsed .subitem-name,
+.sidebar.collapsed .account-item-title,
+.sidebar.collapsed .logout-text,
+.sidebar.collapsed h3 {
+  display: none;
+}
+
+.sidebar.collapsed .project-subitems,
+.sidebar.collapsed .account-list {
+  display: none;
+}
+
+.sidebar.collapsed .client-header,
+.sidebar.collapsed .account-header,
+.sidebar.collapsed .projects-header {
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+/* Client Header */
+.client-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 0 1.5rem 0;
+  padding: 0 1.5rem 1rem 1.5rem;
+  border-bottom: 2px solid var(--color-dark);
+}
+
+.client-name {
+  font-family: var(--font--acme);
+  font-size: 1.4rem;
+  color: var(--color-dark);
+  margin: 0;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+/* Client Dropdown */
+.client-dropdown {
+  position: relative;
+}
+
+.dropdown-btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: var(--color-neutral-300);
+  color: var(--color-dark);
+  border: 2px solid var(--color-dark);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropdown-btn:hover {
+  background: var(--color-primary);
+}
+
+.dropdown-icon {
+  font-size: 1.2rem;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--color-neutral-200);
+  border: 2px solid var(--color-dark);
+  min-width: 180px;
+  z-index: 1000;
+}
+
+.dropdown-item {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  color: var(--color-dark);
+  border: none;
+  border-bottom: 1px solid var(--color-neutral-300);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background: var(--color-primary);
+  color: var(--color-dark);
+}
+
+.item-icon {
+  font-size: 1rem;
+}
+
+/* Logout Button (sidebar footer) */
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--color-neutral-300);
+  border: 2px solid var(--color-dark);
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.logout-btn:hover {
+  background: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.logout-icon {
+  font-size: 0.9rem;
+}
+
+/* Sidebar footer for projects sidebar */
+.projects-sidebar.collapsed .logout-text {
+  display: none;
+}
+
+.projects-sidebar.collapsed .logout-btn {
+  padding: 0.5rem;
+  min-width: 2rem;
+  height: 2rem;
+  justify-content: center;
+}
+
+.projects-sidebar.collapsed .toggle-icon {
+  transform: rotate(180deg);
+}
+
+.projects-sidebar.collapsed .client-header {
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.projects-sidebar.collapsed .account-header {
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.projects-sidebar.collapsed .projects-header {
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.projects-sidebar.collapsed .client-name,
+.projects-sidebar.collapsed .project-name,
+.projects-sidebar.collapsed .subitem-name,
+.projects-sidebar.collapsed .account-item-title,
+.projects-sidebar.collapsed h3 {
+  display: none;
+}
+
+.projects-sidebar.collapsed .project-subitems {
+  display: none;
+}
+
+.projects-sidebar.collapsed .account-list {
+  display: none;
+}
