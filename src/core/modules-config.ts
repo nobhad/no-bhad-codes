@@ -205,25 +205,6 @@ export function registerModules(debug: boolean = false): void {
       }
     },
     {
-      name: 'SectionTransitionsModule',
-      type: 'dom',
-      factory: async () => {
-        // Only load section transitions on index/home page
-        const currentPath = window.location.pathname;
-        if (currentPath === '/' || currentPath === '/index.html') {
-          const { SectionTransitionsModule } = await import('../modules/animation/section-transitions');
-          return new SectionTransitionsModule();
-        }
-        // Return a dummy module for other pages
-        return {
-          init: async () => {},
-          destroy: () => {},
-          isInitialized: true,
-          name: 'SectionTransitionsModule'
-        };
-      }
-    },
-    {
       name: 'PageTransitionModule',
       type: 'dom',
       factory: async () => {
@@ -318,8 +299,7 @@ export function getMainSiteModules(): string[] {
     'ScrollSnapModule', // Disabled on desktop home - virtual pages instead
     'TextAnimationModule',
     'ContactAnimationModule',
-    'SectionTransitionsModule',
-    'PageTransitionModule' // Desktop only - virtual pages like salcosta.dev
+    'PageTransitionModule' // Virtual pages for all screen sizes
   ];
 }
 
