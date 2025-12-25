@@ -110,7 +110,6 @@
 /* Remove card backgrounds */
 [data-page="client-portal"] .card,
 [data-page="client-portal"] .stat-card,
-[data-page="client-portal"] .summary-card,
 [data-page="client-portal"] .overview-card,
 [data-page="client-portal"] .cp-card,
 [data-page="client-portal"] .cp-stat,
