@@ -120,6 +120,7 @@ li {
   left: 0;
   right: 0;
   width: 100%;
+  background-color: var(--color-neutral-300);
 }
 
 .header .container {

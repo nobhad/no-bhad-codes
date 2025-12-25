@@ -25,11 +25,8 @@ import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
 gsap.registerPlugin(ScrollTrigger);
 
 // Animation timing constants
-const ANIMATION_DURATION_IN = ANIMATION_CONSTANTS.DURATIONS.STANDARD_LENGTH; // 0.5s
-const ANIMATION_DURATION_OUT = ANIMATION_CONSTANTS.DURATIONS.NORMAL; // 0.3s (faster exit)
-const STAGGER_DELAY = 0.1;
-const EASE_CURVE = ANIMATION_CONSTANTS.EASING.SMOOTH_SAL; // cubic-bezier(0.3, 0.9, 0.3, 0.9)
-const BLUR_AMOUNT = 15; // pixels - visible blur without being too heavy
+const ANIMATION_DURATION_OUT = 0.4;
+const BLUR_AMOUNT = 20;
 
 interface PageConfig {
   id: string;
@@ -79,18 +76,20 @@ export class PageTransitionModule extends BaseModule {
   override async init(): Promise<void> {
     await super.init();
 
+    console.log('[PageTransitionModule] Init starting...');
+
     // Check if mobile
     this.isMobile = window.matchMedia('(max-width: 767px)').matches;
 
     // Skip on mobile unless explicitly enabled
     if (this.isMobile && !this.enableOnMobile) {
-      this.log('Mobile detected - virtual pages disabled, using scroll behavior');
+      console.log('[PageTransitionModule] Mobile detected - virtual pages disabled');
       return;
     }
 
     // Skip if reduced motion is preferred
     if (this.reducedMotion) {
-      this.log('Reduced motion preferred - using instant transitions');
+      console.log('[PageTransitionModule] Reduced motion preferred');
     }
 
     this.setupPages();
@@ -100,7 +99,7 @@ export class PageTransitionModule extends BaseModule {
     // Wait for intro animation to complete before enabling page transitions
     this.listenForIntroComplete();
 
-    this.log('Page transition module initialized');
+    console.log('[PageTransitionModule] Init complete, pages:', this.pages.size);
   }
 
   /**
@@ -138,13 +137,6 @@ export class PageTransitionModule extends BaseModule {
         title: 'Projects - No Bhad Codes',
         // Animate .projects-content as single unit (same pattern as about page)
         childSelectors: ['.projects-content'],
-        useFadeOnly: true
-      },
-      {
-        id: 'portfolio',
-        route: '#/portfolio',
-        title: 'Portfolio - No Bhad Codes',
-        childSelectors: ['.portfolio-content', 'h2', '.wip-sign-container', '.wip-sign'],
         useFadeOnly: true
       },
       {
@@ -186,14 +178,21 @@ export class PageTransitionModule extends BaseModule {
     const hash = window.location.hash;
     const initialPageId = this.isMobile ? 'intro' : (this.getPageIdFromHash(hash) || 'intro');
 
+    this.log(`Initializing page states, hash: ${hash}, initialPageId: ${initialPageId}`);
+
     this.pages.forEach((page, id) => {
       if (!page.element) return;
 
       if (id === initialPageId) {
-        page.element.classList.add('page-active');
+        // Show the initial page - set classes AND ensure visible
         page.element.classList.remove('page-hidden');
+        page.element.classList.add('page-active');
+        gsap.set(page.element, { opacity: 1, filter: 'none', visibility: 'visible' });
         this.currentPageId = id;
+        this.log(`Showing initial page: ${id}`);
       } else {
+        // Hide all other pages
+        gsap.set(page.element, { clearProps: 'all' });
         page.element.classList.add('page-hidden');
         page.element.classList.remove('page-active');
       }
@@ -203,7 +202,7 @@ export class PageTransitionModule extends BaseModule {
       window.history.replaceState({}, '', '#/');
     }
 
-    this.log(`Initial page: ${this.currentPageId}`);
+    this.log(`Initial page set: ${this.currentPageId}`);
   }
 
   /**
@@ -248,27 +247,22 @@ export class PageTransitionModule extends BaseModule {
     // Listen for router navigation events
     this.on('router:navigate', ((event: CustomEvent) => {
       const { pageId } = event.detail || {};
-      console.log('[PageTransition] router:navigate received', {
-        pageId,
-        currentPageId: this.currentPageId,
-        introComplete: this.introComplete,
-        isTransitioning: this.isTransitioning
-      });
+      console.log('[PageTransitionModule] router:navigate received', { pageId, introComplete: this.introComplete, currentPageId: this.currentPageId });
 
       if (this.isTransitioning) {
-        console.log('[PageTransition] Blocked - already transitioning');
+        console.log('[PageTransitionModule] Blocked - already transitioning');
         return;
       }
 
       if (pageId && this.introComplete) {
         if (pageId === this.currentPageId) {
-          console.log('[PageTransition] Blocked - same page');
+          console.log('[PageTransitionModule] Blocked - same page');
           return;
         }
-        console.log('[PageTransition] Starting transition to:', pageId);
+        console.log('[PageTransitionModule] Starting transition to:', pageId);
         this.transitionTo(pageId);
       } else if (!this.introComplete) {
-        this.warn('Navigation blocked - intro not complete');
+        console.log('[PageTransitionModule] Blocked - intro not complete');
       }
     }) as EventListener);
 
@@ -331,6 +325,7 @@ export class PageTransitionModule extends BaseModule {
       'intro': 'intro',
       'home': 'intro',
       'about': 'about',
+      'projects': 'projects',
       'contact': 'contact'
     };
 
@@ -383,34 +378,22 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
-   * Handle animating the initial page if it's not intro and needs blur animation
+   * Handle initial page setup when navigating directly to a non-intro page
+   * No animation on initial load - just ensure page is visible
    */
   private async handleInitialPageAnimation(): Promise<void> {
     if (!this.currentPageId || this.currentPageId === 'intro') return;
 
     const currentPage = this.pages.get(this.currentPageId);
-    if (!currentPage?.useFadeOnly || !currentPage.element) return;
+    if (!currentPage?.element) return;
 
-    currentPage.element.classList.remove('page-hidden');
-    currentPage.element.classList.add('page-active');
+    // Page is already visible from initializePageStates
+    // No animation needed on initial load
+    this.log(`Initial page ready: ${this.currentPageId}`);
 
-    const displayValue = (this.currentPageId === 'contact' || this.currentPageId === 'about') ? 'grid' : undefined;
-    gsap.set(currentPage.element, {
-      visibility: 'visible',
-      opacity: 0,
-      ...(displayValue && { display: displayValue })
-    });
-
-    const children = this.getAnimatableChildren(currentPage);
-    if (children.length > 0) {
-      gsap.set(children, {
-        opacity: 0,
-        filter: `blur(${BLUR_AMOUNT}px)`,
-        webkitFilter: `blur(${BLUR_AMOUNT}px)`
-      });
+    if (this.currentPageId === 'contact') {
+      this.dispatchEvent('contact-page-ready', { pageId: this.currentPageId });
     }
-
-    await this.animateIn(currentPage);
   }
 
   /**
@@ -418,8 +401,8 @@ export class PageTransitionModule extends BaseModule {
    */
   private listenForIntroComplete(): void {
     const handleIntroComplete = (async () => {
+      console.log('[PageTransitionModule] Intro complete event received!');
       this.introComplete = true;
-      this.log('Intro complete - page transitions enabled');
       await this.handleInitialPageAnimation();
       this.dispatchEvent('ready');
     }) as EventListener;
@@ -453,29 +436,27 @@ export class PageTransitionModule extends BaseModule {
    * Transition to a page with animations
    */
   async transitionTo(pageId: string): Promise<void> {
-    console.log('[PageTransition] transitionTo called with:', pageId);
+    console.log('[PageTransitionModule] transitionTo called:', pageId);
 
     if (pageId === this.currentPageId || this.isTransitioning) {
-      console.log('[PageTransition] transitionTo early return - same page or transitioning');
+      console.log('[PageTransitionModule] transitionTo blocked - same page or already transitioning');
       return;
     }
     if (this.isMobile && !this.enableOnMobile) {
-      console.log('[PageTransition] transitionTo early return - mobile disabled');
+      console.log('[PageTransitionModule] transitionTo blocked - mobile');
       return;
     }
 
     const targetPage = this.pages.get(pageId);
     const currentPage = this.pages.get(this.currentPageId);
 
-    console.log('[PageTransition] targetPage:', !!targetPage, 'currentPage:', !!currentPage);
-
     if (!targetPage || !targetPage.element) {
-      this.warn(`Target page not found: ${pageId}`);
+      console.log('[PageTransitionModule] Target page not found:', pageId);
       return;
     }
 
     this.isTransitioning = true;
-    console.log('[PageTransition] Starting transition:', this.currentPageId, '->', pageId);
+    console.log(`[PageTransitionModule] Transitioning: ${this.currentPageId} -> ${pageId}`);
 
     // Hide intro page immediately to prevent flash during coyote paw animation
     if (pageId === 'intro') {
@@ -490,21 +471,25 @@ export class PageTransitionModule extends BaseModule {
 
     try {
       // Animate out current page
-      console.log('[PageTransition] Animating out current page:', this.currentPageId);
+      console.log('[PageTransitionModule] Step 1: Animating out current page');
       if (this.currentPageId === 'intro') {
         await this.playIntroExitAnimation();
+        console.log('[PageTransitionModule] Intro exit animation complete');
       } else if (currentPage && currentPage.element) {
         await this.animateOut(currentPage);
+        console.log('[PageTransitionModule] Page exit animation complete');
       }
-      console.log('[PageTransition] Animate out complete');
 
       // Hide current page after animation
+      console.log('[PageTransitionModule] Step 2: Hiding current page');
       if (currentPage && currentPage.element) {
+        gsap.set(currentPage.element, { clearProps: 'all' });
         currentPage.element.classList.add('page-hidden');
         currentPage.element.classList.remove('page-active');
       }
 
       // Show and prepare target page
+      console.log('[PageTransitionModule] Step 3: Preparing target page');
       if (pageId !== 'intro') {
         this.prepareTargetPage(targetPage, pageId);
       }
@@ -515,13 +500,13 @@ export class PageTransitionModule extends BaseModule {
       }
 
       // Animate in target page
-      console.log('[PageTransition] Animating in target page:', pageId);
+      console.log('[PageTransitionModule] Step 4: Animating in target page');
       if (pageId === 'intro') {
         await this.playIntroEntryAnimation();
       } else {
         await this.animateIn(targetPage);
       }
-      console.log('[PageTransition] Animate in complete');
+      console.log('[PageTransitionModule] Step 5: Animation complete');
 
       // Update state
       this.currentPageId = pageId;
@@ -584,37 +569,21 @@ export class PageTransitionModule extends BaseModule {
 
   /**
    * Prepare target page for animation
+   * Sets up CSS classes - actual GSAP setup happens in animateIn
    */
-  private prepareTargetPage(targetPage: PageConfig, pageId: string): void {
+  private prepareTargetPage(targetPage: PageConfig, _pageId: string): void {
     if (!targetPage.element) return;
 
+    console.log('[PageTransitionModule] prepareTargetPage - before:', targetPage.element.className);
+
+    // Update CSS classes for page visibility
     targetPage.element.classList.remove('page-hidden');
     targetPage.element.classList.add('page-active');
 
-    // Set correct display value for each page type
-    let displayValue: string | undefined;
-    if (pageId === 'contact' || pageId === 'about') {
-      displayValue = 'grid';
-    } else if (pageId === 'projects' || pageId === 'portfolio') {
-      displayValue = 'flex';
-    }
+    // Clear any conflicting inline styles from previous transitions
+    gsap.set(targetPage.element, { clearProps: 'zIndex' });
 
-    gsap.set(targetPage.element, {
-      visibility: 'visible',
-      opacity: 0,
-      ...(displayValue && { display: displayValue })
-    });
-
-    if (targetPage.useFadeOnly) {
-      const children = this.getAnimatableChildren(targetPage);
-      if (children.length > 0) {
-        gsap.set(children, {
-          opacity: 0,
-          filter: `blur(${BLUR_AMOUNT}px)`,
-          webkitFilter: `blur(${BLUR_AMOUNT}px)`
-        });
-      }
-    }
+    console.log('[PageTransitionModule] prepareTargetPage - after:', targetPage.element.className);
   }
 
   /**
@@ -635,10 +604,8 @@ export class PageTransitionModule extends BaseModule {
    * Play the coyote paw entry animation when entering the intro page
    */
   private async playIntroEntryAnimation(): Promise<void> {
-    console.log('[PageTransition] playIntroEntryAnimation called');
     try {
       const introPage = this.pages.get('intro');
-      console.log('[PageTransition] introPage:', !!introPage, 'element:', !!introPage?.element);
 
       if (introPage?.element) {
         // Clear props on the section itself but NOT on children
@@ -666,25 +633,18 @@ export class PageTransitionModule extends BaseModule {
 
         introPage.element.classList.remove('page-hidden');
         introPage.element.classList.add('page-active');
-        console.log('[PageTransition] Intro page classes updated');
 
         await new Promise(resolve => requestAnimationFrame(resolve));
       }
 
-      console.log('[PageTransition] Resolving IntroAnimationModule...');
       const introModule = await container.resolve('IntroAnimationModule') as IntroAnimationModule;
-      console.log('[PageTransition] IntroAnimationModule resolved:', !!introModule);
 
       if (introModule && typeof introModule.playEntryAnimation === 'function') {
-        console.log('[PageTransition] Calling introModule.playEntryAnimation()');
         await introModule.playEntryAnimation();
-        console.log('[PageTransition] playEntryAnimation complete');
       } else {
-        console.log('[PageTransition] Using fallback');
         this.showIntroPageFallback();
       }
-    } catch (error) {
-      console.error('[PageTransition] playIntroEntryAnimation error:', error);
+    } catch {
       this.log('IntroAnimationModule not available for entry animation');
       this.showIntroPageFallback();
     }
@@ -706,278 +666,107 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
-   * Animate page out (blur-out + optional drop-out)
+   * Animate page out - SIMPLE blur + fade
+   * Same animation for all content pages (about/contact/projects)
    */
   private async animateOut(page: PageConfig): Promise<void> {
     if (!page.element || page.skipAnimation) return;
 
+    const el = page.element;
+
     if (this.reducedMotion) {
-      gsap.set(page.element, { opacity: 0, visibility: 'hidden' });
+      gsap.set(el, { opacity: 0 });
       return;
     }
 
-    const useFadeOnly = page.useFadeOnly === true;
-
-    // Add .leaving class to CSS-animated stagger items for exit animations
-    const staggerItems = page.element.querySelectorAll('.stagger-item, .stagger-blur, .intro-nav-link, .input-item, .p-wrapper p, .heading-wrapper h2');
-    staggerItems.forEach(item => item.classList.add('leaving'));
-
-    const children = this.getAnimatableChildren(page);
-
-    // Ensure children start in correct state (visible, no blur) before exit animation
-    // This ensures the reverse animation (blur then fade) works correctly
-    if (children.length > 0 && useFadeOnly) {
-      gsap.set(children, {
-        opacity: 1,
-        filter: 'blur(0px)',
-        willChange: 'filter, opacity, transform' // GPU acceleration hint
-      });
-    }
-
-    // Ensure page element is visible and on top during animation
-    // This prevents it from being hidden by page-hidden class or other pages
-    // Use correct display value for each page type
-    let displayValue: string;
-    if (page.id === 'contact' || page.id === 'about') {
-      displayValue = 'grid';
-    } else if (page.id === 'projects' || page.id === 'portfolio') {
-      displayValue = 'flex';
-    } else {
-      displayValue = 'block';
-    }
-    gsap.set(page.element, {
-      display: displayValue,
-      visibility: 'visible',
-      zIndex: 200 // High z-index to ensure it's on top during fade out
-    });
-
     return new Promise((resolve) => {
-      const tl = gsap.timeline({
-        onComplete: () => {
-          // Clean up .leaving classes after animation
-          staggerItems.forEach(item => item.classList.remove('leaving'));
-          // Reset z-index after animation
-          gsap.set(page.element, { zIndex: 'auto' });
-          resolve();
-        }
+      // Simple blur + fade out animation
+      gsap.to(el, {
+        opacity: 0,
+        filter: `blur(${BLUR_AMOUNT}px)`,
+        duration: ANIMATION_DURATION_OUT,
+        ease: 'power2.in',
+        onComplete: resolve
       });
-
-      // Animate children out
-      if (children.length > 0) {
-        if (useFadeOnly) {
-          const isMobileNonIntro = this.isMobile && this.enableOnMobile && page.id !== 'intro';
-
-          if (isMobileNonIntro) {
-            // Mobile: Simpler, faster fade without heavy blur
-            tl.to(children, {
-              filter: `blur(${BLUR_AMOUNT * 0.5}px)`, // Half blur on mobile for performance
-              opacity: 0,
-              duration: 0.4,
-              stagger: STAGGER_DELAY * 0.3,
-              ease: 'power2.in'
-            }, 0);
-          } else {
-            // Desktop: Smooth blur-then-fade sequence
-            // Step 1: Blur children FIRST while still visible
-            tl.to(children, {
-              filter: `blur(${BLUR_AMOUNT}px)`,
-              duration: 0.35, // Slightly faster
-              stagger: STAGGER_DELAY * 0.5,
-              ease: 'sine.in' // Smoother blur easing
-            }, 0);
-
-            // Step 2: Brief pause - blur lingers
-            tl.to({}, { duration: 0.15 });
-
-            // Step 3: THEN fade out (while blurred)
-            tl.to(children, {
-              opacity: 0,
-              duration: 0.25,
-              stagger: STAGGER_DELAY,
-              ease: 'power2.in'
-            });
-          }
-
-          // Clean up will-change after animation completes
-          tl.set(children, { willChange: 'auto' });
-        } else {
-          // Drop out children with stagger
-          tl.to(children, {
-            y: '105%',
-            duration: ANIMATION_DURATION_OUT,
-            stagger: STAGGER_DELAY,
-            ease: EASE_CURVE
-          }, 0);
-        }
-      }
-
-      // Fade out container
-      const isMobileNonIntro = this.isMobile && this.enableOnMobile && page.id !== 'intro';
-      if (isMobileNonIntro && useFadeOnly) {
-        // Fade out container after blur and fade of children
-        tl.to(page.element, {
-          opacity: 0,
-          duration: 0.2,
-          ease: 'power2.in'
-        }, '-=0.1'); // Start slightly before children fade completes
-      } else {
-        // Desktop: fade out container after children animation starts
-        tl.to(page.element, {
-          opacity: 0,
-          duration: 0.2,
-          ease: 'power2.in'
-        }, ANIMATION_DURATION_OUT - 0.1);
-      }
-
-      this.addTimeline(tl);
     });
   }
 
   /**
-   * Animate page in (blur-in + optional drop-in)
+   * Animate page in - blur effect on CONTENT (not section)
+   * Same animation for all content pages (about/contact/projects)
    */
   private async animateIn(page: PageConfig): Promise<void> {
-    if (!page.element) return;
+    console.log('[PageTransitionModule] animateIn called for:', page.id);
 
-    if (page.skipAnimation || this.reducedMotion) {
-      gsap.set(page.element, { opacity: 1, visibility: 'visible', filter: 'none' });
+    if (!page.element) {
+      console.log('[PageTransitionModule] animateIn - no element!');
       return;
     }
 
-    const children = this.getAnimatableChildren(page);
-    const useFadeOnly = page.useFadeOnly === true;
+    const sectionEl = page.element;
 
-    // Set initial state with correct display value for each page type
-    let displayValue: string | undefined;
-    if (page.id === 'contact' || page.id === 'about') {
-      displayValue = 'grid';
-    } else if (page.id === 'projects' || page.id === 'portfolio') {
-      displayValue = 'flex';
+    // Step 1: Update CSS classes to show the section
+    sectionEl.classList.remove('page-hidden');
+    sectionEl.classList.add('page-active');
+
+    // Handle reduced motion
+    if (page.skipAnimation || this.reducedMotion) {
+      return;
     }
 
-    gsap.set(page.element, {
-      opacity: 0,
-      visibility: 'visible',
-      ...(displayValue && { display: displayValue, minHeight: '100%' })
-    });
+    // Find the content element inside the section
+    const contentEl = sectionEl.querySelector('.about-content, .contact-content, .projects-content') as HTMLElement;
 
-    // For fade-only: children start invisible AND blurred (blur on children works on mobile)
-    // For drop-in: children start above
-    if (children.length > 0) {
-      if (useFadeOnly) {
-        // Mobile non-intro pages: ensure children start blurred and invisible
-        // This resets any existing opacity that might have been set by other modules (e.g., AboutHeroModule)
-
-        // Apply blur to children (works on mobile scrollable sections)
-        gsap.set(children, {
-          opacity: 0,
-          filter: `blur(${BLUR_AMOUNT}px)`,
-          webkitFilter: `blur(${BLUR_AMOUNT}px)` // Safari compatibility
-        });
-      } else {
-        gsap.set(children, { y: '-105%' });
-      }
+    if (!contentEl) {
+      console.log('[PageTransitionModule] No content element found, skipping animation');
+      return;
     }
+
+    console.log('[PageTransitionModule] Animating content element:', contentEl.className);
+
+    // Kill any existing animations
+    gsap.killTweensOf(contentEl);
 
     return new Promise((resolve) => {
-      const tl = gsap.timeline({
-        onComplete: () => {
-          // Clear filter property after animation
-          if (children.length > 0 && useFadeOnly) {
-            gsap.set(children, { filter: 'none', webkitFilter: 'none' });
-          }
-          // Ensure page element is fully visible after animation
-          // Set correct display value for each page type
-          let finalDisplayValue: string | undefined;
-          if (page.id === 'contact' || page.id === 'about') {
-            finalDisplayValue = 'grid';
-          } else if (page.id === 'projects' || page.id === 'portfolio') {
-            finalDisplayValue = 'flex';
-          }
-          gsap.set(page.element, {
-            opacity: 1,
-            visibility: 'visible',
-            ...(finalDisplayValue && { display: finalDisplayValue, minHeight: '100%' })
-          });
+      console.log('[PageTransitionModule] Starting gsap.fromTo animation');
 
-          // Dispatch event when contact page blur animation completes
-          // This allows ContactAnimationModule to start form animations
-          if (page.id === 'contact') {
-            this.dispatchEvent('contact-page-ready', { pageId: page.id });
+      // Use fromTo for guaranteed animation from blurry to clear
+      gsap.fromTo(contentEl,
+        {
+          // FROM: blurry, scaled down, semi-transparent
+          opacity: 0.5,
+          filter: 'blur(30px)',
+          scale: 0.8,
+          transformOrigin: 'center center'
+        },
+        {
+          // TO: clear, full scale, fully visible
+          opacity: 1,
+          filter: 'blur(0px)',
+          scale: 1,
+          duration: 1.5,
+          ease: 'power2.out',
+          onStart: () => {
+            console.log('[PageTransitionModule] Animation STARTED - check element style now');
+            console.log('[PageTransitionModule] Current filter:', contentEl.style.filter);
+          },
+          onUpdate: function () {
+            // Log progress every ~25%
+            const progress = this.progress();
+            if (progress < 0.1 || (progress > 0.24 && progress < 0.26) || (progress > 0.49 && progress < 0.51) || (progress > 0.74 && progress < 0.76)) {
+              console.log('[PageTransitionModule] Animation progress:', `${Math.round(progress * 100)  }%`, 'filter:', contentEl.style.filter);
+            }
+          },
+          onComplete: () => {
+            console.log('[PageTransitionModule] Animation COMPLETE');
+            gsap.set(contentEl, { clearProps: 'filter,scale,transformOrigin,opacity' });
+            if (page.id === 'contact') {
+              this.dispatchEvent('contact-page-ready', { pageId: page.id });
+            }
+            resolve();
           }
-
-          resolve();
         }
-      });
-
-      // Fade in container FIRST to ensure it's visible before children animation
-      // CSS handles display via .page-active class
-      tl.set(page.element, {
-        visibility: 'visible'
-        // display is handled by CSS .page-active rules
-      });
-      tl.set(page.element, {
-        opacity: 1
-      }, 0);
-
-      // Animate children
-      if (children.length > 0) {
-        if (useFadeOnly) {
-          // Mobile non-intro pages: fade in blurred (shorter), then blur clears (longer)
-          const isMobileNonIntro = this.isMobile && this.enableOnMobile && page.id !== 'intro';
-
-          if (isMobileNonIntro) {
-            // Step 1: Fade in children while KEEPING blur (shorter fade duration for mobile)
-            tl.to(children, {
-              opacity: 1,
-              // Keep blur at BLUR_AMOUNT - don't change it yet
-              duration: 0.3, // Shorter fade on mobile
-              stagger: STAGGER_DELAY,
-              ease: 'power2.out'
-            }, 0.1); // Start slightly after page element is visible
-
-            // Step 2: Brief pause - blur lingers after fade complete
-            tl.to({}, { duration: 0.2 });
-
-            // Step 3: NOW remove the blur (longer duration - blur lasts longer than fade)
-            tl.to(children, {
-              filter: 'blur(0px)',
-              webkitFilter: 'blur(0px)',
-              duration: 0.7, // Longer blur clear on mobile
-              stagger: STAGGER_DELAY * 0.5,
-              ease: 'power2.out'
-            });
-          } else {
-            // Desktop: fade in while blurred, pause, then clear blur
-            tl.to(children, {
-              opacity: 1,
-              duration: 0.6,
-              stagger: STAGGER_DELAY,
-              ease: 'power2.out'
-            }, 0.1);
-
-            tl.to({}, { duration: 0.4 });
-
-            tl.to(children, {
-              filter: 'blur(0px)',
-              webkitFilter: 'blur(0px)',
-              duration: 0.7,
-              stagger: STAGGER_DELAY * 0.5,
-              ease: 'power2.out'
-            });
-          }
-        } else {
-          // Drop in children with stagger
-          tl.to(children, {
-            y: 0,
-            duration: ANIMATION_DURATION_IN,
-            stagger: STAGGER_DELAY,
-            ease: EASE_CURVE
-          }, STAGGER_DELAY);
-        }
-      }
-
-      this.addTimeline(tl);
+      );
     });
   }
 
