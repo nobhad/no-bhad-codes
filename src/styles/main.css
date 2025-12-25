@@ -228,8 +228,12 @@ body {
   background-color: var(--color-neutral-100);
   padding: 1.5rem 2rem;
   border-radius: 8px;
-  border: 2px solid var(--color-neutral-400);
-  
+  border: 2px solid var(--color-neutral-600);
+}
+
+/* Dark theme: lighter border for contrast */
+html[data-theme="dark"] .tech-stack {
+  border-color: var(--color-neutral-400);
 }
 
 /* Dark theme: colors automatically switch via CSS variables */

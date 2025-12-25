@@ -509,18 +509,26 @@
         }
 
         get position() {
-          return this._position || { x: 0.5, y: 0.4 }; // Higher up to leave room for shadow below
+          return this._position || { x: 0.5, y: 0.5 };
         }
 
-        get divisional() {
-          return (Math.PI * 2) / this.numPoints;
+        get visualCenterOffset() {
+          // Calculate offset to visually center blob+shadow combo
+          // Shadow is at y + radius * 1.7 below blob center
+          // To center: shift blob up by half the shadow offset
+          return this.radius * 0.85; // Half of 1.7 radius offset
         }
 
         get center() {
           return {
             x: this.canvas.width * this.position.x,
-            y: this.canvas.height * this.position.y
+            // Shift up by visual offset to center blob+shadow combo
+            y: this.canvas.height * this.position.y - this.visualCenterOffset
           };
+        }
+
+        get divisional() {
+          return (Math.PI * 2) / this.numPoints;
         }
 
         set running(value) {
