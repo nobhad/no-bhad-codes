@@ -112,7 +112,7 @@ li {
    4. HEADER & NAVIGATION STRUCTURE
    ===================================================== */
 .header {
-  z-index: 110;
+  z-index: 130; /* Above menu (125) so header buttons remain accessible when nav is open */
   font-family: var(--font-family-acme);
   padding: 0;
   position: fixed;
@@ -188,6 +188,8 @@ li {
   pointer-events: auto;
   flex-shrink: 0;
   white-space: nowrap;
+  position: relative;
+  z-index: 125; /* Above overlay (115) so theme toggle and menu button remain accessible */
 }
 
 /* =====================================================
