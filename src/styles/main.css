@@ -71,9 +71,6 @@
 /* Intro morph animation */
 @import "./components/intro-morph.css";
 
-/* Blob animation background */
-@import "./components/blob-animation.css";
-
 /* Page transitions (virtual pages) */
 @import "./components/page-transitions.css";
 

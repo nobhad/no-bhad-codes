@@ -70,6 +70,13 @@
 .morph-card-group {
   opacity: 1;
   visibility: visible;
+  /* Light mode shadow - matches business card box-shadow */
+  filter: url(#card-shadow-light);
+}
+
+/* Dark mode: deeper shadow matching business card dark mode */
+html[data-theme="dark"] .morph-card-group {
+  filter: url(#card-shadow-dark);
 }
 
 /*
