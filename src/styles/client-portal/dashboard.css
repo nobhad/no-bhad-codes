@@ -12,9 +12,11 @@
 .status-badge {
   background: var(--color-primary);
   color: var(--color-dark);
-  padding: 0.25rem 0.5rem;
+  padding: 0.25rem 0.75rem 0.25rem 0.75rem;
+  margin-left: 0.5rem;
   font-weight: 600;
   font-size: 0.8rem;
+  border-radius: 4px;
 }
 
 .status-badge.status-pending {
