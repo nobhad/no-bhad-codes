@@ -256,6 +256,10 @@ export class NavigationModule extends BaseModule {
     // Set initial states exactly like CodePen
     gsap.set(this.nav, { display: 'none' });
 
+    // Set fade targets (social links) to hidden initially
+    const fadeTargets = this.nav.querySelectorAll('[data-menu-fade]');
+    gsap.set(fadeTargets, { autoAlpha: 0 });
+
     this.log('Animations initialized');
   }
 
@@ -284,12 +288,17 @@ export class NavigationModule extends BaseModule {
     const portalButton = document.querySelector('.portal-button') as HTMLElement;
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
 
+    // Get fade targets (social links section)
+    const fadeTargets = this.nav.querySelectorAll('[data-menu-fade]');
+
     // Create opening animation exactly like working version 9.0
     const tl = gsap.timeline();
 
     // Faster opening sequence
     tl.set(this.nav, { display: 'block' })
       .set(document.querySelector('.menu'), { xPercent: 0 }, '<')
+      // Hide fade targets initially
+      .set(fadeTargets, { autoAlpha: 0, yPercent: 50 })
       .fromTo(
         this.menuButtonTexts,
         { yPercent: 0 },
@@ -308,6 +317,13 @@ export class NavigationModule extends BaseModule {
         { yPercent: 140, autoAlpha: 0 },
         { yPercent: 0, autoAlpha: 1, stagger: 0.04, duration: 0.5 },
         '<+=0.25'
+      )
+      // Animate social links after menu links (Osmo pattern)
+      .fromTo(
+        fadeTargets,
+        { autoAlpha: 0, yPercent: 50 },
+        { autoAlpha: 1, yPercent: 0, stagger: 0.04, duration: 0.4 },
+        '<+=0.2'
       );
 
     // On mobile, show portal button after panels pass (at 0.25s)
@@ -343,6 +359,9 @@ export class NavigationModule extends BaseModule {
       });
     }
 
+    // Get fade targets (social links section)
+    const fadeTargets = this.nav.querySelectorAll('[data-menu-fade]');
+
     // Create closing animation matching working version 9.0
     const tl = gsap.timeline({
       onComplete: () => {
@@ -353,8 +372,9 @@ export class NavigationModule extends BaseModule {
       }
     });
 
-    // Faster closing sequence
-    tl.to(this.overlay, { autoAlpha: 0, duration: 0.3 })
+    // Faster closing sequence - hide fade targets immediately
+    tl.to(fadeTargets, { autoAlpha: 0, duration: 0.15 }, 0)
+      .to(this.overlay, { autoAlpha: 0, duration: 0.3 }, '<')
       .to(document.querySelector('.menu'), { xPercent: 120, duration: 0.3 }, '<')
       .to(this.menuButtonTexts, { yPercent: 0, duration: 0.3 }, '<')
       .to(document.querySelector('.menu-button-icon'), { rotation: 0, duration: 0.3 }, '<')

@@ -31,10 +31,7 @@
 
 /* Eyebrows always visible now - no need for open state opacity change */
 
-.nav[data-nav="open"] .menu-details {
-  opacity: 1;
-  transform: translateY(0);
-}
+/* menu-details always visible - slides with menu panel */
 
 /* When menu is open, swap the text positions */
 /* Menu button text animation handled by GSAP */

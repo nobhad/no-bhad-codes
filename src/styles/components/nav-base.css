@@ -603,8 +603,6 @@ html[data-theme="dark"] .coming-soon-banner {
   justify-content: flex-start;
   align-items: flex-start;
   display: flex;
-  opacity: 0;
-  transform: translateY(50px);
   text-transform: uppercase;
 }
 
