@@ -32,6 +32,13 @@
           visibility: hidden;
         }
       }
+      /* Body background must be set before CSS loads to prevent white flash */
+      body {
+        background-color: #e0e0e0; /* Light theme */
+      }
+      html[data-theme="dark"] body {
+        background-color: #2a2a2a; /* Dark theme */
+      }
       /* Header is transparent to show coyote paw animation through it */
       .header {
         background-color: transparent;
