@@ -87,7 +87,7 @@ export async function showAvatarIntro(chatContainer: HTMLElement): Promise<void>
 
   // Fetch and inline the SVG for path animation
   try {
-    const response = await fetch('/images/avatar.svg');
+    const response = await fetch('/images/avatar_terminal.svg');
     const svgText = await response.text();
 
     // Parse the SVG
@@ -99,23 +99,22 @@ export async function showAvatarIntro(chatContainer: HTMLElement): Promise<void>
       // Add class for styling
       svgElement.classList.add('terminal-avatar-img');
 
-      // Insert the SVG into the wrapper first
-      wrapper.appendChild(svgElement);
-
-      // Process image elements to apply light color filter and identify eye
+      // Fix relative image paths to absolute paths
+      // SVG references images like "avatar_terminal-1.png" which need full path when inlined
       const images = svgElement.querySelectorAll('image');
-
       images.forEach((img) => {
-        // Parse transform to get position
-        const transform = img.getAttribute('transform') || '';
-
-        // Eye is typically positioned in upper center area
-        // Based on SVG: image at translate(118) is likely the eye (upper right, y=0)
-        if (transform.includes('translate(118)') || transform === 'translate(118)') {
-          // This is the eye - mark it for CSS styling
-          img.classList.add('eye-image');
+        const href = img.getAttribute('xlink:href') || img.getAttribute('href');
+        if (href && !href.startsWith('/') && !href.startsWith('data:') && !href.startsWith('http')) {
+          img.setAttribute('xlink:href', `/images/${href}`);
+          img.setAttribute('href', `/images/${href}`);
         }
       });
+
+      // Insert the SVG into the wrapper
+      wrapper.appendChild(svgElement);
+
+      // SVG has named elements: #Head, #Ear, #Nose, #Eye
+      // CSS targets these IDs for styling
 
       // Fade in the container with the full SVG
       gsap.to(avatarContainer, {
@@ -128,7 +127,7 @@ export async function showAvatarIntro(chatContainer: HTMLElement): Promise<void>
     }
   } catch {
     // Fallback to img tag if fetch fails
-    wrapper.innerHTML = '<img src="/images/avatar.svg" alt="No Bhad Codes" class="terminal-avatar-img" />';
+    wrapper.innerHTML = '<img src="/images/avatar_terminal.svg" alt="No Bhad Codes" class="terminal-avatar-img" />';
     gsap.to(avatarContainer, {
       opacity: 1,
       duration: 0.5,

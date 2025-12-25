@@ -669,17 +669,32 @@ html[data-theme="light"] .terminal-intake {
 }
 
 /* Target image elements within the SVG - apply light color filter to make them light (not black) */
+/* SVG has named elements: #Head, #Ear, #Nose, #Eye */
 svg.terminal-avatar-img image {
   filter: brightness(0) invert(1) brightness(0.9);
 }
 
-/* Eye image - style it to match terminal bg color */
+/* Head - main body */
+svg.terminal-avatar-img #Head {
+  filter: brightness(0) invert(1) brightness(0.9);
+}
+
+/* Ear - same color as head/body */
+svg.terminal-avatar-img #Ear {
+  filter: brightness(0) invert(1) brightness(0.9);
+}
+
+/* Nose - same color as head/body */
+svg.terminal-avatar-img #Nose {
+  filter: brightness(0) invert(1) brightness(0.9);
+}
+
+/* Eye - style it to match terminal bg color */
 /* Terminal bg is #0a0a0a (very dark, almost black) */
-/* Make the eye image appear as this color by making it black */
-svg.terminal-avatar-img image.eye-image {
+/* Make the eye images appear as this color by making them black */
+svg.terminal-avatar-img #Eye,
+svg.terminal-avatar-img #Eye image {
   filter: brightness(0);
-  /* The terminal bg is so dark that black is close enough */
-  /* If exact match needed, we'd need a more complex filter, but this should work */
 }
 
 /* Grainy overlay - only on the avatar SVG */
