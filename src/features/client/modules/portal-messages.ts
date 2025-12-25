@@ -32,7 +32,7 @@ export function setCurrentThreadId(id: number | null): void {
  * Load messages from API
  */
 export async function loadMessagesFromAPI(ctx: ClientPortalContext): Promise<void> {
-  const messagesContainer = document.getElementById('messages-list');
+  const messagesContainer = document.getElementById('messages-thread');
   if (!messagesContainer) return;
 
   if (ctx.isDemo()) {
@@ -86,26 +86,17 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext): Promise<voi
 }
 
 /**
- * Render demo messages
+ * Render demo messages - keeps existing HTML messages if present
  */
-function renderDemoMessages(container: HTMLElement, ctx: ClientPortalContext): void {
-  const demoMessages: PortalMessage[] = [
-    {
-      id: 1,
-      sender_type: 'admin',
-      sender_name: 'Support',
-      message: 'Welcome to your client portal! Feel free to send us any questions.',
-      created_at: new Date(Date.now() - 86400000).toISOString()
-    },
-    {
-      id: 2,
-      sender_type: 'client',
-      sender_name: 'You',
-      message: 'Thanks! Looking forward to working together.',
-      created_at: new Date(Date.now() - 3600000).toISOString()
-    }
-  ];
-  renderMessages(container, demoMessages, ctx);
+function renderDemoMessages(container: HTMLElement, _ctx: ClientPortalContext): void {
+  // In demo mode, keep the existing static HTML messages
+  // Only render if container is empty
+  if (container.children.length > 0) {
+    return;
+  }
+
+  // Fallback if no static messages exist
+  container.innerHTML = '<div class="no-messages"><p>No messages yet. Start a conversation!</p></div>';
 }
 
 /**
@@ -122,17 +113,24 @@ function renderMessages(
   }
 
   container.innerHTML = messages
-    .map(
-      (msg) => `
-      <div class="message message-${msg.sender_type === 'client' ? 'sent' : 'received'}">
-        <div class="message-header">
-          <span class="message-sender">${ctx.escapeHtml(msg.sender_name || 'Unknown')}</span>
-          <span class="message-time">${ctx.formatDate(msg.created_at)}</span>
+    .map((msg) => {
+      const isSent = msg.sender_type === 'client';
+      const initials = (msg.sender_name || 'Unknown').substring(0, 3).toUpperCase();
+      return `
+      <div class="message message-${isSent ? 'sent' : 'received'}">
+        <div class="message-avatar">
+          <div class="avatar-placeholder">${initials}</div>
         </div>
-        <div class="message-content">${ctx.escapeHtml(msg.message)}</div>
+        <div class="message-content">
+          <div class="message-header">
+            <span class="message-sender">${ctx.escapeHtml(msg.sender_name || 'Unknown')}</span>
+            <span class="message-time">${ctx.formatDate(msg.created_at)}</span>
+          </div>
+          <div class="message-body">${ctx.escapeHtml(msg.message)}</div>
+        </div>
       </div>
-    `
-    )
+    `;
+    })
     .join('');
 
   container.scrollTop = container.scrollHeight;

@@ -100,11 +100,14 @@
 .sidebar-buttons .btn {
   width: 100%;
   padding: 0.85rem 1.1rem;
+  font-family: var(--font--acme);
   font-size: 0.9rem;
+  letter-spacing: 1px;
   text-align: left;
-  background: #333333;
+  background: transparent;
   color: #f5f5f5;
-  border: 2px solid #444444;
+  border: 2px solid #f5f5f5;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -129,6 +132,8 @@
 .sidebar-buttons .btn.active {
   background: var(--color-primary);
   color: #333333;
+  border-color: var(--color-primary);
+  outline: 2px solid var(--color-primary);
 }
 
 /* Collapsed state - show only icons */
@@ -184,9 +189,12 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: #333333;
+  font-family: var(--font--acme);
+  letter-spacing: 1px;
+  background: transparent;
   color: #f5f5f5;
-  border: 2px solid #444444;
+  border: 2px solid #f5f5f5;
+  border-radius: 12px;
 }
 
 .sidebar-footer .btn-logout:hover {

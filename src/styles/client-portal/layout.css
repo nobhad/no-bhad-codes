@@ -109,19 +109,14 @@
 
 /* Remove card backgrounds */
 [data-page="client-portal"] .card,
-[data-page="client-portal"] .stat-card,
-[data-page="client-portal"] .overview-card,
 [data-page="client-portal"] .cp-card,
 [data-page="client-portal"] .cp-stat,
-[data-page="client-portal"] .cp-project-card,
 [data-page="client-portal"] .content-section,
 [data-page="client-portal"] .timeline-content,
 [data-page="client-portal"] .update-item,
 [data-page="client-portal"] .content-item,
-[data-page="client-portal"] .settings-section,
 [data-page="client-portal"] .settings-form,
-[data-page="client-portal"] .message-compose,
-[data-page="client-portal"] .messages-container {
+[data-page="client-portal"] .message-compose {
   background: transparent !important;
   border: none !important;
 }
