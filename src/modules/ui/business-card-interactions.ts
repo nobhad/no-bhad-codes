@@ -32,10 +32,10 @@ export class BusinessCardInteractions extends BaseModule {
   private isEnabled = false;
   private currentRotationY = 0; // Track actual rotation value for directional flips
 
-  // Idle animations (wiggle then flip)
+  // Idle animations (wiggle, flip, flip, repeat)
   private idleTimer: ReturnType<typeof setTimeout> | null = null;
   private wiggleTimeline: gsap.core.Timeline | null = null;
-  private nextIdleAction: 'wiggle' | 'flip' = 'wiggle';
+  private idleActionIndex = 0; // 0=wiggle, 1=flip, 2=flip, then repeat
   private static readonly IDLE_TIMEOUT = 45000; // 45 seconds
 
   // Animation configuration (from centralized constants)
@@ -620,22 +620,25 @@ export class BusinessCardInteractions extends BaseModule {
 
   /**
    * Start the idle timer - resets on any interaction
-   * After 45 seconds: wiggle, then after another 45 seconds: flip
+   * Sequence: wiggle → flip → flip → wiggle → flip → flip...
    */
   private startIdleTimer(): void {
     this.stopIdleTimer();
 
     this.idleTimer = setTimeout(() => {
       if (this.isEnabled && !this.isAnimating && !this.isHovering) {
-        if (this.nextIdleAction === 'wiggle') {
+        if (this.idleActionIndex === 0) {
+          // First action: wiggle
           this.log('Idle timeout reached - playing wiggle animation');
           this.playWiggleAnimation();
-          this.nextIdleAction = 'flip';
+          this.idleActionIndex = 1;
         } else {
+          // Second and third actions: flip
           this.log('Idle timeout reached - flipping card');
           this.flipCard('right');
-          this.nextIdleAction = 'wiggle';
-          // Restart timer after flip completes (handled in flipCard onComplete)
+          // After two flips, go back to wiggle
+          this.idleActionIndex = this.idleActionIndex === 1 ? 2 : 0;
+          // Timer restarts in flipCard onComplete
         }
       }
     }, BusinessCardInteractions.IDLE_TIMEOUT);
@@ -657,7 +660,7 @@ export class BusinessCardInteractions extends BaseModule {
   private resetIdleTimer(): void {
     if (this.isEnabled) {
       // Reset to wiggle as first idle action after user interaction
-      this.nextIdleAction = 'wiggle';
+      this.idleActionIndex = 0;
       this.startIdleTimer();
     }
   }
