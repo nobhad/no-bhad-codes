@@ -106,13 +106,15 @@ html[data-theme="dark"] .morph-card-group {
 }
 
 
-/* Mobile: Overlay is initially hidden via CSS, JS will show it when mobile animation runs */
+/* Mobile: Overlay stays visible (same as desktop) to hide card until animation reveals it */
 @media screen and (max-width: 767px) {
   .intro-morph-overlay {
-    /* Start hidden - JS will override these for mobile paw animation */
-    display: none;
-    opacity: 0;
-    visibility: hidden;
+    /* Overlay is visible by default - matches desktop behavior */
+    /* This ensures user sees the background color, not a blank page */
+    /* Animation will reveal the card and then hide the overlay */
+    display: flex;
+    opacity: 1;
+    visibility: visible;
   }
 }
 

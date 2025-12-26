@@ -49,12 +49,25 @@
         background-color: transparent;
       }
       @media screen and (max-width: 767px) {
+        /* Mobile: Show overlay (same as desktop) to cover card area until animation */
         .intro-morph-overlay {
-          display: none;
+          position: fixed;
+          top: 60px; /* --header-height fallback */
+          left: 0;
+          width: 100vw;
+          height: calc(100dvh - 60px - 40px); /* header + footer fallback */
+          z-index: 50;
+          background-color: #e0e0e0; /* --color-neutral-300 light mode fallback */
+          display: flex;
+          opacity: 1;
+          visibility: visible;
         }
-        /* Hide business card until JS removes intro-loading class */
-        .intro-loading .business-card-inner {
+        html[data-theme="dark"] .intro-morph-overlay {
+          background-color: #333333; /* Mobile dark mode background */
+        }
+        .intro-morph-overlay.hidden {
           opacity: 0;
+          visibility: hidden;
         }
         .header,
         .intro-loading .header {
