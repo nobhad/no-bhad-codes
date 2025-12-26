@@ -192,15 +192,7 @@
   }
 
   /* Contact content wrapper - GSAP controls visibility */
-  .contact-content {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    /* DO NOT set opacity in CSS - GSAP controls it in PageHeroModule */
-  }
+  /* NOTE: Main layout defined below in desktop section - this is for hero overlay */
 }
 
 /* ==========================================
@@ -209,34 +201,58 @@
    ========================================== */
 
 @media screen and (min-width: 768px) {
-  /* Contact Section - full viewport height, centered content (desktop) - CSS Grid (NO FLEX) */
+  /* Contact Section - full viewport height, content at top (desktop) - CSS Grid */
   .contact-section {
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     height: calc(100vh - var(--header-height) - var(--footer-height));
     display: grid;
-    place-content: center center; /* Vertical and horizontal center */
+    justify-items: center; /* Center horizontally only */
+    align-items: start; /* Align to top, not center */
     width: 100%;
     padding: clamp(1rem, 4vw, 2rem);
     box-sizing: border-box;
     position: relative;
-    overflow: visible; /* Allow content to be visible */
+    overflow: visible;
   }
 
-  /* Contact content wrapper - contains h2 and layout */
+  /* Contact content wrapper - same vertical position as about, centered horizontally */
   .contact-content {
-    width: auto;
+    width: 100%;
     margin: 0 auto;
+    padding: 1rem;
+    padding-top: 0;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0;
+    align-self: start;
   }
 
-  /* Contact heading - aligns with form left edge */
-  .contact-content h2 {
-    text-align: left;
-    margin: 0; /* No margin - hr handles spacing below */
+  /* Position h2 - align left, SAME SPACING AS ABOUT/PROJECTS */
+  .contact-section h2 {
+    margin: 0;
+    margin-top: -70.7px;
+    margin-bottom: 1.5rem; /* MUST match about-section h2 and projects-section h2 */
     padding: 0;
+    text-align: left;
+    width: 100%;
   }
+
+  /* hr - align left, base margin from typography.css applies */
+  .contact-section hr {
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  /* hr uses base margin: 0 0 1.5rem 0, no override needed */
+
+  /* Gap between hr and contact-layout */
+  .contact-layout {
+    margin-top: 1rem;
+  }
+
 
   /* ==========================================
      TWO-COLUMN LAYOUT - DESKTOP ONLY
@@ -437,7 +453,7 @@
 .input-wrapper {
   overflow: visible;
   position: relative;
-  padding: 2px; /* Prevent focus outline from being clipped */
+  padding: 2px;
   width: 100%;
   box-sizing: border-box;
   display: flex;

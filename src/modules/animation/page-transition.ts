@@ -8,7 +8,7 @@
  * DESIGN:
  * - Virtual pages architecture - one full-viewport "page" visible at a time
  * - Hash-based URLs: #/, #/about, #/contact
- * - GSAP blur-in/out + drop-in/out animations
+ * - GSAP flip-clock and slide animations
  * - Desktop only - mobile keeps scroll behavior
  */
 
@@ -192,31 +192,125 @@ export class PageTransitionModule extends BaseModule {
         this.currentPageId = id;
         this.log(`Showing initial page: ${id}`);
 
-        // Play flip-clock animation for about page on initial load
+        // About page: flip-clock animation on initial load
         if (id === 'about') {
           const textWrapper = page.element.querySelector('.about-text-wrapper') as HTMLElement;
           const techStack = page.element.querySelector('.tech-stack-desktop') as HTMLElement;
 
-          // Hide tech stack initially - flipped down, hinged at bottom
+          // Text wrapper flips down from top
+          if (textWrapper) {
+            gsap.set(textWrapper, {
+              rotateX: -90,
+              opacity: 1,
+              transformOrigin: 'top center',
+              transformStyle: 'preserve-3d'
+            });
+            gsap.to(textWrapper, {
+              rotateX: 0,
+              duration: this.TRANSITION_DURATION_LONG,
+              delay: 0.4,
+              ease: this.TRANSITION_EASE
+            });
+          }
+
+          // Tech stack flips up from bottom
           if (techStack) {
             gsap.set(techStack, {
               rotateX: 90,
               opacity: 1,
               transformOrigin: 'bottom center',
-              transformPerspective: 1200
+              transformStyle: 'preserve-3d'
+            });
+            gsap.to(techStack, {
+              rotateX: 0,
+              duration: this.TRANSITION_DURATION_LONG,
+              delay: 0.5,
+              ease: this.TRANSITION_EASE
+            });
+          }
+        }
+
+        // Projects page: UNIFORM h2/hr + blur-in content on initial load
+        if (id === 'projects') {
+          const projectsContent = page.element.querySelector('.projects-content') as HTMLElement;
+          const h2 = page.element.querySelector('h2') as HTMLElement;
+          const hr = page.element.querySelector('hr') as HTMLElement;
+
+          // h2 drops in from above
+          if (h2) {
+            gsap.set(h2, { yPercent: -105, clipPath: 'inset(0 0 0 0)' });
+            gsap.to(h2, {
+              yPercent: 0,
+              duration: this.TRANSITION_DURATION,
+              delay: 0.4,
+              ease: this.TRANSITION_EASE
             });
           }
 
-          // Run both animations at the same time
-          if (textWrapper) {
-            this.playFlipClockAnimation(textWrapper);
+          // hr scales in from left
+          if (hr) {
+            gsap.set(hr, { scale: 0, transformOrigin: 'bottom left' });
+            gsap.to(hr, {
+              scale: 1,
+              duration: this.TRANSITION_DURATION_LONG,
+              delay: 0.4,
+              ease: this.TRANSITION_EASE
+            });
           }
-          if (techStack) {
-            gsap.to(techStack, {
-              rotateX: 0,
-              duration: 0.8,
-              delay: 0.5,
-              ease: 'power2.out'
+
+          // Content blurs in (excluding h2/hr)
+          if (projectsContent) {
+            const otherContent = projectsContent.querySelectorAll(':scope > *:not(h2):not(hr)');
+            otherContent.forEach((el) => {
+              gsap.set(el, { opacity: 0, filter: `blur(${this.BLUR_AMOUNT}px)` });
+              gsap.to(el, {
+                opacity: 1,
+                filter: 'blur(0px)',
+                duration: this.TRANSITION_DURATION_LONG,
+                delay: 0.5,
+                ease: this.TRANSITION_EASE
+              });
+            });
+          }
+        }
+
+        // Contact page: UNIFORM h2/hr + blur-in content on initial load
+        if (id === 'contact') {
+          const h2 = page.element.querySelector('h2') as HTMLElement;
+          const hr = page.element.querySelector('hr') as HTMLElement;
+          const contactLayout = page.element.querySelector('.contact-layout') as HTMLElement;
+
+          // h2 drops in from above
+          if (h2) {
+            gsap.set(h2, { yPercent: -105, clipPath: 'inset(0 0 0 0)' });
+            gsap.to(h2, {
+              yPercent: 0,
+              duration: this.TRANSITION_DURATION,
+              delay: 0.4,
+              ease: this.TRANSITION_EASE
+            });
+          }
+
+          // hr scales in from left
+          if (hr) {
+            gsap.set(hr, { scale: 0, transformOrigin: 'bottom left' });
+            gsap.to(hr, {
+              scale: 1,
+              duration: this.TRANSITION_DURATION_LONG,
+              delay: 0.4,
+              ease: this.TRANSITION_EASE
+            });
+          }
+
+          // Contact layout blurs in
+          if (contactLayout) {
+            gsap.set(contactLayout, { opacity: 0, filter: `blur(${this.BLUR_AMOUNT}px)` });
+            gsap.to(contactLayout, {
+              opacity: 1,
+              filter: 'blur(0px)',
+              duration: this.TRANSITION_DURATION_LONG,
+              delay: 0.6,
+              ease: this.TRANSITION_EASE
             });
           }
         }
@@ -489,48 +583,60 @@ export class PageTransitionModule extends BaseModule {
       this.hideIntroPageImmediately(targetPage);
     }
 
-    // Show transition overlay - skip for intro (uses intro-morph-overlay instead)
-    // Also skip overlay when transitioning TO intro (to see fade out)
-    if (this.currentPageId !== 'intro' && pageId !== 'intro') {
+    // Show transition overlay - skip for intro and about (about has visible exit animation)
+    if (this.currentPageId !== 'intro' && this.currentPageId !== 'about' && pageId !== 'intro') {
       this.showTransitionOverlay();
     }
 
     try {
-      // Animate out current page
-      this.log('[PageTransitionModule] Step 1: Animating out current page');
-      if (this.currentPageId === 'intro') {
-        await this.playIntroExitAnimation();
-        this.log('[PageTransitionModule] Intro exit animation complete');
-      } else if (currentPage && currentPage.element) {
-        await this.animateOut(currentPage);
-        this.log('[PageTransitionModule] Page exit animation complete');
-      }
-
-      // Hide current page after animation
-      this.log('[PageTransitionModule] Step 2: Hiding current page');
-      if (currentPage && currentPage.element) {
-        gsap.set(currentPage.element, { clearProps: 'all' });
-        currentPage.element.classList.add('page-hidden');
-        currentPage.element.classList.remove('page-active');
-      }
-
-      // Show and prepare target page
-      this.log('[PageTransitionModule] Step 3: Preparing target page');
-      if (pageId !== 'intro') {
-        this.prepareTargetPage(targetPage, pageId);
-      }
-      if (targetPage.skipAnimation) {
-        targetPage.element.style.display = '';
-        targetPage.element.style.visibility = '';
-        targetPage.element.style.opacity = '';
-      }
-
-      // Animate in target page
-      this.log('[PageTransitionModule] Step 4: Animating in target page');
-      if (pageId === 'intro') {
-        await this.playIntroEntryAnimation();
+      // Special case: about ↔ contact (seamless overlapping transitions)
+      if (this.currentPageId === 'about' && pageId === 'contact') {
+        await this.playAboutToContactTransition(currentPage!, targetPage);
+      } else if (this.currentPageId === 'contact' && pageId === 'about') {
+        await this.playContactToAboutTransition(currentPage!, targetPage);
       } else {
-        await this.animateIn(targetPage);
+        // Hide target page during exit animation to prevent it showing through
+        if (targetPage.element && pageId !== 'intro') {
+          gsap.set(targetPage.element, { visibility: 'hidden', opacity: 0 });
+        }
+
+        // Animate out current page
+        this.log('[PageTransitionModule] Step 1: Animating out current page');
+        if (this.currentPageId === 'intro') {
+          await this.playIntroExitAnimation();
+          this.log('[PageTransitionModule] Intro exit animation complete');
+        } else if (currentPage && currentPage.element) {
+          await this.animateOut(currentPage);
+          this.log('[PageTransitionModule] Page exit animation complete');
+        }
+
+
+        // Hide current page after animation
+        this.log('[PageTransitionModule] Step 2: Hiding current page');
+        if (currentPage && currentPage.element) {
+          gsap.set(currentPage.element, { clearProps: 'all' });
+          currentPage.element.classList.add('page-hidden');
+          currentPage.element.classList.remove('page-active');
+        }
+
+        // Show and prepare target page
+        this.log('[PageTransitionModule] Step 3: Preparing target page');
+        if (pageId !== 'intro') {
+          this.prepareTargetPage(targetPage, pageId);
+        }
+        if (targetPage.skipAnimation) {
+          targetPage.element.style.display = '';
+          targetPage.element.style.visibility = '';
+          targetPage.element.style.opacity = '';
+        }
+
+        // Animate in target page
+        this.log('[PageTransitionModule] Step 4: Animating in target page');
+        if (pageId === 'intro') {
+          await this.playIntroEntryAnimation();
+        } else {
+          await this.animateIn(targetPage);
+        }
       }
       this.log('[PageTransitionModule] Step 5: Animation complete');
 
@@ -698,22 +804,120 @@ export class PageTransitionModule extends BaseModule {
     }
   }
 
+  // Page transition animation constants
+  private readonly TRANSITION_EASE = 'power2.out';
+  private readonly TRANSITION_EASE_EXIT = 'power2.in';
+  private readonly TRANSITION_DURATION = 0.5;
+  private readonly TRANSITION_DURATION_LONG = 0.8;
+  private readonly BLUR_AMOUNT = 8;
+
   /**
-   * Animate page out - instant hide (blur/fade disabled)
-   * Same animation for all content pages (about/contact/projects)
+   * Animate page out with uniform h2/hr animations + page-specific content
+   * UNIFORM: h2 drop-out with clipPath, hr scale-out from bottom left
    */
   private async animateOut(page: PageConfig): Promise<void> {
     if (!page.element || page.skipAnimation) return;
 
-    const el = page.element;
+    // Get common elements (uniform across all pages)
+    const h2 = page.element.querySelector('h2') as HTMLElement;
+    const hr = page.element.querySelector('hr') as HTMLElement;
 
-    // Instant hide - no blur/fade animation
-    gsap.set(el, { opacity: 0, visibility: 'hidden' });
+    await new Promise<void>((resolve) => {
+      const tl = gsap.timeline({ onComplete: resolve });
+
+      // === UNIFORM: h2 drops out with clipPath ===
+      if (h2) {
+        gsap.set(h2, { clipPath: 'inset(0 0 0 0)' }); // Reset before animating out
+        tl.to(h2, {
+          yPercent: 105,
+          clipPath: 'inset(100% 0 0 0)',
+          duration: this.TRANSITION_DURATION,
+          ease: this.TRANSITION_EASE
+        }, 0);
+      }
+
+      // === UNIFORM: hr scales out from bottom left ===
+      if (hr) {
+        gsap.set(hr, { transformOrigin: 'bottom left' });
+        tl.to(hr, {
+          scale: 0,
+          duration: this.TRANSITION_DURATION,
+          ease: this.TRANSITION_EASE
+        }, 0);
+      }
+
+      // === PAGE-SPECIFIC CONTENT ANIMATIONS ===
+      if (page.id === 'about') {
+        const textWrapper = page.element!.querySelector('.about-text-wrapper') as HTMLElement;
+        const techStack = page.element!.querySelector('.tech-stack-desktop') as HTMLElement;
+
+        // Text wrapper flips out
+        if (textWrapper) {
+          gsap.set(textWrapper, { transformOrigin: 'top center', transformStyle: 'preserve-3d' });
+          tl.to(textWrapper, {
+            rotateX: -90,
+            duration: this.TRANSITION_DURATION,
+            ease: this.TRANSITION_EASE_EXIT
+          }, 0);
+        }
+
+        // Tech stack flips out
+        if (techStack) {
+          gsap.set(techStack, { transformOrigin: 'bottom center', transformStyle: 'preserve-3d' });
+          tl.to(techStack, {
+            rotateX: 90,
+            duration: this.TRANSITION_DURATION,
+            ease: this.TRANSITION_EASE_EXIT
+          }, 0);
+        }
+      } else if (page.id === 'contact') {
+        const contactLayoutEl = page.element!.querySelector('.contact-layout') as HTMLElement;
+
+        // Contact layout blurs out
+        if (contactLayoutEl) {
+          tl.to(contactLayoutEl, {
+            opacity: 0,
+            filter: `blur(${this.BLUR_AMOUNT}px)`,
+            duration: this.TRANSITION_DURATION,
+            ease: this.TRANSITION_EASE
+          }, 0);
+        }
+      } else if (page.id === 'projects') {
+        const projectsContent = page.element!.querySelector('.projects-content') as HTMLElement;
+
+        // Projects content blurs out (excluding h2/hr which are handled above)
+        if (projectsContent) {
+          // Find elements that are NOT h2 or hr
+          const otherContent = projectsContent.querySelectorAll(':scope > *:not(h2):not(hr)');
+          otherContent.forEach((el) => {
+            tl.to(el, {
+              opacity: 0,
+              filter: `blur(${this.BLUR_AMOUNT}px)`,
+              duration: this.TRANSITION_DURATION,
+              ease: this.TRANSITION_EASE
+            }, 0);
+          });
+        }
+      } else {
+        // === DEFAULT: blur out content ===
+        const content = page.element!.querySelector('[class*="-content"]') as HTMLElement;
+        if (content) {
+          tl.to(content, {
+            opacity: 0,
+            filter: `blur(${this.BLUR_AMOUNT}px)`,
+            duration: this.TRANSITION_DURATION,
+            ease: this.TRANSITION_EASE
+          }, 0);
+        }
+      }
+    });
+
+    gsap.set(page.element, { opacity: 0, visibility: 'hidden' });
   }
 
   /**
-   * Animate page in - instant show (blur/fade disabled)
-   * Same animation for all content pages (about/contact/projects)
+   * Animate page in with UNIFORM h2/hr animations + page-specific content
+   * UNIFORM: h2 drop-in, hr scale-in from bottom left
    */
   private async animateIn(page: PageConfig): Promise<void> {
     this.log('[PageTransitionModule] animateIn called for:', page.id);
@@ -732,39 +936,356 @@ export class PageTransitionModule extends BaseModule {
     // Instant show section
     gsap.set(sectionEl, { opacity: 1, visibility: 'visible' });
 
-    // About page: flip-clock animation for text wrapper (GIF + text) + tech stack slide
+    // Get common elements (uniform across all pages)
+    const h2 = sectionEl.querySelector('h2') as HTMLElement;
+    const hr = sectionEl.querySelector('hr') as HTMLElement;
+
+    // === UNIFORM: Clear any lingering properties from exit animations ===
+    if (h2) {
+      gsap.set(h2, { clearProps: 'clipPath,yPercent' });
+    }
+    if (hr) {
+      gsap.set(hr, { clearProps: 'scale,transformOrigin' });
+    }
+
+    // === ABOUT PAGE: flip-clock animation (no h2/hr drop-in, uses flip instead) ===
     if (page.id === 'about') {
       const textWrapper = sectionEl.querySelector('.about-text-wrapper') as HTMLElement;
       const techStack = sectionEl.querySelector('.tech-stack-desktop') as HTMLElement;
 
-      // Hide tech stack initially - flipped down, hinged at bottom
+      // Text wrapper flips down from top
+      if (textWrapper) {
+        gsap.set(textWrapper, {
+          rotateX: -90,
+          opacity: 1,
+          transformOrigin: 'top center',
+          transformStyle: 'preserve-3d'
+        });
+        gsap.to(textWrapper, {
+          rotateX: 0,
+          duration: this.TRANSITION_DURATION_LONG,
+          delay: 0,
+          ease: this.TRANSITION_EASE
+        });
+      }
+
+      // Tech stack flips up from bottom
       if (techStack) {
         gsap.set(techStack, {
           rotateX: 90,
           opacity: 1,
           transformOrigin: 'bottom center',
-          transformPerspective: 1200
+          transformStyle: 'preserve-3d'
         });
-      }
-
-      // Run both animations at the same time
-      if (textWrapper) {
-        this.playFlipClockAnimation(textWrapper);
-      }
-      if (techStack) {
         gsap.to(techStack, {
           rotateX: 0,
-          duration: 0.8,
-          delay: 0.5,
-          ease: 'power2.out'
+          duration: this.TRANSITION_DURATION_LONG,
+          delay: 0.1,
+          ease: this.TRANSITION_EASE
         });
       }
     }
 
-    // Dispatch contact page ready event if needed
+    // === PROJECTS PAGE: UNIFORM h2/hr + blur-in content ===
+    if (page.id === 'projects') {
+      const projectsContent = sectionEl.querySelector('.projects-content') as HTMLElement;
+
+      // === UNIFORM: h2 drops in from above ===
+      if (h2) {
+        gsap.set(h2, { yPercent: -105, clipPath: 'inset(0 0 0 0)' });
+        gsap.to(h2, {
+          yPercent: 0,
+          duration: this.TRANSITION_DURATION,
+          delay: 0.4,
+          ease: this.TRANSITION_EASE
+        });
+      }
+
+      // === UNIFORM: hr scales in from bottom left ===
+      if (hr) {
+        gsap.set(hr, { scale: 0, transformOrigin: 'bottom left' });
+        gsap.to(hr, {
+          scale: 1,
+          duration: this.TRANSITION_DURATION_LONG,
+          delay: 0.4,
+          ease: this.TRANSITION_EASE
+        });
+      }
+
+      // Content blurs in (excluding h2/hr)
+      if (projectsContent) {
+        const otherContent = projectsContent.querySelectorAll(':scope > *:not(h2):not(hr)');
+        otherContent.forEach((el) => {
+          gsap.set(el, { opacity: 0, filter: `blur(${this.BLUR_AMOUNT}px)` });
+          gsap.to(el, {
+            opacity: 1,
+            filter: 'blur(0px)',
+            duration: this.TRANSITION_DURATION_LONG,
+            delay: 0.5,
+            ease: this.TRANSITION_EASE
+          });
+        });
+      }
+    }
+
+    // === CONTACT PAGE: UNIFORM h2/hr + blur-in content ===
     if (page.id === 'contact') {
+      const contactLayout = sectionEl.querySelector('.contact-layout') as HTMLElement;
+
+      // === UNIFORM: h2 drops in from above ===
+      if (h2) {
+        gsap.set(h2, { yPercent: -105, clipPath: 'inset(0 0 0 0)' });
+        gsap.to(h2, {
+          yPercent: 0,
+          duration: this.TRANSITION_DURATION,
+          delay: 0.4,
+          ease: this.TRANSITION_EASE
+        });
+      }
+
+      // === UNIFORM: hr scales in from bottom left ===
+      if (hr) {
+        gsap.set(hr, { scale: 0, transformOrigin: 'bottom left' });
+        gsap.to(hr, {
+          scale: 1,
+          duration: this.TRANSITION_DURATION_LONG,
+          delay: 0.4,
+          ease: this.TRANSITION_EASE
+        });
+      }
+
+      // Contact layout blurs in
+      if (contactLayout) {
+        gsap.set(contactLayout, {
+          opacity: 0,
+          filter: `blur(${this.BLUR_AMOUNT}px)`
+        });
+        gsap.to(contactLayout, {
+          opacity: 1,
+          filter: 'blur(0px)',
+          duration: this.TRANSITION_DURATION_LONG,
+          delay: 0.6,
+          ease: this.TRANSITION_EASE
+        });
+      }
+
       this.dispatchEvent('contact-page-ready', { pageId: page.id });
     }
+  }
+
+  /**
+   * Seamless about → contact transition with overlapping animations
+   */
+  private async playAboutToContactTransition(
+    aboutPage: PageConfig,
+    contactPage: PageConfig
+  ): Promise<void> {
+    this.log('[PageTransitionModule] Playing seamless about→contact transition');
+
+    const aboutEl = aboutPage.element!;
+    const contactEl = contactPage.element!;
+
+    // About elements
+    const textWrapper = aboutEl.querySelector('.about-text-wrapper') as HTMLElement;
+    const techStack = aboutEl.querySelector('.tech-stack-desktop') as HTMLElement;
+
+    // Contact elements
+    const h2 = contactEl.querySelector('h2') as HTMLElement;
+    const hr = contactEl.querySelector('hr') as HTMLElement;
+    const contactLayout = contactEl.querySelector('.contact-layout') as HTMLElement;
+
+    // Prepare contact page (visible but elements hidden in starting positions)
+    contactEl.classList.remove('page-hidden');
+    contactEl.classList.add('page-active');
+    gsap.set(contactEl, { opacity: 1, visibility: 'visible' });
+
+    // Clear any lingering exit properties, then set starting positions
+    if (h2) gsap.set(h2, { clearProps: 'clipPath,yPercent', yPercent: -105, clipPath: 'inset(0 0 0 0)' }); // drop-in start
+    if (hr) gsap.set(hr, { clearProps: 'scale', scale: 0, transformOrigin: 'bottom left' }); // scale-in-left start
+    if (contactLayout) {
+      gsap.set(contactLayout, {
+        opacity: 0,
+        filter: `blur(${this.BLUR_AMOUNT}px)` // blur-in start
+      });
+    }
+
+    const overlapOffset = 0.2; // Start contact entry before about exit finishes
+
+    await new Promise<void>((resolve) => {
+      const tl = gsap.timeline({ onComplete: resolve });
+
+      // === ABOUT EXIT (at position 0) ===
+      // Text wrapper flips back up
+      if (textWrapper) {
+        gsap.set(textWrapper, { transformOrigin: 'top center', transformStyle: 'preserve-3d' });
+        tl.to(textWrapper, {
+          rotateX: -90,
+          duration: this.TRANSITION_DURATION,
+          ease: this.TRANSITION_EASE_EXIT
+        }, 0);
+      }
+
+      // Tech stack flips back down
+      if (techStack) {
+        gsap.set(techStack, { transformOrigin: 'bottom center', transformStyle: 'preserve-3d' });
+        tl.to(techStack, {
+          rotateX: 90,
+          duration: this.TRANSITION_DURATION,
+          ease: this.TRANSITION_EASE_EXIT
+        }, 0);
+      }
+
+      // === CONTACT ENTRY (overlapped - style) ===
+      const entryStart = this.TRANSITION_DURATION - overlapOffset;
+
+      // h2 drops in (drop-in)
+      if (h2) {
+        tl.to(h2, {
+          yPercent: 0,
+          duration: this.TRANSITION_DURATION,
+          ease: this.TRANSITION_EASE
+        }, entryStart);
+      }
+
+      // hr scales in from left (scale-in-left)
+      if (hr) {
+        tl.to(hr, {
+          scale: 1,
+          duration: this.TRANSITION_DURATION_LONG,
+          ease: this.TRANSITION_EASE
+        }, entryStart);
+      }
+
+      // Contact layout blurs in (blur-in)
+      if (contactLayout) {
+        tl.to(contactLayout, {
+          opacity: 1,
+          filter: 'blur(0px)',
+          duration: this.TRANSITION_DURATION_LONG,
+          ease: this.TRANSITION_EASE
+        }, entryStart + 0.2);
+      }
+
+      // Hide about page partway through
+      tl.call(() => {
+        gsap.set(aboutEl, { clearProps: 'all' });
+        aboutEl.classList.add('page-hidden');
+        aboutEl.classList.remove('page-active');
+      }, [], this.TRANSITION_DURATION);
+    });
+
+    this.dispatchEvent('contact-page-ready', { pageId: 'contact' });
+  }
+
+  /**
+   * Seamless contact → about transition with overlapping animations
+   */
+  private async playContactToAboutTransition(
+    contactPage: PageConfig,
+    aboutPage: PageConfig
+  ): Promise<void> {
+    this.log('[PageTransitionModule] Playing seamless contact→about transition');
+
+    const contactEl = contactPage.element!;
+    const aboutEl = aboutPage.element!;
+
+    // Contact elements
+    const h2 = contactEl.querySelector('h2') as HTMLElement;
+    const hr = contactEl.querySelector('hr') as HTMLElement;
+    const contactLayout = contactEl.querySelector('.contact-layout') as HTMLElement;
+
+    // About elements
+    const textWrapper = aboutEl.querySelector('.about-text-wrapper') as HTMLElement;
+    const techStack = aboutEl.querySelector('.tech-stack-desktop') as HTMLElement;
+
+    // Prepare about page
+    aboutEl.classList.remove('page-hidden');
+    aboutEl.classList.add('page-active');
+    gsap.set(aboutEl, { opacity: 1, visibility: 'visible' });
+
+    // Set about elements to their starting positions
+    if (textWrapper) {
+      gsap.set(textWrapper, {
+        rotateX: -90,
+        opacity: 1,
+        transformOrigin: 'top center',
+        transformStyle: 'preserve-3d'
+      });
+    }
+    if (techStack) {
+      gsap.set(techStack, {
+        rotateX: 90,
+        opacity: 1,
+        transformOrigin: 'bottom center',
+        transformStyle: 'preserve-3d'
+      });
+    }
+
+    const overlapOffset = 0.2;
+
+    await new Promise<void>((resolve) => {
+      const tl = gsap.timeline({ onComplete: resolve });
+
+      // === CONTACT EXIT (GSAP clipPath for clipping) ===
+      // h2 drops out with clipPath
+      if (h2) {
+        gsap.set(h2, { clipPath: 'inset(0 0 0 0)' }); // Reset before animating out
+        tl.to(h2, {
+          yPercent: 105,
+          clipPath: 'inset(100% 0 0 0)',
+          duration: this.TRANSITION_DURATION,
+          ease: this.TRANSITION_EASE
+        }, 0);
+      }
+
+      // hr scales out from bottom left
+      if (hr) {
+        gsap.set(hr, { transformOrigin: 'bottom left' });
+        tl.to(hr, {
+          scale: 0,
+          duration: this.TRANSITION_DURATION,
+          ease: this.TRANSITION_EASE
+        }, 0);
+      }
+
+      // Contact layout blurs out
+      if (contactLayout) {
+        tl.to(contactLayout, {
+          opacity: 0,
+          filter: `blur(${this.BLUR_AMOUNT}px)`,
+          duration: this.TRANSITION_DURATION,
+          ease: this.TRANSITION_EASE
+        }, 0);
+      }
+
+      // === ABOUT ENTRY (overlapped) ===
+      const entryStart = this.TRANSITION_DURATION - overlapOffset;
+
+      // Text wrapper flips down
+      if (textWrapper) {
+        tl.to(textWrapper, {
+          rotateX: 0,
+          duration: this.TRANSITION_DURATION_LONG,
+          ease: this.TRANSITION_EASE
+        }, entryStart);
+      }
+
+      // Tech stack flips up
+      if (techStack) {
+        tl.to(techStack, {
+          rotateX: 0,
+          duration: this.TRANSITION_DURATION_LONG,
+          ease: this.TRANSITION_EASE
+        }, entryStart + 0.1);
+      }
+
+      // Hide contact page partway through
+      tl.call(() => {
+        gsap.set(contactEl, { clearProps: 'all' });
+        contactEl.classList.add('page-hidden');
+        contactEl.classList.remove('page-active');
+      }, [], this.TRANSITION_DURATION);
+    });
   }
 
   /**
