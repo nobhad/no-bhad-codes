@@ -2,12 +2,24 @@
 <html lang="en" class="intro-loading">
   <head>
     <meta charset="UTF-8" />
+    <!-- CRITICAL: Theme detection MUST run BEFORE any CSS to prevent flash -->
+    <script>
+      (function () {
+        try {
+          var savedTheme = localStorage.getItem('theme');
+          var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var theme = savedTheme || (systemDark ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#e0e0e0" />
     <title>No Bhad Codes - Professional Web Development</title>
 
-    <!-- All CSS moved to external stylesheets -->
-    <!-- Critical CSS - ensures correct visibility from first paint before external CSS loads -->
+    <!-- Critical CSS - ensures correct visibility from first paint -->
     <style>
       @media screen and (min-width: 768px) {
         .intro-morph-overlay {
@@ -97,25 +109,6 @@
         visibility: visible !important;
       }
     </style>
-    <script>
-      (function () {
-        try {
-          var savedTheme = localStorage.getItem('theme');
-          // If no saved theme, check system preference
-          var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-          var theme = savedTheme || (systemDark ? 'dark' : 'light');
-          document.documentElement.setAttribute('data-theme', theme);
-          var themeColorMeta = document.querySelector('meta[name="theme-color"]');
-          if (themeColorMeta) {
-            var isMobile = window.innerWidth <= 767;
-            var darkColor = isMobile ? '#333333' : '#2a2a2a';
-            themeColorMeta.setAttribute('content', theme === 'dark' ? darkColor : '#e0e0e0');
-          }
-        } catch (e) {
-          document.documentElement.setAttribute('data-theme', 'light');
-        }
-      })();
-    </script>
 
     <!-- SEO -->
     <meta
