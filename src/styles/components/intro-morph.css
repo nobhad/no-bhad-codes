@@ -44,8 +44,8 @@
 }
 
 /* Dark theme support - uses --color-neutral-300 which is theme-aware:
- * Light: #e0e0e0 (matches light mode page background)
- * Dark: #2a2a2a (matches dark mode page background)
+ * Light: #f8f5f4 (matches light mode page background)
+ * Dark: #333333 (matches dark mode page background)
  * No override needed since base rule uses the theme-aware variable */
 
 /* SVG Container - absolute positioning, no viewBox scaling */
