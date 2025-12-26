@@ -185,17 +185,50 @@ export class PageTransitionModule extends BaseModule {
       if (!page.element) return;
 
       if (id === initialPageId) {
-        // Show the initial page - set classes AND ensure visible
+        // Get h2/hr elements FIRST
+        const h2 = page.element.querySelector('h2') as HTMLElement;
+        const hr = page.element.querySelector('hr') as HTMLElement;
+
+        // Set h2/hr to hidden starting positions BEFORE making page visible
+        // This prevents the flash of visible elements
+        if (h2 && id !== 'intro') {
+          gsap.set(h2, { yPercent: -105, clipPath: 'inset(0 0 0 0)' });
+        }
+        if (hr && id !== 'intro') {
+          gsap.set(hr, { scale: 0, transformOrigin: 'bottom left' });
+        }
+
+        // Now show the initial page
         page.element.classList.remove('page-hidden');
         page.element.classList.add('page-active');
         gsap.set(page.element, { opacity: 1, filter: 'none', visibility: 'visible' });
         this.currentPageId = id;
         this.log(`Showing initial page: ${id}`);
 
-        // About page: flip-clock animation on initial load
+        // About page: UNIFORM h2/hr + flip-clock animation on initial load
         if (id === 'about') {
           const textWrapper = page.element.querySelector('.about-text-wrapper') as HTMLElement;
           const techStack = page.element.querySelector('.tech-stack-desktop') as HTMLElement;
+
+          // h2 drops in from above (already set to hidden position above)
+          if (h2) {
+            gsap.to(h2, {
+              yPercent: 0,
+              duration: this.TRANSITION_DURATION,
+              delay: 0.4,
+              ease: this.TRANSITION_EASE
+            });
+          }
+
+          // hr scales in from left (already set to hidden position above)
+          if (hr) {
+            gsap.to(hr, {
+              scale: 1,
+              duration: this.TRANSITION_DURATION_LONG,
+              delay: 0.4,
+              ease: this.TRANSITION_EASE
+            });
+          }
 
           // Text wrapper flips down from top
           if (textWrapper) {
@@ -208,7 +241,7 @@ export class PageTransitionModule extends BaseModule {
             gsap.to(textWrapper, {
               rotateX: 0,
               duration: this.TRANSITION_DURATION_LONG,
-              delay: 0.4,
+              delay: 0.5,
               ease: this.TRANSITION_EASE
             });
           }
@@ -224,7 +257,7 @@ export class PageTransitionModule extends BaseModule {
             gsap.to(techStack, {
               rotateX: 0,
               duration: this.TRANSITION_DURATION_LONG,
-              delay: 0.5,
+              delay: 0.6,
               ease: this.TRANSITION_EASE
             });
           }
@@ -233,12 +266,9 @@ export class PageTransitionModule extends BaseModule {
         // Projects page: UNIFORM h2/hr + blur-in content on initial load
         if (id === 'projects') {
           const projectsContent = page.element.querySelector('.projects-content') as HTMLElement;
-          const h2 = page.element.querySelector('h2') as HTMLElement;
-          const hr = page.element.querySelector('hr') as HTMLElement;
 
-          // h2 drops in from above
+          // h2 drops in from above (already set to hidden position above)
           if (h2) {
-            gsap.set(h2, { yPercent: -105, clipPath: 'inset(0 0 0 0)' });
             gsap.to(h2, {
               yPercent: 0,
               duration: this.TRANSITION_DURATION,
@@ -247,9 +277,8 @@ export class PageTransitionModule extends BaseModule {
             });
           }
 
-          // hr scales in from left
+          // hr scales in from left (already set to hidden position above)
           if (hr) {
-            gsap.set(hr, { scale: 0, transformOrigin: 'bottom left' });
             gsap.to(hr, {
               scale: 1,
               duration: this.TRANSITION_DURATION_LONG,
@@ -276,13 +305,10 @@ export class PageTransitionModule extends BaseModule {
 
         // Contact page: UNIFORM h2/hr + blur-in content on initial load
         if (id === 'contact') {
-          const h2 = page.element.querySelector('h2') as HTMLElement;
-          const hr = page.element.querySelector('hr') as HTMLElement;
           const contactLayout = page.element.querySelector('.contact-layout') as HTMLElement;
 
-          // h2 drops in from above
+          // h2 drops in from above (already set to hidden position above)
           if (h2) {
-            gsap.set(h2, { yPercent: -105, clipPath: 'inset(0 0 0 0)' });
             gsap.to(h2, {
               yPercent: 0,
               duration: this.TRANSITION_DURATION,
@@ -291,9 +317,8 @@ export class PageTransitionModule extends BaseModule {
             });
           }
 
-          // hr scales in from left
+          // hr scales in from left (already set to hidden position above)
           if (hr) {
-            gsap.set(hr, { scale: 0, transformOrigin: 'bottom left' });
             gsap.to(hr, {
               scale: 1,
               duration: this.TRANSITION_DURATION_LONG,
@@ -948,10 +973,32 @@ export class PageTransitionModule extends BaseModule {
       gsap.set(hr, { clearProps: 'scale,transformOrigin' });
     }
 
-    // === ABOUT PAGE: flip-clock animation (no h2/hr drop-in, uses flip instead) ===
+    // === ABOUT PAGE: UNIFORM h2/hr + flip-clock for content ===
     if (page.id === 'about') {
       const textWrapper = sectionEl.querySelector('.about-text-wrapper') as HTMLElement;
       const techStack = sectionEl.querySelector('.tech-stack-desktop') as HTMLElement;
+
+      // === UNIFORM: h2 drops in from above ===
+      if (h2) {
+        gsap.set(h2, { yPercent: -105, clipPath: 'inset(0 0 0 0)' });
+        gsap.to(h2, {
+          yPercent: 0,
+          duration: this.TRANSITION_DURATION,
+          delay: 0,
+          ease: this.TRANSITION_EASE
+        });
+      }
+
+      // === UNIFORM: hr scales in from bottom left ===
+      if (hr) {
+        gsap.set(hr, { scale: 0, transformOrigin: 'bottom left' });
+        gsap.to(hr, {
+          scale: 1,
+          duration: this.TRANSITION_DURATION_LONG,
+          delay: 0,
+          ease: this.TRANSITION_EASE
+        });
+      }
 
       // Text wrapper flips down from top
       if (textWrapper) {
@@ -964,7 +1011,7 @@ export class PageTransitionModule extends BaseModule {
         gsap.to(textWrapper, {
           rotateX: 0,
           duration: this.TRANSITION_DURATION_LONG,
-          delay: 0,
+          delay: 0.1,
           ease: this.TRANSITION_EASE
         });
       }
@@ -980,7 +1027,7 @@ export class PageTransitionModule extends BaseModule {
         gsap.to(techStack, {
           rotateX: 0,
           duration: this.TRANSITION_DURATION_LONG,
-          delay: 0.1,
+          delay: 0.2,
           ease: this.TRANSITION_EASE
         });
       }
