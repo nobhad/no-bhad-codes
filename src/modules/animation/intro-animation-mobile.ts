@@ -49,8 +49,8 @@ gsap.registerPlugin(MorphSVGPlugin);
 // Uses the SAME SVG as desktop, scaled to match mobile card size.
 // ============================================================================
 
-/** SVG file path with cache-busting timestamp */
-const PAW_SVG = `${SVG_PATH}?v=${Date.now()}`;
+/** SVG file path - uses browser cache, preload in index.html ensures fast loading */
+const PAW_SVG = SVG_PATH;
 
 // ============================================================================
 // MOBILE INTRO ANIMATION MODULE CLASS
@@ -151,12 +151,10 @@ export class MobileIntroAnimationModule extends BaseModule {
 
     // ========================================================================
     // LOAD AND PARSE SVG
+    // Uses shared cache from SvgBuilder (preload in index.html ensures fast loading)
     // ========================================================================
     this.log('Loading SVG file...');
-    const response = await fetch(PAW_SVG);
-    const svgText = await response.text();
-    const parser = new DOMParser();
-    const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+    const svgDoc = await SvgBuilder.fetchAndParseSvg(PAW_SVG);
 
     // ========================================================================
     // EXTRACT SVG ELEMENTS

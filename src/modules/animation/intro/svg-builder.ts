@@ -37,6 +37,9 @@ import type {
 /** Cache for parsed SVG documents keyed by SVG path */
 const svgDocumentCache = new Map<string, Document>();
 
+/** Cache for raw SVG text keyed by SVG path */
+const svgTextCache = new Map<string, string>();
+
 /** Cache for extracted SVG elements keyed by SVG path */
 const svgElementsCache = new Map<string, SVGElements>();
 
@@ -45,6 +48,7 @@ const pathDataCache = new Map<string, CompleteMorphPathData>();
 
 /**
  * Fetch and parse SVG file (with caching)
+ * Also caches raw text for getSvgText()
  */
 export async function fetchAndParseSvg(svgPath: string): Promise<Document> {
   // Check cache first
@@ -57,10 +61,29 @@ export async function fetchAndParseSvg(svgPath: string): Promise<Document> {
   const parser = new DOMParser();
   const doc = parser.parseFromString(svgText, 'image/svg+xml');
 
-  // Cache the parsed document
+  // Cache both the parsed document and raw text
   svgDocumentCache.set(svgPath, doc);
+  svgTextCache.set(svgPath, svgText);
 
   return doc;
+}
+
+/**
+ * Get raw SVG text (with caching)
+ * Uses cached text from fetchAndParseSvg if available, otherwise fetches
+ */
+export async function getSvgText(svgPath: string): Promise<string> {
+  // Check cache first
+  if (svgTextCache.has(svgPath)) {
+    return svgTextCache.get(svgPath)!;
+  }
+
+  // Fetch and cache
+  const response = await fetch(svgPath);
+  const svgText = await response.text();
+  svgTextCache.set(svgPath, svgText);
+
+  return svgText;
 }
 
 /**
@@ -68,6 +91,7 @@ export async function fetchAndParseSvg(svgPath: string): Promise<Document> {
  */
 export function clearSvgCaches(): void {
   svgDocumentCache.clear();
+  svgTextCache.clear();
   svgElementsCache.clear();
   pathDataCache.clear();
 }

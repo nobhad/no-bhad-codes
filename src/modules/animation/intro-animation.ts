@@ -161,8 +161,8 @@ gsap.registerPlugin(MorphSVGPlugin);
 // DERIVED CONSTANTS
 // ============================================================================
 
-/** SVG file path with cache-busting timestamp */
-const PAW_SVG = `${SVG_PATH}?v=${Date.now()}`;
+/** SVG file path - uses browser cache, preload in index.html ensures fast loading */
+const PAW_SVG = SVG_PATH;
 
 // ============================================================================
 // INTRO ANIMATION MODULE CLASS
@@ -369,9 +369,8 @@ export class IntroAnimationModule extends BaseModule {
     this.log('Loading SVG file...');
     const svgDoc = await SvgBuilder.fetchAndParseSvg(PAW_SVG);
 
-    // Cache SVG text for exit/entry animations
-    const response = await fetch(PAW_SVG);
-    this.cachedSvgText = await response.text();
+    // Cache SVG text for exit/entry animations (uses shared cache, no extra fetch)
+    this.cachedSvgText = await SvgBuilder.getSvgText(PAW_SVG);
 
     // ========================================================================
     // EXTRACT SVG ELEMENTS
@@ -1206,8 +1205,8 @@ export class IntroAnimationModule extends BaseModule {
     if (this.cachedSvgText) {
       return this.cachedSvgText;
     }
-    const response = await fetch(PAW_SVG);
-    this.cachedSvgText = await response.text();
+    // Use shared cache from SvgBuilder (no extra fetch if already cached)
+    this.cachedSvgText = await SvgBuilder.getSvgText(PAW_SVG);
     return this.cachedSvgText;
   }
 
