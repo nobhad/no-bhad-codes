@@ -753,7 +753,7 @@ export class PageTransitionModule extends BaseModule {
           opacity: 1,
           filter: 'blur(0px)',
           scale: 1,
-          duration: 1.5,
+          duration: ANIMATION_CONSTANTS.DURATIONS.PAGE_TRANSITION_IN,
           ease: 'power2.out',
           onStart: () => {
             this.log('[PageTransitionModule] Animation STARTED - check element style now');
