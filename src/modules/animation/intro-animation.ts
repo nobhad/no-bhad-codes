@@ -477,8 +477,16 @@ export class IntroAnimationModule extends BaseModule {
    */
   private completeMorphAnimation(): void {
     const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
+    const cardInner = document.getElementById(DOM_ELEMENT_IDS.businessCardInner);
 
-    // Cross-fade: Show static card FIRST (while animated card still visible)
+    // CRITICAL: Reveal business card inner FIRST (clear inline visibility:hidden;opacity:0)
+    // Must happen before showing businessCard to prevent flash
+    if (cardInner) {
+      cardInner.style.visibility = 'visible';
+      cardInner.style.opacity = '1';
+    }
+
+    // Cross-fade: Show static card (while animated card still visible)
     // This masks any sub-pixel differences between the two SVG renders
     if (businessCard) {
       businessCard.style.opacity = '1';
@@ -546,10 +554,13 @@ export class IntroAnimationModule extends BaseModule {
     }
 
     // Reset card to front-facing position (no flip)
+    // Also clear inline visibility:hidden and opacity:0 that was set to prevent flash
     const cardInner = document.getElementById(DOM_ELEMENT_IDS.businessCardInner);
     if (cardInner) {
       cardInner.style.transition = 'none';
       cardInner.style.transform = 'rotateY(0deg)';
+      cardInner.style.visibility = 'visible';
+      cardInner.style.opacity = '1';
     }
 
     // Make intro nav visible immediately (GSAP handles animation)
@@ -632,6 +643,10 @@ export class IntroAnimationModule extends BaseModule {
 
     const cardContainer = cardInner.parentElement;
 
+    // CRITICAL: Clear inline visibility:hidden;opacity:0 so flip animation is visible
+    cardInner.style.visibility = 'visible';
+    cardInner.style.opacity = '1';
+
     // Set initial state - showing back of card
     cardInner.style.transition = 'none';
     cardInner.style.transform = 'rotateY(180deg)';
@@ -699,6 +714,13 @@ export class IntroAnimationModule extends BaseModule {
     const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
     if (businessCard) {
       businessCard.style.opacity = '1';
+    }
+
+    // Ensure business card inner is visible (clear inline styles set to prevent flash)
+    const cardInner = document.getElementById(DOM_ELEMENT_IDS.businessCardInner);
+    if (cardInner) {
+      cardInner.style.visibility = 'visible';
+      cardInner.style.opacity = '1';
     }
 
     // Fade in intro nav with GSAP - slow ease in
@@ -1216,8 +1238,15 @@ export class IntroAnimationModule extends BaseModule {
    */
   private showIntroFallback(): void {
     const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
+    const cardInner = document.getElementById(DOM_ELEMENT_IDS.businessCardInner);
     const introNav = document.querySelector('.intro-nav') as HTMLElement;
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
+
+    // CRITICAL: Reveal card inner first (clear inline visibility:hidden;opacity:0)
+    if (cardInner) {
+      cardInner.style.visibility = 'visible';
+      cardInner.style.opacity = '1';
+    }
 
     if (isMobile) {
       // On mobile, animate the elements fading in - matching desktop timing
@@ -1561,7 +1590,15 @@ export class IntroAnimationModule extends BaseModule {
 
       this.entryTimeline = gsap.timeline({
         onComplete: () => {
-          // Cross-fade: Show static card FIRST (while animated card still visible)
+          // CRITICAL: Reveal business card inner FIRST (clear inline visibility:hidden;opacity:0)
+          // Must happen before showing businessCard to prevent flash
+          const entryCardInner = document.getElementById(DOM_ELEMENT_IDS.businessCardInner);
+          if (entryCardInner) {
+            entryCardInner.style.visibility = 'visible';
+            entryCardInner.style.opacity = '1';
+          }
+
+          // Cross-fade: Show static card (while animated card still visible)
           // This masks any sub-pixel differences between the two renders
           businessCard.style.opacity = '1';
           businessCard.style.visibility = 'visible';

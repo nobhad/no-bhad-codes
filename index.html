@@ -83,7 +83,9 @@
       (function () {
         try {
           var savedTheme = localStorage.getItem('theme');
-          var theme = savedTheme || 'light';
+          // If no saved theme, check system preference
+          var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var theme = savedTheme || (systemDark ? 'dark' : 'light');
           document.documentElement.setAttribute('data-theme', theme);
           var themeColorMeta = document.querySelector('meta[name="theme-color"]');
           if (themeColorMeta) {
@@ -382,7 +384,7 @@
       <section id="intro" class="business-card-section page-active" data-page="intro">
         <div class="business-card-container">
           <div id="business-card" class="business-card">
-            <div id="business-card-inner" class="business-card-inner" style="opacity:0">
+            <div id="business-card-inner" class="business-card-inner" style="visibility:hidden;opacity:0">
               <!-- FRONT OF CARD -->
               <div class="business-card-front">
                 <img

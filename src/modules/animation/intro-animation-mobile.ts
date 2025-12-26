@@ -480,6 +480,14 @@ export class MobileIntroAnimationModule extends BaseModule {
    * Complete the morph animation
    */
   private completeMorphAnimation(): void {
+    // CRITICAL: Reveal business card inner FIRST (clear inline visibility:hidden;opacity:0)
+    // Must happen before hiding overlay to prevent flash
+    const cardInner = document.getElementById('business-card-inner');
+    if (cardInner) {
+      cardInner.style.visibility = 'visible';
+      cardInner.style.opacity = '1';
+    }
+
     if (this.morphOverlay) {
       this.morphOverlay.style.visibility = 'hidden';
     }
@@ -545,6 +553,13 @@ export class MobileIntroAnimationModule extends BaseModule {
     const businessCard = document.getElementById('business-card');
     if (businessCard) {
       businessCard.style.opacity = '1';
+    }
+
+    // Reveal business card inner (clear inline visibility:hidden;opacity:0)
+    const cardInner = document.getElementById('business-card-inner');
+    if (cardInner) {
+      cardInner.style.visibility = 'visible';
+      cardInner.style.opacity = '1';
     }
 
     // Make intro nav visible immediately
@@ -617,6 +632,13 @@ export class MobileIntroAnimationModule extends BaseModule {
         visibility: 'visible',
         opacity: 1
       });
+    }
+
+    // CRITICAL: Reveal card inner first (clear inline visibility:hidden;opacity:0)
+    const cardInner = document.getElementById('business-card-inner');
+    if (cardInner) {
+      cardInner.style.visibility = 'visible';
+      cardInner.style.opacity = '1';
     }
 
     // Show business card with animation
@@ -737,6 +759,13 @@ export class MobileIntroAnimationModule extends BaseModule {
     const businessCard = document.getElementById('business-card');
     if (businessCard) {
       businessCard.style.opacity = '1';
+    }
+
+    // Reveal business card inner (clear inline visibility:hidden;opacity:0)
+    const cardInner = document.getElementById('business-card-inner');
+    if (cardInner) {
+      cardInner.style.visibility = 'visible';
+      cardInner.style.opacity = '1';
     }
 
     // Fade in intro nav with GSAP - matching desktop timing
