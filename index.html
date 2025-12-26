@@ -9,7 +9,6 @@
     <!-- All CSS moved to external stylesheets -->
     <!-- Critical CSS - ensures correct visibility from first paint before external CSS loads -->
     <style>
-      /* CRITICAL: Intro overlay visible immediately on desktop */
       @media screen and (min-width: 768px) {
         .intro-morph-overlay {
           position: fixed;
@@ -26,24 +25,20 @@
           opacity: 0;
           visibility: hidden;
         }
-        /* Hide main content during intro */
         .intro-loading main {
           opacity: 0;
           visibility: hidden;
         }
       }
-      /* Body background must be set before CSS loads to prevent white flash */
       body {
         background-color: #e0e0e0; /* Light theme */
       }
       html[data-theme="dark"] body {
         background-color: #2a2a2a; /* Dark theme */
       }
-      /* Header is transparent to show coyote paw animation through it */
       .header {
         background-color: transparent;
       }
-      /* CRITICAL: Header must be visible immediately on mobile */
       @media screen and (max-width: 767px) {
         .intro-morph-overlay {
           display: none;
@@ -62,40 +57,11 @@
     </style>
     <script>
       (function () {
-        // Scroll to top immediately on page load (prevents browser scroll restoration)
-        if ('scrollRestoration' in history) {
-          history.scrollRestoration = 'manual';
-        }
         try {
-          window.scrollTo(0, 0);
-          document.documentElement.scrollTop = 0;
-          if (document.body) document.body.scrollTop = 0;
-        } catch (e) { /* ignore scroll errors during early page load */ }
-
-        // Also scroll to top after DOM loads and window loads
-        document.addEventListener('DOMContentLoaded', function() {
-          window.scrollTo(0, 0);
-          document.documentElement.scrollTop = 0;
-          if (document.body) document.body.scrollTop = 0;
-          // Also scroll the main container
-          var main = document.querySelector('main');
-          if (main) main.scrollTop = 0;
-        });
-        window.addEventListener('load', function() {
-          window.scrollTo(0, 0);
-          document.documentElement.scrollTop = 0;
-          if (document.body) document.body.scrollTop = 0;
-          // Also scroll the main container
-          var main = document.querySelector('main');
-          if (main) main.scrollTop = 0;
-        });
-
-        try {
-          const savedTheme = localStorage.getItem('theme');
-          const theme = savedTheme || 'light';
+          var savedTheme = localStorage.getItem('theme');
+          var theme = savedTheme || 'light';
           document.documentElement.setAttribute('data-theme', theme);
-          // Update theme-color meta tag to match site background
-          const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+          var themeColorMeta = document.querySelector('meta[name="theme-color"]');
           if (themeColorMeta) {
             themeColorMeta.setAttribute('content', theme === 'dark' ? '#2a2a2a' : '#e0e0e0');
           }
@@ -749,10 +715,8 @@
       </div>
     </footer>
     <script>
-      // Dynamic copyright year
       document.getElementById('copyright-year').textContent = new Date().getFullYear();
 
-      // Portal dropdown functionality
       (function() {
         const trigger = document.getElementById('portal-trigger');
         const dropdown = document.getElementById('portal-dropdown');
@@ -766,40 +730,33 @@
         const backToLogin = document.getElementById('back-to-login');
         const backToLogin2 = document.getElementById('back-to-login-2');
 
-        // Function to position caret under portal button center
         function positionCaret() {
           const buttonRect = trigger.getBoundingClientRect();
           const dropdownRect = dropdown.getBoundingClientRect();
-          // Calculate the left position: button center relative to dropdown left edge, minus half the caret width (10px)
           const caretLeft = buttonRect.left + (buttonRect.width / 2) - dropdownRect.left - 10;
           dropdown.style.setProperty('--caret-left', caretLeft + 'px');
         }
 
-        // Toggle dropdown
         trigger.addEventListener('click', function(e) {
           e.stopPropagation();
           dropdown.classList.toggle('open');
           backdrop.classList.toggle('open');
-          // Position caret after dropdown is visible
           if (dropdown.classList.contains('open')) {
             requestAnimationFrame(positionCaret);
           }
         });
 
-        // Reposition caret on window resize
         window.addEventListener('resize', function() {
           if (dropdown.classList.contains('open')) {
             positionCaret();
           }
         });
 
-        // Close on backdrop click
         backdrop.addEventListener('click', function() {
           dropdown.classList.remove('open');
           backdrop.classList.remove('open');
         });
 
-        // Close on escape
         document.addEventListener('keydown', function(e) {
           if (e.key === 'Escape') {
             dropdown.classList.remove('open');
@@ -807,12 +764,10 @@
           }
         });
 
-        // Email validation helper
         function isValidEmail(email) {
           return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
-        // Hide all forms helper
         function hideAllForms() {
           passwordForm.classList.remove('form-active');
           magicForm.classList.remove('form-active');
@@ -820,7 +775,6 @@
           resetSent.classList.remove('form-active');
         }
 
-        // Show login form helper
         function showLoginForm() {
           hideAllForms();
           passwordForm.classList.add('form-active');
@@ -829,7 +783,6 @@
           authToggle.querySelector('[data-form="magic"]').classList.remove('active');
         }
 
-        // Auth toggle (Password/Magic Link)
         authToggle.addEventListener('click', function(e) {
           const btn = e.target.closest('.portal-toggle-btn');
           if (!btn) return;
@@ -837,17 +790,14 @@
           e.preventDefault();
           e.stopPropagation();
 
-          // Hide forgot/reset views
           forgotForm.classList.remove('form-active');
           resetSent.classList.remove('form-active');
 
-          // Update button states
           authToggle.querySelectorAll('.portal-toggle-btn').forEach(function(b) {
             b.classList.remove('active');
           });
           btn.classList.add('active');
 
-          // Show/hide forms
           if (btn.dataset.form === 'password') {
             passwordForm.classList.add('form-active');
             magicForm.classList.remove('form-active');
@@ -857,7 +807,6 @@
           }
         });
 
-        // Password visibility toggle
         const pwToggle = dropdown.querySelector('.password-toggle');
         if (pwToggle) {
           pwToggle.addEventListener('click', function() {
@@ -868,7 +817,6 @@
           });
         }
 
-        // Forgot password link
         forgotLink.addEventListener('click', function(e) {
           e.preventDefault();
           hideAllForms();
@@ -876,7 +824,6 @@
           authToggle.style.display = 'none';
         });
 
-        // Back to login buttons
         backToLogin.addEventListener('click', function(e) {
           e.preventDefault();
           showLoginForm();
@@ -887,7 +834,6 @@
           showLoginForm();
         });
 
-        // Form validation - Password form
         function validatePasswordForm() {
           const emailInput = passwordForm.querySelector('input[type="email"]');
           const passwordInput = passwordForm.querySelector('input[type="password"]');
@@ -909,7 +855,6 @@
           input.addEventListener('input', validatePasswordForm);
         });
 
-        // Form validation - Magic link form
         function validateMagicForm() {
           const emailInput = magicForm.querySelector('input[type="email"]');
           const submitBtn = magicForm.querySelector('.dropdown-submit');
@@ -927,7 +872,6 @@
           input.addEventListener('input', validateMagicForm);
         });
 
-        // Form validation - Forgot form
         function validateForgotForm() {
           const emailInput = forgotForm.querySelector('input[type="email"]');
           const submitBtn = forgotForm.querySelector('.dropdown-submit');
@@ -945,7 +889,6 @@
           input.addEventListener('input', validateForgotForm);
         });
 
-        // Forgot form submit - show confirmation
         forgotForm.addEventListener('submit', function(e) {
           e.preventDefault();
           const emailInput = forgotForm.querySelector('input[type="email"]');
@@ -964,14 +907,12 @@
           }
         });
 
-        // Password form submit - handle login
         passwordForm.addEventListener('submit', async function(e) {
           e.preventDefault();
           const emailInput = passwordForm.querySelector('input[type="email"]');
           const passwordInput = passwordForm.querySelector('input[type="password"]');
           const submitBtn = passwordForm.querySelector('.dropdown-submit');
 
-          // Validate inputs exist
           if (!emailInput || !passwordInput || !submitBtn) {
             console.error('Login form elements not found');
             alert('Form error: Please refresh the page and try again.');
@@ -982,10 +923,9 @@
           const password = passwordInput.value;
 
           if (!email || !password) {
-            return; // Validation will handle this
+            return; /* Validation will handle this */
           }
 
-          // Show loading state
           submitBtn.disabled = true;
           submitBtn.textContent = 'Signing in...';
 
@@ -1000,29 +940,24 @@
             if (response.ok) {
               const responseData = await response.json();
               
-              // Backend returns { success: true, message: "...", data: { user: {...}, expiresIn: "7d" } }
               const user = responseData.data?.user || responseData.user;
               
               if (!user) {
                 throw new Error('Invalid response format from server');
               }
               
-              // Store auth mode and user info
               sessionStorage.setItem('client_auth_mode', 'authenticated');
               sessionStorage.setItem('client_auth_user', JSON.stringify(user));
 
-              // Close dropdown and redirect to portal
               dropdown.classList.remove('open');
               backdrop.classList.remove('open');
               window.location.href = '/client/portal';
             } else {
-              // Handle HTTP error responses (401, 400, etc.)
               let errorMessage = 'Login failed. Please check your credentials.';
               try {
                 const errorData = await response.json();
                 errorMessage = errorData.error || errorMessage;
               } catch (parseError) {
-                // If response isn't JSON, use status-based message
                 if (response.status === 401) {
                   errorMessage = 'Invalid email or password. Please try again.';
                 } else if (response.status === 429) {
@@ -1032,18 +967,14 @@
                 }
               }
               
-              // Show error to user
               alert(errorMessage);
               submitBtn.disabled = false;
               submitBtn.textContent = 'Sign In';
             }
           } catch (error) {
-            // Only catch network/connection errors (not HTTP errors)
             console.error('Login network error:', error);
             
-            // Check if it's actually a network error (no response) vs HTTP error
             if (error instanceof TypeError && error.message.includes('fetch')) {
-              // Network error - backend unavailable, fallback to demo mode
               sessionStorage.setItem('client_auth_mode', 'demo');
               sessionStorage.setItem('client_auth_user', JSON.stringify({
                 id: 1,
@@ -1051,12 +982,10 @@
                 name: email.split('@')[0].replace(/[^a-zA-Z]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
               }));
 
-              // Close dropdown and redirect to portal
               dropdown.classList.remove('open');
               backdrop.classList.remove('open');
               window.location.href = '/client/portal';
             } else {
-              // Other error - show to user
               alert('An unexpected error occurred. Please try again.');
               submitBtn.disabled = false;
               submitBtn.textContent = 'Sign In';
@@ -1068,7 +997,6 @@
 
     </script>
     <script type="module">
-      // Intake modal functionality (module script for dynamic imports)
       document.addEventListener('DOMContentLoaded', function() {
         const intakeModal = document.getElementById('intake-modal');
         const intakeBackdrop = document.getElementById('intake-modal-backdrop');
@@ -1082,7 +1010,6 @@
           intakeBackdrop.classList.add('open');
           document.body.style.overflow = 'hidden';
 
-          // Initialize terminal if not already done
           if (!terminalModule && intakeContainer) {
             try {
               const module = await import('./src/features/client/terminal-intake.ts');
@@ -1102,7 +1029,6 @@
           document.body.style.overflow = '';
         }
 
-        // Open modal from "intake form" link
         if (openIntakeLink) {
           openIntakeLink.addEventListener('click', function(e) {
             e.preventDefault();
@@ -1110,27 +1036,23 @@
           });
         }
 
-        // Open modal from card intake link
         const cardIntakeLink = document.getElementById('card-intake-link');
         if (cardIntakeLink) {
           cardIntakeLink.addEventListener('click', function(e) {
             e.preventDefault();
-            e.stopPropagation(); // Prevent card flip
+            e.stopPropagation(); /* Prevent card flip */
             openIntakeModal();
           });
         }
 
-        // Close button
         if (intakeClose) {
           intakeClose.addEventListener('click', closeIntakeModal);
         }
 
-        // Close on backdrop click
         if (intakeBackdrop) {
           intakeBackdrop.addEventListener('click', closeIntakeModal);
         }
 
-        // Close on escape
         document.addEventListener('keydown', function(e) {
           if (e.key === 'Escape' && intakeModal && intakeModal.classList.contains('open')) {
             closeIntakeModal();
