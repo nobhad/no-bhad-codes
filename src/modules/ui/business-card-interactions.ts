@@ -677,30 +677,35 @@ export class BusinessCardInteractions extends BaseModule {
     const wiggleAngle = 5; // degrees
     const wiggleDuration = 0.12; // seconds per wiggle
 
-    // Gentle wiggle sequence
+    // Gentle wiggle sequence with slight tilt
     this.wiggleTimeline
       .to(this.businessCardInner, {
         rotationY: this.currentRotationY - wiggleAngle,
+        rotationZ: -1,
         duration: wiggleDuration,
         ease: 'power1.inOut'
       })
       .to(this.businessCardInner, {
         rotationY: this.currentRotationY + wiggleAngle,
+        rotationZ: 1,
         duration: wiggleDuration,
         ease: 'power1.inOut'
       })
       .to(this.businessCardInner, {
         rotationY: this.currentRotationY - wiggleAngle * 0.5,
+        rotationZ: -0.5,
         duration: wiggleDuration,
         ease: 'power1.inOut'
       })
       .to(this.businessCardInner, {
         rotationY: this.currentRotationY + wiggleAngle * 0.5,
+        rotationZ: 0.5,
         duration: wiggleDuration,
         ease: 'power1.inOut'
       })
       .to(this.businessCardInner, {
         rotationY: this.currentRotationY,
+        rotationZ: 0,
         duration: 0.15,
         ease: 'power2.out'
       });
