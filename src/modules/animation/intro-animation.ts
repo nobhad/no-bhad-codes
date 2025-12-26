@@ -1724,13 +1724,13 @@ export class IntroAnimationModule extends BaseModule {
           ease: 'sine.inOut'
         }, '-=0.3');
 
-        // Animate individual nav links with stagger
+        // Animate individual nav links with stagger (slower fade)
         if (navLinksForFadeIn.length > 0) {
           this.entryTimeline.to(navLinksForFadeIn, {
             opacity: 1,
-            duration: 1.2,
+            duration: 2.0,
             ease: 'sine.inOut',
-            stagger: 0.15
+            stagger: 0.2
           }, '<');
         }
       }
