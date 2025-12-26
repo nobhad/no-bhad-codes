@@ -109,13 +109,13 @@ export class ContactAnimationModule extends BaseModule {
 
     // ========================================================================
     // PHASE 1: h2 and card BLUR IN (fade in while blurred, then clear blur)
-    // Reduced blur amount and faster timing for snappier feel
+    // Ultra-fast timing for snappy feel
     // ========================================================================
-    const blurAmount = 6;
-    const blurFadeDuration = 0.35; // Faster fade in (was 0.6)
-    const blurClearDuration = 0.3; // Faster blur clear (was 0.5)
-    const blurPause = 0.1; // Minimal pause (was 0.3)
-    const dropDuration = blurFadeDuration + blurPause + blurClearDuration; // Total blur phase duration
+    const blurAmount = 4;
+    const blurFadeDuration = 0.15; // Very fast fade in
+    const blurClearDuration = 0.15; // Very fast blur clear
+    const blurPause = 0; // No pause
+    const dropDuration = blurFadeDuration + blurPause + blurClearDuration; // Total blur phase duration (~0.3s)
 
     // Set initial blur state with will-change hint for GPU acceleration
     if (heading) {
@@ -349,7 +349,7 @@ export class ContactAnimationModule extends BaseModule {
     allFieldWrappers.forEach((field, i) => {
       this.timeline?.to(field, {
         height: compressedHeight,
-        duration: 0.4,
+        duration: 0.2,
         ease: 'sine.out'
       }, formStartTime + i * stagger);
     });
@@ -363,12 +363,12 @@ export class ContactAnimationModule extends BaseModule {
         height: inputFieldHeight,
         overflow: 'visible',
         clearProps: 'borderRadius',
-        duration: 0.5,
+        duration: 0.25,
         ease: 'sine.inOut'
       }, expandStart);
     }
     if (nameInput) {
-      this.timeline.to(nameInput, { height: inputFieldHeight, opacity: 1, duration: 0.5, ease: 'sine.inOut' }, '<');
+      this.timeline.to(nameInput, { height: inputFieldHeight, opacity: 1, duration: 0.25, ease: 'sine.inOut' }, '<');
     }
 
     if (companyField) {
@@ -376,12 +376,12 @@ export class ContactAnimationModule extends BaseModule {
         height: inputFieldHeight,
         overflow: 'visible',
         clearProps: 'borderRadius',
-        duration: 0.5,
+        duration: 0.25,
         ease: 'sine.inOut'
       }, expandStart + stagger);
     }
     if (companyInput) {
-      this.timeline.to(companyInput, { height: inputFieldHeight, opacity: 1, duration: 0.5, ease: 'sine.inOut' }, '<');
+      this.timeline.to(companyInput, { height: inputFieldHeight, opacity: 1, duration: 0.25, ease: 'sine.inOut' }, '<');
     }
 
     if (emailField) {
@@ -389,12 +389,12 @@ export class ContactAnimationModule extends BaseModule {
         height: inputFieldHeight,
         overflow: 'visible',
         clearProps: 'borderRadius',
-        duration: 0.5,
+        duration: 0.25,
         ease: 'sine.inOut'
       }, expandStart + stagger * 2);
     }
     if (emailInput) {
-      this.timeline.to(emailInput, { height: inputFieldHeight, opacity: 1, duration: 0.5, ease: 'sine.inOut' }, '<');
+      this.timeline.to(emailInput, { height: inputFieldHeight, opacity: 1, duration: 0.25, ease: 'sine.inOut' }, '<');
     }
 
     // Message field expands to its final height
@@ -403,7 +403,7 @@ export class ContactAnimationModule extends BaseModule {
         height: finalMessageFieldHeight,
         overflow: 'visible',
         clearProps: 'borderRadius',
-        duration: 0.5,
+        duration: 0.25,
         ease: 'sine.inOut'
       }, expandStart + stagger * 3);
     }
@@ -412,7 +412,7 @@ export class ContactAnimationModule extends BaseModule {
         height: finalTextareaHeight,
         minHeight: finalTextareaHeight,
         opacity: 1,
-        duration: 0.5,
+        duration: 0.25,
         ease: 'sine.inOut'
       }, '<');
     }
@@ -421,7 +421,7 @@ export class ContactAnimationModule extends BaseModule {
         height: 'auto',
         overflow: 'visible',
         clearProps: 'borderRadius',
-        duration: 0.5,
+        duration: 0.25,
         ease: 'sine.inOut'
       }, '<');
     }
@@ -449,16 +449,16 @@ export class ContactAnimationModule extends BaseModule {
     const allInputsWithPlaceholders = [nameInput, companyInput, emailInput, textarea].filter(Boolean);
 
     // Start text fade-in during field expansion
-    const textFadeStart = formStartTime + 0.8;
+    const textFadeStart = formStartTime + 0.2;
 
     if (allLabels.length > 0) {
-      this.timeline.to(allLabels, { opacity: 1, duration: 0.6, ease: 'power1.out' }, textFadeStart);
+      this.timeline.to(allLabels, { opacity: 1, duration: 0.3, ease: 'power1.out' }, textFadeStart);
     }
 
     if (allInputsWithPlaceholders.length > 0) {
       this.timeline.to(allInputsWithPlaceholders, {
         '--placeholder-opacity': 1,
-        duration: 0.6,
+        duration: 0.3,
         ease: 'power1.out'
       }, textFadeStart);
     }
@@ -468,9 +468,9 @@ export class ContactAnimationModule extends BaseModule {
       this.timeline.to(submitButton, {
         opacity: 1,
         scale: 1,
-        duration: 0.6,
+        duration: 0.3,
         ease: 'back.out(1.5)'
-      }, '+=0.1');
+      }, '+=0');
     }
 
     // Restore overflow, section height, and clear inline widths after animation
@@ -493,7 +493,7 @@ export class ContactAnimationModule extends BaseModule {
     // BUSINESS CARD - Flip AFTER form and button animation is 100% complete
     // Card flip starts after: dropDuration (0.6) + totalDuration (2.5) + button (0.7) = ~3.8s
     // ========================================================================
-    const cardFlipStart = formStartTime + totalDuration + 0.5;
+    const cardFlipStart = formStartTime + totalDuration + 0.3;
 
     if (businessCard) {
       const cardInner = businessCard.querySelector('.business-card-inner') as HTMLElement;
