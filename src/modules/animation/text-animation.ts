@@ -16,6 +16,7 @@ import { BaseModule } from '../core/base';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { ModuleOptions } from '../../types/modules';
+import { getDebugMode } from '../../core/env';
 
 // Register ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
@@ -38,7 +39,7 @@ export class TextAnimationModule extends BaseModule {
   private duration: number;
 
   constructor(options: TextAnimationOptions = {}) {
-    super('TextAnimationModule', { debug: true, ...options });
+    super('TextAnimationModule', { debug: getDebugMode(), ...options });
 
     this.containerSelector = options.containerSelector || '.hero-section';
     this.duration = options.duration || 5;

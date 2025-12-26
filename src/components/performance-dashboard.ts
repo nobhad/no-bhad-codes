@@ -15,6 +15,7 @@ import type {
   PerformanceMetrics,
   PerformanceAlert
 } from '../services/performance-service';
+import { getDebugMode } from '../core/env';
 
 export interface PerformanceDashboardProps extends ComponentProps {
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
@@ -49,7 +50,7 @@ export class PerformanceDashboard extends BaseComponent<
       isVisible: true
     };
 
-    super('PerformanceDashboard', props, initialState, { debug: true });
+    super('PerformanceDashboard', props, initialState, { debug: getDebugMode() });
 
     this.template = {
       render: () => this.renderTemplate(),

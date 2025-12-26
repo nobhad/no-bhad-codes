@@ -20,6 +20,7 @@ import {
 import { SanitizationUtils } from '../../utils/sanitization-utils';
 import type { ModuleOptions } from '../../types/modules';
 import { gsap } from 'gsap';
+import { getDebugMode } from '../../core/env';
 
 export interface ContactFormModuleOptions extends ModuleOptions {
   backend?: ContactBackend;
@@ -35,7 +36,7 @@ export class ContactFormModule extends BaseModule {
   private contactService: ContactService;
 
   constructor(options: ContactFormModuleOptions = {}) {
-    super('contact-form', { debug: true, ...options });
+    super('contact-form', { debug: getDebugMode(), ...options });
 
     // Initialize contact service with configuration
     this.contactService = new ContactService({

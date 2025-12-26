@@ -27,6 +27,7 @@ import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
 import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
 import { throttle } from '../../utils/gsap-utilities';
+import { getDebugMode } from '../../core/env';
 
 // ============================================================================
 // CONTACT ANIMATION MODULE CLASS
@@ -44,7 +45,7 @@ export class ContactAnimationModule extends BaseModule {
   private blurAnimationComplete = false; // Track if blur animation has completed
 
   constructor(options: ModuleOptions = {}) {
-    super('ContactAnimationModule', { debug: true, ...options });
+    super('ContactAnimationModule', { debug: getDebugMode(), ...options });
   }
 
   override async init(): Promise<void> {

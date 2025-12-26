@@ -20,6 +20,7 @@ import {
   getAdminModules
 } from './modules-config';
 import { setupDebugHelpers } from './debug';
+import { isDev } from './env';
 
 // Type definitions
 interface ServiceInstance {
@@ -38,7 +39,13 @@ export class Application {
   private modules = new Map<string, ModuleInstance>();
   private services = new Map<string, ServiceInstance>();
   private isInitialized = false;
-  private debug = false;
+  private debug = isDev();
+
+  private log(...args: any[]): void {
+    if (this.debug) {
+      console.log('[Application]', ...args);
+    }
+  }
 
   constructor() {
     registerServices();
@@ -60,7 +67,7 @@ export class Application {
       return;
     }
 
-    console.log('[Application] Starting initialization...');
+    this.log('Starting initialization...');
 
     try {
       // Initialize consent banner FIRST (non-blocking)
@@ -85,7 +92,7 @@ export class Application {
       }
 
       this.isInitialized = true;
-      console.log('[Application] Initialization complete');
+      this.log('Initialization complete');
 
       // Update global state
       appState.setState({ introAnimating: true });
@@ -147,13 +154,13 @@ export class Application {
               }
             },
             onDecline: () => {
-              console.log('[Application] Visitor tracking declined');
+              this.log('Visitor tracking declined');
             }
           },
           consentWrapper
         );
       } else {
-        console.log('[Application] Existing consent found, will initialize tracking after services');
+        this.log('Existing consent found, will initialize tracking after services');
       }
     } catch (error) {
       console.error('[Application] Failed to initialize consent banner:', error);
@@ -222,16 +229,16 @@ export class Application {
     if (isProtectionEnabled()) {
       services.push('CodeProtectionService');
     } else {
-      console.log('[Application] CodeProtectionService skipped (protection disabled)');
+      this.log('CodeProtectionService skipped (protection disabled)');
     }
 
     for (const serviceName of services) {
       try {
-        console.log(`[Application] Initializing ${serviceName}...`);
+        this.log(`Initializing ${serviceName}...`);
         const service = (await container.resolve(serviceName)) as ServiceInstance;
         await service.init?.();
         this.services.set(serviceName, service);
-        console.log(`[Application] ${serviceName} initialized`);
+        this.log(`${serviceName} initialized`);
 
         if (serviceName === 'RouterService') {
           this.registerHomePageRoutes(service as any);
@@ -253,7 +260,7 @@ export class Application {
     routerService.addRoute({ path: '#/contact', section: 'contact', title: 'Contact - No Bhad Codes' });
     // Root path
     routerService.addRoute({ path: '/', section: 'intro', title: 'No Bhad Codes - Professional Web Development' });
-    console.log('[Application] Home page routes registered (salcosta-style)');
+    this.log('Home page routes registered (salcosta-style)');
   }
 
   /**
@@ -285,11 +292,11 @@ export class Application {
 
     for (const moduleName of coreModuleList) {
       try {
-        console.log(`[Application] Initializing ${moduleName}...`);
+        this.log(`Initializing ${moduleName}...`);
         const moduleInstance = (await container.resolve(moduleName)) as ModuleInstance;
         await moduleInstance.init?.();
         this.modules.set(moduleName, moduleInstance);
-        console.log(`[Application] ${moduleName} initialized`);
+        this.log(`${moduleName} initialized`);
       } catch (error) {
         console.error(`[Application] Failed to initialize ${moduleName}:`, error);
       }
@@ -314,7 +321,7 @@ export class Application {
    * Hot reload for development
    */
   async hotReload(): Promise<void> {
-    console.log('[Application] Hot reloading...');
+    this.log('Hot reloading...');
 
     for (const [_name, module] of this.modules) {
       if (module.destroy) {
@@ -408,7 +415,7 @@ export class Application {
   private redirectToHttps(): void {
     const { href } = window.location;
     const httpsUrl = href.replace(/^http:/, 'https:');
-    console.log('[Application] Redirecting to HTTPS:', httpsUrl);
+    this.log('Redirecting to HTTPS:', httpsUrl);
     window.location.replace(httpsUrl);
   }
 }

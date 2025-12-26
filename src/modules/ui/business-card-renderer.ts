@@ -17,6 +17,7 @@
 
 import { BaseModule } from '../core/base';
 import type { ModuleOptions } from '../../types/modules';
+import { getDebugMode } from '../../core/env';
 
 interface BusinessCardConfig {
   businessCardId?: string;
@@ -42,7 +43,7 @@ export class BusinessCardRenderer extends BaseModule {
   private isVisible = false;
 
   constructor(config: BusinessCardConfig = {}, options: ModuleOptions = {}) {
-    super('BusinessCardRenderer', { debug: true, ...options });
+    super('BusinessCardRenderer', { debug: getDebugMode(), ...options });
 
     this.elementConfig = {
       businessCardId: config.businessCardId || 'business-card',

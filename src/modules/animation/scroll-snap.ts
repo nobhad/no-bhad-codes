@@ -19,6 +19,7 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import type { ModuleOptions } from '../../types/modules';
 import { throttle, debounce } from '../../utils/gsap-utilities';
 import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
+import { getDebugMode } from '../../core/env';
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
@@ -62,7 +63,7 @@ export class ScrollSnapModule extends BaseModule {
   private debouncedHandleResize: (() => void) | null = null;
 
   constructor(options: ScrollSnapOptions = {}) {
-    super('ScrollSnapModule', { debug: true, ...options });
+    super('ScrollSnapModule', { debug: getDebugMode(), ...options });
 
     // Set configuration with defaults (desktop only - mobile is disabled in init())
     this.containerSelector = options.containerSelector || 'main';

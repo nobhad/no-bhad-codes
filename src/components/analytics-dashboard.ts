@@ -15,6 +15,7 @@ import type {
   EngagementMetrics,
   VisitorSession
 } from '../services/visitor-tracking';
+import { getDebugMode } from '../core/env';
 
 export interface AnalyticsDashboardProps extends ComponentProps {
   position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
@@ -66,7 +67,7 @@ export class AnalyticsDashboard extends BaseComponent<
       }
     };
 
-    super('AnalyticsDashboard', props, initialState, { debug: true });
+    super('AnalyticsDashboard', props, initialState, { debug: getDebugMode() });
 
     this.template = {
       render: () => this.renderTemplate(),

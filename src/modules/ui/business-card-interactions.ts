@@ -20,6 +20,7 @@ import type { BusinessCardRenderer } from './business-card-renderer';
 import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
 import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
+import { getDebugMode } from '../../core/env';
 
 export class BusinessCardInteractions extends BaseModule {
   // Renderer reference
@@ -65,7 +66,7 @@ export class BusinessCardInteractions extends BaseModule {
   private onCardInteraction: ((type: string) => void) | null = null;
 
   constructor(renderer: BusinessCardRenderer, options: ModuleOptions = {}) {
-    super('BusinessCardInteractions', { debug: true, ...options });
+    super('BusinessCardInteractions', { debug: getDebugMode(), ...options });
     this.renderer = renderer;
     this.cardFront = null;
     this.cardBack = null;

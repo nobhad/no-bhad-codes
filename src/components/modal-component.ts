@@ -9,6 +9,7 @@
 
 import { BaseComponent, type ComponentProps, type ComponentState } from './base-component';
 import { ComponentUtils } from './component-store';
+import { getDebugMode } from '../core/env';
 
 export interface ModalProps extends ComponentProps {
   title?: string;
@@ -41,7 +42,7 @@ export class ModalComponent extends BaseComponent<ModalProps, ModalState> {
       isAnimating: false
     };
 
-    super('ModalComponent', props, initialState, { debug: true });
+    super('ModalComponent', props, initialState, { debug: getDebugMode() });
 
     this.template = {
       render: () => this.renderTemplate(),

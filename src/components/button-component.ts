@@ -9,6 +9,7 @@
 
 import { BaseComponent, type ComponentProps, type ComponentState } from './base-component';
 import { ComponentUtils } from './component-store';
+import { getDebugMode } from '../core/env';
 
 export interface ButtonProps extends ComponentProps {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -36,7 +37,7 @@ export class ButtonComponent extends BaseComponent<ButtonProps, ButtonState> {
       focused: false
     };
 
-    super('ButtonComponent', props, initialState, { debug: true });
+    super('ButtonComponent', props, initialState, { debug: getDebugMode() });
 
     this.template = {
       render: () => this.renderTemplate(),

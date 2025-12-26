@@ -16,6 +16,7 @@
 import { BaseModule } from '../core/base';
 import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
+import { getDebugMode } from '../../core/env';
 
 export interface HeroTimelines {
   groupTimeline: gsap.core.Timeline;
@@ -39,7 +40,7 @@ export abstract class BaseHeroAnimation extends BaseModule {
   protected duration: number;
 
   constructor(name: string, options: ModuleOptions & { duration?: number } = {}) {
-    super(name, { debug: true, ...options });
+    super(name, { debug: getDebugMode(), ...options });
     this.duration = options.duration || 2;
   }
 
