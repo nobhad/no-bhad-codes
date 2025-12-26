@@ -3,7 +3,7 @@
  * Implements caching strategies and offline functionality
  */
 
-const CACHE_NAME = 'nbw-v10.0.17';
+const CACHE_NAME = 'nbw-v10.0.18';
 const RUNTIME_CACHE = 'nbw-runtime';
 
 // Assets to cache on install
