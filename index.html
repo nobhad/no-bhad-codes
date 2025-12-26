@@ -76,7 +76,9 @@
           document.documentElement.setAttribute('data-theme', theme);
           var themeColorMeta = document.querySelector('meta[name="theme-color"]');
           if (themeColorMeta) {
-            themeColorMeta.setAttribute('content', theme === 'dark' ? '#2a2a2a' : '#e0e0e0');
+            var isMobile = window.innerWidth <= 767;
+            var darkColor = isMobile ? '#333333' : '#2a2a2a';
+            themeColorMeta.setAttribute('content', theme === 'dark' ? darkColor : '#e0e0e0');
           }
         } catch (e) {
           document.documentElement.setAttribute('data-theme', 'light');
