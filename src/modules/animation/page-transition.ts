@@ -750,13 +750,6 @@ export class PageTransitionModule extends BaseModule {
             this.log('[PageTransitionModule] Animation STARTED - check element style now');
             this.log('[PageTransitionModule] Current filter:', contentEl.style.filter);
           },
-          onUpdate: function () {
-            // Log progress every ~25%
-            const progress = this.progress();
-            if (progress < 0.1 || (progress > 0.24 && progress < 0.26) || (progress > 0.49 && progress < 0.51) || (progress > 0.74 && progress < 0.76)) {
-              this.log('[PageTransitionModule] Animation progress:', `${Math.round(progress * 100)  }%`, 'filter:', contentEl.style.filter);
-            }
-          },
           onComplete: () => {
             this.log('[PageTransitionModule] Animation COMPLETE');
             gsap.set(contentEl, { clearProps: 'filter,scale,transformOrigin,opacity' });
