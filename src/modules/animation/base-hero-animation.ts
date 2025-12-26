@@ -274,27 +274,17 @@ export abstract class BaseHeroAnimation extends BaseModule {
 
   /**
    * Show content immediately (for reduced motion or mobile)
-   * Shared skip animation logic (~20 lines)
+   * Note: Don't set opacity here - let PageTransitionModule handle blur animation
    */
   protected showContentImmediately(
     heroSelector: string,
-    contentSelector: string | ((hero: HTMLElement) => HTMLElement | null)
+    _contentSelector: string | ((hero: HTMLElement) => HTMLElement | null)
   ): void {
     const hero = document.querySelector(heroSelector) as HTMLElement;
     if (!hero) return;
 
+    // Hide hero on mobile - content will be animated by PageTransitionModule
     hero.style.display = 'none';
-
-    let content: HTMLElement | null = null;
-    if (typeof contentSelector === 'string') {
-      content = document.querySelector(contentSelector) as HTMLElement;
-    } else {
-      content = contentSelector(hero);
-    }
-
-    if (content) {
-      content.style.opacity = '1';
-    }
   }
 }
 

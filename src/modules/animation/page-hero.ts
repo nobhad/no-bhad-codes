@@ -330,23 +330,15 @@ export class PageHeroModule extends BaseHeroAnimation {
 
   /**
    * Show all content immediately (for reduced motion or mobile)
+   * Note: Don't set opacity here - let PageTransitionModule handle blur animation
    */
   private showAllContentImmediately(): void {
     const heroElements = document.querySelectorAll(this.heroSelector);
 
     heroElements.forEach((heroEl) => {
       const hero = heroEl as HTMLElement;
-      const pageId = hero.dataset.heroPage;
-
+      // Hide hero on mobile - content will be animated by PageTransitionModule
       hero.style.display = 'none';
-
-      if (pageId) {
-        const section = hero.closest('section');
-        const content = section?.querySelector(`.${pageId}-content`) as HTMLElement | null;
-        if (content) {
-          content.style.opacity = '1';
-        }
-      }
     });
   }
 

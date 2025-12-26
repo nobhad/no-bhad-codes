@@ -667,17 +667,10 @@ export class ContactAnimationModule extends BaseModule {
       return;
     }
 
-    // Mobile: Ensure content is visible
-    gsap.set(this.container, {
-      opacity: 1,
-      filter: 'none',
-      visibility: 'visible'
-    });
-
-    // Make sure all form fields are visible
+    // Mobile: Don't set opacity/filter here - let PageTransitionModule handle blur animation
+    // Only ensure form fields are ready for interaction after page transition completes
     const allFields = this.container.querySelectorAll('.input-item, .input-wrapper');
     gsap.set(allFields, {
-      opacity: 1,
       visibility: 'visible',
       transform: 'none'
     });

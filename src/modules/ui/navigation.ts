@@ -121,14 +121,6 @@ export class NavigationModule extends BaseModule {
       this.menuLinks.forEach((link) => {
         const linkHref = (link as HTMLAnchorElement).getAttribute('href');
         this.addEventListener(link as Element, 'click', (event: Event) => {
-
-          // On touch devices, handle tap-to-animate behavior
-          if (this.isTouchDevice && !link.classList.contains('touch-active')) {
-            // First tap - just show animation, don't navigate
-            event.preventDefault();
-            this.setTouchActiveLink(link);
-            return;
-          }
           // Handle submenu toggle links
           if ((link as Element).hasAttribute('data-submenu-toggle')) {
             return; // Let submenu module handle this
@@ -143,11 +135,21 @@ export class NavigationModule extends BaseModule {
           // For all other valid links, handle navigation
           const href = linkHref;
           if (href) {
+            event.preventDefault();
+
+            // On touch devices, show animation then navigate after delay
+            // On desktop, navigate immediately after menu close starts
+            const animationDelay = this.isTouchDevice ? 300 : 100;
+
+            // Add touch-active class on mobile to trigger animation
+            if (this.isTouchDevice) {
+              this.setTouchActiveLink(link);
+            }
+
+            this.closeMenu();
+
             // Handle hash links (same-page navigation) with router
             if (href.startsWith('#')) {
-              event.preventDefault();
-              this.closeMenu();
-
               // Check if we're on the home page
               const currentPath = window.location.pathname;
               const isHomePage =
@@ -155,7 +157,7 @@ export class NavigationModule extends BaseModule {
 
               this.log('Hash link clicked:', href, 'isHomePage:', isHomePage);
 
-              // Small delay to let menu close animation start
+              // Delay to let animation play, then navigate
               setTimeout(() => {
                 if (isHomePage) {
                   // If already on home page, navigate via router
@@ -176,16 +178,12 @@ export class NavigationModule extends BaseModule {
                   // If on another page, navigate to home page with hash
                   window.location.href = `/${href}`;
                 }
-              }, 100);
+              }, animationDelay);
             } else {
-              // For non-hash links, navigate explicitly
-              event.preventDefault();
-              this.closeMenu();
-
-              // Small delay to let menu close animation start, then navigate
+              // For non-hash links, delay then navigate
               setTimeout(() => {
                 window.location.href = href;
-              }, 100);
+              }, animationDelay);
             }
           }
         });

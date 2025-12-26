@@ -71,11 +71,8 @@ export class AboutHeroModule extends BaseHeroAnimation {
     await super.init();
 
     if (this.shouldSkipAnimation()) {
-      // On mobile, make sure content is visible
-      const content = document.querySelector(`.about-section ${this.contentSelector}`) as HTMLElement;
-      if (content) {
-        content.style.opacity = '1';
-      }
+      // On mobile, let PageTransitionModule handle the blur animation
+      // Don't set opacity here - it will be animated by page transitions
       return;
     }
 
