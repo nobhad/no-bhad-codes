@@ -3,7 +3,7 @@
  * Implements caching strategies and offline functionality
  */
 
-const CACHE_NAME = 'nbw-v10.0.3';
+const CACHE_NAME = 'nbw-v10.0.4';
 const RUNTIME_CACHE = 'nbw-runtime';
 
 // Assets to cache on install
@@ -15,6 +15,7 @@ const STATIC_ASSETS = [
   '/icons/icon-512.svg',
   '/images/business-card_front.svg',
   '/images/business-card_back.svg',
+  '/images/coyote_paw.svg',
   '/images/avatar.svg',
   '/favicon.ico',
   '/manifest.json'

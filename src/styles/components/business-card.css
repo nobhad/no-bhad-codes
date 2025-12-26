@@ -108,14 +108,14 @@
 @media (max-width: 767px) {
   .business-card-container {
     width: 380px;
-    height: 213.01px; /* 380 ÷ 1.78423 = 213.01 */
+    height: 213px; /* 380 ÷ 1.784582 = 212.96 */
   }
 }
 
 @media (max-width: 479px) {
   .business-card-container {
     width: 315px;
-    height: 176.56px; /* 315 ÷ 1.78423 = 176.56 */
+    height: 177px; /* 315 ÷ 1.784582 = 176.54 */
   }
 }
 
@@ -477,12 +477,13 @@
   .business-card-container,
   .intro-animation-container {
     /* Fixed mobile size to prevent CLS - maintaining exact aspect ratio */
+    /* 380 ÷ 1.784582 = 212.96 ≈ 213px */
     width: 380px;
-    height: 213.01px; /* 380 ÷ 1.78423 = 213.01 */
+    height: 213px;
     min-width: 380px;
-    min-height: 211.52px;
+    min-height: 213px;
     max-width: 380px;
-    max-height: 211.52px;
+    max-height: 213px;
   }
 
   /* Contact business card - smaller and flexible sizing */
@@ -525,12 +526,13 @@
   .business-card-container,
   .intro-animation-container {
     /* Fixed small screen size to prevent CLS - maintaining exact aspect ratio */
+    /* 315 ÷ 1.784582 = 176.54 ≈ 177px */
     width: 315px;
-    height: 176.56px; /* 315 ÷ 1.78423 = 176.56 */
+    height: 177px;
     min-width: 315px;
-    min-height: 175.33px;
+    min-height: 177px;
     max-width: 315px;
-    max-height: 175.33px;
+    max-height: 177px;
   }
 
   /* Contact business card - even smaller on very small screens */

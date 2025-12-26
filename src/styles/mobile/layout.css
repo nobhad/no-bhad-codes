@@ -22,6 +22,12 @@
     overflow: hidden;
   }
 
+  /* Mobile dark mode: Slightly lighter background for better visibility on phone screens */
+  html[data-theme="dark"] body {
+    --color-neutral-300: #333333; /* Slightly lighter than desktop's #2a2a2a */
+    background-color: var(--color-neutral-300);
+  }
+
   main {
     position: fixed;
     top: var(--header-height);
