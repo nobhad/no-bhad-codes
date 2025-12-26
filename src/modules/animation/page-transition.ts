@@ -658,10 +658,19 @@ export class PageTransitionModule extends BaseModule {
     const introNav = document.querySelector('.intro-nav') as HTMLElement;
     if (businessCard) businessCard.style.opacity = '1';
     if (introNav) {
-      introNav.style.opacity = '1';
-      // Also show the individual nav links
-      const navLinks = introNav.querySelectorAll('.intro-nav-link') as NodeListOf<HTMLElement>;
-      navLinks.forEach(link => link.style.opacity = '1');
+      // Use GSAP fromTo to ensure smooth fade animation
+      gsap.fromTo(introNav,
+        { opacity: 0 },
+        { opacity: 1, duration: 1.2, ease: 'sine.inOut' }
+      );
+      // Also animate the individual nav links with stagger (slower fade)
+      const navLinks = introNav.querySelectorAll('.intro-nav-link');
+      if (navLinks.length > 0) {
+        gsap.fromTo(navLinks,
+          { opacity: 0 },
+          { opacity: 1, duration: 2.0, ease: 'sine.inOut', stagger: 0.2 }
+        );
+      }
     }
   }
 

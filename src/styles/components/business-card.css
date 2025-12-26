@@ -658,6 +658,8 @@ html[data-theme="dark"] .business-card-container {
   margin-top: 1rem;
   padding: 1.5rem 1.5rem;
   box-sizing: border-box;
+  /* Initial state - GSAP handles animation */
+  opacity: 0;
 }
 
 /* Navigation links - styled like H2 tags */

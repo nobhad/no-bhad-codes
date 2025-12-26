@@ -705,20 +705,18 @@ export class IntroAnimationModule extends BaseModule {
     // Fade in intro nav with GSAP - slow ease in
     const introNav = document.querySelector('.intro-nav') as HTMLElement;
     if (introNav) {
-      gsap.to(introNav, {
-        opacity: 1,
-        duration: 1.2,
-        ease: 'sine.inOut'
-      });
-      // Also animate the individual nav links with stagger
+      // Use fromTo to ensure we animate from 0, regardless of CSS state
+      gsap.fromTo(introNav,
+        { opacity: 0 },
+        { opacity: 1, duration: 1.2, ease: 'sine.inOut' }
+      );
+      // Also animate the individual nav links with stagger (slower fade)
       const navLinks = introNav.querySelectorAll('.intro-nav-link');
       if (navLinks.length > 0) {
-        gsap.to(navLinks, {
-          opacity: 1,
-          duration: 1.2,
-          ease: 'sine.inOut',
-          stagger: 0.15
-        });
+        gsap.fromTo(navLinks,
+          { opacity: 0 },
+          { opacity: 1, duration: 2.0, ease: 'sine.inOut', stagger: 0.2 }
+        );
       }
     }
 
@@ -1260,13 +1258,21 @@ export class IntroAnimationModule extends BaseModule {
         }
       }
     } else {
-      // Desktop: just set opacity directly (no animation needed)
+      // Desktop: use GSAP animation for smooth fade in (same as completeIntro)
       if (businessCard) businessCard.style.opacity = '1';
       if (introNav) {
-        introNav.style.opacity = '1';
-        // Also show the individual nav links
-        const navLinks = introNav.querySelectorAll('.intro-nav-link') as NodeListOf<HTMLElement>;
-        navLinks.forEach(link => link.style.opacity = '1');
+        gsap.fromTo(introNav,
+          { opacity: 0 },
+          { opacity: 1, duration: 1.2, ease: 'sine.inOut' }
+        );
+        // Also animate the individual nav links with stagger (slower fade)
+        const navLinks = introNav.querySelectorAll('.intro-nav-link');
+        if (navLinks.length > 0) {
+          gsap.fromTo(navLinks,
+            { opacity: 0 },
+            { opacity: 1, duration: 2.0, ease: 'sine.inOut', stagger: 0.2 }
+          );
+        }
       }
     }
   }
