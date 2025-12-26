@@ -587,8 +587,8 @@
     max-width: none;
     margin: 0 auto;
     display: block;
-    /* Shift right to center the sign visually */
-    transform: translateX(8%);
+    /* Scale up and shift right to center the sign visually */
+    transform: translateX(8%) scale(1.15);
   }
 }
 
@@ -624,8 +624,8 @@
     max-width: none;
     margin: 0 auto;
     display: block;
-    /* Shift right to center the sign visually */
-    transform: translateX(8%);
+    /* Scale up and shift right to center the sign visually */
+    transform: translateX(8%) scale(1.2);
   }
 }
 
