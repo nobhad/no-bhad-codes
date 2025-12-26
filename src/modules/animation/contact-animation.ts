@@ -125,11 +125,11 @@ export class ContactAnimationModule extends BaseModule {
         willChange: 'filter, opacity' // GPU acceleration hint
       });
     }
+    // Contact options (nav links) show immediately - no animation delay
     if (contactOptions) {
       gsap.set(contactOptions, {
-        opacity: 0,
-        filter: `blur(${blurAmount}px)`,
-        willChange: 'filter, opacity'
+        opacity: 1,
+        filter: 'blur(0px)'
       });
     }
     if (cardColumn) {
@@ -148,13 +148,7 @@ export class ContactAnimationModule extends BaseModule {
         ease: 'power2.out'
       }, 0);
     }
-    if (contactOptions) {
-      this.timeline.to(contactOptions, {
-        opacity: 1,
-        duration: blurFadeDuration,
-        ease: 'power2.out'
-      }, 0);
-    }
+    // contactOptions already visible - no animation needed
     if (cardColumn) {
       this.timeline.to(cardColumn, {
         opacity: 1,
@@ -173,13 +167,7 @@ export class ContactAnimationModule extends BaseModule {
         ease: 'power2.out'
       }, '>');
     }
-    if (contactOptions) {
-      this.timeline.to(contactOptions, {
-        filter: 'blur(0px)',
-        duration: blurClearDuration,
-        ease: 'power2.out'
-      }, '<');
-    }
+    // contactOptions already visible - no blur animation
     if (cardColumn) {
       this.timeline.to(cardColumn, {
         filter: 'blur(0px)',
@@ -189,7 +177,7 @@ export class ContactAnimationModule extends BaseModule {
     }
 
     // Clean up will-change after blur animations complete
-    this.timeline.set([heading, contactOptions, cardColumn].filter(Boolean), {
+    this.timeline.set([heading, cardColumn].filter(Boolean), {
       willChange: 'auto'
     });
 
@@ -604,7 +592,8 @@ export class ContactAnimationModule extends BaseModule {
     const cardColumn = this.container.querySelector('.contact-card-column');
 
     if (heading) gsap.set(heading, { opacity: 0, filter: `blur(${blurAmount}px)`, willChange: 'filter, opacity' });
-    if (contactOptions) gsap.set(contactOptions, { opacity: 0, filter: `blur(${blurAmount}px)`, willChange: 'filter, opacity' });
+    // Contact options (nav links) show immediately - no animation
+    if (contactOptions) gsap.set(contactOptions, { opacity: 1, filter: 'blur(0px)' });
     if (cardColumn) gsap.set(cardColumn, { opacity: 0, filter: `blur(${blurAmount}px)`, willChange: 'filter, opacity' });
 
     // Reset form container
