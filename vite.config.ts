@@ -1,4 +1,4 @@
-import { defineConfig, Plugin } from 'vite';
+import { defineConfig, Plugin, type Terser } from 'vite';
 import { resolve } from 'path';
 import { ViteEjsPlugin } from 'vite-plugin-ejs';
 import { createObfuscationPlugin } from './src/utils/obfuscation-plugin';
@@ -65,6 +65,17 @@ export default defineConfig({
     // Optimize chunk splitting
     chunkSizeWarningLimit: 600,
     minify: 'terser',
+    terserOptions: {
+      compress: {
+        // Drop console.log, console.info, console.debug in production
+        // Keep console.warn and console.error for important messages
+        drop_console: false, // Don't drop all console
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+      },
+      format: {
+        comments: false, // Remove comments in production
+      },
+    } as Terser.MinifyOptions,
   },
 
   // Multi-page application mode
