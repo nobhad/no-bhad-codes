@@ -5,19 +5,19 @@
 
 /* Project Status */
 .project-status {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 var(--cp-spacing-sm) 0;
   font-size: 0.9rem;
 }
 
 .status-badge {
   background: var(--color-primary);
-  color: #1a1a1a;
+  color: var(--cp-text-dark);
   padding: 0.4rem 1.25rem;
-  margin-left: 0.5rem;
+  margin-left: var(--cp-spacing-sm);
   font-family: var(--font--acme);
   font-weight: 400;
   font-size: 1rem;
-  border-radius: 50px;
+  border-radius: var(--cp-radius-pill);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -40,14 +40,14 @@
 
 /* Project Progress */
 .project-progress {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 var(--cp-spacing-sm) 0;
   font-size: 0.9rem;
 }
 
 .progress-bar {
   width: 100%;
   height: 10px;
-  background: #555555;
+  background: var(--cp-bg-light);
   border: none;
   border-radius: 5px;
   overflow: hidden;
@@ -63,19 +63,19 @@
 
 /* Recent Activity */
 .recent-activity {
-  background: #333333 !important;
+  background: var(--cp-bg-dark) !important;
   border: none !important;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  color: #f5f5f5;
+  border-radius: var(--cp-radius-lg);
+  padding: var(--cp-spacing-xl);
+  margin-bottom: var(--cp-spacing-2xl);
+  color: var(--cp-text-light);
 }
 
 .recent-activity h3 {
   font-family: var(--font--acme);
   font-size: 1.1rem;
-  color: #f5f5f5;
-  margin: 0 0 1rem 0;
+  color: var(--cp-text-light);
+  margin: 0 0 var(--cp-spacing-lg) 0;
   text-transform: uppercase;
 }
 
@@ -86,17 +86,17 @@
 }
 
 .activity-list li {
-  padding: 0.75rem 1rem;
-  background: #444444;
-  border-radius: 6px;
-  margin-bottom: 0.5rem;
+  padding: var(--cp-spacing-md) var(--cp-spacing-lg);
+  background: var(--cp-bg-medium);
+  border-radius: var(--cp-radius-sm);
+  margin-bottom: var(--cp-spacing-sm);
   font-size: 0.9rem;
-  color: #f5f5f5;
+  color: var(--cp-text-light);
   transition: background-color 0.2s ease;
 }
 
 .activity-list li:hover {
-  background: #555555;
+  background: var(--cp-bg-light);
 }
 
 .activity-list li:last-child {
@@ -107,21 +107,21 @@
 .quick-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: var(--cp-spacing-lg);
+  margin-bottom: var(--cp-spacing-xl);
 }
 
 /* Stat Card */
 .stat-card,
 button.stat-card,
 .stat-card.cp-shadow {
-  background: #333333 !important;
-  background-color: #333333 !important;
+  background: var(--cp-bg-dark) !important;
+  background-color: var(--cp-bg-dark) !important;
   border: none !important;
-  border-radius: 12px;
-  padding: 1.5rem;
+  border-radius: var(--cp-radius-lg);
+  padding: var(--cp-spacing-xl);
   text-align: center;
-  color: #f5f5f5;
+  color: var(--cp-text-light);
   font-family: inherit;
 }
 
@@ -131,7 +131,7 @@ button.stat-card,
 }
 
 .stat-card-clickable:hover {
-  background: #444444 !important;
+  background: var(--cp-bg-medium) !important;
 }
 
 .stat-card-clickable:hover .stat-number {
@@ -150,8 +150,8 @@ button.stat-card,
 .stat-label {
   display: block;
   font-size: 0.85rem;
-  color: #cccccc;
-  margin-top: 0.5rem;
+  color: var(--cp-text-secondary);
+  margin-top: var(--cp-spacing-sm);
   text-transform: uppercase;
 }
 
@@ -159,35 +159,35 @@ button.stat-card,
 .progress-card .progress-bar {
   width: 100%;
   height: 16px;
-  background: #555555;
+  background: var(--cp-bg-light);
   border: none;
-  border-radius: 8px;
-  margin: 1rem 0;
+  border-radius: var(--cp-radius-md);
+  margin: var(--cp-spacing-lg) 0;
   overflow: hidden;
 }
 
 .progress-card .progress-fill {
   height: 100%;
   background: var(--color-primary);
-  border-radius: 8px;
+  border-radius: var(--cp-radius-md);
   transition: width 0.3s ease;
 }
 
 .progress-card .progress-text {
   font-weight: 600;
-  color: #f5f5f5;
+  color: var(--cp-text-light);
 }
 
 /* Overview Card */
 .overview-card {
-  background: #333333 !important;
+  background: var(--cp-bg-dark) !important;
   border: none !important;
-  border-radius: 12px;
-  padding: 1.5rem;
-  color: #f5f5f5;
+  border-radius: var(--cp-radius-lg);
+  padding: var(--cp-spacing-xl);
+  color: var(--cp-text-light);
 }
 
 .overview-card h3 {
-  color: #f5f5f5;
-  margin-bottom: 1rem;
+  color: var(--cp-text-light);
+  margin-bottom: var(--cp-spacing-lg);
 }

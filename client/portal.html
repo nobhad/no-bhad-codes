@@ -150,8 +150,8 @@
             </div>
 
             <!-- Project Cards -->
-            <div class="cp-project-cards">
-              <div class="cp-project-card cp-shadow">
+            <div class="portal-project-cards">
+              <div class="portal-project-card portal-shadow">
                 <h3>Your Website Project</h3>
                 <p class="project-status">Status: <span class="status-badge">In Progress</span></p>
                 <p class="project-progress">Progress: 25%</p>
@@ -164,7 +164,7 @@
             <!-- Quick Stats -->
             <div class="quick-stats">
               <button
-                class="stat-card stat-card-clickable cp-shadow"
+                class="stat-card stat-card-clickable portal-shadow"
                 data-tab="dashboard"
                 type="button"
               >
@@ -172,7 +172,7 @@
                 <span class="stat-label">Active Projects</span>
               </button>
               <button
-                class="stat-card stat-card-clickable cp-shadow"
+                class="stat-card stat-card-clickable portal-shadow"
                 data-tab="invoices"
                 type="button"
               >
@@ -180,7 +180,7 @@
                 <span class="stat-label">Pending Invoices</span>
               </button>
               <button
-                class="stat-card stat-card-clickable cp-shadow"
+                class="stat-card stat-card-clickable portal-shadow"
                 data-tab="messages"
                 type="button"
               >
@@ -190,7 +190,7 @@
             </div>
 
             <!-- Recent Activity -->
-            <div class="recent-activity cp-shadow">
+            <div class="recent-activity portal-shadow">
               <h3>Recent Activity</h3>
               <ul class="activity-list">
                 <li>Project outline uploaded - Dec 1, 2025</li>
@@ -208,7 +208,7 @@
             </div>
 
             <!-- Upload Section -->
-            <div class="files-upload-section cp-shadow">
+            <div class="files-upload-section portal-shadow">
               <h3>Upload Files</h3>
               <div class="upload-dropzone" id="upload-dropzone">
                 <p class="dropzone-desktop">Drag and drop files here or</p>
@@ -219,7 +219,7 @@
             </div>
 
             <!-- Files List -->
-            <div class="files-list-section cp-shadow">
+            <div class="files-list-section portal-shadow">
               <h3>Project Files</h3>
               <div class="files-filter">
                 <select id="files-project-filter" class="form-select">
@@ -291,7 +291,7 @@
             </div>
 
             <!-- Messages Thread -->
-            <div class="messages-container cp-shadow">
+            <div class="messages-container portal-shadow">
               <div class="messages-thread" id="messages-thread">
                 <div class="message message-received">
                   <div class="message-avatar" data-name="Noelle">
@@ -388,18 +388,18 @@
 
             <!-- Invoice Summary -->
             <div class="invoice-summary">
-              <div class="summary-card cp-shadow">
+              <div class="summary-card portal-shadow">
                 <span class="summary-label">Total Outstanding</span>
                 <span class="summary-value">$0.00</span>
               </div>
-              <div class="summary-card cp-shadow">
+              <div class="summary-card portal-shadow">
                 <span class="summary-label">Total Paid</span>
                 <span class="summary-value">$0.00</span>
               </div>
             </div>
 
             <!-- Invoices List -->
-            <div class="invoices-list cp-shadow">
+            <div class="invoices-list portal-shadow">
               <h3>Invoice History</h3>
               <div class="invoice-item">
                 <div class="invoice-info">
@@ -429,7 +429,7 @@
 
             <div class="settings-grid">
               <!-- Account Section (Profile) -->
-              <div class="settings-section cp-shadow">
+              <div class="settings-section portal-shadow">
                 <h3>Account</h3>
                 <form class="settings-form" id="profile-form">
                   <div class="form-group">
@@ -468,12 +468,12 @@
               </div>
 
               <!-- Change Password Section -->
-              <div class="settings-section cp-shadow">
+              <div class="settings-section portal-shadow">
                 <h3>Change Password</h3>
                 <form class="settings-form" id="password-form">
                   <div class="form-group">
                     <label for="current-password">Current Password</label>
-                    <div class="cp-password-wrapper">
+                    <div class="portal-password-wrapper">
                       <input
                         type="password"
                         id="current-password"
@@ -482,7 +482,7 @@
                       />
                       <button
                         type="button"
-                        class="cp-password-toggle"
+                        class="portal-password-toggle"
                         data-target="current-password"
                         aria-label="Toggle password visibility"
                       >
@@ -505,7 +505,7 @@
                   </div>
                   <div class="form-group">
                     <label for="new-password">New Password</label>
-                    <div class="cp-password-wrapper">
+                    <div class="portal-password-wrapper">
                       <input
                         type="password"
                         id="new-password"
@@ -514,7 +514,7 @@
                       />
                       <button
                         type="button"
-                        class="cp-password-toggle"
+                        class="portal-password-toggle"
                         data-target="new-password"
                         aria-label="Toggle password visibility"
                       >
@@ -537,7 +537,7 @@
                   </div>
                   <div class="form-group">
                     <label for="confirm-password">Confirm New Password</label>
-                    <div class="cp-password-wrapper">
+                    <div class="portal-password-wrapper">
                       <input
                         type="password"
                         id="confirm-password"
@@ -546,7 +546,7 @@
                       />
                       <button
                         type="button"
-                        class="cp-password-toggle"
+                        class="portal-password-toggle"
                         data-target="confirm-password"
                         aria-label="Toggle password visibility"
                       >
@@ -572,7 +572,7 @@
               </div>
 
               <!-- Billing Info Section -->
-              <div class="settings-section settings-section-wide cp-shadow">
+              <div class="settings-section settings-section-wide portal-shadow">
                 <h3>Billing Information</h3>
                 <form class="settings-form billing-form-grid" id="billing-form">
                   <div class="billing-column">
@@ -827,26 +827,26 @@
 
             <!-- Leads Stats -->
             <div class="leads-stats quick-stats">
-              <div class="stat-card cp-shadow">
+              <div class="stat-card portal-shadow">
                 <span class="stat-number" id="leads-total">-</span>
                 <span class="stat-label">Total Leads</span>
               </div>
-              <div class="stat-card cp-shadow">
+              <div class="stat-card portal-shadow">
                 <span class="stat-number" id="leads-pending">-</span>
                 <span class="stat-label">Pending</span>
               </div>
-              <div class="stat-card cp-shadow">
+              <div class="stat-card portal-shadow">
                 <span class="stat-number" id="leads-active">-</span>
                 <span class="stat-label">In Progress</span>
               </div>
-              <div class="stat-card cp-shadow">
+              <div class="stat-card portal-shadow">
                 <span class="stat-number" id="leads-completed">-</span>
                 <span class="stat-label">Completed</span>
               </div>
             </div>
 
             <!-- Leads Table -->
-            <div class="leads-table-section cp-shadow">
+            <div class="leads-table-section portal-shadow">
               <div class="leads-table-header">
                 <h3>All Submissions</h3>
                 <button class="btn btn-secondary btn-sm" id="btn-refresh-leads">Refresh</button>

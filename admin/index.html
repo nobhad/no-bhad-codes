@@ -124,7 +124,7 @@
             <!-- Quick Stats -->
             <div class="quick-stats">
               <button
-                class="stat-card stat-card-clickable cp-shadow"
+                class="stat-card stat-card-clickable portal-shadow"
                 data-tab="leads"
                 type="button"
               >
@@ -132,7 +132,7 @@
                 <span class="stat-label">Total Leads</span>
               </button>
               <button
-                class="stat-card stat-card-clickable cp-shadow"
+                class="stat-card stat-card-clickable portal-shadow"
                 data-tab="leads"
                 type="button"
               >
@@ -140,7 +140,7 @@
                 <span class="stat-label">Pending</span>
               </button>
               <button
-                class="stat-card stat-card-clickable cp-shadow"
+                class="stat-card stat-card-clickable portal-shadow"
                 data-tab="analytics"
                 type="button"
               >
@@ -150,7 +150,7 @@
             </div>
 
             <!-- Recent Leads -->
-            <div class="recent-activity cp-shadow">
+            <div class="recent-activity portal-shadow">
               <h3>Recent Leads</h3>
               <ul class="activity-list" id="recent-leads-list">
                 <li>Loading...</li>
@@ -167,19 +167,19 @@
 
             <!-- Leads Stats -->
             <div class="quick-stats">
-              <div class="stat-card cp-shadow">
+              <div class="stat-card portal-shadow">
                 <span class="stat-number" id="leads-total">-</span>
                 <span class="stat-label">Total Leads</span>
               </div>
-              <div class="stat-card cp-shadow">
+              <div class="stat-card portal-shadow">
                 <span class="stat-number" id="leads-pending">-</span>
                 <span class="stat-label">Pending</span>
               </div>
-              <div class="stat-card cp-shadow">
+              <div class="stat-card portal-shadow">
                 <span class="stat-number" id="leads-active">-</span>
                 <span class="stat-label">In Progress</span>
               </div>
-              <div class="stat-card cp-shadow">
+              <div class="stat-card portal-shadow">
                 <span class="stat-number" id="leads-completed">-</span>
                 <span class="stat-label">Completed</span>
               </div>
@@ -253,19 +253,19 @@
 
             <!-- Projects Stats -->
             <div class="quick-stats">
-              <div class="stat-card cp-shadow">
+              <div class="stat-card portal-shadow">
                 <span class="stat-number" id="projects-total">-</span>
                 <span class="stat-label">Total Projects</span>
               </div>
-              <div class="stat-card cp-shadow">
+              <div class="stat-card portal-shadow">
                 <span class="stat-number" id="projects-active">-</span>
                 <span class="stat-label">Active</span>
               </div>
-              <div class="stat-card cp-shadow">
+              <div class="stat-card portal-shadow">
                 <span class="stat-number" id="projects-completed">-</span>
                 <span class="stat-label">Completed</span>
               </div>
-              <div class="stat-card cp-shadow">
+              <div class="stat-card portal-shadow">
                 <span class="stat-number" id="projects-on-hold">-</span>
                 <span class="stat-label">On Hold</span>
               </div>
@@ -311,7 +311,7 @@
 
             <!-- Client Selector -->
             <div
-              class="client-selector-wrapper cp-shadow"
+              class="client-selector-wrapper portal-shadow"
               style="margin-bottom: 1rem; padding: 1rem"
             >
               <label for="admin-client-select" style="font-weight: 600; margin-right: 1rem"
@@ -332,7 +332,7 @@
             </div>
 
             <!-- Messages Container (like client portal) -->
-            <div class="messages-container cp-shadow">
+            <div class="messages-container portal-shadow">
               <div class="messages-thread" id="admin-messages-thread">
                 <div
                   style="
@@ -367,21 +367,21 @@
             </div>
 
             <div class="quick-stats">
-              <div class="stat-card cp-shadow">
+              <div class="stat-card portal-shadow">
                 <span class="stat-number" id="analytics-visitors">-</span>
                 <span class="stat-label">Total Visitors</span>
               </div>
-              <div class="stat-card cp-shadow">
+              <div class="stat-card portal-shadow">
                 <span class="stat-number" id="analytics-pageviews">-</span>
                 <span class="stat-label">Page Views</span>
               </div>
-              <div class="stat-card cp-shadow">
+              <div class="stat-card portal-shadow">
                 <span class="stat-number" id="analytics-sessions">-</span>
                 <span class="stat-label">Avg. Session</span>
               </div>
             </div>
 
-            <div class="cp-project-card cp-shadow" style="margin-top: 2rem">
+            <div class="portal-project-card portal-shadow" style="margin-top: 2rem">
               <h3>Analytics Dashboard</h3>
               <p style="color: var(--color-text-secondary, #666)">
                 Analytics data will be loaded here.
@@ -396,7 +396,7 @@
               <h2>System Information</h2>
             </div>
 
-            <div class="cp-project-card cp-shadow">
+            <div class="portal-project-card portal-shadow">
               <h3>Build Information</h3>
               <div class="system-info-grid" style="display: grid; gap: 1rem; margin-top: 1rem">
                 <div
@@ -435,7 +435,7 @@
               </div>
             </div>
 
-            <div class="cp-project-card cp-shadow" style="margin-top: 1.5rem">
+            <div class="portal-project-card portal-shadow" style="margin-top: 1.5rem">
               <h3>Browser Information</h3>
               <div class="system-info-grid" style="display: grid; gap: 1rem; margin-top: 1rem">
                 <div
@@ -490,7 +490,7 @@
             </div>
 
             <!-- Project Overview Card -->
-            <div class="project-detail-overview cp-shadow">
+            <div class="project-detail-overview portal-shadow">
               <div class="project-detail-header">
                 <div class="project-detail-info">
                   <h3 id="pd-project-name">Project Name</h3>
@@ -538,7 +538,7 @@
             <!-- Overview Sub-Tab -->
             <div class="pd-tab-content active" id="pd-tab-overview">
               <!-- Progress Section -->
-              <div class="cp-project-card cp-shadow">
+              <div class="portal-project-card portal-shadow">
                 <h3>Project Progress</h3>
                 <div class="project-progress-display">
                   <div class="progress-percentage" id="pd-progress-percent">0%</div>
@@ -549,7 +549,7 @@
               </div>
 
               <!-- Milestones Section -->
-              <div class="cp-project-card cp-shadow">
+              <div class="portal-project-card portal-shadow">
                 <div class="card-header-with-action">
                   <h3>Milestones</h3>
                   <button class="btn btn-secondary btn-sm" id="btn-add-milestone">
@@ -564,7 +564,7 @@
               </div>
 
               <!-- Project Description / Notes -->
-              <div class="cp-project-card cp-shadow">
+              <div class="portal-project-card portal-shadow">
                 <div class="card-header-with-action">
                   <h3>Project Notes</h3>
                   <button class="btn btn-secondary btn-sm" id="btn-edit-notes">Edit</button>
@@ -575,7 +575,7 @@
               </div>
 
               <!-- Recent Activity -->
-              <div class="recent-activity cp-shadow">
+              <div class="recent-activity portal-shadow">
                 <h3>Recent Activity</h3>
                 <ul class="activity-list" id="pd-activity-list">
                   <li>No activity recorded yet.</li>
@@ -586,7 +586,7 @@
             <!-- Files Sub-Tab -->
             <div class="pd-tab-content" id="pd-tab-files">
               <!-- Upload Section -->
-              <div class="files-upload-section cp-shadow">
+              <div class="files-upload-section portal-shadow">
                 <h3>Upload Files for Client</h3>
                 <div class="upload-dropzone" id="pd-upload-dropzone">
                   <p>Drag and drop files here or</p>
@@ -596,7 +596,7 @@
               </div>
 
               <!-- Files List -->
-              <div class="files-list-section cp-shadow">
+              <div class="files-list-section portal-shadow">
                 <h3>Project Files</h3>
                 <div class="files-list" id="pd-files-list">
                   <p class="empty-state">No files uploaded yet.</p>
@@ -606,7 +606,7 @@
 
             <!-- Messages Sub-Tab -->
             <div class="pd-tab-content" id="pd-tab-messages">
-              <div class="messages-container cp-shadow">
+              <div class="messages-container portal-shadow">
                 <div class="messages-thread" id="pd-messages-thread">
                   <p class="empty-state">
                     No messages yet. Start the conversation with your client.
@@ -630,18 +630,18 @@
             <div class="pd-tab-content" id="pd-tab-invoices">
               <!-- Invoice Summary -->
               <div class="invoice-summary">
-                <div class="summary-card cp-shadow">
+                <div class="summary-card portal-shadow">
                   <span class="summary-label">Total Outstanding</span>
                   <span class="summary-value" id="pd-outstanding">$0.00</span>
                 </div>
-                <div class="summary-card cp-shadow">
+                <div class="summary-card portal-shadow">
                   <span class="summary-label">Total Paid</span>
                   <span class="summary-value" id="pd-paid">$0.00</span>
                 </div>
               </div>
 
               <!-- Create Invoice Button -->
-              <div class="cp-project-card cp-shadow">
+              <div class="portal-project-card portal-shadow">
                 <div class="card-header-with-action">
                   <h3>Invoices</h3>
                   <button class="btn btn-secondary" id="btn-create-invoice">
@@ -658,7 +658,7 @@
             <div class="pd-tab-content" id="pd-tab-settings">
               <div class="settings-grid">
                 <!-- Project Settings -->
-                <div class="settings-section cp-shadow">
+                <div class="settings-section portal-shadow">
                   <h3>Project Settings</h3>
                   <form class="settings-form" id="pd-project-settings-form">
                     <div class="form-group">
@@ -690,7 +690,7 @@
                 </div>
 
                 <!-- Client Account -->
-                <div class="settings-section cp-shadow">
+                <div class="settings-section portal-shadow">
                   <h3>Client Account</h3>
                   <div class="client-account-info">
                     <p><strong>Email:</strong> <span id="pd-client-account-email">-</span></p>
@@ -711,7 +711,7 @@
                 </div>
 
                 <!-- Preview URL -->
-                <div class="settings-section cp-shadow">
+                <div class="settings-section portal-shadow">
                   <h3>Preview URL</h3>
                   <form class="settings-form" id="pd-preview-form">
                     <div class="form-group">

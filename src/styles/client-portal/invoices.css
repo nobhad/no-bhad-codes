@@ -7,25 +7,25 @@
 .invoice-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: var(--cp-spacing-lg);
+  margin-bottom: var(--cp-spacing-xl);
 }
 
 /* Summary Card */
 .summary-card {
-  background: #333333 !important;
+  background: var(--cp-bg-dark) !important;
   border: none !important;
-  border-radius: 12px;
-  padding: 1.5rem;
+  border-radius: var(--cp-radius-lg);
+  padding: var(--cp-spacing-xl);
   text-align: center;
-  color: #f5f5f5;
+  color: var(--cp-text-light);
 }
 
 .summary-label {
   display: block;
   font-size: 0.9rem;
-  color: #cccccc;
-  margin-bottom: 0.5rem;
+  color: var(--cp-text-secondary);
+  margin-bottom: var(--cp-spacing-sm);
   text-transform: uppercase;
 }
 
@@ -33,47 +33,47 @@
   display: block;
   font-family: var(--font--acme);
   font-size: 1.8rem;
-  color: #f5f5f5;
+  color: var(--cp-text-light);
 }
 
 /* Invoices List Container */
 .invoices-list {
-  background: #333333;
+  background: var(--cp-bg-dark);
   border: none;
-  border-radius: 12px;
-  padding: 1.5rem;
-  color: #f5f5f5;
+  border-radius: var(--cp-radius-lg);
+  padding: var(--cp-spacing-xl);
+  color: var(--cp-text-light);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--cp-spacing-md);
 }
 
 .invoices-list h3 {
   font-family: var(--font--acme);
   font-size: 1.1rem;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 var(--cp-spacing-sm) 0;
   text-transform: uppercase;
-  color: #f5f5f5;
+  color: var(--cp-text-light);
 }
 
 /* Invoice Item */
 .invoice-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  padding-right: 1rem;
-  background: #444444;
+  gap: var(--cp-spacing-lg);
+  padding: var(--cp-spacing-lg);
+  padding-right: var(--cp-spacing-lg);
+  background: var(--cp-bg-medium);
   border: none;
-  border-radius: 8px;
-  color: #f5f5f5;
+  border-radius: var(--cp-radius-md);
+  color: var(--cp-text-light);
   position: relative;
   transition: background-color 0.2s ease;
   flex-wrap: wrap;
 }
 
 .invoice-item:hover {
-  background: #555555;
+  background: var(--cp-bg-light);
 }
 
 /* Invoice Info */
@@ -81,34 +81,34 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--cp-spacing-xs);
 }
 
 .invoice-number {
   font-weight: 600;
-  color: #f5f5f5;
+  color: var(--cp-text-light);
 }
 
 .invoice-date,
 .invoice-project {
   font-size: 0.85rem;
-  color: #cccccc;
+  color: var(--cp-text-secondary);
 }
 
 /* Invoice Amount */
 .invoice-amount {
   font-family: var(--font--acme);
   font-size: 1.2rem;
-  color: #f5f5f5;
+  color: var(--cp-text-light);
 }
 
 /* Invoice Status */
 .invoice-status {
-  padding: 0.25rem 0.75rem;
+  padding: var(--cp-spacing-xs) var(--cp-spacing-md);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  border-radius: 4px;
+  border-radius: var(--cp-radius-xs);
 }
 
 .status-pending {
@@ -127,14 +127,14 @@
 }
 
 .status-draft {
-  background: #666666;
-  color: #f5f5f5;
+  background: var(--cp-bg-light);
+  color: var(--cp-text-light);
 }
 
 /* Invoice Actions */
 .invoice-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--cp-spacing-sm);
   margin-left: auto;
 }
 
@@ -142,8 +142,8 @@
   min-width: 90px;
   text-align: center;
   justify-content: center;
-  color: #f5f5f5;
-  border-color: #f5f5f5;
+  color: var(--cp-text-light);
+  border-color: var(--cp-text-light);
   background: transparent;
 }
 
@@ -155,10 +155,10 @@
 
 /* No Invoices Message */
 .no-invoices-message {
-  color: #cccccc;
+  color: var(--cp-text-secondary);
   font-style: italic;
   text-align: left;
-  padding: 1rem 0;
+  padding: var(--cp-spacing-lg) 0;
 }
 
 /* Responsive */
@@ -172,7 +172,7 @@
   .invoice-item {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.75rem;
+    gap: var(--cp-spacing-md);
   }
 
   .invoice-actions {

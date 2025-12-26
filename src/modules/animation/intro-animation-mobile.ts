@@ -70,7 +70,7 @@ export class MobileIntroAnimationModule extends BaseModule {
   private morphOverlay: HTMLElement | null = null;
 
   constructor(options: ModuleOptions = {}) {
-    super('MobileIntroAnimationModule', { debug: true, ...options });
+    super('MobileIntroAnimationModule', { debug: false, ...options });
 
     // Bind methods
     this.handleSkip = this.handleSkip.bind(this);
@@ -580,7 +580,7 @@ export class MobileIntroAnimationModule extends BaseModule {
    * Uses the same paw animation as desktop by delegating to IntroAnimationModule
    */
   async playEntryAnimation(): Promise<void> {
-    console.log('[MobileIntro] playEntryAnimation called - using paw animation');
+    this.log('[MobileIntro] playEntryAnimation called - using paw animation');
     this.log('Playing paw entry animation (same as desktop)');
 
     try {
@@ -593,7 +593,7 @@ export class MobileIntroAnimationModule extends BaseModule {
       // Call the desktop entry animation with bypassMobileCheck=true
       await desktopModule.playEntryAnimation(true);
 
-      console.log('[MobileIntro] Paw entry animation complete');
+      this.log('[MobileIntro] Paw entry animation complete');
       this.log('Paw entry animation complete');
     } catch (error) {
       console.error('[MobileIntro] Failed to load desktop entry animation:', error);
@@ -664,7 +664,7 @@ export class MobileIntroAnimationModule extends BaseModule {
    * It should NOT be used for any other pages or sections.
    */
   async playExitAnimation(): Promise<void> {
-    console.log('[MobileIntro] playExitAnimation called - ONLY for home page / business card section');
+    this.log('[MobileIntro] playExitAnimation called - ONLY for home page / business card section');
     this.log('Playing paw exit animation (same as desktop)');
 
     try {
@@ -679,7 +679,7 @@ export class MobileIntroAnimationModule extends BaseModule {
       // We pass through to it since it now works on both mobile and desktop
       await desktopModule.playExitAnimation();
 
-      console.log('[MobileIntro] Paw exit animation complete');
+      this.log('[MobileIntro] Paw exit animation complete');
       this.log('Paw exit animation complete');
     } catch (error) {
       console.error('[MobileIntro] Failed to load desktop exit animation:', error);
@@ -783,9 +783,9 @@ export class MobileIntroAnimationModule extends BaseModule {
     }
 
     // Dispatch complete event for PageTransitionModule
-    console.log('[MobileIntro] Dispatching complete event');
+    this.log('[MobileIntro] Dispatching complete event');
     this.dispatchEvent('complete');
-    console.log('[MobileIntro] Complete event dispatched');
+    this.log('[MobileIntro] Complete event dispatched');
 
     this.log('Mobile intro animation complete');
   }

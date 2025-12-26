@@ -61,7 +61,7 @@ export class PageTransitionModule extends BaseModule {
   private isMobile: boolean = false;
 
   constructor(options: PageTransitionOptions = {}) {
-    super('PageTransitionModule', { debug: true, ...options });
+    super('PageTransitionModule', { debug: false, ...options });
 
     this.containerSelector = options.containerSelector || '#main-content';
     this.enableOnMobile = options.enableOnMobile || false;
@@ -76,20 +76,20 @@ export class PageTransitionModule extends BaseModule {
   override async init(): Promise<void> {
     await super.init();
 
-    console.log('[PageTransitionModule] Init starting...');
+    this.log('[PageTransitionModule] Init starting...');
 
     // Check if mobile
     this.isMobile = window.matchMedia('(max-width: 767px)').matches;
 
     // Skip on mobile unless explicitly enabled
     if (this.isMobile && !this.enableOnMobile) {
-      console.log('[PageTransitionModule] Mobile detected - virtual pages disabled');
+      this.log('[PageTransitionModule] Mobile detected - virtual pages disabled');
       return;
     }
 
     // Skip if reduced motion is preferred
     if (this.reducedMotion) {
-      console.log('[PageTransitionModule] Reduced motion preferred');
+      this.log('[PageTransitionModule] Reduced motion preferred');
     }
 
     this.setupPages();
@@ -99,7 +99,7 @@ export class PageTransitionModule extends BaseModule {
     // Wait for intro animation to complete before enabling page transitions
     this.listenForIntroComplete();
 
-    console.log('[PageTransitionModule] Init complete, pages:', this.pages.size);
+    this.log('[PageTransitionModule] Init complete, pages:', this.pages.size);
   }
 
   /**
@@ -247,22 +247,22 @@ export class PageTransitionModule extends BaseModule {
     // Listen for router navigation events
     this.on('router:navigate', ((event: CustomEvent) => {
       const { pageId } = event.detail || {};
-      console.log('[PageTransitionModule] router:navigate received', { pageId, introComplete: this.introComplete, currentPageId: this.currentPageId });
+      this.log('[PageTransitionModule] router:navigate received', { pageId, introComplete: this.introComplete, currentPageId: this.currentPageId });
 
       if (this.isTransitioning) {
-        console.log('[PageTransitionModule] Blocked - already transitioning');
+        this.log('[PageTransitionModule] Blocked - already transitioning');
         return;
       }
 
       if (pageId && this.introComplete) {
         if (pageId === this.currentPageId) {
-          console.log('[PageTransitionModule] Blocked - same page');
+          this.log('[PageTransitionModule] Blocked - same page');
           return;
         }
-        console.log('[PageTransitionModule] Starting transition to:', pageId);
+        this.log('[PageTransitionModule] Starting transition to:', pageId);
         this.transitionTo(pageId);
       } else if (!this.introComplete) {
-        console.log('[PageTransitionModule] Blocked - intro not complete');
+        this.log('[PageTransitionModule] Blocked - intro not complete');
       }
     }) as EventListener);
 
@@ -401,7 +401,7 @@ export class PageTransitionModule extends BaseModule {
    */
   private listenForIntroComplete(): void {
     const handleIntroComplete = (async () => {
-      console.log('[PageTransitionModule] Intro complete event received!');
+      this.log('[PageTransitionModule] Intro complete event received!');
       this.introComplete = true;
       await this.handleInitialPageAnimation();
       this.dispatchEvent('ready');
@@ -436,14 +436,14 @@ export class PageTransitionModule extends BaseModule {
    * Transition to a page with animations
    */
   async transitionTo(pageId: string): Promise<void> {
-    console.log('[PageTransitionModule] transitionTo called:', pageId);
+    this.log('[PageTransitionModule] transitionTo called:', pageId);
 
     if (pageId === this.currentPageId || this.isTransitioning) {
-      console.log('[PageTransitionModule] transitionTo blocked - same page or already transitioning');
+      this.log('[PageTransitionModule] transitionTo blocked - same page or already transitioning');
       return;
     }
     if (this.isMobile && !this.enableOnMobile) {
-      console.log('[PageTransitionModule] transitionTo blocked - mobile');
+      this.log('[PageTransitionModule] transitionTo blocked - mobile');
       return;
     }
 
@@ -451,12 +451,12 @@ export class PageTransitionModule extends BaseModule {
     const currentPage = this.pages.get(this.currentPageId);
 
     if (!targetPage || !targetPage.element) {
-      console.log('[PageTransitionModule] Target page not found:', pageId);
+      this.log('[PageTransitionModule] Target page not found:', pageId);
       return;
     }
 
     this.isTransitioning = true;
-    console.log(`[PageTransitionModule] Transitioning: ${this.currentPageId} -> ${pageId}`);
+    this.log(`Transitioning: ${this.currentPageId} -> ${pageId}`);
 
     // Hide intro page immediately to prevent flash during coyote paw animation
     if (pageId === 'intro') {
@@ -471,17 +471,17 @@ export class PageTransitionModule extends BaseModule {
 
     try {
       // Animate out current page
-      console.log('[PageTransitionModule] Step 1: Animating out current page');
+      this.log('[PageTransitionModule] Step 1: Animating out current page');
       if (this.currentPageId === 'intro') {
         await this.playIntroExitAnimation();
-        console.log('[PageTransitionModule] Intro exit animation complete');
+        this.log('[PageTransitionModule] Intro exit animation complete');
       } else if (currentPage && currentPage.element) {
         await this.animateOut(currentPage);
-        console.log('[PageTransitionModule] Page exit animation complete');
+        this.log('[PageTransitionModule] Page exit animation complete');
       }
 
       // Hide current page after animation
-      console.log('[PageTransitionModule] Step 2: Hiding current page');
+      this.log('[PageTransitionModule] Step 2: Hiding current page');
       if (currentPage && currentPage.element) {
         gsap.set(currentPage.element, { clearProps: 'all' });
         currentPage.element.classList.add('page-hidden');
@@ -489,7 +489,7 @@ export class PageTransitionModule extends BaseModule {
       }
 
       // Show and prepare target page
-      console.log('[PageTransitionModule] Step 3: Preparing target page');
+      this.log('[PageTransitionModule] Step 3: Preparing target page');
       if (pageId !== 'intro') {
         this.prepareTargetPage(targetPage, pageId);
       }
@@ -500,13 +500,13 @@ export class PageTransitionModule extends BaseModule {
       }
 
       // Animate in target page
-      console.log('[PageTransitionModule] Step 4: Animating in target page');
+      this.log('[PageTransitionModule] Step 4: Animating in target page');
       if (pageId === 'intro') {
         await this.playIntroEntryAnimation();
       } else {
         await this.animateIn(targetPage);
       }
-      console.log('[PageTransitionModule] Step 5: Animation complete');
+      this.log('[PageTransitionModule] Step 5: Animation complete');
 
       // Update state
       this.currentPageId = pageId;
@@ -574,7 +574,7 @@ export class PageTransitionModule extends BaseModule {
   private prepareTargetPage(targetPage: PageConfig, _pageId: string): void {
     if (!targetPage.element) return;
 
-    console.log('[PageTransitionModule] prepareTargetPage - before:', targetPage.element.className);
+    this.log('[PageTransitionModule] prepareTargetPage - before:', targetPage.element.className);
 
     // Update CSS classes for page visibility
     targetPage.element.classList.remove('page-hidden');
@@ -583,7 +583,7 @@ export class PageTransitionModule extends BaseModule {
     // Clear any conflicting inline styles from previous transitions
     gsap.set(targetPage.element, { clearProps: 'zIndex' });
 
-    console.log('[PageTransitionModule] prepareTargetPage - after:', targetPage.element.className);
+    this.log('[PageTransitionModule] prepareTargetPage - after:', targetPage.element.className);
   }
 
   /**
@@ -696,10 +696,10 @@ export class PageTransitionModule extends BaseModule {
    * Same animation for all content pages (about/contact/projects)
    */
   private async animateIn(page: PageConfig): Promise<void> {
-    console.log('[PageTransitionModule] animateIn called for:', page.id);
+    this.log('[PageTransitionModule] animateIn called for:', page.id);
 
     if (!page.element) {
-      console.log('[PageTransitionModule] animateIn - no element!');
+      this.log('[PageTransitionModule] animateIn - no element!');
       return;
     }
 
@@ -718,17 +718,17 @@ export class PageTransitionModule extends BaseModule {
     const contentEl = sectionEl.querySelector('.about-content, .contact-content, .projects-content') as HTMLElement;
 
     if (!contentEl) {
-      console.log('[PageTransitionModule] No content element found, skipping animation');
+      this.log('[PageTransitionModule] No content element found, skipping animation');
       return;
     }
 
-    console.log('[PageTransitionModule] Animating content element:', contentEl.className);
+    this.log('[PageTransitionModule] Animating content element:', contentEl.className);
 
     // Kill any existing animations
     gsap.killTweensOf(contentEl);
 
     return new Promise((resolve) => {
-      console.log('[PageTransitionModule] Starting gsap.fromTo animation');
+      this.log('[PageTransitionModule] Starting gsap.fromTo animation');
 
       // Use fromTo for guaranteed animation from blurry to clear
       gsap.fromTo(contentEl,
@@ -747,18 +747,18 @@ export class PageTransitionModule extends BaseModule {
           duration: 1.5,
           ease: 'power2.out',
           onStart: () => {
-            console.log('[PageTransitionModule] Animation STARTED - check element style now');
-            console.log('[PageTransitionModule] Current filter:', contentEl.style.filter);
+            this.log('[PageTransitionModule] Animation STARTED - check element style now');
+            this.log('[PageTransitionModule] Current filter:', contentEl.style.filter);
           },
           onUpdate: function () {
             // Log progress every ~25%
             const progress = this.progress();
             if (progress < 0.1 || (progress > 0.24 && progress < 0.26) || (progress > 0.49 && progress < 0.51) || (progress > 0.74 && progress < 0.76)) {
-              console.log('[PageTransitionModule] Animation progress:', `${Math.round(progress * 100)  }%`, 'filter:', contentEl.style.filter);
+              this.log('[PageTransitionModule] Animation progress:', `${Math.round(progress * 100)  }%`, 'filter:', contentEl.style.filter);
             }
           },
           onComplete: () => {
-            console.log('[PageTransitionModule] Animation COMPLETE');
+            this.log('[PageTransitionModule] Animation COMPLETE');
             gsap.set(contentEl, { clearProps: 'filter,scale,transformOrigin,opacity' });
             if (page.id === 'contact') {
               this.dispatchEvent('contact-page-ready', { pageId: page.id });

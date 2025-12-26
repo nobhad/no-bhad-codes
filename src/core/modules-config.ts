@@ -272,7 +272,7 @@ export function registerModules(debug: boolean = false): void {
           name: 'AdminDashboardModule'
         };
       }
-    },
+    }
   ];
 
   // Register modules in container

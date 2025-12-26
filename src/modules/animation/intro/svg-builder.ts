@@ -234,17 +234,20 @@ export function calculateSvgAlignment(
   const translateX = (cardLeftRelativeToOverlay - svgDisplayX) / viewBoxToPixelScale - SVG_CARD.x * scale;
   const translateY = (cardTopRelativeToOverlay - svgDisplayY) / viewBoxToPixelScale - SVG_CARD.y * scale;
 
-  console.log('[SVG Alignment] Pixel-perfect alignment:');
-  console.log('  elementUsed:', svgImage ? 'svg-image' : cardFront ? 'card-front' : 'business-card');
-  console.log('  overlayOffset:', overlayLeft.toFixed(2), ',', overlayTop.toFixed(2), overlayElement ? '(from overlay)' : '(none)');
-  console.log('  elementRect:', elementRect.width.toFixed(2), 'x', elementRect.height.toFixed(2), 'at', elementRect.left.toFixed(2), ',', elementRect.top.toFixed(2));
-  console.log('  contentRect:', actualCardRect.width.toFixed(2), 'x', actualCardRect.height.toFixed(2), 'at', actualCardRect.left.toFixed(2), ',', actualCardRect.top.toFixed(2));
-  console.log('  cardRelOverlay:', cardLeftRelativeToOverlay.toFixed(2), ',', cardTopRelativeToOverlay.toFixed(2));
-  console.log('  svgViewBox:', SVG_VIEWBOX.width, 'x', SVG_VIEWBOX.height, '(aspect:', svgAspectRatio.toFixed(4), ')');
-  console.log('  viewport/overlay:', viewportWidth, 'x', viewportHeight, '(aspect:', viewportAspectRatio.toFixed(4), ')');
-  console.log('  svgDisplay:', svgDisplayWidth.toFixed(2), 'x', svgDisplayHeight.toFixed(2), 'at', svgDisplayX.toFixed(2), ',', svgDisplayY.toFixed(2));
-  console.log('  transforms: scale=', scale.toFixed(6), 'translate=', translateX.toFixed(2), ',', translateY.toFixed(2));
-  console.log('  SVG_CARD:', SVG_CARD.x, ',', SVG_CARD.y, 'size:', SVG_CARD.width, 'x', SVG_CARD.height);
+  // Debug logging only in development
+  if (import.meta.env?.DEV) {
+    console.log('[SVG Alignment] Pixel-perfect alignment:');
+    console.log('  elementUsed:', svgImage ? 'svg-image' : cardFront ? 'card-front' : 'business-card');
+    console.log('  overlayOffset:', overlayLeft.toFixed(2), ',', overlayTop.toFixed(2), overlayElement ? '(from overlay)' : '(none)');
+    console.log('  elementRect:', elementRect.width.toFixed(2), 'x', elementRect.height.toFixed(2), 'at', elementRect.left.toFixed(2), ',', elementRect.top.toFixed(2));
+    console.log('  contentRect:', actualCardRect.width.toFixed(2), 'x', actualCardRect.height.toFixed(2), 'at', actualCardRect.left.toFixed(2), ',', actualCardRect.top.toFixed(2));
+    console.log('  cardRelOverlay:', cardLeftRelativeToOverlay.toFixed(2), ',', cardTopRelativeToOverlay.toFixed(2));
+    console.log('  svgViewBox:', SVG_VIEWBOX.width, 'x', SVG_VIEWBOX.height, '(aspect:', svgAspectRatio.toFixed(4), ')');
+    console.log('  viewport/overlay:', viewportWidth, 'x', viewportHeight, '(aspect:', viewportAspectRatio.toFixed(4), ')');
+    console.log('  svgDisplay:', svgDisplayWidth.toFixed(2), 'x', svgDisplayHeight.toFixed(2), 'at', svgDisplayX.toFixed(2), ',', svgDisplayY.toFixed(2));
+    console.log('  transforms: scale=', scale.toFixed(6), 'translate=', translateX.toFixed(2), ',', translateY.toFixed(2));
+    console.log('  SVG_CARD:', SVG_CARD.x, ',', SVG_CARD.y, 'size:', SVG_CARD.width, 'x', SVG_CARD.height);
+  }
 
   return {
     scale,

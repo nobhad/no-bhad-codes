@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** December 23, 2025
+**Last Updated:** December 25, 2025
 
 ## Table of Contents
 
@@ -718,11 +718,26 @@ src/styles/
 │   ├── business-card.css      # Business card component
 │   ├── intro-morph.css        # Intro animation overlay
 │   └── page-transitions.css   # Virtual page transition styles
+├── client-portal/             # Client Portal (modular - 15 files)
+│   ├── index.css              # Import orchestrator
+│   ├── components.css         # cp- prefixed reusable components
+│   ├── layout.css             # Dashboard layout, containers
+│   ├── sidebar.css            # Sidebar navigation
+│   ├── login.css              # Login form
+│   ├── dashboard.css          # Stats, activity, project cards
+│   ├── files.css              # File upload/management
+│   ├── messages.css           # Messaging system
+│   ├── invoices.css           # Invoice display
+│   ├── settings.css           # Settings, account views
+│   ├── projects.css           # Project navigation, details
+│   ├── views.css              # Content views, welcome, updates
+│   ├── responsive.css         # Tablet/desktop media queries
+│   └── mobile.css             # Mobile hamburger, overlay
 ├── pages/
-│   ├── client-portal.css      # Client Portal specific
 │   ├── client.css             # Client landing page
 │   ├── terminal-intake.css    # Terminal-style intake form
 │   ├── client-dashboard.css   # Client dashboard
+│   ├── client-portal-section.css # Portal section on main page
 │   ├── projects.css           # Projects page
 │   ├── admin.css              # Admin dashboard
 │   ├── contact.css            # Contact page
@@ -758,7 +773,9 @@ src/styles/
 /* ... other components */
 
 /* 6. Page-specific */
-@import './pages/client-portal.css';
+@import './client-portal/index.css';  /* Modular client portal */
+@import './pages/client.css';
+/* ... other pages */
 
 /* 7. Mobile overrides (last) */
 @import './mobile/index.css';
@@ -778,7 +795,7 @@ src/styles/
 - Use semantic class names
 - Group related styles together
 - Add comments for complex selectors
-- Use the standardized component classes defined at the top of client-portal.css
+- Use the standardized cp- component classes defined in `client-portal/components.css`
 
 ### Don'ts
 
@@ -875,9 +892,27 @@ This is intentional to maintain Client Portal styling consistency.
 | File | Lines | Status |
 |------|-------|--------|
 | `pages/admin.css` | 1820+ | Could be split by section (low priority) |
-| `pages/client-portal.css` | 3050+ | Complex but organized by section |
+| `client-portal/` | ~3500 | Split into 15 modular files (all <300 lines) |
 
-All navigation and form CSS files are now properly sized (<300 lines each).
+All navigation, form, and client portal CSS files are now properly sized (<300 lines each).
+
+**Client Portal Modular Structure (December 2025):**
+
+| File | Purpose |
+|------|---------|
+| `components.css` | cp- prefixed reusable components |
+| `layout.css` | Dashboard layout, containers |
+| `sidebar.css` | Sidebar navigation (with contrasting border) |
+| `login.css` | Login form |
+| `dashboard.css` | Stats, activity, project cards |
+| `files.css` | File upload/management |
+| `messages.css` | Messaging system |
+| `invoices.css` | Invoice display |
+| `settings.css` | Settings, account views |
+| `projects.css` | Project navigation, details |
+| `views.css` | Content views, welcome, updates |
+| `responsive.css` | Tablet/desktop media queries |
+| `mobile.css` | Mobile hamburger, overlay |
 
 ---
 

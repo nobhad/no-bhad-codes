@@ -191,7 +191,7 @@ export class IntroAnimationModule extends BaseModule {
   private cachedSvgText: string | null = null;
 
   constructor(options: ModuleOptions = {}) {
-    super('IntroAnimationModule', { debug: true, ...options });
+    super('IntroAnimationModule', { debug: false, ...options });
 
     // Bind methods to maintain correct 'this' context
     this.handleSkip = this.handleSkip.bind(this);
@@ -1280,14 +1280,14 @@ export class IntroAnimationModule extends BaseModule {
     this.resetState();
 
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
-    console.log('[IntroAnimation] playEntryAnimation called, isMobile:', isMobile, 'bypassMobileCheck:', bypassMobileCheck);
+    this.log('[IntroAnimation] playEntryAnimation called, isMobile:', isMobile, 'bypassMobileCheck:', bypassMobileCheck);
 
     if (!bypassMobileCheck && (isMobile || this.reducedMotion)) {
       this.log('Mobile/reduced motion - showing intro page directly');
 
       // On mobile, we need to make the intro page section visible first
       const introSection = document.querySelector('.business-card-section') as HTMLElement;
-      console.log('[IntroAnimation] Found intro section:', !!introSection);
+      this.log('[IntroAnimation] Found intro section:', !!introSection);
 
       if (introSection) {
         // Clear any hiding styles from exit animation
@@ -1299,7 +1299,7 @@ export class IntroAnimationModule extends BaseModule {
           visibility: 'visible',
           opacity: 1
         });
-        console.log('[IntroAnimation] Intro section shown');
+        this.log('[IntroAnimation] Intro section shown');
       }
 
       this.showIntroFallback();
