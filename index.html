@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="intro-loading" data-theme="light">
+<html lang="en" class="intro-loading">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -30,8 +30,12 @@
           visibility: hidden;
         }
       }
+      /* Hide body until theme is determined to prevent flash */
+      html:not([data-theme]) body {
+        visibility: hidden;
+      }
       body {
-        background-color: #e0e0e0; /* Light theme */
+        background-color: #e0e0e0; /* Light theme default */
       }
       html[data-theme="dark"] body {
         background-color: #2a2a2a; /* Dark theme */
