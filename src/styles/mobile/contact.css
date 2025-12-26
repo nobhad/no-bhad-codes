@@ -27,8 +27,10 @@
     flex-direction: column !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    padding: 2rem 1rem !important;
+    padding: 1rem 1rem 2rem 1rem !important;
     box-sizing: border-box !important;
+    overflow-y: auto !important; /* Enable scrolling if content overflows */
+    -webkit-overflow-scrolling: touch !important;
   }
 
   .contact-section h2 {
@@ -68,7 +70,7 @@
   /* SHOW contact options on mobile - user prefers this over card */
   p.contact-options {
     display: block !important;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     font-size: 0.95rem;
     color: var(--color-text-secondary);
     text-align: left;
@@ -118,7 +120,7 @@
 
   /* Top form field spacing */
   .contact-left .input-wrapper:first-child {
-    margin-top: 1rem;
+    margin-top: 0.5rem;
   }
 
   .input-item {
@@ -314,7 +316,7 @@
   }
 
   .contact-left .input-wrapper:first-child {
-    margin-top: 0.75rem;
+    margin-top: 0.25rem;
   }
 
   /* Card is hidden on mobile - no small screen rules needed */

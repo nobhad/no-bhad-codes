@@ -139,8 +139,7 @@
   .about-section .about-content {
     display: flex !important;
     flex-direction: column !important;
-    padding: 1.5rem 1rem 1rem 1rem !important;
-    padding-bottom: 50vh !important; /* FORCE overflow - half viewport padding */
+    padding: 1.5rem 1rem 2rem 1rem !important; /* Reduced bottom padding */
     gap: 1rem !important;
     max-width: 100% !important;
     width: 100% !important;
@@ -184,8 +183,8 @@
   .portfolio-section h2 {
     font-size: clamp(2.5rem, 10vw, 4rem);
     line-height: 1.1;
-    margin-top: 1rem;
-    margin-bottom: 1.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
     text-align: left;
   }
 
