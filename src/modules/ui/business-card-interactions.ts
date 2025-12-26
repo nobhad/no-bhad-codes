@@ -664,7 +664,7 @@ export class BusinessCardInteractions extends BaseModule {
 
     this.log('Playing wiggle animation');
 
-    // Create wiggle animation - more pronounced rotation with slight lift
+    // Create wiggle animation - gentle but noticeable
     this.wiggleTimeline = gsap.timeline({
       onComplete: () => {
         this.log('Wiggle animation completed');
@@ -673,68 +673,37 @@ export class BusinessCardInteractions extends BaseModule {
       }
     });
 
-    // Wiggle parameters - more noticeable
-    const wiggleAngle = 8; // degrees - more pronounced
-    const wiggleDuration = 0.08; // seconds per wiggle - snappier
+    // Wiggle parameters - balanced
+    const wiggleAngle = 5; // degrees
+    const wiggleDuration = 0.12; // seconds per wiggle
 
-    // Energetic wiggle sequence with slight tilt
+    // Gentle wiggle sequence
     this.wiggleTimeline
-      // Slight lift to draw attention
-      .to(this.businessCard, {
-        y: -5,
-        duration: 0.15,
-        ease: 'power2.out'
-      }, 0)
-      // First big wiggle
       .to(this.businessCardInner, {
         rotationY: this.currentRotationY - wiggleAngle,
-        rotationZ: -2,
         duration: wiggleDuration,
         ease: 'power1.inOut'
-      }, 0)
+      })
       .to(this.businessCardInner, {
         rotationY: this.currentRotationY + wiggleAngle,
-        rotationZ: 2,
-        duration: wiggleDuration,
-        ease: 'power1.inOut'
-      })
-      .to(this.businessCardInner, {
-        rotationY: this.currentRotationY - wiggleAngle * 0.8,
-        rotationZ: -1.5,
-        duration: wiggleDuration,
-        ease: 'power1.inOut'
-      })
-      .to(this.businessCardInner, {
-        rotationY: this.currentRotationY + wiggleAngle * 0.8,
-        rotationZ: 1.5,
         duration: wiggleDuration,
         ease: 'power1.inOut'
       })
       .to(this.businessCardInner, {
         rotationY: this.currentRotationY - wiggleAngle * 0.5,
-        rotationZ: -1,
         duration: wiggleDuration,
         ease: 'power1.inOut'
       })
       .to(this.businessCardInner, {
         rotationY: this.currentRotationY + wiggleAngle * 0.5,
-        rotationZ: 1,
         duration: wiggleDuration,
         ease: 'power1.inOut'
       })
-      // Settle back to center
       .to(this.businessCardInner, {
         rotationY: this.currentRotationY,
-        rotationZ: 0,
         duration: 0.15,
         ease: 'power2.out'
-      })
-      // Lower back down
-      .to(this.businessCard, {
-        y: 0,
-        duration: 0.2,
-        ease: 'power2.inOut'
-      }, '-=0.1');
+      });
   }
 
   /**
