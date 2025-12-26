@@ -220,12 +220,12 @@ export class PageTransitionModule extends BaseModule {
             });
           }
 
-          // hr scales in from left (already set to hidden position above)
+          // hr scales in from left - starts 0.1s after h2 for better visual sequence
           if (hr) {
             gsap.to(hr, {
               scale: 1,
               duration: this.TRANSITION_DURATION_LONG,
-              delay: 0.4,
+              delay: 0.5,
               ease: this.TRANSITION_EASE
             });
           }
@@ -277,12 +277,12 @@ export class PageTransitionModule extends BaseModule {
             });
           }
 
-          // hr scales in from left (already set to hidden position above)
+          // hr scales in from left - starts 0.1s after h2 for better visual sequence
           if (hr) {
             gsap.to(hr, {
               scale: 1,
               duration: this.TRANSITION_DURATION_LONG,
-              delay: 0.4,
+              delay: 0.5,
               ease: this.TRANSITION_EASE
             });
           }
@@ -317,12 +317,12 @@ export class PageTransitionModule extends BaseModule {
             });
           }
 
-          // hr scales in from left (already set to hidden position above)
+          // hr scales in from left - starts 0.1s after h2 for better visual sequence
           if (hr) {
             gsap.to(hr, {
               scale: 1,
               duration: this.TRANSITION_DURATION_LONG,
-              delay: 0.4,
+              delay: 0.5,
               ease: this.TRANSITION_EASE
             });
           }

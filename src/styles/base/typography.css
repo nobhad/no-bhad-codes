@@ -80,6 +80,7 @@ p {
 hr {
   border: none;
   height: 4px;
+  border-radius: 2px 0 4px 2px;
   background-color: var(--color-dark);
   margin: 0 0 1.5rem 0; /* No top margin, spacing below */
   width: 100%;

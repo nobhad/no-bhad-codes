@@ -509,12 +509,23 @@
   align-self: center;
 }
 
-/* Projects heading - matches about section h2 styling */
-/* Desktop: uses base typography.css h2 size and letter-spacing */
+/* Projects heading - matches about section spacing (about uses block layout, projects uses flex) */
+/* In about: h2 margin-bottom 1.5rem - hr margin-top 1rem = 0.5rem net gap */
+/* In projects (flex): h2 margin-bottom + gap 1rem - hr margin-top 1rem = net gap */
+/* So set h2 margin-bottom to 0.5rem to match about's 0.5rem net gap */
 .projects-section h2 {
-  margin-bottom: 1.5rem;
+  margin: 0;
+  margin-bottom: 0.5rem;
+  padding: 0;
   text-align: left;
   width: 100%;
+}
+
+/* hr - counteract flex gap to match about section spacing */
+.projects-section hr {
+  margin-top: -1rem;
+  margin-left: 0;
+  margin-right: auto;
 }
 
 /* WIP sign container */
@@ -522,11 +533,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100vw;
+  width: 100%;
   max-width: none;
   flex: 1;
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
+  overflow: visible;
 }
 
 /* WIP sign SVG */
@@ -543,8 +553,8 @@
 /* Desktop: Make SVG smaller */
 @media screen and (min-width: 768px) {
   .wip-sign {
-    width: 60vw;
-    max-width: 800px;
+    width: 50vw;
+    max-width: 650px;
   }
 }
 

@@ -68,20 +68,20 @@
     will-change: transform;
   }
 
-  /* About content container - centered in viewport with flip-clock setup */
+  /* About content container - fixed position from top for consistent transitions */
   .about-content {
     max-width: min(1000px, 90vw);
     width: 100%;
     margin: 0 auto;
     padding: 1rem;
+    padding-top: 5vh;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: flex-start;
     gap: 1rem;
-    /* Ensure content is vertically centered in viewport */
-    align-self: center;
+    align-self: start;
     /* Flip clock 3D setup */
     perspective: 1000px;
   }
@@ -91,6 +91,8 @@
     transform-origin: top center;
     transform-style: preserve-3d;
     backface-visibility: hidden;
+    margin: 0;
+    padding: 0;
   }
 
   /* Main content area (text + tech stack) */
@@ -99,6 +101,8 @@
     flex-direction: column;
     gap: 1rem;
     width: 100%;
+    margin: 0;
+    padding: 0;
   }
 
   /* About photo - desktop: float left of paragraphs */
