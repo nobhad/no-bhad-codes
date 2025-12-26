@@ -896,14 +896,50 @@ export class PageTransitionModule extends BaseModule {
           }, 0);
         }
       } else if (page.id === 'contact') {
-        const contactLayoutEl = page.element!.querySelector('.contact-layout') as HTMLElement;
+        // Get all contact form elements
+        const inputItems = page.element!.querySelectorAll('.input-item');
+        const submitButton = page.element!.querySelector('.submit-button') as HTMLElement;
+        const businessCard = page.element!.querySelector('.contact-card-column') as HTMLElement;
+        const contactOptions = page.element!.querySelector('.contact-options') as HTMLElement;
 
-        // Contact layout blurs out
-        if (contactLayoutEl) {
-          tl.to(contactLayoutEl, {
+        // Input fields drop out with staggered delays
+        if (inputItems.length > 0) {
+          inputItems.forEach((item, index) => {
+            const el = item as HTMLElement;
+            tl.to(el, {
+              yPercent: 105,
+              duration: 0.5,
+              ease: this.TRANSITION_EASE
+            }, index * 0.05); // 0ms, 0.05s, 0.1s, 0.15s stagger
+          });
+        }
+
+        // Submit button slides out to right (0.8s duration, 0ms delay)
+        if (submitButton) {
+          tl.to(submitButton, {
+            x: 800,
             opacity: 0,
-            filter: `blur(${this.BLUR_AMOUNT}px)`,
-            duration: this.TRANSITION_DURATION,
+            duration: 0.8,
+            ease: this.TRANSITION_EASE
+          }, 0);
+        }
+
+        // Contact options text fades out with blur (0.5s duration, 0ms delay)
+        if (contactOptions) {
+          tl.to(contactOptions, {
+            opacity: 0,
+            filter: 'blur(8px)',
+            duration: 0.5,
+            ease: this.TRANSITION_EASE
+          }, 0);
+        }
+
+        // Business card column fades out with blur (0.5s duration, 0ms delay)
+        if (businessCard) {
+          tl.to(businessCard, {
+            opacity: 0,
+            filter: 'blur(8px)',
+            duration: 0.5,
             ease: this.TRANSITION_EASE
           }, 0);
         }
@@ -1075,43 +1111,87 @@ export class PageTransitionModule extends BaseModule {
       }
     }
 
-    // === CONTACT PAGE: UNIFORM h2/hr + blur-in content ===
+    // === CONTACT PAGE: Detailed staggered entry animations ===
     if (page.id === 'contact') {
-      const contactLayout = sectionEl.querySelector('.contact-layout') as HTMLElement;
+      // Get all contact form elements
+      const inputItems = sectionEl.querySelectorAll('.input-item');
+      const submitButton = sectionEl.querySelector('.submit-button') as HTMLElement;
+      const businessCard = sectionEl.querySelector('.contact-card-column') as HTMLElement;
+      const contactOptions = sectionEl.querySelector('.contact-options') as HTMLElement;
 
-      // === UNIFORM: h2 drops in from above ===
+      // h2 drops in from -110% (0.5s duration, 0.4s delay)
       if (h2) {
-        gsap.set(h2, { yPercent: -105, clipPath: 'inset(0 0 0 0)' });
+        gsap.set(h2, { yPercent: -110, clipPath: 'inset(0 0 0 0)' });
         gsap.to(h2, {
           yPercent: 0,
-          duration: this.TRANSITION_DURATION,
+          duration: 0.5,
           delay: 0.4,
           ease: this.TRANSITION_EASE
         });
       }
 
-      // === UNIFORM: hr scales in from bottom left ===
+      // hr scales in from left (0.8s duration, 0.4s delay)
       if (hr) {
-        gsap.set(hr, { scale: 0, transformOrigin: 'bottom left' });
+        gsap.set(hr, { scaleX: 0, transformOrigin: 'left center' });
         gsap.to(hr, {
-          scale: 1,
-          duration: this.TRANSITION_DURATION_LONG,
+          scaleX: 1,
+          duration: 0.8,
           delay: 0.4,
           ease: this.TRANSITION_EASE
         });
       }
 
-      // Contact layout blurs in
-      if (contactLayout) {
-        gsap.set(contactLayout, {
-          opacity: 0,
-          filter: `blur(${this.BLUR_AMOUNT}px)`
+      // Input fields drop in with staggered delays
+      // Name: 0.5s, Company/Email: 0.6s, Email: 0.7s (based on order in DOM)
+      if (inputItems.length > 0) {
+        inputItems.forEach((item, index) => {
+          const el = item as HTMLElement;
+          const wrapper = el.closest('.input-wrapper') as HTMLElement;
+          if (wrapper) {
+            gsap.set(wrapper, { overflow: 'hidden' });
+          }
+          gsap.set(el, { yPercent: -105 });
+          gsap.to(el, {
+            yPercent: 0,
+            duration: 0.5,
+            delay: 0.5 + (index * 0.1), // 0.5s, 0.6s, 0.7s, 0.8s
+            ease: this.TRANSITION_EASE
+          });
         });
-        gsap.to(contactLayout, {
+      }
+
+      // Submit button slides in from right (0.8s duration, 0.8s delay)
+      if (submitButton) {
+        gsap.set(submitButton, { x: 800, opacity: 0 });
+        gsap.to(submitButton, {
+          x: 0,
+          opacity: 1,
+          duration: 0.8,
+          delay: 0.8,
+          ease: this.TRANSITION_EASE
+        });
+      }
+
+      // Contact options text fades in with blur (0.5s duration, 1.2s delay)
+      if (contactOptions) {
+        gsap.set(contactOptions, { opacity: 0, filter: 'blur(8px)' });
+        gsap.to(contactOptions, {
           opacity: 1,
           filter: 'blur(0px)',
-          duration: this.TRANSITION_DURATION_LONG,
-          delay: 0.6,
+          duration: 0.5,
+          delay: 1.2,
+          ease: this.TRANSITION_EASE
+        });
+      }
+
+      // Business card column fades in with blur (0.5s duration, 1.2s delay)
+      if (businessCard) {
+        gsap.set(businessCard, { opacity: 0, filter: 'blur(8px)' });
+        gsap.to(businessCard, {
+          opacity: 1,
+          filter: 'blur(0px)',
+          duration: 0.5,
+          delay: 1.2,
           ease: this.TRANSITION_EASE
         });
       }
@@ -1139,22 +1219,27 @@ export class PageTransitionModule extends BaseModule {
     // Contact elements
     const h2 = contactEl.querySelector('h2') as HTMLElement;
     const hr = contactEl.querySelector('hr') as HTMLElement;
-    const contactLayout = contactEl.querySelector('.contact-layout') as HTMLElement;
+    const inputItems = contactEl.querySelectorAll('.input-item');
+    const submitButton = contactEl.querySelector('.submit-button') as HTMLElement;
+    const businessCard = contactEl.querySelector('.contact-card-column') as HTMLElement;
+    const contactOptions = contactEl.querySelector('.contact-options') as HTMLElement;
 
     // Prepare contact page (visible but elements hidden in starting positions)
     contactEl.classList.remove('page-hidden');
     contactEl.classList.add('page-active');
     gsap.set(contactEl, { opacity: 1, visibility: 'visible' });
 
-    // Clear any lingering exit properties, then set starting positions
-    if (h2) gsap.set(h2, { clearProps: 'clipPath,yPercent', yPercent: -105, clipPath: 'inset(0 0 0 0)' }); // drop-in start
-    if (hr) gsap.set(hr, { clearProps: 'scale', scale: 0, transformOrigin: 'bottom left' }); // scale-in-left start
-    if (contactLayout) {
-      gsap.set(contactLayout, {
-        opacity: 0,
-        filter: `blur(${this.BLUR_AMOUNT}px)` // blur-in start
-      });
-    }
+    // Clear and set starting positions for all contact elements
+    if (h2) gsap.set(h2, { clearProps: 'clipPath,yPercent', yPercent: -110, clipPath: 'inset(0 0 0 0)' });
+    if (hr) gsap.set(hr, { clearProps: 'scaleX', scaleX: 0, transformOrigin: 'left center' });
+    inputItems.forEach((item) => {
+      const wrapper = (item as HTMLElement).closest('.input-wrapper') as HTMLElement;
+      if (wrapper) gsap.set(wrapper, { overflow: 'hidden' });
+      gsap.set(item, { yPercent: -105 });
+    });
+    if (submitButton) gsap.set(submitButton, { x: 800, opacity: 0 });
+    if (contactOptions) gsap.set(contactOptions, { opacity: 0, filter: 'blur(8px)' });
+    if (businessCard) gsap.set(businessCard, { opacity: 0, filter: 'blur(8px)' });
 
     const overlapOffset = 0.2; // Start contact entry before about exit finishes
 
@@ -1182,35 +1267,64 @@ export class PageTransitionModule extends BaseModule {
         }, 0);
       }
 
-      // === CONTACT ENTRY (overlapped - style) ===
+      // === CONTACT ENTRY (overlapped - detailed staggered animations) ===
       const entryStart = this.TRANSITION_DURATION - overlapOffset;
 
-      // h2 drops in (drop-in)
+      // h2 drops in from -110% (0.5s duration)
       if (h2) {
         tl.to(h2, {
           yPercent: 0,
-          duration: this.TRANSITION_DURATION,
+          duration: 0.5,
           ease: this.TRANSITION_EASE
         }, entryStart);
       }
 
-      // hr scales in from left (scale-in-left)
+      // hr scales in from left (0.8s duration)
       if (hr) {
         tl.to(hr, {
-          scale: 1,
-          duration: this.TRANSITION_DURATION_LONG,
+          scaleX: 1,
+          duration: 0.8,
           ease: this.TRANSITION_EASE
         }, entryStart);
       }
 
-      // Contact layout blurs in (blur-in)
-      if (contactLayout) {
-        tl.to(contactLayout, {
+      // Input fields drop in with staggered delays
+      inputItems.forEach((item, index) => {
+        tl.to(item, {
+          yPercent: 0,
+          duration: 0.5,
+          ease: this.TRANSITION_EASE
+        }, entryStart + 0.1 + (index * 0.1));
+      });
+
+      // Submit button slides in from right
+      if (submitButton) {
+        tl.to(submitButton, {
+          x: 0,
+          opacity: 1,
+          duration: 0.8,
+          ease: this.TRANSITION_EASE
+        }, entryStart + 0.4);
+      }
+
+      // Contact options text fades in with blur
+      if (contactOptions) {
+        tl.to(contactOptions, {
           opacity: 1,
           filter: 'blur(0px)',
-          duration: this.TRANSITION_DURATION_LONG,
+          duration: 0.5,
           ease: this.TRANSITION_EASE
-        }, entryStart + 0.2);
+        }, entryStart + 0.8);
+      }
+
+      // Business card fades in with blur
+      if (businessCard) {
+        tl.to(businessCard, {
+          opacity: 1,
+          filter: 'blur(0px)',
+          duration: 0.5,
+          ease: this.TRANSITION_EASE
+        }, entryStart + 0.8);
       }
 
       // Hide about page partway through
@@ -1239,7 +1353,10 @@ export class PageTransitionModule extends BaseModule {
     // Contact elements
     const h2 = contactEl.querySelector('h2') as HTMLElement;
     const hr = contactEl.querySelector('hr') as HTMLElement;
-    const contactLayout = contactEl.querySelector('.contact-layout') as HTMLElement;
+    const inputItems = contactEl.querySelectorAll('.input-item');
+    const submitButton = contactEl.querySelector('.submit-button') as HTMLElement;
+    const businessCard = contactEl.querySelector('.contact-card-column') as HTMLElement;
+    const contactOptions = contactEl.querySelector('.contact-options') as HTMLElement;
 
     // About elements
     const textWrapper = aboutEl.querySelector('.about-text-wrapper') as HTMLElement;
@@ -1273,34 +1390,63 @@ export class PageTransitionModule extends BaseModule {
     await new Promise<void>((resolve) => {
       const tl = gsap.timeline({ onComplete: resolve });
 
-      // === CONTACT EXIT (GSAP clipPath for clipping) ===
-      // h2 drops out with clipPath
+      // === CONTACT EXIT (detailed staggered animations) ===
+      // h2 drops out with clipPath (0.5s duration, 0ms delay)
       if (h2) {
-        gsap.set(h2, { clipPath: 'inset(0 0 0 0)' }); // Reset before animating out
+        gsap.set(h2, { clipPath: 'inset(0 0 0 0)' });
         tl.to(h2, {
           yPercent: 105,
           clipPath: 'inset(100% 0 0 0)',
-          duration: this.TRANSITION_DURATION,
+          duration: 0.5,
           ease: this.TRANSITION_EASE
         }, 0);
       }
 
-      // hr scales out from bottom left
+      // hr scales out from left (0.5s duration, 0ms delay)
       if (hr) {
-        gsap.set(hr, { transformOrigin: 'bottom left' });
+        gsap.set(hr, { transformOrigin: 'left center' });
         tl.to(hr, {
-          scale: 0,
-          duration: this.TRANSITION_DURATION,
+          scaleX: 0,
+          duration: 0.5,
           ease: this.TRANSITION_EASE
         }, 0);
       }
 
-      // Contact layout blurs out
-      if (contactLayout) {
-        tl.to(contactLayout, {
+      // Input fields drop out with staggered delays
+      inputItems.forEach((item, index) => {
+        tl.to(item, {
+          yPercent: 105,
+          duration: 0.5,
+          ease: this.TRANSITION_EASE
+        }, index * 0.05);
+      });
+
+      // Submit button slides out to right (0.8s duration, 0ms delay)
+      if (submitButton) {
+        tl.to(submitButton, {
+          x: 800,
           opacity: 0,
-          filter: `blur(${this.BLUR_AMOUNT}px)`,
-          duration: this.TRANSITION_DURATION,
+          duration: 0.8,
+          ease: this.TRANSITION_EASE
+        }, 0);
+      }
+
+      // Contact options text fades out with blur (0.5s duration, 0ms delay)
+      if (contactOptions) {
+        tl.to(contactOptions, {
+          opacity: 0,
+          filter: 'blur(8px)',
+          duration: 0.5,
+          ease: this.TRANSITION_EASE
+        }, 0);
+      }
+
+      // Business card fades out with blur (0.5s duration, 0ms delay)
+      if (businessCard) {
+        tl.to(businessCard, {
+          opacity: 0,
+          filter: 'blur(8px)',
+          duration: 0.5,
           ease: this.TRANSITION_EASE
         }, 0);
       }
