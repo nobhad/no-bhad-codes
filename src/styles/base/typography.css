@@ -76,6 +76,34 @@ p {
   margin: 0;
 }
 
+/* Horizontal rule styling */
+hr {
+  border: none;
+  height: 4px;
+  background-color: var(--color-dark);
+  margin: 0 0 1.5rem 0; /* No top margin, spacing below */
+  width: 100%;
+}
+
+/* Section headings with hr - uniform implementation */
+section h2 {
+  text-align: left;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+section h2 + hr {
+  margin-top: -1rem; /* Counteract parent flex gap */
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* Dark mode hr */
+html[data-theme="dark"] hr {
+  background-color: var(--color-light);
+}
+
 /* Typography utility classes */
 .text-xs {
   font-size: clamp(0.75rem, 1.5vw, 0.875rem);

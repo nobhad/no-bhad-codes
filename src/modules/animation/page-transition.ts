@@ -24,11 +24,6 @@ import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
 
-// Animation timing constants
-const ANIMATION_DURATION_OUT = 0.4;
-const BLUR_AMOUNT_DESKTOP = 40;
-const BLUR_AMOUNT_MOBILE = 10;
-
 interface PageConfig {
   id: string;
   route: string;
@@ -96,6 +91,10 @@ export class PageTransitionModule extends BaseModule {
     this.setupPages();
     this.setupTransitionOverlay();
     this.setupEventListeners();
+
+    // Mark JS as ready - this disables critical CSS page visibility rules
+    // and lets JavaScript control page transitions
+    document.documentElement.classList.add('js-ready');
 
     // Wait for intro animation to complete before enabling page transitions
     this.listenForIntroComplete();
@@ -177,7 +176,8 @@ export class PageTransitionModule extends BaseModule {
    */
   private initializePageStates(): void {
     const hash = window.location.hash;
-    const initialPageId = this.isMobile ? 'intro' : (this.getPageIdFromHash(hash) || 'intro');
+    // Respect hash on both mobile and desktop - no more forcing intro on mobile
+    const initialPageId = this.getPageIdFromHash(hash) || 'intro';
 
     this.log(`Initializing page states, hash: ${hash}, initialPageId: ${initialPageId}`);
 
@@ -191,6 +191,35 @@ export class PageTransitionModule extends BaseModule {
         gsap.set(page.element, { opacity: 1, filter: 'none', visibility: 'visible' });
         this.currentPageId = id;
         this.log(`Showing initial page: ${id}`);
+
+        // Play flip-clock animation for about page on initial load
+        if (id === 'about') {
+          const textWrapper = page.element.querySelector('.about-text-wrapper') as HTMLElement;
+          const techStack = page.element.querySelector('.tech-stack-desktop') as HTMLElement;
+
+          // Hide tech stack initially - flipped down, hinged at bottom
+          if (techStack) {
+            gsap.set(techStack, {
+              rotateX: 90,
+              opacity: 1,
+              transformOrigin: 'bottom center',
+              transformPerspective: 1200
+            });
+          }
+
+          // Run both animations at the same time
+          if (textWrapper) {
+            this.playFlipClockAnimation(textWrapper);
+          }
+          if (techStack) {
+            gsap.to(techStack, {
+              rotateX: 0,
+              duration: 0.8,
+              delay: 0.5,
+              ease: 'power2.out'
+            });
+          }
+        }
       } else {
         // Hide all other pages
         gsap.set(page.element, { clearProps: 'all' });
@@ -198,10 +227,6 @@ export class PageTransitionModule extends BaseModule {
         page.element.classList.remove('page-active');
       }
     });
-
-    if (this.isMobile && hash && hash !== '#/' && hash !== '#') {
-      window.history.replaceState({}, '', '#/');
-    }
 
     this.log(`Initial page set: ${this.currentPageId}`);
   }
@@ -674,7 +699,7 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
-   * Animate page out - SIMPLE blur + fade
+   * Animate page out - instant hide (blur/fade disabled)
    * Same animation for all content pages (about/contact/projects)
    */
   private async animateOut(page: PageConfig): Promise<void> {
@@ -682,25 +707,12 @@ export class PageTransitionModule extends BaseModule {
 
     const el = page.element;
 
-    if (this.reducedMotion) {
-      gsap.set(el, { opacity: 0 });
-      return;
-    }
-
-    return new Promise((resolve) => {
-      const blurAmount = this.isMobile ? BLUR_AMOUNT_MOBILE : BLUR_AMOUNT_DESKTOP;
-      gsap.to(el, {
-        opacity: 0,
-        filter: `blur(${blurAmount}px)`,
-        duration: ANIMATION_DURATION_OUT,
-        ease: 'power2.in',
-        onComplete: resolve
-      });
-    });
+    // Instant hide - no blur/fade animation
+    gsap.set(el, { opacity: 0, visibility: 'hidden' });
   }
 
   /**
-   * Animate page in - blur effect on CONTENT (not section)
+   * Animate page in - instant show (blur/fade disabled)
    * Same animation for all content pages (about/contact/projects)
    */
   private async animateIn(page: PageConfig): Promise<void> {
@@ -713,62 +725,84 @@ export class PageTransitionModule extends BaseModule {
 
     const sectionEl = page.element;
 
-    // Step 1: Update CSS classes to show the section
+    // Update CSS classes to show the section
     sectionEl.classList.remove('page-hidden');
     sectionEl.classList.add('page-active');
 
-    // Handle reduced motion
-    if (page.skipAnimation || this.reducedMotion) {
-      return;
-    }
+    // Instant show section
+    gsap.set(sectionEl, { opacity: 1, visibility: 'visible' });
 
-    // Find the content element inside the section
-    const contentEl = sectionEl.querySelector('.about-content, .contact-content, .projects-content') as HTMLElement;
+    // About page: flip-clock animation for text wrapper (GIF + text) + tech stack slide
+    if (page.id === 'about') {
+      const textWrapper = sectionEl.querySelector('.about-text-wrapper') as HTMLElement;
+      const techStack = sectionEl.querySelector('.tech-stack-desktop') as HTMLElement;
 
-    if (!contentEl) {
-      this.log('[PageTransitionModule] No content element found, skipping animation');
-      return;
-    }
-
-    this.log('[PageTransitionModule] Animating content element:', contentEl.className);
-
-    // Kill any existing animations
-    gsap.killTweensOf(contentEl);
-
-    return new Promise((resolve) => {
-      this.log('[PageTransitionModule] Starting gsap.fromTo animation');
-
-      // Mobile: Use lighter blur for better performance
-      // Desktop: Use full blur + scale
-      const blurAmount = this.isMobile ? 15 : 50;
-      const useScale = !this.isMobile;
-
-      gsap.fromTo(contentEl,
-        {
-          opacity: 0.5,
-          filter: `blur(${blurAmount}px)`,
-          scale: useScale ? 0.8 : 1,
-          transformOrigin: 'center center'
-        },
-        {
+      // Hide tech stack initially - flipped down, hinged at bottom
+      if (techStack) {
+        gsap.set(techStack, {
+          rotateX: 90,
           opacity: 1,
-          filter: 'blur(0px)',
-          scale: 1,
-          duration: this.isMobile ? 0.4 : ANIMATION_CONSTANTS.DURATIONS.PAGE_TRANSITION_IN,
-          ease: 'power2.out',
-          onStart: () => {
-            this.log('[PageTransitionModule] Animation STARTED');
-          },
-          onComplete: () => {
-            this.log('[PageTransitionModule] Animation COMPLETE');
-            gsap.set(contentEl, { clearProps: 'filter,scale,transformOrigin,opacity' });
-            if (page.id === 'contact') {
-              this.dispatchEvent('contact-page-ready', { pageId: page.id });
+          transformOrigin: 'bottom center',
+          transformPerspective: 1200
+        });
+      }
+
+      // Run both animations at the same time
+      if (textWrapper) {
+        this.playFlipClockAnimation(textWrapper);
+      }
+      if (techStack) {
+        gsap.to(techStack, {
+          rotateX: 0,
+          duration: 0.8,
+          delay: 0.5,
+          ease: 'power2.out'
+        });
+      }
+    }
+
+    // Dispatch contact page ready event if needed
+    if (page.id === 'contact') {
+      this.dispatchEvent('contact-page-ready', { pageId: page.id });
+    }
+  }
+
+  /**
+   * Play flip-clock animation - element flips down from behind the hr
+   */
+  private async playFlipClockAnimation(element: HTMLElement): Promise<void> {
+    return new Promise((resolve) => {
+      // Start hidden behind (flipped back) - hinged at top edge
+      gsap.set(element, {
+        rotateX: -90,
+        opacity: 1,
+        transformOrigin: 'top center',
+        transformPerspective: 1200
+      });
+
+      // Flip down into view - swings out from behind (delay to wait for exit)
+      gsap.to(element, {
+        rotateX: 0,
+        duration: 0.8,
+        delay: 0.5,
+        ease: 'power2.out',
+        onComplete: () => {
+          // Small bounce/settle at the end
+          gsap.to(element, {
+            rotateX: 2,
+            duration: 0.08,
+            ease: 'power1.out',
+            onComplete: () => {
+              gsap.to(element, {
+                rotateX: 0,
+                duration: 0.08,
+                ease: 'power1.in',
+                onComplete: resolve
+              });
             }
-            resolve();
-          }
+          });
         }
-      );
+      });
     });
   }
 

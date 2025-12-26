@@ -806,9 +806,9 @@ html[data-theme="dark"] .menu-link-heading {
   text-shadow: 0 1em 0 var(--color-neutral-300);
 }
 
-/* Dark mode panel color swaps - keep green, swap the other two */
+/* Dark mode panel color swaps - use darker bg, keep green, swap the other two */
 html[data-theme="dark"] .bg-panel {
-  background-color: var(--color-neutral-300);
+  background-color: #2a2a2a; /* Darker than page background #333333 */
 }
 
 html[data-theme="dark"] .bg-panel.first {

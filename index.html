@@ -2,10 +2,11 @@
 <html lang="en" class="intro-loading">
   <head>
     <meta charset="UTF-8" />
-    <!-- CRITICAL: Theme detection MUST run BEFORE any CSS to prevent flash -->
+    <!-- CRITICAL: Theme + Page detection MUST run BEFORE any CSS to prevent flash -->
     <script>
       (function () {
         try {
+          // Theme detection
           var savedTheme = localStorage.getItem('theme');
           var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
           var theme = savedTheme || (systemDark ? 'dark' : 'light');
@@ -14,6 +15,22 @@
           var themeColor = theme === 'dark' ? '#333333' : '#f8f5f4';
           var meta = document.querySelector('meta[name="theme-color"]');
           if (meta) meta.setAttribute('content', themeColor);
+
+          // Page detection - determine which page to show based on hash
+          var hash = window.location.hash;
+          var pageId = 'intro'; // default
+          if (hash === '#/about') pageId = 'about';
+          else if (hash === '#/contact') pageId = 'contact';
+          else if (hash === '#/projects') pageId = 'projects';
+
+          // Store for CSS to use via data attribute
+          document.documentElement.setAttribute('data-initial-page', pageId);
+
+          // If not on intro page, skip intro animation
+          if (pageId !== 'intro') {
+            document.documentElement.classList.remove('intro-loading');
+            document.documentElement.classList.add('intro-complete', 'intro-finished');
+          }
         } catch (e) {
           document.documentElement.setAttribute('data-theme', 'light');
         }
@@ -112,6 +129,35 @@
         opacity: 1 !important;
         visibility: visible !important;
       }
+
+      /* CRITICAL: Hash-based initial page visibility - prevents flash on refresh */
+      /* Only applies before JS initializes (html has data-initial-page but not .js-ready) */
+      /* When on intro page (default), show intro, hide others */
+      html[data-initial-page="intro"]:not(.js-ready) #intro { display: grid !important; opacity: 1 !important; visibility: visible !important; }
+      html[data-initial-page="intro"]:not(.js-ready) #about,
+      html[data-initial-page="intro"]:not(.js-ready) #contact,
+      html[data-initial-page="intro"]:not(.js-ready) #projects { display: none !important; }
+
+      /* When on about page, show about, hide others */
+      html[data-initial-page="about"]:not(.js-ready) #about { display: grid !important; opacity: 1 !important; visibility: visible !important; }
+      html[data-initial-page="about"]:not(.js-ready) #intro,
+      html[data-initial-page="about"]:not(.js-ready) #contact,
+      html[data-initial-page="about"]:not(.js-ready) #projects { display: none !important; }
+      html[data-initial-page="about"]:not(.js-ready) .intro-morph-overlay { display: none !important; }
+
+      /* When on contact page, show contact, hide others */
+      html[data-initial-page="contact"]:not(.js-ready) #contact { display: grid !important; opacity: 1 !important; visibility: visible !important; }
+      html[data-initial-page="contact"]:not(.js-ready) #intro,
+      html[data-initial-page="contact"]:not(.js-ready) #about,
+      html[data-initial-page="contact"]:not(.js-ready) #projects { display: none !important; }
+      html[data-initial-page="contact"]:not(.js-ready) .intro-morph-overlay { display: none !important; }
+
+      /* When on projects page, show projects, hide others */
+      html[data-initial-page="projects"]:not(.js-ready) #projects { display: grid !important; opacity: 1 !important; visibility: visible !important; }
+      html[data-initial-page="projects"]:not(.js-ready) #intro,
+      html[data-initial-page="projects"]:not(.js-ready) #about,
+      html[data-initial-page="projects"]:not(.js-ready) #contact { display: none !important; }
+      html[data-initial-page="projects"]:not(.js-ready) .intro-morph-overlay { display: none !important; }
     </style>
 
     <!-- SEO -->
@@ -425,14 +471,14 @@
 
         <!-- Navigation links below business card -->
         <nav class="intro-nav" aria-label="Page navigation">
-          <a href="#/about" class="intro-nav-link" data-nav-link>ABOUT</a>
+          <a href="#/projects" class="intro-nav-link" data-nav-link>MY WORK</a>
           <span class="intro-nav-separator" aria-hidden="true"></span>
-          <a href="#/contact" class="intro-nav-link" data-nav-link>CONTACT</a>
+          <a href="#/contact" class="intro-nav-link" data-nav-link>LET'S TALK</a>
         </nav>
       </section>
 
       <!-- HERO SECTION (order: 2) -->
-      <section id="hero" class="hero-section page-hidden" data-page="hero" style="display:none">
+      <section id="hero" class="hero-section page-hidden" data-page="hero">
         <svg viewBox="0 0 1280 720" class="text-animation-svg">
           <defs>
             <mask id="maskLeft">
@@ -458,14 +504,15 @@
       </section>
 
       <!-- ABOUT SECTION (order: 3) -->
-      <section id="about" class="about-section page-hidden" data-page="about" style="display:none">
+      <section id="about" class="about-section page-hidden" data-page="about">
         <div class="about-content">
           <div class="about-main">
             <div class="about-text-wrapper">
               <h2>about</h2>
+              <hr>
               <img src="/images/photobooth_loop.gif" alt="Coyote the dog" class="about-photo" />
               <p>
-                I'm a creative full-stack developer with a background in dog care and resale. Coding lets me utilize my love for tinkering and problem-solving by combining clean code with good design.
+                Hi, I'm Noelle, a creative full-stack developer based in the Boston, MA aread.  Coding lets me utilize my love for tinkering and problem-solving by combining clean code with good design.
                 I work with modern frameworks, build type-safe apps, set up scalable backends, and make sure the UI actually feels nice to use.
               </p>
 
@@ -474,7 +521,7 @@
               </p>
 
               <p>
-                Currently based in the Boston, MA area and actively seeking web development opportunities.
+                I am actively seeking both local and remote web development opportunities.
               </p>
             </div>
 
@@ -497,10 +544,11 @@
       </section>
 
       <!-- PROJECTS SECTION (order: 4.5) -->
-      <section id="projects" class="projects-section page-hidden" data-page="projects" style="display:none">
+      <section id="projects" class="projects-section page-hidden" data-page="projects">
 
         <div class="projects-content">
           <h2>projects</h2>
+          <hr>
           <div class="wip-sign-container">
             <svg id="Layer_3" data-name="Layer 3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1713.38 1142.26" class="wip-sign" aria-label="404 Work In Progress sign">
               <defs>
@@ -580,10 +628,11 @@
       </section>
 
       <!-- CONTACT SECTION (order: 5) -->
-      <section id="contact" class="contact-section page-hidden" data-page="contact" style="display:none">
+      <section id="contact" class="contact-section page-hidden" data-page="contact">
 
         <div class="contact-content">
         <h2>contact</h2>
+        <hr>
 
         <!-- Two-column layout -->
         <div class="contact-layout">

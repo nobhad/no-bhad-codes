@@ -68,7 +68,7 @@
     will-change: transform;
   }
 
-  /* About content container - centered in viewport */
+  /* About content container - centered in viewport with flip-clock setup */
   .about-content {
     max-width: min(1000px, 90vw);
     width: 100%;
@@ -82,6 +82,15 @@
     gap: 1rem;
     /* Ensure content is vertically centered in viewport */
     align-self: center;
+    /* Flip clock 3D setup */
+    perspective: 1000px;
+  }
+
+  /* About text wrapper - flip clock animation target */
+  .about-text-wrapper {
+    transform-origin: top center;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
   }
 
   /* Main content area (text + tech stack) */
