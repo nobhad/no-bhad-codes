@@ -297,8 +297,8 @@ export class NavigationModule extends BaseModule {
     // Faster opening sequence
     tl.set(this.nav, { display: 'block' })
       .set(document.querySelector('.menu'), { xPercent: 0 }, '<')
-      // Hide fade targets initially
-      .set(fadeTargets, { autoAlpha: 0, yPercent: 50 })
+      // Hide fade targets initially (social links container)
+      .set(fadeTargets, { autoAlpha: 0 })
       .fromTo(
         this.menuButtonTexts,
         { yPercent: 0 },
@@ -318,13 +318,8 @@ export class NavigationModule extends BaseModule {
         { yPercent: 0, autoAlpha: 1, stagger: 0.04, duration: 0.5 },
         '<+=0.25'
       )
-      // Animate social links after menu links (Osmo pattern)
-      .fromTo(
-        fadeTargets,
-        { autoAlpha: 0, yPercent: 50 },
-        { autoAlpha: 1, yPercent: 0, stagger: 0.04, duration: 0.4 },
-        '<+=0.2'
-      );
+      // Animate social links container after menu links
+      .to(fadeTargets, { autoAlpha: 1, duration: 0.3 }, '<+=0.15');
 
     // On mobile, show portal button after panels pass (at 0.25s)
     if (isMobile && portalButton) {
