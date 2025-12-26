@@ -1746,34 +1746,14 @@ export class IntroAnimationModule extends BaseModule {
         }, '<');
       }
 
-      // Phase 5: Fade in nav links at end
-      // Re-query nav in case it wasn't found earlier
+      // Phase 5: Show nav links immediately when card is visible
       const navForFadeIn = document.querySelector('.intro-nav') as HTMLElement;
       if (navForFadeIn) {
-        // Ensure nav is visible but start with opacity 0
-        gsap.set(navForFadeIn, { visibility: 'visible', display: 'flex', opacity: 0 });
-
-        // Also set up nav links - visible but opacity 0
+        // Show nav immediately - no animation delay
+        gsap.set(navForFadeIn, { visibility: 'visible', display: 'flex', opacity: 1 });
         const navLinksForFadeIn = navForFadeIn.querySelectorAll('.intro-nav-link');
         if (navLinksForFadeIn.length > 0) {
-          gsap.set(navLinksForFadeIn, { visibility: 'visible', opacity: 0 });
-        }
-
-        // Animate nav container
-        this.entryTimeline.to(navForFadeIn, {
-          opacity: 1,
-          duration: 1.2,
-          ease: 'sine.inOut'
-        }, '-=0.3');
-
-        // Animate individual nav links with stagger (slower fade)
-        if (navLinksForFadeIn.length > 0) {
-          this.entryTimeline.to(navLinksForFadeIn, {
-            opacity: 1,
-            duration: 2.0,
-            ease: 'sine.inOut',
-            stagger: 0.2
-          }, '<');
+          gsap.set(navLinksForFadeIn, { visibility: 'visible', opacity: 1 });
         }
       }
 

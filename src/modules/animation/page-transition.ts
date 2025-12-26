@@ -619,14 +619,19 @@ export class PageTransitionModule extends BaseModule {
           gsap.set(containers, { clearProps: 'display,visibility' });
         }
 
-        // Keep business card and nav hidden - entry animation will show them
+        // Keep business card hidden - entry animation will show it
         const businessCard = introPage.element.querySelector('.business-card');
-        const introNav = introPage.element.querySelector('.intro-nav');
+        const introNav = introPage.element.querySelector('.intro-nav') as HTMLElement;
         if (businessCard) {
           gsap.set(businessCard, { opacity: 0 });
         }
+        // Show intro nav immediately - don't wait for paw animation
         if (introNav) {
-          gsap.set(introNav, { opacity: 0 });
+          gsap.set(introNav, { opacity: 1, visibility: 'visible', display: 'flex' });
+          const navLinks = introNav.querySelectorAll('.intro-nav-link');
+          if (navLinks.length > 0) {
+            gsap.set(navLinks, { opacity: 1 });
+          }
         }
 
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -657,19 +662,12 @@ export class PageTransitionModule extends BaseModule {
     const businessCard = document.getElementById('business-card');
     const introNav = document.querySelector('.intro-nav') as HTMLElement;
     if (businessCard) businessCard.style.opacity = '1';
+    // Show intro nav immediately
     if (introNav) {
-      // Use GSAP fromTo to ensure smooth fade animation
-      gsap.fromTo(introNav,
-        { opacity: 0 },
-        { opacity: 1, duration: 1.2, ease: 'sine.inOut' }
-      );
-      // Also animate the individual nav links with stagger (slower fade)
+      gsap.set(introNav, { opacity: 1, visibility: 'visible', display: 'flex' });
       const navLinks = introNav.querySelectorAll('.intro-nav-link');
       if (navLinks.length > 0) {
-        gsap.fromTo(navLinks,
-          { opacity: 0 },
-          { opacity: 1, duration: 2.0, ease: 'sine.inOut', stagger: 0.2 }
-        );
+        gsap.set(navLinks, { opacity: 1 });
       }
     }
   }
