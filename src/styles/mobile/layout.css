@@ -24,7 +24,7 @@
 
   /* Mobile dark mode: Match desktop colors for consistency */
   html[data-theme="dark"] body {
-    --color-neutral-300: #2a2a2a; /* Match desktop dark theme */
+    --color-neutral-300: #333333; /* Match desktop dark theme */
     background-color: var(--color-neutral-300);
   }
 
