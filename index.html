@@ -67,6 +67,17 @@
           visibility: visible !important;
         }
       }
+      /* Critical: Page visibility - hide non-active pages before external CSS loads */
+      section.page-hidden {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+      section.page-active {
+        display: grid !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
     </style>
     <script>
       (function () {
