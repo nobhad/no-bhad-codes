@@ -26,7 +26,8 @@ gsap.registerPlugin(ScrollTrigger);
 
 // Animation timing constants
 const ANIMATION_DURATION_OUT = 0.4;
-const BLUR_AMOUNT = 20;
+const BLUR_AMOUNT_DESKTOP = 40;
+const BLUR_AMOUNT_MOBILE = 10;
 
 interface PageConfig {
   id: string;
@@ -687,9 +688,7 @@ export class PageTransitionModule extends BaseModule {
     }
 
     return new Promise((resolve) => {
-      // Mobile: Use lighter blur (10px) for better performance
-      // Desktop: Use full blur (20px)
-      const blurAmount = this.isMobile ? 10 : BLUR_AMOUNT;
+      const blurAmount = this.isMobile ? BLUR_AMOUNT_MOBILE : BLUR_AMOUNT_DESKTOP;
       gsap.to(el, {
         opacity: 0,
         filter: `blur(${blurAmount}px)`,
@@ -739,9 +738,9 @@ export class PageTransitionModule extends BaseModule {
     return new Promise((resolve) => {
       this.log('[PageTransitionModule] Starting gsap.fromTo animation');
 
-      // Mobile: Use lighter blur (15px) for better performance
-      // Desktop: Use full blur (30px) + scale
-      const blurAmount = this.isMobile ? 15 : 30;
+      // Mobile: Use lighter blur for better performance
+      // Desktop: Use full blur + scale
+      const blurAmount = this.isMobile ? 15 : 50;
       const useScale = !this.isMobile;
 
       gsap.fromTo(contentEl,
