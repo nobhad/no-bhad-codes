@@ -326,7 +326,7 @@ html[data-theme="light"] {
 
 /* Dark theme legacy aliases */
 html[data-theme="dark"] {
-  --color-neutral-300: #2a2a2a;
+  --color-neutral-300: #333333;
   --color-neutral-100: #3a3a3a;
   --color-neutral-200: #3a3a3a;
   --color-neutral-800: #f0f0f0;

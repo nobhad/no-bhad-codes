@@ -687,14 +687,25 @@ export class PageTransitionModule extends BaseModule {
     }
 
     return new Promise((resolve) => {
-      // Simple blur + fade out animation
-      gsap.to(el, {
-        opacity: 0,
-        filter: `blur(${BLUR_AMOUNT}px)`,
-        duration: ANIMATION_DURATION_OUT,
-        ease: 'power2.in',
-        onComplete: resolve
-      });
+      // Mobile: Use simpler animation (no blur - it's expensive on mobile)
+      // Desktop: Use blur + fade animation
+      if (this.isMobile) {
+        gsap.to(el, {
+          opacity: 0,
+          y: -20,
+          duration: 0.25,
+          ease: 'power2.in',
+          onComplete: resolve
+        });
+      } else {
+        gsap.to(el, {
+          opacity: 0,
+          filter: `blur(${BLUR_AMOUNT}px)`,
+          duration: ANIMATION_DURATION_OUT,
+          ease: 'power2.in',
+          onComplete: resolve
+        });
+      }
     });
   }
 
@@ -737,36 +748,60 @@ export class PageTransitionModule extends BaseModule {
     return new Promise((resolve) => {
       this.log('[PageTransitionModule] Starting gsap.fromTo animation');
 
-      // Use fromTo for guaranteed animation from blurry to clear
-      gsap.fromTo(contentEl,
-        {
-          // FROM: blurry, scaled down, semi-transparent
-          opacity: 0.5,
-          filter: 'blur(30px)',
-          scale: 0.8,
-          transformOrigin: 'center center'
-        },
-        {
-          // TO: clear, full scale, fully visible
-          opacity: 1,
-          filter: 'blur(0px)',
-          scale: 1,
-          duration: ANIMATION_CONSTANTS.DURATIONS.PAGE_TRANSITION_IN,
-          ease: 'power2.out',
-          onStart: () => {
-            this.log('[PageTransitionModule] Animation STARTED - check element style now');
-            this.log('[PageTransitionModule] Current filter:', contentEl.style.filter);
+      // Mobile: Use simpler animation (no blur - it's expensive on mobile)
+      // Desktop: Use blur + scale animation
+      if (this.isMobile) {
+        // Mobile-optimized: opacity + translateY only (GPU accelerated)
+        gsap.fromTo(contentEl,
+          {
+            opacity: 0,
+            y: 30
           },
-          onComplete: () => {
-            this.log('[PageTransitionModule] Animation COMPLETE');
-            gsap.set(contentEl, { clearProps: 'filter,scale,transformOrigin,opacity' });
-            if (page.id === 'contact') {
-              this.dispatchEvent('contact-page-ready', { pageId: page.id });
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.3,
+            ease: 'power2.out',
+            onComplete: () => {
+              this.log('[PageTransitionModule] Mobile animation COMPLETE');
+              gsap.set(contentEl, { clearProps: 'opacity,y' });
+              if (page.id === 'contact') {
+                this.dispatchEvent('contact-page-ready', { pageId: page.id });
+              }
+              resolve();
             }
-            resolve();
           }
-        }
-      );
+        );
+      } else {
+        // Desktop: Use blur + scale animation
+        gsap.fromTo(contentEl,
+          {
+            opacity: 0.5,
+            filter: 'blur(30px)',
+            scale: 0.8,
+            transformOrigin: 'center center'
+          },
+          {
+            opacity: 1,
+            filter: 'blur(0px)',
+            scale: 1,
+            duration: ANIMATION_CONSTANTS.DURATIONS.PAGE_TRANSITION_IN,
+            ease: 'power2.out',
+            onStart: () => {
+              this.log('[PageTransitionModule] Animation STARTED - check element style now');
+              this.log('[PageTransitionModule] Current filter:', contentEl.style.filter);
+            },
+            onComplete: () => {
+              this.log('[PageTransitionModule] Animation COMPLETE');
+              gsap.set(contentEl, { clearProps: 'filter,scale,transformOrigin,opacity' });
+              if (page.id === 'contact') {
+                this.dispatchEvent('contact-page-ready', { pageId: page.id });
+              }
+              resolve();
+            }
+          }
+        );
+      }
     });
   }
 
