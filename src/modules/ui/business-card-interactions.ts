@@ -32,6 +32,11 @@ export class BusinessCardInteractions extends BaseModule {
   private isEnabled = false;
   private currentRotationY = 0; // Track actual rotation value for directional flips
 
+  // Idle wiggle animation
+  private idleTimer: ReturnType<typeof setTimeout> | null = null;
+  private wiggleTimeline: gsap.core.Timeline | null = null;
+  private static readonly IDLE_TIMEOUT = 45000; // 45 seconds
+
   // Animation configuration (from centralized constants)
   private cardFlipDuration: number = ANIMATION_CONSTANTS.DURATIONS.CARD_FLIP;
   private tiltDuration: number = ANIMATION_CONSTANTS.DURATIONS.CARD_TILT;
@@ -195,6 +200,9 @@ export class BusinessCardInteractions extends BaseModule {
     this.setCardCursor();
     this.isEnabled = true;
 
+    // Start idle timer for wiggle animation
+    this.startIdleTimer();
+
     this.log('Card interactions enabled');
   }
 
@@ -205,6 +213,9 @@ export class BusinessCardInteractions extends BaseModule {
     }
 
     this.log('Disabling card interactions...');
+
+    // Stop idle timer
+    this.stopIdleTimer();
 
     this.removeEventListeners();
     this.resetCardCursor();
@@ -304,6 +315,9 @@ export class BusinessCardInteractions extends BaseModule {
     event.preventDefault();
     event.stopPropagation();
 
+    // Reset idle timer on any click
+    this.resetIdleTimer();
+
     if (!this.isEnabled || this.isAnimating) {
       this.log('Card click ignored - interactions disabled or animating');
       return;
@@ -334,6 +348,9 @@ export class BusinessCardInteractions extends BaseModule {
    * Enter or Space flips the card
    */
   handleKeyDown(event: KeyboardEvent) {
+    // Reset idle timer on keyboard interaction
+    this.resetIdleTimer();
+
     if (!this.isEnabled || this.isAnimating) {
       this.log('Card keydown ignored - interactions disabled or animating');
       return;
@@ -443,6 +460,15 @@ export class BusinessCardInteractions extends BaseModule {
   handleMouseEnter(_event: MouseEvent) {
     if (!this.isEnabled) return;
 
+    // Reset idle timer when user hovers
+    this.resetIdleTimer();
+
+    // Stop any wiggle animation in progress
+    if (this.wiggleTimeline) {
+      this.wiggleTimeline.kill();
+      this.wiggleTimeline = null;
+    }
+
     this.log('Mouse entered card');
     this.isHovering = true;
 
@@ -502,6 +528,9 @@ export class BusinessCardInteractions extends BaseModule {
   }
 
   handleTouchEnd(event: TouchEvent) {
+    // Reset idle timer on touch
+    this.resetIdleTimer();
+
     if (!this.isEnabled || this.isAnimating) return;
 
     event.preventDefault();
@@ -577,6 +606,104 @@ export class BusinessCardInteractions extends BaseModule {
       rotationY: this.currentRotationY,
       ease: 'power2.inOut'
     });
+  }
+
+  /**
+   * ==========================================
+   * IDLE WIGGLE ANIMATION
+   * ==========================================
+   */
+
+  /**
+   * Start the idle timer - resets on any interaction
+   * After 45 seconds of no interaction, triggers wiggle animation
+   */
+  private startIdleTimer(): void {
+    this.stopIdleTimer();
+
+    this.idleTimer = setTimeout(() => {
+      if (this.isEnabled && !this.isAnimating && !this.isHovering) {
+        this.log('Idle timeout reached - playing wiggle animation');
+        this.playWiggleAnimation();
+      }
+    }, BusinessCardInteractions.IDLE_TIMEOUT);
+  }
+
+  /**
+   * Stop the idle timer
+   */
+  private stopIdleTimer(): void {
+    if (this.idleTimer) {
+      clearTimeout(this.idleTimer);
+      this.idleTimer = null;
+    }
+  }
+
+  /**
+   * Reset the idle timer - called on any user interaction
+   */
+  private resetIdleTimer(): void {
+    if (this.isEnabled) {
+      this.startIdleTimer();
+    }
+  }
+
+  /**
+   * Play a subtle wiggle animation to draw attention to the card
+   * Uses GSAP timeline for smooth back-and-forth rotation
+   */
+  private playWiggleAnimation(): void {
+    if (!this.businessCardInner || this.isAnimating || this.isHovering) {
+      return;
+    }
+
+    // Kill any existing wiggle animation
+    if (this.wiggleTimeline) {
+      this.wiggleTimeline.kill();
+    }
+
+    this.log('Playing wiggle animation');
+
+    // Create wiggle animation - subtle rotation back and forth
+    this.wiggleTimeline = gsap.timeline({
+      onComplete: () => {
+        this.log('Wiggle animation completed');
+        // Restart idle timer after wiggle completes
+        this.startIdleTimer();
+      }
+    });
+
+    // Wiggle parameters
+    const wiggleAngle = 3; // degrees
+    const wiggleDuration = 0.1; // seconds per wiggle
+
+    // Quick wiggle sequence: left, right, left, right, center
+    this.wiggleTimeline
+      .to(this.businessCardInner, {
+        rotationY: this.currentRotationY - wiggleAngle,
+        duration: wiggleDuration,
+        ease: 'power1.inOut'
+      })
+      .to(this.businessCardInner, {
+        rotationY: this.currentRotationY + wiggleAngle,
+        duration: wiggleDuration,
+        ease: 'power1.inOut'
+      })
+      .to(this.businessCardInner, {
+        rotationY: this.currentRotationY - wiggleAngle * 0.6,
+        duration: wiggleDuration,
+        ease: 'power1.inOut'
+      })
+      .to(this.businessCardInner, {
+        rotationY: this.currentRotationY + wiggleAngle * 0.6,
+        duration: wiggleDuration,
+        ease: 'power1.inOut'
+      })
+      .to(this.businessCardInner, {
+        rotationY: this.currentRotationY,
+        duration: wiggleDuration,
+        ease: 'power2.out'
+      });
   }
 
   /**
@@ -660,6 +787,9 @@ export class BusinessCardInteractions extends BaseModule {
   protected override async onDestroy() {
     this.log('BusinessCardInteractions cleanup started');
 
+    // Stop idle timer
+    this.stopIdleTimer();
+
     // Disable interactions
     this.disableInteractions();
 
@@ -672,6 +802,11 @@ export class BusinessCardInteractions extends BaseModule {
     if (this.hoverTimeline) {
       this.hoverTimeline.kill();
       this.hoverTimeline = null;
+    }
+
+    if (this.wiggleTimeline) {
+      this.wiggleTimeline.kill();
+      this.wiggleTimeline = null;
     }
 
     // Reset card
