@@ -102,10 +102,8 @@ export class ThemeModule extends BaseModule {
     // Update theme-color meta tag to match site background
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');
     if (themeColorMeta) {
-      // Light mode: #e0e0e0, Dark mode: #333333 (mobile) or #2a2a2a (desktop)
-      const isMobile = window.innerWidth <= 767;
-      const darkColor = isMobile ? '#333333' : '#2a2a2a';
-      const themeColor = theme === 'dark' ? darkColor : '#e0e0e0';
+      // Light mode: #e0e0e0, Dark mode: #2a2a2a (same for mobile and desktop)
+      const themeColor = theme === 'dark' ? '#2a2a2a' : '#e0e0e0';
       themeColorMeta.setAttribute('content', themeColor);
     }
 

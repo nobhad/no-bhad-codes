@@ -56,10 +56,10 @@
   --color-bg-overlay: rgba(0, 0, 0, 0.5);
 
   /* Surface Colors */
-  --color-surface-primary: #ffffff;
+  --color-surface-primary: #fffefd;
   --color-surface-secondary: var(--color-gray-100);
   --color-surface-tertiary: var(--color-gray-200);
-  --color-surface-elevated: #ffffff;
+  --color-surface-elevated: #fffefd;
 
   /* Form Field Background */
   --color-form-input-bg: #333333; /* rgb(51, 51, 51) - Dark gray background for form inputs in light mode */
@@ -69,7 +69,7 @@
   --color-text-secondary: var(--color-gray-700);
   --color-text-tertiary: var(--color-gray-500);
   --color-text-disabled: var(--color-gray-400);
-  --color-text-inverse: #ffffff;
+  --color-text-inverse: #fffefd;
   --color-text-brand: var(--color-brand-primary);
 
   /* Header/Navigation Specific Text Color */
@@ -200,9 +200,9 @@ html[data-theme="dark"] {
 :root,
 html[data-theme="light"] {
   /* Legacy neutral colors → gray scale */
-  --color-neutral-100: var(--color-gray-100);
+  --color-neutral-100: #fffdfc; /* Tech stack background - warm */
   --color-neutral-200: var(--color-gray-200);
-  --color-neutral-300: #e0e0e0; /* Light theme background */
+  --color-neutral-300: #f8f5f4; /* Light theme background - warm */
   --color-neutral-400: var(--color-gray-400);
   --color-neutral-500: var(--color-gray-500);
   --color-neutral-600: var(--color-gray-600);
@@ -222,7 +222,7 @@ html[data-theme="light"] {
 
   /* Legacy base colors */
   --color-black: var(--color-gray-900); /* Soft black instead of #000000 */
-  --color-white: #ffffff;
+  --color-white: #fffefd;
 
   /* Legacy status colors */
   --color-success: #10b981;
@@ -307,7 +307,7 @@ html[data-theme="light"] {
   --color-svg-text-right: #222222;
 
   /* Legacy business card colors */
-  --color-card-bg: #ffffff;
+  --color-card-bg: #fffefd;
   --color-card-bg-gradient-end: #f8f9fa;
   --color-card-text: #333333;
 
@@ -320,7 +320,7 @@ html[data-theme="light"] {
   --form-input-border: #333333;
   --form-input-placeholder: #666666;
   --form-btn-bg: #333333;
-  --form-btn-fg: #ffffff;
+  --form-btn-fg: #fffefd;
   --form-btn-shadow: rgba(0, 0, 0, 0.2);
 }
 

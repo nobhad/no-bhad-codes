@@ -29,7 +29,7 @@
           width: 100vw;
           height: calc(100vh - 60px - 40px); /* header + footer fallback */
           z-index: 50;
-          background-color: #e0e0e0; /* --color-neutral-300 light mode fallback */
+          background-color: #fffaf5; /* --color-neutral-300 light mode fallback */
           opacity: 1;
           visibility: visible;
         }
@@ -49,7 +49,7 @@
         opacity: 0;
       }
       body {
-        background-color: #e0e0e0; /* Light theme default */
+        background-color: #fffaf5; /* Light theme default - warm */
       }
       html[data-theme="dark"] body {
         background-color: #2a2a2a; /* Dark theme desktop */
@@ -59,7 +59,7 @@
       }
       @media screen and (max-width: 767px) {
         html[data-theme="dark"] body {
-          background-color: #333333; /* Slightly lighter on mobile */
+          background-color: #2a2a2a; /* Match desktop dark theme */
         }
       }
       .header {
@@ -74,13 +74,13 @@
           width: 100vw;
           height: calc(100dvh - 60px - 40px); /* header + footer fallback */
           z-index: 50;
-          background-color: #e0e0e0; /* --color-neutral-300 light mode fallback */
+          background-color: #fffaf5; /* --color-neutral-300 light mode fallback */
           display: flex;
           opacity: 1;
           visibility: visible;
         }
         html[data-theme="dark"] .intro-morph-overlay {
-          background-color: #333333; /* Mobile dark mode background */
+          background-color: #2a2a2a; /* Match desktop dark theme */
         }
         .intro-morph-overlay.hidden {
           opacity: 0;
@@ -455,36 +455,38 @@
 
       <!-- ABOUT SECTION (order: 3) -->
       <section id="about" class="about-section page-hidden" data-page="about" style="display:none">
-
         <div class="about-content">
-          <div class="about-text-wrapper">
-            <h2>about</h2>
-            <p>
-              I'm a creative full-stack developer with a background in dog care and resale. Coding lets me utilize my love for tinkering and problem-solving by combining clean code with good design. 
-              I work with modern frameworks, build type-safe apps, set up scalable backends, and make sure the UI actually feels nice to use. 
-            </p>
-
-            <p>
-              When I'm not coding, I'm treasure hunting and engaging with art and nature. I draw inspiration from midcentury animation and children's book illustrations.
-            </p>
-
-            <p>
-              Currently based in the Boston, MA area and actively seeking web development opportunities.  
-            </p>
-          </div>
-
-          <!-- Tech stack inside about section - DESKTOP ONLY -->
-          <div class="tech-stack-viewport tech-stack-desktop">
-            <div class="tech-stack">
-              <h3>tech stack</h3>
-              <p class="tech-list">
-                JavaScript • TypeScript • HTML5 • CSS3 • PHP • React • Next.js • Vue.js • jQuery •
-                Tailwind CSS • Bootstrap • Vuetify • GSAP • Node.js • Express.js • EJS • Handlebars •
-                PostgreSQL • MongoDB • Redis • Supabase • MySQL • SQLite • Mongoose • Git • Vite •
-                Webpack • npm/yarn • Jotai • Zod • JWT Auth • Vitest • Playwright • Storybook •
-                Sentry • Vercel • Railway • Chart.js • PDFKit • Nodemailer • Chrome Extensions API •
-                Claude Code CLI • Adobe Illustrator • Photoshop
+          <div class="about-main">
+            <div class="about-text-wrapper">
+              <h2>about</h2>
+              <img src="/images/photobooth_loop.gif" alt="Coyote the dog" class="about-photo" />
+              <p>
+                I'm a creative full-stack developer with a background in dog care and resale. Coding lets me utilize my love for tinkering and problem-solving by combining clean code with good design.
+                I work with modern frameworks, build type-safe apps, set up scalable backends, and make sure the UI actually feels nice to use.
               </p>
+
+              <p>
+                When I'm not coding, I'm treasure hunting and engaging with art and nature. I draw inspiration from midcentury animation and children's book illustrations.
+              </p>
+
+              <p>
+                Currently based in the Boston, MA area and actively seeking web development opportunities.
+              </p>
+            </div>
+
+            <!-- Tech stack inside about section - DESKTOP ONLY -->
+            <div class="tech-stack-viewport tech-stack-desktop">
+              <div class="tech-stack">
+                <h3>tech stack</h3>
+                <p class="tech-list">
+                  JavaScript • TypeScript • HTML5 • CSS3 • PHP • React • Next.js • Vue.js • jQuery •
+                  Tailwind CSS • Bootstrap • Vuetify • GSAP • Node.js • Express.js • EJS • Handlebars •
+                  PostgreSQL • MongoDB • Redis • Supabase • MySQL • SQLite • Mongoose • Git • Vite •
+                  Webpack • npm/yarn • Jotai • Zod • JWT Auth • Vitest • Playwright • Storybook •
+                  Sentry • Vercel • Railway • Chart.js • PDFKit • Nodemailer • Chrome Extensions API •
+                  Claude Code CLI • Adobe Illustrator • Photoshop
+                </p>
+              </div>
             </div>
           </div>
         </div>

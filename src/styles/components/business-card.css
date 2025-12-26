@@ -614,7 +614,7 @@
   .business-card-inner {
     transform: none !important;
     box-shadow: none;
-    border: 1pt solid #000;
+    border: 1pt solid #333333;
     background-color: var(--color-card-bg);
   }
 
