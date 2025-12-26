@@ -100,10 +100,8 @@ section h2 + hr {
   margin-right: auto;
 }
 
-/* Dark mode hr */
-html[data-theme="dark"] hr {
-  background-color: var(--color-light);
-}
+/* Dark mode hr - uses --color-dark which flips to light color in dark mode */
+/* No override needed - base hr uses --color-dark which is themed */
 
 /* Typography utility classes */
 .text-xs {

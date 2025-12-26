@@ -509,21 +509,20 @@
   align-self: center;
 }
 
-/* Projects heading - matches about section spacing (about uses block layout, projects uses flex) */
-/* In about: h2 margin-bottom 1.5rem - hr margin-top 1rem = 0.5rem net gap */
-/* In projects (flex): h2 margin-bottom + gap 1rem - hr margin-top 1rem = net gap */
-/* So set h2 margin-bottom to 0.5rem to match about's 0.5rem net gap */
+/* Projects heading - matches about section spacing */
+/* About: h2 margin-bottom 1.5rem, hr margin-top -1rem = 0.5rem gap */
+/* Projects (flex with 1rem gap): h2 margin-bottom 1.5rem + gap 1rem + hr margin-top -2rem = 0.5rem */
 .projects-section h2 {
   margin: 0;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
   padding: 0;
   text-align: left;
   width: 100%;
 }
 
-/* hr - counteract flex gap to match about section spacing */
+/* hr - counteract flex gap (1rem) and match about's 0.5rem net gap */
 .projects-section hr {
-  margin-top: -1rem;
+  margin-top: -2rem;
   margin-left: 0;
   margin-right: auto;
 }
@@ -578,6 +577,12 @@
 
   .projects-section h2 {
     text-align: left;
+  }
+
+  /* Mobile: gap is 2rem, so hr needs margin-top -3rem to get 0.5rem net */
+  /* 1.5rem (h2 margin) + 2rem (gap) - 3rem = 0.5rem */
+  .projects-section hr {
+    margin-top: -3rem;
   }
 
   .wip-sign-container {
