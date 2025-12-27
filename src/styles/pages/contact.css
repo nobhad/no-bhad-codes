@@ -116,11 +116,11 @@
    ========================================== */
 
 :root {
-  /* Contact form field dimensions */
+  /* Contact form field dimensions - responsive */
   --contact-input-height: 60px;
-  --contact-input-width: 460px;
+  --contact-input-width: min(460px, 100%);
   --contact-textarea-height: 155px;
-  --contact-textarea-width: 640px;
+  --contact-textarea-width: min(640px, 100%);
   --contact-field-gap: 0.75rem;
   --contact-row-gap: 0.75rem;
   /* Total layout height: 3 inputs + gaps + textarea + row gap + buffer */
@@ -821,10 +821,101 @@ html[data-theme="dark"] .submit-button:focus-visible {
  * Removed: drop-in, drop-out, blur-in, blur-out, submit-button-slide-in, submit-button-slide-out
  * GSAP provides better performance and control for complex animations */
 
-/* Fixed widths - no responsive changes on desktop */
+/* ==========================================
+   RESPONSIVE - MEDIUM VIEWPORTS (768px - 1100px)
+   Stack layout when viewport too narrow for two columns
+   ========================================== */
 
-/* Responsive - Keep two-column layout at all desktop sizes (768px+) */
-/* Card should NEVER wrap to next line on desktop */
+@media screen and (min-width: 500px) and (max-width: 1100px) {
+  /* Override CSS variables for medium viewports */
+  :root {
+    --contact-input-width: 100%;
+    --contact-textarea-width: 100%;
+  }
+
+  /* Section - center content */
+  .contact-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Contact content - 90vw centered */
+  .contact-section .contact-content {
+    width: 90vw;
+    max-width: 90vw;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  /* h2 - ensure visible, no clipping */
+  .contact-section h2 {
+    margin-top: 0;
+    overflow: visible;
+  }
+
+  /* Stack layout - single column, full width of parent */
+  .contact-section .contact-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: auto;
+  }
+
+  /* Form column - full width */
+  .contact-section .contact-form-column {
+    width: 100%;
+    max-width: none;
+  }
+
+  /* Hide card on medium viewports - show options text instead */
+  .contact-section .contact-card-column {
+    display: none;
+  }
+
+  /* Keep form row horizontal - inputs left, button right */
+  .contact-section .contact-row {
+    flex-direction: row;
+    gap: 1.5rem;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* Input fields - flexible width */
+  .contact-section .contact-left {
+    width: auto;
+    flex: 1;
+    flex-shrink: 1;
+  }
+
+  .contact-section .contact-left .input-item {
+    width: 100%;
+  }
+
+  /* Submit button stays to the right of inputs */
+  .contact-section .contact-right {
+    flex-shrink: 0;
+  }
+
+  /* Message row - full width */
+  .contact-section .contact-message-row {
+    width: 100%;
+  }
+
+  .contact-section .contact-message-row .input-item {
+    width: 100%;
+  }
+
+  /* Show contact options text on medium viewports (replaces card) */
+  .contact-section p.contact-options {
+    display: block;
+    text-align: left;
+    margin: 0;
+  }
+}
 
 /* Mobile styles moved to /src/styles/mobile/contact.css */
 

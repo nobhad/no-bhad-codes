@@ -608,8 +608,8 @@ export class PageTransitionModule extends BaseModule {
       this.hideIntroPageImmediately(targetPage);
     }
 
-    // Show transition overlay - skip for intro and about (about has visible exit animation)
-    if (this.currentPageId !== 'intro' && this.currentPageId !== 'about' && pageId !== 'intro') {
+    // Show transition overlay - skip for intro, about, and contact (these have visible exit animations)
+    if (this.currentPageId !== 'intro' && this.currentPageId !== 'about' && this.currentPageId !== 'contact' && pageId !== 'intro') {
       this.showTransitionOverlay();
     }
 
@@ -622,7 +622,12 @@ export class PageTransitionModule extends BaseModule {
       } else {
         // Hide target page during exit animation to prevent it showing through
         if (targetPage.element && pageId !== 'intro') {
-          gsap.set(targetPage.element, { visibility: 'hidden', opacity: 0 });
+          gsap.set(targetPage.element, { visibility: 'hidden', opacity: 0, zIndex: 50 });
+        }
+
+        // Ensure exiting page is on top during its exit animation
+        if (currentPage && currentPage.element) {
+          gsap.set(currentPage.element, { zIndex: 150 });
         }
 
         // Animate out current page
@@ -648,6 +653,10 @@ export class PageTransitionModule extends BaseModule {
         this.log('[PageTransitionModule] Step 3: Preparing target page');
         if (pageId !== 'intro') {
           this.prepareTargetPage(targetPage, pageId);
+        }
+        // Reset target page z-index to normal
+        if (targetPage.element) {
+          gsap.set(targetPage.element, { zIndex: 100 });
         }
         if (targetPage.skipAnimation) {
           targetPage.element.style.display = '';
@@ -1119,7 +1128,11 @@ export class PageTransitionModule extends BaseModule {
       const businessCard = sectionEl.querySelector('.contact-card-column') as HTMLElement;
       const contactOptions = sectionEl.querySelector('.contact-options') as HTMLElement;
 
+      // === REFINED CONTACT PAGE ANIMATION SEQUENCE ===
+      // Timeline: h2 lands → hr scales → inputs cascade → submit slides → options fade
+
       // h2 drops in from -110% (0.5s duration, 0.4s delay)
+      // Ends at 0.9s
       if (h2) {
         gsap.set(h2, { yPercent: -110, clipPath: 'inset(0 0 0 0)' });
         gsap.to(h2, {
@@ -1130,19 +1143,20 @@ export class PageTransitionModule extends BaseModule {
         });
       }
 
-      // hr scales in from left (0.8s duration, 0.4s delay)
+      // hr scales in from left AFTER h2 fully lands (0.6s duration, 1.0s delay)
+      // h2 ends at 0.9s, hr starts at 1.0s for clear sequential animation
       if (hr) {
-        gsap.set(hr, { scaleX: 0, transformOrigin: 'left center' });
+        gsap.set(hr, { scale: 0, transformOrigin: 'left center' });
         gsap.to(hr, {
-          scaleX: 1,
-          duration: 0.8,
-          delay: 0.4,
+          scale: 1,
+          duration: 0.6,
+          delay: 1.0,
           ease: this.TRANSITION_EASE
         });
       }
 
-      // Input fields drop in with staggered delays
-      // Name: 0.5s, Company/Email: 0.6s, Email: 0.7s (based on order in DOM)
+      // Input fields drop in with staggered delays - starts after hr begins
+      // First input at 1.2s, then 0.1s stagger
       if (inputItems.length > 0) {
         inputItems.forEach((item, index) => {
           const el = item as HTMLElement;
@@ -1154,44 +1168,44 @@ export class PageTransitionModule extends BaseModule {
           gsap.to(el, {
             yPercent: 0,
             duration: 0.5,
-            delay: 0.5 + (index * 0.1), // 0.5s, 0.6s, 0.7s, 0.8s
+            delay: 1.2 + (index * 0.1), // 1.2s, 1.3s, 1.4s, 1.5s
             ease: this.TRANSITION_EASE
           });
         });
       }
 
-      // Submit button slides in from right (0.8s duration, 0.8s delay)
+      // Submit button slides in from right - starts after inputs begin landing
       if (submitButton) {
         gsap.set(submitButton, { x: 800, opacity: 0 });
         gsap.to(submitButton, {
           x: 0,
           opacity: 1,
-          duration: 0.8,
-          delay: 0.8,
+          duration: 0.6,
+          delay: 1.5,
           ease: this.TRANSITION_EASE
         });
       }
 
-      // Contact options text fades in with blur (0.5s duration, 1.2s delay)
+      // Contact options text fades in with blur - after form visible
       if (contactOptions) {
         gsap.set(contactOptions, { opacity: 0, filter: 'blur(8px)' });
         gsap.to(contactOptions, {
           opacity: 1,
           filter: 'blur(0px)',
           duration: 0.5,
-          delay: 1.2,
+          delay: 1.7,
           ease: this.TRANSITION_EASE
         });
       }
 
-      // Business card column fades in with blur (0.5s duration, 1.2s delay)
+      // Business card column fades in with blur - same timing as options
       if (businessCard) {
         gsap.set(businessCard, { opacity: 0, filter: 'blur(8px)' });
         gsap.to(businessCard, {
           opacity: 1,
           filter: 'blur(0px)',
           duration: 0.5,
-          delay: 1.2,
+          delay: 1.7,
           ease: this.TRANSITION_EASE
         });
       }
@@ -1227,11 +1241,12 @@ export class PageTransitionModule extends BaseModule {
     // Prepare contact page (visible but elements hidden in starting positions)
     contactEl.classList.remove('page-hidden');
     contactEl.classList.add('page-active');
-    gsap.set(contactEl, { opacity: 1, visibility: 'visible' });
+    gsap.set(contactEl, { opacity: 1, visibility: 'visible', zIndex: 50 });
+    gsap.set(aboutEl, { zIndex: 150 }); // About exits on top
 
     // Clear and set starting positions for all contact elements
     if (h2) gsap.set(h2, { clearProps: 'clipPath,yPercent', yPercent: -110, clipPath: 'inset(0 0 0 0)' });
-    if (hr) gsap.set(hr, { clearProps: 'scaleX', scaleX: 0, transformOrigin: 'left center' });
+    if (hr) gsap.set(hr, { clearProps: 'scale', scale: 0, transformOrigin: 'left center' });
     inputItems.forEach((item) => {
       const wrapper = (item as HTMLElement).closest('.input-wrapper') as HTMLElement;
       if (wrapper) gsap.set(wrapper, { overflow: 'hidden' });
@@ -1282,7 +1297,7 @@ export class PageTransitionModule extends BaseModule {
       // hr scales in from left (0.8s duration)
       if (hr) {
         tl.to(hr, {
-          scaleX: 1,
+          scale: 1,
           duration: 0.8,
           ease: this.TRANSITION_EASE
         }, entryStart);
@@ -1406,7 +1421,7 @@ export class PageTransitionModule extends BaseModule {
       if (hr) {
         gsap.set(hr, { transformOrigin: 'left center' });
         tl.to(hr, {
-          scaleX: 0,
+          scale: 0,
           duration: 0.5,
           ease: this.TRANSITION_EASE
         }, 0);

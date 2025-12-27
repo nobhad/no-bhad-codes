@@ -275,27 +275,69 @@
 }
 
 /* ============================================
- * SMALL MOBILE CONTACT (max-width: 479px)
+ * SMALL MOBILE CONTACT (max-width: 500px)
+ * Form fields 90vw and centered
  * ============================================ */
 
-@media screen and (max-width: 479px) {
+@media screen and (max-width: 500px) {
+  /* Center content at 90vw */
+  .contact-section {
+    align-items: center !important;
+  }
+
+  .contact-content {
+    width: 90vw !important;
+    max-width: 90vw !important;
+    margin: 0 auto !important;
+  }
+
+  .contact-layout {
+    width: 100% !important;
+  }
+
+  .contact-form-column {
+    width: 100% !important;
+  }
+
+  .contact-form {
+    width: 100% !important;
+  }
+
+  .contact-left {
+    width: 100% !important;
+  }
+
+  .input-wrapper {
+    width: 100% !important;
+    margin-bottom: 0.5rem;
+  }
+
+  .input-item {
+    width: 100% !important;
+  }
+
   .input-item input {
     height: 50px !important;
     font-size: 0.95rem !important;
     width: 100% !important;
-    border-radius: 0 30px 30px 30px !important; /* Keep rounded style */
+    border-radius: 0 30px 30px 30px !important;
   }
 
   .input-item textarea {
     min-height: 100px !important;
     font-size: 0.95rem !important;
     width: 100% !important;
-    border-radius: 0 30px 30px 30px !important; /* Keep rounded style */
+    border-radius: 0 30px 30px 30px !important;
+  }
+
+  .contact-message-row {
+    width: 100% !important;
   }
 
   .contact-right {
+    width: 100% !important;
     margin-top: 0.75rem;
-    padding-bottom: 0.5rem; /* Space for button shadow */
+    padding-bottom: 0.5rem;
   }
 
   .submit-button {
@@ -310,14 +352,7 @@
     height: 28px !important;
   }
 
-  /* Reduce spacing between form fields on very small screens */
-  .input-wrapper {
-    margin-bottom: 0.5rem;
-  }
-
   .contact-left .input-wrapper:first-child {
     margin-top: 0.25rem;
   }
-
-  /* Card is hidden on mobile - no small screen rules needed */
 }
