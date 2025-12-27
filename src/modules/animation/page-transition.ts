@@ -368,20 +368,33 @@ export class PageTransitionModule extends BaseModule {
   }
 
   /**
-   * Show the transition overlay
+   * Show the transition overlay with fade in
    */
   private showTransitionOverlay(): void {
     if (this.transitionOverlay) {
       this.transitionOverlay.classList.add('transitioning');
+      gsap.fromTo(this.transitionOverlay,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.3, ease: 'power2.out' }
+      );
     }
   }
 
   /**
-   * Hide the transition overlay
+   * Hide the transition overlay with fade out
    */
   private hideTransitionOverlay(): void {
     if (this.transitionOverlay) {
-      this.transitionOverlay.classList.remove('transitioning');
+      gsap.to(this.transitionOverlay, {
+        opacity: 0,
+        duration: 0.3,
+        ease: 'power2.in',
+        onComplete: () => {
+          if (this.transitionOverlay) {
+            this.transitionOverlay.classList.remove('transitioning');
+          }
+        }
+      });
     }
   }
 
@@ -608,8 +621,8 @@ export class PageTransitionModule extends BaseModule {
       this.hideIntroPageImmediately(targetPage);
     }
 
-    // Show transition overlay - skip for intro, about, and contact (these have visible exit animations)
-    if (this.currentPageId !== 'intro' && this.currentPageId !== 'about' && this.currentPageId !== 'contact' && pageId !== 'intro') {
+    // Show transition overlay for all transitions except to/from intro
+    if (this.currentPageId !== 'intro' && pageId !== 'intro') {
       this.showTransitionOverlay();
     }
 
@@ -622,12 +635,7 @@ export class PageTransitionModule extends BaseModule {
       } else {
         // Hide target page during exit animation to prevent it showing through
         if (targetPage.element && pageId !== 'intro') {
-          gsap.set(targetPage.element, { visibility: 'hidden', opacity: 0, zIndex: 50 });
-        }
-
-        // Ensure exiting page is on top during its exit animation
-        if (currentPage && currentPage.element) {
-          gsap.set(currentPage.element, { zIndex: 150 });
+          gsap.set(targetPage.element, { visibility: 'hidden', opacity: 0 });
         }
 
         // Animate out current page
@@ -654,17 +662,16 @@ export class PageTransitionModule extends BaseModule {
         if (pageId !== 'intro') {
           this.prepareTargetPage(targetPage, pageId);
         }
-        // Reset target page z-index to normal
-        if (targetPage.element) {
-          gsap.set(targetPage.element, { zIndex: 100 });
-        }
         if (targetPage.skipAnimation) {
           targetPage.element.style.display = '';
           targetPage.element.style.visibility = '';
           targetPage.element.style.opacity = '';
         }
 
-        // Animate in target page
+        // Start fading out overlay as entry animation begins
+        this.hideTransitionOverlay();
+
+        // Animate in target page (runs while overlay fades out)
         this.log('[PageTransitionModule] Step 4: Animating in target page');
         if (pageId === 'intro') {
           await this.playIntroEntryAnimation();
@@ -695,8 +702,6 @@ export class PageTransitionModule extends BaseModule {
         ScrollTrigger.refresh();
         this.log('ScrollTrigger refreshed after page transition');
       });
-
-      this.hideTransitionOverlay();
     } catch (error) {
       this.error('Transition failed:', error);
       this.hideTransitionOverlay();

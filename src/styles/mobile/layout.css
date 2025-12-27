@@ -181,7 +181,7 @@
     width: 100%;
   }
 
-  /* About text wrapper - matches desktop */
+  /* About text wrapper - reorder for mobile: photo above h2 */
   .about-section .about-text-wrapper {
     display: flex;
     flex-direction: column;
@@ -190,6 +190,12 @@
     padding: 0;
     margin: 0;
   }
+
+  /* Mobile order: photo first, then h2, then hr, then text */
+  .about-section .about-text-wrapper h2 { order: 2; width: 100%; }
+  .about-section .about-text-wrapper hr { order: 3; width: 100%; }
+  .about-section .about-photo { order: 1; }
+  .about-section .about-text-wrapper p { order: 4; }
 
   .about-section .about-text-wrapper p {
     max-width: 100%;

@@ -201,13 +201,14 @@
    ========================================== */
 
 @media screen and (min-width: 768px) {
-  /* Contact Section - full viewport height, content at top (desktop) - CSS Grid */
+  /* Contact Section - full viewport height, content centered */
   .contact-section {
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     height: calc(100vh - var(--header-height) - var(--footer-height));
-    display: grid;
-    justify-items: center; /* Center horizontally only */
-    align-items: start; /* Align to top, not center */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     width: 100%;
     padding: clamp(1rem, 4vw, 2rem);
     box-sizing: border-box;
@@ -215,29 +216,30 @@
     overflow: visible;
   }
 
-  /* Contact content wrapper - same vertical position as about, centered horizontally */
+  /* Contact content wrapper */
   .contact-content {
     width: 100%;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 1rem;
-    padding-top: 0;
+    padding: 0 1rem;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-start;
     gap: 0;
-    align-self: start;
+    overflow: visible;
   }
 
   /* Position h2 - align left, SAME SPACING AS ABOUT/PROJECTS */
   .contact-section h2 {
-    margin: 0;
-    margin-top: -70.7px;
-    margin-bottom: 1.5rem; /* MUST match about-section h2 and projects-section h2 */
+    margin: 0 0 1.5rem 0;
     padding: 0;
     text-align: left;
     width: 100%;
+    overflow: visible;
+    position: relative;
+    left: 0;
   }
 
   /* hr - align left, base margin from typography.css applies */
@@ -299,12 +301,13 @@
      CONTACT BUSINESS CARD - DESKTOP ONLY
      ========================================== */
 
-  /* Contact business card - dynamic sizing based on container */
+  /* Contact business card - dynamic sizing, can shrink to prevent clipping */
   .contact-business-card {
-    width: clamp(280px, 100%, 400px);
+    width: clamp(200px, 30vw, 400px);
     aspect-ratio: var(--business-card-aspect-ratio, 1.787);
     height: auto;
     overflow: visible;
+    flex-shrink: 1;
   }
 
   /* Ensure contact business card fills container and is interactive */

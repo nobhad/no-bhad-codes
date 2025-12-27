@@ -127,27 +127,14 @@
     display: block;
     width: 100% !important;
     position: relative; /* Needed for absolute label positioning */
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: none !important;
-    animation: none !important;
     padding: 0 !important;
     margin: 0 !important;
-    transition: none !important;
+    /* GSAP controls animations - don't override transform/opacity */
   }
 
-  /* Disable all animations on form fields - only button animates */
-  .input-item.entering,
-  .input-item.leaving {
-    animation: none !important;
-    transform: none !important;
-    opacity: 1 !important;
-  }
-
+  /* Allow GSAP drop-in/drop-out animations on mobile */
   .input-wrapper {
-    animation: none !important;
-    transform: none !important;
-    opacity: 1 !important;
+    overflow: hidden; /* Clip during drop animation */
   }
 
   /* Error toast on mobile - positioned below the field */
