@@ -1,8 +1,34 @@
-# Current Work - December 23, 2025
+# Current Work - December 27, 2025
 
 ---
 
-## Recent Updates (December 23, 2025)
+## Recent Updates (December 27, 2025)
+
+### Coyote Paw Animation Page Restriction - COMPLETE
+
+Fixed issue where coyote paw animation would sometimes play when refreshing non-intro pages (about, contact, projects).
+
+**Issue:** The mobile intro animation module (`intro-animation-mobile.ts`) was missing the page check that exists in the desktop version. When refreshing a page like `/about` or `/contact`, the module would incorrectly trigger the paw animation.
+
+**Fix:** Added the same page check to `MobileIntroAnimationModule.init()` that already exists in `IntroAnimationModule.init()`:
+
+```typescript
+const hash = window.location.hash;
+const isIntroPage = !hash || hash === '#' || hash === '#/' || hash === '#/intro' || hash === '#/home';
+if (!isIntroPage) {
+  this.log(`Not on intro page (hash: ${hash}) - skipping coyote paw animation`);
+  this.skipIntroImmediately();
+  return;
+}
+```
+
+**Files Modified:**
+
+- `src/modules/animation/intro-animation-mobile.ts` - Added page check in init()
+
+---
+
+## Previous Updates (December 23, 2025)
 
 ### Animation Smoothness Deep Dive - COMPLETE
 

@@ -86,6 +86,19 @@ export class MobileIntroAnimationModule extends BaseModule {
     this.log('Mobile intro animation initializing...');
 
     // ========================================================================
+    // PAGE CHECK - ONLY RUN ON INTRO/HOME PAGE
+    // The coyote paw animation is ONLY for the home page / business card section
+    // Skip if we're on any other page (contact, about, projects, etc.)
+    // ========================================================================
+    const hash = window.location.hash;
+    const isIntroPage = !hash || hash === '#' || hash === '#/' || hash === '#/intro' || hash === '#/home';
+    if (!isIntroPage) {
+      this.log(`Not on intro page (hash: ${hash}) - skipping coyote paw animation`);
+      this.skipIntroImmediately();
+      return;
+    }
+
+    // ========================================================================
     // REDUCED MOTION CHECK
     // ========================================================================
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
