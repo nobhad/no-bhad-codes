@@ -4,15 +4,15 @@
  * ===============================================
  * @file src/styles/mobile/contact.css
  *
- * Mobile-specific contact form overrides (max-width: 767px)
- * Matches breakpoint in mobile/layout.css
+ * Mobile-specific contact form overrides (max-width: 599px)
+ * 600-1100px uses medium viewport styles in contact.css
  */
 
 /* ============================================
- * MOBILE CONTACT (max-width: 767px)
+ * MOBILE CONTACT (max-width: 599px)
  * ============================================ */
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 599px) {
   /* Mobile-only line breaks */
   br.mobile-only {
     display: block !important;

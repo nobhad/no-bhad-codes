@@ -61,9 +61,10 @@ export class ContactAnimationModule extends BaseModule {
 
     // ========================================================================
     // DETECT LAYOUT: Check viewport width instead of element positioning
+    // Desktop (side-by-side) only at 1100px+, otherwise stacked/mobile layout
     // ========================================================================
     const viewportWidth = window.innerWidth;
-    const isMobile = viewportWidth < 768;
+    const isMobile = viewportWidth < 1100; // Matches CSS medium viewport breakpoint
 
     this.log(`Viewport width: ${viewportWidth}px, isMobile: ${isMobile}`);
 

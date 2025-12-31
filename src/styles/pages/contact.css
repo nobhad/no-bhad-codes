@@ -217,16 +217,15 @@
   }
 
   /* Contact content wrapper */
+  /* Uses grid to ensure h2/hr span full width of layout below */
   .contact-content {
-    width: 100%;
-    max-width: 1200px;
+    display: grid;
+    grid-template-columns: 1fr;
+    width: fit-content; /* Size to content (layout width) */
+    max-width: calc(100% - 2rem);
     margin: 0 auto;
-    padding: 0 1rem;
+    padding: 0;
     box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
     gap: 0;
     overflow: visible;
   }
@@ -242,10 +241,16 @@
     left: 0;
   }
 
-  /* hr - align left, base margin from typography.css applies */
+  /* hr - width matches layout (form 640px + gap + card 525px) */
+  /* Card uses 525px from .business-card-container base, NOT the clamp value */
   .contact-section hr {
+    --layout-form-width: 640px;
+    --layout-gap: clamp(1.5rem, 4vw, 5rem);
+    --layout-card-width: 525px; /* Actual card container width */
+    width: calc(var(--layout-form-width) + var(--layout-gap) + var(--layout-card-width));
+    max-width: none;
     margin-left: 0;
-    margin-right: auto;
+    margin-right: 0;
   }
 
   /* hr uses base margin: 0 0 1.5rem 0, no override needed */
@@ -261,14 +266,17 @@
      ========================================== */
 
   /* Contact layout - two-column container using CSS Grid (NO FLEX) */
-  /* Columns sized to content for proper centering */
+  /* Explicit width calculation ensures h2/hr above match this width */
   .contact-layout {
+    --layout-form-width: 640px;
+    --layout-gap: clamp(1.5rem, 4vw, 5rem);
+    --layout-card-width: 525px; /* Matches .business-card-container base width */
     display: grid;
-    /* Columns size to their content */
-    grid-template-columns: auto auto;
-    gap: clamp(4rem, 8vw, 6rem);
+    grid-template-columns: var(--layout-form-width) var(--layout-card-width);
+    gap: var(--layout-gap);
     align-items: start;
-    width: auto; /* Size to content */
+    /* Explicit width = form + gap + card */
+    width: calc(var(--layout-form-width) + var(--layout-gap) + var(--layout-card-width));
     padding-top: 0;
     /* Fixed height prevents layout shifts during animation */
     min-height: var(--contact-layout-height);
@@ -278,13 +286,14 @@
 
   /* Left column - contact form */
   .contact-form-column {
-    width: var(--contact-textarea-width); /* Match widest element (message field) */
+    width: var(--layout-form-width); /* Match grid column width */
     position: relative;
     z-index: 1; /* Form behind card */
   }
 
   /* Right column - business card */
   .contact-card-column {
+    width: 525px; /* Matches .business-card-container base width */
     padding-top: 1rem;
     justify-self: start;
     overflow: visible;
@@ -301,9 +310,9 @@
      CONTACT BUSINESS CARD - DESKTOP ONLY
      ========================================== */
 
-  /* Contact business card - dynamic sizing, can shrink to prevent clipping */
+  /* Contact business card - matches base card container size */
   .contact-business-card {
-    width: clamp(200px, 30vw, 400px);
+    width: 525px; /* Matches .business-card-container base width */
     aspect-ratio: var(--business-card-aspect-ratio, 1.787);
     height: auto;
     overflow: visible;
@@ -825,11 +834,11 @@ html[data-theme="dark"] .submit-button:focus-visible {
  * GSAP provides better performance and control for complex animations */
 
 /* ==========================================
-   RESPONSIVE - MEDIUM VIEWPORTS (768px - 1100px)
-   Stack layout when viewport too narrow for two columns
+   RESPONSIVE - MEDIUM VIEWPORTS (600px - 1100px)
+   Stack layout with card above form
    ========================================== */
 
-@media screen and (min-width: 500px) and (max-width: 1100px) {
+@media screen and (min-width: 600px) and (max-width: 1100px) {
   /* Override CSS variables for medium viewports */
   :root {
     --contact-input-width: 100%;
@@ -852,71 +861,150 @@ html[data-theme="dark"] .submit-button:focus-visible {
     padding: 0;
   }
 
-  /* h2 - ensure visible, no clipping */
+  /* h2 - centered block, left-aligned text */
   .contact-section h2 {
     margin-top: 0;
     overflow: visible;
+    width: 100%;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
   }
 
-  /* Stack layout - single column, full width of parent */
+  /* Stack layout - single column, card above form, centered */
   .contact-section .contact-layout {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 2rem;
     width: 100%;
-    max-width: 100%;
+    max-width: 640px;
     height: auto;
     min-height: auto;
+    margin: 0 auto; /* Center the layout */
   }
 
-  /* Form column - full width */
+  /* Form column - full width, comes first */
   .contact-section .contact-form-column {
     width: 100%;
     max-width: none;
+    order: 1; /* Form first */
   }
 
-  /* Hide card on medium viewports - show options text instead */
+  /* Card column - show below form */
   .contact-section .contact-card-column {
-    display: none;
+    display: block;
+    width: 100%;
+    margin: 0;
+    order: 3; /* Card after form and button */
+    padding-top: 1rem;
   }
 
-  /* Keep form row horizontal - inputs left, button right */
+  /* Card sizing for medium viewport - aligned left within column */
+  .contact-section .contact-business-card {
+    width: 400px;
+    max-width: 100%;
+    margin: 0; /* No centering - align with form left edge */
+  }
+
+  /* Card container - remove extra width/padding that causes grey areas */
+  .contact-section .business-card-container {
+    width: auto !important;
+    height: auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  /* Card wrapper - fit to content */
+  .contact-section .contact-business-card {
+    width: auto;
+    height: auto !important;
+    aspect-ratio: unset !important;
+  }
+
+  /* Business card itself - auto height to fit content */
+  .contact-section .business-card {
+    width: 400px;
+    max-width: 100%;
+    height: auto !important;
+  }
+
+  .contact-section .business-card-inner {
+    height: auto !important;
+  }
+
+  .contact-section .business-card-front,
+  .contact-section .contact-card-front {
+    height: auto !important;
+    padding: 1.5rem !important;
+  }
+
+  /* Labels always visible on medium viewports */
+  .contact-section label.text-small {
+    opacity: 1;
+  }
+
+  /* Placeholder text always visible */
+  .contact-section .input-item input::placeholder,
+  .contact-section .input-item textarea::placeholder {
+    opacity: 0.6;
+  }
+
+  /* Stack all form fields vertically */
   .contact-section .contact-row {
-    flex-direction: row;
-    gap: 1.5rem;
-    align-items: center;
+    flex-direction: column;
+    gap: 0;
+    align-items: stretch;
     width: 100%;
   }
 
-  /* Input fields - flexible width */
+  /* Input fields container - full width, stacked */
   .contact-section .contact-left {
-    width: auto;
-    flex: 1;
-    flex-shrink: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--contact-field-gap, 0.75rem);
   }
 
   .contact-section .contact-left .input-item {
     width: 100%;
   }
 
-  /* Submit button stays to the right of inputs */
+  /* Hide button container in row - button moves to after message */
   .contact-section .contact-right {
-    flex-shrink: 0;
+    display: none;
   }
 
   /* Message row - full width */
   .contact-section .contact-message-row {
     width: 100%;
+    margin-top: var(--contact-row-gap, 0.75rem);
   }
 
   .contact-section .contact-message-row .input-item {
     width: 100%;
   }
 
-  /* Show contact options text on medium viewports (replaces card) */
+  /* Submit button - show after message, centered, above card */
+  .contact-section .submit-button {
+    position: relative;
+    margin: 1.5rem auto 0;
+    right: auto;
+    top: auto;
+    transform: none;
+    z-index: 20; /* Above card */
+  }
+
+  /* Hide contact options text since card is shown */
   .contact-section p.contact-options {
-    display: block;
-    text-align: left;
-    margin: 0;
+    display: none;
+  }
+
+  /* hr - centered block, matches layout width */
+  .contact-section hr {
+    width: 100%;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
