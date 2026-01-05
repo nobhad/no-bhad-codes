@@ -18,7 +18,7 @@ export const QUESTIONS: IntakeQuestion[] = [
     id: 'greeting',
     field: '',
     question:
-      'Hello! I\'m here to help you start your project. Let\'s gather some information to create a custom proposal for you. First, what\'s your name?',
+      'Hello, I\'m Arrow - Noelle\'s personal assistant. I\'m here to help you start your project. Let\'s gather some information to create a custom proposal for you. First, what\'s your name?',
     type: 'text',
     required: true,
     placeholder: 'Enter your full name'
