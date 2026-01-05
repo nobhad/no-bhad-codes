@@ -567,6 +567,24 @@ input.terminal-input:focus {
    ============================================================================ */
 
 @media (max-width: 767px) {
+  /* Mobile: Force filters on SVG elements with !important */
+  svg.terminal-avatar-img image,
+  svg.terminal-avatar-img #Head,
+  svg.terminal-avatar-img #Head image,
+  svg.terminal-avatar-img #Ear,
+  svg.terminal-avatar-img #Ear image,
+  svg.terminal-avatar-img #Nose,
+  svg.terminal-avatar-img #Nose image {
+    filter: brightness(0) invert(1) brightness(0.9) !important;
+    -webkit-filter: brightness(0) invert(1) brightness(0.9) !important;
+  }
+
+  svg.terminal-avatar-img #Eye,
+  svg.terminal-avatar-img #Eye image {
+    filter: brightness(0) !important;
+    -webkit-filter: brightness(0) !important;
+  }
+
   body[data-page="client-intake"] #main-content {
     padding: 0;
     margin: 0;
