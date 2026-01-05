@@ -115,14 +115,6 @@ export const QUESTIONS: IntakeQuestion[] = [
       { value: 'flexible', label: 'Flexible timing' }
     ]
   },
-  {
-    id: 'budget',
-    field: 'budget',
-    question: 'What\'s your budget range for this project?',
-    type: 'select',
-    required: true,
-    options: [] // Dynamically set based on projectType
-  },
   // Features
   {
     id: 'features',
@@ -294,6 +286,15 @@ export const QUESTIONS: IntakeQuestion[] = [
     required: true,
     dependsOn: { field: 'hosting', value: 'have-hosting' },
     placeholder: 'e.g., GoDaddy, Bluehost, AWS, etc.'
+  },
+  // Budget - asked after gathering project details
+  {
+    id: 'budget',
+    field: 'budget',
+    question: 'Based on everything you\'ve shared, what\'s your budget range for this project?',
+    type: 'select',
+    required: true,
+    options: [] // Dynamically set based on projectType
   },
   {
     id: 'challenges',
