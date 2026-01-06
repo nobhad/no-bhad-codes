@@ -508,7 +508,7 @@ label.text-small {
   z-index: 3;
   transform: translate(0);
   color: var(--color-text-inverse);
-  opacity: 0;
+  opacity: 1;
   pointer-events: none;
   font-size: 1rem;
 }

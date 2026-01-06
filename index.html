@@ -242,7 +242,7 @@
 
       <!-- Password Form -->
       <form class="portal-dropdown-form form-active" id="portal-password-form" autocomplete="off">
-        <input type="email" id="portal-email" name="email" class="dropdown-input" placeholder="Email" required autocomplete="email" />
+        <input type="text" id="portal-email" name="email" class="dropdown-input" placeholder="Email or Username" required autocomplete="username" />
         <div class="password-field">
           <input type="password" id="portal-password" name="password" class="dropdown-input" placeholder="Password" required autocomplete="current-password" />
           <button type="button" class="password-toggle" aria-label="Toggle password visibility">
@@ -257,7 +257,7 @@
       <!-- Forgot Password Form -->
       <form class="portal-dropdown-form" id="portal-forgot-form" autocomplete="off">
         <p class="forgot-info">Enter your email to receive a password reset link.</p>
-        <input type="email" id="portal-forgot-email" name="email" class="dropdown-input" placeholder="Email" required autocomplete="email" />
+        <input type="text" id="portal-forgot-email" name="email" class="dropdown-input" placeholder="Email or Username" required autocomplete="username" />
         <button type="submit" class="dropdown-submit">Send Reset Link</button>
         <button type="button" class="dropdown-link" id="back-to-login">Back to login</button>
       </form>
@@ -277,7 +277,7 @@
 
       <!-- Magic Link Form -->
       <form class="portal-dropdown-form" id="portal-magic-form" autocomplete="off">
-        <input type="email" id="portal-magic-email" name="email" class="dropdown-input" placeholder="Email" required autocomplete="email" />
+        <input type="text" id="portal-magic-email" name="email" class="dropdown-input" placeholder="Email or Username" required autocomplete="username" />
         <button type="submit" class="dropdown-submit">Send Link</button>
         <p class="magic-info">A secure login link will be sent to your email.</p>
       </form>
@@ -821,9 +821,23 @@
           btn.classList.add('active');
 
           if (btn.dataset.form === 'password') {
+            /* Copy email from magic link to password form */
+            const magicEmail = magicForm.querySelector('#portal-magic-email');
+            const passwordEmail = passwordForm.querySelector('#portal-email');
+            if (magicEmail && passwordEmail && magicEmail.value.trim()) {
+              passwordEmail.value = magicEmail.value.trim();
+              validatePasswordForm();
+            }
             passwordForm.classList.add('form-active');
             magicForm.classList.remove('form-active');
           } else {
+            /* Copy email from password to magic link form */
+            const passwordEmail = passwordForm.querySelector('#portal-email');
+            const magicEmail = magicForm.querySelector('#portal-magic-email');
+            if (passwordEmail && magicEmail && passwordEmail.value.trim()) {
+              magicEmail.value = passwordEmail.value.trim();
+              validateMagicForm();
+            }
             magicForm.classList.add('form-active');
             passwordForm.classList.remove('form-active');
           }
@@ -857,13 +871,14 @@
         });
 
         function validatePasswordForm() {
-          const emailInput = passwordForm.querySelector('input[type="email"]');
+          const emailInput = passwordForm.querySelector('#portal-email');
           const passwordInput = passwordForm.querySelector('input[type="password"]');
           const submitBtn = passwordForm.querySelector('.dropdown-submit');
 
           if (!emailInput || !passwordInput || !submitBtn) return;
 
-          const emailValid = isValidEmail(emailInput.value.trim());
+          const emailValue = emailInput.value.trim();
+          const emailValid = isValidEmail(emailValue);
           const passwordValid = passwordInput.value.length >= 1;
 
           if (emailValid && passwordValid) {
@@ -878,7 +893,7 @@
         });
 
         function validateMagicForm() {
-          const emailInput = magicForm.querySelector('input[type="email"]');
+          const emailInput = magicForm.querySelector('#portal-magic-email');
           const submitBtn = magicForm.querySelector('.dropdown-submit');
 
           if (!emailInput || !submitBtn) return;
@@ -894,8 +909,61 @@
           input.addEventListener('input', validateMagicForm);
         });
 
+        magicForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const emailInput = magicForm.querySelector('#portal-magic-email');
+          const submitBtn = magicForm.querySelector('.dropdown-submit');
+
+          if (!emailInput || !submitBtn) {
+            console.error('Magic link form elements not found');
+            return;
+          }
+
+          const email = emailInput.value.trim();
+          if (!isValidEmail(email)) {
+            return;
+          }
+
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Sending...';
+
+          try {
+            const response = await fetch('/api/auth/magic-link', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ email })
+            });
+
+            /* Always show success for security (don't reveal if email exists) */
+            submitBtn.textContent = 'Link sent!';
+            submitBtn.classList.remove('valid');
+            submitBtn.classList.add('sent');
+
+            /* Reset form after delay */
+            setTimeout(function() {
+              emailInput.value = '';
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Send Link';
+              submitBtn.classList.remove('sent');
+            }, 3000);
+
+          } catch (error) {
+            console.error('Magic link error:', error);
+            submitBtn.textContent = 'Link sent!';
+            submitBtn.classList.add('sent');
+
+            setTimeout(function() {
+              emailInput.value = '';
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Send Link';
+              submitBtn.classList.remove('sent');
+            }, 3000);
+          }
+        });
+
         function validateForgotForm() {
-          const emailInput = forgotForm.querySelector('input[type="email"]');
+          const emailInput = forgotForm.querySelector('#portal-forgot-email');
           const submitBtn = forgotForm.querySelector('.dropdown-submit');
 
           if (!emailInput || !submitBtn) return;
@@ -913,14 +981,14 @@
 
         forgotForm.addEventListener('submit', function(e) {
           e.preventDefault();
-          const emailInput = forgotForm.querySelector('input[type="email"]');
+          const emailInput = forgotForm.querySelector('#portal-forgot-email');
           const submitBtn = forgotForm.querySelector('.dropdown-submit');
-          
+
           if (!emailInput || !submitBtn) {
             console.error('Forgot password form elements not found');
             return;
           }
-          
+
           if (isValidEmail(emailInput.value.trim())) {
             hideAllForms();
             resetSent.classList.add('form-active');
@@ -931,7 +999,7 @@
 
         passwordForm.addEventListener('submit', async function(e) {
           e.preventDefault();
-          const emailInput = passwordForm.querySelector('input[type="email"]');
+          const emailInput = passwordForm.querySelector('#portal-email');
           const passwordInput = passwordForm.querySelector('input[type="password"]');
           const submitBtn = passwordForm.querySelector('.dropdown-submit');
 
@@ -951,29 +1019,44 @@
           submitBtn.disabled = true;
           submitBtn.textContent = 'Signing in...';
 
+          /* Check if admin email for admin login */
+          const adminEmail = 'nobhaduri@gmail.com';
+          const isAdminLogin = email.toLowerCase() === adminEmail.toLowerCase();
+
           try {
-            const response = await fetch('/api/auth/login', {
+            const loginUrl = isAdminLogin ? '/api/auth/admin/login' : '/api/auth/login';
+            const loginBody = isAdminLogin ? { password } : { email, password };
+
+            const response = await fetch(loginUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
-              body: JSON.stringify({ email, password })
+              body: JSON.stringify(loginBody)
             });
 
             if (response.ok) {
               const responseData = await response.json();
-              
-              const user = responseData.data?.user || responseData.user;
-              
-              if (!user) {
-                throw new Error('Invalid response format from server');
-              }
-              
-              sessionStorage.setItem('client_auth_mode', 'authenticated');
-              sessionStorage.setItem('client_auth_user', JSON.stringify(user));
 
-              dropdown.classList.remove('open');
-              backdrop.classList.remove('open');
-              window.location.href = '/client/portal';
+              if (isAdminLogin) {
+                /* Admin login - redirect to admin panel */
+                dropdown.classList.remove('open');
+                backdrop.classList.remove('open');
+                window.location.href = '/admin';
+              } else {
+                /* Client login */
+                const user = responseData.data?.user || responseData.user;
+
+                if (!user) {
+                  throw new Error('Invalid response format from server');
+                }
+
+                sessionStorage.setItem('client_auth_mode', 'authenticated');
+                sessionStorage.setItem('client_auth_user', JSON.stringify(user));
+
+                dropdown.classList.remove('open');
+                backdrop.classList.remove('open');
+                window.location.href = '/client/portal';
+              }
             } else {
               let errorMessage = 'Login failed. Please check your credentials.';
               try {
@@ -988,14 +1071,14 @@
                   errorMessage = `Login failed (${response.status}). Please try again.`;
                 }
               }
-              
+
               alert(errorMessage);
               submitBtn.disabled = false;
               submitBtn.textContent = 'Sign In';
             }
           } catch (error) {
             console.error('Login network error:', error);
-            
+
             if (error instanceof TypeError && error.message.includes('fetch')) {
               sessionStorage.setItem('client_auth_mode', 'demo');
               sessionStorage.setItem('client_auth_user', JSON.stringify({
