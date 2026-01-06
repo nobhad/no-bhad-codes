@@ -937,7 +937,6 @@
 
             /* Always show success for security (don't reveal if email exists) */
             submitBtn.textContent = 'Link sent!';
-            submitBtn.classList.remove('valid');
             submitBtn.classList.add('sent');
 
             /* Reset form after delay */
@@ -946,6 +945,7 @@
               submitBtn.disabled = false;
               submitBtn.textContent = 'Send Link';
               submitBtn.classList.remove('sent');
+              submitBtn.classList.remove('valid');
             }, 3000);
 
           } catch (error) {
@@ -958,6 +958,7 @@
               submitBtn.disabled = false;
               submitBtn.textContent = 'Send Link';
               submitBtn.classList.remove('sent');
+              submitBtn.classList.remove('valid');
             }, 3000);
           }
         });
