@@ -29,7 +29,7 @@
     "build:analyze": "vite build --mode production && vite-bundle-analyzer dist",
     "build:stats": "vite build --mode production --reporter=verbose",
     "optimize": "npm run build:stats && npm run lint && npm run typecheck",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "migrate": "tsx scripts/migrate.ts migrate",
     "migrate:rollback": "tsx scripts/migrate.ts rollback",
     "migrate:status": "tsx scripts/migrate.ts status",
