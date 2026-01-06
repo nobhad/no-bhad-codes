@@ -18,7 +18,7 @@ export const QUESTIONS: IntakeQuestion[] = [
     id: 'greeting',
     field: '',
     question:
-      'Hello, I\'m Arrow - Noelle\'s personal assistant. I\'m here to help you start your project. Let\'s gather some information to create a custom proposal for you. First, what\'s your name?',
+      'Hello, I\'m Arrow - Noelle\'s personal assistant. I\'m here to help you start your project. Let\'s gather some information to create a custom proposal for you. You can click on any previous answer to go back and edit it before submitting. First, what\'s your name?',
     type: 'text',
     required: true,
     placeholder: 'Enter your full name'
@@ -83,13 +83,64 @@ export const QUESTIONS: IntakeQuestion[] = [
     type: 'select',
     required: true,
     options: [
-      { value: 'simple-site', label: 'Simple Site (1-2 pages, landing page)' },
+      { value: 'simple-site', label: 'Simple Site (1-2 pages, landing page, Linktree)' },
       { value: 'business-site', label: 'Small Business Website (5-10 pages)' },
       { value: 'portfolio', label: 'Portfolio Website' },
       { value: 'ecommerce', label: 'E-commerce Store' },
       { value: 'web-app', label: 'Web Application' },
       { value: 'browser-extension', label: 'Browser Extension' },
       { value: 'other', label: 'Other' }
+    ]
+  },
+  {
+    id: 'simpleSiteType',
+    field: 'simpleSiteType',
+    question: 'What kind of simple site do you need?',
+    type: 'select',
+    required: true,
+    dependsOn: { field: 'projectType', value: 'simple-site' },
+    options: [
+      { value: 'linktree', label: 'Linktree-style Link Page' },
+      { value: 'landing-page', label: 'Landing Page' },
+      { value: 'coming-soon', label: 'Coming Soon Page' },
+      { value: 'single-page', label: 'Single Page Website' },
+      { value: 'other', label: 'Other' }
+    ]
+  },
+  {
+    id: 'linktreeLinks',
+    field: 'linktreeLinks',
+    question: 'Would you like to share your links now, or provide them later?',
+    type: 'select',
+    required: true,
+    dependsOn: { field: 'simpleSiteType', value: 'linktree' },
+    options: [
+      { value: 'now', label: 'I\'ll paste them now' },
+      { value: 'later', label: 'I\'ll provide them later' }
+    ]
+  },
+  {
+    id: 'linktreeLinksText',
+    field: 'linktreeLinksText',
+    question: 'Paste your links below (one per line):',
+    type: 'textarea',
+    required: true,
+    dependsOn: { field: 'linktreeLinks', value: 'now' },
+    placeholder: 'https://instagram.com/yourhandle\nhttps://twitter.com/yourhandle\nhttps://yourwebsite.com'
+  },
+  {
+    id: 'linktreeLinkCount',
+    field: 'linktreeLinkCount',
+    question: 'Approximately how many links will you have?',
+    type: 'select',
+    required: true,
+    dependsOn: { field: 'simpleSiteType', value: 'linktree' },
+    options: [
+      { value: '1-5', label: '1-5 links' },
+      { value: '6-10', label: '6-10 links' },
+      { value: '11-20', label: '11-20 links' },
+      { value: '20+', label: 'More than 20' },
+      { value: 'unsure', label: 'Not sure yet' }
     ]
   },
   {
@@ -297,6 +348,18 @@ export const QUESTIONS: IntakeQuestion[] = [
     options: [] // Dynamically set based on projectType
   },
   {
+    id: 'ongoingMaintenance',
+    field: 'ongoingMaintenance',
+    question: 'Would you like ongoing maintenance and support after launch?',
+    type: 'select',
+    required: true,
+    options: [
+      { value: 'yes', label: 'Yes, I need ongoing support' },
+      { value: 'maybe', label: 'Maybe, let\'s discuss options' },
+      { value: 'no', label: 'No, just the initial build' }
+    ]
+  },
+  {
     id: 'challenges',
     field: 'challenges',
     question: 'What are your biggest concerns with this project?',
@@ -414,6 +477,7 @@ export const FEATURE_OPTIONS: Record<string, { value: string; label: string }[]>
     { value: 'social-links', label: 'Social Media Links' },
     { value: 'analytics', label: 'Analytics Tracking' },
     { value: 'mobile-optimized', label: 'Mobile Optimization' },
+    { value: 'age-verification', label: 'Age Verification Page' },
     { value: 'basic-only', label: 'Basic Static Pages Only' }
   ],
   'business-site': [
@@ -423,7 +487,8 @@ export const FEATURE_OPTIONS: Record<string, { value: string; label: string }[]>
     { value: 'testimonials', label: 'Customer Testimonials' },
     { value: 'booking', label: 'Appointment Booking' },
     { value: 'cms', label: 'Content Management System' },
-    { value: 'seo-pages', label: 'SEO-Optimized Pages' }
+    { value: 'seo-pages', label: 'SEO-Optimized Pages' },
+    { value: 'age-verification', label: 'Age Verification Page' }
   ],
   portfolio: [
     { value: 'portfolio-gallery', label: 'Project Gallery' },
@@ -439,7 +504,8 @@ export const FEATURE_OPTIONS: Record<string, { value: string; label: string }[]>
     { value: 'inventory-management', label: 'Inventory Management' },
     { value: 'user-accounts', label: 'User Accounts/Login' },
     { value: 'admin-dashboard', label: 'Admin Dashboard' },
-    { value: 'shipping-calculator', label: 'Shipping Calculator' }
+    { value: 'shipping-calculator', label: 'Shipping Calculator' },
+    { value: 'age-verification', label: 'Age Verification Page' }
   ],
   'web-app': [
     { value: 'user-authentication', label: 'User Authentication' },
@@ -447,7 +513,8 @@ export const FEATURE_OPTIONS: Record<string, { value: string; label: string }[]>
     { value: 'api-integration', label: 'Third-party API Integration' },
     { value: 'user-dashboard', label: 'User Dashboard' },
     { value: 'real-time-features', label: 'Real-time Features' },
-    { value: 'admin-panel', label: 'Admin Panel' }
+    { value: 'admin-panel', label: 'Admin Panel' },
+    { value: 'age-verification', label: 'Age Verification Page' }
   ],
   'browser-extension': [
     { value: 'popup-interface', label: 'Popup Interface' },
@@ -463,6 +530,7 @@ export const FEATURE_OPTIONS: Record<string, { value: string; label: string }[]>
     { value: 'database-integration', label: 'Database Integration' },
     { value: 'api-integration', label: 'API Integration' },
     { value: 'admin-panel', label: 'Admin Panel' },
+    { value: 'age-verification', label: 'Age Verification Page' },
     { value: 'custom', label: 'Custom Features (describe in next step)' }
   ]
 };
