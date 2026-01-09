@@ -108,31 +108,42 @@ router.post('/', async (req: Request, res: Response) => {
 
     const intakeData: IntakeFormData = req.body;
 
-    // Start database transaction
+    // Get database and run everything in a transaction
     const db = getDatabase();
 
-    try {
-      await db.run('BEGIN TRANSACTION');
+    // Process features arrays outside transaction
+    const features = Array.isArray(intakeData.features)
+      ? intakeData.features
+      : [intakeData.features].filter(Boolean);
+    const addons = Array.isArray(intakeData.addons)
+      ? intakeData.addons
+      : [intakeData.addons].filter(Boolean);
+    const brandAssets = Array.isArray(intakeData.brandAssets)
+      ? intakeData.brandAssets
+      : [intakeData.brandAssets].filter(Boolean);
 
+    // Normalize company name (convert "none", "n/a" etc. to client name)
+    const normalizedCompany = normalizeCompanyName(intakeData.company || '', intakeData.name);
+
+    // Generate password hash outside transaction
+    const hashedPassword = await bcrypt.hash(generateRandomPassword(), 10);
+
+    // Execute database operations in a transaction
+    const result = await db.transaction(async (ctx) => {
       // Check if client with this email already exists
-      const existingClient = (await db.get('SELECT id, email FROM clients WHERE email = ?', [
+      const existingClient = (await ctx.get('SELECT id, email FROM clients WHERE email = ?', [
         intakeData.email,
       ])) as ExistingClient | undefined;
 
       let clientId: number;
       const isNewClient = !existingClient;
 
-      // Normalize company name (convert "none", "n/a" etc. to client name)
-      const normalizedCompany = normalizeCompanyName(intakeData.company || '', intakeData.name);
-
       if (existingClient) {
         clientId = existingClient.id;
         console.log(`Existing client found: ${clientId}`);
       } else {
         // Create new client account
-        const hashedPassword = await bcrypt.hash(generateRandomPassword(), 10);
-
-        const clientResult = await db.run(
+        const clientResult = await ctx.run(
           `
           INSERT INTO clients (
             company_name, contact_name, email, phone,
@@ -146,19 +157,8 @@ router.post('/', async (req: Request, res: Response) => {
         console.log(`New client created: ${clientId}`);
       }
 
-      // Process features array
-      const features = Array.isArray(intakeData.features)
-        ? intakeData.features
-        : [intakeData.features].filter(Boolean);
-      const addons = Array.isArray(intakeData.addons)
-        ? intakeData.addons
-        : [intakeData.addons].filter(Boolean);
-      const brandAssets = Array.isArray(intakeData.brandAssets)
-        ? intakeData.brandAssets
-        : [intakeData.brandAssets].filter(Boolean);
-
       // Create project record
-      const projectResult = await db.run(
+      const projectResult = await ctx.run(
         `
         INSERT INTO projects (
           client_id, project_name, description, status, priority,
@@ -197,14 +197,8 @@ router.post('/', async (req: Request, res: Response) => {
       const projectId = projectResult.lastID!;
       console.log(`Project created: ${projectId}`);
 
-      // Generate project plan based on intake data
-      const projectPlan: ProjectPlan = await generateProjectPlan(intakeData, projectId);
-
-      // Generate initial invoice
-      const invoice: Invoice = await generateInvoice(intakeData, projectId, clientId);
-
       // Create initial project update
-      await db.run(
+      await ctx.run(
         `
         INSERT INTO project_updates (
           project_id, title, description, update_type, author, created_at
@@ -220,7 +214,7 @@ router.post('/', async (req: Request, res: Response) => {
       // Auto-generate project milestones based on project type and timeline
       const milestones = generateProjectMilestones(intakeData.projectType, intakeData.timeline);
       for (const milestone of milestones) {
-        await db.run(
+        await ctx.run(
           `INSERT INTO milestones (project_id, title, description, due_date, deliverables, is_completed, created_at)
            VALUES (?, ?, ?, ?, ?, 0, datetime('now'))`,
           [
@@ -234,65 +228,68 @@ router.post('/', async (req: Request, res: Response) => {
       }
       console.log(`Created ${milestones.length} milestones for project ${projectId}`);
 
-      // Generate access token for client portal
-      const jwtSecret = process.env.JWT_SECRET;
-      if (!jwtSecret) {
-        throw new Error('JWT_SECRET not configured');
-      }
-      const accessToken = jwt.sign(
-        {
-          clientId,
-          projectId,
-          email: intakeData.email,
-          type: 'client_access',
-        },
-        jwtSecret,
-        { expiresIn: '7d' }
-      );
+      return { clientId, projectId, isNewClient };
+    });
 
-      // Commit transaction
-      await db.run('COMMIT');
+    const { clientId, projectId, isNewClient } = result;
 
-      // Send notifications (async, don't wait)
-      setTimeout(async () => {
-        try {
-          // Send welcome email to client
-          if (isNewClient) {
-            await sendWelcomeEmail(intakeData.email, intakeData.name, accessToken);
-          }
+    // Generate project plan based on intake data (outside transaction)
+    const projectPlan: ProjectPlan = await generateProjectPlan(intakeData, projectId);
 
-          // Send new intake notification to admin
-          await sendNewIntakeNotification(intakeData, projectId);
-        } catch (emailError) {
-          console.error('Failed to send emails:', emailError);
-        }
-      }, 100);
+    // Generate initial invoice (outside transaction)
+    const invoice: Invoice = await generateInvoice(intakeData, projectId, clientId);
 
-      // Return success response
-      res.status(201).json({
-        success: true,
-        message: 'Intake form processed successfully',
-        data: {
-          clientId,
-          projectId,
-          projectName: generateProjectName(intakeData.projectType, normalizedCompany),
-          accessToken,
-          isNewClient,
-          projectPlan: projectPlan.summary,
-          estimatedDelivery: projectPlan.estimatedDelivery,
-          nextSteps: [
-            'Review your project details in the client portal',
-            "We'll send a detailed proposal within 24-48 hours",
-            'Schedule a discovery call to discuss requirements',
-            'Begin project development upon agreement',
-          ],
-        },
-      });
-    } catch (dbError) {
-      // Rollback transaction on error
-      await db.run('ROLLBACK');
-      throw dbError;
+    // Generate access token for client portal
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET not configured');
     }
+    const accessToken = jwt.sign(
+      {
+        clientId,
+        projectId,
+        email: intakeData.email,
+        type: 'client_access',
+      },
+      jwtSecret,
+      { expiresIn: '7d' }
+    );
+
+    // Send notifications (async, don't wait)
+    setTimeout(async () => {
+      try {
+        // Send welcome email to client
+        if (isNewClient) {
+          await sendWelcomeEmail(intakeData.email, intakeData.name, accessToken);
+        }
+
+        // Send new intake notification to admin
+        await sendNewIntakeNotification(intakeData, projectId);
+      } catch (emailError) {
+        console.error('Failed to send emails:', emailError);
+      }
+    }, 100);
+
+    // Return success response
+    res.status(201).json({
+      success: true,
+      message: 'Intake form processed successfully',
+      data: {
+        clientId,
+        projectId,
+        projectName: generateProjectName(intakeData.projectType, normalizedCompany),
+        accessToken,
+        isNewClient,
+        projectPlan: projectPlan.summary,
+        estimatedDelivery: projectPlan.estimatedDelivery,
+        nextSteps: [
+          'Review your project details in the client portal',
+          "We'll send a detailed proposal within 24-48 hours",
+          'Schedule a discovery call to discuss requirements',
+          'Begin project development upon agreement',
+        ],
+      },
+    });
   } catch (error: any) {
     console.error('Intake processing error:', error);
     res.status(500).json({

@@ -15,10 +15,17 @@ interface DatabaseRow {
   [key: string]: any;
 }
 
+interface TransactionContext {
+  get(sql: string, params?: any[]): Promise<DatabaseRow | undefined>;
+  all(sql: string, params?: any[]): Promise<DatabaseRow[]>;
+  run(sql: string, params?: any[]): Promise<{ lastID?: number; changes?: number }>;
+}
+
 interface Database {
   get(sql: string, params?: any[]): Promise<DatabaseRow | undefined>;
   all(sql: string, params?: any[]): Promise<DatabaseRow[]>;
   run(sql: string, params?: any[]): Promise<{ lastID?: number; changes?: number }>;
+  transaction<T>(fn: (ctx: TransactionContext) => Promise<T>): Promise<T>;
   close(): Promise<void>;
   getConnectionStats(): ConnectionStats;
 }
@@ -66,12 +73,15 @@ class DatabaseConnectionPool implements Database {
           return;
         }
 
-        // Configure SQLite optimizations
-        db.run('PRAGMA foreign_keys = ON');
-        db.run('PRAGMA journal_mode = WAL');
-        db.run('PRAGMA synchronous = NORMAL');
-        db.run('PRAGMA temp_store = MEMORY');
-        db.run('PRAGMA mmap_size = 268435456'); // 256MB
+        // Configure SQLite optimizations - these must run outside of any transaction
+        // Use serialize to ensure they complete before the connection is used
+        db.serialize(() => {
+          db.run('PRAGMA foreign_keys = ON');
+          db.run('PRAGMA journal_mode = WAL');
+          db.run('PRAGMA synchronous = NORMAL');
+          db.run('PRAGMA temp_store = MEMORY');
+          db.run('PRAGMA mmap_size = 268435456'); // 256MB
+        });
 
         const connection: PooledConnection = {
           db,
@@ -181,6 +191,65 @@ class DatabaseConnectionPool implements Database {
           else resolve({ lastID: this.lastID, changes: this.changes });
         });
       });
+    } finally {
+      this.releaseConnection(connection);
+    }
+  }
+
+  /**
+   * Execute a function within a database transaction
+   * All operations within the callback use the same connection
+   */
+  async transaction<T>(fn: (ctx: TransactionContext) => Promise<T>): Promise<T> {
+    const connection = await this.getConnection();
+
+    // Create a context that uses this specific connection
+    const ctx: TransactionContext = {
+      get: (sql: string, params: any[] = []): Promise<DatabaseRow | undefined> => {
+        return new Promise((resolve, reject) => {
+          connection.db.get(sql, params, (err, row) => {
+            if (err) reject(err);
+            else resolve(row as DatabaseRow);
+          });
+        });
+      },
+      all: (sql: string, params: any[] = []): Promise<DatabaseRow[]> => {
+        return new Promise((resolve, reject) => {
+          connection.db.all(sql, params, (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows as DatabaseRow[]);
+          });
+        });
+      },
+      run: (sql: string, params: any[] = []): Promise<{ lastID?: number; changes?: number }> => {
+        return new Promise((resolve, reject) => {
+          connection.db.run(sql, params, function (err) {
+            if (err) reject(err);
+            else resolve({ lastID: this.lastID, changes: this.changes });
+          });
+        });
+      },
+    };
+
+    try {
+      // Begin transaction
+      await ctx.run('BEGIN TRANSACTION');
+
+      // Execute the callback
+      const result = await fn(ctx);
+
+      // Commit transaction
+      await ctx.run('COMMIT');
+
+      return result;
+    } catch (error) {
+      // Rollback on error
+      try {
+        await ctx.run('ROLLBACK');
+      } catch (rollbackError) {
+        console.error('Rollback failed:', rollbackError);
+      }
+      throw error;
     } finally {
       this.releaseConnection(connection);
     }

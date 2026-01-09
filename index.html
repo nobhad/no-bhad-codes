@@ -1112,16 +1112,19 @@
         let terminalModule = null;
 
         async function openIntakeModal() {
+          console.log('[IntakeModal] Opening modal, terminalModule:', terminalModule ? 'exists' : 'null');
           intakeModal.classList.add('open');
           intakeBackdrop.classList.add('open');
           document.body.style.overflow = 'hidden';
 
           if (!terminalModule && intakeContainer) {
+            console.log('[IntakeModal] Creating new TerminalIntakeModule');
             try {
               const module = await import('./src/features/client/terminal-intake.ts');
               const { TerminalIntakeModule } = module;
               terminalModule = new TerminalIntakeModule(intakeContainer, { isModal: true });
               await terminalModule.init();
+              console.log('[IntakeModal] TerminalIntakeModule initialized');
             } catch (error) {
               console.error('[IntakeModal] Failed to initialize:', error);
               intakeContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: #ff4444; background: #1e1e1e; height: 100%; display: flex; flex-direction: column; justify-content: center;"><h2>Unable to load intake form</h2><p>Please try refreshing the page or <a href="/client/intake" style="color: #00ff41;">visit the intake page directly</a>.</p></div>';
@@ -1130,9 +1133,19 @@
         }
 
         function closeIntakeModal() {
+          console.log('[IntakeModal] Closing modal, terminalModule:', terminalModule ? 'exists' : 'null');
           intakeModal.classList.remove('open');
           intakeBackdrop.classList.remove('open');
           document.body.style.overflow = '';
+          // Reset module so a fresh instance is created on next open
+          // This ensures the resume prompt shows again if there's saved progress
+          if (terminalModule) {
+            console.log('[IntakeModal] Resetting terminalModule to null');
+            terminalModule = null;
+            if (intakeContainer) {
+              intakeContainer.innerHTML = '';
+            }
+          }
         }
 
         if (openIntakeLink) {
@@ -1163,6 +1176,12 @@
           if (e.key === 'Escape' && intakeModal && intakeModal.classList.contains('open')) {
             closeIntakeModal();
           }
+        });
+
+        // Listen for close event from terminal's own close button
+        window.addEventListener('intakeModalClosed', function() {
+          console.log('[IntakeModal] Received intakeModalClosed event');
+          terminalModule = null;
         });
       });
     </script>

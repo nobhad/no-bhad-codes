@@ -72,6 +72,9 @@ export class TerminalIntakeModule extends BaseModule {
   private inputHistory: string[] = [];
   private historyIndex = -1;
 
+  // Guard against duplicate askToResume calls
+  private resumePromptShown = false;
+
   constructor(container: HTMLElement, options: TerminalIntakeOptions = {}) {
     super('TerminalIntake', { debug: false });
     this.terminalContainer = container;
@@ -80,13 +83,17 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   protected override async onInit(): Promise<void> {
+    console.log('[TerminalIntake] onInit called');
     this.render();
     this.bindEvents();
 
     const savedProgress = this.loadProgress();
+    console.log('[TerminalIntake] Saved progress:', savedProgress ? `index=${savedProgress.currentQuestionIndex}` : 'none');
     if (savedProgress && savedProgress.currentQuestionIndex > 0) {
+      console.log('[TerminalIntake] Calling askToResume');
       await this.askToResume(savedProgress);
     } else {
+      console.log('[TerminalIntake] Calling startConversation');
       await this.startConversation();
     }
   }
@@ -136,6 +143,13 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private async askToResume(savedProgress: SavedProgress): Promise<void> {
+    // Prevent duplicate resume prompts
+    if (this.resumePromptShown) {
+      console.log('[askToResume] Already shown, skipping');
+      return;
+    }
+    this.resumePromptShown = true;
+
     let bootstrapElement: HTMLElement | null = null;
     if (this.chatContainer) {
       bootstrapElement = addBootstrapMessage(this.chatContainer);
@@ -147,32 +161,21 @@ export class TerminalIntakeModule extends BaseModule {
     }
     await delay(400);
 
-    this.addMessage({
-      type: 'ai',
-      content: `Welcome back${savedProgress.intakeData.name ? `, ${savedProgress.intakeData.name}` : ''}! I found your previous progress. Would you like to continue where you left off or start fresh?`,
-      options: [
-        { value: 'resume', label: 'Resume where I left off' },
-        { value: 'restart', label: 'Start over' }
-      ]
-    });
-
     // Block regular handlers during this special prompt
     this.isInSpecialPrompt = true;
 
     let handled = false;
-    let handleResumeClick: ((e: Event) => Promise<void>) | null = null;
-    let handleResumeKeydown: ((e: KeyboardEvent) => Promise<void>) | null = null;
+    let handleResumeKeydown: ((e: KeyboardEvent) => void) | null = null;
 
     const processChoice = async (choice: 'resume' | 'restart', displayText: string) => {
+      console.log('[PROCESS CHOICE] Called with choice:', choice, 'displayText:', displayText, 'handled:', handled);
       if (handled) return;
       handled = true;
+      console.log('[PROCESS CHOICE] Processing choice:', choice);
 
       // Re-enable regular handlers
       this.isInSpecialPrompt = false;
 
-      if (handleResumeClick) {
-        this.chatContainer?.removeEventListener('click', handleResumeClick, true);
-      }
       if (handleResumeKeydown) {
         document.removeEventListener('keydown', handleResumeKeydown);
       }
@@ -207,38 +210,86 @@ export class TerminalIntakeModule extends BaseModule {
       }
     };
 
-    handleResumeClick = async (e: Event) => {
+    // Create the message with options that have DIRECT click handlers
+    const messageEl = document.createElement('div');
+    messageEl.className = 'chat-message ai';
+
+    const contentEl = document.createElement('div');
+    contentEl.className = 'message-content';
+    contentEl.textContent = `Welcome back${savedProgress.intakeData.name ? `, ${savedProgress.intakeData.name}` : ''}! I found your previous progress. Would you like to continue where you left off or start fresh?`;
+    messageEl.appendChild(contentEl);
+
+    const optionsEl = document.createElement('div');
+    optionsEl.className = 'chat-options';
+
+    // Button 1: Resume
+    const btn1 = document.createElement('button');
+    btn1.className = 'chat-option';
+    btn1.dataset.value = 'resume';
+    btn1.dataset.resumeBtn = '1';
+    btn1.textContent = '[1] Resume where I left off';
+    optionsEl.appendChild(btn1);
+
+    // Button 2: Start over
+    const btn2 = document.createElement('button');
+    btn2.className = 'chat-option';
+    btn2.dataset.value = 'restart';
+    btn2.dataset.resumeBtn = '2';
+    btn2.textContent = '[2] Start over';
+    optionsEl.appendChild(btn2);
+
+    // Use event delegation on the options container instead of individual button handlers
+    optionsEl.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      // Find the actual button if click was on a child element
-      const optionBtn = target.classList.contains('chat-option')
-        ? target
-        : target.closest('.chat-option') as HTMLElement;
+      const btnNum = target.dataset.resumeBtn;
+      console.log('[RESUME OPTIONS CLICK] Clicked element:', target.tagName, 'data-resume-btn:', btnNum, 'data-value:', target.dataset.value);
 
-      if (optionBtn) {
-        e.preventDefault();
-        e.stopPropagation();
-        (e as Event & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
-        const choice = optionBtn.dataset.value as 'resume' | 'restart';
-        const displayText = optionBtn.textContent || choice || '';
-        await processChoice(choice, displayText);
+      if (!btnNum) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      // Disable both buttons immediately
+      btn1.disabled = true;
+      btn2.disabled = true;
+
+      if (btnNum === '1') {
+        processChoice('resume', '[1] Resume where I left off');
+      } else if (btnNum === '2') {
+        processChoice('restart', '[2] Start over');
       }
-    };
+    });
 
-    handleResumeKeydown = async (e: KeyboardEvent) => {
+    messageEl.appendChild(optionsEl);
+
+    if (this.chatContainer) {
+      this.chatContainer.appendChild(messageEl);
+      scrollToBottom(this.chatContainer);
+    }
+    this.messages.push({
+      type: 'ai',
+      content: contentEl.textContent
+    });
+
+    handleResumeKeydown = (e: KeyboardEvent) => {
+      console.log('[RESUME KEYDOWN] Key pressed:', e.key, 'handled:', handled);
+      if (handled) return;
       if (e.key === '1') {
+        console.log('[RESUME KEYDOWN] Processing key 1 - RESUME');
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        await processChoice('resume', '[1] Resume where I left off');
+        processChoice('resume', '[1] Resume where I left off');
       } else if (e.key === '2') {
+        console.log('[RESUME KEYDOWN] Processing key 2 - START OVER');
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        await processChoice('restart', '[2] Start over');
+        processChoice('restart', '[2] Start over');
       }
     };
 
-    this.chatContainer?.addEventListener('click', handleResumeClick, true);
     document.addEventListener('keydown', handleResumeKeydown);
 
     if (this.inputElement) {
@@ -392,6 +443,12 @@ export class TerminalIntakeModule extends BaseModule {
     this.chatContainer?.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (target.classList.contains('chat-option')) {
+        // Skip resume/restart buttons - they have their own handler
+        if (target.dataset.resumeBtn) {
+          console.log('[CHAT CONTAINER CLICK] Skipping resume button');
+          return;
+        }
+        console.log('[CHAT CONTAINER CLICK] Option clicked:', target.dataset.value, target.textContent);
         e.stopPropagation();
         this.handleOptionClick(target);
       }
@@ -415,6 +472,8 @@ export class TerminalIntakeModule extends BaseModule {
       if (backdrop) {
         backdrop.classList.remove('open');
       }
+      // Dispatch event so index.html can reset terminalModule
+      window.dispatchEvent(new CustomEvent('intakeModalClosed'));
     });
 
     const minimizeBtn = this.terminalContainer.querySelector('#terminalMinimize');
@@ -949,6 +1008,7 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private handleOptionClick(target: HTMLElement): void {
+    console.log('[HANDLE OPTION CLICK] Called with value:', target.dataset.value, 'isProcessing:', this.isProcessing, 'isInSpecialPrompt:', this.isInSpecialPrompt);
     // Skip if processing or in a special prompt (resume, review, etc.)
     if (this.isProcessing || this.isInSpecialPrompt) return;
 
