@@ -215,17 +215,17 @@ export class PageTransitionModule extends BaseModule {
             gsap.to(h2, {
               yPercent: 0,
               duration: this.TRANSITION_DURATION,
-              delay: 0.4,
+              delay: 0.1,
               ease: this.TRANSITION_EASE
             });
           }
 
-          // hr scales in from left - starts 0.1s after h2 for better visual sequence
+          // hr scales in from left - starts shortly after h2
           if (hr) {
             gsap.to(hr, {
               scale: 1,
               duration: this.TRANSITION_DURATION_LONG,
-              delay: 0.5,
+              delay: 0.15,
               ease: this.TRANSITION_EASE
             });
           }
@@ -241,7 +241,7 @@ export class PageTransitionModule extends BaseModule {
             gsap.to(textWrapper, {
               rotateX: 0,
               duration: this.TRANSITION_DURATION_LONG,
-              delay: 0.5,
+              delay: 0.15,
               ease: this.TRANSITION_EASE
             });
           }
@@ -257,7 +257,7 @@ export class PageTransitionModule extends BaseModule {
             gsap.to(techStack, {
               rotateX: 0,
               duration: this.TRANSITION_DURATION_LONG,
-              delay: 0.6,
+              delay: 0.2,
               ease: this.TRANSITION_EASE
             });
           }

@@ -91,6 +91,7 @@
     transform-origin: top center;
     transform-style: preserve-3d;
     backface-visibility: hidden;
+    will-change: transform;
     margin: 0;
     padding: 0;
   }
@@ -222,5 +223,6 @@
   .tech-stack-desktop {
     display: block;
     width: 100%;
+    will-change: transform;
   }
 }
