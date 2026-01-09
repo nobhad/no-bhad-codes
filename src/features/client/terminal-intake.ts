@@ -60,6 +60,7 @@ export class TerminalIntakeModule extends BaseModule {
   private intakeData: IntakeData = {};
   private messages: ChatMessage[] = [];
   private isProcessing = false;
+  private isInSpecialPrompt = false; // Blocks regular handlers during resume/confirm prompts
   private selectedOptions: string[] = [];
   private isModal: boolean;
   private clientData: TerminalIntakeOptions['clientData'];
@@ -155,6 +156,9 @@ export class TerminalIntakeModule extends BaseModule {
       ]
     });
 
+    // Block regular handlers during this special prompt
+    this.isInSpecialPrompt = true;
+
     let handled = false;
     let handleResumeClick: ((e: Event) => Promise<void>) | null = null;
     let handleResumeKeydown: ((e: KeyboardEvent) => Promise<void>) | null = null;
@@ -162,6 +166,9 @@ export class TerminalIntakeModule extends BaseModule {
     const processChoice = async (choice: 'resume' | 'restart', displayText: string) => {
       if (handled) return;
       handled = true;
+
+      // Re-enable regular handlers
+      this.isInSpecialPrompt = false;
 
       if (handleResumeClick) {
         this.chatContainer?.removeEventListener('click', handleResumeClick, true);
@@ -296,7 +303,8 @@ export class TerminalIntakeModule extends BaseModule {
         const isModalClosed = modal && !modal.classList.contains('open');
         if (isModalClosed) return;
 
-        if (this.isProcessing) return;
+        // Skip if processing or in a special prompt
+        if (this.isProcessing || this.isInSpecialPrompt) return;
 
         const question = this.getCurrentQuestion();
         if (question?.type === 'multiselect' && this.selectedOptions.length > 0) {
@@ -307,7 +315,8 @@ export class TerminalIntakeModule extends BaseModule {
     });
 
     document.addEventListener('keydown', (e) => {
-      if (this.isProcessing) return;
+      // Skip if processing or in a special prompt (resume, company confirm, etc.)
+      if (this.isProcessing || this.isInSpecialPrompt) return;
 
       if (this.inputElement) {
         const inputHasText = this.inputElement.value.trim().length > 0;
@@ -355,7 +364,8 @@ export class TerminalIntakeModule extends BaseModule {
     });
 
     document.addEventListener('keydown', (e) => {
-      if (this.isProcessing) return;
+      // Skip if processing or in a special prompt
+      if (this.isProcessing || this.isInSpecialPrompt) return;
 
       const modal = document.getElementById('intake-modal');
       if (modal && !modal.classList.contains('open')) return;
@@ -512,6 +522,9 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private setupCompanyConfirmHandler(companyName: string): void {
+    // Block regular handlers during this special prompt
+    this.isInSpecialPrompt = true;
+
     if (this.inputElement) {
       this.inputElement.placeholder = 'Click or type 1 or 2...';
       this.inputElement.disabled = false;
@@ -524,6 +537,7 @@ export class TerminalIntakeModule extends BaseModule {
     let keyHandler: ((e: KeyboardEvent) => void) | null = null;
 
     const cleanup = () => {
+      this.isInSpecialPrompt = false;
       this.handleUserInput = originalInputHandler;
       this.handleOptionClick = originalClickHandler;
       if (keyHandler) document.removeEventListener('keydown', keyHandler);
@@ -595,6 +609,9 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private setupForCompanyHandler(): void {
+    // Block regular handlers during this special prompt
+    this.isInSpecialPrompt = true;
+
     if (this.inputElement) {
       this.inputElement.placeholder = 'Click or type 1 or 2...';
       this.inputElement.disabled = false;
@@ -607,6 +624,7 @@ export class TerminalIntakeModule extends BaseModule {
     let keyHandler: ((e: KeyboardEvent) => void) | null = null;
 
     const cleanup = () => {
+      this.isInSpecialPrompt = false;
       this.handleUserInput = originalInputHandler;
       this.handleOptionClick = originalClickHandler;
       if (keyHandler) document.removeEventListener('keydown', keyHandler);
@@ -790,8 +808,11 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private getCurrentQuestion(): IntakeQuestion | null {
-    while (this.currentQuestionIndex < QUESTIONS.length) {
-      const question = QUESTIONS[this.currentQuestionIndex];
+    // Find the next valid question starting from currentQuestionIndex
+    let searchIndex = this.currentQuestionIndex;
+
+    while (searchIndex < QUESTIONS.length) {
+      const question = QUESTIONS[searchIndex];
 
       if (question.dependsOn) {
         const dependentValue = this.intakeData[question.dependsOn.field];
@@ -809,14 +830,18 @@ export class TerminalIntakeModule extends BaseModule {
         }
 
         if (!matches) {
-          this.currentQuestionIndex++;
+          searchIndex++;
           continue;
         }
       }
 
+      // Found a valid question - update index and return
+      this.currentQuestionIndex = searchIndex;
       return question;
     }
 
+    // No more questions
+    this.currentQuestionIndex = searchIndex;
     return null;
   }
 
@@ -894,8 +919,25 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private handleOptionClick(target: HTMLElement): void {
+    if (this.isProcessing) return;
+
     const value = target.dataset.value;
     if (!value) return;
+
+    // Check if this option belongs to the current question or a different one
+    const parentMessage = target.closest('[data-question-index]');
+    if (parentMessage) {
+      const optionQuestionIndex = parseInt(
+        parentMessage.getAttribute('data-question-index') || '-1',
+        10
+      );
+
+      // If clicking on an option from a DIFFERENT question, go to that question for editing
+      if (optionQuestionIndex !== -1 && optionQuestionIndex !== this.currentQuestionIndex) {
+        this.goBackToQuestion(optionQuestionIndex);
+        return;
+      }
+    }
 
     const question = this.getCurrentQuestion();
     if (!question) return;
@@ -1069,6 +1111,26 @@ export class TerminalIntakeModule extends BaseModule {
   private async processAnswer(value: string | string[], displayValue: string): Promise<void> {
     this.isProcessing = true;
 
+    // If we're editing a previous answer, use in-place update
+    if (this.editingQuestionIndex !== null) {
+      const editIndex = this.editingQuestionIndex;
+      const question = QUESTIONS[editIndex];
+
+      // Validate if needed
+      if (question.validation && typeof value === 'string') {
+        const error = question.validation(value);
+        if (error) {
+          this.addMessage({ type: 'error', content: error });
+          this.isProcessing = false;
+          return;
+        }
+      }
+
+      await this.updateAnswerInPlace(editIndex, value, displayValue);
+      this.isProcessing = false;
+      return;
+    }
+
     const question = this.getCurrentQuestion();
     if (!question) {
       this.isProcessing = false;
@@ -1106,13 +1168,15 @@ export class TerminalIntakeModule extends BaseModule {
     }
 
     this.currentQuestionIndex++;
-    this.isProcessing = false;
 
     this.saveProgress();
     this.selectedOptions = [];
 
     await delay(300);
     await this.askCurrentQuestion();
+
+    // Only set isProcessing to false AFTER the next question is displayed
+    this.isProcessing = false;
   }
 
   private formatFieldForReview(field: string, value: string | string[] | undefined): string {
@@ -1252,30 +1316,33 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private async waitForReviewConfirmation(): Promise<void> {
+    // Block regular handlers during this special prompt
+    this.isInSpecialPrompt = true;
+
     return new Promise((resolve) => {
       let handleConfirmClick: ((e: Event) => Promise<void>) | null = null;
       let handleConfirmKeydown: ((e: KeyboardEvent) => Promise<void>) | null = null;
 
+      const cleanup = () => {
+        this.isInSpecialPrompt = false;
+        if (handleConfirmClick) {
+          this.chatContainer?.removeEventListener('click', handleConfirmClick, true);
+        }
+        if (handleConfirmKeydown) {
+          document.removeEventListener('keydown', handleConfirmKeydown);
+        }
+      };
+
       handleConfirmKeydown = async (e: KeyboardEvent) => {
         if (e.key === '1') {
           e.preventDefault();
-          if (handleConfirmClick) {
-            this.chatContainer?.removeEventListener('click', handleConfirmClick, true);
-          }
-          if (handleConfirmKeydown) {
-            document.removeEventListener('keydown', handleConfirmKeydown);
-          }
+          cleanup();
           this.addMessage({ type: 'user', content: '[1] Yes, submit my request' });
           await this.submitIntake();
           resolve();
         } else if (e.key === '2') {
           e.preventDefault();
-          if (handleConfirmClick) {
-            this.chatContainer?.removeEventListener('click', handleConfirmClick, true);
-          }
-          if (handleConfirmKeydown) {
-            document.removeEventListener('keydown', handleConfirmKeydown);
-          }
+          cleanup();
           this.addMessage({ type: 'user', content: '[2] No, I need to make changes' });
           this.addMessage({
             type: 'ai',
@@ -1298,13 +1365,7 @@ export class TerminalIntakeModule extends BaseModule {
           const choice = target.dataset.value;
           const displayText = target.textContent || '';
 
-          if (handleConfirmClick) {
-            this.chatContainer?.removeEventListener('click', handleConfirmClick, true);
-          }
-          if (handleConfirmKeydown) {
-            document.removeEventListener('keydown', handleConfirmKeydown);
-          }
-
+          cleanup();
           this.addMessage({ type: 'user', content: displayText });
 
           if (choice === 'yes') {
@@ -1337,30 +1398,33 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private async waitForChangeDecision(): Promise<void> {
+    // Block regular handlers during this special prompt
+    this.isInSpecialPrompt = true;
+
     return new Promise((resolve) => {
       let handleClick: ((e: Event) => Promise<void>) | null = null;
       let handleKeydown: ((e: KeyboardEvent) => Promise<void>) | null = null;
 
+      const cleanup = () => {
+        this.isInSpecialPrompt = false;
+        if (handleClick) {
+          this.chatContainer?.removeEventListener('click', handleClick, true);
+        }
+        if (handleKeydown) {
+          document.removeEventListener('keydown', handleKeydown);
+        }
+      };
+
       handleKeydown = async (e: KeyboardEvent) => {
         if (e.key === '1') {
           e.preventDefault();
-          if (handleClick) {
-            this.chatContainer?.removeEventListener('click', handleClick, true);
-          }
-          if (handleKeydown) {
-            document.removeEventListener('keydown', handleKeydown);
-          }
+          cleanup();
           this.addMessage({ type: 'user', content: '[1] Done - show summary again' });
           await this.showReviewAndConfirm();
           resolve();
         } else if (e.key === '2') {
           e.preventDefault();
-          if (handleClick) {
-            this.chatContainer?.removeEventListener('click', handleClick, true);
-          }
-          if (handleKeydown) {
-            document.removeEventListener('keydown', handleKeydown);
-          }
+          cleanup();
           this.addMessage({ type: 'user', content: '[2] Start over completely' });
           this.clearProgress();
           this.currentQuestionIndex = 0;
@@ -1381,13 +1445,7 @@ export class TerminalIntakeModule extends BaseModule {
           const choice = target.dataset.value;
           const displayText = target.textContent || '';
 
-          if (handleClick) {
-            this.chatContainer?.removeEventListener('click', handleClick, true);
-          }
-          if (handleKeydown) {
-            document.removeEventListener('keydown', handleKeydown);
-          }
-
+          cleanup();
           this.addMessage({ type: 'user', content: displayText });
 
           if (choice === 'review') {
@@ -1497,6 +1555,11 @@ Thank you for choosing No Bhad Codes!
     this.isProcessing = false;
   }
 
+  // Track editing state
+  private editingQuestionIndex: number | null = null;
+  private editingOldAnswer: string | string[] | undefined = undefined;
+  private lastAnsweredQuestionIndex: number = 0;
+
   private async goBackToQuestion(questionIndex: number): Promise<void> {
     if (this.isProcessing) return;
 
@@ -1505,6 +1568,8 @@ Thank you for choosing No Bhad Codes!
     this.isProcessing = true;
 
     const question = QUESTIONS[questionIndex];
+
+    // Store the old answer and editing state
     let oldAnswer: string | string[] | undefined;
     if (question.id === 'greeting') {
       oldAnswer = this.intakeData.name as string;
@@ -1512,57 +1577,39 @@ Thank you for choosing No Bhad Codes!
       oldAnswer = this.intakeData[question.field];
     }
 
-    for (let i = questionIndex; i < QUESTIONS.length; i++) {
-      const q = QUESTIONS[i];
-      if (q.field && this.intakeData[q.field]) {
-        delete this.intakeData[q.field];
-      }
-    }
-    if (questionIndex === 0 && this.intakeData.name) {
-      delete this.intakeData.name;
-    }
+    // Store editing context
+    this.editingQuestionIndex = questionIndex;
+    this.editingOldAnswer = oldAnswer;
+    this.lastAnsweredQuestionIndex = this.currentQuestionIndex;
 
-    if (this.chatContainer) {
-      const elementsToRemove: Element[] = [];
-      this.chatContainer.querySelectorAll('[data-question-index]').forEach((el) => {
-        const idx = parseInt(el.getAttribute('data-question-index') || '-1', 10);
-        if (idx >= questionIndex) {
-          elementsToRemove.push(el);
-        }
-      });
-      elementsToRemove.forEach((el) => el.remove());
-
-      const typingIndicators = this.chatContainer.querySelectorAll('.typing-indicator');
-      typingIndicators.forEach((el) => el.remove());
-    }
-
-    this.messages = this.messages.filter((msg) => {
-      if (msg.questionIndex === undefined) return true;
-      return msg.questionIndex < questionIndex;
-    });
-
-    this.selectedOptions = [];
+    // Set current question to the one being edited
     this.currentQuestionIndex = questionIndex;
+    this.selectedOptions = [];
 
-    this.saveProgress();
-    this.updateProgress();
+    // Reset confirmedCompany flag if going back to or before the company question (index 2)
+    if (questionIndex <= 2) {
+      this.confirmedCompany = false;
+    }
 
-    this.isProcessing = false;
-
-    await delay(200);
-    await this.askCurrentQuestion(true);
-
+    // For select questions, pre-select the old answer
     if (oldAnswer) {
       if (question.type === 'multiselect' && Array.isArray(oldAnswer)) {
         this.selectedOptions = [...oldAnswer];
         oldAnswer.forEach((value) => {
           const optionBtn = this.chatContainer?.querySelector(
-            `.chat-option[data-value="${value}"]`
+            `.chat-message[data-question-index="${questionIndex}"] .chat-option[data-value="${value}"]`
           ) as HTMLElement;
           if (optionBtn) {
             optionBtn.classList.add('selected');
           }
         });
+      } else if (question.type === 'select' && typeof oldAnswer === 'string') {
+        const optionBtn = this.chatContainer?.querySelector(
+          `.chat-message[data-question-index="${questionIndex}"] .chat-option[data-value="${oldAnswer}"]`
+        ) as HTMLElement;
+        if (optionBtn) {
+          optionBtn.classList.add('selected');
+        }
       } else if (typeof oldAnswer === 'string') {
         const textTypes = ['text', 'email', 'tel', 'url', 'textarea'];
         if (textTypes.includes(question.type) && this.inputElement) {
@@ -1573,8 +1620,153 @@ Thank you for choosing No Bhad Codes!
       }
     }
 
+    // Scroll to the question being edited
     if (this.chatContainer) {
       scrollToQuestion(this.chatContainer, questionIndex);
+    }
+
+    // Update input placeholder
+    if (this.inputElement) {
+      this.inputElement.placeholder = question.placeholder || 'Click or type your response...';
+      this.inputElement.disabled = false;
+      this.inputElement.focus();
+    }
+
+    this.isProcessing = false;
+  }
+
+  /**
+   * Check if any subsequent questions depend on a given field
+   */
+  private findFirstDependentQuestionIndex(changedField: string, fromIndex: number): number {
+    for (let i = fromIndex + 1; i < QUESTIONS.length; i++) {
+      const q = QUESTIONS[i];
+      if (q.dependsOn && q.dependsOn.field === changedField) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * Update answer in place and handle dependencies
+   */
+  private async updateAnswerInPlace(
+    questionIndex: number,
+    newValue: string | string[],
+    displayValue: string
+  ): Promise<void> {
+    const question = QUESTIONS[questionIndex];
+    const oldAnswer = this.editingOldAnswer;
+    const changedField = question.field || (question.id === 'greeting' ? 'name' : '');
+
+    // Check if the answer actually changed
+    const answerChanged = JSON.stringify(newValue) !== JSON.stringify(oldAnswer);
+
+    // Update the answer text in the DOM
+    const answerElements = this.chatContainer?.querySelectorAll(
+      `.chat-message.user[data-question-index="${questionIndex}"]`
+    );
+    if (answerElements && answerElements.length > 0) {
+      const answerEl = answerElements[0];
+      const contentEl = answerEl.querySelector('.message-content');
+      if (contentEl) {
+        // Update just the text, keeping the ::before pseudo-element
+        const textNode = contentEl.firstChild;
+        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+          textNode.textContent = displayValue;
+        } else {
+          contentEl.textContent = displayValue;
+        }
+      }
+    }
+
+    // Update the data
+    if (question.field) {
+      this.intakeData[question.field] = newValue;
+    } else if (question.id === 'greeting') {
+      this.intakeData.name = newValue as string;
+    }
+
+    // Clear editing state
+    const lastAnswered = this.lastAnsweredQuestionIndex;
+    this.editingQuestionIndex = null;
+    this.editingOldAnswer = undefined;
+
+    // If answer changed, check for dependent questions
+    if (answerChanged && changedField) {
+      const firstDependentIndex = this.findFirstDependentQuestionIndex(changedField, questionIndex);
+
+      if (firstDependentIndex !== -1) {
+        // There are dependent questions - need to clear from that point
+        // Remove elements from the first dependent question onwards
+        if (this.chatContainer) {
+          const targetElement = this.chatContainer.querySelector(
+            `[data-question-index="${firstDependentIndex}"]`
+          );
+
+          if (targetElement) {
+            const parent = targetElement.parentElement;
+            if (parent) {
+              const children = Array.from(parent.children);
+              const targetIndex = children.indexOf(targetElement);
+
+              for (let i = children.length - 1; i >= targetIndex; i--) {
+                const child = children[i];
+                if (
+                  !child.classList.contains('terminal-login-info') &&
+                  !child.classList.contains('terminal-avatar-intro')
+                ) {
+                  child.remove();
+                }
+              }
+            }
+          }
+        }
+
+        // Clear data for dependent questions
+        for (let i = firstDependentIndex; i < QUESTIONS.length; i++) {
+          const q = QUESTIONS[i];
+          if (q.field && this.intakeData[q.field]) {
+            delete this.intakeData[q.field];
+          }
+        }
+
+        // Filter messages array
+        this.messages = this.messages.filter((msg) => {
+          if (msg.questionIndex === undefined) return true;
+          return msg.questionIndex < firstDependentIndex;
+        });
+
+        // Continue from the dependent question
+        this.currentQuestionIndex = firstDependentIndex;
+        this.saveProgress();
+        this.updateProgress();
+
+        await delay(300);
+        await this.askCurrentQuestion();
+        return;
+      }
+    }
+
+    // No dependent questions affected or answer didn't change
+    // Return to where we were
+    this.currentQuestionIndex = lastAnswered;
+    this.saveProgress();
+    this.updateProgress();
+
+    // Scroll back to the last question
+    if (this.chatContainer) {
+      scrollToBottom(this.chatContainer);
+    }
+
+    // Re-enable input for the current question
+    if (this.inputElement) {
+      const currentQ = this.getCurrentQuestion();
+      if (currentQ) {
+        this.inputElement.placeholder = currentQ.placeholder || 'Click or type your response...';
+      }
+      this.inputElement.disabled = false;
     }
   }
 
