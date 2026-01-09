@@ -209,10 +209,17 @@ export class TerminalIntakeModule extends BaseModule {
 
     handleResumeClick = async (e: Event) => {
       const target = e.target as HTMLElement;
-      if (target.classList.contains('chat-option')) {
+      // Find the actual button if click was on a child element
+      const optionBtn = target.classList.contains('chat-option')
+        ? target
+        : target.closest('.chat-option') as HTMLElement;
+
+      if (optionBtn) {
+        e.preventDefault();
         e.stopPropagation();
-        const choice = target.dataset.value as 'resume' | 'restart';
-        const displayText = target.textContent || choice || '';
+        (e as Event & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
+        const choice = optionBtn.dataset.value as 'resume' | 'restart';
+        const displayText = optionBtn.textContent || choice || '';
         await processChoice(choice, displayText);
       }
     };
@@ -221,10 +228,12 @@ export class TerminalIntakeModule extends BaseModule {
       if (e.key === '1') {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         await processChoice('resume', '[1] Resume where I left off');
       } else if (e.key === '2') {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         await processChoice('restart', '[2] Start over');
       }
     };
@@ -680,6 +689,9 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private async askForCompanyName(): Promise<void> {
+    // Block regular handlers during this special prompt
+    this.isInSpecialPrompt = true;
+
     if (this.chatContainer) {
       await showTypingIndicator(this.chatContainer, 300);
     }
@@ -700,6 +712,7 @@ export class TerminalIntakeModule extends BaseModule {
       const value = this.inputElement?.value.trim();
       if (!value) return;
 
+      this.isInSpecialPrompt = false;
       this.addMessage({ type: 'user', content: value });
       this.intakeData.company = value;
       if (this.inputElement) this.inputElement.value = '';
@@ -782,8 +795,25 @@ export class TerminalIntakeModule extends BaseModule {
       this.addMessage({
         type: 'ai',
         content: question.question,
-        questionIndex: i
+        questionIndex: i,
+        options: question.options
       });
+
+      // Mark selected option(s) for visual feedback
+      const questionEl = this.chatContainer?.querySelector(
+        `.chat-message[data-question-index="${i}"]`
+      );
+      if (questionEl && question.options) {
+        if (Array.isArray(answer)) {
+          answer.forEach((val) => {
+            const optBtn = questionEl.querySelector(`.chat-option[data-value="${val}"]`);
+            if (optBtn) optBtn.classList.add('selected');
+          });
+        } else {
+          const optBtn = questionEl.querySelector(`.chat-option[data-value="${answer}"]`);
+          if (optBtn) optBtn.classList.add('selected');
+        }
+      }
 
       let displayAnswer: string;
       if (Array.isArray(answer)) {
@@ -919,7 +949,8 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private handleOptionClick(target: HTMLElement): void {
-    if (this.isProcessing) return;
+    // Skip if processing or in a special prompt (resume, review, etc.)
+    if (this.isProcessing || this.isInSpecialPrompt) return;
 
     const value = target.dataset.value;
     if (!value) return;
@@ -955,7 +986,8 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private async handleUserInput(): Promise<void> {
-    if (this.isProcessing) return;
+    // Skip if processing or in a special prompt (resume, review, etc.)
+    if (this.isProcessing || this.isInSpecialPrompt) return;
 
     const inputValue = this.inputElement?.value.trim() || '';
 
@@ -1152,6 +1184,22 @@ export class TerminalIntakeModule extends BaseModule {
       questionIndex: this.currentQuestionIndex
     });
 
+    // Mark the selected option(s) as selected for visual feedback
+    const questionEl = this.chatContainer?.querySelector(
+      `.chat-message[data-question-index="${this.currentQuestionIndex}"]`
+    );
+    if (questionEl && question.options) {
+      if (Array.isArray(value)) {
+        value.forEach((val) => {
+          const optBtn = questionEl.querySelector(`.chat-option[data-value="${val}"]`);
+          if (optBtn) optBtn.classList.add('selected');
+        });
+      } else {
+        const optBtn = questionEl.querySelector(`.chat-option[data-value="${value}"]`);
+        if (optBtn) optBtn.classList.add('selected');
+      }
+    }
+
     // Add to command history for arrow key navigation
     this.inputHistory.push(displayValue);
     this.historyIndex = this.inputHistory.length;
@@ -1336,12 +1384,16 @@ export class TerminalIntakeModule extends BaseModule {
       handleConfirmKeydown = async (e: KeyboardEvent) => {
         if (e.key === '1') {
           e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
           cleanup();
           this.addMessage({ type: 'user', content: '[1] Yes, submit my request' });
           await this.submitIntake();
           resolve();
         } else if (e.key === '2') {
           e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
           cleanup();
           this.addMessage({ type: 'user', content: '[2] No, I need to make changes' });
           this.addMessage({
@@ -1418,12 +1470,16 @@ export class TerminalIntakeModule extends BaseModule {
       handleKeydown = async (e: KeyboardEvent) => {
         if (e.key === '1') {
           e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
           cleanup();
           this.addMessage({ type: 'user', content: '[1] Done - show summary again' });
           await this.showReviewAndConfirm();
           resolve();
         } else if (e.key === '2') {
           e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
           cleanup();
           this.addMessage({ type: 'user', content: '[2] Start over completely' });
           this.clearProgress();
@@ -1678,6 +1734,28 @@ Thank you for choosing No Bhad Codes!
         } else {
           contentEl.textContent = displayValue;
         }
+      }
+    }
+
+    // Update option highlighting - remove old selection and add new
+    const questionEl = this.chatContainer?.querySelector(
+      `.chat-message[data-question-index="${questionIndex}"]`
+    );
+    if (questionEl) {
+      // Remove all selected classes from this question's options
+      questionEl.querySelectorAll('.chat-option.selected').forEach((opt) => {
+        opt.classList.remove('selected');
+      });
+
+      // Add selected class to the newly chosen option(s)
+      if (Array.isArray(newValue)) {
+        newValue.forEach((val) => {
+          const optBtn = questionEl.querySelector(`.chat-option[data-value="${val}"]`);
+          if (optBtn) optBtn.classList.add('selected');
+        });
+      } else {
+        const optBtn = questionEl.querySelector(`.chat-option[data-value="${newValue}"]`);
+        if (optBtn) optBtn.classList.add('selected');
       }
     }
 
