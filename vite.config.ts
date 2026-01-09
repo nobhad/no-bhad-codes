@@ -170,7 +170,7 @@ export default defineConfig({
       level: 'standard', // Options: basic, standard, advanced, maximum
       encryptionKey: process.env.OBFUSCATION_KEY,
       features: {
-        minifyHTML: true,
+        minifyHTML: false, // DISABLED: was corrupting inline scripts
         obfuscateJS: true,
         obfuscateCSS: false,
         encryptStrings: false, // DISABLED: breaks dynamic imports (visitor-tracking-!~{00f}~.js)
