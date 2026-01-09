@@ -22,7 +22,7 @@ const router = express.Router();
 interface IntakeFormData {
   name: string;
   email: string;
-  company: string;
+  company?: string;
   phone: string;
   projectType: string;
   projectDescription: string;
@@ -90,7 +90,6 @@ router.post('/', async (req: Request, res: Response) => {
     const requiredFields = [
       'name',
       'email',
-      'company',
       'phone',
       'projectType',
       'projectDescription',
@@ -124,7 +123,7 @@ router.post('/', async (req: Request, res: Response) => {
       const isNewClient = !existingClient;
 
       // Normalize company name (convert "none", "n/a" etc. to client name)
-      const normalizedCompany = normalizeCompanyName(intakeData.company, intakeData.name);
+      const normalizedCompany = normalizeCompanyName(intakeData.company || '', intakeData.name);
 
       if (existingClient) {
         clientId = existingClient.id;

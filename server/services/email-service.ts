@@ -25,7 +25,7 @@ export interface EmailResult {
 
 export interface IntakeData {
   name: string;
-  company: string;
+  company?: string;
   email: string;
   phone: string;
   projectType: string;

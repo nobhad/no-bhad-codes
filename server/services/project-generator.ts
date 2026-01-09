@@ -9,7 +9,7 @@
  */
 
 export interface IntakeData {
-  company: string;
+  company?: string;
   projectType: string;
   projectDescription: string;
   timeline: string;
