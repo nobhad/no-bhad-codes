@@ -199,7 +199,7 @@ router.get(
     // Get project updates
     const updates = await db.all(
       `
-    SELECT id, title, content, update_type, created_at
+    SELECT id, title, description, update_type, created_at
     FROM project_updates
     WHERE project_id = ?
     ORDER BY created_at DESC
