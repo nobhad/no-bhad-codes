@@ -274,6 +274,13 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
     ? intakeData.addons
     : [intakeData.addons].filter(Boolean);
 
+  const infoRow = (label: string, value: string | undefined) => `
+    <tr>
+      <td style="padding: 8px 12px; font-weight: 600; color: #555; width: 140px; vertical-align: top;">${label}</td>
+      <td style="padding: 8px 12px; color: #222;">${value || 'Not specified'}</td>
+    </tr>
+  `;
+
   return `
     <!DOCTYPE html>
     <html>
@@ -281,143 +288,111 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>New Project Intake</title>
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 700px; margin: 0; padding: 20px; }
-        .header { background: #00ff41; color: #000; padding: 20px; text-align: center; }
-        .content { padding: 20px; background: #f9f9f9; }
-        .section { margin-bottom: 20px; }
-        .section h3 { color: #00ff41; border-bottom: 2px solid #00ff41; padding-bottom: 5px; }
-        .info-grid { display: grid; grid-template-columns: 200px 1fr; gap: 10px; margin-bottom: 15px; }
-        .info-label { font-weight: bold; }
-        .features-list { background: #fff; padding: 15px; border-left: 4px solid #00ff41; }
-        .project-id { 
-          background: #333; 
-          color: #00ff41; 
-          padding: 10px; 
-          text-align: center; 
-          font-size: 1.2em; 
-          font-weight: bold;
-        }
-      </style>
     </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>New Project Intake Received!</h1>
-        </div>
-        
-        <div class="project-id">
-          Project ID: ${projectId}
-        </div>
-        
-        <div class="content">
-          <div class="section">
-            <h3>Client Information</h3>
-            <div class="info-grid">
-              <div class="info-label">Name:</div>
-              <div>${intakeData.name}</div>
-              <div class="info-label">Company:</div>
-              <div>${intakeData.company}</div>
-              <div class="info-label">Email:</div>
-              <div>${intakeData.email}</div>
-              <div class="info-label">Phone:</div>
-              <div>${intakeData.phone}</div>
-            </div>
-          </div>
-          
-          <div class="section">
-            <h3>Project Details</h3>
-            <div class="info-grid">
-              <div class="info-label">Type:</div>
-              <div>${intakeData.projectType}</div>
-              <div class="info-label">Budget:</div>
-              <div>${intakeData.budget}</div>
-              <div class="info-label">Timeline:</div>
-              <div>${intakeData.timeline}</div>
-              <div class="info-label">Pages:</div>
-              <div>${intakeData.pages || 'Not specified'}</div>
-            </div>
-            
-            <div style="margin-top: 15px;">
-              <div class="info-label">Description:</div>
-              <div style="background: #fff; padding: 10px; border-left: 4px solid #00ff41; margin-top: 5px;">
-                ${intakeData.projectDescription}
-              </div>
-            </div>
-          </div>
-          
-          ${
-            features.length > 0
-              ? `
-          <div class="section">
-            <h3>Requested Features</h3>
-            <div class="features-list">
-              ${features.map((feature) => `<div>• ${feature}</div>`).join('')}
-            </div>
-          </div>
-          `
-              : ''
-          }
-          
-          ${
-            addons.length > 0
-              ? `
-          <div class="section">
-            <h3>Additional Services</h3>
-            <div class="features-list">
-              ${addons.map((addon) => `<div>• ${addon}</div>`).join('')}
-            </div>
-          </div>
-          `
-              : ''
-          }
-          
-          <div class="section">
-            <h3>Additional Information</h3>
-            <div class="info-grid">
-              <div class="info-label">Design Level:</div>
-              <div>${intakeData.designLevel || 'Not specified'}</div>
-              <div class="info-label">Content Status:</div>
-              <div>${intakeData.contentStatus || 'Not specified'}</div>
-              <div class="info-label">Tech Comfort:</div>
-              <div>${intakeData.techComfort || 'Not specified'}</div>
-              <div class="info-label">Hosting:</div>
-              <div>${intakeData.hosting || 'Not specified'}</div>
-            </div>
-            
-            ${
-              intakeData.integrations
-                ? `
-            <div style="margin-top: 15px;">
-              <div class="info-label">Integrations:</div>
-              <div style="background: #fff; padding: 10px; border-left: 4px solid #00ff41; margin-top: 5px;">
-                ${intakeData.integrations}
-              </div>
-            </div>
-            `
-                : ''
-            }
-            
-            ${
-              intakeData.challenges
-                ? `
-            <div style="margin-top: 15px;">
-              <div class="info-label">Challenges/Concerns:</div>
-              <div style="background: #fff; padding: 10px; border-left: 4px solid #00ff41; margin-top: 5px;">
-                ${intakeData.challenges}
-              </div>
-            </div>
-            `
-                : ''
-            }
-          </div>
-          
-          <p style="text-align: center; margin-top: 30px;">
-            <strong>Next Step:</strong> Review the intake details and prepare a proposal within 24-48 hours.
-          </p>
-        </div>
-      </div>
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #333; background-color: #f5f5f5;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px 0;">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+
+              <!-- Header -->
+              <tr>
+                <td style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 30px 20px; text-align: center;">
+                  <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600;">New Project Intake</h1>
+                  <p style="margin: 10px 0 0; color: #7ff709; font-size: 16px;">Project #${projectId}</p>
+                </td>
+              </tr>
+
+              <!-- Client Info -->
+              <tr>
+                <td style="padding: 25px 20px 15px;">
+                  <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Client</h2>
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    ${infoRow('Name', intakeData.name)}
+                    ${infoRow('Company', intakeData.company || 'Personal Project')}
+                    ${infoRow('Email', `<a href="mailto:${intakeData.email}" style="color: #0066cc;">${intakeData.email}</a>`)}
+                    ${infoRow('Phone', intakeData.phone)}
+                  </table>
+                </td>
+              </tr>
+
+              <!-- Project Details -->
+              <tr>
+                <td style="padding: 15px 20px;">
+                  <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Project</h2>
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    ${infoRow('Type', intakeData.projectType)}
+                    ${infoRow('Budget', intakeData.budget)}
+                    ${infoRow('Timeline', intakeData.timeline)}
+                    ${intakeData.pages ? infoRow('Pages', intakeData.pages) : ''}
+                  </table>
+                  <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #7ff709;">
+                    <strong style="display: block; margin-bottom: 8px; color: #555;">Description:</strong>
+                    <span style="color: #222;">${intakeData.projectDescription}</span>
+                  </div>
+                </td>
+              </tr>
+
+              ${features.length > 0 ? `
+              <!-- Features -->
+              <tr>
+                <td style="padding: 15px 20px;">
+                  <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Features</h2>
+                  <div style="padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                    ${features.map((f) => `<span style="display: inline-block; margin: 4px; padding: 6px 12px; background: #e8f5e9; color: #2e7d32; border-radius: 20px; font-size: 14px;">${f}</span>`).join('')}
+                  </div>
+                </td>
+              </tr>
+              ` : ''}
+
+              ${addons.length > 0 ? `
+              <!-- Addons -->
+              <tr>
+                <td style="padding: 15px 20px;">
+                  <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Add-ons</h2>
+                  <div style="padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                    ${addons.map((a) => `<span style="display: inline-block; margin: 4px; padding: 6px 12px; background: #e3f2fd; color: #1565c0; border-radius: 20px; font-size: 14px;">${a}</span>`).join('')}
+                  </div>
+                </td>
+              </tr>
+              ` : ''}
+
+              <!-- Additional Info -->
+              <tr>
+                <td style="padding: 15px 20px;">
+                  <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Details</h2>
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    ${infoRow('Design Level', intakeData.designLevel)}
+                    ${infoRow('Content Status', intakeData.contentStatus)}
+                    ${infoRow('Tech Comfort', intakeData.techComfort)}
+                    ${infoRow('Hosting', intakeData.hosting)}
+                  </table>
+                  ${intakeData.integrations ? `
+                  <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #7ff709;">
+                    <strong style="display: block; margin-bottom: 8px; color: #555;">Integrations:</strong>
+                    <span style="color: #222;">${intakeData.integrations}</span>
+                  </div>
+                  ` : ''}
+                  ${intakeData.challenges ? `
+                  <div style="margin-top: 15px; padding: 15px; background: #fff3e0; border-radius: 6px; border-left: 4px solid #ff9800;">
+                    <strong style="display: block; margin-bottom: 8px; color: #e65100;">Concerns:</strong>
+                    <span style="color: #222;">${intakeData.challenges}</span>
+                  </div>
+                  ` : ''}
+                </td>
+              </tr>
+
+              <!-- Footer -->
+              <tr>
+                <td style="padding: 20px; background: #f8f9fa; text-align: center; border-top: 1px solid #eee;">
+                  <p style="margin: 0; color: #666; font-size: 14px;">Review and prepare proposal within 24-48 hours</p>
+                </td>
+              </tr>
+
+            </table>
+          </td>
+        </tr>
+      </table>
     </body>
     </html>
   `;

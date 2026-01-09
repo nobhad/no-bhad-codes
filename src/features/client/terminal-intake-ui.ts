@@ -448,6 +448,26 @@ export async function addSystemMessageWithTyping(
 }
 
 /**
+ * Add a system message with HTML content (for styled summaries)
+ * Renders HTML directly without typing animation for cleaner display
+ */
+export async function addSystemMessageHtml(
+  chatContainer: HTMLElement,
+  htmlContent: string
+): Promise<void> {
+  const messageEl = document.createElement('div');
+  messageEl.className = 'chat-message system';
+
+  const contentEl = document.createElement('div');
+  contentEl.className = 'message-content';
+  contentEl.innerHTML = htmlContent;
+  messageEl.appendChild(contentEl);
+
+  chatContainer.appendChild(messageEl);
+  scrollToBottom(chatContainer);
+}
+
+/**
  * Setup custom block cursor for input field
  */
 export function setupCustomInputCursor(inputElement: HTMLInputElement): void {

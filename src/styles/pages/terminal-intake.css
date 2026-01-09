@@ -255,6 +255,16 @@ body[data-page="client-intake"] .terminal-window {
   padding: 8px 0;
 }
 
+/* Summary value highlighting - answers in blue for readability */
+.chat-message.system .summary-value {
+  color: var(--color-terminal-blue);
+  display: inline;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
 /* Error Messages - red */
 .chat-message.error .message-content {
   color: var(--color-terminal-red);
@@ -475,8 +485,8 @@ input.terminal-input:focus {
   color: var(--color-terminal-green);
 }
 
-.chat-option.selected::after {
-  content: " <";
+.chat-option.selected::before {
+  content: "> ";
   color: var(--color-terminal-green);
 }
 
@@ -489,10 +499,6 @@ input.terminal-input:focus {
 .chat-options.multi-select .chat-option.selected::before {
   content: "[x] ";
   color: var(--color-terminal-green);
-}
-
-.chat-options.multi-select .chat-option.selected::after {
-  content: "";
 }
 
 /* Confirm button for multiselect */

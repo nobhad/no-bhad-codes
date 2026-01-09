@@ -28,6 +28,7 @@ import {
   createMessageElement,
   addMessageWithTyping,
   addSystemMessageWithTyping,
+  addSystemMessageHtml,
   setupCustomInputCursor,
   updateProgressBar,
   scrollToBottom,
@@ -1309,58 +1310,57 @@ export class TerminalIntakeModule extends BaseModule {
       return value.length > 0 ? value.join(', ') : 'None selected';
     }
 
-    if (typeof value === 'string' && value.length > 0) {
-      return value.charAt(0).toUpperCase() + value.slice(1);
-    }
-
     return value;
   }
 
   private generateReviewSummary(): string {
     const data = this.intakeData;
 
+    // Helper to wrap values in span for blue color styling
+    const val = (value: string): string => `<span class="summary-value">${value}</span>`;
+
     const sections = [
       '--- PROJECT SUMMARY ---',
       '',
       '[CONTACT]',
-      `Name: ${this.formatFieldForReview('name', data.name as string)}`,
-      `Email: ${this.formatFieldForReview('email', data.email as string)}`,
-      `Company: ${this.formatFieldForReview('company', data.company as string)}`,
-      `Phone: ${this.formatFieldForReview('phone', data.phone as string)}`,
+      `Name: ${val(this.formatFieldForReview('name', data.name as string))}`,
+      `Email: ${val(this.formatFieldForReview('email', data.email as string))}`,
+      `Company: ${val(this.formatFieldForReview('company', data.company as string))}`,
+      `Phone: ${val(this.formatFieldForReview('phone', data.phone as string))}`,
       '',
       '[PROJECT]',
-      `Type: ${this.formatFieldForReview('projectType', data.projectType as string)}`,
-      `Description: ${this.formatFieldForReview('projectDescription', data.projectDescription as string)}`,
-      `Timeline: ${this.formatFieldForReview('timeline', data.timeline as string)}`,
-      `Budget: ${this.formatFieldForReview('budget', data.budget as string)}`,
+      `Type: ${val(this.formatFieldForReview('projectType', data.projectType as string))}`,
+      `Description: ${val(this.formatFieldForReview('projectDescription', data.projectDescription as string))}`,
+      `Timeline: ${val(this.formatFieldForReview('timeline', data.timeline as string))}`,
+      `Budget: ${val(this.formatFieldForReview('budget', data.budget as string))}`,
       '',
       '[FEATURES]',
-      `Features: ${this.formatFieldForReview('features', data.features as string[])}`,
-      `Custom Features: ${data.customFeatures ? data.customFeatures : 'N/A'}`,
-      `Need Integrations: ${this.formatFieldForReview('hasIntegrations', data.hasIntegrations as string)}`,
-      `Integrations: ${data.hasIntegrations === 'yes' ? this.formatFieldForReview('integrations', data.integrations as string[]) : 'N/A'}`,
+      `Features: ${val(this.formatFieldForReview('features', data.features as string[]))}`,
+      `Custom Features: ${val(data.customFeatures ? String(data.customFeatures) : 'N/A')}`,
+      `Need Integrations: ${val(this.formatFieldForReview('hasIntegrations', data.hasIntegrations as string))}`,
+      `Integrations: ${val(data.hasIntegrations === 'yes' ? this.formatFieldForReview('integrations', data.integrations as string[]) : 'N/A')}`,
       '',
       '[DESIGN]',
-      `Design Level: ${this.formatFieldForReview('designLevel', data.designLevel as string)}`,
-      `Brand Assets: ${this.formatFieldForReview('brandAssets', data.brandAssets as string[])}`,
-      `Has Inspiration: ${this.formatFieldForReview('hasInspiration', data.hasInspiration as string)}`,
-      `Inspiration URLs: ${data.hasInspiration === 'yes' ? this.formatFieldForReview('inspiration', data.inspiration as string) : 'N/A'}`,
+      `Design Level: ${val(this.formatFieldForReview('designLevel', data.designLevel as string))}`,
+      `Brand Assets: ${val(this.formatFieldForReview('brandAssets', data.brandAssets as string[]))}`,
+      `Has Inspiration: ${val(this.formatFieldForReview('hasInspiration', data.hasInspiration as string))}`,
+      `Inspiration URLs: ${val(data.hasInspiration === 'yes' ? this.formatFieldForReview('inspiration', data.inspiration as string) : 'N/A')}`,
       '',
       '[TECHNICAL]',
-      `Tech Comfort: ${this.formatFieldForReview('techComfort', data.techComfort as string)}`,
-      `Has Current Site: ${this.formatFieldForReview('hasCurrentSite', data.hasCurrentSite as string)}`,
-      `Current Site URL: ${data.hasCurrentSite === 'yes' ? this.formatFieldForReview('currentSite', data.currentSite as string) : 'N/A'}`,
-      `Has Domain: ${data.hasCurrentSite === 'no' ? this.formatFieldForReview('hasDomain', data.hasDomain as string) : 'N/A (has current site)'}`,
-      `Domain Name: ${data.hasCurrentSite === 'no' && data.hasDomain === 'yes' ? this.formatFieldForReview('domainName', data.domainName as string) : 'N/A'}`,
-      `Hosting: ${this.formatFieldForReview('hosting', data.hosting as string)}`,
-      `Hosting Provider: ${data.hosting === 'have-hosting' ? this.formatFieldForReview('hostingProvider', data.hostingProvider as string) : 'N/A'}`,
+      `Tech Comfort: ${val(this.formatFieldForReview('techComfort', data.techComfort as string))}`,
+      `Has Current Site: ${val(this.formatFieldForReview('hasCurrentSite', data.hasCurrentSite as string))}`,
+      `Current Site URL: ${val(data.hasCurrentSite === 'yes' ? this.formatFieldForReview('currentSite', data.currentSite as string) : 'N/A')}`,
+      `Has Domain: ${val(data.hasCurrentSite === 'no' ? this.formatFieldForReview('hasDomain', data.hasDomain as string) : 'N/A (has current site)')}`,
+      `Domain Name: ${val(data.hasCurrentSite === 'no' && data.hasDomain === 'yes' ? this.formatFieldForReview('domainName', data.domainName as string) : 'N/A')}`,
+      `Hosting: ${val(this.formatFieldForReview('hosting', data.hosting as string))}`,
+      `Hosting Provider: ${val(data.hosting === 'have-hosting' ? this.formatFieldForReview('hostingProvider', data.hostingProvider as string) : 'N/A')}`,
       '',
       '[OTHER]',
-      `Concerns: ${this.formatFieldForReview('challenges', data.challenges as string[])}`,
-      `Has Additional Info: ${this.formatFieldForReview('hasAdditionalInfo', data.hasAdditionalInfo as string)}`,
-      `Additional Notes: ${data.hasAdditionalInfo === 'yes' ? this.formatFieldForReview('additionalInfo', data.additionalInfo as string) : 'N/A'}`,
-      `Was Referred: ${this.formatFieldForReview('wasReferred', data.wasReferred as string)}`,
-      `Referral Name: ${data.wasReferred === 'yes' ? this.formatFieldForReview('referralName', data.referralName as string) : 'N/A'}`,
+      `Concerns: ${val(this.formatFieldForReview('challenges', data.challenges as string[]))}`,
+      `Has Additional Info: ${val(this.formatFieldForReview('hasAdditionalInfo', data.hasAdditionalInfo as string))}`,
+      `Additional Notes: ${val(data.hasAdditionalInfo === 'yes' ? this.formatFieldForReview('additionalInfo', data.additionalInfo as string) : 'N/A')}`,
+      `Was Referred: ${val(this.formatFieldForReview('wasReferred', data.wasReferred as string))}`,
+      `Referral Name: ${val(data.wasReferred === 'yes' ? this.formatFieldForReview('referralName', data.referralName as string) : 'N/A')}`,
       '',
       '--- END SUMMARY ---'
     ];
@@ -1388,7 +1388,8 @@ export class TerminalIntakeModule extends BaseModule {
     await delay(300);
 
     if (this.chatContainer) {
-      await addSystemMessageWithTyping(this.chatContainer, this.generateReviewSummary());
+      // Render summary with correct colors from the start
+      await addSystemMessageHtml(this.chatContainer, this.generateReviewSummary());
     }
 
     await delay(300);
