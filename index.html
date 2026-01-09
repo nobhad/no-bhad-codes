@@ -510,7 +510,7 @@
             <div class="about-text-wrapper">
               <h2>about</h2>
               <hr>
-              <img src="/images/photobooth_loop.gif" alt="Coyote the dog" class="about-photo" />
+              <img src="/images/photobooth_loop.gif" alt="Coyote the dog" class="about-photo" loading="lazy" decoding="async" />
               <p>
                 Hi, I'm Noelle, a creative full-stack developer based in the Boston, MA area. Coding lets me utilize my love for tinkering and problem-solving by combining clean code with good design.
                 I work with modern frameworks, build type-safe apps, set up scalable backends, and make sure the UI actually feels nice to use.
@@ -890,7 +890,41 @@
 
         passwordForm.querySelectorAll('input').forEach(function(input) {
           input.addEventListener('input', validatePasswordForm);
+          input.addEventListener('change', validatePasswordForm);
         });
+
+        // Detect browser autofill (doesn't always trigger input events)
+        function checkAutofill() {
+          const emailInput = passwordForm.querySelector('#portal-email');
+          const passwordInput = passwordForm.querySelector('input[type="password"]');
+          if (emailInput && passwordInput) {
+            // Check if inputs have been autofilled
+            const emailFilled = emailInput.matches(':-webkit-autofill') || emailInput.value.length > 0;
+            const passFilled = passwordInput.matches(':-webkit-autofill') || passwordInput.value.length > 0;
+            if (emailFilled || passFilled) {
+              validatePasswordForm();
+            }
+          }
+        }
+
+        // Check for autofill after short delays (browsers autofill at different times)
+        setTimeout(checkAutofill, 100);
+        setTimeout(checkAutofill, 500);
+        setTimeout(checkAutofill, 1000);
+
+        // Also check when dropdown opens
+        var portalObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.target.classList && mutation.target.classList.contains('open')) {
+              setTimeout(checkAutofill, 50);
+              setTimeout(checkAutofill, 200);
+            }
+          });
+        });
+        var portalDropdown = document.querySelector('.portal-dropdown');
+        if (portalDropdown) {
+          portalObserver.observe(portalDropdown, { attributes: true, attributeFilter: ['class'] });
+        }
 
         function validateMagicForm() {
           const emailInput = magicForm.querySelector('#portal-magic-email');
