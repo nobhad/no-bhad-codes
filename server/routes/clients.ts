@@ -303,10 +303,11 @@ router.get(
       async () => {
         return await db.all(
           `
-          SELECT 
-            id, name, description, status, priority, start_date, 
-            due_date, completed_at, budget, created_at, updated_at
-          FROM projects 
+          SELECT
+            id, project_name as name, description, status, priority, start_date,
+            estimated_end_date as due_date, actual_end_date as completed_at,
+            budget_range as budget, created_at, updated_at
+          FROM projects
           WHERE client_id = ?
           ORDER BY created_at DESC
         `,

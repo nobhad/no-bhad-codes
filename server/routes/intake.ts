@@ -235,6 +235,10 @@ router.post('/', async (req: Request, res: Response) => {
       console.log(`Created ${milestones.length} milestones for project ${projectId}`);
 
       // Generate access token for client portal
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        throw new Error('JWT_SECRET not configured');
+      }
       const accessToken = jwt.sign(
         {
           clientId,
@@ -242,7 +246,7 @@ router.post('/', async (req: Request, res: Response) => {
           email: intakeData.email,
           type: 'client_access',
         },
-        process.env.JWT_SECRET || 'fallback-secret',
+        jwtSecret,
         { expiresIn: '7d' }
       );
 

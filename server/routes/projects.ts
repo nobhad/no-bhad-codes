@@ -312,7 +312,7 @@ router.post(
 
     const result = await db.run(
       `
-    INSERT INTO projects (client_id, name, description, priority, start_date, due_date, budget)
+    INSERT INTO projects (client_id, project_name, description, priority, start_date, estimated_end_date, budget_range)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `,
       [client_id, name, description, priority, start_date, due_date, budget]
@@ -361,6 +361,16 @@ router.put(
 
     const updates: string[] = [];
     const values: any[] = [];
+    // Map frontend field names to database column names
+    const fieldMapping: Record<string, string> = {
+      name: 'project_name',
+      due_date: 'estimated_end_date',
+      budget: 'budget_range',
+      description: 'description',
+      status: 'status',
+      priority: 'priority',
+      start_date: 'start_date',
+    };
     const allowedUpdates =
       req.user!.type === 'admin'
         ? ['name', 'description', 'status', 'priority', 'start_date', 'due_date', 'budget']
@@ -368,7 +378,8 @@ router.put(
 
     for (const field of allowedUpdates) {
       if (req.body[field] !== undefined) {
-        updates.push(`${field} = ?`);
+        const dbColumn = fieldMapping[field] || field;
+        updates.push(`${dbColumn} = ?`);
         values.push(req.body[field]);
       }
     }
@@ -391,12 +402,12 @@ router.put(
       values
     );
 
-    // If status changed to completed, set completed_at
+    // If status changed to completed, set actual_end_date
     if (req.body.status === 'completed') {
       await db.run(
         `
-      UPDATE projects 
-      SET completed_at = CURRENT_TIMESTAMP 
+      UPDATE projects
+      SET actual_end_date = CURRENT_TIMESTAMP
       WHERE id = ?
     `,
         [projectId]
