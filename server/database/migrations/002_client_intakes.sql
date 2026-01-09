@@ -26,9 +26,9 @@ CREATE TABLE IF NOT EXISTS client_intakes (
 );
 
 -- Create indexes for common queries
-CREATE INDEX idx_client_intakes_email ON client_intakes(email);
-CREATE INDEX idx_client_intakes_status ON client_intakes(status);
-CREATE INDEX idx_client_intakes_created_at ON client_intakes(created_at);
+CREATE INDEX IF NOT EXISTS idx_client_intakes_email ON client_intakes(email);
+CREATE INDEX IF NOT EXISTS idx_client_intakes_status ON client_intakes(status);
+CREATE INDEX IF NOT EXISTS idx_client_intakes_created_at ON client_intakes(created_at);
 
 -- Create invoices table for tracking project invoices
 CREATE TABLE IF NOT EXISTS invoices (
@@ -55,10 +55,10 @@ CREATE TABLE IF NOT EXISTS invoices (
 );
 
 -- Create indexes for invoice queries
-CREATE INDEX idx_invoices_client ON invoices(client_id);
-CREATE INDEX idx_invoices_project ON invoices(project_id);
-CREATE INDEX idx_invoices_status ON invoices(status);
-CREATE INDEX idx_invoices_due_date ON invoices(due_date);
+CREATE INDEX IF NOT EXISTS idx_invoices_client ON invoices(client_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_project ON invoices(project_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
+CREATE INDEX IF NOT EXISTS idx_invoices_due_date ON invoices(due_date);
 
 -- DOWN
 -- Rollback: Drop tables and indexes
