@@ -34,7 +34,6 @@ import {
   scrollToBottom,
   scrollToQuestion,
   sanitizeInput,
-  formatPhoneNumber,
   capitalizeWords,
   delay
 } from './terminal-intake-ui';
@@ -65,7 +64,6 @@ export class TerminalIntakeModule extends BaseModule {
   private selectedOptions: string[] = [];
   private isModal: boolean;
   private clientData: TerminalIntakeOptions['clientData'];
-  private confirmedCompany = false;
 
   private static STORAGE_KEY = 'terminalIntakeProgress';
 
@@ -565,225 +563,12 @@ export class TerminalIntakeModule extends BaseModule {
       this.intakeData.email = this.clientData.email;
     }
 
-    if (this.clientData?.company) {
-      await this.askCompanyConfirmation();
-    } else {
-      await this.askIfForCompany();
-    }
-  }
-
-  private async askCompanyConfirmation(): Promise<void> {
-    const companyName = this.clientData?.company || '';
-    if (this.chatContainer) {
-      await showTypingIndicator(this.chatContainer, 300);
-    }
-
-    this.addMessage({
-      type: 'ai',
-      content: `Is this project for "${companyName}"?`,
-      options: [
-        { value: 'yes', label: 'Yes' },
-        { value: 'no', label: 'No, different company/personal' }
-      ]
-    });
-
-    this.setupCompanyConfirmHandler(companyName);
-  }
-
-  private setupCompanyConfirmHandler(companyName: string): void {
-    // Block regular handlers during this special prompt
-    this.isInSpecialPrompt = true;
-
-    if (this.inputElement) {
-      this.inputElement.placeholder = 'Click or type 1 or 2...';
-      this.inputElement.disabled = false;
-      this.inputElement.focus();
-    }
-
-    const originalClickHandler = this.handleOptionClick.bind(this);
-    const originalInputHandler = this.handleUserInput.bind(this);
-
-    let keyHandler: ((e: KeyboardEvent) => void) | null = null;
-
-    const cleanup = () => {
-      this.isInSpecialPrompt = false;
-      this.handleUserInput = originalInputHandler;
-      this.handleOptionClick = originalClickHandler;
-      if (keyHandler) document.removeEventListener('keydown', keyHandler);
-    };
-
-    keyHandler = (e: KeyboardEvent) => {
-      if (e.key === '1') {
-        e.preventDefault();
-        cleanup();
-        this.handleCompanyConfirmAnswer('yes', companyName);
-      } else if (e.key === '2') {
-        e.preventDefault();
-        cleanup();
-        this.handleCompanyConfirmAnswer('no', companyName);
-      }
-    };
-
-    this.handleOptionClick = (target: HTMLElement) => {
-      const value = target.dataset.value;
-      if (value === 'yes' || value === 'no') {
-        cleanup();
-        this.handleCompanyConfirmAnswer(value, companyName);
-      }
-    };
-
-    this.handleUserInput = async () => {
-      const input = this.inputElement?.value.trim();
-      if (input === '1') {
-        cleanup();
-        this.handleCompanyConfirmAnswer('yes', companyName);
-      } else if (input === '2') {
-        cleanup();
-        this.handleCompanyConfirmAnswer('no', companyName);
-      }
-    };
-
-    document.addEventListener('keydown', keyHandler);
-  }
-
-  private async handleCompanyConfirmAnswer(value: string, companyName: string): Promise<void> {
-    const displayText = value === 'yes' ? 'Yes' : 'No, different company/personal';
-    this.addMessage({ type: 'user', content: displayText });
-    if (this.inputElement) this.inputElement.value = '';
-
-    if (value === 'yes') {
-      this.intakeData.company = companyName;
-      this.confirmedCompany = true;
-      await this.skipToRelevantQuestion();
-    } else {
-      await this.askIfForCompany();
-    }
-  }
-
-  private async askIfForCompany(): Promise<void> {
-    if (this.chatContainer) {
-      await showTypingIndicator(this.chatContainer, 300);
-    }
-
-    this.addMessage({
-      type: 'ai',
-      content: 'Is this project for a company or business?',
-      options: [
-        { value: 'yes', label: 'Yes' },
-        { value: 'no', label: 'No, personal project' }
-      ]
-    });
-
-    this.setupForCompanyHandler();
-  }
-
-  private setupForCompanyHandler(): void {
-    // Block regular handlers during this special prompt
-    this.isInSpecialPrompt = true;
-
-    if (this.inputElement) {
-      this.inputElement.placeholder = 'Click or type 1 or 2...';
-      this.inputElement.disabled = false;
-      this.inputElement.focus();
-    }
-
-    const originalClickHandler = this.handleOptionClick.bind(this);
-    const originalInputHandler = this.handleUserInput.bind(this);
-
-    let keyHandler: ((e: KeyboardEvent) => void) | null = null;
-
-    const cleanup = () => {
-      this.isInSpecialPrompt = false;
-      this.handleUserInput = originalInputHandler;
-      this.handleOptionClick = originalClickHandler;
-      if (keyHandler) document.removeEventListener('keydown', keyHandler);
-    };
-
-    keyHandler = (e: KeyboardEvent) => {
-      if (e.key === '1') {
-        e.preventDefault();
-        cleanup();
-        this.handleForCompanyAnswer('yes');
-      } else if (e.key === '2') {
-        e.preventDefault();
-        cleanup();
-        this.handleForCompanyAnswer('no');
-      }
-    };
-
-    this.handleOptionClick = (target: HTMLElement) => {
-      const value = target.dataset.value;
-      if (value === 'yes' || value === 'no') {
-        cleanup();
-        this.handleForCompanyAnswer(value);
-      }
-    };
-
-    this.handleUserInput = async () => {
-      const input = this.inputElement?.value.trim();
-      if (input === '1') {
-        cleanup();
-        this.handleForCompanyAnswer('yes');
-      } else if (input === '2') {
-        cleanup();
-        this.handleForCompanyAnswer('no');
-      }
-    };
-
-    document.addEventListener('keydown', keyHandler);
-  }
-
-  private async handleForCompanyAnswer(value: string): Promise<void> {
-    const displayText = value === 'yes' ? 'Yes' : 'No, personal project';
-    this.addMessage({ type: 'user', content: displayText });
-    if (this.inputElement) this.inputElement.value = '';
-
-    if (value === 'yes') {
-      this.confirmedCompany = true;
-      await this.askForCompanyName();
-    } else {
-      this.intakeData.company = '';
-      this.confirmedCompany = true;
-      await this.skipToRelevantQuestion();
-    }
-  }
-
-  private async askForCompanyName(): Promise<void> {
-    // Block regular handlers during this special prompt
-    this.isInSpecialPrompt = true;
-
-    if (this.chatContainer) {
-      await showTypingIndicator(this.chatContainer, 300);
-    }
-
-    this.addMessage({
-      type: 'ai',
-      content: 'What\'s the company or business name?'
-    });
-
-    if (this.inputElement) {
-      this.inputElement.placeholder = 'Click or type company name...';
-      this.inputElement.disabled = false;
-      this.inputElement.focus();
-    }
-
-    const originalInputHandler = this.handleUserInput.bind(this);
-    this.handleUserInput = async () => {
-      const value = this.inputElement?.value.trim();
-      if (!value) return;
-
-      this.isInSpecialPrompt = false;
-      this.addMessage({ type: 'user', content: value });
-      this.intakeData.company = value;
-      if (this.inputElement) this.inputElement.value = '';
-
-      this.handleUserInput = originalInputHandler;
-      await this.skipToRelevantQuestion();
-    };
+    // Skip to the first unanswered question
+    await this.skipToRelevantQuestion();
   }
 
   private async skipToRelevantQuestion(): Promise<void> {
-    const fieldsToSkip = ['name', 'email', 'company'];
+    const fieldsToSkip = ['name', 'email'];
 
     while (this.currentQuestionIndex < QUESTIONS.length) {
       const question = QUESTIONS[this.currentQuestionIndex];
@@ -792,11 +577,6 @@ export class TerminalIntakeModule extends BaseModule {
         fieldsToSkip.includes(question.field) &&
         this.intakeData[question.field as keyof IntakeData]
       ) {
-        this.currentQuestionIndex++;
-        continue;
-      }
-
-      if (question.field === 'company' && this.confirmedCompany) {
         this.currentQuestionIndex++;
         continue;
       }
@@ -940,11 +720,6 @@ export class TerminalIntakeModule extends BaseModule {
 
     if (!question) {
       await this.showReviewAndConfirm();
-      return;
-    }
-
-    if (question.field === 'company' && !this.confirmedCompany) {
-      await this.askIfForCompany();
       return;
     }
 
@@ -1289,20 +1064,9 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private formatFieldForReview(field: string, value: string | string[] | undefined): string {
-    if (field === 'company' && value === '') {
-      return 'N/A (Personal Project)';
-    }
     if (!value) return 'Not provided';
 
-    if (field === 'phone' && typeof value === 'string') {
-      return formatPhoneNumber(value);
-    }
-
     if (field === 'name' && typeof value === 'string') {
-      return capitalizeWords(value);
-    }
-
-    if (field === 'company' && typeof value === 'string') {
       return capitalizeWords(value);
     }
 
@@ -1325,8 +1089,6 @@ export class TerminalIntakeModule extends BaseModule {
       '[CONTACT]',
       `Name: ${val(this.formatFieldForReview('name', data.name as string))}`,
       `Email: ${val(this.formatFieldForReview('email', data.email as string))}`,
-      `Company: ${val(this.formatFieldForReview('company', data.company as string))}`,
-      `Phone: ${val(this.formatFieldForReview('phone', data.phone as string))}`,
       '',
       '[PROJECT]',
       `Type: ${val(this.formatFieldForReview('projectType', data.projectType as string))}`,
@@ -1334,33 +1096,16 @@ export class TerminalIntakeModule extends BaseModule {
       `Timeline: ${val(this.formatFieldForReview('timeline', data.timeline as string))}`,
       `Budget: ${val(this.formatFieldForReview('budget', data.budget as string))}`,
       '',
-      '[FEATURES]',
-      `Features: ${val(this.formatFieldForReview('features', data.features as string[]))}`,
-      `Custom Features: ${val(data.customFeatures ? String(data.customFeatures) : 'N/A')}`,
-      `Need Integrations: ${val(this.formatFieldForReview('hasIntegrations', data.hasIntegrations as string))}`,
-      `Integrations: ${val(data.hasIntegrations === 'yes' ? this.formatFieldForReview('integrations', data.integrations as string[]) : 'N/A')}`,
-      '',
-      '[DESIGN]',
-      `Design Level: ${val(this.formatFieldForReview('designLevel', data.designLevel as string))}`,
-      `Brand Assets: ${val(this.formatFieldForReview('brandAssets', data.brandAssets as string[]))}`,
-      `Has Inspiration: ${val(this.formatFieldForReview('hasInspiration', data.hasInspiration as string))}`,
-      `Inspiration URLs: ${val(data.hasInspiration === 'yes' ? this.formatFieldForReview('inspiration', data.inspiration as string) : 'N/A')}`,
-      '',
       '[TECHNICAL]',
       `Tech Comfort: ${val(this.formatFieldForReview('techComfort', data.techComfort as string))}`,
-      `Has Current Site: ${val(this.formatFieldForReview('hasCurrentSite', data.hasCurrentSite as string))}`,
-      `Current Site URL: ${val(data.hasCurrentSite === 'yes' ? this.formatFieldForReview('currentSite', data.currentSite as string) : 'N/A')}`,
-      `Has Domain: ${val(data.hasCurrentSite === 'no' ? this.formatFieldForReview('hasDomain', data.hasDomain as string) : 'N/A (has current site)')}`,
-      `Domain Name: ${val(data.hasCurrentSite === 'no' && data.hasDomain === 'yes' ? this.formatFieldForReview('domainName', data.domainName as string) : 'N/A')}`,
-      `Hosting: ${val(this.formatFieldForReview('hosting', data.hosting as string))}`,
-      `Hosting Provider: ${val(data.hosting === 'have-hosting' ? this.formatFieldForReview('hostingProvider', data.hostingProvider as string) : 'N/A')}`,
+      `Domain/Hosting: ${val(this.formatFieldForReview('domainHosting', data.domainHosting as string))}`,
       '',
-      '[OTHER]',
-      `Concerns: ${val(this.formatFieldForReview('challenges', data.challenges as string[]))}`,
-      `Has Additional Info: ${val(this.formatFieldForReview('hasAdditionalInfo', data.hasAdditionalInfo as string))}`,
-      `Additional Notes: ${val(data.hasAdditionalInfo === 'yes' ? this.formatFieldForReview('additionalInfo', data.additionalInfo as string) : 'N/A')}`,
-      `Was Referred: ${val(this.formatFieldForReview('wasReferred', data.wasReferred as string))}`,
-      `Referral Name: ${val(data.wasReferred === 'yes' ? this.formatFieldForReview('referralName', data.referralName as string) : 'N/A')}`,
+      '[FEATURES & DESIGN]',
+      `Features: ${val(this.formatFieldForReview('features', data.features as string[]))}`,
+      `Design Level: ${val(this.formatFieldForReview('designLevel', data.designLevel as string))}`,
+      '',
+      '[NOTES]',
+      `Additional Info: ${val(data.additionalInfo ? this.formatFieldForReview('additionalInfo', data.additionalInfo as string) : 'None')}`,
       '',
       '--- END SUMMARY ---'
     ];
@@ -1616,9 +1361,6 @@ export class TerminalIntakeModule extends BaseModule {
         features: Array.isArray(this.intakeData.features)
           ? this.intakeData.features
           : [this.intakeData.features].filter(Boolean),
-        brandAssets: Array.isArray(this.intakeData.brandAssets)
-          ? this.intakeData.brandAssets
-          : [this.intakeData.brandAssets].filter(Boolean),
         submittedAt: new Date().toISOString()
       };
 
@@ -1702,11 +1444,6 @@ Thank you for choosing No Bhad Codes!
     // Set current question to the one being edited
     this.currentQuestionIndex = questionIndex;
     this.selectedOptions = [];
-
-    // Reset confirmedCompany flag if going back to or before the company question (index 2)
-    if (questionIndex <= 2) {
-      this.confirmedCompany = false;
-    }
 
     // For select questions, pre-select the old answer
     if (oldAnswer) {

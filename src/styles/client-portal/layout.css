@@ -62,8 +62,9 @@
   color: var(--color-dark) !important;
 }
 
-/* Force light theme colors for client portal - unaffected by theme toggle */
-[data-page="client-portal"] {
+/* Force light theme colors for dashboard pages - unaffected by theme toggle */
+[data-page="client-portal"],
+[data-page="admin"] {
   /* Base neutral colors */
   --color-neutral-100: #f5f5f5;
   --color-neutral-200: #e0e0e0;
@@ -105,7 +106,7 @@
   --cp-spacing-2xl: 2rem;
 }
 
-/* Remove ALL shadows from client portal */
+/* Remove ALL shadows from dashboard pages */
 [data-page="client-portal"] .btn,
 [data-page="client-portal"] .form-button,
 [data-page="client-portal"] .login-btn,
@@ -134,7 +135,36 @@
 [data-page="client-portal"] h5,
 [data-page="client-portal"] h6,
 [data-page="client-portal"] .page-header h2,
-[data-page="client-portal"] .client-name {
+[data-page="client-portal"] .client-name,
+[data-page="admin"] .btn,
+[data-page="admin"] .form-button,
+[data-page="admin"] .login-btn,
+[data-page="admin"] .btn-primary,
+[data-page="admin"] .btn-secondary,
+[data-page="admin"] .sidebar-buttons .btn,
+[data-page="admin"] .card,
+[data-page="admin"] .stat-card,
+[data-page="admin"] .summary-card,
+[data-page="admin"] .overview-card,
+[data-page="admin"] .content-section,
+[data-page="admin"] .messages-container,
+[data-page="admin"] .invoices-list,
+[data-page="admin"] .file-section,
+[data-page="admin"] .settings-section,
+[data-page="admin"] .project-item,
+[data-page="admin"] .auth-container,
+[data-page="admin"] .portal-card,
+[data-page="admin"] .portal-form-area .login-form,
+[data-page="admin"] .dynamic-content,
+[data-page="admin"] input[type="submit"],
+[data-page="admin"] h1,
+[data-page="admin"] h2,
+[data-page="admin"] h3,
+[data-page="admin"] h4,
+[data-page="admin"] h5,
+[data-page="admin"] h6,
+[data-page="admin"] .page-header h2,
+[data-page="admin"] .client-name {
   box-shadow: none !important;
   text-shadow: none !important;
 }
@@ -148,7 +178,16 @@
 [data-page="client-portal"] .update-item,
 [data-page="client-portal"] .content-item,
 [data-page="client-portal"] .settings-form,
-[data-page="client-portal"] .message-compose {
+[data-page="client-portal"] .message-compose,
+[data-page="admin"] .card,
+[data-page="admin"] .cp-card,
+[data-page="admin"] .cp-stat,
+[data-page="admin"] .content-section,
+[data-page="admin"] .timeline-content,
+[data-page="admin"] .update-item,
+[data-page="admin"] .content-item,
+[data-page="admin"] .settings-form,
+[data-page="admin"] .message-compose {
   background: transparent !important;
   border: none !important;
 }

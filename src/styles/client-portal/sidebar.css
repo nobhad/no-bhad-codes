@@ -3,10 +3,12 @@
    Main navigation sidebar with collapse states
    ===================================================== */
 
-.sidebar {
+/* Base sidebar - applies to client portal and admin */
+[data-page="client-portal"] .sidebar,
+[data-page="admin"] .sidebar {
   width: 240px;
   min-width: 240px;
-  background: var(--cp-bg-dark);
+  background: var(--cp-bg-dark) !important;
   border-right: none;
   display: flex;
   flex-direction: column;
@@ -98,20 +100,27 @@
   gap: 1rem;
 }
 
-.sidebar-buttons .btn {
+/* Override global btn styles for sidebar buttons */
+[data-page="client-portal"] .sidebar-buttons .btn,
+[data-page="client-portal"] .sidebar-buttons .btn.btn-secondary,
+[data-page="admin"] .sidebar-buttons .btn,
+[data-page="admin"] .sidebar-buttons .btn.btn-secondary {
   width: 100%;
   padding: 0.85rem 1.1rem;
   font-family: var(--font--acme);
   font-size: 0.9rem;
   letter-spacing: 1px;
   text-align: left;
-  background: transparent;
-  color: var(--cp-text-light);
-  border: 2px solid var(--cp-border-light);
-  border-radius: var(--cp-radius-lg);
+  background: transparent !important;
+  background-color: transparent !important;
+  color: var(--cp-text-light) !important;
+  border: 2px solid var(--cp-border-light) !important;
+  border-radius: var(--cp-radius-lg) !important;
   display: flex;
   align-items: center;
   gap: var(--cp-spacing-md);
+  box-shadow: none !important;
+  text-shadow: none !important;
 }
 
 .sidebar-buttons .btn .btn-icon {
@@ -124,17 +133,21 @@
   flex: 1;
 }
 
-.sidebar-buttons .btn:hover {
-  background: var(--color-primary);
-  color: var(--cp-bg-dark);
-  border-color: var(--color-primary);
+[data-page="client-portal"] .sidebar-buttons .btn:hover,
+[data-page="admin"] .sidebar-buttons .btn:hover {
+  background: var(--color-primary) !important;
+  background-color: var(--color-primary) !important;
+  color: var(--cp-bg-dark) !important;
+  border-color: var(--color-primary) !important;
 }
 
-.sidebar-buttons .btn.active {
-  background: var(--color-primary);
-  color: var(--cp-bg-dark);
-  border-color: var(--color-primary);
-  outline: 2px solid var(--color-primary);
+[data-page="client-portal"] .sidebar-buttons .btn.active,
+[data-page="admin"] .sidebar-buttons .btn.active {
+  background: var(--color-primary) !important;
+  background-color: var(--color-primary) !important;
+  color: var(--cp-bg-dark) !important;
+  border-color: var(--color-primary) !important;
+  outline: 2px solid var(--color-primary) !important;
 }
 
 /* Collapsed state - show only icons */
@@ -186,22 +199,28 @@
 }
 
 /* Footer button styling */
-.sidebar-footer .btn-logout {
+[data-page="client-portal"] .sidebar-footer .btn-logout,
+[data-page="admin"] .sidebar-footer .btn-logout {
   display: flex;
   align-items: center;
   gap: var(--cp-spacing-md);
   font-family: var(--font--acme);
   letter-spacing: 1px;
-  background: transparent;
-  color: var(--cp-text-light);
-  border: 2px solid var(--cp-border-light);
-  border-radius: var(--cp-radius-lg);
+  background: transparent !important;
+  background-color: transparent !important;
+  color: var(--cp-text-light) !important;
+  border: 2px solid var(--cp-border-light) !important;
+  border-radius: var(--cp-radius-lg) !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
 }
 
-.sidebar-footer .btn-logout:hover {
-  background: var(--color-primary);
-  color: var(--cp-bg-dark);
-  border-color: var(--color-primary);
+[data-page="client-portal"] .sidebar-footer .btn-logout:hover,
+[data-page="admin"] .sidebar-footer .btn-logout:hover {
+  background: var(--color-primary) !important;
+  background-color: var(--color-primary) !important;
+  color: var(--cp-bg-dark) !important;
+  border-color: var(--color-primary) !important;
 }
 
 /* Sidebar Toggle Button */

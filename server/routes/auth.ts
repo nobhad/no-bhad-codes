@@ -761,7 +761,9 @@ router.post(
     // Set HttpOnly cookie with admin auth token
     res.cookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, token, COOKIE_CONFIG.ADMIN_OPTIONS);
 
+    // Also return token in response body for frontend storage
     return sendSuccess(res, {
+      token,
       expiresIn: JWT_CONFIG.ADMIN_TOKEN_EXPIRY,
     }, 'Admin login successful');
   })

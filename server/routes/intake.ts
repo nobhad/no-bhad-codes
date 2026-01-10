@@ -22,27 +22,15 @@ const router = express.Router();
 interface IntakeFormData {
   name: string;
   email: string;
-  company?: string;
-  phone: string;
   projectType: string;
   projectDescription: string;
   timeline: string;
   budget: string;
-  features?: string | string[];
-  addons?: string | string[];
-  brandAssets?: string | string[];
-  designLevel?: string;
-  contentStatus?: string;
   techComfort?: string;
-  hosting?: string;
-  pages?: string;
-  integrations?: string;
-  inspiration?: string;
-  currentSite?: string;
-  challenges?: string;
+  domainHosting?: string;
+  features?: string | string[];
+  designLevel?: string;
   additionalInfo?: string;
-  wasReferred?: string;
-  referralName?: string;
 }
 
 interface ExistingClient {
@@ -90,7 +78,6 @@ router.post('/', async (req: Request, res: Response) => {
     const requiredFields = [
       'name',
       'email',
-      'phone',
       'projectType',
       'projectDescription',
       'timeline',
@@ -111,19 +98,13 @@ router.post('/', async (req: Request, res: Response) => {
     // Get database and run everything in a transaction
     const db = getDatabase();
 
-    // Process features arrays outside transaction
+    // Process features array outside transaction
     const features = Array.isArray(intakeData.features)
       ? intakeData.features
       : [intakeData.features].filter(Boolean);
-    const addons = Array.isArray(intakeData.addons)
-      ? intakeData.addons
-      : [intakeData.addons].filter(Boolean);
-    const brandAssets = Array.isArray(intakeData.brandAssets)
-      ? intakeData.brandAssets
-      : [intakeData.brandAssets].filter(Boolean);
 
-    // Normalize company name (convert "none", "n/a" etc. to client name)
-    const normalizedCompany = normalizeCompanyName(intakeData.company || '', intakeData.name);
+    // Use client name as company name (streamlined form doesn't collect company)
+    const companyName = intakeData.name;
 
     // Generate password hash outside transaction
     const hashedPassword = await bcrypt.hash(generateRandomPassword(), 10);
@@ -150,7 +131,7 @@ router.post('/', async (req: Request, res: Response) => {
             password_hash, status, created_at, updated_at
           ) VALUES (?, ?, ?, ?, ?, 'pending', datetime('now'), datetime('now'))
         `,
-          [normalizedCompany, intakeData.name, intakeData.email, intakeData.phone, hashedPassword]
+          [companyName, intakeData.name, intakeData.email, '', hashedPassword]
         );
 
         clientId = clientResult.lastID!;
@@ -163,34 +144,22 @@ router.post('/', async (req: Request, res: Response) => {
         INSERT INTO projects (
           client_id, project_name, description, status, priority,
           project_type, budget_range, timeline, features,
-          design_level, content_status, tech_comfort,
-          hosting_preference, page_count, integrations,
-          brand_assets, inspiration, current_site,
-          challenges, additional_info, addons,
-          referral_source, created_at, updated_at
-        ) VALUES (?, ?, ?, 'pending', 'medium', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+          design_level, tech_comfort, hosting_preference,
+          additional_info, created_at, updated_at
+        ) VALUES (?, ?, ?, 'pending', 'medium', ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
       `,
         [
           clientId,
-          generateProjectName(intakeData.projectType, normalizedCompany),
+          generateProjectName(intakeData.projectType, companyName),
           intakeData.projectDescription,
           intakeData.projectType,
           intakeData.budget,
           intakeData.timeline,
           features.join(','),
-          intakeData.designLevel,
-          intakeData.contentStatus,
-          intakeData.techComfort,
-          intakeData.hosting,
-          intakeData.pages,
-          intakeData.integrations,
-          brandAssets.join(','),
-          intakeData.inspiration,
-          intakeData.currentSite,
-          intakeData.challenges,
-          intakeData.additionalInfo,
-          addons.join(','),
-          intakeData.wasReferred === 'yes' ? intakeData.referralName : null,
+          intakeData.designLevel || null,
+          intakeData.techComfort || null,
+          intakeData.domainHosting || null,
+          intakeData.additionalInfo || null,
         ]
       );
 
@@ -277,7 +246,7 @@ router.post('/', async (req: Request, res: Response) => {
       data: {
         clientId,
         projectId,
-        projectName: generateProjectName(intakeData.projectType, normalizedCompany),
+        projectName: generateProjectName(intakeData.projectType, companyName),
         accessToken,
         isNewClient,
         projectPlan: projectPlan.summary,
@@ -384,43 +353,6 @@ function generateRandomPassword(length: number = 12): string {
   return password;
 }
 
-/**
- * Normalize company name - if "none", "n/a", "no company" etc, use client name instead
- */
-function normalizeCompanyName(company: string, clientName: string): string {
-  const noCompanyPatterns = [
-    'none',
-    'n/a',
-    'na',
-    'no company',
-    'no-company',
-    'nocompany',
-    'self',
-    'personal',
-    'individual',
-    'freelance',
-    'freelancer',
-    '-',
-    '.',
-    '',
-  ];
-
-  const normalizedCompany = (company || '').toLowerCase().trim();
-
-  if (noCompanyPatterns.includes(normalizedCompany) || normalizedCompany.length < 2) {
-    // Use client's first name + last initial
-    const nameParts = clientName.trim().split(/\s+/);
-    if (nameParts.length >= 2) {
-      const firstName = nameParts[0];
-      const lastInitial = nameParts[nameParts.length - 1].charAt(0).toUpperCase();
-      return `${firstName} ${lastInitial}.`;
-    }
-    return clientName; // Just use full name if can't parse
-  }
-
-  return company;
-}
-
 function generateProjectName(projectType: string, companyName: string): string {
   const typeNames: Record<string, string> = {
     'simple-site': 'Simple Website',
@@ -452,20 +384,17 @@ function generateProjectMilestones(projectType: string, timeline: string): Miles
     case 'asap':
       timelineWeeks = 2;
       break;
-    case '1-2-weeks':
-      timelineWeeks = 2;
-      break;
-    case '2-4-weeks':
+    case '1-month':
       timelineWeeks = 4;
       break;
-    case '1-2-months':
-      timelineWeeks = 6;
+    case '1-3-months':
+      timelineWeeks = 8;
       break;
-    case '2-3-months':
-      timelineWeeks = 10;
+    case '3-6-months':
+      timelineWeeks = 16;
       break;
     case 'flexible':
-      timelineWeeks = 8;
+      timelineWeeks = 6;
       break;
   }
 

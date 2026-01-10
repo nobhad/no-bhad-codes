@@ -25,22 +25,16 @@ export interface EmailResult {
 
 export interface IntakeData {
   name: string;
-  company?: string;
   email: string;
-  phone: string;
   projectType: string;
-  budget: string;
-  timeline: string;
   projectDescription: string;
-  features?: string | string[];
-  addons?: string | string[];
-  designLevel?: string;
-  contentStatus?: string;
+  timeline: string;
+  budget: string;
   techComfort?: string;
-  hosting?: string;
-  pages?: string;
-  integrations?: string;
-  challenges?: string;
+  domainHosting?: string;
+  features?: string | string[];
+  designLevel?: string;
+  additionalInfo?: string;
 }
 
 interface EmailServiceStatus {
@@ -171,15 +165,13 @@ export async function sendNewIntakeNotification(
 
   const emailContent: EmailContent = {
     to: adminEmail,
-    subject: `New Project Intake: ${intakeData.company} - ${intakeData.projectType}`,
+    subject: `New Project Intake: ${intakeData.name} - ${intakeData.projectType}`,
     text: `
       New project intake received!
 
       Client Details:
       - Name: ${intakeData.name}
-      - Company: ${intakeData.company}
       - Email: ${intakeData.email}
-      - Phone: ${intakeData.phone}
 
       Project Details:
       - Type: ${intakeData.projectType}
@@ -187,7 +179,13 @@ export async function sendNewIntakeNotification(
       - Timeline: ${intakeData.timeline}
       - Description: ${intakeData.projectDescription}
 
+      Technical:
+      - Tech Comfort: ${intakeData.techComfort || 'Not specified'}
+      - Domain/Hosting: ${intakeData.domainHosting || 'Not specified'}
+
       Features: ${Array.isArray(intakeData.features) ? intakeData.features.join(', ') : intakeData.features || 'None specified'}
+      Design Level: ${intakeData.designLevel || 'Not specified'}
+      ${intakeData.additionalInfo ? `Additional Info: ${intakeData.additionalInfo}` : ''}
 
       Project ID: ${projectId}
 
@@ -270,9 +268,6 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
   const features = Array.isArray(intakeData.features)
     ? intakeData.features
     : [intakeData.features].filter(Boolean);
-  const addons = Array.isArray(intakeData.addons)
-    ? intakeData.addons
-    : [intakeData.addons].filter(Boolean);
 
   const infoRow = (label: string, value: string | undefined) => `
     <tr>
@@ -309,9 +304,7 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
                   <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Client</h2>
                   <table width="100%" cellpadding="0" cellspacing="0">
                     ${infoRow('Name', intakeData.name)}
-                    ${infoRow('Company', intakeData.company || 'Personal Project')}
                     ${infoRow('Email', `<a href="mailto:${intakeData.email}" style="color: #0066cc;">${intakeData.email}</a>`)}
-                    ${infoRow('Phone', intakeData.phone)}
                   </table>
                 </td>
               </tr>
@@ -324,12 +317,22 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
                     ${infoRow('Type', intakeData.projectType)}
                     ${infoRow('Budget', intakeData.budget)}
                     ${infoRow('Timeline', intakeData.timeline)}
-                    ${intakeData.pages ? infoRow('Pages', intakeData.pages) : ''}
                   </table>
                   <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #7ff709;">
                     <strong style="display: block; margin-bottom: 8px; color: #555;">Description:</strong>
                     <span style="color: #222;">${intakeData.projectDescription}</span>
                   </div>
+                </td>
+              </tr>
+
+              <!-- Technical -->
+              <tr>
+                <td style="padding: 15px 20px;">
+                  <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Technical</h2>
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    ${infoRow('Tech Comfort', intakeData.techComfort)}
+                    ${infoRow('Domain/Hosting', intakeData.domainHosting)}
+                  </table>
                 </td>
               </tr>
 
@@ -345,38 +348,17 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
               </tr>
               ` : ''}
 
-              ${addons.length > 0 ? `
-              <!-- Addons -->
+              <!-- Design & Notes -->
               <tr>
                 <td style="padding: 15px 20px;">
-                  <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Add-ons</h2>
-                  <div style="padding: 15px; background: #f8f9fa; border-radius: 6px;">
-                    ${addons.map((a) => `<span style="display: inline-block; margin: 4px; padding: 6px 12px; background: #e3f2fd; color: #1565c0; border-radius: 20px; font-size: 14px;">${a}</span>`).join('')}
-                  </div>
-                </td>
-              </tr>
-              ` : ''}
-
-              <!-- Additional Info -->
-              <tr>
-                <td style="padding: 15px 20px;">
-                  <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Details</h2>
+                  <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Design & Notes</h2>
                   <table width="100%" cellpadding="0" cellspacing="0">
                     ${infoRow('Design Level', intakeData.designLevel)}
-                    ${infoRow('Content Status', intakeData.contentStatus)}
-                    ${infoRow('Tech Comfort', intakeData.techComfort)}
-                    ${infoRow('Hosting', intakeData.hosting)}
                   </table>
-                  ${intakeData.integrations ? `
+                  ${intakeData.additionalInfo ? `
                   <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #7ff709;">
-                    <strong style="display: block; margin-bottom: 8px; color: #555;">Integrations:</strong>
-                    <span style="color: #222;">${intakeData.integrations}</span>
-                  </div>
-                  ` : ''}
-                  ${intakeData.challenges ? `
-                  <div style="margin-top: 15px; padding: 15px; background: #fff3e0; border-radius: 6px; border-left: 4px solid #ff9800;">
-                    <strong style="display: block; margin-bottom: 8px; color: #e65100;">Concerns:</strong>
-                    <span style="color: #222;">${intakeData.challenges}</span>
+                    <strong style="display: block; margin-bottom: 8px; color: #555;">Additional Info:</strong>
+                    <span style="color: #222;">${intakeData.additionalInfo}</span>
                   </div>
                   ` : ''}
                 </td>

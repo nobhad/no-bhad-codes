@@ -119,6 +119,7 @@ class AdminDashboard {
   }
 
   private async init(): Promise<void> {
+    console.log('[AdminDashboard] init() called');
     // Initialize security measures first
     AdminSecurity.init();
 
@@ -126,13 +127,19 @@ class AdminDashboard {
     await this.initializeModules();
 
     // Check authentication
-    if (!AdminAuth.isAuthenticated()) {
+    const isAuth = AdminAuth.isAuthenticated();
+    console.log('[AdminDashboard] isAuthenticated:', isAuth);
+    if (!isAuth) {
+      console.log('[AdminDashboard] Not authenticated, showing auth gate');
       this.showAuthGate();
       return;
     }
 
+    console.log('[AdminDashboard] Authenticated, showing dashboard');
     this.showDashboard();
+    console.log('[AdminDashboard] Calling setupEventListeners...');
     this.setupEventListeners();
+    console.log('[AdminDashboard] setupEventListeners complete');
     await this.loadDashboardData();
     this.startAutoRefresh();
   }
@@ -201,9 +208,11 @@ class AdminDashboard {
   }
 
   private setupEventListeners(): void {
+    console.log('[AdminDashboard] setupEventListeners() called');
     // Logout button (both old and new IDs)
     const logoutBtn =
       document.getElementById('logout-btn') || document.getElementById('btn-logout');
+    console.log('[AdminDashboard] logoutBtn found:', !!logoutBtn);
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
         // Clear auth data and redirect to home page
@@ -228,11 +237,16 @@ class AdminDashboard {
 
     // Tab navigation - new portal style (sidebar buttons with data-tab)
     const sidebarButtons = document.querySelectorAll('.sidebar-buttons .btn[data-tab]');
-    sidebarButtons.forEach((btn) => {
+    console.log('[AdminDashboard] Found sidebar buttons:', sidebarButtons.length);
+    sidebarButtons.forEach((btn, index) => {
+      const tabName = (btn as HTMLElement).dataset.tab;
+      console.log(`[AdminDashboard] Setting up button ${index}: ${tabName}`);
       btn.addEventListener('click', (e) => {
+        console.log('[AdminDashboard] Button clicked!', tabName);
         e.preventDefault();
-        const tabName = (btn as HTMLElement).dataset.tab;
+        e.stopPropagation();
         if (tabName) {
+          console.log('[AdminDashboard] Switching to tab:', tabName);
           this.switchTab(tabName);
           // Update active state on sidebar buttons
           sidebarButtons.forEach((b) => b.classList.remove('active'));
