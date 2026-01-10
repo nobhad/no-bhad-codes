@@ -420,7 +420,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
                 </svg>
               </span>
               <div class="file-info">
-                <span class="file-name">${file.original_name || file.filename}</span>
+                <span class="file-name">${file.original_filename || file.filename}</span>
                 <span class="file-meta">Uploaded ${new Date(file.created_at).toLocaleDateString()} - ${this.formatFileSize(file.size)}</span>
               </div>
               <div class="file-actions">

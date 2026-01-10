@@ -424,7 +424,7 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
       <tbody>
         ${files
     .map((file) => {
-      const safeName = SanitizationUtils.escapeHtml(file.original_name || file.filename);
+      const safeName = SanitizationUtils.escapeHtml(file.original_filename || file.filename);
       const size = formatFileSize(file.size);
       const date = new Date(file.created_at).toLocaleDateString();
 

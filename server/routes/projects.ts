@@ -177,7 +177,7 @@ router.get(
     // Get project files
     const files = await db.all(
       `
-    SELECT id, filename, original_name, file_size, mime_type, uploaded_by, created_at
+    SELECT id, filename, original_filename, file_size, mime_type, uploaded_by, created_at
     FROM files 
     WHERE project_id = ?
     ORDER BY created_at DESC
@@ -188,7 +188,7 @@ router.get(
     // Get project messages
     const messages = await db.all(
       `
-    SELECT id, sender_type, sender_name, message, is_read, created_at
+    SELECT id, sender_role, sender_name, message, is_read, created_at
     FROM messages 
     WHERE project_id = ?
     ORDER BY created_at ASC
@@ -528,7 +528,7 @@ router.post(
     for (const file of files) {
       const result = await db.run(
         `
-      INSERT INTO files (project_id, filename, original_name, file_path, file_size, mime_type, uploaded_by)
+      INSERT INTO files (project_id, filename, original_filename, file_path, file_size, mime_type, uploaded_by)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `,
         [
@@ -608,7 +608,7 @@ router.post(
 
     const newMessage = await db.get(
       `
-    SELECT id, sender_type, sender_name, message, is_read, created_at
+    SELECT id, sender_role, sender_name, message, is_read, created_at
     FROM messages WHERE id = ?
   `,
       [result.lastID]
@@ -1081,7 +1081,7 @@ router.get(
     // Get recent messages (last 5)
     const recentMessages = await db.all(
       `
-    SELECT id, sender_type, sender_name, message, is_read, created_at
+    SELECT id, sender_role, sender_name, message, is_read, created_at
     FROM messages
     WHERE project_id = ?
     ORDER BY created_at DESC

@@ -161,7 +161,7 @@ export interface ProjectFile {
   id: number;
   project_id: number;
   filename: string;
-  original_name: string;
+  original_filename: string;
   mime_type: string;
   size: number;
   uploaded_by: string;
