@@ -676,5 +676,69 @@ No Bhad Codes Team
   })
 );
 
+/**
+ * GET /api/admin/bundle-stats
+ * Get bundle size statistics from dist folder
+ */
+router.get(
+  '/bundle-stats',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
+    const fs = await import('fs');
+    const path = await import('path');
+
+    const distPath = path.join(process.cwd(), 'dist', 'assets');
+
+    try {
+      const files = fs.readdirSync(distPath);
+
+      let totalJs = 0;
+      let totalCss = 0;
+      const jsFiles: { name: string; size: number }[] = [];
+      const cssFiles: { name: string; size: number }[] = [];
+
+      for (const file of files) {
+        const filePath = path.join(distPath, file);
+        const stats = fs.statSync(filePath);
+
+        if (file.endsWith('.js')) {
+          totalJs += stats.size;
+          jsFiles.push({ name: file, size: stats.size });
+        } else if (file.endsWith('.css')) {
+          totalCss += stats.size;
+          cssFiles.push({ name: file, size: stats.size });
+        }
+      }
+
+      // Sort by size descending
+      jsFiles.sort((a, b) => b.size - a.size);
+      cssFiles.sort((a, b) => b.size - a.size);
+
+      res.json({
+        total: totalJs + totalCss,
+        js: totalJs,
+        css: totalCss,
+        totalFormatted: formatBytes(totalJs + totalCss),
+        jsFormatted: formatBytes(totalJs),
+        cssFormatted: formatBytes(totalCss),
+        jsFiles: jsFiles.slice(0, 10).map(f => ({ ...f, sizeFormatted: formatBytes(f.size) })),
+        cssFiles: cssFiles.slice(0, 5).map(f => ({ ...f, sizeFormatted: formatBytes(f.size) })),
+      });
+    } catch (error) {
+      console.error('Error reading bundle stats:', error);
+      res.status(500).json({ error: 'Failed to read bundle stats' });
+    }
+  })
+);
+
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+}
+
 export { router as adminRouter };
 export default router;

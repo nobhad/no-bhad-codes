@@ -95,8 +95,8 @@ export function registerServices(): void {
         : 'http://localhost:4001';
       return new VisitorTrackingService({
         enableTracking: true,
-        respectDoNotTrack: true,
-        cookieConsent: true,
+        respectDoNotTrack: false, // Track all visitors for analytics
+        cookieConsent: false, // Don't require cookie consent for basic analytics
         sessionTimeout: 30,
         trackScrollDepth: true,
         trackClicks: true,

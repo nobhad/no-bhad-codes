@@ -24,7 +24,91 @@ const charts: Map<string, Chart> = new Map();
 
 export async function loadOverviewData(_ctx: AdminDashboardContext): Promise<void> {
   // Load overview stats and charts
-  await Promise.all([loadVisitorsChart(), loadSourcesChart()]);
+  await Promise.all([
+    loadVisitorsChart(),
+    loadSourcesChart(),
+    loadAnalyticsSummary()
+  ]);
+}
+
+async function loadAnalyticsSummary(): Promise<void> {
+  try {
+    const response = await fetch('/api/analytics/summary?days=30', {
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      console.warn('[AdminAnalytics] Failed to load analytics summary');
+      return;
+    }
+
+    const data = await response.json();
+    const summary = data.summary || {};
+
+    // Update analytics tab stats
+    updateElement('analytics-visitors', formatNumber(summary.unique_visitors || 0));
+    updateElement('analytics-pageviews', formatNumber(summary.total_page_views || 0));
+    updateElement('analytics-sessions', formatDuration(summary.avg_session_duration || 0));
+
+    // Update overview tab stats
+    updateElement('total-visitors', formatNumber(summary.unique_visitors || 0));
+    updateElement('page-views', formatNumber(summary.total_page_views || 0));
+    updateElement('avg-session', formatDuration(summary.avg_session_duration || 0));
+
+    // Calculate week-over-week changes if we have daily data
+    if (data.daily && data.daily.length >= 7) {
+      const thisWeek = data.daily.slice(0, 7);
+      const lastWeek = data.daily.slice(7, 14);
+
+      if (lastWeek.length > 0) {
+        const thisWeekVisitors = thisWeek.reduce((sum: number, d: { visitors?: number }) => sum + (d.visitors || 0), 0);
+        const lastWeekVisitors = lastWeek.reduce((sum: number, d: { visitors?: number }) => sum + (d.visitors || 0), 0);
+        const visitorChange = calculatePercentChange(lastWeekVisitors, thisWeekVisitors);
+        updateChangeElement('visitors-change', visitorChange);
+
+        const thisWeekViews = thisWeek.reduce((sum: number, d: { page_views?: number }) => sum + (d.page_views || 0), 0);
+        const lastWeekViews = lastWeek.reduce((sum: number, d: { page_views?: number }) => sum + (d.page_views || 0), 0);
+        const viewsChange = calculatePercentChange(lastWeekViews, thisWeekViews);
+        updateChangeElement('views-change', viewsChange);
+      }
+    }
+
+    // Get card interactions count from topInteractions
+    if (data.topInteractions) {
+      const cardFlips = data.topInteractions
+        .filter((i: { event_type?: string; element?: string }) =>
+          i.event_type === 'card_flip' || i.element?.includes('card'))
+        .reduce((sum: number, i: { count?: number }) => sum + (i.count || 0), 0);
+      updateElement('card-interactions', formatNumber(cardFlips));
+    }
+
+  } catch (error) {
+    console.error('[AdminAnalytics] Error loading analytics summary:', error);
+  }
+}
+
+function formatNumber(num: number): string {
+  if (num >= 1000000) {
+    return `${(num / 1000000).toFixed(1)}M`;
+  }
+  if (num >= 1000) {
+    return `${(num / 1000).toFixed(1)}K`;
+  }
+  return num.toLocaleString();
+}
+
+function calculatePercentChange(oldVal: number, newVal: number): number {
+  if (oldVal === 0) return newVal > 0 ? 100 : 0;
+  return Math.round(((newVal - oldVal) / oldVal) * 100);
+}
+
+function updateChangeElement(id: string, change: number): void {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  const prefix = change >= 0 ? '+' : '';
+  el.textContent = `${prefix}${change}%`;
+  el.className = `metric-change ${change >= 0 ? 'positive' : 'negative'}`;
 }
 
 export async function loadPerformanceData(_ctx: AdminDashboardContext): Promise<void> {
@@ -36,13 +120,6 @@ export async function loadPerformanceData(_ctx: AdminDashboardContext): Promise<
     updateVital('fid', perfData.fid);
     updateVital('cls', perfData.cls);
 
-    // Bundle analysis
-    if (perfData.bundleSize) {
-      updateElement('total-bundle-size', perfData.bundleSize.total);
-      updateElement('js-bundle-size', perfData.bundleSize.main);
-      updateElement('css-bundle-size', perfData.bundleSize.vendor);
-    }
-
     // Performance score
     if (perfData.score !== undefined) {
       updateElement('performance-score', `${Math.round(perfData.score)}/100`);
@@ -50,112 +127,200 @@ export async function loadPerformanceData(_ctx: AdminDashboardContext): Promise<
   } catch (error) {
     console.error('[AdminAnalytics] Error loading performance data:', error);
   }
+
+  // Load bundle stats from API
+  try {
+    const response = await fetch('/api/admin/bundle-stats', {
+      credentials: 'include'
+    });
+
+    if (response.ok) {
+      const bundleData = await response.json();
+      updateElement('total-bundle-size', bundleData.totalFormatted);
+      updateElement('js-bundle-size', bundleData.jsFormatted);
+      updateElement('css-bundle-size', bundleData.cssFormatted);
+    }
+  } catch (error) {
+    console.error('[AdminAnalytics] Error loading bundle stats:', error);
+  }
 }
 
 export async function loadAnalyticsData(_ctx: AdminDashboardContext): Promise<void> {
   try {
-    const analyticsData = await getAnalyticsData();
+    const response = await fetch('/api/analytics/summary?days=30', {
+      credentials: 'include'
+    });
 
-    populateDataList(
-      'popular-pages',
-      analyticsData.popularPages || [
-        { label: 'Homepage', value: '2,145 views' },
-        { label: 'Art Portfolio', value: '856 views' },
-        { label: 'Codes Section', value: '634 views' },
-        { label: 'Contact', value: '423 views' }
-      ]
-    );
+    if (!response.ok) {
+      console.warn('[AdminAnalytics] Failed to load analytics data');
+      showEmptyStates();
+      return;
+    }
 
-    populateDataList(
-      'device-breakdown',
-      analyticsData.deviceBreakdown || [
-        { label: 'Desktop', value: '45%' },
-        { label: 'Mobile', value: '38%' },
-        { label: 'Tablet', value: '17%' }
-      ]
-    );
+    const data = await response.json();
 
-    populateDataList(
-      'geo-distribution',
-      analyticsData.geoDistribution || [
-        { label: 'United States', value: '42%' },
-        { label: 'Canada', value: '18%' },
-        { label: 'United Kingdom', value: '12%' },
-        { label: 'Other', value: '28%' }
-      ]
-    );
+    // Popular Pages
+    if (data.topPages && data.topPages.length > 0) {
+      populateDataList(
+        'popular-pages',
+        data.topPages.map((p: { url: string; views: number }) => ({
+          label: formatPageUrl(p.url),
+          value: `${p.views.toLocaleString()} views`
+        }))
+      );
+    } else {
+      populateDataList('popular-pages', [{ label: 'No data yet', value: '-' }]);
+    }
 
-    populateDataList(
-      'engagement-events',
-      analyticsData.engagementEvents || [
-        { label: 'Business Card Flips', value: '456' },
-        { label: 'Contact Form Submissions', value: '23' },
-        { label: 'External Link Clicks', value: '187' }
-      ]
-    );
+    // Device Breakdown
+    if (data.devices && data.devices.length > 0) {
+      const total = data.devices.reduce((sum: number, d: { count: number }) => sum + d.count, 0);
+      populateDataList(
+        'device-breakdown',
+        data.devices.map((d: { device_type: string; count: number }) => ({
+          label: capitalizeFirst(d.device_type || 'Unknown'),
+          value: `${Math.round((d.count / total) * 100)}%`
+        }))
+      );
+    } else {
+      populateDataList('device-breakdown', [{ label: 'No data yet', value: '-' }]);
+    }
+
+    // Geographic Distribution (from browsers/referrers as proxy - real geo needs IP lookup)
+    if (data.browsers && data.browsers.length > 0) {
+      const total = data.browsers.reduce((sum: number, b: { count: number }) => sum + b.count, 0);
+      populateDataList(
+        'geo-distribution',
+        data.browsers.slice(0, 4).map((b: { browser: string; count: number }) => ({
+          label: b.browser || 'Unknown',
+          value: `${Math.round((b.count / total) * 100)}%`
+        }))
+      );
+    } else {
+      populateDataList('geo-distribution', [{ label: 'No data yet', value: '-' }]);
+    }
+
+    // Engagement Events
+    if (data.topInteractions && data.topInteractions.length > 0) {
+      populateDataList(
+        'engagement-events',
+        data.topInteractions.slice(0, 5).map((i: { event_type: string; element?: string; count: number }) => ({
+          label: formatInteractionType(i.event_type, i.element),
+          value: i.count.toLocaleString()
+        }))
+      );
+    } else {
+      // Show summary stats as engagement if no interactions
+      const summary = data.summary || {};
+      populateDataList('engagement-events', [
+        { label: 'Total Sessions', value: (summary.total_sessions || 0).toLocaleString() },
+        { label: 'Bounce Rate', value: `${summary.bounce_rate || 0}%` },
+        { label: 'Pages per Session', value: (summary.avg_pages_per_session || 0).toFixed(1) }
+      ]);
+    }
+
   } catch (error) {
     console.error('[AdminAnalytics] Error loading analytics data:', error);
+    showEmptyStates();
   }
+}
+
+function showEmptyStates(): void {
+  const emptyData = [{ label: 'No data available', value: '-' }];
+  populateDataList('popular-pages', emptyData);
+  populateDataList('device-breakdown', emptyData);
+  populateDataList('geo-distribution', emptyData);
+  populateDataList('engagement-events', emptyData);
+}
+
+function formatPageUrl(url: string): string {
+  if (!url || url === '/') return 'Homepage';
+  // Remove leading slash and clean up
+  return url.replace(/^\//, '').replace(/-/g, ' ').replace(/\//g, ' / ') || 'Homepage';
+}
+
+function capitalizeFirst(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+function formatInteractionType(type: string, element?: string): string {
+  const formatted = type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  if (element && element.length < 20) {
+    return `${formatted} (${element})`;
+  }
+  return formatted;
 }
 
 export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<void> {
   const container = document.getElementById('visitors-table-body');
   if (!container) return;
 
-  // Load visitor data from service if available
   try {
-    const { container: serviceContainer } = await import('../../../core/container');
-    const visitorService = (await serviceContainer.resolve('VisitorTrackingService')) as {
-      exportData?: () => Promise<RawVisitorData>;
-    };
+    const response = await fetch('/api/analytics/sessions?days=7&limit=50', {
+      credentials: 'include'
+    });
 
-    if (visitorService?.exportData) {
-      const data = await visitorService.exportData();
-      renderVisitorsTable(data, container);
+    if (!response.ok) {
+      container.innerHTML =
+        '<tr><td colspan="6" class="loading-row">Failed to load visitor data</td></tr>';
       return;
     }
+
+    const data = await response.json();
+    const sessions = data.sessions || [];
+
+    if (sessions.length === 0) {
+      container.innerHTML =
+        '<tr><td colspan="6" class="loading-row">No visitor sessions recorded</td></tr>';
+      return;
+    }
+
+    container.innerHTML = sessions
+      .map((session: {
+        session_id: string;
+        start_time: string;
+        total_time_on_site: number;
+        page_views: number;
+        device_type: string;
+        city?: string;
+        country?: string;
+        browser?: string;
+      }) => {
+        const startTime = new Date(session.start_time).toLocaleString();
+        const duration = formatDuration(session.total_time_on_site || 0);
+        const location = session.city && session.country
+          ? `${session.city}, ${session.country}`
+          : session.country || '-';
+
+        return `
+          <tr>
+            <td>${session.session_id.substring(0, 8)}...</td>
+            <td>${startTime}</td>
+            <td>${duration}</td>
+            <td>${session.page_views || 0}</td>
+            <td>${capitalizeFirst(session.device_type || 'desktop')}</td>
+            <td>${location}</td>
+          </tr>
+        `;
+      })
+      .join('');
+
   } catch (error) {
-    console.warn('[AdminAnalytics] Could not load visitor service:', error);
-  }
-
-  // Fallback message
-  container.innerHTML =
-    '<tr><td colspan="6" class="loading-row">Visitor tracking data not available</td></tr>';
-}
-
-function renderVisitorsTable(data: RawVisitorData, container: HTMLElement): void {
-  const sessions = data.sessions || [];
-
-  if (sessions.length === 0) {
+    console.error('[AdminAnalytics] Error loading visitors data:', error);
     container.innerHTML =
-      '<tr><td colspan="6" class="loading-row">No visitor sessions recorded</td></tr>';
-    return;
+      '<tr><td colspan="6" class="loading-row">Error loading visitor data</td></tr>';
   }
-
-  container.innerHTML = sessions
-    .slice(0, 50)
-    .map((session) => {
-      const startTime = new Date(session.startTime).toLocaleString();
-      return `
-        <tr>
-          <td>${session.id.substring(0, 8)}...</td>
-          <td>${startTime}</td>
-          <td>-</td>
-          <td>-</td>
-          <td>-</td>
-          <td>-</td>
-        </tr>
-      `;
-    })
-    .join('');
 }
 
 async function getPerformanceMetrics(): Promise<PerformanceMetricsDisplay> {
+  // Try to get data from PerformanceService first
   try {
-    // Try to get data from container
     const { container } = await import('../../../core/container');
     const performanceService = (await container.resolve('PerformanceService')) as {
-      generateReport?: () => any;
+      generateReport?: () => {
+        metrics: { lcp?: number; fid?: number; cls?: number; ttfb?: number; bundleSize?: number };
+        score?: number;
+      };
     };
 
     if (performanceService?.generateReport) {
@@ -189,19 +354,89 @@ async function getPerformanceMetrics(): Promise<PerformanceMetricsDisplay> {
       };
     }
   } catch (error) {
-    console.warn('[AdminAnalytics] Could not get live performance data:', error);
+    console.warn('[AdminAnalytics] Could not get performance service data:', error);
   }
 
-  // Fallback mock data
+  // Try browser Performance API as fallback
+  try {
+    type NavTiming = { responseStart?: number; requestStart?: number };
+    type ResourceTiming = { name: string; transferSize?: number };
+    type LCPEntry = { startTime: number };
+
+    const navEntries = performance.getEntriesByType('navigation');
+    const navigation = navEntries[0] as NavTiming | undefined;
+    const lcpEntries = performance.getEntriesByType('largest-contentful-paint');
+
+    const ttfb = navigation?.responseStart && navigation?.requestStart
+      ? Math.round(navigation.responseStart - navigation.requestStart)
+      : undefined;
+    const lcp = lcpEntries.length > 0
+      ? Math.round((lcpEntries[lcpEntries.length - 1] as LCPEntry).startTime)
+      : undefined;
+
+    // Get resource sizes for bundle estimation
+    const resources = performance.getEntriesByType('resource') as ResourceTiming[];
+    const jsResources = resources.filter(r => r.name.endsWith('.js'));
+    const cssResources = resources.filter(r => r.name.endsWith('.css'));
+
+    const jsSize = jsResources.reduce((sum, r) => sum + (r.transferSize || 0), 0);
+    const cssSize = cssResources.reduce((sum, r) => sum + (r.transferSize || 0), 0);
+    const totalSize = jsSize + cssSize;
+
+    return {
+      lcp: {
+        value: lcp ? `${lcp}ms` : 'N/A',
+        status: getVitalStatus('lcp', lcp)
+      },
+      fid: {
+        value: 'N/A', // FID requires user interaction
+        status: 'unknown'
+      },
+      cls: {
+        value: 'N/A', // CLS requires PerformanceObserver
+        status: 'unknown'
+      },
+      ttfb: {
+        value: ttfb ? `${ttfb}ms` : 'N/A',
+        status: getVitalStatus('ttfb', ttfb)
+      },
+      bundleSize: {
+        total: totalSize > 0 ? `${Math.round(totalSize / 1024)} KB` : 'N/A',
+        main: jsSize > 0 ? `${Math.round(jsSize / 1024)} KB` : 'N/A',
+        vendor: cssSize > 0 ? `${Math.round(cssSize / 1024)} KB` : 'N/A'
+      },
+      score: lcp && ttfb ? calculatePerformanceScore(lcp, ttfb) : 0,
+      grade: lcp && ttfb ? getGradeFromScore(calculatePerformanceScore(lcp, ttfb)) : 'N/A'
+    };
+  } catch (error) {
+    console.warn('[AdminAnalytics] Could not get browser performance data:', error);
+  }
+
+  // No data available
   return {
-    lcp: { value: '1.2s', status: 'good' },
-    fid: { value: '45ms', status: 'good' },
-    cls: { value: '0.05', status: 'good' },
-    ttfb: { value: '120ms', status: 'good' },
-    bundleSize: { total: '156 KB', main: '98 KB', vendor: '58 KB' },
-    score: 95,
-    grade: 'A'
+    lcp: { value: 'N/A', status: 'unknown' },
+    fid: { value: 'N/A', status: 'unknown' },
+    cls: { value: 'N/A', status: 'unknown' },
+    ttfb: { value: 'N/A', status: 'unknown' },
+    bundleSize: { total: 'N/A', main: 'N/A', vendor: 'N/A' },
+    score: 0,
+    grade: 'N/A'
   };
+}
+
+function calculatePerformanceScore(lcp: number, ttfb: number): number {
+  // Simple scoring based on Core Web Vitals thresholds
+  let score = 100;
+
+  // LCP scoring (good < 2500ms, needs improvement < 4000ms)
+  if (lcp > 4000) score -= 30;
+  else if (lcp > 2500) score -= 15;
+
+  // TTFB scoring (good < 800ms, needs improvement < 1800ms)
+  if (ttfb > 1800) score -= 20;
+  else if (ttfb > 800) score -= 10;
+
+  return Math.max(0, score);
 }
 
 async function getAnalyticsData(): Promise<AnalyticsData> {
@@ -597,14 +832,39 @@ async function loadVisitorsChart(): Promise<void> {
     charts.get('visitors')?.destroy();
   }
 
+  // Try to fetch real data from API
+  let labels: string[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  let data: number[] = [0, 0, 0, 0, 0, 0, 0];
+
+  try {
+    const response = await fetch('/api/analytics/summary?days=7', {
+      credentials: 'include'
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      if (result.daily && result.daily.length > 0) {
+        // Reverse to get chronological order and take last 7 days
+        const dailyData = result.daily.slice(0, 7).reverse();
+        labels = dailyData.map((d: { date: string }) => {
+          const date = new Date(d.date);
+          return date.toLocaleDateString('en-US', { weekday: 'short' });
+        });
+        data = dailyData.map((d: { visitors?: number }) => d.visitors || 0);
+      }
+    }
+  } catch (error) {
+    console.warn('[AdminAnalytics] Failed to load chart data:', error);
+  }
+
   const chart = new Chart(canvas, {
     type: 'line',
     data: {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      labels,
       datasets: [
         {
           label: 'Visitors',
-          data: [120, 190, 150, 220, 180, 90, 110],
+          data,
           borderColor: '#00aff0',
           backgroundColor: 'rgba(0, 175, 240, 0.1)',
           fill: true,
@@ -621,11 +881,11 @@ async function loadVisitorsChart(): Promise<void> {
       scales: {
         y: {
           beginAtZero: true,
-          ticks: { color: '#cccccc' },
+          ticks: { color: '#f5f5f5' },
           grid: { color: '#555555' }
         },
         x: {
-          ticks: { color: '#cccccc' },
+          ticks: { color: '#f5f5f5' },
           grid: { color: '#555555' }
         }
       }
@@ -643,13 +903,54 @@ async function loadSourcesChart(): Promise<void> {
     charts.get('sources')?.destroy();
   }
 
+  // Try to fetch real data from API
+  let labels: string[] = ['Direct', 'Search', 'Social', 'Referral'];
+  let data: number[] = [0, 0, 0, 0];
+
+  try {
+    const response = await fetch('/api/analytics/summary?days=30', {
+      credentials: 'include'
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      if (result.topReferrers && result.topReferrers.length > 0) {
+        // Map referrers to categories
+        const sources: Record<string, number> = {
+          'Direct': 0,
+          'Search': 0,
+          'Social': 0,
+          'Referral': 0
+        };
+
+        result.topReferrers.forEach((r: { source: string; count: number }) => {
+          const source = r.source.toLowerCase();
+          if (source === 'direct' || source === '') {
+            sources['Direct'] += r.count;
+          } else if (source.includes('google') || source.includes('bing') || source.includes('yahoo') || source.includes('duckduckgo')) {
+            sources['Search'] += r.count;
+          } else if (source.includes('facebook') || source.includes('twitter') || source.includes('linkedin') || source.includes('instagram') || source.includes('tiktok')) {
+            sources['Social'] += r.count;
+          } else {
+            sources['Referral'] += r.count;
+          }
+        });
+
+        labels = Object.keys(sources);
+        data = Object.values(sources);
+      }
+    }
+  } catch (error) {
+    console.warn('[AdminAnalytics] Failed to load sources chart data:', error);
+  }
+
   const chart = new Chart(canvas, {
     type: 'doughnut',
     data: {
-      labels: ['Direct', 'Search', 'Social', 'Referral'],
+      labels,
       datasets: [
         {
-          data: [45, 30, 15, 10],
+          data,
           backgroundColor: ['#00aff0', '#00d4aa', '#ffc107', '#ff6b6b']
         }
       ]
@@ -660,7 +961,7 @@ async function loadSourcesChart(): Promise<void> {
       plugins: {
         legend: {
           position: 'bottom',
-          labels: { color: '#cccccc' }
+          labels: { color: '#f5f5f5' }
         }
       }
     }
