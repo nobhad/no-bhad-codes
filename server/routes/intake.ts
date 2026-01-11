@@ -22,6 +22,8 @@ const router = express.Router();
 interface IntakeFormData {
   name: string;
   email: string;
+  projectFor?: string;
+  companyName?: string;
   projectType: string;
   projectDescription: string;
   timeline: string;
@@ -103,8 +105,10 @@ router.post('/', async (req: Request, res: Response) => {
       ? intakeData.features
       : [intakeData.features].filter(Boolean);
 
-    // Use client name as company name (streamlined form doesn't collect company)
-    const companyName = intakeData.name;
+    // Use company name from form, or "Personal Project" for personal projects
+    const companyName = intakeData.projectFor === 'personal'
+      ? 'Personal Project'
+      : (intakeData.companyName || intakeData.name);
 
     // Generate password hash outside transaction
     const hashedPassword = await bcrypt.hash(generateRandomPassword(), 10);

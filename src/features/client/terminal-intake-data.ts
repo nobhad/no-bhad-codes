@@ -38,6 +38,29 @@ export const QUESTIONS: IntakeQuestion[] = [
     },
     placeholder: 'your@email.com'
   },
+  {
+    id: 'projectFor',
+    field: 'projectFor',
+    question: 'Is this project for a business or personal use?',
+    type: 'select',
+    required: true,
+    options: [
+      { value: 'business', label: 'Business / Company' },
+      { value: 'personal', label: 'Personal Project' }
+    ]
+  },
+  {
+    id: 'companyName',
+    field: 'companyName',
+    question: 'What\'s the name of your business or company?',
+    type: 'text',
+    required: true,
+    dependsOn: {
+      field: 'projectFor',
+      value: 'business'
+    },
+    placeholder: 'Enter company name'
+  },
 
   // Phase 2: Project Basics (3 questions)
   {

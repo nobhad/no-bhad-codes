@@ -681,7 +681,6 @@
 .visitors-table td {
   padding: var(--space-3) var(--space-4);
   text-align: left;
-  border-bottom: 1px solid var(--color-border-secondary);
   background: #333333;
 }
 
@@ -692,11 +691,14 @@
   font-size: var(--font-size-sm);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  border-top: 1px solid var(--color-border-secondary);
+  border-bottom: 1px solid var(--color-border-secondary);
 }
 
 .visitors-table td {
   color: #f5f5f5;
   font-size: var(--font-size-sm);
+  border: none;
 }
 
 .visitors-pagination {
@@ -777,7 +779,6 @@
 .leads-table td {
   padding: var(--space-3) var(--space-4);
   text-align: left;
-  border-bottom: none;
   background: #333333;
 }
 
@@ -789,12 +790,14 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
+  border-top: 1px solid var(--color-border-secondary);
   border-bottom: 1px solid var(--color-border-secondary);
 }
 
 .leads-table td {
   color: #f5f5f5;
   font-size: var(--font-size-sm);
+  border: none;
 }
 
 .leads-table tr:hover td {
@@ -967,7 +970,6 @@
 .contacts-table td {
   padding: var(--space-3) var(--space-4);
   text-align: left;
-  border-bottom: none;
   background: #333333;
 }
 
@@ -979,12 +981,14 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
+  border-top: 1px solid var(--color-border-secondary);
   border-bottom: 1px solid var(--color-border-secondary);
 }
 
 .contacts-table td {
   color: #f5f5f5;
   font-size: var(--font-size-sm);
+  border: none;
 }
 
 .contacts-table tr:hover td {
@@ -1339,8 +1343,39 @@
 .projects-table td {
   padding: var(--space-3) var(--space-4);
   text-align: left;
-  border-bottom: 1px solid var(--color-border-secondary);
   background: #333333;
+}
+
+/* Column widths for projects table */
+.projects-table th:nth-child(1),
+.projects-table td:nth-child(1) {
+  width: 30%;
+}
+
+.projects-table th:nth-child(2),
+.projects-table td:nth-child(2) {
+  width: 20%;
+}
+
+.projects-table th:nth-child(3),
+.projects-table td:nth-child(3) {
+  width: 12%;
+}
+
+.projects-table th:nth-child(4),
+.projects-table td:nth-child(4) {
+  width: 12%;
+}
+
+.projects-table th:nth-child(5),
+.projects-table td:nth-child(5) {
+  width: 12%;
+}
+
+.projects-table th:nth-child(6),
+.projects-table td:nth-child(6) {
+  width: auto;
+  white-space: nowrap;
 }
 
 .projects-table th {
@@ -1351,17 +1386,21 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
+  border-top: 1px solid var(--color-border-secondary);
+  border-bottom: 1px solid var(--color-border-secondary);
 }
 
 .projects-table td {
   color: #f5f5f5;
   font-size: var(--font-size-sm);
   vertical-align: middle;
+  border: none;
 }
 
-/* Align status column (last column) */
-.projects-table td:last-child {
-  text-align: center;
+/* Status column alignment */
+.projects-table td:last-child,
+.projects-table th:last-child {
+  text-align: left;
   white-space: nowrap;
 }
 
@@ -1381,6 +1420,155 @@
 
 .projects-table td a:hover {
   text-decoration: underline;
+}
+
+/* ================================================
+   Custom Status Dropdown (Projects Table)
+   ================================================ */
+.custom-status-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.status-dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  width: 140px;
+  justify-content: space-between;
+}
+
+.status-dropdown-trigger:hover {
+  opacity: 0.9;
+}
+
+.status-dropdown-trigger .status-arrow {
+  font-size: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.custom-status-dropdown.open .status-arrow {
+  transform: rotate(180deg);
+}
+
+.custom-status-dropdown.open .status-dropdown-trigger {
+  border-radius: 4px 4px 0 0;
+}
+
+/* Status trigger colors */
+.status-dropdown-trigger.status-pending {
+  background-color: #fbbf24;
+  color: #000000;
+}
+
+.status-dropdown-trigger.status-active,
+.status-dropdown-trigger.status-in_progress {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+.status-dropdown-trigger.status-on_hold {
+  background-color: #fbbf24;
+  color: #000000;
+}
+
+.status-dropdown-trigger.status-completed {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+.status-dropdown-trigger.status-cancelled {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+/* Dropdown menu */
+.status-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0;
+  background: #2a2a2a;
+  border: none;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  width: 140px;
+  display: none;
+  overflow: hidden;
+}
+
+.custom-status-dropdown.open .status-dropdown-menu {
+  display: block;
+}
+
+/* Status options */
+.status-option {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: #f5f5f5;
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.status-option:hover {
+  background: #3a3a3a;
+}
+
+/* Status option left border colors - only left border, no other borders */
+[data-page="admin"] .status-dropdown-menu .status-option.status-pending {
+  border: none !important;
+  border-left: 3px solid #fbbf24 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #f5f5f5 !important;
+}
+
+[data-page="admin"] .status-dropdown-menu .status-option.status-active {
+  border: none !important;
+  border-left: 3px solid #3b82f6 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+[data-page="admin"] .status-dropdown-menu .status-option.status-in_progress {
+  border: none !important;
+  border-left: 3px solid #3b82f6 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+[data-page="admin"] .status-dropdown-menu .status-option.status-on_hold {
+  border: none !important;
+  border-left: 3px solid #fbbf24 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+[data-page="admin"] .status-dropdown-menu .status-option.status-completed {
+  border: none !important;
+  border-left: 3px solid #10b981 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+[data-page="admin"] .status-dropdown-menu .status-option.status-cancelled {
+  border: none !important;
+  border-left: 3px solid #ef4444 !important;
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 /* Action buttons in tables */
@@ -1436,6 +1624,28 @@
 .action-btn.action-invite:hover {
   background: #9333ea;
   border-color: #9333ea;
+}
+
+/* Icon-only buttons (no border) */
+.icon-btn {
+  background: transparent;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: #f5f5f5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+}
+
+.icon-btn:hover {
+  color: var(--color-primary);
+}
+
+.icon-btn svg {
+  display: block;
 }
 
 /* Set Password Page Styles */
@@ -2489,7 +2699,26 @@
 }
 
 /* ================================================
+   Details Overlay (darkens page behind panel)
+   ================================================ */
+.details-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 999;
+  cursor: pointer;
+}
+
+.details-overlay.hidden {
+  display: none;
+}
+
+/* ================================================
    Details Panel (for Leads/Contacts)
+   Dark background with light text
    ================================================ */
 .details-panel {
   position: fixed;
@@ -2498,8 +2727,8 @@
   width: 400px;
   max-width: 90vw;
   height: 100vh;
-  background: var(--color-bg-secondary);
-  border-left: 1px solid var(--color-border-primary);
+  background: #1a1a1a;
+  border-left: none;
   box-shadow: var(--shadow-2xl);
   z-index: 1000;
   overflow-y: auto;
@@ -2516,11 +2745,11 @@
   align-items: center;
   margin-bottom: var(--space-6);
   padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--color-border-primary);
+  border-bottom: 1px solid var(--cp-border-light);
 }
 
 .details-panel .details-header h3 {
-  color: var(--color-text-primary);
+  color: var(--cp-text-light);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   margin: 0;
@@ -2530,29 +2759,35 @@
   background: none;
   border: none;
   font-size: var(--font-size-2xl);
-  color: var(--color-text-secondary);
+  color: var(--cp-text-secondary);
   cursor: pointer;
   padding: var(--space-2);
   line-height: 1;
 }
 
 .details-panel .close-btn:hover {
-  color: var(--color-text-primary);
+  color: var(--cp-text-light);
 }
 
 .details-panel .details-content p {
-  color: var(--color-text-primary);
+  color: var(--cp-text-light);
   margin-bottom: var(--space-3);
   font-size: var(--font-size-sm);
 }
 
 .details-panel .details-content strong {
-  color: var(--color-text-secondary);
+  color: var(--color-primary);
+}
+
+.details-panel .details-divider {
+  border: none;
+  border-top: 1px solid var(--cp-border-light);
+  margin: var(--space-4) 0;
 }
 
 .details-panel .message-box {
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-secondary);
+  background: var(--cp-bg-medium);
+  border: 1px solid var(--cp-border-light);
   border-radius: var(--border-radius-md);
   padding: var(--space-4);
   margin-top: var(--space-4);

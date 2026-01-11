@@ -77,6 +77,20 @@ export class SanitizationUtils {
   }
 
   /**
+   * Capitalize each word in a string (Title Case)
+   * Handles names like "john doe" -> "John Doe"
+   */
+  static capitalizeName(input: string): string {
+    if (!input || typeof input !== 'string') return '';
+
+    return input
+      .toLowerCase()
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  /**
    * Remove all HTML tags from input
    */
   static stripHtml(input: string): string {

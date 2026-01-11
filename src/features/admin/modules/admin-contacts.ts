@@ -85,9 +85,9 @@ function renderContactsTable(
   tableBody.innerHTML = submissions
     .map((submission) => {
       const date = new Date(submission.created_at).toLocaleDateString();
-      const safeName = SanitizationUtils.escapeHtml(submission.name || '-');
+      const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(submission.name || '-'));
       const safeEmail = SanitizationUtils.escapeHtml(submission.email || '-');
-      const safeCompany = SanitizationUtils.escapeHtml(submission.company || '-');
+      const safeCompany = submission.company ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(submission.company)) : '';
       const safeMessage = SanitizationUtils.escapeHtml(submission.message || '-');
       const truncatedMessage =
         safeMessage.length > 50 ? `${safeMessage.substring(0, 50)}...` : safeMessage;
@@ -143,10 +143,10 @@ export function showContactDetails(contactId: number): void {
   const detailsPanel = document.getElementById('contact-details-panel');
   if (!detailsPanel) return;
 
-  const safeName = SanitizationUtils.escapeHtml(contact.name || '-');
+  const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(contact.name || '-'));
   const safeEmail = SanitizationUtils.escapeHtml(contact.email || '-');
-  const safeCompany = SanitizationUtils.escapeHtml(contact.company || '-');
-  const safePhone = SanitizationUtils.escapeHtml(contact.phone || '-');
+  const safeCompany = contact.company ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(contact.company)) : '';
+  const safePhone = contact.phone ? SanitizationUtils.escapeHtml(contact.phone) : '';
   const safeMessage = SanitizationUtils.escapeHtml(contact.message || '-');
 
   detailsPanel.innerHTML = `
