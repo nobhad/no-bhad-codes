@@ -109,18 +109,25 @@ export interface VisitorInfo {
   device: string;
 }
 
-// Lead types
+// Lead types (intake submissions)
 export interface Lead {
   id: number;
   company_name: string;
   contact_name: string;
   email: string;
   phone?: string;
-  status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost';
+  status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost' | 'pending' | 'active' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
   source?: string;
   notes?: string;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
+  // Intake submission fields
+  project_name?: string;
+  project_type?: string;
+  description?: string;
+  budget_range?: string;
+  timeline?: string;
+  features?: string;
 }
 
 // Contact submission types
