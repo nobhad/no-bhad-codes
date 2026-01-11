@@ -394,7 +394,12 @@
 }
 
 .portal-project-card:hover {
-  background: var(--cp-bg-hover) !important;
+  background: var(--cp-bg-hover);
+}
+
+/* No hover on system info cards */
+#tab-system .portal-project-card:hover {
+  background: var(--cp-bg-dark);
 }
 
 .portal-project-card h3 {

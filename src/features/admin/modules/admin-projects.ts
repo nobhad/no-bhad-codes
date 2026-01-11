@@ -73,7 +73,7 @@ export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
 
 function updateProjectsDisplay(data: ProjectsData, ctx: AdminDashboardContext): void {
   const projects = (data.leads || []).filter(
-    (p) => p.status !== 'pending' || p.project_name
+    (p) => normalizeStatus(p.status) !== 'pending' || p.project_name
   );
 
   // Update stats
@@ -83,10 +83,10 @@ function updateProjectsDisplay(data: ProjectsData, ctx: AdminDashboardContext): 
   const projectsOnHold = document.getElementById('projects-on-hold');
 
   const activeCount = projects.filter(
-    (p) => p.status === 'active' || p.status === 'in_progress'
+    (p) => normalizeStatus(p.status) === 'active' || normalizeStatus(p.status) === 'in_progress'
   ).length;
-  const completedCount = projects.filter((p) => p.status === 'completed').length;
-  const onHoldCount = projects.filter((p) => p.status === 'on_hold').length;
+  const completedCount = projects.filter((p) => normalizeStatus(p.status) === 'completed').length;
+  const onHoldCount = projects.filter((p) => normalizeStatus(p.status) === 'on_hold').length;
 
   if (projectsTotal) projectsTotal.textContent = projects.length.toString();
   if (projectsActive) projectsActive.textContent = activeCount.toString();
@@ -102,7 +102,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
 
   if (projects.length === 0) {
     tableBody.innerHTML =
-      '<tr><td colspan="7" class="loading-row">No projects yet. Convert leads to start projects.</td></tr>';
+      '<tr><td colspan="6" class="loading-row">No projects yet. Convert leads to start projects.</td></tr>';
     return;
   }
 
@@ -113,26 +113,25 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
       );
       const safeContact = SanitizationUtils.escapeHtml(project.contact_name || '-');
       const safeCompany = SanitizationUtils.escapeHtml(project.company_name || '');
+      // Normalize status to underscore format for CSS class consistency
+      const status = normalizeStatus(project.status);
 
       return `
-        <tr data-project-id="${project.id}">
+        <tr data-project-id="${project.id}" class="clickable-row">
           <td>${safeName}</td>
           <td>${safeContact}<br><small>${safeCompany}</small></td>
           <td>${formatProjectType(project.project_type)}</td>
           <td>${project.budget_range || '-'}</td>
           <td>${project.timeline || '-'}</td>
           <td>
-            <select class="project-status-select status-select status-${project.status || 'pending'}" data-id="${project.id}" data-status="${project.status || 'pending'}" onclick="event.stopPropagation()">
-              <option value="pending" ${project.status === 'pending' ? 'selected' : ''}>Pending</option>
-              <option value="active" ${project.status === 'active' ? 'selected' : ''}>Active</option>
-              <option value="in_progress" ${project.status === 'in_progress' ? 'selected' : ''}>In Progress</option>
-              <option value="on_hold" ${project.status === 'on_hold' ? 'selected' : ''}>On Hold</option>
-              <option value="completed" ${project.status === 'completed' ? 'selected' : ''}>Completed</option>
-              <option value="cancelled" ${project.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+            <select class="project-status-select status-select status-${status}" data-id="${project.id}" data-status="${status}" onclick="event.stopPropagation()">
+              <option value="pending" ${status === 'pending' ? 'selected' : ''}>Pending</option>
+              <option value="active" ${status === 'active' ? 'selected' : ''}>Active</option>
+              <option value="in_progress" ${status === 'in_progress' ? 'selected' : ''}>In Progress</option>
+              <option value="on_hold" ${status === 'on_hold' ? 'selected' : ''}>On Hold</option>
+              <option value="completed" ${status === 'completed' ? 'selected' : ''}>Completed</option>
+              <option value="cancelled" ${status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
             </select>
-          </td>
-          <td>
-            <button class="action-btn action-edit" data-id="${project.id}" onclick="event.stopPropagation()">View</button>
           </td>
         </tr>
       `;
@@ -173,18 +172,6 @@ function setupProjectTableHandlers(ctx: AdminDashboardContext): void {
         target.dataset.status = newStatus;
 
         updateProjectStatus(parseInt(id), newStatus, ctx);
-      }
-    });
-  });
-
-  // View button handlers
-  const viewBtns = tableBody.querySelectorAll('.action-btn.action-edit');
-  viewBtns.forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const id = (btn as HTMLElement).dataset.id;
-      if (id) {
-        showProjectDetails(parseInt(id), ctx);
       }
     });
   });
@@ -265,11 +252,12 @@ function populateProjectDetailView(project: LeadProject): void {
     if (el) el.textContent = SanitizationUtils.escapeHtml(value);
   });
 
-  // Status badge
-  const status = document.getElementById('pd-status');
-  if (status) {
-    status.textContent = (project.status || 'pending').replace('_', ' ');
-    status.className = `status-badge status-${(project.status || 'pending').replace('_', '-')}`;
+  // Status badge - normalize to underscore format
+  const statusEl = document.getElementById('pd-status');
+  if (statusEl) {
+    const normalizedStatus = normalizeStatus(project.status);
+    statusEl.textContent = normalizedStatus.replace(/_/g, ' ');
+    statusEl.className = `status-badge status-${normalizedStatus}`;
   }
 
   // Progress
@@ -301,7 +289,7 @@ function populateProjectDetailView(project: LeadProject): void {
   const settingProgress = document.getElementById('pd-setting-progress') as HTMLInputElement;
 
   if (settingName) settingName.value = project.project_name || '';
-  if (settingStatus) settingStatus.value = project.status || 'pending';
+  if (settingStatus) settingStatus.value = normalizeStatus(project.status);
   if (settingProgress) settingProgress.value = (project.progress || 0).toString();
 }
 
@@ -330,6 +318,15 @@ function formatProjectType(type: string | undefined): string {
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+}
+
+/**
+ * Normalize status value to underscore format for CSS class consistency.
+ * Database may store hyphens (in-progress) but CSS/JS uses underscores (in_progress).
+ */
+function normalizeStatus(status: string | undefined): string {
+  if (!status) return 'pending';
+  return status.replace(/-/g, '_');
 }
 
 // Project Messages
