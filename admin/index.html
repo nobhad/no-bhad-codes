@@ -50,6 +50,17 @@
           <p>Enter your admin password to continue</p>
         </div>
         <form class="auth-gate-form" id="admin-login-form">
+          <!-- Hidden username field for accessibility and password managers -->
+          <input
+            type="email"
+            id="admin-username"
+            name="username"
+            value="admin@nobhad.codes"
+            autocomplete="username"
+            tabindex="-1"
+            aria-hidden="true"
+            style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;"
+          />
           <div class="form-group">
             <label for="admin-password" class="visually-hidden">Admin Password</label>
             <div class="password-input-wrapper">
