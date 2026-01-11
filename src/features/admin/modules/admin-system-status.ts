@@ -232,15 +232,17 @@ function renderStatusList(items: Record<string, StatusItem>, type: string): stri
   }
 
   return entries.map(([name, item]) => {
-    const statusClass = getStatusClass(item.status);
-    const statusIcon = getStatusIcon(item.status);
-    const message = item.message || item.status;
+    // Handle cases where status is undefined (e.g., { loaded: true })
+    const status = item.status || (item.loaded ? 'healthy' : 'unknown');
+    const statusClass = getStatusClass(status);
+    const statusIcon = getStatusIcon(status);
+    const message = item.message || (item.loaded ? 'Loaded' : status);
 
     return `
       <div class="status-item ${statusClass}">
         <span class="status-icon">${statusIcon}</span>
         <span class="status-name">${formatName(name)}</span>
-        <span class="status-badge ${statusClass}">${item.status}</span>
+        <span class="status-badge ${statusClass}">${status}</span>
         ${message ? `<span class="status-message">${message}</span>` : ''}
       </div>
     `;

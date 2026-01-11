@@ -86,7 +86,10 @@ export interface RawVisitorData {
 
 // System status types
 export interface StatusItem {
-  status: string;
+  status?: string;
+  loaded?: boolean;
+  message?: string;
+  responseTime?: number;
   [key: string]: unknown;
 }
 

@@ -43,7 +43,7 @@
   </head>
   <body data-page="admin">
     <!-- Dashboard Layout (same structure as client portal) -->
-    <div class="dashboard-container">
+    <div class="dashboard-container" id="admin-dashboard">
       <!-- Mobile Header Bar -->
       <header class="mobile-header" id="mobile-header">
         <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle menu">
@@ -121,7 +121,7 @@
               <h2>Admin Dashboard</h2>
             </div>
 
-            <!-- Quick Stats -->
+            <!-- Lead Stats (Clickable) -->
             <div class="quick-stats">
               <button
                 class="stat-card stat-card-clickable portal-shadow"
@@ -147,6 +147,33 @@
                 <span class="stat-number" id="stat-visitors">-</span>
                 <span class="stat-label">Visitors Today</span>
               </button>
+            </div>
+
+            <!-- Visitor Analytics Stats -->
+            <div class="analytics-overview portal-shadow" style="margin-top: 2rem">
+              <h3>Weekly Overview</h3>
+              <div class="overview-stats-grid">
+                <div class="overview-stat">
+                  <span class="stat-number" id="total-visitors">-</span>
+                  <span class="stat-label">Total Visitors</span>
+                  <span class="metric-change" id="visitors-change">-</span>
+                </div>
+                <div class="overview-stat">
+                  <span class="stat-number" id="page-views">-</span>
+                  <span class="stat-label">Page Views</span>
+                  <span class="metric-change" id="views-change">-</span>
+                </div>
+                <div class="overview-stat">
+                  <span class="stat-number" id="avg-session">-</span>
+                  <span class="stat-label">Avg. Session</span>
+                  <span class="metric-change" id="session-change">-</span>
+                </div>
+                <div class="overview-stat">
+                  <span class="stat-number" id="card-interactions">-</span>
+                  <span class="stat-label">Card Interactions</span>
+                  <span class="metric-change" id="interactions-change">-</span>
+                </div>
+              </div>
             </div>
 
             <!-- Recent Leads -->
@@ -229,7 +256,7 @@
                       <th>Date</th>
                       <th>Name</th>
                       <th>Email</th>
-                      <th>Subject</th>
+                      <th>Company</th>
                       <th>Message</th>
                       <th>Status</th>
                     </tr>
@@ -242,6 +269,12 @@
                 </table>
               </div>
             </div>
+
+            <!-- Lead Details Panel (Hidden by default) -->
+            <div class="details-panel hidden" id="lead-details-panel"></div>
+
+            <!-- Contact Details Panel (Hidden by default) -->
+            <div class="details-panel hidden" id="contact-details-panel"></div>
           </div>
 
           <!-- Projects Tab -->
@@ -354,7 +387,7 @@
                     placeholder="Type your message..."
                   ></textarea>
                 </div>
-                <button class="btn btn-secondary" id="btn-admin-send-message">Send Message</button>
+                <button class="btn btn-secondary" id="admin-send-message">Send Message</button>
               </div>
             </div>
           </div>
@@ -381,11 +414,121 @@
               </div>
             </div>
 
-            <div class="portal-project-card portal-shadow" style="margin-top: 2rem">
-              <h3>Analytics Dashboard</h3>
-              <p style="color: var(--color-text-secondary, #666)">
-                Analytics data will be loaded here.
-              </p>
+            <!-- Charts Section -->
+            <div class="charts-grid" style="margin-top: 2rem">
+              <div class="chart-container portal-shadow">
+                <h3>Visitors Over Time</h3>
+                <div class="chart" style="height: 300px">
+                  <canvas id="visitors-chart"></canvas>
+                </div>
+              </div>
+              <div class="chart-container portal-shadow">
+                <h3>Traffic Sources</h3>
+                <div class="chart" style="height: 300px">
+                  <canvas id="sources-chart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Analytics Data Grid -->
+            <div class="analytics-grid" style="margin-top: 2rem">
+              <div class="analytics-section portal-shadow">
+                <h3>Popular Pages</h3>
+                <div class="data-list" id="popular-pages">
+                  <div class="data-item"><span class="data-label">Loading...</span></div>
+                </div>
+              </div>
+              <div class="analytics-section portal-shadow">
+                <h3>Device Breakdown</h3>
+                <div class="data-list" id="device-breakdown">
+                  <div class="data-item"><span class="data-label">Loading...</span></div>
+                </div>
+              </div>
+              <div class="analytics-section portal-shadow">
+                <h3>Geographic Distribution</h3>
+                <div class="data-list" id="geo-distribution">
+                  <div class="data-item"><span class="data-label">Loading...</span></div>
+                </div>
+              </div>
+              <div class="analytics-section portal-shadow">
+                <h3>Engagement Events</h3>
+                <div class="data-list" id="engagement-events">
+                  <div class="data-item"><span class="data-label">Loading...</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="metric-group portal-shadow" style="margin-top: 2rem">
+              <h3>Core Web Vitals</h3>
+              <div class="vitals-grid">
+                <div class="vital-card">
+                  <h4>LCP</h4>
+                  <div class="vital-value" id="lcp-value">-</div>
+                  <span class="vital-status" id="lcp-status">-</span>
+                </div>
+                <div class="vital-card">
+                  <h4>FID</h4>
+                  <div class="vital-value" id="fid-value">-</div>
+                  <span class="vital-status" id="fid-status">-</span>
+                </div>
+                <div class="vital-card">
+                  <h4>CLS</h4>
+                  <div class="vital-value" id="cls-value">-</div>
+                  <span class="vital-status" id="cls-status">-</span>
+                </div>
+                <div class="vital-card">
+                  <h4>TTFB</h4>
+                  <div class="vital-value" id="ttfb-value">-</div>
+                  <span class="vital-status" id="ttfb-status">-</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bundle Analysis -->
+            <div class="metric-group portal-shadow" style="margin-top: 2rem">
+              <h3>Bundle Analysis</h3>
+              <div class="bundle-info">
+                <div class="bundle-item">
+                  <span>Total Bundle Size</span>
+                  <span id="total-bundle-size">-</span>
+                </div>
+                <div class="bundle-item">
+                  <span>Main JS</span>
+                  <span id="js-bundle-size">-</span>
+                </div>
+                <div class="bundle-item">
+                  <span>Vendor JS</span>
+                  <span id="css-bundle-size">-</span>
+                </div>
+                <div class="bundle-item">
+                  <span>Performance Score</span>
+                  <span id="performance-score">-</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Visitors Table -->
+            <div class="visitors-dashboard" style="margin-top: 2rem">
+              <div class="visitors-table-container portal-shadow">
+                <table class="visitors-table">
+                  <thead>
+                    <tr>
+                      <th>Session ID</th>
+                      <th>Started</th>
+                      <th>Duration</th>
+                      <th>Pages</th>
+                      <th>Device</th>
+                      <th>Location</th>
+                    </tr>
+                  </thead>
+                  <tbody id="visitors-table-body">
+                    <tr>
+                      <td colspan="6" class="loading-row">Loading visitor data...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
@@ -396,7 +539,23 @@
               <h2>System Information</h2>
             </div>
 
+            <!-- Module Status -->
             <div class="portal-project-card portal-shadow">
+              <h3>Module Status</h3>
+              <div class="status-list" id="modules-status">
+                <p class="loading-text">Loading module status...</p>
+              </div>
+            </div>
+
+            <!-- Service Status -->
+            <div class="portal-project-card portal-shadow" style="margin-top: 1.5rem">
+              <h3>Service Status</h3>
+              <div class="status-list" id="services-status">
+                <p class="loading-text">Loading service status...</p>
+              </div>
+            </div>
+
+            <div class="portal-project-card portal-shadow" style="margin-top: 1.5rem">
               <h3>Build Information</h3>
               <div class="system-info-grid" style="display: grid; gap: 1rem; margin-top: 1rem">
                 <div

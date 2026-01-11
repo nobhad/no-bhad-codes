@@ -78,8 +78,8 @@ export class ClientPortalModule extends BaseModule {
     // Disable animations that might cause issues
     // this.setupAnimations();
 
-    // Disable auth check to prevent redirects
-    // await this.checkExistingAuth();
+    // Check existing auth and handle redirects
+    await this.checkExistingAuth();
   }
 
   protected override async onDestroy(): Promise<void> {
@@ -753,6 +753,23 @@ export class ClientPortalModule extends BaseModule {
           this.isLoggedIn = true;
           this.currentUser = data.user.email;
 
+          // Check for redirect parameter first
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirectUrl = urlParams.get('redirect');
+          console.log('[ClientPortal] Login success, redirect param:', redirectUrl, 'user:', data.user);
+          if (redirectUrl && redirectUrl.startsWith('/')) {
+            console.log('[ClientPortal] Redirecting to:', redirectUrl);
+            window.location.href = redirectUrl;
+            return;
+          }
+
+          // If user is admin, redirect to admin dashboard
+          if (data.user.isAdmin || data.user.type === 'admin') {
+            console.log('[ClientPortal] User is admin, redirecting to /admin/');
+            window.location.href = '/admin/';
+            return;
+          }
+
           // Load user projects from backend or mock
           await this.loadMockUserProjects({
             id: data.user.id,
@@ -763,7 +780,7 @@ export class ClientPortalModule extends BaseModule {
           // Redirect to client portal if not already there
           const isOnPortalPage = document.body.getAttribute('data-page') === 'client-portal';
           if (!isOnPortalPage) {
-            window.location.href = '/client/portal';
+            window.location.href = '/client/portal.html';
             return;
           }
 
@@ -804,12 +821,22 @@ export class ClientPortalModule extends BaseModule {
           this.isLoggedIn = true;
           this.currentUser = mockUserData.user.email;
 
+          // Check for redirect parameter FIRST (e.g., from admin dashboard)
+          const demoUrlParams = new URLSearchParams(window.location.search);
+          const demoRedirectUrl = demoUrlParams.get('redirect');
+          console.log('[ClientPortal] Demo mode login, redirect param:', demoRedirectUrl);
+          if (demoRedirectUrl && demoRedirectUrl.startsWith('/')) {
+            console.log('[ClientPortal] Demo mode redirecting to:', demoRedirectUrl);
+            window.location.href = demoRedirectUrl;
+            return;
+          }
+
           await this.loadMockUserProjects(mockUserData.user);
 
           // Redirect to client portal if not already there
           const isOnPortalPage = document.body.getAttribute('data-page') === 'client-portal';
           if (!isOnPortalPage) {
-            window.location.href = '/client/portal';
+            window.location.href = '/client/portal.html';
             return;
           }
 
@@ -1780,9 +1807,20 @@ export class ClientPortalModule extends BaseModule {
     const authMode = sessionStorage.getItem('client_auth_mode');
     if (!authMode) return;
 
-    // Skip auth check for demo mode
+    // Check for redirect parameter first - if user is already logged in and there's a redirect, go there
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectUrl = urlParams.get('redirect');
+    if (redirectUrl && redirectUrl.startsWith('/')) {
+      console.log('[ClientPortal] Already authenticated, redirecting to:', redirectUrl);
+      window.location.href = redirectUrl;
+      return;
+    }
+
+    // Skip further auth check for demo mode
     if (authMode === 'demo') {
-      console.log('[ClientPortal] Demo mode detected, skipping auth check');
+      console.log('[ClientPortal] Demo mode detected, showing dashboard');
+      this.isLoggedIn = true;
+      this.showDashboard();
       return;
     }
 
@@ -1795,6 +1833,14 @@ export class ClientPortalModule extends BaseModule {
         const data = await response.json();
         this.isLoggedIn = true;
         this.currentUser = data.user.email;
+
+        // If user is admin, redirect to admin dashboard
+        if (data.user.isAdmin || data.user.type === 'admin') {
+          console.log('[ClientPortal] User is admin, redirecting to /admin/');
+          window.location.href = '/admin/';
+          return;
+        }
+
         await this.loadMockUserProjects({
           id: data.user.id,
           email: data.user.email,

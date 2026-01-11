@@ -22,6 +22,58 @@
   justify-content: center;
   min-height: 100vh;
   background: linear-gradient(135deg, var(--color-admin-bg-start) 0%, var(--color-admin-bg-end) 100%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+}
+
+.auth-gate.hidden {
+  display: none;
+}
+
+/* Override portal label positioning for auth form */
+.auth-gate .auth-form-group {
+  position: relative !important;
+}
+
+.auth-gate .auth-form-group label {
+  position: static !important;
+  display: block !important;
+  margin-bottom: var(--space-2) !important;
+  color: var(--color-text-primary) !important;
+  font-weight: var(--font-weight-medium) !important;
+  font-size: var(--font-size-sm) !important;
+}
+
+.auth-gate .portal-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-gate .portal-password-wrapper input {
+  padding-right: 3rem !important;
+  padding-top: var(--space-3) !important;
+  min-height: auto !important;
+  height: auto !important;
+}
+
+.auth-gate .portal-password-toggle {
+  position: absolute;
+  right: var(--space-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1);
+  color: var(--color-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.auth-gate .portal-password-toggle:hover {
+  color: var(--color-brand-primary);
 }
 
 .auth-container {
@@ -1818,5 +1870,230 @@
 
   .project-progress-display .progress-bar {
     width: 100%;
+  }
+}
+
+/* ================================================
+   Overview Stats Grid
+   ================================================ */
+.analytics-overview {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--border-radius-card);
+  padding: var(--space-6);
+}
+
+.analytics-overview h3 {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-4);
+}
+
+.overview-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-4);
+}
+
+.overview-stat {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-4);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.overview-stat .stat-number {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.overview-stat .stat-label {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ================================================
+   Details Panel (for Leads/Contacts)
+   ================================================ */
+.details-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  max-width: 90vw;
+  height: 100vh;
+  background: var(--color-bg-secondary);
+  border-left: 1px solid var(--color-border-primary);
+  box-shadow: var(--shadow-2xl);
+  z-index: 1000;
+  overflow-y: auto;
+  padding: var(--space-6);
+}
+
+.details-panel.hidden {
+  display: none;
+}
+
+.details-panel .details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-primary);
+}
+
+.details-panel .details-header h3 {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+}
+
+.details-panel .close-btn {
+  background: none;
+  border: none;
+  font-size: var(--font-size-2xl);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--space-2);
+  line-height: 1;
+}
+
+.details-panel .close-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.details-panel .details-content p {
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+.details-panel .details-content strong {
+  color: var(--color-text-secondary);
+}
+
+.details-panel .message-box {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.details-panel .actions {
+  margin-top: var(--space-6);
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* ================================================
+   System Status List
+   ================================================ */
+.status-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.status-list .loading-text {
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+}
+
+.status-item .status-icon {
+  font-size: var(--font-size-lg);
+  width: 24px;
+  text-align: center;
+}
+
+.status-item .status-name {
+  flex: 1;
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.status-item .status-badge {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+}
+
+.status-item .status-message {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.status-item.status-healthy .status-icon {
+  color: var(--color-success);
+}
+
+.status-item.status-healthy .status-badge {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-success);
+}
+
+.status-item.status-warning .status-icon {
+  color: var(--color-warning);
+}
+
+.status-item.status-warning .status-badge {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--color-warning);
+}
+
+.status-item.status-error .status-icon {
+  color: var(--color-danger);
+}
+
+.status-item.status-error .status-badge {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger);
+}
+
+.no-status {
+  color: var(--color-text-secondary);
+  font-style: italic;
+  text-align: center;
+  padding: var(--space-4);
+}
+
+.status-error {
+  color: var(--color-danger);
+  text-align: center;
+  padding: var(--space-4);
+}
+
+/* ================================================
+   Responsive - Details Panel
+   ================================================ */
+@media (max-width: 767px) {
+  .details-panel {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .overview-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

@@ -126,18 +126,8 @@ class AdminDashboard {
     // Initialize navigation and theme modules
     await this.initializeModules();
 
-    // Check authentication
-    const isAuth = AdminAuth.isAuthenticated();
-    console.log('[AdminDashboard] isAuthenticated:', isAuth);
-    if (!isAuth) {
-      console.log('[AdminDashboard] Not authenticated, showing auth gate');
-      this.showAuthGate();
-      return;
-    }
-
-    console.log('[AdminDashboard] Authenticated, showing dashboard');
-    this.showDashboard();
-    console.log('[AdminDashboard] Calling setupEventListeners...');
+    // Set up the dashboard - server-side middleware handles auth
+    console.log('[AdminDashboard] Setting up dashboard');
     this.setupEventListeners();
     console.log('[AdminDashboard] setupEventListeners complete');
     await this.loadDashboardData();
@@ -148,63 +138,6 @@ class AdminDashboard {
     // Admin dashboard doesn't use theme toggle or main site navigation
     // Theme is handled via CSS and sessionStorage directly
     // No additional modules needed for admin portal
-  }
-
-  private showAuthGate(): void {
-    const authGate = document.getElementById('auth-gate');
-    const dashboard = document.getElementById('admin-dashboard');
-
-    if (authGate) authGate.classList.remove('hidden');
-    if (dashboard) dashboard.classList.add('hidden');
-
-    this.setupAuthEventListeners();
-  }
-
-  private showDashboard(): void {
-    const authGate = document.getElementById('auth-gate');
-    const dashboard = document.getElementById('admin-dashboard');
-
-    if (authGate) authGate.classList.add('hidden');
-    if (dashboard) dashboard.classList.remove('hidden');
-  }
-
-  private setupAuthEventListeners(): void {
-    const authForm = document.getElementById('auth-form') as HTMLFormElement;
-
-    if (authForm) {
-      authForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const formData = new FormData(authForm);
-        const authKey = formData.get('authKey') as string;
-
-        try {
-          if (await AdminAuth.authenticate(authKey)) {
-            this.showDashboard();
-            this.setupEventListeners();
-            await this.loadDashboardData();
-            this.startAutoRefresh();
-          } else {
-            this.showAuthError('Invalid access key. Please try again.');
-          }
-        } catch (error) {
-          const message =
-            error instanceof Error ? error.message : 'Authentication failed. Please try again.';
-          this.showAuthError(message);
-        }
-      });
-    }
-  }
-
-  private showAuthError(message: string): void {
-    const authError = document.getElementById('auth-error');
-    if (authError) {
-      authError.textContent = message;
-      authError.classList.remove('hidden');
-      setTimeout(() => {
-        authError.classList.add('hidden');
-      }, 5000);
-    }
   }
 
   private setupEventListeners(): void {
