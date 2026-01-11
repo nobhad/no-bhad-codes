@@ -1681,12 +1681,36 @@ html[data-theme="dark"] .auth-gate .password-input-wrapper input {
 
 /* Responsive Design */
 
-/* Force 2x2 grid for stat cards and vitals at medium widths */
+/* Force 2x2 grid for groups of 4 - always 2 columns */
+[data-page="admin"] .vitals-grid,
+[data-page="admin"] .analytics-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
 @media (max-width: 1100px) {
   [data-page="admin"] .quick-stats,
-  [data-page="admin"] .vitals-grid,
   [data-page="admin"] .leads-stats {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Groups of 3 should go directly to 1 column, never 2+1 */
+@media (max-width: 1100px) {
+  [data-page="admin"] .overview-stats-grid,
+  [data-page="admin"] .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Single column on small screens for all grids */
+@media (max-width: 900px) {
+  [data-page="admin"] .vitals-grid,
+  [data-page="admin"] .analytics-grid,
+  [data-page="admin"] .quick-stats,
+  [data-page="admin"] .leads-stats,
+  [data-page="admin"] .overview-stats-grid,
+  [data-page="admin"] .charts-grid {
+    grid-template-columns: 1fr;
   }
 }
 
