@@ -42,13 +42,13 @@
   font-family: "Inter", sans-serif;
 }
 
-/* Auth Gate */
+/* Auth Gate - matches main site body background */
 .auth-gate {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: var(--color-bg-primary);
+  background: var(--color-neutral-300);
   position: fixed;
   top: 0;
   left: 0;
@@ -180,15 +180,14 @@
   display: none;
 }
 
-/* Auth Gate Container - Matches site styling */
+/* Auth Gate Container - Matches client login dropdown styling */
 .auth-gate-container {
-  background: var(--color-white);
+  background: var(--color-dark);
   border-radius: 8px;
-  border: 1px solid var(--color-border-secondary);
+  border: 1px solid var(--color-neutral-400);
   padding: clamp(1.5rem, 4vw, 2.5rem);
   width: 100%;
-  max-width: min(450px, 90vw);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  max-width: min(500px, 90vw);
 }
 
 .auth-gate-header {
@@ -200,12 +199,12 @@
   font-family: var(--font--acme);
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   text-transform: uppercase;
-  color: var(--color-dark);
+  color: var(--color-neutral-200);
   margin: 0 0 0.5rem 0;
 }
 
 .auth-gate-header p {
-  color: var(--color-dark);
+  color: var(--color-neutral-400);
   font-size: clamp(0.875rem, 2.5vw, 1rem);
   margin: 0;
 }
@@ -222,16 +221,17 @@
   align-items: center;
 }
 
+/* Auth form input - matches client login dropdown */
 [data-page="admin"] .auth-gate .password-input-wrapper input,
 .auth-gate .password-input-wrapper input {
   width: 100%;
   padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px);
   padding-right: 45px;
-  border: 1px solid var(--color-border-primary);
-  border-radius: clamp(6px, 1.5vw, 12px);
+  border: 1px solid var(--color-neutral-400);
+  border-radius: 30px;
   font-size: clamp(0.875rem, 2vw, 1rem);
-  background-color: #333333;
-  color: #f5f5f5;
+  background-color: var(--color-dark);
+  color: var(--color-neutral-200);
   font-family: inherit;
   height: clamp(40px, 8vw, 48px);
   transition: all 0.2s ease;
@@ -240,19 +240,18 @@
 
 [data-page="admin"] .auth-gate .password-input-wrapper input::placeholder,
 .auth-gate .password-input-wrapper input::placeholder {
-  color: #999999;
+  color: var(--color-neutral-500);
 }
 
 [data-page="admin"] .auth-gate .password-input-wrapper input:focus,
 .auth-gate .password-input-wrapper input:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  outline: none;
   border-color: var(--color-primary);
 }
 
 .auth-gate .password-toggle {
   position: absolute;
-  right: 10px;
+  right: 15px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
@@ -262,7 +261,7 @@
   padding: 5px;
   opacity: 0.7;
   transition: opacity 0.2s ease;
-  color: #999999;
+  color: var(--color-neutral-400);
 }
 
 .auth-gate .password-toggle:hover {
@@ -270,32 +269,26 @@
   color: var(--color-primary);
 }
 
+/* Auth submit button - matches client login dropdown */
 .auth-submit {
   width: 100%;
   padding: clamp(10px, 2.5vw, 14px) clamp(20px, 4vw, 28px);
-  border: 2px solid #666666;
-  border-radius: 6px;
+  border: 1px solid var(--color-neutral-400);
+  border-radius: 30px;
   font-size: clamp(0.9rem, 2vw, 1.1rem);
   font-weight: 600;
-  cursor: not-allowed;
+  cursor: pointer;
   font-family: inherit;
   transition: all 0.2s ease;
   text-transform: uppercase;
-  background-color: #666666;
-  color: #999999;
+  background-color: var(--color-dark);
+  color: var(--color-neutral-200);
   margin-top: clamp(8px, 2vw, 16px);
 }
 
-.auth-submit.active {
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-white);
-  cursor: pointer;
-}
-
-.auth-submit.active:hover {
-  background-color: var(--color-interactive-primary-hover);
-  border-color: var(--color-interactive-primary-hover);
+.auth-submit:hover {
+  background-color: var(--color-neutral-600);
+  border-color: var(--color-neutral-300);
 }
 
 .auth-submit:disabled {
@@ -307,7 +300,7 @@
   display: block;
   text-align: center;
   margin-top: 1.5rem;
-  color: var(--color-gray-600);
+  color: var(--color-neutral-400);
   text-decoration: none;
   font-size: clamp(0.875rem, 2.5vw, 1rem);
   transition: color 0.2s ease;
@@ -315,34 +308,6 @@
 
 .back-link:hover {
   color: var(--color-primary);
-}
-
-/* Dark theme adjustments for auth gate */
-html[data-theme="dark"] .auth-gate-container {
-  background: var(--color-gray-800);
-  border-color: var(--color-gray-700);
-}
-
-html[data-theme="dark"] .auth-gate-header h1 {
-  color: var(--color-gray-100);
-}
-
-html[data-theme="dark"] .auth-gate-header p {
-  color: var(--color-gray-300);
-}
-
-html[data-theme="dark"] .auth-gate .password-input-wrapper input {
-  background: var(--color-gray-900);
-  border-color: var(--color-gray-600);
-  color: var(--color-gray-100);
-}
-
-html[data-theme="dark"] .auth-gate .password-input-wrapper input::placeholder {
-  color: var(--color-gray-500);
-}
-
-html[data-theme="dark"] .back-link {
-  color: var(--color-gray-400);
 }
 
 .visually-hidden {
@@ -1724,7 +1689,8 @@ html[data-theme="dark"] .back-link {
 /* Groups of 3 should go directly to 1 column, never 2+1 */
 @media (max-width: 1100px) {
   [data-page="admin"] .overview-stats-grid,
-  [data-page="admin"] .charts-grid {
+  [data-page="admin"] .charts-grid,
+  [data-page="admin"] #tab-analytics .quick-stats {
     grid-template-columns: 1fr;
   }
 }
@@ -2675,4 +2641,20 @@ html[data-theme="dark"] .back-link {
   .overview-stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* ================================================
+   Admin Sidebar Footer & Logout Button
+   ================================================ */
+[data-page="admin"] .sidebar-footer {
+  z-index: 1000 !important;
+  pointer-events: auto !important;
+}
+
+[data-page="admin"] .sidebar-footer .btn-logout,
+[data-page="admin"] #btn-logout {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 1001 !important;
+  position: relative !important;
 }
