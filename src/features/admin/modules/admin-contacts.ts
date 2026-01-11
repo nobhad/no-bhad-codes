@@ -46,6 +46,12 @@ export async function loadContacts(ctx: AdminDashboardContext): Promise<void> {
 }
 
 function updateContactsDisplay(data: ContactsData, ctx: AdminDashboardContext): void {
+  // Update overview stat for messages
+  const statMessages = document.getElementById('stat-messages');
+  if (statMessages) {
+    statMessages.textContent = data.stats?.total?.toString() || '0';
+  }
+
   // Update new count badge
   const newCountBadge = document.getElementById('contact-new-count');
   if (newCountBadge) {

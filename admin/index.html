@@ -42,8 +42,45 @@
     <script type="module" src="/src/main.ts"></script>
   </head>
   <body data-page="admin">
+    <!-- Auth Gate - Login Form -->
+    <div class="auth-gate" id="auth-gate">
+      <div class="auth-gate-container">
+        <div class="auth-gate-header">
+          <h1>Admin Access</h1>
+          <p>Enter your admin password to continue</p>
+        </div>
+        <form class="auth-gate-form" id="admin-login-form">
+          <div class="form-group">
+            <label for="admin-password" class="visually-hidden">Admin Password</label>
+            <div class="password-input-wrapper">
+              <input
+                type="password"
+                id="admin-password"
+                name="password"
+                placeholder="Admin Password"
+                required
+                autocomplete="current-password"
+              />
+              <button type="button" class="password-toggle" id="password-toggle" aria-label="Toggle password visibility">
+                <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="auth-error" id="auth-error"></div>
+          <button type="submit" class="btn btn-primary auth-submit">
+            <span class="btn-text">Sign In</span>
+            <span class="btn-loading" style="display: none;">Signing in...</span>
+          </button>
+        </form>
+        <a href="/" class="back-link">Back to site</a>
+      </div>
+    </div>
+
     <!-- Dashboard Layout (same structure as client portal) -->
-    <div class="dashboard-container" id="admin-dashboard">
+    <div class="dashboard-container" id="admin-dashboard" style="display: none;">
       <!-- Mobile Header Bar -->
       <header class="mobile-header" id="mobile-header">
         <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle menu">
@@ -147,6 +184,14 @@
                 <span class="stat-number" id="stat-visitors">-</span>
                 <span class="stat-label">Visitors Today</span>
               </button>
+              <button
+                class="stat-card stat-card-clickable portal-shadow"
+                data-tab="messages"
+                type="button"
+              >
+                <span class="stat-number" id="stat-messages">-</span>
+                <span class="stat-label">Messages</span>
+              </button>
             </div>
 
             <!-- Visitor Analytics Stats -->
@@ -167,11 +212,6 @@
                   <span class="stat-number" id="avg-session">-</span>
                   <span class="stat-label">Avg. Session</span>
                   <span class="metric-change" id="session-change">-</span>
-                </div>
-                <div class="overview-stat">
-                  <span class="stat-number" id="card-interactions">-</span>
-                  <span class="stat-label">Card Interactions</span>
-                  <span class="metric-change" id="interactions-change">-</span>
                 </div>
               </div>
             </div>

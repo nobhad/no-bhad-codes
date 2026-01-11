@@ -123,15 +123,113 @@ class AdminDashboard {
     // Initialize security measures first
     AdminSecurity.init();
 
+    // Check authentication first
+    const isAuthenticated = await this.checkAuthentication();
+
+    if (!isAuthenticated) {
+      console.log('[AdminDashboard] Not authenticated, showing auth gate');
+      this.setupAuthGate();
+      return;
+    }
+
+    // User is authenticated - show dashboard
+    this.showDashboard();
+
     // Initialize navigation and theme modules
     await this.initializeModules();
 
-    // Set up the dashboard - server-side middleware handles auth
+    // Set up the dashboard
     console.log('[AdminDashboard] Setting up dashboard');
     this.setupEventListeners();
     console.log('[AdminDashboard] setupEventListeners complete');
     await this.loadDashboardData();
     this.startAutoRefresh();
+  }
+
+  private async checkAuthentication(): Promise<boolean> {
+    // Try to validate session by calling an admin-only endpoint
+    try {
+      const response = await fetch('/api/admin/leads', {
+        credentials: 'include'
+      });
+      // If we get 200, we're authenticated as admin
+      // If we get 401/403, we're not authenticated
+      return response.ok;
+    } catch (error) {
+      console.log('[AdminDashboard] Auth check failed:', error);
+    }
+    return false;
+  }
+
+  private setupAuthGate(): void {
+    const authGate = document.getElementById('auth-gate');
+    const dashboard = document.getElementById('admin-dashboard');
+    const loginForm = document.getElementById('admin-login-form');
+    const passwordInput = document.getElementById('admin-password') as HTMLInputElement;
+    const passwordToggle = document.getElementById('password-toggle');
+    const authError = document.getElementById('auth-error');
+
+    if (authGate) authGate.style.display = 'flex';
+    if (dashboard) dashboard.style.display = 'none';
+
+    // Password toggle
+    if (passwordToggle && passwordInput) {
+      passwordToggle.addEventListener('click', () => {
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+      });
+    }
+
+    // Login form submission
+    if (loginForm) {
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (authError) authError.textContent = '';
+
+        const password = passwordInput?.value;
+        if (!password) return;
+
+        const submitBtn = loginForm.querySelector('.auth-submit') as HTMLButtonElement;
+        const btnText = submitBtn?.querySelector('.btn-text') as HTMLElement;
+        const btnLoading = submitBtn?.querySelector('.btn-loading') as HTMLElement;
+
+        if (submitBtn) submitBtn.disabled = true;
+        if (btnText) btnText.style.display = 'none';
+        if (btnLoading) btnLoading.style.display = 'inline';
+
+        try {
+          const response = await fetch('/api/auth/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ password })
+          });
+
+          if (response.ok) {
+            // Reload page to show dashboard
+            window.location.reload();
+          } else {
+            const data = await response.json();
+            if (authError) authError.textContent = data.error || 'Invalid password';
+          }
+        } catch (error) {
+          console.error('[AdminDashboard] Login error:', error);
+          if (authError) authError.textContent = 'Connection error. Please try again.';
+        } finally {
+          if (submitBtn) submitBtn.disabled = false;
+          if (btnText) btnText.style.display = 'inline';
+          if (btnLoading) btnLoading.style.display = 'none';
+        }
+      });
+    }
+  }
+
+  private showDashboard(): void {
+    const authGate = document.getElementById('auth-gate');
+    const dashboard = document.getElementById('admin-dashboard');
+
+    if (authGate) authGate.style.display = 'none';
+    if (dashboard) dashboard.style.display = '';
   }
 
   private async initializeModules(): Promise<void> {
