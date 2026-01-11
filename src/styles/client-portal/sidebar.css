@@ -176,7 +176,17 @@
   justify-content: center;
   margin: 0 auto;
   border-radius: var(--cp-radius-md);
-  border: none;
+  border: none !important;
+  background: transparent !important;
+}
+
+.sidebar.collapsed .sidebar-buttons .btn.active {
+  background: transparent !important;
+  border: none !important;
+}
+
+.sidebar.collapsed .sidebar-buttons .btn.active .btn-icon {
+  color: var(--color-primary) !important;
 }
 
 .sidebar.collapsed .sidebar-buttons .btn .btn-text {
@@ -200,7 +210,8 @@
   justify-content: center;
   margin: 0 auto;
   border-radius: var(--cp-radius-md);
-  border: none;
+  border: none !important;
+  background: transparent !important;
   display: flex;
   align-items: center;
 }
