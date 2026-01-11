@@ -395,23 +395,18 @@
               <h2>Client Messages</h2>
             </div>
 
-            <!-- Client Selector -->
-            <div class="client-selector-wrapper portal-shadow">
-              <label for="admin-client-select" style="font-weight: 600; margin-right: 1rem"
-                >Select Client:</label
-              >
-              <select
-                id="admin-client-select"
-                class="form-select"
-                style="
-                  min-width: 250px;
-                  padding: 0.5rem 1rem;
-                  border: 1px solid var(--color-border, #ddd);
-                  border-radius: 4px;
-                "
-              >
-                <option value="">-- Select a client --</option>
-              </select>
+            <!-- Client Selector (Custom Dropdown) -->
+            <div class="client-selector-wrapper">
+              <label class="client-selector-label">Select Client:</label>
+              <div class="custom-dropdown" id="admin-client-dropdown">
+                <button type="button" class="custom-dropdown-trigger" id="admin-client-trigger">
+                  <span class="custom-dropdown-text">-- Select a client --</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="custom-dropdown-caret"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <ul class="custom-dropdown-menu" id="admin-client-menu">
+                </ul>
+                <input type="hidden" id="admin-client-select" value="" />
+              </div>
             </div>
 
             <!-- Messages Container (like client portal) -->
@@ -420,7 +415,7 @@
                 <div
                   style="
                     text-align: center;
-                    color: var(--color-text-secondary, #666);
+                    color: #333333;
                     padding: 2rem;
                   "
                 >
