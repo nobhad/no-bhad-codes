@@ -522,11 +522,12 @@
   gap: var(--space-4);
 }
 
-.vital-card {
-  background: #333333;
-  border: 1px solid var(--color-border-secondary);
-  border-radius: var(--border-radius-md);
-  padding: var(--space-4);
+.vital-card,
+[data-page="admin"] .vital-card {
+  background: var(--cp-bg-medium);
+  border: 1px solid #333333;
+  border-radius: var(--cp-radius-sm);
+  padding: var(--cp-spacing-md) var(--cp-spacing-lg);
   text-align: center;
 }
 
@@ -534,6 +535,8 @@
   color: #cccccc;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   margin-bottom: var(--space-2);
 }
 
@@ -1828,10 +1831,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-bg-primary);
-  border-radius: var(--border-radius-md);
-  border: 1px solid var(--color-border-secondary);
+  padding: var(--cp-spacing-md) var(--cp-spacing-lg);
+  background: var(--cp-bg-medium);
+  border-radius: var(--cp-radius-sm);
+  border: 1px solid #333333;
 }
 
 .status-indicator {
@@ -2817,10 +2820,10 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-secondary);
-  border-radius: var(--border-radius-md);
+  padding: var(--cp-spacing-md) var(--cp-spacing-lg);
+  background: var(--cp-bg-medium);
+  border: 1px solid #333333;
+  border-radius: var(--cp-radius-sm);
 }
 
 .status-item .status-icon {
@@ -2831,7 +2834,7 @@
 
 .status-item .status-name {
   flex: 1;
-  color: var(--color-text-primary);
+  color: #f5f5f5;
   font-weight: var(--font-weight-medium);
 }
 
@@ -2853,8 +2856,9 @@
 }
 
 .status-item.status-healthy .status-badge {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--color-success);
+  background: #10b981;
+  border: 1px solid var(--color-black);
+  color: var(--color-black);
 }
 
 .status-item.status-warning .status-icon {
@@ -2862,8 +2866,9 @@
 }
 
 .status-item.status-warning .status-badge {
-  background: rgba(245, 158, 11, 0.1);
-  color: var(--color-warning);
+  background: #fbbf24;
+  border: 1px solid var(--color-black);
+  color: var(--color-black);
 }
 
 .status-item.status-error .status-icon {
@@ -2871,8 +2876,19 @@
 }
 
 .status-item.status-error .status-badge {
-  background: rgba(239, 68, 68, 0.1);
+  background: #ef4444;
+  border: 1px solid var(--color-black);
+  color: var(--color-black);
+}
+
+.status-item.status-unknown .status-icon {
   color: var(--color-danger);
+}
+
+.status-item.status-unknown .status-badge {
+  background: #ef4444;
+  border: 1px solid var(--color-black);
+  color: var(--color-black);
 }
 
 .no-status {

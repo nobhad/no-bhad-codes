@@ -236,14 +236,12 @@ function renderStatusList(items: Record<string, StatusItem>, type: string): stri
     const status = item.status || (item.loaded ? 'healthy' : 'unknown');
     const statusClass = getStatusClass(status);
     const statusIcon = getStatusIcon(status);
-    const message = item.message || (item.loaded ? 'Loaded' : status);
 
     return `
       <div class="status-item ${statusClass}">
         <span class="status-icon">${statusIcon}</span>
         <span class="status-name">${formatName(name)}</span>
         <span class="status-badge ${statusClass}">${status}</span>
-        ${message ? `<span class="status-message">${message}</span>` : ''}
       </div>
     `;
   }).join('');
