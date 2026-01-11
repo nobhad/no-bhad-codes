@@ -1851,29 +1851,9 @@ class AdminDashboard {
   private selectedThreadId: number | null = null;
 
   private setupMessaging(): void {
-    // Client selector dropdown
-    const clientSelect = document.getElementById('admin-client-select') as HTMLSelectElement;
-    if (clientSelect) {
-      clientSelect.addEventListener('change', () => {
-        const selectedValue = clientSelect.value;
-        if (selectedValue) {
-          const [clientId, threadId] = selectedValue.split(':').map(Number);
-          const clientName = clientSelect.options[clientSelect.selectedIndex].text;
-          this.selectThread(clientId, threadId, clientName);
-        } else {
-          // Clear messages when no client selected
-          const messagesThread = document.getElementById('admin-messages-thread');
-          if (messagesThread) {
-            messagesThread.innerHTML =
-              '<div style="text-align: center; color: var(--color-text-secondary, #666); padding: 2rem;">Select a client to view messages</div>';
-          }
-          const composeArea = document.getElementById('admin-compose-area');
-          if (composeArea) {
-            composeArea.style.display = 'none';
-          }
-        }
-      });
-    }
+    // Custom dropdown is now handled by admin-messaging.ts module
+    // The hidden input #admin-client-select stores the selected value
+    // No additional setup needed here as the module handles everything
 
     // Send message button (new UI)
     const sendBtn = document.getElementById('btn-admin-send-message');

@@ -25,11 +25,11 @@ export function getSelectedClientId(): number | null {
 export async function loadClientThreads(ctx: AdminDashboardContext): Promise<void> {
   if (ctx.isDemo()) return;
 
-  const clientSelect = document.getElementById('admin-client-select') as HTMLSelectElement;
-  if (!clientSelect) return;
+  const dropdown = document.getElementById('admin-client-dropdown');
+  if (!dropdown) return;
 
   // Add ARIA label for accessibility
-  clientSelect.setAttribute('aria-label', 'Select a client conversation');
+  dropdown.setAttribute('aria-label', 'Select a client conversation');
 
   try {
     const response = await fetch('/api/messages/threads', {
@@ -46,36 +46,115 @@ export async function loadClientThreads(ctx: AdminDashboardContext): Promise<voi
 }
 
 function populateClientDropdown(threads: MessageThread[], ctx: AdminDashboardContext): void {
-  const clientSelect = document.getElementById('admin-client-select') as HTMLSelectElement;
-  if (!clientSelect) return;
+  const dropdown = document.getElementById('admin-client-dropdown');
+  const menu = document.getElementById('admin-client-menu');
+  const trigger = document.getElementById('admin-client-trigger');
+  const hiddenInput = document.getElementById('admin-client-select') as HTMLInputElement;
 
-  clientSelect.innerHTML = '<option value="">-- Select a client --</option>';
+  if (!dropdown || !menu || !trigger || !hiddenInput) return;
+
+  // Clear existing items
+  menu.innerHTML = '';
 
   if (threads.length === 0) {
-    const option = document.createElement('option');
-    option.value = '';
-    option.textContent = 'No conversations yet';
-    option.disabled = true;
-    clientSelect.appendChild(option);
+    const item = document.createElement('li');
+    item.className = 'custom-dropdown-item';
+    item.dataset.value = '';
+    item.textContent = 'No conversations yet';
+    item.style.opacity = '0.5';
+    item.style.cursor = 'not-allowed';
+    menu.appendChild(item);
     return;
   }
 
   threads.forEach((thread: any) => {
-    const option = document.createElement('option');
-    option.value = `${thread.client_id}:${thread.id}`;
+    const item = document.createElement('li');
+    item.className = 'custom-dropdown-item';
+    item.dataset.value = `${thread.client_id}:${thread.id}`;
     const clientName =
       thread.contact_name || thread.company_name || thread.client_name || 'Unknown Client';
-    const unreadText = thread.unread_count > 0 ? ` (${thread.unread_count} unread)` : '';
-    option.textContent = `${clientName} - ${thread.subject || 'No subject'}${unreadText}`;
-    clientSelect.appendChild(option);
+    const messageCount = thread.message_count || thread.total_messages || 0;
+
+    // Create name span
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'dropdown-item-name';
+    nameSpan.textContent = clientName;
+    item.appendChild(nameSpan);
+
+    // Create count span (right-aligned)
+    if (messageCount > 0) {
+      const countSpan = document.createElement('span');
+      countSpan.className = 'dropdown-item-count';
+      countSpan.textContent = String(messageCount);
+      item.appendChild(countSpan);
+    }
+
+    menu.appendChild(item);
   });
 
-  // Add change handler
-  clientSelect.addEventListener('change', (e) => {
-    const value = (e.target as HTMLSelectElement).value;
-    if (value) {
-      const [clientId, threadId] = value.split(':').map(Number);
-      selectThread(clientId, threadId, ctx);
+  // Setup dropdown behavior
+  setupCustomDropdown(dropdown, trigger, menu, hiddenInput, ctx);
+}
+
+function setupCustomDropdown(
+  dropdown: HTMLElement,
+  trigger: HTMLElement,
+  menu: HTMLElement,
+  hiddenInput: HTMLInputElement,
+  ctx: AdminDashboardContext
+): void {
+  // Toggle dropdown on trigger click
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle('open');
+  });
+
+  // Handle item selection
+  menu.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.classList.contains('custom-dropdown-item')) {
+      const value = target.dataset.value || '';
+      const textSpan = trigger.querySelector('.custom-dropdown-text');
+
+      // Update display text
+      if (textSpan) {
+        textSpan.textContent = target.textContent || '-- Select a client --';
+      }
+
+      // Update hidden input
+      hiddenInput.value = value;
+
+      // Update selected state
+      menu.querySelectorAll('.custom-dropdown-item').forEach(item => {
+        item.classList.remove('selected');
+      });
+      target.classList.add('selected');
+
+      // Close dropdown
+      dropdown.classList.remove('open');
+
+      // Trigger selection if value is not empty
+      if (value) {
+        const [clientId, threadId] = value.split(':').map(Number);
+        selectThread(clientId, threadId, ctx);
+      }
+    }
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!dropdown.contains(e.target as Node)) {
+      dropdown.classList.remove('open');
+    }
+  });
+
+  // Keyboard navigation
+  trigger.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      dropdown.classList.toggle('open');
+    } else if (e.key === 'Escape') {
+      dropdown.classList.remove('open');
     }
   });
 }
