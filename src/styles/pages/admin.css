@@ -182,12 +182,13 @@
 
 /* Auth Gate Container - Matches site styling */
 .auth-gate-container {
-  background: var(--color-neutral-100);
+  background: var(--color-white);
   border-radius: 8px;
-  border: 1px solid var(--color-neutral-300);
-  padding: clamp(1rem, 3vw, 2rem);
+  border: 1px solid var(--color-border-secondary);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
   width: 100%;
-  max-width: min(500px, 90vw);
+  max-width: min(450px, 90vw);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .auth-gate-header {
@@ -204,7 +205,7 @@
 }
 
 .auth-gate-header p {
-  color: var(--color-text-secondary);
+  color: var(--color-dark);
   font-size: clamp(0.875rem, 2.5vw, 1rem);
   margin: 0;
 }
@@ -221,23 +222,32 @@
   align-items: center;
 }
 
+[data-page="admin"] .auth-gate .password-input-wrapper input,
 .auth-gate .password-input-wrapper input {
   width: 100%;
   padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px);
   padding-right: 45px;
-  border: 2px solid var(--form-input-border);
+  border: 1px solid var(--color-border-primary);
   border-radius: clamp(6px, 1.5vw, 12px);
   font-size: clamp(0.875rem, 2vw, 1rem);
-  background-color: var(--color-neutral-100);
-  color: var(--color-text-primary);
+  background-color: var(--color-white);
+  color: var(--color-dark);
   font-family: inherit;
   height: clamp(40px, 8vw, 48px);
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
+[data-page="admin"] .auth-gate .password-input-wrapper input::placeholder,
+.auth-gate .password-input-wrapper input::placeholder {
+  color: var(--color-gray-500);
+}
+
+[data-page="admin"] .auth-gate .password-input-wrapper input:focus,
 .auth-gate .password-input-wrapper input:focus {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+  border-color: var(--color-primary);
 }
 
 .auth-gate .password-toggle {
@@ -289,7 +299,7 @@
   display: block;
   text-align: center;
   margin-top: 1.5rem;
-  color: var(--color-text-secondary);
+  color: var(--color-gray-600);
   text-decoration: none;
   font-size: clamp(0.875rem, 2.5vw, 1rem);
   transition: color 0.2s ease;
@@ -301,17 +311,30 @@
 
 /* Dark theme adjustments for auth gate */
 html[data-theme="dark"] .auth-gate-container {
-  background: var(--color-neutral-300);
-  border-color: var(--color-neutral-100);
+  background: var(--color-gray-800);
+  border-color: var(--color-gray-700);
 }
 
 html[data-theme="dark"] .auth-gate-header h1 {
-  color: var(--color-text-primary);
+  color: var(--color-gray-100);
+}
+
+html[data-theme="dark"] .auth-gate-header p {
+  color: var(--color-gray-300);
 }
 
 html[data-theme="dark"] .auth-gate .password-input-wrapper input {
-  background: var(--color-neutral-200);
-  border-color: var(--color-neutral-100);
+  background: var(--color-gray-900);
+  border-color: var(--color-gray-600);
+  color: var(--color-gray-100);
+}
+
+html[data-theme="dark"] .auth-gate .password-input-wrapper input::placeholder {
+  color: var(--color-gray-500);
+}
+
+html[data-theme="dark"] .back-link {
+  color: var(--color-gray-400);
 }
 
 .visually-hidden {
@@ -2692,7 +2715,11 @@ html[data-theme="dark"] .auth-gate .password-input-wrapper input {
 /* Admin message compose area */
 [data-page="admin"] .message-compose {
   gap: var(--space-3);
-  padding: var(--space-3);
+  padding: var(--space-2);
+}
+
+[data-page="admin"] .message-compose .message-input-wrapper {
+  margin-bottom: var(--space-2);
 }
 
 [data-page="admin"] .message-compose .btn,

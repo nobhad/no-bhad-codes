@@ -112,23 +112,25 @@ function setupCustomDropdown(
   // Handle item selection
   menu.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
-    if (target.classList.contains('custom-dropdown-item')) {
-      const value = target.dataset.value || '';
+    const item = target.closest('.custom-dropdown-item') as HTMLElement;
+    if (item) {
+      const value = item.dataset.value || '';
       const textSpan = trigger.querySelector('.custom-dropdown-text');
 
-      // Update display text
+      // Update display text - get just the name, not the count
+      const nameSpan = item.querySelector('.dropdown-item-name');
       if (textSpan) {
-        textSpan.textContent = target.textContent || '-- Select a client --';
+        textSpan.textContent = nameSpan?.textContent || item.textContent || '-- Select a client --';
       }
 
       // Update hidden input
       hiddenInput.value = value;
 
       // Update selected state
-      menu.querySelectorAll('.custom-dropdown-item').forEach(item => {
-        item.classList.remove('selected');
+      menu.querySelectorAll('.custom-dropdown-item').forEach(i => {
+        i.classList.remove('selected');
       });
-      target.classList.add('selected');
+      item.classList.add('selected');
 
       // Close dropdown
       dropdown.classList.remove('open');
