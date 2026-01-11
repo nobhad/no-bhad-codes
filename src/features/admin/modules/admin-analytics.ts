@@ -619,7 +619,15 @@ async function loadVisitorsChart(): Promise<void> {
         legend: { display: false }
       },
       scales: {
-        y: { beginAtZero: true }
+        y: {
+          beginAtZero: true,
+          ticks: { color: '#cccccc' },
+          grid: { color: '#555555' }
+        },
+        x: {
+          ticks: { color: '#cccccc' },
+          grid: { color: '#555555' }
+        }
       }
     }
   });
@@ -650,7 +658,10 @@ async function loadSourcesChart(): Promise<void> {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { position: 'bottom' }
+        legend: {
+          position: 'bottom',
+          labels: { color: '#cccccc' }
+        }
       }
     }
   });
