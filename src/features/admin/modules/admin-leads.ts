@@ -28,20 +28,44 @@ export function getLeadsData(): Lead[] {
 }
 
 export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
-  if (ctx.isDemo()) return;
+  if (ctx.isDemo()) {
+    console.log('[AdminLeads] Skipping load - demo mode');
+    return;
+  }
+
+  console.log('[AdminLeads] Loading leads...');
 
   try {
     const response = await fetch('/api/admin/leads', {
       credentials: 'include'
     });
 
+    console.log('[AdminLeads] Response status:', response.status);
+
     if (response.ok) {
       const data: LeadsData = await response.json();
+      console.log('[AdminLeads] Received data:', {
+        leadsCount: data.leads?.length || 0,
+        stats: data.stats
+      });
       leadsData = data.leads || [];
       updateLeadsDisplay(data, ctx);
+    } else {
+      const errorText = await response.text();
+      console.error('[AdminLeads] API error:', response.status, errorText);
+      // Show error in table
+      const tableBody = document.getElementById('leads-table-body');
+      if (tableBody) {
+        tableBody.innerHTML = `<tr><td colspan="7" class="loading-row">Error loading leads: ${response.status}</td></tr>`;
+      }
     }
   } catch (error) {
     console.error('[AdminLeads] Failed to load leads:', error);
+    // Show error in table
+    const tableBody = document.getElementById('leads-table-body');
+    if (tableBody) {
+      tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">Network error loading leads</td></tr>';
+    }
   }
 }
 

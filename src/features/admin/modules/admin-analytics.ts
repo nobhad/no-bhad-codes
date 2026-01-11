@@ -93,23 +93,6 @@ async function loadAnalyticsSummary(): Promise<void> {
       setChangeText('session-change', 'No prior data');
     }
 
-    // Get card interactions count from topInteractions
-    let cardInteractions = 0;
-    if (data.topInteractions && data.topInteractions.length > 0) {
-      cardInteractions = data.topInteractions
-        .filter((i: { event_type?: string; element?: string }) =>
-          i.event_type === 'card_flip' || i.element?.includes('card'))
-        .reduce((sum: number, i: { count?: number }) => sum + (i.count || 0), 0);
-    }
-    updateElement('card-interactions', formatNumber(cardInteractions));
-
-    // For interactions change, we don't have historical data easily, so show neutral
-    if (cardInteractions > 0) {
-      setChangeText('interactions-change', 'This period');
-    } else {
-      setChangeText('interactions-change', 'No interactions');
-    }
-
   } catch (error) {
     console.error('[AdminAnalytics] Error loading analytics summary:', error);
     showOverviewDefaults();
@@ -120,12 +103,10 @@ function showOverviewDefaults(): void {
   updateElement('total-visitors', '0');
   updateElement('page-views', '0');
   updateElement('avg-session', '0s');
-  updateElement('card-interactions', '0');
   updateElement('stat-visitors', '0');
   setChangeText('visitors-change', 'No data');
   setChangeText('views-change', 'No data');
   setChangeText('session-change', 'No data');
-  setChangeText('interactions-change', 'No data');
 }
 
 function setChangeText(id: string, text: string): void {
