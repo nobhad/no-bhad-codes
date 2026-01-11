@@ -143,7 +143,50 @@ class AdminDashboard {
     this.setupEventListeners();
     console.log('[AdminDashboard] setupEventListeners complete');
     await this.loadDashboardData();
+    this.setupTruncatedTextTooltips();
     this.startAutoRefresh();
+  }
+
+  /**
+   * Sets up tooltips for truncated text elements
+   * Adds title attribute with full text when content is truncated
+   */
+  private setupTruncatedTextTooltips(): void {
+    // Find all elements with truncation classes
+    const truncatedElements = document.querySelectorAll('.truncate-text, .message-cell, [class*="ellipsis"]');
+
+    truncatedElements.forEach((el) => {
+      const element = el as HTMLElement;
+      // Set title to the text content for hover tooltip
+      if (element.textContent && element.textContent.trim() !== '-') {
+        element.title = element.textContent.trim();
+      }
+    });
+
+    // Also set up a mutation observer to handle dynamically added content
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node instanceof HTMLElement) {
+            const truncated = node.querySelectorAll('.truncate-text, .message-cell');
+            truncated.forEach((el) => {
+              const element = el as HTMLElement;
+              if (element.textContent && element.textContent.trim() !== '-' && !element.title) {
+                element.title = element.textContent.trim();
+              }
+            });
+            // Check if the node itself is truncated
+            if (node.classList?.contains('truncate-text') || node.classList?.contains('message-cell')) {
+              if (node.textContent && node.textContent.trim() !== '-' && !node.title) {
+                node.title = node.textContent.trim();
+              }
+            }
+          }
+        });
+      });
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
   }
 
   private async checkAuthentication(): Promise<boolean> {
