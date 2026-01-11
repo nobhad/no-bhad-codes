@@ -122,7 +122,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
           <td>${project.budget_range || '-'}</td>
           <td>${project.timeline || '-'}</td>
           <td>
-            <select class="project-status-select status-select" data-id="${project.id}" onclick="event.stopPropagation()">
+            <select class="project-status-select status-select status-${project.status || 'pending'}" data-id="${project.id}" data-status="${project.status || 'pending'}" onclick="event.stopPropagation()">
               <option value="pending" ${project.status === 'pending' ? 'selected' : ''}>Pending</option>
               <option value="active" ${project.status === 'active' ? 'selected' : ''}>Active</option>
               <option value="in_progress" ${project.status === 'in_progress' ? 'selected' : ''}>In Progress</option>
@@ -165,7 +165,14 @@ function setupProjectTableHandlers(ctx: AdminDashboardContext): void {
       const target = e.target as HTMLSelectElement;
       const id = target.dataset.id;
       if (id) {
-        updateProjectStatus(parseInt(id), target.value, ctx);
+        // Update the class to reflect new status color
+        const oldStatus = target.dataset.status || 'pending';
+        const newStatus = target.value;
+        target.classList.remove(`status-${oldStatus}`);
+        target.classList.add(`status-${newStatus}`);
+        target.dataset.status = newStatus;
+
+        updateProjectStatus(parseInt(id), newStatus, ctx);
       }
     });
   });

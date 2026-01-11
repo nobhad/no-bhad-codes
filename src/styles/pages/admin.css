@@ -3,9 +3,36 @@
  * ADMIN DASHBOARD STYLES
  * ===============================================
  * @file src/styles/admin-dashboard.css
- * 
+ *
  * Secure admin dashboard for performance and analytics.
  */
+
+/* Override text colors for dark backgrounds */
+[data-page="admin"] {
+  --color-text-primary: #f5f5f5;
+  --color-text-secondary: #cccccc;
+}
+
+/* Ensure all admin text is light on dark backgrounds */
+[data-page="admin"] .stat-card,
+[data-page="admin"] .admin-table-card,
+[data-page="admin"] .chart-container,
+[data-page="admin"] .metric-group,
+[data-page="admin"] .analytics-section,
+[data-page="admin"] .analytics-overview,
+[data-page="admin"] .projects-table-container,
+[data-page="admin"] .admin-table-header {
+  color: #f5f5f5;
+}
+
+[data-page="admin"] .stat-label,
+[data-page="admin"] .admin-table-card h3,
+[data-page="admin"] .chart-container h3,
+[data-page="admin"] .metric-group h3,
+[data-page="admin"] .analytics-section h3,
+[data-page="admin"] .analytics-overview h3 {
+  color: #f5f5f5;
+}
 
 /* Base Admin Styles */
 .admin-body {
@@ -189,7 +216,7 @@
 
 .tab-btn {
   padding: var(--space-2) var(--space-4);
-  background: transparent;
+  background: #333333;
   border: 1px solid var(--color-border-secondary);
   border-radius: var(--border-radius-md);
   color: var(--color-text-secondary);
@@ -290,11 +317,10 @@
 }
 
 .chart-container {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-primary);
+  background: #333333;
+  border: 1px solid var(--color-border-secondary);
   border-radius: var(--border-radius-card);
   padding: var(--space-6);
-  box-shadow: var(--shadow-card-rest);
 }
 
 .chart-container h3 {
@@ -323,11 +349,10 @@
 }
 
 .metric-group {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-primary);
+  background: #333333;
+  border: 1px solid var(--color-border-secondary);
   border-radius: var(--border-radius-card);
   padding: var(--space-6);
-  box-shadow: var(--shadow-card-rest);
 }
 
 .metric-group h3 {
@@ -437,11 +462,10 @@
 }
 
 .analytics-section {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-primary);
+  background: #333333;
+  border: 1px solid var(--color-border-secondary);
   border-radius: var(--border-radius-card);
   padding: var(--space-6);
-  box-shadow: var(--shadow-card-rest);
 }
 
 .analytics-section h3 {
@@ -553,14 +577,13 @@
 }
 
 .stat-card {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-primary);
+  background: #333333;
+  border: 1px solid var(--color-border-secondary);
   border-radius: var(--border-radius-card);
   padding: var(--space-4);
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  box-shadow: var(--shadow-card-rest);
 }
 
 .stat-label {
@@ -578,11 +601,10 @@
 }
 
 .leads-table-container {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-primary);
+  background: #333333;
+  border: 1px solid var(--color-border-secondary);
   border-radius: var(--border-radius-card);
   overflow: hidden;
-  box-shadow: var(--shadow-card-rest);
   overflow-x: auto;
 }
 
@@ -590,6 +612,7 @@
   width: 100%;
   border-collapse: collapse;
   min-width: 800px;
+  background: #333333;
 }
 
 .leads-table th,
@@ -597,11 +620,12 @@
   padding: var(--space-3) var(--space-4);
   text-align: left;
   border-bottom: 1px solid var(--color-border-secondary);
+  background: #333333;
 }
 
 .leads-table th {
-  background: var(--color-bg-primary);
-  color: var(--color-text-secondary);
+  background: #333333;
+  color: #f5f5f5;
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-sm);
   text-transform: uppercase;
@@ -610,12 +634,12 @@
 }
 
 .leads-table td {
-  color: var(--color-text-primary);
+  color: #f5f5f5;
   font-size: var(--font-size-sm);
 }
 
 .leads-table tr:hover td {
-  background: var(--color-bg-primary);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .leads-table td a {
@@ -688,13 +712,37 @@
   color: var(--color-black);
 }
 
+/* Lead-specific status badges */
+.status-badge.status-contacted {
+  background: var(--color-status-blue);
+  border-color: var(--color-black);
+  color: var(--color-black);
+}
+
+.status-badge.status-qualified {
+  background: #8b5cf6; /* Purple - qualified but not converted */
+  border-color: var(--color-black);
+  color: var(--color-white);
+}
+
+.status-badge.status-converted {
+  background: var(--color-success);
+  border-color: var(--color-black);
+  color: var(--color-black);
+}
+
+.status-badge.status-lost {
+  background: var(--color-danger);
+  border-color: var(--color-black);
+  color: var(--color-white);
+}
+
 /* Admin Table Card - Consistent styling for data tables */
 .admin-table-card {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-primary);
+  background: #333333;
+  border: 1px solid var(--color-border-secondary);
   border-radius: var(--border-radius-card);
   overflow: hidden;
-  box-shadow: var(--shadow-card-rest);
   margin-top: 1.5rem;
 }
 
@@ -704,12 +752,12 @@
   align-items: center;
   padding: var(--space-4) var(--space-5);
   border-bottom: 1px solid var(--color-border-secondary);
-  background: var(--color-bg-primary);
+  background: #333333;
 }
 
 .admin-table-header h3 {
   margin: 0;
-  color: var(--color-text-primary);
+  color: #f5f5f5;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
 }
@@ -730,7 +778,7 @@
 
 /* Contacts Table - Same styling as Leads Table */
 .contacts-table-container {
-  background: var(--color-bg-secondary);
+  background: #333333;
   overflow-x: auto;
 }
 
@@ -738,6 +786,7 @@
   width: 100%;
   border-collapse: collapse;
   min-width: 700px;
+  background: #333333;
 }
 
 .contacts-table th,
@@ -745,11 +794,12 @@
   padding: var(--space-3) var(--space-4);
   text-align: left;
   border-bottom: 1px solid var(--color-border-secondary);
+  background: #333333;
 }
 
 .contacts-table th {
-  background: var(--color-bg-primary);
-  color: var(--color-text-secondary);
+  background: #333333;
+  color: #f5f5f5;
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-sm);
   text-transform: uppercase;
@@ -758,12 +808,12 @@
 }
 
 .contacts-table td {
-  color: var(--color-text-primary);
+  color: #f5f5f5;
   font-size: var(--font-size-sm);
 }
 
 .contacts-table tr:hover td {
-  background: var(--color-bg-primary);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .contacts-table td a {
@@ -783,20 +833,115 @@
   text-overflow: ellipsis;
 }
 
-/* Status dropdown in tables */
-.status-select {
-  padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--color-border-secondary);
-  border-radius: var(--border-radius-sm);
-  background: var(--color-bg-primary);
+/* Status dropdown in tables - styled to match badges */
+/* Using high specificity to override [data-page="admin"] select rules */
+[data-page="admin"] .projects-table select.status-select,
+[data-page="admin"] .leads-table select.status-select,
+[data-page="admin"] select.status-select.project-status-select {
+  padding: 4px 24px 4px 14px;
+  border: 1px solid var(--color-black);
+  border-radius: 9999px;
+  background-color: var(--color-bg-secondary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
   color: var(--color-text-primary);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
   cursor: pointer;
+  text-transform: capitalize;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  height: auto;
+  line-height: 1.4;
+  width: auto;
+  min-width: unset;
 }
 
-.status-select:focus {
+[data-page="admin"] select.status-select:focus {
   outline: none;
   border-color: var(--color-brand-primary);
+}
+
+/* Status-specific colors for select dropdowns */
+[data-page="admin"] .projects-table select.status-select.status-pending,
+[data-page="admin"] .leads-table select.status-select.status-pending,
+[data-page="admin"] select.status-select.project-status-select.status-pending {
+  background-color: var(--color-warning);
+  color: var(--color-black);
+}
+
+[data-page="admin"] .projects-table select.status-select.status-active,
+[data-page="admin"] .leads-table select.status-select.status-active,
+[data-page="admin"] select.status-select.project-status-select.status-active {
+  background-color: var(--color-status-blue);
+  color: var(--color-black);
+}
+
+[data-page="admin"] .projects-table select.status-select.status-in_progress,
+[data-page="admin"] .projects-table select.status-select.status-in-progress,
+[data-page="admin"] .leads-table select.status-select.status-in_progress,
+[data-page="admin"] .leads-table select.status-select.status-in-progress,
+[data-page="admin"] select.status-select.project-status-select.status-in_progress,
+[data-page="admin"] select.status-select.project-status-select.status-in-progress {
+  background-color: var(--color-status-blue);
+  color: var(--color-black);
+}
+
+[data-page="admin"] .projects-table select.status-select.status-on_hold,
+[data-page="admin"] .projects-table select.status-select.status-on-hold,
+[data-page="admin"] .leads-table select.status-select.status-on_hold,
+[data-page="admin"] .leads-table select.status-select.status-on-hold,
+[data-page="admin"] select.status-select.project-status-select.status-on_hold,
+[data-page="admin"] select.status-select.project-status-select.status-on-hold {
+  background-color: var(--color-warning);
+  color: var(--color-black);
+}
+
+[data-page="admin"] .projects-table select.status-select.status-completed,
+[data-page="admin"] .leads-table select.status-select.status-completed,
+[data-page="admin"] select.status-select.project-status-select.status-completed {
+  background-color: var(--color-success);
+  color: var(--color-black);
+}
+
+[data-page="admin"] .projects-table select.status-select.status-cancelled,
+[data-page="admin"] .leads-table select.status-select.status-cancelled,
+[data-page="admin"] select.status-select.project-status-select.status-cancelled {
+  background-color: var(--color-danger);
+  color: var(--color-black);
+}
+
+/* Lead-specific status colors for select dropdowns */
+[data-page="admin"] .leads-table select.status-select.status-new,
+[data-page="admin"] select.status-select.status-new {
+  background-color: var(--color-warning);
+  color: var(--color-black);
+}
+
+[data-page="admin"] .leads-table select.status-select.status-contacted,
+[data-page="admin"] select.status-select.status-contacted {
+  background-color: var(--color-status-blue);
+  color: var(--color-black);
+}
+
+[data-page="admin"] .leads-table select.status-select.status-qualified,
+[data-page="admin"] select.status-select.status-qualified {
+  background-color: #8b5cf6;
+  color: var(--color-white);
+}
+
+[data-page="admin"] .leads-table select.status-select.status-converted,
+[data-page="admin"] select.status-select.status-converted {
+  background-color: var(--color-success);
+  color: var(--color-black);
+}
+
+[data-page="admin"] .leads-table select.status-select.status-lost,
+[data-page="admin"] select.status-select.status-lost {
+  background-color: var(--color-danger);
+  color: var(--color-white);
 }
 
 /* Clickable table rows */
@@ -808,12 +953,12 @@
 
 .leads-table tbody tr:hover td,
 .contacts-table tbody tr:hover td {
-  background: var(--color-bg-primary);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .leads-table tbody tr:active td,
 .contacts-table tbody tr:active td {
-  background: var(--color-bg-secondary);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Admin Modal Styles */
@@ -959,7 +1104,7 @@
 
 /* Projects Table - Same styling as Leads/Contacts Tables */
 .projects-table-container {
-  background: var(--color-bg-secondary);
+  background: #333333;
   overflow-x: auto;
 }
 
@@ -967,6 +1112,7 @@
   width: 100%;
   border-collapse: collapse;
   min-width: 800px;
+  background: #333333;
 }
 
 .projects-table th,
@@ -974,10 +1120,11 @@
   padding: var(--space-3) var(--space-4);
   text-align: left;
   border-bottom: 1px solid var(--color-border-secondary);
+  background: #333333;
 }
 
 .projects-table th {
-  background: var(--color-bg-primary);
+  background: #333333;
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-sm);
@@ -989,6 +1136,14 @@
 .projects-table td {
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
+  vertical-align: middle;
+}
+
+/* Align status and actions columns */
+.projects-table td:nth-last-child(2),
+.projects-table td:last-child {
+  text-align: center;
+  white-space: nowrap;
 }
 
 .projects-table tbody tr {
@@ -997,7 +1152,7 @@
 }
 
 .projects-table tbody tr:hover td {
-  background: var(--color-bg-primary);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .projects-table td a {
@@ -1059,14 +1214,18 @@
 }
 
 .action-btn.action-edit {
-  background: rgba(59, 130, 246, 0.1);
-  border-color: var(--color-status-blue);
-  color: var(--color-status-blue);
+  background: #333333;
+  border: 1px solid var(--color-black);
+  color: var(--color-text-primary);
+  padding: 4px 16px;
+  font-size: var(--font-size-sm);
+  border-radius: 9999px;
+  font-weight: 500;
 }
 
 .action-btn.action-edit:hover {
-  background: var(--color-status-blue);
-  color: white;
+  background: var(--color-bg-secondary);
+  border-color: var(--color-black);
 }
 
 .action-btn.action-invite {
@@ -1877,8 +2036,8 @@
    Overview Stats Grid
    ================================================ */
 .analytics-overview {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-primary);
+  background: #333333;
+  border: 1px solid var(--color-border-secondary);
   border-radius: var(--border-radius-card);
   padding: var(--space-6);
 }

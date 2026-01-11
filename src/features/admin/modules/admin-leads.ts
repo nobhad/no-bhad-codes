@@ -98,18 +98,15 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
   tableBody.innerHTML = leads
     .map((lead) => {
       const date = new Date(lead.created_at).toLocaleDateString();
-      const statusClass =
-        lead.status === 'new'
-          ? 'status-pending'
-          : lead.status === 'contacted' || lead.status === 'qualified'
-            ? 'status-active'
-            : 'status-completed';
+      const statusClass = `status-${lead.status || 'new'}`;
       const showActivateBtn = lead.status === 'new' || lead.status === 'qualified';
 
       const safeContactName = SanitizationUtils.escapeHtml(lead.contact_name || '-');
       const safeCompanyName = SanitizationUtils.escapeHtml(lead.company_name || '-');
       const safeEmail = SanitizationUtils.escapeHtml(lead.email || '-');
-      const safeSource = SanitizationUtils.escapeHtml(lead.source || '-');
+      const leadAny = lead as unknown as Record<string, string>;
+      const safeProjectType = SanitizationUtils.escapeHtml(leadAny.project_type || '-');
+      const safeBudget = SanitizationUtils.escapeHtml(leadAny.budget_range || '-');
       const safeStatus = SanitizationUtils.escapeHtml(lead.status || 'new');
 
       return `
@@ -118,7 +115,8 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
           <td>${safeContactName}</td>
           <td>${safeCompanyName}</td>
           <td>${safeEmail}</td>
-          <td>${safeSource}</td>
+          <td>${safeProjectType}</td>
+          <td>${safeBudget}</td>
           <td>
             <span class="status-badge ${statusClass}">${safeStatus}</span>
             ${showActivateBtn ? `<button class="action-btn action-convert activate-lead-btn" data-id="${lead.id}" onclick="event.stopPropagation()" style="margin-left: 0.5rem;">Activate</button>` : ''}

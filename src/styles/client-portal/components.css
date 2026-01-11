@@ -130,21 +130,21 @@
 [data-page="admin"] input[type="tel"],
 [data-page="admin"] input[type="number"],
 [data-page="admin"] textarea,
-[data-page="admin"] select {
+[data-page="admin"] select:not(.status-select) {
   width: 100%;
   padding: var(--cp-spacing-lg) var(--cp-spacing-xl);
-  border: none !important;
-  border-radius: var(--cp-radius-lg) !important;
-  font-size: 1.2rem !important;
-  font-weight: 600 !important;
-  background-color: #333333 !important;
-  color: #f5f5f5 !important;
+  border: none;
+  border-radius: var(--cp-radius-lg);
+  font-size: 1.2rem;
+  font-weight: 600;
+  background-color: #333333;
+  color: #f5f5f5;
   font-family: inherit;
   box-sizing: border-box;
   transition: background-color 0.2s ease;
   min-height: 60px;
   height: auto;
-  caret-color: #f5f5f5 !important;
+  caret-color: #f5f5f5;
 }
 
 /* Placeholder styling - matches contact form */
@@ -175,10 +175,10 @@
 [data-page="client-portal"] select:focus,
 [data-page="admin"] input:focus,
 [data-page="admin"] textarea:focus,
-[data-page="admin"] select:focus {
-  outline: none !important;
-  background-color: #444444 !important;
-  color: #f5f5f5 !important;
+[data-page="admin"] select:not(.status-select):focus {
+  outline: none;
+  background-color: #444444;
+  color: #f5f5f5;
 }
 
 .portal-input[readonly],
@@ -253,10 +253,10 @@
 [data-page="client-portal"] .form-group select,
 [data-page="admin"] .form-group input,
 [data-page="admin"] .form-group textarea,
-[data-page="admin"] .form-group select {
-  padding-top: 1.75rem !important;
-  padding-bottom: var(--cp-spacing-sm) !important;
-  padding-left: var(--cp-spacing-xl) !important;
+[data-page="admin"] .form-group select:not(.status-select) {
+  padding-top: 1.75rem;
+  padding-bottom: var(--cp-spacing-sm);
+  padding-left: var(--cp-spacing-xl);
 }
 
 /* ----- COMPONENT: Form Row ----- */
