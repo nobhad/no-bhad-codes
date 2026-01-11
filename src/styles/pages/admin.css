@@ -833,12 +833,36 @@
   white-space: nowrap;
 }
 
+/* ================================================
+   STANDARDIZED STATUS COLORS
+   ================================================
+   All status badges AND select dropdowns use these colors:
+
+   YELLOW (#fbbf24) - Awaiting Action:
+     pending, new, on_hold, on-hold
+
+   BLUE (#3b82f6) - In Progress:
+     active, in_progress, in-progress, contacted
+
+   GREEN (#10b981) - Success/Complete:
+     completed, converted, replied
+
+   RED (#ef4444) - Cancelled/Lost:
+     cancelled, lost, archived
+
+   PURPLE (#8b5cf6) - Qualified:
+     qualified
+
+   GRAY (#9ca3af) - Read/Inactive:
+     read
+   ================================================ */
+
 /* Yellow/Warning status badges */
 .status-badge.status-pending,
 .status-badge.status-new,
 .status-badge.status-on_hold,
 .status-badge.status-on-hold {
-  background: var(--color-warning);
+  background: #fbbf24;
   border-color: var(--color-black);
   color: var(--color-black);
 }
@@ -848,7 +872,7 @@
 .status-badge.status-in_progress,
 .status-badge.status-in-progress,
 .status-badge.status-contacted {
-  background: var(--color-status-blue);
+  background: #3b82f6;
   border-color: var(--color-black);
   color: var(--color-black);
 }
@@ -857,15 +881,16 @@
 .status-badge.status-completed,
 .status-badge.status-converted,
 .status-badge.status-replied {
-  background: var(--color-success);
+  background: #10b981;
   border-color: var(--color-black);
   color: var(--color-black);
 }
 
 /* Red/Danger status badges */
 .status-badge.status-cancelled,
-.status-badge.status-lost {
-  background: var(--color-danger);
+.status-badge.status-lost,
+.status-badge.status-archived {
+  background: #ef4444;
   border-color: var(--color-black);
   color: var(--color-white);
 }
@@ -879,15 +904,9 @@
 
 /* Gray status badges (for messages/contacts) */
 .status-badge.status-read {
-  background: var(--color-status-gray);
+  background: #9ca3af;
   border-color: var(--color-black);
   color: var(--color-black);
-}
-
-.status-badge.status-archived {
-  background: var(--color-status-gray-dark);
-  border-color: var(--color-black);
-  color: var(--color-white);
 }
 
 /* Admin Table Card - Consistent styling for data tables */
@@ -990,18 +1009,18 @@
 }
 
 /* Status dropdown in tables - styled to match badges */
-/* Using high specificity to override [data-page="admin"] select rules */
+/* Base styles WITHOUT background-color - status classes set the color */
 [data-page="admin"] .projects-table select.status-select,
 [data-page="admin"] .leads-table select.status-select,
-[data-page="admin"] select.status-select.project-status-select {
+[data-page="admin"] .contacts-table select.status-select,
+[data-page="admin"] select.status-select.project-status-select,
+[data-page="admin"] select.status-select.contact-status-select {
   padding: 8px 32px 8px 16px;
   border: 1px solid var(--color-black);
   border-radius: 9999px;
-  background-color: var(--color-bg-secondary);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
-  color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
@@ -1021,43 +1040,68 @@
   border-color: var(--color-brand-primary);
 }
 
-/* Status-specific colors for select dropdowns - Unified for all tables */
-/* Yellow/Warning statuses */
-[data-page="admin"] select.status-select.status-pending,
-[data-page="admin"] select.status-select.status-new,
-[data-page="admin"] select.status-select.status-on_hold,
-[data-page="admin"] select.status-select.status-on-hold {
-  background-color: var(--color-warning);
-  color: var(--color-black);
+/* Status-specific colors for select dropdowns - SAME hex values as badges */
+/* Yellow (#fbbf24) - Awaiting Action */
+[data-page="admin"] .projects-table select.status-select.status-pending,
+[data-page="admin"] .projects-table select.status-select.status-new,
+[data-page="admin"] .projects-table select.status-select.status-on_hold,
+[data-page="admin"] .projects-table select.status-select.status-on-hold,
+[data-page="admin"] .leads-table select.status-select.status-pending,
+[data-page="admin"] .leads-table select.status-select.status-new,
+[data-page="admin"] .leads-table select.status-select.status-on_hold,
+[data-page="admin"] .leads-table select.status-select.status-on-hold,
+[data-page="admin"] .contacts-table select.status-select.status-pending,
+[data-page="admin"] .contacts-table select.status-select.status-new {
+  background-color: #fbbf24;
+  color: #000000;
 }
 
-/* Blue/Active statuses */
-[data-page="admin"] select.status-select.status-active,
-[data-page="admin"] select.status-select.status-in_progress,
-[data-page="admin"] select.status-select.status-in-progress,
-[data-page="admin"] select.status-select.status-contacted {
-  background-color: var(--color-status-blue);
-  color: var(--color-black);
+/* Blue (#3b82f6) - In Progress */
+[data-page="admin"] .projects-table select.status-select.status-active,
+[data-page="admin"] .projects-table select.status-select.status-in_progress,
+[data-page="admin"] .projects-table select.status-select.status-in-progress,
+[data-page="admin"] .projects-table select.status-select.status-contacted,
+[data-page="admin"] .leads-table select.status-select.status-active,
+[data-page="admin"] .leads-table select.status-select.status-in_progress,
+[data-page="admin"] .leads-table select.status-select.status-in-progress,
+[data-page="admin"] .leads-table select.status-select.status-contacted,
+[data-page="admin"] .contacts-table select.status-select.status-active,
+[data-page="admin"] .contacts-table select.status-select.status-contacted {
+  background-color: #3b82f6;
+  color: #000000;
 }
 
-/* Green/Success statuses */
-[data-page="admin"] select.status-select.status-completed,
-[data-page="admin"] select.status-select.status-converted {
-  background-color: var(--color-success);
-  color: var(--color-black);
+/* Green (#10b981) - Success/Complete */
+[data-page="admin"] .projects-table select.status-select.status-completed,
+[data-page="admin"] .projects-table select.status-select.status-converted,
+[data-page="admin"] .leads-table select.status-select.status-completed,
+[data-page="admin"] .leads-table select.status-select.status-converted,
+[data-page="admin"] .contacts-table select.status-select.status-replied {
+  background-color: #10b981;
+  color: #000000;
 }
 
-/* Red/Danger statuses */
-[data-page="admin"] select.status-select.status-cancelled,
-[data-page="admin"] select.status-select.status-lost {
-  background-color: var(--color-danger);
-  color: var(--color-white);
+/* Red (#ef4444) - Cancelled/Lost */
+[data-page="admin"] .projects-table select.status-select.status-cancelled,
+[data-page="admin"] .projects-table select.status-select.status-lost,
+[data-page="admin"] .leads-table select.status-select.status-cancelled,
+[data-page="admin"] .leads-table select.status-select.status-lost,
+[data-page="admin"] .contacts-table select.status-select.status-archived {
+  background-color: #ef4444;
+  color: #ffffff;
 }
 
-/* Purple/Qualified status */
-[data-page="admin"] select.status-select.status-qualified {
+/* Purple (#8b5cf6) - Qualified */
+[data-page="admin"] .projects-table select.status-select.status-qualified,
+[data-page="admin"] .leads-table select.status-select.status-qualified {
   background-color: #8b5cf6;
-  color: var(--color-white);
+  color: #ffffff;
+}
+
+/* Gray (#9ca3af) - Read */
+[data-page="admin"] .contacts-table select.status-select.status-read {
+  background-color: #9ca3af;
+  color: #000000;
 }
 
 /* Clickable table rows */
@@ -1315,8 +1359,7 @@
   vertical-align: middle;
 }
 
-/* Align status and actions columns */
-.projects-table td:nth-last-child(2),
+/* Align status column (last column) */
 .projects-table td:last-child {
   text-align: center;
   white-space: nowrap;
@@ -2435,18 +2478,14 @@
   display: flex;
   justify-content: space-between;
   padding: var(--cp-spacing-sm) 0;
-  border-bottom: 1px solid var(--color-border-secondary);
-}
-
-.system-info-row:last-child {
-  border-bottom: none;
 }
 
 .truncate-text {
-  max-width: 300px;
+  max-width: 400px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: help;
 }
 
 /* ================================================
@@ -2657,4 +2696,67 @@
   cursor: pointer !important;
   z-index: 1001 !important;
   position: relative !important;
+}
+
+/* ================================================
+   Admin & Client Portal - No Mobile Collapse
+   Sidebar stays visible, no hamburger menu
+   ================================================ */
+@media screen and (max-width: 767px) {
+  /* Hide hamburger menu on admin and client portal */
+  [data-page="admin"] .mobile-menu-toggle,
+  [data-page="admin"] .mobile-overlay,
+  [data-page="admin"] .sidebar-close-btn,
+  [data-page="client-portal"] .mobile-menu-toggle,
+  [data-page="client-portal"] .mobile-overlay,
+  [data-page="client-portal"] .sidebar-close-btn {
+    display: none !important;
+  }
+
+  /* Keep sidebar visible on admin and client portal */
+  [data-page="admin"] .sidebar,
+  [data-page="client-portal"] .sidebar {
+    position: fixed;
+    left: 0;
+    width: 220px;
+    min-width: 220px;
+  }
+
+  /* Keep sidebar toggle visible */
+  [data-page="admin"] .sidebar-toggle,
+  [data-page="client-portal"] .sidebar-toggle {
+    display: flex;
+  }
+
+  /* Adjust dashboard content margin for visible sidebar */
+  [data-page="admin"] .dashboard-content,
+  [data-page="client-portal"] .dashboard-content {
+    padding-top: var(--space-6);
+    padding-left: var(--space-4);
+    margin-left: 220px;
+  }
+
+  /* Keep header toggle visible */
+  [data-page="admin"] .page-header .header-sidebar-toggle,
+  [data-page="client-portal"] .page-header .header-sidebar-toggle {
+    display: flex;
+  }
+
+  /* Page header no extra padding needed */
+  [data-page="admin"] .page-header,
+  [data-page="client-portal"] .page-header {
+    padding-left: 0;
+  }
+
+  /* Handle collapsed sidebar */
+  [data-page="admin"] .sidebar.collapsed,
+  [data-page="client-portal"] .sidebar.collapsed {
+    width: 60px;
+    min-width: 60px;
+  }
+
+  [data-page="admin"] .sidebar.collapsed ~ .dashboard-content,
+  [data-page="client-portal"] .sidebar.collapsed ~ .dashboard-content {
+    margin-left: 60px;
+  }
 }
