@@ -125,8 +125,8 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
       const statusClass = `status-${lead.status || 'new'}`;
       const showActivateBtn = lead.status === 'new' || lead.status === 'qualified';
 
-      const safeContactName = SanitizationUtils.escapeHtml(lead.contact_name || '-');
-      const safeCompanyName = SanitizationUtils.escapeHtml(lead.company_name || '-');
+      const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.contact_name || '-'));
+      const safeCompanyName = lead.company_name ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.company_name)) : '';
       const safeEmail = SanitizationUtils.escapeHtml(lead.email || '-');
       const leadAny = lead as unknown as Record<string, string>;
       const safeProjectType = SanitizationUtils.escapeHtml(leadAny.project_type || '-');
@@ -178,32 +178,60 @@ export function showLeadDetails(leadId: number): void {
   if (!lead) return;
 
   const detailsPanel = document.getElementById('lead-details-panel');
+  const overlay = document.getElementById('details-overlay');
   if (!detailsPanel) return;
 
-  const safeContactName = SanitizationUtils.escapeHtml(lead.contact_name || '-');
-  const safeCompanyName = SanitizationUtils.escapeHtml(lead.company_name || '-');
+  const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.contact_name || '-'));
+  const safeCompanyName = lead.company_name ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.company_name)) : '';
   const safeEmail = SanitizationUtils.escapeHtml(lead.email || '-');
   const safePhone = SanitizationUtils.escapeHtml(lead.phone || '-');
-  const safeNotes = SanitizationUtils.escapeHtml(lead.notes || 'No notes');
+  const safeProjectType = SanitizationUtils.escapeHtml(lead.project_type || '-');
+  const safeDescription = SanitizationUtils.escapeHtml(lead.description || 'No description');
+  const safeBudget = SanitizationUtils.escapeHtml(lead.budget_range || '-');
+  const safeTimeline = SanitizationUtils.escapeHtml(lead.timeline || '-');
+  const safeFeatures = SanitizationUtils.escapeHtml(lead.features || '-');
+  const safeSource = SanitizationUtils.escapeHtml(lead.source || '-');
 
   detailsPanel.innerHTML = `
     <div class="details-header">
       <h3>${safeContactName}</h3>
-      <button class="close-btn" onclick="document.getElementById('lead-details-panel').classList.add('hidden')">×</button>
+      <button class="close-btn" onclick="window.closeDetailsPanel()">×</button>
     </div>
     <div class="details-content">
-      <p><strong>Company:</strong> ${safeCompanyName}</p>
+      ${safeCompanyName ? `<p><strong>Company:</strong> ${safeCompanyName}</p>` : ''}
       <p><strong>Email:</strong> ${safeEmail}</p>
       <p><strong>Phone:</strong> ${safePhone}</p>
       <p><strong>Status:</strong> ${lead.status}</p>
-      <p><strong>Source:</strong> ${lead.source || '-'}</p>
-      <p><strong>Notes:</strong> ${safeNotes}</p>
+      <p><strong>Source:</strong> ${safeSource}</p>
+      <hr class="details-divider">
+      <p><strong>Project Type:</strong> ${safeProjectType}</p>
+      <p><strong>Budget:</strong> ${safeBudget}</p>
+      <p><strong>Timeline:</strong> ${safeTimeline}</p>
+      <p><strong>Description:</strong> ${safeDescription}</p>
+      <p><strong>Features:</strong> ${safeFeatures}</p>
+      <hr class="details-divider">
       <p><strong>Created:</strong> ${new Date(lead.created_at).toLocaleString()}</p>
     </div>
   `;
 
+  // Show overlay and panel
+  if (overlay) overlay.classList.remove('hidden');
   detailsPanel.classList.remove('hidden');
 }
+
+// Global function to close details panel
+declare global {
+  interface Window {
+    closeDetailsPanel: () => void;
+  }
+}
+
+window.closeDetailsPanel = function (): void {
+  const detailsPanel = document.getElementById('lead-details-panel');
+  const overlay = document.getElementById('details-overlay');
+  if (detailsPanel) detailsPanel.classList.add('hidden');
+  if (overlay) overlay.classList.add('hidden');
+};
 
 export async function activateLead(
   leadId: number,
