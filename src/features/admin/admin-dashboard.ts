@@ -289,11 +289,8 @@ class AdminDashboard {
     console.log('[AdminDashboard] logoutBtn found:', !!logoutBtn);
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
-        // Clear auth data and redirect to home page
-        sessionStorage.removeItem('clientAuth');
-        sessionStorage.removeItem('client_auth_token');
-        sessionStorage.removeItem('clientAuthToken');
-        window.location.href = '/';
+        // Use AdminAuth.logout() to properly clear admin session
+        AdminAuth.logout();
       });
     }
 
