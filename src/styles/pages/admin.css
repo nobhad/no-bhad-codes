@@ -764,8 +764,8 @@ html[data-theme="dark"] .auth-gate .password-input-wrapper input {
 
 .leads-table-container {
   background: #333333;
-  border: 1px solid var(--color-border-secondary);
-  border-radius: var(--border-radius-card);
+  border: none;
+  border-radius: 0;
   overflow: hidden;
   overflow-x: auto;
 }
@@ -781,7 +781,7 @@ html[data-theme="dark"] .auth-gate .password-input-wrapper input {
 .leads-table td {
   padding: var(--space-3) var(--space-4);
   text-align: left;
-  border-bottom: 1px solid var(--color-border-secondary);
+  border-bottom: none;
   background: #333333;
 }
 
@@ -793,6 +793,7 @@ html[data-theme="dark"] .auth-gate .password-input-wrapper input {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
+  border-bottom: 1px solid var(--color-border-secondary);
 }
 
 .leads-table td {
@@ -830,6 +831,10 @@ html[data-theme="dark"] .auth-gate .password-input-wrapper input {
   text-transform: capitalize;
   border: 2px solid var(--color-black);
   color: var(--color-black);
+  width: 130px;
+  text-align: center;
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .status-badge.status-pending {
@@ -913,6 +918,7 @@ html[data-theme="dark"] .auth-gate .password-input-wrapper input {
   justify-content: space-between;
   align-items: center;
   padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--color-border-secondary);
   border-bottom: 1px solid var(--color-border-secondary);
   background: #333333;
 }
@@ -941,6 +947,7 @@ html[data-theme="dark"] .auth-gate .password-input-wrapper input {
 /* Contacts Table - Same styling as Leads Table */
 .contacts-table-container {
   background: #333333;
+  border-radius: 0;
   overflow-x: auto;
 }
 
@@ -955,7 +962,7 @@ html[data-theme="dark"] .auth-gate .password-input-wrapper input {
 .contacts-table td {
   padding: var(--space-3) var(--space-4);
   text-align: left;
-  border-bottom: 1px solid var(--color-border-secondary);
+  border-bottom: none;
   background: #333333;
 }
 
@@ -967,6 +974,7 @@ html[data-theme="dark"] .auth-gate .password-input-wrapper input {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
+  border-bottom: 1px solid var(--color-border-secondary);
 }
 
 .contacts-table td {
@@ -1122,6 +1130,66 @@ html[data-theme="dark"] .auth-gate .password-input-wrapper input {
 .leads-table tbody tr:active td,
 .contacts-table tbody tr:active td {
   background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive table styles for smaller screens */
+@media (max-width: 900px) {
+  .leads-table,
+  .contacts-table {
+    min-width: unset;
+  }
+
+  .leads-table th,
+  .leads-table td,
+  .contacts-table th,
+  .contacts-table td {
+    padding: var(--space-2) var(--space-2);
+    font-size: var(--font-size-xs);
+  }
+
+  /* Give NAME column more space */
+  .leads-table th:nth-child(2),
+  .leads-table td:nth-child(2),
+  .contacts-table th:nth-child(2),
+  .contacts-table td:nth-child(2) {
+    min-width: 120px;
+    width: 40%;
+  }
+
+  /* Leads table: hide Company (3), Email (4), Project Type (5), Budget (6) */
+  .leads-table th:nth-child(3),
+  .leads-table td:nth-child(3),
+  .leads-table th:nth-child(4),
+  .leads-table td:nth-child(4),
+  .leads-table th:nth-child(5),
+  .leads-table td:nth-child(5),
+  .leads-table th:nth-child(6),
+  .leads-table td:nth-child(6) {
+    display: none;
+  }
+
+  /* Contacts table: hide Company (4), Message (5) */
+  .contacts-table th:nth-child(4),
+  .contacts-table td:nth-child(4),
+  .contacts-table th:nth-child(5),
+  .contacts-table td:nth-child(5) {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .leads-table th,
+  .leads-table td,
+  .contacts-table th,
+  .contacts-table td {
+    padding: var(--space-1) var(--space-2);
+  }
+
+  /* Contacts table: also hide Email (3) on very small screens */
+  .contacts-table th:nth-child(3),
+  .contacts-table td:nth-child(3) {
+    display: none;
+  }
 }
 
 /* Admin Modal Styles */
@@ -2619,6 +2687,17 @@ html[data-theme="dark"] .auth-gate .password-input-wrapper input {
   color: var(--color-danger);
   text-align: center;
   padding: var(--space-4);
+}
+
+/* Admin message compose area */
+[data-page="admin"] .message-compose {
+  gap: var(--space-3);
+  padding: var(--space-3);
+}
+
+[data-page="admin"] .message-compose .btn,
+[data-page="admin"] #admin-send-message {
+  width: 100%;
 }
 
 /* ================================================
