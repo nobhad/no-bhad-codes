@@ -153,9 +153,8 @@ export class BaseModule {
         this.log(`Cached element: ${name} (${selector})`);
       } else if (required) {
         this.error(`Required element "${name}" with selector "${selector}" not found.`);
-      } else {
-        this.warn(`Optional element "${name}" with selector "${selector}" not found.`);
       }
+      // Optional elements that aren't found don't need a warning - that's expected behavior
     }
     return element;
   }
