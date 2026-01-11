@@ -192,7 +192,7 @@ class AdminDashboard {
   private async checkAuthentication(): Promise<boolean> {
     // Try to validate session by calling an admin-only endpoint
     // Retry logic handles race condition when backend starts slower than frontend
-    const MAX_RETRIES = 3;
+    const MAX_RETRIES = 5;
     const RETRY_DELAY_MS = 500;
 
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
@@ -200,6 +200,16 @@ class AdminDashboard {
         const response = await fetch('/api/admin/leads', {
           credentials: 'include'
         });
+
+        // 503 = backend starting up, retry
+        if (response.status === 503) {
+          if (attempt < MAX_RETRIES) {
+            console.log(`[AdminDashboard] Backend starting up (attempt ${attempt}), retrying in ${RETRY_DELAY_MS}ms...`);
+            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+            continue;
+          }
+        }
+
         // If we get 200, we're authenticated as admin
         // If we get 401/403, we're not authenticated
         return response.ok;
@@ -1789,7 +1799,10 @@ class AdminDashboard {
     if (sysVersion) sysVersion.textContent = '10.0.0';
     if (sysEnv) sysEnv.textContent = import.meta.env?.MODE || 'development';
     if (sysBuildDate) sysBuildDate.textContent = new Date().toLocaleDateString();
-    if (sysUserAgent) sysUserAgent.textContent = `${navigator.userAgent.substring(0, 50)}...`;
+    if (sysUserAgent) {
+      sysUserAgent.textContent = navigator.userAgent;
+      sysUserAgent.title = navigator.userAgent;
+    }
     if (sysScreen) sysScreen.textContent = `${screen.width} x ${screen.height}`;
     if (sysViewport) sysViewport.textContent = `${window.innerWidth} x ${window.innerHeight}`;
 
