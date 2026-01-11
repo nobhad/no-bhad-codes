@@ -191,15 +191,27 @@ class AdminDashboard {
 
   private async checkAuthentication(): Promise<boolean> {
     // Try to validate session by calling an admin-only endpoint
-    try {
-      const response = await fetch('/api/admin/leads', {
-        credentials: 'include'
-      });
-      // If we get 200, we're authenticated as admin
-      // If we get 401/403, we're not authenticated
-      return response.ok;
-    } catch (error) {
-      console.log('[AdminDashboard] Auth check failed:', error);
+    // Retry logic handles race condition when backend starts slower than frontend
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_MS = 500;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const response = await fetch('/api/admin/leads', {
+          credentials: 'include'
+        });
+        // If we get 200, we're authenticated as admin
+        // If we get 401/403, we're not authenticated
+        return response.ok;
+      } catch (error) {
+        // Network error - backend might not be ready yet
+        if (attempt < MAX_RETRIES) {
+          console.log(`[AdminDashboard] Auth check attempt ${attempt} failed, retrying in ${RETRY_DELAY_MS}ms...`);
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+        } else {
+          console.log('[AdminDashboard] Auth check failed after all retries:', error);
+        }
+      }
     }
     return false;
   }
@@ -288,11 +300,26 @@ class AdminDashboard {
       document.getElementById('logout-btn') || document.getElementById('btn-logout');
     console.log('[AdminDashboard] logoutBtn found:', !!logoutBtn);
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', () => {
+      logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('[AdminDashboard] Logout button clicked');
         // Use AdminAuth.logout() to properly clear admin session
         AdminAuth.logout();
       });
     }
+
+    // Document-level event delegation for logout button (fallback for CSS blocking)
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const logoutButton = target.closest('#btn-logout, #logout-btn, .btn-logout');
+      if (logoutButton) {
+        console.log('[AdminDashboard] Logout detected via document delegation');
+        e.preventDefault();
+        e.stopPropagation();
+        AdminAuth.logout();
+      }
+    }, true); // Use capture phase to catch events before they're blocked
 
     // Tab navigation - old style (.tab-btn)
     const tabButtons = document.querySelectorAll('.tab-btn');

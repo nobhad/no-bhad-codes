@@ -95,6 +95,21 @@ export default defineConfig({
         target: 'http://localhost:4001',
         changeOrigin: true,
         secure: false,
+        // Suppress proxy errors when backend isn't ready yet (race condition on startup)
+        configure: (proxy) => {
+          proxy.on('error', (_err, _req, res) => {
+            // Return a 503 Service Unavailable instead of crashing
+            // The frontend retry logic will handle this gracefully
+            // Type guard: res can be Socket or ServerResponse
+            if (res && 'writeHead' in res && typeof res.writeHead === 'function') {
+              const response = res as import('http').ServerResponse;
+              if (!response.headersSent) {
+                response.writeHead(503, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify({ error: 'Backend server starting up, please retry' }));
+              }
+            }
+          });
+        },
       },
       '/uploads': {
         target: 'http://localhost:4001',

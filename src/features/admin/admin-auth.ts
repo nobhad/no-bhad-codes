@@ -188,9 +188,16 @@ export class AdminAuth {
    * Logout and clear all auth data
    */
   static logout(): void {
-    sessionStorage.removeItem(this.TOKEN_KEY);
-    sessionStorage.removeItem(this.SESSION_KEY);
-    window.location.reload();
+    console.log('[AdminAuth] Logout called - clearing ALL session data');
+    // Clear all sessionStorage (ensures nothing is missed)
+    sessionStorage.clear();
+    // Also clear localStorage in case anything is stored there
+    localStorage.removeItem('adminAuth');
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('client_auth_token');
+    console.log('[AdminAuth] All storage cleared, navigating to login');
+    // Navigate to /admin instead of reload to ensure fresh state
+    window.location.href = '/admin';
   }
 
   /**
