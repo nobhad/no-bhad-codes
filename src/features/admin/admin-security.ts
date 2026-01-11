@@ -88,6 +88,11 @@ export class AdminSecurity {
 
   static detectDevTools(): boolean {
     // Simple dev tools detection (not foolproof but adds a layer)
+    // Only run in production - dev tools detection in development is just noise
+    if (process.env.NODE_ENV !== 'production') {
+      return false;
+    }
+
     const devtools = {
       open: false,
       orientation: null as string | null
@@ -101,7 +106,7 @@ export class AdminSecurity {
       ) {
         if (!devtools.open) {
           devtools.open = true;
-          console.warn('[AdminSecurity] Developer tools detected');
+          // Silent detection - no console warning in production either
         }
       } else {
         devtools.open = false;
