@@ -39,6 +39,7 @@ async function loadAnalyticsSummary(): Promise<void> {
 
     if (!response.ok) {
       console.warn('[AdminAnalytics] Failed to load analytics summary');
+      showOverviewDefaults();
       return;
     }
 
@@ -55,35 +56,83 @@ async function loadAnalyticsSummary(): Promise<void> {
     updateElement('page-views', formatNumber(summary.total_page_views || 0));
     updateElement('avg-session', formatDuration(summary.avg_session_duration || 0));
 
+    // Update stat-visitors with today's visitors
+    if (data.daily && data.daily.length > 0) {
+      const todayVisitors = data.daily[0]?.visitors || 0;
+      updateElement('stat-visitors', todayVisitors.toString());
+    }
+
     // Calculate week-over-week changes if we have daily data
     if (data.daily && data.daily.length >= 7) {
       const thisWeek = data.daily.slice(0, 7);
       const lastWeek = data.daily.slice(7, 14);
 
       if (lastWeek.length > 0) {
+        // Visitors change
         const thisWeekVisitors = thisWeek.reduce((sum: number, d: { visitors?: number }) => sum + (d.visitors || 0), 0);
         const lastWeekVisitors = lastWeek.reduce((sum: number, d: { visitors?: number }) => sum + (d.visitors || 0), 0);
         const visitorChange = calculatePercentChange(lastWeekVisitors, thisWeekVisitors);
         updateChangeElement('visitors-change', visitorChange);
 
+        // Page views change
         const thisWeekViews = thisWeek.reduce((sum: number, d: { page_views?: number }) => sum + (d.page_views || 0), 0);
         const lastWeekViews = lastWeek.reduce((sum: number, d: { page_views?: number }) => sum + (d.page_views || 0), 0);
         const viewsChange = calculatePercentChange(lastWeekViews, thisWeekViews);
         updateChangeElement('views-change', viewsChange);
+
+        // Session duration change
+        const thisWeekSessions = thisWeek.reduce((sum: number, d: { avg_session?: number }) => sum + (d.avg_session || 0), 0) / thisWeek.length;
+        const lastWeekSessions = lastWeek.reduce((sum: number, d: { avg_session?: number }) => sum + (d.avg_session || 0), 0) / lastWeek.length;
+        const sessionChange = calculatePercentChange(lastWeekSessions, thisWeekSessions);
+        updateChangeElement('session-change', sessionChange);
       }
+    } else {
+      // No comparison data available
+      setChangeText('visitors-change', 'No prior data');
+      setChangeText('views-change', 'No prior data');
+      setChangeText('session-change', 'No prior data');
     }
 
     // Get card interactions count from topInteractions
-    if (data.topInteractions) {
-      const cardFlips = data.topInteractions
+    let cardInteractions = 0;
+    if (data.topInteractions && data.topInteractions.length > 0) {
+      cardInteractions = data.topInteractions
         .filter((i: { event_type?: string; element?: string }) =>
           i.event_type === 'card_flip' || i.element?.includes('card'))
         .reduce((sum: number, i: { count?: number }) => sum + (i.count || 0), 0);
-      updateElement('card-interactions', formatNumber(cardFlips));
+    }
+    updateElement('card-interactions', formatNumber(cardInteractions));
+
+    // For interactions change, we don't have historical data easily, so show neutral
+    if (cardInteractions > 0) {
+      setChangeText('interactions-change', 'This period');
+    } else {
+      setChangeText('interactions-change', 'No interactions');
     }
 
   } catch (error) {
     console.error('[AdminAnalytics] Error loading analytics summary:', error);
+    showOverviewDefaults();
+  }
+}
+
+function showOverviewDefaults(): void {
+  updateElement('total-visitors', '0');
+  updateElement('page-views', '0');
+  updateElement('avg-session', '0s');
+  updateElement('card-interactions', '0');
+  updateElement('stat-visitors', '0');
+  setChangeText('visitors-change', 'No data');
+  setChangeText('views-change', 'No data');
+  setChangeText('session-change', 'No data');
+  setChangeText('interactions-change', 'No data');
+}
+
+function setChangeText(id: string, text: string): void {
+  const el = document.getElementById(id);
+  if (el) {
+    el.textContent = text;
+    el.className = 'metric-change neutral';
   }
 }
 

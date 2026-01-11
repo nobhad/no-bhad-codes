@@ -150,7 +150,7 @@
             </div>
 
             <!-- Visitor Analytics Stats -->
-            <div class="analytics-overview portal-shadow" style="margin-top: 2rem">
+            <div class="analytics-overview portal-shadow">
               <h3>Weekly Overview</h3>
               <div class="overview-stats-grid">
                 <div class="overview-stat">
@@ -343,10 +343,7 @@
             </div>
 
             <!-- Client Selector -->
-            <div
-              class="client-selector-wrapper portal-shadow"
-              style="margin-bottom: 1rem; padding: 1rem"
-            >
+            <div class="client-selector-wrapper portal-shadow">
               <label for="admin-client-select" style="font-weight: 600; margin-right: 1rem"
                 >Select Client:</label
               >
@@ -548,89 +545,43 @@
             </div>
 
             <!-- Service Status -->
-            <div class="portal-project-card portal-shadow" style="margin-top: 1.5rem">
+            <div class="portal-project-card portal-shadow">
               <h3>Service Status</h3>
               <div class="status-list" id="services-status">
                 <p class="loading-text">Loading service status...</p>
               </div>
             </div>
 
-            <div class="portal-project-card portal-shadow" style="margin-top: 1.5rem">
+            <div class="portal-project-card portal-shadow">
               <h3>Build Information</h3>
-              <div class="system-info-grid" style="display: grid; gap: 1rem; margin-top: 1rem">
-                <div
-                  style="
-                    display: flex;
-                    justify-content: space-between;
-                    padding: 0.5rem 0;
-                    border-bottom: 1px solid var(--color-border, #eee);
-                  "
-                >
+              <div class="system-info-grid">
+                <div class="system-info-row">
                   <span>Version</span>
                   <span id="sys-version">10.0.0</span>
                 </div>
-                <div
-                  style="
-                    display: flex;
-                    justify-content: space-between;
-                    padding: 0.5rem 0;
-                    border-bottom: 1px solid var(--color-border, #eee);
-                  "
-                >
+                <div class="system-info-row">
                   <span>Environment</span>
                   <span id="sys-environment">development</span>
                 </div>
-                <div
-                  style="
-                    display: flex;
-                    justify-content: space-between;
-                    padding: 0.5rem 0;
-                    border-bottom: 1px solid var(--color-border, #eee);
-                  "
-                >
+                <div class="system-info-row">
                   <span>Build Date</span>
                   <span id="sys-build-date">-</span>
                 </div>
               </div>
             </div>
 
-            <div class="portal-project-card portal-shadow" style="margin-top: 1.5rem">
+            <div class="portal-project-card portal-shadow">
               <h3>Browser Information</h3>
-              <div class="system-info-grid" style="display: grid; gap: 1rem; margin-top: 1rem">
-                <div
-                  style="
-                    display: flex;
-                    justify-content: space-between;
-                    padding: 0.5rem 0;
-                    border-bottom: 1px solid var(--color-border, #eee);
-                  "
-                >
+              <div class="system-info-grid">
+                <div class="system-info-row">
                   <span>User Agent</span>
-                  <span
-                    id="sys-useragent"
-                    style="max-width: 300px; overflow: hidden; text-overflow: ellipsis"
-                    >-</span
-                  >
+                  <span id="sys-useragent" class="truncate-text">-</span>
                 </div>
-                <div
-                  style="
-                    display: flex;
-                    justify-content: space-between;
-                    padding: 0.5rem 0;
-                    border-bottom: 1px solid var(--color-border, #eee);
-                  "
-                >
+                <div class="system-info-row">
                   <span>Screen Resolution</span>
                   <span id="sys-screen">-</span>
                 </div>
-                <div
-                  style="
-                    display: flex;
-                    justify-content: space-between;
-                    padding: 0.5rem 0;
-                    border-bottom: 1px solid var(--color-border, #eee);
-                  "
-                >
+                <div class="system-info-row">
                   <span>Viewport Size</span>
                   <span id="sys-viewport">-</span>
                 </div>
