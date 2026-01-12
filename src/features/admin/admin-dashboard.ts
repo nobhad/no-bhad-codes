@@ -111,7 +111,8 @@ class AdminDashboard {
       },
       showNotification: (message: string, type: 'success' | 'error' | 'info') =>
         this.showNotification(message, type),
-      refreshData: () => this.loadDashboardData()
+      refreshData: () => this.loadDashboardData(),
+      switchTab: (tab: string) => this.switchTab(tab)
     };
     // Initialize project details handler
     this.projectDetails = new AdminProjectDetails();

@@ -188,18 +188,15 @@ export async function updateProjectStatus(
 
 export function showProjectDetails(
   projectId: number,
-  ctx: AdminDashboardContext,
-  switchTab?: (tab: string) => void
+  ctx: AdminDashboardContext
 ): void {
   const project = projectsData.find((p) => p.id === projectId);
   if (!project) return;
 
   currentProjectId = projectId;
 
-  // Switch to project-detail tab if callback provided
-  if (switchTab) {
-    switchTab('project-detail');
-  }
+  // Switch to project-detail tab
+  ctx.switchTab('project-detail');
 
   populateProjectDetailView(project);
   setupProjectDetailTabs(ctx);
