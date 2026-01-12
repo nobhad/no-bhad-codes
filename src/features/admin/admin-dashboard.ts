@@ -1055,7 +1055,6 @@ class AdminDashboard {
 
     if (clientAccountStatus) {
       clientAccountStatus.textContent = hasAccount ? 'Active' : 'Not Invited';
-      clientAccountStatus.className = `status-badge status-${hasAccount ? 'active' : 'pending'}`;
     }
     if (clientLastLogin) {
       clientLastLogin.textContent = project.last_login_at

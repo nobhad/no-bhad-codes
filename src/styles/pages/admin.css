@@ -2297,15 +2297,25 @@
   margin-bottom: 0;
 }
 
+[data-page="admin"] .form-row .form-group label {
+  text-align: left;
+  padding-left: 0;
+  display: block;
+  margin-bottom: var(--portal-spacing-sm);
+  position: relative;
+}
+
 /* Readonly form value display (no background) */
 [data-page="admin"] .form-value-readonly {
   display: block;
   background: transparent;
-  padding: var(--portal-spacing-sm) 0;
+  padding: var(--portal-spacing-md) 0;
+  margin-top: var(--portal-spacing-md);
   font-size: 1.2rem;
   font-weight: 600;
   color: var(--portal-text-light);
   line-height: 1.5;
+  text-align: left;
 }
 
 /* Thicker focus border for admin form fields */
@@ -2375,6 +2385,13 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
+/* Form group spacing in settings */
+#pd-tab-settings .settings-section .form-group {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: var(--portal-spacing-lg) !important;
+}
+
 /* Form labels - size and color only (matches meta-label) */
 #pd-tab-settings .settings-section .form-group label {
   font-size: 0.75rem !important;
@@ -2382,9 +2399,8 @@
   text-transform: uppercase !important;
   letter-spacing: 0.05em !important;
   font-weight: 500 !important;
-  margin-bottom: var(--portal-spacing-lg) !important;
   padding-left: 0 !important;
-  display: block;
+  margin: 0 !important;
 }
 
 /* Project settings form fields - smaller text */
