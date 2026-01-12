@@ -17,7 +17,7 @@
   gap: 6px;
   padding: 0.5rem 1rem;
   margin-bottom: 0;
-  color: var(--color-dark);
+  color: var(--portal-border-dark);
   font-size: 0.85rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -78,7 +78,7 @@
   border: none;
   background: none;
   font-weight: 500;
-  color: var(--color-dark);
+  color: var(--portal-border-dark);
   font-size: 0.875rem;
   line-height: 1.3;
 }
@@ -89,7 +89,7 @@
 
 .project-item.active {
   background-color: rgba(0, 0, 0, 0.08);
-  color: var(--color-dark);
+  color: var(--portal-border-dark);
 }
 
 .project-icon {
@@ -125,12 +125,12 @@
 
 .project-subitem:hover {
   background-color: rgba(0, 0, 0, 0.03);
-  color: var(--color-dark);
+  color: var(--portal-border-dark);
 }
 
 .project-subitem.active {
   background-color: rgba(0, 0, 0, 0.05);
-  color: var(--color-dark);
+  color: var(--portal-border-dark);
   font-weight: 500;
 }
 
@@ -155,7 +155,7 @@
   gap: 6px;
   padding: 0.5rem 1rem;
   margin-bottom: 0;
-  color: var(--color-dark);
+  color: var(--portal-border-dark);
   font-size: 0.85rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -286,7 +286,7 @@
   margin: 0;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--color-dark);
+  color: var(--portal-border-dark);
   line-height: 1.3;
   letter-spacing: 0.01em;
 }
@@ -332,7 +332,7 @@
 .project-title-section h1 {
   font-family: var(--font--acme);
   font-size: 2rem;
-  color: var(--color-dark);
+  color: var(--portal-border-dark);
   margin: 0;
   text-transform: uppercase;
 }
@@ -340,8 +340,8 @@
 .project-status {
   padding: 0.5rem 1rem;
   background: var(--color-neutral-300);
-  color: var(--color-dark);
-  border: 2px solid var(--color-dark);
+  color: var(--portal-border-dark);
+  border: 2px solid var(--portal-border-dark);
   font-size: 0.875rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -359,14 +359,14 @@
   display: flex;
   gap: 0;
   margin-bottom: 2rem;
-  border: 2px solid var(--color-dark);
+  border: 2px solid var(--portal-border-dark);
   overflow: hidden;
 }
 
 .project-tab {
   flex: 1;
   border: none;
-  border-right: 2px solid var(--color-dark);
+  border-right: 2px solid var(--portal-border-dark);
   padding: 1rem;
 }
 
@@ -376,7 +376,7 @@
 
 .project-tab.active {
   background: var(--color-primary);
-  color: var(--color-dark);
+  color: var(--portal-border-dark);
 }
 
 /* Tab Content */
@@ -408,7 +408,7 @@
 .overview-card h3 {
   font-family: var(--font--acme);
   font-size: 1.2rem;
-  color: var(--color-dark);
+  color: var(--portal-border-dark);
   margin: 0 0 1rem 0;
   text-transform: uppercase;
 }
@@ -426,7 +426,7 @@
   height: calc(100vh - 200px);
   background: var(--color-neutral-300);
   border: 4px solid var(--color-border);
-  color: var(--color-dark);
+  color: var(--portal-border-dark);
 }
 
 .preview-toolbar {
@@ -435,8 +435,8 @@
   align-items: center;
   padding: 0.75rem 1rem;
   background: var(--color-neutral-200);
-  border-bottom: 2px solid var(--color-dark);
-  color: var(--color-dark);
+  border-bottom: 2px solid var(--portal-border-dark);
+  color: var(--portal-border-dark);
 }
 
 .preview-url {
@@ -445,16 +445,16 @@
   gap: 0.5rem;
   background: var(--color-neutral-100);
   padding: 0.5rem 1rem;
-  border: 2px solid var(--color-dark);
+  border: 2px solid var(--portal-border-dark);
   border-radius: 4px;
   font-size: 0.9rem;
-  color: var(--color-dark);
+  color: var(--portal-border-dark);
 }
 
 .url-icon {
   display: flex;
   align-items: center;
-  color: var(--color-dark);
+  color: var(--portal-border-dark);
 }
 
 .preview-actions {

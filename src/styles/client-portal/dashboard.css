@@ -5,19 +5,19 @@
 
 /* Project Status */
 .project-status {
-  margin: 0 0 var(--cp-spacing-sm) 0;
+  margin: 0 0 var(--portal-spacing-sm) 0;
   font-size: 0.9rem;
 }
 
 .status-badge {
   background: var(--color-primary);
-  color: var(--cp-text-dark);
+  color: var(--portal-text-dark);
   padding: 0.4rem 1.25rem;
-  margin-left: var(--cp-spacing-sm);
+  margin-left: var(--portal-spacing-sm);
   font-family: var(--font--acme);
   font-weight: 400;
   font-size: 1rem;
-  border-radius: var(--cp-radius-pill);
+  border-radius: var(--portal-radius-pill);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -29,7 +29,7 @@
 
 .status-badge.status-active {
   background: var(--color-primary);
-  border-color: var(--color-dark);
+  border-color: var(--portal-border-dark);
 }
 
 .status-badge.status-completed {
@@ -40,14 +40,14 @@
 
 /* Project Progress */
 .project-progress {
-  margin: 0 0 var(--cp-spacing-sm) 0;
+  margin: 0 0 var(--portal-spacing-sm) 0;
   font-size: 0.9rem;
 }
 
 .progress-bar {
   width: 100%;
   height: 10px;
-  background: var(--cp-bg-light);
+  background: var(--portal-bg-light);
   border: none;
   border-radius: 5px;
   overflow: hidden;
@@ -63,19 +63,19 @@
 
 /* Recent Activity */
 .recent-activity {
-  background: var(--cp-bg-dark) !important;
+  background: var(--portal-bg-dark) !important;
   border: none !important;
-  border-radius: var(--cp-radius-lg);
-  padding: var(--cp-spacing-xl);
-  margin-bottom: var(--cp-spacing-2xl);
-  color: var(--cp-text-light);
+  border-radius: var(--portal-radius-lg);
+  padding: var(--portal-spacing-xl);
+  margin-bottom: var(--portal-spacing-2xl);
+  color: var(--portal-text-light);
 }
 
 .recent-activity h3 {
   font-family: var(--font--acme);
   font-size: 1.1rem;
-  color: var(--cp-text-light);
-  margin: 0 0 var(--cp-spacing-lg) 0;
+  color: var(--portal-text-light);
+  margin: 0 0 var(--portal-spacing-lg) 0;
   text-transform: uppercase;
 }
 
@@ -86,17 +86,18 @@
 }
 
 .activity-list li {
-  padding: var(--cp-spacing-md) var(--cp-spacing-lg);
-  background: var(--cp-bg-medium);
-  border-radius: var(--cp-radius-sm);
-  margin-bottom: var(--cp-spacing-sm);
+  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  background: var(--portal-bg-medium);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--portal-border-medium);
+  margin-bottom: var(--portal-spacing-sm);
   font-size: 0.9rem;
-  color: var(--cp-text-light);
+  color: var(--portal-text-light);
   transition: background-color 0.2s ease;
 }
 
 .activity-list li:hover {
-  background: var(--cp-bg-light);
+  background: var(--portal-bg-light);
 }
 
 .activity-list li:last-child {
@@ -107,21 +108,21 @@
 .quick-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--cp-spacing-lg);
-  margin-bottom: var(--cp-spacing-lg);
+  gap: var(--portal-spacing-lg);
+  margin-bottom: var(--portal-spacing-lg);
 }
 
 /* Stat Card */
 .stat-card,
 button.stat-card,
 .stat-card.cp-shadow {
-  background: var(--cp-bg-dark) !important;
-  background-color: var(--cp-bg-dark) !important;
+  background: var(--portal-bg-dark) !important;
+  background-color: var(--portal-bg-dark) !important;
   border: none !important;
-  border-radius: var(--cp-radius-lg);
-  padding: var(--cp-spacing-xl);
+  border-radius: var(--portal-radius-lg);
+  padding: var(--portal-spacing-xl);
   text-align: center;
-  color: var(--cp-text-light);
+  color: var(--portal-text-light);
   font-family: inherit;
 }
 
@@ -131,7 +132,7 @@ button.stat-card,
 }
 
 .stat-card-clickable:hover {
-  background: var(--cp-bg-medium) !important;
+  background: var(--portal-bg-medium) !important;
 }
 
 .stat-card-clickable:hover .stat-number {
@@ -150,8 +151,8 @@ button.stat-card,
 .stat-label {
   display: block;
   font-size: 0.85rem;
-  color: var(--cp-text-secondary);
-  margin-top: var(--cp-spacing-sm);
+  color: var(--portal-text-secondary);
+  margin-top: var(--portal-spacing-sm);
   text-transform: uppercase;
 }
 
@@ -159,35 +160,35 @@ button.stat-card,
 .progress-card .progress-bar {
   width: 100%;
   height: 16px;
-  background: var(--cp-bg-light);
+  background: var(--portal-bg-light);
   border: none;
-  border-radius: var(--cp-radius-md);
-  margin: var(--cp-spacing-lg) 0;
+  border-radius: var(--portal-radius-md);
+  margin: var(--portal-spacing-lg) 0;
   overflow: hidden;
 }
 
 .progress-card .progress-fill {
   height: 100%;
   background: var(--color-primary);
-  border-radius: var(--cp-radius-md);
+  border-radius: var(--portal-radius-md);
   transition: width 0.3s ease;
 }
 
 .progress-card .progress-text {
   font-weight: 600;
-  color: var(--cp-text-light);
+  color: var(--portal-text-light);
 }
 
 /* Overview Card */
 .overview-card {
-  background: var(--cp-bg-dark) !important;
+  background: var(--portal-bg-dark) !important;
   border: none !important;
-  border-radius: var(--cp-radius-lg);
-  padding: var(--cp-spacing-xl);
-  color: var(--cp-text-light);
+  border-radius: var(--portal-radius-lg);
+  padding: var(--portal-spacing-xl);
+  color: var(--portal-text-light);
 }
 
 .overview-card h3 {
-  color: var(--cp-text-light);
-  margin-bottom: var(--cp-spacing-lg);
+  color: var(--portal-text-light);
+  margin-bottom: var(--portal-spacing-lg);
 }

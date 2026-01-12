@@ -108,7 +108,7 @@
     </script>
 
     <!-- Dashboard Layout (same structure as client portal) -->
-    <div class="dashboard-container" id="admin-dashboard" style="display: none;">
+    <div class="dashboard-container hidden" id="admin-dashboard">
       <!-- Mobile Header Bar -->
       <header class="mobile-header" id="mobile-header">
         <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle menu">
@@ -460,7 +460,7 @@
               </div>
 
               <!-- Compose Message -->
-              <div class="message-compose" id="admin-compose-area" style="display: none">
+              <div class="message-compose hidden" id="admin-compose-area">
                 <div class="message-input-wrapper">
                   <textarea
                     id="admin-message-text"
@@ -499,13 +499,13 @@
             <div class="charts-grid">
               <div class="chart-container portal-shadow">
                 <h3>Visitors Over Time</h3>
-                <div class="chart" style="height: 300px">
+                <div class="chart">
                   <canvas id="visitors-chart"></canvas>
                 </div>
               </div>
               <div class="chart-container portal-shadow">
                 <h3>Traffic Sources</h3>
-                <div class="chart" style="height: 300px">
+                <div class="chart">
                   <canvas id="sources-chart"></canvas>
                 </div>
               </div>
@@ -928,7 +928,7 @@
     </div>
 
     <!-- Detail Modal for Leads/Contacts -->
-    <div class="admin-modal-overlay" id="detail-modal" style="display: none">
+    <div class="admin-modal-overlay hidden" id="detail-modal">
       <div class="admin-modal">
         <div class="admin-modal-header">
           <h3 id="modal-title">Details</h3>

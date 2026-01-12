@@ -294,7 +294,10 @@ class AdminDashboard {
     const dashboard = document.getElementById('admin-dashboard');
 
     if (authGate) authGate.style.display = 'none';
-    if (dashboard) dashboard.style.display = '';
+    if (dashboard) {
+      dashboard.classList.remove('hidden');
+      dashboard.style.display = '';
+    }
   }
 
   private async initializeModules(): Promise<void> {

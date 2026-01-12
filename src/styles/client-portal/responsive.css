@@ -49,7 +49,7 @@
 
   .project-tab {
     border-right: none;
-    border-bottom: 2px solid var(--color-dark);
+    border-bottom: 2px solid var(--portal-border-dark);
   }
 
   .project-tab:last-child {
