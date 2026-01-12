@@ -122,10 +122,10 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     if (settingName) settingName.value = project.project_name || '';
     if (settingStatus) {
-      const status = project.status || 'pending';
-      settingStatus.value = status;
+      const projectStatus = project.status || 'pending';
+      settingStatus.value = projectStatus;
       // Update custom dropdown display
-      this.updateCustomDropdown(status);
+      this.updateCustomDropdown(projectStatus);
       // Set up custom dropdown if not already done
       this.setupCustomStatusDropdown();
     }
