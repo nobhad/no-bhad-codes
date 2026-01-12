@@ -222,13 +222,18 @@ function populateProjectDetailView(project: LeadProject): void {
     'pd-budget': project.budget_range || '-',
     'pd-timeline': project.timeline || '-',
     'pd-start-date': project.created_at ? new Date(project.created_at).toLocaleDateString() : '-',
-    'pd-client-account-email': project.email || '-'
   };
 
   Object.entries(fields).forEach(([id, value]) => {
     const el = document.getElementById(id);
     if (el) el.textContent = SanitizationUtils.escapeHtml(value);
   });
+
+  // Client account email is an input field
+  const clientEmailInput = document.getElementById('pd-client-account-email') as HTMLInputElement;
+  if (clientEmailInput) {
+    clientEmailInput.value = project.email || '';
+  }
 
   // Status badge - normalize to underscore format
   const statusEl = document.getElementById('pd-status');
@@ -276,12 +281,170 @@ function populateProjectDetailView(project: LeadProject): void {
 
   // Settings form
   const settingName = document.getElementById('pd-setting-name') as HTMLInputElement;
-  const settingStatus = document.getElementById('pd-setting-status') as HTMLSelectElement;
+  const settingStatus = document.getElementById('pd-setting-status') as HTMLInputElement;
   const settingProgress = document.getElementById('pd-setting-progress') as HTMLInputElement;
 
   if (settingName) settingName.value = project.project_name || '';
-  if (settingStatus) settingStatus.value = normalizeStatus(project.status);
+  if (settingStatus) {
+    const status = normalizeStatus(project.status);
+    settingStatus.value = status;
+    updateCustomDropdown(status);
+    setupCustomStatusDropdown();
+  }
   if (settingProgress) settingProgress.value = (project.progress || 0).toString();
+
+  // Set up unsaved changes tracking
+  setupUnsavedChangesTracking(project);
+}
+
+// Store original values for comparison
+let originalProjectSettings: { name: string; status: string; progress: string } | null = null;
+
+/**
+ * Set up tracking for unsaved changes in project settings
+ */
+function setupUnsavedChangesTracking(project: any): void {
+  const settingName = document.getElementById('pd-setting-name') as HTMLInputElement;
+  const settingStatus = document.getElementById('pd-setting-status') as HTMLInputElement;
+  const settingProgress = document.getElementById('pd-setting-progress') as HTMLInputElement;
+  const saveBtn = document.getElementById('btn-save-project-settings');
+
+  if (!settingName || !settingStatus || !settingProgress || !saveBtn) return;
+
+  // Store original values
+  originalProjectSettings = {
+    name: project.project_name || '',
+    status: normalizeStatus(project.status),
+    progress: (project.progress || 0).toString()
+  };
+
+  // Reset button state
+  updateSaveButtonState(false);
+
+  // Add change listeners (only if not already added)
+  if (!settingName.dataset.changeTracking) {
+    settingName.dataset.changeTracking = 'true';
+    settingName.addEventListener('input', checkForChanges);
+  }
+  if (!settingProgress.dataset.changeTracking) {
+    settingProgress.dataset.changeTracking = 'true';
+    settingProgress.addEventListener('input', checkForChanges);
+  }
+}
+
+/**
+ * Check if form values differ from original and update button state
+ */
+function checkForChanges(): void {
+  if (!originalProjectSettings) return;
+
+  const settingName = document.getElementById('pd-setting-name') as HTMLInputElement;
+  const settingStatus = document.getElementById('pd-setting-status') as HTMLInputElement;
+  const settingProgress = document.getElementById('pd-setting-progress') as HTMLInputElement;
+
+  if (!settingName || !settingStatus || !settingProgress) return;
+
+  const hasChanges =
+    settingName.value !== originalProjectSettings.name ||
+    settingStatus.value !== originalProjectSettings.status ||
+    settingProgress.value !== originalProjectSettings.progress;
+
+  updateSaveButtonState(hasChanges);
+}
+
+/**
+ * Update save button appearance based on unsaved changes
+ */
+function updateSaveButtonState(hasChanges: boolean): void {
+  const saveBtn = document.getElementById('btn-save-project-settings');
+  if (!saveBtn) return;
+
+  if (hasChanges) {
+    saveBtn.classList.add('has-unsaved-changes');
+  } else {
+    saveBtn.classList.remove('has-unsaved-changes');
+  }
+}
+
+/**
+ * Set up custom status dropdown behavior
+ */
+function setupCustomStatusDropdown(): void {
+  const dropdown = document.getElementById('pd-status-dropdown');
+
+  if (!dropdown) return;
+
+  // Skip if already set up
+  if (dropdown.dataset.listenerAdded) return;
+  dropdown.dataset.listenerAdded = 'true';
+
+  // Use event delegation on the dropdown container
+  dropdown.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+
+    // Handle trigger click
+    if (target.closest('.custom-dropdown-trigger')) {
+      e.preventDefault();
+      e.stopPropagation();
+      dropdown.classList.toggle('open');
+      return;
+    }
+
+    // Handle option click
+    const option = target.closest('.custom-dropdown-option') as HTMLElement;
+    if (option) {
+      const value = option.dataset.value || '';
+      const hiddenInput = document.getElementById('pd-setting-status') as HTMLInputElement;
+      if (hiddenInput) {
+        hiddenInput.value = value;
+      }
+      updateCustomDropdown(value);
+      dropdown.classList.remove('open');
+      checkForChanges();
+    }
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!dropdown.contains(e.target as Node)) {
+      dropdown.classList.remove('open');
+    }
+  });
+}
+
+/**
+ * Update custom dropdown display based on selected value
+ */
+function updateCustomDropdown(status: string): void {
+  const trigger = document.getElementById('pd-status-trigger');
+  const valueSpan = trigger?.querySelector('.custom-dropdown-value');
+  const menu = document.getElementById('pd-status-menu');
+
+  if (!trigger || !valueSpan) return;
+
+  // Update displayed text
+  const statusLabels: Record<string, string> = {
+    'pending': 'Pending',
+    'active': 'Active',
+    'on_hold': 'On Hold',
+    'completed': 'Completed',
+    'cancelled': 'Cancelled'
+  };
+  valueSpan.textContent = statusLabels[status] || status;
+
+  // Update trigger color
+  trigger.classList.remove('status-pending', 'status-active', 'status-on_hold', 'status-completed', 'status-cancelled');
+  if (status) {
+    trigger.classList.add(`status-${status}`);
+  }
+
+  // Update selected option in menu
+  if (menu) {
+    const options = menu.querySelectorAll('.custom-dropdown-option');
+    options.forEach((option) => {
+      option.classList.toggle('selected', (option as HTMLElement).dataset.value === status);
+    });
+  }
 }
 
 function setupProjectDetailTabs(_ctx: AdminDashboardContext): void {

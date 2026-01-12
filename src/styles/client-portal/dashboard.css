@@ -14,7 +14,6 @@
   color: var(--portal-text-dark);
   padding: 0.4rem 1.25rem;
   margin-left: var(--portal-spacing-sm);
-  font-family: var(--font--acme);
   font-weight: 400;
   font-size: 1rem;
   border-radius: var(--portal-radius-pill);

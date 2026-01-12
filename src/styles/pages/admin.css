@@ -540,8 +540,9 @@
 .chart {
   height: 320px;
   background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border-medium);
+  border: none;
   border-radius: var(--border-radius-md);
+  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -711,7 +712,8 @@
   padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-medium);
   border-radius: var(--border-radius-sm);
-  border: 1px solid var(--portal-border-medium);
+  border: none;
+  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
   color: var(--portal-text-light);
   font-size: var(--font-size-xs);
 }
@@ -918,7 +920,7 @@
   text-transform: capitalize;
   border: 2px solid var(--portal-border-dark);
   color: var(--color-black);
-  width: 130px;
+  width: 150px;
   text-align: center;
   box-sizing: border-box;
   white-space: nowrap;
@@ -2278,7 +2280,32 @@
 [data-page="admin"] textarea,
 [data-page="admin"] select:not(.status-select),
 [data-page="admin"] .form-select {
-  background-color: #222222 !important;
+  background-color: #1a1a1a !important;
+}
+
+/* Form row - two columns side by side */
+[data-page="admin"] .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--portal-spacing-lg);
+  background: transparent;
+  margin-bottom: var(--portal-spacing-md);
+}
+
+[data-page="admin"] .form-row .form-group {
+  background: transparent;
+  margin-bottom: 0;
+}
+
+/* Readonly form value display (no background) */
+[data-page="admin"] .form-value-readonly {
+  display: block;
+  background: transparent;
+  padding: var(--portal-spacing-sm) 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--portal-text-light);
+  line-height: 1.5;
 }
 
 /* Thicker focus border for admin form fields */
@@ -2355,6 +2382,59 @@
   text-transform: uppercase !important;
   letter-spacing: 0.05em !important;
   font-weight: 500 !important;
+  margin-bottom: var(--portal-spacing-sm) !important;
+  padding-left: var(--portal-spacing-xs) !important;
+  display: block;
+}
+
+/* Project settings form fields - smaller text */
+#pd-tab-settings .form-input,
+#pd-tab-settings input[type="text"],
+#pd-tab-settings input[type="number"],
+#pd-tab-settings input[type="url"],
+#pd-tab-settings input[type="email"] {
+  font-size: 0.95rem !important;
+  font-weight: 400 !important;
+  padding: var(--portal-spacing-sm) var(--portal-spacing-xs) !important;
+}
+
+/* Project status dropdown - match input field styling */
+#pd-status-dropdown .custom-dropdown-trigger {
+  padding: var(--portal-spacing-sm) var(--portal-spacing-xs);
+  font-size: 0.95rem;
+  font-weight: 400;
+  min-height: auto;
+}
+
+#pd-status-dropdown .custom-dropdown-value {
+  text-transform: capitalize;
+}
+
+#pd-status-dropdown .custom-dropdown-menu {
+  display: none;
+  flex-direction: column;
+}
+
+#pd-status-dropdown.open .custom-dropdown-menu {
+  display: flex;
+  flex-direction: column;
+}
+
+#pd-status-dropdown .custom-dropdown-option {
+  display: block;
+  width: 100%;
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  background: transparent;
+  border: none;
+  color: var(--portal-text-light);
+  text-align: left;
+  cursor: pointer;
+  text-transform: capitalize;
+  font-size: 0.95rem;
+}
+
+#pd-status-dropdown .custom-dropdown-option:hover {
+  background: var(--color-primary);
 }
 
 /* Ensure all project detail text is light on dark backgrounds */
@@ -2622,36 +2702,90 @@
 #pd-messages-thread .message,
 .messages-thread .message {
   display: flex;
-  flex-direction: column;
-  max-width: 80%;
-  padding: var(--portal-spacing-md);
-  border-radius: var(--portal-radius-md);
+  flex-direction: row;
+  align-items: flex-end;
+  gap: var(--portal-spacing-md);
+  max-width: 85%;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
 }
 
 #pd-messages-list .message-received,
 #pd-messages-thread .message-received,
 .messages-thread .message-received {
   align-self: flex-start;
-  background: var(--color-white);
-  border: 1px solid var(--color-neutral-300);
+}
+
+/* Message Avatar */
+#pd-messages-list .message-avatar,
+#pd-messages-thread .message-avatar,
+.messages-thread .message-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--portal-spacing-xs);
+  flex-shrink: 0;
+}
+
+#pd-messages-list .message-avatar .avatar-placeholder,
+#pd-messages-thread .message-avatar .avatar-placeholder,
+.messages-thread .message-avatar .avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-dark);
+  color: var(--color-neutral-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+/* Message Content (the bubble) */
+#pd-messages-list .message-content,
+#pd-messages-thread .message-content,
+.messages-thread .message-content {
+  background: white;
+  border: 2px solid var(--portal-border-dark);
+  border-radius: 18px;
+  padding: var(--portal-spacing-lg) 1.25rem;
+  flex: 1;
+}
+
+#pd-messages-list .message-received .message-content,
+#pd-messages-thread .message-received .message-content,
+.messages-thread .message-received .message-content {
+  color: var(--portal-text-dark);
+  border-bottom-left-radius: var(--portal-radius-xs);
 }
 
 #pd-messages-list .message-sent,
 #pd-messages-thread .message-sent,
 .messages-thread .message-sent {
   align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+#pd-messages-list .message-sent .message-content,
+#pd-messages-thread .message-sent .message-content,
+.messages-thread .message-sent .message-content {
   background: var(--color-primary);
   color: var(--portal-text-dark);
+  border-color: var(--portal-border-dark);
+  border-bottom-right-radius: var(--portal-radius-xs);
 }
 
 #pd-messages-list .message-header,
 #pd-messages-thread .message-header,
 .messages-thread .message-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-bottom: var(--portal-spacing-xs);
-  gap: var(--portal-spacing-md);
 }
 
 #pd-messages-list .message-sender,
@@ -2677,19 +2811,20 @@
 #pd-messages-thread .message-time,
 .messages-thread .message-time {
   font-size: 0.75rem;
-  opacity: 0.7;
-}
-
-#pd-messages-list .message-received .message-time,
-#pd-messages-thread .message-received .message-time,
-.messages-thread .message-received .message-time {
-  color: var(--color-text-secondary);
-}
-
-#pd-messages-list .message-sent .message-time,
-#pd-messages-thread .message-sent .message-time,
-.messages-thread .message-sent .message-time {
   color: var(--portal-text-dark);
+}
+
+/* Sender name below avatar */
+#pd-messages-list .message-avatar .message-sender,
+#pd-messages-thread .message-avatar .message-sender,
+.messages-thread .message-avatar .message-sender {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--portal-text-dark);
+  text-align: center;
+  max-width: 60px;
+  word-wrap: break-word;
+  line-height: 1.2;
 }
 
 #pd-messages-list .message-content,
@@ -2736,9 +2871,9 @@
 
 .client-account-actions {
   display: flex;
-  gap: var(--portal-spacing-md);
-  flex-wrap: nowrap;
-  margin-top: auto;
+  flex-direction: column;
+  gap: var(--portal-spacing-sm);
+  margin-top: var(--portal-spacing-md);
 }
 
 .client-account-actions .btn {
@@ -2746,6 +2881,7 @@
   color: var(--portal-text-light);
   border: 2px solid var(--portal-border-light);
   border-radius: var(--portal-radius-lg);
+  width: 100%;
 }
 
 .client-account-actions .btn:hover {
@@ -3026,6 +3162,7 @@
   width: 100%;
 }
 
+
 [data-page="admin"] .custom-dropdown-trigger {
   display: flex;
   align-items: center;
@@ -3035,11 +3172,12 @@
   padding: var(--space-2) var(--space-3);
   border: 4px solid var(--portal-border-dark);
   border-radius: var(--portal-radius-lg);
-  background-color: var(--portal-bg-dark);
+  background-color: #1a1a1a;
   color: var(--portal-text-light);
   font-size: var(--font-size-base);
   cursor: pointer;
   text-align: left;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3), -1px 0 1px rgba(0, 0, 0, 0.3), 0 -1px 1px rgba(0, 0, 0, 0.3);
 }
 
 [data-page="admin"] .custom-dropdown-trigger:hover {
@@ -3078,24 +3216,34 @@
   margin-top: -4px;
   padding: 0;
   list-style: none;
-  background-color: var(--portal-bg-dark);
+  background-color: #1a1a1a;
   border: 4px solid var(--portal-border-dark);
   border-top: none;
   border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
   max-height: 300px;
   overflow-y: auto;
   z-index: 100;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3), -1px 0 1px rgba(0, 0, 0, 0.3), 0 -1px 1px rgba(0, 0, 0, 0.3);
 }
 
 [data-page="admin"] .custom-dropdown.open .custom-dropdown-menu {
   display: block;
   border-color: var(--color-brand-primary);
+  /* Only sides and bottom shadow - clip top shadow with clip-path */
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3), -4px 0 12px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
+  clip-path: inset(0 -20px -20px -20px);
+  margin-top: -4px;
 }
 
 [data-page="admin"] .custom-dropdown.open .custom-dropdown-trigger {
   border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
   border-color: var(--color-brand-primary);
-  border-bottom-color: transparent;
+  border-bottom: none;
+  /* Only top and side shadows - clip bottom shadow */
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3), -4px 0 12px rgba(0, 0, 0, 0.3), 0 -4px 12px rgba(0, 0, 0, 0.3);
+  clip-path: inset(-20px -20px 0 -20px);
+  position: relative;
+  z-index: 101;
 }
 
 [data-page="admin"] .custom-dropdown-item {

@@ -1042,14 +1042,18 @@ class AdminDashboard {
     if (settingProgress) settingProgress.value = (project.progress || 0).toString();
 
     // Client account info in settings
-    const clientAccountEmail = document.getElementById('pd-client-account-email');
+    const clientAccountEmail = document.getElementById('pd-client-account-email') as HTMLInputElement;
     const clientAccountStatus = document.getElementById('pd-client-account-status');
     const clientLastLogin = document.getElementById('pd-client-last-login');
+    const resendInviteBtn = document.getElementById('btn-resend-invite');
+    const resetPasswordBtn = document.getElementById('btn-reset-password');
 
-    if (clientAccountEmail) clientAccountEmail.textContent = project.email || '-';
+    if (clientAccountEmail) clientAccountEmail.value = project.email || '';
+
+    // Check if client has account
+    const hasAccount = project.client_id || project.password_hash;
+
     if (clientAccountStatus) {
-      // Check if client has account
-      const hasAccount = project.client_id || project.password_hash;
       clientAccountStatus.textContent = hasAccount ? 'Active' : 'Not Invited';
       clientAccountStatus.className = `status-badge status-${hasAccount ? 'active' : 'pending'}`;
     }
@@ -1057,6 +1061,16 @@ class AdminDashboard {
       clientLastLogin.textContent = project.last_login_at
         ? new Date(project.last_login_at).toLocaleString()
         : 'Never';
+    }
+
+    // Show/hide buttons based on account status
+    // Not activated: Save Email + Resend Invitation
+    // Activated: Save Email + Reset Password
+    if (resendInviteBtn) {
+      resendInviteBtn.style.display = hasAccount ? 'none' : '';
+    }
+    if (resetPasswordBtn) {
+      resetPasswordBtn.style.display = hasAccount ? '' : 'none';
     }
 
     // Load project-specific data
@@ -1104,6 +1118,15 @@ class AdminDashboard {
       settingsForm.addEventListener('submit', (e) => {
         e.preventDefault();
         this.saveProjectSettings();
+      });
+    }
+
+    // Client account form handler
+    const clientAccountForm = document.getElementById('pd-client-account-form');
+    if (clientAccountForm) {
+      clientAccountForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.saveClientEmail();
       });
     }
 
@@ -1188,6 +1211,51 @@ class AdminDashboard {
     } catch (error) {
       console.error('[AdminDashboard] Error saving project settings:', error);
       this.showNotification('Error saving project settings', 'error');
+    }
+  }
+
+  /**
+   * Save client email from the client account form
+   */
+  private async saveClientEmail(): Promise<void> {
+    if (!this.currentProjectId) return;
+
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (!authMode || authMode === 'demo') return;
+
+    const emailInput = document.getElementById('pd-client-account-email') as HTMLInputElement;
+    const email = emailInput?.value?.trim();
+
+    if (!email) {
+      this.showNotification('Please enter an email address', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/projects/${this.currentProjectId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email })
+      });
+
+      if (response.ok) {
+        this.showNotification('Client email updated', 'success');
+        // Refresh project data
+        await this.loadProjects();
+        // Re-populate the view
+        const project = this.projectsData.find((p: any) => p.id === this.currentProjectId);
+        if (project) {
+          this.populateProjectDetailView(project);
+        }
+      } else {
+        this.showNotification('Failed to update client email', 'error');
+      }
+    } catch (error) {
+      console.error('[AdminDashboard] Error saving client email:', error);
+      this.showNotification('Error saving client email', 'error');
     }
   }
 
