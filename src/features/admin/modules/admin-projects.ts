@@ -671,6 +671,36 @@ function renderProjectMilestones(
       toggleMilestone(milestoneId, target.checked, ctx);
     });
   });
+
+  // Calculate and update progress based on completed milestones
+  const completedCount = milestones.filter((m) => m.is_completed).length;
+  const totalCount = milestones.length;
+  const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+  updateProgressBar(progress);
+}
+
+function updateProgressBar(progress: number): void {
+  const progressPercent = document.getElementById('pd-progress-percent');
+  const progressBar = document.getElementById('pd-progress-bar');
+
+  if (progressPercent) {
+    progressPercent.textContent = `${progress}%`;
+  }
+  if (progressBar) {
+    progressBar.style.width = `${progress}%`;
+  }
+
+  // Save progress to database
+  if (currentProjectId) {
+    fetch(`/api/projects/${currentProjectId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({ progress })
+    }).catch((err) => console.error('[AdminProjects] Error saving progress:', err));
+  }
 }
 
 export async function toggleMilestone(
@@ -692,6 +722,8 @@ export async function toggleMilestone(
 
     if (response.ok) {
       ctx.showNotification('Milestone updated', 'success');
+      // Reload milestones to update progress
+      loadProjectMilestones(currentProjectId, ctx);
     } else {
       ctx.showNotification('Failed to update milestone', 'error');
     }
