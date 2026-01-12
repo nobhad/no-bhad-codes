@@ -141,7 +141,6 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       // Check if client has account
       const hasAccount = project.client_id || project.password_hash;
       clientAccountStatus.textContent = hasAccount ? 'Active' : 'Not Invited';
-      clientAccountStatus.className = `status-badge status-${hasAccount ? 'active' : 'pending'}`;
     }
     if (clientLastLogin) {
       clientLastLogin.textContent = project.last_login_at
