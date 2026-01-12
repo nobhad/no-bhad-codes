@@ -2382,8 +2382,8 @@
   text-transform: uppercase !important;
   letter-spacing: 0.05em !important;
   font-weight: 500 !important;
-  margin-bottom: var(--portal-spacing-sm) !important;
-  padding-left: var(--portal-spacing-xs) !important;
+  margin-bottom: var(--portal-spacing-lg) !important;
+  padding-left: 0 !important;
   display: block;
 }
 
@@ -2395,12 +2395,14 @@
 #pd-tab-settings input[type="email"] {
   font-size: 0.95rem !important;
   font-weight: 400 !important;
-  padding: var(--portal-spacing-sm) var(--portal-spacing-xs) !important;
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md) !important;
+  padding-left: var(--portal-spacing-lg) !important;
 }
 
 /* Project status dropdown - match input field styling */
 #pd-status-dropdown .custom-dropdown-trigger {
-  padding: var(--portal-spacing-sm) var(--portal-spacing-xs);
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding-left: var(--portal-spacing-lg);
   font-size: 0.95rem;
   font-weight: 400;
   min-height: auto;

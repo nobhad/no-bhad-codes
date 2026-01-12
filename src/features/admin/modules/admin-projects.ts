@@ -221,7 +221,7 @@ function populateProjectDetailView(project: LeadProject): void {
     'pd-type': formatProjectType(project.project_type),
     'pd-budget': project.budget_range || '-',
     'pd-timeline': project.timeline || '-',
-    'pd-start-date': project.created_at ? new Date(project.created_at).toLocaleDateString() : '-',
+    'pd-start-date': project.created_at ? new Date(project.created_at).toLocaleDateString() : '-'
   };
 
   Object.entries(fields).forEach(([id, value]) => {
