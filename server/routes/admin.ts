@@ -677,6 +677,71 @@ No Bhad Codes Team
 );
 
 /**
+ * @swagger
+ * /api/admin/leads/{id}/activate:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: Activate a lead as a project
+ *     description: Converts a pending lead to an active project without sending invitation
+ *     security:
+ *       - BearerAuth: []
+ */
+router.post(
+  '/leads/:id/activate',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    try {
+      const { id } = req.params;
+      const db = getDatabase();
+
+      // Get the lead/project
+      const lead = await db.get('SELECT id, status, project_name FROM projects WHERE id = ?', [id]);
+
+      if (!lead) {
+        return res.status(404).json({
+          success: false,
+          error: 'Lead not found',
+        });
+      }
+
+      if (lead.status === 'active' || lead.status === 'in_progress') {
+        return res.status(400).json({
+          success: false,
+          error: 'Lead is already activated',
+        });
+      }
+
+      // Update project status to active
+      await db.run('UPDATE projects SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
+        'active',
+        id,
+      ]);
+
+      // Log the activation
+      errorTracker.captureMessage('Admin activated lead as project', 'info', {
+        tags: { component: 'admin-leads' },
+        user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
+        extra: { leadId: id, projectName: lead.project_name },
+      });
+
+      res.json({
+        success: true,
+        message: 'Lead activated as project successfully',
+        projectId: id,
+      });
+    } catch (error) {
+      console.error('Error activating lead:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to activate lead',
+      });
+    }
+  })
+);
+
+/**
  * GET /api/admin/bundle-stats
  * Get bundle size statistics from dist folder
  */
