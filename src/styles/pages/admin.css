@@ -92,16 +92,16 @@
 
 /* Admin Dashboard Content - Dark background */
 [data-page="admin"] .dashboard-content {
-  background: #444444 !important;
+  background: #444444;
 }
 
 /* Admin Page Header - Red heading and toggle button */
 [data-page="admin"] .page-header h2 {
-  color: var(--color-primary) !important;
+  color: var(--color-primary);
 }
 
 [data-page="admin"] .page-header .header-sidebar-toggle {
-  color: var(--color-primary) !important;
+  color: var(--color-primary);
 }
 
 /* Auth Gate - matches main site body background */
@@ -208,6 +208,17 @@
   color: var(--color-text-primary);
   font-weight: var(--font-weight-medium);
   font-size: var(--font-size-sm);
+}
+
+/* Admin form labels - match meta-label styling */
+[data-page="admin"] .form-group label,
+[data-page="admin"] .settings-section label,
+[data-page="admin"] label {
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
 }
 
 .form-control,
@@ -816,24 +827,23 @@
   transition: background 0.2s ease;
 }
 
-.stat-card:hover,
 [data-page="admin"] .stat-card:hover,
 [data-page="admin"] .stat-card-clickable:hover {
-  background: #2a2a2a !important;
+  background: #2a2a2a;
 }
 
 /* Active filter card stays dark */
 [data-page="admin"] .stat-card-clickable.active {
-  background: #2a2a2a !important;
+  background: #2a2a2a;
 }
 
 /* Remove hover states from analytics page cards */
-#tab-analytics .stat-card:hover,
-#tab-analytics .chart-container:hover,
-#tab-analytics .analytics-section:hover,
-#tab-analytics .metric-group:hover,
-#tab-analytics .analytics-overview:hover {
-  background: var(--portal-bg-dark) !important;
+[data-page="admin"] #tab-analytics .stat-card:hover,
+[data-page="admin"] #tab-analytics .chart-container:hover,
+[data-page="admin"] #tab-analytics .analytics-section:hover,
+[data-page="admin"] #tab-analytics .metric-group:hover,
+[data-page="admin"] #tab-analytics .analytics-overview:hover {
+  background: var(--portal-bg-dark);
 }
 
 .stat-label {
@@ -1637,46 +1647,40 @@
 
 /* Status option left border colors - only left border, no other borders */
 [data-page="admin"] .status-dropdown-menu .status-option.status-pending {
-  border: none !important;
-  border-left: 3px solid var(--color-warning) !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  color: var(--portal-text-light) !important;
+  border: none;
+  border-left: 3px solid var(--color-warning);
+  background: transparent;
+  color: var(--portal-text-light);
 }
 
 [data-page="admin"] .status-dropdown-menu .status-option.status-active {
-  border: none !important;
-  border-left: 3px solid var(--color-info) !important;
-  background: transparent !important;
-  background-color: transparent !important;
+  border: none;
+  border-left: 3px solid var(--color-info);
+  background: transparent;
 }
 
 [data-page="admin"] .status-dropdown-menu .status-option.status-in_progress {
-  border: none !important;
-  border-left: 3px solid var(--color-info) !important;
-  background: transparent !important;
-  background-color: transparent !important;
+  border: none;
+  border-left: 3px solid var(--color-info);
+  background: transparent;
 }
 
 [data-page="admin"] .status-dropdown-menu .status-option.status-on_hold {
-  border: none !important;
-  border-left: 3px solid var(--color-warning) !important;
-  background: transparent !important;
-  background-color: transparent !important;
+  border: none;
+  border-left: 3px solid var(--color-warning);
+  background: transparent;
 }
 
 [data-page="admin"] .status-dropdown-menu .status-option.status-completed {
-  border: none !important;
-  border-left: 3px solid var(--color-success) !important;
-  background: transparent !important;
-  background-color: transparent !important;
+  border: none;
+  border-left: 3px solid var(--color-success);
+  background: transparent;
 }
 
 [data-page="admin"] .status-dropdown-menu .status-option.status-cancelled {
-  border: none !important;
-  border-left: 3px solid var(--color-danger) !important;
-  background: transparent !important;
-  background-color: transparent !important;
+  border: none;
+  border-left: 3px solid var(--color-danger);
+  background: transparent;
 }
 
 /* Action buttons in tables */
@@ -2138,6 +2142,17 @@
   font-size: var(--font-size-sm);
 }
 
+/* Project Detail Page Header with Status Badge */
+#tab-project-detail .page-header {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-lg);
+}
+
+#tab-project-detail .page-header .status-badge {
+  margin-left: auto;
+}
+
 /* Project Overview Card */
 .project-detail-overview {
   background: var(--portal-bg-dark);
@@ -2146,53 +2161,48 @@
   padding: var(--portal-spacing-xl);
   margin-bottom: var(--portal-spacing-xl);
   color: var(--portal-text-light);
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-xl);
 }
 
-.project-detail-header {
+.project-detail-overview .overview-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--portal-spacing-lg);
-  gap: var(--portal-spacing-lg);
+  align-items: center;
 }
 
-.project-detail-info h3 {
-  margin: 0 0 var(--portal-spacing-sm) 0;
+.project-detail-overview h3 {
+  margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--portal-text-light);
   font-family: var(--font--acme);
 }
 
-.project-detail-info p {
-  margin: var(--portal-spacing-xs) 0;
+.project-detail-overview .btn-icon {
+  background: transparent;
+  border: none;
   color: var(--portal-text-secondary);
-  font-size: 0.9rem;
+  cursor: pointer;
+  padding: var(--portal-spacing-sm);
+  border-radius: var(--portal-radius-sm);
+  transition: color 0.2s ease, background 0.2s ease;
 }
 
-.project-client-info {
-  color: var(--portal-text-light) !important;
+.project-detail-overview .btn-icon:hover {
+  color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.project-detail-status .status-badge {
-  font-size: 0.85rem;
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
-}
-
-.project-detail-meta {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--portal-spacing-lg);
-  padding-top: var(--portal-spacing-lg);
-  border-top: 1px solid var(--portal-border-medium);
-}
-
+/* Root meta-item styling - applies everywhere */
 .meta-item {
   display: flex;
   flex-direction: column;
   gap: var(--portal-spacing-xs);
 }
 
+/* Root meta-label styling - applies everywhere */
 .meta-label {
   font-size: 0.75rem;
   color: var(--portal-text-secondary);
@@ -2201,27 +2211,41 @@
   font-weight: 500;
 }
 
+/* Root meta-value styling - applies everywhere */
 .meta-value {
-  font-size: 0.95rem;
-  color: var(--portal-text-light);
-  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-white);
+  font-weight: 400;
+}
+
+.project-detail-client-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--portal-spacing-xl);
+}
+
+.project-detail-meta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--portal-spacing-xl);
 }
 
 /* Project Detail Tabs */
 .project-detail-tabs {
   display: flex;
   gap: var(--portal-spacing-sm);
-  margin-bottom: var(--portal-spacing-xl);
+  margin-bottom: 0;
   overflow-x: auto;
 }
 
 .pd-tab-btn {
   padding: var(--portal-spacing-md) var(--portal-spacing-xl);
-  background: #333333;
+  background: #222222;
   border: none;
   border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0;
   color: var(--portal-text-secondary);
   font-size: 0.85rem;
+  box-shadow: 1px -1px 4px rgba(0, 0, 0, 0.3), 2px -2px 8px rgba(0, 0, 0, 0.2);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -2238,38 +2262,85 @@
 
 .pd-tab-btn.active {
   color: var(--portal-text-light);
-  background: #444444;
+  background: var(--portal-bg-dark);
   font-weight: 700;
-  border: 2px solid var(--color-primary);
-  border-bottom: none;
+  border: none;
 }
 
 /* Project Detail Tab Content */
 .pd-tab-content {
   display: none;
+  background: var(--portal-bg-dark);
+  border-radius: 0 var(--portal-radius-lg) var(--portal-radius-lg) var(--portal-radius-lg);
+  padding: 4rem 2rem;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4), 4px 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .pd-tab-content.active {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+/* Remove individual card backgrounds inside tabs - content is now in unified container */
+.pd-tab-content .portal-project-card,
+.pd-tab-content .portal-shadow,
+.pd-tab-content .files-upload-section,
+.pd-tab-content .files-list-section,
+.pd-tab-content .messages-container,
+.pd-tab-content .recent-activity,
+.pd-tab-content .settings-section,
+.pd-tab-content .invoice-summary .summary-card {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+
+/* Override any adjacent sibling margins inside tab content */
+.pd-tab-content .portal-project-card + .portal-project-card {
+  margin-top: 0 !important;
+}
+
+/* Unified heading style for all sections inside tab content */
+.pd-tab-content h3 {
+  font-family: var(--font--acme);
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--portal-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--portal-spacing-lg) 0;
+}
+
+/* Invoice summary within tab - keep flex layout */
+.pd-tab-content .invoice-summary {
+  display: flex;
+  gap: var(--portal-spacing-xl);
+  margin: 0;
 }
 
 /* Settings tab sections - darker background and equal heights */
-#pd-tab-settings .settings-grid {
+[data-page="admin"] #pd-tab-settings .settings-grid {
   align-items: stretch;
-  grid-template-columns: repeat(3, 1fr) !important;
+  grid-template-columns: repeat(3, 1fr);
   max-width: none;
   width: 100%;
 }
 
-#pd-tab-settings .settings-section {
-  background: #333333 !important;
+[data-page="admin"] #pd-tab-settings .settings-section {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
   height: 100%;
-  grid-column: span 1 !important;
+  grid-column: span 1;
   flex: 1;
   min-width: 0;
 }
 
-/* Darker form field backgrounds for admin */
+/* Black form field backgrounds for admin */
 [data-page="admin"] .form-input,
 [data-page="admin"] input[type="text"],
 [data-page="admin"] input[type="email"],
@@ -2280,7 +2351,7 @@
 [data-page="admin"] textarea,
 [data-page="admin"] select:not(.status-select),
 [data-page="admin"] .form-select {
-  background-color: #1a1a1a !important;
+  background-color: #000000 !important;
 }
 
 /* Form row - two columns side by side */
@@ -2329,29 +2400,29 @@
 [data-page="admin"] textarea:focus,
 [data-page="admin"] select:not(.status-select):focus,
 [data-page="admin"] .form-select:not(.status-select):focus {
-  border: 3px solid var(--color-primary) !important;
+  border: 3px solid var(--color-primary);
   outline: none;
 }
 
 /* Custom status dropdown for settings form - matches text fields */
-#pd-setting-status {
+[data-page="admin"] #pd-setting-status {
   width: 100%;
-  padding: 1.75rem var(--portal-spacing-xl) var(--portal-spacing-sm) var(--portal-spacing-xl) !important;
+  padding: 1.75rem var(--portal-spacing-xl) var(--portal-spacing-sm) var(--portal-spacing-xl);
   border: none;
   border-radius: var(--portal-radius-lg);
-  font-size: 1.2rem !important;
-  font-weight: 600 !important;
+  font-size: 1.2rem;
+  font-weight: 600;
   cursor: pointer;
   text-transform: capitalize;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-color: #222222 !important;
-  color: var(--portal-text-light) !important;
+  background-color: #000000;
+  color: var(--portal-text-light);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 16px center;
-  min-height: 60px !important;
+  min-height: 60px;
 }
 
 #pd-setting-status:focus {
@@ -2360,59 +2431,54 @@
 }
 
 /* Status colors for settings dropdown */
-#pd-setting-status.status-pending,
-#pd-setting-status.status-on_hold {
-  background-color: var(--color-warning) !important;
+[data-page="admin"] #pd-setting-status.status-pending,
+[data-page="admin"] #pd-setting-status.status-on_hold {
+  background-color: var(--color-warning);
   color: var(--color-black);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
-#pd-setting-status.status-active {
-  background-color: var(--color-info) !important;
+[data-page="admin"] #pd-setting-status.status-active {
+  background-color: var(--color-info);
   color: var(--color-black);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
-#pd-setting-status.status-completed {
-  background-color: var(--color-success) !important;
+[data-page="admin"] #pd-setting-status.status-completed {
+  background-color: var(--color-success);
   color: var(--color-black);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
-#pd-setting-status.status-cancelled {
-  background-color: var(--color-danger) !important;
+[data-page="admin"] #pd-setting-status.status-cancelled {
+  background-color: var(--color-danger);
   color: var(--color-white);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
 /* Form group spacing in settings */
-#pd-tab-settings .settings-section .form-group {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: var(--portal-spacing-lg) !important;
+[data-page="admin"] #pd-tab-settings .settings-section .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-lg);
 }
 
-/* Form labels - size and color only (matches meta-label) */
-#pd-tab-settings .settings-section .form-group label {
-  font-size: 0.75rem !important;
-  color: var(--portal-text-secondary) !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
-  font-weight: 500 !important;
-  padding-left: 0 !important;
-  margin: 0 !important;
+/* Settings form labels - additional spacing */
+[data-page="admin"] #pd-tab-settings .settings-section .form-group label {
+  padding-left: 0;
+  margin: 0;
 }
 
 /* Project settings form fields - smaller text */
-#pd-tab-settings .form-input,
-#pd-tab-settings input[type="text"],
-#pd-tab-settings input[type="number"],
-#pd-tab-settings input[type="url"],
-#pd-tab-settings input[type="email"] {
-  font-size: 0.95rem !important;
-  font-weight: 400 !important;
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md) !important;
-  padding-left: var(--portal-spacing-lg) !important;
+[data-page="admin"] #pd-tab-settings .form-input,
+[data-page="admin"] #pd-tab-settings input[type="text"],
+[data-page="admin"] #pd-tab-settings input[type="number"],
+[data-page="admin"] #pd-tab-settings input[type="url"],
+[data-page="admin"] #pd-tab-settings input[type="email"] {
+  font-size: 0.95rem;
+  font-weight: 400;
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding-left: var(--portal-spacing-lg);
 }
 
 /* Project status dropdown - match input field styling */
@@ -2477,7 +2543,6 @@
 }
 
 /* Secondary/muted text in project detail */
-#tab-project-detail .meta-label,
 #tab-project-detail .file-meta,
 #tab-project-detail .invoice-date,
 #tab-project-detail .empty-state {
@@ -2521,6 +2586,7 @@
   background: var(--portal-bg-light);
   border-radius: var(--portal-radius-pill);
   overflow: hidden;
+  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.5), inset -1px -1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .project-progress-display .progress-fill {
@@ -2548,11 +2614,48 @@
   box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
+/* Custom checkbox - wrapper div */
 .milestone-checkbox {
   flex-shrink: 0;
   width: 20px;
   height: 20px;
   cursor: pointer;
+  background: #000000;
+  border-radius: 4px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hide the actual checkbox input */
+.milestone-checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+/* Checked state - change wrapper background */
+.milestone-checkbox:has(input:checked) {
+  background: var(--color-primary);
+}
+
+/* Checkmark for checked state */
+.milestone-checkbox:has(input:checked)::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 .milestone-content {
@@ -2595,18 +2698,25 @@
 /* Project Notes - inside overview card */
 .project-detail-overview .project-notes {
   background: transparent;
-  padding: var(--portal-spacing-lg) 0 0 0;
+  padding: 0;
   border-radius: 0;
   border: none;
-  border-top: 1px solid var(--portal-border-medium);
-  margin-top: var(--portal-spacing-lg);
+  margin: 0;
   min-height: 0;
-  white-space: pre-wrap;
+  white-space: normal;
   color: var(--portal-text-light);
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-xl);
 }
 
 .project-detail-overview .project-notes:empty {
   display: none;
+}
+
+/* Project notes meta-value allows wrapping */
+.project-detail-overview .project-notes .meta-value {
+  white-space: pre-wrap;
 }
 
 /* Project Notes - standalone */
@@ -2624,9 +2734,10 @@
   margin: 0 0 var(--portal-spacing-md) 0;
 }
 
-.project-notes h4 {
+.project-notes h4,
+#tab-project-detail .project-notes h4 {
   font-size: 0.75rem;
-  color: var(--portal-text-secondary);
+  color: var(--portal-text-secondary) !important;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 500;
@@ -3095,9 +3206,12 @@
 }
 
 [data-page="admin"] .recent-activity h3 {
-  color: var(--portal-text-light);
   font-family: var(--font--acme);
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--portal-text-light);
   text-transform: uppercase;
+  letter-spacing: 0.05em;
   margin: 0 0 var(--portal-spacing-lg) 0;
 }
 
@@ -3105,16 +3219,18 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-md);
 }
 
 [data-page="admin"] .activity-list li {
   color: var(--portal-text-light);
-  padding: var(--portal-spacing-sm) 0 var(--portal-spacing-sm) var(--portal-spacing-lg);
-  border-bottom: 1px solid var(--portal-border-medium);
-}
-
-[data-page="admin"] .activity-list li:last-child {
-  border-bottom: none;
+  padding: var(--portal-spacing-lg);
+  background: var(--portal-bg-medium);
+  border: none;
+  border-radius: var(--portal-radius-md);
+  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .overview-stats-grid {
@@ -3190,7 +3306,7 @@
   padding: var(--space-2) var(--space-3);
   border: 4px solid var(--portal-border-dark);
   border-radius: var(--portal-radius-lg);
-  background-color: #1a1a1a;
+  background-color: #000000;
   color: var(--portal-text-light);
   font-size: var(--font-size-base);
   cursor: pointer;
@@ -3234,7 +3350,7 @@
   margin-top: -4px;
   padding: 0;
   list-style: none;
-  background-color: #1a1a1a;
+  background-color: #000000;
   border: 4px solid var(--portal-border-dark);
   border-top: none;
   border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);

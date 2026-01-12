@@ -220,6 +220,7 @@ function populateProjectDetailView(project: LeadProject): void {
     'pd-company': project.company_name || '-',
     'pd-type': formatProjectType(project.project_type),
     'pd-budget': project.budget_range || '-',
+    'pd-price': '-',
     'pd-timeline': project.timeline || '-',
     'pd-start-date': project.created_at ? new Date(project.created_at).toLocaleDateString() : '-'
   };
@@ -258,7 +259,7 @@ function populateProjectDetailView(project: LeadProject): void {
     if (project.description || project.features) {
       let html = '';
       if (project.description) {
-        html += `<h4>PROJECT DESCRIPTION</h4><p>${safeDesc}</p>`;
+        html += `<div class="meta-item"><span class="meta-label">Project Description</span><span class="meta-value">${safeDesc}</span></div>`;
       }
       if (project.features) {
         // Filter out plan tiers that aren't actual features
@@ -270,7 +271,7 @@ function populateProjectDetailView(project: LeadProject): void {
           .map((f) => `<span class="feature-tag">${SanitizationUtils.escapeHtml(f)}</span>`)
           .join('');
         if (featuresList) {
-          html += `<h4>FEATURES REQUESTED</h4><div class="features-list">${featuresList}</div>`;
+          html += `<div class="meta-item"><span class="meta-label">Features Requested</span><div class="features-list">${featuresList}</div></div>`;
         }
       }
       notes.innerHTML = html;
