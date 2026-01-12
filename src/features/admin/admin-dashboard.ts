@@ -1157,7 +1157,7 @@ class AdminDashboard {
       });
 
       if (response.ok) {
-        alert('Project settings saved!');
+        this.showNotification('Project settings saved', 'success');
         // Refresh project data
         await this.loadProjects();
         // Re-populate the view
@@ -1166,11 +1166,11 @@ class AdminDashboard {
           this.populateProjectDetailView(project);
         }
       } else {
-        alert('Failed to save project settings');
+        this.showNotification('Failed to save project settings', 'error');
       }
     } catch (error) {
       console.error('[AdminDashboard] Error saving project settings:', error);
-      alert('Error saving project settings');
+      this.showNotification('Error saving project settings', 'error');
     }
   }
 
