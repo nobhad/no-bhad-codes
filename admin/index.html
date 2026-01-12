@@ -275,26 +275,26 @@
 
             <!-- Leads Stats -->
             <div class="quick-stats">
-              <div class="stat-card portal-shadow">
+              <button class="stat-card stat-card-clickable portal-shadow" data-filter="all" data-table="leads">
                 <span class="stat-number" id="leads-total">-</span>
                 <span class="stat-label">Total Leads</span>
-              </div>
-              <div class="stat-card portal-shadow">
+              </button>
+              <button class="stat-card stat-card-clickable portal-shadow" data-filter="pending" data-table="leads">
                 <span class="stat-number" id="leads-pending">-</span>
                 <span class="stat-label">Pending</span>
-              </div>
-              <div class="stat-card portal-shadow">
+              </button>
+              <button class="stat-card stat-card-clickable portal-shadow" data-filter="in_progress" data-table="leads">
                 <span class="stat-number" id="leads-active">-</span>
                 <span class="stat-label">In Progress</span>
-              </div>
-              <div class="stat-card portal-shadow">
+              </button>
+              <button class="stat-card stat-card-clickable portal-shadow" data-filter="completed" data-table="leads">
                 <span class="stat-number" id="leads-completed">-</span>
                 <span class="stat-label">Completed</span>
-              </div>
+              </button>
             </div>
 
             <!-- Leads Table -->
-            <div class="admin-table-card">
+            <div class="admin-table-card" id="intake-submissions-card">
               <div class="admin-table-header">
                 <h3>Intake Submissions</h3>
                 <button class="icon-btn" id="refresh-leads-btn" title="Refresh">
@@ -324,7 +324,7 @@
             </div>
 
             <!-- Contact Form Submissions Table -->
-            <div class="admin-table-card">
+            <div class="admin-table-card" id="contact-submissions-card">
               <div class="admin-table-header">
                 <h3>Contact Form Submissions</h3>
                 <div class="admin-table-actions">
@@ -374,26 +374,26 @@
 
             <!-- Projects Stats -->
             <div class="quick-stats">
-              <div class="stat-card portal-shadow">
+              <button class="stat-card stat-card-clickable portal-shadow" data-filter="all" data-table="projects">
                 <span class="stat-number" id="projects-total">-</span>
                 <span class="stat-label">Total Projects</span>
-              </div>
-              <div class="stat-card portal-shadow">
+              </button>
+              <button class="stat-card stat-card-clickable portal-shadow" data-filter="active" data-table="projects">
                 <span class="stat-number" id="projects-active">-</span>
                 <span class="stat-label">Active</span>
-              </div>
-              <div class="stat-card portal-shadow">
+              </button>
+              <button class="stat-card stat-card-clickable portal-shadow" data-filter="completed" data-table="projects">
                 <span class="stat-number" id="projects-completed">-</span>
                 <span class="stat-label">Completed</span>
-              </div>
-              <div class="stat-card portal-shadow">
+              </button>
+              <button class="stat-card stat-card-clickable portal-shadow" data-filter="on_hold" data-table="projects">
                 <span class="stat-number" id="projects-on-hold">-</span>
                 <span class="stat-label">On Hold</span>
-              </div>
+              </button>
             </div>
 
             <!-- Projects Table -->
-            <div class="admin-table-card">
+            <div class="admin-table-card" id="projects-card">
               <div class="admin-table-header">
                 <h3>All Projects</h3>
                 <div class="admin-table-actions">
@@ -840,7 +840,7 @@
                     </div>
                     <div class="form-group">
                       <label for="pd-setting-status">Status</label>
-                      <select id="pd-setting-status" class="form-select">
+                      <select id="pd-setting-status" class="form-select status-select">
                         <option value="pending">Pending</option>
                         <option value="active">Active</option>
                         <option value="on_hold">On Hold</option>
