@@ -117,19 +117,17 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     // Settings form
     const settingName = document.getElementById('pd-setting-name') as HTMLInputElement;
-    const settingStatus = document.getElementById('pd-setting-status') as HTMLSelectElement;
+    const settingStatus = document.getElementById('pd-setting-status') as HTMLInputElement;
     const settingProgress = document.getElementById('pd-setting-progress') as HTMLInputElement;
 
     if (settingName) settingName.value = project.project_name || '';
     if (settingStatus) {
-      settingStatus.value = project.status || 'pending';
-      // Update status dropdown color
-      this.updateStatusDropdownColor(settingStatus);
-      // Add change listener if not already added
-      if (!settingStatus.dataset.listenerAdded) {
-        settingStatus.addEventListener('change', () => this.updateStatusDropdownColor(settingStatus));
-        settingStatus.dataset.listenerAdded = 'true';
-      }
+      const status = project.status || 'pending';
+      settingStatus.value = status;
+      // Update custom dropdown display
+      this.updateCustomDropdown(status);
+      // Set up custom dropdown if not already done
+      this.setupCustomStatusDropdown();
     }
     if (settingProgress) settingProgress.value = (project.progress || 0).toString();
 
@@ -237,15 +235,89 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   }
 
   /**
-   * Update status dropdown color based on selected value
+   * Set up custom status dropdown behavior
    */
-  private updateStatusDropdownColor(select: HTMLSelectElement): void {
-    // Remove all status classes
-    select.classList.remove('status-pending', 'status-active', 'status-on_hold', 'status-completed', 'status-cancelled');
-    // Add the appropriate status class
-    const status = select.value;
+  private setupCustomStatusDropdown(): void {
+    const dropdown = document.getElementById('pd-status-dropdown');
+    console.log('[ProjectDetails] setupCustomStatusDropdown called, dropdown:', dropdown);
+
+    if (!dropdown) return;
+
+    // Skip if already set up
+    if (dropdown.dataset.listenerAdded) {
+      console.log('[ProjectDetails] Dropdown already set up, skipping');
+      return;
+    }
+    dropdown.dataset.listenerAdded = 'true';
+    console.log('[ProjectDetails] Setting up dropdown listeners');
+
+    // Use event delegation on the dropdown container
+    dropdown.addEventListener('click', (e) => {
+      console.log('[ProjectDetails] Dropdown clicked', e.target);
+      const target = e.target as HTMLElement;
+
+      // Handle trigger click
+      if (target.closest('.custom-dropdown-trigger')) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropdown.classList.toggle('open');
+        console.log('[ProjectDetails] Toggled dropdown, open:', dropdown.classList.contains('open'));
+        return;
+      }
+
+      // Handle option click
+      const option = target.closest('.custom-dropdown-option') as HTMLElement;
+      if (option) {
+        const value = option.dataset.value || '';
+        const hiddenInput = document.getElementById('pd-setting-status') as HTMLInputElement;
+        if (hiddenInput) {
+          hiddenInput.value = value;
+        }
+        this.updateCustomDropdown(value);
+        dropdown.classList.remove('open');
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!dropdown.contains(e.target as Node)) {
+        dropdown.classList.remove('open');
+      }
+    });
+  }
+
+  /**
+   * Update custom dropdown display based on selected value
+   */
+  private updateCustomDropdown(status: string): void {
+    const trigger = document.getElementById('pd-status-trigger');
+    const valueSpan = trigger?.querySelector('.custom-dropdown-value');
+    const menu = document.getElementById('pd-status-menu');
+
+    if (!trigger || !valueSpan) return;
+
+    // Update displayed text
+    const statusLabels: Record<string, string> = {
+      'pending': 'Pending',
+      'active': 'Active',
+      'on_hold': 'On Hold',
+      'completed': 'Completed',
+      'cancelled': 'Cancelled'
+    };
+    valueSpan.textContent = statusLabels[status] || status;
+
+    // Update trigger color
+    trigger.classList.remove('status-pending', 'status-active', 'status-on_hold', 'status-completed', 'status-cancelled');
     if (status) {
-      select.classList.add(`status-${status}`);
+      trigger.classList.add(`status-${status}`);
+    }
+
+    // Update selected option in menu
+    if (menu) {
+      const options = menu.querySelectorAll('.custom-dropdown-option');
+      options.forEach((option) => {
+        option.classList.toggle('selected', (option as HTMLElement).dataset.value === status);
+      });
     }
   }
 
@@ -259,7 +331,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (!authMode || authMode === 'demo') return;
 
     const name = (document.getElementById('pd-setting-name') as HTMLInputElement)?.value;
-    const status = (document.getElementById('pd-setting-status') as HTMLSelectElement)?.value;
+    const status = (document.getElementById('pd-setting-status') as HTMLInputElement)?.value;
     const progress = parseInt(
       (document.getElementById('pd-setting-progress') as HTMLInputElement)?.value || '0'
     );

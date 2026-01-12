@@ -312,11 +312,12 @@
                       <th>Project Type</th>
                       <th>Budget</th>
                       <th>Status</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody id="leads-table-body">
                     <tr>
-                      <td colspan="7" class="loading-row">Loading leads...</td>
+                      <td colspan="8" class="loading-row">Loading leads...</td>
                     </tr>
                   </tbody>
                 </table>
@@ -355,14 +356,6 @@
               </div>
             </div>
 
-            <!-- Details Overlay (darkens page when panel is open) -->
-            <div class="details-overlay hidden" id="details-overlay" onclick="window.closeDetailsPanel && window.closeDetailsPanel()"></div>
-
-            <!-- Lead Details Panel (Hidden by default) -->
-            <div class="details-panel hidden" id="lead-details-panel"></div>
-
-            <!-- Contact Details Panel (Hidden by default) -->
-            <div class="details-panel hidden" id="contact-details-panel"></div>
           </div>
 
           <!-- Projects Tab -->
@@ -840,13 +833,20 @@
                     </div>
                     <div class="form-group">
                       <label for="pd-setting-status">Status</label>
-                      <select id="pd-setting-status" class="form-select status-select">
-                        <option value="pending">Pending</option>
-                        <option value="active">Active</option>
-                        <option value="on_hold">On Hold</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
+                      <div class="custom-dropdown" id="pd-status-dropdown">
+                        <input type="hidden" id="pd-setting-status" name="status" value="pending" />
+                        <button type="button" class="custom-dropdown-trigger" id="pd-status-trigger">
+                          <span class="custom-dropdown-value">Pending</span>
+                          <svg class="custom-dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+                        </button>
+                        <div class="custom-dropdown-menu" id="pd-status-menu">
+                          <button type="button" class="custom-dropdown-option" data-value="pending">Pending</button>
+                          <button type="button" class="custom-dropdown-option" data-value="active">Active</button>
+                          <button type="button" class="custom-dropdown-option" data-value="on_hold">On Hold</button>
+                          <button type="button" class="custom-dropdown-option" data-value="completed">Completed</button>
+                          <button type="button" class="custom-dropdown-option" data-value="cancelled">Cancelled</button>
+                        </div>
+                      </div>
                     </div>
                     <div class="form-group">
                       <label for="pd-setting-progress">Progress (%)</label>
@@ -858,29 +858,47 @@
                         max="100"
                       />
                     </div>
-                    <button type="submit" class="btn btn-secondary">Save Changes</button>
+                    <button type="submit" id="btn-save-project-settings" class="btn btn-secondary">Save Changes</button>
                   </form>
                 </div>
 
                 <!-- Client Account -->
                 <div class="settings-section portal-shadow">
                   <h3>Client Account</h3>
-                  <div class="client-account-info">
-                    <p><strong>Email:</strong> <span id="pd-client-account-email">-</span></p>
-                    <p>
-                      <strong>Account Status:</strong>
-                      <span id="pd-client-account-status" class="status-badge">-</span>
-                    </p>
-                    <p><strong>Last Login:</strong> <span id="pd-client-last-login">Never</span></p>
-                  </div>
-                  <div class="client-account-actions">
-                    <button class="btn btn-secondary btn-sm" id="btn-resend-invite">
-                      Resend Invitation
-                    </button>
-                    <button class="btn btn-secondary btn-sm" id="btn-reset-password">
-                      Reset Password
-                    </button>
-                  </div>
+                  <form class="settings-form" id="pd-client-account-form">
+                    <div class="form-group">
+                      <label for="pd-client-account-email">Email</label>
+                      <input
+                        type="email"
+                        id="pd-client-account-email"
+                        class="form-input"
+                        placeholder="client@example.com"
+                      />
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label>Account Status</label>
+                        <div class="form-value-readonly">
+                          <span id="pd-client-account-status" class="status-badge">-</span>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label>Last Login</label>
+                        <div class="form-value-readonly" id="pd-client-last-login">Never</div>
+                      </div>
+                    </div>
+                    <div class="client-account-actions">
+                      <button type="submit" class="btn btn-secondary" id="btn-save-client-email">
+                        Save Email
+                      </button>
+                      <button type="button" class="btn btn-secondary" id="btn-resend-invite">
+                        Resend Invitation
+                      </button>
+                      <button type="button" class="btn btn-secondary" id="btn-reset-password">
+                        Reset Password
+                      </button>
+                    </div>
+                  </form>
                 </div>
 
                 <!-- Preview URL -->
@@ -905,6 +923,15 @@
         </div>
       </div>
     </div>
+
+    <!-- Details Overlay (darkens page when panel is open) -->
+    <div class="details-overlay hidden" id="details-overlay" onclick="window.closeDetailsPanel && window.closeDetailsPanel()"></div>
+
+    <!-- Lead Details Panel (Hidden by default) -->
+    <div class="details-panel hidden" id="lead-details-panel"></div>
+
+    <!-- Contact Details Panel (Hidden by default) -->
+    <div class="details-panel hidden" id="contact-details-panel"></div>
 
     <!-- Detail Modal for Leads/Contacts -->
     <div class="admin-modal-overlay hidden" id="detail-modal">

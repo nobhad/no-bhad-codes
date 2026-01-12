@@ -13,6 +13,7 @@ import type { MessageThread, Message, AdminDashboardContext } from '../admin-typ
 
 let selectedClientId: number | null = null;
 let selectedThreadId: number | null = null;
+let selectedClientName: string = 'Client';
 
 export function getSelectedThreadId(): number | null {
   return selectedThreadId;
@@ -119,9 +120,12 @@ function setupCustomDropdown(
 
       // Update display text - get just the name, not the count
       const nameSpan = item.querySelector('.dropdown-item-name');
+      const clientName = nameSpan?.textContent || item.textContent || 'Client';
       if (textSpan) {
-        textSpan.textContent = nameSpan?.textContent || item.textContent || '-- Select a client --';
+        textSpan.textContent = clientName;
       }
+      // Store the client name for use in messages
+      selectedClientName = clientName;
 
       // Update hidden input
       hiddenInput.value = value;
@@ -241,25 +245,24 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
         minute: '2-digit'
       });
       const date = new Date(msg.created_at).toLocaleDateString();
-      const rawSenderName = isAdmin ? 'You (Admin)' : msg.sender_name || 'Client';
+      const rawSenderName = isAdmin ? 'You (Admin)' : selectedClientName || 'Client';
       const safeSenderName = SanitizationUtils.escapeHtml(rawSenderName);
       const safeContent = SanitizationUtils.escapeHtml(msg.message || msg.content || '');
-      const safeInitials = SanitizationUtils.escapeHtml(
-        rawSenderName.substring(0, 2).toUpperCase()
-      );
+      const initials = rawSenderName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      const safeInitials = SanitizationUtils.escapeHtml(initials);
 
       if (isAdmin) {
         return `
           <div class="message message-sent">
             <div class="message-content">
               <div class="message-header">
-                <span class="message-sender">${safeSenderName}</span>
                 <span class="message-time">${date} at ${time}</span>
               </div>
               <div class="message-body">${safeContent}</div>
             </div>
             <div class="message-avatar" data-name="Admin">
               <div class="avatar-placeholder">ADM</div>
+              <span class="message-sender">${safeSenderName}</span>
             </div>
           </div>
         `;
@@ -269,10 +272,10 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
         <div class="message message-received">
           <div class="message-avatar" data-name="${safeSenderName}">
             <div class="avatar-placeholder">${safeInitials}</div>
+            <span class="message-sender">${safeSenderName}</span>
           </div>
           <div class="message-content">
             <div class="message-header">
-              <span class="message-sender">${safeSenderName}</span>
               <span class="message-time">${date} at ${time}</span>
             </div>
             <div class="message-body">${safeContent}</div>

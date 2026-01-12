@@ -28,6 +28,9 @@ export function getLeadsData(): Lead[] {
 }
 
 export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
+  // Store context for global functions (activate from details panel)
+  setLeadsContext(ctx);
+
   if (ctx.isDemo()) {
     console.log('[AdminLeads] Skipping load - demo mode');
     return;
@@ -56,7 +59,7 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
       // Show error in table
       const tableBody = document.getElementById('leads-table-body');
       if (tableBody) {
-        tableBody.innerHTML = `<tr><td colspan="7" class="loading-row">Error loading leads: ${response.status}</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="8" class="loading-row">Error loading leads: ${response.status}</td></tr>`;
       }
     }
   } catch (error) {
@@ -64,7 +67,7 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
     // Show error in table
     const tableBody = document.getElementById('leads-table-body');
     if (tableBody) {
-      tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">Network error loading leads</td></tr>';
+      tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">Network error loading leads</td></tr>';
     }
   }
 }
@@ -100,9 +103,18 @@ function updateLeadsDisplay(data: LeadsData, ctx: AdminDashboardContext): void {
         .map((lead) => {
           const date = new Date(lead.created_at).toLocaleDateString();
           const safeName = SanitizationUtils.escapeHtml(lead.contact_name || 'Unknown');
-          return `<li>${safeName} - ${date}</li>`;
+          return `<li data-lead-id="${lead.id}" class="clickable-lead">${safeName} - ${date}</li>`;
         })
         .join('');
+
+      // Add click handlers to recent leads
+      recentList.querySelectorAll('li[data-lead-id]').forEach((li) => {
+        li.addEventListener('click', () => {
+          const leadId = parseInt((li as HTMLElement).dataset.leadId || '0');
+          console.log('[AdminLeads] Recent lead clicked, id:', leadId);
+          if (leadId) showLeadDetails(leadId);
+        });
+      });
     }
   }
 
@@ -115,7 +127,7 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
   if (!tableBody) return;
 
   if (!leads || leads.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">No leads found</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">No leads found</td></tr>';
     return;
   }
 
@@ -143,7 +155,9 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
           <td>${safeBudget}</td>
           <td>
             <span class="status-badge ${statusClass}">${safeStatus}</span>
-            ${showActivateBtn ? `<button class="action-btn action-convert activate-lead-btn" data-id="${lead.id}" onclick="event.stopPropagation()" style="margin-left: 0.5rem;">Activate</button>` : ''}
+          </td>
+          <td>
+            ${showActivateBtn ? `<button class="btn activate-lead-btn" data-id="${lead.id}" onclick="event.stopPropagation()">Activate</button>` : ''}
           </td>
         </tr>
       `;
@@ -189,8 +203,13 @@ export function showLeadDetails(leadId: number): void {
   const safeDescription = SanitizationUtils.escapeHtml(lead.description || 'No description');
   const safeBudget = SanitizationUtils.escapeHtml(lead.budget_range || '-');
   const safeTimeline = SanitizationUtils.escapeHtml(lead.timeline || '-');
-  const safeFeatures = SanitizationUtils.escapeHtml(lead.features || '-');
+  const safeFeatures = SanitizationUtils.escapeHtml((lead.features || '-').replace(/,/g, ', '));
   const safeSource = SanitizationUtils.escapeHtml(lead.source || '-');
+
+  // Show activate button only for pending/new leads
+  const showActivateBtn = !lead.status || lead.status === 'pending' || lead.status === 'new' || lead.status === 'qualified';
+  // Show view project button for activated leads
+  const isActivated = lead.status === 'active' || lead.status === 'in_progress' || lead.status === 'on_hold' || lead.status === 'completed' || lead.status === 'converted';
 
   detailsPanel.innerHTML = `
     <div class="details-header">
@@ -203,26 +222,60 @@ export function showLeadDetails(leadId: number): void {
       <p><strong>Phone:</strong> ${safePhone}</p>
       <p><strong>Status:</strong> ${lead.status}</p>
       <p><strong>Source:</strong> ${safeSource}</p>
-      <hr class="details-divider">
       <p><strong>Project Type:</strong> ${safeProjectType}</p>
       <p><strong>Budget:</strong> ${safeBudget}</p>
       <p><strong>Timeline:</strong> ${safeTimeline}</p>
       <p><strong>Description:</strong> ${safeDescription}</p>
       <p><strong>Features:</strong> ${safeFeatures}</p>
-      <hr class="details-divider">
       <p><strong>Created:</strong> ${new Date(lead.created_at).toLocaleString()}</p>
+      <div class="details-actions" style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+        ${showActivateBtn ? `<button class="btn details-activate-btn" data-id="${lead.id}">Activate as Project</button>` : ''}
+        ${isActivated ? `<button class="btn details-view-project-btn" data-id="${lead.id}">View Project</button>` : ''}
+      </div>
     </div>
   `;
+
+  // Add click handler for activate button
+  const activateBtn = detailsPanel.querySelector('.details-activate-btn');
+  if (activateBtn) {
+    activateBtn.addEventListener('click', () => {
+      const id = (activateBtn as HTMLElement).dataset.id;
+      if (id && confirm('Activate this lead as a project?')) {
+        window.activateLeadFromPanel(parseInt(id));
+      }
+    });
+  }
+
+  // Add click handler for view project button
+  const viewProjectBtn = detailsPanel.querySelector('.details-view-project-btn');
+  if (viewProjectBtn) {
+    viewProjectBtn.addEventListener('click', () => {
+      const id = (viewProjectBtn as HTMLElement).dataset.id;
+      if (id) {
+        window.closeDetailsPanel();
+        window.viewProjectFromLead(parseInt(id));
+      }
+    });
+  }
 
   // Show overlay and panel
   if (overlay) overlay.classList.remove('hidden');
   detailsPanel.classList.remove('hidden');
 }
 
-// Global function to close details panel
+// Store context for global functions
+let storedContext: AdminDashboardContext | null = null;
+
+export function setLeadsContext(ctx: AdminDashboardContext): void {
+  storedContext = ctx;
+}
+
+// Global functions for details panel
 declare global {
   interface Window {
     closeDetailsPanel: () => void;
+    activateLeadFromPanel: (leadId: number) => void;
+    viewProjectFromLead: (projectId: number) => void;
   }
 }
 
@@ -231,6 +284,27 @@ window.closeDetailsPanel = function (): void {
   const overlay = document.getElementById('details-overlay');
   if (detailsPanel) detailsPanel.classList.add('hidden');
   if (overlay) overlay.classList.add('hidden');
+};
+
+window.activateLeadFromPanel = function (leadId: number): void {
+  if (storedContext) {
+    activateLead(leadId, storedContext).then(() => {
+      window.closeDetailsPanel();
+    });
+  }
+};
+
+window.viewProjectFromLead = function (projectId: number): void {
+  if (storedContext) {
+    // Switch to projects tab
+    storedContext.switchTab('projects');
+    // Show project details after a brief delay to allow tab switch
+    setTimeout(() => {
+      import('./admin-projects').then((module) => {
+        module.showProjectDetails(projectId, storedContext!);
+      });
+    }, 100);
+  }
 };
 
 export async function activateLead(
