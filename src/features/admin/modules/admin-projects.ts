@@ -221,7 +221,8 @@ function populateProjectDetailView(project: LeadProject): void {
     'pd-type': formatProjectType(project.project_type),
     'pd-budget': project.budget_range || '-',
     'pd-timeline': project.timeline || '-',
-    'pd-start-date': project.created_at ? new Date(project.created_at).toLocaleDateString() : '-'
+    'pd-start-date': project.created_at ? new Date(project.created_at).toLocaleDateString() : '-',
+    'pd-client-account-email': project.email || '-'
   };
 
   Object.entries(fields).forEach(([id, value]) => {
@@ -248,15 +249,28 @@ function populateProjectDetailView(project: LeadProject): void {
   const notes = document.getElementById('pd-notes');
   if (notes) {
     const safeDesc = SanitizationUtils.escapeHtml(project.description || '');
-    const safeFeatures = SanitizationUtils.escapeHtml(project.features || '');
 
-    if (project.description) {
-      notes.innerHTML = `<p>${safeDesc}</p>`;
-      if (project.features) {
-        notes.innerHTML += `<h4>Features Requested:</h4><p>${safeFeatures}</p>`;
+    if (project.description || project.features) {
+      let html = '';
+      if (project.description) {
+        html += `<h4>PROJECT DESCRIPTION</h4><p>${safeDesc}</p>`;
       }
+      if (project.features) {
+        // Filter out plan tiers that aren't actual features
+        const excludedValues = ['basic-only', 'standard', 'premium', 'enterprise'];
+        const featuresList = project.features
+          .split(',')
+          .map((f) => f.trim())
+          .filter((f) => f && !excludedValues.includes(f.toLowerCase()))
+          .map((f) => `<span class="feature-tag">${SanitizationUtils.escapeHtml(f)}</span>`)
+          .join('');
+        if (featuresList) {
+          html += `<h4>FEATURES REQUESTED</h4><div class="features-list">${featuresList}</div>`;
+        }
+      }
+      notes.innerHTML = html;
     } else {
-      notes.innerHTML = '<p class="empty-state">No project notes yet.</p>';
+      notes.innerHTML = '';
     }
   }
 

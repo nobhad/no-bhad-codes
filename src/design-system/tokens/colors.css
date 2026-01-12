@@ -312,8 +312,8 @@ html[data-theme="light"] {
   --color-card-text: #333333;
 
   /* Legacy admin colors */
-  --color-admin-bg-start: #1e293b;
-  --color-admin-bg-end: #334155;
+  --color-admin-bg-start: #444444;
+  --color-admin-bg-end: #444444;
   --color-admin-purple: #a855f7;
   --color-admin-purple-dark: #9333ea;
 
