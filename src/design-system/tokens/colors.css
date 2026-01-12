@@ -315,6 +315,7 @@ html[data-theme="light"] {
   --color-admin-bg-start: #1e293b;
   --color-admin-bg-end: #334155;
   --color-admin-purple: #a855f7;
+  --color-admin-purple-dark: #9333ea;
 
   /* Legacy form variables */
   --form-input-border: #333333;

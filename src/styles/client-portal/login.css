@@ -117,7 +117,7 @@
 
 .login-form .btn {
   padding: clamp(10px, 2.5vw, 14px) clamp(20px, 4vw, 28px);
-  border: 2px solid var(--color-dark);
+  border: 2px solid var(--portal-border-dark);
   border-radius: 6px;
   font-size: clamp(0.9rem, 2vw, 1.1rem);
   font-weight: 600;

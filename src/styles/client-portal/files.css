@@ -5,66 +5,66 @@
 
 /* Files Upload Section */
 .files-upload-section {
-  background: var(--cp-bg-dark);
+  background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--cp-radius-lg);
-  padding: var(--cp-spacing-xl);
-  margin-bottom: var(--cp-spacing-2xl);
-  color: var(--cp-text-light);
+  border-radius: var(--portal-radius-lg);
+  padding: var(--portal-spacing-xl);
+  margin-bottom: var(--portal-spacing-2xl);
+  color: var(--portal-text-light);
 }
 
 .files-upload-section h3 {
   font-family: var(--font--acme);
   font-size: 1.1rem;
-  margin: 0 0 var(--cp-spacing-lg) 0;
+  margin: 0 0 var(--portal-spacing-lg) 0;
   text-transform: uppercase;
-  color: var(--cp-text-light);
+  color: var(--portal-text-light);
 }
 
 /* Upload Dropzone */
 .upload-dropzone {
-  border: 2px dashed var(--cp-bg-light);
-  border-radius: var(--cp-radius-md);
-  padding: var(--cp-spacing-2xl);
+  border: 2px dashed var(--portal-bg-light);
+  border-radius: var(--portal-radius-md);
+  padding: var(--portal-spacing-2xl);
   text-align: center;
-  background: var(--cp-bg-medium);
-  color: var(--cp-text-light);
+  background: var(--portal-bg-medium);
+  color: var(--portal-text-light);
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .upload-dropzone:hover {
   border-color: var(--color-primary);
-  background: var(--cp-bg-light);
+  background: var(--portal-bg-light);
 }
 
 .upload-dropzone p {
-  margin: 0 0 var(--cp-spacing-lg) 0;
-  color: var(--cp-text-secondary);
+  margin: 0 0 var(--portal-spacing-lg) 0;
+  color: var(--portal-text-secondary);
 }
 
 /* Files List Section */
 .files-list-section {
-  background: var(--cp-bg-dark);
+  background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--cp-radius-lg);
-  padding: var(--cp-spacing-xl);
-  color: var(--cp-text-light);
+  border-radius: var(--portal-radius-lg);
+  padding: var(--portal-spacing-xl);
+  color: var(--portal-text-light);
   display: flex;
   flex-direction: column;
-  gap: var(--cp-spacing-md);
+  gap: var(--portal-spacing-md);
 }
 
 .files-list-section h3 {
   font-family: var(--font--acme);
   font-size: 1.1rem;
-  margin: 0 0 var(--cp-spacing-lg) 0;
+  margin: 0 0 var(--portal-spacing-lg) 0;
   text-transform: uppercase;
-  color: var(--cp-text-light);
+  color: var(--portal-text-light);
 }
 
 /* Files Filter */
 .files-filter {
-  margin-bottom: var(--cp-spacing-lg);
+  margin-bottom: var(--portal-spacing-lg);
 }
 
 .files-filter .form-select {
@@ -75,38 +75,38 @@
 .files-list {
   display: flex;
   flex-direction: column;
-  gap: var(--cp-spacing-sm);
+  gap: var(--portal-spacing-sm);
 }
 
 /* File Item */
 .file-item {
   display: flex;
   align-items: center;
-  gap: var(--cp-spacing-lg);
-  padding: var(--cp-spacing-lg);
+  gap: var(--portal-spacing-lg);
+  padding: var(--portal-spacing-lg);
   padding-right: 3rem;
-  background: var(--cp-bg-medium);
+  background: var(--portal-bg-medium);
   border: none;
-  border-radius: var(--cp-radius-md);
-  color: var(--cp-text-light);
+  border-radius: var(--portal-radius-md);
+  color: var(--portal-text-light);
   position: relative;
   transition: background-color 0.2s ease;
 }
 
 .file-item:hover {
-  background: var(--cp-bg-light);
+  background: var(--portal-bg-light);
 }
 
 /* Delete button positioned absolutely at end */
 .file-delete-icon {
   position: absolute;
-  right: var(--cp-spacing-lg);
+  right: var(--portal-spacing-lg);
   top: 50%;
   transform: translateY(-50%);
   background: transparent;
   border: none;
   cursor: pointer;
-  color: var(--cp-text-muted);
+  color: var(--portal-text-muted);
   padding: 0.35rem 0.5rem;
   transition: color 0.2s ease;
   display: flex;
@@ -126,30 +126,30 @@
 .file-name {
   flex: 1;
   font-weight: 500;
-  color: var(--cp-text-light);
+  color: var(--portal-text-light);
 }
 
 .file-date {
   font-size: 0.9rem;
-  color: var(--cp-text-secondary);
+  color: var(--portal-text-secondary);
 }
 
 .file-meta {
   font-size: 0.85rem;
-  color: var(--cp-text-secondary);
+  color: var(--portal-text-secondary);
 }
 
 .file-info {
   display: flex;
   flex-direction: column;
-  gap: var(--cp-spacing-xs);
+  gap: var(--portal-spacing-xs);
   flex: 1;
 }
 
 .file-actions {
   display: flex;
   flex-direction: row;
-  gap: var(--cp-spacing-sm);
+  gap: var(--portal-spacing-sm);
   flex-shrink: 0;
   margin-left: auto;
 }
@@ -159,8 +159,8 @@
   min-width: 90px;
   text-align: center;
   justify-content: center;
-  color: var(--cp-text-light);
-  border-color: var(--cp-text-light);
+  color: var(--portal-text-light);
+  border-color: var(--portal-text-light);
   background: transparent;
 }
 
@@ -175,9 +175,9 @@
   color: var(--color-primary);
   text-decoration: none;
   font-weight: 600;
-  padding: var(--cp-spacing-sm) var(--cp-spacing-lg);
+  padding: var(--portal-spacing-sm) var(--portal-spacing-lg);
   border: 1px solid var(--color-primary);
-  border-radius: var(--cp-radius-xs);
+  border-radius: var(--portal-radius-xs);
   transition: all 0.2s ease;
 }
 
@@ -188,38 +188,38 @@
 
 /* Files View (alternate layout) */
 .files-view {
-  padding: var(--cp-spacing-2xl);
+  padding: var(--portal-spacing-2xl);
   overflow-y: auto;
 }
 
 .files-header {
-  margin-bottom: var(--cp-spacing-2xl);
-  padding-bottom: var(--cp-spacing-lg);
+  margin-bottom: var(--portal-spacing-2xl);
+  padding-bottom: var(--portal-spacing-lg);
   border-bottom: 1px solid var(--color-neutral-300);
 }
 
 .files-header h1 {
   font-size: 2rem;
-  margin-bottom: var(--cp-spacing-sm);
+  margin-bottom: var(--portal-spacing-sm);
   color: var(--color-dark);
 }
 
 .files-container {
   display: flex;
   flex-direction: column;
-  gap: var(--cp-spacing-2xl);
+  gap: var(--portal-spacing-2xl);
 }
 
 /* File Section */
 .file-section {
   background: var(--color-neutral-100);
   border: 1px solid var(--color-neutral-300);
-  border-radius: var(--cp-radius-md);
+  border-radius: var(--portal-radius-md);
   overflow: hidden;
 }
 
 .file-section-header {
-  padding: var(--cp-spacing-lg) var(--cp-spacing-xl);
+  padding: var(--portal-spacing-lg) var(--portal-spacing-xl);
   background: var(--color-neutral-200);
   border-bottom: 1px solid var(--color-neutral-300);
 }
@@ -235,7 +235,7 @@
 }
 
 .file-list .file-item {
-  padding: var(--cp-spacing-lg) var(--cp-spacing-xl);
+  padding: var(--portal-spacing-lg) var(--portal-spacing-xl);
   border-bottom: 1px solid var(--color-neutral-300);
   transition: background-color 0.2s ease;
 }
@@ -247,7 +247,7 @@
 /* No Files State */
 .no-files {
   text-align: center;
-  padding: var(--cp-spacing-2xl);
+  padding: var(--portal-spacing-2xl);
   color: var(--color-neutral-600);
   font-style: italic;
 }

@@ -12,9 +12,9 @@
 .portal-card {
   background: var(--color-neutral-100);
   border: 1px solid var(--color-neutral-300);
-  border-radius: var(--cp-radius-md);
-  padding: var(--cp-spacing-xl);
-  margin-bottom: var(--cp-spacing-xl);
+  border-radius: var(--portal-radius-md);
+  padding: var(--portal-spacing-xl);
+  margin-bottom: var(--portal-spacing-xl);
 }
 
 .portal-card:last-child {
@@ -25,11 +25,11 @@
 .portal-card-header {
   font-family: var(--font--acme);
   font-size: 1.1rem;
-  color: var(--color-dark);
-  margin: 0 0 var(--cp-spacing-lg) 0;
+  color: var(--portal-border-dark);
+  margin: 0 0 var(--portal-spacing-lg) 0;
   text-transform: uppercase;
   border-bottom: 1px solid var(--color-neutral-300);
-  padding-bottom: var(--cp-spacing-sm);
+  padding-bottom: var(--portal-spacing-sm);
 }
 
 /* ----- COMPONENT: Buttons ----- */
@@ -39,11 +39,11 @@
 .client-portal-main .btn-secondary,
 .client-portal-main .btn-outline,
 .client-portal-main button[type="submit"] {
-  padding: var(--cp-spacing-md) var(--cp-spacing-xl);
+  padding: var(--portal-spacing-md) var(--portal-spacing-xl);
   background: var(--color-neutral-200);
-  color: var(--color-dark);
-  border: 2px solid var(--color-dark);
-  border-radius: var(--cp-radius-sm);
+  color: var(--portal-border-dark);
+  border: 2px solid var(--portal-border-dark);
+  border-radius: var(--portal-radius-sm);
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
@@ -63,7 +63,7 @@
 
 .portal-btn-sm,
 .client-portal-main .btn-sm {
-  padding: var(--cp-spacing-sm) var(--cp-spacing-lg);
+  padding: var(--portal-spacing-sm) var(--portal-spacing-lg);
   font-size: 0.8rem;
   border-width: 2px;
 }
@@ -81,25 +81,25 @@
 .portal-btn-primary:hover,
 .client-portal-main .btn-primary:hover,
 .client-portal-main button[type="submit"]:hover {
-  background: var(--color-dark);
-  border-color: var(--color-dark);
+  background: var(--portal-border-dark);
+  border-color: var(--portal-border-dark);
 }
 
 .btn-outline {
   background: transparent;
-  color: var(--color-dark);
-  border: 2px solid var(--color-dark);
-  padding: var(--cp-spacing-sm) var(--cp-spacing-lg);
+  color: var(--portal-border-dark);
+  border: 2px solid var(--portal-border-dark);
+  padding: var(--portal-spacing-sm) var(--portal-spacing-lg);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   text-transform: uppercase;
-  border-radius: var(--cp-radius-sm);
+  border-radius: var(--portal-radius-sm);
 }
 
 .btn-outline:hover {
-  background: var(--color-dark);
+  background: var(--portal-border-dark);
   color: var(--color-white);
 }
 
@@ -132,9 +132,9 @@
 [data-page="admin"] textarea,
 [data-page="admin"] select:not(.status-select) {
   width: 100%;
-  padding: var(--cp-spacing-lg) var(--cp-spacing-xl);
+  padding: var(--portal-spacing-lg) var(--portal-spacing-xl);
   border: none;
-  border-radius: var(--cp-radius-lg);
+  border-radius: var(--portal-radius-lg);
   font-size: 1.2rem;
   font-weight: 600;
   background-color: #333333;
@@ -232,8 +232,8 @@
 [data-page="admin"] .form-group label,
 [data-page="admin"] label {
   position: absolute !important;
-  top: var(--cp-spacing-sm) !important;
-  left: var(--cp-spacing-xl) !important;
+  top: var(--portal-spacing-sm) !important;
+  left: var(--portal-spacing-xl) !important;
   z-index: 1 !important;
   font-weight: 400 !important;
   color: #f5f5f5 !important;
@@ -255,8 +255,8 @@
 [data-page="admin"] .form-group textarea,
 [data-page="admin"] .form-group select:not(.status-select) {
   padding-top: 1.75rem;
-  padding-bottom: var(--cp-spacing-sm);
-  padding-left: var(--cp-spacing-xl);
+  padding-bottom: var(--portal-spacing-sm);
+  padding-left: var(--portal-spacing-xl);
 }
 
 /* ----- COMPONENT: Form Row ----- */
@@ -264,7 +264,7 @@
 .client-portal-main .form-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--cp-spacing-lg);
+  gap: var(--portal-spacing-lg);
 }
 
 /* ----- COMPONENT: Password Input with Toggle ----- */
@@ -281,13 +281,13 @@
 
 .portal-password-toggle {
   position: absolute;
-  right: var(--cp-spacing-md);
+  right: var(--portal-spacing-md);
   background: none;
   border: none;
   cursor: pointer;
   font-size: 1.2rem;
   color: var(--color-neutral-500);
-  padding: var(--cp-spacing-xs);
+  padding: var(--portal-spacing-xs);
   transition: color 0.2s ease;
 }
 
@@ -299,12 +299,12 @@
 .portal-list-item {
   display: flex;
   align-items: center;
-  gap: var(--cp-spacing-lg);
-  padding: var(--cp-spacing-lg);
+  gap: var(--portal-spacing-lg);
+  padding: var(--portal-spacing-lg);
   background: var(--color-neutral-100);
   border: 1px solid var(--color-neutral-300);
-  border-radius: var(--cp-radius-sm);
-  margin-bottom: var(--cp-spacing-sm);
+  border-radius: var(--portal-radius-sm);
+  margin-bottom: var(--portal-spacing-sm);
   transition: border-color 0.2s ease;
 }
 
@@ -319,22 +319,22 @@
 /* ----- COMPONENT: Item Actions ----- */
 .portal-item-actions {
   display: flex;
-  gap: var(--cp-spacing-sm);
+  gap: var(--portal-spacing-sm);
   flex-shrink: 0;
 }
 
 /* ----- COMPONENT: Status Badge ----- */
 .portal-badge {
-  padding: var(--cp-spacing-xs) var(--cp-spacing-md);
+  padding: var(--portal-spacing-xs) var(--portal-spacing-md);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  border-radius: var(--cp-radius-xs);
+  border-radius: var(--portal-radius-xs);
 }
 
 .portal-badge-pending {
   background: var(--color-warning);
-  color: var(--color-dark);
+  color: var(--portal-border-dark);
 }
 
 .portal-badge-success {
@@ -346,8 +346,8 @@
 .portal-stat {
   background: var(--color-neutral-100);
   border: 1px solid var(--color-neutral-300);
-  border-radius: var(--cp-radius-md);
-  padding: var(--cp-spacing-xl);
+  border-radius: var(--portal-radius-md);
+  padding: var(--portal-spacing-xl);
   text-align: center;
 }
 
@@ -364,7 +364,7 @@
   display: block;
   font-size: 0.85rem;
   color: var(--color-neutral-600);
-  margin-top: var(--cp-spacing-sm);
+  margin-top: var(--portal-spacing-sm);
   text-transform: uppercase;
 }
 
@@ -373,48 +373,48 @@
   color: var(--color-neutral-600);
   font-style: italic;
   text-align: center;
-  padding: var(--cp-spacing-2xl);
+  padding: var(--portal-spacing-2xl);
 }
 
 /* ----- COMPONENT: Project Cards ----- */
 .portal-project-cards {
   display: block;
-  margin-bottom: var(--cp-spacing-lg);
+  margin-bottom: var(--portal-spacing-lg);
 }
 
 .portal-project-card {
   display: block;
-  background: var(--cp-bg-dark) !important;
+  background: var(--portal-bg-dark) !important;
   border: none !important;
-  border-radius: var(--cp-radius-lg);
-  padding: var(--cp-spacing-xl);
-  color: var(--cp-text-light);
+  border-radius: var(--portal-radius-lg);
+  padding: var(--portal-spacing-xl);
+  color: var(--portal-text-light);
   transition: background-color 0.2s ease;
   position: relative;
 }
 
 .portal-project-card:hover {
-  background: var(--cp-bg-hover);
+  background: var(--portal-bg-hover);
 }
 
 /* No hover on system info cards */
 #tab-system .portal-project-card:hover {
-  background: var(--cp-bg-dark);
+  background: var(--portal-bg-dark);
 }
 
 .portal-project-card h3 {
   font-family: var(--font--acme);
   font-size: 1.2rem;
-  color: var(--cp-text-light);
-  margin: 0 0 var(--cp-spacing-lg) 0;
+  color: var(--portal-text-light);
+  margin: 0 0 var(--portal-spacing-lg) 0;
   text-transform: uppercase;
   padding-right: 120px;
 }
 
 .portal-project-card .project-status {
   position: absolute;
-  top: var(--cp-spacing-xl);
-  right: var(--cp-spacing-xl);
+  top: var(--portal-spacing-xl);
+  right: var(--portal-spacing-xl);
   margin: 0;
   padding: 0;
   font-size: 0;
@@ -428,21 +428,21 @@
 }
 
 .portal-project-card .project-progress {
-  color: var(--cp-text-secondary);
-  margin: 0 0 var(--cp-spacing-sm) 0;
+  color: var(--portal-text-secondary);
+  margin: 0 0 var(--portal-spacing-sm) 0;
 }
 
 .portal-project-card .progress-bar {
-  background: var(--cp-bg-medium);
+  background: var(--portal-bg-medium);
   border: none;
-  border-radius: var(--cp-radius-sm);
+  border-radius: var(--portal-radius-sm);
   height: 12px;
   overflow: hidden;
 }
 
 .portal-project-card .progress-fill {
   background: var(--color-primary);
-  border-radius: var(--cp-radius-sm);
+  border-radius: var(--portal-radius-sm);
   height: 100%;
 }
 

@@ -22,7 +22,7 @@
 [data-page="admin"] .analytics-overview,
 [data-page="admin"] .projects-table-container,
 [data-page="admin"] .admin-table-header {
-  color: #f5f5f5;
+  color: var(--portal-text-light);
 }
 
 [data-page="admin"] .stat-label,
@@ -31,7 +31,7 @@
 [data-page="admin"] .metric-group h3,
 [data-page="admin"] .analytics-section h3,
 [data-page="admin"] .analytics-overview h3 {
-  color: #f5f5f5;
+  color: var(--portal-text-light);
 }
 
 /* Base Admin Styles */
@@ -110,7 +110,7 @@
   padding: var(--space-12);
   width: 100%;
   max-width: 400px;
-  border: 1px solid var(--color-border-primary);
+  border: 1px solid var(--portal-border-dark);
 }
 
 .auth-header {
@@ -184,7 +184,7 @@
 .auth-gate-container {
   background: var(--color-dark);
   border-radius: 8px;
-  border: 1px solid var(--color-neutral-400);
+  border: 1px solid var(--portal-border-medium);
   padding: clamp(1.5rem, 4vw, 2.5rem);
   width: 100%;
   max-width: min(500px, 90vw);
@@ -227,7 +227,7 @@
   width: 100%;
   padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px);
   padding-right: 45px;
-  border: 1px solid var(--color-neutral-400);
+  border: 1px solid var(--portal-border-medium);
   border-radius: 30px;
   font-size: clamp(0.875rem, 2vw, 1rem);
   background-color: var(--color-dark);
@@ -258,7 +258,7 @@
   border: none;
   cursor: pointer;
   font-size: 1.2rem;
-  padding: 5px;
+  padding: var(--space-1);
   opacity: 0.7;
   transition: opacity 0.2s ease;
   color: var(--color-neutral-400);
@@ -273,7 +273,7 @@
 .auth-submit {
   width: 100%;
   padding: clamp(10px, 2.5vw, 14px) clamp(20px, 4vw, 28px);
-  border: 1px solid var(--color-neutral-400);
+  border: 1px solid var(--portal-border-medium);
   border-radius: 30px;
   font-size: clamp(0.9rem, 2vw, 1.1rem);
   font-weight: 600;
@@ -288,7 +288,7 @@
 
 .auth-submit:hover {
   background-color: var(--color-neutral-600);
-  border-color: var(--color-neutral-300);
+  border-color: var(--portal-border-light);
 }
 
 .auth-submit:disabled {
@@ -332,7 +332,7 @@
 
 .admin-nav {
   background: var(--color-bg-secondary);
-  border-bottom: 1px solid var(--color-border-primary);
+  border-bottom: 1px solid var(--portal-border-dark);
   padding: var(--space-4) var(--space-6);
   position: sticky;
   top: 0;
@@ -361,10 +361,10 @@
 
 .tab-btn {
   padding: var(--space-2) var(--space-4);
-  background: #444444;
-  border: 1px solid #666666;
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-bg-light);
   border-radius: var(--border-radius-md);
-  color: #cccccc;
+  color: var(--portal-text-secondary);
   cursor: pointer;
   transition: var(--animation-button-hover);
   font-size: var(--font-size-sm);
@@ -372,15 +372,15 @@
 }
 
 .tab-btn:hover {
-  background: #555555;
-  border-color: #888888;
-  color: #f5f5f5;
+  background: var(--portal-bg-light);
+  border-color: var(--portal-text-muted);
+  color: var(--portal-text-light);
 }
 
 .tab-btn.active {
   background: var(--color-brand-primary);
   border-color: var(--color-brand-primary);
-  color: #ffffff;
+  color: var(--color-white);
 }
 
 /* Tab Content */
@@ -409,7 +409,7 @@
 
 .metric-card {
   background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-primary);
+  border: 1px solid var(--portal-border-dark);
   border-radius: var(--border-radius-card);
   padding: var(--space-6);
   box-shadow: var(--shadow-card-rest);
@@ -458,18 +458,18 @@
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: var(--cp-spacing-lg);
+  gap: var(--portal-spacing-lg);
 }
 
 .chart-container {
-  background: #333333;
-  border: 1px solid var(--color-border-secondary);
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--border-radius-card);
   padding: var(--space-4);
 }
 
 .chart-container h3 {
-  color: #f5f5f5;
+  color: var(--portal-text-light);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--space-3) 0;
@@ -477,21 +477,22 @@
 
 .chart {
   height: 320px;
-  background: #444444;
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--border-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #cccccc;
+  color: var(--portal-text-secondary);
   font-style: italic;
-  padding: 10px;
+  padding: var(--space-2);
   box-sizing: border-box;
 }
 
 .chart canvas,
 #visitors-chart,
 #sources-chart {
-  padding: 6px;
+  padding: var(--space-1);
 }
 
 /* Performance Tab */
@@ -502,15 +503,15 @@
 }
 
 .metric-group {
-  background: #333333;
-  border: 1px solid var(--color-border-secondary);
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--border-radius-card);
   padding: var(--space-4);
-  margin-top: var(--cp-spacing-lg);
+  margin-top: var(--portal-spacing-lg);
 }
 
 .metric-group h3 {
-  color: #f5f5f5;
+  color: var(--portal-text-light);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   margin-bottom: var(--space-2);
@@ -524,15 +525,15 @@
 
 .vital-card,
 [data-page="admin"] .vital-card {
-  background: var(--cp-bg-medium);
-  border: 1px solid #333333;
-  border-radius: var(--cp-radius-sm);
-  padding: var(--cp-spacing-md) var(--cp-spacing-lg);
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-medium);
+  border-radius: var(--border-radius-md);
+  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
   text-align: center;
 }
 
 .vital-card h4 {
-  color: #cccccc;
+  color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
@@ -541,7 +542,7 @@
 }
 
 .vital-value {
-  color: #f5f5f5;
+  color: var(--portal-text-light);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   margin-bottom: var(--space-1);
@@ -582,20 +583,20 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-3) var(--space-4);
-  background: #444444;
+  background: var(--portal-bg-medium);
   border-radius: var(--border-radius-md);
-  border: 1px solid var(--color-border-secondary);
-  color: #f5f5f5;
+  border: 1px solid var(--portal-border-medium);
+  color: var(--portal-text-light);
 }
 
 .timeline-chart {
   height: 200px;
-  background: #333333;
+  background: var(--portal-bg-dark);
   border-radius: var(--border-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #cccccc;
+  color: var(--portal-text-secondary);
   font-style: italic;
 }
 
@@ -616,19 +617,19 @@
 .analytics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
-  gap: var(--cp-spacing-lg);
-  margin-top: var(--cp-spacing-lg);
+  gap: var(--portal-spacing-lg);
+  margin-top: var(--portal-spacing-lg);
 }
 
 .analytics-section {
-  background: #333333;
-  border: 1px solid var(--color-border-secondary);
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--border-radius-card);
   padding: var(--space-4);
 }
 
 .analytics-section h3 {
-  color: #f5f5f5;
+  color: var(--portal-text-light);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--space-3) 0;
@@ -645,10 +646,10 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-2) var(--space-3);
-  background: #444444;
+  background: var(--portal-bg-medium);
   border-radius: var(--border-radius-sm);
-  border: 1px solid var(--color-border-secondary);
-  color: #f5f5f5;
+  border: 1px solid var(--portal-border-medium);
+  color: var(--portal-text-light);
   font-size: var(--font-size-xs);
 }
 
@@ -656,8 +657,8 @@
 .visitors-dashboard {
   display: flex;
   flex-direction: column;
-  gap: var(--cp-spacing-lg);
-  margin-top: var(--cp-spacing-lg);
+  gap: var(--portal-spacing-lg);
+  margin-top: var(--portal-spacing-lg);
 }
 
 .visitors-controls {
@@ -668,8 +669,8 @@
 }
 
 .visitors-table-container {
-  background: #333333;
-  border: 1px solid var(--color-border-secondary);
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--border-radius-card);
   overflow: hidden;
 }
@@ -677,29 +678,29 @@
 .visitors-table {
   width: 100%;
   border-collapse: collapse;
-  background: #333333;
+  background: var(--portal-bg-dark);
 }
 
 .visitors-table th,
 .visitors-table td {
   padding: var(--space-3) var(--space-4);
   text-align: left;
-  background: #333333;
+  background: var(--portal-bg-dark);
 }
 
 .visitors-table th {
-  background: #333333;
-  color: #f5f5f5;
+  background: var(--portal-bg-dark);
+  color: var(--portal-text-light);
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-sm);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-top: 1px solid var(--color-border-secondary);
-  border-bottom: 1px solid var(--color-border-secondary);
+  border-top: 1px solid var(--portal-border-medium);
+  border-bottom: 1px solid var(--portal-border-medium);
 }
 
 .visitors-table td {
-  color: #f5f5f5;
+  color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   border: none;
 }
@@ -740,8 +741,8 @@
 }
 
 .stat-card {
-  background: #333333;
-  border: 1px solid var(--color-border-secondary);
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--border-radius-card);
   padding: var(--space-4);
   display: flex;
@@ -764,7 +765,7 @@
 }
 
 .leads-table-container {
-  background: #333333;
+  background: var(--portal-bg-dark);
   border: none;
   border-radius: 0;
   overflow: hidden;
@@ -775,30 +776,30 @@
   width: 100%;
   border-collapse: collapse;
   min-width: 800px;
-  background: #333333;
+  background: var(--portal-bg-dark);
 }
 
 .leads-table th,
 .leads-table td {
   padding: var(--space-3) var(--space-4);
   text-align: left;
-  background: #333333;
+  background: var(--portal-bg-dark);
 }
 
 .leads-table th {
-  background: #333333;
-  color: #f5f5f5;
+  background: var(--portal-bg-dark);
+  color: var(--portal-text-light);
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-sm);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
-  border-top: 1px solid var(--color-border-secondary);
-  border-bottom: 1px solid var(--color-border-secondary);
+  border-top: 1px solid var(--portal-border-medium);
+  border-bottom: 1px solid var(--portal-border-medium);
 }
 
 .leads-table td {
-  color: #f5f5f5;
+  color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   border: none;
 }
@@ -831,7 +832,7 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   text-transform: capitalize;
-  border: 2px solid var(--color-black);
+  border: 2px solid var(--portal-border-dark);
   color: var(--color-black);
   width: 130px;
   text-align: center;
@@ -868,8 +869,8 @@
 .status-badge.status-new,
 .status-badge.status-on_hold,
 .status-badge.status-on-hold {
-  background: #fbbf24;
-  border-color: var(--color-black);
+  background: var(--color-warning);
+  border-color: var(--portal-border-dark);
   color: var(--color-black);
 }
 
@@ -878,8 +879,8 @@
 .status-badge.status-in_progress,
 .status-badge.status-in-progress,
 .status-badge.status-contacted {
-  background: #3b82f6;
-  border-color: var(--color-black);
+  background: var(--color-info);
+  border-color: var(--portal-border-dark);
   color: var(--color-black);
 }
 
@@ -887,8 +888,8 @@
 .status-badge.status-completed,
 .status-badge.status-converted,
 .status-badge.status-replied {
-  background: #10b981;
-  border-color: var(--color-black);
+  background: var(--color-success);
+  border-color: var(--portal-border-dark);
   color: var(--color-black);
 }
 
@@ -896,32 +897,32 @@
 .status-badge.status-cancelled,
 .status-badge.status-lost,
 .status-badge.status-archived {
-  background: #ef4444;
-  border-color: var(--color-black);
+  background: var(--color-danger);
+  border-color: var(--portal-border-dark);
   color: var(--color-white);
 }
 
 /* Purple status badge */
 .status-badge.status-qualified {
-  background: #8b5cf6;
-  border-color: var(--color-black);
+  background: var(--color-status-review-border);
+  border-color: var(--portal-border-dark);
   color: var(--color-white);
 }
 
 /* Gray status badges (for messages/contacts) */
 .status-badge.status-read {
-  background: #9ca3af;
-  border-color: var(--color-black);
+  background: var(--portal-text-muted);
+  border-color: var(--portal-border-dark);
   color: var(--color-black);
 }
 
 /* Admin Table Card - Consistent styling for data tables */
 .admin-table-card {
-  background: #333333;
-  border: 1px solid var(--color-border-secondary);
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--border-radius-card);
   overflow: hidden;
-  margin-top: var(--cp-spacing-lg);
+  margin-top: var(--portal-spacing-lg);
 }
 
 .admin-table-header {
@@ -929,14 +930,14 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-4) var(--space-5);
-  border-top: 1px solid var(--color-border-secondary);
-  border-bottom: 1px solid var(--color-border-secondary);
-  background: #333333;
+  border-top: 1px solid var(--portal-border-medium);
+  border-bottom: 1px solid var(--portal-border-medium);
+  background: var(--portal-bg-dark);
 }
 
 .admin-table-header h3 {
   margin: 0;
-  color: #f5f5f5;
+  color: var(--portal-text-light);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
 }
@@ -957,7 +958,7 @@
 
 /* Contacts Table - Same styling as Leads Table */
 .contacts-table-container {
-  background: #333333;
+  background: var(--portal-bg-dark);
   border-radius: 0;
   overflow-x: auto;
 }
@@ -966,30 +967,30 @@
   width: 100%;
   border-collapse: collapse;
   min-width: 700px;
-  background: #333333;
+  background: var(--portal-bg-dark);
 }
 
 .contacts-table th,
 .contacts-table td {
   padding: var(--space-3) var(--space-4);
   text-align: left;
-  background: #333333;
+  background: var(--portal-bg-dark);
 }
 
 .contacts-table th {
-  background: #333333;
-  color: #f5f5f5;
+  background: var(--portal-bg-dark);
+  color: var(--portal-text-light);
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-sm);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
-  border-top: 1px solid var(--color-border-secondary);
-  border-bottom: 1px solid var(--color-border-secondary);
+  border-top: 1px solid var(--portal-border-medium);
+  border-bottom: 1px solid var(--portal-border-medium);
 }
 
 .contacts-table td {
-  color: #f5f5f5;
+  color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   border: none;
 }
@@ -1022,12 +1023,14 @@
 [data-page="admin"] .contacts-table select.status-select,
 [data-page="admin"] select.status-select.project-status-select,
 [data-page="admin"] select.status-select.contact-status-select {
-  padding: 8px 32px 8px 16px;
-  border: 1px solid var(--color-black);
+  padding: var(--space-2) var(--space-8) var(--space-2) var(--space-6);
+  border: 1px solid var(--portal-border-dark);
   border-radius: 9999px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 12px center;
+  background-position: right 14px center;
+  width: 160px !important;
+  min-width: 160px !important;
   font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
@@ -1037,8 +1040,6 @@
   -moz-appearance: none;
   height: auto;
   line-height: 1.2;
-  width: auto;
-  min-width: unset;
   box-sizing: border-box;
 }
 
@@ -1047,8 +1048,8 @@
   border-color: var(--color-brand-primary);
 }
 
-/* Status-specific colors for select dropdowns - SAME hex values as badges */
-/* Yellow (#fbbf24) - Awaiting Action */
+/* Status-specific colors for select dropdowns - uses same CSS variables as badges */
+/* Yellow - Awaiting Action */
 [data-page="admin"] .projects-table select.status-select.status-pending,
 [data-page="admin"] .projects-table select.status-select.status-new,
 [data-page="admin"] .projects-table select.status-select.status-on_hold,
@@ -1059,11 +1060,11 @@
 [data-page="admin"] .leads-table select.status-select.status-on-hold,
 [data-page="admin"] .contacts-table select.status-select.status-pending,
 [data-page="admin"] .contacts-table select.status-select.status-new {
-  background-color: #fbbf24;
-  color: #000000;
+  background-color: var(--color-warning);
+  color: var(--color-black);
 }
 
-/* Blue (#3b82f6) - In Progress */
+/* Blue - In Progress */
 [data-page="admin"] .projects-table select.status-select.status-active,
 [data-page="admin"] .projects-table select.status-select.status-in_progress,
 [data-page="admin"] .projects-table select.status-select.status-in-progress,
@@ -1074,41 +1075,41 @@
 [data-page="admin"] .leads-table select.status-select.status-contacted,
 [data-page="admin"] .contacts-table select.status-select.status-active,
 [data-page="admin"] .contacts-table select.status-select.status-contacted {
-  background-color: #3b82f6;
-  color: #000000;
+  background-color: var(--color-info);
+  color: var(--color-black);
 }
 
-/* Green (#10b981) - Success/Complete */
+/* Green - Success/Complete */
 [data-page="admin"] .projects-table select.status-select.status-completed,
 [data-page="admin"] .projects-table select.status-select.status-converted,
 [data-page="admin"] .leads-table select.status-select.status-completed,
 [data-page="admin"] .leads-table select.status-select.status-converted,
 [data-page="admin"] .contacts-table select.status-select.status-replied {
-  background-color: #10b981;
-  color: #000000;
+  background-color: var(--color-success);
+  color: var(--color-black);
 }
 
-/* Red (#ef4444) - Cancelled/Lost */
+/* Red - Cancelled/Lost */
 [data-page="admin"] .projects-table select.status-select.status-cancelled,
 [data-page="admin"] .projects-table select.status-select.status-lost,
 [data-page="admin"] .leads-table select.status-select.status-cancelled,
 [data-page="admin"] .leads-table select.status-select.status-lost,
 [data-page="admin"] .contacts-table select.status-select.status-archived {
-  background-color: #ef4444;
-  color: #ffffff;
+  background-color: var(--color-danger);
+  color: var(--color-white);
 }
 
-/* Purple (#8b5cf6) - Qualified */
+/* Purple - Qualified */
 [data-page="admin"] .projects-table select.status-select.status-qualified,
 [data-page="admin"] .leads-table select.status-select.status-qualified {
-  background-color: #8b5cf6;
-  color: #ffffff;
+  background-color: var(--color-status-review-border);
+  color: var(--color-white);
 }
 
-/* Gray (#9ca3af) - Read */
+/* Gray - Read */
 [data-page="admin"] .contacts-table select.status-select.status-read {
-  background-color: #9ca3af;
-  color: #000000;
+  background-color: var(--portal-text-muted);
+  color: var(--color-black);
 }
 
 /* Clickable table rows */
@@ -1209,7 +1210,7 @@
 
 .admin-modal {
   background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-primary);
+  border: 1px solid var(--portal-border-dark);
   border-radius: var(--border-radius-card);
   box-shadow: var(--shadow-2xl);
   width: 100%;
@@ -1237,7 +1238,7 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-4) var(--space-5);
-  border-bottom: 1px solid var(--color-border-secondary);
+  border-bottom: 1px solid var(--portal-border-medium);
   background: var(--color-bg-primary);
 }
 
@@ -1274,7 +1275,7 @@
   justify-content: flex-end;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
-  border-top: 1px solid var(--color-border-secondary);
+  border-top: 1px solid var(--portal-border-medium);
   background: var(--color-bg-primary);
 }
 
@@ -1289,7 +1290,7 @@
   grid-template-columns: 140px 1fr;
   gap: var(--space-3);
   padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--color-border-secondary);
+  border-bottom: 1px solid var(--portal-border-medium);
 }
 
 .detail-row:last-child {
@@ -1315,7 +1316,7 @@
   background: var(--color-bg-primary);
   padding: var(--space-3);
   border-radius: var(--border-radius-sm);
-  border: 1px solid var(--color-border-secondary);
+  border: 1px solid var(--portal-border-medium);
   max-height: 200px;
   overflow-y: auto;
 }
@@ -1331,7 +1332,7 @@
 
 /* Projects Table - Same styling as Leads/Contacts Tables */
 .projects-table-container {
-  background: #333333;
+  background: var(--portal-bg-dark);
   overflow-x: auto;
 }
 
@@ -1339,14 +1340,14 @@
   width: 100%;
   border-collapse: collapse;
   min-width: 800px;
-  background: #333333;
+  background: var(--portal-bg-dark);
 }
 
 .projects-table th,
 .projects-table td {
   padding: var(--space-3) var(--space-4);
   text-align: left;
-  background: #333333;
+  background: var(--portal-bg-dark);
 }
 
 /* Column widths for projects table */
@@ -1382,19 +1383,19 @@
 }
 
 .projects-table th {
-  background: #333333;
-  color: #f5f5f5;
+  background: var(--portal-bg-dark);
+  color: var(--portal-text-light);
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-sm);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
-  border-top: 1px solid var(--color-border-secondary);
-  border-bottom: 1px solid var(--color-border-secondary);
+  border-top: 1px solid var(--portal-border-medium);
+  border-bottom: 1px solid var(--portal-border-medium);
 }
 
 .projects-table td {
-  color: #f5f5f5;
+  color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   vertical-align: middle;
   border: none;
@@ -1436,15 +1437,16 @@
 .status-dropdown-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
   border: none;
   border-radius: 4px;
   font-size: var(--font-size-sm);
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.2s ease;
-  width: 140px;
+  width: 160px !important;
+  min-width: 160px !important;
   justify-content: space-between;
 }
 
@@ -1467,29 +1469,29 @@
 
 /* Status trigger colors */
 .status-dropdown-trigger.status-pending {
-  background-color: #fbbf24;
-  color: #000000;
+  background-color: var(--color-warning);
+  color: var(--color-black);
 }
 
 .status-dropdown-trigger.status-active,
 .status-dropdown-trigger.status-in_progress {
-  background-color: #3b82f6;
-  color: #ffffff;
+  background-color: var(--color-info);
+  color: var(--color-white);
 }
 
 .status-dropdown-trigger.status-on_hold {
-  background-color: #fbbf24;
-  color: #000000;
+  background-color: var(--color-warning);
+  color: var(--color-black);
 }
 
 .status-dropdown-trigger.status-completed {
-  background-color: #10b981;
-  color: #ffffff;
+  background-color: var(--color-success);
+  color: var(--color-white);
 }
 
 .status-dropdown-trigger.status-cancelled {
-  background-color: #ef4444;
-  color: #ffffff;
+  background-color: var(--color-danger);
+  color: var(--color-white);
 }
 
 /* Dropdown menu */
@@ -1498,7 +1500,7 @@
   top: 100%;
   left: 0;
   margin-top: 0;
-  background: #2a2a2a;
+  background: var(--portal-bg-dark);
   border: none;
   border-radius: 0 0 6px 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -1516,10 +1518,10 @@
 .status-option {
   display: block;
   width: 100%;
-  padding: 8px 12px;
+  padding: var(--space-2) var(--space-3);
   border: none;
   background: transparent;
-  color: #f5f5f5;
+  color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   text-align: left;
   cursor: pointer;
@@ -1527,49 +1529,49 @@
 }
 
 .status-option:hover {
-  background: #3a3a3a;
+  background: var(--portal-bg-hover);
 }
 
 /* Status option left border colors - only left border, no other borders */
 [data-page="admin"] .status-dropdown-menu .status-option.status-pending {
   border: none !important;
-  border-left: 3px solid #fbbf24 !important;
+  border-left: 3px solid var(--color-warning) !important;
   background: transparent !important;
   background-color: transparent !important;
-  color: #f5f5f5 !important;
+  color: var(--portal-text-light) !important;
 }
 
 [data-page="admin"] .status-dropdown-menu .status-option.status-active {
   border: none !important;
-  border-left: 3px solid #3b82f6 !important;
+  border-left: 3px solid var(--color-info) !important;
   background: transparent !important;
   background-color: transparent !important;
 }
 
 [data-page="admin"] .status-dropdown-menu .status-option.status-in_progress {
   border: none !important;
-  border-left: 3px solid #3b82f6 !important;
+  border-left: 3px solid var(--color-info) !important;
   background: transparent !important;
   background-color: transparent !important;
 }
 
 [data-page="admin"] .status-dropdown-menu .status-option.status-on_hold {
   border: none !important;
-  border-left: 3px solid #fbbf24 !important;
+  border-left: 3px solid var(--color-warning) !important;
   background: transparent !important;
   background-color: transparent !important;
 }
 
 [data-page="admin"] .status-dropdown-menu .status-option.status-completed {
   border: none !important;
-  border-left: 3px solid #10b981 !important;
+  border-left: 3px solid var(--color-success) !important;
   background: transparent !important;
   background-color: transparent !important;
 }
 
 [data-page="admin"] .status-dropdown-menu .status-option.status-cancelled {
   border: none !important;
-  border-left: 3px solid #ef4444 !important;
+  border-left: 3px solid var(--color-danger) !important;
   background: transparent !important;
   background-color: transparent !important;
 }
@@ -1577,11 +1579,11 @@
 /* Action buttons in tables */
 /* Unified action button styles for dark theme */
 .action-btn {
-  padding: 8px 16px;
-  border: 1px solid #888888;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--portal-text-muted);
   border-radius: 9999px;
-  background: #444444;
-  color: #f5f5f5;
+  background: var(--portal-bg-medium);
+  color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
@@ -1592,14 +1594,14 @@
 }
 
 .action-btn:hover {
-  background: #555555;
-  border-color: #aaaaaa;
+  background: var(--portal-bg-light);
+  border-color: var(--portal-text-secondary);
 }
 
 .action-btn.action-convert {
   background: var(--color-success);
   border-color: var(--color-success);
-  color: #ffffff;
+  color: var(--color-white);
 }
 
 .action-btn.action-convert:hover {
@@ -1608,34 +1610,34 @@
 }
 
 .action-btn.action-edit {
-  background: #444444;
-  border-color: #888888;
-  color: #f5f5f5;
+  background: var(--portal-bg-medium);
+  border-color: var(--portal-text-muted);
+  color: var(--portal-text-light);
 }
 
 .action-btn.action-edit:hover {
-  background: #555555;
-  border-color: #aaaaaa;
+  background: var(--portal-bg-light);
+  border-color: var(--portal-text-secondary);
 }
 
 .action-btn.action-invite {
   background: var(--color-admin-purple);
   border-color: var(--color-admin-purple);
-  color: #ffffff;
+  color: var(--color-white);
 }
 
 .action-btn.action-invite:hover {
-  background: #9333ea;
-  border-color: #9333ea;
+  background: var(--color-admin-purple-dark);
+  border-color: var(--color-admin-purple-dark);
 }
 
 /* Icon-only buttons (no border) */
 .icon-btn {
   background: transparent;
   border: none;
-  padding: 8px;
+  padding: var(--space-2);
   cursor: pointer;
-  color: #f5f5f5;
+  color: var(--portal-text-light);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1668,7 +1670,7 @@
 
 .set-password-card {
   background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-primary);
+  border: 1px solid var(--portal-border-dark);
   border-radius: var(--border-radius-card);
   padding: var(--space-8);
   box-shadow: var(--shadow-card-rest);
@@ -1747,7 +1749,7 @@
 .set-password-form .form-input {
   width: 100%;
   padding: var(--space-3);
-  border: 1px solid var(--color-border-secondary);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--border-radius-sm);
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
@@ -1808,7 +1810,7 @@
 
 .system-section {
   background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-primary);
+  border: 1px solid var(--portal-border-dark);
   border-radius: var(--border-radius-card);
   padding: var(--space-6);
   box-shadow: var(--shadow-card-rest);
@@ -1831,10 +1833,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--cp-spacing-md) var(--cp-spacing-lg);
-  background: var(--cp-bg-medium);
-  border-radius: var(--cp-radius-sm);
-  border: 1px solid #333333;
+  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  background: var(--portal-bg-medium);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--portal-border-medium);
 }
 
 .status-indicator {
@@ -1898,7 +1900,7 @@
 .loader {
   width: 40px;
   height: 40px;
-  border: 4px solid var(--color-border-secondary);
+  border: 4px solid var(--portal-border-medium);
   border-top: 4px solid var(--color-brand-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -2036,7 +2038,7 @@
 /* Project Overview Card */
 .project-detail-overview {
   background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-primary);
+  border: 1px solid var(--portal-border-dark);
   border-radius: var(--border-radius-card);
   padding: var(--space-6);
   margin-bottom: var(--space-6);
@@ -2077,7 +2079,7 @@
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: var(--space-4);
   padding-top: var(--space-4);
-  border-top: 1px solid var(--color-border-secondary);
+  border-top: 1px solid var(--portal-border-medium);
 }
 
 .meta-item {
@@ -2105,7 +2107,7 @@
   display: flex;
   gap: var(--space-2);
   margin-bottom: var(--space-6);
-  border-bottom: 2px solid var(--color-border-secondary);
+  border-bottom: 2px solid var(--portal-border-medium);
   padding-bottom: var(--space-2);
   overflow-x: auto;
 }
@@ -2113,7 +2115,7 @@
 .pd-tab-btn {
   padding: var(--space-3) var(--space-4);
   background: var(--color-bg-secondary);
-  border: 2px solid var(--color-border-primary);
+  border: 2px solid var(--portal-border-dark);
   border-bottom: none;
   border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
   color: var(--color-text-primary);
@@ -2133,8 +2135,8 @@
 .pd-tab-btn.active {
   color: var(--color-black);
   background: var(--color-brand-primary);
-  border-color: var(--color-black);
-  border-bottom: 3px solid var(--color-black);
+  border-color: var(--portal-border-dark);
+  border-bottom: 3px solid var(--portal-border-dark);
   margin-bottom: -3px;
   font-weight: var(--font-weight-bold);
 }
@@ -2201,7 +2203,7 @@
   gap: var(--space-3);
   padding: var(--space-3);
   background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-secondary);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--border-radius-sm);
 }
 
@@ -2242,7 +2244,7 @@
   background: var(--color-bg-primary);
   padding: var(--space-4);
   border-radius: var(--border-radius-sm);
-  border: 1px solid var(--color-border-secondary);
+  border: 1px solid var(--portal-border-medium);
   min-height: 100px;
   white-space: pre-wrap;
 }
@@ -2262,7 +2264,7 @@
   gap: var(--space-3);
   padding: var(--space-3);
   background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-secondary);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--border-radius-sm);
   margin-bottom: var(--space-2);
 }
@@ -2328,7 +2330,7 @@
   gap: var(--space-3);
   padding: var(--space-3);
   background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-secondary);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--border-radius-sm);
   margin-bottom: var(--space-2);
 }
@@ -2372,7 +2374,7 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   background: var(--color-bg-secondary);
-  padding: 2px 8px;
+  padding: var(--space-px) var(--space-1);
   border-radius: var(--border-radius-sm);
 }
 
@@ -2399,7 +2401,7 @@
 
 /* File Upload Dropzone */
 #pd-upload-dropzone {
-  border: 2px dashed var(--color-border-primary);
+  border: 2px dashed var(--portal-border-dark);
   border-radius: var(--border-radius-md);
   padding: var(--space-8);
   text-align: center;
@@ -2483,15 +2485,15 @@
    Overview Stats Grid
    ================================================ */
 .analytics-overview {
-  background: #333333;
-  border: 1px solid var(--color-border-secondary);
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--border-radius-card);
   padding: var(--space-6);
-  margin-top: var(--cp-spacing-lg);
+  margin-top: var(--portal-spacing-lg);
 }
 
 .analytics-overview h3 {
-  color: #f5f5f5;
+  color: var(--portal-text-light);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--space-3) 0;
@@ -2499,7 +2501,7 @@
 
 /* Admin page recent-activity spacing */
 [data-page="admin"] .recent-activity {
-  margin-top: var(--cp-spacing-lg);
+  margin-top: var(--portal-spacing-lg);
   margin-bottom: 0;
 }
 
@@ -2510,8 +2512,8 @@
 }
 
 .overview-stat {
-  background: #444444;
-  border: 1px solid var(--color-border-secondary);
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--border-radius-md);
   padding: var(--space-4);
   text-align: center;
@@ -2521,13 +2523,13 @@
 }
 
 .overview-stat .stat-number {
-  color: #f5f5f5;
+  color: var(--portal-text-light);
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
 }
 
 .overview-stat .stat-label {
-  color: #cccccc;
+  color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
 }
@@ -2539,7 +2541,7 @@
 /* Consistent spacing for stacked cards/sections */
 [data-page="admin"] .portal-project-card + .portal-project-card,
 [data-page="admin"] .admin-table-card + .admin-table-card {
-  margin-top: var(--cp-spacing-lg);
+  margin-top: var(--portal-spacing-lg);
 }
 
 /* Client selector wrapper - aligns with messages-container */
@@ -2548,7 +2550,7 @@
   flex-direction: column;
   gap: var(--space-2);
   padding: 0;
-  margin-bottom: var(--cp-spacing-lg);
+  margin-bottom: var(--portal-spacing-lg);
   background: transparent;
   box-shadow: none !important;
 }
@@ -2572,10 +2574,10 @@
   width: 100%;
   box-sizing: border-box;
   padding: var(--space-2) var(--space-3);
-  border: 4px solid var(--cp-border-dark);
-  border-radius: var(--cp-radius-lg);
-  background-color: #333333;
-  color: #f5f5f5;
+  border: 4px solid var(--portal-border-dark);
+  border-radius: var(--portal-radius-lg);
+  background-color: var(--portal-bg-dark);
+  color: var(--portal-text-light);
   font-size: var(--font-size-base);
   cursor: pointer;
   text-align: left;
@@ -2617,10 +2619,10 @@
   margin-top: -4px;
   padding: 0;
   list-style: none;
-  background-color: #333333;
-  border: 4px solid var(--cp-border-dark);
+  background-color: var(--portal-bg-dark);
+  border: 4px solid var(--portal-border-dark);
   border-top: none;
-  border-radius: 0 0 var(--cp-radius-lg) var(--cp-radius-lg);
+  border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
   max-height: 300px;
   overflow-y: auto;
   z-index: 100;
@@ -2632,7 +2634,7 @@
 }
 
 [data-page="admin"] .custom-dropdown.open .custom-dropdown-trigger {
-  border-radius: var(--cp-radius-lg) var(--cp-radius-lg) 0 0;
+  border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
   border-color: var(--color-brand-primary);
   border-bottom-color: transparent;
 }
@@ -2643,7 +2645,7 @@
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-2) var(--space-3);
-  color: #f5f5f5;
+  color: var(--portal-text-light);
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
@@ -2661,16 +2663,16 @@
 
 [data-page="admin"] .custom-dropdown-item:hover {
   background-color: var(--color-brand-primary);
-  color: #f5f5f5;
+  color: var(--portal-text-light);
 }
 
 [data-page="admin"] .custom-dropdown-item.selected {
   background-color: rgba(var(--color-brand-primary-rgb, 0, 175, 240), 0.2);
-  color: #f5f5f5;
+  color: var(--portal-text-light);
 }
 
 [data-page="admin"] .custom-dropdown-item:last-child {
-  border-radius: 0 0 calc(var(--cp-radius-lg) - 4px) calc(var(--cp-radius-lg) - 4px);
+  border-radius: 0 0 calc(var(--portal-radius-lg) - 4px) calc(var(--portal-radius-lg) - 4px);
 }
 
 /* Caret color matches text color */
@@ -2684,13 +2686,13 @@
 .system-info-grid {
   display: grid;
   gap: 0;
-  margin-top: var(--cp-spacing-lg);
+  margin-top: var(--portal-spacing-lg);
 }
 
 .system-info-row {
   display: flex;
   justify-content: space-between;
-  padding: var(--cp-spacing-sm) 0;
+  padding: var(--portal-spacing-sm) 0;
 }
 
 .truncate-text {
@@ -2730,7 +2732,7 @@
   width: 400px;
   max-width: 90vw;
   height: 100vh;
-  background: #1a1a1a;
+  background: var(--portal-bg-readonly);
   border-left: none;
   box-shadow: var(--shadow-2xl);
   z-index: 1000;
@@ -2748,11 +2750,11 @@
   align-items: center;
   margin-bottom: var(--space-6);
   padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--cp-border-light);
+  border-bottom: 1px solid var(--portal-border-light);
 }
 
 .details-panel .details-header h3 {
-  color: var(--cp-text-light);
+  color: var(--portal-text-light);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   margin: 0;
@@ -2762,18 +2764,18 @@
   background: none;
   border: none;
   font-size: var(--font-size-2xl);
-  color: var(--cp-text-secondary);
+  color: var(--portal-text-secondary);
   cursor: pointer;
   padding: var(--space-2);
   line-height: 1;
 }
 
 .details-panel .close-btn:hover {
-  color: var(--cp-text-light);
+  color: var(--portal-text-light);
 }
 
 .details-panel .details-content p {
-  color: var(--cp-text-light);
+  color: var(--portal-text-light);
   margin-bottom: var(--space-3);
   font-size: var(--font-size-sm);
 }
@@ -2784,13 +2786,13 @@
 
 .details-panel .details-divider {
   border: none;
-  border-top: 1px solid var(--cp-border-light);
+  border-top: 1px solid var(--portal-border-light);
   margin: var(--space-4) 0;
 }
 
 .details-panel .message-box {
-  background: var(--cp-bg-medium);
-  border: 1px solid var(--cp-border-light);
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-light);
   border-radius: var(--border-radius-md);
   padding: var(--space-4);
   margin-top: var(--space-4);
@@ -2820,10 +2822,10 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--cp-spacing-md) var(--cp-spacing-lg);
-  background: var(--cp-bg-medium);
-  border: 1px solid #333333;
-  border-radius: var(--cp-radius-sm);
+  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-medium);
+  border-radius: var(--border-radius-md);
 }
 
 .status-item .status-icon {
@@ -2834,7 +2836,7 @@
 
 .status-item .status-name {
   flex: 1;
-  color: #f5f5f5;
+  color: var(--portal-text-light);
   font-weight: var(--font-weight-medium);
 }
 
@@ -2856,8 +2858,8 @@
 }
 
 .status-item.status-healthy .status-badge {
-  background: #10b981;
-  border: 1px solid var(--color-black);
+  background: var(--color-success);
+  border: 1px solid var(--portal-border-dark);
   color: var(--color-black);
 }
 
@@ -2866,8 +2868,8 @@
 }
 
 .status-item.status-warning .status-badge {
-  background: #fbbf24;
-  border: 1px solid var(--color-black);
+  background: var(--color-warning);
+  border: 1px solid var(--portal-border-dark);
   color: var(--color-black);
 }
 
@@ -2876,8 +2878,8 @@
 }
 
 .status-item.status-error .status-badge {
-  background: #ef4444;
-  border: 1px solid var(--color-black);
+  background: var(--color-danger);
+  border: 1px solid var(--portal-border-dark);
   color: var(--color-black);
 }
 
@@ -2886,8 +2888,8 @@
 }
 
 .status-item.status-unknown .status-badge {
-  background: #ef4444;
-  border: 1px solid var(--color-black);
+  background: var(--color-danger);
+  border: 1px solid var(--portal-border-dark);
   color: var(--color-black);
 }
 

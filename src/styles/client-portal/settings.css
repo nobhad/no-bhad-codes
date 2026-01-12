@@ -7,27 +7,27 @@
 .settings-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--cp-spacing-2xl);
-  padding: 0 var(--cp-spacing-2xl);
+  gap: var(--portal-spacing-2xl);
+  padding: 0 var(--portal-spacing-2xl);
   max-width: 1100px;
 }
 
 @media (max-width: 900px) {
   .settings-grid {
     grid-template-columns: 1fr;
-    padding: 0 var(--cp-spacing-lg);
+    padding: 0 var(--portal-spacing-lg);
   }
 }
 
 /* Settings Section */
 .settings-section {
-  background: var(--cp-bg-medium) !important;
+  background: var(--portal-bg-medium) !important;
   border: none !important;
-  border-radius: var(--cp-radius-lg);
-  padding: var(--cp-spacing-xl);
+  border-radius: var(--portal-radius-lg);
+  padding: var(--portal-spacing-xl);
   display: flex;
   flex-direction: column;
-  color: var(--cp-text-light);
+  color: var(--portal-text-light);
 }
 
 .settings-section-wide {
@@ -43,11 +43,11 @@
 .settings-section h3 {
   font-family: var(--font--acme);
   font-size: 1.1rem;
-  margin: 0 0 var(--cp-spacing-xl) 0;
+  margin: 0 0 var(--portal-spacing-xl) 0;
   text-transform: uppercase;
-  border-bottom: 1px solid var(--cp-border-medium);
-  padding-bottom: var(--cp-spacing-sm);
-  color: var(--cp-text-light);
+  border-bottom: 1px solid var(--portal-border-medium);
+  padding-bottom: var(--portal-spacing-sm);
+  color: var(--portal-text-light);
 }
 
 .settings-section .settings-form {
@@ -64,13 +64,13 @@
 .billing-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--cp-spacing-xl);
+  gap: var(--portal-spacing-xl);
 }
 
 .billing-column {
   display: flex;
   flex-direction: column;
-  gap: var(--cp-spacing-lg);
+  gap: var(--portal-spacing-lg);
 }
 
 .billing-submit {
@@ -92,19 +92,19 @@
 .settings-form {
   display: flex;
   flex-direction: column;
-  gap: var(--cp-spacing-lg);
+  gap: var(--portal-spacing-lg);
 }
 
 .settings-form .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--cp-spacing-xl);
+  gap: var(--portal-spacing-xl);
 }
 
 .settings-form .form-group {
   display: flex;
   flex-direction: column;
-  gap: var(--cp-spacing-sm);
+  gap: var(--portal-spacing-sm);
 }
 
 .settings-form label {
@@ -129,18 +129,18 @@
 .settings-form .checkbox-group {
   display: flex;
   flex-direction: column;
-  gap: var(--cp-spacing-lg);
+  gap: var(--portal-spacing-lg);
 }
 
 .settings-form .checkbox-item {
   display: flex;
   align-items: center;
-  gap: var(--cp-spacing-md);
+  gap: var(--portal-spacing-md);
   cursor: pointer;
   background: var(--color-neutral-100);
   border: 1px solid var(--color-neutral-300);
-  border-radius: var(--cp-radius-sm);
-  padding: var(--cp-spacing-md) var(--cp-spacing-lg);
+  border-radius: var(--portal-radius-sm);
+  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
   transition: border-color 0.2s ease;
 }
 
@@ -162,27 +162,27 @@
 .settings-form .btn {
   width: 100%;
   background: transparent;
-  color: var(--cp-text-light);
-  border: 2px solid var(--cp-border-light);
-  border-radius: var(--cp-radius-lg);
+  color: var(--portal-text-light);
+  border: 2px solid var(--portal-border-light);
+  border-radius: var(--portal-radius-lg);
 }
 
 .settings-form .btn:hover {
   background: var(--color-primary);
-  color: var(--cp-bg-dark);
+  color: var(--portal-bg-dark);
 }
 
 /* Form Row/Group (generic) */
 .form-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--cp-spacing-lg);
+  gap: var(--portal-spacing-lg);
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: var(--cp-spacing-sm);
+  gap: var(--portal-spacing-sm);
 }
 
 .form-group label {
@@ -200,19 +200,19 @@
 .checkbox-group {
   display: flex;
   flex-direction: column;
-  gap: var(--cp-spacing-md);
+  gap: var(--portal-spacing-md);
   flex: 1;
 }
 
 .checkbox-item {
   display: flex;
   align-items: center;
-  gap: var(--cp-spacing-md);
+  gap: var(--portal-spacing-md);
   cursor: pointer;
   background: var(--color-neutral-100);
   border: 1px solid var(--color-neutral-300);
-  border-radius: var(--cp-radius-sm);
-  padding: var(--cp-spacing-md) var(--cp-spacing-lg);
+  border-radius: var(--portal-radius-sm);
+  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
   flex: 1;
   transition: border-color 0.2s ease;
 }
@@ -229,8 +229,8 @@
 
 /* Settings Header */
 .settings-header {
-  margin-bottom: var(--cp-spacing-2xl);
-  padding-bottom: var(--cp-spacing-xl);
+  margin-bottom: var(--portal-spacing-2xl);
+  padding-bottom: var(--portal-spacing-xl);
   border-bottom: 1px solid var(--color-neutral-300);
 }
 
@@ -238,7 +238,7 @@
   font-family: var(--font--acme);
   font-size: 2rem;
   color: var(--color-dark);
-  margin: 0 0 var(--cp-spacing-sm) 0;
+  margin: 0 0 var(--portal-spacing-sm) 0;
   text-transform: uppercase;
 }
 
@@ -252,12 +252,12 @@
 .settings-content {
   display: flex;
   flex-direction: column;
-  gap: var(--cp-spacing-2xl);
+  gap: var(--portal-spacing-2xl);
 }
 
 /* Settings View */
 .settings-view {
-  padding: var(--cp-spacing-2xl);
+  padding: var(--portal-spacing-2xl);
   overflow-y: auto;
 }
 
@@ -266,10 +266,10 @@
   font-family: var(--font--acme);
   font-size: 1.4rem;
   color: var(--color-dark);
-  margin: 0 0 var(--cp-spacing-xl) 0;
+  margin: 0 0 var(--portal-spacing-xl) 0;
   text-transform: uppercase;
   border-bottom: 1px solid var(--color-neutral-300);
-  padding-bottom: var(--cp-spacing-sm);
+  padding-bottom: var(--portal-spacing-sm);
 }
 
 /* Account Views - Contact, Billing, Notifications */
@@ -279,7 +279,7 @@
   width: 100%;
   height: 100%;
   min-height: calc(100vh - var(--footer-height) - 4rem);
-  padding: var(--cp-spacing-2xl);
+  padding: var(--portal-spacing-2xl);
   overflow-y: auto;
   box-sizing: border-box;
 }
@@ -287,8 +287,8 @@
 .contact-view-header,
 .billing-view-header,
 .notifications-view-header {
-  margin-bottom: var(--cp-spacing-2xl);
-  padding-bottom: var(--cp-spacing-xl);
+  margin-bottom: var(--portal-spacing-2xl);
+  padding-bottom: var(--portal-spacing-xl);
   border-bottom: 1px solid var(--color-neutral-300);
 }
 
@@ -298,7 +298,7 @@
   font-family: var(--font--acme);
   font-size: 2rem;
   color: var(--color-dark);
-  margin: 0 0 var(--cp-spacing-sm) 0;
+  margin: 0 0 var(--portal-spacing-sm) 0;
   text-transform: uppercase;
 }
 
@@ -323,8 +323,8 @@
 .notifications-view-section {
   background: var(--color-neutral-100);
   border: 1px solid var(--color-neutral-300);
-  border-radius: var(--cp-radius-md);
-  padding: var(--cp-spacing-2xl);
+  border-radius: var(--portal-radius-md);
+  padding: var(--portal-spacing-2xl);
 }
 
 .contact-view-section h2,
@@ -333,8 +333,8 @@
   font-family: var(--font--acme);
   font-size: 1.4rem;
   color: var(--color-dark);
-  margin: 0 0 var(--cp-spacing-xl) 0;
+  margin: 0 0 var(--portal-spacing-xl) 0;
   text-transform: uppercase;
   border-bottom: 1px solid var(--color-neutral-300);
-  padding-bottom: var(--cp-spacing-sm);
+  padding-bottom: var(--portal-spacing-sm);
 }

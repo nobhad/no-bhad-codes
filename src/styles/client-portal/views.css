@@ -283,7 +283,7 @@
 .content-action-btn {
   background: var(--color-neutral-200);
   color: var(--color-dark);
-  border: 2px solid var(--color-dark);
+  border: 2px solid var(--portal-border-dark);
   padding: 0.5rem 1rem;
   border-radius: 6px;
   font-weight: 600;

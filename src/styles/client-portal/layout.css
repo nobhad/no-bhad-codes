@@ -75,35 +75,35 @@
   --color-border: #333333;
 
   /* Portal dark theme colors */
-  --cp-text-light: #f5f5f5;
-  --cp-text-secondary: #cccccc;
-  --cp-text-muted: #999999;
-  --cp-text-dark: #1a1a1a;
+  --portal-text-light: #f5f5f5;
+  --portal-text-secondary: #cccccc;
+  --portal-text-muted: #999999;
+  --portal-text-dark: #1a1a1a;
 
-  --cp-bg-dark: #333333;
-  --cp-bg-medium: #444444;
-  --cp-bg-light: #555555;
-  --cp-bg-hover: #3a3a3a;
-  --cp-bg-readonly: #222222;
+  --portal-bg-dark: #333333;
+  --portal-bg-medium: #444444;
+  --portal-bg-light: #555555;
+  --portal-bg-hover: #3a3a3a;
+  --portal-bg-readonly: #222222;
 
-  --cp-border-dark: #333333;
-  --cp-border-medium: #444444;
-  --cp-border-light: #f5f5f5;
+  --portal-border-dark: #333333;
+  --portal-border-medium: #666666;
+  --portal-border-light: #f5f5f5;
 
   /* Border radius */
-  --cp-radius-xs: 4px;
-  --cp-radius-sm: 6px;
-  --cp-radius-md: 8px;
-  --cp-radius-lg: 12px;
-  --cp-radius-pill: 50px;
+  --portal-radius-xs: 4px;
+  --portal-radius-sm: 6px;
+  --portal-radius-md: 8px;
+  --portal-radius-lg: 12px;
+  --portal-radius-pill: 50px;
 
   /* Spacing */
-  --cp-spacing-xs: 0.25rem;
-  --cp-spacing-sm: 0.5rem;
-  --cp-spacing-md: 0.75rem;
-  --cp-spacing-lg: 1rem;
-  --cp-spacing-xl: 1.5rem;
-  --cp-spacing-2xl: 2rem;
+  --portal-spacing-xs: 0.25rem;
+  --portal-spacing-sm: 0.5rem;
+  --portal-spacing-md: 0.75rem;
+  --portal-spacing-lg: 1rem;
+  --portal-spacing-xl: 1.5rem;
+  --portal-spacing-2xl: 2rem;
 }
 
 /* Remove ALL shadows from dashboard pages */
