@@ -132,7 +132,7 @@ button.stat-card,
 }
 
 .stat-card-clickable:hover {
-  background: var(--portal-bg-medium) !important;
+  background: #2a2a2a !important;
 }
 
 .stat-card-clickable:hover .stat-number {

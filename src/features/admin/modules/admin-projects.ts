@@ -210,7 +210,7 @@ export function showProjectDetails(
 
 function populateProjectDetailView(project: LeadProject): void {
   const titleEl = document.getElementById('project-detail-title');
-  if (titleEl) titleEl.textContent = project.project_name || 'Project Details';
+  if (titleEl) titleEl.textContent = 'Project Details';
 
   // Overview fields
   const fields: Record<string, string> = {
