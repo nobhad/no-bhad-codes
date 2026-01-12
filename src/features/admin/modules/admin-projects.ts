@@ -133,20 +133,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
           <td>${project.budget_range || '-'}</td>
           <td>${project.timeline || '-'}</td>
           <td>
-            <div class="custom-status-dropdown" data-id="${project.id}" data-status="${status}" onclick="event.stopPropagation()">
-              <button type="button" class="status-dropdown-trigger status-${status}">
-                <span class="status-text">${statusLabels[status] || 'Pending'}</span>
-                <span class="status-arrow">▾</span>
-              </button>
-              <div class="status-dropdown-menu">
-                <button type="button" class="status-option status-pending" data-value="pending">Pending</button>
-                <button type="button" class="status-option status-active" data-value="active">Active</button>
-                <button type="button" class="status-option status-in_progress" data-value="in_progress">In Progress</button>
-                <button type="button" class="status-option status-on_hold" data-value="on_hold">On Hold</button>
-                <button type="button" class="status-option status-completed" data-value="completed">Completed</button>
-                <button type="button" class="status-option status-cancelled" data-value="cancelled">Cancelled</button>
-              </div>
-            </div>
+            <span class="status-badge status-${status}">${statusLabels[status] || 'Pending'}</span>
           </td>
         </tr>
       `;
@@ -160,79 +147,12 @@ function setupProjectTableHandlers(ctx: AdminDashboardContext): void {
   const tableBody = document.getElementById('projects-table-body');
   if (!tableBody) return;
 
-  // Row click handlers
+  // Row click handlers - clicking row opens project details
   const rows = tableBody.querySelectorAll('tr[data-project-id]');
   rows.forEach((row) => {
-    row.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      // Ignore clicks on dropdown elements
-      if (target.closest('.custom-status-dropdown')) return;
+    row.addEventListener('click', () => {
       const projectId = parseInt((row as HTMLElement).dataset.projectId || '0');
       showProjectDetails(projectId, ctx);
-    });
-  });
-
-  // Custom status dropdown handlers
-  const dropdowns = tableBody.querySelectorAll('.custom-status-dropdown');
-  dropdowns.forEach((dropdown) => {
-    const trigger = dropdown.querySelector('.status-dropdown-trigger');
-    const options = dropdown.querySelectorAll('.status-option');
-
-    // Function to update which option is hidden (current status)
-    const updateHiddenOption = () => {
-      const currentStatus = (dropdown as HTMLElement).dataset.status || 'pending';
-      options.forEach((opt) => {
-        const optValue = (opt as HTMLElement).dataset.value;
-        (opt as HTMLElement).style.display = optValue === currentStatus ? 'none' : 'block';
-      });
-    };
-
-    // Toggle dropdown on trigger click
-    trigger?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      // Close all other dropdowns first
-      document.querySelectorAll('.custom-status-dropdown.open').forEach((d) => {
-        if (d !== dropdown) d.classList.remove('open');
-      });
-      // Update hidden option before opening
-      updateHiddenOption();
-      dropdown.classList.toggle('open');
-    });
-
-    // Handle option selection
-    options.forEach((option) => {
-      option.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const newStatus = (option as HTMLElement).dataset.value || 'pending';
-        const id = (dropdown as HTMLElement).dataset.id;
-        const oldStatus = (dropdown as HTMLElement).dataset.status || 'pending';
-
-        if (id && newStatus !== oldStatus) {
-          // Update dropdown state
-          (dropdown as HTMLElement).dataset.status = newStatus;
-          trigger?.classList.remove(`status-${oldStatus}`);
-          trigger?.classList.add(`status-${newStatus}`);
-
-          // Update trigger text
-          const statusText = trigger?.querySelector('.status-text');
-          if (statusText) {
-            statusText.textContent = (option as HTMLElement).textContent || 'Pending';
-          }
-
-          // Update project status
-          updateProjectStatus(parseInt(id), newStatus, ctx);
-        }
-
-        // Close dropdown
-        dropdown.classList.remove('open');
-      });
-    });
-  });
-
-  // Close dropdowns when clicking outside
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.custom-status-dropdown.open').forEach((d) => {
-      d.classList.remove('open');
     });
   });
 }

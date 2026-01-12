@@ -831,14 +831,29 @@ Comprehensive optimization of GSAP animations and page transitions:
 
 ---
 
-## TODOs
+## TODOs (Prioritized)
 
-### Features
+### Phase 1: Core Admin Functionality (High Priority)
 
-- [ ] Add animated section between about and contact to balance spacing
+1. [x] Leads need to be responded to and USER needs to turn into projects (added /api/admin/leads/:id/activate endpoint)
+2. [x] Build out project view page (exists, removed inline status dropdown from table)
+3. [x] Status needs to be changed on individual project page (works via Settings tab, uses notifications)
 
-### Code Quality (In Progress - Phase 3)
+### Phase 2: Admin UI Polish (Medium Priority)
 
+4. [ ] Leads Management - cards should filter table
+5. [ ] Fix tooltip for truncated text
+6. [ ] Better button design for portal sidebar
+7. [ ] Fix mobile view for portal
+
+### Phase 3: Main Site Features (Medium Priority)
+
+8. [ ] SEO optimization
+
+### Phase 4: Code Quality (Ongoing - can be done alongside other work)
+
+- [x] Deep dive to identify inconsistencies with admin portal and make uniform
+- [x] Font size for sidebar should match current size of signout button in sidebar
 - [x] Extract duplicate hero logic from `page-hero.ts` and `about-hero.ts` (~400 lines)
 - [x] Split `admin-dashboard.ts` (2,879 lines) - Partially complete (auth & project details extracted)
 - [ ] Complete `admin-dashboard.ts` split (remove duplicate methods, create UI handlers file)
@@ -847,6 +862,10 @@ Comprehensive optimization of GSAP animations and page transitions:
 - [ ] Split `terminal-intake.ts` (1,617 lines → multiple files)
 - [ ] Split `contact-animation.ts` (880 lines → multiple files)
 - [ ] Split `visitor-tracking.ts` (836 lines → multiple files)
+
+### Phase 5: Documentation (After CMS complete)
+
+9. [ ] Take screenshots of CMS for projects on main site (once complete)
 
 ---
 
