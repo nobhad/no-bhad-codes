@@ -223,4 +223,5 @@ export interface AdminDashboardContext {
   isDemo: () => boolean;
   showNotification: (message: string, type: 'success' | 'error' | 'info') => void;
   refreshData: () => Promise<void>;
+  switchTab: (tab: string) => void;
 }
