@@ -2037,108 +2037,112 @@
 
 /* Project Overview Card */
 .project-detail-overview {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--portal-border-dark);
-  border-radius: var(--border-radius-card);
-  padding: var(--space-6);
-  margin-bottom: var(--space-6);
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-medium);
+  border-radius: var(--portal-radius-lg);
+  padding: var(--portal-spacing-xl);
+  margin-bottom: var(--portal-spacing-xl);
+  color: var(--portal-text-light);
 }
 
 .project-detail-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--space-4);
-  gap: var(--space-4);
+  margin-bottom: var(--portal-spacing-lg);
+  gap: var(--portal-spacing-lg);
 }
 
 .project-detail-info h3 {
-  margin: 0 0 var(--space-2) 0;
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
+  margin: 0 0 var(--portal-spacing-sm) 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--portal-text-light);
+  font-family: var(--font--acme);
 }
 
 .project-detail-info p {
-  margin: var(--space-1) 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
+  margin: var(--portal-spacing-xs) 0;
+  color: var(--portal-text-secondary);
+  font-size: 0.9rem;
 }
 
 .project-client-info {
-  color: var(--color-text-primary) !important;
+  color: var(--portal-text-light) !important;
 }
 
 .project-detail-status .status-badge {
-  font-size: var(--font-size-sm);
-  padding: var(--space-2) var(--space-3);
+  font-size: 0.85rem;
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
 }
 
 .project-detail-meta {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--space-4);
-  padding-top: var(--space-4);
+  gap: var(--portal-spacing-lg);
+  padding-top: var(--portal-spacing-lg);
   border-top: 1px solid var(--portal-border-medium);
 }
 
 .meta-item {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--portal-spacing-xs);
 }
 
 .meta-label {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-weight: var(--font-weight-medium);
+  font-weight: 500;
 }
 
 .meta-value {
-  font-size: var(--font-size-base);
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-semibold);
+  font-size: 0.95rem;
+  color: var(--portal-text-light);
+  font-weight: 600;
 }
 
 /* Project Detail Tabs */
 .project-detail-tabs {
   display: flex;
-  gap: var(--space-2);
-  margin-bottom: var(--space-6);
+  gap: var(--portal-spacing-sm);
+  margin-bottom: var(--portal-spacing-xl);
   border-bottom: 2px solid var(--portal-border-medium);
-  padding-bottom: var(--space-2);
+  padding-bottom: var(--portal-spacing-sm);
   overflow-x: auto;
 }
 
 .pd-tab-btn {
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-bg-secondary);
+  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  background: var(--portal-bg-dark);
   border: 2px solid var(--portal-border-dark);
   border-bottom: none;
-  border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0;
+  color: var(--portal-text-light);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
 }
 
 .pd-tab-btn:hover {
-  color: var(--color-text-primary);
-  background: var(--color-bg-tertiary, #333);
-  border-color: var(--color-brand-primary);
+  color: var(--portal-text-light);
+  background: var(--portal-bg-medium);
+  border-color: var(--color-primary);
 }
 
 .pd-tab-btn.active {
-  color: var(--color-black);
-  background: var(--color-brand-primary);
+  color: var(--portal-text-dark);
+  background: var(--color-primary);
   border-color: var(--portal-border-dark);
   border-bottom: 3px solid var(--portal-border-dark);
   margin-bottom: -3px;
-  font-weight: var(--font-weight-bold);
+  font-weight: 700;
 }
 
 /* Project Detail Tab Content */
@@ -2155,38 +2159,40 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--portal-spacing-lg);
 }
 
 .card-header-with-action h3 {
   margin: 0;
+  color: var(--portal-text-light);
+  font-family: var(--font--acme);
 }
 
 /* Progress Display */
 .project-progress-display {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--portal-spacing-lg);
 }
 
 .progress-percentage {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-brand-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
   min-width: 60px;
 }
 
 .project-progress-display .progress-bar {
   flex: 1;
   height: 12px;
-  background: var(--color-bg-primary);
-  border-radius: var(--border-radius-full);
+  background: var(--portal-bg-light);
+  border-radius: var(--portal-radius-pill);
   overflow: hidden;
 }
 
 .project-progress-display .progress-fill {
   height: 100%;
-  background: var(--color-brand-primary);
+  background: var(--color-primary);
   transition: width 0.3s ease;
 }
 
@@ -2194,17 +2200,17 @@
 .milestones-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--portal-spacing-md);
 }
 
 .milestone-item {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  background: var(--color-bg-primary);
+  gap: var(--portal-spacing-md);
+  padding: var(--portal-spacing-md);
+  background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border-medium);
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--portal-radius-md);
 }
 
 .milestone-checkbox {
@@ -2219,41 +2225,42 @@
 }
 
 .milestone-title {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-  margin: 0 0 var(--space-1) 0;
+  font-weight: 500;
+  color: var(--portal-text-light);
+  margin: 0 0 var(--portal-spacing-xs) 0;
 }
 
 .milestone-item.completed .milestone-title {
   text-decoration: line-through;
-  color: var(--color-text-secondary);
+  color: var(--portal-text-secondary);
 }
 
 .milestone-due {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
 }
 
 .milestone-actions {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--portal-spacing-sm);
 }
 
 /* Project Notes */
 .project-notes {
-  background: var(--color-bg-primary);
-  padding: var(--space-4);
-  border-radius: var(--border-radius-sm);
+  background: var(--portal-bg-medium);
+  padding: var(--portal-spacing-lg);
+  border-radius: var(--portal-radius-md);
   border: 1px solid var(--portal-border-medium);
   min-height: 100px;
   white-space: pre-wrap;
+  color: var(--portal-text-light);
 }
 
 /* Empty State */
 .empty-state {
   text-align: center;
-  color: var(--color-text-secondary);
-  padding: var(--space-6);
+  color: var(--portal-text-secondary);
+  padding: var(--portal-spacing-xl);
   font-style: italic;
 }
 
@@ -2261,17 +2268,17 @@
 #pd-files-list .file-item {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  background: var(--color-bg-primary);
+  gap: var(--portal-spacing-md);
+  padding: var(--portal-spacing-md);
+  background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border-medium);
-  border-radius: var(--border-radius-sm);
-  margin-bottom: var(--space-2);
+  border-radius: var(--portal-radius-md);
+  margin-bottom: var(--portal-spacing-sm);
 }
 
 #pd-files-list .file-icon {
   flex-shrink: 0;
-  color: var(--color-text-secondary);
+  color: var(--portal-text-secondary);
 }
 
 #pd-files-list .file-info {
@@ -2281,45 +2288,46 @@
 
 #pd-files-list .file-name {
   display: block;
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
+  font-weight: 500;
+  color: var(--portal-text-light);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 #pd-files-list .file-meta {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
 }
 
 #pd-files-list .file-actions {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--portal-spacing-sm);
 }
 
 /* Messages in Project Detail */
 #pd-messages-thread {
   max-height: 400px;
   overflow-y: auto;
-  padding: var(--space-4);
-  background: var(--color-bg-primary);
-  border-radius: var(--border-radius-sm);
-  margin-bottom: var(--space-4);
+  padding: var(--portal-spacing-lg);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-md);
+  margin-bottom: var(--portal-spacing-lg);
 }
 
 /* Client Account Info */
 .client-account-info {
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--portal-spacing-lg);
+  color: var(--portal-text-light);
 }
 
 .client-account-info p {
-  margin: var(--space-2) 0;
+  margin: var(--portal-spacing-sm) 0;
 }
 
 .client-account-actions {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--portal-spacing-sm);
   flex-wrap: wrap;
 }
 
@@ -2327,12 +2335,12 @@
 .invoice-item {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  background: var(--color-bg-primary);
+  gap: var(--portal-spacing-md);
+  padding: var(--portal-spacing-md);
+  background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border-medium);
-  border-radius: var(--border-radius-sm);
-  margin-bottom: var(--space-2);
+  border-radius: var(--portal-radius-md);
+  margin-bottom: var(--portal-spacing-sm);
 }
 
 .invoice-info {
@@ -2342,24 +2350,24 @@
 
 .invoice-info strong {
   display: block;
-  color: var(--color-text-primary);
+  color: var(--portal-text-light);
 }
 
 .invoice-date {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
 }
 
 .invoice-amount {
-  font-weight: var(--font-weight-bold);
-  color: var(--color-brand-primary);
+  font-weight: 700;
+  color: var(--color-primary);
   min-width: 80px;
   text-align: right;
 }
 
 .invoice-actions {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--portal-spacing-sm);
 }
 
 /* Enhanced Milestone Styles */
@@ -2367,21 +2375,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--portal-spacing-sm);
 }
 
 .milestone-due-date {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  background: var(--color-bg-secondary);
-  padding: var(--space-px) var(--space-1);
-  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+  background: var(--portal-bg-dark);
+  padding: 2px var(--portal-spacing-xs);
+  border-radius: var(--portal-radius-sm);
 }
 
 .milestone-description {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  margin: var(--space-2) 0;
+  font-size: 0.85rem;
+  color: var(--portal-text-secondary);
+  margin: var(--portal-spacing-sm) 0;
 }
 
 .milestone-deliverables {
