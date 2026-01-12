@@ -384,6 +384,22 @@ class AdminDashboard {
       });
     });
 
+    // Filter stat cards for leads and projects tables
+    const filterCards = document.querySelectorAll('.stat-card-clickable[data-filter]');
+    filterCards.forEach((card) => {
+      card.addEventListener('click', () => {
+        const filter = (card as HTMLElement).dataset.filter;
+        const table = (card as HTMLElement).dataset.table;
+        if (filter && table) {
+          this.filterTable(table, filter);
+          // Update active state on filter cards
+          const siblingCards = document.querySelectorAll(`.stat-card-clickable[data-table="${table}"]`);
+          siblingCards.forEach((c) => c.classList.remove('active'));
+          card.classList.add('active');
+        }
+      });
+    });
+
     // Mobile menu toggle
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
     if (mobileMenuToggle) {
@@ -966,7 +982,7 @@ class AdminDashboard {
   private populateProjectDetailView(project: any): void {
     // Header info
     const titleEl = document.getElementById('project-detail-title');
-    if (titleEl) titleEl.textContent = project.project_name || 'Project Details';
+    if (titleEl) titleEl.textContent = 'Project Details';
 
     // Overview card
     const projectName = document.getElementById('pd-project-name');
@@ -2162,6 +2178,42 @@ class AdminDashboard {
 
     // Load tab-specific data (modules handle all tab data loading)
     this.loadTabData(tabName);
+  }
+
+  private filterTable(tableName: string, filter: string): void {
+    let tableBody: HTMLElement | null = null;
+    let statusColumnIndex = -1;
+
+    if (tableName === 'leads') {
+      tableBody = document.getElementById('leads-table-body');
+      statusColumnIndex = 6; // Status column is 7th (0-indexed: 6)
+    } else if (tableName === 'projects') {
+      tableBody = document.getElementById('projects-table-body');
+      statusColumnIndex = 4; // Status column is 5th (0-indexed: 4)
+    }
+
+    if (!tableBody) return;
+
+    const rows = tableBody.querySelectorAll('tr');
+    rows.forEach((row) => {
+      if (filter === 'all') {
+        row.style.display = '';
+        return;
+      }
+
+      const statusCell = row.querySelectorAll('td')[statusColumnIndex];
+      if (statusCell) {
+        const statusText = statusCell.textContent?.toLowerCase().replace(/\s+/g, '_') || '';
+        const filterNormalized = filter.toLowerCase();
+
+        // Match status text with filter
+        const matches = statusText.includes(filterNormalized) ||
+                       (filterNormalized === 'in_progress' && statusText.includes('progress')) ||
+                       (filterNormalized === 'on_hold' && statusText.includes('hold'));
+
+        row.style.display = matches ? '' : 'none';
+      }
+    });
   }
 
   private async loadDashboardData(): Promise<void> {

@@ -63,7 +63,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   private populateProjectDetailView(project: any): void {
     // Header info
     const titleEl = document.getElementById('project-detail-title');
-    if (titleEl) titleEl.textContent = project.project_name || 'Project Details';
+    if (titleEl) titleEl.textContent = 'Project Details';
 
     // Overview card
     const projectName = document.getElementById('pd-project-name');
@@ -121,7 +121,16 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const settingProgress = document.getElementById('pd-setting-progress') as HTMLInputElement;
 
     if (settingName) settingName.value = project.project_name || '';
-    if (settingStatus) settingStatus.value = project.status || 'pending';
+    if (settingStatus) {
+      settingStatus.value = project.status || 'pending';
+      // Update status dropdown color
+      this.updateStatusDropdownColor(settingStatus);
+      // Add change listener if not already added
+      if (!settingStatus.dataset.listenerAdded) {
+        settingStatus.addEventListener('change', () => this.updateStatusDropdownColor(settingStatus));
+        settingStatus.dataset.listenerAdded = 'true';
+      }
+    }
     if (settingProgress) settingProgress.value = (project.progress || 0).toString();
 
     // Client account info in settings
@@ -225,6 +234,19 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     // File upload handlers
     this.setupFileUploadHandlers();
+  }
+
+  /**
+   * Update status dropdown color based on selected value
+   */
+  private updateStatusDropdownColor(select: HTMLSelectElement): void {
+    // Remove all status classes
+    select.classList.remove('status-pending', 'status-active', 'status-on_hold', 'status-completed', 'status-cancelled');
+    // Add the appropriate status class
+    const status = select.value;
+    if (status) {
+      select.classList.add(`status-${status}`);
+    }
   }
 
   /**
