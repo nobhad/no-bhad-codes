@@ -2287,6 +2287,7 @@
 .pd-tab-content .portal-shadow,
 .pd-tab-content .files-upload-section,
 .pd-tab-content .files-list-section,
+.pd-tab-content .intake-form-section,
 .pd-tab-content .messages-container,
 .pd-tab-content .recent-activity,
 .pd-tab-content .settings-section,
@@ -2320,6 +2321,26 @@
   display: flex;
   gap: var(--portal-spacing-xl);
   margin: 0;
+}
+
+/* Messages container - add border back */
+#pd-tab-messages .messages-container {
+  border: 3px solid #000000 !important;
+  border-radius: var(--portal-radius-md) !important;
+  padding: 0 !important;
+  background: #E0E0E0 !important;
+}
+
+/* Divider between messages thread and compose area */
+#pd-tab-messages .message-compose {
+  border-top: 3px solid #000000;
+  margin-top: var(--portal-spacing-lg);
+  padding-top: var(--portal-spacing-lg);
+}
+
+/* Send message button - thicker border */
+#pd-tab-messages .message-compose .btn {
+  border: 3px solid #000000;
 }
 
 /* Settings tab sections - darker background and equal heights */
