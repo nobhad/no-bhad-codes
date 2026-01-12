@@ -177,8 +177,7 @@
 [data-page="admin"] textarea:focus,
 [data-page="admin"] select:not(.status-select):focus {
   outline: none;
-  background-color: #444444;
-  color: #f5f5f5;
+  border-color: var(--color-primary);
 }
 
 .portal-input[readonly],

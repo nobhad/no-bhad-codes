@@ -34,12 +34,41 @@
   color: var(--portal-text-light);
 }
 
+/* ================================================
+   ADMIN PORTAL - GLOBAL BUTTON STYLES
+   ================================================ */
+[data-page="admin"] .btn,
+[data-page="admin"] .btn-secondary,
+[data-page="admin"] button[type="submit"] {
+  background: transparent;
+  color: var(--portal-text-light);
+  border: 2px solid var(--portal-border-light);
+  border-radius: var(--portal-radius-lg);
+  padding: var(--portal-spacing-md) var(--portal-spacing-xl);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+[data-page="admin"] .btn:hover,
+[data-page="admin"] .btn-secondary:hover,
+[data-page="admin"] button[type="submit"]:hover {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark);
+  border-color: var(--color-primary);
+}
+
 /* Base Admin Styles */
 .admin-body {
   background: linear-gradient(135deg, var(--color-admin-bg-start) 0%, var(--color-admin-bg-end) 100%);
   color: var(--color-text-primary);
   min-height: 100vh;
   font-family: "Inter", sans-serif;
+}
+
+/* Admin Dashboard Content - Dark background */
+[data-page="admin"] .dashboard-content {
+  background: #444444 !important;
 }
 
 /* Auth Gate - matches main site body background */
@@ -2109,18 +2138,15 @@
   display: flex;
   gap: var(--portal-spacing-sm);
   margin-bottom: var(--portal-spacing-xl);
-  border-bottom: 2px solid var(--portal-border-medium);
-  padding-bottom: var(--portal-spacing-sm);
   overflow-x: auto;
 }
 
 .pd-tab-btn {
-  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
-  background: var(--portal-bg-dark);
-  border: 2px solid var(--portal-border-dark);
-  border-bottom: none;
+  padding: var(--portal-spacing-md) var(--portal-spacing-xl);
+  background: var(--portal-bg-medium);
+  border: none;
   border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0;
-  color: var(--portal-text-light);
+  color: var(--portal-text-secondary);
   font-size: 0.85rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -2128,21 +2154,28 @@
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
+  position: relative;
 }
 
 .pd-tab-btn:hover {
   color: var(--portal-text-light);
-  background: var(--portal-bg-medium);
-  border-color: var(--color-primary);
+  background: var(--portal-bg-light);
 }
 
 .pd-tab-btn.active {
   color: var(--portal-text-dark);
   background: var(--color-primary);
-  border-color: var(--portal-border-dark);
-  border-bottom: 3px solid var(--portal-border-dark);
-  margin-bottom: -3px;
   font-weight: 700;
+}
+
+.pd-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-primary);
 }
 
 /* Project Detail Tab Content */
@@ -2152,6 +2185,35 @@
 
 .pd-tab-content.active {
   display: block;
+}
+
+/* Ensure all project detail text is light on dark backgrounds */
+#tab-project-detail,
+#tab-project-detail p,
+#tab-project-detail span,
+#tab-project-detail strong,
+#tab-project-detail li,
+#tab-project-detail td,
+#tab-project-detail th {
+  color: var(--portal-text-light);
+}
+
+#tab-project-detail h3,
+#tab-project-detail h4 {
+  color: var(--portal-text-light);
+}
+
+/* Acme font only for main project name heading */
+#tab-project-detail #pd-project-name {
+  font-family: var(--font--acme);
+}
+
+/* Secondary/muted text in project detail */
+#tab-project-detail .meta-label,
+#tab-project-detail .file-meta,
+#tab-project-detail .invoice-date,
+#tab-project-detail .empty-state {
+  color: var(--portal-text-secondary);
 }
 
 /* Card Header with Action */
@@ -2165,7 +2227,10 @@
 .card-header-with-action h3 {
   margin: 0;
   color: var(--portal-text-light);
-  font-family: var(--font--acme);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
 }
 
 /* Progress Display */
@@ -2203,12 +2268,13 @@
   gap: var(--portal-spacing-md);
 }
 
-.milestone-item {
+.milestone-item,
+[data-page="admin"] .milestone-item {
   display: flex;
   align-items: flex-start;
   gap: var(--portal-spacing-md);
-  padding: var(--portal-spacing-md);
-  background: var(--portal-bg-medium);
+  padding: var(--portal-spacing-lg);
+  background: var(--portal-bg-dark) !important;
   border: 1px solid var(--portal-border-medium);
   border-radius: var(--portal-radius-md);
 }
@@ -2224,20 +2290,32 @@
   flex: 1;
 }
 
-.milestone-title {
-  font-weight: 500;
-  color: var(--portal-text-light);
-  margin: 0 0 var(--portal-spacing-xs) 0;
+.milestone-title,
+[data-page="admin"] .milestone-title {
+  font-weight: 600;
+  color: var(--portal-text-light) !important;
+  margin: 0 0 var(--portal-spacing-sm) 0;
+  font-family: var(--font--acme);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .milestone-item.completed .milestone-title {
   text-decoration: line-through;
-  color: var(--portal-text-secondary);
+  color: var(--portal-text-secondary) !important;
 }
 
-.milestone-due {
+.milestone-description,
+[data-page="admin"] .milestone-description {
+  color: var(--portal-text-light) !important;
+  font-size: 0.9rem;
+  margin-bottom: var(--portal-spacing-sm);
+}
+
+.milestone-due,
+[data-page="admin"] .milestone-due {
   font-size: 0.75rem;
-  color: var(--portal-text-secondary);
+  color: var(--portal-text-secondary) !important;
 }
 
 .milestone-actions {
@@ -2245,7 +2323,24 @@
   gap: var(--portal-spacing-sm);
 }
 
-/* Project Notes */
+/* Project Notes - inside overview card */
+.project-detail-overview .project-notes {
+  background: transparent;
+  padding: var(--portal-spacing-lg) 0 0 0;
+  border-radius: 0;
+  border: none;
+  border-top: 1px solid var(--portal-border-medium);
+  margin-top: var(--portal-spacing-lg);
+  min-height: 0;
+  white-space: pre-wrap;
+  color: var(--portal-text-light);
+}
+
+.project-detail-overview .project-notes:empty {
+  display: none;
+}
+
+/* Project Notes - standalone */
 .project-notes {
   background: var(--portal-bg-medium);
   padding: var(--portal-spacing-lg);
@@ -2254,6 +2349,37 @@
   min-height: 100px;
   white-space: pre-wrap;
   color: var(--portal-text-light);
+}
+
+.project-notes p {
+  margin: 0 0 var(--portal-spacing-md) 0;
+}
+
+.project-notes h4 {
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  font-family: inherit;
+  margin: var(--portal-spacing-lg) 0 var(--portal-spacing-sm) 0;
+}
+
+.project-notes .features-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--portal-spacing-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-notes .feature-tag {
+  background: var(--portal-bg-dark);
+  color: var(--portal-text-light);
+  padding: var(--portal-spacing-xs) var(--portal-spacing-md);
+  border-radius: var(--portal-radius-sm);
+  font-size: 0.85rem;
 }
 
 /* Empty State */
@@ -2305,14 +2431,125 @@
   gap: var(--portal-spacing-sm);
 }
 
-/* Messages in Project Detail */
-#pd-messages-thread {
+/* Messages in Project Detail - Light background */
+#pd-messages-list,
+#pd-messages-thread,
+[data-page="admin"] .messages-thread {
   max-height: 400px;
   overflow-y: auto;
   padding: var(--portal-spacing-lg);
-  background: var(--portal-bg-medium);
+  background: var(--color-neutral-200) !important;
+  border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0 !important;
+  margin-bottom: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-md);
+}
+
+#pd-messages-list .message,
+#pd-messages-thread .message,
+.messages-thread .message {
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+  padding: var(--portal-spacing-md);
   border-radius: var(--portal-radius-md);
-  margin-bottom: var(--portal-spacing-lg);
+}
+
+#pd-messages-list .message-received,
+#pd-messages-thread .message-received,
+.messages-thread .message-received {
+  align-self: flex-start;
+  background: var(--color-white);
+  border: 1px solid var(--color-neutral-300);
+}
+
+#pd-messages-list .message-sent,
+#pd-messages-thread .message-sent,
+.messages-thread .message-sent {
+  align-self: flex-end;
+  background: var(--color-primary);
+  color: var(--portal-text-dark);
+}
+
+#pd-messages-list .message-header,
+#pd-messages-thread .message-header,
+.messages-thread .message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--portal-spacing-xs);
+  gap: var(--portal-spacing-md);
+}
+
+#pd-messages-list .message-sender,
+#pd-messages-thread .message-sender,
+.messages-thread .message-sender {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+#pd-messages-list .message-received .message-sender,
+#pd-messages-thread .message-received .message-sender,
+.messages-thread .message-received .message-sender {
+  color: var(--portal-text-dark);
+}
+
+#pd-messages-list .message-sent .message-sender,
+#pd-messages-thread .message-sent .message-sender,
+.messages-thread .message-sent .message-sender {
+  color: var(--portal-text-dark);
+}
+
+#pd-messages-list .message-time,
+#pd-messages-thread .message-time,
+.messages-thread .message-time {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+#pd-messages-list .message-received .message-time,
+#pd-messages-thread .message-received .message-time,
+.messages-thread .message-received .message-time {
+  color: var(--color-text-secondary);
+}
+
+#pd-messages-list .message-sent .message-time,
+#pd-messages-thread .message-sent .message-time,
+.messages-thread .message-sent .message-time {
+  color: var(--portal-text-dark);
+}
+
+#pd-messages-list .message-content,
+#pd-messages-thread .message-content,
+.messages-thread .message-content {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+#pd-messages-list .message-received .message-content,
+#pd-messages-thread .message-received .message-content,
+.messages-thread .message-received .message-content {
+  color: var(--portal-text-dark);
+}
+
+#pd-messages-list .message-sent .message-content,
+#pd-messages-thread .message-sent .message-content,
+.messages-thread .message-sent .message-content {
+  color: var(--portal-text-dark);
+}
+
+/* Empty state in messages - dark text on light bg */
+#pd-messages-list .empty-state,
+#pd-messages-list > p,
+#pd-messages-thread .empty-state,
+#pd-messages-thread > p,
+.messages-thread .empty-state,
+.messages-thread > p {
+  color: var(--portal-text-dark) !important;
+  text-align: center;
+  font-style: italic;
+  padding: var(--portal-spacing-xl);
 }
 
 /* Client Account Info */
@@ -2327,8 +2564,21 @@
 
 .client-account-actions {
   display: flex;
-  gap: var(--portal-spacing-sm);
-  flex-wrap: wrap;
+  gap: var(--portal-spacing-md);
+  flex-wrap: nowrap;
+}
+
+.client-account-actions .btn {
+  background: transparent;
+  color: var(--portal-text-light);
+  border: 2px solid var(--portal-border-light);
+  border-radius: var(--portal-radius-lg);
+}
+
+.client-account-actions .btn:hover {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark);
+  border-color: var(--color-primary);
 }
 
 /* Invoice Items */
@@ -2425,7 +2675,7 @@
 
 #pd-upload-dropzone p {
   color: var(--color-text-secondary);
-  margin: 0;
+  margin: 0 0 var(--portal-spacing-lg) 0;
 }
 
 /* Invoice Summary */
@@ -2507,10 +2757,36 @@
   margin: 0 0 var(--space-3) 0;
 }
 
-/* Admin page recent-activity spacing */
+/* Admin page recent-activity styling */
 [data-page="admin"] .recent-activity {
   margin-top: var(--portal-spacing-lg);
   margin-bottom: 0;
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-lg);
+  padding: var(--portal-spacing-xl);
+}
+
+[data-page="admin"] .recent-activity h3 {
+  color: var(--portal-text-light);
+  font-family: var(--font--acme);
+  text-transform: uppercase;
+  margin: 0 0 var(--portal-spacing-lg) 0;
+}
+
+[data-page="admin"] .activity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+[data-page="admin"] .activity-list li {
+  color: var(--portal-text-light);
+  padding: var(--portal-spacing-sm) 0 var(--portal-spacing-sm) var(--portal-spacing-lg);
+  border-bottom: 1px solid var(--portal-border-medium);
+}
+
+[data-page="admin"] .activity-list li:last-child {
+  border-bottom: none;
 }
 
 .overview-stats-grid {
@@ -2916,17 +3192,33 @@
 
 /* Admin message compose area */
 [data-page="admin"] .message-compose {
-  gap: var(--space-3);
-  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-lg);
+  padding: var(--portal-spacing-lg);
+  background: var(--portal-bg-dark);
+  border-radius: 0 0 var(--portal-radius-md) var(--portal-radius-md);
 }
 
 [data-page="admin"] .message-compose .message-input-wrapper {
-  margin-bottom: var(--space-2);
+  margin-bottom: 0;
 }
 
 [data-page="admin"] .message-compose .btn,
-[data-page="admin"] #admin-send-message {
+[data-page="admin"] #admin-send-message,
+[data-page="admin"] #btn-pd-send-message {
   width: 100%;
+  background: transparent;
+  color: var(--portal-text-dark);
+  border: 2px solid var(--portal-border-dark);
+}
+
+[data-page="admin"] .message-compose .btn:hover,
+[data-page="admin"] #admin-send-message:hover,
+[data-page="admin"] #btn-pd-send-message:hover {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark);
+  border-color: var(--color-primary);
 }
 
 /* ================================================
