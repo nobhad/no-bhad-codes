@@ -1489,11 +1489,38 @@ class AdminDashboard {
           `;
             })
             .join('');
+
+          // Calculate and update progress based on completed milestones
+          const completedCount = milestones.filter((m: any) => m.is_completed).length;
+          const totalCount = milestones.length;
+          const progress = Math.round((completedCount / totalCount) * 100);
+          this.updateProgressBar(progress);
         }
       }
     } catch (error) {
       console.error('[AdminDashboard] Error loading milestones:', error);
       milestonesList.innerHTML = '<p class="empty-state">Error loading milestones.</p>';
+    }
+  }
+
+  /**
+   * Update the progress bar display and save to database
+   */
+  private updateProgressBar(progress: number): void {
+    const progressPercent = document.getElementById('pd-progress-percent');
+    const progressBar = document.getElementById('pd-progress-bar');
+
+    if (progressPercent) progressPercent.textContent = `${progress}%`;
+    if (progressBar) progressBar.style.width = `${progress}%`;
+
+    // Save progress to database
+    if (this.currentProjectId) {
+      fetch(`/api/projects/${this.currentProjectId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ progress })
+      }).catch(err => console.error('[AdminDashboard] Error saving progress:', err));
     }
   }
 
