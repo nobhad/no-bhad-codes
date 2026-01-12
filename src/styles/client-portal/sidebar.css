@@ -152,6 +152,12 @@
   border-color: var(--color-primary) !important;
 }
 
+/* Icon color on hover (expanded sidebar) - dark for contrast on red background */
+[data-page="client-portal"] .sidebar-buttons .btn:hover .btn-icon,
+[data-page="admin"] .sidebar-buttons .btn:hover .btn-icon {
+  color: var(--portal-bg-dark) !important;
+}
+
 [data-page="client-portal"] .sidebar-buttons .btn.active,
 [data-page="admin"] .sidebar-buttons .btn.active {
   background: var(--color-primary) !important;
@@ -189,6 +195,17 @@
   color: var(--color-primary) !important;
 }
 
+/* Collapsed sidebar - hover turns icon red */
+.sidebar.collapsed .sidebar-buttons .btn:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.sidebar.collapsed .sidebar-buttons .btn:hover .btn-icon {
+  color: var(--color-primary) !important;
+}
+
 .sidebar.collapsed .sidebar-buttons .btn .btn-text {
   display: none;
 }
@@ -214,6 +231,16 @@
   background: transparent !important;
   display: flex;
   align-items: center;
+}
+
+.sidebar.collapsed .sidebar-footer .btn-logout:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.sidebar.collapsed .sidebar-footer .btn-logout:hover .btn-icon {
+  color: var(--color-primary) !important;
 }
 
 .sidebar.collapsed .sidebar-footer .btn-text {

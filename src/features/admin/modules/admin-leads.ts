@@ -122,8 +122,8 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
   tableBody.innerHTML = leads
     .map((lead) => {
       const date = new Date(lead.created_at).toLocaleDateString();
-      const statusClass = `status-${lead.status || 'new'}`;
-      const showActivateBtn = lead.status === 'new' || lead.status === 'qualified';
+      const statusClass = `status-${lead.status || 'pending'}`;
+      const showActivateBtn = lead.status === 'new' || lead.status === 'qualified' || lead.status === 'pending';
 
       const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.contact_name || '-'));
       const safeCompanyName = lead.company_name ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.company_name)) : '';
