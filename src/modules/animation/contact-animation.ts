@@ -13,12 +13,11 @@
  *
  * ANIMATION SEQUENCE:
  * 1. Navigate to contact page (hash #/contact)
- * 2. h2 "contact" drops in from above
- * 3. Contact options text drops in (overlapped)
- * 4. Card column (avatar blurb) drops in
- * 5. Form fields cascade: appear → expand height → expand width
+ * 2. h2 "contact" blur in
+ * 3. Contact options text shows immediately
+ * 4. Card column blur in
+ * 5. Form fields + Submit button + Avatar blurb all animate together (synced)
  * 6. Labels and placeholders fade in
- * 7. Submit button appears
  */
 
 import { BaseModule } from '../core/base';
@@ -89,9 +88,10 @@ export class ContactAnimationModule extends BaseModule {
     const heading = this.container.querySelector('h2');
     const contactOptions = this.container.querySelector('.contact-options');
     const cardColumn = this.container.querySelector('.contact-card-column');
+    const avatarBlurb = this.container.querySelector('.avatar-blurb-container');
 
     // Debug: log what elements were found
-    this.log(`Elements found - h2: ${!!heading}, contactOptions: ${!!contactOptions}, cardColumn: ${!!cardColumn}`);
+    this.log(`Elements found - h2: ${!!heading}, contactOptions: ${!!contactOptions}, cardColumn: ${!!cardColumn}, avatarBlurb: ${!!avatarBlurb}`);
 
     this.timeline = gsap.timeline({
       onComplete: () => {
@@ -129,6 +129,15 @@ export class ContactAnimationModule extends BaseModule {
         opacity: 0,
         filter: `blur(${blurAmount}px)`,
         willChange: 'filter, opacity'
+      });
+    }
+    // Avatar blurb starts scaled down, blurred, and invisible
+    if (avatarBlurb) {
+      gsap.set(avatarBlurb, {
+        opacity: 0,
+        scale: 0.8,
+        filter: `blur(${blurAmount}px)`,
+        transformOrigin: 'center center'
       });
     }
 
@@ -221,7 +230,7 @@ export class ContactAnimationModule extends BaseModule {
     if (companyField) gsap.set(companyField, { zIndex: 4, position: 'relative' });
     if (emailField) gsap.set(emailField, { zIndex: 3, position: 'relative' });
     if (messageField) gsap.set(messageField, { zIndex: 2, position: 'relative' });
-    if (submitButton) gsap.set(submitButton, { zIndex: 1, opacity: 0, scale: 0.8 });
+    if (submitButton) gsap.set(submitButton, { zIndex: 1, opacity: 0, scale: 0.8, filter: `blur(${blurAmount}px)` });
 
     // Shared border-radius for all fields during cascade
     const fieldBorderRadius = '0 50px 50px 50px';
@@ -301,6 +310,17 @@ export class ContactAnimationModule extends BaseModule {
     const totalDuration = ANIMATION_CONSTANTS.SEQUENCES.CONTACT_FORM.TOTAL_DURATION;
     const stagger = ANIMATION_CONSTANTS.SEQUENCES.CONTACT_FORM.FIELD_STAGGER;
     const formStartTime = dropDuration; // Form starts AFTER h2/card drop completes
+
+    // Avatar blurb scales up and clears blur in sync with form fields cascade
+    if (avatarBlurb) {
+      this.timeline.to(avatarBlurb, {
+        opacity: 1,
+        scale: 1,
+        filter: 'blur(0px)',
+        duration: 0.5,
+        ease: 'back.out(1.4)'
+      }, formStartTime);
+    }
 
     // All fields animate together with stagger
     const allFieldWrappers = [nameField, companyField, emailField, messageField].filter(
@@ -430,14 +450,15 @@ export class ContactAnimationModule extends BaseModule {
       }, textFadeStart);
     }
 
-    // Button appears after fields are mostly expanded
+    // Button scales up and clears blur in sync with form fields and avatar blurb
     if (submitButton) {
       this.timeline.to(submitButton, {
         opacity: 1,
         scale: 1,
-        duration: 0.3,
-        ease: 'back.out(1.5)'
-      }, '+=0');
+        filter: 'blur(0px)',
+        duration: 0.5,
+        ease: 'back.out(1.4)'
+      }, formStartTime);
     }
 
     // Restore overflow, section height, and clear inline widths after animation
@@ -555,6 +576,10 @@ export class ContactAnimationModule extends BaseModule {
     if (contactOptions) gsap.set(contactOptions, { opacity: 1, filter: 'blur(0px)' });
     if (cardColumn) gsap.set(cardColumn, { opacity: 0, filter: `blur(${blurAmount}px)`, willChange: 'filter, opacity' });
 
+    // Reset avatar blurb to initial scaled-down, blurred state
+    const avatarBlurb = this.container.querySelector('.avatar-blurb-container');
+    if (avatarBlurb) gsap.set(avatarBlurb, { opacity: 0, scale: 0.8, filter: `blur(${blurAmount}px)`, transformOrigin: 'center center' });
+
     // Reset form container
     const formContainer = this.container.querySelector('.contact-form') ||
                           this.container.querySelector('.contact-form-column');
@@ -599,7 +624,7 @@ export class ContactAnimationModule extends BaseModule {
 
     // Reset button
     const submitButton = this.container.querySelector('.submit-button, button[type="submit"]');
-    if (submitButton) gsap.set(submitButton, { zIndex: 1, opacity: 0, scale: 0.8 });
+    if (submitButton) gsap.set(submitButton, { zIndex: 1, opacity: 0, scale: 0.8, filter: `blur(${blurAmount}px)` });
   }
 
   /**
