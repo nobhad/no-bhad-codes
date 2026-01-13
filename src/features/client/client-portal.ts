@@ -9,7 +9,7 @@
  */
 
 import { BaseModule } from '../../modules/core/base';
-import type { ClientProject, ClientProjectStatus } from '../../types/client';
+import type { ClientProject, ClientProjectStatus, ProjectPriority } from '../../types/client';
 import { gsap } from 'gsap';
 import { APP_CONSTANTS } from '../../config/constants';
 import 'emoji-picker-element';
@@ -770,8 +770,8 @@ export class ClientPortalModule extends BaseModule {
             return;
           }
 
-          // Load user projects from backend or mock
-          await this.loadMockUserProjects({
+          // Load real user projects from API for authenticated users
+          await this.loadRealUserProjects({
             id: data.user.id,
             email: data.user.email,
             name: data.user.contactName || data.user.companyName || data.user.email.split('@')[0]
@@ -944,6 +944,110 @@ export class ClientPortalModule extends BaseModule {
     }
   }
 
+  /**
+   * Load real user projects from API (for authenticated users)
+   * Fetches projects and milestones from backend instead of using mock data
+   */
+  private async loadRealUserProjects(user: {
+    id: number;
+    email: string;
+    name: string;
+  }): Promise<void> {
+    try {
+      // Fetch projects from API
+      const projectsResponse = await fetch('/api/projects', {
+        credentials: 'include'
+      });
+
+      if (!projectsResponse.ok) {
+        console.error('[ClientPortal] Failed to fetch projects:', projectsResponse.status);
+        // Fall back to mock data if API fails
+        return this.loadMockUserProjects(user);
+      }
+
+      const projectsData = await projectsResponse.json();
+      const apiProjects = projectsData.projects || [];
+
+      if (apiProjects.length === 0) {
+        // No projects yet - show empty state
+        const clientNameElement = document.getElementById('client-name');
+        if (clientNameElement) {
+          clientNameElement.textContent = user.name || user.email || 'Client';
+        }
+        this.populateProjectsList([]);
+        return;
+      }
+
+      // Transform API projects to ClientProject interface
+      const clientProjects: ClientProject[] = await Promise.all(
+        apiProjects.map(async (apiProject: any) => {
+          // Fetch milestones for this project
+          let milestones: any[] = [];
+          try {
+            const milestonesResponse = await fetch(`/api/projects/${apiProject.id}/milestones`, {
+              credentials: 'include'
+            });
+            if (milestonesResponse.ok) {
+              const milestonesData = await milestonesResponse.json();
+              milestones = milestonesData.milestones || [];
+            }
+          } catch (milestoneError) {
+            console.warn(`[ClientPortal] Failed to fetch milestones for project ${apiProject.id}:`, milestoneError);
+          }
+
+          // Transform milestone data to match ProjectMilestone interface
+          const transformedMilestones = milestones.map((m: any) => ({
+            id: String(m.id),
+            title: m.title || 'Untitled Milestone',
+            description: m.description || '',
+            dueDate: m.due_date || new Date().toISOString().split('T')[0],
+            completedDate: m.completed_date || undefined,
+            isCompleted: Boolean(m.is_completed),
+            deliverables: Array.isArray(m.deliverables) ? m.deliverables : []
+          }));
+
+          // Calculate progress from milestones if available
+          const completedMilestones = transformedMilestones.filter((m: any) => m.isCompleted).length;
+          const totalMilestones = transformedMilestones.length;
+          const calculatedProgress = totalMilestones > 0
+            ? Math.round((completedMilestones / totalMilestones) * 100)
+            : (apiProject.progress || 0);
+
+          // Transform to ClientProject interface
+          return {
+            id: String(apiProject.id),
+            projectName: apiProject.project_name || apiProject.name || 'Untitled Project',
+            description: apiProject.description || '',
+            clientId: String(apiProject.client_id || user.id),
+            clientName: user.name || user.email || 'Client',
+            status: (apiProject.status || 'pending') as ClientProjectStatus,
+            priority: (apiProject.priority || 'medium') as ProjectPriority,
+            progress: calculatedProgress,
+            startDate: apiProject.start_date || apiProject.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+            estimatedEndDate: apiProject.estimated_end_date || undefined,
+            actualEndDate: apiProject.actual_end_date || undefined,
+            updates: [], // Loaded on-demand when project is selected
+            files: [],   // Loaded on-demand when project is selected
+            messages: [], // Loaded on-demand when project is selected
+            milestones: transformedMilestones
+          } as ClientProject;
+        })
+      );
+
+      // Set client name in header
+      const clientNameElement = document.getElementById('client-name');
+      if (clientNameElement) {
+        clientNameElement.textContent = user.name || user.email || 'Client';
+      }
+
+      this.populateProjectsList(clientProjects);
+    } catch (error) {
+      console.error('[ClientPortal] Failed to load real projects:', error);
+      // Fall back to mock data on error
+      return this.loadMockUserProjects(user);
+    }
+  }
+
   private populateProjectsList(projects: ClientProject[]): void {
     if (!this.projectsList) return;
 
@@ -976,11 +1080,10 @@ export class ClientPortalModule extends BaseModule {
     });
   }
 
-  private selectProject(project: ClientProject): void {
+  private async selectProject(project: ClientProject): Promise<void> {
     this.currentProject = project;
-    this.populateProjectDetails();
 
-    // Hide other views
+    // Hide other views first
     const welcomeView = document.getElementById('welcome-view');
     const projectDetailView = document.getElementById('project-detail-view');
     const settingsView = document.getElementById('settings-view');
@@ -993,6 +1096,62 @@ export class ClientPortalModule extends BaseModule {
 
     // Clear active state from navigation items
     document.querySelectorAll('.account-item').forEach((item) => item.classList.remove('active'));
+
+    // For authenticated users, fetch full project details (updates, messages)
+    const authMode = sessionStorage.getItem('client_auth_mode');
+    if (authMode === 'authenticated') {
+      await this.fetchProjectDetails(project.id);
+    }
+
+    this.populateProjectDetails();
+  }
+
+  /**
+   * Fetch full project details including updates and messages from API
+   */
+  private async fetchProjectDetails(projectId: string): Promise<void> {
+    if (!this.currentProject) return;
+
+    try {
+      // Fetch project details from API
+      const response = await fetch(`/api/projects/${projectId}`, {
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        console.warn('[ClientPortal] Failed to fetch project details:', response.status);
+        return;
+      }
+
+      const data = await response.json();
+
+      // Transform and update updates
+      if (data.updates && Array.isArray(data.updates)) {
+        this.currentProject.updates = data.updates.map((u: any) => ({
+          id: String(u.id),
+          date: u.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+          title: u.title || 'Update',
+          description: u.description || '',
+          author: u.author || 'System',
+          type: u.update_type || 'general'
+        }));
+      }
+
+      // Transform and update messages
+      if (data.messages && Array.isArray(data.messages)) {
+        this.currentProject.messages = data.messages.map((m: any) => ({
+          id: String(m.id),
+          sender: m.sender_name || 'Unknown',
+          senderRole: m.sender_role === 'admin' ? 'developer' : (m.sender_role || 'system'),
+          message: m.message || '',
+          timestamp: m.created_at || new Date().toISOString(),
+          isRead: Boolean(m.is_read)
+        }));
+      }
+
+    } catch (error) {
+      console.warn('[ClientPortal] Error fetching project details:', error);
+    }
   }
 
   private populateProjectDetails(): void {
