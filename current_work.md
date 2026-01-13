@@ -1005,6 +1005,46 @@ Comprehensive optimization of GSAP animations and page transitions:
 - Phase 2: Gradually refactor to mobile-first for mobile/* files
 - Phase 3: Use CSS layers for animation/transition states
 
+### Shared Component Analysis (86 classes duplicated)
+
+**Reusable Components to Extract:**
+
+| Component | Classes | Target File |
+|-----------|---------|-------------|
+| **Buttons** | `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-icon`, `.btn-sm`, `.btn-logout` | `shared/buttons.css` |
+| **Forms** | `.form-group`, `.form-input`, `.form-row`, `.form-select`, `.password-*` | `shared/forms.css` |
+| **Sidebar** | `.sidebar`, `.sidebar-footer`, `.sidebar-toggle`, `.collapsed` | `shared/sidebar.css` |
+| **Messages** | `.message`, `.message-*`, `.messages-thread`, `.message-compose` | `shared/messages.css` |
+| **Files** | `.file-item`, `.file-*`, `.files-*-section` | `shared/files.css` |
+| **Invoices** | `.invoice-item`, `.invoice-*` | `shared/invoices.css` |
+| **Status** | `.status-badge`, `.status-active`, `.status-pending`, etc. | `shared/status.css` |
+| **Stats/Cards** | `.stat-card`, `.stat-*`, `.portal-project-card`, `.portal-shadow` | `shared/cards.css` |
+| **Progress** | `.progress-bar`, `.progress-fill` | `shared/progress.css` |
+| **Layout** | `.page-header`, `.dashboard-content`, `.tab-content` | `shared/layout.css` |
+| **Utilities** | `.hidden`, `.active`, `.visually-hidden` | `shared/utilities.css` |
+
+**Current State:**
+- `client-portal/components.css` already serves as shared components (has `[data-page="admin"]` selectors)
+- `admin.css` is 4,194 lines (100KB) - needs to be split
+
+**admin.css Split Plan:**
+
+| New File | ~Lines | Content |
+|----------|--------|---------|
+| `admin/tables.css` | 400 | `.leads-table`, `.projects-table`, `.clients-table`, `.contacts-table` |
+| `admin/project-detail.css` | 1000 | Project detail view, tabs, messages, files, invoices |
+| `admin/client-detail.css` | 300 | Client detail view, billing, projects list |
+| `admin/status.css` | 200 | Status badges, status select, status dropdown |
+| `admin/modals.css` | 100 | `.admin-modal`, overlays |
+| `admin/analytics.css` | 300 | Analytics tab, charts, stats grid |
+| `admin/base.css` | 1500 | Core layout, sidebar, buttons, forms |
+
+**Separation Strategy:**
+1. Keep `client-portal/components.css` as shared base (already working)
+2. Split admin.css into modular files in `/src/styles/admin/`
+3. Create `admin/index.css` to import all modules
+4. Keep page-specific overrides in respective files
+
 ---
 
 2. **Standardize Naming Convention**
