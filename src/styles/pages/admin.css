@@ -2346,7 +2346,7 @@
 /* Settings tab sections - darker background and equal heights */
 [data-page="admin"] #pd-tab-settings .settings-grid {
   align-items: stretch;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   max-width: none;
   width: 100%;
 }
@@ -2477,29 +2477,69 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
-/* Form group spacing in settings */
-[data-page="admin"] #pd-tab-settings .settings-section .form-group {
+/* Settings tab - override ALL floating label styles to match meta-label */
+#pd-tab-settings label {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  color: var(--portal-text-secondary) !important;
+  letter-spacing: 0.05em !important;
+  margin: 0 !important;
+  pointer-events: auto !important;
+}
+
+/* Settings tab form groups - match meta-item styling */
+#pd-tab-settings .form-group {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-lg);
+  gap: var(--portal-spacing-xs);
+  position: relative;
+  margin-bottom: 1rem;
 }
 
-/* Settings form labels - additional spacing */
-[data-page="admin"] #pd-tab-settings .settings-section .form-group label {
-  padding-left: 0;
-  margin: 0;
+/* Settings form inputs - reduced top padding to match Overview spacing */
+#pd-tab-settings input,
+#pd-tab-settings .form-input {
+  padding: 0.5rem 1rem !important;
+  min-height: auto !important;
+  font-size: 0.95rem !important;
+  font-weight: 400 !important;
 }
 
-/* Project settings form fields - smaller text */
-[data-page="admin"] #pd-tab-settings .form-input,
-[data-page="admin"] #pd-tab-settings input[type="text"],
-[data-page="admin"] #pd-tab-settings input[type="number"],
-[data-page="admin"] #pd-tab-settings input[type="url"],
-[data-page="admin"] #pd-tab-settings input[type="email"] {
-  font-size: 0.95rem;
+/* Settings form placeholder - not bold */
+#pd-tab-settings input::placeholder {
+  font-weight: 400 !important;
+}
+
+/* Form row for Account Status and Last Login */
+#pd-tab-settings .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+
+#pd-tab-settings .form-row .form-group {
+  margin-bottom: 0;
+  gap: var(--portal-spacing-sm);
+}
+
+/* Readonly form values - match meta-value styling */
+#pd-tab-settings .form-value-readonly {
+  color: var(--color-white);
+  font-size: 1rem;
   font-weight: 400;
-  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
-  padding-left: var(--portal-spacing-lg);
+}
+
+/* Client account actions buttons */
+#pd-tab-settings .client-account-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 /* Project status dropdown - match input field styling */

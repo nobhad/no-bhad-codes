@@ -833,45 +833,6 @@
             <!-- Settings Sub-Tab -->
             <div class="pd-tab-content" id="pd-tab-settings">
               <div class="settings-grid">
-                <!-- Project Settings -->
-                <div class="settings-section portal-shadow">
-                  <h3>Project Settings</h3>
-                  <form class="settings-form" id="pd-project-settings-form">
-                    <div class="form-group">
-                      <label for="pd-setting-name">Project Name</label>
-                      <input type="text" id="pd-setting-name" class="form-input" />
-                    </div>
-                    <div class="form-group">
-                      <label for="pd-setting-status">Status</label>
-                      <div class="custom-dropdown" id="pd-status-dropdown">
-                        <input type="hidden" id="pd-setting-status" name="status" value="pending" />
-                        <button type="button" class="custom-dropdown-trigger" id="pd-status-trigger">
-                          <span class="custom-dropdown-value">Pending</span>
-                          <svg class="custom-dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
-                        </button>
-                        <div class="custom-dropdown-menu" id="pd-status-menu">
-                          <button type="button" class="custom-dropdown-option" data-value="pending">Pending</button>
-                          <button type="button" class="custom-dropdown-option" data-value="active">Active</button>
-                          <button type="button" class="custom-dropdown-option" data-value="on_hold">On Hold</button>
-                          <button type="button" class="custom-dropdown-option" data-value="completed">Completed</button>
-                          <button type="button" class="custom-dropdown-option" data-value="cancelled">Cancelled</button>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <label for="pd-setting-progress">Progress (%)</label>
-                      <input
-                        type="number"
-                        id="pd-setting-progress"
-                        class="form-input"
-                        min="0"
-                        max="100"
-                      />
-                    </div>
-                    <button type="submit" id="btn-save-project-settings" class="btn btn-secondary">Save Changes</button>
-                  </form>
-                </div>
-
                 <!-- Client Account -->
                 <div class="settings-section portal-shadow">
                   <h3>Client Account</h3>

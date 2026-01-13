@@ -280,22 +280,29 @@ function populateProjectDetailView(project: LeadProject): void {
     }
   }
 
-  // Settings form
-  const settingName = document.getElementById('pd-setting-name') as HTMLInputElement;
-  const settingStatus = document.getElementById('pd-setting-status') as HTMLInputElement;
-  const settingProgress = document.getElementById('pd-setting-progress') as HTMLInputElement;
+  // Settings form - Client Account
+  const clientAccountEmail = document.getElementById('pd-client-account-email') as HTMLInputElement;
+  const clientAccountStatus = document.getElementById('pd-client-account-status');
+  const clientLastLogin = document.getElementById('pd-client-last-login');
+  const projectData = project as any;
 
-  if (settingName) settingName.value = project.project_name || '';
-  if (settingStatus) {
-    const status = normalizeStatus(project.status);
-    settingStatus.value = status;
-    updateCustomDropdown(status);
-    setupCustomStatusDropdown();
+  if (clientAccountEmail) clientAccountEmail.value = project.email || '';
+  if (clientAccountStatus) {
+    const hasAccount = projectData.client_id || projectData.password_hash;
+    const hasLoggedIn = projectData.last_login_at;
+    if (hasAccount && hasLoggedIn) {
+      clientAccountStatus.textContent = 'Active';
+    } else if (hasAccount) {
+      clientAccountStatus.textContent = 'Pending';
+    } else {
+      clientAccountStatus.textContent = 'Not Invited';
+    }
   }
-  if (settingProgress) settingProgress.value = (project.progress || 0).toString();
-
-  // Set up unsaved changes tracking
-  setupUnsavedChangesTracking(project);
+  if (clientLastLogin) {
+    clientLastLogin.textContent = projectData.last_login_at
+      ? new Date(projectData.last_login_at).toLocaleString()
+      : 'Never';
+  }
 }
 
 // Store original values for comparison
