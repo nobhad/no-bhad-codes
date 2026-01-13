@@ -27,3 +27,15 @@ export async function loadMessagesModule() {
 export async function loadSettingsModule() {
   return import('./portal-settings');
 }
+
+export async function loadNavigationModule() {
+  return import('./portal-navigation');
+}
+
+export async function loadProjectsModule() {
+  return import('./portal-projects');
+}
+
+export async function loadAuthModule() {
+  return import('./portal-auth');
+}

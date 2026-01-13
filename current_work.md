@@ -117,20 +117,34 @@ See [ARCHIVED_WORK_2026-01.md](./ARCHIVED_WORK_2026-01.md) for details.
 
 ---
 
-### Phase 3: Code Organization
+### Phase 3: Code Organization - IN PROGRESS
 
 **Goal:** Split large files to improve maintainability.
 
-**Large Files Remaining:**
+**Large Files Status:**
 
-| File | Lines | Priority | Notes |
-|------|-------|----------|-------|
-| `client-portal.ts` | 2,293 | High | Largest file, needs splitting |
+| File | Lines | Priority | Status |
+|------|-------|----------|--------|
+| `client-portal.ts` | 1,952 | High | IN PROGRESS - 3 new modules extracted |
 | `admin-dashboard.ts` | 1,917 | Medium | Already has 9 extracted modules |
 | `intro-animation.ts` | 1,815 | Medium | Animation logic |
 | `terminal-intake.ts` | 1,685 | Medium | Terminal UI logic |
 | `page-transition.ts` | 580 | Low | Recently simplified |
 | `admin-project-details.ts` | 1,024 | Low | Recently extracted |
+
+**Client Portal Refactor Progress:**
+
+New modules created (total 7 modules now):
+
+- `portal-navigation.ts` (398 lines) - Navigation, views, sidebar, mobile menu
+- `portal-projects.ts` (497 lines) - Project loading, display, preview
+- `portal-auth.ts` (346 lines) - Login, logout, session management
+- `portal-files.ts` (455 lines) - File management (existing)
+- `portal-invoices.ts` (250 lines) - Invoice management (existing)
+- `portal-messages.ts` (268 lines) - Messaging (existing)
+- `portal-settings.ts` (261 lines) - Settings forms (existing)
+
+Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 
 **Files Approaching 1000 Lines:**
 
@@ -153,7 +167,7 @@ See [ARCHIVED_WORK_2026-01.md](./ARCHIVED_WORK_2026-01.md) for details.
 
 ### Code Quality (Ongoing)
 
-- [ ] Split `client-portal.ts` (2,429 lines)
+- [x] Split `client-portal.ts` - Phase 1 complete (1,952 lines, 3 new modules)
 - [ ] CSS !important cleanup (650+ uses - architectural issue)
 
 ### CSS Cleanup Plan
