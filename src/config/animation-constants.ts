@@ -159,6 +159,17 @@ export const ANIMATION_PERFORMANCE = {
 } as const;
 
 // ============================================
+// PAGE ANIMATION (Unified blur effect)
+// ============================================
+
+export const PAGE_ANIMATION = {
+  DURATION: 0.5,
+  BLUR_AMOUNT: 12,
+  EASE_IN: 'power2.in',
+  EASE_OUT: 'power2.out'
+} as const;
+
+// ============================================
 // COMBINED CONSTANTS OBJECT
 // ============================================
 
@@ -170,7 +181,8 @@ export const ANIMATION_CONSTANTS = {
   SEQUENCES: ANIMATION_SEQUENCES,
   POSITIONS: ANIMATION_POSITIONS,
   SHADOWS: ANIMATION_SHADOWS,
-  PERFORMANCE: ANIMATION_PERFORMANCE
+  PERFORMANCE: ANIMATION_PERFORMANCE,
+  PAGE: PAGE_ANIMATION
 } as const;
 
 // ============================================
