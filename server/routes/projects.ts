@@ -367,6 +367,7 @@ router.put(
       project_name: 'project_name',
       project_type: 'project_type',
       due_date: 'estimated_end_date',
+      estimated_end_date: 'estimated_end_date',
       budget: 'budget_range',
       price: 'price',
       timeline: 'timeline',
@@ -376,10 +377,16 @@ router.put(
       priority: 'priority',
       start_date: 'start_date',
       progress: 'progress',
+      notes: 'notes',
+      repository_url: 'repository_url',
+      staging_url: 'staging_url',
+      production_url: 'production_url',
+      deposit_amount: 'deposit_amount',
+      contract_signed_at: 'contract_signed_at',
     };
     const allowedUpdates =
       req.user!.type === 'admin'
-        ? ['name', 'project_name', 'project_type', 'description', 'status', 'priority', 'start_date', 'due_date', 'budget', 'price', 'timeline', 'preview_url', 'progress']
+        ? ['name', 'project_name', 'project_type', 'description', 'status', 'priority', 'start_date', 'due_date', 'estimated_end_date', 'budget', 'price', 'timeline', 'preview_url', 'progress', 'notes', 'repository_url', 'staging_url', 'production_url', 'deposit_amount', 'contract_signed_at']
         : ['description']; // Clients can only update description
 
     for (const field of allowedUpdates) {
