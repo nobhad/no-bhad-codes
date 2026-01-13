@@ -376,8 +376,10 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   }
 
   /**
-   * Load messages for the current project
+   * Load messages for the current project using thread-based messaging system
    */
+  private currentThreadId: number | null = null;
+
   private async loadProjectMessages(projectId: number): Promise<void> {
     const messagesThread = document.getElementById('pd-messages-thread');
     if (!messagesThread) return;
@@ -398,26 +400,59 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         return;
       }
 
-      const response = await fetch(`/api/messages?client_id=${project.client_id}`, {
+      // Get all threads and find one for this project/client
+      const threadsResponse = await fetch('/api/messages/threads', {
         credentials: 'include'
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        const messages = data.messages || [];
+      if (!threadsResponse.ok) {
+        messagesThread.innerHTML = '<p class="empty-state">Error loading messages.</p>';
+        return;
+      }
 
-        if (messages.length === 0) {
-          messagesThread.innerHTML =
-            '<p class="empty-state">No messages yet. Start the conversation with your client.</p>';
-        } else {
-          messagesThread.innerHTML = messages
-            .map((msg: any) => {
-              // Sanitize user data to prevent XSS
-              const safeSenderName = SanitizationUtils.escapeHtml(
-                msg.sender_type === 'admin' ? 'You' : (project.contact_name || 'Client')
-              );
-              const safeContent = SanitizationUtils.escapeHtml(msg.content || '');
-              return `
+      const threadsData = await threadsResponse.json();
+      const threads = threadsData.threads || [];
+
+      // Find thread for this project or client
+      let thread = threads.find((t: any) => t.project_id === projectId);
+      if (!thread) {
+        thread = threads.find((t: any) => t.client_id === project.client_id);
+      }
+
+      if (!thread) {
+        this.currentThreadId = null;
+        messagesThread.innerHTML =
+          '<p class="empty-state">No messages yet. Start the conversation with your client.</p>';
+        return;
+      }
+
+      this.currentThreadId = thread.id;
+
+      // Get messages in this thread
+      const messagesResponse = await fetch(`/api/messages/threads/${thread.id}`, {
+        credentials: 'include'
+      });
+
+      if (!messagesResponse.ok) {
+        messagesThread.innerHTML = '<p class="empty-state">Error loading messages.</p>';
+        return;
+      }
+
+      const messagesData = await messagesResponse.json();
+      const messages = messagesData.messages || [];
+
+      if (messages.length === 0) {
+        messagesThread.innerHTML =
+          '<p class="empty-state">No messages yet. Start the conversation with your client.</p>';
+      } else {
+        messagesThread.innerHTML = messages
+          .map((msg: any) => {
+            // Sanitize user data to prevent XSS
+            const safeSenderName = SanitizationUtils.escapeHtml(
+              msg.sender_type === 'admin' ? 'You' : (msg.sender_name || project.contact_name || 'Client')
+            );
+            const safeContent = SanitizationUtils.escapeHtml(msg.message || msg.content || '');
+            return `
             <div class="message ${msg.sender_type === 'admin' ? 'message-sent' : 'message-received'}">
               <div class="message-content">
                 <div class="message-header">
@@ -428,11 +463,10 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
               </div>
             </div>
           `;
-            })
-            .join('');
-          // Scroll to bottom
-          messagesThread.scrollTop = messagesThread.scrollHeight;
-        }
+          })
+          .join('');
+        // Scroll to bottom
+        messagesThread.scrollTop = messagesThread.scrollHeight;
       }
     } catch (error) {
       console.error('[AdminProjectDetails] Error loading project messages:', error);
@@ -441,7 +475,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   }
 
   /**
-   * Send a message for the current project
+   * Send a message for the current project using thread-based messaging
    */
   private async sendProjectMessage(): Promise<void> {
     if (!this.currentProjectId) return;
@@ -459,16 +493,43 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
 
     try {
-      const response = await fetch('/api/messages', {
+      // If no existing thread, create one
+      if (!this.currentThreadId) {
+        const createResponse = await fetch('/api/messages/threads', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            client_id: project.client_id,
+            project_id: this.currentProjectId,
+            subject: `Project: ${project.project_name || 'Untitled'}`,
+            thread_type: 'project',
+            message: messageInput.value.trim()
+          })
+        });
+
+        if (createResponse.ok) {
+          const data = await createResponse.json();
+          this.currentThreadId = data.thread?.id || data.threadId;
+          messageInput.value = '';
+          this.loadProjectMessages(this.currentProjectId!);
+        } else {
+          alert('Failed to create message thread');
+        }
+        return;
+      }
+
+      // Send message to existing thread
+      const response = await fetch(`/api/messages/threads/${this.currentThreadId}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         credentials: 'include',
         body: JSON.stringify({
-          client_id: project.client_id,
-          content: messageInput.value.trim(),
-          sender_type: 'admin'
+          message: messageInput.value.trim()
         })
       });
 
@@ -499,7 +560,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
 
     try {
-      const response = await fetch(`/api/files?project_id=${projectId}`, {
+      const response = await fetch(`/api/uploads/project/${projectId}`, {
         credentials: 'include'
       });
 
@@ -521,11 +582,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
                 </svg>
               </span>
               <div class="file-info">
-                <span class="file-name">${file.original_filename || file.filename}</span>
-                <span class="file-meta">Uploaded ${new Date(file.created_at).toLocaleDateString()} - ${formatFileSize(file.size)}</span>
+                <span class="file-name">${file.originalName || file.filename}</span>
+                <span class="file-meta">Uploaded ${new Date(file.uploadedAt).toLocaleDateString()} - ${formatFileSize(file.size)}</span>
               </div>
               <div class="file-actions">
-                <a href="/uploads/${file.filename}" class="btn btn-outline btn-sm" target="_blank">Download</a>
+                <a href="/api/uploads/file/${file.id}" class="btn btn-outline btn-sm" target="_blank">Download</a>
               </div>
             </div>
           `
