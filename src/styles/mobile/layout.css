@@ -242,12 +242,12 @@
   /* Tech stack box styling on mobile - inside about section */
   .tech-stack-desktop .tech-stack {
     background-color: var(--color-neutral-100);
-    padding: 1rem 1.5rem;
+    padding: 2rem;
     border-radius: 8px;
     border: 2px solid var(--color-neutral-600);
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .tech-stack-desktop .tech-stack h3,
