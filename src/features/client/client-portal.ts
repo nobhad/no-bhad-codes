@@ -354,6 +354,15 @@ export class ClientPortalModule extends BaseModule {
       });
     }
 
+    // Password form
+    const passwordForm = document.getElementById('password-form') as HTMLFormElement;
+    if (passwordForm) {
+      passwordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await this.savePasswordSettings();
+      });
+    }
+
     // Notifications form
     const notificationsForm = document.getElementById('notifications-form') as HTMLFormElement;
     if (notificationsForm) {
@@ -526,6 +535,66 @@ export class ClientPortalModule extends BaseModule {
     } catch (error) {
       console.error('Error saving profile:', error);
       alert(error instanceof Error ? error.message : 'Failed to save profile. Please try again.');
+    }
+  }
+
+  /**
+   * Save password settings
+   */
+  private async savePasswordSettings(): Promise<void> {
+    const authMode = sessionStorage.getItem('client_auth_mode');
+
+    if (!authMode || authMode === 'demo') {
+      alert('Password cannot be changed in demo mode. Please log in with a real account.');
+      return;
+    }
+
+    const currentPassword = (document.getElementById('current-password') as HTMLInputElement)?.value;
+    const newPassword = (document.getElementById('new-password') as HTMLInputElement)?.value;
+    const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement)?.value;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      alert('Please fill in all password fields');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      alert('New passwords do not match');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      alert('Password must be at least 8 characters');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          currentPassword,
+          newPassword
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update password');
+      }
+
+      // Clear password fields
+      (document.getElementById('current-password') as HTMLInputElement).value = '';
+      (document.getElementById('new-password') as HTMLInputElement).value = '';
+      (document.getElementById('confirm-password') as HTMLInputElement).value = '';
+
+      alert('Password updated successfully!');
+    } catch (error) {
+      console.error('Error updating password:', error);
+      alert(error instanceof Error ? error.message : 'Failed to update password. Please try again.');
     }
   }
 
