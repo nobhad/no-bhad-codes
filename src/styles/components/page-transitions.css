@@ -14,38 +14,16 @@
  * ============================================ */
 
 :root {
-  --page-transition-duration-in: 0.5s;
-  --page-transition-duration-out: 0.4s;
-  --page-transition-stagger: 0.1s;
-  --page-transition-ease: cubic-bezier(0.3, 0.9, 0.3, 0.9);
-  --page-blur-amount: 8px;
+  --page-transition-duration: 0.5s;
+  --page-blur-amount: 12px;
 }
 
 /* ============================================
- * PAGE TRANSITION OVERLAY
- * Covers main content area only (between header and footer)
- * Used during page transitions - NOT for intro animation
+ * PAGE TRANSITION OVERLAY (DISABLED)
+ * Overlay no longer used - direct blur crossfade instead
  * ============================================ */
 
-.page-transition-overlay {
-  position: fixed;
-  top: var(--header-height);
-  left: 0;
-  width: 100vw;
-  height: calc(100vh - var(--header-height) - var(--footer-height));
-  z-index: 50; /* Above main content (1) but below nav (100) */
-  background-color: var(--color-neutral-300);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  /* GSAP handles overlay transition - see page-transition.ts */
-}
-
-/* Active state during transitions */
-.page-transition-overlay.transitioning {
-  opacity: 1;
-  visibility: visible;
-}
+/* .page-transition-overlay - removed, no longer needed */
 
 /* ============================================
  * PAGE STATE CLASSES (Mobile + Desktop)
@@ -62,12 +40,18 @@ section.page-hidden {
   z-index: -1 !important;
 }
 
+/* Page entering state - MUST be invisible before GSAP animates in */
+/* This class is added before page-active and removed after animation completes */
+section.page-entering {
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
 /* Active page state - when page-active is present, page-hidden is removed */
-/* GSAP controls opacity for animated blur transitions - CSS handles display/visibility */
-/* Using !important to ensure active pages are always visible */
+/* GSAP controls opacity AND visibility via autoAlpha - CSS only handles display */
 section.page-active:not(.contact-section):not(.about-section):not(.business-card-section) {
   display: block !important;
-  visibility: visible !important;
+  /* visibility controlled by GSAP autoAlpha */
   pointer-events: auto;
   z-index: 100;
 }
@@ -75,7 +59,7 @@ section.page-active:not(.contact-section):not(.about-section):not(.business-card
 /* Contact section needs grid display when active */
 section.contact-section.page-active {
   display: grid !important;
-  visibility: visible !important;
+  /* visibility controlled by GSAP autoAlpha */
   pointer-events: auto;
   z-index: 100;
 }
@@ -83,7 +67,7 @@ section.contact-section.page-active {
 /* About section needs grid display when active */
 section.about-section.page-active {
   display: grid !important;
-  visibility: visible !important;
+  /* visibility controlled by GSAP autoAlpha */
   pointer-events: auto;
   z-index: 100;
 }
@@ -91,22 +75,22 @@ section.about-section.page-active {
 /* Projects section needs flex display when active */
 section.projects-section.page-active {
   display: flex !important;
-  visibility: visible !important;
+  /* visibility controlled by GSAP autoAlpha */
   pointer-events: auto;
   z-index: 100;
 }
 
-/* Ensure virtual pages sections are visible when active */
+/* Ensure virtual pages sections use correct display when active */
 main[data-virtual-pages] > section.contact-section.page-active,
 main[data-virtual-pages] > section.about-section.page-active {
   display: grid;
-  visibility: visible;
+  /* visibility controlled by GSAP autoAlpha */
   pointer-events: auto;
   z-index: 100;
 }
 
 /* About section scroll - ensure scrolling on mobile */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   /* Force about section to be scrollable on mobile - highest specificity */
   section#about.about-section.page-active,
   section.about-section#about.page-active {
@@ -155,7 +139,7 @@ section.business-card-section.page-hidden .intro-nav {
  * VIRTUAL PAGE LAYOUT (Desktop Only)
  * ============================================ */
 
-@media screen and (min-width: 768px) {
+@media (--tablet) {
   /* Main container for virtual pages */
   main[data-virtual-pages] {
     position: fixed;
@@ -253,9 +237,8 @@ section.business-card-section.page-hidden .intro-nav {
     overflow: hidden;
     box-sizing: border-box;
     padding: clamp(1rem, 4vw, 2rem);
-    visibility: visible;
+    /* visibility controlled by GSAP autoAlpha */
     pointer-events: auto;
-    /* GSAP controls opacity for blur animation */
   }
 
   /* About content centered in viewport */
@@ -279,9 +262,8 @@ section.business-card-section.page-hidden .intro-nav {
     overflow: visible;
     box-sizing: border-box;
     padding: clamp(1rem, 4vw, 2rem);
-    visibility: visible;
+    /* visibility controlled by GSAP autoAlpha */
     pointer-events: auto;
-    /* GSAP controls opacity for blur animation */
   }
 
   /* Tech stack section is mobile-only - keep hidden on desktop */
@@ -308,55 +290,20 @@ section.business-card-section.page-hidden .intro-nav {
 }
 
 /* ============================================
- * TRANSITION STATES
+ * TRANSITION STATES (Blur effect)
+ * GSAP handles all animations - these are fallback states
  * ============================================ */
 
-/* Blur-in animation (entering) */
+/* Entering page state */
 .page-entering {
   opacity: 0;
   filter: blur(var(--page-blur-amount));
 }
 
-.page-entering.page-enter-active {
-  opacity: 1;
-  filter: blur(0);
-  /* GSAP handles page enter transition - see page-transition.ts */
-}
-
-/* Blur-out animation (leaving) */
+/* Leaving page state */
 .page-leaving {
-  opacity: 1;
-  filter: blur(0);
-}
-
-.page-leaving.page-leave-active {
   opacity: 0;
   filter: blur(var(--page-blur-amount));
-  /* GSAP handles page leave transition - see page-transition.ts */
-}
-
-/* ============================================
- * DROP-IN/OUT ANIMATIONS FOR CHILDREN
- * ============================================ */
-
-/* Child elements drop-in (from top) */
-.page-child-entering {
-  transform: translateY(-105%);
-}
-
-.page-child-entering.page-child-enter-active {
-  transform: translateY(0);
-  /* GSAP handles child enter transition - see page-transition.ts */
-}
-
-/* Child elements drop-out (to bottom) */
-.page-child-leaving {
-  transform: translateY(0);
-}
-
-.page-child-leaving.page-child-leave-active {
-  transform: translateY(105%);
-  /* GSAP handles child leave transition - see page-transition.ts */
 }
 
 /* ============================================
@@ -365,16 +312,12 @@ section.business-card-section.page-hidden .intro-nav {
 
 @media (prefers-reduced-motion: reduce) {
   :root {
-    --page-transition-duration-in: 0s;
-    --page-transition-duration-out: 0s;
-    --page-transition-stagger: 0s;
+    --page-transition-duration: 0s;
     --page-blur-amount: 0;
   }
 
   .page-entering,
-  .page-leaving,
-  .page-child-entering,
-  .page-child-leaving {
+  .page-leaving {
     transition: none !important;
     animation: none !important;
   }
