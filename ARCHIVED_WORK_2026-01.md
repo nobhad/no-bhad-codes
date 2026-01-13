@@ -4,6 +4,115 @@ This file contains completed work from January 2026. Items are moved here from `
 
 ---
 
+## Page Transition Animation Flash - RESOLVED (January 13, 2026)
+
+**Issue:** HR element and button briefly flashed before content animated in with blur effect.
+
+**Status:** No longer occurring - resolved through previous animation simplification work.
+
+---
+
+## Admin Project Additional Fields - COMPLETE (January 13, 2026)
+
+Added new fields to project management for better tracking and exposed existing date fields in the edit form.
+
+**New Database Columns:**
+
+- `notes` - Internal admin notes (not visible to clients)
+- `repository_url` - GitHub/GitLab repository URL
+- `staging_url` - Staging environment URL
+- `production_url` - Production environment URL
+- `deposit_amount` - Deposit amount received
+- `contract_signed_at` - Contract signing date
+
+**Existing Fields Now Exposed:**
+
+- `start_date` - Project start date (was hidden)
+- `estimated_end_date` - Target completion date (was hidden)
+
+**Files Modified:**
+
+- `server/database/migrations/021_project_additional_fields.sql` - New migration
+- `server/database/migrations/020_project_price.sql` - Fixed format
+- `server/routes/projects.ts` - Added fields to API field mapping
+- `admin/index.html` - Added form fields to edit modal and display elements
+- `src/features/admin/admin-project-details.ts` - Updated modal and save logic
+
+---
+
+## Admin Project Edit Button Fix - COMPLETE (January 13, 2026)
+
+Fixed broken project editing functionality in admin dashboard.
+
+**Issues Fixed:**
+
+1. **Edit button not working** - Handler existed in `admin-projects.ts` but wasn't called from detail view
+2. **Auth check failing** - Was checking `client_auth_mode` (client portal only) instead of `AdminAuth`
+3. **Field name mismatch** - Frontend sent `budget_range` but backend expected `budget`
+4. **Missing database columns** - Added `price` column via migration 020
+5. **Logout not working** - Server uses HttpOnly cookies, needed server endpoint call
+
+**Files Modified:**
+
+- `src/features/admin/admin-project-details.ts` - Added edit modal methods, fixed auth
+- `src/features/admin/admin-auth.ts` - Fixed logout to call server endpoint
+- `src/features/admin/modules/admin-projects.ts` - Fixed budget field name
+- `server/routes/projects.ts` - Added field mappings
+- `server/routes/clients.ts` - Allow creating clients without password
+
+---
+
+## Header White Flash in Dark Mode - FIXED (January 13, 2026)
+
+**Issue:** Header area briefly flashed white when navigating in dark mode.
+
+**Root Cause:** Inline critical CSS in `index.html` had hardcoded color values (`#f8f5f4`) that didn't match the CSS variable `--color-neutral-300` (`#e0e0e0`).
+
+**Solution:** Replaced all hardcoded background colors with `var(--color-neutral-300)` which is theme-aware (light: `#e0e0e0`, dark: `#333333`).
+
+**Files Modified:**
+
+- `index.html` - Use CSS variables instead of hardcoded colors
+- `src/styles/components/intro-morph.css` - Updated comment to match actual color value
+
+---
+
+## Terminal Styling Refactor - COMPLETE (January 13, 2026)
+
+**Changes Made:**
+
+1. **Created reusable terminal component** (`src/styles/components/terminal.css`)
+   - Extracted base terminal styles (window, header, input, scrollbar)
+   - Added CSS custom properties for terminal font settings
+   - Consistent styling across all terminal instances
+
+2. **Removed green glow from terminal**
+   - Removed `box-shadow` glow effects from `.terminal-window`
+   - Removed glow from `.progress-fill`
+   - Terminal now has clean drop shadow only
+
+3. **Fixed terminal width on open**
+   - Terminal now appears at full 900px width immediately
+   - Added `min-width: 100%` to prevent content-based sizing
+   - No more "skinny" initial state
+
+4. **Added shadows to client portal**
+   - Added `box-shadow: var(--shadow-card)` to match admin portal
+   - Components updated: `.portal-card`, `.portal-project-card`, `.stat-card`, `.overview-card`, `.recent-activity`, `.progress-bar`, `.update-item`, `.timeline-content`, `.content-section`, `.content-item`, `.new-project-form`
+
+**Files Modified:**
+
+- `src/styles/components/terminal.css` (NEW)
+- `src/styles/pages/terminal-intake.css`
+- `src/styles/components/nav-portal.css`
+- `src/styles/pages/client.css`
+- `src/styles/client-portal/components.css`
+- `src/styles/client-portal/dashboard.css`
+- `src/styles/client-portal/views.css`
+- `src/styles/main.css`
+
+---
+
 ## Client Portal - Real Project Data - COMPLETE (January 13, 2026)
 
 Fixed client portal to fetch real project data from API instead of using hardcoded demo data.
