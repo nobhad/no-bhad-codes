@@ -120,13 +120,16 @@
 }
 
 .pd-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-sm);
   padding: var(--portal-spacing-md) var(--portal-spacing-xl);
-  background: #222222;
+  background: var(--portal-bg-readonly);
   border: none;
   border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0;
   color: var(--portal-text-secondary);
   font-size: 0.85rem;
-  box-shadow: 1px -1px 4px rgba(0, 0, 0, 0.3), 2px -2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-tab);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -134,6 +137,12 @@
   transition: all 0.15s ease;
   white-space: nowrap;
   position: relative;
+}
+
+.pd-tab-btn .tab-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
 }
 
 .pd-tab-btn:hover {
@@ -154,7 +163,7 @@
   background: var(--portal-bg-dark);
   border-radius: 0 var(--portal-radius-lg) var(--portal-radius-lg) var(--portal-radius-lg);
   padding: 4rem 2rem;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4), 4px 4px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-content);
 }
 
 .pd-tab-content.active {
@@ -173,17 +182,17 @@
 .pd-tab-content .recent-activity,
 .pd-tab-content .settings-section,
 .pd-tab-content .invoice-summary .summary-card {
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  padding: 0 !important;
-  box-shadow: none !important;
-  margin: 0 !important;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  margin: 0;
 }
 
 /* Override any adjacent sibling margins inside tab content */
 .pd-tab-content .portal-project-card + .portal-project-card {
-  margin-top: 0 !important;
+  margin-top: 0;
 }
 
 /* Unified heading style for all sections inside tab content */
@@ -206,22 +215,22 @@
 
 /* Messages container - add border back */
 #pd-tab-messages .messages-container {
-  border: 3px solid #000000 !important;
-  border-radius: var(--portal-radius-md) !important;
-  padding: 0 !important;
-  background: #E0E0E0 !important;
+  border: 3px solid var(--color-black);
+  border-radius: var(--portal-radius-md);
+  padding: 0;
+  background: var(--color-neutral-200);
 }
 
 /* Divider between messages thread and compose area */
 #pd-tab-messages .message-compose {
-  border-top: 3px solid #000000;
+  border-top: 3px solid var(--color-black);
   margin-top: var(--portal-spacing-lg);
   padding-top: var(--portal-spacing-lg);
 }
 
 /* Send message button - thicker border */
 #pd-tab-messages .message-compose .btn {
-  border: 3px solid #000000;
+  border: 3px solid var(--color-black);
 }
 
 /* Settings tab sections - darker background and equal heights */
@@ -253,7 +262,7 @@
 [data-page="admin"] textarea,
 [data-page="admin"] select:not(.status-select),
 [data-page="admin"] .form-select {
-  background-color: #000000 !important;
+  background-color: var(--color-black);
 }
 
 /* Form row - two columns side by side */
@@ -319,7 +328,7 @@
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-color: #000000;
+  background-color: var(--color-black);
   color: var(--portal-text-light);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -360,16 +369,16 @@
 
 /* Settings tab - override ALL floating label styles to match meta-label */
 #pd-tab-settings label {
-  position: static !important;
-  top: auto !important;
-  left: auto !important;
-  font-size: 0.75rem !important;
-  font-weight: 500 !important;
-  text-transform: uppercase !important;
-  color: var(--portal-text-secondary) !important;
-  letter-spacing: 0.05em !important;
-  margin: 0 !important;
-  pointer-events: auto !important;
+  position: static;
+  top: auto;
+  left: auto;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--portal-text-secondary);
+  letter-spacing: 0.05em;
+  margin: 0;
+  pointer-events: auto;
 }
 
 /* Settings tab form groups - match meta-item styling */
@@ -384,15 +393,15 @@
 /* Settings form inputs - reduced top padding to match Overview spacing */
 #pd-tab-settings input,
 #pd-tab-settings .form-input {
-  padding: 0.5rem 1rem !important;
-  min-height: auto !important;
-  font-size: 0.95rem !important;
-  font-weight: 400 !important;
+  padding: 0.5rem 1rem;
+  min-height: auto;
+  font-size: 0.95rem;
+  font-weight: 400;
 }
 
 /* Settings form placeholder - not bold */
 #pd-tab-settings input::placeholder {
-  font-weight: 400 !important;
+  font-weight: 400;
 }
 
 /* Form row for Account Status and Last Login */
@@ -528,7 +537,7 @@
   background: var(--portal-bg-light);
   border-radius: var(--portal-radius-pill);
   overflow: hidden;
-  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.5), inset -1px -1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-inset);
 }
 
 .project-progress-display .progress-fill {
@@ -550,10 +559,10 @@
   align-items: flex-start;
   gap: var(--portal-spacing-md);
   padding: var(--portal-spacing-lg);
-  background: var(--portal-bg-medium) !important;
+  background: var(--portal-bg-medium);
   border: none;
   border-radius: var(--portal-radius-md);
-  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-card);
 }
 
 /* Custom checkbox - wrapper div */
@@ -562,7 +571,7 @@
   width: 20px;
   height: 20px;
   cursor: pointer;
-  background: #000000;
+  background: var(--color-black);
   border-radius: 4px;
   position: relative;
   display: flex;
@@ -607,7 +616,7 @@
 .milestone-title,
 [data-page="admin"] .milestone-title {
   font-weight: 600;
-  color: var(--portal-text-light) !important;
+  color: var(--portal-text-light);
   margin: 0 0 var(--portal-spacing-sm) 0;
   font-family: var(--font--acme);
   text-transform: uppercase;
@@ -616,12 +625,12 @@
 
 .milestone-item.completed .milestone-title {
   text-decoration: line-through;
-  color: var(--portal-text-secondary) !important;
+  color: var(--portal-text-secondary);
 }
 
 .milestone-description,
 [data-page="admin"] .milestone-description {
-  color: var(--portal-text-light) !important;
+  color: var(--portal-text-light);
   font-size: 0.9rem;
   margin-bottom: var(--portal-spacing-sm);
 }
@@ -629,7 +638,7 @@
 .milestone-due,
 [data-page="admin"] .milestone-due {
   font-size: 0.75rem;
-  color: var(--portal-text-secondary) !important;
+  color: var(--portal-text-secondary);
 }
 
 .milestone-actions {
@@ -750,7 +759,7 @@
   border: none;
   border-radius: var(--portal-radius-md);
   margin-bottom: var(--portal-spacing-sm);
-  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-card);
 }
 
 #pd-files-list .file-icon {
@@ -787,9 +796,9 @@
   max-height: 400px;
   overflow-y: auto;
   padding: var(--portal-spacing-lg);
-  background: var(--color-neutral-200) !important;
-  border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0 !important;
-  margin-bottom: 0 !important;
+  background: var(--color-neutral-200);
+  border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0;
+  margin-bottom: 0;
   display: flex;
   flex-direction: column;
   gap: var(--portal-spacing-md);
@@ -912,7 +921,7 @@
 /* Empty state in messages - dark text on light bg */
 .messages-thread .empty-state,
 .messages-thread > p {
-  color: var(--portal-text-dark) !important;
+  color: var(--portal-text-dark);
   text-align: center;
   font-style: italic;
   padding: var(--portal-spacing-xl);
@@ -959,7 +968,7 @@
   border: none;
   border-radius: var(--portal-radius-md);
   margin-bottom: var(--portal-spacing-sm);
-  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-card);
 }
 
 .invoice-info {
@@ -1074,7 +1083,7 @@
 }
 
 /* Responsive adjustments for project detail */
-@media (max-width: 767px) {
+@media (--mobile) {
   .project-detail-header {
     flex-direction: column;
   }
@@ -1160,7 +1169,7 @@
   background: var(--portal-bg-medium);
   border: none;
   border-radius: var(--portal-radius-md);
-  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-card);
 }
 
 .overview-stats-grid {
@@ -1178,7 +1187,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-card);
 }
 
 .overview-stat .stat-number {
@@ -1211,7 +1220,7 @@
   padding: 0;
   margin-bottom: var(--portal-spacing-lg);
   background: transparent;
-  box-shadow: none !important;
+  box-shadow: none;
 }
 
 [data-page="admin"] .client-selector-label {
@@ -1236,12 +1245,12 @@
   padding: var(--space-2) var(--space-3);
   border: 4px solid var(--portal-border-dark);
   border-radius: var(--portal-radius-lg);
-  background-color: #000000;
+  background-color: var(--color-black);
   color: var(--portal-text-light);
   font-size: var(--font-size-base);
   cursor: pointer;
   text-align: left;
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3), -1px 0 1px rgba(0, 0, 0, 0.3), 0 -1px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-panel);
 }
 
 [data-page="admin"] .custom-dropdown-trigger:hover {
@@ -1280,21 +1289,21 @@
   margin-top: -4px;
   padding: 0;
   list-style: none;
-  background-color: #000000;
+  background-color: var(--color-black);
   border: 4px solid var(--portal-border-dark);
   border-top: none;
   border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
   max-height: 300px;
   overflow-y: auto;
   z-index: 100;
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3), -1px 0 1px rgba(0, 0, 0, 0.3), 0 -1px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-panel);
 }
 
 [data-page="admin"] .custom-dropdown.open .custom-dropdown-menu {
   display: block;
   border-color: var(--color-brand-primary);
   /* Only sides and bottom shadow - clip top shadow with clip-path */
-  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3), -4px 0 12px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-spread);
   clip-path: inset(0 -20px -20px -20px);
   margin-top: -4px;
 }
@@ -1304,7 +1313,7 @@
   border-color: var(--color-brand-primary);
   border-bottom: none;
   /* Only top and side shadows - clip bottom shadow */
-  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3), -4px 0 12px rgba(0, 0, 0, 0.3), 0 -4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-dropdown);
   clip-path: inset(-20px -20px 0 -20px);
   position: relative;
   z-index: 101;
@@ -1510,7 +1519,7 @@
   background: var(--portal-bg-medium);
   border: none;
   border-radius: var(--border-radius-md);
-  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-card);
 }
 
 .status-item .status-icon {
@@ -1625,7 +1634,7 @@
 /* ================================================
    Responsive - Details Panel
    ================================================ */
-@media (max-width: 767px) {
+@media (--mobile) {
   .details-panel {
     width: 100%;
     max-width: 100%;
@@ -1640,22 +1649,22 @@
    Admin Sidebar Footer & Logout Button
    ================================================ */
 [data-page="admin"] .sidebar-footer {
-  z-index: 1000 !important;
-  pointer-events: auto !important;
+  z-index: 1000;
+  pointer-events: auto;
 }
 
 [data-page="admin"] .sidebar-footer .btn-logout {
-  pointer-events: auto !important;
-  cursor: pointer !important;
-  z-index: 1001 !important;
-  position: relative !important;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 1001;
+  position: relative;
 }
 
 /* ================================================
    Admin & Client Portal - No Mobile Collapse
    Sidebar stays visible, no hamburger menu
    ================================================ */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   /* Hide hamburger menu on admin and client portal */
   [data-page="admin"] .mobile-menu-toggle,
   [data-page="admin"] .mobile-overlay,
@@ -1663,7 +1672,7 @@
   [data-page="client-portal"] .mobile-menu-toggle,
   [data-page="client-portal"] .mobile-overlay,
   [data-page="client-portal"] .sidebar-close-btn {
-    display: none !important;
+    display: none;
   }
 
   /* Keep sidebar visible on admin and client portal */

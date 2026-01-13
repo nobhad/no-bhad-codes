@@ -168,31 +168,33 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 ### Code Quality (Ongoing)
 
 - [x] Split `client-portal.ts` - Phase 1 complete (1,952 lines, 3 new modules)
-- [x] CSS !important cleanup - Phase 1 complete (569 → 381, 33% reduction)
-  - Added CSS cascade layers (`@layer`) to main.css
-  - Cleaned mobile/contact.css (85 → 0)
-  - Cleaned mobile/layout.css (61 → 3)
-  - Cleaned client-portal/sidebar.css (47 → 0)
+- [x] CSS !important cleanup - Phase 2 complete (381 → 336, 12% reduction)
+  - Phase 1: Added CSS cascade layers (`@layer`) to main.css
+  - Phase 1: Cleaned mobile/contact.css (85 → 0)
+  - Phase 1: Cleaned mobile/layout.css (61 → 3)
+  - Phase 1: Cleaned client-portal/sidebar.css (47 → 0)
+  - Phase 2: Cleaned admin/project-detail.css (45 → 0)
 
 ### CSS Cleanup Plan
 
-**Problem:** 650+ `!important` declarations indicate specificity wars.
+**Problem:** Started with 650+ `!important` declarations indicating specificity wars.
 
-**Root Causes Identified:**
+**Progress:**
 
-| File | Count | Root Cause |
-|------|-------|------------|
-| mobile/contact.css | 85 | Mobile overriding desktop |
-| admin.css | 64 | Admin overriding portal styles |
-| mobile/layout.css | 55 | Mobile overriding desktop |
-| page-transitions.css | 47 | Animation states forcing visibility |
-| client-portal/sidebar.css | 47 | Sidebar overriding global nav |
+| File | Before | After | Status |
+|------|--------|-------|--------|
+| mobile/contact.css | 85 | 0 | DONE |
+| mobile/layout.css | 61 | 3 | DONE |
+| client-portal/sidebar.css | 47 | 0 | DONE |
+| admin/project-detail.css | 45 | 0 | DONE |
+| page-transitions.css | 47 | - | Pending |
+| admin.css | 64 | - | Pending |
 
-**Architectural Solutions (Future):**
+**Architectural Solutions Implemented:**
 
-1. Mobile-First Refactor - Write base styles for mobile, add desktop in media queries
-2. CSS Cascade Layers - Use `@layer` to control cascade order
-3. Scoped Styles - Use `[data-page="admin"]` prefix to avoid conflicts
+1. CSS Cascade Layers - `@layer` in main.css controls cascade order
+2. Scoped Styles - `[data-page="admin"]` prefix for admin-specific overrides
+3. High-specificity selectors - ID selectors like `#pd-tab-settings` avoid !important
 
 ---
 
