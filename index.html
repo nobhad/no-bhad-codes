@@ -506,38 +506,39 @@
       <!-- ABOUT SECTION (order: 3) -->
       <section id="about" class="about-section page-hidden" data-page="about">
         <div class="about-content">
-          <div class="about-main">
-            <div class="about-text-wrapper">
-              <h2>about</h2>
-              <hr>
+          <div class="about-layout">
+            <!-- Left column: Image -->
+            <div class="about-image-column">
               <img src="/images/photobooth_loop.gif" alt="Coyote the dog" class="about-photo" loading="lazy" decoding="async" />
+            </div>
+            <!-- Right column: Text -->
+            <div class="about-text-column">
+              <h2>ABOUT</h2>
+              <hr class="about-divider">
               <p>
                 Hi, I'm Noelle, a creative full-stack developer based in the Boston, MA area. Coding lets me utilize my love for tinkering and problem-solving by combining clean code with good design.
                 I work with modern frameworks, build type-safe apps, set up scalable backends, and make sure the UI actually feels nice to use.
               </p>
-
               <p>
                 When I'm not coding, I'm treasure hunting and engaging with art and nature. I draw inspiration from midcentury animation and children's book illustrations.
               </p>
-
               <p class="opportunities-text">
                 I am actively seeking both local and remote web development opportunities.
               </p>
             </div>
-
-            <!-- Tech stack inside about section - DESKTOP ONLY -->
-            <div class="tech-stack-viewport tech-stack-desktop">
-              <div class="tech-stack">
-                <h3>tech stack</h3>
-                <p class="tech-list">
-                  JavaScript • TypeScript • HTML5 • CSS3 • PHP • React • Next.js • Vue.js • jQuery •
-                  Tailwind CSS • Bootstrap • Vuetify • GSAP • Node.js • Express.js • EJS • Handlebars •
-                  PostgreSQL • MongoDB • Redis • Supabase • MySQL • SQLite • Mongoose • Git • Vite •
-                  Webpack • npm/yarn • Jotai • Zod • JWT Auth • Vitest • Playwright • Storybook •
-                  Sentry • Vercel • Railway • Chart.js • PDFKit • Nodemailer • Chrome Extensions API •
-                  Claude Code CLI • Adobe Illustrator • Photoshop
-                </p>
-              </div>
+          </div>
+          <!-- Tech stack - hidden but preserved for future use -->
+          <div class="tech-stack-viewport tech-stack-desktop" hidden>
+            <div class="tech-stack">
+              <h3>tech stack</h3>
+              <p class="tech-list">
+                JavaScript • TypeScript • HTML5 • CSS3 • PHP • React • Next.js • Vue.js • jQuery •
+                Tailwind CSS • Bootstrap • Vuetify • GSAP • Node.js • Express.js • EJS • Handlebars •
+                PostgreSQL • MongoDB • Redis • Supabase • MySQL • SQLite • Mongoose • Git • Vite •
+                Webpack • npm/yarn • Jotai • Zod • JWT Auth • Vitest • Playwright • Storybook •
+                Sentry • Vercel • Railway • Chart.js • PDFKit • Nodemailer • Chrome Extensions API •
+                Claude Code CLI • Adobe Illustrator • Photoshop
+              </p>
             </div>
           </div>
         </div>
@@ -698,7 +699,7 @@
               />
               <div class="avatar-blurb-content">
                 <p class="avatar-blurb-text">
-                  Message me here, fill out a project <a href="#" class="avatar-blurb-link" id="card-intake-link">intake form</a>, or you can email me at <a href="mailto:nobhaduri@gmail.com" class="avatar-blurb-link">nobhaduri@gmail.com</a>
+                  Message me here, fill out an <a href="#" class="avatar-blurb-link" id="card-intake-link">intake form</a>,<br> or email me at <a href="mailto:nobhaduri@gmail.com" class="avatar-blurb-link">nobhaduri@gmail.com</a>
                 </p>
               </div>
             </div>

@@ -31,7 +31,7 @@
   }
 }
 
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   :root {
     --header-height: 45px;
   }
@@ -116,7 +116,7 @@ main > section:not(.contact-section):not(.tech-stack-section) {
 }
 
 /* Text animation section - full viewport height */
-@media screen and (min-width: 768px) {
+@media (--tablet) {
   .text-animation-section {
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     height: auto;
@@ -166,7 +166,7 @@ section.about-section.page-active {
 
 /* DESKTOP SECTION ORDERING - Business card first visually
    (HTML has hero first for mobile, CSS reorders for desktop) */
-@media screen and (min-width: 768px) {
+@media (--tablet) {
   .business-card-section {
     order: 1;
   }
@@ -189,8 +189,8 @@ section.about-section.page-active {
  * ============================================ */
 
 /* Universal container - based on main page pattern */
+/* NOTE: .about-content has its own styles in pages/about.css */
 .container,
-.about-content,
 .section-content,
 .login-wrapper,
 .page-content {
@@ -348,7 +348,7 @@ section.about-section.page-active {
  * VISIBILITY UTILITIES
  * ============================================ */
 
-@media (max-width: 767px) {
+@media (--mobile) {
   .md\:hidden {
     display: none;
   }
@@ -362,7 +362,7 @@ section.about-section.page-active {
   }
 }
 
-@media (min-width: 768px) {
+@media (--tablet) {
   .md\:block {
     display: block;
   }
@@ -414,7 +414,7 @@ main {
 
 /* Desktop: Hide main content during intro animation (overlay covers it anyway) */
 /* This prevents any flash of content before overlay renders */
-@media screen and (min-width: 768px) {
+@media (--tablet) {
   .intro-loading main {
     opacity: 0;
     visibility: hidden;
@@ -455,7 +455,7 @@ main {
 }
 
 /* Mobile: header and content always visible, no intro animation effects */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   .header,
   .intro-loading .header,
   .intro-complete .header,
@@ -513,7 +513,7 @@ main {
  * Virtual pages are controlled by PageTransitionModule with enableOnMobile: true
  * ============================================ */
 
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   /* Container width adjustments only - layout handled by mobile/layout.css */
   .section-content {
     max-width: 95vw;
@@ -527,7 +527,7 @@ main {
   }
 }
 
-@media screen and (max-width: 479px) {
+@media (--small-mobile) {
   section {
     padding: 0.75rem;
   }
@@ -575,7 +575,7 @@ main {
 /* Dark mode: colors automatically switch via CSS variables */
 
 /* Mobile adjustments for text animation */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   .text-animation-svg {
     max-width: 100%;
     padding: 0;

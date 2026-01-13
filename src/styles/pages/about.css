@@ -1,6 +1,6 @@
 /**
  * @file about.css
- * @description About section styles - individual section height and layout
+ * @description About section styles - two-column layout with image left, text right
  * @author Noelle Bhaduri
  *
  * DESKTOP ONLY (min-width: 768px) - Mobile styles in /src/styles/mobile/layout.css
@@ -10,232 +10,105 @@
    DESKTOP LAYOUT (min-width: 768px)
    ========================================== */
 
-/* about-hero-desktop - DISABLED - hero animations removed */
-.about-hero-desktop {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-@media screen and (min-width: 768px) {
-  /* About Section - full viewport height, position relative for overlay */
+@media (--tablet) {
+  /* About Section - full viewport height, centered content */
   .about-section {
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
-    height: calc(100vh - var(--header-height) - var(--footer-height));
     display: grid;
     place-items: center;
-    padding: clamp(1rem, 4vw, 2rem);
+    padding: clamp(2rem, 4vw, 4rem);
     box-sizing: border-box;
     width: 100%;
     position: relative;
-    overflow: hidden;
   }
 
-  /* About photo - desktop: positioned left of text */
-  .about-photo {
-    display: block;
-    width: clamp(180px, 15vw, 260px);
-    height: auto;
-    border: 4px solid var(--color-black, #000);
-    margin: 0;
-    align-self: flex-start;
-    flex-shrink: 0;
-  }
-
-  /* Hero overlay - DISABLED - completely hidden */
-  .about-hero-desktop {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-  }
-
-  /* Hero revealed state - hidden after animation */
-  .about-hero-desktop.hero-revealed {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-  }
-
-  /* Text animation SVG - large and centered */
-  .about-hero-desktop .text-animation-svg {
-    width: 90%;
-    max-width: 1200px;
-    height: auto;
-    max-height: 80vh;
-    will-change: transform;
-  }
-
-  /* About content container - fixed position from top for consistent transitions */
+  /* About content container - override base layout flex */
   .about-content {
-    max-width: min(1000px, 90vw);
+    display: block;
+    max-width: 100%;
     width: 100%;
     margin: 0 auto;
-    padding: 1rem;
-    padding-top: 5vh;
+    padding: 0;
     box-sizing: border-box;
+  }
+
+  /* Two-column layout - image fixed size, text takes rest */
+  .about-layout {
     display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+    gap: 1rem;
     align-items: flex-start;
-    gap: 1rem;
-    align-self: start;
-    /* Flip clock 3D setup */
-    perspective: 1000px;
-  }
-
-  /* About text wrapper - flip clock animation target */
-  .about-text-wrapper {
-    transform-origin: top center;
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
-    will-change: transform;
-    margin: 0;
-    padding: 0;
-  }
-
-  /* Main content area (text + tech stack) */
-  .about-main {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
     width: 100%;
-    margin: 0;
-    padding: 0;
   }
 
-  /* About photo - desktop: float left of paragraphs */
-  .about-photo {
-    float: left;
-    width: 240px;
-    height: auto;
-    border: 4px solid var(--color-black, #000);
-    margin: 0 1.5rem 1rem 0;
+  /* Left column: Image - fixed width */
+  .about-image-column {
     flex-shrink: 0;
   }
 
-  /* Section heading - staggered entrance */
-  .about-section h2 {
-    margin-bottom: 1.5rem;
-    text-align: left;
-    width: 100%;
+  /* About photo - fixed size */
+  .about-photo {
+    width: 300px;
+    height: auto;
+    border: 4px solid var(--color-dark);
+    display: block;
   }
 
-  /* Heading wrapper for drop animation */
-  .heading-wrapper {
-    overflow: hidden;
-  }
-
-  .heading-wrapper h2 {
-    transform: translateY(-105%);
-    animation: drop-in var(--transition-length) cubic-bezier(0.3, 0.9, 0.3, 0.9) 0.4s forwards;
-  }
-
-  .heading-wrapper h2.leaving {
-    transform: translateY(0);
-    animation: drop-out var(--transition-length) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
-  }
-
-  /* About text wrapper - staggered paragraphs */
-  .about-text-wrapper {
-    margin-bottom: 0; /* Remove bottom margin - tech stack has its own margin-top */
-  }
-
-  /* Paragraph wrapper for drop animation */
-  .p-wrapper {
-    overflow: hidden;
-  }
-
-  .p-wrapper p {
-    transform: translateY(-105%);
-    animation: drop-in var(--transition-long) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
-  }
-
-  /* Staggered paragraph delays */
-  .p-wrapper:nth-child(1) p,
-  .p-wrapper.index-0 p { animation-delay: 0.5s; }
-
-  .p-wrapper:nth-child(2) p,
-  .p-wrapper.index-1 p { animation-delay: 0.6s; }
-
-  .p-wrapper:nth-child(3) p,
-  .p-wrapper.index-2 p { animation-delay: 0.7s; }
-
-  /* Exit animations */
-  .p-wrapper p.leaving {
-    transform: translateY(0);
-    animation: drop-out var(--transition-length) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
-  }
-
-  .p-wrapper:nth-child(1) p.leaving,
-  .p-wrapper.index-0 p.leaving { animation-delay: 0.05s; }
-
-  .p-wrapper:nth-child(2) p.leaving,
-  .p-wrapper.index-1 p.leaving { animation-delay: 0.1s; }
-
-  .p-wrapper:nth-child(3) p.leaving,
-  .p-wrapper.index-2 p.leaving { animation-delay: 0.15s; }
-
-  .about-content p,
-  .about-text-wrapper p {
-    margin-bottom: 1.5rem;
-  }
-
-  /* Remove bottom margin from last paragraph in text wrapper */
-  .about-text-wrapper p:last-child {
-    margin-bottom: 0;
-  }
-
-  /* Opportunities text - extra spacing above */
-  .opportunities-text {
-    margin-top: 2.5rem;
-  }
-
-  /* Remove bottom margin from last element in about-content */
-  .about-content > *:last-child {
-    margin-bottom: 0;
-  }
-
-  /* Tech stack viewport */
-  .tech-stack-viewport {
-    margin-top: 0.5rem;
-    margin-bottom: 0; /* Remove any bottom margin */
-    width: 100%;
-  }
-
-  /* Tech stack box - contain text within bounds */
-  .tech-stack {
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-    box-sizing: border-box;
+  /* Right column: Text - takes all remaining space */
+  .about-text-column {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    flex: 1;
+    gap: 0;
+    padding-top: 0;
   }
 
-  .tech-stack h3,
-  .tech-stack .tech-list {
-    margin: 0;
+  /* Section heading - uppercase, large */
+  .about-section h2,
+  .about-text-column h2 {
+    font-family: var(--font-family-acme);
+    font-size: clamp(4rem, 9vw, 6rem);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-dark);
+    margin: 0 0 0.5rem 0;
+    line-height: 1;
   }
 
-  .tech-stack .tech-list {
-    position: relative;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
+  /* Horizontal divider - thick dark line, not full width */
+  .about-divider {
+    width: 95%;
+    height: 6px;
+    background: var(--color-dark);
+    border: none;
+    margin: 0 0 1.5rem 0;
   }
 
-  /* Tech stack section visibility - hidden on desktop */
-  .tech-stack-section {
-    display: none;
+  /* Paragraphs */
+  .about-text-column p {
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    color: var(--color-dark);
+    margin: 0 0 1.25rem 0;
   }
 
+  .about-text-column p:last-child {
+    margin-bottom: 0;
+  }
+
+
+  /* Hidden tech stack - preserved but not displayed */
+  .tech-stack-viewport,
   .tech-stack-desktop {
-    display: block;
-    width: 100%;
-    will-change: transform;
+    display: none !important;
+  }
+}
+
+/* ==========================================
+   WIDE SCREENS (min-width: 1200px)
+   ========================================== */
+
+@media (--wide) {
+  .about-layout {
+    gap: 2rem;
   }
 }

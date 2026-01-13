@@ -207,7 +207,7 @@ export class PageTransitionModule extends BaseModule {
 
         // About page: UNIFORM h2/hr + flip-clock animation on initial load
         if (id === 'about') {
-          const textWrapper = page.element.querySelector('.about-text-wrapper') as HTMLElement;
+          const textWrapper = page.element.querySelector('.about-text-column') as HTMLElement;
           const techStack = page.element.querySelector('.tech-stack-desktop') as HTMLElement;
 
           // h2 drops in from above (already set to hidden position above)
@@ -887,7 +887,7 @@ export class PageTransitionModule extends BaseModule {
 
       // === PAGE-SPECIFIC CONTENT ANIMATIONS ===
       if (page.id === 'about') {
-        const textWrapper = page.element!.querySelector('.about-text-wrapper') as HTMLElement;
+        const textWrapper = page.element!.querySelector('.about-text-column') as HTMLElement;
         const techStack = page.element!.querySelector('.tech-stack-desktop') as HTMLElement;
 
         // Text wrapper flips out
@@ -1025,7 +1025,7 @@ export class PageTransitionModule extends BaseModule {
 
     // === ABOUT PAGE: UNIFORM h2/hr + flip-clock for content ===
     if (page.id === 'about') {
-      const textWrapper = sectionEl.querySelector('.about-text-wrapper') as HTMLElement;
+      const textWrapper = sectionEl.querySelector('.about-text-column') as HTMLElement;
       const techStack = sectionEl.querySelector('.tech-stack-desktop') as HTMLElement;
 
       // === UNIFORM: h2 drops in from above ===
@@ -1232,7 +1232,7 @@ export class PageTransitionModule extends BaseModule {
     const contactEl = contactPage.element!;
 
     // About elements
-    const textWrapper = aboutEl.querySelector('.about-text-wrapper') as HTMLElement;
+    const textWrapper = aboutEl.querySelector('.about-text-column') as HTMLElement;
     const techStack = aboutEl.querySelector('.tech-stack-desktop') as HTMLElement;
 
     // Contact elements
@@ -1379,7 +1379,7 @@ export class PageTransitionModule extends BaseModule {
     const contactOptions = contactEl.querySelector('.contact-options') as HTMLElement;
 
     // About elements
-    const textWrapper = aboutEl.querySelector('.about-text-wrapper') as HTMLElement;
+    const textWrapper = aboutEl.querySelector('.about-text-column') as HTMLElement;
     const techStack = aboutEl.querySelector('.tech-stack-desktop') as HTMLElement;
 
     // Prepare about page
