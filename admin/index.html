@@ -245,17 +245,17 @@
               <div class="overview-stats-grid">
                 <div class="overview-stat">
                   <span class="stat-number" id="total-visitors">-</span>
-                  <span class="stat-label">Total Visitors</span>
+                  <span class="meta-label">Total Visitors</span>
                   <span class="metric-change" id="visitors-change">-</span>
                 </div>
                 <div class="overview-stat">
                   <span class="stat-number" id="page-views">-</span>
-                  <span class="stat-label">Page Views</span>
+                  <span class="meta-label">Page Views</span>
                   <span class="metric-change" id="views-change">-</span>
                 </div>
                 <div class="overview-stat">
                   <span class="stat-number" id="avg-session">-</span>
-                  <span class="stat-label">Avg. Session</span>
+                  <span class="meta-label">Avg. Session</span>
                   <span class="metric-change" id="session-change">-</span>
                 </div>
               </div>
@@ -313,15 +313,14 @@
                       <th>Name</th>
                       <th>Company</th>
                       <th>Email</th>
-                      <th>Project Type</th>
+                      <th>Type</th>
                       <th>Budget</th>
                       <th>Status</th>
-                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody id="leads-table-body">
                     <tr>
-                      <td colspan="8" class="loading-row">Loading leads...</td>
+                      <td colspan="7" class="loading-row">Loading leads...</td>
                     </tr>
                   </tbody>
                 </table>
@@ -465,9 +464,8 @@
                 <table class="clients-table">
                   <thead>
                     <tr>
-                      <th>Name</th>
+                      <th>Client</th>
                       <th>Email</th>
-                      <th>Company</th>
                       <th>Status</th>
                       <th>Projects</th>
                       <th>Created</th>
@@ -475,7 +473,7 @@
                   </thead>
                   <tbody id="clients-table-body">
                     <tr>
-                      <td colspan="6" class="loading-row">Loading clients...</td>
+                      <td colspan="5" class="loading-row">Loading clients...</td>
                     </tr>
                   </tbody>
                 </table>
@@ -673,15 +671,15 @@
             <div class="quick-stats">
               <div class="stat-card portal-shadow">
                 <span class="stat-number" id="analytics-visitors">-</span>
-                <span class="stat-label">Total Visitors</span>
+                <span class="meta-label">Total Visitors</span>
               </div>
               <div class="stat-card portal-shadow">
                 <span class="stat-number" id="analytics-pageviews">-</span>
-                <span class="stat-label">Page Views</span>
+                <span class="meta-label">Page Views</span>
               </div>
               <div class="stat-card portal-shadow">
                 <span class="stat-number" id="analytics-sessions">-</span>
-                <span class="stat-label">Avg. Session</span>
+                <span class="meta-label">Avg. Session</span>
               </div>
             </div>
 
@@ -1139,25 +1137,121 @@
         <form id="add-client-form">
           <div class="admin-modal-body">
             <div class="form-group">
-              <label for="new-client-email">Email *</label>
+              <label class="meta-label" for="new-client-email">Email *</label>
               <input type="email" id="new-client-email" class="form-input" placeholder="client@example.com" required />
             </div>
             <div class="form-group">
-              <label for="new-client-name">Contact Name</label>
+              <label class="meta-label" for="new-client-name">Contact Name</label>
               <input type="text" id="new-client-name" class="form-input" placeholder="John Smith" />
             </div>
             <div class="form-group">
-              <label for="new-client-company">Company Name</label>
+              <label class="meta-label" for="new-client-company">Company Name</label>
               <input type="text" id="new-client-company" class="form-input" placeholder="Acme Inc." />
             </div>
             <div class="form-group">
-              <label for="new-client-phone">Phone</label>
+              <label class="meta-label" for="new-client-phone">Phone</label>
               <input type="tel" id="new-client-phone" class="form-input" placeholder="(555) 123-4567" />
             </div>
           </div>
           <div class="admin-modal-footer">
             <button type="button" class="btn btn-secondary" id="add-client-cancel">Cancel</button>
             <button type="submit" class="btn btn-primary">Add Client</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit Client Info Modal -->
+    <div class="admin-modal-overlay hidden" id="edit-client-info-modal">
+      <div class="admin-modal">
+        <div class="admin-modal-header">
+          <h3>Edit Client Info</h3>
+          <button class="admin-modal-close" id="edit-client-info-close" aria-label="Close modal">
+            &times;
+          </button>
+        </div>
+        <form id="edit-client-info-form">
+          <div class="admin-modal-body">
+            <div class="form-group">
+              <label class="meta-label" for="edit-client-email">Email</label>
+              <input type="email" id="edit-client-email" class="form-input" placeholder="client@example.com" />
+            </div>
+            <div class="form-group">
+              <label class="meta-label" for="edit-client-name">Contact Name</label>
+              <input type="text" id="edit-client-name" class="form-input" placeholder="John Smith" />
+            </div>
+            <div class="form-group">
+              <label class="meta-label" for="edit-client-company">Company Name</label>
+              <input type="text" id="edit-client-company" class="form-input" placeholder="Acme Inc." />
+            </div>
+            <div class="form-group">
+              <label class="meta-label" for="edit-client-phone">Phone</label>
+              <input type="tel" id="edit-client-phone" class="form-input" placeholder="(555) 123-4567" />
+            </div>
+            <div class="form-group">
+              <label class="meta-label" for="edit-client-status">Status</label>
+              <select id="edit-client-status" class="form-input">
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div class="admin-modal-footer">
+            <button type="button" class="btn btn-secondary" id="edit-client-info-cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit Billing Details Modal -->
+    <div class="admin-modal-overlay hidden" id="edit-billing-modal">
+      <div class="admin-modal">
+        <div class="admin-modal-header">
+          <h3>Edit Billing Details</h3>
+          <button class="admin-modal-close" id="edit-billing-close" aria-label="Close modal">
+            &times;
+          </button>
+        </div>
+        <form id="edit-billing-form">
+          <div class="admin-modal-body">
+            <div class="form-group">
+              <label class="meta-label" for="edit-billing-name">Billing Name</label>
+              <input type="text" id="edit-billing-name" class="form-input" placeholder="John Smith" />
+            </div>
+            <div class="form-group">
+              <label class="meta-label" for="edit-billing-email">Billing Email</label>
+              <input type="email" id="edit-billing-email" class="form-input" placeholder="billing@example.com" />
+            </div>
+            <div class="form-group">
+              <label class="meta-label" for="edit-billing-address">Address</label>
+              <input type="text" id="edit-billing-address" class="form-input" placeholder="123 Main St" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="meta-label" for="edit-billing-city">City</label>
+                <input type="text" id="edit-billing-city" class="form-input" placeholder="New York" />
+              </div>
+              <div class="form-group">
+                <label class="meta-label" for="edit-billing-state">State/Province</label>
+                <input type="text" id="edit-billing-state" class="form-input" placeholder="NY" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="meta-label" for="edit-billing-zip">ZIP/Postal Code</label>
+                <input type="text" id="edit-billing-zip" class="form-input" placeholder="10001" />
+              </div>
+              <div class="form-group">
+                <label class="meta-label" for="edit-billing-country">Country</label>
+                <input type="text" id="edit-billing-country" class="form-input" placeholder="USA" />
+              </div>
+            </div>
+          </div>
+          <div class="admin-modal-footer">
+            <button type="button" class="btn btn-secondary" id="edit-billing-cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
           </div>
         </form>
       </div>
