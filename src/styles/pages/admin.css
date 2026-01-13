@@ -3943,6 +3943,21 @@
   text-decoration: underline;
 }
 
+/* Clickable client items in project details */
+.clickable-client {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.clickable-client:hover {
+  opacity: 0.8;
+}
+
+.clickable-client:hover .meta-value {
+  color: var(--portal-accent);
+  text-decoration: underline;
+}
+
 /* Back button in client detail */
 .btn-back {
   display: flex;
