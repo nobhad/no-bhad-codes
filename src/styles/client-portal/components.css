@@ -200,10 +200,10 @@
 /* Label inside input like contact form */
 .portal-form-group,
 :is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) .form-group {
-  margin: 0 !important;
-  position: relative !important;
-  display: flex !important;
-  flex-direction: column !important;
+  margin: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .portal-form-group:last-child,
@@ -214,17 +214,17 @@
 /* Label positioned inside input at top - SMALL UPPERCASE style */
 .portal-form-group label,
 :is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) :is(.form-group label, label) {
-  position: absolute !important;
-  top: var(--portal-spacing-sm) !important;
-  left: var(--portal-spacing-xl) !important;
-  z-index: 1 !important;
-  font-weight: var(--label-font-weight, 500) !important;
-  color: var(--portal-text-secondary) !important;
-  font-size: var(--label-font-size, 0.75rem) !important;
-  text-transform: var(--label-text-transform, uppercase) !important;
-  letter-spacing: var(--label-letter-spacing, 0.05em) !important;
-  pointer-events: none !important;
-  margin: 0 !important;
+  position: absolute;
+  top: var(--portal-spacing-sm);
+  left: var(--portal-spacing-xl);
+  z-index: 1;
+  font-weight: var(--label-font-weight, 500);
+  color: var(--portal-text-secondary);
+  font-size: var(--label-font-size, 0.75rem);
+  text-transform: var(--label-text-transform, uppercase);
+  letter-spacing: var(--label-letter-spacing, 0.05em);
+  pointer-events: none;
+  margin: 0;
 }
 
 /* Adjust input padding to account for smaller label */
@@ -366,8 +366,8 @@
 
 .portal-project-card {
   display: block;
-  background: var(--portal-bg-dark) !important;
-  border: none !important;
+  background: var(--portal-bg-dark);
+  border: none;
   border-radius: var(--portal-radius-lg);
   padding: var(--portal-spacing-xl);
   color: var(--portal-text-light);

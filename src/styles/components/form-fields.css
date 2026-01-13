@@ -106,9 +106,9 @@ select::-ms-expand {
 .login-form textarea:focus,
 .form-container select:focus,
 .login-form select:focus {
-  outline: none !important;
-  border-color: var(--color-primary) !important;
-  box-shadow: 0 0 0 2px rgba(var(--color-brand-primary-rgb), 0.25) !important;
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-brand-primary-rgb), 0.25);
 }
 
 /* ============================================

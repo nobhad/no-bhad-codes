@@ -44,9 +44,9 @@
 .btn-primary.form-valid,
 .form-button.form-valid,
 .login-btn.form-valid {
-  background-color: var(--color-primary) !important;
-  color: var(--color-black) !important;
-  border-color: var(--color-border) !important;
+  background-color: var(--color-primary);
+  color: var(--color-black);
+  border-color: var(--color-border);
 }
 
 /* Ensure border stays black on all states */
@@ -59,8 +59,8 @@
 .login-btn:focus,
 .login-btn:active,
 .login-btn:hover {
-  border-color: var(--color-border) !important;
-  outline: none !important;
+  border-color: var(--color-border);
+  outline: none;
 }
 
 /* Secondary button styling */
@@ -72,17 +72,17 @@
 /* Submit button focus - keep black border */
 input[type="submit"]:focus,
 input[type="submit"]:active {
-  border-color: var(--color-border) !important;
-  outline: none !important;
-  box-shadow: 0 4px 8px var(--color-shadow) !important;
+  border-color: var(--color-border);
+  outline: none;
+  box-shadow: 0 4px 8px var(--color-shadow);
 }
 
 /* Submit button valid state - lime green background */
 input[type="submit"].form-valid,
 input.form-button.form-valid {
-  background-color: var(--color-primary) !important;
-  color: var(--color-black) !important;
-  border-color: var(--color-border) !important;
+  background-color: var(--color-primary);
+  color: var(--color-black);
+  border-color: var(--color-border);
 }
 
 /* ============================================
