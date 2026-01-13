@@ -76,31 +76,6 @@ export function registerModules(debug: boolean = false): void {
       dependencies: ['SectionCardRenderer']
     },
     {
-      name: 'ContactCardRenderer',
-      type: 'dom',
-      factory: async () => {
-        const { BusinessCardRenderer } = await import('../modules/ui/business-card-renderer');
-        return new BusinessCardRenderer({
-          businessCardId: 'contact-business-card',
-          businessCardInnerId: 'contact-business-card-inner',
-          frontSelector: '#contact-business-card .business-card-front',
-          backSelector: '#contact-business-card .business-card-back',
-          containerSelector: '#contact-card-container'
-        });
-      }
-    },
-    {
-      name: 'ContactCardInteractions',
-      type: 'dom',
-      factory: async () => {
-        const { BusinessCardInteractions } =
-          await import('../modules/ui/business-card-interactions');
-        const renderer = await container.resolve('ContactCardRenderer');
-        return new BusinessCardInteractions(renderer as any);
-      },
-      dependencies: ['ContactCardRenderer']
-    },
-    {
       name: 'NavigationModule',
       type: 'dom',
       factory: async () => {
@@ -292,14 +267,12 @@ export function getMainSiteModules(): string[] {
     'ThemeModule',
     'SectionCardRenderer',
     'SectionCardInteractions',
-    'ContactCardRenderer',
-    // ContactCardInteractions removed - flip controlled by ContactAnimationModule
     'NavigationModule',
     'ContactFormModule',
-    'ScrollSnapModule', // Disabled on desktop home - virtual pages instead
+    'ScrollSnapModule',
     'TextAnimationModule',
     'ContactAnimationModule',
-    'PageTransitionModule' // Virtual pages for all screen sizes
+    'PageTransitionModule'
   ];
 }
 
