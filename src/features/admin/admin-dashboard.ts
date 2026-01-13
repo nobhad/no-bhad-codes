@@ -1244,6 +1244,9 @@ class AdminDashboard {
     } else if (tableName === 'projects') {
       tableBody = document.getElementById('projects-table-body');
       statusColumnIndex = 4; // Status column is 5th (0-indexed: 4)
+    } else if (tableName === 'clients') {
+      tableBody = document.getElementById('clients-table-body');
+      statusColumnIndex = 2; // Status column is 3rd (0-indexed: 2)
     }
 
     if (!tableBody) return;
