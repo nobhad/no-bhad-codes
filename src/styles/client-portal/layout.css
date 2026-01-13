@@ -108,6 +108,13 @@
   --portal-spacing-lg: 1rem;
   --portal-spacing-xl: 1.5rem;
   --portal-spacing-2xl: 2rem;
+
+  /* Label styling */
+  --label-font-size: 0.75rem;
+  --label-color: var(--color-gray-400);
+  --label-font-weight: 500;
+  --label-text-transform: uppercase;
+  --label-letter-spacing: 0.05em;
 }
 
 /* Remove ALL shadows from dashboard pages */
@@ -168,6 +175,63 @@
 [data-page="admin"] .client-name {
   box-shadow: none !important;
   text-shadow: none !important;
+}
+
+/* ================================================
+   CLIENT PORTAL - CARD SHADOWS (matches admin)
+   ================================================ */
+[data-page="client-portal"] .stat-card,
+[data-page="client-portal"] .summary-card,
+[data-page="client-portal"] .overview-card,
+[data-page="client-portal"] .messages-container,
+[data-page="client-portal"] .settings-section,
+[data-page="client-portal"] .file-section,
+[data-page="client-portal"] .invoices-list,
+[data-page="client-portal"] .content-section,
+[data-page="client-portal"] .portal-project-card,
+[data-page="client-portal"] .recent-activity,
+[data-page="client-portal"] .files-upload-section,
+[data-page="client-portal"] .files-list-section {
+  box-shadow: var(--shadow-panel) !important;
+}
+
+/* No shadows on child divs inside main containers */
+[data-page="client-portal"] .overview-card > div,
+[data-page="client-portal"] .stat-card > div,
+[data-page="client-portal"] .summary-card > div,
+[data-page="client-portal"] .messages-container > div,
+[data-page="client-portal"] .settings-section > div,
+[data-page="client-portal"] .invoices-list > div,
+[data-page="client-portal"] .content-section > div,
+[data-page="client-portal"] .portal-project-card > div,
+[data-page="client-portal"] .recent-activity > div,
+[data-page="client-portal"] .files-upload-section > div,
+[data-page="client-portal"] .files-list-section > div {
+  box-shadow: none !important;
+}
+
+/* ================================================
+   CLIENT PORTAL - GLOBAL BUTTON STYLES
+   ================================================ */
+[data-page="client-portal"] .btn,
+[data-page="client-portal"] .btn-secondary,
+[data-page="client-portal"] button[type="submit"] {
+  background: transparent;
+  color: var(--portal-text-light);
+  border: 2px solid var(--portal-border-light);
+  border-radius: var(--portal-radius-lg);
+  padding: var(--portal-spacing-md) var(--portal-spacing-xl);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+[data-page="client-portal"] .btn:hover,
+[data-page="client-portal"] .btn-secondary:hover,
+[data-page="client-portal"] button[type="submit"]:hover {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark);
+  border-color: var(--color-primary);
 }
 
 /* Remove card backgrounds */
