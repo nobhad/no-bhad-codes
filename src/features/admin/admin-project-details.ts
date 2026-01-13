@@ -9,6 +9,7 @@
 
 import { SanitizationUtils } from '../../utils/sanitization-utils';
 import { formatFileSize } from '../../utils/format-utils';
+import { AdminAuth } from './admin-auth';
 
 export interface ProjectDetailsHandler {
   showProjectDetails(projectId: number, projectsData: any[], switchTab: (tab: string) => void, loadProjects: () => Promise<void>, formatProjectType: (type: string) => string, inviteLead: (leadId: number, email: string) => Promise<void>): void;
@@ -171,8 +172,13 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const tabContents = document.querySelectorAll('.pd-tab-content');
 
     tabBtns.forEach((btn) => {
+      const btnEl = btn as HTMLElement;
+      // Skip if already set up
+      if (btnEl.dataset.listenerAdded) return;
+      btnEl.dataset.listenerAdded = 'true';
+
       btn.addEventListener('click', () => {
-        const tabName = (btn as HTMLElement).dataset.pdTab;
+        const tabName = btnEl.dataset.pdTab;
         if (!tabName) return;
 
         // Update active button
@@ -187,8 +193,9 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     });
 
     // Back button handler
-    const backBtn = document.getElementById('btn-back-to-projects');
-    if (backBtn && this.switchTabFn) {
+    const backBtn = document.getElementById('btn-back-to-projects') as HTMLElement;
+    if (backBtn && this.switchTabFn && !backBtn.dataset.listenerAdded) {
+      backBtn.dataset.listenerAdded = 'true';
       backBtn.addEventListener('click', () => {
         this.currentProjectId = null;
         this.switchTabFn!('projects');
@@ -196,8 +203,9 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
 
     // Settings form handler
-    const settingsForm = document.getElementById('pd-project-settings-form');
-    if (settingsForm) {
+    const settingsForm = document.getElementById('pd-project-settings-form') as HTMLElement;
+    if (settingsForm && !settingsForm.dataset.listenerAdded) {
+      settingsForm.dataset.listenerAdded = 'true';
       settingsForm.addEventListener('submit', (e) => {
         e.preventDefault();
         this.saveProjectSettings();
@@ -205,14 +213,16 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
 
     // Send message handler
-    const sendMsgBtn = document.getElementById('btn-pd-send-message');
-    if (sendMsgBtn) {
+    const sendMsgBtn = document.getElementById('btn-pd-send-message') as HTMLElement;
+    if (sendMsgBtn && !sendMsgBtn.dataset.listenerAdded) {
+      sendMsgBtn.dataset.listenerAdded = 'true';
       sendMsgBtn.addEventListener('click', () => this.sendProjectMessage());
     }
 
     // Resend invite handler
-    const resendInviteBtn = document.getElementById('btn-resend-invite');
-    if (resendInviteBtn && this.inviteLeadFn) {
+    const resendInviteBtn = document.getElementById('btn-resend-invite') as HTMLElement;
+    if (resendInviteBtn && this.inviteLeadFn && !resendInviteBtn.dataset.listenerAdded) {
+      resendInviteBtn.dataset.listenerAdded = 'true';
       resendInviteBtn.addEventListener('click', () => {
         if (this.currentProjectId && this.inviteLeadFn) {
           const project = this.projectsData.find((p: any) => p.id === this.currentProjectId);
@@ -226,14 +236,16 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
 
     // Add milestone handler
-    const addMilestoneBtn = document.getElementById('btn-add-milestone');
-    if (addMilestoneBtn) {
+    const addMilestoneBtn = document.getElementById('btn-add-milestone') as HTMLElement;
+    if (addMilestoneBtn && !addMilestoneBtn.dataset.listenerAdded) {
+      addMilestoneBtn.dataset.listenerAdded = 'true';
       addMilestoneBtn.addEventListener('click', () => this.showAddMilestonePrompt());
     }
 
     // Create invoice handler
-    const createInvoiceBtn = document.getElementById('btn-create-invoice');
-    if (createInvoiceBtn) {
+    const createInvoiceBtn = document.getElementById('btn-create-invoice') as HTMLElement;
+    if (createInvoiceBtn && !createInvoiceBtn.dataset.listenerAdded) {
+      createInvoiceBtn.dataset.listenerAdded = 'true';
       createInvoiceBtn.addEventListener('click', () => this.showCreateInvoicePrompt());
     }
 
@@ -334,8 +346,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   private async saveProjectSettings(): Promise<void> {
     if (!this.currentProjectId || !this.loadProjectsFn) return;
 
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') return;
+    if (!AdminAuth.isAuthenticated()) return;
 
     const name = (document.getElementById('pd-setting-name') as HTMLInputElement)?.value;
     const status = (document.getElementById('pd-setting-status') as HTMLInputElement)?.value;
@@ -384,8 +395,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const messagesThread = document.getElementById('pd-messages-thread');
     if (!messagesThread) return;
 
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') {
+    if (!AdminAuth.isAuthenticated()) {
       messagesThread.innerHTML =
         '<p class="empty-state">Authentication required to view messages.</p>';
       return;
@@ -483,8 +493,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const messageInput = document.getElementById('pd-message-input') as HTMLTextAreaElement;
     if (!messageInput || !messageInput.value.trim()) return;
 
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') return;
+    if (!AdminAuth.isAuthenticated()) return;
 
     const project = this.projectsData.find((p: any) => p.id === this.currentProjectId);
     if (!project || !project.client_id) {
@@ -553,8 +562,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const filesList = document.getElementById('pd-files-list');
     if (!filesList) return;
 
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') {
+    if (!AdminAuth.isAuthenticated()) {
       filesList.innerHTML = '<p class="empty-state">Authentication required to view files.</p>';
       return;
     }
@@ -607,8 +615,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const milestonesList = document.getElementById('pd-milestones-list');
     if (!milestonesList) return;
 
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') {
+    if (!AdminAuth.isAuthenticated()) {
       milestonesList.innerHTML = '<p class="empty-state">Authentication required.</p>';
       return;
     }
@@ -718,8 +725,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   private async addMilestone(title: string, description: string, dueDate: string): Promise<void> {
     if (!this.currentProjectId) return;
 
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') return;
+    if (!AdminAuth.isAuthenticated()) return;
 
     try {
       const response = await fetch(`/api/projects/${this.currentProjectId}/milestones`, {
@@ -754,8 +760,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   public async toggleMilestone(milestoneId: number, isCompleted: boolean): Promise<void> {
     if (!this.currentProjectId) return;
 
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') return;
+    if (!AdminAuth.isAuthenticated()) return;
 
     try {
       const response = await fetch(
@@ -785,8 +790,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (!this.currentProjectId) return;
     if (!confirm('Are you sure you want to delete this milestone?')) return;
 
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') return;
+    if (!AdminAuth.isAuthenticated()) return;
 
     try {
       const response = await fetch(
@@ -818,8 +822,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     if (!invoicesList) return;
 
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') {
+    if (!AdminAuth.isAuthenticated()) {
       invoicesList.innerHTML = '<p class="empty-state">Authentication required.</p>';
       return;
     }
@@ -920,8 +923,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   ): Promise<void> {
     if (!this.currentProjectId) return;
 
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') return;
+    if (!AdminAuth.isAuthenticated()) return;
 
     try {
       const response = await fetch('/api/invoices', {
@@ -963,8 +965,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Send an invoice to the client (exposed globally for onclick)
    */
   public async sendInvoice(invoiceId: number): Promise<void> {
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') return;
+    if (!AdminAuth.isAuthenticated()) return;
 
     try {
       const response = await fetch(`/api/invoices/${invoiceId}/send`, {
@@ -990,15 +991,17 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Set up file upload handlers for project detail view
    */
   private setupFileUploadHandlers(): void {
-    const dropzone = document.getElementById('pd-upload-dropzone');
+    const dropzone = document.getElementById('pd-upload-dropzone') as HTMLElement;
     const fileInput = document.getElementById('pd-file-input') as HTMLInputElement;
-    const browseBtn = document.getElementById('btn-pd-browse-files');
+    const browseBtn = document.getElementById('btn-pd-browse-files') as HTMLElement;
 
-    if (browseBtn && fileInput) {
+    if (browseBtn && fileInput && !browseBtn.dataset.listenerAdded) {
+      browseBtn.dataset.listenerAdded = 'true';
       browseBtn.addEventListener('click', () => fileInput.click());
     }
 
-    if (fileInput) {
+    if (fileInput && !fileInput.dataset.listenerAdded) {
+      fileInput.dataset.listenerAdded = 'true';
       fileInput.addEventListener('change', () => {
         if (fileInput.files && fileInput.files.length > 0) {
           this.uploadFiles(fileInput.files);
@@ -1007,7 +1010,8 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       });
     }
 
-    if (dropzone) {
+    if (dropzone && !dropzone.dataset.listenerAdded) {
+      dropzone.dataset.listenerAdded = 'true';
       // Make dropzone keyboard accessible
       dropzone.setAttribute('tabindex', '0');
       dropzone.setAttribute('role', 'button');
@@ -1046,8 +1050,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   private async uploadFiles(files: FileList): Promise<void> {
     if (!this.currentProjectId) return;
 
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') return;
+    if (!AdminAuth.isAuthenticated()) return;
 
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
