@@ -505,24 +505,23 @@
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 1rem;
+  gap: 0;
   align-self: center;
 }
 
-/* Projects heading - matches about section spacing */
-/* About: h2 margin-bottom 1.5rem, hr margin-top -1rem = 0.5rem gap */
-/* Projects (flex with 1rem gap): h2 margin-bottom 1.5rem + gap 1rem + hr margin-top -2rem = 0.5rem */
+/* Projects heading - inherits from base section h2 styling */
 .projects-section h2 {
   margin: 0;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
   padding: 0;
   text-align: left;
   width: 100%;
 }
 
-/* hr - counteract flex gap (1rem) and match about's 0.5rem net gap */
+/* hr - simple positive margins, no hacks */
 .projects-section hr {
-  margin-top: -2rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
   margin-left: 0;
   margin-right: auto;
 }
@@ -566,23 +565,17 @@
   .projects-section {
     padding: 1rem;
     flex-direction: column;
-    gap: 2rem;
+    gap: 0;
   }
 
   .projects-content {
     flex-direction: column;
-    gap: 2rem;
+    gap: 0;
     padding: 0.5rem 0;
   }
 
   .projects-section h2 {
     text-align: left;
-  }
-
-  /* Mobile: gap is 2rem, so hr needs margin-top -3rem to get 0.5rem net */
-  /* 1.5rem (h2 margin) + 2rem (gap) - 3rem = 0.5rem */
-  .projects-section hr {
-    margin-top: -3rem;
   }
 
   .wip-sign-container {
@@ -623,7 +616,7 @@
   }
 
   .projects-content {
-    gap: 1.5rem;
+    gap: 0;
     padding: 0;
   }
 
