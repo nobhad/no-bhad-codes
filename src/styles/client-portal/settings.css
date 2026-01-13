@@ -163,7 +163,7 @@
   width: 100%;
   background: transparent;
   color: var(--portal-text-light);
-  border: 2px solid var(--portal-border-light);
+  border: var(--portal-border-light-style);
   border-radius: var(--portal-radius-lg);
 }
 

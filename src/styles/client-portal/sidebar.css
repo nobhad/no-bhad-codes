@@ -127,7 +127,7 @@
   background: transparent;
   background-color: transparent;
   color: var(--portal-text-light);
-  border: 2px solid var(--portal-border-light);
+  border: var(--portal-border-light-style);
   border-radius: var(--portal-radius-lg);
   display: flex;
   align-items: center;
@@ -261,7 +261,7 @@
   background: transparent;
   background-color: transparent;
   color: var(--portal-text-light);
-  border: 2px solid var(--portal-border-light);
+  border: var(--portal-border-light-style);
   border-radius: var(--portal-radius-lg);
   box-shadow: none;
   text-shadow: none;
@@ -281,7 +281,7 @@
   top: 0.5rem;
   right: -12px;
   background: var(--color-neutral-200);
-  border: 2px solid var(--portal-border-dark);
+  border: var(--portal-border);
   border-radius: 50%;
   width: 24px;
   height: 24px;
@@ -373,7 +373,7 @@
   padding: 0;
   background: var(--color-neutral-300);
   color: var(--color-dark);
-  border: 2px solid var(--portal-border-dark);
+  border: var(--portal-border);
   cursor: pointer;
   transition: all var(--transition-fast);
   display: flex;
@@ -394,7 +394,7 @@
   top: calc(100% + 8px);
   right: 0;
   background: var(--color-neutral-200);
-  border: 2px solid var(--portal-border-dark);
+  border: var(--portal-border);
   min-width: 180px;
   z-index: 1000;
 }
@@ -434,7 +434,7 @@
   align-items: center;
   gap: 0.5rem;
   background: var(--color-neutral-300);
-  border: 2px solid var(--portal-border-dark);
+  border: var(--portal-border);
   border-radius: 4px;
   padding: 0.5rem 1rem;
   cursor: pointer;

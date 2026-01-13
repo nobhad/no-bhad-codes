@@ -52,7 +52,7 @@
   padding: var(--portal-spacing-md) var(--portal-spacing-xl);
   background: var(--color-neutral-200);
   color: var(--portal-border-dark);
-  border: 2px solid var(--portal-border-dark);
+  border: var(--portal-border);
   border-radius: var(--portal-radius-sm);
   font-size: 0.9rem;
   font-weight: 600;
@@ -98,7 +98,7 @@
 .btn-outline {
   background: transparent;
   color: var(--portal-border-dark);
-  border: 2px solid var(--portal-border-dark);
+  border: var(--portal-border);
   padding: var(--portal-spacing-sm) var(--portal-spacing-lg);
   font-size: 0.85rem;
   font-weight: 600;
@@ -166,9 +166,9 @@
 [data-page="client-portal"] textarea::placeholder,
 [data-page="admin"] input::placeholder,
 [data-page="admin"] textarea::placeholder {
-  color: var(--portal-text-light) !important;
-  opacity: 0.5 !important;
-  font-weight: 600 !important;
+  color: var(--portal-text-light);
+  opacity: 0.5;
+  font-weight: 600;
 }
 
 .portal-input:focus,

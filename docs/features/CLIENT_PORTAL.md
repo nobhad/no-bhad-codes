@@ -1,6 +1,6 @@
 # Client Portal Dashboard
 
-**Last Updated:** December 2, 2025
+**Last Updated:** January 13, 2026
 
 ## Table of Contents
 
@@ -53,7 +53,7 @@ The Client Portal is a dedicated dashboard for clients to manage their projects,
   - Project type, budget, timeline selection
   - Admin notification on submission
 - Live project preview iframe
-- JWT authentication (real login with demo fallback)
+- HttpOnly cookie authentication (real login with demo fallback)
 
 **Access:** `/client/portal.html`
 
@@ -76,23 +76,45 @@ The Client Portal is a dedicated dashboard for clients to manage their projects,
 
 ```
 src/features/client/
-├── client-portal.ts      # Main portal module (~3000 lines)
-├── client-intake.ts      # Intake form handling
-└── terminal-intake.ts    # Terminal-style intake form
+├── client-portal.ts              # Main portal module (~2000 lines)
+├── terminal-intake.ts            # Terminal-style intake form (~1700 lines)
+├── terminal-intake-ui.ts         # Terminal UI components (~600 lines)
+├── terminal-intake-commands.ts   # Terminal commands (~150 lines)
+├── terminal-intake-data.ts       # Terminal data/questions (~300 lines)
+├── terminal-intake-types.ts      # Type definitions
+└── portal-types.ts               # Portal type definitions
 
-templates/pages/
-└── client-portal.ejs     # Portal HTML template
+src/features/client/modules/      # Extracted modules
+├── portal-auth.ts                # Login, logout, session (~350 lines)
+├── portal-files.ts               # File management (~450 lines)
+├── portal-invoices.ts            # Invoice display (~250 lines)
+├── portal-messages.ts            # Messaging (~270 lines)
+├── portal-navigation.ts          # Navigation, views, sidebar (~400 lines)
+├── portal-projects.ts            # Project loading, display (~500 lines)
+├── portal-settings.ts            # Settings forms (~260 lines)
+└── index.ts                      # Module exports
 
-src/styles/pages/
-├── client-portal.css     # Portal-specific styles
-└── terminal-intake.css   # Terminal intake styles
+client/
+├── portal.html                   # Portal HTML entry point
+├── set-password.html             # Password setup page
+└── intake.html                   # Intake form page
+
+src/styles/client-portal/         # Portal-specific styles
+├── components.css                # Reusable components
+├── dashboard.css                 # Dashboard layout
+├── layout.css                    # Overall layout
+├── login.css                     # Login form
+├── mobile.css                    # Mobile responsiveness
+├── responsive.css                # Responsive breakpoints
+├── sidebar.css                   # Sidebar navigation
+└── views.css                     # View-specific styles
 
 server/routes/
-├── uploads.ts            # File upload API endpoints
-├── clients.ts            # Client profile/settings API
-├── projects.ts           # Project management API
-├── invoices.ts           # Invoice API with PDF generation
-└── messages.ts           # Messaging API
+├── uploads.ts                    # File upload API endpoints
+├── clients.ts                    # Client profile/settings API
+├── projects.ts                   # Project management API
+├── invoices.ts                   # Invoice API with PDF generation
+└── messages.ts                   # Messaging API
 ```
 
 ---
@@ -175,15 +197,15 @@ Three stat cards at the top of the dashboard, each clickable to navigate to the 
 ```html
 <!-- templates/pages/client-portal.ejs:39-52 -->
 <div class="quick-stats">
-    <button class="stat-card stat-card-clickable cp-shadow" data-tab="dashboard" type="button">
+    <button class="stat-card stat-card-clickable portal-shadow" data-tab="dashboard" type="button">
         <span class="stat-number">1</span>
         <span class="stat-label">Active Projects</span>
     </button>
-    <button class="stat-card stat-card-clickable cp-shadow" data-tab="invoices" type="button">
+    <button class="stat-card stat-card-clickable portal-shadow" data-tab="invoices" type="button">
         <span class="stat-number">0</span>
         <span class="stat-label">Pending Invoices</span>
     </button>
-    <button class="stat-card stat-card-clickable cp-shadow" data-tab="messages" type="button">
+    <button class="stat-card stat-card-clickable portal-shadow" data-tab="messages" type="button">
         <span class="stat-number">1</span>
         <span class="stat-label">Unread Messages</span>
     </button>
@@ -229,7 +251,7 @@ Displays current project status with:
 ```html
 <!-- templates/pages/client-portal.ejs:54-64 -->
 <div class="cp-project-cards">
-    <div class="cp-project-card cp-shadow">
+    <div class="cp-project-card portal-shadow">
         <h3>Your Website Project</h3>
         <p class="project-status">Status: <span class="status-badge">In Progress</span></p>
         <p class="project-progress">Progress: 25%</p>
@@ -253,7 +275,7 @@ Chronological log of project events:
 
 ```html
 <!-- templates/pages/client-portal.ejs:66-73 -->
-<div class="recent-activity cp-shadow">
+<div class="recent-activity portal-shadow">
     <h3>Recent Activity</h3>
     <ul class="activity-list">
         <li>Project intake received - Nov 30, 2025</li>
@@ -843,10 +865,10 @@ private showSuccessMessage(message: string): void {
 
 ### Shadow Utility Class
 
-All cards and sections use the `.cp-shadow` utility class for consistent styling:
+All cards and sections use the `.portal-shadow` utility class for consistent styling:
 
 ```css
-.cp-shadow {
+.portal-shadow {
   box-shadow:
     20px 6px 30px rgba(0, 0, 0, 0.6),
     8px 8px 16px rgba(0, 0, 0, 0.8),
@@ -895,17 +917,15 @@ Settings grid adapts to viewport:
 | File | Purpose |
 |------|---------|
 | `client/portal.html` | Entry point HTML |
-| `templates/pages/client-portal.ejs` | Main EJS template |
-| `src/features/client/client-portal.ts` | Main TypeScript module (~2400 lines) |
-| `src/styles/pages/client-portal.css` | Portal-specific styles |
+| `src/features/client/client-portal.ts` | Main TypeScript module (~2000 lines) |
+| `src/features/client/modules/` | Extracted portal modules (7 files) |
+| `src/styles/client-portal/` | Portal-specific styles (8 CSS files) |
 | `src/client-portal.ts` | Entry point script |
 | `server/routes/uploads.ts` | File upload API endpoints |
 | `server/routes/clients.ts` | Client profile/settings API |
-| `server/routes/projects.ts` | Project request API |
+| `server/routes/projects.ts` | Project management API |
 | `server/routes/invoices.ts` | Invoice API with PDF generation |
 | `server/routes/messages.ts` | Messaging API |
-| `server/database/migrations/006_client_settings_columns.sql` | Settings schema |
-| `server/database/migrations/007_project_request_columns.sql` | Project request schema |
 
 ---
 

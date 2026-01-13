@@ -425,7 +425,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   z-index: 20001 !important;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-dropdown-xl);
   background-color: var(--color-terminal-bg);
 }
 
