@@ -6,6 +6,9 @@
  *
  * Mobile-specific layout overrides (max-width: 767px)
  * Separated from desktop styles for maintainability.
+ *
+ * NOTE: This file is in the 'mobile' CSS layer which has higher
+ * priority than 'pages' and 'components' layers.
  */
 
 /* ============================================
@@ -24,7 +27,7 @@
 
   /* Mobile dark mode: Match desktop colors for consistency */
   html[data-theme="dark"] body {
-    --color-neutral-300: #333333; /* Match desktop dark theme */
+    --color-neutral-300: #333333;
     background-color: var(--color-neutral-300);
   }
 
@@ -37,7 +40,7 @@
     width: 100%;
     height: calc(100vh - var(--header-height) - var(--footer-height));
     height: calc(100dvh - var(--header-height) - var(--footer-height));
-    overflow: hidden; /* Changed from scroll - virtual pages mode */
+    overflow: hidden;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -50,9 +53,9 @@
     height: 100%;
     padding: 1rem;
     box-sizing: border-box;
-    overflow-y: auto !important; /* Allow scrolling within section if content overflows */
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain; /* Prevent pull-to-refresh interfering */
+    overscroll-behavior: contain;
   }
 
   .section-content {
@@ -74,36 +77,35 @@
 
   /* Intro/Business card section - centered card */
   .business-card-section {
-    /* Use CSS Grid for guaranteed centering */
-    display: grid !important;
-    place-items: center !important;
-    align-content: center !important;
-    justify-content: center !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: visible !important;
-    position: relative !important;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    position: relative;
   }
 
   /* Ensure business card section stays on top during exit animation */
   .business-card-section.page-active {
-    z-index: 50 !important; /* Same as intro */
+    z-index: 50;
   }
 
   /* Card container centered in viewport */
   .business-card-section .business-card-container {
-    margin: 0 auto !important;
-    align-self: center !important;
-    justify-self: center !important;
+    margin: 0 auto;
+    align-self: center;
+    justify-self: center;
   }
 
   /* Intro nav positioned absolutely below centered card (like desktop) */
   /* Card height on mobile is ~209px (380px width / 1.816 aspect ratio) */
   .business-card-section .intro-nav {
-    position: absolute !important;
-    top: calc(50% + 105px + 0.75rem) !important; /* 50% + half card height + margin */
-    left: 50% !important;
-    transform: translateX(-50%) !important;
+    position: absolute;
+    top: calc(50% + 105px + 0.75rem);
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   /* Hero sections - hidden on mobile */
@@ -124,53 +126,53 @@
   .about-section.page-active,
   #about.about-section,
   section#about {
-    padding: 0 !important;
-    margin: 0 !important;
-    display: block !important;
-    overflow-y: scroll !important; /* SECTION scrolls */
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior-y: contain !important;
-    touch-action: pan-y !important;
-    box-sizing: border-box !important;
-    height: 100% !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
+    padding: 0;
+    margin: 0;
+    display: block;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    box-sizing: border-box;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
 
   /* About content wrapper - natural height, NO min-height constraint */
   .about-section .about-content {
-    display: flex !important;
-    flex-direction: column !important;
-    padding: 1.5rem 1rem 2rem 1rem !important;
-    gap: 1rem !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    min-height: unset !important;
-    height: auto !important;
-    box-sizing: border-box !important;
-    align-items: center !important;
-    pointer-events: auto !important;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 1rem 2rem 1rem;
+    gap: 1rem;
+    max-width: 100%;
+    width: 100%;
+    min-height: unset;
+    height: auto;
+    box-sizing: border-box;
+    align-items: center;
+    pointer-events: auto;
   }
 
   /* Ensure children don't block touch */
   .about-section .about-content *,
   .about-section .about-layout,
   .about-section .tech-stack-desktop {
-    touch-action: pan-y !important;
-    pointer-events: auto !important;
+    touch-action: pan-y;
+    pointer-events: auto;
   }
 
   /* About layout - single column on mobile */
   .about-layout {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 1.5rem !important;
-    width: 100% !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
   }
 
   /* Image column - centered on mobile */
@@ -239,12 +241,12 @@
 
   /* Tech stack heading inside about section */
   .tech-stack-desktop h3 {
-    font-size: clamp(1.25rem, 5vw, 1.75rem) !important;
-    font-family: var(--font--acme) !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    margin: 0 !important;
-    letter-spacing: 0.08em !important;
+    font-size: clamp(1.25rem, 5vw, 1.75rem);
+    font-family: var(--font--acme);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0;
+    letter-spacing: 0.08em;
   }
 
   /* Hide separate mobile tech-stack section - show inside about like desktop */
@@ -254,7 +256,7 @@
 
   /* Show tech-stack-desktop on mobile (matching desktop layout) */
   .tech-stack-desktop {
-    display: block !important;
+    display: block;
     width: 100%;
     margin-top: 1rem;
   }
@@ -272,7 +274,7 @@
 
   .tech-stack-desktop .tech-stack h3,
   .tech-stack-desktop .tech-stack .tech-list {
-    margin: 0 !important;
+    margin: 0;
   }
 
   /* Dark theme: lighter border for contrast */
@@ -300,9 +302,9 @@
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    overflow: visible; /* Allow button shadow to show */
+    overflow: visible;
     box-sizing: border-box;
-    position: relative; /* For hero overlay positioning */
+    position: relative;
   }
 
   .container,
@@ -370,6 +372,6 @@
 
   /* Intro nav position for smaller card (315px width, ~173px height) */
   .business-card-section .intro-nav {
-    top: calc(50% + 87px + 0.5rem) !important; /* 50% + half card height + margin */
+    top: calc(50% + 87px + 0.5rem);
   }
 }
