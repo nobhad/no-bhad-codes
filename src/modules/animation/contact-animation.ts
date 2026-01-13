@@ -15,18 +15,16 @@
  * 1. Navigate to contact page (hash #/contact)
  * 2. h2 "contact" drops in from above
  * 3. Contact options text drops in (overlapped)
- * 4. Business card column drops in
+ * 4. Card column (avatar blurb) drops in
  * 5. Form fields cascade: appear → expand height → expand width
  * 6. Labels and placeholders fade in
  * 7. Submit button appears
- * 8. Business card flips from back to front
  */
 
 import { BaseModule } from '../core/base';
 import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
 import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
-import { throttle } from '../../utils/gsap-utilities';
 import { getDebugMode } from '../../core/env';
 
 // ============================================================================
@@ -36,12 +34,6 @@ import { getDebugMode } from '../../core/env';
 export class ContactAnimationModule extends BaseModule {
   private container: HTMLElement | null = null;
   private timeline: gsap.core.Timeline | null = null;
-  private hasFlippedCard = false;
-  private cardClickHandler: ((e: MouseEvent) => void) | null = null;
-  private cardMouseMoveHandler: ((e: MouseEvent) => void) | null = null;
-  private cardMouseLeaveHandler: (() => void) | null = null;
-  private businessCardEl: HTMLElement | null = null;
-  private businessCardInner: HTMLElement | null = null;
   private blurAnimationComplete = false; // Track if blur animation has completed
 
   constructor(options: ModuleOptions = {}) {
@@ -96,11 +88,10 @@ export class ContactAnimationModule extends BaseModule {
     // Get animatable elements
     const heading = this.container.querySelector('h2');
     const contactOptions = this.container.querySelector('.contact-options');
-    const businessCard = this.container.querySelector('#contact-business-card');
     const cardColumn = this.container.querySelector('.contact-card-column');
 
     // Debug: log what elements were found
-    this.log(`Elements found - h2: ${!!heading}, contactOptions: ${!!contactOptions}, card: ${!!businessCard}, cardColumn: ${!!cardColumn}`);
+    this.log(`Elements found - h2: ${!!heading}, contactOptions: ${!!contactOptions}, cardColumn: ${!!cardColumn}`);
 
     this.timeline = gsap.timeline({
       onComplete: () => {
@@ -181,19 +172,6 @@ export class ContactAnimationModule extends BaseModule {
     this.timeline.set([heading, cardColumn].filter(Boolean), {
       willChange: 'auto'
     });
-
-    // Business card setup
-    if (businessCard) {
-      const cardInner = businessCard.querySelector('.business-card-inner') as HTMLElement;
-
-      // Start with back showing (rotated 180) - set immediately
-      if (cardInner) {
-        gsap.set(cardInner, { rotationY: 180 });
-      }
-
-      // Setup click handler for manual card flip
-      this.setupCardClickHandler(businessCard as HTMLElement);
-    }
 
     // ========================================================================
     // PHASE 3: Form fields cascade animation
@@ -478,26 +456,6 @@ export class ContactAnimationModule extends BaseModule {
 
     // Keep all container dimensions locked permanently - do not clear
 
-    // ========================================================================
-    // BUSINESS CARD - Flip AFTER form and button animation is 100% complete
-    // Card flip starts after: dropDuration (0.6) + totalDuration (2.5) + button (0.7) = ~3.8s
-    // ========================================================================
-    const cardFlipStart = formStartTime + totalDuration + 0.3;
-
-    if (businessCard) {
-      const cardInner = businessCard.querySelector('.business-card-inner') as HTMLElement;
-      if (cardInner) {
-        this.timeline.to(cardInner, {
-          rotationY: '+=180',
-          duration: 0.8,
-          ease: 'power2.inOut',
-          onStart: () => {
-            this.hasFlippedCard = true;
-          }
-        }, cardFlipStart);
-      }
-    }
-
     this.timeline.pause();
 
     this.on('PageTransitionModule:contact-page-ready', (() => {
@@ -642,13 +600,6 @@ export class ContactAnimationModule extends BaseModule {
     // Reset button
     const submitButton = this.container.querySelector('.submit-button, button[type="submit"]');
     if (submitButton) gsap.set(submitButton, { zIndex: 1, opacity: 0, scale: 0.8 });
-
-    // Reset business card
-    const businessCard = this.container.querySelector('#contact-business-card');
-    const cardInner = businessCard?.querySelector('.business-card-inner');
-    if (cardInner) gsap.set(cardInner, { rotationY: 180 });
-
-    this.hasFlippedCard = false;
   }
 
   /**
@@ -703,110 +654,6 @@ export class ContactAnimationModule extends BaseModule {
   }
 
   /**
-   * Setup click and tilt handlers for contact business card
-   */
-  private setupCardClickHandler(card: HTMLElement): void {
-    const cardInner = card.querySelector('.business-card-inner') as HTMLElement;
-    if (!cardInner) return;
-
-    // Store references for tilt effects
-    this.businessCardEl = card;
-    this.businessCardInner = cardInner;
-
-    // Setup 3D perspective and clear CSS transition to prevent GSAP conflicts
-    gsap.set(card, { perspective: 1000 });
-    gsap.set(cardInner, { transformStyle: 'preserve-3d', transition: 'none' });
-
-    // Make card clickable
-    card.style.cursor = 'pointer';
-
-    // Click handler for flip (direction based on click position)
-    // Only flips when clicking corners/edges, not when clicking text/links
-    this.cardClickHandler = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-
-      // Don't flip if clicking on links - let links work normally
-      if (target.tagName === 'A' || target.closest('a')) {
-        return;
-      }
-
-      // Check if click is in a corner zone (outside center 60% of card)
-      const rect = card.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const clickY = e.clientY - rect.top;
-      const cornerZone = 0.2; // 20% from each edge is "corner"
-
-      const inCenterX = clickX > rect.width * cornerZone && clickX < rect.width * (1 - cornerZone);
-      const inCenterY = clickY > rect.height * cornerZone && clickY < rect.height * (1 - cornerZone);
-
-      // If click is in center area (not in corner zones), don't flip
-      if (inCenterX && inCenterY) {
-        return;
-      }
-
-      e.preventDefault();
-      e.stopPropagation();
-
-      // Determine flip direction based on which side of card was clicked
-      const cardCenterX = rect.width / 2;
-      const flipDirection = clickX < cardCenterX ? -180 : 180;
-
-      gsap.to(cardInner, {
-        rotationY: `+=${flipDirection}`,
-        duration: 0.8,
-        ease: 'power2.inOut'
-      });
-
-      this.log(`Contact card flipped ${flipDirection > 0 ? 'right' : 'left'} via corner click`);
-    };
-
-    // Mouse move handler for tilt effect (throttled for performance)
-    const maxTiltAngle = 12;
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = card.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-
-      const rotateX = ((e.clientY - centerY) / rect.height) * -maxTiltAngle;
-      const rotateY = ((e.clientX - centerX) / rect.width) * maxTiltAngle;
-
-      // Get current base rotation (multiple of 180)
-      const currentRotation = gsap.getProperty(cardInner, 'rotationY') as number;
-      const baseRotation = Math.round(currentRotation / 180) * 180;
-
-      gsap.to(cardInner, {
-        rotationX: rotateX,
-        rotationY: baseRotation + rotateY,
-        duration: 0.3,
-        ease: 'power2.out'
-      });
-    };
-
-    // Throttle mousemove handler for performance
-    this.cardMouseMoveHandler = throttle(
-      handleMouseMove,
-      ANIMATION_CONSTANTS.PERFORMANCE.THROTTLE_MOUSE_MOVE
-    );
-
-    // Mouse leave handler to reset tilt
-    this.cardMouseLeaveHandler = () => {
-      const currentRotation = gsap.getProperty(cardInner, 'rotationY') as number;
-      const baseRotation = Math.round(currentRotation / 180) * 180;
-
-      gsap.to(cardInner, {
-        rotationX: 0,
-        rotationY: baseRotation,
-        duration: 0.5,
-        ease: 'power2.out'
-      });
-    };
-
-    card.addEventListener('click', this.cardClickHandler);
-    card.addEventListener('mousemove', this.cardMouseMoveHandler);
-    card.addEventListener('mouseleave', this.cardMouseLeaveHandler);
-  }
-
-  /**
    * Get module status
    */
   override getStatus() {
@@ -821,30 +668,12 @@ export class ContactAnimationModule extends BaseModule {
    * Cleanup on destroy
    */
   override async destroy(): Promise<void> {
-    // Remove card event listeners
-    if (this.businessCardEl) {
-      if (this.cardClickHandler) {
-        this.businessCardEl.removeEventListener('click', this.cardClickHandler);
-      }
-      if (this.cardMouseMoveHandler) {
-        this.businessCardEl.removeEventListener('mousemove', this.cardMouseMoveHandler);
-      }
-      if (this.cardMouseLeaveHandler) {
-        this.businessCardEl.removeEventListener('mouseleave', this.cardMouseLeaveHandler);
-      }
-    }
-
     if (this.timeline) {
       this.timeline.kill();
       this.timeline = null;
     }
 
     this.container = null;
-    this.businessCardEl = null;
-    this.businessCardInner = null;
-    this.cardClickHandler = null;
-    this.cardMouseMoveHandler = null;
-    this.cardMouseLeaveHandler = null;
 
     await super.destroy();
   }
