@@ -213,7 +213,7 @@ export class ContactAnimationModule extends BaseModule {
                          this.container.querySelector('textarea')?.closest('.input-item');
     const submitButton = this.container.querySelector('button[type="submit"]') ||
                          this.container.querySelector('.contact-submit');
-    const formContainer = this.container.querySelector('.contact-form') ||
+    const _formContainer = this.container.querySelector('.contact-form') ||
                           this.container.querySelector('.contact-form-column');
     const textarea = messageField?.querySelector('textarea') as HTMLTextAreaElement | null;
     const wrapper = messageField?.querySelector('.input-wrapper') || messageField;
@@ -597,7 +597,7 @@ export class ContactAnimationModule extends BaseModule {
     if (avatarBlurb) gsap.set(avatarBlurb, { opacity: 0, scale: 0.8, filter: `blur(${blurAmount}px)`, transformOrigin: 'center center' });
 
     // Get form container reference (no overflow changes - causes button clipping)
-    const formContainer = this.container.querySelector('.contact-form') ||
+    const _formContainer = this.container.querySelector('.contact-form') ||
                           this.container.querySelector('.contact-form-column');
 
     // Reset form fields
