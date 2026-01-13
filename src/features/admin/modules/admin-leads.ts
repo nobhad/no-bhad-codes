@@ -127,23 +127,23 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
   if (!tableBody) return;
 
   if (!leads || leads.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">No leads found</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">No leads found</td></tr>';
     return;
   }
 
   tableBody.innerHTML = leads
     .map((lead) => {
       const date = new Date(lead.created_at).toLocaleDateString();
-      const statusClass = `status-${lead.status || 'pending'}`;
-      const showActivateBtn = lead.status === 'new' || lead.status === 'qualified' || lead.status === 'pending';
-
       const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.contact_name || '-'));
-      const safeCompanyName = lead.company_name ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.company_name)) : '';
+      const safeCompanyName = lead.company_name ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.company_name)) : '-';
       const safeEmail = SanitizationUtils.escapeHtml(lead.email || '-');
       const leadAny = lead as unknown as Record<string, string>;
-      const safeProjectType = SanitizationUtils.escapeHtml(leadAny.project_type || '-');
-      const safeBudget = SanitizationUtils.escapeHtml(leadAny.budget_range || '-');
-      const safeStatus = SanitizationUtils.escapeHtml(lead.status || 'new');
+      const projectType = leadAny.project_type || '-';
+      const displayType = projectType !== '-' ? projectType.charAt(0).toUpperCase() + projectType.slice(1) : '-';
+      const budget = leadAny.budget_range || '-';
+      const displayBudget = budget !== '-' ? budget.charAt(0).toUpperCase() + budget.slice(1) : '-';
+      const status = lead.status || 'new';
+      const displayStatus = status.charAt(0).toUpperCase() + status.slice(1);
 
       return `
         <tr data-lead-id="${lead.id}">
@@ -151,36 +151,20 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
           <td>${safeContactName}</td>
           <td>${safeCompanyName}</td>
           <td>${safeEmail}</td>
-          <td>${safeProjectType}</td>
-          <td>${safeBudget}</td>
-          <td>${safeStatus}</td>
-          <td>
-            ${showActivateBtn ? `<button class="btn activate-lead-btn" data-id="${lead.id}" onclick="event.stopPropagation()">Activate</button>` : ''}
-          </td>
+          <td>${SanitizationUtils.escapeHtml(displayType)}</td>
+          <td>${SanitizationUtils.escapeHtml(displayBudget)}</td>
+          <td>${displayStatus}</td>
         </tr>
       `;
     })
     .join('');
 
-  // Add click handlers
+  // Add click handlers - click row to view details
   const rows = tableBody.querySelectorAll('tr[data-lead-id]');
   rows.forEach((row) => {
-    row.addEventListener('click', (e) => {
-      if ((e.target as HTMLElement).tagName === 'BUTTON') return;
+    row.addEventListener('click', () => {
       const leadId = parseInt((row as HTMLElement).dataset.leadId || '0');
       showLeadDetails(leadId);
-    });
-  });
-
-  // Add click handlers for activate buttons
-  const activateBtns = tableBody.querySelectorAll('.activate-lead-btn');
-  activateBtns.forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const id = (btn as HTMLElement).dataset.id;
-      if (id && confirm('Activate this lead as a project?')) {
-        activateLead(parseInt(id), ctx);
-      }
     });
   });
 }

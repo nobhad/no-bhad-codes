@@ -11,6 +11,14 @@
 [data-page="admin"] {
   --color-text-primary: #f5f5f5;
   --color-text-secondary: #cccccc;
+  --portal-text-secondary: #999999;
+
+  /* Label styling variables */
+  --label-font-size: 0.75rem;
+  --label-color: #999999;
+  --label-font-weight: 500;
+  --label-text-transform: uppercase;
+  --label-letter-spacing: 0.05em;
 }
 
 /* Ensure all admin text is light on dark backgrounds */
@@ -204,21 +212,13 @@
   gap: var(--space-2);
 }
 
+/* Base form label - uses variables for easy override */
 .form-group label {
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-sm);
-}
-
-/* Admin form labels - match meta-label styling */
-[data-page="admin"] .form-group label,
-[data-page="admin"] .settings-section label,
-[data-page="admin"] label {
-  font-size: 0.75rem;
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 500;
+  color: var(--label-color, var(--color-text-primary));
+  font-weight: var(--label-font-weight, var(--font-weight-medium));
+  font-size: var(--label-font-size, var(--font-size-sm));
+  text-transform: var(--label-text-transform, none);
+  letter-spacing: var(--label-letter-spacing, normal);
 }
 
 .form-control,
@@ -1389,9 +1389,12 @@
 
 .admin-modal {
   background: var(--color-bg-secondary);
-  border: 1px solid var(--portal-border-dark);
+  border: none;
   border-radius: var(--border-radius-card);
-  box-shadow: var(--shadow-2xl);
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 10px 20px rgba(0, 0, 0, 0.15),
+    0 25px 50px rgba(0, 0, 0, 0.25);
   width: 100%;
   max-width: 600px;
   max-height: 90vh;
@@ -1416,14 +1419,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-4) var(--space-5);
-  border-bottom: 1px solid var(--portal-border-medium);
-  background: var(--color-bg-primary);
+  padding: var(--space-5) var(--space-5) var(--space-4);
 }
 
 .admin-modal-header h3 {
   margin: 0;
-  color: var(--color-text-primary);
+  color: var(--color-brand-primary);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
 }
@@ -1444,8 +1445,24 @@
 }
 
 .admin-modal-body {
-  padding: var(--space-5);
+  padding: 0 var(--space-5);
   overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.admin-modal-body .form-group {
+  margin-bottom: 0;
+}
+
+.admin-modal-body .form-row {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.admin-modal-body .form-row .form-group {
   flex: 1;
 }
 
@@ -1453,9 +1470,7 @@
   display: flex;
   justify-content: flex-end;
   gap: var(--space-3);
-  padding: var(--space-4) var(--space-5);
-  border-top: 1px solid var(--portal-border-medium);
-  background: var(--color-bg-primary);
+  padding: var(--space-4) var(--space-5) var(--space-5);
 }
 
 /* Modal Detail Grid */
@@ -2268,13 +2283,13 @@
   gap: var(--portal-spacing-xs);
 }
 
-/* Root meta-label styling - applies everywhere */
+/* Root meta-label styling - uses label variables */
 .meta-label {
-  font-size: 0.75rem;
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 500;
+  font-size: var(--label-font-size, 0.75rem);
+  color: var(--label-color, var(--portal-text-secondary));
+  text-transform: var(--label-text-transform, uppercase);
+  letter-spacing: var(--label-letter-spacing, 0.05em);
+  font-weight: var(--label-font-weight, 500);
 }
 
 /* Root meta-value styling - applies everywhere */
@@ -3585,6 +3600,19 @@
   cursor: pointer;
 }
 
+.details-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  animation: fadeIn 0.2s ease;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
 .details-overlay.hidden {
   display: none;
 }
@@ -4138,4 +4166,27 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* Modal form labels - inherits from label variables */
+.admin-modal .form-group label {
+  display: block;
+  margin-bottom: var(--space-2);
+}
+
+.admin-modal .form-input,
+.admin-modal select.form-input {
+  background: var(--portal-bg-lighter);
+  border: 1px solid var(--portal-border-dark);
+  color: var(--portal-text-light);
+}
+
+.admin-modal .form-input:focus,
+.admin-modal select.form-input:focus {
+  border-color: var(--portal-accent);
+  outline: none;
+}
+
+.admin-modal .form-input::placeholder {
+  color: var(--portal-text-secondary);
 }
