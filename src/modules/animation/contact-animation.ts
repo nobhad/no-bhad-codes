@@ -5,13 +5,25 @@
  * @file src/modules/contact-animation.ts
  * @extends BaseModule
  *
- * DESIGN:
- * - DESKTOP ONLY - No animation on mobile
- * - Triggered by PageTransitionModule navigation events (virtual pages)
- * - Animates elements when navigating TO contact page
- * - Staggered reveal animation for visual interest
+ * THREE-TIER ANIMATION STRATEGY:
+ * Breakpoints match CSS layout breakpoints for consistency.
  *
- * ANIMATION SEQUENCE:
+ * DESKTOP (>1100px):
+ * - Full blur-in animation with form field cascade
+ * - Submit button scales up with blur clear
+ * - Avatar blurb animates in
+ *
+ * TABLET (600-1100px):
+ * - Simple fade-in animation only (no transforms)
+ * - CSS handles all positioning (grid layout)
+ * - No button roll or position transforms
+ *
+ * MOBILE (<600px):
+ * - No GSAP animation - PageTransitionModule handles page transitions
+ * - CSS handles stacked layout
+ * - Elements shown immediately
+ *
+ * ANIMATION SEQUENCE (Desktop):
  * 1. Navigate to contact page (hash #/contact)
  * 2. h2 "contact" blur in
  * 3. Contact options text shows immediately
@@ -51,18 +63,24 @@ export class ContactAnimationModule extends BaseModule {
     }
 
     // ========================================================================
-    // DETECT LAYOUT: Check viewport width instead of element positioning
-    // Desktop (side-by-side) only at 1100px+, otherwise stacked/mobile layout
+    // THREE-TIER ANIMATION: Match CSS layout breakpoints
+    // Desktop (>1100px): Full animation
+    // Tablet (600-1100px): Simple fade-in only
+    // Mobile (<600px): No animation - PageTransitionModule handles it
     // ========================================================================
     const viewportWidth = window.innerWidth;
-    const isMobile = viewportWidth < 1100; // Matches CSS medium viewport breakpoint
+    const isDesktop = viewportWidth >= 1100;
+    const isTablet = viewportWidth >= 600 && viewportWidth < 1100;
+    const isMobile = viewportWidth < 600;
 
-    this.log(`Viewport width: ${viewportWidth}px, isMobile: ${isMobile}`);
+    this.log(`Viewport: ${viewportWidth}px | Desktop: ${isDesktop}, Tablet: ${isTablet}, Mobile: ${isMobile}`);
 
-    if (isMobile) {
-      this.setupMobileAnimation();
-    } else {
+    if (isDesktop) {
       this.setupAnimation();
+    } else if (isTablet) {
+      this.setupTabletAnimation();
+    } else {
+      this.setupMobileAnimation();
     }
   }
 
@@ -221,16 +239,17 @@ export class ContactAnimationModule extends BaseModule {
     this.log(`Message field target height: ${finalTextareaHeight}px`);
 
     // === BATCH 4: DOM WRITES (all gsap.set calls together) ===
-    // Lock section to final height and set form container overflow
+    // Lock section to final height
+    // NOTE: Don't set overflow:hidden on formContainer - it clips the button during width animation
     gsap.set(this.container, { minHeight: finalSectionHeight });
-    if (formContainer) gsap.set(formContainer, { overflow: 'hidden' });
 
     // Set up z-index - name on TOP of stack (highest z-index)
     if (nameField) gsap.set(nameField, { zIndex: 5, position: 'relative' });
     if (companyField) gsap.set(companyField, { zIndex: 4, position: 'relative' });
     if (emailField) gsap.set(emailField, { zIndex: 3, position: 'relative' });
     if (messageField) gsap.set(messageField, { zIndex: 2, position: 'relative' });
-    if (submitButton) gsap.set(submitButton, { zIndex: 1, opacity: 0, scale: 0.8, filter: `blur(${blurAmount}px)` });
+    // Button needs higher z-index to stay visible during form width animation
+    if (submitButton) gsap.set(submitButton, { zIndex: 10, opacity: 0, scale: 0.8, filter: `blur(${blurAmount}px)` });
 
     // Shared border-radius for all fields during cascade
     const fieldBorderRadius = '0 50px 50px 50px';
@@ -461,10 +480,7 @@ export class ContactAnimationModule extends BaseModule {
       }, formStartTime);
     }
 
-    // Restore overflow, section height, and clear inline widths after animation
-    if (formContainer) {
-      this.timeline.set(formContainer, { overflow: 'visible' });
-    }
+    // Restore section height after animation
     this.timeline.set(this.container, { minHeight: 'auto' });
 
     // Set final state for placeholders and labels to ensure they stay visible
@@ -561,7 +577,7 @@ export class ContactAnimationModule extends BaseModule {
   private resetAnimatedElements(): void {
     if (!this.container) return;
 
-    const blurAmount = 6; // Reduced from 8px for better performance
+    const blurAmount = 4; // Match setupAnimation blur amount
     const fieldBorderRadius = '0 50px 50px 50px';
     const startWidth = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_WIDTH_START;
     const compressedHeight = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_COMPRESSED;
@@ -580,10 +596,9 @@ export class ContactAnimationModule extends BaseModule {
     const avatarBlurb = this.container.querySelector('.avatar-blurb-container');
     if (avatarBlurb) gsap.set(avatarBlurb, { opacity: 0, scale: 0.8, filter: `blur(${blurAmount}px)`, transformOrigin: 'center center' });
 
-    // Reset form container
+    // Get form container reference (no overflow changes - causes button clipping)
     const formContainer = this.container.querySelector('.contact-form') ||
                           this.container.querySelector('.contact-form-column');
-    if (formContainer) gsap.set(formContainer, { overflow: 'hidden' });
 
     // Reset form fields
     const fields = [
@@ -624,14 +639,17 @@ export class ContactAnimationModule extends BaseModule {
 
     // Reset button
     const submitButton = this.container.querySelector('.submit-button, button[type="submit"]');
-    if (submitButton) gsap.set(submitButton, { zIndex: 1, opacity: 0, scale: 0.8, filter: `blur(${blurAmount}px)` });
+    if (submitButton) gsap.set(submitButton, { zIndex: 10, opacity: 0, scale: 0.8, filter: `blur(${blurAmount}px)` });
   }
 
   /**
-   * Set up mobile-specific contact animation
-   * Mobile: Submit button rolls in from right
+   * Set up tablet-specific contact animation (600-1100px)
+   * Simple fade-in with avatar blurb animation - no transforms on button
+   * CSS handles grid layout positioning
    */
-  private setupMobileAnimation(): void {
+  private setupTabletAnimation(): void {
+    this.log('Setting up TABLET contact form animation...');
+
     // Kill any existing timeline to prevent state accumulation
     if (this.timeline) {
       this.timeline.kill();
@@ -644,38 +662,170 @@ export class ContactAnimationModule extends BaseModule {
       return;
     }
 
-    // Mobile: Don't set opacity/filter here - let PageTransitionModule handle blur animation
-    // Only ensure form fields are ready for interaction after page transition completes
-    const allFields = this.container.querySelectorAll('.input-item, .input-wrapper');
-    gsap.set(allFields, {
-      visibility: 'visible',
-      transform: 'none'
+    // Get animatable elements
+    const heading = this.container.querySelector('h2');
+    const contactOptions = this.container.querySelector('.contact-options');
+    const cardColumn = this.container.querySelector('.contact-card-column');
+    const avatarBlurb = this.container.querySelector('.avatar-blurb-container');
+    const submitButton = this.container.querySelector('.submit-button') as HTMLElement;
+    const formFields = this.container.querySelectorAll('.input-item');
+    const labels = this.container.querySelectorAll('.input-item label');
+
+    this.timeline = gsap.timeline({
+      onComplete: () => {
+        this.log('Tablet contact form animation complete');
+      }
     });
 
-    // Submit button rolls in from right
-    const submitButton = this.container.querySelector('.submit-button') as HTMLElement;
-    if (submitButton) {
-      // Set initial state: off-screen right with rotation
-      gsap.set(submitButton, {
-        opacity: 1,
-        visibility: 'visible',
-        x: window.innerWidth,
-        rotation: -360
-      });
+    const blurAmount = 4;
+    const fadeDuration = 0.3;
 
-      // Roll in animation
-      this.timeline = gsap.timeline({ delay: 0.3 });
-      this.timeline.to(submitButton, {
-        x: 0,
-        rotation: 0,
-        duration: 0.8,
-        ease: 'power2.out'
-      });
+    // Set initial states - opacity/blur only, NO transforms on positioned elements
+    if (heading) gsap.set(heading, { opacity: 0, filter: `blur(${blurAmount}px)` });
+    if (contactOptions) gsap.set(contactOptions, { opacity: 1 }); // Show immediately
+    if (cardColumn) gsap.set(cardColumn, { opacity: 0, filter: `blur(${blurAmount}px)` });
 
-      this.addTimeline(this.timeline);
+    // Avatar blurb - scale animation is OK here since it's not grid-positioned
+    if (avatarBlurb) {
+      gsap.set(avatarBlurb, {
+        opacity: 0,
+        scale: 0.8,
+        filter: `blur(${blurAmount}px)`,
+        transformOrigin: 'center center'
+      });
     }
 
-    this.log('Contact animation initialized (mobile - button roll in)');
+    // Form fields - just opacity, no height/width transforms
+    formFields.forEach(field => {
+      gsap.set(field, { opacity: 0 });
+    });
+    labels.forEach(label => {
+      gsap.set(label, { opacity: 0 });
+    });
+
+    // Submit button - opacity only, NO x/rotation transforms (CSS handles position)
+    if (submitButton) {
+      gsap.set(submitButton, { opacity: 0, filter: `blur(${blurAmount}px)` });
+    }
+
+    // PHASE 1: Heading and card column fade in
+    if (heading) {
+      this.timeline.to(heading, { opacity: 1, filter: 'blur(0px)', duration: fadeDuration, ease: 'power2.out' }, 0);
+    }
+    if (cardColumn) {
+      this.timeline.to(cardColumn, { opacity: 1, filter: 'blur(0px)', duration: fadeDuration, ease: 'power2.out' }, 0);
+    }
+
+    // PHASE 2: Avatar blurb scales up (the key animation user wants)
+    if (avatarBlurb) {
+      this.timeline.to(avatarBlurb, {
+        opacity: 1,
+        scale: 1,
+        filter: 'blur(0px)',
+        duration: 0.5,
+        ease: 'back.out(1.4)'
+      }, 0.1);
+    }
+
+    // PHASE 3: Form fields and button fade in
+    this.timeline.to(formFields, {
+      opacity: 1,
+      duration: fadeDuration,
+      stagger: 0.05,
+      ease: 'power2.out'
+    }, 0.15);
+
+    this.timeline.to(labels, {
+      opacity: 1,
+      duration: fadeDuration,
+      ease: 'power2.out'
+    }, 0.2);
+
+    if (submitButton) {
+      this.timeline.to(submitButton, {
+        opacity: 1,
+        filter: 'blur(0px)',
+        duration: 0.4,
+        ease: 'power2.out'
+      }, 0.2);
+    }
+
+    // Pause timeline - wait for page transition
+    this.timeline.pause();
+
+    // Listen for page transition events
+    this.on('PageTransitionModule:contact-page-ready', (() => {
+      this.blurAnimationComplete = true;
+      this.timeline?.restart();
+    }) as EventListener);
+
+    this.on('PageTransitionModule:page-changed', ((event: CustomEvent) => {
+      const { to, from } = event.detail || {};
+      if (from === 'contact') {
+        this.timeline?.pause();
+        this.timeline?.progress(0);
+        this.blurAnimationComplete = false;
+      }
+      if (to === 'contact' && !this.blurAnimationComplete) {
+        setTimeout(() => {
+          if (!this.blurAnimationComplete && !this.timeline?.isActive()) {
+            this.blurAnimationComplete = true;
+            this.timeline?.restart();
+          }
+        }, 3000);
+      }
+    }) as EventListener);
+
+    // Check if already on contact page
+    const currentHash = window.location.hash;
+    if (currentHash === '#/contact' || currentHash === '#contact') {
+      setTimeout(() => {
+        if (!this.blurAnimationComplete && !this.timeline?.isActive()) {
+          this.blurAnimationComplete = true;
+          this.timeline?.restart();
+        }
+      }, 500);
+    }
+
+    this.log('Contact animation initialized (tablet - fade-in with avatar blurb)');
+  }
+
+  /**
+   * Set up mobile-specific contact animation (<600px)
+   * No GSAP animation - PageTransitionModule handles page transitions
+   * Just ensure elements are visible
+   */
+  private setupMobileAnimation(): void {
+    this.log('Setting up MOBILE contact - no GSAP animation');
+
+    // Kill any existing timeline
+    if (this.timeline) {
+      this.timeline.kill();
+      this.timeline = null;
+    }
+
+    this.container = document.querySelector('.contact-section') as HTMLElement;
+    if (!this.container) {
+      this.log('Contact section not found');
+      return;
+    }
+
+    // Mobile: Ensure all elements are visible - no animation
+    // PageTransitionModule handles page transitions
+    const allElements = this.container.querySelectorAll(
+      'h2, .contact-options, .contact-card-column, .avatar-blurb-container, ' +
+      '.input-item, .input-wrapper, .submit-button, label'
+    );
+
+    gsap.set(allElements, {
+      opacity: 1,
+      visibility: 'visible',
+      filter: 'blur(0px)',
+      transform: 'none',
+      clearProps: 'scale,x,y,rotation'
+    });
+
+    this.log('Contact animation initialized (mobile - elements visible, no animation)');
   }
 
   /**
