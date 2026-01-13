@@ -53,11 +53,12 @@
     display: block;
   }
 
-  /* Right column: Text - takes all remaining space */
+  /* Right column: Text - constrained width */
   .about-text-column {
     display: flex;
     flex-direction: column;
     flex: 1;
+    max-width: 700px;
     gap: 0;
     padding-top: 0;
   }

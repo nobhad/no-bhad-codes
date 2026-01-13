@@ -4,73 +4,56 @@
 
 ## Active Issues
 
-### Page Transition Animation Issues - IN PROGRESS
+### Page Transition Animation Issues - OPEN
 
-**Status:** Actively debugging
+**Status:** Open - Fix attempted but reverted
 **Priority:** High
 
-**Issues Reported:**
+**Issue:**
+HR element and button briefly flash/appear before the rest of the content animates in with blur effect.
 
-1. **HR element shows before rest of content** - Contact page HR appears briefly before the blur animation starts, despite using `page-entering` CSS class as bridge during class transitions.
+**Root Cause Identified:**
+Race condition between CSS class changes and GSAP inline styles:
 
-2. **Button visibility problems** - Submit button on contact page has had various issues:
-   - Was showing early before page animation
-   - Then wasn't showing at all after fixes
-   - Root cause approach needed (not workarounds)
+- Adding `page-active` makes element display:grid/flex
+- Browser paint cycle occurs before GSAP sets visibility:hidden
+- Child elements (HR, button) flash during this window
 
-3. **Intro/coyote paw animation issues** - When navigating back to home page:
-   - Business card section may fade in before coyote paw animation completes
-   - Animation timing needs coordination between PageTransitionModule and IntroAnimationModule
+**Fix Attempted (REVERTED):**
+Tried applying GSAP inline styles FIRST before class changes, and removing `!important` from page-transitions.css. This broke:
 
-**Current Implementation:**
+- Header/footer colors (showed wrong background)
+- Business card positioning
+- Overlay colors
 
-```typescript
-// page-transition.ts - transitionTo()
-targetPage.element.classList.add('page-entering');  // CSS !important keeps hidden
-targetPage.element.classList.remove('page-hidden');
-targetPage.element.classList.add('page-active');
-gsap.set(targetPage.element, { opacity: 0, visibility: 'hidden', filter: 'blur(12px)' });
-targetPage.element.classList.remove('page-entering');  // GSAP takes over
-await this.animateIn(targetPage);
-```
+**Changes were reverted** - both `page-transition.ts` and `page-transitions.css` are back to original state.
 
-**Root Cause Analysis Needed:**
+**Next Approach Needed:**
+Need to find a solution that prevents the flash without breaking the layout. Possible approaches:
 
-- CSS `!important` rules vs GSAP inline styles timing
-- Browser paint timing between class changes
-- Possible specificity conflicts with child elements (HR, button)
-
-**Files Involved:**
-
-- `src/modules/animation/page-transition.ts`
-- `src/modules/animation/intro-animation.ts`
-- `src/styles/components/page-transitions.css`
-- `src/styles/pages/contact.css`
-
-**Recent Commits:**
-
-- `4e1a758` - refactor: simplify page transitions to uniform blur animation
-
----
-
-### Header White Flash in Dark Mode
-
-**Status:** Under Investigation
-**Priority:** Medium
-
-**Issue:** When clicking home button to navigate back to intro page in dark mode, header area briefly flashes white.
-
-**Suspected Root Cause:** Browser default white background showing during page transition. The `html` element doesn't have background color set.
-
-**Files to Investigate:**
-
-- `src/modules/animation/intro-animation.ts` - playEntryAnimation()
-- `src/modules/animation/page-transition.ts` - transitionTo()
-- `src/styles/main.css` - html/body background colors
+1. Use `requestAnimationFrame` to ensure atomic class + style changes
+2. Keep `!important` but fix the animation timing differently
+3. Use CSS `content-visibility: hidden` before animation starts
 
 ---
 
 ## Completed Work (Ready to Archive)
+
+### Header White Flash in Dark Mode - FIXED
+
+**Status:** Complete
+**Date:** January 13, 2026
+
+**Issue:** Header area briefly flashed white when navigating in dark mode.
+
+**Root Cause:** Inline critical CSS in `index.html` had hardcoded color values (`#f8f5f4`) that didn't match the CSS variable `--color-neutral-300` (`#e0e0e0`).
+
+**Solution:** Replaced all hardcoded background colors with `var(--color-neutral-300)` which is theme-aware (light: `#e0e0e0`, dark: `#333333`).
+
+**Files Modified:**
+
+- `index.html` - Use CSS variables instead of hardcoded colors
+- `src/styles/components/intro-morph.css` - Updated comment to match actual color value
 
 ### Terminal Styling Refactor - COMPLETE
 
@@ -168,12 +151,13 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 ### Code Quality (Ongoing)
 
 - [x] Split `client-portal.ts` - Phase 1 complete (1,952 lines, 3 new modules)
-- [x] CSS !important cleanup - Phase 2 complete (381 → 336, 12% reduction)
+- [x] CSS !important cleanup - Phase 3 complete (336 → 289, ~14% reduction)
   - Phase 1: Added CSS cascade layers (`@layer`) to main.css
   - Phase 1: Cleaned mobile/contact.css (85 → 0)
   - Phase 1: Cleaned mobile/layout.css (61 → 3)
   - Phase 1: Cleaned client-portal/sidebar.css (47 → 0)
   - Phase 2: Cleaned admin/project-detail.css (45 → 0)
+  - Phase 3: Cleaned page-transitions.css (47 → 0)
 
 ### CSS Cleanup Plan
 
@@ -187,14 +171,15 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 | mobile/layout.css | 61 | 3 | DONE |
 | client-portal/sidebar.css | 47 | 0 | DONE |
 | admin/project-detail.css | 45 | 0 | DONE |
-| page-transitions.css | 47 | - | Pending |
+| page-transitions.css | 47 | 0 | DONE |
 | admin.css | 64 | - | Pending |
 
 **Architectural Solutions Implemented:**
 
 1. CSS Cascade Layers - `@layer` in main.css controls cascade order
 2. Scoped Styles - `[data-page="admin"]` prefix for admin-specific overrides
-3. High-specificity selectors - ID selectors like `#pd-tab-settings` avoid !important
+3. High-specificity selectors - `section[data-page].page-hidden` instead of !important
+4. GSAP inline styles first - Apply before class changes for animation states
 
 ---
 

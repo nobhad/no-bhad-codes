@@ -44,7 +44,7 @@
 }
 
 /* Dark theme support - uses --color-neutral-300 which is theme-aware:
- * Light: #f8f5f4 (matches light mode page background)
+ * Light: #e0e0e0 (matches light mode page background)
  * Dark: #333333 (matches dark mode page background)
  * No override needed since base rule uses the theme-aware variable */
 
@@ -107,7 +107,7 @@ html[data-theme="dark"] .morph-card-group {
 
 
 /* Mobile: Overlay stays visible (same as desktop) to hide card until animation reveals it */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   .intro-morph-overlay {
     /* Overlay is visible by default - matches desktop behavior */
     /* This ensures user sees the background color, not a blank page */
