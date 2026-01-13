@@ -115,7 +115,7 @@
   .contact-hero-desktop,
   .projects-hero-desktop,
   .portfolio-hero-desktop {
-    display: none !important;
+    display: none;
   }
 
   /* About section - SCROLLABLE SECTION
@@ -251,7 +251,7 @@
 
   /* Hide separate mobile tech-stack section - show inside about like desktop */
   .tech-stack-section {
-    display: none !important;
+    display: none;
   }
 
   /* Show tech-stack-desktop on mobile (matching desktop layout) */
