@@ -230,9 +230,10 @@
     overflow: visible;
   }
 
-  /* Position h2 - align left, SAME SPACING AS ABOUT/PROJECTS */
+  /* Position h2 - consistent with other sections */
   .contact-section h2 {
-    margin: 0 0 1.5rem 0;
+    margin: 0;
+    margin-bottom: 0.5rem;
     padding: 0;
     text-align: left;
     width: 100%;
@@ -242,13 +243,14 @@
     font-size: clamp(3rem, 6vw, 4.5rem);
   }
 
-  /* hr - width matches top form field width (460px), does not extend past it */
+  /* hr - width matches top form field width (460px) */
   .contact-section hr {
     width: var(--contact-input-width, 460px);
     max-width: 100%;
+    margin: 0;
+    margin-bottom: 1rem;
     margin-left: 0;
     margin-right: auto;
-    margin-bottom: 0.25rem;
     height: 6px;
   }
 
