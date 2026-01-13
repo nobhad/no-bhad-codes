@@ -1088,6 +1088,10 @@ html[data-theme="dark"] .login-form {
   display: block;
 }
 
+br.desktop-only {
+  display: inline;
+}
+
 /* Portal cards needs grid display even with desktop-only class */
 .portal-cards.desktop-only {
   display: grid;
