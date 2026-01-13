@@ -113,35 +113,6 @@ export function registerModules(debug: boolean = false): void {
       }
     },
     {
-      name: 'ScrollSnapModule',
-      type: 'dom',
-      factory: async () => {
-        // Load scroll snap on all pages EXCEPT client portal and desktop home (uses virtual pages)
-        const currentPath = window.location.pathname;
-        const isClientPortal = currentPath.includes('/client');
-        const isHomePage = currentPath === '/' || currentPath === '/index.html';
-        const isDesktop = window.matchMedia('(min-width: 768px)').matches;
-
-        // Desktop home page uses virtual pages instead of scroll snap
-        if (isClientPortal || (isHomePage && isDesktop)) {
-          return {
-            init: async () => {},
-            destroy: () => {},
-            isInitialized: true,
-            name: 'ScrollSnapModule'
-          };
-        }
-
-        const { ScrollSnapModule } = await import('../modules/animation/scroll-snap');
-        return new ScrollSnapModule({
-          containerSelector: 'main',
-          sectionSelector: '.business-card-section, .hero-section, .about-section, .contact-section, .page-section, main > section',
-          snapDuration: 0.6,
-          snapDelay: 150
-        });
-      }
-    },
-    {
       name: 'TextAnimationModule',
       type: 'dom',
       factory: async () => {
@@ -269,7 +240,6 @@ export function getMainSiteModules(): string[] {
     'SectionCardInteractions',
     'NavigationModule',
     'ContactFormModule',
-    'ScrollSnapModule',
     'TextAnimationModule',
     'ContactAnimationModule',
     'PageTransitionModule'
