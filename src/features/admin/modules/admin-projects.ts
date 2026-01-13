@@ -9,6 +9,7 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { formatFileSize } from '../../../utils/format-utils';
 import type { ProjectMilestone, ProjectFile, ProjectInvoice, AdminDashboardContext, Message } from '../admin-types';
 
 /** Lead/Project data from admin leads API */
@@ -944,15 +945,6 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
       </tbody>
     </table>
   `;
-}
-
-// Utility functions
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
 
 /**

@@ -9,6 +9,7 @@
  */
 
 import type { PortalFile, ClientPortalContext } from '../portal-types';
+import { formatFileSize } from '../../../utils/format-utils';
 
 const FILES_API_BASE = '/api/uploads';
 
@@ -152,18 +153,6 @@ function getFileIcon(mimetype: string): string {
     return pdfIcon;
   }
   return docIcon;
-}
-
-/**
- * Format file size in human-readable format
- */
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  const size = parseFloat((bytes / Math.pow(k, i)).toFixed(1));
-  return `${size} ${sizes[i]}`;
 }
 
 /**
