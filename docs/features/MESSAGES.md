@@ -1,6 +1,6 @@
 # Messaging System
 
-**Last Updated:** December 2, 2025
+**Last Updated:** January 13, 2026
 
 ## Table of Contents
 
@@ -185,44 +185,42 @@ import 'emoji-picker-element';
 ### Complete Event Handling
 
 ```typescript
-// src/features/client/client-portal.ts:195-228
-// Emoji picker (using emoji-picker-element web component)
-const emojiToggle = document.getElementById('emoji-toggle');
-const emojiPickerWrapper = document.getElementById('emoji-picker-wrapper');
-const emojiPicker = document.getElementById('emoji-picker');
-const messageInput = document.getElementById('message-input') as HTMLTextAreaElement;
-const sendButton = document.getElementById('btn-send-message');
+// src/features/client/modules/portal-messages.ts
+// Setup messaging event listeners including emoji picker
+export function setupMessagingListeners(ctx: ClientPortalContext): void {
+  const sendBtn = document.getElementById('btn-send-message');
+  if (sendBtn) {
+    sendBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      sendMessage(ctx);
+    });
+  }
 
-if (emojiToggle && emojiPickerWrapper && emojiPicker) {
-  // Toggle picker visibility
-  emojiToggle.addEventListener('click', () => {
-    emojiPickerWrapper.classList.toggle('hidden');
-  });
+  const messageInput = document.getElementById('message-input') as HTMLTextAreaElement;
+  if (messageInput) {
+    messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage(ctx);
+      }
+    });
+  }
 
-  // Handle emoji selection from web component
-  emojiPicker.addEventListener('emoji-click', (event: Event) => {
-    const customEvent = event as CustomEvent;
-    if (messageInput && customEvent.detail?.unicode) {
-      const emoji = customEvent.detail.unicode;
-      const start = messageInput.selectionStart;
-      const end = messageInput.selectionEnd;
-      const text = messageInput.value;
-      // Insert emoji at cursor position
-      messageInput.value = text.substring(0, start) + emoji + text.substring(end);
-      messageInput.focus();
-      // Move cursor after inserted emoji
-      messageInput.selectionStart = messageInput.selectionEnd = start + emoji.length;
-    }
-  });
-
-  // Close picker when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!emojiPickerWrapper.contains(e.target as Node) &&
-        e.target !== emojiToggle &&
-        !emojiToggle.contains(e.target as Node)) {
-      emojiPickerWrapper.classList.add('hidden');
-    }
-  });
+  // Emoji picker integration
+  const emojiPicker = document.querySelector('emoji-picker');
+  if (emojiPicker && messageInput) {
+    emojiPicker.addEventListener('emoji-click', ((e: CustomEvent) => {
+      const emoji = e.detail?.unicode;
+      if (emoji) {
+        const start = messageInput.selectionStart;
+        const end = messageInput.selectionEnd;
+        const text = messageInput.value;
+        messageInput.value = text.substring(0, start) + emoji + text.substring(end);
+        messageInput.selectionStart = messageInput.selectionEnd = start + emoji.length;
+        messageInput.focus();
+      }
+    }) as EventListener);
+  }
 }
 ```
 
@@ -295,55 +293,67 @@ if (messageInput && sendButton) {
 ### API Base URL
 
 ```typescript
-private static readonly MESSAGES_API_BASE = 'http://localhost:3001/api/messages';
+const MESSAGES_API_BASE = '/api/messages';
 ```
 
 ### Loading Messages from API
 
 ```typescript
-private async loadMessagesFromAPI(): Promise<void> {
-  const messagesThread = document.getElementById('messages-thread');
-  if (!messagesThread) return;
+// src/features/client/modules/portal-messages.ts
+export async function loadMessagesFromAPI(ctx: ClientPortalContext): Promise<void> {
+  const messagesContainer = document.getElementById('messages-thread');
+  if (!messagesContainer) return;
 
-  const token = localStorage.getItem('client_auth_token');
-
-  if (!token || token.startsWith('demo_token_')) {
-    this.renderDemoMessages(messagesThread);
+  // Demo mode check using context
+  if (ctx.isDemo()) {
+    renderDemoMessages(messagesContainer, ctx);
     return;
   }
 
   try {
-    const response = await fetch(`${ClientPortalModule.MESSAGES_API_BASE}/threads`, {
-      headers: { Authorization: `Bearer ${token}` }
+    const threadsResponse = await fetch(`${MESSAGES_API_BASE}/threads`, {
+      credentials: 'include' // HttpOnly cookie authentication
     });
 
-    if (!response.ok) {
-      this.renderDemoMessages(messagesThread);
-      return;
+    if (!threadsResponse.ok) {
+      throw new Error('Failed to load message threads');
     }
 
-    const data = await response.json();
-    const threads = data.threads || [];
+    const threadsData = await threadsResponse.json();
+    const threads = threadsData.threads || [];
 
     if (threads.length === 0) {
-      this.renderDemoMessages(messagesThread);
+      messagesContainer.innerHTML = `
+        <div class="no-messages">
+          <p>No messages yet. Start a conversation!</p>
+        </div>
+      `;
       return;
     }
 
     // Get messages from first thread
-    const threadId = threads[0].id;
-    const messagesResponse = await fetch(
-      `${ClientPortalModule.MESSAGES_API_BASE}/threads/${threadId}/messages`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    const thread = threads[0];
+    currentThreadId = thread.id;
 
-    if (messagesResponse.ok) {
-      const messagesData = await messagesResponse.json();
-      this.renderMessages(messagesThread, messagesData.messages || []);
+    const messagesResponse = await fetch(`${MESSAGES_API_BASE}/threads/${thread.id}/messages`, {
+      credentials: 'include' // HttpOnly cookie authentication
+    });
+
+    if (!messagesResponse.ok) {
+      throw new Error('Failed to load messages');
     }
+
+    const messagesData = await messagesResponse.json();
+    renderMessages(messagesContainer, messagesData.messages || [], ctx);
+
+    // Mark thread as read
+    await fetch(`${MESSAGES_API_BASE}/threads/${thread.id}/read`, {
+      method: 'PUT',
+      credentials: 'include'
+    });
   } catch (error) {
     console.error('Error loading messages:', error);
-    this.renderDemoMessages(messagesThread);
+    renderDemoMessages(messagesContainer, ctx);
   }
 }
 ```
@@ -351,38 +361,37 @@ private async loadMessagesFromAPI(): Promise<void> {
 ### Rendering Messages
 
 ```typescript
-private renderMessages(container: HTMLElement, messages: any[]): void {
-  container.innerHTML = '';
+// src/features/client/modules/portal-messages.ts
+function renderMessages(
+  container: HTMLElement,
+  messages: PortalMessage[],
+  ctx: ClientPortalContext
+): void {
+  if (messages.length === 0) {
+    container.innerHTML = '<div class="no-messages"><p>No messages in this thread yet.</p></div>';
+    return;
+  }
 
-  messages.forEach((message) => {
-    const isReceived = message.sender_type === 'admin' || message.sender_type === 'system';
-    const messageElement = document.createElement('div');
-    messageElement.className = `message ${isReceived ? 'message-received' : 'message-sent'}`;
-
-    const avatarHtml = isReceived
-      ? `<div class="message-avatar">
-           <img src="/images/avatar.svg" alt="Noelle" class="avatar-img">
-         </div>`
-      : `<div class="message-avatar">
-           <div class="avatar-placeholder">YOU</div>
-         </div>`;
-
-    const senderName = isReceived ? (message.sender_name || 'Noelle') : 'You';
-
-    messageElement.innerHTML = `
-      ${isReceived ? avatarHtml : ''}
-      <div class="message-content">
-        <div class="message-header">
-          <span class="message-sender">${senderName}</span>
-          <span class="message-time">${this.formatDate(message.created_at)}</span>
+  container.innerHTML = messages
+    .map((msg) => {
+      const isSent = msg.sender_type === 'client';
+      const initials = (msg.sender_name || 'Unknown').substring(0, 3).toUpperCase();
+      return `
+      <div class="message message-${isSent ? 'sent' : 'received'}">
+        <div class="message-avatar">
+          <div class="avatar-placeholder">${initials}</div>
         </div>
-        <div class="message-body">${this.escapeHtml(message.content)}</div>
+        <div class="message-content">
+          <div class="message-header">
+            <span class="message-sender">${ctx.escapeHtml(msg.sender_name || 'Unknown')}</span>
+            <span class="message-time">${ctx.formatDate(msg.created_at)}</span>
+          </div>
+          <div class="message-body">${ctx.escapeHtml(msg.message)}</div>
+        </div>
       </div>
-      ${!isReceived ? avatarHtml : ''}
     `;
-
-    container.appendChild(messageElement);
-  });
+    })
+    .join('');
 
   // Scroll to bottom
   container.scrollTop = container.scrollHeight;
@@ -392,153 +401,113 @@ private renderMessages(container: HTMLElement, messages: any[]): void {
 ### Sending Messages
 
 ```typescript
-private async sendMessage(): Promise<void> {
+// src/features/client/modules/portal-messages.ts
+export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
   const messageInput = document.getElementById('message-input') as HTMLTextAreaElement;
   if (!messageInput) return;
 
-  const content = messageInput.value.trim();
-  if (!content) return;
+  const message = messageInput.value.trim();
+  if (!message) return;
 
-  const token = localStorage.getItem('client_auth_token');
-
-  if (!token || token.startsWith('demo_token_')) {
-    // Demo mode: show message locally
-    const messagesThread = document.getElementById('messages-thread');
-    if (messagesThread) {
-      const messageElement = document.createElement('div');
-      messageElement.className = 'message message-sent';
-      messageElement.innerHTML = `
-        <div class="message-content">
-          <div class="message-header">
-            <span class="message-sender">You</span>
-            <span class="message-time">${this.formatDate(new Date().toISOString())}</span>
-          </div>
-          <div class="message-body">${this.escapeHtml(content)}</div>
-        </div>
-        <div class="message-avatar">
-          <div class="avatar-placeholder">YOU</div>
-        </div>
-      `;
-      messagesThread.appendChild(messageElement);
-      messagesThread.scrollTop = messagesThread.scrollHeight;
-    }
+  // Demo mode: add message locally (resets on refresh)
+  if (ctx.isDemo()) {
+    addDemoMessage(message, ctx);
     messageInput.value = '';
     return;
   }
 
   try {
-    // Get or create thread
-    const threadsResponse = await fetch(`${ClientPortalModule.MESSAGES_API_BASE}/threads`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const threadsData = await threadsResponse.json();
-    let threadId: number;
+    let url: string;
+    let body: { message: string; subject?: string };
 
-    if (threadsData.threads && threadsData.threads.length > 0) {
-      threadId = threadsData.threads[0].id;
+    // If thread exists, send to thread; otherwise create via inquiry endpoint
+    if (currentThreadId) {
+      url = `${MESSAGES_API_BASE}/threads/${currentThreadId}/messages`;
+      body = { message };
     } else {
-      // Create new thread
-      const createResponse = await fetch(`${ClientPortalModule.MESSAGES_API_BASE}/threads`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ subject: 'General Discussion' })
-      });
-      const createData = await createResponse.json();
-      threadId = createData.thread.id;
+      url = `${MESSAGES_API_BASE}/inquiry`;
+      body = { subject: 'General Inquiry', message };
     }
 
-    // Send message
-    const response = await fetch(
-      `${ClientPortalModule.MESSAGES_API_BASE}/threads/${threadId}/messages`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ content })
-      }
-    );
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include', // HttpOnly cookie authentication
+      body: JSON.stringify(body)
+    });
 
-    if (response.ok) {
-      messageInput.value = '';
-      await this.loadMessagesFromAPI();
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to send message');
     }
+
+    const data = await response.json();
+
+    // Store thread ID if new thread was created
+    if (data.threadId) {
+      currentThreadId = data.threadId;
+    }
+
+    messageInput.value = '';
+    await loadMessagesFromAPI(ctx);
   } catch (error) {
     console.error('Error sending message:', error);
-    alert('Failed to send message. Please try again.');
+    alert(error instanceof Error ? error.message : 'Failed to send message. Please try again.');
   }
 }
 ```
 
 ### Demo Messages Fallback
 
+In demo mode, the static HTML messages from `portal.html` are preserved. If no static messages exist, a placeholder is shown:
+
 ```typescript
-private renderDemoMessages(container: HTMLElement): void {
-  container.innerHTML = `
-    <div class="message message-received">
-      <div class="message-avatar">
-        <img src="/images/avatar.svg" alt="Noelle" class="avatar-img">
-      </div>
-      <div class="message-content">
-        <div class="message-header">
-          <span class="message-sender">Noelle</span>
-          <span class="message-time">Nov 30, 2025 at 10:30 AM</span>
-        </div>
-        <div class="message-body">
-          Welcome to your project portal! I'm excited to work with you.
-          I've reviewed your intake form and will begin the planning phase shortly.
-        </div>
-      </div>
-    </div>
-    <div class="message message-sent">
-      <div class="message-content">
-        <div class="message-header">
-          <span class="message-sender">You</span>
-          <span class="message-time">Nov 30, 2025 at 11:15 AM</span>
-        </div>
-        <div class="message-body">
-          Thanks! Looking forward to seeing the initial designs.
-        </div>
-      </div>
-      <div class="message-avatar">
-        <div class="avatar-placeholder">YOU</div>
-      </div>
-    </div>
-  `;
+// src/features/client/modules/portal-messages.ts
+function renderDemoMessages(container: HTMLElement, _ctx: ClientPortalContext): void {
+  // In demo mode, keep the existing static HTML messages
+  // Only render placeholder if container is empty
+  if (container.children.length > 0) {
+    return;
+  }
+
+  // Fallback if no static messages exist
+  container.innerHTML = '<div class="no-messages"><p>No messages yet. Start a conversation!</p></div>';
 }
 ```
 
 ### Message Data Interface
 
 ```typescript
-interface ProjectMessage {
-  id: string;
-  sender: string;
-  senderRole: 'system' | 'client' | 'admin';
+// src/features/client/portal-types.ts
+interface PortalMessage {
+  id: number;
+  thread_id: number;
+  sender_id: number;
+  sender_name: string;
+  sender_type: 'client' | 'admin' | 'system';
   message: string;
-  timestamp: string;
-  isRead: boolean;
+  created_at: string;
+  read_at: string | null;
 }
 ```
 
-### Sample Message Data
+### Thread ID Tracking
+
+The module tracks the current thread ID to avoid repeated lookups:
 
 ```typescript
-// src/features/client/client-portal.ts:434-443
-messages: [
-  {
-    id: 'msg-001',
-    sender: 'No Bhad Codes Team',
-    senderRole: 'system',
-    message: 'Welcome to your project portal! We\'ll keep you updated on progress here.',
-    timestamp: new Date().toISOString(),
-    isRead: false
-  }
-]
+// src/features/client/modules/portal-messages.ts
+let currentThreadId: number | null = null;
+
+export function getCurrentThreadId(): number | null {
+  return currentThreadId;
+}
+
+export function setCurrentThreadId(id: number | null): void {
+  currentThreadId = id;
+}
 ```
 
 ---
@@ -552,24 +521,37 @@ messages: [
 | `/api/messages/threads` | GET | Load message threads |
 | `/api/messages/threads` | POST | Create new thread |
 | `/api/messages/threads/:id/messages` | GET | Get messages in thread |
-| `/api/messages/threads/:id/messages` | POST | Send message |
+| `/api/messages/threads/:id/messages` | POST | Send message in thread |
+| `/api/messages/threads/:id/read` | PUT | Mark thread messages as read |
+| `/api/messages/inquiry` | POST | Create quick inquiry (creates thread + message) |
 | `/api/messages/preferences` | GET | Get notification preferences |
 | `/api/messages/preferences` | PUT | Update notification preferences |
+| `/api/messages/analytics` | GET | Get message analytics (admin only) |
 
 ### Database Schema
 
-**Messages Table:**
+**General Messages Table:**
 
 ```sql
-CREATE TABLE messages (
+CREATE TABLE general_messages (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  thread_id INTEGER NOT NULL,
-  sender_id INTEGER NOT NULL,
-  content TEXT NOT NULL,
+  client_id INTEGER NOT NULL,
+  sender_type TEXT NOT NULL CHECK (sender_type IN ('client', 'admin', 'system')),
+  sender_name TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  message TEXT NOT NULL,
+  message_type TEXT DEFAULT 'inquiry' CHECK (message_type IN ('inquiry', 'quote_request', 'support', 'feedback', 'system')),
+  priority TEXT DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
+  status TEXT DEFAULT 'new' CHECK (status IN ('new', 'read', 'replied', 'closed')),
+  reply_to INTEGER DEFAULT NULL REFERENCES general_messages(id) ON DELETE SET NULL,
+  attachments TEXT DEFAULT NULL, -- JSON array of attachment file paths
+  is_read BOOLEAN DEFAULT FALSE,
+  read_at DATETIME DEFAULT NULL,
+  thread_id INTEGER DEFAULT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  read_at DATETIME,
-  FOREIGN KEY (thread_id) REFERENCES message_threads(id),
-  FOREIGN KEY (sender_id) REFERENCES users(id)
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
+  FOREIGN KEY (thread_id) REFERENCES message_threads(id) ON DELETE SET NULL
 );
 ```
 
@@ -578,14 +560,19 @@ CREATE TABLE messages (
 ```sql
 CREATE TABLE message_threads (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER DEFAULT NULL, -- NULL for general threads
   client_id INTEGER NOT NULL,
-  subject TEXT,
-  thread_type TEXT DEFAULT 'general',
-  project_id INTEGER,
-  priority TEXT DEFAULT 'normal',
+  subject TEXT NOT NULL,
+  thread_type TEXT DEFAULT 'general' CHECK (thread_type IN ('general', 'project', 'support', 'quote')),
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'closed', 'archived')),
+  priority TEXT DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
+  last_message_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  last_message_by TEXT DEFAULT NULL,
+  participant_count INTEGER DEFAULT 2,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (client_id) REFERENCES clients(id),
-  FOREIGN KEY (project_id) REFERENCES projects(id)
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+  FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
 );
 ```
 
@@ -625,25 +612,38 @@ On mobile devices (screens under 768px), the messaging interface adapts for touc
 In demo mode, users can send messages that display locally but reset on page refresh:
 
 ```typescript
-private addDemoMessage(content: string): void {
+// src/features/client/modules/portal-messages.ts
+function addDemoMessage(message: string, ctx: ClientPortalContext): void {
   const messagesThread = document.getElementById('messages-thread');
   if (!messagesThread) return;
 
-  const messageElement = document.createElement('div');
-  messageElement.className = 'message message-sent';
-  messageElement.innerHTML = `
-    <div class="message-content">
-      <div class="message-header">
-        <span class="message-sender">You</span>
-        <span class="message-time">${this.formatDate(new Date().toISOString())}</span>
+  const now = new Date();
+  const timeString = `${now.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  })} at ${now.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  })}`;
+
+  const messageHTML = `
+    <div class="message message-sent">
+      <div class="message-content">
+        <div class="message-header">
+          <span class="message-sender">You</span>
+          <span class="message-time">${timeString}</span>
+        </div>
+        <div class="message-body">${ctx.escapeHtml(message)}</div>
       </div>
-      <div class="message-body">${this.escapeHtml(content)}</div>
-    </div>
-    <div class="message-avatar" data-name="You">
-      <div class="avatar-placeholder">YOU</div>
+      <div class="message-avatar" data-name="You">
+        <div class="avatar-placeholder">YOU</div>
+      </div>
     </div>
   `;
-  messagesThread.appendChild(messageElement);
+
+  messagesThread.insertAdjacentHTML('beforeend', messageHTML);
   messagesThread.scrollTop = messagesThread.scrollHeight;
 }
 ```
@@ -857,14 +857,13 @@ private addDemoMessage(content: string): void {
 
 ## File Locations
 
-| File | Lines | Purpose |
-|------|-------|---------|
-| `templates/pages/client-portal.ejs` | 128-181 | Messages HTML template |
-| `src/features/client/client-portal.ts` | 195-240 | Message event handlers |
-| `src/features/client/client-portal.ts` | 653-673 | Load messages function |
-| `src/styles/pages/client-portal.css` | - | Message styling |
-| `server/routes/messages.ts` | - | API endpoints |
-| `server/services/email-service.ts` | - | Email notifications |
+| File | Purpose |
+|------|---------|
+| `client/portal.html` | Messages HTML (tab-messages section) |
+| `src/features/client/modules/portal-messages.ts` | Message module (~270 lines) |
+| `src/styles/client-portal/messages.css` | Message styling |
+| `server/routes/messages.ts` | API endpoints |
+| `server/services/email-service.ts` | Email notifications |
 
 ---
 

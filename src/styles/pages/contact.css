@@ -741,7 +741,7 @@ html[data-theme="dark"] .submit-button svg {
 }
 
 html[data-theme="dark"] .submit-button {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75);
+  box-shadow: var(--shadow-elevated-dark);
 }
 
 html[data-theme="dark"] .submit-button:focus,

@@ -155,6 +155,12 @@ This CSS file defines global variables and font-face rules for consistent stylin
   /* Large dropdown shadows - for modal-like dropdowns */
   --shadow-dropdown-xl: 0 20px 60px rgba(0, 0, 0, 0.5);
 
+  /* Terminal/modal shadows - layered depth effect */
+  --shadow-terminal: 4px 4px 10px rgba(0, 0, 0, 0.3), 0 8px 32px rgba(0, 0, 0, 0.4);
+
+  /* Dark mode elevated shadow - stronger for contrast */
+  --shadow-elevated-dark: 0 8px 32px rgba(0, 0, 0, 0.75);
+
   /* Button shadows - for 3D button effects */
   --shadow-button: 6px 6px 12px rgba(0, 0, 0, 0.2), 12px 12px 24px rgba(0, 0, 0, 0.15);
   --shadow-button-dark: 6px 6px 12px rgba(0, 0, 0, 0.5), 12px 12px 24px rgba(0, 0, 0, 0.4);
@@ -205,6 +211,10 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --portal-border-dark: #333333;
   --portal-border-medium: #666666;
   --portal-border-light: #f5f5f5;
+
+  /* Portal border patterns - reusable */
+  --portal-border: 2px solid var(--portal-border-dark);
+  --portal-border-light-style: 2px solid var(--portal-border-light);
 
   /* Border radius */
   --portal-radius-xs: 4px;

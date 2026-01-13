@@ -38,7 +38,7 @@
 [data-page="admin"] button[type="submit"] {
   background: transparent;
   color: var(--portal-text-light);
-  border: 2px solid var(--portal-border-light);
+  border: var(--portal-border-light-style);
   border-radius: var(--portal-radius-lg);
   padding: var(--portal-spacing-md) var(--portal-spacing-xl);
   font-weight: 600;
@@ -1037,7 +1037,7 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   text-transform: capitalize;
-  border: 2px solid var(--portal-border-dark);
+  border: var(--portal-border);
   color: var(--color-black);
   width: 150px;
   text-align: center;
@@ -1134,7 +1134,7 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   text-transform: capitalize;
-  border: 2px solid var(--portal-border-dark);
+  border: var(--portal-border);
   white-space: nowrap;
 }
 

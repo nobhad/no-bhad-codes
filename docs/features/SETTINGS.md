@@ -309,23 +309,23 @@ passwordToggles.forEach((toggle) => {
 ### Form Save Methods
 
 ```typescript
-// src/features/client/client-portal.ts:1370-1430
+// src/features/client/modules/portal-settings.ts
 
-private async saveContactInfo(formData: FormData): Promise<void> {
+async function saveContactInfo(formData: FormData, ctx: ClientPortalContext): Promise<void> {
   const data = Object.fromEntries(formData);
   console.log('Saving contact info:', data);
-  localStorage.setItem('client_contact_info', JSON.stringify(data));
-  this.showSuccessMessage('Contact information saved successfully!');
+  sessionStorage.setItem('client_contact_info', JSON.stringify(data));
+  ctx.showNotification('Contact information saved successfully!', 'success');
 }
 
-private async saveBillingAddress(formData: FormData): Promise<void> {
+async function saveBillingAddress(formData: FormData, ctx: ClientPortalContext): Promise<void> {
   const data = Object.fromEntries(formData);
   console.log('Saving billing address:', data);
-  localStorage.setItem('client_billing_address', JSON.stringify(data));
-  this.showSuccessMessage('Billing address saved successfully!');
+  sessionStorage.setItem('client_billing_address', JSON.stringify(data));
+  ctx.showNotification('Billing address saved successfully!', 'success');
 }
 
-private async saveNotificationPrefs(formData: FormData): Promise<void> {
+async function saveNotificationPrefs(formData: FormData, ctx: ClientPortalContext): Promise<void> {
   const checkboxes = formData.getAll('notifications');
   const prefs = {
     projectUpdates: checkboxes.includes('project-updates'),
@@ -334,19 +334,20 @@ private async saveNotificationPrefs(formData: FormData): Promise<void> {
     milestones: checkboxes.includes('milestones')
   };
   console.log('Saving notification preferences:', prefs);
-  localStorage.setItem('client_notification_prefs', JSON.stringify(prefs));
-  this.showSuccessMessage('Notification preferences saved successfully!');
+  sessionStorage.setItem('client_notification_prefs', JSON.stringify(prefs));
+  ctx.showNotification('Notification preferences saved successfully!', 'success');
 }
 ```
 
 ### Load Settings Methods
 
 ```typescript
-// src/features/client/client-portal.ts:1209-1256
-private loadUserSettings(): void {
+// src/features/client/modules/portal-settings.ts
+
+export function loadUserSettings(currentUser: string | null): void {
   const userData = {
-    name: this.currentUser || 'User',
-    email: this.currentUser || '',
+    name: currentUser || 'User',
+    email: currentUser || '',
     company: 'Company Name',
     phone: '',
     secondaryEmail: '',
@@ -376,50 +377,49 @@ private loadUserSettings(): void {
   const cityInput = document.getElementById('billing-city') as HTMLInputElement;
   // ... more field population
 }
+
+export function loadBillingSettings(): void {
+  const savedBillingData = sessionStorage.getItem('client_billing_address');
+  const billingData = savedBillingData ? JSON.parse(savedBillingData) : { ... };
+  // ... populate billing fields
+}
+
+export function loadNotificationSettings(): void {
+  const savedNotifications = sessionStorage.getItem('client_notification_prefs');
+  // ... populate notification checkboxes
+}
 ```
 
 ### Success Message Toast
 
+The settings module uses the `ClientPortalContext.showNotification()` method:
+
 ```typescript
-// src/features/client/client-portal.ts:1432-1455
-private showSuccessMessage(message: string): void {
-  const successDiv = document.createElement('div');
-  successDiv.className = 'success-message';
-  successDiv.textContent = message;
-  successDiv.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: var(--color-primary);
-    color: var(--color-dark);
-    padding: 1rem 2rem;
-    border: 2px solid var(--color-dark);
-    z-index: 9999;
-    font-weight: 600;
-  `;
+// src/features/client/modules/portal-settings.ts
+ctx.showNotification('Contact information saved successfully!', 'success');
 
-  document.body.appendChild(successDiv);
-
-  // Remove after 3 seconds
-  setTimeout(() => {
-    successDiv.remove();
-  }, 3000);
+// ClientPortalContext provides this method:
+interface ClientPortalContext {
+  showNotification: (message: string, type: 'success' | 'error' | 'warning') => void;
+  // ... other context methods
 }
 ```
 
 ---
 
-## LocalStorage Keys
+## Storage Keys
 
-| Key | Purpose | Data Structure |
-|-----|---------|----------------|
-| `client_auth_token` | Authentication token | `string` |
-| `client_contact_info` | Contact details | `{ name, email, company, phone }` |
-| `client_billing_address` | Billing address | `{ address1, address2, city, state, zip, country }` |
-| `client_notification_prefs` | Notification settings | `{ projectUpdates, invoices, messages, milestones }` |
-| `client_billing_view_address` | Billing view data | `{ ... }` |
-| `client_tax_info` | Tax information | `{ taxId, businessName }` |
-| `client_notification_frequency` | Frequency settings | `{ frequency, quietStart, quietEnd }` |
+The settings module uses `sessionStorage` for client-side data persistence (cleared on browser close).
+
+| Key | Storage | Purpose | Data Structure |
+|-----|---------|---------|----------------|
+| `clientEmail` | sessionStorage | Current user email | `string` |
+| `client_contact_info` | sessionStorage | Contact details | `{ name, email, company, phone }` |
+| `client_billing_address` | sessionStorage | Billing address | `{ address1, address2, city, state, zip, country }` |
+| `client_notification_prefs` | sessionStorage | Notification settings | `{ projectUpdates, invoices, messages, milestones }` |
+| `client_billing_view_address` | sessionStorage | Billing view data | `{ ... }` |
+| `client_tax_info` | sessionStorage | Tax information | `{ taxId, businessName }` |
+| `client_notification_frequency` | sessionStorage | Frequency settings | `{ frequency, quietStart, quietEnd }` |
 
 ---
 
@@ -635,16 +635,13 @@ billing_country TEXT
 
 ## File Locations
 
-| File | Lines | Purpose |
-|------|-------|---------|
-| `templates/pages/client-portal.ejs` | 221-334 | Settings tab HTML |
-| `src/features/client/client-portal.ts` | 172-193 | Password toggle handlers |
-| `src/features/client/client-portal.ts` | 1163-1207 | Setup settings forms |
-| `src/features/client/client-portal.ts` | 1209-1368 | Load settings data |
-| `src/features/client/client-portal.ts` | 1370-1430 | Save settings methods |
-| `src/styles/pages/client-portal.css` | - | Settings styling |
-| `server/routes/clients.ts` | - | Client profile API endpoints |
-| `server/routes/auth.ts` | - | Password change endpoint |
+| File | Purpose |
+|------|---------|
+| `client/portal.html` | Settings tab HTML (tab-settings section) |
+| `src/features/client/modules/portal-settings.ts` | Settings module (~260 lines) |
+| `src/styles/client-portal/settings.css` | Settings styling |
+| `server/routes/clients.ts` | Client profile API endpoints |
+| `server/routes/auth.ts` | Password change endpoint |
 
 ---
 
