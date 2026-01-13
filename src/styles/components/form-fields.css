@@ -49,7 +49,7 @@ input[type="radio"] {
   color: var(--portal-text-light);
   font-family: inherit;
   box-sizing: border-box;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   min-height: clamp(32px, 8vw, 44px);
   height: auto;
 }
@@ -211,7 +211,7 @@ label {
   }
 }
 
-@media screen and (max-width: 479px) {
+@media (--small-mobile) {
   .form-container,
   .login-form {
     max-width: 98vw;

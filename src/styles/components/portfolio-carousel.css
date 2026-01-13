@@ -256,7 +256,7 @@ html[data-theme="dark"] .indicator {
   }
 }
 
-@media (max-width: 479px) {
+@media (--small-mobile) {
   .portfolio-item {
     padding: 1.5rem;
   }

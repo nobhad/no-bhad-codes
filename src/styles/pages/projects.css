@@ -419,7 +419,7 @@
   }
 }
 
-@media (max-width: 479px) {
+@media (--small-mobile) {
   .hero-title {
     font-size: 2rem;
   }

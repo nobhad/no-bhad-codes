@@ -1104,7 +1104,7 @@
   padding: var(--space-8);
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 #pd-upload-dropzone:hover,
@@ -1164,7 +1164,7 @@
   }
 }
 
-@media (max-width: 479px) {
+@media (--small-mobile) {
   .project-detail-meta {
     grid-template-columns: 1fr;
   }
