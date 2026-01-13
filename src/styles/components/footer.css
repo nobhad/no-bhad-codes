@@ -46,7 +46,7 @@
 }
 
 /* Mobile: Footer stays fixed at bottom for scroll snap layout */
-@media (max-width: 767px) {
+@media (--mobile) {
   .footer {
     position: fixed;
     bottom: 0;

@@ -477,7 +477,14 @@ export class VisitorTrackingService {
     if (target.id) {
       elementDescription += `#${target.id}`;
     } else if (target.className) {
-      elementDescription += `.${target.className.split(' ')[0]}`;
+      // Handle SVG elements where className is SVGAnimatedString
+      const className = target.className;
+      const classStr = typeof className === 'string'
+        ? className
+        : (className as { baseVal?: string })?.baseVal || '';
+      if (classStr) {
+        elementDescription += `.${classStr.split(' ')[0]}`;
+      }
     }
 
     // Track external links

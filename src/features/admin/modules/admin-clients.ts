@@ -164,15 +164,14 @@ function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): voi
       const displayStatus = status.charAt(0).toUpperCase() + status.slice(1);
       const projectCount = client.project_count || 0;
 
-      // Client type badge
+      // Client type - plain text
       const clientType = client.client_type || 'business';
-      const typeBadgeClass = clientType === 'personal' ? 'client-type-personal' : 'client-type-business';
       const typeLabel = clientType === 'personal' ? 'Personal' : 'Business';
 
       return `
         <tr data-client-id="${client.id}" class="clickable-row">
           <td>${safeName}${safeCompany ? `<br><small>${safeCompany}</small>` : ''}</td>
-          <td><span class="client-type-badge ${typeBadgeClass}">${typeLabel}</span></td>
+          <td>${typeLabel}</td>
           <td>${safeEmail}</td>
           <td>${displayStatus}</td>
           <td>${projectCount}</td>
@@ -256,13 +255,12 @@ function populateClientDetailView(client: Client): void {
     statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
   }
 
-  // Client type badge
+  // Client type - plain text
   const typeEl = document.getElementById('cd-client-type');
   if (typeEl) {
     const clientType = client.client_type || 'business';
-    const typeBadgeClass = clientType === 'personal' ? 'client-type-personal' : 'client-type-business';
     const typeLabel = clientType === 'personal' ? 'Personal' : 'Business';
-    typeEl.innerHTML = `<span class="client-type-badge ${typeBadgeClass}">${typeLabel}</span>`;
+    typeEl.textContent = typeLabel;
   }
 
   const createdEl = document.getElementById('cd-created');

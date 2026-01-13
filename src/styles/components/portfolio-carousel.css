@@ -64,7 +64,7 @@
   border-radius: 12px;
   padding: 2.5rem;
   position: relative;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-elevated-md);
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease;
@@ -73,7 +73,7 @@
 
 .portfolio-item:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-elevated-xl);
 }
 
 .portfolio-number {
@@ -144,7 +144,7 @@
   color: var(--color-dark);
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-elevated-sm);
 }
 
 .carousel-btn:hover {
@@ -163,7 +163,7 @@
 .carousel-btn:disabled:hover {
   background: var(--color-neutral-200);
   color: var(--color-dark);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-elevated-sm);
 }
 
 /* Carousel Indicators */
@@ -228,7 +228,7 @@ html[data-theme="dark"] .indicator {
 }
 
 /* Responsive Design */
-@media (max-width: 767px) {
+@media (--mobile) {
   .portfolio-section {
     padding: 3rem 1rem;
   }

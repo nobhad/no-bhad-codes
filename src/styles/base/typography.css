@@ -332,7 +332,7 @@ a.icon-link:focus-visible svg {
  * RESPONSIVE TYPOGRAPHY
  * ============================================ */
 
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   h1,
   .h1 {
     font-size: clamp(1.5rem, 6vw, 2.5rem);

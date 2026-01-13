@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="AVATAR" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 514.67 487.98">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke: #231f20;
+        stroke-miterlimit: 10;
+        stroke-width: 6px;
+      }
+
+      .cls-1, .cls-2 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <path class="cls-1" d="M288.11,285.53l-62.53,1.59s-5.36,42.28,19.01,69.03c-28.1-11.08-59.56-19.03-82.12-67.9-17.15,1.03-61.24-1.29-61.24-1.29-54.03,0-98.23-50.39-98.23-111.98v-59.98C3,53.39,47.2,3,101.23,3h182.57c54.03,0,98.23,50.39,98.23,111.98v59.98c0,61.59-39.89,110.57-93.92,110.57Z"/>
+  <rect id="_ALIGN_TEXT_HERE_" data-name="&amp;lt;ALIGN TEXT HERE&amp;gt;" class="cls-2" x="39.86" y="32.23" width="301.38" height="223.4"/>
+</svg>

@@ -146,7 +146,7 @@ html[data-theme="dark"] .login-form label {
 }
 
 /* Responsive */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   .client-login {
     padding: 1rem;
   }

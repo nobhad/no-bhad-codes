@@ -8,6 +8,15 @@
   box-shadow: var(--shadow-card);
 }
 
+/* ----- COMPONENT: Panel - No border, panel shadow ----- */
+/* Use for main container divs in admin and client portals */
+.portal-panel {
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--border-radius-card);
+  box-shadow: var(--shadow-panel);
+}
+
 /* ----- COMPONENT: Card - Dark theme to match admin ----- */
 .portal-card {
   background: var(--portal-bg-dark);
@@ -106,7 +115,7 @@
 
 /* ----- COMPONENT: Form Input ----- */
 /* Matches main site contact form styling - dark bg, light text */
-/* FORM FIELD BACKGROUND COLORS ARE PRESERVED - DO NOT CHANGE */
+/* FORM FIELD STYLING - BLACK BACKGROUND FOR ALL PORTAL INPUTS */
 .portal-input,
 .client-portal-main .form-input,
 .client-portal-main input[type="text"],
@@ -138,7 +147,7 @@
   border-radius: var(--portal-radius-lg);
   font-size: 1.2rem;
   font-weight: 600;
-  background-color: var(--portal-bg-dark);
+  background-color: var(--color-black);
   color: var(--portal-text-light);
   font-family: inherit;
   box-sizing: border-box;

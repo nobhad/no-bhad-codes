@@ -78,9 +78,11 @@
 [data-page="admin"] .settings-section,
 [data-page="admin"] .visitors-table-container,
 [data-page="admin"] .project-detail-overview,
-[data-page="admin"] .recent-activity,
 [data-page="admin"] .portal-project-card,
-[data-page="admin"] .summary-card {
+[data-page="admin"] .recent-activity,
+[data-page="admin"] .summary-card,
+[data-page="admin"] .pd-tab-content,
+[data-page="admin"] .messages-container {
   box-shadow: var(--shadow-panel) !important;
 }
 
@@ -88,6 +90,59 @@
 [data-page="admin"] .vital-card,
 [data-page="admin"] .bundle-item {
   box-shadow: var(--shadow-card) !important;
+}
+
+/* ================================================
+   ADMIN TABLE - Reusable table class
+   ================================================
+   Apply .admin-table to any table for consistent styling
+   ================================================ */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--portal-bg-dark);
+}
+
+.admin-table th,
+.admin-table td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  background: var(--portal-bg-dark);
+}
+
+.admin-table th {
+  color: var(--portal-text-light);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  border-top: 1px solid var(--portal-border-medium);
+  border-bottom: 1px solid var(--portal-border-medium);
+}
+
+.admin-table td {
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  border: none;
+}
+
+.admin-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.admin-table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.admin-table td a {
+  color: var(--color-brand-primary);
+  text-decoration: none;
+}
+
+.admin-table td a:hover {
+  text-decoration: underline;
 }
 
 /* Base Admin Styles */
@@ -482,7 +537,7 @@
 
 .metric-card {
   background: var(--color-bg-secondary);
-  border: 1px solid var(--portal-border-dark);
+  border: none;
   border-radius: var(--border-radius-card);
   padding: var(--space-6);
   box-shadow: var(--shadow-card-rest);
@@ -818,7 +873,7 @@
 
 .stat-card {
   background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border-medium);
+  border: none;
   border-radius: var(--border-radius-card);
   padding: var(--space-4);
   display: flex;
@@ -1110,7 +1165,7 @@
 /* Admin Table Card - Consistent styling for data tables */
 .admin-table-card {
   background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border-medium);
+  border: none;
   border-radius: var(--border-radius-card);
   overflow: hidden;
   margin-top: var(--portal-spacing-lg);
@@ -1127,19 +1182,15 @@
   border: none;
 }
 
-#intake-submissions-card .admin-table-header,
-#contact-submissions-card .admin-table-header,
-#projects-card .admin-table-header {
-  border-top: none;
-}
+/* Border overrides removed - base .admin-table-header now has no borders */
 
 .admin-table-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: var(--space-4) var(--space-5);
-  border-top: 1px solid var(--portal-border-medium);
-  border-bottom: 1px solid var(--portal-border-medium);
+  border-top: none;
+  border-bottom: none;
   background: var(--portal-bg-dark);
 }
 
@@ -1417,13 +1468,10 @@
 }
 
 .admin-modal {
-  background: var(--color-bg-secondary);
+  background: var(--portal-bg-dark);
   border: none;
   border-radius: var(--border-radius-card);
-  box-shadow:
-    0 4px 6px rgba(0, 0, 0, 0.1),
-    0 10px 20px rgba(0, 0, 0, 0.15),
-    0 25px 50px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-panel);
   width: 100%;
   max-width: 600px;
   max-height: 90vh;

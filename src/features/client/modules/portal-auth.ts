@@ -212,11 +212,11 @@ export async function checkExistingAuth(callbacks: {
         type: data.user.type
       }, false);
       return true;
-    } else {
-      // Auth is invalid, clear it
-      clearAuthData();
-      return false;
     }
+    // Auth is invalid, clear it
+    clearAuthData();
+    return false;
+
   } catch (error) {
     console.error('Auth check failed:', error);
     // Don't remove auth on network errors - might just be backend down

@@ -1007,16 +1007,15 @@ class AdminDashboard {
     this.selectedClientId = clientId;
     this.selectedThreadId = threadId;
 
-    // Show compose area
-    const composeArea = document.getElementById('admin-compose-area');
-    if (composeArea) {
-      composeArea.style.display = 'block';
+    // Enable compose area inputs
+    const textarea = document.getElementById('admin-message-text') as HTMLTextAreaElement;
+    const sendButton = document.getElementById('admin-send-message') as HTMLButtonElement;
+    if (textarea) {
+      textarea.disabled = false;
+      textarea.placeholder = 'Type your message...';
     }
-
-    // Also support old UI structure
-    const messageInput = document.getElementById('admin-message-input');
-    if (messageInput) {
-      messageInput.style.display = 'block';
+    if (sendButton) {
+      sendButton.disabled = false;
     }
 
     // Load messages

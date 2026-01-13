@@ -46,7 +46,7 @@
 }
 
 /* Mobile Styles */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   :root {
     --nav-base-gap: clamp(0.3rem, 1vw, 0.6rem);
     --menu-padding: clamp(0.75rem, 3vw, 1.5rem);
@@ -254,7 +254,7 @@
 /* Removed automatic dark mode preference - site manages theme manually */
 
 /* Theme toggle visible on mobile - positioned properly */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   .theme-button {
     display: flex;
     width: 36px;
@@ -452,7 +452,7 @@ html[data-theme="dark"] .submenu-link-heading {
 }
 
 /* Mobile submenu adjustments */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   .submenu-link {
     padding: 0.6rem var(--menu-padding);
     padding-left: calc(var(--menu-padding) * 1.5);
