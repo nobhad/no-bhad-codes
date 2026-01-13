@@ -829,7 +829,7 @@ router.get(
 
       // Get client info
       const client = await db.get(
-        'SELECT contact_name, company_name, email FROM clients WHERE id = ?',
+        'SELECT contact_name, company_name, email, client_type FROM clients WHERE id = ?',
         [invoice.clientId]
       );
 
@@ -877,8 +877,14 @@ router.get(
       // Bill To section
       doc.fontSize(12).font('Helvetica-Bold').text('Bill To:');
       doc.fontSize(10).font('Helvetica');
-      if (client?.company_name) doc.text(client.company_name);
-      if (client?.contact_name) doc.text(client.contact_name);
+      if (client?.client_type === 'personal') {
+        // Personal: just show contact name
+        if (client?.contact_name) doc.text(client.contact_name);
+      } else {
+        // Business: show company name, then contact as "Attn:"
+        if (client?.company_name) doc.text(client.company_name);
+        if (client?.contact_name) doc.text(`Attn: ${client.contact_name}`);
+      }
       if (client?.email) doc.text(client.email);
 
       doc.moveDown(2);

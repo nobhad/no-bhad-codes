@@ -11,6 +11,8 @@
 import express, { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { join } from 'path';
 import { getDatabase } from '../database/init.js';
 import { generateProjectPlan, ProjectPlan } from '../services/project-generator.js';
 import { generateInvoice, Invoice } from '../services/invoice-generator.js';
@@ -18,6 +20,83 @@ import { sendWelcomeEmail, sendNewIntakeNotification } from '../services/email-s
 import { auditLogger } from '../services/audit-logger.js';
 
 const router = express.Router();
+
+/**
+ * Save intake form data as a JSON file for project records
+ */
+async function saveIntakeAsFile(
+  intakeData: IntakeFormData,
+  projectId: number,
+  projectName: string
+): Promise<void> {
+  const db = getDatabase();
+
+  // Create uploads directory if it doesn't exist
+  const uploadsDir = join(process.cwd(), 'uploads', 'intake');
+  if (!existsSync(uploadsDir)) {
+    mkdirSync(uploadsDir, { recursive: true });
+  }
+
+  // Create formatted intake document
+  const intakeDocument = {
+    submittedAt: new Date().toISOString(),
+    projectId,
+    projectName,
+    clientInfo: {
+      name: intakeData.name,
+      email: intakeData.email,
+      projectFor: intakeData.projectFor || 'business',
+      companyName: intakeData.companyName || null
+    },
+    projectDetails: {
+      type: intakeData.projectType,
+      description: intakeData.projectDescription,
+      timeline: intakeData.timeline,
+      budget: intakeData.budget,
+      features: intakeData.features || [],
+      designLevel: intakeData.designLevel || null
+    },
+    technicalInfo: {
+      techComfort: intakeData.techComfort || null,
+      domainHosting: intakeData.domainHosting || null
+    },
+    additionalInfo: intakeData.additionalInfo || null
+  };
+
+  // Generate filename
+  const timestamp = Date.now();
+  const safeProjectName = projectName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
+  const filename = `intake_${projectId}_${safeProjectName}_${timestamp}.json`;
+  const filePath = join(uploadsDir, filename);
+  const relativePath = `uploads/intake/${filename}`;
+
+  // Write file
+  writeFileSync(filePath, JSON.stringify(intakeDocument, null, 2), 'utf-8');
+
+  // Get file size
+  const fileSize = Buffer.byteLength(JSON.stringify(intakeDocument, null, 2), 'utf-8');
+
+  // Insert into files table
+  await db.run(
+    `INSERT INTO files (
+      project_id, filename, original_filename, file_path,
+      file_size, mime_type, file_type, description, uploaded_by, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+    [
+      projectId,
+      filename,
+      'Project Intake Form.json',
+      relativePath,
+      fileSize,
+      'application/json',
+      'document',
+      'Original project intake form submission',
+      'system'
+    ]
+  );
+
+  console.log(`[Intake] Saved intake form as file: ${relativePath}`);
+}
 
 interface IntakeFormData {
   name: string;
@@ -105,9 +184,10 @@ router.post('/', async (req: Request, res: Response) => {
       ? intakeData.features
       : [intakeData.features].filter(Boolean);
 
-    // Use company name from form, or "Personal Project" for personal projects
-    const companyName = intakeData.projectFor === 'personal'
-      ? 'Personal Project'
+    // Determine client type and company name
+    const clientType: 'personal' | 'business' = intakeData.projectFor === 'personal' ? 'personal' : 'business';
+    const companyName = clientType === 'personal'
+      ? null  // Personal clients don't have a company name
       : (intakeData.companyName || intakeData.name);
 
     // Generate password hash outside transaction
@@ -132,10 +212,10 @@ router.post('/', async (req: Request, res: Response) => {
           `
           INSERT INTO clients (
             company_name, contact_name, email, phone,
-            password_hash, status, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, 'pending', datetime('now'), datetime('now'))
+            password_hash, status, client_type, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, 'pending', ?, datetime('now'), datetime('now'))
         `,
-          [companyName, intakeData.name, intakeData.email, '', hashedPassword]
+          [companyName, intakeData.name, intakeData.email, '', hashedPassword, clientType]
         );
 
         clientId = clientResult.lastID!;
@@ -154,7 +234,7 @@ router.post('/', async (req: Request, res: Response) => {
       `,
         [
           clientId,
-          generateProjectName(intakeData.projectType, companyName),
+          generateProjectName(intakeData.projectType, clientType, companyName, intakeData.name),
           intakeData.projectDescription,
           intakeData.projectType,
           intakeData.budget,
@@ -212,6 +292,15 @@ router.post('/', async (req: Request, res: Response) => {
     // Generate initial invoice (outside transaction)
     const invoice: Invoice = await generateInvoice(intakeData, projectId, clientId);
 
+    // Save intake form as downloadable file
+    const projectName = generateProjectName(intakeData.projectType, clientType, companyName, intakeData.name);
+    try {
+      await saveIntakeAsFile(intakeData, projectId, projectName);
+    } catch (fileError) {
+      console.error('[Intake] Failed to save intake file:', fileError);
+      // Non-critical error - don't fail the whole request
+    }
+
     // Generate access token for client portal
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
@@ -250,7 +339,7 @@ router.post('/', async (req: Request, res: Response) => {
       data: {
         clientId,
         projectId,
-        projectName: generateProjectName(intakeData.projectType, companyName),
+        projectName: generateProjectName(intakeData.projectType, clientType, companyName, intakeData.name),
         accessToken,
         isNewClient,
         projectPlan: projectPlan.summary,
@@ -357,7 +446,12 @@ function generateRandomPassword(length: number = 12): string {
   return password;
 }
 
-function generateProjectName(projectType: string, companyName: string): string {
+function generateProjectName(
+  projectType: string,
+  clientType: 'personal' | 'business',
+  companyName: string | null,
+  contactName: string
+): string {
   const typeNames: Record<string, string> = {
     'simple-site': 'Simple Website',
     'business-site': 'Business Website',
@@ -369,7 +463,10 @@ function generateProjectName(projectType: string, companyName: string): string {
   };
 
   const typeName = typeNames[projectType] || 'Web Project';
-  return `${companyName} - ${typeName}`;
+  // Personal: "Jane Doe - Portfolio Website"
+  // Business: "Acme Corp - Business Website"
+  const identifier = clientType === 'personal' ? contactName : (companyName || contactName);
+  return `${identifier} - ${typeName}`;
 }
 
 interface Milestone {
