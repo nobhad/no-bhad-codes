@@ -1,6 +1,9 @@
 /* =====================================================
    CLIENT PORTAL - SIDEBAR
    Main navigation sidebar with collapse states
+
+   NOTE: This file is in the 'portals' CSS layer which has higher
+   priority than 'components' layer, so most !important is not needed.
    ===================================================== */
 
 /* Base sidebar - applies to client portal and admin */
@@ -8,7 +11,7 @@
 [data-page="admin"] .sidebar {
   width: 240px;
   min-width: 240px;
-  background: var(--portal-bg-dark) !important;
+  background: var(--portal-bg-dark);
   border-right: none;
   display: flex;
   flex-direction: column;
@@ -17,7 +20,7 @@
   height: 100vh;
   min-height: 100vh;
   z-index: 60;
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-sidebar);
 }
 
 .sidebar.collapsed {
@@ -61,13 +64,13 @@
   right: 1.5rem;
   border-top: none;
   z-index: 100;
-  pointer-events: auto !important;
+  pointer-events: auto;
 }
 
 .sidebar-footer .btn-logout,
 .sidebar-footer button {
-  pointer-events: auto !important;
-  cursor: pointer !important;
+  pointer-events: auto;
+  cursor: pointer;
   position: relative;
   z-index: 101;
 }
@@ -121,16 +124,16 @@
   font-size: 1rem;
   letter-spacing: 1px;
   text-align: left;
-  background: transparent !important;
-  background-color: transparent !important;
-  color: var(--portal-text-light) !important;
-  border: 2px solid var(--portal-border-light) !important;
-  border-radius: var(--portal-radius-lg) !important;
+  background: transparent;
+  background-color: transparent;
+  color: var(--portal-text-light);
+  border: 2px solid var(--portal-border-light);
+  border-radius: var(--portal-radius-lg);
   display: flex;
   align-items: center;
   gap: var(--portal-spacing-md);
-  box-shadow: none !important;
-  text-shadow: none !important;
+  box-shadow: none;
+  text-shadow: none;
 }
 
 .sidebar-buttons .btn .btn-icon {
@@ -145,25 +148,25 @@
 
 [data-page="client-portal"] .sidebar-buttons .btn:hover,
 [data-page="admin"] .sidebar-buttons .btn:hover {
-  background: var(--color-primary) !important;
-  background-color: var(--color-primary) !important;
-  color: var(--portal-bg-dark) !important;
-  border-color: var(--color-primary) !important;
+  background: var(--color-primary);
+  background-color: var(--color-primary);
+  color: var(--portal-bg-dark);
+  border-color: var(--color-primary);
 }
 
 /* Icon color on hover (expanded sidebar) - dark for contrast on red background */
 [data-page="client-portal"] .sidebar-buttons .btn:hover .btn-icon,
 [data-page="admin"] .sidebar-buttons .btn:hover .btn-icon {
-  color: var(--portal-bg-dark) !important;
+  color: var(--portal-bg-dark);
 }
 
 [data-page="client-portal"] .sidebar-buttons .btn.active,
 [data-page="admin"] .sidebar-buttons .btn.active {
-  background: var(--color-primary) !important;
-  background-color: var(--color-primary) !important;
-  color: var(--portal-bg-dark) !important;
-  border-color: var(--color-primary) !important;
-  outline: 2px solid var(--color-primary) !important;
+  background: var(--color-primary);
+  background-color: var(--color-primary);
+  color: var(--portal-bg-dark);
+  border-color: var(--color-primary);
+  outline: 2px solid var(--color-primary);
 }
 
 /* Collapsed state - show only icons */
@@ -181,28 +184,28 @@
   justify-content: center;
   margin: 0 auto;
   border-radius: var(--portal-radius-md);
-  border: none !important;
-  background: transparent !important;
+  border: none;
+  background: transparent;
 }
 
 .sidebar.collapsed .sidebar-buttons .btn.active {
-  background: transparent !important;
-  border: none !important;
+  background: transparent;
+  border: none;
 }
 
 .sidebar.collapsed .sidebar-buttons .btn.active .btn-icon {
-  color: var(--color-primary) !important;
+  color: var(--color-primary);
 }
 
 /* Collapsed sidebar - hover turns icon red */
 .sidebar.collapsed .sidebar-buttons .btn:hover {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
+  background: transparent;
+  background-color: transparent;
+  border: none;
 }
 
 .sidebar.collapsed .sidebar-buttons .btn:hover .btn-icon {
-  color: var(--color-primary) !important;
+  color: var(--color-primary);
 }
 
 .sidebar.collapsed .sidebar-buttons .btn .btn-text {
@@ -226,20 +229,20 @@
   justify-content: center;
   margin: 0 auto;
   border-radius: var(--portal-radius-md);
-  border: none !important;
-  background: transparent !important;
+  border: none;
+  background: transparent;
   display: flex;
   align-items: center;
 }
 
 .sidebar.collapsed .sidebar-footer .btn-logout:hover {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
+  background: transparent;
+  background-color: transparent;
+  border: none;
 }
 
 .sidebar.collapsed .sidebar-footer .btn-logout:hover .btn-icon {
-  color: var(--color-primary) !important;
+  color: var(--color-primary);
 }
 
 .sidebar.collapsed .sidebar-footer .btn-text {
@@ -255,21 +258,21 @@
   font-family: var(--font--acme);
   font-size: 1rem;
   letter-spacing: 1px;
-  background: transparent !important;
-  background-color: transparent !important;
-  color: var(--portal-text-light) !important;
-  border: 2px solid var(--portal-border-light) !important;
-  border-radius: var(--portal-radius-lg) !important;
-  box-shadow: none !important;
-  text-shadow: none !important;
+  background: transparent;
+  background-color: transparent;
+  color: var(--portal-text-light);
+  border: 2px solid var(--portal-border-light);
+  border-radius: var(--portal-radius-lg);
+  box-shadow: none;
+  text-shadow: none;
 }
 
 [data-page="client-portal"] .sidebar-footer .btn-logout:hover,
 [data-page="admin"] .sidebar-footer .btn-logout:hover {
-  background: var(--color-primary) !important;
-  background-color: var(--color-primary) !important;
-  color: var(--portal-bg-dark) !important;
-  border-color: var(--color-primary) !important;
+  background: var(--color-primary);
+  background-color: var(--color-primary);
+  color: var(--portal-bg-dark);
+  border-color: var(--color-primary);
 }
 
 /* Sidebar Toggle Button */

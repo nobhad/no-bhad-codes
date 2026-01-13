@@ -168,7 +168,11 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 ### Code Quality (Ongoing)
 
 - [x] Split `client-portal.ts` - Phase 1 complete (1,952 lines, 3 new modules)
-- [ ] CSS !important cleanup (650+ uses - architectural issue)
+- [x] CSS !important cleanup - Phase 1 complete (569 → 381, 33% reduction)
+  - Added CSS cascade layers (`@layer`) to main.css
+  - Cleaned mobile/contact.css (85 → 0)
+  - Cleaned mobile/layout.css (61 → 3)
+  - Cleaned client-portal/sidebar.css (47 → 0)
 
 ### CSS Cleanup Plan
 

@@ -4,124 +4,145 @@
  * ===============================================
  * @file src/styles/main.css
  *
- * Modular CSS architecture with proper layering:
- * 1. Design System Tokens
- * 2. Base Layer (reset, typography, layout)
- * 3. Component Layer
- * 4. Page-specific Layer
+ * Modular CSS architecture with cascade layers:
+ * Layers declared in priority order (later = higher priority)
  */
 
 /* ============================================
- * 0. FONT FACE DEFINITIONS (MUST BE FIRST)
+ * CASCADE LAYER ORDER DECLARATION
+ * ============================================
+ * Layers are listed in priority order - later layers win.
+ * This eliminates the need for !important in overrides.
+ */
+@layer reset, tokens, base, components, pages, portals, mobile, utilities;
+
+/* ============================================
+ * 0. FONT FACE DEFINITIONS (MUST BE FIRST, NO LAYER)
  * ============================================ */
 
 /* Font faces must be defined BEFORE any CSS references them */
 @import "./base/fonts.css";
 
 /* ============================================
- * 1. DESIGN SYSTEM FOUNDATION
+ * 1. RESET LAYER
  * ============================================ */
-
-/* Import design system tokens first */
-@import "../design-system/index.css";
+@import "./base/reset.css" layer(reset);
 
 /* ============================================
- * 2. BASE LAYER
+ * 2. DESIGN TOKENS LAYER
  * ============================================ */
-
-/* CSS reset and normalize */
-@import "./base/reset.css";
-
-/* Typography foundation */
-@import "./base/typography.css";
-
-/* Layout primitives */
-@import "./base/layout.css";
-
-/* Theme variables (legacy - to be phased out) */
-@import "./variables.css";
+@import "../design-system/index.css" layer(tokens);
+@import "./variables.css" layer(tokens);
 
 /* ============================================
- * 3. COMPONENT LAYER
+ * 3. BASE LAYER
+ * ============================================ */
+@import "./base/typography.css" layer(base);
+@import "./base/layout.css" layer(base);
+
+/* ============================================
+ * 4. COMPONENTS LAYER
  * ============================================ */
 
 /* Form system */
-@import "./components/form-fields.css";
-@import "./components/form-buttons.css";
-@import "./components/form-validation.css";
+@import "./components/form-fields.css" layer(components);
+@import "./components/form-buttons.css" layer(components);
+@import "./components/form-validation.css" layer(components);
 
 /* Navigation system */
-@import "./components/nav-base.css";
-@import "./components/nav-animations.css";
-@import "./components/nav-responsive.css";
-@import "./components/nav-portal.css";
+@import "./components/nav-base.css" layer(components);
+@import "./components/nav-animations.css" layer(components);
+@import "./components/nav-responsive.css" layer(components);
+@import "./components/nav-portal.css" layer(components);
 
 /* Business card component */
-@import "./components/business-card.css";
+@import "./components/business-card.css" layer(components);
 
 /* Footer component */
-@import "./components/footer.css";
+@import "./components/footer.css" layer(components);
 
 /* Loading states */
-@import "./components/loading.css";
+@import "./components/loading.css" layer(components);
 
 /* Portfolio carousel */
-@import "./components/portfolio-carousel.css";
+@import "./components/portfolio-carousel.css" layer(components);
 
 /* Intro morph animation */
-@import "./components/intro-morph.css";
+@import "./components/intro-morph.css" layer(components);
 
 /* Page transitions (virtual pages) */
-@import "./components/page-transitions.css";
+@import "./components/page-transitions.css" layer(components);
 
 /* Terminal component (reusable) */
-@import "./components/terminal.css";
+@import "./components/terminal.css" layer(components);
+
+/* Shared components */
+@import "./shared/progress.css" layer(components);
 
 /* ============================================
- * 4. PAGE-SPECIFIC LAYER
+ * 5. PAGE-SPECIFIC LAYER
  * ============================================ */
 
 /* About page */
-@import "./pages/about.css";
+@import "./pages/about.css" layer(pages);
 
 /* Contact page */
-@import "./pages/contact.css";
+@import "./pages/contact.css" layer(pages);
 
 /* Admin dashboard */
-@import "./pages/admin.css";
-@import "./admin/index.css";
+@import "./pages/admin.css" layer(pages);
+@import "./admin/index.css" layer(pages);
 
 /* Client portal */
-@import "./pages/client.css";
-
-/* Client portal (modular) */
-@import "./client-portal/index.css";
+@import "./pages/client.css" layer(pages);
 
 /* Client dashboard */
-@import "./pages/client-dashboard.css";
+@import "./pages/client-dashboard.css" layer(pages);
 
 /* Projects page */
-@import "./pages/projects.css";
+@import "./pages/projects.css" layer(pages);
 
 /* Terminal intake form */
-@import "./pages/terminal-intake.css";
+@import "./pages/terminal-intake.css" layer(pages);
 
 /* Client portal section on main page */
-@import "./pages/client-portal-section.css";
+@import "./pages/client-portal-section.css" layer(pages);
 
 /* ============================================
- * 5. MOBILE OVERRIDES
+ * 6. PORTALS LAYER (Admin & Client portals)
  * ============================================ */
-
-/* Mobile-specific styles (imported last to override desktop) */
-@import "./mobile/index.css";
+@import "./client-portal/index.css" layer(portals);
 
 /* ============================================
- * SECTION TRANSITION VARIABLES
+ * 7. MOBILE OVERRIDES LAYER (highest priority)
+ * ============================================ */
+@import "./mobile/index.css" layer(mobile);
+
+/* ============================================
+ * 8. UTILITIES LAYER (can override everything)
+ * ============================================ */
+@layer utilities {
+  /* Visually hidden utility */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+/* ============================================
+ * UNLAYERED STYLES (highest specificity)
+ * These override all layers when needed.
  * ============================================ */
 
+/* Section transition variables */
 :root {
-  /* Blur-in/drop-in transition timings - subtle and fast */
   --blur-amount: 4px;
   --drop-distance: 20px;
   --transition-enter: 0.3s;
@@ -129,15 +150,10 @@
   --stagger-delay: 0.05s;
 }
 
-/* ============================================
- * 6. THEME INTEGRATION
- * ============================================ */
-
-/* Theme-specific overrides */
+/* Theme integration */
 body {
   background-color: var(--color-neutral-300);
   color: var(--color-dark);
-  /* Theme transitions controlled by GSAP */
 }
 
 /* Footer integration with theme */
@@ -150,18 +166,7 @@ body {
   text-transform: uppercase;
 }
 
-/* ============================================
- * 6. SMOOTH TRANSITIONS
- * ============================================ */
-
-/* REMOVED: Global * transition was causing unwanted animation effects
- * Individual elements should define their own transitions as needed
- */
-
-/* ============================================
- * 7. SCROLLBAR STYLING
- * ============================================ */
-
+/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -179,18 +184,13 @@ body {
   background: var(--color-neutral-500, #5f6368);
 }
 
-/* Mobile: Scrollbar track matches page background */
 @media (--mobile) {
   ::-webkit-scrollbar-track {
     background: var(--color-body-bg);
   }
 }
 
-/* ============================================
- * 8. HERO TEXT ANIMATIONS - DISABLED
- * ============================================ */
-
-/* Hide all hero text animation elements */
+/* Hero text animations - DISABLED */
 .page-hero-desktop,
 .about-hero-desktop,
 .contact-hero-desktop,
@@ -202,29 +202,22 @@ body {
   pointer-events: none !important;
 }
 
-/* ============================================
- * 9. SPECIALIZED SECTION STYLES - DESKTOP ONLY
- * ============================================ */
-
+/* Desktop-only section styles */
 @media (--tablet) {
-  /* Show all sections immediately */
   main section:not(.business-card-section) {
     opacity: 1;
     visibility: visible;
   }
 
-  /* Contact section heading styling */
   .contact-section h2 {
     margin-bottom: 1.5rem;
     text-align: left;
     width: 100%;
     letter-spacing: 0.10em;
-
   }
 }
 
-/* Contact section styling - h2 styles defined in pages/contact.css */
-
+/* Tech stack styling */
 .tech-stack {
   background-color: var(--color-neutral-100);
   padding: 2rem;
@@ -235,12 +228,9 @@ body {
   gap: 1rem;
 }
 
-/* Dark theme: lighter border for contrast */
 html[data-theme="dark"] .tech-stack {
   border-color: var(--color-neutral-400);
 }
-
-/* Dark theme: colors automatically switch via CSS variables */
 
 .tech-stack h3 {
   font-size: clamp(1rem, 2.5vw, 1.2rem);
@@ -263,13 +253,10 @@ html[data-theme="dark"] .tech-stack {
   color: var(--color-primary, var(--color-text-primary));
 }
 
-/* ============================================
- * 9. RESPONSIVE VIDEO
- * ============================================ */
-
+/* Responsive video */
 .video-responsive {
   position: relative;
-  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  padding-bottom: 56.25%;
   height: 0;
   overflow: hidden;
 }
