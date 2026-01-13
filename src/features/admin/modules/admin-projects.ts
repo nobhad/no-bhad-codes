@@ -40,6 +40,7 @@ interface ProjectsData {
 
 let projectsData: LeadProject[] = [];
 let currentProjectId: number | null = null;
+let storedContext: AdminDashboardContext | null = null;
 
 export function getProjectsData(): LeadProject[] {
   return projectsData;
@@ -132,9 +133,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
           <td>${formatProjectType(project.project_type)}</td>
           <td>${project.budget_range || '-'}</td>
           <td>${project.timeline || '-'}</td>
-          <td>
-            <span class="status-badge status-${status}">${statusLabels[status] || 'Pending'}</span>
-          </td>
+          <td>${statusLabels[status] || 'Pending'}</td>
         </tr>
       `;
     })
@@ -194,6 +193,7 @@ export function showProjectDetails(
   if (!project) return;
 
   currentProjectId = projectId;
+  storedContext = ctx;
 
   // Switch to project-detail tab
   ctx.switchTab('project-detail');
@@ -229,6 +229,29 @@ function populateProjectDetailView(project: LeadProject): void {
     const el = document.getElementById(id);
     if (el) el.textContent = SanitizationUtils.escapeHtml(value);
   });
+
+  // Make client name and company clickable to navigate to client details
+  const clientNameEl = document.getElementById('pd-client-name');
+  const companyEl = document.getElementById('pd-company');
+  const projectEmail = project.email;
+
+  if (clientNameEl && projectEmail) {
+    clientNameEl.classList.add('clickable-link');
+    clientNameEl.style.cursor = 'pointer';
+    // Clone to remove old listeners
+    const newClientNameEl = clientNameEl.cloneNode(true) as HTMLElement;
+    clientNameEl.parentNode?.replaceChild(newClientNameEl, clientNameEl);
+    newClientNameEl.addEventListener('click', () => navigateToClientByEmail(projectEmail));
+  }
+
+  if (companyEl && projectEmail && project.company_name) {
+    companyEl.classList.add('clickable-link');
+    companyEl.style.cursor = 'pointer';
+    // Clone to remove old listeners
+    const newCompanyEl = companyEl.cloneNode(true) as HTMLElement;
+    companyEl.parentNode?.replaceChild(newCompanyEl, companyEl);
+    newCompanyEl.addEventListener('click', () => navigateToClientByEmail(projectEmail));
+  }
 
   // Client account email is an input field
   const clientEmailInput = document.getElementById('pd-client-account-email') as HTMLInputElement;
@@ -814,4 +837,32 @@ function formatFileSize(bytes: number): string {
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+}
+
+/**
+ * Navigate to client detail view by looking up client via email
+ */
+async function navigateToClientByEmail(email: string): Promise<void> {
+  if (!storedContext || !email) return;
+
+  try {
+    // Import and use the clients module
+    const clientsModule = await import('./admin-clients');
+
+    // First ensure clients are loaded
+    await clientsModule.loadClients(storedContext);
+
+    // Find the client by email
+    const clients = clientsModule.getClientsData();
+    const client = clients.find(c => c.email === email);
+
+    if (client) {
+      clientsModule.showClientDetails(client.id, storedContext);
+    } else {
+      storedContext.showNotification('Client not found', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminProjects] Error navigating to client:', error);
+    storedContext?.showNotification('Error loading client details', 'error');
+  }
 }
