@@ -221,7 +221,7 @@ html[data-theme="light"] {
   --color-shadow: rgba(0, 0, 0, 0.2);
 
   /* Legacy base colors */
-  --color-black: var(--color-gray-900); /* Soft black instead of #000000 */
+  --color-black: #000000;
   --color-white: #fffefd;
 
   /* Legacy status colors */

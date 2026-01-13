@@ -41,6 +41,26 @@ This CSS file defines global variables and font-face rules for consistent stylin
     - --color-shadow: Shadow color with increased transparency for dark mode.
  */
 
+/* ============================================
+ * CUSTOM MEDIA QUERIES
+ * ============================================
+ * Use these instead of hardcoded breakpoints:
+ * @media (--small-mobile) { } - max-width: 479px
+ * @media (--mobile) { }       - max-width: 767px
+ * @media (--tablet) { }       - min-width: 768px
+ * @media (--tablet-only) { }  - 768px to 991px
+ * @media (--desktop) { }      - min-width: 992px
+ * @media (--wide) { }         - min-width: 1200px
+ * @media (--ultra-wide) { }   - min-width: 1400px
+ */
+@custom-media --small-mobile (max-width: 479px);
+@custom-media --mobile (max-width: 767px);
+@custom-media --tablet (min-width: 768px);
+@custom-media --tablet-only (min-width: 768px) and (max-width: 991px);
+@custom-media --desktop (min-width: 992px);
+@custom-media --wide (min-width: 1200px);
+@custom-media --ultra-wide (min-width: 1400px);
+
 /* Font defined in typography.css */
 
 :root {
@@ -93,6 +113,44 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --bp-lg: 992px;
   --bp-xl: 1200px;
   --bp-2xl: 1400px;
+
+  /* ============================================
+   * SHADOW SYSTEM
+   * ============================================
+   * Standardized shadows for consistent depth across UI.
+   * Use these instead of hardcoding box-shadow values.
+   */
+
+  /* Card shadows - subtle elevation for cards and panels */
+  --shadow-card: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+
+  /* Tab shadows - for tab buttons */
+  --shadow-tab: 1px -1px 4px rgba(0, 0, 0, 0.3), 2px -2px 8px rgba(0, 0, 0, 0.2);
+
+  /* Content box shadows - medium elevation */
+  --shadow-content: 2px 2px 8px rgba(0, 0, 0, 0.4), 4px 4px 16px rgba(0, 0, 0, 0.3);
+
+  /* Sidebar/panel shadows - strong elevation for overlays */
+  --shadow-sidebar: 2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3);
+
+  /* Panel shadows - for floating panels with border emphasis */
+  --shadow-panel: 2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3), -1px 0 1px rgba(0, 0, 0, 0.3), 0 -1px 1px rgba(0, 0, 0, 0.3);
+
+  /* Inset shadows - for progress bars and recessed elements */
+  --shadow-inset: inset 2px 2px 6px rgba(0, 0, 0, 0.5), inset -1px -1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-inset-light: inset 2px 2px 6px rgba(0, 0, 0, 0.3), inset -1px -1px 3px rgba(0, 0, 0, 0.15);
+
+  /* Spread shadows - for modals */
+  --shadow-spread: 4px 0 12px rgba(0, 0, 0, 0.3), -4px 0 12px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
+
+  /* Elevated shadows - for floating elements */
+  --shadow-elevated-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-elevated-md: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --shadow-elevated-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --shadow-elevated-xl: 0 12px 40px rgba(0, 0, 0, 0.15);
+
+  /* Dropdown/menu shadows - top shadows for tabs */
+  --shadow-dropdown: 4px 0 12px rgba(0, 0, 0, 0.3), -4px 0 12px rgba(0, 0, 0, 0.3), 0 -4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* ============================================
@@ -179,7 +237,7 @@ section,
 }
 
 /* Responsive Breakpoints */
-@media (max-width: 767px) {
+@media (--mobile) {
   .grid-cols-2,
   .grid-cols-3,
   .grid-cols-4 {
@@ -197,7 +255,7 @@ section,
   }
 }
 
-@media (min-width: 768px) {
+@media (--tablet) {
   .md\:grid-cols-2 {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -209,7 +267,7 @@ section,
   }
 }
 
-@media (min-width: 992px) {
+@media (--desktop) {
   .lg\:grid-cols-2 {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -308,7 +366,7 @@ section,
   display: none;
 }
 
-@media (max-width: 767px) {
+@media (--mobile) {
   .md\:hidden {
     display: none;
   }
@@ -317,7 +375,7 @@ section,
   }
 }
 
-@media (min-width: 768px) {
+@media (--tablet) {
   .md\:block {
     display: block;
   }

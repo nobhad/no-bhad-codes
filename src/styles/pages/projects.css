@@ -181,7 +181,7 @@
 
 .project-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-elevated-md);
   border-color: var(--color-primary);
 }
 
@@ -376,7 +376,7 @@
   pointer-events: none !important;
 }
 
-@media (max-width: 767px) {
+@media (--mobile) {
   .projects-hero {
     padding: 2rem 0 1.5rem;
   }
@@ -460,7 +460,7 @@
 }
 
 [data-theme="dark"] .project-card:hover {
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-elevated-lg);
 }
 
 /* ===============================================
@@ -481,7 +481,7 @@
 }
 
 /* Desktop layout - matches about section sizing */
-@media screen and (min-width: 768px) {
+@media (--tablet) {
   .projects-section {
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     height: calc(100vh - var(--header-height) - var(--footer-height));
@@ -550,7 +550,7 @@
 }
 
 /* Desktop: Make SVG smaller */
-@media screen and (min-width: 768px) {
+@media (--tablet) {
   .wip-sign {
     width: 50vw;
     max-width: 650px;
@@ -562,7 +562,7 @@
 }
 
 /* Mobile adjustments for projects section */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   .projects-section {
     padding: 1rem;
     flex-direction: column;
@@ -608,7 +608,7 @@
 }
 
 /* Mobile: match about section h2 size from mobile/layout.css */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   .projects-section h2 {
     font-size: clamp(2.5rem, 10vw, 4rem) !important;
     font-family: var(--font--acme) !important;
@@ -617,7 +617,7 @@
   }
 }
 
-@media screen and (max-width: 479px) {
+@media (--small-mobile) {
   .projects-section h2 {
     font-size: clamp(2.5rem, 10vw, 4rem) !important;
   }
@@ -686,7 +686,7 @@
 }
 
 /* Mobile adjustments for portfolio section */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   .portfolio-section {
     padding: 1rem;
     flex-direction: column;
@@ -704,7 +704,7 @@
   }
 }
 
-@media screen and (max-width: 479px) {
+@media (--small-mobile) {
   .portfolio-section h2 {
     font-size: clamp(2rem, 10vw, 3rem);
   }

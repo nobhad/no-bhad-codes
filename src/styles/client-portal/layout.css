@@ -48,7 +48,7 @@
   height: 100vh;
 }
 
-/* Dashboard Content Area (right side) - Fixed light theme, unaffected by toggle */
+/* Dashboard Content Area (right side) - Base styles */
 .dashboard-content {
   flex: 1;
   padding: clamp(1rem, 3vw, 2rem);
@@ -58,8 +58,12 @@
   min-width: 0;
   height: 100vh;
   min-height: 100vh;
-  background: var(--color-neutral-300) !important;
-  color: var(--color-dark) !important;
+}
+
+/* Client Portal Dashboard - Dark theme to match admin */
+[data-page="client-portal"] .dashboard-content {
+  background: var(--portal-bg-medium) !important;
+  color: var(--portal-text-light) !important;
 }
 
 /* Force light theme colors for dashboard pages - unaffected by theme toggle */
@@ -183,8 +187,7 @@
 [data-page="admin"] .timeline-content,
 [data-page="admin"] .update-item,
 [data-page="admin"] .content-item,
-[data-page="admin"] .settings-form,
-[data-page="admin"] .message-compose {
+[data-page="admin"] .settings-form {
   background: transparent !important;
   border: none !important;
 }
@@ -226,7 +229,7 @@
 .page-header h2 {
   font-family: var(--font--acme);
   font-size: clamp(1.5rem, 4vw, 2rem);
-  color: var(--color-dark);
+  color: var(--portal-text-light);
   margin: 0;
   text-transform: uppercase;
 }
@@ -242,7 +245,7 @@
   justify-content: center;
   font-family: var(--font--acme);
   font-size: clamp(1.25rem, 3.5vw, 1.75rem);
-  color: var(--color-dark);
+  color: var(--portal-text-light);
 }
 
 .page-header .header-sidebar-toggle:hover {
@@ -269,40 +272,40 @@
   gap: 1.5rem;
 }
 
-/* Generic Card */
+/* Generic Card - Dark theme to match admin */
 .card {
-  background: var(--color-neutral-200);
-  border: 2px solid var(--color-neutral-300);
-  border-radius: 8px;
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-medium);
+  border-radius: var(--portal-radius-md, 8px);
   padding: 1.5rem;
   transition: all 0.2s ease;
 }
 
 .card:hover {
-  border-color: var(--color-primary);
+  border-color: var(--portal-border-light);
 }
 
 .card h3 {
   font-family: var(--font--acme);
   font-size: 1.1rem;
-  color: var(--color-dark);
+  color: var(--portal-text-light);
   margin: 0 0 0.75rem 0;
   text-transform: uppercase;
 }
 
 .card p {
-  color: var(--color-neutral-600);
+  color: var(--portal-text-secondary);
   margin: 0 0 1rem 0;
   line-height: 1.5;
 }
 
-/* Portal Header */
+/* Portal Header - Dark theme to match admin */
 .portal-header {
   position: sticky;
   top: 0;
   z-index: 20;
-  background: white;
-  border-bottom: 1px solid var(--color-neutral-300);
+  background: var(--portal-bg-dark);
+  border-bottom: 1px solid var(--portal-border-medium);
 }
 
 .header-primary {

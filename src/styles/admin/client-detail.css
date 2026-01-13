@@ -272,20 +272,3 @@
   display: block;
   margin-bottom: var(--space-2);
 }
-
-.admin-modal .form-input,
-.admin-modal select.form-input {
-  background: var(--portal-bg-lighter);
-  border: 1px solid var(--portal-border-dark);
-  color: var(--portal-text-light);
-}
-
-.admin-modal .form-input:focus,
-.admin-modal select.form-input:focus {
-  border-color: var(--portal-accent);
-  outline: none;
-}
-
-.admin-modal .form-input::placeholder {
-  color: var(--portal-text-secondary);
-}

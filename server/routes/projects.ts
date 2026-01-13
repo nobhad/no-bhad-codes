@@ -365,8 +365,12 @@ router.put(
     const fieldMapping: Record<string, string> = {
       name: 'project_name',
       project_name: 'project_name',
+      project_type: 'project_type',
       due_date: 'estimated_end_date',
       budget: 'budget_range',
+      price: 'price',
+      timeline: 'timeline',
+      preview_url: 'preview_url',
       description: 'description',
       status: 'status',
       priority: 'priority',
@@ -375,7 +379,7 @@ router.put(
     };
     const allowedUpdates =
       req.user!.type === 'admin'
-        ? ['name', 'project_name', 'description', 'status', 'priority', 'start_date', 'due_date', 'budget', 'progress']
+        ? ['name', 'project_name', 'project_type', 'description', 'status', 'priority', 'start_date', 'due_date', 'budget', 'price', 'timeline', 'preview_url', 'progress']
         : ['description']; // Clients can only update description
 
     for (const field of allowedUpdates) {

@@ -334,12 +334,13 @@ router.post(
   requireAdmin,
   invalidateCache(['clients']),
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { email, password, company_name, contact_name, phone, client_type } = req.body;
+    const { email, password, company_name, contact_name, phone, client_type, status } = req.body;
 
-    // Validate required fields
-    if (!email || !password) {
+    // Validate required fields - only email is required
+    // Password is optional (client can be invited to set password later)
+    if (!email) {
       return res.status(400).json({
-        error: 'Email and password are required',
+        error: 'Email is required',
         code: 'MISSING_REQUIRED_FIELDS',
       });
     }
@@ -353,8 +354,8 @@ router.post(
       });
     }
 
-    // Validate password strength
-    if (password.length < 8) {
+    // Validate password strength if provided
+    if (password && password.length < 8) {
       return res.status(400).json({
         error: 'Password must be at least 8 characters long',
         code: 'WEAK_PASSWORD',
@@ -375,15 +376,16 @@ router.post(
       });
     }
 
-    // Hash password
+    // Hash password if provided, otherwise empty string (pending invite)
     const saltRounds = 12;
-    const password_hash = await bcrypt.hash(password, saltRounds);
+    const password_hash = password ? await bcrypt.hash(password, saltRounds) : '';
 
-    // Insert new client
+    // Insert new client - status defaults to 'pending' if no password provided
+    const clientStatus = password ? (status || 'active') : 'pending';
     const result = await db.run(
       `
-    INSERT INTO clients (email, password_hash, company_name, contact_name, phone, client_type)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO clients (email, password_hash, company_name, contact_name, phone, client_type, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `,
       [
         email.toLowerCase(),
@@ -392,6 +394,7 @@ router.post(
         contact_name || null,
         phone || null,
         client_type || 'business',
+        clientStatus,
       ]
     );
 
