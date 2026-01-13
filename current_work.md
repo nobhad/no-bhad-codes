@@ -1,8 +1,45 @@
-# Current Work - December 27, 2025
+# Current Work - January 13, 2026
 
 ---
 
-## Recent Updates (December 27, 2025)
+## Recent Updates (January 13, 2026)
+
+### Contact Section Animation Refactor - COMPLETE
+
+Replaced business card with avatar blurb and unified contact section animations.
+
+**Completed:**
+
+1. **Removed Business Card Animations**
+   - Removed card flip animation (rotationY 180°)
+   - Removed click-to-flip handler
+   - Removed 3D tilt effect on mouse move/leave
+   - Removed business card reset and cleanup logic
+   - Removed unused `throttle` import
+   - Reduced file from ~850 to 705 lines
+
+2. **Added Avatar Blurb Animation**
+   - Avatar blurb scales up from 0.8 with blur clear effect
+   - Synced with form fields cascade (starts at `formStartTime`)
+   - Uses `back.out(1.4)` ease for subtle pop effect
+
+3. **Unified Animation Timing**
+   - Form fields, submit button, and avatar blurb all animate together
+   - Button now has matching blur + scale animation (was delayed before)
+   - Cohesive reveal: blur-in phase → synced scale+fade for all content
+
+**Files Modified:**
+
+- `src/modules/animation/contact-animation.ts` - Removed business card code, added avatar blurb animation
+
+**Commits:**
+
+- `2e7d097` - refactor: remove business card animations from contact section
+- `6c390c0` - feat: add avatar blurb animation synced with contact form
+
+---
+
+## Previous Updates (December 27, 2025)
 
 ### Coyote Paw Animation Page Restriction - COMPLETE
 
@@ -623,12 +660,14 @@ Removed deprecated mobile-specific sections and styles after implementing virtua
 - `src/modules/animation/about-hero.ts`
 
 **Remaining Work:**
-- [ ] Complete admin-dashboard.ts split (remove duplicate methods)
-- [ ] Split `intro-animation.ts` (1,569 lines → 3 files)
-- [ ] Split `client-portal.ts` (2,376 lines → multiple files)
-- [ ] Split `terminal-intake.ts` (1,617 lines → multiple files)
-- [ ] Split `contact-animation.ts` (880 lines → multiple files)
-- [ ] Split `visitor-tracking.ts` (836 lines → multiple files)
+- [ ] Complete admin-dashboard.ts split (2,679 lines - mixes many concerns)
+- [ ] Split `client-portal.ts` (2,376 lines - too large)
+- [ ] Split `intro-animation.ts` (1,569 lines)
+- [ ] Split `terminal-intake.ts` (1,617 lines)
+
+**No longer needed** (cohesive files under 1000 lines):
+- ~~Split `contact-animation.ts`~~ (705 lines - single purpose)
+- ~~Split `visitor-tracking.ts`~~ (836 lines - single purpose)
 
 ---
 
@@ -856,12 +895,10 @@ Comprehensive optimization of GSAP animations and page transitions:
 - [x] Font size for sidebar should match current size of signout button in sidebar
 - [x] Extract duplicate hero logic from `page-hero.ts` and `about-hero.ts` (~400 lines)
 - [x] Split `admin-dashboard.ts` (2,879 lines) - Partially complete (auth & project details extracted)
-- [ ] Complete `admin-dashboard.ts` split (remove duplicate methods, create UI handlers file)
-- [ ] Split `intro-animation.ts` (1,569 lines → 3 files)
-- [ ] Split `client-portal.ts` (2,376 lines → multiple files)
-- [ ] Split `terminal-intake.ts` (1,617 lines → multiple files)
-- [ ] Split `contact-animation.ts` (880 lines → multiple files)
-- [ ] Split `visitor-tracking.ts` (836 lines → multiple files)
+- [ ] Complete `admin-dashboard.ts` split (2,679 lines - mixes many concerns)
+- [ ] Split `client-portal.ts` (2,376 lines - too large)
+- [ ] Split `intro-animation.ts` (1,569 lines)
+- [ ] Split `terminal-intake.ts` (1,617 lines)
 - [ ] **CSS ID Inconsistencies & Conflicts Cleanup** - See plan below
 
 ### CSS ID/Class Cleanup Plan
@@ -1081,7 +1118,7 @@ Comprehensive optimization of GSAP animations and page transitions:
 
 ## System Status
 
-**Last Updated**: December 23, 2025 (Documentation update complete)
+**Last Updated**: January 13, 2026
 
 ### Build Status
 
