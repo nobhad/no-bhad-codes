@@ -143,7 +143,7 @@ function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): voi
   if (!tableBody) return;
 
   if (!clients || clients.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="6" class="loading-row">No clients found</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="5" class="loading-row">No clients found</td></tr>';
     return;
   }
 
@@ -157,16 +157,15 @@ function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): voi
       const safeEmail = SanitizationUtils.escapeHtml(client.email || '-');
       const safeCompany = client.company_name
         ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(client.company_name))
-        : '-';
+        : '';
       const status = client.status || 'pending';
       const displayStatus = status.charAt(0).toUpperCase() + status.slice(1);
       const projectCount = client.project_count || 0;
 
       return `
         <tr data-client-id="${client.id}" class="clickable-row">
-          <td>${safeName}</td>
+          <td>${safeName}${safeCompany ? `<br><small>${safeCompany}</small>` : ''}</td>
           <td>${safeEmail}</td>
-          <td>${safeCompany}</td>
           <td>${displayStatus}</td>
           <td>${projectCount}</td>
           <td>${date}</td>
@@ -318,7 +317,7 @@ function setupClientDetailHandlers(client: Client, ctx: AdminDashboardContext): 
     if (svg) {
       resendBtn.innerHTML = '';
       resendBtn.appendChild(svg.cloneNode(true));
-      resendBtn.appendChild(document.createTextNode(' ' + buttonText));
+      resendBtn.appendChild(document.createTextNode(` ${  buttonText}`));
     }
 
     // Clone to reset event listeners
@@ -570,106 +569,184 @@ async function editClient(clientId: number): Promise<void> {
   }
 }
 
-async function editClientInfo(clientId: number, ctx: AdminDashboardContext): Promise<void> {
+function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
   const client = clientsData.find(c => c.id === clientId);
   if (!client) {
     console.error('[AdminClients] Client not found:', clientId);
     return;
   }
 
-  // Simple edit via prompts for now
-  const newName = prompt('Contact Name:', client.contact_name || '');
-  if (newName === null) return;
+  const modal = document.getElementById('edit-client-info-modal');
+  const form = document.getElementById('edit-client-info-form') as HTMLFormElement;
+  const closeBtn = document.getElementById('edit-client-info-close');
+  const cancelBtn = document.getElementById('edit-client-info-cancel');
 
-  const newCompany = prompt('Company Name:', client.company_name || '');
-  if (newCompany === null) return;
+  if (!modal || !form) return;
 
-  const newPhone = prompt('Phone:', client.phone || '');
-  if (newPhone === null) return;
+  // Populate form with current values
+  const emailInput = document.getElementById('edit-client-email') as HTMLInputElement;
+  const nameInput = document.getElementById('edit-client-name') as HTMLInputElement;
+  const companyInput = document.getElementById('edit-client-company') as HTMLInputElement;
+  const phoneInput = document.getElementById('edit-client-phone') as HTMLInputElement;
+  const statusSelect = document.getElementById('edit-client-status') as HTMLSelectElement;
 
-  const newStatus = prompt('Status (active/inactive/pending):', client.status);
-  if (newStatus === null) return;
+  if (emailInput) emailInput.value = client.email || '';
+  if (nameInput) nameInput.value = client.contact_name || '';
+  if (companyInput) companyInput.value = client.company_name || '';
+  if (phoneInput) phoneInput.value = client.phone || '';
+  if (statusSelect) statusSelect.value = client.status || 'pending';
 
-  try {
-    const response = await fetch(`/api/clients/${clientId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        contact_name: newName || null,
-        company_name: newCompany || null,
-        phone: newPhone || null,
-        status: newStatus
-      })
-    });
+  // Show modal
+  modal.classList.remove('hidden');
 
-    if (response.ok) {
-      ctx.showNotification('Client info updated successfully', 'success');
-      await loadClients(ctx);
-      // Refresh the detail view
-      showClientDetails(clientId, ctx);
-    } else {
-      ctx.showNotification('Failed to update client info', 'error');
+  // Close handlers
+  const closeModal = () => {
+    modal.classList.add('hidden');
+  };
+
+  const closeHandler = () => closeModal();
+  closeBtn?.addEventListener('click', closeHandler, { once: true });
+  cancelBtn?.addEventListener('click', closeHandler, { once: true });
+
+  // Click outside to close
+  const overlayHandler = (e: Event) => {
+    if (e.target === modal) closeModal();
+  };
+  modal.addEventListener('click', overlayHandler, { once: true });
+
+  // Form submit handler
+  const handleSubmit = async (e: Event) => {
+    e.preventDefault();
+
+    const newEmail = emailInput?.value.trim();
+    const newName = nameInput?.value.trim();
+    const newCompany = companyInput?.value.trim();
+    const newPhone = phoneInput?.value.trim();
+    const newStatus = statusSelect?.value;
+
+    try {
+      const response = await fetch(`/api/clients/${clientId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: newEmail || null,
+          contact_name: newName || null,
+          company_name: newCompany || null,
+          phone: newPhone || null,
+          status: newStatus
+        })
+      });
+
+      if (response.ok) {
+        ctx.showNotification('Client info updated successfully', 'success');
+        closeModal();
+        await loadClients(ctx);
+        showClientDetails(clientId, ctx);
+      } else {
+        ctx.showNotification('Failed to update client info', 'error');
+      }
+    } catch (error) {
+      console.error('[AdminClients] Error updating client info:', error);
+      ctx.showNotification('Error updating client info', 'error');
     }
-  } catch (error) {
-    console.error('[AdminClients] Error updating client info:', error);
-    ctx.showNotification('Error updating client info', 'error');
-  }
+  };
+
+  form.addEventListener('submit', handleSubmit, { once: true });
 }
 
-async function editClientBilling(clientId: number, ctx: AdminDashboardContext): Promise<void> {
+function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
   const client = clientsData.find(c => c.id === clientId);
   if (!client) {
     console.error('[AdminClients] Client not found:', clientId);
     return;
   }
 
-  // Simple edit via prompts for now
-  const newBillingName = prompt('Billing Name:', client.billing_name || client.contact_name || '');
-  if (newBillingName === null) return;
+  const modal = document.getElementById('edit-billing-modal');
+  const form = document.getElementById('edit-billing-form') as HTMLFormElement;
+  const closeBtn = document.getElementById('edit-billing-close');
+  const cancelBtn = document.getElementById('edit-billing-cancel');
 
-  const newBillingAddress = prompt('Billing Address:', client.billing_address || '');
-  if (newBillingAddress === null) return;
+  if (!modal || !form) return;
 
-  const newBillingCity = prompt('City:', client.billing_city || '');
-  if (newBillingCity === null) return;
+  // Populate form with current values
+  const nameInput = document.getElementById('edit-billing-name') as HTMLInputElement;
+  const emailInput = document.getElementById('edit-billing-email') as HTMLInputElement;
+  const addressInput = document.getElementById('edit-billing-address') as HTMLInputElement;
+  const cityInput = document.getElementById('edit-billing-city') as HTMLInputElement;
+  const stateInput = document.getElementById('edit-billing-state') as HTMLInputElement;
+  const zipInput = document.getElementById('edit-billing-zip') as HTMLInputElement;
+  const countryInput = document.getElementById('edit-billing-country') as HTMLInputElement;
 
-  const newBillingState = prompt('State/Province:', client.billing_state || '');
-  if (newBillingState === null) return;
+  if (nameInput) nameInput.value = client.billing_name || client.contact_name || '';
+  if (emailInput) emailInput.value = client.billing_email || client.email || '';
+  if (addressInput) addressInput.value = client.billing_address || '';
+  if (cityInput) cityInput.value = client.billing_city || '';
+  if (stateInput) stateInput.value = client.billing_state || '';
+  if (zipInput) zipInput.value = client.billing_zip || '';
+  if (countryInput) countryInput.value = client.billing_country || '';
 
-  const newBillingZip = prompt('ZIP/Postal Code:', client.billing_zip || '');
-  if (newBillingZip === null) return;
+  // Show modal
+  modal.classList.remove('hidden');
 
-  const newBillingCountry = prompt('Country:', client.billing_country || '');
-  if (newBillingCountry === null) return;
+  // Close handlers
+  const closeModal = () => {
+    modal.classList.add('hidden');
+  };
 
-  try {
-    const response = await fetch(`/api/clients/${clientId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        billing_name: newBillingName || null,
-        billing_address: newBillingAddress || null,
-        billing_city: newBillingCity || null,
-        billing_state: newBillingState || null,
-        billing_zip: newBillingZip || null,
-        billing_country: newBillingCountry || null
-      })
-    });
+  const closeHandler = () => closeModal();
+  closeBtn?.addEventListener('click', closeHandler, { once: true });
+  cancelBtn?.addEventListener('click', closeHandler, { once: true });
 
-    if (response.ok) {
-      ctx.showNotification('Billing details updated successfully', 'success');
-      await loadClients(ctx);
-      // Refresh the detail view
-      showClientDetails(clientId, ctx);
-    } else {
-      ctx.showNotification('Failed to update billing details', 'error');
+  // Click outside to close
+  const overlayHandler = (e: Event) => {
+    if (e.target === modal) closeModal();
+  };
+  modal.addEventListener('click', overlayHandler, { once: true });
+
+  // Form submit handler
+  const handleSubmit = async (e: Event) => {
+    e.preventDefault();
+
+    const newBillingName = nameInput?.value.trim();
+    const newBillingEmail = emailInput?.value.trim();
+    const newBillingAddress = addressInput?.value.trim();
+    const newBillingCity = cityInput?.value.trim();
+    const newBillingState = stateInput?.value.trim();
+    const newBillingZip = zipInput?.value.trim();
+    const newBillingCountry = countryInput?.value.trim();
+
+    try {
+      const response = await fetch(`/api/clients/${clientId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          billing_name: newBillingName || null,
+          billing_email: newBillingEmail || null,
+          billing_address: newBillingAddress || null,
+          billing_city: newBillingCity || null,
+          billing_state: newBillingState || null,
+          billing_zip: newBillingZip || null,
+          billing_country: newBillingCountry || null
+        })
+      });
+
+      if (response.ok) {
+        ctx.showNotification('Billing details updated successfully', 'success');
+        closeModal();
+        await loadClients(ctx);
+        showClientDetails(clientId, ctx);
+      } else {
+        ctx.showNotification('Failed to update billing details', 'error');
+      }
+    } catch (error) {
+      console.error('[AdminClients] Error updating billing details:', error);
+      ctx.showNotification('Error updating billing details', 'error');
     }
-  } catch (error) {
-    console.error('[AdminClients] Error updating billing details:', error);
-    ctx.showNotification('Error updating billing details', 'error');
-  }
+  };
+
+  form.addEventListener('submit', handleSubmit, { once: true });
 }
 
 async function deleteClient(clientId: number): Promise<void> {
