@@ -9,6 +9,8 @@
 
 import express from 'express';
 import PDFDocument from 'pdfkit';
+import { join } from 'path';
+import { existsSync } from 'fs';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { InvoiceService, InvoiceCreateData } from '../services/invoice-service.js';
@@ -834,10 +836,13 @@ router.get(
       );
 
       // Get project info
-      const project = await db.get('SELECT name FROM projects WHERE id = ?', [invoice.projectId]);
+      const project = await db.get(
+        'SELECT project_name, description, features FROM projects WHERE id = ?',
+        [invoice.projectId]
+      );
 
       // Create PDF document
-      const doc = new PDFDocument({ margin: 50 });
+      const doc = new PDFDocument({ margin: 50, size: 'LETTER' });
 
       // Set response headers
       res.setHeader('Content-Type', 'application/pdf');
@@ -849,129 +854,184 @@ router.get(
       // Pipe PDF to response
       doc.pipe(res);
 
-      // Header
-      doc.fontSize(24).font('Helvetica-Bold').text('INVOICE', { align: 'right' });
-      doc
-        .fontSize(10)
+      // Helper function to format date as "Month Day, Year"
+      const formatDate = (dateStr: string | undefined): string => {
+        if (!dateStr) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      };
+
+      // === HEADER WITH LOGO ===
+      const logoPath = join(process.cwd(), 'public/images/avatar_small-1.png');
+      if (existsSync(logoPath)) {
+        doc.image(logoPath, (doc.page.width - 60) / 2, 30, { width: 60 });
+        doc.moveDown(4);
+      }
+
+      // Business header line
+      const businessName = invoice.businessName || 'No Bhad Codes';
+      const businessContact = invoice.businessContact || 'Noelle Bhaduri';
+      const businessEmail = invoice.businessEmail || 'nobhaduri@gmail.com';
+      const businessWebsite = invoice.businessWebsite || 'nobhad.codes';
+
+      doc.y = 100;
+      doc.fontSize(10).font('Helvetica-Bold')
+        .text(businessName, { continued: true, align: 'center' })
         .font('Helvetica')
-        .text(`Invoice #: ${invoice.invoiceNumber}`, { align: 'right' });
-      doc.text(
-        `Date: ${invoice.createdAt ? new Date(invoice.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}`,
-        { align: 'right' }
-      );
-      if (invoice.dueDate) {
-        doc.text(`Due Date: ${new Date(invoice.dueDate).toLocaleDateString()}`, { align: 'right' });
+        .text(` | ${businessContact} | ${businessEmail} | ${businessWebsite}`, { align: 'center' });
+
+      doc.moveDown(2);
+
+      // === TWO-COLUMN LAYOUT: Invoice Details & Bill To ===
+      const leftCol = 50;
+      const rightCol = 350;
+      const colTop = doc.y;
+
+      // Left column: Invoice details
+      doc.fontSize(10).font('Helvetica-Bold').text('Invoice Number: ', leftCol, colTop, { continued: true });
+      doc.font('Helvetica').text(invoice.invoiceNumber);
+
+      doc.font('Helvetica-Bold').text('Invoice Date: ', leftCol, colTop + 15, { continued: true });
+      doc.font('Helvetica').text(formatDate(invoice.issuedDate || invoice.createdAt));
+
+      doc.font('Helvetica-Bold').text('Due Date: ', leftCol, colTop + 30, { continued: true });
+      doc.font('Helvetica').text('Within 14 days');
+
+      // Right column: Bill To
+      doc.fontSize(10).font('Helvetica-Bold').text('Bill To:', rightCol, colTop);
+      const billToName = invoice.billToName || client?.contact_name || 'Client';
+      const billToEmail = invoice.billToEmail || client?.email || '';
+      doc.font('Helvetica').text(billToName, rightCol, colTop + 15);
+      doc.text(billToEmail, rightCol, colTop + 30);
+
+      doc.y = colTop + 60;
+      doc.moveDown(2);
+
+      // === SERVICES PROVIDED SECTION ===
+      doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('Services Provided');
+      doc.fillColor('black');
+      doc.moveDown(0.5);
+
+      // Services title and description
+      const servicesTitle = invoice.servicesTitle || project?.project_name || 'Web Development Services';
+      const servicesDesc = invoice.servicesDescription || project?.description || '';
+
+      doc.fontSize(10).font('Helvetica-Bold').text(servicesTitle, { continued: servicesDesc ? true : false });
+      if (servicesDesc) {
+        doc.font('Helvetica').text(` - ${servicesDesc}`);
+      }
+      doc.moveDown(0.5);
+
+      // Deliverables (bullet points)
+      const deliverables = invoice.deliverables || [];
+      if (deliverables.length > 0) {
+        doc.font('Helvetica-Bold').text('Deliverables:');
+        deliverables.forEach((item: string) => {
+          doc.font('Helvetica').text(`• ${item}`, { indent: 10 });
+        });
+        doc.moveDown(0.5);
+      }
+
+      // Features
+      const features = invoice.features || project?.features || '';
+      if (features) {
+        doc.font('Helvetica-Bold').text('Features: ', { continued: true });
+        doc.font('Helvetica').text(features);
       }
 
       doc.moveDown(2);
 
-      // Company info (left side)
-      const companyName = process.env.COMPANY_NAME || 'No Bhad Codes';
-      const supportEmail = process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL || '';
-      doc.fontSize(14).font('Helvetica-Bold').text(companyName, { continued: false });
-      doc.fontSize(10).font('Helvetica').text('Web Development Services');
-      if (supportEmail) doc.text(supportEmail);
+      // === AMOUNT DUE SECTION ===
+      doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('Amount Due');
+      doc.fillColor('black');
+      doc.moveDown(0.5);
 
-      doc.moveDown(2);
-
-      // Bill To section
-      doc.fontSize(12).font('Helvetica-Bold').text('Bill To:');
-      doc.fontSize(10).font('Helvetica');
-      if (client?.client_type === 'personal') {
-        // Personal: just show contact name
-        if (client?.contact_name) doc.text(client.contact_name);
-      } else {
-        // Business: show company name, then contact as "Attn:"
-        if (client?.company_name) doc.text(client.company_name);
-        if (client?.contact_name) doc.text(`Attn: ${client.contact_name}`);
-      }
-      if (client?.email) doc.text(client.email);
-
-      doc.moveDown(2);
-
-      // Project info
-      if (project?.name) {
-        doc.fontSize(10).font('Helvetica-Bold').text('Project: ', { continued: true });
-        doc.font('Helvetica').text(project.name);
-        doc.moveDown();
-      }
-
-      // Line items table header
-      const tableTop = doc.y + 20;
+      // Table header
+      const tableTop = doc.y;
       doc.fontSize(10).font('Helvetica-Bold');
-      doc.text('Description', 50, tableTop);
-      doc.text('Qty', 300, tableTop, { width: 50, align: 'right' });
-      doc.text('Rate', 360, tableTop, { width: 70, align: 'right' });
-      doc.text('Amount', 440, tableTop, { width: 70, align: 'right' });
+      doc.text('Description', leftCol, tableTop);
+      doc.text('Amount', 450, tableTop, { width: 100, align: 'right' });
 
       // Line under header
-      doc
-        .moveTo(50, tableTop + 15)
-        .lineTo(510, tableTop + 15)
-        .stroke();
+      doc.moveTo(leftCol, tableTop + 15).lineTo(550, tableTop + 15).stroke();
 
       // Line items
       let y = tableTop + 25;
       doc.font('Helvetica');
 
-      const lineItems =
-        typeof invoice.lineItems === 'string'
-          ? JSON.parse(invoice.lineItems)
-          : invoice.lineItems || [];
-
+      const lineItems = Array.isArray(invoice.lineItems) ? invoice.lineItems : [];
       lineItems.forEach((item: any) => {
-        doc.text(item.description || '', 50, y, { width: 240 });
-        doc.text(item.quantity?.toString() || '1', 300, y, { width: 50, align: 'right' });
-        doc.text(`$${(item.rate || 0).toFixed(2)}`, 360, y, { width: 70, align: 'right' });
-        doc.text(`$${(item.amount || 0).toFixed(2)}`, 440, y, { width: 70, align: 'right' });
+        doc.text(item.description || '', leftCol, y, { width: 380 });
+        doc.text(`$${(item.amount || 0).toFixed(2)}`, 450, y, { width: 100, align: 'right' });
         y += 20;
       });
 
-      // Totals
-      y += 20;
-      doc.moveTo(300, y).lineTo(510, y).stroke();
+      // Total line
       y += 10;
+      doc.moveTo(leftCol, y).lineTo(550, y).stroke();
+      y += 15;
 
-      doc.font('Helvetica-Bold');
-      doc.text('Total:', 360, y, { width: 70, align: 'right' });
-      doc.text(`$${(invoice.amountTotal || 0).toFixed(2)}`, 440, y, { width: 70, align: 'right' });
+      doc.fontSize(12).font('Helvetica-Bold')
+        .text(`Total Due: $${(invoice.amountTotal || 0).toFixed(2)} ${invoice.currency || 'USD'}`,
+          leftCol, y, { width: 500, align: 'right' });
 
-      if (invoice.amountPaid > 0) {
-        y += 15;
-        doc.font('Helvetica');
-        doc.text('Paid:', 360, y, { width: 70, align: 'right' });
-        doc.text(`$${(invoice.amountPaid || 0).toFixed(2)}`, 440, y, { width: 70, align: 'right' });
+      doc.y = y + 30;
+      doc.moveDown(2);
 
-        y += 15;
-        doc.font('Helvetica-Bold');
-        doc.text('Balance Due:', 360, y, { width: 70, align: 'right' });
-        doc.text(
-          `$${((invoice.amountTotal || 0) - (invoice.amountPaid || 0)).toFixed(2)}`,
-          440,
-          y,
-          {
-            width: 70,
-            align: 'right',
-          }
-        );
-      }
+      // === PAYMENT METHODS SECTION ===
+      doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('Payment Methods');
+      doc.fillColor('black');
+      doc.moveDown(0.5);
 
-      // Notes
+      const boxTop = doc.y;
+      const boxHeight = 50;
+      const boxWidth = 230;
+
+      // Venmo box
+      doc.rect(leftCol, boxTop, boxWidth, boxHeight).stroke();
+      doc.fontSize(10).font('Helvetica-Bold').text('Venmo', leftCol + 10, boxTop + 10);
+      doc.font('Helvetica').text(invoice.venmoHandle || '@nobhad', leftCol + 10, boxTop + 25);
+
+      // PayPal box
+      doc.rect(rightCol - 50, boxTop, boxWidth, boxHeight).stroke();
+      doc.font('Helvetica-Bold').text('PayPal', rightCol - 40, boxTop + 10);
+      doc.font('Helvetica').text(invoice.paypalEmail || 'nobhaduri@gmail.com', rightCol - 40, boxTop + 25);
+      doc.fontSize(8).text('(Friends & Family or Goods & Services)', rightCol - 40, boxTop + 38);
+
+      doc.y = boxTop + boxHeight + 20;
+      doc.moveDown(2);
+
+      // === TERMS & NOTES SECTION ===
+      doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('Terms & Notes');
+      doc.fillColor('black');
+      doc.moveDown(0.5);
+
+      doc.fontSize(9).font('Helvetica');
+
+      // Default terms if none provided
+      const termsText = invoice.terms || `Payment is due within 14 days of receipt. Please include invoice number (${invoice.invoiceNumber}) in payment notes.`;
+      const termsLines = termsText.split('\n').filter((line: string) => line.trim());
+      termsLines.forEach((line: string) => {
+        doc.text(`• ${line.trim()}`);
+      });
+
       if (invoice.notes) {
-        doc.moveDown(3);
-        doc.fontSize(10).font('Helvetica-Bold').text('Notes:');
-        doc.font('Helvetica').text(invoice.notes);
+        doc.moveDown(0.5);
+        const notesLines = invoice.notes.split('\n').filter((line: string) => line.trim());
+        notesLines.forEach((line: string) => {
+          doc.text(`• ${line.trim()}`);
+        });
       }
 
-      // Terms
-      if (invoice.terms) {
-        doc.moveDown();
-        doc.fontSize(10).font('Helvetica-Bold').text('Terms:');
-        doc.font('Helvetica').text(invoice.terms);
-      }
+      // === FOOTER ===
+      doc.moveDown(3);
+      doc.fontSize(10).font('Helvetica-Bold').fillColor('#cc0000')
+        .text('Thank you for your business!', { align: 'center' });
+      doc.fillColor('black').font('Helvetica').fontSize(9)
+        .text(`For questions regarding this invoice, please contact: ${businessContact} | ${businessEmail}`,
+          { align: 'center' });
 
-      // Footer
-      doc.fontSize(8).text('Thank you for your business!', 50, 750, { align: 'center' });
+      // Page number
+      doc.fontSize(8).text('1/1', 550, 750);
 
       // Finalize PDF
       doc.end();
