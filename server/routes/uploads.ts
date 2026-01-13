@@ -345,7 +345,7 @@ router.post(
     try {
       const db = await getDatabase();
       await db.run(
-        `INSERT INTO files (project_id, filename, original_filename, mimetype, size, file_path, uploaded_by, created_at)
+        `INSERT INTO files (project_id, filename, original_filename, mime_type, file_size, file_path, uploaded_by, created_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
         [
           projectId,
@@ -576,7 +576,7 @@ router.get(
         res.setHeader('Content-Disposition', `inline; filename="${file.original_filename}"`);
       }
 
-      res.setHeader('Content-Type', file.mimetype);
+      res.setHeader('Content-Type', file.mime_type);
       res.sendFile(filePath);
     } catch (dbError) {
       console.error('Failed to fetch file:', dbError);
