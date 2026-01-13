@@ -1,0 +1,1716 @@
+/**
+ * ===============================================
+ * ADMIN - PROJECT DETAIL STYLES
+ * ===============================================
+ * @file src/styles/admin/project-detail.css
+ *
+ * Styles for the project detail view including:
+ * - Project header and navigation
+ * - Tab content (Overview, Messages, Files, Invoices)
+ * - Message thread display
+ * - File uploads and listing
+ * - Invoice display
+ */
+
+/* =====================================================
+   PROJECT DETAIL VIEW STYLES
+   ===================================================== */
+
+/* Back button in header */
+.btn-back {
+  margin-right: var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+/* Project Detail Page Header with Status Badge */
+#tab-project-detail .page-header {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-lg);
+}
+
+#tab-project-detail .page-header .status-badge {
+  margin-left: auto;
+}
+
+/* Project Overview Card */
+.project-detail-overview {
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--portal-radius-lg);
+  padding: var(--portal-spacing-xl);
+  margin-bottom: var(--portal-spacing-xl);
+  color: var(--portal-text-light);
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-xl);
+}
+
+.project-detail-overview .overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.project-detail-overview h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--portal-text-light);
+  font-family: var(--font--acme);
+}
+
+.project-detail-overview .btn-icon {
+  background: transparent;
+  border: none;
+  color: var(--portal-text-secondary);
+  cursor: pointer;
+  padding: var(--portal-spacing-sm);
+  border-radius: var(--portal-radius-sm);
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.project-detail-overview .btn-icon:hover {
+  color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Root meta-item styling - applies everywhere */
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-xs);
+}
+
+/* Root meta-label styling - uses label variables */
+.meta-label {
+  font-size: var(--label-font-size, 0.75rem);
+  color: var(--label-color, var(--portal-text-secondary));
+  text-transform: var(--label-text-transform, uppercase);
+  letter-spacing: var(--label-letter-spacing, 0.05em);
+  font-weight: var(--label-font-weight, 500);
+}
+
+/* Root meta-value styling - applies everywhere */
+.meta-value {
+  font-size: 1rem;
+  color: var(--color-white);
+  font-weight: 400;
+}
+
+.project-detail-client-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--portal-spacing-xl);
+}
+
+.project-detail-meta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--portal-spacing-xl);
+}
+
+/* Project Detail Tabs */
+.project-detail-tabs {
+  display: flex;
+  gap: var(--portal-spacing-sm);
+  margin-bottom: 0;
+  overflow-x: auto;
+}
+
+.pd-tab-btn {
+  padding: var(--portal-spacing-md) var(--portal-spacing-xl);
+  background: #222222;
+  border: none;
+  border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0;
+  color: var(--portal-text-secondary);
+  font-size: 0.85rem;
+  box-shadow: 1px -1px 4px rgba(0, 0, 0, 0.3), 2px -2px 8px rgba(0, 0, 0, 0.2);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  position: relative;
+}
+
+.pd-tab-btn:hover {
+  color: var(--portal-text-light);
+  background: var(--color-primary);
+}
+
+.pd-tab-btn.active {
+  color: var(--portal-text-light);
+  background: var(--portal-bg-dark);
+  font-weight: 700;
+  border: none;
+}
+
+/* Project Detail Tab Content */
+.pd-tab-content {
+  display: none;
+  background: var(--portal-bg-dark);
+  border-radius: 0 var(--portal-radius-lg) var(--portal-radius-lg) var(--portal-radius-lg);
+  padding: 4rem 2rem;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4), 4px 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.pd-tab-content.active {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+/* Remove individual card backgrounds inside tabs - content is now in unified container */
+.pd-tab-content .portal-project-card,
+.pd-tab-content .portal-shadow,
+.pd-tab-content .files-upload-section,
+.pd-tab-content .files-list-section,
+.pd-tab-content .intake-form-section,
+.pd-tab-content .messages-container,
+.pd-tab-content .recent-activity,
+.pd-tab-content .settings-section,
+.pd-tab-content .invoice-summary .summary-card {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+
+/* Override any adjacent sibling margins inside tab content */
+.pd-tab-content .portal-project-card + .portal-project-card {
+  margin-top: 0 !important;
+}
+
+/* Unified heading style for all sections inside tab content */
+.pd-tab-content h3 {
+  font-family: var(--font--acme);
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--portal-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--portal-spacing-lg) 0;
+}
+
+/* Invoice summary within tab - keep flex layout */
+.pd-tab-content .invoice-summary {
+  display: flex;
+  gap: var(--portal-spacing-xl);
+  margin: 0;
+}
+
+/* Messages container - add border back */
+#pd-tab-messages .messages-container {
+  border: 3px solid #000000 !important;
+  border-radius: var(--portal-radius-md) !important;
+  padding: 0 !important;
+  background: #E0E0E0 !important;
+}
+
+/* Divider between messages thread and compose area */
+#pd-tab-messages .message-compose {
+  border-top: 3px solid #000000;
+  margin-top: var(--portal-spacing-lg);
+  padding-top: var(--portal-spacing-lg);
+}
+
+/* Send message button - thicker border */
+#pd-tab-messages .message-compose .btn {
+  border: 3px solid #000000;
+}
+
+/* Settings tab sections - darker background and equal heights */
+[data-page="admin"] #pd-tab-settings .settings-grid {
+  align-items: stretch;
+  grid-template-columns: repeat(2, 1fr);
+  max-width: none;
+  width: 100%;
+}
+
+[data-page="admin"] #pd-tab-settings .settings-section {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  height: 100%;
+  grid-column: span 1;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Black form field backgrounds for admin */
+[data-page="admin"] .form-input,
+[data-page="admin"] input[type="text"],
+[data-page="admin"] input[type="email"],
+[data-page="admin"] input[type="password"],
+[data-page="admin"] input[type="tel"],
+[data-page="admin"] input[type="number"],
+[data-page="admin"] input[type="url"],
+[data-page="admin"] textarea,
+[data-page="admin"] select:not(.status-select),
+[data-page="admin"] .form-select {
+  background-color: #000000 !important;
+}
+
+/* Form row - two columns side by side */
+[data-page="admin"] .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--portal-spacing-lg);
+  background: transparent;
+  margin-bottom: var(--portal-spacing-md);
+}
+
+[data-page="admin"] .form-row .form-group {
+  background: transparent;
+  margin-bottom: 0;
+}
+
+[data-page="admin"] .form-row .form-group label {
+  text-align: left;
+  padding-left: 0;
+  display: block;
+  margin-bottom: var(--portal-spacing-sm);
+  position: relative;
+}
+
+/* Readonly form value display (no background) */
+[data-page="admin"] .form-value-readonly {
+  display: block;
+  background: transparent;
+  padding: var(--portal-spacing-md) 0;
+  margin-top: var(--portal-spacing-md);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--portal-text-light);
+  line-height: 1.5;
+  text-align: left;
+}
+
+/* Thicker focus border for admin form fields */
+[data-page="admin"] .form-input:focus,
+[data-page="admin"] input[type="text"]:focus,
+[data-page="admin"] input[type="email"]:focus,
+[data-page="admin"] input[type="password"]:focus,
+[data-page="admin"] input[type="tel"]:focus,
+[data-page="admin"] input[type="number"]:focus,
+[data-page="admin"] input[type="url"]:focus,
+[data-page="admin"] textarea:focus,
+[data-page="admin"] select:not(.status-select):focus,
+[data-page="admin"] .form-select:not(.status-select):focus {
+  border: 3px solid var(--color-primary);
+  outline: none;
+}
+
+/* Custom status dropdown for settings form - matches text fields */
+[data-page="admin"] #pd-setting-status {
+  width: 100%;
+  padding: 1.75rem var(--portal-spacing-xl) var(--portal-spacing-sm) var(--portal-spacing-xl);
+  border: none;
+  border-radius: var(--portal-radius-lg);
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: capitalize;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #000000;
+  color: var(--portal-text-light);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  min-height: 60px;
+}
+
+#pd-setting-status:focus {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Status colors for settings dropdown */
+[data-page="admin"] #pd-setting-status.status-pending,
+[data-page="admin"] #pd-setting-status.status-on_hold {
+  background-color: var(--color-warning);
+  color: var(--color-black);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+}
+
+[data-page="admin"] #pd-setting-status.status-active {
+  background-color: var(--color-info);
+  color: var(--color-black);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+}
+
+[data-page="admin"] #pd-setting-status.status-completed {
+  background-color: var(--color-success);
+  color: var(--color-black);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+}
+
+[data-page="admin"] #pd-setting-status.status-cancelled {
+  background-color: var(--color-danger);
+  color: var(--color-white);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+}
+
+/* Settings tab - override ALL floating label styles to match meta-label */
+#pd-tab-settings label {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  color: var(--portal-text-secondary) !important;
+  letter-spacing: 0.05em !important;
+  margin: 0 !important;
+  pointer-events: auto !important;
+}
+
+/* Settings tab form groups - match meta-item styling */
+#pd-tab-settings .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-xs);
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+/* Settings form inputs - reduced top padding to match Overview spacing */
+#pd-tab-settings input,
+#pd-tab-settings .form-input {
+  padding: 0.5rem 1rem !important;
+  min-height: auto !important;
+  font-size: 0.95rem !important;
+  font-weight: 400 !important;
+}
+
+/* Settings form placeholder - not bold */
+#pd-tab-settings input::placeholder {
+  font-weight: 400 !important;
+}
+
+/* Form row for Account Status and Last Login */
+#pd-tab-settings .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+
+#pd-tab-settings .form-row .form-group {
+  margin-bottom: 0;
+  gap: var(--portal-spacing-sm);
+}
+
+/* Readonly form values - match meta-value styling */
+#pd-tab-settings .form-value-readonly {
+  color: var(--color-white);
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+/* Client account actions buttons */
+#pd-tab-settings .client-account-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Project status dropdown - match input field styling */
+#pd-status-dropdown .custom-dropdown-trigger {
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  padding-left: var(--portal-spacing-lg);
+  font-size: 0.95rem;
+  font-weight: 400;
+  min-height: auto;
+}
+
+#pd-status-dropdown .custom-dropdown-value {
+  text-transform: capitalize;
+}
+
+#pd-status-dropdown .custom-dropdown-menu {
+  display: none;
+  flex-direction: column;
+}
+
+#pd-status-dropdown.open .custom-dropdown-menu {
+  display: flex;
+  flex-direction: column;
+}
+
+#pd-status-dropdown .custom-dropdown-option {
+  display: block;
+  width: 100%;
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  background: transparent;
+  border: none;
+  color: var(--portal-text-light);
+  text-align: left;
+  cursor: pointer;
+  text-transform: capitalize;
+  font-size: 0.95rem;
+}
+
+#pd-status-dropdown .custom-dropdown-option:hover {
+  background: var(--color-primary);
+}
+
+/* Ensure all project detail text is light on dark backgrounds */
+#tab-project-detail,
+#tab-project-detail p,
+#tab-project-detail span,
+#tab-project-detail strong,
+#tab-project-detail li,
+#tab-project-detail td,
+#tab-project-detail th {
+  color: var(--portal-text-light);
+}
+
+#tab-project-detail h3,
+#tab-project-detail h4 {
+  color: var(--portal-text-light);
+}
+
+/* Acme font only for main project name heading */
+#tab-project-detail #pd-project-name {
+  font-family: var(--font--acme);
+}
+
+/* Secondary/muted text in project detail */
+#tab-project-detail .file-meta,
+#tab-project-detail .invoice-date,
+#tab-project-detail .empty-state {
+  color: var(--portal-text-secondary);
+}
+
+/* Card Header with Action */
+.card-header-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--portal-spacing-lg);
+}
+
+.card-header-with-action h3 {
+  margin: 0;
+  color: var(--portal-text-light);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+}
+
+/* Progress Display */
+.project-progress-display {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-lg);
+}
+
+.progress-percentage {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  min-width: 60px;
+}
+
+.project-progress-display .progress-bar {
+  flex: 1;
+  height: 12px;
+  background: var(--portal-bg-light);
+  border-radius: var(--portal-radius-pill);
+  overflow: hidden;
+  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.5), inset -1px -1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.project-progress-display .progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+}
+
+/* Milestones List */
+.milestones-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-md);
+}
+
+.milestone-item,
+[data-page="admin"] .milestone-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--portal-spacing-md);
+  padding: var(--portal-spacing-lg);
+  background: var(--portal-bg-medium) !important;
+  border: none;
+  border-radius: var(--portal-radius-md);
+  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Custom checkbox - wrapper div */
+.milestone-checkbox {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  background: #000000;
+  border-radius: 4px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hide the actual checkbox input */
+.milestone-checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+/* Checked state - change wrapper background */
+.milestone-checkbox:has(input:checked) {
+  background: var(--color-primary);
+}
+
+/* Checkmark for checked state */
+.milestone-checkbox:has(input:checked)::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.milestone-content {
+  flex: 1;
+}
+
+.milestone-title,
+[data-page="admin"] .milestone-title {
+  font-weight: 600;
+  color: var(--portal-text-light) !important;
+  margin: 0 0 var(--portal-spacing-sm) 0;
+  font-family: var(--font--acme);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.milestone-item.completed .milestone-title {
+  text-decoration: line-through;
+  color: var(--portal-text-secondary) !important;
+}
+
+.milestone-description,
+[data-page="admin"] .milestone-description {
+  color: var(--portal-text-light) !important;
+  font-size: 0.9rem;
+  margin-bottom: var(--portal-spacing-sm);
+}
+
+.milestone-due,
+[data-page="admin"] .milestone-due {
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary) !important;
+}
+
+.milestone-actions {
+  display: flex;
+  gap: var(--portal-spacing-sm);
+}
+
+/* Project Description Row - description and preview URL on same line */
+.project-description-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--portal-spacing-xl);
+  margin-top: var(--portal-spacing-lg);
+}
+
+.project-description-row .description-item {
+  flex: 2;
+  min-width: 200px;
+}
+
+.project-description-row .preview-url-item {
+  flex: 1;
+  min-width: 200px;
+}
+
+.project-description-row .meta-value {
+  white-space: pre-wrap;
+}
+
+/* Features container appended to description row */
+.project-description-row .features-container {
+  flex-basis: 100%;
+  margin-top: var(--portal-spacing-md);
+}
+
+/* Project Notes - inside overview card */
+.project-detail-overview .project-notes {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  margin: 0;
+  min-height: 0;
+  white-space: normal;
+  color: var(--portal-text-light);
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-xl);
+}
+
+.project-detail-overview .project-notes:empty {
+  display: none;
+}
+
+/* Project notes meta-value allows wrapping */
+.project-detail-overview .project-notes .meta-value {
+  white-space: pre-wrap;
+}
+
+/* Project Notes - standalone */
+.project-notes {
+  background: var(--portal-bg-medium);
+  padding: var(--portal-spacing-lg);
+  border-radius: var(--portal-radius-md);
+  border: 1px solid var(--portal-border-medium);
+  min-height: 100px;
+  white-space: pre-wrap;
+  color: var(--portal-text-light);
+}
+
+.project-notes p {
+  margin: 0 0 var(--portal-spacing-md) 0;
+}
+
+.project-notes h4,
+#tab-project-detail .project-notes h4 {
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  font-family: inherit;
+  margin: var(--portal-spacing-lg) 0 var(--portal-spacing-sm) 0;
+}
+
+.project-notes .features-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--portal-spacing-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-notes .feature-tag {
+  background: var(--portal-bg-dark);
+  color: var(--portal-text-light);
+  padding: var(--portal-spacing-xs) var(--portal-spacing-md);
+  border-radius: var(--portal-radius-sm);
+  font-size: 0.85rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  color: var(--portal-text-secondary);
+  padding: var(--portal-spacing-xl);
+  font-style: italic;
+}
+
+/* Files List in Project Detail */
+#pd-files-list .file-item {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-md);
+  padding: var(--portal-spacing-md);
+  background: var(--portal-bg-medium);
+  border: none;
+  border-radius: var(--portal-radius-md);
+  margin-bottom: var(--portal-spacing-sm);
+  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+#pd-files-list .file-icon {
+  flex-shrink: 0;
+  color: var(--portal-text-secondary);
+}
+
+#pd-files-list .file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+#pd-files-list .file-name {
+  display: block;
+  font-weight: 500;
+  color: var(--portal-text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#pd-files-list .file-meta {
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+}
+
+#pd-files-list .file-actions {
+  display: flex;
+  gap: var(--portal-spacing-sm);
+}
+
+/* Messages in Project Detail - Light background */
+[data-page="admin"] .messages-thread {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: var(--portal-spacing-lg);
+  background: var(--color-neutral-200) !important;
+  border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0 !important;
+  margin-bottom: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-md);
+}
+
+.messages-thread .message {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: var(--portal-spacing-md);
+  max-width: 85%;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+.messages-thread .message-received {
+  align-self: flex-start;
+}
+
+/* Message Avatar */
+.messages-thread .message-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--portal-spacing-xs);
+  flex-shrink: 0;
+}
+
+.messages-thread .message-avatar .avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-dark);
+  color: var(--color-neutral-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+/* Message Content (the bubble) */
+.messages-thread .message-content {
+  background: white;
+  border: 2px solid var(--portal-border-dark);
+  border-radius: 18px;
+  padding: var(--portal-spacing-lg) 1.25rem;
+  flex: 1;
+}
+
+.messages-thread .message-received .message-content {
+  color: var(--portal-text-dark);
+  border-bottom-left-radius: var(--portal-radius-xs);
+}
+
+.messages-thread .message-sent {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.messages-thread .message-sent .message-content {
+  background: var(--color-primary);
+  color: var(--portal-text-dark);
+  border-color: var(--portal-border-dark);
+  border-bottom-right-radius: var(--portal-radius-xs);
+}
+
+.messages-thread .message-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: var(--portal-spacing-xs);
+}
+
+.messages-thread .message-sender {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.messages-thread .message-received .message-sender {
+  color: var(--portal-text-dark);
+}
+
+.messages-thread .message-sent .message-sender {
+  color: var(--portal-text-dark);
+}
+
+.messages-thread .message-time {
+  font-size: 0.75rem;
+  color: var(--portal-text-dark);
+}
+
+/* Sender name below avatar */
+.messages-thread .message-avatar .message-sender {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--portal-text-dark);
+  text-align: center;
+  max-width: 60px;
+  word-wrap: break-word;
+  line-height: 1.2;
+}
+
+.messages-thread .message-content {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.messages-thread .message-received .message-content {
+  color: var(--portal-text-dark);
+}
+
+.messages-thread .message-sent .message-content {
+  color: var(--portal-text-dark);
+}
+
+/* Empty state in messages - dark text on light bg */
+.messages-thread .empty-state,
+.messages-thread > p {
+  color: var(--portal-text-dark) !important;
+  text-align: center;
+  font-style: italic;
+  padding: var(--portal-spacing-xl);
+}
+
+/* Client Account Info */
+.client-account-info {
+  margin-bottom: var(--portal-spacing-lg);
+  color: var(--portal-text-light);
+}
+
+.client-account-info p {
+  margin: var(--portal-spacing-sm) 0;
+}
+
+.client-account-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-sm);
+  margin-top: var(--portal-spacing-md);
+}
+
+.client-account-actions .btn {
+  background: transparent;
+  color: var(--portal-text-light);
+  border: 2px solid var(--portal-border-light);
+  border-radius: var(--portal-radius-lg);
+  width: 100%;
+}
+
+.client-account-actions .btn:hover {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark);
+  border-color: var(--color-primary);
+}
+
+/* Invoice Items */
+.invoice-item {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-md);
+  padding: var(--portal-spacing-md);
+  background: var(--portal-bg-medium);
+  border: none;
+  border-radius: var(--portal-radius-md);
+  margin-bottom: var(--portal-spacing-sm);
+  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.invoice-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.invoice-info strong {
+  display: block;
+  color: var(--portal-text-light);
+}
+
+.invoice-date {
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+}
+
+.invoice-amount {
+  font-weight: 700;
+  color: var(--color-primary);
+  min-width: 80px;
+  text-align: right;
+}
+
+.invoice-actions {
+  display: flex;
+  gap: var(--portal-spacing-sm);
+}
+
+/* Enhanced Milestone Styles */
+.milestone-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--portal-spacing-sm);
+}
+
+.milestone-due-date {
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+  background: var(--portal-bg-dark);
+  padding: 2px var(--portal-spacing-xs);
+  border-radius: var(--portal-radius-sm);
+}
+
+.milestone-description {
+  font-size: 0.85rem;
+  color: var(--portal-text-secondary);
+  margin: var(--portal-spacing-sm) 0;
+}
+
+.milestone-deliverables {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin: var(--space-2) 0;
+  padding-left: var(--space-4);
+}
+
+.milestone-deliverables li {
+  margin: 2px 0;
+}
+
+.milestone-item .btn-danger {
+  flex-shrink: 0;
+}
+
+/* File Upload Dropzone */
+#pd-upload-dropzone {
+  border: 2px dashed var(--portal-border-dark);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-8);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#pd-upload-dropzone:hover,
+#pd-upload-dropzone.dragover {
+  border-color: var(--color-brand-primary);
+  background: rgba(var(--color-brand-primary-rgb), 0.05);
+}
+
+#pd-upload-dropzone p {
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--portal-spacing-lg) 0;
+}
+
+/* Invoice Summary */
+.invoice-summary {
+  display: flex;
+  gap: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+
+.invoice-summary-item h4 {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-1) 0;
+}
+
+.invoice-summary-item .summary-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.invoice-summary-item .summary-value.outstanding {
+  color: var(--color-warning);
+}
+
+.invoice-summary-item .summary-value.paid {
+  color: var(--color-brand-primary);
+}
+
+/* Responsive adjustments for project detail */
+@media (max-width: 767px) {
+  .project-detail-header {
+    flex-direction: column;
+  }
+
+  .project-detail-meta {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .project-detail-tabs {
+    gap: var(--space-1);
+  }
+
+  .pd-tab-btn {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 479px) {
+  .project-detail-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .project-progress-display {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .project-progress-display .progress-bar {
+    width: 100%;
+  }
+}
+
+/* ================================================
+   Overview Stats Grid
+   ================================================ */
+.analytics-overview {
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--border-radius-card);
+  padding: var(--space-4);
+  margin-top: var(--portal-spacing-lg);
+}
+
+.analytics-overview h3 {
+  color: var(--portal-text-light);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-4) 0;
+}
+
+/* Admin page recent-activity styling */
+[data-page="admin"] .recent-activity {
+  margin-top: var(--portal-spacing-lg);
+  margin-bottom: 0;
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-lg);
+  padding: var(--portal-spacing-xl);
+}
+
+[data-page="admin"] .recent-activity h3 {
+  font-family: var(--font--acme);
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--portal-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--portal-spacing-lg) 0;
+}
+
+[data-page="admin"] .activity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-md);
+}
+
+[data-page="admin"] .activity-list li {
+  color: var(--portal-text-light);
+  padding: var(--portal-spacing-lg);
+  background: var(--portal-bg-medium);
+  border: none;
+  border-radius: var(--portal-radius-md);
+  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.overview-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-4);
+}
+
+.overview-stat {
+  background: var(--portal-bg-medium);
+  border: none;
+  border-radius: var(--border-radius-md);
+  padding: var(--space-4);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.overview-stat .stat-number {
+  color: var(--portal-text-light);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.overview-stat .stat-label {
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ================================================
+   Admin Page Uniform Spacing
+   ================================================ */
+
+/* Consistent spacing for stacked cards/sections */
+[data-page="admin"] .portal-project-card + .portal-project-card,
+[data-page="admin"] .admin-table-card + .admin-table-card {
+  margin-top: var(--portal-spacing-lg);
+}
+
+/* Client selector wrapper - aligns with messages-container */
+[data-page="admin"] .client-selector-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0;
+  margin-bottom: var(--portal-spacing-lg);
+  background: transparent;
+  box-shadow: none !important;
+}
+
+[data-page="admin"] .client-selector-label {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+/* Custom dropdown component */
+[data-page="admin"] .custom-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+
+[data-page="admin"] .custom-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-2) var(--space-3);
+  border: 4px solid var(--portal-border-dark);
+  border-radius: var(--portal-radius-lg);
+  background-color: #000000;
+  color: var(--portal-text-light);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3), -1px 0 1px rgba(0, 0, 0, 0.3), 0 -1px 1px rgba(0, 0, 0, 0.3);
+}
+
+[data-page="admin"] .custom-dropdown-trigger:hover {
+  border-color: var(--color-brand-primary);
+}
+
+[data-page="admin"] .custom-dropdown-trigger:focus {
+  outline: none;
+  border-color: var(--color-brand-primary);
+}
+
+[data-page="admin"] .custom-dropdown-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-page="admin"] .custom-dropdown-caret {
+  flex-shrink: 0;
+  margin-left: var(--space-2);
+  transition: transform 0.2s ease;
+}
+
+[data-page="admin"] .custom-dropdown.open .custom-dropdown-caret {
+  transform: rotate(180deg);
+}
+
+[data-page="admin"] .custom-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 0;
+  margin-top: -4px;
+  padding: 0;
+  list-style: none;
+  background-color: #000000;
+  border: 4px solid var(--portal-border-dark);
+  border-top: none;
+  border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3), -1px 0 1px rgba(0, 0, 0, 0.3), 0 -1px 1px rgba(0, 0, 0, 0.3);
+}
+
+[data-page="admin"] .custom-dropdown.open .custom-dropdown-menu {
+  display: block;
+  border-color: var(--color-brand-primary);
+  /* Only sides and bottom shadow - clip top shadow with clip-path */
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3), -4px 0 12px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
+  clip-path: inset(0 -20px -20px -20px);
+  margin-top: -4px;
+}
+
+[data-page="admin"] .custom-dropdown.open .custom-dropdown-trigger {
+  border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
+  border-color: var(--color-brand-primary);
+  border-bottom: none;
+  /* Only top and side shadows - clip bottom shadow */
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3), -4px 0 12px rgba(0, 0, 0, 0.3), 0 -4px 12px rgba(0, 0, 0, 0.3);
+  clip-path: inset(-20px -20px 0 -20px);
+  position: relative;
+  z-index: 101;
+}
+
+[data-page="admin"] .custom-dropdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  color: var(--portal-text-light);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+[data-page="admin"] .dropdown-item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-page="admin"] .dropdown-item-count {
+  flex-shrink: 0;
+}
+
+[data-page="admin"] .custom-dropdown-item:hover {
+  background-color: var(--color-brand-primary);
+  color: var(--portal-text-light);
+}
+
+[data-page="admin"] .custom-dropdown-item.selected {
+  background-color: rgba(var(--color-brand-primary-rgb, 0, 175, 240), 0.2);
+  color: var(--portal-text-light);
+}
+
+[data-page="admin"] .custom-dropdown-item:last-child {
+  border-radius: 0 0 calc(var(--portal-radius-lg) - 4px) calc(var(--portal-radius-lg) - 4px);
+}
+
+/* Caret color matches text color */
+[data-page="admin"] input,
+[data-page="admin"] textarea,
+[data-page="admin"] select {
+  caret-color: var(--color-text-primary);
+}
+
+/* System info grid and rows */
+.system-info-grid {
+  display: grid;
+  gap: 0;
+  margin-top: var(--portal-spacing-lg);
+}
+
+.system-info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--portal-spacing-sm) 0;
+}
+
+.truncate-text {
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: help;
+}
+
+/* ================================================
+   Details Overlay (darkens page behind panel)
+   ================================================ */
+.details-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 999;
+  cursor: pointer;
+}
+
+.details-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  animation: fadeIn 0.2s ease;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.details-overlay.hidden {
+  display: none;
+}
+
+/* ================================================
+   Details Panel (for Leads/Contacts)
+   Dark background with light text
+   ================================================ */
+.details-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  max-width: 90vw;
+  height: 100vh;
+  background: var(--portal-bg-readonly);
+  border-left: none;
+  box-shadow: var(--shadow-2xl);
+  z-index: 1000;
+  overflow-y: auto;
+  padding: var(--space-6);
+}
+
+.details-panel.hidden {
+  display: none;
+}
+
+.details-panel .details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--portal-border-light);
+}
+
+.details-panel .details-header h3 {
+  color: var(--portal-text-light);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+}
+
+.details-panel .close-btn {
+  background: none;
+  border: none;
+  font-size: var(--font-size-2xl);
+  color: var(--portal-text-secondary);
+  cursor: pointer;
+  padding: var(--space-2);
+  line-height: 1;
+}
+
+.details-panel .close-btn:hover {
+  color: var(--portal-text-light);
+}
+
+.details-panel .details-content p {
+  color: var(--portal-text-light);
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+.details-panel .details-content strong {
+  color: var(--color-primary);
+}
+
+.details-panel .details-divider {
+  border: none;
+  border-top: 1px solid var(--portal-border-light);
+  margin: var(--space-4) 0;
+}
+
+.details-panel .message-box {
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-light);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.details-panel .actions {
+  margin-top: var(--space-6);
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* ================================================
+   System Status List
+   ================================================ */
+.status-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.status-list .loading-text {
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  background: var(--portal-bg-medium);
+  border: none;
+  border-radius: var(--border-radius-md);
+  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.status-item .status-icon {
+  font-size: var(--font-size-lg);
+  width: 24px;
+  text-align: center;
+}
+
+.status-item .status-name {
+  flex: 1;
+  color: var(--portal-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.status-item .status-badge {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+}
+
+.status-item .status-message {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.status-item.status-healthy .status-icon {
+  color: var(--color-success);
+}
+
+.status-item.status-healthy .status-badge {
+  background: var(--color-success);
+  border: 1px solid var(--portal-border-dark);
+  color: var(--color-black);
+}
+
+.status-item.status-warning .status-icon {
+  color: var(--color-warning);
+}
+
+.status-item.status-warning .status-badge {
+  background: var(--color-warning);
+  border: 1px solid var(--portal-border-dark);
+  color: var(--color-black);
+}
+
+.status-item.status-error .status-icon {
+  color: var(--color-danger);
+}
+
+.status-item.status-error .status-badge {
+  background: var(--color-danger);
+  border: 1px solid var(--portal-border-dark);
+  color: var(--color-black);
+}
+
+.status-item.status-unknown .status-icon {
+  color: var(--color-danger);
+}
+
+.status-item.status-unknown .status-badge {
+  background: var(--color-danger);
+  border: 1px solid var(--portal-border-dark);
+  color: var(--color-black);
+}
+
+.no-status {
+  color: var(--color-text-secondary);
+  font-style: italic;
+  text-align: center;
+  padding: var(--space-4);
+}
+
+.status-error {
+  color: var(--color-danger);
+  text-align: center;
+  padding: var(--space-4);
+}
+
+/* Admin message compose area */
+[data-page="admin"] .message-compose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-lg);
+  padding: var(--portal-spacing-lg);
+  background: var(--portal-bg-dark);
+  border-radius: 0 0 var(--portal-radius-md) var(--portal-radius-md);
+}
+
+[data-page="admin"] .message-compose .message-input-wrapper {
+  margin-bottom: 0;
+}
+
+[data-page="admin"] .message-compose .btn,
+[data-page="admin"] #admin-send-message,
+[data-page="admin"] #btn-pd-send-message {
+  width: 100%;
+  background: transparent;
+  color: var(--portal-text-dark);
+  border: 2px solid var(--portal-border-dark);
+}
+
+[data-page="admin"] .message-compose .btn:hover,
+[data-page="admin"] #admin-send-message:hover,
+[data-page="admin"] #btn-pd-send-message:hover {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark);
+  border-color: var(--color-primary);
+}
+
+/* ================================================
+   Responsive - Details Panel
+   ================================================ */
+@media (max-width: 767px) {
+  .details-panel {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .overview-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ================================================
+   Admin Sidebar Footer & Logout Button
+   ================================================ */
+[data-page="admin"] .sidebar-footer {
+  z-index: 1000 !important;
+  pointer-events: auto !important;
+}
+
+[data-page="admin"] .sidebar-footer .btn-logout {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 1001 !important;
+  position: relative !important;
+}
+
+/* ================================================
+   Admin & Client Portal - No Mobile Collapse
+   Sidebar stays visible, no hamburger menu
+   ================================================ */
+@media screen and (max-width: 767px) {
+  /* Hide hamburger menu on admin and client portal */
+  [data-page="admin"] .mobile-menu-toggle,
+  [data-page="admin"] .mobile-overlay,
+  [data-page="admin"] .sidebar-close-btn,
+  [data-page="client-portal"] .mobile-menu-toggle,
+  [data-page="client-portal"] .mobile-overlay,
+  [data-page="client-portal"] .sidebar-close-btn {
+    display: none !important;
+  }
+
+  /* Keep sidebar visible on admin and client portal */
+  [data-page="admin"] .sidebar,
+  [data-page="client-portal"] .sidebar {
+    position: fixed;
+    left: 0;
+    width: 220px;
+    min-width: 220px;
+  }
+
+  /* Keep sidebar toggle visible */
+  [data-page="admin"] .sidebar-toggle,
+  [data-page="client-portal"] .sidebar-toggle {
+    display: flex;
+  }
+
+  /* Adjust dashboard content margin for visible sidebar */
+  [data-page="admin"] .dashboard-content,
+  [data-page="client-portal"] .dashboard-content {
+    padding-top: var(--space-6);
+    padding-left: var(--space-4);
+    margin-left: 220px;
+  }
+
+  /* Keep header toggle visible */
+  [data-page="admin"] .page-header .header-sidebar-toggle,
+  [data-page="client-portal"] .page-header .header-sidebar-toggle {
+    display: flex;
+  }
+
+  /* Page header no extra padding needed */
+  [data-page="admin"] .page-header,
+  [data-page="client-portal"] .page-header {
+    padding-left: 0;
+  }
+
+  /* Handle collapsed sidebar */
+  [data-page="admin"] .sidebar.collapsed,
+  [data-page="client-portal"] .sidebar.collapsed {
+    width: 60px;
+    min-width: 60px;
+  }
+
+  [data-page="admin"] .sidebar.collapsed ~ .dashboard-content,
+  [data-page="client-portal"] .sidebar.collapsed ~ .dashboard-content {
+    margin-left: 60px;
+  }
+}
+
