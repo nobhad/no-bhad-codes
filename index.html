@@ -12,7 +12,7 @@
           var theme = savedTheme || (systemDark ? 'dark' : 'light');
           document.documentElement.setAttribute('data-theme', theme);
           // Set theme-color meta immediately to match background
-          var themeColor = theme === 'dark' ? '#333333' : '#f8f5f4';
+          var themeColor = theme === 'dark' ? '#333333' : '#e0e0e0';
           var meta = document.querySelector('meta[name="theme-color"]');
           if (meta) meta.setAttribute('content', themeColor);
 
@@ -37,7 +37,7 @@
       })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f8f5f4" />
+    <meta name="theme-color" content="#e0e0e0" />
     <title>No Bhad Codes - Professional Web Development</title>
 
     <!-- Critical CSS - ensures correct visibility from first paint -->
@@ -50,7 +50,7 @@
           width: 100vw;
           height: calc(100vh - 60px - 40px); /* header + footer fallback */
           z-index: 50;
-          background-color: #f8f5f4; /* --color-neutral-300 light mode fallback */
+          background-color: var(--color-neutral-300);
           opacity: 1;
           visibility: visible;
         }
@@ -70,18 +70,7 @@
         opacity: 0;
       }
       body {
-        background-color: #f8f5f4; /* Light theme default - warm */
-      }
-      html[data-theme="dark"] body {
-        background-color: #333333; /* Dark theme desktop */
-      }
-      html[data-theme="dark"] .intro-morph-overlay {
-        background-color: #333333; /* Dark theme desktop */
-      }
-      @media screen and (max-width: 767px) {
-        html[data-theme="dark"] body {
-          background-color: #333333; /* Match desktop dark theme */
-        }
+        background-color: var(--color-neutral-300);
       }
       .header {
         background-color: transparent;
@@ -95,13 +84,10 @@
           width: 100vw;
           height: calc(100dvh - 60px - 40px); /* header + footer fallback */
           z-index: 50;
-          background-color: #f8f5f4; /* --color-neutral-300 light mode fallback */
+          background-color: var(--color-neutral-300);
           display: flex;
           opacity: 1;
           visibility: visible;
-        }
-        html[data-theme="dark"] .intro-morph-overlay {
-          background-color: #333333; /* Match desktop dark theme */
         }
         .intro-morph-overlay.hidden {
           opacity: 0;
