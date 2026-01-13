@@ -13,12 +13,15 @@ import type { ClientProject, ClientProjectStatus, ProjectPriority } from '../../
 import { gsap } from 'gsap';
 import { APP_CONSTANTS } from '../../config/constants';
 import 'emoji-picker-element';
-import type { ClientPortalContext, PortalProject } from './portal-types';
+import type { ClientPortalContext } from './portal-types';
 import {
   loadFilesModule,
   loadInvoicesModule,
   loadMessagesModule,
-  loadSettingsModule
+  loadSettingsModule,
+  loadNavigationModule,
+  loadProjectsModule,
+  loadAuthModule
 } from './modules';
 
 export class ClientPortalModule extends BaseModule {
@@ -1767,456 +1770,112 @@ export class ClientPortalModule extends BaseModule {
     });
   }
 
-  private showSettings(): void {
-    this.hideAllViews();
-    const settingsView = document.getElementById('settings-view');
-    if (settingsView) {
-      settingsView.style.display = 'block';
-      this.loadUserSettings();
-    }
-    document
-      .querySelectorAll('.project-item, .account-item')
-      .forEach((item) => item.classList.remove('active'));
+  // =====================================================
+  // NAVIGATION - Delegates to portal-navigation module
+  // =====================================================
+
+  private async showSettings(): Promise<void> {
+    const navModule = await loadNavigationModule();
+    navModule.showSettings(() => this.loadUserSettings());
   }
 
-  private showBillingView(): void {
-    // Hide other views
-    this.hideAllViews();
-
-    // Show billing view
-    const billingView = document.getElementById('billing-view');
-    if (billingView) {
-      billingView.style.display = 'block';
-      // Load current billing data into forms
-      this.loadBillingSettings();
-    }
-
-    // Set active state on billing button
-    document
-      .querySelectorAll('.project-item, .account-item')
-      .forEach((item) => item.classList.remove('active'));
-    const billingBtn = document.getElementById('billing-btn');
-    if (billingBtn) billingBtn.classList.add('active');
+  private async showBillingView(): Promise<void> {
+    const navModule = await loadNavigationModule();
+    navModule.showBillingView(() => this.loadBillingSettings());
   }
 
-  private showContactView(): void {
-    this.hideAllViews();
-    const contactView = document.getElementById('contact-view');
-    if (contactView) {
-      contactView.style.display = 'block';
-      this.loadContactSettings();
-    }
-    document
-      .querySelectorAll('.project-item, .account-item')
-      .forEach((item) => item.classList.remove('active'));
-    const contactBtn = document.getElementById('contact-btn');
-    if (contactBtn) contactBtn.classList.add('active');
+  private async showContactView(): Promise<void> {
+    const navModule = await loadNavigationModule();
+    navModule.showContactView(() => this.loadContactSettings());
   }
 
-  private showNotificationsView(): void {
-    this.hideAllViews();
-    const notificationsView = document.getElementById('notifications-view');
-    if (notificationsView) {
-      notificationsView.style.display = 'block';
-      this.loadNotificationSettings();
-    }
-    document
-      .querySelectorAll('.project-item, .account-item')
-      .forEach((item) => item.classList.remove('active'));
-    const notificationsBtn = document.getElementById('notifications-btn');
-    if (notificationsBtn) notificationsBtn.classList.add('active');
+  private async showNotificationsView(): Promise<void> {
+    const navModule = await loadNavigationModule();
+    navModule.showNotificationsView(() => this.loadNotificationSettings());
   }
 
-  private showUpdatesView(): void {
-    // Hide other views
-    this.hideAllViews();
-
-    // Show updates view
-    const updatesView = document.getElementById('updates-view');
-    if (updatesView) {
-      updatesView.style.display = 'block';
-    }
-
-    // Update active states
-    document
-      .querySelectorAll('.project-item, .account-item, .project-subitem')
-      .forEach((item) => item.classList.remove('active'));
-    const updatesBtn = document.getElementById('updates-btn');
-    if (updatesBtn) updatesBtn.classList.add('active');
+  private async showUpdatesView(): Promise<void> {
+    const navModule = await loadNavigationModule();
+    navModule.showUpdatesView();
   }
 
-  private showFilesView(): void {
-    // Hide other views
-    this.hideAllViews();
-
-    // Show files view
-    const filesView = document.getElementById('files-view');
-    if (filesView) {
-      filesView.style.display = 'block';
-    }
-
-    // Update active states
-    document
-      .querySelectorAll('.project-item, .account-item, .project-subitem')
-      .forEach((item) => item.classList.remove('active'));
-    const filesBtn = document.getElementById('files-btn');
-    if (filesBtn) filesBtn.classList.add('active');
+  private async showFilesView(): Promise<void> {
+    const navModule = await loadNavigationModule();
+    navModule.showFilesView();
   }
 
-  private showMessagesView(): void {
-    // Hide other views
-    this.hideAllViews();
-
-    // Show messages view
-    const messagesView = document.getElementById('messages-view');
-    if (messagesView) {
-      messagesView.style.display = 'block';
-    }
-
-    // Update active states
-    document
-      .querySelectorAll('.project-item, .account-item, .project-subitem')
-      .forEach((item) => item.classList.remove('active'));
-    const messagesBtn = document.getElementById('messages-btn');
-    if (messagesBtn) messagesBtn.classList.add('active');
+  private async showMessagesView(): Promise<void> {
+    const navModule = await loadNavigationModule();
+    navModule.showMessagesView();
   }
 
-  private showContentView(): void {
-    // Hide other views
-    this.hideAllViews();
-
-    // Show content view
-    const contentView = document.getElementById('content-view');
-    if (contentView) {
-      contentView.style.display = 'block';
-    }
-
-    // Update active states
-    document
-      .querySelectorAll('.project-item, .account-item, .project-subitem')
-      .forEach((item) => item.classList.remove('active'));
-    const contentBtn = document.getElementById('content-btn');
-    if (contentBtn) contentBtn.classList.add('active');
+  private async showContentView(): Promise<void> {
+    const navModule = await loadNavigationModule();
+    navModule.showContentView();
   }
 
-  private showProjectDetailView(): void {
-    // Hide other views
-    this.hideAllViews();
-
-    // Show project detail view (overview)
-    const projectDetailView = document.getElementById('project-detail-view');
-    if (projectDetailView) {
-      projectDetailView.style.display = 'block';
-    }
-
-    // Update active states
-    document
-      .querySelectorAll('.project-item, .account-item, .project-subitem')
-      .forEach((item) => item.classList.remove('active'));
-    const projectMain = document.getElementById('project-main');
-    if (projectMain) projectMain.classList.add('active');
-
-    // Update breadcrumbs
-    this.updateBreadcrumbs([
-      { label: 'Dashboard', href: true, onClick: () => this.showWelcomeView() },
-      { label: 'Your Website Project', href: false }
-    ]);
+  private async showProjectDetailView(): Promise<void> {
+    const navModule = await loadNavigationModule();
+    navModule.showProjectDetailView(() => this.showWelcomeView());
   }
 
-  private showWelcomeView(): void {
-    this.hideAllViews();
-    const welcomeView = document.getElementById('welcome-view');
-    if (welcomeView) {
-      welcomeView.style.display = 'block';
-    }
-
-    document
-      .querySelectorAll('.project-item, .account-item, .project-subitem')
-      .forEach((item) => item.classList.remove('active'));
-
-    this.updateBreadcrumbs([{ label: 'Dashboard', href: false }]);
+  private async showWelcomeView(): Promise<void> {
+    const navModule = await loadNavigationModule();
+    navModule.showWelcomeView();
   }
 
-  private updateBreadcrumbs(
-    breadcrumbs: Array<{ label: string; href: boolean; onClick?: () => void }>
-  ): void {
-    const breadcrumbList = document.getElementById('breadcrumb-list');
-    if (!breadcrumbList) return;
+  private async hideAllViews(): Promise<void> {
+    const navModule = await loadNavigationModule();
+    navModule.hideAllViews();
+  }
 
-    breadcrumbList.innerHTML = '';
+  private async toggleSidebar(): Promise<void> {
+    const navModule = await loadNavigationModule();
+    navModule.toggleSidebar();
+  }
 
-    breadcrumbs.forEach((crumb, index) => {
-      const listItem = document.createElement('li');
-      listItem.className = 'breadcrumb-item';
+  private async toggleMobileMenu(): Promise<void> {
+    const navModule = await loadNavigationModule();
+    navModule.toggleMobileMenu();
+  }
 
-      if (crumb.href && crumb.onClick) {
-        const link = document.createElement('button');
-        link.className = 'breadcrumb-link';
-        link.textContent = crumb.label;
-        link.onclick = crumb.onClick;
-        listItem.appendChild(link);
-      } else {
-        const span = document.createElement('span');
-        span.className = 'breadcrumb-current';
-        span.textContent = crumb.label;
-        listItem.appendChild(span);
-      }
+  private async closeMobileMenu(): Promise<void> {
+    const navModule = await loadNavigationModule();
+    navModule.closeMobileMenu();
+  }
 
-      breadcrumbList.appendChild(listItem);
+  /**
+   * Handle user logout - delegates to auth module
+   */
+  private async handleLogout(): Promise<void> {
+    const authModule = await loadAuthModule();
+    authModule.handleLogout();
+  }
 
-      // Add separator if not last item
-      if (index < breadcrumbs.length - 1) {
-        const separator = document.createElement('li');
-        separator.className = 'breadcrumb-separator';
-        separator.textContent = '>';
-        breadcrumbList.appendChild(separator);
-      }
+  /**
+   * Switch to a specific tab in the dashboard - delegates to navigation module
+   */
+  private async switchTab(tabName: string): Promise<void> {
+    const navModule = await loadNavigationModule();
+    navModule.switchTab(tabName, {
+      loadFiles: () => this.loadFiles(),
+      loadInvoices: () => this.loadInvoices(),
+      loadProjectPreview: () => this.loadProjectPreview(),
+      loadMessagesFromAPI: () => this.loadMessagesFromAPI()
     });
   }
 
-  private hideAllViews(): void {
-    const views = [
-      'welcome-view',
-      'settings-view',
-      'contact-view',
-      'billing-view',
-      'notifications-view',
-      'project-detail-view',
-      'updates-view',
-      'files-view',
-      'messages-view',
-      'content-view'
-    ];
-
-    views.forEach((viewId) => {
-      const view = document.getElementById(viewId);
-      if (view) {
-        view.style.display = 'none';
-      }
-    });
-  }
-
-  private toggleSidebar(): void {
-    const sidebar = document.getElementById('sidebar');
-
-    if (!sidebar) {
-      console.error('Sidebar element not found');
-      return;
-    }
-
-    sidebar.classList.toggle('collapsed');
-  }
-
   /**
-   * Toggle mobile menu (hamburger)
-   */
-  private toggleMobileMenu(): void {
-    const sidebar = document.getElementById('sidebar');
-    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-    const mobileOverlay = document.getElementById('mobile-overlay');
-
-    if (!sidebar || !mobileMenuToggle) {
-      console.error('Mobile menu elements not found');
-      return;
-    }
-
-    const isOpen = sidebar.classList.contains('mobile-open');
-
-    if (isOpen) {
-      this.closeMobileMenu();
-    } else {
-      sidebar.classList.add('mobile-open');
-      mobileMenuToggle.classList.add('active');
-      mobileOverlay?.classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-  }
-
-  /**
-   * Close mobile menu
-   */
-  private closeMobileMenu(): void {
-    const sidebar = document.getElementById('sidebar');
-    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-    const mobileOverlay = document.getElementById('mobile-overlay');
-
-    sidebar?.classList.remove('mobile-open');
-    mobileMenuToggle?.classList.remove('active');
-    mobileOverlay?.classList.remove('active');
-    document.body.style.overflow = '';
-  }
-
-  /**
-   * Handle user logout - clear session and redirect to landing page
-   */
-  private handleLogout(): void {
-    // Clear all auth data from sessionStorage
-    sessionStorage.removeItem('clientAuth');
-    sessionStorage.removeItem('clientAuthToken');
-    sessionStorage.removeItem('client_auth_mode');
-    sessionStorage.removeItem('client_auth_user');
-    sessionStorage.removeItem('clientPortalAuth');
-    sessionStorage.removeItem('clientEmail');
-    sessionStorage.removeItem('clientName');
-
-    // Redirect to home page
-    window.location.href = '/';
-  }
-
-  /**
-   * Switch to a specific tab in the dashboard
-   */
-  private switchTab(tabName: string): void {
-    // Hide all tab content
-    const allTabContent = document.querySelectorAll('.tab-content');
-    allTabContent.forEach((tab) => tab.classList.remove('active'));
-
-    // Show the selected tab content
-    const targetTab = document.getElementById(`tab-${tabName}`);
-    if (targetTab) {
-      targetTab.classList.add('active');
-    }
-
-    // Update nav button active states
-    const navButtons = document.querySelectorAll('.nav-btn[data-tab]');
-    navButtons.forEach((btn) => {
-      btn.classList.remove('active');
-      if ((btn as HTMLElement).dataset.tab === tabName) {
-        btn.classList.add('active');
-      }
-    });
-
-    // Update mobile header title
-    this.updateMobileHeaderTitle(tabName);
-
-    // Load tab-specific data
-    if (tabName === 'files') {
-      this.loadFiles();
-    } else if (tabName === 'invoices') {
-      this.loadInvoices();
-    } else if (tabName === 'preview') {
-      this.loadProjectPreview();
-    } else if (tabName === 'messages') {
-      this.loadMessagesFromAPI();
-    }
-  }
-
-  /**
-   * Update the mobile header title based on current tab
-   */
-  private updateMobileHeaderTitle(tabName: string): void {
-    const mobileHeaderTitle = document.getElementById('mobile-header-title');
-    if (!mobileHeaderTitle) return;
-
-    const titles: Record<string, string> = {
-      dashboard: 'Dashboard',
-      files: 'Files',
-      messages: 'Messages',
-      invoices: 'Invoices',
-      settings: 'Settings',
-      'new-project': 'New Project',
-      preview: 'Project Preview'
-    };
-
-    mobileHeaderTitle.textContent = titles[tabName] || 'Dashboard';
-  }
-
-  /**
-   * Load project preview into iframe
+   * Load project preview into iframe - delegates to projects module
    */
   private async loadProjectPreview(): Promise<void> {
-    const iframe = document.getElementById('preview-iframe') as HTMLIFrameElement;
-    const urlDisplay = document.getElementById('preview-url');
-    const openNewTabBtn = document.getElementById('btn-open-new-tab');
-    const refreshBtn = document.getElementById('btn-refresh-preview');
-
-    if (!iframe) return;
-
-    const authMode = sessionStorage.getItem('client_auth_mode');
-
-    if (!authMode || authMode === 'demo') {
-      // Demo mode - show placeholder
-      iframe.src = '';
-      if (urlDisplay) urlDisplay.textContent = 'Preview not available in demo mode';
-      return;
-    }
-
-    try {
-      // Get client's projects to find one with a preview URL
-      const response = await fetch(`${ClientPortalModule.PROJECTS_API_BASE}`, {
-        credentials: 'include' // Include HttpOnly cookies
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to load projects');
-      }
-
-      const data = await response.json();
-      const projects = data.projects || [];
-
-      // Find a project with a preview URL
-      const projectWithPreview = projects.find((p: PortalProject) => p.preview_url);
-
-      if (projectWithPreview && projectWithPreview.preview_url) {
-        const previewUrl = projectWithPreview.preview_url;
-        iframe.src = previewUrl;
-        if (urlDisplay) urlDisplay.textContent = previewUrl;
-
-        // Setup open in new tab button
-        if (openNewTabBtn) {
-          openNewTabBtn.onclick = () => window.open(previewUrl, '_blank');
-        }
-
-        // Setup refresh button
-        if (refreshBtn) {
-          refreshBtn.onclick = () => {
-            iframe.src = '';
-            setTimeout(() => {
-              iframe.src = previewUrl;
-            }, 100);
-          };
-        }
-      } else {
-        iframe.src = '';
-        if (urlDisplay) urlDisplay.textContent = 'No preview available for your projects yet';
-      }
-    } catch (error) {
-      console.error('Error loading project preview:', error);
-      iframe.src = '';
-      if (urlDisplay) urlDisplay.textContent = 'Error loading preview';
-    }
+    const projectsModule = await loadProjectsModule();
+    await projectsModule.loadProjectPreview(this.moduleContext);
   }
 
-  private toggleAccountFolder(): void {
-    const accountList = document.querySelector('.account-list') as HTMLElement;
-    const accountHeader = document.querySelector('.account-header');
-
-    if (!accountList || !accountHeader) return;
-
-    const isCollapsed = accountList.classList.contains('collapsed');
-
-    if (isCollapsed) {
-      // Expand folder
-      accountList.classList.remove('collapsed');
-      accountHeader.classList.add('expanded');
-    } else {
-      // Collapse folder
-      accountList.classList.add('collapsed');
-      accountHeader.classList.remove('expanded');
-      // Clear any active account items when collapsing
-      document.querySelectorAll('.account-item').forEach((item) => item.classList.remove('active'));
-
-      // Hide the main content views when collapsing account
-      const welcomeView = document.getElementById('welcome-view');
-      const settingsView = document.getElementById('settings-view');
-      const billingView = document.getElementById('billing-view');
-
-      if (settingsView && settingsView.style.display !== 'none') {
-        if (welcomeView) welcomeView.style.display = 'block';
-        if (settingsView) settingsView.style.display = 'none';
-        if (billingView) billingView.style.display = 'none';
-      }
-    }
+  private async toggleAccountFolder(): Promise<void> {
+    const navModule = await loadNavigationModule();
+    navModule.toggleAccountFolder();
   }
 
   /**
