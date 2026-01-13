@@ -172,6 +172,71 @@ This CSS file defines global variables and font-face rules for consistent stylin
 }
 
 /* ============================================
+ * PORTAL THEME VARIABLES
+ * ============================================
+ * Shared design tokens for client-portal and admin pages.
+ * These override the default theme for dashboard UIs.
+ */
+[data-page="client-portal"],
+[data-page="admin"] {
+  /* Base neutral colors - override theme */
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e0e0e0;
+  --color-neutral-300: #e0e0e0;
+  --color-neutral-400: #bdbdbd;
+  --color-dark: #333333;
+  --color-text-primary: #333333;
+  --color-border: #333333;
+
+  /* Portal text colors */
+  --portal-text-light: #f5f5f5;
+  --portal-text-secondary: #cccccc;
+  --portal-text-muted: #999999;
+  --portal-text-dark: #1a1a1a;
+
+  /* Portal background colors */
+  --portal-bg-dark: #333333;
+  --portal-bg-medium: #444444;
+  --portal-bg-light: #555555;
+  --portal-bg-hover: #3a3a3a;
+  --portal-bg-readonly: #222222;
+
+  /* Portal border colors */
+  --portal-border-dark: #333333;
+  --portal-border-medium: #666666;
+  --portal-border-light: #f5f5f5;
+
+  /* Border radius */
+  --portal-radius-xs: 4px;
+  --portal-radius-sm: 6px;
+  --portal-radius-md: 8px;
+  --portal-radius-lg: 12px;
+  --portal-radius-pill: 50px;
+
+  /* Spacing */
+  --portal-spacing-xs: 0.25rem;
+  --portal-spacing-sm: 0.5rem;
+  --portal-spacing-md: 0.75rem;
+  --portal-spacing-lg: 1rem;
+  --portal-spacing-xl: 1.5rem;
+  --portal-spacing-2xl: 2rem;
+
+  /* Label styling */
+  --label-font-size: 0.75rem;
+  --label-color: var(--color-gray-400);
+  --label-font-weight: 500;
+  --label-text-transform: uppercase;
+  --label-letter-spacing: 0.05em;
+}
+
+/* Admin-specific overrides */
+[data-page="admin"] {
+  --color-text-primary: var(--color-gray-100);
+  --color-text-secondary: var(--color-gray-300);
+  --portal-text-secondary: var(--color-gray-400);
+}
+
+/* ============================================
  * COLOR VARIABLES
  * ============================================
  * NOTE: Color definitions have been consolidated into
