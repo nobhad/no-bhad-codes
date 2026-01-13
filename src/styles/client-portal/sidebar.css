@@ -65,8 +65,7 @@
 }
 
 .sidebar-footer .btn-logout,
-.sidebar-footer button,
-#btn-logout {
+.sidebar-footer button {
   pointer-events: auto !important;
   cursor: pointer !important;
   position: relative;

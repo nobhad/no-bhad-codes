@@ -3884,8 +3884,7 @@
   pointer-events: auto !important;
 }
 
-[data-page="admin"] .sidebar-footer .btn-logout,
-[data-page="admin"] #btn-logout {
+[data-page="admin"] .sidebar-footer .btn-logout {
   pointer-events: auto !important;
   cursor: pointer !important;
   z-index: 1001 !important;
