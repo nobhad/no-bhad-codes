@@ -178,7 +178,7 @@
   padding: var(--portal-spacing-sm) var(--portal-spacing-lg);
   border: 1px solid var(--color-primary);
   border-radius: var(--portal-radius-xs);
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .file-download:hover {

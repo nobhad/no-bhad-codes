@@ -151,6 +151,24 @@ This CSS file defines global variables and font-face rules for consistent stylin
 
   /* Dropdown/menu shadows - top shadows for tabs */
   --shadow-dropdown: 4px 0 12px rgba(0, 0, 0, 0.3), -4px 0 12px rgba(0, 0, 0, 0.3), 0 -4px 12px rgba(0, 0, 0, 0.3);
+
+  /* Large dropdown shadows - for modal-like dropdowns */
+  --shadow-dropdown-xl: 0 20px 60px rgba(0, 0, 0, 0.5);
+
+  /* Button shadows - for 3D button effects */
+  --shadow-button: 6px 6px 12px rgba(0, 0, 0, 0.2), 12px 12px 24px rgba(0, 0, 0, 0.15);
+  --shadow-button-dark: 6px 6px 12px rgba(0, 0, 0, 0.5), 12px 12px 24px rgba(0, 0, 0, 0.4);
+  --shadow-button-pressed: 8px 8px 16px rgba(0, 0, 0, 0.55), 16px 16px 32px rgba(0, 0, 0, 0.45);
+
+  /* ============================================
+   * OVERLAY COLORS
+   * ============================================
+   * Use these for backgrounds that need transparency.
+   */
+  --color-overlay-light: rgba(0, 0, 0, 0.05);
+  --color-overlay-medium: rgba(0, 0, 0, 0.5);
+  --color-overlay-heavy: rgba(0, 0, 0, 0.8);
+  --color-overlay-dark: rgba(0, 0, 0, 0.85);
 }
 
 /* ============================================

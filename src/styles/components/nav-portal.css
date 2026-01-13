@@ -353,7 +353,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 /* Mobile adjustments for portal dropdown */
-@media screen and (max-width: 479px) {
+@media (--small-mobile) {
   .portal-dropdown {
     position: fixed;
     top: auto;

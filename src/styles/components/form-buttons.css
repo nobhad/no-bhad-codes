@@ -89,7 +89,7 @@ input.form-button.form-valid {
  * RESPONSIVE BUTTONS
  * ============================================ */
 
-@media screen and (max-width: 479px) {
+@media (--small-mobile) {
   .btn,
   .form-button,
   .login-btn {
