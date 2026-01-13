@@ -9,6 +9,7 @@
  */
 
 import type { PortalInvoice, ClientPortalContext } from '../portal-types';
+import { formatCurrency } from '../../../utils/format-utils';
 
 const INVOICES_API_BASE = '/api/invoices';
 
@@ -172,16 +173,6 @@ function getInvoiceStatusLabel(status: string): string {
     cancelled: 'Cancelled'
   };
   return labelMap[status] || 'Pending';
-}
-
-/**
- * Format currency value
- */
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD'
-  }).format(amount || 0);
 }
 
 /**

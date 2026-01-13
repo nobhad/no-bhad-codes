@@ -8,6 +8,7 @@
  */
 
 import { SanitizationUtils } from '../../utils/sanitization-utils';
+import { formatFileSize } from '../../utils/format-utils';
 
 export interface ProjectDetailsHandler {
   showProjectDetails(projectId: number, projectsData: any[], switchTab: (tab: string) => void, loadProjects: () => Promise<void>, formatProjectType: (type: string) => string, inviteLead: (leadId: number, email: string) => Promise<void>): void;
@@ -521,7 +522,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
               </span>
               <div class="file-info">
                 <span class="file-name">${file.original_filename || file.filename}</span>
-                <span class="file-meta">Uploaded ${new Date(file.created_at).toLocaleDateString()} - ${this.formatFileSize(file.size)}</span>
+                <span class="file-meta">Uploaded ${new Date(file.created_at).toLocaleDateString()} - ${formatFileSize(file.size)}</span>
               </div>
               <div class="file-actions">
                 <a href="/uploads/${file.filename}" class="btn btn-outline btn-sm" target="_blank">Download</a>
@@ -536,17 +537,6 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       console.error('[AdminProjectDetails] Error loading project files:', error);
       filesList.innerHTML = '<p class="empty-state">Error loading files.</p>';
     }
-  }
-
-  /**
-   * Format file size for display
-   */
-  private formatFileSize(bytes: number): string {
-    if (!bytes) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
   }
 
   /**

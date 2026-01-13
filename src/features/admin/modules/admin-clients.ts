@@ -10,6 +10,7 @@
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import type { AdminDashboardContext } from '../admin-types';
+import { formatCurrency } from '../../../utils/format-utils';
 
 export interface Client {
   id: number;
@@ -478,13 +479,6 @@ function renderClientInvoices(invoices: any[], container: HTMLElement): void {
       `;
     })
     .join('');
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD'
-  }).format(amount);
 }
 
 async function resetClientPassword(clientId: number): Promise<void> {
