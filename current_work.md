@@ -862,6 +862,152 @@ Comprehensive optimization of GSAP animations and page transitions:
 - [ ] Split `terminal-intake.ts` (1,617 lines → multiple files)
 - [ ] Split `contact-animation.ts` (880 lines → multiple files)
 - [ ] Split `visitor-tracking.ts` (836 lines → multiple files)
+- [ ] **CSS ID Inconsistencies & Conflicts Cleanup** - See plan below
+
+### CSS ID/Class Cleanup Plan
+
+**Problem:** CSS has inconsistent naming conventions, potential ID conflicts, and needs to be cleaner and more consistent.
+
+**Plan:**
+
+1. **Audit Phase** - COMPLETE
+   - [x] Scan all CSS files for ID selectors (`#id`)
+   - [x] Identify duplicate IDs across HTML files
+   - [x] List all naming convention patterns currently in use
+   - [x] Document conflicts between admin, portal, and main site CSS
+
+---
+
+## CSS Audit Results (January 12, 2026)
+
+### ID Selectors by Scope
+
+**Admin Dashboard (20 IDs in admin.css):**
+
+| ID | Usage | Issue |
+|----|-------|-------|
+| `#pd-messages-thread` | 20 | Should be class, heavy styling |
+| `#pd-messages-list` | 20 | Should be class, heavy styling |
+| `#tab-project-detail` | 16 | Tab content, OK as ID |
+| `#pd-tab-settings` | 11 | Should be class |
+| `#pd-setting-status` | 7 | Should be class |
+| `#tab-analytics` | 6 | Tab content, OK as ID |
+| `#pd-status-dropdown` | 6 | Should be class |
+| `#pd-files-list` | 6 | Should be class |
+| `#pd-upload-dropzone` | 4 | OK as ID (unique) |
+| `#pd-tab-messages` | 3 | Should be class |
+| `#tab-client-detail` | 3 | Tab content, OK as ID |
+| `#projects-card` | 2 | Should be class |
+| `#intake-submissions-card` | 2 | Should be class |
+| `#contact-submissions-card` | 2 | Should be class |
+| `#btn-pd-send-message` | 2 | OK as ID (unique button) |
+| `#btn-logout` | 2 | CONFLICT - also in portal |
+| `#admin-send-message` | 2 | OK as ID |
+| `#visitors-chart` | 1 | OK as ID (chart container) |
+| `#sources-chart` | 1 | OK as ID (chart container) |
+| `#pd-project-name` | 1 | OK as ID |
+
+**Client Portal (2 IDs):**
+
+| ID | Issue |
+|----|-------|
+| `#tab-system` | OK as ID |
+| `#btn-logout` | CONFLICT - same ID as admin |
+
+**Main Site (6 IDs):**
+
+| ID | Issue |
+|----|-------|
+| `#intro` | OK - section ID |
+| `#about` | OK - section ID |
+| `#morph-card` | OK - unique element |
+| `#contact-business-card` | OK - unique element |
+| `#card-shadow-light` | OK - SVG filter |
+| `#card-shadow-dark` | OK - SVG filter |
+
+**Terminal Intake (5 IDs - SVG parts):**
+
+| ID | Note |
+|----|------|
+| `#Ear`, `#Eye`, `#Head`, `#Nose` | SVG element IDs |
+| `#main-content` | Section container |
+
+### Duplicate ID Conflicts
+
+| ID | Location 1 | Location 2 | Severity |
+|----|------------|------------|----------|
+| `#btn-logout` | admin.css | client-portal/sidebar.css | **HIGH** |
+| `#toggle-theme` | index.html | blob-animation-mockup.html | Low (test file) |
+| `#copyright-year` | index.html | blob-animation-mockup.html | Low (test file) |
+
+### Naming Convention Patterns Identified
+
+**Current patterns in use (inconsistent):**
+
+1. **`pd-*`** - Project detail elements (admin): `pd-messages-list`, `pd-tab-settings`
+2. **`tab-*`** - Tab content containers: `tab-analytics`, `tab-project-detail`
+3. **`btn-*`** - Buttons: `btn-logout`, `btn-pd-send-message`
+4. **`stat-*`** - Statistics displays: `stat-visitors`, `stat-total-leads`
+5. **`cd-*`** - Client detail elements: `cd-email`, `cd-company`
+6. **`sys-*`** - System info: `sys-version`, `sys-build-date`
+7. **Kebab-case cards** - `projects-card`, `intake-submissions-card`
+8. **No prefix** - Section IDs: `intro`, `about`, `contact`
+
+**Recommended standard:** `[scope]-[component]-[element]`
+
+- Admin: `admin-project-title`, `admin-messages-list`
+- Portal: `portal-nav-link`, `portal-sidebar`
+- Site: Unprefixed section IDs OK (`intro`, `about`, `contact`)
+
+### !important Usage (Red Flags for Conflicts)
+
+| File | Count | Priority |
+|------|-------|----------|
+| mobile/contact.css | 85 | **CRITICAL** |
+| pages/admin.css | 64 | **HIGH** |
+| mobile/layout.css | 55 | **HIGH** |
+| components/page-transitions.css | 47 | **HIGH** |
+| client-portal/sidebar.css | 47 | **HIGH** |
+| pages/terminal-intake.css | 41 | Medium |
+| pages/client.css | 35 | Medium |
+| pages/client-portal-section.css | 30 | Medium |
+| pages/contact.css | 28 | Medium |
+| **TOTAL** | **~650** | - |
+
+### Priority Issues to Fix
+
+1. **`#btn-logout` conflict** - Same ID in admin and portal CSS
+2. **Heavy ID styling** - `#pd-messages-list` (20 rules), `#pd-messages-thread` (20 rules) should be classes
+3. **!important abuse** - 650+ uses indicate specificity wars
+4. **Inconsistent prefixes** - Mix of `pd-`, `cd-`, `tab-`, `btn-`, etc.
+
+---
+
+2. **Standardize Naming Convention**
+   - [ ] Define naming convention: `[scope]-[component]-[element]` (e.g., `admin-project-title`, `portal-nav-link`)
+   - [ ] Prefix admin-specific IDs with `admin-`
+   - [ ] Prefix portal-specific IDs with `portal-` or `client-`
+   - [ ] Prefix main site IDs with `site-` or leave unprefixed
+
+3. **Refactor IDs to Classes Where Appropriate**
+   - [ ] Convert styling IDs to classes (IDs should only be for JS hooks)
+   - [ ] Use BEM-like naming for component classes
+   - [ ] Keep IDs only for: form labels, JS element selection, anchor links
+
+4. **Consolidate Duplicate Styles**
+   - [ ] Identify duplicate style definitions across CSS files
+   - [ ] Extract shared styles into common component classes
+   - [ ] Remove redundant/unused selectors
+
+5. **File Organization**
+   - [ ] Ensure clear separation: `admin.css`, `portal.css`, `main-site.css`
+   - [ ] Move shared styles to `components/` directory
+   - [ ] Document CSS architecture in `CSS_ARCHITECTURE.md`
+
+6. **Validation**
+   - [ ] Run HTML validator to catch duplicate IDs
+   - [ ] Test all pages after refactoring
+   - [ ] Verify no broken styles or JS functionality
 
 ### Phase 5: Documentation (After CMS complete)
 
