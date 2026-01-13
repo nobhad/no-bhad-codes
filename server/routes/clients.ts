@@ -532,6 +532,31 @@ router.put(
   })
 );
 
+// Get client's projects (admin only)
+router.get(
+  '/:id/projects',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    const projects = await db.all(
+      `
+      SELECT
+        id, project_name, description, status, priority, start_date,
+        estimated_end_date, actual_end_date, budget_range, created_at, updated_at
+      FROM projects
+      WHERE client_id = ?
+      ORDER BY created_at DESC
+      `,
+      [clientId]
+    );
+
+    res.json({ projects });
+  })
+);
+
 // Delete client (admin only)
 router.delete(
   '/:id',
