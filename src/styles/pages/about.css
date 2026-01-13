@@ -81,7 +81,8 @@
     height: 6px;
     background: var(--color-dark);
     border: none;
-    margin: 0 0 1.5rem 0;
+    margin: 0;
+    margin-bottom: 1rem;
   }
 
   /* Paragraphs */

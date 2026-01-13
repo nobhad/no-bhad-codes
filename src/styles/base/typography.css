@@ -91,13 +91,15 @@ section h2 {
   text-align: left;
   width: 100%;
   margin: 0;
+  margin-bottom: 0.5rem;
   padding: 0;
 }
 
 section h2 + hr {
-  margin-top: -1rem; /* Counteract parent flex gap */
+  margin-top: 0;
   margin-left: 0;
   margin-right: auto;
+  margin-bottom: 1rem;
 }
 
 /* Dark mode hr - uses --color-dark which flips to light color in dark mode */
