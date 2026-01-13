@@ -20,6 +20,7 @@ import {
   loadMessagesModule,
   loadSettingsModule
 } from './modules';
+import { formatFileSize } from '../../utils/format-utils';
 
 export class ClientPortalModule extends BaseModule {
   private isLoggedIn = false;
@@ -1200,7 +1201,7 @@ export class ClientPortalModule extends BaseModule {
           <span class="file-name">${this.escapeHtml(file.originalName)}</span>
           <span class="file-meta">
             ${file.projectName ? `${file.projectName} • ` : ''}
-            ${this.formatDate(file.uploadedAt)} • ${this.formatFileSize(file.size)}
+            ${this.formatDate(file.uploadedAt)} • ${formatFileSize(file.size)}
           </span>
         </div>
         <div class="file-actions">
@@ -1241,18 +1242,6 @@ export class ClientPortalModule extends BaseModule {
       return pdfIcon;
     }
     return docIcon;
-  }
-
-  /**
-   * Format file size in human-readable format
-   */
-  private formatFileSize(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const size = parseFloat((bytes / Math.pow(k, i)).toFixed(1));
-    return `${size} ${sizes[i]}`;
   }
 
   /**
