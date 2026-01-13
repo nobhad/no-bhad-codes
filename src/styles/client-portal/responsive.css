@@ -73,7 +73,7 @@
 }
 
 /* Mobile */
-@media screen and (max-width: 479px) {
+@media (--small-mobile) {
   .dashboard-layout {
     padding: 0;
   }

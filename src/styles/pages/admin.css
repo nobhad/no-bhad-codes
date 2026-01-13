@@ -55,7 +55,7 @@
   padding: var(--portal-spacing-md) var(--portal-spacing-xl);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 [data-page="admin"] .btn:hover,
@@ -362,7 +362,7 @@
   color: var(--color-neutral-200);
   font-family: inherit;
   height: clamp(40px, 8vw, 48px);
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   box-sizing: border-box;
 }
 
@@ -407,7 +407,7 @@
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   text-transform: uppercase;
   background-color: var(--color-dark);
   color: var(--color-neutral-200);
@@ -2272,7 +2272,7 @@
   }
 }
 
-@media (max-width: 479px) {
+@media (--small-mobile) {
   .auth-container {
     margin: var(--space-4);
     padding: var(--space-6);

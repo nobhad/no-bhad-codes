@@ -418,7 +418,7 @@ html[data-theme="light"] .terminal {
   }
 }
 
-@media (max-width: 479px) {
+@media (--small-mobile) {
   .terminal-header {
     padding: 6px 12px;
   }

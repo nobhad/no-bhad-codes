@@ -54,7 +54,7 @@
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   margin-right: var(--space-3);
 }
 
@@ -84,7 +84,7 @@
   border: 1px solid var(--portal-border-dark);
   border-radius: var(--border-radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .client-project-item:hover {

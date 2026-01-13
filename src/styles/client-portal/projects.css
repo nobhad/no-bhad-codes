@@ -161,7 +161,7 @@
   text-transform: uppercase;
   letter-spacing: 0.3px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   position: relative;
   user-select: none;
 }
@@ -213,7 +213,7 @@
   width: 100%;
   padding: 0.5rem 1rem 0.5rem 2.25rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   position: relative;
   border-left: 3px solid transparent;
   border-radius: 0 4px 4px 0;

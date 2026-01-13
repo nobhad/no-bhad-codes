@@ -129,7 +129,7 @@ button.stat-card,
 
 .stat-card-clickable {
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .stat-card-clickable:hover {

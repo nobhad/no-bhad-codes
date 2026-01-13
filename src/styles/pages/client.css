@@ -556,7 +556,7 @@ body[data-page="client-landing"] .client-login .client-content {
   color: var(--color-text-primary);
   font-family: inherit;
   box-sizing: border-box;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   height: clamp(32px, 8vw, 44px);
 }
 
@@ -738,7 +738,7 @@ body[data-page="client-landing"] .client-login .client-content {
   }
 }
 
-@media (max-width: 479px) {
+@media (--small-mobile) {
   .auth-container {
     height: 520px; /* Fixed height for small screens - NEVER changes */
     padding: 1.25rem;
@@ -1330,7 +1330,7 @@ br.desktop-only {
 }
 
 /* Responsive - Small Mobile */
-@media (max-width: 479px) {
+@media (--small-mobile) {
   .client-login:has(.portal-cards) {
     padding: 0.5rem;
     padding-top: calc(var(--header-height, 60px) + 0.5rem);

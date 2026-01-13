@@ -223,7 +223,7 @@
   padding: var(--portal-spacing-md) var(--portal-spacing-xl);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 [data-page="client-portal"] .btn:hover,
@@ -342,7 +342,7 @@
   border: 1px solid var(--portal-border-medium);
   border-radius: var(--portal-radius-md, 8px);
   padding: 1.5rem;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .card:hover {
