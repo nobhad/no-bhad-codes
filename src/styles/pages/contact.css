@@ -860,226 +860,78 @@ html[data-theme="dark"] .submit-button:focus-visible {
 
 /* ==========================================
    RESPONSIVE - MEDIUM VIEWPORTS (600px - 1100px)
-   Stack layout with card above form
+   Same as desktop layout, scaled to 92vw
    ========================================== */
 
 @media screen and (min-width: 600px) and (max-width: 1100px) {
-  /* Section - center message field and button in viewport */
-  .contact-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: 0;
-  }
-
-  /* Contact content - accommodate 640px form + 480px avatar + gap */
+  /* Scale layout to 92vw while maintaining desktop structure */
   .contact-section .contact-content {
-    width: 100%;
-    max-width: calc(var(--contact-textarea-width, 640px) + 480px + 2rem);
-    margin: 0 auto; /* Center the content */
-    margin-top: 0; /* Remove top margin */
-    padding: 0;
-    padding-top: 0; /* Remove top padding */
-    position: relative;
-    transform: translateX(-10rem); /* Move all content (heading, hr, form, SVG) left to prevent SVG cutoff */
+    width: 92vw;
+    max-width: 92vw;
   }
 
-  /* h2 - left-aligned, larger on tablet screens */
-  .contact-section h2 {
-    margin-top: 0;
-    margin-bottom: 0;
-    line-height: 1;
-    overflow: visible;
-    width: 100%;
-    text-align: left;
-    font-size: clamp(3rem, 7vw, 4rem);
-  }
-
-  /* hr - span only the width of top form fields (400px), align with left edge of form column */
-  /* Form column is centered, so hr needs to align with form column's left edge */
+  /* hr spans width of input fields only */
   .contact-section hr {
-    width: 400px;
-    max-width: 100%;
-    margin-top: 0;
-    margin-bottom: 0.25rem; /* Reduced spacing */
-    /* Align with form column left edge - form column is centered with margin: 0 auto */
-    margin-left: calc((100% - calc(500px + 100px + 1rem)) / 2);
-    margin-right: auto;
+    width: 350px;
+    margin-bottom: 1rem;
   }
 
-  /* Layout - single column for form, avatar floats */
+  /* Remove top margin on form inputs */
+  .contact-section .contact-left {
+    margin-top: 0;
+  }
+
+  /* Layout - same two-column grid as desktop, scaled to fit */
   .contact-section .contact-layout {
-    display: block;
+    --layout-form-width: 600px;
+    --layout-gap: clamp(1rem, 2vw, 2rem);
+    --layout-card-width: 550px;
     width: 100%;
     height: auto;
     min-height: auto;
-    position: relative;
-    margin-top: 0; /* No extra spacing - hr margin-bottom handles gap */
   }
 
-  /* Form column - smaller width, centered */
+  /* Form column */
   .contact-section .contact-form-column {
-    width: calc(500px + 100px + 1rem); /* Width to accommodate message + button */
-    max-width: 100%;
-    overflow: visible;
-    margin: 0 auto; /* Center the form column */
+    width: var(--layout-form-width);
   }
 
-  /* Input heights */
-  .contact-section .input-item input {
-    height: 56px;
+  /* Input fields (name, company, email) - narrower */
+  .contact-section .contact-left .input-item {
+    width: 350px;
+    max-width: 350px;
   }
 
-  .contact-section .input-item textarea {
-    min-height: 116px;
-  }
-
-  /* Avatar blurb column - positioned to the right of input fields, above message field */
+  /* Card column - same size as desktop, positioned for balanced spacing */
   .contact-section .contact-card-column {
-    position: absolute;
-    top: calc(-27rem + 21rem); /* Moved down 21rem total */
-    left: calc(400px - 19rem + 21rem); /* Moved right 21rem total */
-    width: 520px; /* Smaller */
-    margin: 0;
-    padding: 0;
-    z-index: 10;
+    width: var(--layout-card-width);
+    transform: translate(-14rem, -8.5rem);
   }
 
-  /* Avatar blurb sizing for medium viewport - smaller */
+  /* Avatar blurb - match desktop sizing */
   .contact-section .avatar-blurb-container {
     width: 100%;
-    max-width: 520px; /* Smaller */
-  }
-
-  .contact-section .avatar-blurb-content {
-    position: absolute;
-    top: 30%;
-    left: 36%;
-    transform: translate(-50%, -50%);
-    max-width: 55%;
-    text-align: center;
+    max-width: 600px;
   }
 
   .contact-section .avatar-blurb-text {
-    font-size: 1.75rem;
-    text-align: center;
-    color: var(--color-black, #000000); /* Always black - blurb bg is white */
+    font-size: clamp(1.4rem, 2.5vw, 1.7rem);
   }
 
-  /* Dark mode: Make dog avatar SVG true black in medium viewport */
-  html[data-theme="dark"] .contact-section .avatar-blurb-svg {
-    filter: brightness(0);
+  /* Smaller input heights */
+  .contact-section .input-item input {
+    height: 60px;
   }
 
-  /* Stack form fields */
-  .contact-section .contact-row {
-    flex-direction: column;
-    gap: 0;
-    align-items: stretch;
-    width: 100%;
+  .contact-section .input-item textarea {
+    min-height: 120px;
   }
 
-  .contact-section .contact-left {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: var(--contact-field-gap, 0.75rem);
-  }
-
-  /* Input fields on tablet - narrower than textarea (400px) */
-  .contact-section .contact-left .input-item {
-    width: 400px;
-    max-width: 400px;
-  }
-
-  /* Form layout - smaller widths */
-  .contact-section .contact-form {
-    display: grid;
-    grid-template-columns: 500px auto;
-    gap: var(--contact-row-gap, 0.75rem);
-    align-items: start;
-    width: 500px;
-    max-width: 100%;
-  }
-
-  /* Inputs - 400px width (smaller than desktop) */
-  .contact-section .contact-left {
-    grid-column: 1;
-    grid-row: 1;
-    width: 400px;
-    max-width: 400px;
-    min-width: 400px;
-  }
-
-  /* Input fields - 400px (smaller than desktop) */
-  .contact-section .contact-left .input-item {
-    width: 400px;
-    max-width: 400px;
-    min-width: 400px;
-  }
-
-  /* Message row - 500px wide */
-  .contact-section .contact-message-row {
-    grid-column: 1;
-    grid-row: 2;
-    width: 500px;
-    max-width: 500px;
-    min-width: 500px;
-    margin-top: 0;
-  }
-
-  /* Textarea - full width of its 500px container */
-  .contact-section .contact-message-row .input-item {
-    width: 100%;
-    max-width: 500px;
-    min-width: 500px;
-  }
-
-  .contact-section .contact-message-row .input-item textarea {
-    width: 100%;
-  }
-
-  /* Submit button container - second column, second row (same row as message, to the right) */
-  .contact-section .contact-right {
-    grid-column: 2;
-    grid-row: 2;
-    display: flex !important;
-    justify-content: center;
-    align-items: center;
-    width: auto;
-    margin-top: 0;
-    padding-left: 1rem;
-    align-self: center;
-  }
-
-  /* Submit button - to the right of message field, vertically centered */
+  /* Submit button - slightly smaller */
   .contact-section .submit-button {
-    position: relative;
-    margin: 0;
-    right: auto;
-    top: auto;
-    transform: none;
-    z-index: 20; /* Above card */
-    display: flex !important;
-    opacity: 1 !important;
-    visibility: visible !important;
     width: 100px;
     height: 100px;
   }
-
-  /* Labels always visible on medium viewports */
-  .contact-section label.text-small {
-    opacity: 1;
-  }
-
-  /* Placeholder text always visible */
-  .contact-section .input-item input::placeholder,
-  .contact-section .input-item textarea::placeholder {
-    opacity: 0.6;
-  }
-
 
   /* Hide contact options text since card is shown */
   .contact-section p.contact-options {
