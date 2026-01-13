@@ -223,7 +223,7 @@
     font-family: var(--font--acme) !important;
     font-weight: 700 !important;
     text-transform: uppercase !important;
-    margin-bottom: 0.75rem !important;
+    margin: 0 !important;
     letter-spacing: 0.08em !important;
   }
 
@@ -245,6 +245,14 @@
     padding: 1rem 1.5rem;
     border-radius: 8px;
     border: 2px solid var(--color-neutral-600);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .tech-stack-desktop .tech-stack h3,
+  .tech-stack-desktop .tech-stack .tech-list {
+    margin: 0 !important;
   }
 
   /* Dark theme: lighter border for contrast */

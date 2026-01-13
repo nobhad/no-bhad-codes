@@ -1,0 +1,12 @@
+/**
+ * ===============================================
+ * ADMIN DASHBOARD STYLES - INDEX
+ * ===============================================
+ * @file src/styles/admin/index.css
+ *
+ * Import file for all admin dashboard styles.
+ * Split into modules for maintainability.
+ */
+
+@import "./project-detail.css";
+@import "./client-detail.css";
