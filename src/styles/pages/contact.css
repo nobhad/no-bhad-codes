@@ -322,6 +322,11 @@
     display: block;
   }
 
+  /* Dark mode: Make dog avatar true black */
+  html[data-theme="dark"] .avatar-blurb-svg .cls-3 {
+    fill: #000000;
+  }
+
   .avatar-blurb-content {
     position: absolute;
     top: 30%;
