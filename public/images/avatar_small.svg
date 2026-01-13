@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 288 356">
+  <!-- Generator: Adobe Illustrator 29.3.1, SVG Export Plug-In . SVG Version: 2.1.0 Build 151)  -->
+  <defs>
+    <style>
+      .st0 {
+        isolation: isolate;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2">
+    <image class="st0" width="273" height="355" transform="translate(15 1)" xlink:href="avatar_small-1.png"/>
+    <image class="st0" width="99" height="102" transform="translate(0 143)" xlink:href="avatar_small-2.png"/>
+    <image class="st0" width="103" height="159" transform="translate(118)" xlink:href="avatar_small-3.png"/>
+    <image class="st0" width="97" height="112" transform="translate(104 113)" xlink:href="avatar_small-4.png"/>
+    <image class="st0" width="88" height="94" transform="translate(109 122)" xlink:href="avatar_small-5.png"/>
+  </g>
+</svg>

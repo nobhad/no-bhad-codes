@@ -2983,8 +2983,6 @@
 }
 
 /* Messages in Project Detail - Light background */
-#pd-messages-list,
-#pd-messages-thread,
 [data-page="admin"] .messages-thread {
   max-height: 400px;
   overflow-y: auto;
@@ -2997,8 +2995,6 @@
   gap: var(--portal-spacing-md);
 }
 
-#pd-messages-list .message,
-#pd-messages-thread .message,
 .messages-thread .message {
   display: flex;
   flex-direction: row;
@@ -3011,15 +3007,11 @@
   border-radius: 0;
 }
 
-#pd-messages-list .message-received,
-#pd-messages-thread .message-received,
 .messages-thread .message-received {
   align-self: flex-start;
 }
 
 /* Message Avatar */
-#pd-messages-list .message-avatar,
-#pd-messages-thread .message-avatar,
 .messages-thread .message-avatar {
   display: flex;
   flex-direction: column;
@@ -3028,8 +3020,6 @@
   flex-shrink: 0;
 }
 
-#pd-messages-list .message-avatar .avatar-placeholder,
-#pd-messages-thread .message-avatar .avatar-placeholder,
 .messages-thread .message-avatar .avatar-placeholder {
   width: 48px;
   height: 48px;
@@ -3045,8 +3035,6 @@
 }
 
 /* Message Content (the bubble) */
-#pd-messages-list .message-content,
-#pd-messages-thread .message-content,
 .messages-thread .message-content {
   background: white;
   border: 2px solid var(--portal-border-dark);
@@ -3055,22 +3043,16 @@
   flex: 1;
 }
 
-#pd-messages-list .message-received .message-content,
-#pd-messages-thread .message-received .message-content,
 .messages-thread .message-received .message-content {
   color: var(--portal-text-dark);
   border-bottom-left-radius: var(--portal-radius-xs);
 }
 
-#pd-messages-list .message-sent,
-#pd-messages-thread .message-sent,
 .messages-thread .message-sent {
   align-self: flex-end;
   flex-direction: row-reverse;
 }
 
-#pd-messages-list .message-sent .message-content,
-#pd-messages-thread .message-sent .message-content,
 .messages-thread .message-sent .message-content {
   background: var(--color-primary);
   color: var(--portal-text-dark);
@@ -3078,8 +3060,6 @@
   border-bottom-right-radius: var(--portal-radius-xs);
 }
 
-#pd-messages-list .message-header,
-#pd-messages-thread .message-header,
 .messages-thread .message-header {
   display: flex;
   justify-content: flex-end;
@@ -3087,35 +3067,25 @@
   margin-bottom: var(--portal-spacing-xs);
 }
 
-#pd-messages-list .message-sender,
-#pd-messages-thread .message-sender,
 .messages-thread .message-sender {
   font-weight: 600;
   font-size: 0.85rem;
 }
 
-#pd-messages-list .message-received .message-sender,
-#pd-messages-thread .message-received .message-sender,
 .messages-thread .message-received .message-sender {
   color: var(--portal-text-dark);
 }
 
-#pd-messages-list .message-sent .message-sender,
-#pd-messages-thread .message-sent .message-sender,
 .messages-thread .message-sent .message-sender {
   color: var(--portal-text-dark);
 }
 
-#pd-messages-list .message-time,
-#pd-messages-thread .message-time,
 .messages-thread .message-time {
   font-size: 0.75rem;
   color: var(--portal-text-dark);
 }
 
 /* Sender name below avatar */
-#pd-messages-list .message-avatar .message-sender,
-#pd-messages-thread .message-avatar .message-sender,
 .messages-thread .message-avatar .message-sender {
   font-size: 0.7rem;
   font-weight: 600;
@@ -3126,30 +3096,20 @@
   line-height: 1.2;
 }
 
-#pd-messages-list .message-content,
-#pd-messages-thread .message-content,
 .messages-thread .message-content {
   font-size: 0.9rem;
   line-height: 1.5;
 }
 
-#pd-messages-list .message-received .message-content,
-#pd-messages-thread .message-received .message-content,
 .messages-thread .message-received .message-content {
   color: var(--portal-text-dark);
 }
 
-#pd-messages-list .message-sent .message-content,
-#pd-messages-thread .message-sent .message-content,
 .messages-thread .message-sent .message-content {
   color: var(--portal-text-dark);
 }
 
 /* Empty state in messages - dark text on light bg */
-#pd-messages-list .empty-state,
-#pd-messages-list > p,
-#pd-messages-thread .empty-state,
-#pd-messages-thread > p,
 .messages-thread .empty-state,
 .messages-thread > p {
   color: var(--portal-text-dark) !important;
