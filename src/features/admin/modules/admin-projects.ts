@@ -42,6 +42,22 @@ let projectsData: LeadProject[] = [];
 let currentProjectId: number | null = null;
 let storedContext: AdminDashboardContext | null = null;
 
+/**
+ * Format budget/timeline values with proper capitalization
+ * Capitalizes first letter of each word, ASAP becomes all caps
+ */
+function formatDisplayValue(value: string | undefined | null): string {
+  if (!value || value === '-') return '-';
+
+  // Handle ASAP - make it all caps
+  let formatted = value.replace(/\basap\b/gi, 'ASAP');
+
+  // Capitalize first letter of each word
+  formatted = formatted.replace(/\b\w/g, (char) => char.toUpperCase());
+
+  return formatted;
+}
+
 export function getProjectsData(): LeadProject[] {
   return projectsData;
 }
@@ -131,8 +147,8 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
           <td>${safeName}</td>
           <td>${safeContact}<br><small>${safeCompany}</small></td>
           <td>${formatProjectType(project.project_type)}</td>
-          <td>${project.budget_range || '-'}</td>
-          <td>${project.timeline || '-'}</td>
+          <td>${formatDisplayValue(project.budget_range)}</td>
+          <td>${formatDisplayValue(project.timeline)}</td>
           <td>${statusLabels[status] || 'Pending'}</td>
         </tr>
       `;
@@ -221,9 +237,9 @@ function populateProjectDetailView(project: LeadProject): void {
     'pd-client-email': project.email || '-',
     'pd-company': project.company_name || '-',
     'pd-type': formatProjectType(project.project_type),
-    'pd-budget': project.budget_range || '-',
+    'pd-budget': formatDisplayValue(project.budget_range),
     'pd-price': projectData.price || '-',
-    'pd-timeline': project.timeline || '-',
+    'pd-timeline': formatDisplayValue(project.timeline),
     'pd-start-date': project.created_at ? new Date(project.created_at).toLocaleDateString() : '-'
   };
 
@@ -279,32 +295,33 @@ function populateProjectDetailView(project: LeadProject): void {
   if (progressPercent) progressPercent.textContent = `${progress}%`;
   if (progressBar) progressBar.style.width = `${progress}%`;
 
-  // Notes
-  const notes = document.getElementById('pd-notes');
-  if (notes) {
-    const safeDesc = SanitizationUtils.escapeHtml(project.description || '');
+  // Description (now in static HTML element)
+  const descriptionEl = document.getElementById('pd-description');
+  if (descriptionEl) {
+    descriptionEl.textContent = project.description || '-';
+  }
 
-    if (project.description || project.features) {
-      let html = '';
-      if (project.description) {
-        html += `<div class="meta-item"><span class="meta-label">Project Description</span><span class="meta-value">${safeDesc}</span></div>`;
-      }
-      if (project.features) {
-        // Filter out plan tiers that aren't actual features
-        const excludedValues = ['basic-only', 'standard', 'premium', 'enterprise'];
-        const featuresList = project.features
-          .split(',')
-          .map((f) => f.trim())
-          .filter((f) => f && !excludedValues.includes(f.toLowerCase()))
-          .map((f) => `<span class="feature-tag">${SanitizationUtils.escapeHtml(f)}</span>`)
-          .join('');
-        if (featuresList) {
-          html += `<div class="meta-item"><span class="meta-label">Features Requested</span><div class="features-list">${featuresList}</div></div>`;
-        }
-      }
-      notes.innerHTML = html;
-    } else {
-      notes.innerHTML = '';
+  // Features - append below the description row if present
+  const notes = document.getElementById('pd-notes');
+  if (notes && project.features) {
+    // Filter out plan tiers that aren't actual features
+    const excludedValues = ['basic-only', 'standard', 'premium', 'enterprise'];
+    const featuresList = project.features
+      .split(',')
+      .map((f) => f.trim())
+      .filter((f) => f && !excludedValues.includes(f.toLowerCase()))
+      .map((f) => `<span class="feature-tag">${SanitizationUtils.escapeHtml(f)}</span>`)
+      .join('');
+
+    // Check if features container already exists, otherwise append
+    let featuresContainer = notes.querySelector('.features-container');
+    if (!featuresContainer && featuresList) {
+      featuresContainer = document.createElement('div');
+      featuresContainer.className = 'meta-item features-container';
+      featuresContainer.innerHTML = `<span class="meta-label">Features Requested</span><div class="features-list">${featuresList}</div>`;
+      notes.appendChild(featuresContainer);
+    } else if (featuresContainer && featuresList) {
+      featuresContainer.innerHTML = `<span class="meta-label">Features Requested</span><div class="features-list">${featuresList}</div>`;
     }
   }
 }

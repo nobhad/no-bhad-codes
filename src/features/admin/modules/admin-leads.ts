@@ -23,6 +23,22 @@ interface LeadsData {
 
 let leadsData: Lead[] = [];
 
+/**
+ * Format budget/timeline values with proper capitalization
+ * Capitalizes first letter of each word, ASAP becomes all caps
+ */
+function formatDisplayValue(value: string | undefined | null): string {
+  if (!value || value === '-') return '-';
+
+  // Handle ASAP - make it all caps
+  let formatted = value.replace(/\basap\b/gi, 'ASAP');
+
+  // Capitalize first letter of each word
+  formatted = formatted.replace(/\b\w/g, (char) => char.toUpperCase());
+
+  return formatted;
+}
+
 export function getLeadsData(): Lead[] {
   return leadsData;
 }
@@ -140,8 +156,7 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
       const leadAny = lead as unknown as Record<string, string>;
       const projectType = leadAny.project_type || '-';
       const displayType = projectType !== '-' ? projectType.charAt(0).toUpperCase() + projectType.slice(1) : '-';
-      const budget = leadAny.budget_range || '-';
-      const displayBudget = budget !== '-' ? budget.charAt(0).toUpperCase() + budget.slice(1) : '-';
+      const displayBudget = formatDisplayValue(leadAny.budget_range);
       const status = lead.status || 'new';
       const displayStatus = status.charAt(0).toUpperCase() + status.slice(1);
 
@@ -183,8 +198,8 @@ export function showLeadDetails(leadId: number): void {
   const safePhone = SanitizationUtils.escapeHtml(lead.phone || '-');
   const safeProjectType = SanitizationUtils.escapeHtml(lead.project_type || '-');
   const safeDescription = SanitizationUtils.escapeHtml(lead.description || 'No description');
-  const safeBudget = SanitizationUtils.escapeHtml(lead.budget_range || '-');
-  const safeTimeline = SanitizationUtils.escapeHtml(lead.timeline || '-');
+  const safeBudget = SanitizationUtils.escapeHtml(formatDisplayValue(lead.budget_range));
+  const safeTimeline = SanitizationUtils.escapeHtml(formatDisplayValue(lead.timeline));
   const safeFeatures = SanitizationUtils.escapeHtml((lead.features || '-').replace(/,/g, ', '));
   const safeSource = SanitizationUtils.escapeHtml(lead.source || '-');
 

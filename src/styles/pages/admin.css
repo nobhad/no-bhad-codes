@@ -2837,6 +2837,34 @@
   gap: var(--portal-spacing-sm);
 }
 
+/* Project Description Row - description and preview URL on same line */
+.project-description-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--portal-spacing-xl);
+  margin-top: var(--portal-spacing-lg);
+}
+
+.project-description-row .description-item {
+  flex: 2;
+  min-width: 200px;
+}
+
+.project-description-row .preview-url-item {
+  flex: 1;
+  min-width: 200px;
+}
+
+.project-description-row .meta-value {
+  white-space: pre-wrap;
+}
+
+/* Features container appended to description row */
+.project-description-row .features-container {
+  flex-basis: 100%;
+  margin-top: var(--portal-spacing-md);
+}
+
 /* Project Notes - inside overview card */
 .project-detail-overview .project-notes {
   background: transparent;
