@@ -429,7 +429,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       this.currentThreadId = thread.id;
 
       // Get messages in this thread
-      const messagesResponse = await fetch(`/api/messages/threads/${thread.id}`, {
+      const messagesResponse = await fetch(`/api/messages/threads/${thread.id}/messages`, {
         credentials: 'include'
       });
 

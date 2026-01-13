@@ -409,7 +409,7 @@ async function loadClientBilling(clientId: number): Promise<void> {
   const outstandingEl = document.getElementById('cd-outstanding');
 
   try {
-    const response = await fetch(`/api/clients/${clientId}/invoices`, {
+    const response = await fetch(`/api/invoices/client/${clientId}`, {
       credentials: 'include'
     });
 
