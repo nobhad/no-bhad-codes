@@ -41,6 +41,22 @@ export interface Invoice {
   terms?: string;
   createdAt?: string;
   updatedAt?: string;
+  // Custom business info fields
+  businessName?: string;
+  businessContact?: string;
+  businessEmail?: string;
+  businessWebsite?: string;
+  // Payment method fields
+  venmoHandle?: string;
+  paypalEmail?: string;
+  // Services/project fields
+  servicesTitle?: string;
+  servicesDescription?: string;
+  deliverables?: string[]; // Array of bullet points
+  features?: string; // Comma-separated or text
+  // Bill To override fields
+  billToName?: string;
+  billToEmail?: string;
 }
 
 export interface InvoiceCreateData {
@@ -51,6 +67,21 @@ export interface InvoiceCreateData {
   notes?: string;
   terms?: string;
   currency?: string;
+  // Custom business info
+  businessName?: string;
+  businessContact?: string;
+  businessEmail?: string;
+  businessWebsite?: string;
+  venmoHandle?: string;
+  paypalEmail?: string;
+  // Services fields
+  servicesTitle?: string;
+  servicesDescription?: string;
+  deliverables?: string[];
+  features?: string;
+  // Bill To overrides
+  billToName?: string;
+  billToEmail?: string;
 }
 
 export class InvoiceService {
@@ -100,8 +131,11 @@ export class InvoiceService {
     const sql = `
       INSERT INTO invoices (
         invoice_number, project_id, client_id, amount_total, amount_paid,
-        currency, status, due_date, issued_date, line_items, notes, terms
-      ) VALUES (?, ?, ?, ?, 0, ?, 'draft', ?, ?, ?, ?, ?)
+        currency, status, due_date, issued_date, line_items, notes, terms,
+        business_name, business_contact, business_email, business_website,
+        venmo_handle, paypal_email, services_title, services_description,
+        deliverables, features, bill_to_name, bill_to_email
+      ) VALUES (?, ?, ?, ?, 0, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const result = await this.db.run(sql, [
@@ -114,7 +148,19 @@ export class InvoiceService {
       issuedDate,
       JSON.stringify(data.lineItems),
       data.notes || null,
-      data.terms || 'Payment due within 30 days',
+      data.terms || 'Payment due within 14 days of receipt.',
+      data.businessName || 'No Bhad Codes',
+      data.businessContact || 'Noelle Bhaduri',
+      data.businessEmail || 'nobhaduri@gmail.com',
+      data.businessWebsite || 'nobhad.codes',
+      data.venmoHandle || '@nobhad',
+      data.paypalEmail || 'nobhaduri@gmail.com',
+      data.servicesTitle || null,
+      data.servicesDescription || null,
+      data.deliverables ? JSON.stringify(data.deliverables) : null,
+      data.features || null,
+      data.billToName || null,
+      data.billToEmail || null,
     ]);
 
     return this.getInvoiceById(result.lastID!);
@@ -516,6 +562,22 @@ export class InvoiceService {
       terms: row.terms,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+      // Custom business info
+      businessName: row.business_name || 'No Bhad Codes',
+      businessContact: row.business_contact || 'Noelle Bhaduri',
+      businessEmail: row.business_email || 'nobhaduri@gmail.com',
+      businessWebsite: row.business_website || 'nobhad.codes',
+      // Payment methods
+      venmoHandle: row.venmo_handle || '@nobhad',
+      paypalEmail: row.paypal_email || 'nobhaduri@gmail.com',
+      // Services fields
+      servicesTitle: row.services_title,
+      servicesDescription: row.services_description,
+      deliverables: row.deliverables ? JSON.parse(row.deliverables) : [],
+      features: row.features,
+      // Bill To overrides
+      billToName: row.bill_to_name,
+      billToEmail: row.bill_to_email,
     };
   }
 }
