@@ -202,7 +202,7 @@ html[data-theme="light"] {
   /* Legacy neutral colors → gray scale */
   --color-neutral-100: #fffdfc; /* Tech stack background - warm */
   --color-neutral-200: var(--color-gray-200);
-  --color-neutral-300: #f8f5f4; /* Light theme background - warm */
+  --color-neutral-300: #e0e0e0; /* Light theme background */
   --color-neutral-400: var(--color-gray-400);
   --color-neutral-500: var(--color-gray-500);
   --color-neutral-600: var(--color-gray-600);
