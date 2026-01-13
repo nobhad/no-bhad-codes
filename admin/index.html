@@ -899,6 +899,10 @@
                   <span class="meta-label">Started</span>
                   <span class="meta-value" id="pd-start-date">-</span>
                 </div>
+                <div class="meta-item">
+                  <span class="meta-label">Target End</span>
+                  <span class="meta-value" id="pd-end-date">-</span>
+                </div>
               </div>
               <div class="project-detail-meta">
                 <div class="meta-item">
@@ -926,6 +930,36 @@
                 <div class="meta-item preview-url-item">
                   <span class="meta-label">Preview URL</span>
                   <span class="meta-value"><a href="#" id="pd-preview-url-link" target="_blank">-</a></span>
+                </div>
+              </div>
+              <div class="project-detail-meta project-urls-row" id="pd-urls-section" style="display: none;">
+                <div class="meta-item">
+                  <span class="meta-label">Repository</span>
+                  <span class="meta-value"><a href="#" id="pd-repo-url-link" target="_blank">-</a></span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Staging</span>
+                  <span class="meta-value"><a href="#" id="pd-staging-url-link" target="_blank">-</a></span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Production</span>
+                  <span class="meta-value"><a href="#" id="pd-production-url-link" target="_blank">-</a></span>
+                </div>
+              </div>
+              <div class="project-detail-meta project-financial-row" id="pd-financial-section" style="display: none;">
+                <div class="meta-item">
+                  <span class="meta-label">Deposit</span>
+                  <span class="meta-value" id="pd-deposit">-</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Contract Signed</span>
+                  <span class="meta-value" id="pd-contract-date">-</span>
+                </div>
+              </div>
+              <div class="project-description-row" id="pd-admin-notes-section" style="display: none;">
+                <div class="meta-item description-item">
+                  <span class="meta-label">Admin Notes (Internal)</span>
+                  <span class="meta-value" id="pd-admin-notes">-</span>
                 </div>
               </div>
             </div>
@@ -1276,6 +1310,44 @@
                 <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>
               </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="meta-label" for="edit-project-start-date">Start Date</label>
+                <input type="date" id="edit-project-start-date" class="form-input" />
+              </div>
+              <div class="form-group">
+                <label class="meta-label" for="edit-project-end-date">Target End Date</label>
+                <input type="date" id="edit-project-end-date" class="form-input" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="meta-label" for="edit-project-deposit">Deposit Amount</label>
+                <input type="text" id="edit-project-deposit" class="form-input" placeholder="$1,000" />
+              </div>
+              <div class="form-group">
+                <label class="meta-label" for="edit-project-contract-date">Contract Signed</label>
+                <input type="date" id="edit-project-contract-date" class="form-input" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="meta-label" for="edit-project-repo-url">Repository URL</label>
+              <input type="url" id="edit-project-repo-url" class="form-input" placeholder="https://github.com/..." />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="meta-label" for="edit-project-staging-url">Staging URL</label>
+                <input type="url" id="edit-project-staging-url" class="form-input" placeholder="https://staging.example.com" />
+              </div>
+              <div class="form-group">
+                <label class="meta-label" for="edit-project-production-url">Production URL</label>
+                <input type="url" id="edit-project-production-url" class="form-input" placeholder="https://example.com" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="meta-label" for="edit-project-notes">Admin Notes (internal)</label>
+              <textarea id="edit-project-notes" class="form-input" rows="3" placeholder="Internal notes not visible to client..."></textarea>
             </div>
           </div>
           <div class="admin-modal-footer">

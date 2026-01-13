@@ -92,8 +92,17 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (budget) budget.textContent = project.budget_range || '-';
     if (timeline) timeline.textContent = project.timeline || '-';
     if (startDate) {
-      startDate.textContent = project.created_at
-        ? new Date(project.created_at).toLocaleDateString()
+      const dateToShow = project.start_date || project.created_at;
+      startDate.textContent = dateToShow
+        ? new Date(dateToShow).toLocaleDateString()
+        : '-';
+    }
+
+    // Target end date
+    const endDate = document.getElementById('pd-end-date');
+    if (endDate) {
+      endDate.textContent = project.estimated_end_date
+        ? new Date(project.estimated_end_date).toLocaleDateString()
         : '-';
     }
 
@@ -120,6 +129,73 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         previewUrlLink.href = '#';
         previewUrlLink.textContent = '-';
       }
+    }
+
+    // URLs section (repository, staging, production)
+    const urlsSection = document.getElementById('pd-urls-section');
+    const repoUrlLink = document.getElementById('pd-repo-url-link') as HTMLAnchorElement;
+    const stagingUrlLink = document.getElementById('pd-staging-url-link') as HTMLAnchorElement;
+    const productionUrlLink = document.getElementById('pd-production-url-link') as HTMLAnchorElement;
+
+    const hasUrls = project.repository_url || project.staging_url || project.production_url;
+    if (urlsSection) {
+      urlsSection.style.display = hasUrls ? 'flex' : 'none';
+    }
+    if (repoUrlLink) {
+      if (project.repository_url) {
+        repoUrlLink.href = project.repository_url;
+        repoUrlLink.textContent = project.repository_url;
+      } else {
+        repoUrlLink.href = '#';
+        repoUrlLink.textContent = '-';
+      }
+    }
+    if (stagingUrlLink) {
+      if (project.staging_url) {
+        stagingUrlLink.href = project.staging_url;
+        stagingUrlLink.textContent = project.staging_url;
+      } else {
+        stagingUrlLink.href = '#';
+        stagingUrlLink.textContent = '-';
+      }
+    }
+    if (productionUrlLink) {
+      if (project.production_url) {
+        productionUrlLink.href = project.production_url;
+        productionUrlLink.textContent = project.production_url;
+      } else {
+        productionUrlLink.href = '#';
+        productionUrlLink.textContent = '-';
+      }
+    }
+
+    // Financial section (deposit, contract date)
+    const financialSection = document.getElementById('pd-financial-section');
+    const depositEl = document.getElementById('pd-deposit');
+    const contractDateEl = document.getElementById('pd-contract-date');
+
+    const hasFinancial = project.deposit_amount || project.contract_signed_at;
+    if (financialSection) {
+      financialSection.style.display = hasFinancial ? 'flex' : 'none';
+    }
+    if (depositEl) {
+      depositEl.textContent = project.deposit_amount || '-';
+    }
+    if (contractDateEl) {
+      contractDateEl.textContent = project.contract_signed_at
+        ? new Date(project.contract_signed_at).toLocaleDateString()
+        : '-';
+    }
+
+    // Admin notes section
+    const adminNotesSection = document.getElementById('pd-admin-notes-section');
+    const adminNotesEl = document.getElementById('pd-admin-notes');
+
+    if (adminNotesSection) {
+      adminNotesSection.style.display = project.notes ? 'flex' : 'none';
+    }
+    if (adminNotesEl) {
+      adminNotesEl.textContent = project.notes || '-';
     }
 
     // Features - add to notes container if features exist
@@ -407,6 +483,14 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
     const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
     const statusSelect = document.getElementById('edit-project-status') as HTMLSelectElement;
+    const startDateInput = document.getElementById('edit-project-start-date') as HTMLInputElement;
+    const endDateInput = document.getElementById('edit-project-end-date') as HTMLInputElement;
+    const depositInput = document.getElementById('edit-project-deposit') as HTMLInputElement;
+    const contractDateInput = document.getElementById('edit-project-contract-date') as HTMLInputElement;
+    const repoUrlInput = document.getElementById('edit-project-repo-url') as HTMLInputElement;
+    const stagingUrlInput = document.getElementById('edit-project-staging-url') as HTMLInputElement;
+    const productionUrlInput = document.getElementById('edit-project-production-url') as HTMLInputElement;
+    const notesInput = document.getElementById('edit-project-notes') as HTMLTextAreaElement;
 
     if (nameInput) nameInput.value = project.project_name || '';
     if (typeSelect) typeSelect.value = project.project_type || '';
@@ -415,6 +499,14 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (timelineInput) timelineInput.value = project.timeline || '';
     if (previewUrlInput) previewUrlInput.value = project.preview_url || '';
     if (statusSelect) statusSelect.value = project.status || 'pending';
+    if (startDateInput) startDateInput.value = project.start_date ? project.start_date.split('T')[0] : '';
+    if (endDateInput) endDateInput.value = project.estimated_end_date ? project.estimated_end_date.split('T')[0] : '';
+    if (depositInput) depositInput.value = project.deposit_amount || '';
+    if (contractDateInput) contractDateInput.value = project.contract_signed_at ? project.contract_signed_at.split('T')[0] : '';
+    if (repoUrlInput) repoUrlInput.value = project.repository_url || '';
+    if (stagingUrlInput) stagingUrlInput.value = project.staging_url || '';
+    if (productionUrlInput) productionUrlInput.value = project.production_url || '';
+    if (notesInput) notesInput.value = project.notes || '';
 
     // Show modal
     modal.classList.remove('hidden');
@@ -459,6 +551,14 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
     const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
     const statusSelect = document.getElementById('edit-project-status') as HTMLSelectElement;
+    const startDateInput = document.getElementById('edit-project-start-date') as HTMLInputElement;
+    const endDateInput = document.getElementById('edit-project-end-date') as HTMLInputElement;
+    const depositInput = document.getElementById('edit-project-deposit') as HTMLInputElement;
+    const contractDateInput = document.getElementById('edit-project-contract-date') as HTMLInputElement;
+    const repoUrlInput = document.getElementById('edit-project-repo-url') as HTMLInputElement;
+    const stagingUrlInput = document.getElementById('edit-project-staging-url') as HTMLInputElement;
+    const productionUrlInput = document.getElementById('edit-project-production-url') as HTMLInputElement;
+    const notesInput = document.getElementById('edit-project-notes') as HTMLTextAreaElement;
 
     const updates: Record<string, string> = {};
     if (nameInput?.value) updates.project_name = nameInput.value;
@@ -468,6 +568,14 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (timelineInput?.value) updates.timeline = timelineInput.value;
     if (previewUrlInput?.value !== undefined) updates.preview_url = previewUrlInput.value;
     if (statusSelect?.value) updates.status = statusSelect.value;
+    if (startDateInput?.value !== undefined) updates.start_date = startDateInput.value;
+    if (endDateInput?.value !== undefined) updates.estimated_end_date = endDateInput.value;
+    if (depositInput?.value !== undefined) updates.deposit_amount = depositInput.value;
+    if (contractDateInput?.value !== undefined) updates.contract_signed_at = contractDateInput.value;
+    if (repoUrlInput?.value !== undefined) updates.repository_url = repoUrlInput.value;
+    if (stagingUrlInput?.value !== undefined) updates.staging_url = stagingUrlInput.value;
+    if (productionUrlInput?.value !== undefined) updates.production_url = productionUrlInput.value;
+    if (notesInput?.value !== undefined) updates.notes = notesInput.value;
 
     try {
       const response = await fetch(`/api/projects/${this.currentProjectId}`, {
