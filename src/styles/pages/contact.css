@@ -346,13 +346,13 @@
   }
 
   .avatar-blurb-link {
-    color: var(--color-primary, #dc2626);
+    color: var(--color-primary);
     text-decoration: underline;
     text-underline-offset: 2px;
   }
 
   .avatar-blurb-link:hover {
-    color: var(--color-primary-hover, #b91c1c);
+    color: var(--color-primary-hover);
   }
 
   /* Form Container - CSS Grid to position message row and button side by side */
@@ -484,7 +484,7 @@
 
 .contact-card-link:hover,
 .contact-card-link:focus {
-  color: var(--color-primary, #dc2626);
+  color: var(--color-primary);
 }
 
 /* Input wrapper - contains input + label */
@@ -609,7 +609,7 @@ textarea:focus-visible + label {
 .input-item textarea:focus,
 .input-item textarea:focus-visible {
   outline: none !important;
-  box-shadow: 0 0 0 2px var(--color-primary, #dc2626) !important;
+  box-shadow: 0 0 0 2px var(--color-primary) !important;
 }
 
 /* Autofill styling */
@@ -783,7 +783,7 @@ html[data-theme="dark"] .submit-button:focus-visible {
 
 .email-box .a-wrapper a:hover,
 .email-box .a-wrapper a:focus {
-  color: var(--color-primary, #dc2626);
+  color: var(--color-primary);
 }
 
 /* Form Validation Styles */
