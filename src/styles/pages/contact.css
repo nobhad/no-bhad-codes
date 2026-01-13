@@ -291,52 +291,63 @@
     z-index: 1; /* Form behind card */
   }
 
-  /* Right column - business card */
+  /* Right column - avatar blurb */
   .contact-card-column {
-    width: 525px; /* Matches .business-card-container base width */
+    width: 550px;
     padding-top: 1rem;
     justify-self: start;
     overflow: visible;
     position: relative;
-    z-index: 10; /* Card always in front of form */
+    z-index: 10;
   }
 
-  /* Contact options paragraph - hidden on desktop (info is on card instead) */
+  /* Contact options paragraph - hidden on desktop (info is in blurb instead) */
   p.contact-options {
     display: none;
   }
 
   /* ==========================================
-     CONTACT BUSINESS CARD - DESKTOP ONLY
+     AVATAR BLURB - DESKTOP ONLY
      ========================================== */
 
-  /* Contact business card - matches base card container size */
-  .contact-business-card {
-    width: 525px; /* Matches .business-card-container base width */
-    aspect-ratio: var(--business-card-aspect-ratio, 1.787);
+  .avatar-blurb-container {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .avatar-blurb-svg {
+    width: 100%;
     height: auto;
-    overflow: visible;
-    flex-shrink: 1;
+    display: block;
   }
 
-  /* Ensure contact business card fills container and is interactive */
-  .contact-business-card .business-card {
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-    pointer-events: auto;
+  .avatar-blurb-content {
+    position: absolute;
+    top: 30%;
+    left: 35%;
+    transform: translate(-50%, -50%);
+    max-width: 55%;
+    text-align: center;
   }
 
-  .contact-business-card .business-card-inner {
-    width: 100%;
-    height: 100%;
-    pointer-events: auto;
+  .avatar-blurb-text {
+    font-family: var(--font-family-acme), sans-serif;
+    font-size: clamp(1.3rem, 2.4vw, 1.6rem);
+    line-height: 1.4;
+    color: var(--color-text-primary);
+    text-align: center;
+    margin: 0;
   }
 
-  .contact-business-card .business-card-front,
-  .contact-business-card .business-card-back {
-    width: 100%;
-    height: 100%;
+  .avatar-blurb-link {
+    color: var(--color-primary, #dc2626);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .avatar-blurb-link:hover {
+    color: var(--color-primary-hover, #b91c1c);
   }
 
   /* Form Container - same width as h2 for perfect alignment */
@@ -890,52 +901,30 @@ html[data-theme="dark"] .submit-button:focus-visible {
     order: 1; /* Form first */
   }
 
-  /* Card column - show below form */
+  /* Avatar blurb column - show below form */
   .contact-section .contact-card-column {
     display: block;
     width: 100%;
     margin: 0;
-    order: 3; /* Card after form and button */
+    order: 3;
     padding-top: 1rem;
   }
 
-  /* Card sizing for medium viewport - aligned left within column */
-  .contact-section .contact-business-card {
-    width: 400px;
+  /* Avatar blurb sizing for medium viewport */
+  .contact-section .avatar-blurb-container {
+    width: 350px;
     max-width: 100%;
-    margin: 0; /* No centering - align with form left edge */
+    margin: 0;
   }
 
-  /* Card container - remove extra width/padding that causes grey areas */
-  .contact-section .business-card-container {
-    width: auto !important;
-    height: auto !important;
-    padding: 0 !important;
-    background: transparent !important;
+  .contact-section .avatar-blurb-content {
+    top: 10%;
+    left: 6%;
+    width: 54%;
   }
 
-  /* Card wrapper - fit to content */
-  .contact-section .contact-business-card {
-    width: auto;
-    height: auto !important;
-    aspect-ratio: unset !important;
-  }
-
-  /* Business card itself - auto height to fit content */
-  .contact-section .business-card {
-    width: 400px;
-    max-width: 100%;
-    height: auto !important;
-  }
-
-  .contact-section .business-card-inner {
-    height: auto !important;
-  }
-
-  .contact-section .business-card-front,
-  .contact-section .contact-card-front {
-    height: auto !important;
-    padding: 1.5rem !important;
+  .contact-section .avatar-blurb-text {
+    font-size: clamp(0.65rem, 2vw, 0.85rem);
   }
 
   /* Labels always visible on medium viewports */
