@@ -364,16 +364,18 @@ router.put(
     // Map frontend field names to database column names
     const fieldMapping: Record<string, string> = {
       name: 'project_name',
+      project_name: 'project_name',
       due_date: 'estimated_end_date',
       budget: 'budget_range',
       description: 'description',
       status: 'status',
       priority: 'priority',
       start_date: 'start_date',
+      progress: 'progress',
     };
     const allowedUpdates =
       req.user!.type === 'admin'
-        ? ['name', 'description', 'status', 'priority', 'start_date', 'due_date', 'budget']
+        ? ['name', 'project_name', 'description', 'status', 'priority', 'start_date', 'due_date', 'budget', 'progress']
         : ['description']; // Clients can only update description
 
     for (const field of allowedUpdates) {
