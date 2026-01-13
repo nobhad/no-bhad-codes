@@ -890,7 +890,7 @@ export async function loadProjectInvoices(
   if (!container) return;
 
   try {
-    const response = await fetch(`/api/projects/${projectId}/invoices`, {
+    const response = await fetch(`/api/invoices/project/${projectId}`, {
       credentials: 'include'
     });
 
