@@ -2,15 +2,22 @@
  * ===============================================
  * TERMINAL INTAKE FORM STYLES
  * ===============================================
- * AI Chat-style intake form with terminal aesthetic
+ * @file src/styles/pages/terminal-intake.css
+ *
+ * AI Chat-style intake form with terminal aesthetic.
+ * Extends the base terminal component from components/terminal.css
+ *
+ * Base terminal styles (window, header, input, scrollbar) are in:
+ *   src/styles/components/terminal.css
  */
 
 /* ============================================================================
-   BASE TERMINAL STYLES
+   INTAKE-SPECIFIC TERMINAL CONTAINER
    ============================================================================ */
 
+/* Extends .terminal from components/terminal.css */
 .terminal-intake {
-  font-family: "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+  font-family: var(--terminal-font-family);
   background-color: var(--color-terminal-bg);
   color: var(--color-terminal-green);
   min-height: calc(100vh - var(--header-height, 60px) - var(--footer-height, 60px));
@@ -19,90 +26,17 @@
   padding: 0;
   margin: 0;
   overflow: visible;
-  /* Larger, bolder text for better readability */
-  font-size: 16px;
+  font-size: var(--terminal-font-size);
   font-weight: 500;
-  line-height: 1.7;
-}
-
-.terminal-window {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  line-height: var(--terminal-line-height);
   width: 100%;
-  background: var(--color-terminal-bg-panel);
-  border: 1px solid var(--color-terminal-border);
-  border-radius: 10px;
-  overflow: hidden;
-  /* Soft green glow to make terminal stand out */
-  box-shadow:
-    0 0 50px rgba(127, 247, 9, 0.08),
-    0 0 100px rgba(127, 247, 9, 0.05),
-    0 0 150px rgba(127, 247, 9, 0.03),
-    4px 4px 10px rgba(0, 0, 0, 0.3);
+  min-width: 100%;
 }
 
 /* Standalone page: constrain width and center */
 body[data-page="client-intake"] .terminal-window {
   max-width: 900px;
   margin: 0 auto;
-}
-
-/* ============================================================================
-   TERMINAL HEADER (Title Bar)
-   ============================================================================ */
-
-.terminal-header {
-  background: var(--color-terminal-bg-light);
-  border-bottom: 1px solid var(--color-terminal-border);
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.terminal-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.terminal-btn {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: none;
-  cursor: default;
-}
-
-.terminal-btn.close:hover {
-  transform: scale(1.1);
-  filter: brightness(1.1);
-}
-
-.terminal-btn.close:active {
-  transform: scale(0.95);
-}
-
-.terminal-btn.close {
-  background: var(--color-mac-close);
-  cursor: pointer;
-  transition: transform 0.1s ease, filter 0.1s ease;
-}
-
-.terminal-btn.minimize {
-  background: var(--color-mac-minimize);
-}
-
-.terminal-btn.maximize {
-  background: var(--color-mac-maximize);
-}
-
-.terminal-title {
-  color: var(--color-terminal-text-muted);
-  font-size: 14px;
-  flex: 1;
-  text-align: center;
-  font-family: inherit;
 }
 
 /* ============================================================================
@@ -125,19 +59,8 @@ body[data-page="client-intake"] .terminal-window {
   color: var(--color-terminal-text);
 }
 
-.terminal-cursor {
-  color: var(--color-terminal-green);
-  font-weight: bold;
-  /* Animation controlled by GSAP - see gsap-animations.ts createCursorBlink() */
-}
-
-.typing-cursor {
-  display: inline;
-  margin-left: 2px;
-}
-
 /* ============================================================================
-   CHAT CONTAINER
+   CHAT CONTAINER (extends .terminal-body)
    ============================================================================ */
 
 .terminal-chat {
@@ -156,7 +79,7 @@ body[data-page="client-intake"] .terminal-window {
   width: 100%;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar for chat */
 .terminal-chat::-webkit-scrollbar {
   width: 8px;
 }
@@ -216,7 +139,7 @@ body[data-page="client-intake"] .terminal-window {
   display: inline;
 }
 
-/* AI Messages - bright green with ❯ prompt (saloni-garg style) */
+/* AI Messages - bright green with ❯ prompt */
 .chat-message.ai .message-content {
   color: var(--color-terminal-green);
   font-size: 17px;
@@ -229,7 +152,7 @@ body[data-page="client-intake"] .terminal-window {
   font-weight: bold;
 }
 
-/* User Messages - light text with $ prompt (codebyte style) */
+/* User Messages - light text with $ prompt */
 .chat-message.user {
   margin-bottom: 12px;
 }
@@ -275,7 +198,7 @@ body[data-page="client-intake"] .terminal-window {
   color: var(--color-terminal-pink);
 }
 
-/* Success Messages - cyan for distinction (codebyte style) */
+/* Success Messages - cyan for distinction */
 .chat-message.success .message-content {
   color: var(--color-terminal-cyan);
   white-space: pre-line;
@@ -301,159 +224,7 @@ body[data-page="client-intake"] .terminal-window {
 }
 
 /* ============================================================================
-   TYPING INDICATOR / BLINKING CURSOR
-   ============================================================================ */
-
-.typing-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  padding: 8px 0;
-  color: var(--color-terminal-green-dark);
-}
-
-.typing-indicator::before {
-  content: "❯ ";
-  color: var(--color-terminal-green);
-  font-weight: bold;
-}
-
-.typing-indicator::after {
-  content: "█";
-  color: var(--color-terminal-green);
-  font-size: 1.2em;
-  font-weight: bold;
-  /* Animation controlled by GSAP - see gsap-animations.ts createCursorBlink() */
-}
-
-/* Hide the dots, we're using cursor instead */
-.typing-indicator span {
-  display: none;
-}
-
-/* ============================================================================
-   INPUT AREA
-   ============================================================================ */
-
-.terminal-input-area {
-  border-top: 1px solid var(--color-terminal-border);
-  padding: 10px 16px;
-  background: var(--color-terminal-bg-panel);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.terminal-prompt {
-  color: var(--color-terminal-blue);
-  font-weight: bold;
-  white-space: nowrap;
-}
-
-.terminal-input,
-.terminal-input-area input,
-.terminal-input-area input[type="text"],
-input.terminal-input {
-  flex: 1;
-  background: transparent !important;
-  border: none !important;
-  color: var(--color-terminal-text) !important;
-  font-family: "Courier New", Consolas, "Liberation Mono", monospace !important;
-  font-size: 16px;
-  outline: none !important;
-  caret-color: transparent !important;
-  box-shadow: none !important;
-  padding: 4px 0 !important;
-}
-
-.terminal-input::placeholder,
-.terminal-input-area input::placeholder {
-  color: var(--color-terminal-text-dimmer);
-}
-
-/* Hide native caret - using custom block cursor instead */
-.terminal-input,
-.terminal-input:focus,
-.terminal-input-area input,
-.terminal-input-area input:focus,
-input.terminal-input,
-input.terminal-input:focus {
-  caret-color: transparent !important;
-}
-
-/* Wrapper for input + custom cursor positioning */
-.terminal-input-wrapper {
-  position: relative;
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-
-/* Custom block cursor for input */
-.terminal-input-cursor {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0.6em;
-  height: 1.2em;
-  background-color: var(--color-terminal-green);
-  pointer-events: none;
-}
-
-/* Hidden text measurer - matches input font exactly */
-.terminal-input-measurer {
-  position: absolute;
-  visibility: hidden;
-  white-space: pre;
-  font-family: "Courier New", Consolas, "Liberation Mono", monospace;
-  font-size: 16px;
-  pointer-events: none;
-}
-
-.terminal-input:focus,
-.terminal-input:hover,
-.terminal-input:active,
-.terminal-input-area input:focus,
-.terminal-input-area input:hover,
-.terminal-input-area input:active,
-input.terminal-input:focus {
-  background: transparent !important;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-  caret-color: transparent !important;
-}
-
-.terminal-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.terminal-send {
-  background: var(--color-terminal-green-dark);
-  color: var(--color-terminal-bg);
-  border: none;
-  padding: 8px 16px;
-  font-family: inherit;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s;
-  border-radius: 4px;
-}
-
-.terminal-send:hover:not(:disabled) {
-  background: var(--color-terminal-green);
-}
-
-.terminal-send:disabled {
-  background: var(--color-terminal-bg-dark);
-  color: var(--color-terminal-text-dim);
-  cursor: not-allowed;
-}
-
-/* ============================================================================
-   OPTIONS (For multiple choice questions) - Terminal numbered list style
+   OPTIONS (For multiple choice questions)
    ============================================================================ */
 
 .chat-options {
@@ -521,44 +292,16 @@ input.terminal-input:focus {
 }
 
 /* ============================================================================
-   PROGRESS BAR
+   PROGRESS BAR (intake-specific overrides)
    ============================================================================ */
 
-.terminal-progress {
-  padding: 1rem 16px 8px 16px;
-  background: var(--color-terminal-bg-input);
-  border-bottom: 2px solid var(--color-terminal-border-dark);
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  align-items: center !important;
-  gap: 12px;
-}
-
+/* Uses base styles from components/terminal.css */
+/* Additional overrides can go here if needed */
 .progress-label {
   color: var(--color-terminal-text-muted);
   font-size: 14px;
   white-space: nowrap;
   flex-shrink: 0;
-}
-
-.terminal-progress .progress-bar {
-  flex: 1 1 auto !important;
-  width: auto !important;
-  min-width: 0;
-  height: 6px;
-  background: var(--color-terminal-bg-hover);
-  border-radius: 3px;
-  overflow: hidden;
-  display: block !important;
-  border: none !important;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--color-terminal-green-dark), var(--color-terminal-green));
-  transition: width 0.3s ease;
-  box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
 }
 
 .progress-percent {
@@ -569,10 +312,10 @@ input.terminal-input:focus {
 }
 
 /* ============================================================================
-   RESPONSIVE
+   RESPONSIVE - INTAKE SPECIFIC
    ============================================================================ */
 
-@media (max-width: 767px) {
+@media (--mobile) {
   /* Mobile: Force filters on SVG elements with !important */
   svg.terminal-avatar-img image,
   svg.terminal-avatar-img #Head,
@@ -636,26 +379,8 @@ input.terminal-input:focus {
   }
 }
 
-@media (max-width: 479px) {
-  .terminal-header {
-    padding: 6px 12px;
-  }
-
-  .terminal-title {
-    font-size: 12px;
-  }
-
-  .terminal-input-area {
-    padding: 12px;
-  }
-
-  .terminal-prompt {
-    display: none;
-  }
-}
-
 /* ============================================================================
-   DARK MODE ADJUSTMENTS (already dark, but ensure consistency)
+   DARK MODE ADJUSTMENTS
    ============================================================================ */
 
 html[data-theme="dark"] .terminal-intake {
@@ -692,8 +417,7 @@ html[data-theme="light"] .terminal-intake {
   display: block;
 }
 
-/* Target image elements within the SVG - apply light color filter to make them light (not black) */
-/* SVG has named elements: #Head, #Ear, #Nose, #Eye */
+/* Target image elements within the SVG */
 svg.terminal-avatar-img image {
   filter: brightness(0) invert(1) brightness(0.9);
 }
@@ -714,8 +438,6 @@ svg.terminal-avatar-img #Nose {
 }
 
 /* Eye - style it to match terminal bg color */
-/* Terminal bg is #0a0a0a (very dark, almost black) */
-/* Make the eye images appear as this color by making them black */
 svg.terminal-avatar-img #Eye,
 svg.terminal-avatar-img #Eye image {
   filter: brightness(0);

@@ -72,6 +72,43 @@ await this.animateIn(targetPage);
 
 ## Completed Work (Ready to Archive)
 
+### Terminal Styling Refactor - COMPLETE
+
+**Status:** Complete
+**Date:** January 13, 2026
+
+**Changes Made:**
+
+1. **Created reusable terminal component** (`src/styles/components/terminal.css`)
+   - Extracted base terminal styles (window, header, input, scrollbar)
+   - Added CSS custom properties for terminal font settings
+   - Consistent styling across all terminal instances
+
+2. **Removed green glow from terminal**
+   - Removed `box-shadow` glow effects from `.terminal-window`
+   - Removed glow from `.progress-fill`
+   - Terminal now has clean drop shadow only
+
+3. **Fixed terminal width on open**
+   - Terminal now appears at full 900px width immediately
+   - Added `min-width: 100%` to prevent content-based sizing
+   - No more "skinny" initial state
+
+4. **Added shadows to client portal**
+   - Added `box-shadow: var(--shadow-card)` to match admin portal
+   - Components updated: `.portal-card`, `.portal-project-card`, `.stat-card`, `.overview-card`, `.recent-activity`, `.progress-bar`, `.update-item`, `.timeline-content`, `.content-section`, `.content-item`, `.new-project-form`
+
+**Files Modified:**
+
+- `src/styles/components/terminal.css` (NEW)
+- `src/styles/pages/terminal-intake.css`
+- `src/styles/components/nav-portal.css`
+- `src/styles/pages/client.css`
+- `src/styles/client-portal/components.css`
+- `src/styles/client-portal/dashboard.css`
+- `src/styles/client-portal/views.css`
+- `src/styles/main.css`
+
 ### Client Portal - Real Project Data - COMPLETE
 
 ### Admin Project Details - API Fixes - COMPLETE

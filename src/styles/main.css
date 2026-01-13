@@ -74,8 +74,8 @@
 /* Page transitions (virtual pages) */
 @import "./components/page-transitions.css";
 
-/* Form validation (specialized) */
-@import "./form-validation.css";
+/* Terminal component (reusable) */
+@import "./components/terminal.css";
 
 /* ============================================
  * 4. PAGE-SPECIFIC LAYER
@@ -180,7 +180,7 @@ body {
 }
 
 /* Mobile: Scrollbar track matches page background */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   ::-webkit-scrollbar-track {
     background: var(--color-body-bg);
   }
@@ -206,7 +206,7 @@ body {
  * 9. SPECIALIZED SECTION STYLES - DESKTOP ONLY
  * ============================================ */
 
-@media screen and (min-width: 768px) {
+@media (--tablet) {
   /* Show all sections immediately */
   main section:not(.business-card-section) {
     opacity: 1;

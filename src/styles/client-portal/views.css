@@ -63,6 +63,7 @@
   border: 1px solid var(--color-neutral-300);
   border-radius: 8px;
   padding: 1.5rem;
+  box-shadow: var(--shadow-card);
 }
 
 .update-header {
@@ -122,6 +123,7 @@
   border: 1px solid var(--color-neutral-300);
   border-radius: 8px;
   padding: 1.5rem;
+  box-shadow: var(--shadow-card);
 }
 
 .timeline-header {
@@ -180,6 +182,7 @@
   border: 1px solid var(--color-neutral-300);
   border-radius: 8px;
   overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 
 .content-section-header {
@@ -213,6 +216,7 @@
   border-radius: 6px;
   padding: 1rem;
   transition: border-color 0.2s ease;
+  box-shadow: var(--shadow-card);
 }
 
 .content-item:hover {
@@ -306,6 +310,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  box-shadow: var(--shadow-card);
   max-width: 600px;
   margin: 0 auto;
   color: var(--color-dark);
@@ -320,6 +325,7 @@
 /* Portal Intake */
 .portal-intake {
   width: 100%;
+  min-width: 900px;
   max-width: 900px;
   margin: 0 auto;
   padding: 0;
@@ -333,6 +339,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
+  min-width: 100%;
 }
 
 .portal-intake .terminal-window {
@@ -340,6 +348,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
+  min-width: 100%;
 }
 
 .portal-intake .terminal-chat {
@@ -347,10 +357,14 @@
   height: auto;
   min-height: 0;
   max-height: none;
+  width: 100%;
+  min-width: 100%;
 }
 
-@media (max-width: 767px) {
+@media (--mobile) {
   .portal-intake {
+    min-width: 100%;
+    max-width: 100%;
     height: calc(100vh - 150px);
   }
 
