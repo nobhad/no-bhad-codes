@@ -326,7 +326,7 @@ a.icon-link:focus-visible svg {
 
 @media (hover: hover) {
   .text-link:hover {
-    color: var(--color-brand-primary, #dc2626);
+    color: var(--color-brand-primary);
   }
 }
 

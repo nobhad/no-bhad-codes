@@ -39,7 +39,7 @@
 
 .portal-button:hover,
 .portal-button:focus {
-  color: var(--color-primary, #dc2626);
+  color: var(--color-primary);
 }
 
 .portal-button .icon-wrap {
@@ -90,7 +90,7 @@
   top: 70px;
   right: 20px;
   width: 320px;
-  background: var(--color-neutral-300, #e0e0e0);
+  background: var(--color-neutral-300);
   border: 3px solid var(--color-border);
   padding: 1.5rem;
   z-index: 10001;
@@ -127,7 +127,7 @@
   left: calc(var(--caret-left, 20px) + 2px);
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-bottom: 8px solid var(--color-neutral-300, #e0e0e0);
+  border-bottom: 8px solid var(--color-neutral-300);
 }
 
 /* Dropdown header */
@@ -185,7 +185,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 
 .portal-dropdown .portal-toggle-btn.active {
   background: var(--color-bg-inverse);
-  color: var(--color-neutral-300, #e0e0e0);
+  color: var(--color-neutral-300);
 }
 
 /* Dropdown form visibility */
@@ -206,18 +206,18 @@ html[data-theme="dark"] .portal-dropdown-header {
   border-radius: 24px;
   padding: 0 1rem;
   font-size: 0.9rem;
-  color: var(--color-neutral-300, #e0e0e0);
+  color: var(--color-neutral-300);
   margin-bottom: 0.75rem;
   box-sizing: border-box;
 }
 
 .portal-dropdown .dropdown-input::placeholder {
-  color: var(--color-neutral-300, #e0e0e0);
+  color: var(--color-neutral-300);
   opacity: 0.7;
 }
 
 .portal-dropdown .dropdown-input:focus {
-  outline: 2px solid var(--color-primary, #dc2626);
+  outline: 2px solid var(--color-primary);
 }
 
 /* Password field wrapper */
@@ -242,7 +242,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 .portal-dropdown .password-toggle:hover {
-  color: var(--color-primary, #dc2626);
+  color: var(--color-primary);
 }
 
 .portal-dropdown .password-toggle .password-icon-hide {
@@ -262,7 +262,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   width: 100%;
   height: 48px;
   background: var(--color-bg-inverse);
-  color: var(--color-neutral-300, #e0e0e0);
+  color: var(--color-neutral-300);
   border: none;
   border-radius: 24px;
   font-family: var(--font-family-acme);
@@ -276,19 +276,19 @@ html[data-theme="dark"] .portal-dropdown-header {
 .portal-dropdown .dropdown-submit:hover,
 .portal-dropdown .dropdown-submit:focus {
   background: var(--color-bg-inverse);
-  color: var(--color-neutral-300, #e0e0e0);
+  color: var(--color-neutral-300);
 }
 
 /* Valid state - all requirements met */
 .portal-dropdown .dropdown-submit.valid {
-  background: var(--color-primary, #dc2626);
+  background: var(--color-primary);
   color: var(--color-black);
   opacity: 1;
 }
 
 .portal-dropdown .dropdown-submit.valid:hover,
 .portal-dropdown .dropdown-submit.valid:focus {
-  background: var(--color-primary, #dc2626);
+  background: var(--color-primary);
   color: var(--color-black);
   filter: brightness(1.1);
 }
@@ -305,7 +305,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 .portal-dropdown .dropdown-link:hover {
-  color: var(--color-primary, #dc2626);
+  color: var(--color-primary);
 }
 
 /* Button styled as link */
@@ -341,7 +341,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   display: flex;
   justify-content: center;
   margin-bottom: 1rem;
-  color: var(--color-primary, #dc2626);
+  color: var(--color-primary);
 }
 
 .portal-dropdown .reset-sent-message {
