@@ -13,14 +13,13 @@ import type { ClientProject, ClientProjectStatus } from '../../types/client';
 import { gsap } from 'gsap';
 import { APP_CONSTANTS } from '../../config/constants';
 import 'emoji-picker-element';
-import type { ClientPortalContext, PortalFile, PortalProject } from './portal-types';
+import type { ClientPortalContext, PortalProject } from './portal-types';
 import {
   loadFilesModule,
   loadInvoicesModule,
   loadMessagesModule,
   loadSettingsModule
 } from './modules';
-import { formatFileSize } from '../../utils/format-utils';
 
 export class ClientPortalModule extends BaseModule {
   private isLoggedIn = false;
@@ -1129,270 +1128,12 @@ export class ClientPortalModule extends BaseModule {
   }
 
   /**
-   * Render demo files for demo mode
-   */
-  private renderDemoFiles(container: HTMLElement): void {
-    const demoFiles = [
-      {
-        id: 1,
-        originalName: 'Project-Outline.pdf',
-        mimetype: 'application/pdf',
-        size: 245760,
-        uploadedAt: new Date().toISOString(),
-        projectName: 'Website Redesign',
-        uploadedBy: 'admin' // Shared by Noelle - client cannot delete
-      },
-      {
-        id: 2,
-        originalName: 'My-Brand-Assets.zip',
-        mimetype: 'application/zip',
-        size: 5242880,
-        uploadedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-        projectName: 'Website Redesign',
-        uploadedBy: 'client' // Uploaded by client - can delete
-      },
-      {
-        id: 3,
-        originalName: 'Intake-Summary.pdf',
-        mimetype: 'application/pdf',
-        size: 128000,
-        uploadedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
-        projectName: 'Website Redesign',
-        uploadedBy: 'admin' // Shared by Noelle - client cannot delete
-      }
-    ];
-    this.renderFilesList(container, demoFiles);
-  }
-
-  /**
-   * Render the files list
-   */
-  private renderFilesList(container: HTMLElement, files: PortalFile[]): void {
-    if (files.length === 0) {
-      container.innerHTML =
-        '<p class="no-files">No files uploaded yet. Drag and drop files above to upload.</p>';
-      return;
-    }
-
-    // Get current client email to determine ownership
-    const clientEmail = sessionStorage.getItem('clientEmail') || '';
-
-    // Trash icon SVG
-    const trashIcon =
-      '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>';
-
-    container.innerHTML = files
-      .map((file) => {
-        // Only show delete button if client uploaded the file (not shared by admin/Noelle)
-        const canDelete = file.uploadedBy === clientEmail || file.uploadedBy === 'client';
-        const deleteIcon = canDelete
-          ? `<button class="file-delete-icon btn-delete" data-file-id="${file.id}" data-filename="${this.escapeHtml(file.originalName)}" aria-label="Delete file">
-              ${trashIcon}
-            </button>`
-          : '';
-
-        return `
-      <div class="file-item" data-file-id="${file.id}">
-        ${deleteIcon}
-        <div class="file-icon">
-          ${this.getFileIcon(file.mimetype)}
-        </div>
-        <div class="file-info">
-          <span class="file-name">${this.escapeHtml(file.originalName)}</span>
-          <span class="file-meta">
-            ${file.projectName ? `${file.projectName} • ` : ''}
-            ${this.formatDate(file.uploadedAt)} • ${formatFileSize(file.size)}
-          </span>
-        </div>
-        <div class="file-actions">
-          <button class="btn btn-sm btn-outline btn-preview" data-file-id="${file.id}" data-mimetype="${file.mimetype}">
-            Preview
-          </button>
-          <button class="btn btn-sm btn-outline btn-download" data-file-id="${file.id}" data-filename="${this.escapeHtml(file.originalName)}">
-            Download
-          </button>
-        </div>
-      </div>
-    `;
-      })
-      .join('');
-
-    // Attach event listeners to buttons
-    this.attachFileActionListeners(container);
-  }
-
-  /**
-   * Get appropriate icon SVG for file type
-   */
-  private getFileIcon(mimetype: string): string {
-    // Image icon
-    const imageIcon =
-      '<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\' ry=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg>';
-    // PDF icon
-    const pdfIcon =
-      '<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\'/><polyline points=\'14 2 14 8 20 8\'/><line x1=\'16\' y1=\'13\' x2=\'8\' y2=\'13\'/><line x1=\'16\' y1=\'17\' x2=\'8\' y2=\'17\'/><polyline points=\'10 9 9 9 8 9\'/></svg>';
-    // Default document icon
-    const docIcon =
-      '<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\'/><polyline points=\'14 2 14 8 20 8\'/></svg>';
-
-    if (mimetype.startsWith('image/')) {
-      return imageIcon;
-    }
-    if (mimetype === 'application/pdf') {
-      return pdfIcon;
-    }
-    return docIcon;
-  }
-
-  /**
    * Escape HTML to prevent XSS
    */
   private escapeHtml(text: string): string {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
-  }
-
-  /**
-   * Attach event listeners to file action buttons
-   */
-  private attachFileActionListeners(container: HTMLElement): void {
-    // Preview buttons
-    container.querySelectorAll('.btn-preview').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const fileId = (btn as HTMLElement).dataset.fileId;
-        const mimetype = (btn as HTMLElement).dataset.mimetype;
-        if (fileId) {
-          this.previewFile(parseInt(fileId), mimetype || '');
-        }
-      });
-    });
-
-    // Download buttons
-    container.querySelectorAll('.btn-download').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const fileId = (btn as HTMLElement).dataset.fileId;
-        const filename = (btn as HTMLElement).dataset.filename;
-        if (fileId) {
-          this.downloadFile(parseInt(fileId), filename || 'download');
-        }
-      });
-    });
-
-    // Delete buttons
-    container.querySelectorAll('.btn-delete').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const fileId = (btn as HTMLElement).dataset.fileId;
-        const filename = (btn as HTMLElement).dataset.filename;
-        if (fileId) {
-          this.deleteFile(parseInt(fileId), filename || 'file');
-        }
-      });
-    });
-  }
-
-  /**
-   * Preview a file - opens in modal or new tab
-   */
-  private previewFile(fileId: number, mimetype: string): void {
-    const authMode = sessionStorage.getItem('client_auth_mode');
-
-    // For demo mode, show a demo message
-    if (!authMode || authMode === 'demo') {
-      alert('Preview not available in demo mode. Please log in to preview files.');
-      return;
-    }
-
-    // For images and PDFs, open in new tab
-    if (mimetype.startsWith('image/') || mimetype === 'application/pdf') {
-      const url = `${ClientPortalModule.FILES_API_BASE}/file/${fileId}`;
-      window.open(url, '_blank');
-    } else {
-      // For other files, trigger download instead
-      this.downloadFile(fileId, 'file');
-    }
-  }
-
-  /**
-   * Download a file
-   */
-  private downloadFile(fileId: number, filename: string): void {
-    const authMode = sessionStorage.getItem('client_auth_mode');
-
-    // For demo mode, show a demo message
-    if (!authMode || authMode === 'demo') {
-      alert('Download not available in demo mode. Please log in to download files.');
-      return;
-    }
-
-    // Create a temporary link to trigger download
-    const url = `${ClientPortalModule.FILES_API_BASE}/file/${fileId}?download=true`;
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
-
-  /**
-   * Delete a file
-   */
-  private async deleteFile(fileId: number, filename: string): Promise<void> {
-    const authMode = sessionStorage.getItem('client_auth_mode');
-
-    // For demo mode, show a demo message
-    if (!authMode || authMode === 'demo') {
-      alert('Delete not available in demo mode. Please log in to delete files.');
-      return;
-    }
-
-    // Confirm deletion
-    if (!confirm(`Are you sure you want to delete "${filename}"? This action cannot be undone.`)) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`${ClientPortalModule.FILES_API_BASE}/file/${fileId}`, {
-        method: 'DELETE',
-        credentials: 'include' // Include HttpOnly cookies
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to delete file');
-      }
-
-      // Remove the file item from the DOM
-      const fileItem = document.querySelector(`.file-item[data-file-id="${fileId}"]`);
-      if (fileItem) {
-        fileItem.remove();
-      }
-
-      // Check if there are any files left
-      const filesContainer = document.querySelector('.files-list-section .file-item');
-      if (!filesContainer) {
-        const container = document.querySelector('.files-list-section');
-        if (container) {
-          const noFilesMsg = container.querySelector('.no-files');
-          if (!noFilesMsg) {
-            const msgEl = document.createElement('p');
-            msgEl.className = 'no-files';
-            msgEl.textContent = 'No files uploaded yet. Drag and drop files above to upload.';
-            container.appendChild(msgEl);
-          }
-        }
-      }
-
-      console.log(`File ${filename} deleted successfully`);
-    } catch (error) {
-      console.error('Error deleting file:', error);
-      alert(error instanceof Error ? error.message : 'Failed to delete file. Please try again.');
-    }
   }
 
   /**
@@ -1868,20 +1609,12 @@ export class ClientPortalModule extends BaseModule {
   }
 
   private showSettings(): void {
-    // Hide other views
-    const welcomeView = document.getElementById('welcome-view');
-    const projectDetailView = document.getElementById('project-detail-view');
+    this.hideAllViews();
     const settingsView = document.getElementById('settings-view');
-
-    if (welcomeView) welcomeView.style.display = 'none';
-    if (projectDetailView) projectDetailView.style.display = 'none';
     if (settingsView) {
       settingsView.style.display = 'block';
-      // Load current user data into forms
       this.loadUserSettings();
     }
-
-    // Remove active state from all navigation items
     document
       .querySelectorAll('.project-item, .account-item')
       .forEach((item) => item.classList.remove('active'));
@@ -1908,26 +1641,12 @@ export class ClientPortalModule extends BaseModule {
   }
 
   private showContactView(): void {
-    // Hide other views
-    const welcomeView = document.getElementById('welcome-view');
-    const projectDetailView = document.getElementById('project-detail-view');
-    const billingView = document.getElementById('billing-view');
-    const settingsView = document.getElementById('settings-view');
-    const notificationsView = document.getElementById('notifications-view');
+    this.hideAllViews();
     const contactView = document.getElementById('contact-view');
-
-    if (welcomeView) welcomeView.style.display = 'none';
-    if (projectDetailView) projectDetailView.style.display = 'none';
-    if (billingView) billingView.style.display = 'none';
-    if (settingsView) settingsView.style.display = 'none';
-    if (notificationsView) notificationsView.style.display = 'none';
     if (contactView) {
       contactView.style.display = 'block';
-      // Load current contact data into forms
       this.loadContactSettings();
     }
-
-    // Set active state on contact button
     document
       .querySelectorAll('.project-item, .account-item')
       .forEach((item) => item.classList.remove('active'));
@@ -1936,26 +1655,12 @@ export class ClientPortalModule extends BaseModule {
   }
 
   private showNotificationsView(): void {
-    // Hide other views
-    const welcomeView = document.getElementById('welcome-view');
-    const projectDetailView = document.getElementById('project-detail-view');
-    const billingView = document.getElementById('billing-view');
-    const settingsView = document.getElementById('settings-view');
-    const contactView = document.getElementById('contact-view');
+    this.hideAllViews();
     const notificationsView = document.getElementById('notifications-view');
-
-    if (welcomeView) welcomeView.style.display = 'none';
-    if (projectDetailView) projectDetailView.style.display = 'none';
-    if (billingView) billingView.style.display = 'none';
-    if (settingsView) settingsView.style.display = 'none';
-    if (contactView) contactView.style.display = 'none';
     if (notificationsView) {
       notificationsView.style.display = 'block';
-      // Load current notification preferences
       this.loadNotificationSettings();
     }
-
-    // Set active state on notifications button
     document
       .querySelectorAll('.project-item, .account-item')
       .forEach((item) => item.classList.remove('active'));
