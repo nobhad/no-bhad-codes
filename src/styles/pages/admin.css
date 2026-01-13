@@ -913,6 +913,72 @@
   text-decoration: underline;
 }
 
+/* Clients Table - matches leads-table styling */
+.clients-table-container {
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: 0;
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.clients-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+  background: var(--portal-bg-dark);
+}
+
+.clients-table th,
+.clients-table td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  background: var(--portal-bg-dark);
+}
+
+.clients-table th {
+  background: var(--portal-bg-dark);
+  color: var(--portal-text-light);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  border-top: 1px solid var(--portal-border-medium);
+  border-bottom: 1px solid var(--portal-border-medium);
+}
+
+.clients-table td {
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  border: none;
+}
+
+.clients-table tr:hover td {
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+}
+
+.clients-table td a {
+  color: var(--color-brand-primary);
+  text-decoration: none;
+}
+
+.clients-table td a:hover {
+  text-decoration: underline;
+}
+
+/* Clients table action buttons */
+.clients-table .btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  margin-right: 0.25rem;
+}
+
+.clients-table .btn-sm:last-child {
+  margin-right: 0;
+}
+
 .loading-row,
 .empty-row {
   text-align: center;
@@ -3831,4 +3897,245 @@
   [data-page="client-portal"] .sidebar.collapsed ~ .dashboard-content {
     margin-left: 60px;
   }
+}
+
+/* ===============================================
+   CLIENT DETAIL VIEW
+   =============================================== */
+
+/* Clickable links in meta values */
+.clickable-link {
+  color: var(--portal-accent);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.clickable-link:hover {
+  color: var(--portal-accent-hover, var(--portal-accent));
+  text-decoration: underline;
+}
+
+/* Back button in client detail */
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: 1px solid var(--portal-border-dark);
+  border-radius: var(--border-radius-md);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: var(--space-3);
+}
+
+.btn-back:hover {
+  background: var(--portal-bg-lighter);
+  border-color: var(--portal-border-light);
+}
+
+.btn-back svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Client projects list in client detail */
+.client-projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.client-project-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3);
+  background: var(--portal-bg-lighter);
+  border: 1px solid var(--portal-border-dark);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.client-project-item:hover {
+  background: var(--portal-bg-dark);
+  border-color: var(--portal-border-light);
+}
+
+.client-project-item .project-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.client-project-item .project-name {
+  color: var(--portal-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.client-project-item .project-status {
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+  text-transform: capitalize;
+}
+
+.client-project-item .project-date {
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* Client account actions in client detail */
+#tab-client-detail .client-account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+#tab-client-detail .client-account-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+#tab-client-detail .client-account-actions .btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Danger button variant */
+.btn-danger {
+  background: transparent;
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+}
+
+.btn-danger:hover {
+  background: var(--color-danger);
+  color: var(--color-white);
+}
+
+/* Billing details section */
+.billing-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--portal-border-dark);
+}
+
+.billing-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.billing-label {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.billing-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-light);
+}
+
+/* Client invoices list */
+.client-invoices-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.client-invoice-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3);
+  background: var(--portal-bg-lighter);
+  border: 1px solid var(--portal-border-dark);
+  border-radius: var(--border-radius-md);
+}
+
+.client-invoice-item .invoice-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.client-invoice-item .invoice-number {
+  color: var(--portal-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.client-invoice-item .invoice-date {
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.client-invoice-item .invoice-amount {
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-light);
+}
+
+.client-invoice-item .invoice-status {
+  font-size: var(--font-size-sm);
+  text-transform: capitalize;
+}
+
+.client-invoice-item .invoice-status.status-paid {
+  color: var(--color-success);
+}
+
+.client-invoice-item .invoice-status.status-pending {
+  color: var(--color-warning);
+}
+
+.client-invoice-item .invoice-status.status-overdue {
+  color: var(--color-danger);
+}
+
+@media (max-width: 640px) {
+  .billing-summary {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+}
+
+/* Billing info grid */
+.billing-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .billing-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Card header with action button */
+.card-header-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.card-header-with-action h3 {
+  margin: 0;
+}
+
+/* Overview header with edit button */
+.overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }

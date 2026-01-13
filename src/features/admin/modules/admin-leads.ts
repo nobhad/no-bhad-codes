@@ -153,9 +153,7 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
           <td>${safeEmail}</td>
           <td>${safeProjectType}</td>
           <td>${safeBudget}</td>
-          <td>
-            <span class="status-badge ${statusClass}">${safeStatus}</span>
-          </td>
+          <td>${safeStatus}</td>
           <td>
             ${showActivateBtn ? `<button class="btn activate-lead-btn" data-id="${lead.id}" onclick="event.stopPropagation()">Activate</button>` : ''}
           </td>
