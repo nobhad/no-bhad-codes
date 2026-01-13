@@ -33,7 +33,7 @@ router.get(
 
     const db = getDatabase();
     const client = await db.get(
-      `SELECT id, email, company_name, contact_name, phone, status,
+      `SELECT id, email, company_name, contact_name, phone, status, client_type,
               notification_messages, notification_status, notification_invoices, notification_weekly,
               billing_company, billing_address, billing_address2, billing_city,
               billing_state, billing_zip, billing_country,
@@ -72,7 +72,7 @@ router.put(
     );
 
     const updatedClient = await db.get(
-      'SELECT id, email, company_name, contact_name, phone FROM clients WHERE id = ?',
+      'SELECT id, email, company_name, contact_name, phone, client_type FROM clients WHERE id = ?',
       [req.user!.id]
     );
 
@@ -228,9 +228,9 @@ router.get(
       'clients:all:with_projects',
       async () => {
         return await db.all(`
-          SELECT 
-            c.id, c.email, c.company_name, c.contact_name, c.phone, 
-            c.status, c.created_at, c.updated_at,
+          SELECT
+            c.id, c.email, c.company_name, c.contact_name, c.phone,
+            c.status, c.client_type, c.created_at, c.updated_at,
             COUNT(p.id) as project_count
           FROM clients c
           LEFT JOIN projects p ON c.id = p.client_id
@@ -275,9 +275,9 @@ router.get(
       async () => {
         return await db.get(
           `
-          SELECT 
-            c.id, c.email, c.company_name, c.contact_name, c.phone, 
-            c.status, c.created_at, c.updated_at
+          SELECT
+            c.id, c.email, c.company_name, c.contact_name, c.phone,
+            c.status, c.client_type, c.created_at, c.updated_at
           FROM clients c
           WHERE c.id = ?
         `,
@@ -334,7 +334,7 @@ router.post(
   requireAdmin,
   invalidateCache(['clients']),
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { email, password, company_name, contact_name, phone } = req.body;
+    const { email, password, company_name, contact_name, phone, client_type } = req.body;
 
     // Validate required fields
     if (!email || !password) {
@@ -382,8 +382,8 @@ router.post(
     // Insert new client
     const result = await db.run(
       `
-    INSERT INTO clients (email, password_hash, company_name, contact_name, phone)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO clients (email, password_hash, company_name, contact_name, phone, client_type)
+    VALUES (?, ?, ?, ?, ?, ?)
   `,
       [
         email.toLowerCase(),
@@ -391,13 +391,14 @@ router.post(
         company_name || null,
         contact_name || null,
         phone || null,
+        client_type || 'business',
       ]
     );
 
     // Get the created client
     const newClient = await db.get(
       `
-    SELECT id, email, company_name, contact_name, phone, status, created_at
+    SELECT id, email, company_name, contact_name, phone, status, client_type, created_at
     FROM clients WHERE id = ?
   `,
       [result.lastID]
@@ -519,7 +520,7 @@ router.put(
     // Get updated client
     const updatedClient = await db.get(
       `
-    SELECT id, email, company_name, contact_name, phone, status, created_at, updated_at
+    SELECT id, email, company_name, contact_name, phone, status, client_type, created_at, updated_at
     FROM clients WHERE id = ?
   `,
       [clientId]

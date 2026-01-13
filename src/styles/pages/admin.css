@@ -9,13 +9,13 @@
 
 /* Override text colors for dark backgrounds */
 [data-page="admin"] {
-  --color-text-primary: #f5f5f5;
-  --color-text-secondary: #cccccc;
-  --portal-text-secondary: #999999;
+  --color-text-primary: var(--color-gray-100);
+  --color-text-secondary: var(--color-gray-300);
+  --portal-text-secondary: var(--color-gray-400);
 
   /* Label styling variables */
   --label-font-size: 0.75rem;
-  --label-color: #999999;
+  --label-color: var(--color-gray-400);
   --label-font-weight: 500;
   --label-text-transform: uppercase;
   --label-letter-spacing: 0.05em;
@@ -81,13 +81,13 @@
 [data-page="admin"] .recent-activity,
 [data-page="admin"] .portal-project-card,
 [data-page="admin"] .summary-card {
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3), -1px 0 1px rgba(0, 0, 0, 0.3), 0 -1px 1px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: var(--shadow-panel) !important;
 }
 
 /* Less intense shadows for Core Web Vitals & Bundle Analysis cards */
 [data-page="admin"] .vital-card,
 [data-page="admin"] .bundle-item {
-  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  box-shadow: var(--shadow-card) !important;
 }
 
 /* Base Admin Styles */
@@ -100,7 +100,7 @@
 
 /* Admin Dashboard Content - Dark background */
 [data-page="admin"] .dashboard-content {
-  background: #444444;
+  background: var(--portal-bg-medium);
 }
 
 /* Admin Page Header - Red heading and toggle button */
@@ -553,7 +553,7 @@
   background: var(--portal-bg-medium);
   border: none;
   border-radius: var(--border-radius-md);
-  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-card);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -724,7 +724,7 @@
   background: var(--portal-bg-medium);
   border-radius: var(--border-radius-sm);
   border: none;
-  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-card);
   color: var(--portal-text-light);
   font-size: var(--font-size-xs);
 }
@@ -829,12 +829,12 @@
 
 [data-page="admin"] .stat-card:hover,
 [data-page="admin"] .stat-card-clickable:hover {
-  background: #2a2a2a;
+  background: var(--portal-bg-readonly);
 }
 
 /* Active filter card stays dark */
 [data-page="admin"] .stat-card-clickable.active {
-  background: #2a2a2a;
+  background: var(--portal-bg-readonly);
 }
 
 /* Remove hover states from analytics page cards */
@@ -1078,6 +1078,35 @@
   color: var(--color-black);
 }
 
+/* ================================================
+   CLIENT TYPE BADGES
+   ================================================
+   Used to distinguish personal vs business clients
+   ================================================ */
+
+.client-type-badge {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: capitalize;
+  border: 2px solid var(--portal-border-dark);
+  white-space: nowrap;
+}
+
+.client-type-personal {
+  background: var(--color-status-review-border);
+  border-color: var(--portal-border-dark);
+  color: var(--color-white);
+}
+
+.client-type-business {
+  background: var(--color-info);
+  border-color: var(--portal-border-dark);
+  color: var(--color-black);
+}
+
 /* Admin Table Card - Consistent styling for data tables */
 .admin-table-card {
   background: var(--portal-bg-dark);
@@ -1089,7 +1118,7 @@
 }
 
 .admin-table-card:hover {
-  background: #2a2a2a;
+  background: var(--portal-bg-readonly);
 }
 
 #intake-submissions-card,
@@ -1697,7 +1726,7 @@
   background: var(--portal-bg-dark);
   border: none;
   border-radius: 0 0 6px 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-elevated-sm);
   z-index: 100;
   width: 140px;
   display: none;
@@ -2153,7 +2182,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (--mobile) {
   .admin-nav {
     padding: var(--space-3) var(--space-4);
   }

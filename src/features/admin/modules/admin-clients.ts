@@ -17,6 +17,7 @@ export interface Client {
   email: string;
   contact_name: string | null;
   company_name: string | null;
+  client_type: 'personal' | 'business';
   phone: string | null;
   status: 'active' | 'inactive' | 'pending';
   is_admin: boolean;
@@ -144,7 +145,7 @@ function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): voi
   if (!tableBody) return;
 
   if (!clients || clients.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="5" class="loading-row">No clients found</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="6" class="loading-row">No clients found</td></tr>';
     return;
   }
 
@@ -163,9 +164,15 @@ function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): voi
       const displayStatus = status.charAt(0).toUpperCase() + status.slice(1);
       const projectCount = client.project_count || 0;
 
+      // Client type badge
+      const clientType = client.client_type || 'business';
+      const typeBadgeClass = clientType === 'personal' ? 'client-type-personal' : 'client-type-business';
+      const typeLabel = clientType === 'personal' ? 'Personal' : 'Business';
+
       return `
         <tr data-client-id="${client.id}" class="clickable-row">
           <td>${safeName}${safeCompany ? `<br><small>${safeCompany}</small>` : ''}</td>
+          <td><span class="client-type-badge ${typeBadgeClass}">${typeLabel}</span></td>
           <td>${safeEmail}</td>
           <td>${displayStatus}</td>
           <td>${projectCount}</td>
@@ -247,6 +254,15 @@ function populateClientDetailView(client: Client): void {
   if (statusEl) {
     const status = client.status || 'pending';
     statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+  }
+
+  // Client type badge
+  const typeEl = document.getElementById('cd-client-type');
+  if (typeEl) {
+    const clientType = client.client_type || 'business';
+    const typeBadgeClass = clientType === 'personal' ? 'client-type-personal' : 'client-type-business';
+    const typeLabel = clientType === 'personal' ? 'Personal' : 'Business';
+    typeEl.innerHTML = `<span class="client-type-badge ${typeBadgeClass}">${typeLabel}</span>`;
   }
 
   const createdEl = document.getElementById('cd-created');
