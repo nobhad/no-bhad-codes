@@ -535,48 +535,6 @@ async function resendClientInvite(clientId: number): Promise<void> {
   }
 }
 
-async function editClient(clientId: number): Promise<void> {
-  const client = clientsData.find(c => c.id === clientId);
-  if (!client) {
-    console.error('[AdminClients] Client not found:', clientId);
-    return;
-  }
-
-  // Simple edit via prompts for now
-  // TODO: Implement proper edit modal
-  const newName = prompt('Contact Name:', client.contact_name || '');
-  if (newName === null) return;
-
-  const newCompany = prompt('Company Name:', client.company_name || '');
-  if (newCompany === null) return;
-
-  const newStatus = prompt('Status (active/inactive/pending):', client.status);
-  if (newStatus === null) return;
-
-  try {
-    const response = await fetch(`/api/clients/${clientId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        contact_name: newName,
-        company_name: newCompany,
-        status: newStatus
-      })
-    });
-
-    if (response.ok) {
-      storedContext?.showNotification('Client updated successfully', 'success');
-      if (storedContext) loadClients(storedContext);
-    } else {
-      storedContext?.showNotification('Failed to update client', 'error');
-    }
-  } catch (error) {
-    console.error('[AdminClients] Error updating client:', error);
-    storedContext?.showNotification('Error updating client', 'error');
-  }
-}
-
 function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
   const client = clientsData.find(c => c.id === clientId);
   if (!client) {

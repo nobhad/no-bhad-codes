@@ -62,8 +62,8 @@
 
 /* Client Portal Dashboard - Dark theme to match admin */
 [data-page="client-portal"] .dashboard-content {
-  background: var(--portal-bg-medium) !important;
-  color: var(--portal-text-light) !important;
+  background: var(--portal-bg-medium);
+  color: var(--portal-text-light);
 }
 
 /* Portal theme variables are defined in variables.css */
@@ -124,8 +124,8 @@
 [data-page="admin"] h6,
 [data-page="admin"] .page-header h2,
 [data-page="admin"] .client-name {
-  box-shadow: none !important;
-  text-shadow: none !important;
+  box-shadow: none;
+  text-shadow: none;
 }
 
 /* ================================================
@@ -143,7 +143,7 @@
 [data-page="client-portal"] .recent-activity,
 [data-page="client-portal"] .files-upload-section,
 [data-page="client-portal"] .files-list-section {
-  box-shadow: var(--shadow-panel) !important;
+  box-shadow: var(--shadow-panel);
 }
 
 /* No shadows on child divs inside main containers */
@@ -158,7 +158,7 @@
 [data-page="client-portal"] .recent-activity > div,
 [data-page="client-portal"] .files-upload-section > div,
 [data-page="client-portal"] .files-list-section > div {
-  box-shadow: none !important;
+  box-shadow: none;
 }
 
 /* ================================================
@@ -203,8 +203,8 @@
 [data-page="admin"] .update-item,
 [data-page="admin"] .content-item,
 [data-page="admin"] .settings-form {
-  background: transparent !important;
-  border: none !important;
+  background: transparent;
+  border: none;
 }
 
 /* Content Wrapper */
