@@ -142,7 +142,7 @@
 
 .project-item:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-elevated-sm);
 }
 
 .project-item.active {
@@ -351,7 +351,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 767px) {
+@media (--mobile) {
   .dashboard-layout {
     flex-direction: column;
   }
@@ -688,7 +688,7 @@ body[data-page="client-landing"] .client-login .client-content {
 }
 
 /* Auth Container - Mobile Responsive */
-@media (max-width: 767px) {
+@media (--mobile) {
   /* Client landing page - normal document flow on mobile */
   body[data-page="client-landing"] .client-login {
     position: static;
@@ -1094,7 +1094,7 @@ html[data-theme="dark"] .login-form {
 }
 
 /* Responsive - Mobile */
-@media (max-width: 767px) {
+@media (--mobile) {
   /* Show/hide for mobile */
   .mobile-only {
     display: flex !important;
@@ -1431,13 +1431,13 @@ html[data-theme="dark"] .login-form {
    RESPONSIVE - MATCHES MAIN PAGE BREAKPOINTS
    =============================================== */
 
-@media (max-width: 767px) {
+@media (--mobile) {
   .login-title {
     font-size: 2rem;
   }
 }
 
-@media (max-width: 479px) {
+@media (--small-mobile) {
   .login-title {
     font-size: 1.8rem;
   }
@@ -1463,7 +1463,7 @@ html[data-theme="dark"] .login-form {
   ); /* Ensure bottom is always visible */
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Drop shadow */
+  box-shadow: var(--shadow-elevated-sm); /* Drop shadow */
   z-index: 10; /* Ensure it covers the buttons */
 }
 
@@ -1555,7 +1555,7 @@ html[data-theme="dark"] .login-form {
 }
 
 /* Responsive adjustments */
-@media (max-width: 767px) {
+@media (--mobile) {
   .dynamic-content .form-row {
     grid-template-columns: 1fr;
   }
@@ -1581,7 +1581,7 @@ body[data-page="client-landing"] .intake-modal {
   z-index: 1000;
   justify-content: center;
   align-items: center;
-  padding: 0.5rem;
+  padding: 1rem;
 }
 
 body[data-page="client-landing"] .intake-modal.open {
@@ -1597,16 +1597,18 @@ body[data-page="client-landing"] .intake-modal-content .terminal-window {
 }
 
 body[data-page="client-landing"] .intake-modal-content {
-  width: 50vw;
-  min-width: 50vw;
-  height: 98vh;
-  max-height: 98vh;
-  overflow: visible; /* Allow glow to show outside bounds */
+  width: 90vw;
+  min-width: 900px;
+  max-width: 900px;
+  height: 90vh;
+  max-height: 90vh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0; /* Prevent flex shrinking */
-  padding: 10px; /* Space for glow */
+  flex-shrink: 0;
+  padding: 0;
   box-sizing: border-box;
+  border-radius: 10px;
 }
 
 /* Mobile: full screen */
