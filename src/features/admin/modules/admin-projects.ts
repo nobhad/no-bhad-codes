@@ -637,7 +637,7 @@ export async function loadProjectMessages(
 ): Promise<void> {
   if (ctx.isDemo()) return;
 
-  const container = document.getElementById('pd-messages-list');
+  const container = document.getElementById('pd-messages-thread');
   if (!container) return;
 
   try {
