@@ -1081,7 +1081,7 @@ html[data-theme="dark"] .login-form {
 
 /* Desktop/Mobile visibility helpers */
 .mobile-only {
-  display: none !important;
+  display: none;
 }
 
 .desktop-only {
@@ -1097,11 +1097,16 @@ html[data-theme="dark"] .login-form {
 @media (--mobile) {
   /* Show/hide for mobile */
   .mobile-only {
-    display: flex !important;
+    display: flex;
+  }
+
+  /* br elements need block display, not flex */
+  br.mobile-only {
+    display: block;
   }
 
   .desktop-only {
-    display: none !important;
+    display: none;
   }
 
   /* Hide login description on mobile */
@@ -1120,13 +1125,14 @@ html[data-theme="dark"] .login-form {
     flex-direction: column;
     width: 100%;
     padding: 0.5rem 0.5rem 2rem;
-    gap: 1.25rem;
+    gap: 0;
     align-items: center;
   }
 
   .mobile-avatar {
     width: 120px;
     height: 120px;
+    margin-bottom: 1rem;
   }
 
   .mobile-avatar img {
@@ -1139,6 +1145,7 @@ html[data-theme="dark"] .login-form {
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0;
+    margin-bottom: 0.5rem;
     text-transform: uppercase;
     text-align: center;
     letter-spacing: 0.05em;
@@ -1150,7 +1157,7 @@ html[data-theme="dark"] .login-form {
     max-width: 100%;
     border: 2px solid var(--color-neutral-900);
     padding: 1.25rem;
-    margin-top: -1.15rem;
+    margin-bottom: 0.5rem;
   }
 
   /* Mobile login form */
@@ -1183,7 +1190,6 @@ html[data-theme="dark"] .login-form {
   .mobile-forgot-password {
     text-align: center;
     font-size: 0.875rem;
-    margin-top: -1rem;
   }
 
   .mobile-forgot-password p {
