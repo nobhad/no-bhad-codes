@@ -8,7 +8,7 @@
  * Handles mock/real project data, project list, and project details.
  */
 
-import type { ClientProject, ClientProjectStatus, ProjectPriority } from '../../../types/client';
+import type { ClientProject, ClientProjectStatus } from '../../../types/client';
 import type { ClientPortalContext, PortalProject } from '../portal-types';
 
 /** API endpoints */
@@ -33,7 +33,7 @@ export interface ProjectCallbacks {
  */
 export async function loadMockUserProjects(
   user: UserInfo,
-  callbacks: ProjectCallbacks
+  _callbacks: ProjectCallbacks
 ): Promise<ClientProject[]> {
   const sampleProject: ClientProject = {
     id: `project-${user.id}-001`,
@@ -106,102 +106,6 @@ export async function loadMockUserProjects(
   }
 
   return [sampleProject];
-}
-
-/**
- * Load real user projects from API (for authenticated users)
- */
-export async function loadRealUserProjects(user: UserInfo): Promise<ClientProject[]> {
-  try {
-    // Fetch projects from API
-    const projectsResponse = await fetch(PROJECTS_API_BASE, {
-      credentials: 'include'
-    });
-
-    if (!projectsResponse.ok) {
-      console.error('[ClientPortal] Failed to fetch projects:', projectsResponse.status);
-      throw new Error('Failed to fetch projects');
-    }
-
-    const projectsData = await projectsResponse.json();
-    const apiProjects = projectsData.projects || [];
-
-    if (apiProjects.length === 0) {
-      // No projects yet - show empty state
-      const clientNameElement = document.getElementById('client-name');
-      if (clientNameElement) {
-        clientNameElement.textContent = user.name || user.email || 'Client';
-      }
-      return [];
-    }
-
-    // Transform API projects to ClientProject interface
-    const clientProjects: ClientProject[] = await Promise.all(
-      apiProjects.map(async (apiProject: any) => {
-        // Fetch milestones for this project
-        let milestones: any[] = [];
-        try {
-          const milestonesResponse = await fetch(`${PROJECTS_API_BASE}/${apiProject.id}/milestones`, {
-            credentials: 'include'
-          });
-          if (milestonesResponse.ok) {
-            const milestonesData = await milestonesResponse.json();
-            milestones = milestonesData.milestones || [];
-          }
-        } catch (milestoneError) {
-          console.warn(`[ClientPortal] Failed to fetch milestones for project ${apiProject.id}:`, milestoneError);
-        }
-
-        // Transform milestone data to match ProjectMilestone interface
-        const transformedMilestones = milestones.map((m: any) => ({
-          id: String(m.id),
-          title: m.title || 'Untitled Milestone',
-          description: m.description || '',
-          dueDate: m.due_date || new Date().toISOString().split('T')[0],
-          completedDate: m.completed_date || undefined,
-          isCompleted: Boolean(m.is_completed),
-          deliverables: Array.isArray(m.deliverables) ? m.deliverables : []
-        }));
-
-        // Calculate progress from milestones if available
-        const completedMilestones = transformedMilestones.filter((m: any) => m.isCompleted).length;
-        const totalMilestones = transformedMilestones.length;
-        const calculatedProgress = totalMilestones > 0
-          ? Math.round((completedMilestones / totalMilestones) * 100)
-          : (apiProject.progress || 0);
-
-        // Transform to ClientProject interface
-        return {
-          id: String(apiProject.id),
-          projectName: apiProject.project_name || apiProject.name || 'Untitled Project',
-          description: apiProject.description || '',
-          clientId: String(apiProject.client_id || user.id),
-          clientName: user.name || user.email || 'Client',
-          status: (apiProject.status || 'pending') as ClientProjectStatus,
-          priority: (apiProject.priority || 'medium') as ProjectPriority,
-          progress: calculatedProgress,
-          startDate: apiProject.start_date || apiProject.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
-          estimatedEndDate: apiProject.estimated_end_date || undefined,
-          actualEndDate: apiProject.actual_end_date || undefined,
-          updates: [], // Loaded on-demand when project is selected
-          files: [],   // Loaded on-demand when project is selected
-          messages: [], // Loaded on-demand when project is selected
-          milestones: transformedMilestones
-        } as ClientProject;
-      })
-    );
-
-    // Set client name in header
-    const clientNameElement = document.getElementById('client-name');
-    if (clientNameElement) {
-      clientNameElement.textContent = user.name || user.email || 'Client';
-    }
-
-    return clientProjects;
-  } catch (error) {
-    console.error('[ClientPortal] Failed to load real projects:', error);
-    throw error;
-  }
 }
 
 /**

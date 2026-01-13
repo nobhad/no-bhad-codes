@@ -8,8 +8,6 @@
  * Handles sidebar, tabs, mobile menu, breadcrumbs, and view switching.
  */
 
-import type { ClientPortalContext } from '../portal-types';
-
 /** Breadcrumb item structure */
 interface BreadcrumbItem {
   label: string;

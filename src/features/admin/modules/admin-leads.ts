@@ -138,7 +138,7 @@ function updateLeadsDisplay(data: LeadsData, ctx: AdminDashboardContext): void {
   renderLeadsTable(data.leads, ctx);
 }
 
-function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
+function renderLeadsTable(leads: Lead[], _ctx: AdminDashboardContext): void {
   const tableBody = document.getElementById('leads-table-body');
   if (!tableBody) return;
 
