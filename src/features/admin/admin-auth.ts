@@ -187,8 +187,19 @@ export class AdminAuth {
   /**
    * Logout and clear all auth data
    */
-  static logout(): void {
+  static async logout(): Promise<void> {
     console.log('[AdminAuth] Logout called - clearing ALL session data');
+
+    // Call server logout to clear HttpOnly cookie
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.warn('[AdminAuth] Server logout failed:', error);
+    }
+
     // Clear all sessionStorage (ensures nothing is missed)
     sessionStorage.clear();
     // Also clear localStorage in case anything is stored there
