@@ -322,11 +322,6 @@
     display: block;
   }
 
-  /* Dark mode: Make dog avatar SVG true black */
-  html[data-theme="dark"] .avatar-blurb-svg {
-    filter: brightness(0);
-  }
-
   .avatar-blurb-content {
     position: absolute;
     top: 30%;
