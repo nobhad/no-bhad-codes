@@ -1054,7 +1054,15 @@ class AdminDashboard {
     const hasAccount = project.client_id || project.password_hash;
 
     if (clientAccountStatus) {
-      clientAccountStatus.textContent = hasAccount ? 'Active' : 'Not Invited';
+      // Check if client has account and activation status
+      const hasLoggedIn = project.last_login_at;
+      if (hasAccount && hasLoggedIn) {
+        clientAccountStatus.textContent = 'Active';
+      } else if (hasAccount) {
+        clientAccountStatus.textContent = 'Pending';
+      } else {
+        clientAccountStatus.textContent = 'Not Invited';
+      }
     }
     if (clientLastLogin) {
       clientLastLogin.textContent = project.last_login_at

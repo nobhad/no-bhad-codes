@@ -138,9 +138,16 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     if (clientAccountEmail) clientAccountEmail.textContent = project.email || '-';
     if (clientAccountStatus) {
-      // Check if client has account
+      // Check if client has account and activation status
       const hasAccount = project.client_id || project.password_hash;
-      clientAccountStatus.textContent = hasAccount ? 'Active' : 'Not Invited';
+      const hasLoggedIn = project.last_login_at;
+      if (hasAccount && hasLoggedIn) {
+        clientAccountStatus.textContent = 'Active';
+      } else if (hasAccount) {
+        clientAccountStatus.textContent = 'Pending';
+      } else {
+        clientAccountStatus.textContent = 'Not Invited';
+      }
     }
     if (clientLastLogin) {
       clientLastLogin.textContent = project.last_login_at
