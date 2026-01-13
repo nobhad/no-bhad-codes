@@ -873,20 +873,20 @@
             <div class="project-detail-overview portal-shadow">
               <div class="overview-header">
                 <h3 id="pd-project-name">Project Name</h3>
-                <button class="btn-icon" id="btn-edit-project" aria-label="Edit project">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                <button class="icon-btn" id="btn-edit-project" title="Edit Project">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                 </button>
               </div>
               <div class="project-detail-client-row">
-                <div class="meta-item">
+                <div class="meta-item clickable-client" id="pd-client-link">
                   <span class="meta-label">Client</span>
                   <span class="meta-value" id="pd-client-name">-</span>
                 </div>
-                <div class="meta-item">
+                <div class="meta-item clickable-client" id="pd-company-link">
                   <span class="meta-label">Company</span>
                   <span class="meta-value" id="pd-company">-</span>
                 </div>
-                <div class="meta-item">
+                <div class="meta-item clickable-client" id="pd-email-link">
                   <span class="meta-label">Email</span>
                   <span class="meta-value" id="pd-client-email">-</span>
                 </div>
@@ -912,6 +912,10 @@
                   <span class="meta-label">Timeline</span>
                   <span class="meta-value" id="pd-timeline">-</span>
                 </div>
+                <div class="meta-item">
+                  <span class="meta-label">Preview URL</span>
+                  <span class="meta-value"><a href="#" id="pd-preview-url-link" target="_blank">-</a></span>
+                </div>
               </div>
               <div class="project-notes" id="pd-notes"></div>
             </div>
@@ -922,7 +926,6 @@
               <button class="pd-tab-btn" data-pd-tab="files">Files</button>
               <button class="pd-tab-btn" data-pd-tab="messages">Messages</button>
               <button class="pd-tab-btn" data-pd-tab="invoices">Invoices</button>
-              <button class="pd-tab-btn" data-pd-tab="settings">Settings</button>
             </div>
 
             <!-- Overview Sub-Tab -->
@@ -1029,67 +1032,6 @@
                 </div>
                 <div class="invoices-list" id="pd-invoices-list">
                   <p class="empty-state">No invoices created yet.</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Settings Sub-Tab -->
-            <div class="pd-tab-content" id="pd-tab-settings">
-              <div class="settings-grid">
-                <!-- Client Account -->
-                <div class="settings-section portal-shadow">
-                  <h3>Client Account</h3>
-                  <form class="settings-form" id="pd-client-account-form">
-                    <div class="form-group">
-                      <label for="pd-client-account-email">Email</label>
-                      <input
-                        type="email"
-                        id="pd-client-account-email"
-                        class="form-input"
-                        placeholder="client@example.com"
-                      />
-                    </div>
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label>Account Status</label>
-                        <div class="form-value-readonly">
-                          <span id="pd-client-account-status">-</span>
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <label>Last Login</label>
-                        <div class="form-value-readonly" id="pd-client-last-login">Never</div>
-                      </div>
-                    </div>
-                    <div class="client-account-actions">
-                      <button type="submit" class="btn btn-secondary" id="btn-save-client-email">
-                        Save Email
-                      </button>
-                      <button type="button" class="btn btn-secondary" id="btn-resend-invite">
-                        Resend Invitation
-                      </button>
-                      <button type="button" class="btn btn-secondary" id="btn-reset-password">
-                        Reset Password
-                      </button>
-                    </div>
-                  </form>
-                </div>
-
-                <!-- Preview URL -->
-                <div class="settings-section portal-shadow">
-                  <h3>Preview URL</h3>
-                  <form class="settings-form" id="pd-preview-form">
-                    <div class="form-group">
-                      <label for="pd-preview-url">Client Preview URL</label>
-                      <input
-                        type="url"
-                        id="pd-preview-url"
-                        class="form-input"
-                        placeholder="https://preview.example.com"
-                      />
-                    </div>
-                    <button type="submit" class="btn btn-secondary">Save Preview URL</button>
-                  </form>
                 </div>
               </div>
             </div>
@@ -1251,6 +1193,71 @@
           </div>
           <div class="admin-modal-footer">
             <button type="button" class="btn btn-secondary" id="edit-billing-cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit Project Modal -->
+    <div class="admin-modal-overlay hidden" id="edit-project-modal">
+      <div class="admin-modal">
+        <div class="admin-modal-header">
+          <h3>Edit Project</h3>
+          <button class="admin-modal-close" id="edit-project-close" aria-label="Close modal">
+            &times;
+          </button>
+        </div>
+        <form id="edit-project-form">
+          <div class="admin-modal-body">
+            <div class="form-group">
+              <label class="meta-label" for="edit-project-name">Project Name</label>
+              <input type="text" id="edit-project-name" class="form-input" placeholder="Project Name" />
+            </div>
+            <div class="form-group">
+              <label class="meta-label" for="edit-project-type">Project Type</label>
+              <select id="edit-project-type" class="form-input">
+                <option value="">Select type...</option>
+                <option value="website">Website</option>
+                <option value="web-app">Web Application</option>
+                <option value="mobile-app">Mobile App</option>
+                <option value="e-commerce">E-Commerce</option>
+                <option value="branding">Branding</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="meta-label" for="edit-project-budget">Budget</label>
+                <input type="text" id="edit-project-budget" class="form-input" placeholder="$5,000 - $10,000" />
+              </div>
+              <div class="form-group">
+                <label class="meta-label" for="edit-project-price">Price</label>
+                <input type="text" id="edit-project-price" class="form-input" placeholder="$7,500" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="meta-label" for="edit-project-timeline">Timeline</label>
+              <input type="text" id="edit-project-timeline" class="form-input" placeholder="4-6 weeks" />
+            </div>
+            <div class="form-group">
+              <label class="meta-label" for="edit-project-preview-url">Preview URL</label>
+              <input type="url" id="edit-project-preview-url" class="form-input" placeholder="https://preview.example.com" />
+            </div>
+            <div class="form-group">
+              <label class="meta-label" for="edit-project-status">Status</label>
+              <select id="edit-project-status" class="form-input">
+                <option value="pending">Pending</option>
+                <option value="active">Active</option>
+                <option value="in_progress">In Progress</option>
+                <option value="on_hold">On Hold</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+          <div class="admin-modal-footer">
+            <button type="button" class="btn btn-secondary" id="edit-project-cancel">Cancel</button>
             <button type="submit" class="btn btn-primary">Save Changes</button>
           </div>
         </form>

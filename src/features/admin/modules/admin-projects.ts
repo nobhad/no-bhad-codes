@@ -212,6 +212,8 @@ function populateProjectDetailView(project: LeadProject): void {
   const titleEl = document.getElementById('project-detail-title');
   if (titleEl) titleEl.textContent = 'Project Details';
 
+  const projectData = project as any;
+
   // Overview fields
   const fields: Record<string, string> = {
     'pd-project-name': project.project_name || 'Untitled Project',
@@ -220,7 +222,7 @@ function populateProjectDetailView(project: LeadProject): void {
     'pd-company': project.company_name || '-',
     'pd-type': formatProjectType(project.project_type),
     'pd-budget': project.budget_range || '-',
-    'pd-price': '-',
+    'pd-price': projectData.price || '-',
     'pd-timeline': project.timeline || '-',
     'pd-start-date': project.created_at ? new Date(project.created_at).toLocaleDateString() : '-'
   };
@@ -230,34 +232,37 @@ function populateProjectDetailView(project: LeadProject): void {
     if (el) el.textContent = SanitizationUtils.escapeHtml(value);
   });
 
-  // Make client name and company clickable to navigate to client details
-  const clientNameEl = document.getElementById('pd-client-name');
-  const companyEl = document.getElementById('pd-company');
+  // Preview URL
+  const previewUrlLink = document.getElementById('pd-preview-url-link') as HTMLAnchorElement;
+  if (previewUrlLink) {
+    const previewUrl = projectData.preview_url || '';
+    if (previewUrl) {
+      previewUrlLink.href = previewUrl;
+      previewUrlLink.textContent = previewUrl;
+    } else {
+      previewUrlLink.href = '#';
+      previewUrlLink.textContent = '-';
+      previewUrlLink.onclick = (e) => e.preventDefault();
+    }
+  }
+
+  // Make client name, company, and email clickable to navigate to client details
   const projectEmail = project.email;
+  const clickableClients = ['pd-client-link', 'pd-company-link', 'pd-email-link'];
 
-  if (clientNameEl && projectEmail) {
-    clientNameEl.classList.add('clickable-link');
-    clientNameEl.style.cursor = 'pointer';
-    // Clone to remove old listeners
-    const newClientNameEl = clientNameEl.cloneNode(true) as HTMLElement;
-    clientNameEl.parentNode?.replaceChild(newClientNameEl, clientNameEl);
-    newClientNameEl.addEventListener('click', () => navigateToClientByEmail(projectEmail));
-  }
+  clickableClients.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el && projectEmail) {
+      el.style.cursor = 'pointer';
+      // Clone to remove old listeners
+      const newEl = el.cloneNode(true) as HTMLElement;
+      el.parentNode?.replaceChild(newEl, el);
+      newEl.addEventListener('click', () => navigateToClientByEmail(projectEmail));
+    }
+  });
 
-  if (companyEl && projectEmail && project.company_name) {
-    companyEl.classList.add('clickable-link');
-    companyEl.style.cursor = 'pointer';
-    // Clone to remove old listeners
-    const newCompanyEl = companyEl.cloneNode(true) as HTMLElement;
-    companyEl.parentNode?.replaceChild(newCompanyEl, companyEl);
-    newCompanyEl.addEventListener('click', () => navigateToClientByEmail(projectEmail));
-  }
-
-  // Client account email is an input field
-  const clientEmailInput = document.getElementById('pd-client-account-email') as HTMLInputElement;
-  if (clientEmailInput) {
-    clientEmailInput.value = project.email || '';
-  }
+  // Setup edit button
+  setupEditProjectButton(project);
 
   // Status badge - normalize to underscore format
   const statusEl = document.getElementById('pd-status');
@@ -302,29 +307,123 @@ function populateProjectDetailView(project: LeadProject): void {
       notes.innerHTML = '';
     }
   }
+}
 
-  // Settings form - Client Account
-  const clientAccountEmail = document.getElementById('pd-client-account-email') as HTMLInputElement;
-  const clientAccountStatus = document.getElementById('pd-client-account-status');
-  const clientLastLogin = document.getElementById('pd-client-last-login');
+/**
+ * Setup edit project button and modal
+ */
+function setupEditProjectButton(project: LeadProject): void {
+  const editBtn = document.getElementById('btn-edit-project');
+  if (!editBtn) return;
+
+  // Clone to remove old listeners
+  const newEditBtn = editBtn.cloneNode(true) as HTMLElement;
+  editBtn.parentNode?.replaceChild(newEditBtn, editBtn);
+
+  newEditBtn.addEventListener('click', () => openEditProjectModal(project));
+}
+
+/**
+ * Open the edit project modal with current project data
+ */
+function openEditProjectModal(project: LeadProject): void {
+  const modal = document.getElementById('edit-project-modal');
+  if (!modal) return;
+
   const projectData = project as any;
 
-  if (clientAccountEmail) clientAccountEmail.value = project.email || '';
-  if (clientAccountStatus) {
-    const hasAccount = projectData.client_id || projectData.password_hash;
-    const hasLoggedIn = projectData.last_login_at;
-    if (hasAccount && hasLoggedIn) {
-      clientAccountStatus.textContent = 'Active';
-    } else if (hasAccount) {
-      clientAccountStatus.textContent = 'Pending';
-    } else {
-      clientAccountStatus.textContent = 'Not Invited';
-    }
+  // Populate form fields
+  const nameInput = document.getElementById('edit-project-name') as HTMLInputElement;
+  const typeSelect = document.getElementById('edit-project-type') as HTMLSelectElement;
+  const budgetInput = document.getElementById('edit-project-budget') as HTMLInputElement;
+  const priceInput = document.getElementById('edit-project-price') as HTMLInputElement;
+  const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
+  const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
+  const statusSelect = document.getElementById('edit-project-status') as HTMLSelectElement;
+
+  if (nameInput) nameInput.value = project.project_name || '';
+  if (typeSelect) typeSelect.value = project.project_type || '';
+  if (budgetInput) budgetInput.value = project.budget_range || '';
+  if (priceInput) priceInput.value = projectData.price || '';
+  if (timelineInput) timelineInput.value = project.timeline || '';
+  if (previewUrlInput) previewUrlInput.value = projectData.preview_url || '';
+  if (statusSelect) statusSelect.value = normalizeStatus(project.status);
+
+  // Show modal
+  modal.classList.remove('hidden');
+
+  // Setup close handlers
+  const closeBtn = document.getElementById('edit-project-close');
+  const cancelBtn = document.getElementById('edit-project-cancel');
+  const form = document.getElementById('edit-project-form') as HTMLFormElement;
+
+  const closeModal = () => modal.classList.add('hidden');
+
+  closeBtn?.addEventListener('click', closeModal, { once: true });
+  cancelBtn?.addEventListener('click', closeModal, { once: true });
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  }, { once: true });
+
+  // Handle form submit
+  if (form) {
+    const newForm = form.cloneNode(true) as HTMLFormElement;
+    form.parentNode?.replaceChild(newForm, form);
+
+    newForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await saveProjectChanges(project.id);
+      closeModal();
+    });
   }
-  if (clientLastLogin) {
-    clientLastLogin.textContent = projectData.last_login_at
-      ? new Date(projectData.last_login_at).toLocaleString()
-      : 'Never';
+}
+
+/**
+ * Save project changes from the edit modal
+ */
+async function saveProjectChanges(projectId: number): Promise<void> {
+  if (!storedContext) return;
+
+  const nameInput = document.getElementById('edit-project-name') as HTMLInputElement;
+  const typeSelect = document.getElementById('edit-project-type') as HTMLSelectElement;
+  const budgetInput = document.getElementById('edit-project-budget') as HTMLInputElement;
+  const priceInput = document.getElementById('edit-project-price') as HTMLInputElement;
+  const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
+  const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
+  const statusSelect = document.getElementById('edit-project-status') as HTMLSelectElement;
+
+  const updates: Record<string, string> = {};
+  if (nameInput?.value) updates.project_name = nameInput.value;
+  if (typeSelect?.value) updates.project_type = typeSelect.value;
+  if (budgetInput?.value) updates.budget_range = budgetInput.value;
+  if (priceInput?.value) updates.price = priceInput.value;
+  if (timelineInput?.value) updates.timeline = timelineInput.value;
+  if (previewUrlInput?.value !== undefined) updates.preview_url = previewUrlInput.value;
+  if (statusSelect?.value) updates.status = statusSelect.value;
+
+  try {
+    const response = await fetch(`/api/projects/${projectId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(updates)
+    });
+
+    if (response.ok) {
+      storedContext.showNotification('Project updated successfully', 'success');
+      // Reload projects and refresh view
+      await loadProjects(storedContext);
+      const project = projectsData.find((p) => p.id === projectId);
+      if (project) {
+        populateProjectDetailView(project);
+      }
+    } else {
+      const error = await response.json();
+      storedContext.showNotification(error.message || 'Failed to update project', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminProjects] Error saving project:', error);
+    storedContext.showNotification('Failed to update project', 'error');
   }
 }
 
