@@ -20,6 +20,7 @@ import {
   loadLeadsModule,
   loadContactsModule,
   loadProjectsModule,
+  loadClientsModule,
   loadMessagingModule,
   loadAnalyticsModule,
   loadOverviewModule,
@@ -2391,6 +2392,16 @@ class AdminDashboard {
           const projectsModule = await loadProjectsModule();
           await projectsModule.loadProjects(this.moduleContext);
         }
+        break;
+      case 'clients':
+        // Use clients module
+        {
+          const clientsModule = await loadClientsModule();
+          await clientsModule.loadClients(this.moduleContext);
+        }
+        break;
+      case 'client-detail':
+        // Client detail view - data loaded by showClientDetails in admin-clients module
         break;
       case 'messages':
         // Use messaging module

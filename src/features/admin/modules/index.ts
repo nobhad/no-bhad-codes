@@ -24,6 +24,10 @@ export async function loadProjectsModule() {
   return import('./admin-projects');
 }
 
+export async function loadClientsModule() {
+  return import('./admin-clients');
+}
+
 export async function loadMessagingModule() {
   return import('./admin-messaging');
 }
