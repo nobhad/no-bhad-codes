@@ -38,7 +38,7 @@
 }
 
 /* Tablet */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   .overview-grid {
     grid-template-columns: 1fr;
   }

@@ -13,7 +13,7 @@
 }
 
 /* Mobile Styles */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   /* Show hamburger menu button */
   .mobile-menu-toggle {
     display: flex;

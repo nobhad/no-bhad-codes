@@ -305,13 +305,14 @@ function populateProjectDetailView(project: LeadProject): void {
   // Features - append below the description row if present
   const notes = document.getElementById('pd-notes');
   if (notes && project.features) {
+    // Parse features - handles both comma-separated and concatenated formats
+    const parsedFeatures = parseFeatures(project.features);
+
     // Filter out plan tiers that aren't actual features
     const excludedValues = ['basic-only', 'standard', 'premium', 'enterprise'];
-    const featuresList = project.features
-      .split(',')
-      .map((f) => f.trim())
+    const featuresList = parsedFeatures
       .filter((f) => f && !excludedValues.includes(f.toLowerCase()))
-      .map((f) => `<span class="feature-tag">${SanitizationUtils.escapeHtml(f)}</span>`)
+      .map((f) => `<span class="feature-tag">${SanitizationUtils.escapeHtml(f.replace(/-/g, ' '))}</span>`)
       .join('');
 
     // Check if features container already exists, otherwise append
@@ -325,6 +326,58 @@ function populateProjectDetailView(project: LeadProject): void {
       featuresContainer.innerHTML = `<span class="meta-label">Features Requested</span><div class="features-list">${featuresList}</div>`;
     }
   }
+}
+
+/**
+ * Parse features string - handles both comma-separated and concatenated formats
+ */
+function parseFeatures(featuresStr: string): string[] {
+  if (!featuresStr) return [];
+
+  // If comma-separated, split normally
+  if (featuresStr.includes(',')) {
+    return featuresStr.split(',').map((f) => f.trim()).filter((f) => f);
+  }
+
+  // Known feature values from all project types
+  const knownFeatures = [
+    'contact-form', 'social-links', 'analytics', 'mobile-optimized',
+    'age-verification', 'basic-only', 'blog', 'gallery', 'testimonials',
+    'booking', 'cms', 'portfolio-gallery', 'case-studies', 'resume-download',
+    'shopping-cart', 'payment-processing', 'inventory-management',
+    'user-accounts', 'admin-dashboard', 'product-search', 'reviews',
+    'real-time-updates', 'api-integration', 'database', 'authentication',
+    'dashboard', 'notifications', 'file-upload', 'offline-support',
+    'tab-management', 'bookmarks', 'sync', 'dark-mode', 'keyboard-shortcuts'
+  ];
+
+  // Sort by length (longest first) to match longer patterns before shorter ones
+  const sortedFeatures = [...knownFeatures].sort((a, b) => b.length - a.length);
+
+  const found: string[] = [];
+  let remaining = featuresStr;
+
+  // Iteratively find and extract known features
+  while (remaining.length > 0) {
+    let matched = false;
+    for (const feature of sortedFeatures) {
+      const index = remaining.indexOf(feature);
+      if (index !== -1) {
+        found.push(feature);
+        remaining = remaining.slice(0, index) + remaining.slice(index + feature.length);
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) {
+      if (remaining.trim()) {
+        found.push(remaining.trim());
+      }
+      break;
+    }
+  }
+
+  return found;
 }
 
 /**
@@ -413,7 +466,7 @@ async function saveProjectChanges(projectId: number): Promise<void> {
   const updates: Record<string, string> = {};
   if (nameInput?.value) updates.project_name = nameInput.value;
   if (typeSelect?.value) updates.project_type = typeSelect.value;
-  if (budgetInput?.value) updates.budget_range = budgetInput.value;
+  if (budgetInput?.value) updates.budget = budgetInput.value;
   if (priceInput?.value) updates.price = priceInput.value;
   if (timelineInput?.value) updates.timeline = timelineInput.value;
   if (previewUrlInput?.value !== undefined) updates.preview_url = previewUrlInput.value;

@@ -104,16 +104,51 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (progressPercent) progressPercent.textContent = `${progress}%`;
     if (progressBar) progressBar.style.width = `${progress}%`;
 
-    // Project notes
-    const notes = document.getElementById('pd-notes');
-    if (notes) {
-      if (project.description) {
-        notes.innerHTML = `<p>${project.description}</p>`;
-        if (project.features) {
-          notes.innerHTML += `<h4>Features Requested:</h4><p>${project.features}</p>`;
-        }
+    // Project description
+    const descriptionEl = document.getElementById('pd-description');
+    if (descriptionEl) {
+      descriptionEl.textContent = project.description || '-';
+    }
+
+    // Preview URL
+    const previewUrlLink = document.getElementById('pd-preview-url-link') as HTMLAnchorElement;
+    if (previewUrlLink) {
+      if (project.preview_url) {
+        previewUrlLink.href = project.preview_url;
+        previewUrlLink.textContent = project.preview_url;
       } else {
-        notes.innerHTML = '<p class="empty-state">No project notes yet.</p>';
+        previewUrlLink.href = '#';
+        previewUrlLink.textContent = '-';
+      }
+    }
+
+    // Features - add to notes container if features exist
+    const notes = document.getElementById('pd-notes');
+    if (notes && project.features) {
+      // Remove existing features container if present
+      const existingFeatures = notes.querySelector('.features-container');
+      if (existingFeatures) existingFeatures.remove();
+
+      // Parse features - handle both comma-separated and concatenated formats
+      const featuresArray = this.parseFeatures(project.features);
+
+      // Filter out plan tiers and format as feature tags
+      const excludedValues = ['basic-only', 'standard', 'premium', 'enterprise'];
+      const featuresList = featuresArray
+        .filter((f: string) => f && !excludedValues.includes(f.toLowerCase()))
+        .map((f: string) => `<span class="feature-tag">${SanitizationUtils.escapeHtml(f.replace(/-/g, ' '))}</span>`)
+        .join('');
+
+      if (featuresList) {
+        // Add features container with tags
+        const featuresContainer = document.createElement('div');
+        featuresContainer.className = 'meta-item features-container';
+        featuresContainer.style.flexBasis = '100%';
+        featuresContainer.innerHTML = `
+          <span class="meta-label">Features Requested</span>
+          <div class="features-list">${featuresList}</div>
+        `;
+        notes.appendChild(featuresContainer);
       }
     }
 
@@ -168,8 +203,10 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Set up project detail sub-tab navigation
    */
   private setupProjectDetailTabs(): void {
+    console.log('[ProjectDetails] setupProjectDetailTabs called');
     const tabBtns = document.querySelectorAll('.pd-tab-btn');
     const tabContents = document.querySelectorAll('.pd-tab-content');
+    console.log('[ProjectDetails] Found tabBtns:', tabBtns.length, 'tabContents:', tabContents.length);
 
     tabBtns.forEach((btn) => {
       const btnEl = btn as HTMLElement;
@@ -202,14 +239,16 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       });
     }
 
-    // Settings form handler
-    const settingsForm = document.getElementById('pd-project-settings-form') as HTMLElement;
-    if (settingsForm && !settingsForm.dataset.listenerAdded) {
-      settingsForm.dataset.listenerAdded = 'true';
-      settingsForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        this.saveProjectSettings();
+    // Edit project button handler
+    const editProjectBtn = document.getElementById('btn-edit-project') as HTMLElement;
+    console.log('[ProjectDetails] editProjectBtn found:', !!editProjectBtn, 'listenerAdded:', editProjectBtn?.dataset.listenerAdded);
+    if (editProjectBtn && !editProjectBtn.dataset.listenerAdded) {
+      editProjectBtn.dataset.listenerAdded = 'true';
+      editProjectBtn.addEventListener('click', () => {
+        console.log('[ProjectDetails] Edit project button clicked');
+        this.openEditProjectModal();
       });
+      console.log('[ProjectDetails] Edit project listener attached');
     }
 
     // Send message handler
@@ -237,9 +276,14 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     // Add milestone handler
     const addMilestoneBtn = document.getElementById('btn-add-milestone') as HTMLElement;
+    console.log('[ProjectDetails] addMilestoneBtn found:', !!addMilestoneBtn, 'listenerAdded:', addMilestoneBtn?.dataset.listenerAdded);
     if (addMilestoneBtn && !addMilestoneBtn.dataset.listenerAdded) {
       addMilestoneBtn.dataset.listenerAdded = 'true';
-      addMilestoneBtn.addEventListener('click', () => this.showAddMilestonePrompt());
+      addMilestoneBtn.addEventListener('click', () => {
+        console.log('[ProjectDetails] Add milestone button clicked, projectId:', this.currentProjectId);
+        this.showAddMilestonePrompt();
+      });
+      console.log('[ProjectDetails] Add milestone listener attached');
     }
 
     // Create invoice handler
@@ -341,35 +385,99 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   }
 
   /**
-   * Save project settings from the settings form
+   * Open the edit project modal with current project data
    */
-  private async saveProjectSettings(): Promise<void> {
+  private openEditProjectModal(): void {
+    if (!this.currentProjectId) return;
+
+    const project = this.projectsData.find((p: any) => p.id === this.currentProjectId);
+    if (!project) return;
+
+    const modal = document.getElementById('edit-project-modal');
+    if (!modal) {
+      console.error('[ProjectDetails] Edit project modal not found');
+      return;
+    }
+
+    // Populate form fields
+    const nameInput = document.getElementById('edit-project-name') as HTMLInputElement;
+    const typeSelect = document.getElementById('edit-project-type') as HTMLSelectElement;
+    const budgetInput = document.getElementById('edit-project-budget') as HTMLInputElement;
+    const priceInput = document.getElementById('edit-project-price') as HTMLInputElement;
+    const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
+    const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
+    const statusSelect = document.getElementById('edit-project-status') as HTMLSelectElement;
+
+    if (nameInput) nameInput.value = project.project_name || '';
+    if (typeSelect) typeSelect.value = project.project_type || '';
+    if (budgetInput) budgetInput.value = project.budget_range || '';
+    if (priceInput) priceInput.value = project.price || '';
+    if (timelineInput) timelineInput.value = project.timeline || '';
+    if (previewUrlInput) previewUrlInput.value = project.preview_url || '';
+    if (statusSelect) statusSelect.value = project.status || 'pending';
+
+    // Show modal
+    modal.classList.remove('hidden');
+
+    // Setup close handlers
+    const closeBtn = document.getElementById('edit-project-close');
+    const cancelBtn = document.getElementById('edit-project-cancel');
+    const form = document.getElementById('edit-project-form') as HTMLFormElement;
+
+    const closeModal = () => modal.classList.add('hidden');
+
+    closeBtn?.addEventListener('click', closeModal, { once: true });
+    cancelBtn?.addEventListener('click', closeModal, { once: true });
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    }, { once: true });
+
+    // Handle form submit
+    if (form) {
+      const handleSubmit = async (e: Event) => {
+        e.preventDefault();
+        await this.saveProjectChanges();
+        closeModal();
+      };
+      form.removeEventListener('submit', handleSubmit);
+      form.addEventListener('submit', handleSubmit, { once: true });
+    }
+  }
+
+  /**
+   * Save project changes from the edit modal
+   */
+  private async saveProjectChanges(): Promise<void> {
     if (!this.currentProjectId || !this.loadProjectsFn) return;
 
     if (!AdminAuth.isAuthenticated()) return;
 
-    const name = (document.getElementById('pd-setting-name') as HTMLInputElement)?.value;
-    const status = (document.getElementById('pd-setting-status') as HTMLInputElement)?.value;
-    const progress = parseInt(
-      (document.getElementById('pd-setting-progress') as HTMLInputElement)?.value || '0'
-    );
+    const nameInput = document.getElementById('edit-project-name') as HTMLInputElement;
+    const typeSelect = document.getElementById('edit-project-type') as HTMLSelectElement;
+    const budgetInput = document.getElementById('edit-project-budget') as HTMLInputElement;
+    const priceInput = document.getElementById('edit-project-price') as HTMLInputElement;
+    const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
+    const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
+    const statusSelect = document.getElementById('edit-project-status') as HTMLSelectElement;
+
+    const updates: Record<string, string> = {};
+    if (nameInput?.value) updates.project_name = nameInput.value;
+    if (typeSelect?.value) updates.project_type = typeSelect.value;
+    if (budgetInput?.value) updates.budget = budgetInput.value;
+    if (priceInput?.value) updates.price = priceInput.value;
+    if (timelineInput?.value) updates.timeline = timelineInput.value;
+    if (previewUrlInput?.value !== undefined) updates.preview_url = previewUrlInput.value;
+    if (statusSelect?.value) updates.status = statusSelect.value;
 
     try {
       const response = await fetch(`/api/projects/${this.currentProjectId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          project_name: name,
-          status,
-          progress
-        })
+        body: JSON.stringify(updates)
       });
 
       if (response.ok) {
-        alert('Project settings saved!');
         // Refresh project data
         await this.loadProjectsFn();
         // Re-populate the view
@@ -378,11 +486,12 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
           this.populateProjectDetailView(project);
         }
       } else {
-        alert('Failed to save project settings');
+        const error = await response.json();
+        alert(`Failed to save: ${error.message || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('[AdminProjectDetails] Error saving project settings:', error);
-      alert('Error saving project settings');
+      console.error('[AdminProjectDetails] Error saving project:', error);
+      alert('Error saving project');
     }
   }
 
@@ -1076,6 +1185,61 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       console.error('[AdminProjectDetails] Error uploading files:', error);
       alert('Error uploading files');
     }
+  }
+
+  /**
+   * Parse features string - handles both comma-separated and concatenated formats
+   * Known feature values are used to intelligently split concatenated strings
+   */
+  private parseFeatures(featuresStr: string): string[] {
+    if (!featuresStr) return [];
+
+    // If comma-separated, split normally
+    if (featuresStr.includes(',')) {
+      return featuresStr.split(',').map((f: string) => f.trim()).filter((f: string) => f);
+    }
+
+    // Known feature values from all project types
+    const knownFeatures = [
+      'contact-form', 'social-links', 'analytics', 'mobile-optimized',
+      'age-verification', 'basic-only', 'blog', 'gallery', 'testimonials',
+      'booking', 'cms', 'portfolio-gallery', 'case-studies', 'resume-download',
+      'shopping-cart', 'payment-processing', 'inventory-management',
+      'user-accounts', 'admin-dashboard', 'product-search', 'reviews',
+      'real-time-updates', 'api-integration', 'database', 'authentication',
+      'dashboard', 'notifications', 'file-upload', 'offline-support',
+      'tab-management', 'bookmarks', 'sync', 'dark-mode', 'keyboard-shortcuts'
+    ];
+
+    // Sort by length (longest first) to match longer patterns before shorter ones
+    const sortedFeatures = [...knownFeatures].sort((a, b) => b.length - a.length);
+
+    const found: string[] = [];
+    let remaining = featuresStr;
+
+    // Iteratively find and extract known features
+    while (remaining.length > 0) {
+      let matched = false;
+      for (const feature of sortedFeatures) {
+        const index = remaining.indexOf(feature);
+        if (index !== -1) {
+          found.push(feature);
+          remaining = remaining.slice(0, index) + remaining.slice(index + feature.length);
+          matched = true;
+          break;
+        }
+      }
+      // If no known feature found, break to avoid infinite loop
+      if (!matched) {
+        // If there's remaining text, it might be an unknown feature
+        if (remaining.trim()) {
+          found.push(remaining.trim());
+        }
+        break;
+      }
+    }
+
+    return found;
   }
 
   /**

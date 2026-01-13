@@ -18,7 +18,7 @@
    BUSINESS CARD SECTION - DESKTOP LAYOUT
    ========================================== */
 
-@media screen and (min-width: 768px) {
+@media (--tablet) {
   /* Business card section - full viewport height, card centered (ignoring nav height) */
   .business-card-section {
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
@@ -105,14 +105,14 @@
 }
 
 /* Responsive business card container sizes */
-@media (max-width: 767px) {
+@media (--mobile) {
   .business-card-container {
     width: 380px;
     height: 213px; /* 380 ÷ 1.784582 = 212.96 */
   }
 }
 
-@media (max-width: 479px) {
+@media (--small-mobile) {
   .business-card-container {
     width: 315px;
     height: 177px; /* 315 ÷ 1.784582 = 176.54 */
@@ -473,7 +473,7 @@
 /* ==========================================
    RESPONSIVE DESIGN
    ========================================== */
-@media (max-width: 767px) {
+@media (--mobile) {
   .business-card-container,
   .intro-animation-container {
     /* Fixed mobile size to prevent CLS - maintaining exact aspect ratio */
@@ -513,16 +513,14 @@
   .card-contact {
     font-size: var(--font-size-xs);
   }
-}
 
-@media (max-width: 767px) {
   /* Mobile: Start card showing back (rotated 180deg), JS will flip to front */
   .intro-loading .business-card-inner {
     transform: rotateY(180deg);
   }
 }
 
-@media (max-width: 479px) {
+@media (--small-mobile) {
   .business-card-container,
   .intro-animation-container {
     /* Fixed small screen size to prevent CLS - maintaining exact aspect ratio */
@@ -614,7 +612,7 @@
   .business-card-inner {
     transform: none !important;
     box-shadow: none;
-    border: 1pt solid #333333;
+    border: 1pt solid var(--color-dark);
     background-color: var(--color-card-bg);
   }
 
@@ -706,7 +704,7 @@ html[data-theme="dark"] .business-card-container {
 }
 
 /* Mobile adjustments - match card container width */
-@media (max-width: 767px) {
+@media (--mobile) {
   .intro-nav {
     width: 380px;
     max-width: 380px;
@@ -719,7 +717,7 @@ html[data-theme="dark"] .business-card-container {
   }
 }
 
-@media (max-width: 479px) {
+@media (--small-mobile) {
   .intro-nav {
     width: 315px;
     max-width: 315px;

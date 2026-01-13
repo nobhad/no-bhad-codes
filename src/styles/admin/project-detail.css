@@ -116,7 +116,9 @@
   display: flex;
   gap: var(--portal-spacing-sm);
   margin-bottom: 0;
-  overflow-x: auto;
+  overflow: visible;
+  position: relative;
+  z-index: 2;
 }
 
 .pd-tab-btn {
@@ -129,7 +131,6 @@
   border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0;
   color: var(--portal-text-secondary);
   font-size: 0.85rem;
-  box-shadow: var(--shadow-tab);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -137,6 +138,10 @@
   transition: all 0.15s ease;
   white-space: nowrap;
   position: relative;
+  z-index: 1;
+  /* Same shadow as main div but clipped to hide bottom */
+  box-shadow: var(--shadow-panel);
+  clip-path: inset(-20px -20px 0 -20px);
 }
 
 .pd-tab-btn .tab-icon {
@@ -145,7 +150,7 @@
   height: 16px;
 }
 
-.pd-tab-btn:hover {
+.pd-tab-btn:hover:not(.active) {
   color: var(--portal-text-light);
   background: var(--color-primary);
 }
@@ -155,15 +160,42 @@
   background: var(--portal-bg-dark);
   font-weight: 700;
   border: none;
+  /* Active tab merges with content as one piece */
+  z-index: 10;
+  /* No shadow on active tab - it's part of the content area */
+  box-shadow: none;
+  /* Extend into content area to cover the seam */
+  margin-bottom: -8px;
+  padding-bottom: calc(var(--portal-spacing-md) + 8px);
+}
+
+/* First tab (Overview) when active - square bottom-left to connect seamlessly */
+.pd-tab-btn:first-child.active {
+  border-bottom-left-radius: 0;
+}
+
+/* Active tab should never change color on hover/focus */
+.pd-tab-btn.active:hover,
+.pd-tab-btn.active:focus,
+.pd-tab-btn.active:active {
+  background: var(--portal-bg-dark);
+  color: var(--portal-text-light);
+  outline: none;
 }
 
 /* Project Detail Tab Content */
 .pd-tab-content {
   display: none;
   background: var(--portal-bg-dark);
-  border-radius: 0 var(--portal-radius-lg) var(--portal-radius-lg) var(--portal-radius-lg);
+  /* Top-left: 0 (connects with first tab), others rounded */
+  border-top-left-radius: 0;
+  border-top-right-radius: var(--portal-radius-lg);
+  border-bottom-right-radius: var(--portal-radius-lg);
+  border-bottom-left-radius: var(--portal-radius-lg);
   padding: 4rem 2rem;
-  box-shadow: var(--shadow-content);
+  box-shadow: var(--shadow-panel);
+  position: relative;
+  z-index: 1;
 }
 
 .pd-tab-content.active {
@@ -172,22 +204,68 @@
   gap: 4rem;
 }
 
-/* Remove individual card backgrounds inside tabs - content is now in unified container */
-.pd-tab-content .portal-project-card,
-.pd-tab-content .portal-shadow,
-.pd-tab-content .files-upload-section,
-.pd-tab-content .files-list-section,
-.pd-tab-content .intake-form-section,
-.pd-tab-content .messages-container,
-.pd-tab-content .recent-activity,
-.pd-tab-content .settings-section,
-.pd-tab-content .invoice-summary .summary-card {
+/* Remove individual card backgrounds and shadows inside tabs - content is now in unified container */
+[data-page="admin"] .pd-tab-content .portal-project-card,
+[data-page="admin"] .pd-tab-content .portal-shadow,
+[data-page="admin"] .pd-tab-content .files-upload-section,
+[data-page="admin"] .pd-tab-content .files-list-section,
+[data-page="admin"] .pd-tab-content .intake-form-section,
+[data-page="admin"] .pd-tab-content .messages-container,
+[data-page="admin"] .pd-tab-content .recent-activity,
+[data-page="admin"] .pd-tab-content .settings-section {
   background: transparent;
   border: none;
   border-radius: 0;
   padding: 0;
-  box-shadow: none;
   margin: 0;
+  box-shadow: none !important;
+}
+
+/* Invoice summary cards - styled like Weekly Overview cards */
+[data-page="admin"] .pd-tab-content .invoice-summary {
+  display: flex;
+  gap: var(--portal-spacing-xl);
+  margin: 0;
+  background: transparent;
+  box-shadow: none !important;
+}
+
+[data-page="admin"] .pd-tab-content .summary-card {
+  background: var(--portal-bg-medium) !important;
+  border: none;
+  border-radius: var(--portal-radius-md);
+  padding: var(--portal-spacing-xl) !important;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-sm);
+  box-shadow: var(--shadow-card) !important;
+  flex: 1;
+}
+
+/* Summary card labels - match overview stat labels */
+[data-page="admin"] .pd-tab-content .summary-card h4 {
+  color: var(--portal-text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+/* Summary card values - match overview stat numbers */
+[data-page="admin"] .pd-tab-content .summary-card .summary-value {
+  color: var(--portal-text-light);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+[data-page="admin"] .pd-tab-content .summary-card .summary-value.outstanding {
+  color: var(--color-warning);
+}
+
+[data-page="admin"] .pd-tab-content .summary-card .summary-value.paid {
+  color: var(--color-primary);
 }
 
 /* Override any adjacent sibling margins inside tab content */
@@ -211,26 +289,6 @@
   display: flex;
   gap: var(--portal-spacing-xl);
   margin: 0;
-}
-
-/* Messages container - add border back */
-#pd-tab-messages .messages-container {
-  border: 3px solid var(--color-black);
-  border-radius: var(--portal-radius-md);
-  padding: 0;
-  background: var(--color-neutral-200);
-}
-
-/* Divider between messages thread and compose area */
-#pd-tab-messages .message-compose {
-  border-top: 3px solid var(--color-black);
-  margin-top: var(--portal-spacing-lg);
-  padding-top: var(--portal-spacing-lg);
-}
-
-/* Send message button - thicker border */
-#pd-tab-messages .message-compose .btn {
-  border: 3px solid var(--color-black);
 }
 
 /* Settings tab sections - darker background and equal heights */
@@ -724,7 +782,8 @@
   margin: var(--portal-spacing-lg) 0 var(--portal-spacing-sm) 0;
 }
 
-.project-notes .features-list {
+.project-notes .features-list,
+.features-container .features-list {
   display: flex;
   flex-wrap: wrap;
   gap: var(--portal-spacing-sm);
@@ -733,12 +792,15 @@
   list-style: none;
 }
 
-.project-notes .feature-tag {
-  background: var(--portal-bg-dark);
+.project-notes .feature-tag,
+.features-container .feature-tag {
+  background: var(--portal-bg-medium);
   color: var(--portal-text-light);
   padding: var(--portal-spacing-xs) var(--portal-spacing-md);
   border-radius: var(--portal-radius-sm);
   font-size: 0.85rem;
+  display: inline-block;
+  text-transform: capitalize;
 }
 
 /* Empty State */
@@ -1166,8 +1228,7 @@
 [data-page="admin"] .activity-list li {
   color: var(--portal-text-light);
   padding: var(--portal-spacing-lg);
-  background: var(--portal-bg-medium);
-  border: none;
+  background: var(--portal-bg-light);
   border-radius: var(--portal-radius-md);
   box-shadow: var(--shadow-card);
 }
@@ -1551,7 +1612,8 @@
   color: var(--color-success);
 }
 
-.status-item.status-healthy .status-badge {
+.status-item.status-healthy .status-badge,
+.status-badge.status-healthy {
   background: var(--color-success);
   border: 1px solid var(--portal-border-dark);
   color: var(--color-black);
@@ -1561,7 +1623,8 @@
   color: var(--color-warning);
 }
 
-.status-item.status-warning .status-badge {
+.status-item.status-warning .status-badge,
+.status-badge.status-warning {
   background: var(--color-warning);
   border: 1px solid var(--portal-border-dark);
   color: var(--color-black);
@@ -1571,7 +1634,8 @@
   color: var(--color-danger);
 }
 
-.status-item.status-error .status-badge {
+.status-item.status-error .status-badge,
+.status-badge.status-error {
   background: var(--color-danger);
   border: 1px solid var(--portal-border-dark);
   color: var(--color-black);
@@ -1581,7 +1645,8 @@
   color: var(--color-danger);
 }
 
-.status-item.status-unknown .status-badge {
+.status-item.status-unknown .status-badge,
+.status-badge.status-unknown {
   background: var(--color-danger);
   border: 1px solid var(--portal-border-dark);
   color: var(--color-black);
@@ -1600,35 +1665,10 @@
   padding: var(--space-4);
 }
 
-/* Admin message compose area */
-[data-page="admin"] .message-compose {
-  display: flex;
-  flex-direction: column;
-  gap: var(--portal-spacing-lg);
-  padding: var(--portal-spacing-lg);
-  background: var(--portal-bg-dark);
-  border-radius: 0 0 var(--portal-radius-md) var(--portal-radius-md);
-}
-
-[data-page="admin"] .message-compose .message-input-wrapper {
-  margin-bottom: 0;
-}
-
-[data-page="admin"] .message-compose .btn,
-[data-page="admin"] #admin-send-message,
-[data-page="admin"] #btn-pd-send-message {
-  width: 100%;
-  background: transparent;
-  color: var(--portal-text-dark);
-  border: 2px solid var(--portal-border-dark);
-}
-
-[data-page="admin"] .message-compose .btn:hover,
-[data-page="admin"] #admin-send-message:hover,
-[data-page="admin"] #btn-pd-send-message:hover {
-  background: var(--color-primary);
-  color: var(--portal-bg-dark);
-  border-color: var(--color-primary);
+/* Admin messages - height sizing for sidebar messages tab */
+[data-page="admin"] #tab-messages .messages-container {
+  height: 60vh;
+  min-height: 400px;
 }
 
 /* ================================================

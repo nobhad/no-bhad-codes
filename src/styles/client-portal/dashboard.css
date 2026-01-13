@@ -10,7 +10,6 @@
 }
 
 .status-badge {
-  background: var(--color-primary);
   color: var(--portal-text-dark);
   padding: 0.4rem 1.25rem;
   margin-left: var(--portal-spacing-sm);
@@ -90,7 +89,7 @@
   padding: var(--portal-spacing-md) var(--portal-spacing-lg);
   background: var(--portal-bg-medium);
   border-radius: var(--border-radius-md);
-  border: 1px solid var(--portal-border-medium);
+  border: none;
   margin-bottom: var(--portal-spacing-sm);
   font-size: 0.9rem;
   color: var(--portal-text-light);

@@ -634,7 +634,6 @@
 
             <!-- Client Selector (Custom Dropdown) -->
             <div class="client-selector-wrapper">
-              <label class="client-selector-label">Select Client:</label>
               <div class="custom-dropdown" id="admin-client-dropdown">
                 <button type="button" class="custom-dropdown-trigger" id="admin-client-trigger">
                   <span class="custom-dropdown-text">-- Select a client --</span>
@@ -653,15 +652,16 @@
               </div>
 
               <!-- Compose Message -->
-              <div class="message-compose hidden" id="admin-compose-area">
+              <div class="message-compose" id="admin-compose-area">
                 <div class="message-input-wrapper">
                   <textarea
                     id="admin-message-text"
                     class="form-textarea"
-                    placeholder="Type your message..."
+                    placeholder="Select a client to send messages..."
+                    disabled
                   ></textarea>
                 </div>
-                <button class="btn btn-secondary" id="admin-send-message">Send Message</button>
+                <button class="btn btn-secondary" id="admin-send-message" disabled>Send Message</button>
               </div>
             </div>
           </div>
