@@ -1,7 +1,7 @@
 # Terminal Intake Form
 
 **Status:** Complete
-**Last Updated:** 2025-12-12
+**Last Updated:** January 13, 2026
 
 ## Overview
 

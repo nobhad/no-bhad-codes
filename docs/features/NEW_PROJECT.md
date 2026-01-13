@@ -1,5 +1,7 @@
 # New Project Request Form
 
+**Last Updated:** January 13, 2026
+
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -261,11 +263,12 @@ if (newProjectForm) {
 **Status:** Complete
 
 ```typescript
+// src/features/client/client-portal.ts
 private async submitProjectRequest(): Promise<void> {
-  const token = localStorage.getItem('client_auth_token');
+  const authMode = sessionStorage.getItem('client_auth_mode');
 
-  if (!token || token.startsWith('demo_token_')) {
-    alert('Project requests cannot be submitted in demo mode.');
+  if (!authMode || authMode === 'demo') {
+    alert('Project requests cannot be submitted in demo mode. Please log in with a real account.');
     return;
   }
 
@@ -280,21 +283,37 @@ private async submitProjectRequest(): Promise<void> {
     return;
   }
 
-  const response = await fetch(`${ClientPortalModule.PROJECTS_API_BASE}/request`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({ name, projectType, budget, timeline, description })
-  });
+  try {
+    const response = await fetch(`${ClientPortalModule.PROJECTS_API_BASE}/request`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include', // HttpOnly cookie authentication
+      body: JSON.stringify({ name, projectType, budget, timeline, description })
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  if (response.ok) {
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to submit project request');
+    }
+
     alert(data.message || 'Project request submitted successfully!');
-    form.reset();
+
+    // Clear the form
+    const form = document.getElementById('new-project-form') as HTMLFormElement;
+    if (form) form.reset();
+
+    // Switch to dashboard tab
     this.switchTab('dashboard');
+  } catch (error) {
+    console.error('Error submitting project request:', error);
+    alert(
+      error instanceof Error
+        ? error.message
+        : 'Failed to submit project request. Please try again.'
+    );
   }
 }
 ```
@@ -494,13 +513,14 @@ await emailService.sendAdminNotification({
 
 ## File Locations
 
-| File | Lines | Purpose |
-|------|-------|---------|
-| `templates/pages/client-portal.ejs` | 337-393 | New Project form HTML |
-| `src/features/client/client-portal.ts` | 290-347 | Form submission handler |
-| `src/styles/pages/client-portal.css` | - | Form styling |
-| `server/routes/projects.ts` | - | Project request API |
-| `server/services/email-service.ts` | - | Email notifications |
+| File | Purpose |
+|------|---------|
+| `client/portal.html` | New Project form HTML (tab-new-project section) |
+| `src/features/client/client-portal.ts` | submitProjectRequest() method |
+| `src/features/client/modules/portal-projects.ts` | Project loading and display (~500 lines) |
+| `src/styles/client-portal/views.css` | Form styling |
+| `server/routes/projects.ts` | Project request API |
+| `server/services/email-service.ts` | Email notifications |
 
 ---
 

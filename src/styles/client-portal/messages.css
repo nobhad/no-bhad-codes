@@ -96,7 +96,7 @@
 .message-content {
   padding: var(--portal-spacing-lg) 1.25rem;
   border-radius: 18px;
-  border: 2px solid var(--portal-border-dark);
+  border: var(--portal-border);
   background: var(--color-neutral-100);
   line-height: 1.5;
   color: var(--color-dark);

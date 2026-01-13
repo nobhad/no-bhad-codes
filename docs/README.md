@@ -15,6 +15,12 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 | **[Settings](./features/SETTINGS.md)** | Account, notifications, billing information |
 | **[New Project](./features/NEW_PROJECT.md)** | Project request form, validation |
 
+### Admin Dashboard
+
+| Document | Description |
+|----------|-------------|
+| **[Admin Dashboard](./features/ADMIN_DASHBOARD.md)** | Leads, projects, clients, messaging, analytics |
+
 ### Animation Modules
 
 | Document | Description |
@@ -91,29 +97,33 @@ npm run optimize         # Full optimization pipeline
 
 ```
 src/
-├── core/                # Core application systems
-│   ├── app.ts          # Main application controller
-│   ├── container.ts    # Dependency injection
-│   └── state.ts        # State management
-├── components/         # Reusable UI components
-│   ├── base-component.ts
-│   ├── button-component.ts
-│   ├── modal-component.ts
-│   ├── consent-banner.ts
-│   ├── performance-dashboard.ts
-│   └── analytics-dashboard.ts
-├── modules/           # Feature modules
-│   ├── base.ts       # Base module class
-│   ├── theme.ts      # Theme switching (defaults to light)
-│   ├── navigation.ts # Navigation with submenu support  
-│   ├── submenu.ts    # Dropdown submenu functionality
-│   └── ...
-├── services/         # Service layer
+├── core/                    # Core application systems
+│   ├── app.ts              # Main application controller
+│   ├── container.ts        # Dependency injection
+│   ├── state/              # State management (split into modules)
+│   ├── services-config.ts  # Service registrations
+│   └── modules-config.ts   # Module definitions
+├── features/               # Feature modules (domain-driven)
+│   ├── admin/              # Admin dashboard
+│   │   ├── admin-dashboard.ts
+│   │   ├── admin-project-details.ts
+│   │   ├── admin-auth.ts
+│   │   └── modules/        # 10 extracted modules
+│   └── client/             # Client portal
+│       ├── client-portal.ts
+│       ├── terminal-intake.ts
+│       └── modules/        # 7 extracted modules
+├── modules/                # Reusable UI modules
+│   ├── base.ts            # Base module class
+│   ├── theme.ts           # Theme switching
+│   ├── navigation.ts      # Navigation
+│   └── animation/         # Animation modules
+├── services/              # Service layer
 │   ├── performance-service.ts
 │   ├── visitor-tracking.ts
-│   └── bundle-analyzer.ts
-└── types/           # TypeScript definitions
-    └── modules.ts
+│   └── auth-service.ts
+├── components/            # Reusable UI components
+└── types/                 # TypeScript definitions
 ```
 
 ## Architecture Overview
@@ -159,7 +169,7 @@ class MyComponent extends BaseComponent<Props, State> {
 
 ### Navigation System
 
-**Current Navigation Structure (Updated December 2025):**
+**Current Navigation Structure (Updated January 2026):**
 
 - **Home** (00) - Main landing page with business card
 - **About** (01) - About section with hero animation

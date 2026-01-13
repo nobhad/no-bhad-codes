@@ -1,6 +1,6 @@
 # Invoice System
 
-**Last Updated:** December 1, 2025
+**Last Updated:** January 13, 2026
 
 ## Table of Contents
 
@@ -257,12 +257,12 @@ router.get('/:id/pdf', authenticateToken, asyncHandler(async (req, res) => {
 
 ### TypeScript Module
 
-Location: `src/features/client/client-portal.ts`
+Location: `src/features/client/modules/portal-invoices.ts`
 
 ### API Base URL
 
 ```typescript
-private static readonly INVOICES_API_BASE = 'http://localhost:3001/api/invoices';
+const INVOICES_API_BASE = '/api/invoices';
 ```
 
 ### Key Methods
@@ -272,36 +272,45 @@ private static readonly INVOICES_API_BASE = 'http://localhost:3001/api/invoices'
 Fetches invoices from the API and renders the list with summary stats.
 
 ```typescript
-private async loadInvoices(): Promise<void> {
+// src/features/client/modules/portal-invoices.ts
+import { formatCurrency } from '../../../utils/format-utils';
+
+export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
   const invoicesContainer = document.querySelector('.invoices-list');
   const summaryOutstanding = document.querySelector('.summary-card:first-child .summary-value');
   const summaryPaid = document.querySelector('.summary-card:last-child .summary-value');
 
-  try {
-    const token = localStorage.getItem('client_auth_token');
+  if (!invoicesContainer) return;
 
-    if (!token || token.startsWith('demo_token_')) {
-      this.renderDemoInvoices(invoicesContainer as HTMLElement);
+  try {
+    // Demo mode check using context
+    if (ctx.isDemo()) {
+      renderDemoInvoices(invoicesContainer as HTMLElement, ctx);
       return;
     }
 
-    const response = await fetch(`${ClientPortalModule.INVOICES_API_BASE}/me`, {
-      headers: { Authorization: `Bearer ${token}` }
+    const response = await fetch(`${INVOICES_API_BASE}/me`, {
+      credentials: 'include' // HttpOnly cookie authentication
     });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch invoices');
+    }
 
     const data = await response.json();
 
     // Update summary cards
     if (summaryOutstanding && data.summary) {
-      summaryOutstanding.textContent = this.formatCurrency(data.summary.totalOutstanding);
+      summaryOutstanding.textContent = formatCurrency(data.summary.totalOutstanding);
     }
     if (summaryPaid && data.summary) {
-      summaryPaid.textContent = this.formatCurrency(data.summary.totalPaid);
+      summaryPaid.textContent = formatCurrency(data.summary.totalPaid);
     }
 
-    this.renderInvoicesList(invoicesContainer as HTMLElement, data.invoices || []);
+    renderInvoicesList(invoicesContainer as HTMLElement, data.invoices || [], ctx);
   } catch (error) {
-    this.renderDemoInvoices(invoicesContainer as HTMLElement);
+    console.error('Error loading invoices:', error);
+    renderDemoInvoices(invoicesContainer as HTMLElement, ctx);
   }
 }
 ```
@@ -311,32 +320,57 @@ private async loadInvoices(): Promise<void> {
 Renders invoice items with status badges and action buttons.
 
 ```typescript
-private renderInvoicesList(container: HTMLElement, invoices: any[]): void {
+// src/features/client/modules/portal-invoices.ts
+function renderInvoicesList(
+  container: HTMLElement,
+  invoices: PortalInvoice[],
+  ctx: ClientPortalContext
+): void {
+  // Clear existing items
+  const existingItems = container.querySelectorAll('.invoice-item');
+  existingItems.forEach((item) => item.remove());
+
+  const noInvoicesMsg = container.querySelector('.no-invoices-message');
+  if (noInvoicesMsg) noInvoicesMsg.remove();
+
+  if (invoices.length === 0) {
+    const noInvoices = document.createElement('p');
+    noInvoices.className = 'no-invoices-message';
+    noInvoices.textContent =
+      'No invoices yet. Your first invoice will appear here once your project begins.';
+    container.appendChild(noInvoices);
+    return;
+  }
+
   invoices.forEach((invoice) => {
     const invoiceElement = document.createElement('div');
     invoiceElement.className = 'invoice-item';
+    invoiceElement.dataset.invoiceId = String(invoice.id);
 
-    const statusClass = this.getInvoiceStatusClass(invoice.status);
-    const statusLabel = this.getInvoiceStatusLabel(invoice.status);
+    const statusClass = getInvoiceStatusClass(invoice.status);
+    const statusLabel = getInvoiceStatusLabel(invoice.status);
 
     invoiceElement.innerHTML = `
       <div class="invoice-info">
-        <span class="invoice-number">${invoice.invoice_number}</span>
-        <span class="invoice-date">${this.formatDate(invoice.created_at)}</span>
-        <span class="invoice-project">${invoice.project_name || 'Project'}</span>
+        <span class="invoice-number">${ctx.escapeHtml(invoice.invoice_number)}</span>
+        <span class="invoice-date">${ctx.formatDate(invoice.created_at)}</span>
+        <span class="invoice-project">${ctx.escapeHtml(invoice.project_name || 'Project')}</span>
       </div>
-      <div class="invoice-amount">${this.formatCurrency(invoice.amount_total)}</div>
+      <div class="invoice-amount">${formatCurrency(invoice.amount_total)}</div>
       <span class="invoice-status ${statusClass}">${statusLabel}</span>
       <div class="invoice-actions">
-        <button class="btn btn-outline btn-sm btn-preview-invoice">Preview</button>
-        <button class="btn btn-outline btn-sm btn-download-invoice">Download</button>
+        <button class="btn btn-outline btn-sm btn-preview-invoice"
+                data-invoice-id="${invoice.id}">Preview</button>
+        <button class="btn btn-outline btn-sm btn-download-invoice"
+                data-invoice-id="${invoice.id}"
+                data-invoice-number="${ctx.escapeHtml(invoice.invoice_number)}">Download</button>
       </div>
     `;
 
     container.appendChild(invoiceElement);
   });
 
-  this.attachInvoiceActionListeners(container);
+  attachInvoiceActionListeners(container, ctx);
 }
 ```
 
@@ -345,21 +379,21 @@ private renderInvoicesList(container: HTMLElement, invoices: any[]): void {
 Downloads invoice as PDF via blob fetch.
 
 ```typescript
-private async downloadInvoice(invoiceId: number, invoiceNumber: string): Promise<void> {
-  const token = localStorage.getItem('client_auth_token');
-
-  if (!token || token.startsWith('demo_token_')) {
+// src/features/client/modules/portal-invoices.ts
+async function downloadInvoice(
+  invoiceId: number,
+  invoiceNumber: string,
+  ctx: ClientPortalContext
+): Promise<void> {
+  if (ctx.isDemo()) {
     alert('Invoice download not available in demo mode.');
     return;
   }
 
   try {
-    const response = await fetch(
-      `${ClientPortalModule.INVOICES_API_BASE}/${invoiceId}/pdf`,
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
+    const response = await fetch(`${INVOICES_API_BASE}/${invoiceId}/pdf`, {
+      credentials: 'include' // HttpOnly cookie authentication
+    });
 
     if (!response.ok) {
       throw new Error('Failed to download invoice');
@@ -372,8 +406,8 @@ private async downloadInvoice(invoiceId: number, invoiceNumber: string): Promise
     a.download = `invoice-${invoiceNumber}.pdf`;
     document.body.appendChild(a);
     a.click();
-    window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   } catch (error) {
     console.error('Error downloading invoice:', error);
     alert('Failed to download invoice. Please try again.');
@@ -384,8 +418,10 @@ private async downloadInvoice(invoiceId: number, invoiceNumber: string): Promise
 #### Utility Methods
 
 ```typescript
+// src/features/client/modules/portal-invoices.ts
+
 // Get CSS class for status badge
-private getInvoiceStatusClass(status: string): string {
+function getInvoiceStatusClass(status: string): string {
   const statusMap: Record<string, string> = {
     draft: 'status-draft',
     sent: 'status-pending',
@@ -398,8 +434,23 @@ private getInvoiceStatusClass(status: string): string {
   return statusMap[status] || 'status-pending';
 }
 
-// Format currency
-private formatCurrency(amount: number): string {
+// Get display label for invoice status
+function getInvoiceStatusLabel(status: string): string {
+  const labelMap: Record<string, string> = {
+    draft: 'Draft',
+    sent: 'Pending',
+    viewed: 'Viewed',
+    partial: 'Partial',
+    paid: 'Paid',
+    overdue: 'Overdue',
+    cancelled: 'Cancelled'
+  };
+  return labelMap[status] || 'Pending';
+}
+
+// Format currency (imported from shared utils)
+// src/utils/format-utils.ts
+export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD'
@@ -547,11 +598,11 @@ private formatCurrency(amount: number): string {
 
 | File | Purpose |
 |------|---------|
-| `server/routes/invoices.ts` | Invoice API endpoints |
+| `server/routes/invoices.ts` | Invoice API endpoints + PDF generation |
 | `server/services/invoice-service.ts` | Invoice business logic |
-| `src/features/client/client-portal.ts` | Frontend invoice handling (~200 lines) |
-| `src/styles/pages/client-portal.css` | Invoice styling |
-| `templates/pages/client-portal.ejs` | Invoices tab HTML |
+| `src/features/client/modules/portal-invoices.ts` | Frontend invoice handling (~250 lines) |
+| `src/styles/client-portal/invoices.css` | Invoice styling |
+| `client/portal.html` | Invoices tab HTML (tab-invoices section) |
 
 ---
 

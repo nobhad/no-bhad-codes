@@ -20,7 +20,7 @@ The File Management system allows clients to upload, view, preview, and download
 
 **Access:** Client Portal > Files tab (`tab-files`)
 
-**Last Updated:** December 2, 2025
+**Last Updated:** January 13, 2026
 
 ---
 
@@ -55,9 +55,9 @@ The File Management system allows clients to upload, view, preview, and download
 |-----------|------------|
 | Backend | Express.js with TypeScript |
 | File Storage | Multer middleware, local filesystem |
-| Authentication | JWT tokens |
+| Authentication | HttpOnly cookies (session-based) |
 | Frontend | Vanilla TypeScript |
-| API Communication | Fetch API |
+| API Communication | Fetch API with credentials: 'include' |
 
 ### Data Flow
 
@@ -221,12 +221,14 @@ Upload multiple files (max 5).
 
 ### TypeScript Module
 
-Location: `src/features/client/client-portal.ts`
+Location: `src/features/client/modules/portal-files.ts`
+
+The file module uses the `ClientPortalContext` pattern for shared utilities like `escapeHtml()`, `formatDate()`, and `isDemo()`.
 
 ### API Base URL
 
 ```typescript
-private static readonly FILES_API_BASE = 'http://localhost:3001/api/uploads';
+const FILES_API_BASE = '/api/uploads';
 ```
 
 ### Key Methods
@@ -236,25 +238,20 @@ private static readonly FILES_API_BASE = 'http://localhost:3001/api/uploads';
 Fetches files from the API and renders the list.
 
 ```typescript
-private async loadFiles(): Promise<void> {
-  const filesContainer = document.getElementById('files-list');
+// src/features/client/modules/portal-files.ts
+export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
+  const filesContainer = document.querySelector('.files-list-section');
   if (!filesContainer) return;
 
-  filesContainer.innerHTML = '<p class="loading-files">Loading files...</p>';
-
   try {
-    const token = localStorage.getItem('client_auth_token');
-
-    // Use demo data if no token (demo mode)
-    if (!token || token.startsWith('demo_token_')) {
-      this.renderDemoFiles(filesContainer);
+    // Demo mode check using context
+    if (ctx.isDemo()) {
+      renderDemoFiles(filesContainer as HTMLElement, ctx);
       return;
     }
 
-    const response = await fetch(`${ClientPortalModule.FILES_API_BASE}/client`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+    const response = await fetch(`${FILES_API_BASE}/client`, {
+      credentials: 'include' // HttpOnly cookie authentication
     });
 
     if (!response.ok) {
@@ -262,10 +259,10 @@ private async loadFiles(): Promise<void> {
     }
 
     const data = await response.json();
-    this.renderFilesList(filesContainer, data.files || []);
+    renderFilesList(filesContainer as HTMLElement, data.files || [], ctx);
   } catch (error) {
     console.error('Error loading files:', error);
-    this.renderDemoFiles(filesContainer);
+    renderDemoFiles(filesContainer as HTMLElement, ctx);
   }
 }
 ```
@@ -275,52 +272,79 @@ private async loadFiles(): Promise<void> {
 Renders the file list HTML with icons and action buttons.
 
 ```typescript
-private renderFilesList(container: HTMLElement, files: any[]): void {
+// src/features/client/modules/portal-files.ts
+import { formatFileSize } from '../../../utils/format-utils';
+
+function renderFilesList(
+  container: HTMLElement,
+  files: PortalFile[],
+  ctx: ClientPortalContext
+): void {
   if (files.length === 0) {
-    container.innerHTML = '<p class="no-files">No files uploaded yet.</p>';
+    container.innerHTML =
+      '<p class="no-files">No files uploaded yet. Drag and drop files above to upload.</p>';
     return;
   }
 
-  container.innerHTML = files.map((file) => `
-    <div class="file-item" data-file-id="${file.id}">
-      <div class="file-icon">${this.getFileIcon(file.mimetype)}</div>
-      <div class="file-info">
-        <span class="file-name">${this.escapeHtml(file.originalName)}</span>
-        <span class="file-meta">
-          ${file.projectName ? `${file.projectName} • ` : ''}
-          ${this.formatDate(file.uploadedAt)} • ${this.formatFileSize(file.size)}
-        </span>
-      </div>
-      <div class="file-actions">
-        <button class="btn btn-sm btn-outline btn-preview"
-                data-file-id="${file.id}"
-                data-mimetype="${file.mimetype}">
-          Preview
-        </button>
-        <button class="btn btn-sm btn-outline btn-download"
-                data-file-id="${file.id}"
-                data-filename="${this.escapeHtml(file.originalName)}">
-          Download
-        </button>
-      </div>
-    </div>
-  `).join('');
+  const clientEmail = sessionStorage.getItem('clientEmail') || '';
 
-  this.attachFileActionListeners(container);
+  container.innerHTML = files
+    .map((file) => {
+      // Only show delete for client-uploaded files
+      const canDelete = file.uploadedBy === clientEmail || file.uploadedBy === 'client';
+      const deleteIcon = canDelete
+        ? `<button class="file-delete-icon btn-delete" data-file-id="${file.id}"
+             data-filename="${ctx.escapeHtml(file.originalName)}" aria-label="Delete file">
+             ${trashIcon}
+           </button>`
+        : '';
+
+      return `
+        <div class="file-item" data-file-id="${file.id}">
+          ${deleteIcon}
+          <div class="file-icon">${getFileIcon(file.mimetype)}</div>
+          <div class="file-info">
+            <span class="file-name">${ctx.escapeHtml(file.originalName)}</span>
+            <span class="file-meta">
+              ${file.projectName ? `${file.projectName} • ` : ''}
+              ${ctx.formatDate(file.uploadedAt)} • ${formatFileSize(file.size)}
+            </span>
+          </div>
+          <div class="file-actions">
+            <button class="btn btn-sm btn-outline btn-preview" data-file-id="${file.id}"
+                    data-mimetype="${file.mimetype}">Preview</button>
+            <button class="btn btn-sm btn-outline btn-download" data-file-id="${file.id}"
+                    data-filename="${ctx.escapeHtml(file.originalName)}">Download</button>
+          </div>
+        </div>
+      `;
+    })
+    .join('');
+
+  attachFileActionListeners(container, ctx);
 }
 ```
 
 #### setupFileUploadHandlers()
 
-Sets up drag & drop and browse button functionality.
+Sets up drag & drop, browse button, and keyboard accessibility.
 
 ```typescript
-private setupFileUploadHandlers(): void {
+// src/features/client/modules/portal-files.ts
+export function setupFileUploadHandlers(ctx: ClientPortalContext): void {
   const dropzone = document.getElementById('upload-dropzone');
   const fileInput = document.getElementById('file-input') as HTMLInputElement;
   const browseBtn = document.getElementById('btn-browse-files');
 
   if (!dropzone) return;
+
+  // Keyboard accessibility
+  dropzone.setAttribute('tabindex', '0');
+  dropzone.setAttribute('role', 'button');
+  dropzone.setAttribute(
+    'aria-label',
+    'File upload dropzone - press Enter or Space to browse files, or drag and drop files here'
+  );
 
   // Browse button click
   if (browseBtn && fileInput) {
@@ -331,7 +355,7 @@ private setupFileUploadHandlers(): void {
 
     fileInput.addEventListener('change', () => {
       if (fileInput.files && fileInput.files.length > 0) {
-        this.uploadFiles(Array.from(fileInput.files));
+        uploadFiles(Array.from(fileInput.files), ctx);
         fileInput.value = '';
       }
     });
@@ -354,25 +378,35 @@ private setupFileUploadHandlers(): void {
     e.preventDefault();
     e.stopPropagation();
     dropzone.classList.remove('drag-active');
-
     const files = e.dataTransfer?.files;
     if (files && files.length > 0) {
-      this.uploadFiles(Array.from(files));
+      uploadFiles(Array.from(files), ctx);
     }
   });
+
+  // Keyboard support for dropzone
+  dropzone.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      fileInput?.click();
+    }
+  });
+
+  // Prevent accidental drops outside dropzone
+  window.addEventListener('dragover', (e) => e.preventDefault());
+  window.addEventListener('drop', (e) => e.preventDefault());
 }
 ```
 
 #### uploadFiles()
 
-Uploads files to the server via FormData.
+Uploads files to the server via FormData with progress feedback.
 
 ```typescript
-private async uploadFiles(files: File[]): Promise<void> {
-  const token = localStorage.getItem('client_auth_token');
-
-  if (!token || token.startsWith('demo_token_')) {
-    alert('File upload not available in demo mode.');
+// src/features/client/modules/portal-files.ts
+async function uploadFiles(files: File[], ctx: ClientPortalContext): Promise<void> {
+  if (ctx.isDemo()) {
+    alert('File upload not available in demo mode. Please log in to upload files.');
     return;
   }
 
@@ -384,26 +418,46 @@ private async uploadFiles(files: File[]): Promise<void> {
   const maxSize = 10 * 1024 * 1024; // 10MB
   const oversizedFiles = files.filter((f) => f.size > maxSize);
   if (oversizedFiles.length > 0) {
-    alert(`Some files exceed the 10MB limit.`);
+    alert(`Some files exceed the 10MB limit: ${oversizedFiles.map((f) => f.name).join(', ')}`);
     return;
   }
 
-  const formData = new FormData();
-  files.forEach((file) => {
-    formData.append('files', file);
-  });
+  // Show upload progress in dropzone
+  const dropzone = document.getElementById('upload-dropzone');
+  if (dropzone) {
+    dropzone.innerHTML = `
+      <div class="upload-progress">
+        <p>Uploading ${files.length} file(s)...</p>
+        <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+      </div>
+    `;
+  }
 
-  const response = await fetch(`${ClientPortalModule.FILES_API_BASE}/multiple`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`
-    },
-    body: formData
-  });
+  try {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
 
-  if (response.ok) {
-    this.showUploadSuccess(files.length);
-    await this.loadFiles();
+    const response = await fetch(`${FILES_API_BASE}/multiple`, {
+      method: 'POST',
+      credentials: 'include', // HttpOnly cookie authentication
+      body: formData
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Upload failed');
+    }
+
+    const result = await response.json();
+    resetDropzone();
+    showUploadSuccess(result.files?.length || files.length);
+    await loadFiles(ctx);
+  } catch (error) {
+    console.error('Upload error:', error);
+    resetDropzone();
+    alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 ```
@@ -413,20 +467,19 @@ private async uploadFiles(files: File[]): Promise<void> {
 Opens files for preview in a new browser tab.
 
 ```typescript
-private previewFile(fileId: number, mimetype: string): void {
-  const token = localStorage.getItem('client_auth_token');
-
-  if (!token || token.startsWith('demo_token_')) {
-    alert('Preview not available in demo mode.');
+// src/features/client/modules/portal-files.ts
+function previewFile(fileId: number, mimetype: string, ctx: ClientPortalContext): void {
+  if (ctx.isDemo()) {
+    alert('Preview not available in demo mode. Please log in to preview files.');
     return;
   }
 
   // For images and PDFs, open in new tab
   if (mimetype.startsWith('image/') || mimetype === 'application/pdf') {
-    const url = `${ClientPortalModule.FILES_API_BASE}/file/${fileId}`;
+    const url = `${FILES_API_BASE}/file/${fileId}`;
     window.open(url, '_blank');
   } else {
-    this.downloadFile(fileId, 'file');
+    downloadFile(fileId, 'file', ctx);
   }
 }
 ```
@@ -436,15 +489,14 @@ private previewFile(fileId: number, mimetype: string): void {
 Triggers file download.
 
 ```typescript
-private downloadFile(fileId: number, filename: string): void {
-  const token = localStorage.getItem('client_auth_token');
-
-  if (!token || token.startsWith('demo_token_')) {
-    alert('Download not available in demo mode.');
+// src/features/client/modules/portal-files.ts
+function downloadFile(fileId: number, filename: string, ctx: ClientPortalContext): void {
+  if (ctx.isDemo()) {
+    alert('Download not available in demo mode. Please log in to download files.');
     return;
   }
 
-  const url = `${ClientPortalModule.FILES_API_BASE}/file/${fileId}?download=true`;
+  const url = `${FILES_API_BASE}/file/${fileId}?download=true`;
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
@@ -460,27 +512,50 @@ private downloadFile(fileId: number, filename: string): void {
 Deletes a file with confirmation dialog.
 
 ```typescript
-private async deleteFile(fileId: number, filename: string): Promise<void> {
-  const token = localStorage.getItem('client_auth_token');
-
-  if (!token || token.startsWith('demo_token_')) {
-    alert('Delete not available in demo mode.');
+// src/features/client/modules/portal-files.ts
+async function deleteFile(
+  fileId: number,
+  filename: string,
+  ctx: ClientPortalContext
+): Promise<void> {
+  if (ctx.isDemo()) {
+    alert('Delete not available in demo mode. Please log in to delete files.');
     return;
   }
 
-  if (!confirm(`Are you sure you want to delete "${filename}"?`)) {
+  if (!confirm(`Are you sure you want to delete "${filename}"? This action cannot be undone.`)) {
     return;
   }
 
-  const response = await fetch(`${ClientPortalModule.FILES_API_BASE}/file/${fileId}`, {
-    method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  try {
+    const response = await fetch(`${FILES_API_BASE}/file/${fileId}`, {
+      method: 'DELETE',
+      credentials: 'include' // HttpOnly cookie authentication
+    });
 
-  if (response.ok) {
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to delete file');
+    }
+
     // Remove from DOM
     const fileItem = document.querySelector(`.file-item[data-file-id="${fileId}"]`);
     if (fileItem) fileItem.remove();
+
+    // Show "no files" message if list is now empty
+    const filesContainer = document.querySelector('.files-list-section .file-item');
+    if (!filesContainer) {
+      const container = document.querySelector('.files-list-section');
+      if (container) {
+        const msgEl = document.createElement('p');
+        msgEl.className = 'no-files';
+        msgEl.textContent = 'No files uploaded yet. Drag and drop files above to upload.';
+        container.appendChild(msgEl);
+      }
+    }
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    alert(error instanceof Error ? error.message : 'Failed to delete file. Please try again.');
   }
 }
 ```
@@ -505,22 +580,29 @@ private getFileIcon(mimetype: string): string {
 
 ### Utility Functions
 
+The file module uses shared utilities:
+
 ```typescript
-// Format file size in human-readable format
-private formatFileSize(bytes: number): string {
+// Imported from shared utils
+import { formatFileSize } from '../../../utils/format-utils';
+
+// Context utilities from ClientPortalContext
+ctx.escapeHtml(text)   // XSS protection
+ctx.formatDate(date)   // Date formatting
+ctx.isDemo()           // Demo mode check
+```
+
+#### formatFileSize (shared utility)
+
+```typescript
+// src/utils/format-utils.ts
+export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   const size = parseFloat((bytes / Math.pow(k, i)).toFixed(1));
   return `${size} ${sizes[i]}`;
-}
-
-// Escape HTML to prevent XSS
-private escapeHtml(text: string): string {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
 }
 ```
 
@@ -687,11 +769,15 @@ On mobile devices (screens under 768px), the Files section adapts for touch inte
 Clients can only delete files they uploaded themselves. Admin-uploaded files show no delete option:
 
 ```typescript
-// Render file with conditional delete button
-const canDelete = file.uploadedBy === 'client';
-const deleteButton = canDelete
-  ? `<button class="file-delete-icon" data-file-id="${file.id}" title="Delete file">
-       <svg><!-- Trash icon --></svg>
+// src/features/client/modules/portal-files.ts
+const clientEmail = sessionStorage.getItem('clientEmail') || '';
+
+// Check if current user can delete this file
+const canDelete = file.uploadedBy === clientEmail || file.uploadedBy === 'client';
+const deleteIcon = canDelete
+  ? `<button class="file-delete-icon btn-delete" data-file-id="${file.id}"
+       data-filename="${ctx.escapeHtml(file.originalName)}" aria-label="Delete file">
+       ${trashIcon}
      </button>`
   : '';
 ```
@@ -727,9 +813,9 @@ const deleteButton = canDelete
 | File | Purpose |
 |------|---------|
 | `server/routes/uploads.ts` | Backend API endpoints |
-| `src/features/client/client-portal.ts` | Frontend file handling |
-| `src/styles/pages/client-portal.css` | File section styling (incl. mobile) |
-| `templates/pages/client-portal.ejs` | Files tab HTML |
+| `src/features/client/modules/portal-files.ts` | Frontend file handling (~455 lines) |
+| `src/styles/client-portal/files.css` | File section styling |
+| `client/portal.html` | Files tab HTML (tab-files section) |
 
 ---
 

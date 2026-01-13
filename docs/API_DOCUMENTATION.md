@@ -10,7 +10,7 @@ The No Bhad Codes API provides a RESTful interface for client management, projec
 
 ## Authentication
 
-**Updated December 19, 2025:** All authentication now uses HttpOnly cookies for enhanced security.
+**Updated January 13, 2026:** All authentication uses HttpOnly cookies for enhanced security.
 
 ### JWT Token Structure
 

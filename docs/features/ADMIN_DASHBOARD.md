@@ -1,6 +1,6 @@
 # Admin Dashboard
 
-**Last Updated:** December 3, 2025
+**Last Updated:** January 13, 2026
 
 ## Table of Contents
 
@@ -46,17 +46,31 @@ The Admin Dashboard provides comprehensive administrative capabilities for manag
 | Styling | CSS with CSS Variables |
 | Charts | Chart.js |
 | Build Tool | Vite |
-| Authentication | JWT with bcrypt |
+| Authentication | HttpOnly cookies with bcrypt |
 
 ### Module Structure
 
 ```
 admin/
-└── index.html                    # Admin HTML entry point
+└── index.html                    # Admin HTML entry point (~1300 lines)
 
 src/features/admin/
-├── admin-dashboard.ts            # Main dashboard controller (~2000 lines)
+├── admin-dashboard.ts            # Main dashboard controller (~1900 lines)
+├── admin-project-details.ts      # Project detail view handler (~1300 lines)
+├── admin-auth.ts                 # Admin authentication
 └── admin-security.ts             # Rate limiting and security
+
+src/features/admin/modules/       # Extracted modules
+├── admin-analytics.ts            # Analytics and charts (~900 lines)
+├── admin-clients.ts              # Client management (~850 lines)
+├── admin-contacts.ts             # Contact form submissions (~250 lines)
+├── admin-leads.ts                # Leads management (~450 lines)
+├── admin-messaging.ts            # Messaging system (~400 lines)
+├── admin-overview.ts             # Dashboard overview (~200 lines)
+├── admin-performance.ts          # Performance monitoring (~400 lines)
+├── admin-projects.ts             # Projects management (~1000 lines)
+├── admin-system-status.ts        # System status display (~340 lines)
+└── index.ts                      # Module exports
 
 src/styles/pages/
 └── admin.css                     # Admin-specific styles
@@ -65,13 +79,17 @@ server/routes/
 ├── admin.ts                      # Admin-specific API endpoints
 ├── auth.ts                       # Authentication including set-password
 ├── leads.ts                      # Leads management API
-└── projects.ts                   # Projects management API
+├── clients.ts                    # Clients management API
+├── projects.ts                   # Projects management API
+└── invoices.ts                   # Invoice management API
 
 server/database/migrations/
 ├── 003_leads.sql                 # Leads table schema
 ├── 004_contacts.sql              # Contact submissions schema
 ├── 005_clients.sql               # Clients table schema
-└── 010_client_invitation.sql     # Invitation token fields
+├── 010_client_invitation.sql     # Invitation token fields
+├── 020_project_price.sql         # Project price column
+└── 021_project_additional_fields.sql  # Additional project tracking fields
 ```
 
 ---
@@ -242,12 +260,35 @@ private async updateProjectStatus(id: number, status: string): Promise<void> {
 - Create new invoices
 - View invoice history
 
-### Settings Sub-Tab
+### Project Edit Modal
 
-**Project Settings:**
+The edit button opens a modal with all project fields:
+
+**Basic Info:**
 - Project name
+- Project type
 - Status dropdown
-- Progress percentage
+- Budget and Price
+
+**Dates:**
+- Start date
+- Target end date (estimated_end_date)
+- Timeline
+
+**URLs:**
+- Preview URL
+- Repository URL
+- Staging URL
+- Production URL
+
+**Financial/Contract:**
+- Deposit amount
+- Contract signed date
+
+**Internal:**
+- Admin notes (not visible to clients)
+
+### Settings Sub-Tab
 
 **Client Account:**
 - Client email
@@ -255,9 +296,6 @@ private async updateProjectStatus(id: number, status: string): Promise<void> {
 - Last login timestamp
 - Resend Invitation button
 - Reset Password button
-
-**Preview URL:**
-- Set client preview URL for live site previews
 
 ### Back Navigation
 
@@ -382,9 +420,10 @@ The Messages tab includes a client selector dropdown:
 ### Loading Messages
 
 ```typescript
+// src/features/admin/modules/admin-messaging.ts
 private async loadClientThreads(): Promise<void> {
   const response = await fetch('/api/messages/threads', {
-    headers: { 'Authorization': `Bearer ${token}` }
+    credentials: 'include' // HttpOnly cookie authentication
   });
 
   if (response.ok) {
@@ -399,11 +438,12 @@ private async loadClientThreads(): Promise<void> {
 Admin messages are sent with `sender_type: 'admin'`:
 
 ```typescript
+// src/features/admin/modules/admin-messaging.ts
 private async sendMessage(): Promise<void> {
   await fetch('/api/messages', {
     method: 'POST',
+    credentials: 'include', // HttpOnly cookie authentication
     headers: {
-      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
