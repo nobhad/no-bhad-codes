@@ -904,6 +904,13 @@ html[data-theme="dark"] .submit-button:focus-visible {
     max-width: 350px;
   }
 
+  /* Message field - constrained width for medium screens */
+  .contact-section .contact-message-row,
+  .contact-section .contact-message-row .input-item {
+    width: 450px;
+    max-width: 450px;
+  }
+
   /* Card column - same size as desktop, positioned for balanced spacing */
   .contact-section .contact-card-column {
     width: var(--layout-card-width);
