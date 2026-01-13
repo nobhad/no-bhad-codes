@@ -213,7 +213,7 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .tech-stack h3,
