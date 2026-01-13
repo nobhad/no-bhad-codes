@@ -116,31 +116,18 @@
 /* ----- COMPONENT: Form Input ----- */
 /* Matches main site contact form styling - dark bg, light text */
 /* FORM FIELD STYLING - BLACK BACKGROUND FOR ALL PORTAL INPUTS */
+/* Using :is() to reduce selector complexity (was 25 selectors, now simplified) */
 .portal-input,
-.client-portal-main .form-input,
-.client-portal-main input[type="text"],
-.client-portal-main input[type="email"],
-.client-portal-main input[type="password"],
-.client-portal-main input[type="tel"],
-.client-portal-main input[type="number"],
-.client-portal-main textarea,
-.client-portal-main select,
-[data-page="client-portal"] .form-input,
-[data-page="client-portal"] input[type="text"],
-[data-page="client-portal"] input[type="email"],
-[data-page="client-portal"] input[type="password"],
-[data-page="client-portal"] input[type="tel"],
-[data-page="client-portal"] input[type="number"],
-[data-page="client-portal"] textarea,
-[data-page="client-portal"] select,
-[data-page="admin"] .form-input,
-[data-page="admin"] input[type="text"],
-[data-page="admin"] input[type="email"],
-[data-page="admin"] input[type="password"],
-[data-page="admin"] input[type="tel"],
-[data-page="admin"] input[type="number"],
-[data-page="admin"] textarea,
-[data-page="admin"] select:not(.status-select) {
+:is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) :is(
+  .form-input,
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="number"],
+  textarea,
+  select:not(.status-select)
+) {
   width: 100%;
   padding: var(--portal-spacing-lg) var(--portal-spacing-xl);
   border: none;
@@ -159,40 +146,34 @@
 
 /* Placeholder styling - matches contact form */
 .portal-input::placeholder,
-.client-portal-main .form-input::placeholder,
-.client-portal-main input::placeholder,
-.client-portal-main textarea::placeholder,
-[data-page="client-portal"] input::placeholder,
-[data-page="client-portal"] textarea::placeholder,
-[data-page="admin"] input::placeholder,
-[data-page="admin"] textarea::placeholder {
+:is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) :is(
+  .form-input,
+  input,
+  textarea
+)::placeholder {
   color: var(--portal-text-light);
   opacity: 0.5;
   font-weight: 600;
 }
 
+/* Focus states for portal inputs */
 .portal-input:focus,
-.client-portal-main .form-input:focus,
-.client-portal-main input[type="text"]:focus,
-.client-portal-main input[type="email"]:focus,
-.client-portal-main input[type="password"]:focus,
-.client-portal-main input[type="tel"]:focus,
-.client-portal-main input[type="number"]:focus,
-.client-portal-main textarea:focus,
-.client-portal-main select:focus,
-[data-page="client-portal"] input:focus,
-[data-page="client-portal"] textarea:focus,
-[data-page="client-portal"] select:focus,
-[data-page="admin"] input:focus,
-[data-page="admin"] textarea:focus,
-[data-page="admin"] select:not(.status-select):focus {
+:is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) :is(
+  .form-input,
+  input,
+  textarea,
+  select:not(.status-select)
+):focus {
   outline: none;
   border-color: var(--color-primary);
 }
 
+/* Readonly states */
 .portal-input[readonly],
-.client-portal-main .form-input[readonly],
-.client-portal-main input[readonly] {
+:is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) :is(
+  .form-input,
+  input
+)[readonly] {
   background: var(--portal-bg-readonly);
   color: var(--portal-text-muted);
   cursor: not-allowed;
@@ -218,9 +199,7 @@
 /* ----- COMPONENT: Form Group ----- */
 /* Label inside input like contact form */
 .portal-form-group,
-.client-portal-main .form-group,
-[data-page="client-portal"] .form-group,
-[data-page="admin"] .form-group {
+:is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) .form-group {
   margin: 0 !important;
   position: relative !important;
   display: flex !important;
@@ -234,12 +213,7 @@
 
 /* Label positioned inside input at top - SMALL UPPERCASE style */
 .portal-form-group label,
-.client-portal-main .form-group label,
-.client-portal-main label,
-[data-page="client-portal"] .form-group label,
-[data-page="client-portal"] label,
-[data-page="admin"] .form-group label,
-[data-page="admin"] label {
+:is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) :is(.form-group label, label) {
   position: absolute !important;
   top: var(--portal-spacing-sm) !important;
   left: var(--portal-spacing-xl) !important;
@@ -254,17 +228,12 @@
 }
 
 /* Adjust input padding to account for smaller label */
-.portal-form-group .portal-input,
-.portal-form-group input,
-.client-portal-main .form-group input,
-.client-portal-main .form-group textarea,
-.client-portal-main .form-group select,
-[data-page="client-portal"] .form-group input,
-[data-page="client-portal"] .form-group textarea,
-[data-page="client-portal"] .form-group select,
-[data-page="admin"] .form-group input,
-[data-page="admin"] .form-group textarea,
-[data-page="admin"] .form-group select:not(.status-select) {
+.portal-form-group :is(.portal-input, input),
+:is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) .form-group :is(
+  input,
+  textarea,
+  select:not(.status-select)
+) {
   padding-top: 1.5rem;
   padding-bottom: var(--portal-spacing-sm);
   padding-left: var(--portal-spacing-xl);
