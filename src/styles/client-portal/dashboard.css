@@ -51,6 +51,7 @@
   border-radius: 5px;
   overflow: hidden;
   box-sizing: border-box;
+  box-shadow: var(--shadow-inset);
 }
 
 .progress-fill {
@@ -68,6 +69,7 @@
   padding: var(--portal-spacing-xl);
   margin-bottom: var(--portal-spacing-2xl);
   color: var(--portal-text-light);
+  box-shadow: var(--shadow-card);
 }
 
 .recent-activity h3 {
@@ -123,6 +125,7 @@ button.stat-card,
   text-align: center;
   color: var(--portal-text-light);
   font-family: inherit;
+  box-shadow: var(--shadow-card);
 }
 
 .stat-card-clickable {
@@ -131,7 +134,7 @@ button.stat-card,
 }
 
 .stat-card-clickable:hover {
-  background: #2a2a2a !important;
+  background: var(--portal-bg-readonly) !important;
 }
 
 .stat-card-clickable:hover .stat-number {
@@ -185,6 +188,7 @@ button.stat-card,
   border-radius: var(--portal-radius-lg);
   padding: var(--portal-spacing-xl);
   color: var(--portal-text-light);
+  box-shadow: var(--shadow-card);
 }
 
 .overview-card h3 {

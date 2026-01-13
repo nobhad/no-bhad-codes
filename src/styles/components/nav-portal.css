@@ -378,7 +378,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 /* Mobile portal button */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   .portal-button {
     width: 36px;
     height: 36px;
@@ -425,7 +425,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   z-index: 20001 !important;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 20px 60px var(--color-shadow-3xl);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   background-color: var(--color-terminal-bg);
 }
 
@@ -468,14 +468,15 @@ html[data-theme="dark"] .portal-dropdown-header {
 .intake-modal .terminal-intake {
   min-height: 100% !important;
   height: 100% !important;
+  width: 100% !important;
   background-color: var(--color-terminal-bg) !important;
 }
 
 .intake-modal .terminal-window {
   height: 100% !important;
+  width: 100% !important;
   max-width: 100% !important;
   margin: 0 !important;
-  border-radius: 10px !important;
 }
 
 .intake-modal .terminal-chat {
@@ -495,7 +496,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 /* Mobile adjustments */
-@media screen and (max-width: 767px) {
+@media (--mobile) {
   .intake-modal {
     width: 100vw;
     height: 100vh;
