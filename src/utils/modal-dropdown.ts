@@ -22,9 +22,10 @@ export function initModalDropdown(
   selectElement: HTMLSelectElement,
   options: ModalDropdownOptions = {}
 ): HTMLElement {
-  // Create wrapper - uses custom-dropdown class plus modal-dropdown modifier
+  // Create wrapper - uses custom-dropdown class plus data attribute for modal styling
   const wrapper = document.createElement('div');
-  wrapper.className = 'custom-dropdown modal-dropdown';
+  wrapper.className = 'custom-dropdown';
+  wrapper.dataset.modalDropdown = 'true';
 
   // Get current value and options from select
   const currentValue = selectElement.value;

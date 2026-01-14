@@ -1620,32 +1620,33 @@ body.modal-open .dashboard-content {
    ================================================
    Uses the same custom-dropdown classes from messages tab
    but removes the border for modal use.
+   Uses data-modal-dropdown attribute for targeting.
    ================================================ */
 
 /* Remove border from modal dropdown trigger */
-.modal-dropdown.custom-dropdown .custom-dropdown-trigger {
+.custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger {
   border: 4px solid transparent;
 }
 
 /* Focus state - matches messages tab (border turns brand primary) */
-.modal-dropdown.custom-dropdown .custom-dropdown-trigger:focus {
+.custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger:focus {
   outline: none;
   border-color: var(--color-brand-primary);
 }
 
 /* Hover state - matches messages tab */
-.modal-dropdown.custom-dropdown .custom-dropdown-trigger:hover {
+.custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger:hover {
   border-color: var(--color-brand-primary);
 }
 
 /* When open - show brand primary border, hide bottom to connect with menu */
-.modal-dropdown.custom-dropdown.open .custom-dropdown-trigger {
+.custom-dropdown[data-modal-dropdown].open .custom-dropdown-trigger {
   border-color: var(--color-brand-primary);
   border-bottom-color: transparent;
 }
 
 /* Menu also has no border */
-.modal-dropdown.custom-dropdown .custom-dropdown-menu {
+.custom-dropdown[data-modal-dropdown] .custom-dropdown-menu {
   border: none;
 }
 
