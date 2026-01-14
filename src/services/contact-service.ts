@@ -12,6 +12,8 @@
 import { BaseService } from './base-service';
 import { SanitizationUtils } from '../utils/sanitization-utils';
 import { getFormspreeUrl } from '../config/api';
+import { getContactEmail } from '../config/branding';
+import { APP_CONSTANTS } from '../config/constants';
 
 export interface ContactFormData {
   name: string;
@@ -83,9 +85,13 @@ export class ContactService extends BaseService {
     try {
       this.log('Submitting contact form...', { backend: this.config.backend });
 
-      // Rate limiting check (5 submissions per 5 minutes)
+      // Rate limiting check using centralized constants
       const clientIdentifier = this.getClientIdentifier(formData);
-      if (!SanitizationUtils.checkRateLimit(clientIdentifier, 5, 300000)) {
+      if (!SanitizationUtils.checkRateLimit(
+        clientIdentifier,
+        APP_CONSTANTS.RATE_LIMITS.FORM_SUBMISSIONS,
+        APP_CONSTANTS.TIMERS.RATE_LIMIT_WINDOW
+      )) {
         SanitizationUtils.logSecurityViolation(
           'rate_limit_exceeded',
           { identifier: clientIdentifier },
@@ -157,7 +163,7 @@ export class ContactService extends BaseService {
       if (errorMessage.includes('fetch') || errorMessage.includes('network') || errorMessage.includes('Failed to fetch')) {
         userMessage = 'Network error. Please check your connection and try again.';
       } else if (errorMessage.includes('404') || errorMessage.includes('Netlify')) {
-        userMessage = 'Form service unavailable. Please email nobhaduri@gmail.com directly.';
+        userMessage = `Form service unavailable. Please email ${getContactEmail('fallback')} directly.`;
       }
 
       return {

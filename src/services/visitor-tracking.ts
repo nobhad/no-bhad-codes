@@ -40,6 +40,8 @@
  * ```
  */
 
+import { APP_CONSTANTS } from '../config/constants';
+
 /**
  * Visitor session data structure
  * Represents a single browsing session for a visitor
@@ -296,11 +298,11 @@ export class VisitorTrackingService {
    * Get or create visitor ID
    */
   private getOrCreateVisitorId(): string {
-    const stored = localStorage.getItem('nbw_visitor_id');
+    const stored = localStorage.getItem(APP_CONSTANTS.STORAGE_KEYS.VISITOR_ID);
     if (stored) return stored;
 
     const visitorId = this.generateId();
-    localStorage.setItem('nbw_visitor_id', visitorId);
+    localStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.VISITOR_ID, visitorId);
     return visitorId;
   }
 
@@ -308,11 +310,11 @@ export class VisitorTrackingService {
    * Get or create session ID
    */
   private getOrCreateSessionId(): string {
-    const stored = sessionStorage.getItem('nbw_session_id');
+    const stored = sessionStorage.getItem(APP_CONSTANTS.STORAGE_KEYS.SESSION_ID);
     if (stored) return stored;
 
     const sessionId = this.generateId();
-    sessionStorage.setItem('nbw_session_id', sessionId);
+    sessionStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.SESSION_ID, sessionId);
     return sessionId;
   }
 
@@ -328,7 +330,7 @@ export class VisitorTrackingService {
    */
   private getStoredSession(): VisitorSession | null {
     try {
-      const stored = sessionStorage.getItem('nbw_session');
+      const stored = sessionStorage.getItem(APP_CONSTANTS.STORAGE_KEYS.SESSION_DATA);
       return stored ? JSON.parse(stored) : null;
     } catch {
       return null;
@@ -340,7 +342,7 @@ export class VisitorTrackingService {
    */
   private storeSession(): void {
     if (this.currentSession) {
-      sessionStorage.setItem('nbw_session', JSON.stringify(this.currentSession));
+      sessionStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.SESSION_DATA, JSON.stringify(this.currentSession));
     }
   }
 
@@ -686,13 +688,13 @@ export class VisitorTrackingService {
    */
   private storeEventsLocally(events: (PageView | InteractionEvent)[]): void {
     try {
-      const existing = JSON.parse(localStorage.getItem('nbw_tracking_events') || '[]');
+      const existing = JSON.parse(localStorage.getItem(APP_CONSTANTS.STORAGE_KEYS.TRACKING_EVENTS) || '[]');
       const updated = [...existing, ...events];
 
-      // Keep only last 1000 events to prevent localStorage bloat
-      const trimmed = updated.slice(-1000);
+      // Keep only last MAX_STORED_EVENTS to prevent localStorage bloat
+      const trimmed = updated.slice(-APP_CONSTANTS.UI.MAX_STORED_EVENTS);
 
-      localStorage.setItem('nbw_tracking_events', JSON.stringify(trimmed));
+      localStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.TRACKING_EVENTS, JSON.stringify(trimmed));
     } catch (error) {
       console.warn('[VisitorTracking] Failed to store events locally:', error);
     }
@@ -768,7 +770,7 @@ export class VisitorTrackingService {
    */
   private getStoredEvents(): (PageView | InteractionEvent)[] {
     try {
-      return JSON.parse(localStorage.getItem('nbw_tracking_events') || '[]');
+      return JSON.parse(localStorage.getItem(APP_CONSTANTS.STORAGE_KEYS.TRACKING_EVENTS) || '[]');
     } catch {
       return [];
     }
@@ -816,10 +818,10 @@ export class VisitorTrackingService {
    * Clear all tracking data
    */
   clearData(): void {
-    localStorage.removeItem('nbw_visitor_id');
-    localStorage.removeItem('nbw_tracking_events');
-    sessionStorage.removeItem('nbw_session_id');
-    sessionStorage.removeItem('nbw_session');
+    localStorage.removeItem(APP_CONSTANTS.STORAGE_KEYS.VISITOR_ID);
+    localStorage.removeItem(APP_CONSTANTS.STORAGE_KEYS.TRACKING_EVENTS);
+    sessionStorage.removeItem(APP_CONSTANTS.STORAGE_KEYS.SESSION_ID);
+    sessionStorage.removeItem(APP_CONSTANTS.STORAGE_KEYS.SESSION_DATA);
 
     this.currentSession = null;
     this.currentPageView = null;

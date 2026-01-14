@@ -11,6 +11,7 @@
 
 import { BaseModule } from '../core/base';
 import { appState } from '../../core/state';
+import { APP_CONSTANTS } from '../../config/constants';
 import type { ModuleOptions } from '../../types/modules';
 
 export class ThemeModule extends BaseModule {
@@ -97,7 +98,7 @@ export class ThemeModule extends BaseModule {
     document.documentElement.setAttribute('data-theme', theme);
 
     // Store in localStorage
-    localStorage.setItem('theme', theme);
+    localStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.THEME, theme);
 
     // Update theme-color meta tag to match site background
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');
@@ -172,7 +173,7 @@ export class ThemeModule extends BaseModule {
    */
   getSavedPreference(): 'light' | 'dark' | null {
     try {
-      const saved = localStorage.getItem('theme');
+      const saved = localStorage.getItem(APP_CONSTANTS.STORAGE_KEYS.THEME);
       return saved as 'light' | 'dark' | null;
     } catch {
       return null;
@@ -184,7 +185,7 @@ export class ThemeModule extends BaseModule {
    */
   clearSavedPreference(): void {
     try {
-      localStorage.removeItem('theme');
+      localStorage.removeItem(APP_CONSTANTS.STORAGE_KEYS.THEME);
     } catch {
       // Ignore errors
     }
