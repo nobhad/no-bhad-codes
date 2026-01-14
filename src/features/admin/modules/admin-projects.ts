@@ -10,6 +10,7 @@
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatFileSize } from '../../../utils/format-utils';
+import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
 import type { ProjectMilestone, ProjectFile, ProjectInvoice, AdminDashboardContext, Message } from '../admin-types';
 
 /** Lead/Project data from admin leads API */
@@ -390,6 +391,9 @@ function setupEditProjectButton(project: LeadProject): void {
   newEditBtn.addEventListener('click', () => openEditProjectModal(project));
 }
 
+// Store current project ID for form submission
+let editingProjectId: number | null = null;
+
 /**
  * Open the edit project modal with current project data
  */
@@ -397,50 +401,101 @@ function openEditProjectModal(project: LeadProject): void {
   const modal = document.getElementById('edit-project-modal');
   if (!modal) return;
 
+  // Store project ID for form submission
+  editingProjectId = project.id;
   const projectData = project as any;
 
   // Populate form fields
   const nameInput = document.getElementById('edit-project-name') as HTMLInputElement;
-  const typeSelect = document.getElementById('edit-project-type') as HTMLSelectElement;
   const budgetInput = document.getElementById('edit-project-budget') as HTMLInputElement;
   const priceInput = document.getElementById('edit-project-price') as HTMLInputElement;
   const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
   const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
-  const statusSelect = document.getElementById('edit-project-status') as HTMLSelectElement;
 
   if (nameInput) nameInput.value = project.project_name || '';
-  if (typeSelect) typeSelect.value = project.project_type || '';
   if (budgetInput) budgetInput.value = project.budget_range || '';
   if (priceInput) priceInput.value = projectData.price || '';
   if (timelineInput) timelineInput.value = project.timeline || '';
   if (previewUrlInput) previewUrlInput.value = projectData.preview_url || '';
-  if (statusSelect) statusSelect.value = normalizeStatus(project.status);
 
-  // Show modal
+  // Initialize custom dropdowns for selects (only once)
+  initProjectModalDropdowns(project);
+
+  // Show modal and lock body scroll
   modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
 
-  // Setup close handlers
+  // Setup close handlers (only once per modal lifecycle)
+  setupEditProjectModalHandlers(modal);
+}
+
+/**
+ * Initialize custom dropdowns for the edit project modal
+ */
+function initProjectModalDropdowns(project: LeadProject): void {
+  const typeSelect = document.getElementById('edit-project-type') as HTMLSelectElement;
+  const statusSelect = document.getElementById('edit-project-status') as HTMLSelectElement;
+
+  // Type dropdown
+  if (typeSelect) {
+    const typeWrapper = typeSelect.previousElementSibling as HTMLElement;
+    if (typeWrapper?.classList.contains('modal-dropdown')) {
+      // Dropdown already exists, just update the value
+      setModalDropdownValue(typeWrapper, project.project_type || '');
+    } else if (!typeSelect.dataset.dropdownInit) {
+      // Initialize new dropdown
+      typeSelect.value = project.project_type || '';
+      typeSelect.dataset.dropdownInit = 'true';
+      initModalDropdown(typeSelect, { placeholder: 'Select type...' });
+    }
+  }
+
+  // Status dropdown
+  if (statusSelect) {
+    const statusWrapper = statusSelect.previousElementSibling as HTMLElement;
+    if (statusWrapper?.classList.contains('modal-dropdown')) {
+      // Dropdown already exists, just update the value
+      setModalDropdownValue(statusWrapper, normalizeStatus(project.status));
+    } else if (!statusSelect.dataset.dropdownInit) {
+      // Initialize new dropdown
+      statusSelect.value = normalizeStatus(project.status);
+      statusSelect.dataset.dropdownInit = 'true';
+      initModalDropdown(statusSelect, { placeholder: 'Select status...' });
+    }
+  }
+}
+
+/**
+ * Setup modal close and form handlers (only attach once)
+ */
+let editProjectModalInitialized = false;
+function setupEditProjectModalHandlers(modal: HTMLElement): void {
+  if (editProjectModalInitialized) return;
+  editProjectModalInitialized = true;
+
   const closeBtn = document.getElementById('edit-project-close');
   const cancelBtn = document.getElementById('edit-project-cancel');
   const form = document.getElementById('edit-project-form') as HTMLFormElement;
 
-  const closeModal = () => modal.classList.add('hidden');
+  const closeModal = () => {
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  };
 
-  closeBtn?.addEventListener('click', closeModal, { once: true });
-  cancelBtn?.addEventListener('click', closeModal, { once: true });
+  closeBtn?.addEventListener('click', closeModal);
+  cancelBtn?.addEventListener('click', closeModal);
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
-  }, { once: true });
+  });
 
   // Handle form submit
   if (form) {
-    const newForm = form.cloneNode(true) as HTMLFormElement;
-    form.parentNode?.replaceChild(newForm, form);
-
-    newForm.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      await saveProjectChanges(project.id);
-      closeModal();
+      if (editingProjectId !== null) {
+        await saveProjectChanges(editingProjectId);
+        closeModal();
+      }
     });
   }
 }
