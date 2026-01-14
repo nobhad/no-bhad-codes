@@ -322,45 +322,6 @@ export function toggleSidebar(): void {
 }
 
 /**
- * Toggle mobile menu (hamburger)
- */
-export function toggleMobileMenu(): void {
-  const sidebar = document.getElementById('sidebar');
-  const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-  const mobileOverlay = document.getElementById('mobile-overlay');
-
-  if (!sidebar || !mobileMenuToggle) {
-    console.error('Mobile menu elements not found');
-    return;
-  }
-
-  const isOpen = sidebar.classList.contains('mobile-open');
-
-  if (isOpen) {
-    closeMobileMenu();
-  } else {
-    sidebar.classList.add('mobile-open');
-    mobileMenuToggle.classList.add('active');
-    mobileOverlay?.classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-}
-
-/**
- * Close mobile menu
- */
-export function closeMobileMenu(): void {
-  const sidebar = document.getElementById('sidebar');
-  const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-  const mobileOverlay = document.getElementById('mobile-overlay');
-
-  sidebar?.classList.remove('mobile-open');
-  mobileMenuToggle?.classList.remove('active');
-  mobileOverlay?.classList.remove('active');
-  document.body.style.overflow = '';
-}
-
-/**
  * Toggle account folder expanded/collapsed state
  */
 export function toggleAccountFolder(): void {

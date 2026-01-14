@@ -380,8 +380,6 @@ class AdminDashboard {
           // Update active state on sidebar buttons
           sidebarButtons.forEach((b) => b.classList.remove('active'));
           btn.classList.add('active');
-          // Close mobile menu after selecting
-          this.closeMobileMenu();
         }
       });
     });
@@ -417,32 +415,7 @@ class AdminDashboard {
       });
     });
 
-    // Mobile menu toggle
-    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-    if (mobileMenuToggle) {
-      mobileMenuToggle.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.toggleMobileMenu();
-      });
-    }
-
-    // Mobile overlay close
-    const mobileOverlay = document.getElementById('mobile-overlay');
-    if (mobileOverlay) {
-      mobileOverlay.addEventListener('click', () => {
-        this.closeMobileMenu();
-      });
-    }
-
-    // Sidebar close button (mobile)
-    const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
-    if (sidebarCloseBtn) {
-      sidebarCloseBtn.addEventListener('click', () => {
-        this.closeMobileMenu();
-      });
-    }
-
-    // Sidebar toggle (desktop) - multiple buttons, one per tab
+    // Sidebar toggle - multiple buttons, one per tab
     const sidebarToggles = document.querySelectorAll('.header-sidebar-toggle');
     sidebarToggles.forEach((toggle) => {
       toggle.addEventListener('click', (e) => {
@@ -537,22 +510,6 @@ class AdminDashboard {
         closeModal();
       }
     });
-  }
-
-  private toggleMobileMenu(): void {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('mobile-overlay');
-    sidebar?.classList.toggle('active');
-    overlay?.classList.toggle('active');
-    document.body.style.overflow = sidebar?.classList.contains('active') ? 'hidden' : '';
-  }
-
-  private closeMobileMenu(): void {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('mobile-overlay');
-    sidebar?.classList.remove('active');
-    overlay?.classList.remove('active');
-    document.body.style.overflow = '';
   }
 
   private toggleSidebar(): void {

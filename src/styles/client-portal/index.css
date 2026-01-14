@@ -25,9 +25,3 @@
 
 /* Content Views */
 @import './views.css';
-
-/* Responsive (tablet/desktop) */
-@import './responsive.css';
-
-/* Mobile (must be last) */
-@import './mobile.css';
