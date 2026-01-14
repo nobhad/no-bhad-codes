@@ -353,23 +353,23 @@ export class ContactAnimationModule extends BaseModule {
         duration: 0.5,
         ease: 'back.out(1.4)'
       }, formStartTime);
-      
+
       // Star glow animation - starts after avatar blurb appears
       const starGlow = avatarBlurb.querySelector('#STAR_GLOW') as SVGPathElement | null;
-      
+
       if (starGlow) {
         // Glow starts invisible
         gsap.set(starGlow, {
           opacity: 0
         });
-        
+
         // Fade in star glow
         this.timeline.to(starGlow, {
           opacity: 1,
           duration: 0.8,
           ease: 'power2.out'
         }, formStartTime + 0.5);
-        
+
         // Continuous pulsing glow animation (glow overflows beyond star shape)
         const glowTimeline = gsap.timeline({ repeat: -1, repeatDelay: 0 });
         glowTimeline
@@ -383,7 +383,7 @@ export class ContactAnimationModule extends BaseModule {
             duration: 1.5,
             ease: 'sine.inOut'
           });
-        
+
         // Start glow pulse animation after fade-in
         this.timeline.add(glowTimeline, formStartTime + 1.3);
       }
