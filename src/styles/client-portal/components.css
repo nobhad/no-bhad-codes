@@ -392,6 +392,7 @@
   margin: 0 0 var(--portal-spacing-lg) 0;
   text-transform: uppercase;
   padding-right: 120px;
+  white-space: nowrap;
 }
 
 .portal-project-card .project-status {

@@ -171,33 +171,6 @@ export class ClientPortalModule extends BaseModule {
       });
     });
 
-    // Mobile hamburger menu toggle
-    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-    const mobileOverlay = document.getElementById('mobile-overlay');
-    const sidebar = document.getElementById('sidebar');
-
-    if (mobileMenuToggle && sidebar) {
-      mobileMenuToggle.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.toggleMobileMenu();
-      });
-    }
-
-    // Close mobile menu when clicking overlay
-    if (mobileOverlay) {
-      mobileOverlay.addEventListener('click', () => {
-        this.closeMobileMenu();
-      });
-    }
-
-    // Close mobile menu when clicking sidebar close button
-    const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
-    if (sidebarCloseBtn) {
-      sidebarCloseBtn.addEventListener('click', () => {
-        this.closeMobileMenu();
-      });
-    }
-
     // Logout button
     const logoutBtn = document.getElementById('btn-logout');
     if (logoutBtn) {
@@ -219,8 +192,6 @@ export class ClientPortalModule extends BaseModule {
             // Update active state on buttons
             sidebarButtons.forEach((b) => b.classList.remove('active'));
             btn.classList.add('active');
-            // Close mobile menu after selecting a tab
-            this.closeMobileMenu();
           }
         });
       });
@@ -1774,16 +1745,6 @@ export class ClientPortalModule extends BaseModule {
   private async toggleSidebar(): Promise<void> {
     const navModule = await loadNavigationModule();
     navModule.toggleSidebar();
-  }
-
-  private async toggleMobileMenu(): Promise<void> {
-    const navModule = await loadNavigationModule();
-    navModule.toggleMobileMenu();
-  }
-
-  private async closeMobileMenu(): Promise<void> {
-    const navModule = await loadNavigationModule();
-    navModule.closeMobileMenu();
   }
 
   /**
