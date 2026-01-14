@@ -509,19 +509,20 @@
   align-self: center;
 }
 
-/* Projects heading - inherits from base section h2 styling */
+/* Projects heading - minimal top margin */
 .projects-section h2 {
   margin: 0;
-  margin-bottom: 0.5rem;
+  margin-top: 3rem;
+  margin-bottom: 0.25rem;
   padding: 0;
   text-align: left;
   width: 100%;
 }
 
-/* hr - simple positive margins, no hacks */
+/* hr - space below for SVG */
 .projects-section hr {
   margin-top: 0;
-  margin-bottom: 1rem;
+  margin-bottom: 5rem;
   margin-left: 0;
   margin-right: auto;
 }
@@ -563,13 +564,13 @@
 /* Medium viewport adjustments (600px - 1100px) - matches mobile h2/hr spacing */
 @media screen and (min-width: 600px) and (max-width: 1100px) {
   .projects-section h2 {
-    margin-top: 10rem;
+    margin-top: 0;
     margin-bottom: 0.25rem;
   }
 
   .projects-section hr {
     margin-top: 0;
-    margin-bottom: 1rem;
+    margin-bottom: 5rem;
   }
 
   .wip-sign {
