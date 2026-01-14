@@ -508,15 +508,19 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (productionUrlInput) productionUrlInput.value = project.production_url || '';
     if (notesInput) notesInput.value = project.notes || '';
 
-    // Show modal
+    // Show modal and lock body scroll
     modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
 
     // Setup close handlers
     const closeBtn = document.getElementById('edit-project-close');
     const cancelBtn = document.getElementById('edit-project-cancel');
     const form = document.getElementById('edit-project-form') as HTMLFormElement;
 
-    const closeModal = () => modal.classList.add('hidden');
+    const closeModal = () => {
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    };
 
     closeBtn?.addEventListener('click', closeModal, { once: true });
     cancelBtn?.addEventListener('click', closeModal, { once: true });

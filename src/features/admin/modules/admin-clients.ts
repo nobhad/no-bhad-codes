@@ -11,6 +11,7 @@
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import type { AdminDashboardContext } from '../admin-types';
 import { formatCurrency } from '../../../utils/format-utils';
+import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
 
 export interface Client {
   id: number;
@@ -555,14 +556,27 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
   if (nameInput) nameInput.value = client.contact_name || '';
   if (companyInput) companyInput.value = client.company_name || '';
   if (phoneInput) phoneInput.value = client.phone || '';
-  if (statusSelect) statusSelect.value = client.status || 'pending';
 
-  // Show modal
+  // Initialize custom dropdown for status select (only once)
+  if (statusSelect && !statusSelect.dataset.dropdownInit) {
+    statusSelect.value = client.status || 'pending';
+    initModalDropdown(statusSelect, { placeholder: 'Select status...' });
+  } else if (statusSelect) {
+    // Update existing dropdown value
+    const statusWrapper = statusSelect.previousElementSibling as HTMLElement;
+    if (statusWrapper?.classList.contains('modal-dropdown')) {
+      setModalDropdownValue(statusWrapper, client.status || 'pending');
+    }
+  }
+
+  // Show modal and lock body scroll
   modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
 
   // Close handlers
   const closeModal = () => {
     modal.classList.add('hidden');
+    document.body.style.overflow = '';
   };
 
   const closeHandler = () => closeModal();
@@ -647,12 +661,14 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
   if (zipInput) zipInput.value = client.billing_zip || '';
   if (countryInput) countryInput.value = client.billing_country || '';
 
-  // Show modal
+  // Show modal and lock body scroll
   modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
 
   // Close handlers
   const closeModal = () => {
     modal.classList.add('hidden');
+    document.body.style.overflow = '';
   };
 
   const closeHandler = () => closeModal();
@@ -750,12 +766,14 @@ function addClient(ctx: AdminDashboardContext): void {
   // Reset form
   form.reset();
 
-  // Show modal
+  // Show modal and lock body scroll
   modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
 
   // Close handlers
   const closeModal = () => {
     modal.classList.add('hidden');
+    document.body.style.overflow = '';
     form.reset();
   };
 
