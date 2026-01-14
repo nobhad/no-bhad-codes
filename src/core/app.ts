@@ -83,12 +83,13 @@ export class Application {
       // Initialize components from data attributes
       await ComponentRegistry.autoInit();
 
-      // If consent was already accepted, initialize tracking now
+      // Initialize visitor tracking (config has cookieConsent: false, so no consent needed)
       if (typeof window !== 'undefined') {
-        const consentStatus = ConsentBanner.getConsentStatus?.();
-        if (consentStatus === 'accepted') {
+        try {
           const trackingService = (await container.resolve('VisitorTrackingService')) as ServiceInstance;
           await trackingService.init?.();
+        } catch (error) {
+          console.error('[Application] Failed to initialize visitor tracking:', error);
         }
       }
 
