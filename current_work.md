@@ -72,7 +72,7 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 - [x] Leads Management - cards should filter table
 - [x] Fix tooltip for truncated text - now uses fast CSS tooltips instead of native title delay
 - [ ] Remove current mobile styling for portal - use the plugin from main site instead
-- [ ] Custom dropdown for leads page panels - based on modal custom dropdown, bg color should match div bg
+- [x] Custom dropdown for leads page panels - compact table dropdowns with red focus state, transparent bg
 - [x] Add API endpoint for lead/intake status updates - PUT /api/admin/leads/:id/status
 - [x] Info icons on Analytics pages Core Web Vitals - tooltip hovers explaining what each metric means
 - [x] Unread message count badge on sidebar Messages button - red badge, right-aligned, only shows if unread > 0

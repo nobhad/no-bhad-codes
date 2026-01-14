@@ -157,6 +157,56 @@ select::-ms-expand {
  * FORM LABELS AND TEXT
  * ============================================ */
 
+/**
+ * Field Label - Reusable label component
+ * Uses CSS custom properties for customization:
+ * - --label-font-size: Font size (default: 0.75rem)
+ * - --label-color: Text color (default: --portal-text-secondary)
+ * - --label-text-transform: Transform (default: uppercase)
+ * - --label-letter-spacing: Spacing (default: 0.05em)
+ * - --label-font-weight: Weight (default: 500)
+ *
+ * Usage: <span class="field-label">Status</span>
+ */
+.field-label {
+  display: block;
+  font-size: var(--label-font-size, 0.75rem);
+  color: var(--label-color, var(--portal-text-secondary));
+  text-transform: var(--label-text-transform, uppercase);
+  letter-spacing: var(--label-letter-spacing, 0.05em);
+  font-weight: var(--label-font-weight, 500);
+  margin-bottom: var(--label-margin-bottom, 0.5rem);
+}
+
+/* Dark theme field labels */
+[data-theme="dark"] .field-label,
+[data-page="client-portal"] .field-label,
+[data-page="admin"] .field-label {
+  color: var(--label-color, var(--portal-text-secondary));
+}
+
+/* Light theme field labels */
+[data-theme="light"] .field-label {
+  color: var(--label-color, var(--color-text-secondary));
+}
+
+/* Field label variants */
+.field-label--lg {
+  --label-font-size: 0.875rem;
+}
+
+.field-label--sm {
+  --label-font-size: 0.65rem;
+}
+
+.field-label--normal-case {
+  --label-text-transform: none;
+}
+
+.field-label--primary {
+  --label-color: var(--color-primary);
+}
+
 /* Form labels */
 .form-group label,
 label {
