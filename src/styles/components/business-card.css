@@ -162,6 +162,9 @@
 
   /* Cursor indicates interactivity */
   cursor: pointer;
+
+  /* Remove focus outline */
+  outline: none;
 }
 
 /* Intro card element - the actual card inside the container */
@@ -251,6 +254,9 @@
   /* Cursor indicates interactivity */
   cursor: pointer;
 
+  /* Remove focus outline */
+  outline: none;
+
   /* COMPLETELY INVISIBLE WRAPPER - NO VISUAL STYLING */
   background: transparent;
   border: none;
@@ -284,6 +290,9 @@
 
   /* Cursor indicates interactivity */
   cursor: pointer;
+
+  /* Remove focus outline */
+  outline: none;
 
   /* ENSURE VISIBILITY - Important for initial page load */
   opacity: 1 !important;
@@ -691,9 +700,7 @@ html[data-theme="dark"] .business-card-container {
 }
 
 .intro-nav-link:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 4px;
-  border-radius: 2px;
+  outline: none;
 }
 
 /* GSAP handles all intro-nav-link animations */
