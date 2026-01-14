@@ -9,7 +9,7 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import type { MessageThread, Message, AdminDashboardContext } from '../admin-types';
+import type { Message, AdminDashboardContext } from '../admin-types';
 
 let selectedClientId: number | null = null;
 let selectedThreadId: number | null = null;
@@ -23,6 +23,16 @@ export function getSelectedClientId(): number | null {
   return selectedClientId;
 }
 
+interface ClientWithThread {
+  client_id: number;
+  thread_id: number | null;
+  contact_name: string;
+  company_name: string | null;
+  email: string;
+  message_count: number;
+  unread_count: number;
+}
+
 export async function loadClientThreads(ctx: AdminDashboardContext): Promise<void> {
   const dropdown = document.getElementById('admin-client-dropdown');
   if (!dropdown) return;
@@ -31,20 +41,55 @@ export async function loadClientThreads(ctx: AdminDashboardContext): Promise<voi
   dropdown.setAttribute('aria-label', 'Select a client conversation');
 
   try {
-    const response = await fetch('/api/messages/threads', {
-      credentials: 'include'
+    // Fetch both clients and threads in parallel
+    const [clientsResponse, threadsResponse] = await Promise.all([
+      fetch('/api/clients', { credentials: 'include' }),
+      fetch('/api/messages/threads', { credentials: 'include' })
+    ]);
+
+    const clientsData = clientsResponse.ok ? await clientsResponse.json() : { clients: [] };
+    const threadsData = threadsResponse.ok ? await threadsResponse.json() : { threads: [] };
+
+    // Create a map of client_id -> thread info
+    const threadMap = new Map<number, any>();
+    (threadsData.threads || []).forEach((thread: any) => {
+      // Keep the thread with the most messages if client has multiple threads
+      const existing = threadMap.get(thread.client_id);
+      if (!existing || (thread.message_count || 0) > (existing.message_count || 0)) {
+        threadMap.set(thread.client_id, thread);
+      }
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      populateClientDropdown(data.threads || [], ctx);
-    }
+    // Merge clients with their thread data
+    const clientsWithThreads: ClientWithThread[] = (clientsData.clients || []).map((client: any) => {
+      const thread = threadMap.get(client.id);
+      return {
+        client_id: client.id,
+        thread_id: thread?.id || null,
+        contact_name: client.contact_name || '',
+        company_name: client.company_name || null,
+        email: client.email,
+        message_count: thread?.message_count || 0,
+        unread_count: thread?.unread_count || 0
+      };
+    });
+
+    // Sort: clients with unread messages first, then by message count, then alphabetically
+    clientsWithThreads.sort((a, b) => {
+      if (a.unread_count !== b.unread_count) return b.unread_count - a.unread_count;
+      if (a.message_count !== b.message_count) return b.message_count - a.message_count;
+      const nameA = a.contact_name || a.company_name || '';
+      const nameB = b.contact_name || b.company_name || '';
+      return nameA.localeCompare(nameB);
+    });
+
+    populateClientDropdown(clientsWithThreads, ctx);
   } catch (error) {
-    console.error('[AdminMessaging] Failed to load threads:', error);
+    console.error('[AdminMessaging] Failed to load clients/threads:', error);
   }
 }
 
-function populateClientDropdown(threads: MessageThread[], ctx: AdminDashboardContext): void {
+function populateClientDropdown(clients: ClientWithThread[], ctx: AdminDashboardContext): void {
   const dropdown = document.getElementById('admin-client-dropdown');
   const menu = document.getElementById('admin-client-menu');
   const trigger = document.getElementById('admin-client-trigger');
@@ -55,24 +100,24 @@ function populateClientDropdown(threads: MessageThread[], ctx: AdminDashboardCon
   // Clear existing items
   menu.innerHTML = '';
 
-  if (threads.length === 0) {
+  if (clients.length === 0) {
     const item = document.createElement('li');
     item.className = 'custom-dropdown-item';
     item.dataset.value = '';
-    item.textContent = 'No conversations yet';
+    item.textContent = 'No clients yet';
     item.style.opacity = '0.5';
     item.style.cursor = 'not-allowed';
     menu.appendChild(item);
     return;
   }
 
-  threads.forEach((thread: any) => {
+  clients.forEach((client: ClientWithThread) => {
     const item = document.createElement('li');
     item.className = 'custom-dropdown-item';
-    item.dataset.value = `${thread.client_id}:${thread.id}`;
-    const clientName =
-      thread.contact_name || thread.company_name || thread.client_name || 'Unknown Client';
-    const messageCount = thread.message_count || thread.total_messages || 0;
+    // Use 'new' for thread_id if client doesn't have a thread yet
+    const threadIdValue = client.thread_id !== null ? client.thread_id : 'new';
+    item.dataset.value = `${client.client_id}:${threadIdValue}`;
+    const clientName = client.contact_name || client.company_name || 'Unknown Client';
 
     // Create name span
     const nameSpan = document.createElement('span');
@@ -80,11 +125,16 @@ function populateClientDropdown(threads: MessageThread[], ctx: AdminDashboardCon
     nameSpan.textContent = clientName;
     item.appendChild(nameSpan);
 
-    // Create count span (right-aligned)
-    if (messageCount > 0) {
+    // Create count span (right-aligned) - show message count if any
+    if (client.message_count > 0) {
       const countSpan = document.createElement('span');
       countSpan.className = 'dropdown-item-count';
-      countSpan.textContent = String(messageCount);
+      countSpan.textContent = String(client.message_count);
+      // Add unread indicator if there are unread messages
+      if (client.unread_count > 0) {
+        countSpan.classList.add('has-unread');
+        countSpan.title = `${client.unread_count} unread`;
+      }
       item.appendChild(countSpan);
     }
 
@@ -109,7 +159,7 @@ function setupCustomDropdown(
   });
 
   // Handle item selection
-  menu.addEventListener('click', (e) => {
+  menu.addEventListener('click', async (e) => {
     const target = e.target as HTMLElement;
     const item = target.closest('.custom-dropdown-item') as HTMLElement;
     if (item) {
@@ -139,8 +189,42 @@ function setupCustomDropdown(
 
       // Trigger selection if value is not empty
       if (value) {
-        const [clientId, threadId] = value.split(':').map(Number);
-        selectThread(clientId, threadId, ctx);
+        const [clientIdStr, threadIdStr] = value.split(':');
+        const clientId = Number(clientIdStr);
+
+        // Check if we need to create a new thread
+        if (threadIdStr === 'new') {
+          // Create a new thread for this client
+          try {
+            const response = await fetch('/api/messages/threads', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                client_id: clientId,
+                subject: `Conversation with ${clientName}`,
+                thread_type: 'general'
+              })
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              const newThreadId = data.thread.id;
+              // Update the item's value with the real thread ID
+              item.dataset.value = `${clientId}:${newThreadId}`;
+              hiddenInput.value = `${clientId}:${newThreadId}`;
+              selectThread(clientId, newThreadId, ctx);
+            } else {
+              ctx.showNotification('Failed to start conversation', 'error');
+            }
+          } catch (error) {
+            console.error('[AdminMessaging] Failed to create thread:', error);
+            ctx.showNotification('Error starting conversation', 'error');
+          }
+        } else {
+          const threadId = Number(threadIdStr);
+          selectThread(clientId, threadId, ctx);
+        }
       }
     }
   });
