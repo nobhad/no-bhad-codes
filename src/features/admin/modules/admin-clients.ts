@@ -225,7 +225,7 @@ function populateClientDetailView(client: Client): void {
   const safeCompany = client.company_name
     ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(client.company_name))
     : '-';
-  const safePhone = SanitizationUtils.escapeHtml(client.phone || '-');
+  const safePhone = SanitizationUtils.formatPhone(client.phone || '');
 
   // Update header
   const titleEl = document.getElementById('client-detail-title');

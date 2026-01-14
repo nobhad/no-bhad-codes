@@ -184,6 +184,29 @@ export class SanitizationUtils {
   }
 
   /**
+   * Format phone number as (XXX) XXX-XXXX
+   */
+  static formatPhone(phone: string): string {
+    if (!phone || typeof phone !== 'string') return '-';
+
+    // Extract only digits
+    const digits = phone.replace(/\D/g, '');
+
+    // Handle 10-digit US numbers
+    if (digits.length === 10) {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+
+    // Handle 11-digit numbers starting with 1 (US country code)
+    if (digits.length === 11 && digits.startsWith('1')) {
+      return `(${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+    }
+
+    // Return original if not a standard format
+    return phone || '-';
+  }
+
+  /**
    * Sanitize form data object
    */
   static sanitizeFormData(data: Record<string, any>): Record<string, string> {

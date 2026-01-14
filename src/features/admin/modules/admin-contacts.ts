@@ -22,12 +22,14 @@ interface ContactsData {
 }
 
 let contactsData: ContactSubmission[] = [];
+let storedContext: AdminDashboardContext | null = null;
 
 export function getContactsData(): ContactSubmission[] {
   return contactsData;
 }
 
 export async function loadContacts(ctx: AdminDashboardContext): Promise<void> {
+  storedContext = ctx;
   try {
     const response = await fetch('/api/admin/contact-submissions', {
       credentials: 'include'
@@ -145,55 +147,100 @@ export function showContactDetails(contactId: number): void {
   const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(contact.name || '-'));
   const safeEmail = SanitizationUtils.escapeHtml(contact.email || '-');
   const safeCompany = contact.company ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(contact.company)) : '';
-  const safePhone = contact.phone ? SanitizationUtils.escapeHtml(contact.phone) : '';
+  const safePhone = contact.phone ? SanitizationUtils.formatPhone(contact.phone) : '';
   const safeMessage = SanitizationUtils.escapeHtml(contact.message || '-');
   const date = new Date(contact.created_at).toLocaleString();
 
   detailsPanel.innerHTML = `
     <div class="details-header">
-      <h3>Message from ${safeName}</h3>
+      <h3>Contact Form Submission</h3>
       <button class="close-btn" onclick="window.closeContactDetailsPanel && window.closeContactDetailsPanel()">×</button>
     </div>
     <div class="details-content">
-      <div class="detail-grid">
-        <div class="detail-row">
-          <span class="detail-label">From</span>
-          <span class="detail-value">${safeName}</span>
+      <div class="project-detail-meta">
+        <div class="meta-item">
+          <span class="meta-label">Name</span>
+          <span class="meta-value">${safeName}</span>
         </div>
-        <div class="detail-row">
-          <span class="detail-label">Email</span>
-          <span class="detail-value"><a href="mailto:${safeEmail}">${safeEmail}</a></span>
+        <div class="meta-item">
+          <span class="meta-label">Email</span>
+          <span class="meta-value">${safeEmail}</span>
         </div>
         ${safeCompany ? `
-        <div class="detail-row">
-          <span class="detail-label">Company</span>
-          <span class="detail-value">${safeCompany}</span>
+        <div class="meta-item">
+          <span class="meta-label">Company</span>
+          <span class="meta-value">${safeCompany}</span>
         </div>
         ` : ''}
         ${safePhone ? `
-        <div class="detail-row">
-          <span class="detail-label">Phone</span>
-          <span class="detail-value">${safePhone}</span>
+        <div class="meta-item">
+          <span class="meta-label">Phone</span>
+          <span class="meta-value">${safePhone}</span>
         </div>
         ` : ''}
-        <div class="detail-row">
-          <span class="detail-label">Received</span>
-          <span class="detail-value">${date}</span>
+        <div class="meta-item">
+          <span class="meta-label">Status</span>
+          <span class="meta-value">
+            <select class="contact-status-select status-select" id="panel-status-select" data-id="${contact.id}">
+              <option value="new" ${contact.status === 'new' ? 'selected' : ''}>New</option>
+              <option value="read" ${contact.status === 'read' ? 'selected' : ''}>Read</option>
+              <option value="responded" ${contact.status === 'responded' ? 'selected' : ''}>Responded</option>
+              <option value="archived" ${contact.status === 'archived' ? 'selected' : ''}>Archived</option>
+            </select>
+          </span>
         </div>
-        <div class="detail-row">
-          <span class="detail-label">Status</span>
-          <span class="detail-value status-badge status-${contact.status}">${contact.status}</span>
+        <div class="meta-item">
+          <span class="meta-label">Created</span>
+          <span class="meta-value">${date}</span>
         </div>
-        <div class="detail-row">
-          <span class="detail-label">Message</span>
-          <span class="detail-value message-full">${safeMessage}</span>
+      </div>
+      <div class="project-description-row">
+        <div class="meta-item description-item">
+          <span class="meta-label">Message</span>
+          <span class="meta-value">${safeMessage}</span>
         </div>
       </div>
       <div class="details-actions">
-        <a href="mailto:${safeEmail}" class="action-btn action-primary">Reply via Email</a>
+        <a href="mailto:${safeEmail}" class="btn">Reply via Email</a>
+        ${contact.status !== 'archived' ? `<button class="btn btn-secondary" id="archive-contact-btn" data-id="${contact.id}">Archive</button>` : ''}
       </div>
     </div>
   `;
+
+  // Add event listener for status change
+  const statusSelect = detailsPanel.querySelector('#panel-status-select') as HTMLSelectElement;
+  if (statusSelect) {
+    statusSelect.addEventListener('change', (e) => {
+      const target = e.target as HTMLSelectElement;
+      const id = parseInt(target.dataset.id || '0');
+      if (id && storedContext) {
+        updateContactStatus(id, target.value, storedContext);
+        // Update table row status select
+        const tableSelect = document.querySelector(`.contact-status-select[data-id="${id}"]`) as HTMLSelectElement;
+        if (tableSelect && tableSelect !== statusSelect) {
+          tableSelect.value = target.value;
+        }
+      }
+    });
+  }
+
+  // Add event listener for archive button
+  const archiveBtn = detailsPanel.querySelector('#archive-contact-btn');
+  if (archiveBtn) {
+    archiveBtn.addEventListener('click', () => {
+      const id = parseInt((archiveBtn as HTMLElement).dataset.id || '0');
+      if (id && storedContext) {
+        updateContactStatus(id, 'archived', storedContext);
+        // Update status select in panel
+        if (statusSelect) statusSelect.value = 'archived';
+        // Update table row status select
+        const tableSelect = document.querySelector(`.contact-status-select[data-id="${id}"]`) as HTMLSelectElement;
+        if (tableSelect) tableSelect.value = 'archived';
+        // Remove archive button
+        archiveBtn.remove();
+      }
+    });
+  }
 
   // Show overlay and panel
   if (overlay) overlay.classList.remove('hidden');
