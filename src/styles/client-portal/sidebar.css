@@ -15,7 +15,7 @@
   border-right: none;
   display: flex;
   flex-direction: column;
-  transition: width 0.2s ease;
+  transition: width 0.2s ease, transform 0.2s ease;
   position: relative;
   height: 100vh;
   min-height: 100vh;
@@ -187,6 +187,7 @@
 .sidebar.collapsed .sidebar-buttons .btn.active {
   background: transparent;
   border: none;
+  outline: none;
 }
 
 .sidebar.collapsed .sidebar-buttons .btn.active .btn-icon {
@@ -524,11 +525,17 @@
   [data-page="client-portal"] .sidebar .sidebar-collapsed-logo,
   [data-page="admin"] .sidebar .sidebar-collapsed-logo {
     display: flex;
+    justify-content: center;
+    padding-top: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   [data-page="client-portal"] .sidebar .sidebar-buttons,
   [data-page="admin"] .sidebar .sidebar-buttons {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   [data-page="client-portal"] .sidebar .sidebar-buttons .btn,
@@ -538,6 +545,49 @@
     padding: 0;
     justify-content: center;
     border-radius: 8px;
+    border: none;
+    background: transparent;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-buttons .btn.active,
+  [data-page="admin"] .sidebar .sidebar-buttons .btn.active {
+    border: none;
+    outline: none;
+    background: transparent;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-buttons .btn.active .btn-icon,
+  [data-page="admin"] .sidebar .sidebar-buttons .btn.active .btn-icon {
+    color: var(--color-primary);
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-buttons .btn:hover .btn-icon,
+  [data-page="client-portal"] .sidebar .sidebar-buttons .btn:focus .btn-icon,
+  [data-page="admin"] .sidebar .sidebar-buttons .btn:hover .btn-icon,
+  [data-page="admin"] .sidebar .sidebar-buttons .btn:focus .btn-icon {
+    color: var(--color-primary);
+  }
+
+  /* Badge positioning on mobile */
+  [data-page="client-portal"] .sidebar .sidebar-buttons .btn,
+  [data-page="admin"] .sidebar .sidebar-buttons .btn {
+    position: relative;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-badge,
+  [data-page="admin"] .sidebar .sidebar-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    min-width: 14px;
+    height: 14px;
+    font-size: 9px;
+    padding: 0 3px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
   }
 
   [data-page="client-portal"] .sidebar .sidebar-buttons .btn .btn-text,
@@ -566,6 +616,8 @@
     justify-content: center;
     border-radius: 8px;
     margin: 0 auto;
+    border: none;
+    background: transparent;
   }
 
   [data-page="client-portal"] .sidebar .sidebar-footer .btn-text,
@@ -577,7 +629,16 @@
 
   [data-page="client-portal"] .sidebar .sidebar-toggle,
   [data-page="admin"] .sidebar .sidebar-toggle {
-    display: none;
+    display: flex;
+  }
+
+  /* Collapsed on mobile = completely hidden */
+  [data-page="client-portal"] .sidebar.collapsed,
+  [data-page="admin"] .sidebar.collapsed {
+    transform: translateX(-100%);
+    width: 0;
+    min-width: 0;
+    overflow: hidden;
   }
 
   /* Hide text elements in collapsed state */
