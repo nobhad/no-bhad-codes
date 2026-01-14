@@ -1399,9 +1399,10 @@ export class ClientPortalModule extends BaseModule {
             <polyline points="17 8 12 3 7 8"/>
             <line x1="12" y1="3" x2="12" y2="15"/>
           </svg>
-          <p>Drag and drop files here</p>
-          <span class="dropzone-hint">or</span>
+          <p class="dropzone-desktop">Drag and drop files here or</p>
+          <p class="dropzone-mobile">Tap to select files</p>
           <button type="button" class="btn btn-secondary" id="btn-browse-files">Browse Files</button>
+          <input type="file" id="file-input" multiple hidden />
         </div>
       `;
       // Re-attach browse button listener
