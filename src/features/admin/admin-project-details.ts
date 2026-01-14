@@ -131,13 +131,12 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       }
     }
 
-    // URLs section (repository, staging, production)
+    // URLs section (repository, production)
     const urlsSection = document.getElementById('pd-urls-section');
     const repoUrlLink = document.getElementById('pd-repo-url-link') as HTMLAnchorElement;
-    const stagingUrlLink = document.getElementById('pd-staging-url-link') as HTMLAnchorElement;
     const productionUrlLink = document.getElementById('pd-production-url-link') as HTMLAnchorElement;
 
-    const hasUrls = project.repository_url || project.staging_url || project.production_url;
+    const hasUrls = project.repository_url || project.production_url;
     if (urlsSection) {
       urlsSection.style.display = hasUrls ? 'flex' : 'none';
     }
@@ -148,15 +147,6 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       } else {
         repoUrlLink.href = '#';
         repoUrlLink.textContent = '-';
-      }
-    }
-    if (stagingUrlLink) {
-      if (project.staging_url) {
-        stagingUrlLink.href = project.staging_url;
-        stagingUrlLink.textContent = project.staging_url;
-      } else {
-        stagingUrlLink.href = '#';
-        stagingUrlLink.textContent = '-';
       }
     }
     if (productionUrlLink) {
@@ -488,7 +478,6 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const depositInput = document.getElementById('edit-project-deposit') as HTMLInputElement;
     const contractDateInput = document.getElementById('edit-project-contract-date') as HTMLInputElement;
     const repoUrlInput = document.getElementById('edit-project-repo-url') as HTMLInputElement;
-    const stagingUrlInput = document.getElementById('edit-project-staging-url') as HTMLInputElement;
     const productionUrlInput = document.getElementById('edit-project-production-url') as HTMLInputElement;
     const notesInput = document.getElementById('edit-project-notes') as HTMLTextAreaElement;
 
@@ -504,7 +493,6 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (depositInput) depositInput.value = project.deposit_amount || '';
     if (contractDateInput) contractDateInput.value = project.contract_signed_at ? project.contract_signed_at.split('T')[0] : '';
     if (repoUrlInput) repoUrlInput.value = project.repository_url || '';
-    if (stagingUrlInput) stagingUrlInput.value = project.staging_url || '';
     if (productionUrlInput) productionUrlInput.value = project.production_url || '';
     if (notesInput) notesInput.value = project.notes || '';
 
@@ -560,7 +548,6 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const depositInput = document.getElementById('edit-project-deposit') as HTMLInputElement;
     const contractDateInput = document.getElementById('edit-project-contract-date') as HTMLInputElement;
     const repoUrlInput = document.getElementById('edit-project-repo-url') as HTMLInputElement;
-    const stagingUrlInput = document.getElementById('edit-project-staging-url') as HTMLInputElement;
     const productionUrlInput = document.getElementById('edit-project-production-url') as HTMLInputElement;
     const notesInput = document.getElementById('edit-project-notes') as HTMLTextAreaElement;
 
@@ -577,7 +564,6 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (depositInput?.value !== undefined) updates.deposit_amount = depositInput.value;
     if (contractDateInput?.value !== undefined) updates.contract_signed_at = contractDateInput.value;
     if (repoUrlInput?.value !== undefined) updates.repository_url = repoUrlInput.value;
-    if (stagingUrlInput?.value !== undefined) updates.staging_url = stagingUrlInput.value;
     if (productionUrlInput?.value !== undefined) updates.production_url = productionUrlInput.value;
     if (notesInput?.value !== undefined) updates.notes = notesInput.value;
 
