@@ -4,6 +4,24 @@
 
 ## Recently Completed
 
+### Admin Portal Mobile Optimization - January 14, 2026
+
+**Mobile-specific styles added to `src/styles/pages/admin.css`:**
+
+- All grids stack to single column on mobile (600px breakpoint)
+- System page: reduced padding, removed grey backgrounds from status items, text wraps properly
+- Analytics page: reduced chart padding/height, 2x2 grid for chart legends
+- Stat cards: horizontal layout (number + label on same row) to save vertical space
+- Page background matches content area for consistent appearance
+
+**Files Modified:**
+
+- `src/styles/pages/admin.css` - Added 113 lines of mobile-specific styles
+- `src/styles/client-portal/layout.css` - Added body background color
+- `src/styles/client-portal/sidebar.css` - Mobile sidebar collapse behavior
+
+---
+
 ### API Fixes - January 14, 2026
 
 **Fixed 404 Errors:**
@@ -72,6 +90,7 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 - [x] Leads Management - cards should filter table
 - [x] Fix tooltip for truncated text - now uses fast CSS tooltips instead of native title delay
 - [x] Mobile sidebar behavior - collapsed sidebar hides completely, content fills viewport
+- [x] Admin portal mobile optimization - grids stack, reduced padding, horizontal stat cards
 - [x] Custom dropdown for leads page panels - compact table dropdowns with red focus state, transparent bg
 - [x] Add API endpoint for lead/intake status updates - PUT /api/admin/leads/:id/status
 - [x] Info icons on Analytics pages Core Web Vitals - tooltip hovers explaining what each metric means
