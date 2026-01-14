@@ -10,6 +10,7 @@
  */
 
 import type { AdminDashboardContext, ApplicationStatus, StatusItem } from '../admin-types';
+import { APP_CONSTANTS } from '../../../config/constants';
 
 /**
  * Load system status data for admin dashboard
@@ -112,7 +113,7 @@ async function checkApiHealth(): Promise<StatusItem> {
   // Use globalThis to access AbortController (browser global)
   const AbortControllerClass = globalThis.AbortController;
   const controller = new AbortControllerClass();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
+  const timeoutId = setTimeout(() => controller.abort(), APP_CONSTANTS.TIMERS.API_REQUEST_TIMEOUT);
 
   try {
     const startTime = Date.now();
@@ -139,7 +140,7 @@ async function checkApiHealth(): Promise<StatusItem> {
     clearTimeout(timeoutId);
     // API might not have a /health endpoint, try root
     const rootController = new AbortControllerClass();
-    const rootTimeoutId = setTimeout(() => rootController.abort(), 5000);
+    const rootTimeoutId = setTimeout(() => rootController.abort(), APP_CONSTANTS.TIMERS.API_REQUEST_TIMEOUT);
 
     try {
       const response = await fetch('/api', {
