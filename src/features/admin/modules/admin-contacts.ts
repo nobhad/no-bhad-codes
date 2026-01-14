@@ -139,6 +139,7 @@ export function showContactDetails(contactId: number): void {
   if (!contact) return;
 
   const detailsPanel = document.getElementById('contact-details-panel');
+  const overlay = document.getElementById('details-overlay');
   if (!detailsPanel) return;
 
   const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(contact.name || '-'));
@@ -146,31 +147,72 @@ export function showContactDetails(contactId: number): void {
   const safeCompany = contact.company ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(contact.company)) : '';
   const safePhone = contact.phone ? SanitizationUtils.escapeHtml(contact.phone) : '';
   const safeMessage = SanitizationUtils.escapeHtml(contact.message || '-');
+  const date = new Date(contact.created_at).toLocaleString();
 
   detailsPanel.innerHTML = `
     <div class="details-header">
-      <h3>Contact from ${safeName}</h3>
-      <button class="close-btn" onclick="document.getElementById('contact-details-panel').classList.add('hidden')">×</button>
+      <h3>Message from ${safeName}</h3>
+      <button class="close-btn" onclick="window.closeContactDetailsPanel && window.closeContactDetailsPanel()">×</button>
     </div>
     <div class="details-content">
-      <p><strong>Name:</strong> ${safeName}</p>
-      <p><strong>Email:</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
-      <p><strong>Company:</strong> ${safeCompany}</p>
-      <p><strong>Phone:</strong> ${safePhone}</p>
-      <p><strong>Status:</strong> ${contact.status}</p>
-      <p><strong>Received:</strong> ${new Date(contact.created_at).toLocaleString()}</p>
-      <div class="message-box">
-        <strong>Message:</strong>
-        <p>${safeMessage}</p>
+      <div class="detail-grid">
+        <div class="detail-row">
+          <span class="detail-label">From</span>
+          <span class="detail-value">${safeName}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Email</span>
+          <span class="detail-value"><a href="mailto:${safeEmail}">${safeEmail}</a></span>
+        </div>
+        ${safeCompany ? `
+        <div class="detail-row">
+          <span class="detail-label">Company</span>
+          <span class="detail-value">${safeCompany}</span>
+        </div>
+        ` : ''}
+        ${safePhone ? `
+        <div class="detail-row">
+          <span class="detail-label">Phone</span>
+          <span class="detail-value">${safePhone}</span>
+        </div>
+        ` : ''}
+        <div class="detail-row">
+          <span class="detail-label">Received</span>
+          <span class="detail-value">${date}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Status</span>
+          <span class="detail-value status-badge status-${contact.status}">${contact.status}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Message</span>
+          <span class="detail-value message-full">${safeMessage}</span>
+        </div>
       </div>
-      <div class="actions">
-        <a href="mailto:${safeEmail}" class="action-btn">Reply via Email</a>
+      <div class="details-actions">
+        <a href="mailto:${safeEmail}" class="action-btn action-primary">Reply via Email</a>
       </div>
     </div>
   `;
 
+  // Show overlay and panel
+  if (overlay) overlay.classList.remove('hidden');
   detailsPanel.classList.remove('hidden');
 }
+
+// Global function to close contact details panel
+declare global {
+  interface Window {
+    closeContactDetailsPanel?: () => void;
+  }
+}
+
+window.closeContactDetailsPanel = function (): void {
+  const detailsPanel = document.getElementById('contact-details-panel');
+  const overlay = document.getElementById('details-overlay');
+  if (detailsPanel) detailsPanel.classList.add('hidden');
+  if (overlay) overlay.classList.add('hidden');
+};
 
 export async function updateContactStatus(
   id: number,
