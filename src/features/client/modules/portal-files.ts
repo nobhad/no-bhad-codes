@@ -21,11 +21,6 @@ export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
   if (!filesContainer) return;
 
   try {
-    if (ctx.isDemo()) {
-      renderDemoFiles(filesContainer as HTMLElement, ctx);
-      return;
-    }
-
     const response = await fetch(`${FILES_API_BASE}/client`, {
       credentials: 'include' // Include HttpOnly cookies
     });
@@ -38,45 +33,11 @@ export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
     renderFilesList(filesContainer as HTMLElement, data.files || [], ctx);
   } catch (error) {
     console.error('Error loading files:', error);
-    renderDemoFiles(filesContainer as HTMLElement, ctx);
+    (filesContainer as HTMLElement).innerHTML =
+      '<p class="no-files">Unable to load files. Please try again later.</p>';
   }
 }
 
-/**
- * Render demo files for demo mode
- */
-function renderDemoFiles(container: HTMLElement, ctx: ClientPortalContext): void {
-  const demoFiles: PortalFile[] = [
-    {
-      id: 1,
-      originalName: 'Project-Outline.pdf',
-      mimetype: 'application/pdf',
-      size: 245760,
-      uploadedAt: new Date().toISOString(),
-      projectName: 'Website Redesign',
-      uploadedBy: 'admin'
-    },
-    {
-      id: 2,
-      originalName: 'My-Brand-Assets.zip',
-      mimetype: 'application/zip',
-      size: 5242880,
-      uploadedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-      projectName: 'Website Redesign',
-      uploadedBy: 'client'
-    },
-    {
-      id: 3,
-      originalName: 'Intake-Summary.pdf',
-      mimetype: 'application/pdf',
-      size: 128000,
-      uploadedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
-      projectName: 'Website Redesign',
-      uploadedBy: 'admin'
-    }
-  ];
-  renderFilesList(container, demoFiles, ctx);
-}
 
 /**
  * Render the files list
@@ -196,29 +157,19 @@ function attachFileActionListeners(container: HTMLElement, ctx: ClientPortalCont
 /**
  * Preview a file - opens in modal or new tab
  */
-function previewFile(fileId: number, mimetype: string, ctx: ClientPortalContext): void {
-  if (ctx.isDemo()) {
-    alert('Preview not available in demo mode. Please log in to preview files.');
-    return;
-  }
-
+function previewFile(fileId: number, mimetype: string, _ctx: ClientPortalContext): void {
   if (mimetype.startsWith('image/') || mimetype === 'application/pdf') {
     const url = `${FILES_API_BASE}/file/${fileId}`;
     window.open(url, '_blank');
   } else {
-    downloadFile(fileId, 'file', ctx);
+    downloadFile(fileId, 'file', _ctx);
   }
 }
 
 /**
  * Download a file
  */
-function downloadFile(fileId: number, filename: string, ctx: ClientPortalContext): void {
-  if (ctx.isDemo()) {
-    alert('Download not available in demo mode. Please log in to download files.');
-    return;
-  }
-
+function downloadFile(fileId: number, filename: string, _ctx: ClientPortalContext): void {
   const url = `${FILES_API_BASE}/file/${fileId}?download=true`;
   const a = document.createElement('a');
   a.href = url;
@@ -235,13 +186,8 @@ function downloadFile(fileId: number, filename: string, ctx: ClientPortalContext
 async function deleteFile(
   fileId: number,
   filename: string,
-  ctx: ClientPortalContext
+  _ctx: ClientPortalContext
 ): Promise<void> {
-  if (ctx.isDemo()) {
-    alert('Delete not available in demo mode. Please log in to delete files.');
-    return;
-  }
-
   if (!confirm(`Are you sure you want to delete "${filename}"? This action cannot be undone.`)) {
     return;
   }
@@ -352,11 +298,6 @@ export function setupFileUploadHandlers(ctx: ClientPortalContext): void {
  * Upload files to the server
  */
 async function uploadFiles(files: File[], ctx: ClientPortalContext): Promise<void> {
-  if (ctx.isDemo()) {
-    alert('File upload not available in demo mode. Please log in to upload files.');
-    return;
-  }
-
   if (files.length > 5) {
     alert('Maximum 5 files allowed per upload.');
     return;

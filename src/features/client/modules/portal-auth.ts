@@ -30,7 +30,7 @@ export interface AuthUser {
 
 /** Login callbacks */
 export interface LoginCallbacks {
-  onLoginSuccess: (user: AuthUser, isDemo: boolean) => Promise<void>;
+  onLoginSuccess: (user: AuthUser) => Promise<void>;
   onLoginError: (message: string) => void;
   setLoading: (loading: boolean) => void;
   clearErrors: () => void;
@@ -101,7 +101,7 @@ export async function handleLogin(
           name: data.user.contactName || data.user.companyName || data.user.email.split('@')[0],
           isAdmin: data.user.isAdmin,
           type: data.user.type
-        }, false);
+        });
         return;
       }
 
@@ -115,38 +115,10 @@ export async function handleLogin(
         throw new Error(errorData.error || 'Login failed');
       }
     } catch (fetchError) {
-      // If backend is unavailable, fall back to demo mode
+      // If backend is unavailable, show error
       if (fetchError instanceof TypeError && fetchError.message.includes('fetch')) {
-        console.warn('[ClientPortal] Backend unavailable, using demo mode');
-
-        // Demo mode fallback - simulate successful login
-        const mockUser: AuthUser = {
-          id: 1,
-          email: credentials.email,
-          name: credentials.email
-            .split('@')[0]
-            .replace(/[^a-zA-Z]/g, ' ')
-            .replace(/\b\w/g, (l) => l.toUpperCase())
-        };
-
-        // Store demo mode flag (no real token needed - demo data only)
-        sessionStorage.setItem('client_auth_mode', 'demo');
-        sessionStorage.setItem('client_auth_user', JSON.stringify(mockUser));
-
-        // Check for redirect parameter FIRST (e.g., from admin dashboard)
-        const demoUrlParams = new URLSearchParams(window.location.search);
-        const demoRedirectUrl = demoUrlParams.get('redirect');
-        console.log('[ClientPortal] Demo mode login, redirect param:', demoRedirectUrl);
-
-        if (demoRedirectUrl && demoRedirectUrl.startsWith('/')) {
-          console.log('[ClientPortal] Demo mode redirecting to:', demoRedirectUrl);
-          window.location.href = demoRedirectUrl;
-          return;
-        }
-
-        // Call success handler with demo flag
-        await callbacks.onLoginSuccess(mockUser, true);
-        return;
+        console.error('[ClientPortal] Backend unavailable');
+        throw new Error('Unable to connect to server. Please try again later.');
       }
 
       // Re-throw authentication errors
@@ -164,7 +136,7 @@ export async function handleLogin(
  * Check for existing authentication
  */
 export async function checkExistingAuth(callbacks: {
-  onAuthValid: (user: AuthUser, isDemo: boolean) => Promise<void>;
+  onAuthValid: (user: AuthUser) => Promise<void>;
 }): Promise<boolean> {
   const authMode = sessionStorage.getItem('client_auth_mode');
   if (!authMode) return false;
@@ -175,17 +147,6 @@ export async function checkExistingAuth(callbacks: {
   if (redirectUrl && redirectUrl.startsWith('/')) {
     console.log('[ClientPortal] Already authenticated, redirecting to:', redirectUrl);
     window.location.href = redirectUrl;
-    return true;
-  }
-
-  // Skip further auth check for demo mode
-  if (authMode === 'demo') {
-    console.log('[ClientPortal] Demo mode detected, showing dashboard');
-    const storedUser = sessionStorage.getItem('client_auth_user');
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-      await callbacks.onAuthValid(user, true);
-    }
     return true;
   }
 
@@ -210,7 +171,7 @@ export async function checkExistingAuth(callbacks: {
         name: data.user.contactName || data.user.companyName || data.user.email.split('@')[0],
         isAdmin: data.user.isAdmin,
         type: data.user.type
-      }, false);
+      });
       return true;
     }
     // Auth is invalid, clear it
