@@ -585,7 +585,9 @@ body.modal-open .dashboard-content {
 }
 
 .tab-content.active {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
 }
 
 /* Overview Tab */
@@ -1750,11 +1752,6 @@ body.modal-open .dashboard-content {
   grid-template-columns: 140px 1fr;
   gap: var(--space-3);
   padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--portal-border-medium);
-}
-
-.detail-row:last-child {
-  border-bottom: none;
 }
 
 .detail-label {
@@ -2389,6 +2386,15 @@ body.modal-open .dashboard-content {
 [data-page="admin"] .vitals-grid,
 [data-page="admin"] .analytics-grid {
   grid-template-columns: repeat(2, 1fr);
+}
+
+/* Dashboard overview quick-stats should be 2x2 */
+[data-page="admin"] #tab-overview > .quick-stats {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+[data-page="admin"] #tab-overview > .quick-stats > * {
+  height: 100%;
 }
 
 @media (max-width: 1100px) {

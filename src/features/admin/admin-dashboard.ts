@@ -1305,10 +1305,12 @@ class AdminDashboard {
         }
         break;
       case 'leads':
-        // Use leads module
+        // Use leads module and contacts module (both tables are on leads tab)
         {
           const leadsModule = await loadLeadsModule();
           await leadsModule.loadLeads(this.moduleContext);
+          const contactsModule = await loadContactsModule();
+          await contactsModule.loadContacts(this.moduleContext);
         }
         break;
       case 'contacts':

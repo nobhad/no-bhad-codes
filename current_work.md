@@ -43,6 +43,8 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 - [ ] Leads Management - cards should filter table
 - [ ] Fix tooltip for truncated text
 - [ ] Fix mobile view for portal
+- [ ] Custom dropdown for leads panel (match contact panel style)
+- [ ] Add API endpoint for lead/intake status updates (panel dropdown needs backend)
 
 ### Main Site Features (Medium Priority)
 

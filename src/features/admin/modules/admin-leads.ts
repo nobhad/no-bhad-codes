@@ -190,7 +190,7 @@ export function showLeadDetails(leadId: number): void {
   const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.contact_name || '-'));
   const safeCompanyName = lead.company_name ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.company_name)) : '';
   const safeEmail = SanitizationUtils.escapeHtml(lead.email || '-');
-  const safePhone = SanitizationUtils.escapeHtml(lead.phone || '-');
+  const safePhone = SanitizationUtils.formatPhone(lead.phone || '');
   const safeProjectType = SanitizationUtils.escapeHtml(lead.project_type || '-');
   const safeDescription = SanitizationUtils.escapeHtml(lead.description || 'No description');
   const safeBudget = SanitizationUtils.escapeHtml(formatDisplayValue(lead.budget_range));
@@ -205,22 +205,76 @@ export function showLeadDetails(leadId: number): void {
 
   detailsPanel.innerHTML = `
     <div class="details-header">
-      <h3>${safeContactName}</h3>
+      <h3>Intake Form Submission</h3>
       <button class="close-btn" onclick="window.closeDetailsPanel()">×</button>
     </div>
     <div class="details-content">
-      ${safeCompanyName ? `<p><strong>Company:</strong> ${safeCompanyName}</p>` : ''}
-      <p><strong>Email:</strong> ${safeEmail}</p>
-      <p><strong>Phone:</strong> ${safePhone}</p>
-      <p><strong>Status:</strong> ${lead.status}</p>
-      <p><strong>Source:</strong> ${safeSource}</p>
-      <p><strong>Project Type:</strong> ${safeProjectType}</p>
-      <p><strong>Budget:</strong> ${safeBudget}</p>
-      <p><strong>Timeline:</strong> ${safeTimeline}</p>
-      <p><strong>Description:</strong> ${safeDescription}</p>
-      <p><strong>Features:</strong> ${safeFeatures}</p>
-      <p><strong>Created:</strong> ${new Date(lead.created_at).toLocaleString()}</p>
-      <div class="details-actions" style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+      <div class="project-detail-meta">
+        <div class="meta-item">
+          <span class="meta-label">Name</span>
+          <span class="meta-value">${safeContactName}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Email</span>
+          <span class="meta-value">${safeEmail}</span>
+        </div>
+        ${safeCompanyName ? `
+        <div class="meta-item">
+          <span class="meta-label">Company</span>
+          <span class="meta-value">${safeCompanyName}</span>
+        </div>
+        ` : ''}
+        <div class="meta-item">
+          <span class="meta-label">Phone</span>
+          <span class="meta-value">${safePhone}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status</span>
+          <span class="meta-value">
+            <select class="status-select" id="panel-lead-status-select" data-id="${lead.id}">
+              <option value="new" ${lead.status === 'new' ? 'selected' : ''}>New</option>
+              <option value="pending" ${lead.status === 'pending' ? 'selected' : ''}>Pending</option>
+              <option value="qualified" ${lead.status === 'qualified' ? 'selected' : ''}>Qualified</option>
+              <option value="contacted" ${lead.status === 'contacted' ? 'selected' : ''}>Contacted</option>
+              <option value="converted" ${lead.status === 'converted' ? 'selected' : ''}>Converted</option>
+              <option value="lost" ${lead.status === 'lost' ? 'selected' : ''}>Lost</option>
+            </select>
+          </span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Source</span>
+          <span class="meta-value">${safeSource}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Project Type</span>
+          <span class="meta-value">${safeProjectType}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Budget</span>
+          <span class="meta-value">${safeBudget}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Timeline</span>
+          <span class="meta-value">${safeTimeline}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Created</span>
+          <span class="meta-value">${new Date(lead.created_at).toLocaleString()}</span>
+        </div>
+      </div>
+      <div class="project-description-row">
+        <div class="meta-item description-item">
+          <span class="meta-label">Description</span>
+          <span class="meta-value">${safeDescription}</span>
+        </div>
+      </div>
+      <div class="project-description-row">
+        <div class="meta-item description-item">
+          <span class="meta-label">Features</span>
+          <span class="meta-value">${safeFeatures}</span>
+        </div>
+      </div>
+      <div class="details-actions">
         ${showActivateBtn ? `<button class="btn details-activate-btn" data-id="${lead.id}">Activate as Project</button>` : ''}
         ${isActivated ? `<button class="btn details-view-project-btn" data-id="${lead.id}">View Project</button>` : ''}
       </div>
@@ -272,9 +326,14 @@ declare global {
 }
 
 window.closeDetailsPanel = function (): void {
-  const detailsPanel = document.getElementById('lead-details-panel');
+  // Close lead details panel
+  const leadDetailsPanel = document.getElementById('lead-details-panel');
+  if (leadDetailsPanel) leadDetailsPanel.classList.add('hidden');
+  // Close contact details panel
+  const contactDetailsPanel = document.getElementById('contact-details-panel');
+  if (contactDetailsPanel) contactDetailsPanel.classList.add('hidden');
+  // Close overlay
   const overlay = document.getElementById('details-overlay');
-  if (detailsPanel) detailsPanel.classList.add('hidden');
   if (overlay) overlay.classList.add('hidden');
 };
 
