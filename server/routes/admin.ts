@@ -549,6 +549,66 @@ router.put(
 
 /**
  * @swagger
+ * /api/admin/leads/{id}/status:
+ *   put:
+ *     tags:
+ *       - Admin
+ *     summary: Update lead/project status
+ *     description: Update the status of an intake submission (project)
+ *     security:
+ *       - BearerAuth: []
+ */
+router.put(
+  '/leads/:id/status',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      const validStatuses = ['pending', 'active', 'in_progress', 'on_hold', 'completed', 'cancelled', 'archived'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`,
+        });
+      }
+
+      const db = getDatabase();
+
+      // Check if project exists
+      const project = await db.get('SELECT id, status FROM projects WHERE id = ?', [id]);
+      if (!project) {
+        return res.status(404).json({
+          success: false,
+          error: 'Project not found',
+        });
+      }
+
+      await db.run(
+        'UPDATE projects SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        [status, id]
+      );
+
+      res.json({
+        success: true,
+        message: 'Lead status updated successfully',
+        previousStatus: project.status,
+        newStatus: status,
+      });
+    } catch (error) {
+      console.error('Error updating lead status:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to update lead status',
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
  * /api/admin/leads/{id}/invite:
  *   post:
  *     tags:
