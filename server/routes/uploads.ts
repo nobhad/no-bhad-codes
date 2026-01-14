@@ -9,27 +9,40 @@
 
 import express from 'express';
 import multer from 'multer';
-import { resolve, extname, normalize } from 'path';
+import { resolve, extname, normalize, join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { getDatabase } from '../database/init.js';
 import { auditLogger } from '../services/audit-logger.js';
+import { getUploadsDir, getUploadsSubdir, UPLOAD_DIRS } from '../config/uploads.js';
 
 const router = express.Router();
 
-// Ensure uploads directory exists
-const uploadDir = resolve(process.cwd(), 'uploads');
+// Get uploads directory from centralized config (uses persistent storage on Railway)
+const uploadDir = getUploadsDir();
 
 /**
  * Validate file path to prevent path traversal attacks
  * Ensures the resolved path is within the uploads directory
  */
 function isPathSafe(filePath: string): boolean {
-  const resolvedPath = resolve(process.cwd(), filePath.replace(/^\//, ''));
+  // Handle both relative paths (uploads/...) and paths that might already be absolute
+  const cleanPath = filePath.replace(/^\//, '').replace(/^uploads\//, '');
+  const resolvedPath = resolve(uploadDir, cleanPath);
   const normalizedPath = normalize(resolvedPath);
   // Ensure the path is within the uploads directory
-  return normalizedPath.startsWith(uploadDir);
+  return normalizedPath.startsWith(normalize(uploadDir));
+}
+
+/**
+ * Resolve a database file_path to the actual filesystem path
+ * Handles the uploads/ prefix and uses the correct base directory
+ */
+function resolveFilePath(dbFilePath: string): string {
+  // Remove leading slash and 'uploads/' prefix since uploadDir already points to uploads
+  const cleanPath = dbFilePath.replace(/^\//, '').replace(/^uploads\//, '');
+  return resolve(uploadDir, cleanPath);
 }
 if (!existsSync(uploadDir)) {
   mkdirSync(uploadDir, { recursive: true });
@@ -38,24 +51,21 @@ if (!existsSync(uploadDir)) {
 // Configure multer for file storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // Create subdirectories based on file type
-    let subDir = 'general';
+    // Create subdirectories based on file type using centralized config
+    let subDir: string = UPLOAD_DIRS.GENERAL;
 
     if (file.fieldname === 'avatar') {
-      subDir = 'avatars';
+      subDir = UPLOAD_DIRS.AVATARS;
     } else if (file.fieldname === 'project_file') {
-      subDir = 'projects';
+      subDir = UPLOAD_DIRS.PROJECTS;
     } else if (file.fieldname === 'invoice_attachment') {
-      subDir = 'invoices';
+      subDir = UPLOAD_DIRS.INVOICES;
     } else if (file.fieldname === 'message_attachment') {
-      subDir = 'messages';
+      subDir = UPLOAD_DIRS.MESSAGES;
     }
 
-    const targetDir = resolve(uploadDir, subDir);
-    if (!existsSync(targetDir)) {
-      mkdirSync(targetDir, { recursive: true });
-    }
-
+    // getUploadsSubdir creates the directory if it doesn't exist
+    const targetDir = getUploadsSubdir(subDir);
     cb(null, targetDir);
   },
   filename: (req, file, cb) => {
@@ -558,8 +568,8 @@ router.get(
         });
       }
 
-      // Construct the full file path
-      const filePath = resolve(process.cwd(), file.file_path.replace(/^\//, ''));
+      // Construct the full file path using centralized uploads directory
+      const filePath = resolveFilePath(file.file_path);
 
       if (!existsSync(filePath)) {
         return res.status(404).json({
