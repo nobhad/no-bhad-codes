@@ -1,4 +1,33 @@
-# Current Work - January 13, 2026
+# Current Work - January 14, 2026
+
+---
+
+## Recently Completed
+
+### API Fixes - January 14, 2026
+
+**Fixed 404 Errors:**
+
+- Added `GET /api/projects/:id/files` endpoint to return project files
+- Added `GET /api/projects/:id/messages` endpoint to return project messages
+
+**Fixed 401 Token Expiration Handling:**
+
+- Created `src/utils/api-client.ts` - centralized API client with automatic token expiration handling
+- Updated `admin-leads.ts` to use new API client
+- Updated `admin-contacts.ts` to use new API client
+- Updated `admin-analytics.ts` to use new API client
+- Configured API client in `admin-dashboard.ts` to show notification on session expiry
+- When token expires, user now sees "Your session has expired. Please log in again." message and is redirected to login
+
+**Files Modified:**
+
+- `server/routes/projects.ts` - Added GET endpoints for files and messages
+- `src/utils/api-client.ts` - New centralized API client
+- `src/features/admin/admin-dashboard.ts` - API client configuration
+- `src/features/admin/modules/admin-leads.ts` - Use apiFetch
+- `src/features/admin/modules/admin-contacts.ts` - Use apiFetch
+- `src/features/admin/modules/admin-analytics.ts` - Use apiFetch
 
 ---
 
@@ -40,11 +69,16 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 ### Admin UI Polish (High Priority)
 
 - [ ] **REDESIGN ALL PORTAL BUTTONS** - Full button redesign across admin and client portals
-- [ ] Leads Management - cards should filter table
-- [ ] Fix tooltip for truncated text
-- [ ] Fix mobile view for portal
-- [ ] Custom dropdown for leads panel (match contact panel style)
+- [x] Leads Management - cards should filter table
+- [ ] Fix tooltip for truncated text - currently very delayed, needs faster response
+- [ ] Remove current mobile styling for portal - use the plugin from main site instead
+- [ ] Custom dropdown for leads page panels - based on modal custom dropdown, bg color should match div bg
 - [ ] Add API endpoint for lead/intake status updates (panel dropdown needs backend)
+- [ ] Info icons on Analytics pages Core Web Vitals - tooltip hovers explaining what each metric means
+- [x] Unread message count badge on sidebar Messages button - red badge, right-aligned, only shows if unread > 0
+- [x] Leads count badge on sidebar - combined count of new intake/contact submissions, red badge, right-aligned
+- [x] Auto-add clients to messages dropdown - when new client added, they should appear in messages dropdown automatically
+- [x] Intake form submission as project file - save intake form data as downloadable/previewable file in project files automatically
 
 ### Main Site Features (Medium Priority)
 
@@ -99,7 +133,7 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 
 ## System Status
 
-**Last Updated:** January 13, 2026
+**Last Updated:** January 14, 2026
 
 ### Build Status
 

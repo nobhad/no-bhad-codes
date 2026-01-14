@@ -15,6 +15,7 @@ import type { PerformanceMetrics, PerformanceAlert } from '../../services/perfor
 import { SanitizationUtils } from '../../utils/sanitization-utils';
 import type { AdminDashboardContext } from './admin-types';
 import { getChartColor, getChartColorWithAlpha } from '../../config/constants';
+import { configureApiClient } from '../../utils/api-client';
 
 // Dynamic module loaders for code splitting
 import {
@@ -112,6 +113,16 @@ class AdminDashboard {
       refreshData: () => this.loadDashboardData(),
       switchTab: (tab: string) => this.switchTab(tab)
     };
+
+    // Configure API client for token expiration handling
+    configureApiClient({
+      showNotification: (message: string, type: 'error' | 'warning' | 'success' | 'info') =>
+        this.showNotification(message, type as 'success' | 'error' | 'info'),
+      onSessionExpired: () => {
+        // Let the default handler redirect to /admin login
+      }
+    });
+
     // Initialize project details handler
     this.projectDetails = new AdminProjectDetails();
     this.init();
@@ -143,6 +154,7 @@ class AdminDashboard {
     console.log('[AdminDashboard] setupEventListeners complete');
     await this.loadDashboardData();
     this.setupTruncatedTextTooltips();
+    this.updateSidebarBadges();
     this.startAutoRefresh();
   }
 
@@ -1758,11 +1770,52 @@ class AdminDashboard {
     }
   }
 
+  /**
+   * Fetches and updates sidebar notification badges for Leads and Messages
+   */
+  private async updateSidebarBadges(): Promise<void> {
+    try {
+      const response = await fetch('/api/admin/sidebar-counts', {
+        credentials: 'include'
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+      if (!data.success) return;
+
+      // Update leads badge
+      const leadsBadge = document.getElementById('leads-badge');
+      if (leadsBadge) {
+        if (data.leads > 0) {
+          leadsBadge.textContent = String(data.leads);
+          leadsBadge.style.display = '';
+        } else {
+          leadsBadge.style.display = 'none';
+        }
+      }
+
+      // Update messages badge
+      const messagesBadge = document.getElementById('messages-badge');
+      if (messagesBadge) {
+        if (data.messages > 0) {
+          messagesBadge.textContent = String(data.messages);
+          messagesBadge.style.display = '';
+        } else {
+          messagesBadge.style.display = 'none';
+        }
+      }
+    } catch (error) {
+      console.error('[AdminDashboard] Error fetching sidebar counts:', error);
+    }
+  }
+
   private startAutoRefresh(): void {
     // Refresh dashboard data every 5 minutes
     this.refreshInterval = setInterval(
       () => {
         this.loadTabData(this.currentTab);
+        this.updateSidebarBadges();
       },
       5 * 60 * 1000
     );
