@@ -571,12 +571,12 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
 
   // Show modal and lock body scroll
   modal.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
+  document.body.classList.add('modal-open');
 
   // Close handlers
   const closeModal = () => {
     modal.classList.add('hidden');
-    document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
   };
 
   const closeHandler = () => closeModal();
@@ -663,12 +663,12 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
 
   // Show modal and lock body scroll
   modal.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
+  document.body.classList.add('modal-open');
 
   // Close handlers
   const closeModal = () => {
     modal.classList.add('hidden');
-    document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
   };
 
   const closeHandler = () => closeModal();
@@ -768,12 +768,12 @@ function addClient(ctx: AdminDashboardContext): void {
 
   // Show modal and lock body scroll
   modal.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
+  document.body.classList.add('modal-open');
 
   // Close handlers
   const closeModal = () => {
     modal.classList.add('hidden');
-    document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
     form.reset();
   };
 

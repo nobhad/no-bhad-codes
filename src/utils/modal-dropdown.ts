@@ -5,8 +5,8 @@
  * @file src/utils/modal-dropdown.ts
  *
  * Converts native select elements into custom styled dropdowns
- * for use within modals. Provides full styling control over
- * the dropdown menu that native selects don't allow.
+ * for use within modals. Uses the same classes as the messages
+ * tab custom-dropdown but adds 'no-border' modifier.
  */
 
 export interface ModalDropdownOptions {
@@ -16,15 +16,15 @@ export interface ModalDropdownOptions {
 
 /**
  * Initialize a custom dropdown from a native select element
- * Replaces the select with a fully styled custom dropdown
+ * Uses the same structure as messages tab dropdown
  */
 export function initModalDropdown(
   selectElement: HTMLSelectElement,
   options: ModalDropdownOptions = {}
 ): HTMLElement {
-  // Create wrapper
+  // Create wrapper - uses custom-dropdown class plus modal-dropdown modifier
   const wrapper = document.createElement('div');
-  wrapper.className = 'modal-dropdown';
+  wrapper.className = 'custom-dropdown modal-dropdown';
 
   // Get current value and options from select
   const currentValue = selectElement.value;
@@ -32,44 +32,42 @@ export function initModalDropdown(
   const currentOption = selectOptions.find(opt => opt.value === currentValue);
   const displayText = currentOption?.text || options.placeholder || 'Select...';
 
-  // Create trigger button
+  // Create trigger button - matches messages tab structure exactly
   const trigger = document.createElement('button');
   trigger.type = 'button';
-  trigger.className = 'modal-dropdown-trigger';
+  trigger.className = 'custom-dropdown-trigger';
   trigger.innerHTML = `
-    <span class="dropdown-text">${displayText}</span>
-    <span class="dropdown-arrow">&#9662;</span>
+    <span class="custom-dropdown-text">${displayText}</span>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="custom-dropdown-caret"><path d="m6 9 6 6 6-6"/></svg>
   `;
 
-  // Create dropdown menu
-  const menu = document.createElement('div');
-  menu.className = 'modal-dropdown-menu';
+  // Create dropdown menu - ul like messages tab
+  const menu = document.createElement('ul');
+  menu.className = 'custom-dropdown-menu';
 
   // Add options to menu
   selectOptions.forEach(opt => {
     if (opt.value === '') return; // Skip placeholder options
 
-    const optionEl = document.createElement('button');
-    optionEl.type = 'button';
-    optionEl.className = 'modal-dropdown-option';
-    optionEl.dataset.value = opt.value;
-    optionEl.textContent = opt.text;
+    const li = document.createElement('li');
+    li.className = 'custom-dropdown-item';
+    li.dataset.value = opt.value;
 
-    // Add status class if value contains status keyword
-    const statusClass = getStatusClass(opt.value);
-    if (statusClass) {
-      optionEl.classList.add(statusClass);
-    }
+    // Create inner structure
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'dropdown-item-name';
+    nameSpan.textContent = opt.text;
+    li.appendChild(nameSpan);
 
     if (opt.value === currentValue) {
-      optionEl.classList.add('selected');
+      li.classList.add('selected');
     }
 
-    optionEl.addEventListener('click', () => {
+    li.addEventListener('click', () => {
       selectOption(wrapper, selectElement, opt.value, opt.text, options.onChange);
     });
 
-    menu.appendChild(optionEl);
+    menu.appendChild(li);
   });
 
   // Create hidden input to store value for form submission
@@ -113,35 +111,13 @@ export function initModalDropdown(
 }
 
 /**
- * Get status class based on value
- */
-function getStatusClass(value: string): string | null {
-  const normalizedValue = value.toLowerCase().replace(/-/g, '_');
-
-  if (['pending', 'new', 'on_hold'].includes(normalizedValue)) {
-    return `status-${normalizedValue}`;
-  }
-  if (['active', 'in_progress'].includes(normalizedValue)) {
-    return `status-${normalizedValue}`;
-  }
-  if (['completed', 'converted'].includes(normalizedValue)) {
-    return `status-${normalizedValue}`;
-  }
-  if (['cancelled', 'lost', 'inactive'].includes(normalizedValue)) {
-    return `status-${normalizedValue}`;
-  }
-
-  return null;
-}
-
-/**
  * Toggle dropdown open/closed
  */
 function toggleDropdown(wrapper: HTMLElement): void {
   const isOpen = wrapper.classList.contains('open');
 
   // Close all other dropdowns first
-  document.querySelectorAll('.modal-dropdown.open').forEach(el => {
+  document.querySelectorAll('.custom-dropdown.open').forEach(el => {
     if (el !== wrapper) {
       el.classList.remove('open');
     }
@@ -172,7 +148,7 @@ function selectOption(
   onChange?: (value: string, label: string) => void
 ): void {
   // Update trigger text
-  const textEl = wrapper.querySelector('.dropdown-text');
+  const textEl = wrapper.querySelector('.custom-dropdown-text');
   if (textEl) {
     textEl.textContent = label;
   }
@@ -187,7 +163,7 @@ function selectOption(
   originalSelect.value = value;
 
   // Update selected state on options
-  wrapper.querySelectorAll('.modal-dropdown-option').forEach(opt => {
+  wrapper.querySelectorAll('.custom-dropdown-item').forEach(opt => {
     opt.classList.remove('selected');
     if ((opt as HTMLElement).dataset.value === value) {
       opt.classList.add('selected');
@@ -238,12 +214,13 @@ export function getModalDropdownValue(wrapper: HTMLElement): string {
  * Set the value of a modal dropdown
  */
 export function setModalDropdownValue(wrapper: HTMLElement, value: string): void {
-  const option = wrapper.querySelector(`.modal-dropdown-option[data-value="${value}"]`) as HTMLElement;
+  const option = wrapper.querySelector(`.custom-dropdown-item[data-value="${value}"]`) as HTMLElement;
   if (option) {
-    const label = option.textContent || '';
+    const nameEl = option.querySelector('.dropdown-item-name');
+    const label = nameEl?.textContent || option.textContent || '';
 
     // Update trigger text
-    const textEl = wrapper.querySelector('.dropdown-text');
+    const textEl = wrapper.querySelector('.custom-dropdown-text');
     if (textEl) {
       textEl.textContent = label;
     }
@@ -255,7 +232,7 @@ export function setModalDropdownValue(wrapper: HTMLElement, value: string): void
     }
 
     // Update selected state
-    wrapper.querySelectorAll('.modal-dropdown-option').forEach(opt => {
+    wrapper.querySelectorAll('.custom-dropdown-item').forEach(opt => {
       opt.classList.remove('selected');
     });
     option.classList.add('selected');
