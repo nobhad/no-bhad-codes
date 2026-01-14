@@ -587,7 +587,7 @@ body.modal-open .dashboard-content {
 .tab-content.active {
   display: flex;
   flex-direction: column;
-  gap: var(--space-10);
+  gap: var(--space-lg);
 }
 
 /* Overview Tab */
@@ -2386,42 +2386,50 @@ body.modal-open .dashboard-content {
 }
 
 /* ================================================
-   SIDEBAR NOTIFICATION BADGES
+   SIDEBAR NOTIFICATION COUNTS
    ================================================
-   Red badges for unread counts on sidebar buttons.
+   Expanded: inline red text matching button font.
+   Collapsed: small red badge at top-right of icon.
    Used for Leads (new intakes/contacts) and Messages (unread).
    ================================================ */
-[data-page="admin"] .sidebar-badge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  background: var(--color-danger, #ef4444);
-  color: white;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 18px;
-  text-align: center;
-  border-radius: 9px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
 
 /* Ensure sidebar buttons have relative positioning for badge */
 [data-page="admin"] .sidebar-buttons .btn {
   position: relative;
 }
 
-/* Collapsed sidebar badge styling */
+/* Expanded sidebar - inline red text */
+[data-page="admin"] .sidebar-badge {
+  color: var(--color-danger, #ef4444);
+  font-family: var(--font--acme);
+  font-size: inherit;
+  font-weight: inherit;
+  margin-left: 0.5rem;
+}
+
+/* Collapsed sidebar - red badge */
+[data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn {
+  position: relative;
+}
+
 [data-page="admin"] .sidebar.collapsed .sidebar-badge {
-  top: 2px;
-  right: 2px;
-  min-width: 16px;
-  height: 16px;
-  font-size: 10px;
-  line-height: 16px;
-  padding: 0 4px;
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  margin-left: 0;
+  min-width: 12px;
+  height: 12px;
+  padding: 0 3px;
+  background: var(--color-danger, #ef4444);
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 12px;
+  text-align: center;
+  letter-spacing: -0.5px;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* ================================================
