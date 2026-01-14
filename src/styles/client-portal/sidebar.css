@@ -45,15 +45,9 @@
   align-items: center;
 }
 
+/* Hide regular logo when collapsed - show collapsed logo instead */
 .sidebar.collapsed .sidebar-logo {
-  display: flex;
-  justify-content: center;
-  padding-bottom: 0.5rem;
-}
-
-.sidebar.collapsed .sidebar-logo .sidebar-logo-img {
-  width: 36px;
-  height: auto;
+  display: none;
 }
 
 /* Sidebar Footer */
@@ -75,11 +69,13 @@
   z-index: 101;
 }
 
-/* Avatar - Inverted colors */
-.sidebar-logo-img,
-.sidebar-collapsed-logo-img {
+/* Avatar - invert main logo to white for portal dark sidebar */
+[data-page="client-portal"] .sidebar-logo-img,
+[data-page="admin"] .sidebar-logo-img {
   filter: invert(1);
 }
+
+/* Collapsed logo SVG is already white with dark eye - no filter needed */
 
 /* Logout Button */
 .btn-logout {
@@ -312,12 +308,14 @@
 }
 
 .sidebar.collapsed .sidebar-collapsed-logo {
-  display: none;
+  display: flex;
+  justify-content: center;
+  padding-top: 1rem;
 }
 
 .sidebar-collapsed-logo-img {
-  width: 100%;
-  height: 100%;
+  width: 32px;
+  height: 40px;
   object-fit: contain;
 }
 
@@ -496,4 +494,107 @@
 
 .projects-sidebar.collapsed .account-list {
   display: none;
+}
+
+/* =====================================================
+   SMALL SCREEN AUTO-COLLAPSE
+   Auto-collapse sidebar on small screens (no hamburger menu)
+   ===================================================== */
+@media (max-width: 600px) {
+  [data-page="client-portal"] .sidebar,
+  [data-page="admin"] .sidebar {
+    width: 56px;
+    min-width: 56px;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-content,
+  [data-page="admin"] .sidebar .sidebar-content {
+    display: flex;
+    padding: 0.5rem;
+    padding-top: 1rem;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-logo,
+  [data-page="admin"] .sidebar .sidebar-logo {
+    display: none;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-collapsed-logo,
+  [data-page="admin"] .sidebar .sidebar-collapsed-logo {
+    display: flex;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-buttons,
+  [data-page="admin"] .sidebar .sidebar-buttons {
+    width: 100%;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-buttons .btn,
+  [data-page="admin"] .sidebar .sidebar-buttons .btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 8px;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-buttons .btn .btn-text,
+  [data-page="admin"] .sidebar .sidebar-buttons .btn .btn-text {
+    display: none;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-buttons .btn .btn-icon,
+  [data-page="admin"] .sidebar .sidebar-buttons .btn .btn-icon {
+    margin-right: 0;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-footer,
+  [data-page="admin"] .sidebar .sidebar-footer {
+    left: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-footer .btn-logout,
+  [data-page="admin"] .sidebar .sidebar-footer .btn-logout {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 8px;
+    margin: 0 auto;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-footer .btn-text,
+  [data-page="admin"] .sidebar .sidebar-footer .btn-text,
+  [data-page="client-portal"] .sidebar .logout-text,
+  [data-page="admin"] .sidebar .logout-text {
+    display: none;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-toggle,
+  [data-page="admin"] .sidebar .sidebar-toggle {
+    display: none;
+  }
+
+  /* Hide text elements in collapsed state */
+  [data-page="client-portal"] .sidebar .client-name,
+  [data-page="client-portal"] .sidebar .project-name,
+  [data-page="client-portal"] .sidebar .subitem-name,
+  [data-page="client-portal"] .sidebar .account-item-title,
+  [data-page="client-portal"] .sidebar h3,
+  [data-page="admin"] .sidebar .client-name,
+  [data-page="admin"] .sidebar .project-name,
+  [data-page="admin"] .sidebar h3 {
+    display: none;
+  }
+
+  [data-page="client-portal"] .sidebar .project-subitems,
+  [data-page="client-portal"] .sidebar .account-list,
+  [data-page="admin"] .sidebar .project-subitems {
+    display: none;
+  }
 }

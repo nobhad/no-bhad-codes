@@ -1489,66 +1489,6 @@ body.modal-open .dashboard-content {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Responsive table styles for smaller screens */
-@media (max-width: 900px) {
-  .leads-table,
-  .contacts-table {
-    min-width: unset;
-  }
-
-  .leads-table th,
-  .leads-table td,
-  .contacts-table th,
-  .contacts-table td {
-    padding: var(--space-2) var(--space-2);
-    font-size: var(--font-size-xs);
-  }
-
-  /* Give NAME column more space */
-  .leads-table th:nth-child(2),
-  .leads-table td:nth-child(2),
-  .contacts-table th:nth-child(2),
-  .contacts-table td:nth-child(2) {
-    min-width: 120px;
-    width: 40%;
-  }
-
-  /* Leads table: hide Company (3), Email (4), Project Type (5), Budget (6) */
-  .leads-table th:nth-child(3),
-  .leads-table td:nth-child(3),
-  .leads-table th:nth-child(4),
-  .leads-table td:nth-child(4),
-  .leads-table th:nth-child(5),
-  .leads-table td:nth-child(5),
-  .leads-table th:nth-child(6),
-  .leads-table td:nth-child(6) {
-    display: none;
-  }
-
-  /* Contacts table: hide Company (4), Message (5) */
-  .contacts-table th:nth-child(4),
-  .contacts-table td:nth-child(4),
-  .contacts-table th:nth-child(5),
-  .contacts-table td:nth-child(5) {
-    display: none;
-  }
-}
-
-@media (max-width: 600px) {
-  .leads-table th,
-  .leads-table td,
-  .contacts-table th,
-  .contacts-table td {
-    padding: var(--space-1) var(--space-2);
-  }
-
-  /* Contacts table: also hide Email (3) on very small screens */
-  .contacts-table th:nth-child(3),
-  .contacts-table td:nth-child(3) {
-    display: none;
-  }
-}
-
 /* Admin Modal Styles */
 .admin-modal-overlay {
   position: fixed;
@@ -2303,6 +2243,10 @@ body.modal-open .dashboard-content {
   gap: var(--space-4);
 }
 
+.status-grid h3 {
+  white-space: nowrap;
+}
+
 .status-item {
   display: flex;
   justify-content: space-between;
@@ -2311,6 +2255,10 @@ body.modal-open .dashboard-content {
   background: var(--portal-bg-medium);
   border-radius: var(--border-radius-md);
   border: 1px solid var(--portal-border-medium);
+}
+
+.status-item .status-name {
+  white-space: nowrap;
 }
 
 .status-indicator {
@@ -2407,24 +2355,14 @@ body.modal-open .dashboard-content {
 
 /* Force 2x2 grid for groups of 4 - always 2 columns */
 [data-page="admin"] .vitals-grid,
-[data-page="admin"] .analytics-grid {
+[data-page="admin"] .analytics-grid,
+[data-page="admin"] .quick-stats,
+[data-page="admin"] .leads-stats {
   grid-template-columns: repeat(2, 1fr);
 }
 
-/* Dashboard overview quick-stats should be 2x2 */
-[data-page="admin"] #tab-overview > .quick-stats {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-[data-page="admin"] #tab-overview > .quick-stats > * {
+[data-page="admin"] .quick-stats > * {
   height: 100%;
-}
-
-@media (max-width: 1100px) {
-  [data-page="admin"] .quick-stats,
-  [data-page="admin"] .leads-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 /* Groups of 3 should go directly to 1 column, never 2+1 */
@@ -2436,74 +2374,14 @@ body.modal-open .dashboard-content {
   }
 }
 
-/* Single column on small screens for all grids */
-@media (max-width: 900px) {
-  [data-page="admin"] .vitals-grid,
+/* Small screens - stack all grids to single column */
+@media (max-width: 600px) {
   [data-page="admin"] .analytics-grid,
+  [data-page="admin"] .vitals-grid,
   [data-page="admin"] .quick-stats,
   [data-page="admin"] .leads-stats,
-  [data-page="admin"] .overview-stats-grid,
-  [data-page="admin"] .charts-grid {
+  [data-page="admin"] #tab-overview > .quick-stats {
     grid-template-columns: 1fr;
-  }
-}
-
-@media (--mobile) {
-  .admin-nav {
-    padding: var(--space-3) var(--space-4);
-  }
-
-  .nav-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-2);
-  }
-
-  .nav-tabs {
-    width: 100%;
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding-bottom: var(--space-2);
-  }
-
-  .admin-content {
-    padding: var(--space-4);
-  }
-
-  .overview-grid,
-  .charts-grid,
-  .analytics-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .visitors-table-container {
-    overflow-x: auto;
-  }
-
-  .visitors-table {
-    min-width: 600px;
-  }
-
-  .export-controls,
-  .data-controls {
-    flex-direction: column;
-  }
-}
-
-@media (--small-mobile) {
-  .auth-container {
-    margin: var(--space-4);
-    padding: var(--space-6);
-  }
-
-  .analytics-controls,
-  .visitors-controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .form-control {
-    width: 100%;
   }
 }
 

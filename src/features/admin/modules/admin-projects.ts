@@ -317,10 +317,10 @@ function populateProjectDetailView(project: LeadProject): void {
     if (!featuresContainer && featuresList) {
       featuresContainer = document.createElement('div');
       featuresContainer.className = 'meta-item features-container';
-      featuresContainer.innerHTML = `<span class="meta-label">Features Requested</span><div class="features-list">${featuresList}</div>`;
+      featuresContainer.innerHTML = `<span class="field-label">Features Requested</span><div class="features-list">${featuresList}</div>`;
       notes.appendChild(featuresContainer);
     } else if (featuresContainer && featuresList) {
-      featuresContainer.innerHTML = `<span class="meta-label">Features Requested</span><div class="features-list">${featuresList}</div>`;
+      featuresContainer.innerHTML = `<span class="field-label">Features Requested</span><div class="features-list">${featuresList}</div>`;
     }
   }
 }
