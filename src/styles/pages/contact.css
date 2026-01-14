@@ -881,10 +881,17 @@ html[data-theme="dark"] .submit-button:focus-visible {
     max-width: 92vw;
   }
 
+  /* h2/hr spacing - matches projects page */
+  .contact-section h2 {
+    margin: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
   /* hr spans width of input fields only */
   .contact-section hr {
     width: 350px;
-    margin-bottom: 1rem;
+    margin: 0 !important;
+    margin-bottom: 1rem !important;
   }
 
   /* Remove top margin on form inputs */

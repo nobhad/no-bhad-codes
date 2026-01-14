@@ -560,6 +560,25 @@
   transform: scale(1.02);
 }
 
+/* Medium viewport adjustments (600px - 1100px) - matches mobile h2/hr spacing */
+@media screen and (min-width: 600px) and (max-width: 1100px) {
+  .projects-section h2 {
+    margin-top: 10rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .projects-section hr {
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+
+  .wip-sign {
+    width: 70vw;
+    max-width: none;
+    margin: 10rem auto 0;
+  }
+}
+
 /* Mobile adjustments for projects section */
 @media (--mobile) {
   .projects-section {
