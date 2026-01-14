@@ -2522,3 +2522,103 @@ body.modal-open .dashboard-content {
   line-height: 16px;
   padding: 0 4px;
 }
+
+/* ================================================
+   INFO ICONS
+   ================================================ */
+
+[data-page="admin"] .info-icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 4px;
+  opacity: 0.6;
+  cursor: help;
+  transition: opacity 0.15s ease;
+}
+
+[data-page="admin"] .info-icon:hover {
+  opacity: 1;
+}
+
+[data-page="admin"] .vital-card h4 {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ================================================
+   FAST CUSTOM TOOLTIPS
+   ================================================ */
+
+/* Tooltip container - elements with data-tooltip attribute */
+[data-page="admin"] [data-tooltip] {
+  position: relative;
+}
+
+/* Tooltip pseudo-element */
+[data-page="admin"] [data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  background: var(--portal-bg-tertiary, #1a1a2e);
+  color: var(--portal-text-light, #fff);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  white-space: nowrap;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+/* Show tooltip on hover - instant appearance */
+[data-page="admin"] [data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Tooltip arrow */
+[data-page="admin"] [data-tooltip]::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--portal-bg-tertiary, #1a1a2e);
+  z-index: 10001;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+[data-page="admin"] [data-tooltip]:hover::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* For table cells, position tooltip to avoid overflow */
+[data-page="admin"] td[data-tooltip]::after,
+[data-page="admin"] .table-cell[data-tooltip]::after {
+  left: 0;
+  transform: none;
+  white-space: normal;
+  max-width: 250px;
+}
+
+[data-page="admin"] td[data-tooltip]::before,
+[data-page="admin"] .table-cell[data-tooltip]::before {
+  left: 20px;
+  transform: none;
+}
