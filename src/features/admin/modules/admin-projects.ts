@@ -72,8 +72,6 @@ export function setCurrentProjectId(id: number | null): void {
 }
 
 export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
-  if (ctx.isDemo()) return;
-
   try {
     const response = await fetch('/api/admin/leads', {
       credentials: 'include'
@@ -178,8 +176,6 @@ export async function updateProjectStatus(
   status: string,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  if (ctx.isDemo()) return;
-
   try {
     const response = await fetch(`/api/projects/${id}`, {
       method: 'PUT',
@@ -537,10 +533,8 @@ function normalizeStatus(status: string | undefined): string {
 // Project Messages
 export async function loadProjectMessages(
   projectId: number,
-  ctx: AdminDashboardContext
+  _ctx: AdminDashboardContext
 ): Promise<void> {
-  if (ctx.isDemo()) return;
-
   const container = document.getElementById('pd-messages-thread');
   if (!container) return;
 
@@ -590,10 +584,8 @@ function renderProjectMessages(messages: Message[], container: HTMLElement): voi
 // Project Files
 export async function loadProjectFiles(
   projectId: number,
-  ctx: AdminDashboardContext
+  _ctx: AdminDashboardContext
 ): Promise<void> {
-  if (ctx.isDemo()) return;
-
   const container = document.getElementById('pd-files-list');
   if (!container) return;
 
@@ -659,8 +651,6 @@ export async function loadProjectMilestones(
   projectId: number,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  if (ctx.isDemo()) return;
-
   const container = document.getElementById('pd-milestones-list');
   if (!container) return;
 
@@ -758,7 +748,7 @@ export async function toggleMilestone(
   isCompleted: boolean,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  if (ctx.isDemo() || !currentProjectId) return;
+  if (!currentProjectId) return;
 
   try {
     const response = await fetch(`/api/projects/${currentProjectId}/milestones/${milestoneId}`, {
@@ -785,10 +775,8 @@ export async function toggleMilestone(
 // Project Invoices
 export async function loadProjectInvoices(
   projectId: number,
-  ctx: AdminDashboardContext
+  _ctx: AdminDashboardContext
 ): Promise<void> {
-  if (ctx.isDemo()) return;
-
   const container = document.getElementById('pd-invoices-list');
   if (!container) return;
 

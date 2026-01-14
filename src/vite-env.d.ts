@@ -11,10 +11,6 @@ interface ImportMetaEnv {
   readonly VITE_EMAILJS_TEMPLATE_ID?: string;
   readonly VITE_EMAILJS_PUBLIC_KEY?: string;
 
-  // Demo credentials (development only)
-  readonly VITE_DEMO_EMAIL?: string;
-  readonly VITE_DEMO_PASSWORD?: string;
-
   // Base URL for the app
   readonly BASE_URL: string;
   readonly MODE: string;

@@ -106,10 +106,6 @@ class AdminDashboard {
     this.moduleContext = {
       getAuthToken: () =>
         sessionStorage.getItem('client_auth_mode'),
-      isDemo: () => {
-        const mode = sessionStorage.getItem('client_auth_mode');
-        return mode === 'demo';
-      },
       showNotification: (message: string, type: 'success' | 'error' | 'info') =>
         this.showNotification(message, type),
       refreshData: () => this.loadDashboardData(),
@@ -1434,20 +1430,20 @@ class AdminDashboard {
       console.warn('[AdminDashboard] Could not get live performance data:', error);
     }
 
-    // Fallback mock data
+    // Fallback - data unavailable
     return {
-      lcp: { value: '1.2s', status: 'good' },
-      fid: { value: '45ms', status: 'good' },
-      cls: { value: '0.05', status: 'good' },
-      ttfb: { value: '120ms', status: 'good' },
+      lcp: { value: 'N/A', status: 'unknown' },
+      fid: { value: 'N/A', status: 'unknown' },
+      cls: { value: 'N/A', status: 'unknown' },
+      ttfb: { value: 'N/A', status: 'unknown' },
       bundleSize: {
-        total: '156 KB',
-        main: '98 KB',
-        vendor: '58 KB'
+        total: 'N/A',
+        main: 'N/A',
+        vendor: 'N/A'
       },
-      score: 95,
-      grade: 'A',
-      alerts: []
+      score: 0,
+      grade: 'N/A',
+      alerts: ['Unable to load performance data']
     };
   }
 

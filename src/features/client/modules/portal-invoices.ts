@@ -27,11 +27,6 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
   invoiceItems.forEach((item) => item.remove());
 
   try {
-    if (ctx.isDemo()) {
-      renderDemoInvoices(invoicesContainer as HTMLElement, ctx);
-      return;
-    }
-
     const response = await fetch(`${INVOICES_API_BASE}/me`, {
       credentials: 'include' // Include HttpOnly cookies
     });
@@ -52,42 +47,15 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
     renderInvoicesList(invoicesContainer as HTMLElement, data.invoices || [], ctx);
   } catch (error) {
     console.error('Error loading invoices:', error);
-    renderDemoInvoices(invoicesContainer as HTMLElement, ctx);
+    if (summaryOutstanding) summaryOutstanding.textContent = '$0.00';
+    if (summaryPaid) summaryPaid.textContent = '$0.00';
+    const noInvoices = document.createElement('p');
+    noInvoices.className = 'no-invoices-message';
+    noInvoices.textContent = 'Unable to load invoices. Please try again later.';
+    (invoicesContainer as HTMLElement).appendChild(noInvoices);
   }
 }
 
-/**
- * Render demo invoices for demo mode
- */
-function renderDemoInvoices(container: HTMLElement, ctx: ClientPortalContext): void {
-  const demoInvoices: PortalInvoice[] = [
-    {
-      id: 1,
-      invoice_number: 'INV-2025-001',
-      created_at: '2025-11-30T10:00:00Z',
-      due_date: '2025-12-30T10:00:00Z',
-      amount_total: 2500.0,
-      status: 'sent',
-      project_name: 'Website Redesign'
-    },
-    {
-      id: 2,
-      invoice_number: 'INV-2025-002',
-      created_at: '2025-11-15T10:00:00Z',
-      due_date: '2025-12-15T10:00:00Z',
-      amount_total: 1500.0,
-      status: 'paid',
-      project_name: 'Brand Identity'
-    }
-  ];
-
-  const summaryOutstanding = document.querySelector('.summary-card:first-child .summary-value');
-  const summaryPaid = document.querySelector('.summary-card:last-child .summary-value');
-  if (summaryOutstanding) summaryOutstanding.textContent = '$2,500.00';
-  if (summaryPaid) summaryPaid.textContent = '$1,500.00';
-
-  renderInvoicesList(container, demoInvoices, ctx);
-}
 
 /**
  * Render invoices list
@@ -202,12 +170,7 @@ function attachInvoiceActionListeners(container: HTMLElement, ctx: ClientPortalC
 /**
  * Preview invoice (open in new tab or modal)
  */
-function previewInvoice(invoiceId: number, ctx: ClientPortalContext): void {
-  if (ctx.isDemo()) {
-    alert('Invoice preview not available in demo mode.');
-    return;
-  }
-
+function previewInvoice(invoiceId: number, _ctx: ClientPortalContext): void {
   const url = `${INVOICES_API_BASE}/${invoiceId}`;
   window.open(url, '_blank');
 }
@@ -218,13 +181,8 @@ function previewInvoice(invoiceId: number, ctx: ClientPortalContext): void {
 async function downloadInvoice(
   invoiceId: number,
   invoiceNumber: string,
-  ctx: ClientPortalContext
+  _ctx: ClientPortalContext
 ): Promise<void> {
-  if (ctx.isDemo()) {
-    alert('Invoice download not available in demo mode.');
-    return;
-  }
-
   try {
     const response = await fetch(`${INVOICES_API_BASE}/${invoiceId}/pdf`, {
       credentials: 'include' // Include HttpOnly cookies

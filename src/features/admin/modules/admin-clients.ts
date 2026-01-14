@@ -63,11 +63,6 @@ export function getClientsData(): Client[] {
 export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
   storedContext = ctx;
 
-  if (ctx.isDemo()) {
-    console.log('[AdminClients] Skipping load - demo mode');
-    return;
-  }
-
   console.log('[AdminClients] Loading clients...');
 
   try {

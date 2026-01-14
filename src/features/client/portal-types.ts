@@ -52,7 +52,6 @@ export interface PortalMessage {
 /** Context passed to portal modules */
 export interface ClientPortalContext {
   getAuthToken: () => string | null;
-  isDemo: () => boolean;
   showNotification: (message: string, type?: 'success' | 'error' | 'info') => void;
   formatDate: (dateString: string) => string;
   escapeHtml: (text: string) => string;
