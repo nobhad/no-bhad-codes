@@ -11,6 +11,7 @@
 
 import { BaseService } from './base-service';
 import { SanitizationUtils } from '../utils/sanitization-utils';
+import { getFormspreeUrl } from '../config/api';
 
 export interface ContactFormData {
   name: string;
@@ -204,7 +205,7 @@ export class ContactService extends BaseService {
       throw new Error('Formspree form ID not configured');
     }
 
-    const response = await fetch(`https://formspree.io/f/${this.config.formId}`, {
+    const response = await fetch(getFormspreeUrl(this.config.formId), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
