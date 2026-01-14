@@ -9,6 +9,7 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { apiFetch, apiPut } from '../../../utils/api-client';
 import type { ContactSubmission, AdminDashboardContext } from '../admin-types';
 
 interface ContactsData {
@@ -31,15 +32,14 @@ export function getContactsData(): ContactSubmission[] {
 export async function loadContacts(ctx: AdminDashboardContext): Promise<void> {
   storedContext = ctx;
   try {
-    const response = await fetch('/api/admin/contact-submissions', {
-      credentials: 'include'
-    });
+    const response = await apiFetch('/api/admin/contact-submissions');
 
     if (response.ok) {
       const data: ContactsData = await response.json();
       contactsData = data.submissions || [];
       updateContactsDisplay(data, ctx);
     }
+    // 401 errors are handled by apiFetch
   } catch (error) {
     console.error('[AdminContacts] Failed to load contact submissions:', error);
   }
@@ -267,12 +267,7 @@ export async function updateContactStatus(
   ctx: AdminDashboardContext
 ): Promise<void> {
   try {
-    const response = await fetch(`/api/admin/contact-submissions/${id}/status`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ status })
-    });
+    const response = await apiPut(`/api/admin/contact-submissions/${id}/status`, { status });
 
     if (response.ok) {
       ctx.showNotification('Status updated', 'success');
@@ -281,7 +276,7 @@ export async function updateContactStatus(
       if (contact) {
         contact.status = status as ContactSubmission['status'];
       }
-    } else {
+    } else if (response.status !== 401) {
       const error = await response.json();
       ctx.showNotification(error.message || 'Failed to update status', 'error');
     }

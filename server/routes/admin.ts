@@ -128,6 +128,57 @@ router.get(
 
 /**
  * @swagger
+ * /api/admin/sidebar-counts:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: Get sidebar notification counts
+ *     description: Get counts for leads and unread messages for sidebar badges
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Sidebar counts retrieved successfully
+ */
+router.get(
+  '/sidebar-counts',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
+    try {
+      const db = getDatabase();
+
+      // Get new leads count (pending intake + new contact submissions)
+      const leadsCount = await db.get(`
+        SELECT
+          (SELECT COUNT(*) FROM projects WHERE status = 'pending') +
+          (SELECT COUNT(*) FROM contact_submissions WHERE status = 'new') as count
+      `);
+
+      // Get unread messages count (from all threads)
+      const messagesCount = await db.get(`
+        SELECT COUNT(*) as count
+        FROM general_messages
+        WHERE is_read = 0 AND sender_type != 'admin'
+      `);
+
+      res.json({
+        success: true,
+        leads: leadsCount?.count || 0,
+        messages: messagesCount?.count || 0,
+      });
+    } catch (error) {
+      console.error('Error fetching sidebar counts:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch sidebar counts',
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
  * /api/admin/cache/stats:
  *   get:
  *     tags:

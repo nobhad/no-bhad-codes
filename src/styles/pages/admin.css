@@ -2483,3 +2483,42 @@ body.modal-open .dashboard-content {
     width: 100%;
   }
 }
+
+/* ================================================
+   SIDEBAR NOTIFICATION BADGES
+   ================================================
+   Red badges for unread counts on sidebar buttons.
+   Used for Leads (new intakes/contacts) and Messages (unread).
+   ================================================ */
+[data-page="admin"] .sidebar-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--color-danger, #ef4444);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 9px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Ensure sidebar buttons have relative positioning for badge */
+[data-page="admin"] .sidebar-buttons .btn {
+  position: relative;
+}
+
+/* Collapsed sidebar badge styling */
+[data-page="admin"] .sidebar.collapsed .sidebar-badge {
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  font-size: 10px;
+  line-height: 16px;
+  padding: 0 4px;
+}

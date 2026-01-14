@@ -9,6 +9,7 @@
  */
 
 import { Chart, registerables } from 'chart.js';
+import { apiFetch } from '../../../utils/api-client';
 import type {
   PerformanceMetricsDisplay,
   AnalyticsData,
@@ -33,13 +34,14 @@ export async function loadOverviewData(_ctx: AdminDashboardContext): Promise<voi
 
 async function loadAnalyticsSummary(): Promise<void> {
   try {
-    const response = await fetch('/api/analytics/summary?days=30', {
-      credentials: 'include'
-    });
+    const response = await apiFetch('/api/analytics/summary?days=30');
 
     if (!response.ok) {
-      console.warn('[AdminAnalytics] Failed to load analytics summary');
-      showOverviewDefaults();
+      // 401 handled by apiFetch, only show defaults for other errors
+      if (response.status !== 401) {
+        console.warn('[AdminAnalytics] Failed to load analytics summary');
+        showOverviewDefaults();
+      }
       return;
     }
 
@@ -160,9 +162,7 @@ export async function loadPerformanceData(_ctx: AdminDashboardContext): Promise<
 
   // Load bundle stats from API
   try {
-    const response = await fetch('/api/admin/bundle-stats', {
-      credentials: 'include'
-    });
+    const response = await apiFetch('/api/admin/bundle-stats');
 
     if (response.ok) {
       const bundleData = await response.json();
@@ -170,6 +170,7 @@ export async function loadPerformanceData(_ctx: AdminDashboardContext): Promise<
       updateElement('js-bundle-size', bundleData.jsFormatted);
       updateElement('css-bundle-size', bundleData.cssFormatted);
     }
+    // 401 handled by apiFetch
   } catch (error) {
     console.error('[AdminAnalytics] Error loading bundle stats:', error);
   }
@@ -177,13 +178,13 @@ export async function loadPerformanceData(_ctx: AdminDashboardContext): Promise<
 
 export async function loadAnalyticsData(_ctx: AdminDashboardContext): Promise<void> {
   try {
-    const response = await fetch('/api/analytics/summary?days=30', {
-      credentials: 'include'
-    });
+    const response = await apiFetch('/api/analytics/summary?days=30');
 
     if (!response.ok) {
-      console.warn('[AdminAnalytics] Failed to load analytics data');
-      showEmptyStates();
+      if (response.status !== 401) {
+        console.warn('[AdminAnalytics] Failed to load analytics data');
+        showEmptyStates();
+      }
       return;
     }
 
@@ -286,13 +287,13 @@ export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<voi
   if (!container) return;
 
   try {
-    const response = await fetch('/api/analytics/sessions?days=7&limit=50', {
-      credentials: 'include'
-    });
+    const response = await apiFetch('/api/analytics/sessions?days=7&limit=50');
 
     if (!response.ok) {
-      container.innerHTML =
-        '<tr><td colspan="6" class="loading-row">Failed to load visitor data</td></tr>';
+      if (response.status !== 401) {
+        container.innerHTML =
+          '<tr><td colspan="6" class="loading-row">Failed to load visitor data</td></tr>';
+      }
       return;
     }
 
@@ -867,9 +868,7 @@ async function loadVisitorsChart(): Promise<void> {
   let data: number[] = [0, 0, 0, 0, 0, 0, 0];
 
   try {
-    const response = await fetch('/api/analytics/summary?days=7', {
-      credentials: 'include'
-    });
+    const response = await apiFetch('/api/analytics/summary?days=7');
 
     if (response.ok) {
       const result = await response.json();
@@ -883,6 +882,7 @@ async function loadVisitorsChart(): Promise<void> {
         data = dailyData.map((d: { visitors?: number }) => d.visitors || 0);
       }
     }
+    // 401 handled by apiFetch
   } catch (error) {
     console.warn('[AdminAnalytics] Failed to load chart data:', error);
   }
@@ -938,9 +938,7 @@ async function loadSourcesChart(): Promise<void> {
   let data: number[] = [0, 0, 0, 0];
 
   try {
-    const response = await fetch('/api/analytics/summary?days=30', {
-      credentials: 'include'
-    });
+    const response = await apiFetch('/api/analytics/summary?days=30');
 
     if (response.ok) {
       const result = await response.json();
@@ -970,6 +968,7 @@ async function loadSourcesChart(): Promise<void> {
         data = Object.values(sources);
       }
     }
+    // 401 handled by apiFetch
   } catch (error) {
     console.warn('[AdminAnalytics] Failed to load sources chart data:', error);
   }
