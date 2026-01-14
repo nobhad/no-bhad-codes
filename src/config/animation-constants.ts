@@ -64,13 +64,56 @@ export const ANIMATION_EASING = {
 // ============================================
 // COLORS (for GSAP animations)
 // ============================================
+// These reference CSS variables defined in colors.css
+// Use getAnimationColor() to read values at runtime
 
-export const ANIMATION_COLORS = {
-  SHADOW_DEFAULT: 'rgba(0, 0, 0, 0.5)',
-  SHADOW_LIGHT: 'rgba(0, 0, 0, 0.3)',
-  CARD_FILL: '#ffffff',
-  OVERLAY_BG: 'rgba(0, 0, 0, 0.8)'
+export const ANIMATION_COLOR_VARS = {
+  SHADOW_DEFAULT: '--color-shadow-3xl', // rgba(0, 0, 0, 0.5)
+  SHADOW_LIGHT: '--color-shadow-2xl', // rgba(0, 0, 0, 0.3)
+  CARD_FILL: '--color-card-bg', // #ffffff / warm white
+  OVERLAY_BG: '--color-overlay-heavy' // rgba(0, 0, 0, 0.8)
 } as const;
+
+// Fallback values for SSR or when CSS variables are unavailable
+const ANIMATION_COLOR_FALLBACKS: Record<string, string> = {
+  '--color-shadow-3xl': 'rgba(0, 0, 0, 0.5)',
+  '--color-shadow-2xl': 'rgba(0, 0, 0, 0.3)',
+  '--color-card-bg': '#fffefd',
+  '--color-overlay-heavy': 'rgba(0, 0, 0, 0.8)'
+};
+
+/**
+ * Get animation color from CSS variable at runtime
+ */
+export function getAnimationColor(
+  colorKey: keyof typeof ANIMATION_COLOR_VARS
+): string {
+  const cssVarName = ANIMATION_COLOR_VARS[colorKey];
+
+  if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    const computedStyle = window.getComputedStyle(document.documentElement);
+    const color = computedStyle.getPropertyValue(cssVarName).trim();
+    if (color) return color;
+  }
+
+  return ANIMATION_COLOR_FALLBACKS[cssVarName] || 'rgba(0, 0, 0, 0.5)';
+}
+
+// Legacy export for backwards compatibility - reads from CSS at runtime
+export const ANIMATION_COLORS = {
+  get SHADOW_DEFAULT() {
+    return getAnimationColor('SHADOW_DEFAULT');
+  },
+  get SHADOW_LIGHT() {
+    return getAnimationColor('SHADOW_LIGHT');
+  },
+  get CARD_FILL() {
+    return getAnimationColor('CARD_FILL');
+  },
+  get OVERLAY_BG() {
+    return getAnimationColor('OVERLAY_BG');
+  }
+};
 
 // ============================================
 // DIMENSIONS (pixels or degrees)

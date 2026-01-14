@@ -24,8 +24,6 @@ export function getSelectedClientId(): number | null {
 }
 
 export async function loadClientThreads(ctx: AdminDashboardContext): Promise<void> {
-  if (ctx.isDemo()) return;
-
   const dropdown = document.getElementById('admin-client-dropdown');
   if (!dropdown) return;
 
@@ -189,10 +187,8 @@ export function selectThread(
 
 export async function loadThreadMessages(
   threadId: number,
-  ctx: AdminDashboardContext
+  _ctx: AdminDashboardContext
 ): Promise<void> {
-  if (ctx.isDemo()) return;
-
   const container =
     document.getElementById('admin-messages-thread') ||
     document.getElementById('admin-messages-container');
@@ -292,8 +288,6 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
 export async function sendMessage(ctx: AdminDashboardContext): Promise<void> {
   const input = document.getElementById('admin-message-text') as HTMLInputElement;
   if (!input || !input.value.trim() || !selectedThreadId) return;
-
-  if (ctx.isDemo()) return;
 
   const message = input.value.trim();
   input.value = '';

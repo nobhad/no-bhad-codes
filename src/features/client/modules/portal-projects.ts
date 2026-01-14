@@ -8,18 +8,11 @@
  * Handles mock/real project data, project list, and project details.
  */
 
-import type { ClientProject, ClientProjectStatus } from '../../../types/client';
+import type { ClientProject } from '../../../types/client';
 import type { ClientPortalContext, PortalProject } from '../portal-types';
 
 /** API endpoints */
 const PROJECTS_API_BASE = '/api/projects';
-
-/** User info for project loading */
-interface UserInfo {
-  id: number;
-  email: string;
-  name: string;
-}
 
 /** Callbacks for project interactions */
 export interface ProjectCallbacks {
@@ -28,85 +21,6 @@ export interface ProjectCallbacks {
   escapeHtml: (text: string) => string;
 }
 
-/**
- * Load mock projects for demo mode
- */
-export async function loadMockUserProjects(
-  user: UserInfo,
-  _callbacks: ProjectCallbacks
-): Promise<ClientProject[]> {
-  const sampleProject: ClientProject = {
-    id: `project-${user.id}-001`,
-    projectName: 'Your Website Project',
-    description: 'Custom website development based on your intake form requirements.',
-    clientId: user.email,
-    clientName: user.name || 'Valued Client',
-    status: 'pending' as ClientProjectStatus,
-    priority: 'medium',
-    progress: 25,
-    startDate: new Date().toISOString().split('T')[0],
-    estimatedEndDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split('T')[0],
-    updates: [
-      {
-        id: 'update-001',
-        date: new Date().toISOString().split('T')[0],
-        title: 'Project Intake Received',
-        description:
-          'Your project details have been received and we\'re reviewing your requirements.',
-        author: 'No Bhad Codes Team',
-        type: 'general'
-      },
-      {
-        id: 'update-002',
-        date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        title: 'Account Activated',
-        description:
-          'Your client account has been activated and you now have access to this portal.',
-        author: 'System',
-        type: 'general'
-      }
-    ],
-    files: [],
-    messages: [
-      {
-        id: 'msg-001',
-        sender: 'No Bhad Codes Team',
-        senderRole: 'system',
-        message: 'Welcome to your project portal! We\'ll keep you updated on progress here.',
-        timestamp: new Date().toISOString(),
-        isRead: false
-      }
-    ],
-    milestones: [
-      {
-        id: 'milestone-001',
-        title: 'Project Planning',
-        description: 'Review requirements and create detailed project plan',
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        isCompleted: false,
-        deliverables: ['Requirements analysis', 'Project timeline', 'Technical specification']
-      },
-      {
-        id: 'milestone-002',
-        title: 'Design Phase',
-        description: 'Create mockups and design system',
-        dueDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        isCompleted: false,
-        deliverables: ['Wireframes', 'Visual designs', 'Style guide']
-      }
-    ]
-  };
-
-  // Set client name in header
-  const clientNameElement = document.getElementById('client-name');
-  if (clientNameElement) {
-    clientNameElement.textContent = user.name || user.email || 'Client';
-  }
-
-  return [sampleProject];
-}
 
 /**
  * Populate the projects list in the sidebar
@@ -339,20 +253,13 @@ export function loadMessages(
 /**
  * Load project preview into iframe
  */
-export async function loadProjectPreview(ctx: ClientPortalContext): Promise<void> {
+export async function loadProjectPreview(_ctx: ClientPortalContext): Promise<void> {
   const iframe = document.getElementById('preview-iframe') as HTMLIFrameElement;
   const urlDisplay = document.getElementById('preview-url');
   const openNewTabBtn = document.getElementById('btn-open-new-tab');
   const refreshBtn = document.getElementById('btn-refresh-preview');
 
   if (!iframe) return;
-
-  if (ctx.isDemo()) {
-    // Demo mode - show placeholder
-    iframe.src = '';
-    if (urlDisplay) urlDisplay.textContent = 'Preview not available in demo mode';
-    return;
-  }
 
   try {
     // Get client's projects to find one with a preview URL

@@ -35,11 +35,6 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext): Promise<voi
   const messagesContainer = document.getElementById('messages-thread');
   if (!messagesContainer) return;
 
-  if (ctx.isDemo()) {
-    renderDemoMessages(messagesContainer, ctx);
-    return;
-  }
-
   try {
     const threadsResponse = await fetch(`${MESSAGES_API_BASE}/threads`, {
       credentials: 'include' // Include HttpOnly cookies
@@ -81,22 +76,9 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext): Promise<voi
     });
   } catch (error) {
     console.error('Error loading messages:', error);
-    renderDemoMessages(messagesContainer, ctx);
+    messagesContainer.innerHTML =
+      '<div class="no-messages"><p>Unable to load messages. Please try again later.</p></div>';
   }
-}
-
-/**
- * Render demo messages - keeps existing HTML messages if present
- */
-function renderDemoMessages(container: HTMLElement, _ctx: ClientPortalContext): void {
-  // In demo mode, keep the existing static HTML messages
-  // Only render if container is empty
-  if (container.children.length > 0) {
-    return;
-  }
-
-  // Fallback if no static messages exist
-  container.innerHTML = '<div class="no-messages"><p>No messages yet. Start a conversation!</p></div>';
 }
 
 /**
@@ -146,12 +128,6 @@ export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
   const message = messageInput.value.trim();
   if (!message) return;
 
-  if (ctx.isDemo()) {
-    addDemoMessage(message, ctx);
-    messageInput.value = '';
-    return;
-  }
-
   try {
     let url: string;
     let body: { message: string; subject?: string };
@@ -190,43 +166,6 @@ export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
     console.error('Error sending message:', error);
     alert(error instanceof Error ? error.message : 'Failed to send message. Please try again.');
   }
-}
-
-/**
- * Add a demo message locally (for demo mode only, resets on refresh)
- */
-function addDemoMessage(message: string, ctx: ClientPortalContext): void {
-  const messagesThread = document.getElementById('messages-thread');
-  if (!messagesThread) return;
-
-  const now = new Date();
-  const timeString = `${now.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  })} at ${now.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  })}`;
-
-  const messageHTML = `
-    <div class="message message-sent">
-      <div class="message-content">
-        <div class="message-header">
-          <span class="message-sender">You</span>
-          <span class="message-time">${timeString}</span>
-        </div>
-        <div class="message-body">${ctx.escapeHtml(message)}</div>
-      </div>
-      <div class="message-avatar" data-name="You">
-        <div class="avatar-placeholder">YOU</div>
-      </div>
-    </div>
-  `;
-
-  messagesThread.insertAdjacentHTML('beforeend', messageHTML);
-  messagesThread.scrollTop = messagesThread.scrollHeight;
 }
 
 /**

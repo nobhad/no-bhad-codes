@@ -58,10 +58,6 @@ export class ClientPortalModule extends BaseModule {
   private createModuleContext(): ClientPortalContext {
     return {
       getAuthToken: () => sessionStorage.getItem('client_auth_mode'),
-      isDemo: () => {
-        const mode = sessionStorage.getItem('client_auth_mode');
-        return mode === 'demo';
-      },
       showNotification: (message: string, type: 'success' | 'error' | 'info' = 'success') => {
         if (type === 'error') {
           console.error('[ClientPortal]', message);
@@ -397,10 +393,8 @@ export class ClientPortalModule extends BaseModule {
   private async submitProjectRequest(): Promise<void> {
     const authMode = sessionStorage.getItem('client_auth_mode');
 
-    if (!authMode || authMode === 'demo') {
-      alert(
-        'Project requests cannot be submitted in demo mode. Please log in with a real account.'
-      );
+    if (!authMode) {
+      alert('Please log in to submit a project request.');
       return;
     }
 
@@ -462,8 +456,8 @@ export class ClientPortalModule extends BaseModule {
   private async saveProfileSettings(): Promise<void> {
     const authMode = sessionStorage.getItem('client_auth_mode');
 
-    if (!authMode || authMode === 'demo') {
-      alert('Settings cannot be saved in demo mode. Please log in with a real account.');
+    if (!authMode) {
+      alert('Please log in to save settings.');
       return;
     }
 
@@ -544,8 +538,8 @@ export class ClientPortalModule extends BaseModule {
   private async savePasswordSettings(): Promise<void> {
     const authMode = sessionStorage.getItem('client_auth_mode');
 
-    if (!authMode || authMode === 'demo') {
-      alert('Password cannot be changed in demo mode. Please log in with a real account.');
+    if (!authMode) {
+      alert('Please log in to change your password.');
       return;
     }
 
@@ -604,8 +598,8 @@ export class ClientPortalModule extends BaseModule {
   private async saveNotificationSettings(): Promise<void> {
     const authMode = sessionStorage.getItem('client_auth_mode');
 
-    if (!authMode || authMode === 'demo') {
-      alert('Settings cannot be saved in demo mode. Please log in with a real account.');
+    if (!authMode) {
+      alert('Please log in to save settings.');
       return;
     }
 
@@ -650,8 +644,8 @@ export class ClientPortalModule extends BaseModule {
   private async saveBillingSettings(): Promise<void> {
     const authMode = sessionStorage.getItem('client_auth_mode');
 
-    if (!authMode || authMode === 'demo') {
-      alert('Settings cannot be saved in demo mode. Please log in with a real account.');
+    if (!authMode) {
+      alert('Please log in to save settings.');
       return;
     }
 
@@ -871,50 +865,10 @@ export class ClientPortalModule extends BaseModule {
           throw new Error(errorData.error || 'Login failed');
         }
       } catch (fetchError) {
-        // If backend is unavailable, fall back to demo mode
+        // If backend is unavailable, show error
         if (fetchError instanceof TypeError && fetchError.message.includes('fetch')) {
-          console.warn('[ClientPortal] Backend unavailable, using demo mode');
-
-          // Demo mode fallback - simulate successful login
-          const mockUserData = {
-            user: {
-              id: 1,
-              email: credentials.email,
-              name: credentials.email
-                .split('@')[0]
-                .replace(/[^a-zA-Z]/g, ' ')
-                .replace(/\b\w/g, (l) => l.toUpperCase())
-            }
-          };
-
-          // Store demo mode flag (no real token needed - demo data only)
-          sessionStorage.setItem('client_auth_mode', 'demo');
-          sessionStorage.setItem('client_auth_user', JSON.stringify(mockUserData.user));
-          this.isLoggedIn = true;
-          this.currentUser = mockUserData.user.email;
-
-          // Check for redirect parameter FIRST (e.g., from admin dashboard)
-          const demoUrlParams = new URLSearchParams(window.location.search);
-          const demoRedirectUrl = demoUrlParams.get('redirect');
-          console.log('[ClientPortal] Demo mode login, redirect param:', demoRedirectUrl);
-          if (demoRedirectUrl && demoRedirectUrl.startsWith('/')) {
-            console.log('[ClientPortal] Demo mode redirecting to:', demoRedirectUrl);
-            window.location.href = demoRedirectUrl;
-            return;
-          }
-
-          await this.loadMockUserProjects(mockUserData.user);
-
-          // Redirect to client portal if not already there
-          const isOnPortalPage = document.body.getAttribute('data-page') === 'client-portal';
-          if (!isOnPortalPage) {
-            window.location.href = '/client/portal.html';
-            return;
-          }
-
-          // If already on portal page, try to show dashboard
-          this.showDashboard();
-          return;
+          console.error('[ClientPortal] Backend unavailable');
+          throw new Error('Unable to connect to server. Please try again later.');
         }
 
         // Re-throw authentication errors
@@ -925,94 +879,6 @@ export class ClientPortalModule extends BaseModule {
       this.showLoginError(error instanceof Error ? error.message : 'Login failed');
     } finally {
       this.setLoginLoading(false);
-    }
-  }
-
-  private async loadMockUserProjects(user: {
-    id: number;
-    email: string;
-    name: string;
-  }): Promise<void> {
-    try {
-      // Create sample project data based on user
-      const sampleProject: ClientProject = {
-        id: `project-${user.id}-001`,
-        projectName: 'Your Website Project',
-        description: 'Custom website development based on your intake form requirements.',
-        clientId: user.email,
-        clientName: user.name || 'Valued Client',
-        status: 'pending' as ClientProjectStatus,
-        priority: 'medium',
-        progress: 25,
-        startDate: new Date().toISOString().split('T')[0],
-        estimatedEndDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split('T')[0],
-        updates: [
-          {
-            id: 'update-001',
-            date: new Date().toISOString().split('T')[0],
-            title: 'Project Intake Received',
-            description:
-              'Your project details have been received and we\'re reviewing your requirements.',
-            author: 'No Bhad Codes Team',
-            type: 'general'
-          },
-          {
-            id: 'update-002',
-            date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            title: 'Account Activated',
-            description:
-              'Your client account has been activated and you now have access to this portal.',
-            author: 'System',
-            type: 'general'
-          }
-        ],
-        files: [],
-        messages: [
-          {
-            id: 'msg-001',
-            sender: 'No Bhad Codes Team',
-            senderRole: 'system',
-            message: 'Welcome to your project portal! We\'ll keep you updated on progress here.',
-            timestamp: new Date().toISOString(),
-            isRead: false
-          }
-        ],
-        milestones: [
-          {
-            id: 'milestone-001',
-            title: 'Project Planning',
-            description: 'Review requirements and create detailed project plan',
-            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            isCompleted: false,
-            deliverables: ['Requirements analysis', 'Project timeline', 'Technical specification']
-          },
-          {
-            id: 'milestone-002',
-            title: 'Design Phase',
-            description: 'Create mockups and design system',
-            dueDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            isCompleted: false,
-            deliverables: ['Wireframes', 'Visual designs', 'Style guide']
-          }
-        ]
-      };
-
-      // Set client name in header
-      const clientNameElement = document.getElementById('client-name');
-      if (clientNameElement) {
-        clientNameElement.textContent = user.name || user.email || 'Client';
-      }
-
-      this.populateProjectsList([sampleProject]);
-    } catch (error) {
-      console.error('Failed to load projects:', error);
-      // Show error message or fallback
-      if (this.projectsList) {
-        this.projectsList.innerHTML =
-          '<div class="error-message"><p>Failed to load projects. Please try refreshing the page.</p></div>';
-      }
     }
   }
 
@@ -1033,8 +899,16 @@ export class ClientPortalModule extends BaseModule {
 
       if (!projectsResponse.ok) {
         console.error('[ClientPortal] Failed to fetch projects:', projectsResponse.status);
-        // Fall back to mock data if API fails
-        return this.loadMockUserProjects(user);
+        // Show error state
+        const clientNameElement = document.getElementById('client-name');
+        if (clientNameElement) {
+          clientNameElement.textContent = user.name || user.email || 'Client';
+        }
+        if (this.projectsList) {
+          this.projectsList.innerHTML =
+            '<div class="error-message"><p>Unable to load projects. Please try again later.</p></div>';
+        }
+        return;
       }
 
       const projectsData = await projectsResponse.json();
@@ -1114,9 +988,16 @@ export class ClientPortalModule extends BaseModule {
 
       this.populateProjectsList(clientProjects);
     } catch (error) {
-      console.error('[ClientPortal] Failed to load real projects:', error);
-      // Fall back to mock data on error
-      return this.loadMockUserProjects(user);
+      console.error('[ClientPortal] Failed to load projects:', error);
+      // Show error state
+      const clientNameElement = document.getElementById('client-name');
+      if (clientNameElement) {
+        clientNameElement.textContent = user.name || user.email || 'Client';
+      }
+      if (this.projectsList) {
+        this.projectsList.innerHTML =
+          '<div class="error-message"><p>Unable to load projects. Please try again later.</p></div>';
+      }
     }
   }
 
@@ -1441,9 +1322,8 @@ export class ClientPortalModule extends BaseModule {
   private async uploadFiles(files: File[]): Promise<void> {
     const authMode = sessionStorage.getItem('client_auth_mode');
 
-    // Demo mode check
-    if (!authMode || authMode === 'demo') {
-      alert('File upload not available in demo mode. Please log in to upload files.');
+    if (!authMode) {
+      alert('Please log in to upload files.');
       return;
     }
 
@@ -1777,14 +1657,6 @@ export class ClientPortalModule extends BaseModule {
       return;
     }
 
-    // Skip further auth check for demo mode
-    if (authMode === 'demo') {
-      console.log('[ClientPortal] Demo mode detected, showing dashboard');
-      this.isLoggedIn = true;
-      this.showDashboard();
-      return;
-    }
-
     try {
       const response = await fetch(`${ClientPortalModule.API_BASE}/profile`, {
         credentials: 'include' // Include HttpOnly cookies
@@ -1802,7 +1674,7 @@ export class ClientPortalModule extends BaseModule {
           return;
         }
 
-        await this.loadMockUserProjects({
+        await this.loadRealUserProjects({
           id: data.user.id,
           email: data.user.email,
           name: data.user.contactName || data.user.companyName || data.user.email.split('@')[0]

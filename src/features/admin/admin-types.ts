@@ -220,7 +220,6 @@ export interface ApiResponse<T> {
 // Dashboard context passed to modules
 export interface AdminDashboardContext {
   getAuthToken: () => string | null;
-  isDemo: () => boolean;
   showNotification: (message: string, type: 'success' | 'error' | 'info') => void;
   refreshData: () => Promise<void>;
   switchTab: (tab: string) => void;

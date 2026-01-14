@@ -47,11 +47,6 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
   // Store context for global functions (activate from details panel)
   setLeadsContext(ctx);
 
-  if (ctx.isDemo()) {
-    console.log('[AdminLeads] Skipping load - demo mode');
-    return;
-  }
-
   console.log('[AdminLeads] Loading leads...');
 
   try {
@@ -308,8 +303,6 @@ export async function activateLead(
   leadId: number,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  if (ctx.isDemo()) return;
-
   try {
     const response = await fetch(`/api/admin/leads/${leadId}/activate`, {
       method: 'POST',
@@ -335,8 +328,6 @@ export async function inviteLead(
   email: string,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  if (ctx.isDemo()) return;
-
   try {
     const response = await fetch(`/api/admin/leads/${leadId}/invite`, {
       method: 'POST',

@@ -49,14 +49,16 @@ export const APP_CONSTANTS = {
     API_REQUESTS: 100
   },
 
-  // Project status colors
-  PROJECT_COLORS: {
-    pending: '#FFA500',
-    'in-progress': '#3B82F6',
-    'in-review': '#8B5CF6',
-    completed: '#10B981',
-    'on-hold': '#6B7280',
-    default: '#6B7280'
+  // Project status colors - CSS variable references
+  // These map to semantic status colors defined in colors.css
+  // Use getProjectStatusColor() which reads from CSS variables at runtime
+  PROJECT_STATUS_CSS_VARS: {
+    pending: '--color-status-pending-border',
+    'in-progress': '--color-status-progress-border',
+    'in-review': '--color-status-review-border',
+    completed: '--color-status-completed-border',
+    'on-hold': '--color-status-hold-border',
+    default: '--color-status-hold-border'
   },
 
   // Theme colors (use CSS variables when possible, these are fallbacks)
@@ -133,13 +135,31 @@ export const APP_CONSTANTS = {
 } as const;
 
 /**
- * Get project status color
+ * Get project status color from CSS variables
+ * Reads the color value at runtime from CSS custom properties
  */
 export function getProjectStatusColor(status: string): string {
-  return (
-    APP_CONSTANTS.PROJECT_COLORS[status as keyof typeof APP_CONSTANTS.PROJECT_COLORS] ||
-    APP_CONSTANTS.PROJECT_COLORS.default
-  );
+  const cssVarName =
+    APP_CONSTANTS.PROJECT_STATUS_CSS_VARS[
+      status as keyof typeof APP_CONSTANTS.PROJECT_STATUS_CSS_VARS
+    ] || APP_CONSTANTS.PROJECT_STATUS_CSS_VARS.default;
+
+  // Read color from CSS variable at runtime
+  if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    const computedStyle = window.getComputedStyle(document.documentElement);
+    const color = computedStyle.getPropertyValue(cssVarName).trim();
+    if (color) return color;
+  }
+
+  // Fallback for SSR or if CSS variable not found
+  const fallbackColors: Record<string, string> = {
+    '--color-status-pending-border': '#f59e0b',
+    '--color-status-progress-border': '#3b82f6',
+    '--color-status-review-border': '#8b5cf6',
+    '--color-status-completed-border': '#10b981',
+    '--color-status-hold-border': '#6b7280'
+  };
+  return fallbackColors[cssVarName] || '#6b7280';
 }
 
 /**

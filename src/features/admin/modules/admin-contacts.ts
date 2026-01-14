@@ -28,8 +28,6 @@ export function getContactsData(): ContactSubmission[] {
 }
 
 export async function loadContacts(ctx: AdminDashboardContext): Promise<void> {
-  if (ctx.isDemo()) return;
-
   try {
     const response = await fetch('/api/admin/contact-submissions', {
       credentials: 'include'
@@ -179,8 +177,6 @@ export async function updateContactStatus(
   status: string,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  if (ctx.isDemo()) return;
-
   try {
     const response = await fetch(`/api/admin/contact-submissions/${id}/status`, {
       method: 'PUT',
