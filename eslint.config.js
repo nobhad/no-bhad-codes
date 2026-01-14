@@ -62,6 +62,7 @@ const commonGlobals = {
   URLSearchParams: 'readonly',
   Headers: 'readonly',
   Request: 'readonly',
+  RequestInit: 'readonly',
   Response: 'readonly',
 
   // Browser APIs
