@@ -14,6 +14,7 @@ import { AdminProjectDetails } from './admin-project-details';
 import type { PerformanceMetrics, PerformanceAlert } from '../../services/performance-service';
 import { SanitizationUtils } from '../../utils/sanitization-utils';
 import type { AdminDashboardContext } from './admin-types';
+import { getChartColor, getChartColorWithAlpha } from '../../config/constants';
 
 // Dynamic module loaders for code splitting
 import {
@@ -1550,7 +1551,7 @@ class AdminDashboard {
     let chart: InstanceType<typeof ChartJS>;
 
     if (chartType === 'visitors') {
-      // Line chart for visitor trends
+      // Line chart for visitor trends - colors from CSS variables
       chart = new ChartJS(ctx, {
         type: 'line',
         data: {
@@ -1559,16 +1560,16 @@ class AdminDashboard {
             {
               label: 'Visitors',
               data: [120, 190, 150, 220, 180, 250, 210],
-              borderColor: '#dc2626',
-              backgroundColor: 'rgba(0, 255, 65, 0.1)',
+              borderColor: getChartColor('PRIMARY'),
+              backgroundColor: getChartColorWithAlpha('PRIMARY', 0.1),
               tension: 0.4,
               fill: true
             },
             {
               label: 'Page Views',
               data: [300, 450, 380, 520, 420, 600, 480],
-              borderColor: '#333333',
-              backgroundColor: 'rgba(51, 51, 51, 0.1)',
+              borderColor: getChartColor('DARK'),
+              backgroundColor: getChartColorWithAlpha('DARK', 0.1),
               tension: 0.4,
               fill: true
             }
@@ -1590,7 +1591,7 @@ class AdminDashboard {
             y: {
               beginAtZero: true,
               grid: {
-                color: 'rgba(0, 0, 0, 0.1)'
+                color: getChartColorWithAlpha('DARK', 0.1)
               }
             },
             x: {
@@ -1602,7 +1603,7 @@ class AdminDashboard {
         }
       });
     } else {
-      // Doughnut chart for traffic sources
+      // Doughnut chart for traffic sources - colors from CSS variables
       chart = new ChartJS(ctx, {
         type: 'doughnut',
         data: {
@@ -1610,8 +1611,14 @@ class AdminDashboard {
           datasets: [
             {
               data: [35, 30, 20, 10, 5],
-              backgroundColor: ['#dc2626', '#333333', '#666666', '#999999', '#cccccc'],
-              borderColor: '#ffffff',
+              backgroundColor: [
+                getChartColor('PRIMARY'),
+                getChartColor('DARK'),
+                getChartColor('GRAY_600'),
+                getChartColor('GRAY_400'),
+                getChartColor('GRAY_300')
+              ],
+              borderColor: getChartColor('WHITE'),
               borderWidth: 2
             }
           ]

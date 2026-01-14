@@ -18,6 +18,7 @@ import {
   type ContactBackend
 } from '../../services/contact-service';
 import { SanitizationUtils } from '../../utils/sanitization-utils';
+import { getFormspreeUrl } from '../../config/api';
 import type { ModuleOptions } from '../../types/modules';
 import { gsap } from 'gsap';
 import { getDebugMode } from '../../core/env';
@@ -510,7 +511,7 @@ export class ContactFormModule extends BaseModule {
       throw new Error('Formspree form ID not configured in environment variables');
     }
 
-    const response = await fetch(`https://formspree.io/f/${formId}`, {
+    const response = await fetch(getFormspreeUrl(formId), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)

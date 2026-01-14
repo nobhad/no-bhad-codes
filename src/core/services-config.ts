@@ -89,10 +89,11 @@ export function registerServices(): void {
     'VisitorTrackingService',
     async () => {
       const { VisitorTrackingService } = await import('../services/visitor-tracking');
-      // Use API endpoint - Railway in production, localhost in dev
-      const apiUrl = import.meta.env.PROD
-        ? 'https://no-bhad-codes-production.up.railway.app'
-        : 'http://localhost:4001';
+      // Use API URL from environment variable - avoids hardcoding production URLs
+      // VITE_API_URL should be set in .env files for each environment
+      const apiUrl =
+        import.meta.env.VITE_API_URL ||
+        (import.meta.env.PROD ? '' : 'http://localhost:4001');
       return new VisitorTrackingService({
         enableTracking: true,
         respectDoNotTrack: false, // Track all visitors for analytics

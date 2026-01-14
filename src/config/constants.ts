@@ -70,6 +70,18 @@ export const APP_CONSTANTS = {
     NEUTRAL: 'var(--color-neutral-400, #6B7280)'
   },
 
+  // Chart color CSS variable mappings
+  // Use getChartColors() to read these at runtime
+  CHART_COLOR_VARS: {
+    PRIMARY: '--color-brand-primary',
+    DARK: '--color-dark',
+    GRAY_600: '--color-gray-600',
+    GRAY_400: '--color-gray-400',
+    GRAY_300: '--color-gray-300',
+    WHITE: '--color-white',
+    GRID: '--color-shadow-sm'
+  },
+
   // Storage keys
   STORAGE_KEYS: {
     AUTH_TOKEN: 'auth_token',
@@ -174,4 +186,81 @@ export function getBreakpoint(size: keyof typeof APP_CONSTANTS.BREAKPOINTS): num
  */
 export function getStorageKey(key: keyof typeof APP_CONSTANTS.STORAGE_KEYS): string {
   return APP_CONSTANTS.STORAGE_KEYS[key];
+}
+
+/**
+ * Chart color fallbacks for SSR or when CSS variables unavailable
+ */
+const CHART_COLOR_FALLBACKS: Record<string, string> = {
+  '--color-brand-primary': '#dc2626',
+  '--color-dark': '#333333',
+  '--color-gray-600': '#525252',
+  '--color-gray-400': '#a3a3a3',
+  '--color-gray-300': '#d4d4d4',
+  '--color-white': '#ffffff',
+  '--color-shadow-sm': 'rgba(0, 0, 0, 0.05)'
+};
+
+/**
+ * Get a single chart color from CSS variable
+ */
+export function getChartColor(
+  colorKey: keyof typeof APP_CONSTANTS.CHART_COLOR_VARS
+): string {
+  const cssVarName = APP_CONSTANTS.CHART_COLOR_VARS[colorKey];
+
+  if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    const computedStyle = window.getComputedStyle(document.documentElement);
+    const color = computedStyle.getPropertyValue(cssVarName).trim();
+    if (color) return color;
+  }
+
+  return CHART_COLOR_FALLBACKS[cssVarName] || '#333333';
+}
+
+/**
+ * Get all chart colors as an object for Chart.js configuration
+ * Reads from CSS variables at runtime
+ */
+export function getChartColors(): Record<string, string> {
+  const colors: Record<string, string> = {};
+
+  for (const key of Object.keys(
+    APP_CONSTANTS.CHART_COLOR_VARS
+  ) as (keyof typeof APP_CONSTANTS.CHART_COLOR_VARS)[]) {
+    colors[key] = getChartColor(key);
+  }
+
+  return colors;
+}
+
+/**
+ * Get chart color with alpha transparency
+ */
+export function getChartColorWithAlpha(
+  colorKey: keyof typeof APP_CONSTANTS.CHART_COLOR_VARS,
+  alpha: number
+): string {
+  const color = getChartColor(colorKey);
+
+  // If it's already rgba, extract and replace alpha
+  if (color.startsWith('rgba')) {
+    return color.replace(/[\d.]+\)$/, `${alpha})`);
+  }
+
+  // If it's rgb, convert to rgba
+  if (color.startsWith('rgb(')) {
+    return color.replace('rgb(', 'rgba(').replace(')', `, ${alpha})`);
+  }
+
+  // If it's hex, convert to rgba
+  if (color.startsWith('#')) {
+    const hex = color.slice(1);
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  return color;
 }
