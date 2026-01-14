@@ -1581,6 +1581,12 @@ body.modal-open .admin-content {
   border: none;
 }
 
+/* Focus state - use box-shadow since no border */
+.modal-dropdown.custom-dropdown .custom-dropdown-trigger:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-brand-primary);
+}
+
 /* When open, no border on trigger either */
 .modal-dropdown.custom-dropdown.open .custom-dropdown-trigger {
   border: none;

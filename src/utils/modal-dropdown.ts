@@ -45,9 +45,10 @@ export function initModalDropdown(
   const menu = document.createElement('ul');
   menu.className = 'custom-dropdown-menu';
 
-  // Add options to menu
+  // Add options to menu (skip currently selected)
   selectOptions.forEach(opt => {
     if (opt.value === '') return; // Skip placeholder options
+    if (opt.value === currentValue) return; // Skip currently selected option
 
     const li = document.createElement('li');
     li.className = 'custom-dropdown-item';
@@ -58,10 +59,6 @@ export function initModalDropdown(
     nameSpan.className = 'dropdown-item-name';
     nameSpan.textContent = opt.text;
     li.appendChild(nameSpan);
-
-    if (opt.value === currentValue) {
-      li.classList.add('selected');
-    }
 
     li.addEventListener('click', () => {
       selectOption(wrapper, selectElement, opt.value, opt.text, options.onChange);
@@ -162,13 +159,8 @@ function selectOption(
   // Update original select (for form submission compatibility)
   originalSelect.value = value;
 
-  // Update selected state on options
-  wrapper.querySelectorAll('.custom-dropdown-item').forEach(opt => {
-    opt.classList.remove('selected');
-    if ((opt as HTMLElement).dataset.value === value) {
-      opt.classList.add('selected');
-    }
-  });
+  // Rebuild menu to hide newly selected option and show previously selected
+  rebuildMenu(wrapper, originalSelect, value, onChange);
 
   // Close dropdown
   closeDropdown(wrapper);
@@ -180,6 +172,44 @@ function selectOption(
 
   // Dispatch change event on original select for any existing listeners
   originalSelect.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+/**
+ * Rebuild menu items, hiding the currently selected option
+ */
+function rebuildMenu(
+  wrapper: HTMLElement,
+  originalSelect: HTMLSelectElement,
+  currentValue: string,
+  onChange?: (value: string, label: string) => void
+): void {
+  const menu = wrapper.querySelector('.custom-dropdown-menu');
+  if (!menu) return;
+
+  // Clear existing items
+  menu.innerHTML = '';
+
+  // Rebuild from original select options
+  const selectOptions = Array.from(originalSelect.options);
+  selectOptions.forEach(opt => {
+    if (opt.value === '') return; // Skip placeholder
+    if (opt.value === currentValue) return; // Skip currently selected
+
+    const li = document.createElement('li');
+    li.className = 'custom-dropdown-item';
+    li.dataset.value = opt.value;
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'dropdown-item-name';
+    nameSpan.textContent = opt.text;
+    li.appendChild(nameSpan);
+
+    li.addEventListener('click', () => {
+      selectOption(wrapper, originalSelect, opt.value, opt.text, onChange);
+    });
+
+    menu.appendChild(li);
+  });
 }
 
 /**
@@ -214,27 +244,31 @@ export function getModalDropdownValue(wrapper: HTMLElement): string {
  * Set the value of a modal dropdown
  */
 export function setModalDropdownValue(wrapper: HTMLElement, value: string): void {
-  const option = wrapper.querySelector(`.custom-dropdown-item[data-value="${value}"]`) as HTMLElement;
-  if (option) {
-    const nameEl = option.querySelector('.dropdown-item-name');
-    const label = nameEl?.textContent || option.textContent || '';
+  // Find the original select element (hidden after the wrapper)
+  const originalSelect = wrapper.nextElementSibling as HTMLSelectElement;
+  if (!originalSelect || originalSelect.tagName !== 'SELECT') return;
 
-    // Update trigger text
-    const textEl = wrapper.querySelector('.custom-dropdown-text');
-    if (textEl) {
-      textEl.textContent = label;
-    }
+  // Find the option in the original select
+  const matchingOption = Array.from(originalSelect.options).find(opt => opt.value === value);
+  if (!matchingOption) return;
 
-    // Update hidden input
-    const hiddenInput = wrapper.querySelector('input[type="hidden"]') as HTMLInputElement;
-    if (hiddenInput) {
-      hiddenInput.value = value;
-    }
+  const label = matchingOption.text;
 
-    // Update selected state
-    wrapper.querySelectorAll('.custom-dropdown-item').forEach(opt => {
-      opt.classList.remove('selected');
-    });
-    option.classList.add('selected');
+  // Update trigger text
+  const textEl = wrapper.querySelector('.custom-dropdown-text');
+  if (textEl) {
+    textEl.textContent = label;
   }
+
+  // Update hidden input
+  const hiddenInput = wrapper.querySelector('input[type="hidden"]') as HTMLInputElement;
+  if (hiddenInput) {
+    hiddenInput.value = value;
+  }
+
+  // Update original select
+  originalSelect.value = value;
+
+  // Rebuild menu to hide newly selected option
+  rebuildMenu(wrapper, originalSelect, value);
 }
