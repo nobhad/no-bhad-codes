@@ -510,7 +510,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     // Show modal and lock body scroll
     modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+    document.body.classList.add('modal-open');
 
     // Setup close handlers
     const closeBtn = document.getElementById('edit-project-close');
@@ -519,7 +519,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     const closeModal = () => {
       modal.classList.add('hidden');
-      document.body.style.overflow = '';
+      document.body.classList.remove('modal-open');
     };
 
     closeBtn?.addEventListener('click', closeModal, { once: true });
