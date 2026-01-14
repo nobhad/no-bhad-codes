@@ -9,7 +9,8 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { apiFetch, apiPost } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
+import { createTableDropdown, LEAD_STATUS_OPTIONS } from '../../../utils/table-dropdown';
 import type { Lead, AdminDashboardContext } from '../admin-types';
 
 interface LeadsData {
@@ -23,6 +24,7 @@ interface LeadsData {
 }
 
 let leadsData: Lead[] = [];
+let storedContext: AdminDashboardContext | null = null;
 
 /**
  * Format budget/timeline values with proper capitalization
@@ -131,7 +133,7 @@ function updateLeadsDisplay(data: LeadsData, ctx: AdminDashboardContext): void {
   renderLeadsTable(data.leads, ctx);
 }
 
-function renderLeadsTable(leads: Lead[], _ctx: AdminDashboardContext): void {
+function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
   const tableBody = document.getElementById('leads-table-body');
   if (!tableBody) return;
 
@@ -140,41 +142,73 @@ function renderLeadsTable(leads: Lead[], _ctx: AdminDashboardContext): void {
     return;
   }
 
-  tableBody.innerHTML = leads
-    .map((lead) => {
-      const date = new Date(lead.created_at).toLocaleDateString();
-      const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.contact_name || '-'));
-      const safeCompanyName = lead.company_name ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.company_name)) : '-';
-      const safeEmail = SanitizationUtils.escapeHtml(lead.email || '-');
-      const leadAny = lead as unknown as Record<string, string>;
-      const projectType = leadAny.project_type || '-';
-      const displayType = projectType !== '-' ? projectType.charAt(0).toUpperCase() + projectType.slice(1) : '-';
-      const displayBudget = formatDisplayValue(leadAny.budget_range);
-      const status = lead.status || 'new';
-      const displayStatus = status.charAt(0).toUpperCase() + status.slice(1);
+  // Clear and rebuild table
+  tableBody.innerHTML = '';
 
-      return `
-        <tr data-lead-id="${lead.id}">
-          <td>${date}</td>
-          <td>${safeContactName}</td>
-          <td>${safeCompanyName}</td>
-          <td>${safeEmail}</td>
-          <td>${SanitizationUtils.escapeHtml(displayType)}</td>
-          <td>${SanitizationUtils.escapeHtml(displayBudget)}</td>
-          <td>${displayStatus}</td>
-        </tr>
-      `;
-    })
-    .join('');
+  leads.forEach((lead) => {
+    const date = new Date(lead.created_at).toLocaleDateString();
+    const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.contact_name || '-'));
+    const safeCompanyName = lead.company_name ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.company_name)) : '-';
+    const safeEmail = SanitizationUtils.escapeHtml(lead.email || '-');
+    const leadAny = lead as unknown as Record<string, string>;
+    const projectType = leadAny.project_type || '-';
+    const displayType = projectType !== '-' ? projectType.charAt(0).toUpperCase() + projectType.slice(1) : '-';
+    const displayBudget = formatDisplayValue(leadAny.budget_range);
+    const status = lead.status || 'pending';
 
-  // Add click handlers - click row to view details
-  const rows = tableBody.querySelectorAll('tr[data-lead-id]');
-  rows.forEach((row) => {
-    row.addEventListener('click', () => {
-      const leadId = parseInt((row as HTMLElement).dataset.leadId || '0');
-      showLeadDetails(leadId);
+    const row = document.createElement('tr');
+    row.dataset.leadId = String(lead.id);
+
+    // Add data cells
+    row.innerHTML = `
+      <td>${date}</td>
+      <td>${safeContactName}</td>
+      <td>${safeCompanyName}</td>
+      <td>${safeEmail}</td>
+      <td>${SanitizationUtils.escapeHtml(displayType)}</td>
+      <td>${SanitizationUtils.escapeHtml(displayBudget)}</td>
+      <td class="status-cell"></td>
+    `;
+
+    // Create custom dropdown for status
+    const statusCell = row.querySelector('.status-cell');
+    if (statusCell) {
+      const dropdown = createTableDropdown({
+        options: LEAD_STATUS_OPTIONS,
+        currentValue: status,
+        onChange: async (newStatus) => {
+          await updateLeadStatus(lead.id, newStatus, ctx);
+          // Update local data
+          lead.status = newStatus as Lead['status'];
+        }
+      });
+      statusCell.appendChild(dropdown);
+    }
+
+    // Add click handler for row (excluding status cell)
+    row.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('.table-dropdown')) return;
+      showLeadDetails(lead.id);
     });
+
+    tableBody.appendChild(row);
   });
+}
+
+async function updateLeadStatus(id: number, status: string, ctx: AdminDashboardContext): Promise<void> {
+  try {
+    const response = await apiPut(`/api/admin/leads/${id}/status`, { status });
+    if (response.ok) {
+      ctx.showNotification('Status updated', 'success');
+    } else if (response.status !== 401) {
+      const error = await response.json();
+      ctx.showNotification(error.message || 'Failed to update status', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminLeads] Failed to update status:', error);
+    ctx.showNotification('Failed to update status', 'error');
+  }
 }
 
 export function showLeadDetails(leadId: number): void {
@@ -209,66 +243,57 @@ export function showLeadDetails(leadId: number): void {
     <div class="details-content">
       <div class="project-detail-meta">
         <div class="meta-item">
-          <span class="meta-label">Name</span>
+          <span class="field-label">Name</span>
           <span class="meta-value">${safeContactName}</span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">Email</span>
+          <span class="field-label">Email</span>
           <span class="meta-value">${safeEmail}</span>
         </div>
         ${safeCompanyName ? `
         <div class="meta-item">
-          <span class="meta-label">Company</span>
+          <span class="field-label">Company</span>
           <span class="meta-value">${safeCompanyName}</span>
         </div>
         ` : ''}
         <div class="meta-item">
-          <span class="meta-label">Phone</span>
+          <span class="field-label">Phone</span>
           <span class="meta-value">${safePhone}</span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">Status</span>
-          <span class="meta-value">
-            <select class="status-select" id="panel-lead-status-select" data-id="${lead.id}">
-              <option value="new" ${lead.status === 'new' ? 'selected' : ''}>New</option>
-              <option value="pending" ${lead.status === 'pending' ? 'selected' : ''}>Pending</option>
-              <option value="qualified" ${lead.status === 'qualified' ? 'selected' : ''}>Qualified</option>
-              <option value="contacted" ${lead.status === 'contacted' ? 'selected' : ''}>Contacted</option>
-              <option value="converted" ${lead.status === 'converted' ? 'selected' : ''}>Converted</option>
-              <option value="lost" ${lead.status === 'lost' ? 'selected' : ''}>Lost</option>
-            </select>
-          </span>
+          <span class="field-label">Status</span>
+          <span class="meta-value" id="panel-lead-status-container"></span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">Source</span>
+          <span class="field-label">Source</span>
           <span class="meta-value">${safeSource}</span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">Project Type</span>
+          <span class="field-label">Project Type</span>
           <span class="meta-value">${safeProjectType}</span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">Budget</span>
+          <span class="field-label">Budget</span>
           <span class="meta-value">${safeBudget}</span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">Timeline</span>
+          <span class="field-label">Timeline</span>
           <span class="meta-value">${safeTimeline}</span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">Created</span>
+          <span class="field-label">Created</span>
           <span class="meta-value">${new Date(lead.created_at).toLocaleString()}</span>
         </div>
       </div>
       <div class="project-description-row">
         <div class="meta-item description-item">
-          <span class="meta-label">Description</span>
+          <span class="field-label">Description</span>
           <span class="meta-value">${safeDescription}</span>
         </div>
       </div>
       <div class="project-description-row">
         <div class="meta-item description-item">
-          <span class="meta-label">Features</span>
+          <span class="field-label">Features</span>
           <span class="meta-value">${safeFeatures}</span>
         </div>
       </div>
@@ -278,6 +303,30 @@ export function showLeadDetails(leadId: number): void {
       </div>
     </div>
   `;
+
+  // Add custom dropdown for status in panel
+  const statusContainer = detailsPanel.querySelector('#panel-lead-status-container');
+  if (statusContainer && storedContext) {
+    const dropdown = createTableDropdown({
+      options: LEAD_STATUS_OPTIONS,
+      currentValue: lead.status || 'pending',
+      onChange: async (newStatus) => {
+        await updateLeadStatus(lead.id, newStatus, storedContext!);
+        lead.status = newStatus as Lead['status'];
+        // Update table row dropdown if visible
+        const tableDropdown = document.querySelector(`tr[data-lead-id="${lead.id}"] .table-dropdown`);
+        if (tableDropdown) {
+          const textEl = tableDropdown.querySelector('.custom-dropdown-text');
+          if (textEl) {
+            const option = LEAD_STATUS_OPTIONS.find(o => o.value === newStatus);
+            textEl.textContent = option?.label || newStatus;
+          }
+          (tableDropdown as HTMLElement).dataset.status = newStatus;
+        }
+      }
+    });
+    statusContainer.appendChild(dropdown);
+  }
 
   // Add click handler for activate button
   const activateBtn = detailsPanel.querySelector('.details-activate-btn');
@@ -306,9 +355,6 @@ export function showLeadDetails(leadId: number): void {
   if (overlay) overlay.classList.remove('hidden');
   detailsPanel.classList.remove('hidden');
 }
-
-// Store context for global functions
-let storedContext: AdminDashboardContext | null = null;
 
 export function setLeadsContext(ctx: AdminDashboardContext): void {
   storedContext = ctx;
