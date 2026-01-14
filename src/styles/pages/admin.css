@@ -55,6 +55,43 @@
 }
 
 /* ================================================
+   ADMIN PORTAL - FORM INPUT STYLES
+   ================================================
+   Separate from portfolio site styling.
+   Inputs should NOT be bold.
+   ================================================ */
+[data-page="admin"] input,
+[data-page="admin"] textarea,
+[data-page="admin"] select,
+[data-page="admin"] .form-input {
+  font-weight: normal;
+  background: var(--portal-bg-medium);
+  color: var(--portal-text-light);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+[data-page="admin"] input::placeholder,
+[data-page="admin"] textarea::placeholder {
+  font-weight: normal;
+  color: var(--portal-text-muted);
+  opacity: 0.7;
+}
+
+[data-page="admin"] input:focus,
+[data-page="admin"] textarea:focus,
+[data-page="admin"] select:focus,
+[data-page="admin"] .form-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(var(--color-brand-primary-rgb), 0.25);
+}
+
+/* ================================================
    ADMIN PORTAL - CARD SHADOWS (matches sidebar)
    ================================================ */
 [data-page="admin"] .stat-card,
@@ -1486,7 +1523,7 @@ body.modal-open .dashboard-content {
   border-radius: var(--border-radius-card);
   box-shadow: var(--shadow-panel);
   width: 100%;
-  max-width: 600px;
+  max-width: 860px;
   max-height: 90vh;
   overflow: hidden;
   display: flex;
@@ -1535,10 +1572,20 @@ body.modal-open .dashboard-content {
   color: var(--color-text-primary);
 }
 
+/* Form wrapper inside modal needs flex to allow body scrolling */
+.admin-modal form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .admin-modal-body {
-  padding: 0 var(--space-5);
+  padding: var(--space-4) var(--space-5);
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -1591,10 +1638,10 @@ body.modal-open .dashboard-content {
   border-color: var(--color-brand-primary);
 }
 
-/* When open, no border on trigger either */
+/* When open - show brand primary border, hide bottom to connect with menu */
 .modal-dropdown.custom-dropdown.open .custom-dropdown-trigger {
-  border: none;
-  border-bottom: none;
+  border-color: var(--color-brand-primary);
+  border-bottom-color: transparent;
 }
 
 /* Menu also has no border */
