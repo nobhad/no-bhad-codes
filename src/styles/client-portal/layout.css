@@ -3,6 +3,11 @@
    Dashboard structure, containers, page framework
    ===================================================== */
 
+/* Page background - match main content area */
+body[data-page="client-portal"] {
+  background: var(--portal-bg-medium);
+}
+
 /* Footer is hidden via footer.css [data-page="client-portal"] selector */
 
 /* Client Portal Main Container */
