@@ -553,9 +553,6 @@ class AdminDashboard {
   // NOTE: updateLeadsDisplay moved to admin-leads module
 
   private async loadContactSubmissions(): Promise<void> {
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') return;
-
     try {
       const response = await fetch('/api/admin/contact-submissions', {
         credentials: 'include'
@@ -655,9 +652,6 @@ class AdminDashboard {
   }
 
   private async updateContactStatus(id: number, status: string): Promise<void> {
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') return;
-
     try {
       const response = await fetch(`/api/admin/contact-submissions/${id}/status`, {
         method: 'PUT',
@@ -682,9 +676,6 @@ class AdminDashboard {
 
 
   private async inviteLead(leadId: number, email: string): Promise<void> {
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') return;
-
     const inviteBtn = document.getElementById('invite-lead-btn') as HTMLButtonElement;
     if (inviteBtn) {
       inviteBtn.disabled = true;
@@ -814,9 +805,6 @@ class AdminDashboard {
   // NOTE: updateProjectsDisplay moved to admin-projects module
 
   private async updateProjectStatus(id: number, status: string): Promise<void> {
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') return;
-
     try {
       const response = await fetch(`/api/projects/${id}`, {
         method: 'PUT',
@@ -1023,9 +1011,6 @@ class AdminDashboard {
   }
 
   private async loadThreadMessages(threadId: number): Promise<void> {
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') return;
-
     // Try new container ID first, then old one
     const container =
       document.getElementById('admin-messages-thread') ||
@@ -1130,9 +1115,6 @@ class AdminDashboard {
   private async sendMessage(): Promise<void> {
     const input = document.getElementById('admin-message-text') as HTMLInputElement;
     if (!input || !input.value.trim() || !this.selectedThreadId) return;
-
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode || authMode === 'demo') return;
 
     const message = input.value.trim();
     input.value = '';
