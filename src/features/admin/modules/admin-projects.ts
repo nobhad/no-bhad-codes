@@ -423,7 +423,7 @@ function openEditProjectModal(project: LeadProject): void {
 
   // Show modal and lock body scroll
   modal.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
+  document.body.classList.add('modal-open');
 
   // Setup close handlers (only once per modal lifecycle)
   setupEditProjectModalHandlers(modal);
@@ -479,7 +479,7 @@ function setupEditProjectModalHandlers(modal: HTMLElement): void {
 
   const closeModal = () => {
     modal.classList.add('hidden');
-    document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
   };
 
   closeBtn?.addEventListener('click', closeModal);

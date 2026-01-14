@@ -506,6 +506,12 @@
   overflow-y: auto;
 }
 
+/* Lock scroll when modal is open */
+body.modal-open,
+body.modal-open .admin-content {
+  overflow: hidden !important;
+}
+
 .tab-content {
   display: none;
   animation: fadeIn var(--duration-normal) var(--easing-decelerated);
@@ -1468,6 +1474,9 @@
   /* Backdrop blur for depth */
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
+  /* Prevent scroll on overlay */
+  overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 .admin-modal {
@@ -1533,6 +1542,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  /* Prevent scroll chaining to body */
+  overscroll-behavior: contain;
 }
 
 .admin-modal-body .form-group {
@@ -1559,127 +1570,26 @@
 }
 
 /* ================================================
-   Custom Modal Dropdown
+   Modal Dropdown Modifier
    ================================================
-   A reusable custom dropdown for modals. Based on the
-   messages tab dropdown styling but without the border.
+   Uses the same custom-dropdown classes from messages tab
+   but removes the border for modal use.
    ================================================ */
-.modal-dropdown {
-  position: relative;
-  width: 100%;
-}
 
-.modal-dropdown-trigger {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  box-sizing: border-box;
-  padding: var(--space-2) var(--space-3);
+/* Remove border from modal dropdown trigger */
+.modal-dropdown.custom-dropdown .custom-dropdown-trigger {
   border: none;
-  border-radius: var(--portal-radius-lg);
-  background-color: var(--color-black);
-  color: var(--portal-text-light);
-  font-size: var(--font-size-base);
-  cursor: pointer;
-  text-align: left;
-  box-shadow: var(--shadow-panel);
 }
 
-.modal-dropdown-trigger:hover {
-  background-color: var(--portal-bg-medium);
-}
-
-.modal-dropdown-trigger:focus {
-  outline: none;
-  box-shadow: var(--shadow-panel), 0 0 0 2px var(--color-brand-primary);
-}
-
-.modal-dropdown-trigger .dropdown-text {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.modal-dropdown-trigger .dropdown-arrow {
-  flex-shrink: 0;
-  margin-left: var(--space-2);
-  transition: transform 0.2s ease;
-  color: var(--portal-text-secondary);
-}
-
-.modal-dropdown.open .dropdown-arrow {
-  transform: rotate(180deg);
-}
-
-.modal-dropdown.open .modal-dropdown-trigger {
-  border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
-  box-shadow: var(--shadow-dropdown);
-  clip-path: inset(-20px -20px 0 -20px);
-  position: relative;
-  z-index: 101;
-}
-
-/* Dropdown menu */
-.modal-dropdown-menu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin: 0;
-  margin-top: 0;
-  padding: 0;
-  list-style: none;
-  background-color: var(--color-black);
-  border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
-  max-height: 300px;
-  overflow-y: auto;
-  z-index: 100;
-  box-shadow: var(--shadow-panel);
-}
-
-.modal-dropdown.open .modal-dropdown-menu {
-  display: block;
-  box-shadow: var(--shadow-spread);
-  clip-path: inset(0 -20px -20px -20px);
-}
-
-/* Dropdown options */
-.modal-dropdown-option {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-4);
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
+/* When open, no border on trigger either */
+.modal-dropdown.custom-dropdown.open .custom-dropdown-trigger {
   border: none;
-  background: transparent;
-  color: var(--portal-text-light);
-  font-size: var(--font-size-base);
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
+  border-bottom: none;
 }
 
-.modal-dropdown-option:hover {
-  background-color: var(--color-brand-primary);
-  color: var(--portal-text-light);
-}
-
-.modal-dropdown-option.selected {
-  background-color: rgba(var(--color-brand-primary-rgb, 0, 175, 240), 0.2);
-  color: var(--portal-text-light);
-}
-
-.modal-dropdown-option:last-child {
-  border-radius: 0 0 calc(var(--portal-radius-lg) - 4px) calc(var(--portal-radius-lg) - 4px);
-}
-
-/* Hidden input for form submission */
-.modal-dropdown input[type="hidden"] {
-  display: none;
+/* Menu also has no border */
+.modal-dropdown.custom-dropdown .custom-dropdown-menu {
+  border: none;
 }
 
 /* ================================================
