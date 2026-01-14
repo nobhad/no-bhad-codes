@@ -70,11 +70,11 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 
 - [ ] **REDESIGN ALL PORTAL BUTTONS** - Full button redesign across admin and client portals
 - [x] Leads Management - cards should filter table
-- [ ] Fix tooltip for truncated text - currently very delayed, needs faster response
+- [x] Fix tooltip for truncated text - now uses fast CSS tooltips instead of native title delay
 - [ ] Remove current mobile styling for portal - use the plugin from main site instead
 - [ ] Custom dropdown for leads page panels - based on modal custom dropdown, bg color should match div bg
-- [ ] Add API endpoint for lead/intake status updates (panel dropdown needs backend)
-- [ ] Info icons on Analytics pages Core Web Vitals - tooltip hovers explaining what each metric means
+- [x] Add API endpoint for lead/intake status updates - PUT /api/admin/leads/:id/status
+- [x] Info icons on Analytics pages Core Web Vitals - tooltip hovers explaining what each metric means
 - [x] Unread message count badge on sidebar Messages button - red badge, right-aligned, only shows if unread > 0
 - [x] Leads count badge on sidebar - combined count of new intake/contact submissions, red badge, right-aligned
 - [x] Auto-add clients to messages dropdown - when new client added, they should appear in messages dropdown automatically

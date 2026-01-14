@@ -159,37 +159,44 @@ class AdminDashboard {
   }
 
   /**
-   * Sets up tooltips for truncated text elements
-   * Adds title attribute with full text when content is truncated
+   * Sets up fast custom tooltips for truncated text elements
+   * Uses data-tooltip attribute for instant CSS-based tooltips
    */
   private setupTruncatedTextTooltips(): void {
+    // Helper to add tooltip if text is truncated
+    const addTooltipIfTruncated = (element: HTMLElement): void => {
+      const text = element.textContent?.trim();
+      if (!text || text === '-') return;
+
+      // Only add tooltip if content is actually truncated
+      // Check if scrollWidth > clientWidth (text overflows)
+      if (element.scrollWidth > element.clientWidth || text.length > 30) {
+        element.setAttribute('data-tooltip', text);
+        // Remove native title to avoid double tooltip
+        element.removeAttribute('title');
+      }
+    };
+
     // Find all elements with truncation classes
     const truncatedElements = document.querySelectorAll('.truncate-text, .message-cell, [class*="ellipsis"]');
-
-    truncatedElements.forEach((el) => {
-      const element = el as HTMLElement;
-      // Set title to the text content for hover tooltip
-      if (element.textContent && element.textContent.trim() !== '-') {
-        element.title = element.textContent.trim();
-      }
-    });
+    truncatedElements.forEach((el) => addTooltipIfTruncated(el as HTMLElement));
 
     // Also set up a mutation observer to handle dynamically added content
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
           if (node instanceof HTMLElement) {
-            const truncated = node.querySelectorAll('.truncate-text, .message-cell');
+            // Check child elements
+            const truncated = node.querySelectorAll('.truncate-text, .message-cell, [class*="ellipsis"]');
             truncated.forEach((el) => {
-              const element = el as HTMLElement;
-              if (element.textContent && element.textContent.trim() !== '-' && !element.title) {
-                element.title = element.textContent.trim();
+              if (!el.hasAttribute('data-tooltip')) {
+                addTooltipIfTruncated(el as HTMLElement);
               }
             });
             // Check if the node itself is truncated
             if (node.classList?.contains('truncate-text') || node.classList?.contains('message-cell')) {
-              if (node.textContent && node.textContent.trim() !== '-' && !node.title) {
-                node.title = node.textContent.trim();
+              if (!node.hasAttribute('data-tooltip')) {
+                addTooltipIfTruncated(node);
               }
             }
           }
