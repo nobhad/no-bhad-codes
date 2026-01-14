@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Button Effects Preview</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #e0e0e0;
+      min-height: 100vh;
+      padding: 0;
+      margin: 0;
+      color: #171717;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    .container {
+      width: 100%;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: #171717;
+      margin-bottom: 2rem;
+      font-size: 2.5rem;
+      position: sticky;
+      left: 0;
+    }
+
+    .sidebars-grid {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 3rem;
+      width: fit-content;
+    }
+
+    .sidebar-wrapper {
+      position: relative;
+      flex-shrink: 0;
+      width: 240px;
+      min-width: 240px;
+      max-width: 240px;
+    }
+
+    .sidebar-wrapper h2 {
+      color: #171717;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      background: #e0e0e0;
+      padding: 0.5rem;
+      z-index: 10;
+    }
+
+    /* Sidebar base styles */
+    .sidebar {
+      width: 240px;
+      min-width: 240px;
+      max-width: 240px;
+      background: #333333;
+      border-right: none;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      height: 100vh;
+      min-height: 100vh;
+      z-index: 60;
+      box-shadow: 2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3);
+      box-sizing: border-box;
+    }
+
+    .sidebar-content {
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      gap: 2rem;
+      height: 100%;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      justify-content: center;
+      padding-bottom: 1rem;
+      position: relative;
+    }
+
+    .sidebar-logo-img {
+      width: 120px;
+      height: auto;
+      filter: invert(1);
+    }
+
+    .sidebar-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .sidebar-footer {
+      position: absolute;
+      bottom: 1.5rem;
+      left: 1.5rem;
+      right: 1.5rem;
+      border-top: none;
+      z-index: 100;
+    }
+
+    /* Base button styles */
+    .sidebar-buttons .btn,
+    .sidebar-footer .btn {
+      width: 100%;
+      padding: 0.85rem 1.1rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      text-align: left;
+      background: transparent;
+      background-color: transparent;
+      color: #f5f5f5;
+      border: 2px solid #f5f5f5;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: none;
+      text-shadow: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar-buttons .btn .btn-icon,
+    .sidebar-footer .btn .btn-icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+    }
+
+    .sidebar-buttons .btn .btn-text,
+    .sidebar-footer .btn .btn-text {
+      flex: 1;
+    }
+
+    .sidebar-buttons .btn.active {
+      background: #dc2626;
+      background-color: #dc2626;
+      color: #333333;
+      border-color: #dc2626;
+      outline: 2px solid #dc2626;
+    }
+
+    .sidebar-buttons .btn.active .btn-icon {
+      color: #333333;
+    }
+
+    /* ============================================
+       STYLE 1: Current Design (No 3D effect)
+       ============================================ */
+    .sidebar-1 .sidebar-buttons .btn:hover,
+    .sidebar-1 .sidebar-footer .btn:hover {
+      background: #dc2626;
+      background-color: #dc2626;
+      color: #333333;
+      border-color: #dc2626;
+    }
+
+    .sidebar-1 .sidebar-buttons .btn:hover .btn-icon,
+    .sidebar-1 .sidebar-footer .btn:hover .btn-icon {
+      color: #333333;
+    }
+
+    .sidebar-1 .sidebar-buttons .btn.active {
+      background: #dc2626;
+      background-color: #dc2626;
+      color: #333333;
+      border-color: #dc2626;
+      outline: 2px solid #dc2626;
+    }
+
+    .sidebar-1 .sidebar-buttons .btn.active .btn-icon {
+      color: #333333;
+    }
+
+    /* ============================================
+       STYLE 2: Subtle Shadow Depth
+       ============================================ */
+    .sidebar-2 .sidebar-buttons .btn,
+    .sidebar-2 .sidebar-footer .btn {
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .sidebar-2 .sidebar-buttons .btn:hover,
+    .sidebar-2 .sidebar-footer .btn:hover {
+      background: #dc2626;
+      background-color: #dc2626;
+      color: #333333;
+      border: 2px solid #dc2626;
+      border-color: #dc2626;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(220,38,38,0.3);
+    }
+
+    .sidebar-2 .sidebar-buttons .btn:hover .btn-icon,
+    .sidebar-2 .sidebar-footer .btn:hover .btn-icon {
+      color: #333333;
+    }
+
+    /* ============================================
+       STYLE 3: Inset Border Depth
+       ============================================ */
+    .sidebar-3 .sidebar-buttons .btn,
+    .sidebar-3 .sidebar-footer .btn {
+      box-shadow: 
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        inset 0 -1px 0 rgba(0,0,0,0.2),
+        0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .sidebar-3 .sidebar-buttons .btn:hover,
+    .sidebar-3 .sidebar-footer .btn:hover {
+      background: #dc2626;
+      background-color: #dc2626;
+      color: #333333;
+      border: 2px solid #dc2626;
+      border-color: #dc2626;
+      transform: translateY(-1px);
+      box-shadow: 
+        inset 0 1px 0 rgba(255,255,255,0.2),
+        inset 0 -1px 0 rgba(0,0,0,0.3),
+        0 4px 8px rgba(220,38,38,0.3);
+    }
+
+    .sidebar-3 .sidebar-buttons .btn:hover .btn-icon,
+    .sidebar-3 .sidebar-footer .btn:hover .btn-icon {
+      color: #333333;
+    }
+
+    /* ============================================
+       STYLE 4: Layered Shadow
+       ============================================ */
+    .sidebar-4 .sidebar-buttons .btn,
+    .sidebar-4 .sidebar-footer .btn {
+      box-shadow: 
+        0 1px 2px rgba(0,0,0,0.1),
+        0 2px 4px rgba(0,0,0,0.15),
+        0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .sidebar-4 .sidebar-buttons .btn:hover,
+    .sidebar-4 .sidebar-footer .btn:hover {
+      background: #dc2626;
+      background-color: #dc2626;
+      color: #333333;
+      border-color: #dc2626;
+      transform: translateY(-1px);
+      box-shadow: 
+        0 2px 4px rgba(220,38,38,0.2),
+        0 4px 8px rgba(220,38,38,0.25),
+        0 8px 16px rgba(220,38,38,0.2);
+    }
+
+    .sidebar-4 .sidebar-buttons .btn:hover .btn-icon,
+    .sidebar-4 .sidebar-footer .btn:hover .btn-icon {
+      color: #333333;
+    }
+
+    /* ============================================
+       STYLE 5: Pressed Effect
+       ============================================ */
+    .sidebar-5 .sidebar-buttons .btn,
+    .sidebar-5 .sidebar-footer .btn {
+      box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.3),
+        inset 0 -1px 2px rgba(255,255,255,0.1),
+        0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .sidebar-5 .sidebar-buttons .btn:hover,
+    .sidebar-5 .sidebar-footer .btn:hover {
+      background: #dc2626;
+      background-color: #dc2626;
+      color: #333333;
+      border-color: #dc2626;
+      transform: translateY(-1px);
+      box-shadow: 
+        inset 0 1px 2px rgba(0,0,0,0.2),
+        inset 0 -1px 2px rgba(255,255,255,0.15),
+        0 4px 8px rgba(220,38,38,0.3);
+    }
+
+    .sidebar-5 .sidebar-buttons .btn:hover .btn-icon,
+    .sidebar-5 .sidebar-footer .btn:hover .btn-icon {
+      color: #333333;
+    }
+
+    /* ============================================
+       STYLE 6: Soft Elevation
+       ============================================ */
+    .sidebar-6 .sidebar-buttons .btn,
+    .sidebar-6 .sidebar-footer .btn {
+      box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    }
+
+    .sidebar-6 .sidebar-buttons .btn:hover,
+    .sidebar-6 .sidebar-footer .btn:hover {
+      background: #dc2626;
+      background-color: #dc2626;
+      color: #333333;
+      border-color: #dc2626;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(220,38,38,0.25);
+    }
+
+    .sidebar-6 .sidebar-buttons .btn:hover .btn-icon,
+    .sidebar-6 .sidebar-footer .btn:hover .btn-icon {
+      color: #333333;
+    }
+
+    /* ============================================
+       STYLE 7: Border Depth
+       ============================================ */
+    .sidebar-7 .sidebar-buttons .btn,
+    .sidebar-7 .sidebar-footer .btn {
+      box-shadow: 
+        0 2px 4px rgba(0,0,0,0.2),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .sidebar-7 .sidebar-buttons .btn:hover,
+    .sidebar-7 .sidebar-footer .btn:hover {
+      background: #dc2626;
+      background-color: #dc2626;
+      color: #333333;
+      border-color: #dc2626;
+      transform: translateY(-1px);
+      box-shadow: 
+        0 4px 8px rgba(220,38,38,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    .sidebar-7 .sidebar-buttons .btn:hover .btn-icon,
+    .sidebar-7 .sidebar-footer .btn:hover .btn-icon {
+      color: #333333;
+    }
+
+    /* ============================================
+       STYLE 8: Double Shadow
+       ============================================ */
+    .sidebar-8 .sidebar-buttons .btn,
+    .sidebar-8 .sidebar-footer .btn {
+      box-shadow: 
+        0 2px 4px rgba(0,0,0,0.15),
+        0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .sidebar-8 .sidebar-buttons .btn:hover,
+    .sidebar-8 .sidebar-footer .btn:hover {
+      background: #dc2626;
+      background-color: #dc2626;
+      color: #333333;
+      border-color: #dc2626;
+      transform: translateY(-1px);
+      box-shadow: 
+        0 4px 8px rgba(220,38,38,0.2),
+        0 8px 16px rgba(220,38,38,0.15);
+    }
+
+    .sidebar-8 .sidebar-buttons .btn:hover .btn-icon,
+    .sidebar-8 .sidebar-footer .btn:hover .btn-icon {
+      color: #333333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>3D Button Effects Preview</h1>
+    
+    <div class="sidebars-grid">
+      <!-- Style 1: Current Design -->
+      <div class="sidebar-wrapper">
+        <h2>1. Current Design</h2>
+        <aside class="sidebar sidebar-1">
+          <div class="sidebar-content">
+            <a href="#" class="sidebar-logo">
+              <div class="sidebar-logo-img" style="width: 120px; height: 60px; background: #f5f5f5; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #333; font-size: 0.75rem;">LOGO</div>
+            </a>
+            <div class="sidebar-buttons">
+              <button class="btn btn-secondary active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                <span class="btn-text">DASHBOARD</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M15 2h-4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/><path d="M16.706 2.706A2.4 2.4 0 0 0 15 2v5a1 1 0 0 0 1 1h5a2.4 2.4 0 0 0-.706-1.706z"/><path d="M5 7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 1.732-1"/></svg>
+                <span class="btn-text">FILES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
+                <span class="btn-text">MESSAGES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                <span class="btn-text">INVOICES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
+                <span class="btn-text">SETTINGS</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+                <span class="btn-text">NEW PROJECT</span>
+              </button>
+            </div>
+            <div class="sidebar-footer">
+              <button class="btn btn-secondary btn-logout">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+                <span class="btn-text">SIGN OUT</span>
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Style 2: Subtle Shadow -->
+      <div class="sidebar-wrapper">
+        <h2>2. Subtle Shadow</h2>
+        <aside class="sidebar sidebar-2">
+          <div class="sidebar-content">
+            <a href="#" class="sidebar-logo">
+              <div class="sidebar-logo-img" style="width: 120px; height: 60px; background: #f5f5f5; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #333; font-size: 0.75rem;">LOGO</div>
+            </a>
+            <div class="sidebar-buttons">
+              <button class="btn btn-secondary active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                <span class="btn-text">DASHBOARD</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M15 2h-4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/><path d="M16.706 2.706A2.4 2.4 0 0 0 15 2v5a1 1 0 0 0 1 1h5a2.4 2.4 0 0 0-.706-1.706z"/><path d="M5 7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 1.732-1"/></svg>
+                <span class="btn-text">FILES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
+                <span class="btn-text">MESSAGES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                <span class="btn-text">INVOICES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
+                <span class="btn-text">SETTINGS</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+                <span class="btn-text">NEW PROJECT</span>
+              </button>
+            </div>
+            <div class="sidebar-footer">
+              <button class="btn btn-secondary btn-logout">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+                <span class="btn-text">SIGN OUT</span>
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Style 3: Inset Depth -->
+      <div class="sidebar-wrapper">
+        <h2>3. Inset Depth</h2>
+        <aside class="sidebar sidebar-3">
+          <div class="sidebar-content">
+            <a href="#" class="sidebar-logo">
+              <div class="sidebar-logo-img" style="width: 120px; height: 60px; background: #f5f5f5; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #333; font-size: 0.75rem;">LOGO</div>
+            </a>
+            <div class="sidebar-buttons">
+              <button class="btn btn-secondary active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                <span class="btn-text">DASHBOARD</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M15 2h-4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/><path d="M16.706 2.706A2.4 2.4 0 0 0 15 2v5a1 1 0 0 0 1 1h5a2.4 2.4 0 0 0-.706-1.706z"/><path d="M5 7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 1.732-1"/></svg>
+                <span class="btn-text">FILES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
+                <span class="btn-text">MESSAGES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                <span class="btn-text">INVOICES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
+                <span class="btn-text">SETTINGS</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+                <span class="btn-text">NEW PROJECT</span>
+              </button>
+            </div>
+            <div class="sidebar-footer">
+              <button class="btn btn-secondary btn-logout">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+                <span class="btn-text">SIGN OUT</span>
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Style 4: Layered Shadow -->
+      <div class="sidebar-wrapper">
+        <h2>4. Layered Shadow</h2>
+        <aside class="sidebar sidebar-4">
+          <div class="sidebar-content">
+            <a href="#" class="sidebar-logo">
+              <div class="sidebar-logo-img" style="width: 120px; height: 60px; background: #f5f5f5; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #333; font-size: 0.75rem;">LOGO</div>
+            </a>
+            <div class="sidebar-buttons">
+              <button class="btn btn-secondary active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                <span class="btn-text">DASHBOARD</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M15 2h-4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/><path d="M16.706 2.706A2.4 2.4 0 0 0 15 2v5a1 1 0 0 0 1 1h5a2.4 2.4 0 0 0-.706-1.706z"/><path d="M5 7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 1.732-1"/></svg>
+                <span class="btn-text">FILES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
+                <span class="btn-text">MESSAGES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                <span class="btn-text">INVOICES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
+                <span class="btn-text">SETTINGS</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+                <span class="btn-text">NEW PROJECT</span>
+              </button>
+            </div>
+            <div class="sidebar-footer">
+              <button class="btn btn-secondary btn-logout">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+                <span class="btn-text">SIGN OUT</span>
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Style 5: Pressed -->
+      <div class="sidebar-wrapper">
+        <h2>5. Pressed</h2>
+        <aside class="sidebar sidebar-5">
+          <div class="sidebar-content">
+            <a href="#" class="sidebar-logo">
+              <div class="sidebar-logo-img" style="width: 120px; height: 60px; background: #f5f5f5; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #333; font-size: 0.75rem;">LOGO</div>
+            </a>
+            <div class="sidebar-buttons">
+              <button class="btn btn-secondary active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                <span class="btn-text">DASHBOARD</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M15 2h-4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/><path d="M16.706 2.706A2.4 2.4 0 0 0 15 2v5a1 1 0 0 0 1 1h5a2.4 2.4 0 0 0-.706-1.706z"/><path d="M5 7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 1.732-1"/></svg>
+                <span class="btn-text">FILES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
+                <span class="btn-text">MESSAGES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                <span class="btn-text">INVOICES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
+                <span class="btn-text">SETTINGS</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+                <span class="btn-text">NEW PROJECT</span>
+              </button>
+            </div>
+            <div class="sidebar-footer">
+              <button class="btn btn-secondary btn-logout">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+                <span class="btn-text">SIGN OUT</span>
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Style 6: Soft Elevation -->
+      <div class="sidebar-wrapper">
+        <h2>6. Soft Elevation</h2>
+        <aside class="sidebar sidebar-6">
+          <div class="sidebar-content">
+            <a href="#" class="sidebar-logo">
+              <div class="sidebar-logo-img" style="width: 120px; height: 60px; background: #f5f5f5; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #333; font-size: 0.75rem;">LOGO</div>
+            </a>
+            <div class="sidebar-buttons">
+              <button class="btn btn-secondary active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                <span class="btn-text">DASHBOARD</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M15 2h-4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/><path d="M16.706 2.706A2.4 2.4 0 0 0 15 2v5a1 1 0 0 0 1 1h5a2.4 2.4 0 0 0-.706-1.706z"/><path d="M5 7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 1.732-1"/></svg>
+                <span class="btn-text">FILES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
+                <span class="btn-text">MESSAGES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                <span class="btn-text">INVOICES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
+                <span class="btn-text">SETTINGS</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+                <span class="btn-text">NEW PROJECT</span>
+              </button>
+            </div>
+            <div class="sidebar-footer">
+              <button class="btn btn-secondary btn-logout">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+                <span class="btn-text">SIGN OUT</span>
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Style 7: Border Depth -->
+      <div class="sidebar-wrapper">
+        <h2>7. Border Depth</h2>
+        <aside class="sidebar sidebar-7">
+          <div class="sidebar-content">
+            <a href="#" class="sidebar-logo">
+              <div class="sidebar-logo-img" style="width: 120px; height: 60px; background: #f5f5f5; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #333; font-size: 0.75rem;">LOGO</div>
+            </a>
+            <div class="sidebar-buttons">
+              <button class="btn btn-secondary active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                <span class="btn-text">DASHBOARD</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M15 2h-4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/><path d="M16.706 2.706A2.4 2.4 0 0 0 15 2v5a1 1 0 0 0 1 1h5a2.4 2.4 0 0 0-.706-1.706z"/><path d="M5 7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 1.732-1"/></svg>
+                <span class="btn-text">FILES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
+                <span class="btn-text">MESSAGES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                <span class="btn-text">INVOICES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
+                <span class="btn-text">SETTINGS</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+                <span class="btn-text">NEW PROJECT</span>
+              </button>
+            </div>
+            <div class="sidebar-footer">
+              <button class="btn btn-secondary btn-logout">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+                <span class="btn-text">SIGN OUT</span>
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Style 8: Double Shadow -->
+      <div class="sidebar-wrapper">
+        <h2>8. Double Shadow</h2>
+        <aside class="sidebar sidebar-8">
+          <div class="sidebar-content">
+            <a href="#" class="sidebar-logo">
+              <div class="sidebar-logo-img" style="width: 120px; height: 60px; background: #f5f5f5; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #333; font-size: 0.75rem;">LOGO</div>
+            </a>
+            <div class="sidebar-buttons">
+              <button class="btn btn-secondary active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                <span class="btn-text">DASHBOARD</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M15 2h-4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/><path d="M16.706 2.706A2.4 2.4 0 0 0 15 2v5a1 1 0 0 0 1 1h5a2.4 2.4 0 0 0-.706-1.706z"/><path d="M5 7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 1.732-1"/></svg>
+                <span class="btn-text">FILES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
+                <span class="btn-text">MESSAGES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                <span class="btn-text">INVOICES</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
+                <span class="btn-text">SETTINGS</span>
+              </button>
+              <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+                <span class="btn-text">NEW PROJECT</span>
+              </button>
+            </div>
+            <div class="sidebar-footer">
+              <button class="btn btn-secondary btn-logout">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+                <span class="btn-text">SIGN OUT</span>
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
