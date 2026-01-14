@@ -9,6 +9,11 @@
 
 /* Portal theme variables and admin overrides are in variables.css */
 
+/* Page background - match main content area */
+body[data-page="admin"] {
+  background: var(--portal-bg-medium);
+}
+
 /* Ensure all admin text is light on dark backgrounds */
 [data-page="admin"] .stat-card,
 [data-page="admin"] .admin-table-card,
