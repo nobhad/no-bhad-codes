@@ -497,6 +497,47 @@ router.put(
   })
 );
 
+// Get files for a project
+router.get(
+  '/:id/files',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    // Check if user can access this project
+    let project;
+    if (req.user!.type === 'admin') {
+      project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
+    } else {
+      project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
+        projectId,
+        req.user!.id,
+      ]);
+    }
+
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
+      });
+    }
+
+    const files = await db.all(
+      `
+    SELECT id, filename, original_filename, file_size, mime_type, file_type,
+           description, uploaded_by, created_at
+    FROM files
+    WHERE project_id = ?
+    ORDER BY created_at DESC
+  `,
+      [projectId]
+    );
+
+    res.json({ files });
+  })
+);
+
 // Upload files to project
 router.post(
   '/:id/files',
@@ -565,6 +606,46 @@ router.post(
       message: `${files.length} file(s) uploaded successfully`,
       files: uploadedFiles,
     });
+  })
+);
+
+// Get messages for a project
+router.get(
+  '/:id/messages',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    // Check if user can access this project
+    let project;
+    if (req.user!.type === 'admin') {
+      project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
+    } else {
+      project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
+        projectId,
+        req.user!.id,
+      ]);
+    }
+
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
+      });
+    }
+
+    const messages = await db.all(
+      `
+    SELECT id, sender_role, sender_name, message, is_read, created_at
+    FROM messages
+    WHERE project_id = ?
+    ORDER BY created_at ASC
+  `,
+      [projectId]
+    );
+
+    res.json({ messages });
   })
 );
 

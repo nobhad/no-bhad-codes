@@ -9,6 +9,7 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { apiFetch, apiPost } from '../../../utils/api-client';
 import type { Lead, AdminDashboardContext } from '../admin-types';
 
 interface LeadsData {
@@ -50,9 +51,7 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
   console.log('[AdminLeads] Loading leads...');
 
   try {
-    const response = await fetch('/api/admin/leads', {
-      credentials: 'include'
-    });
+    const response = await apiFetch('/api/admin/leads');
 
     console.log('[AdminLeads] Response status:', response.status);
 
@@ -64,10 +63,10 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
       });
       leadsData = data.leads || [];
       updateLeadsDisplay(data, ctx);
-    } else {
+    } else if (response.status !== 401) {
+      // Don't show error for 401 - handled by apiFetch
       const errorText = await response.text();
       console.error('[AdminLeads] API error:', response.status, errorText);
-      // Show error in table
       const tableBody = document.getElementById('leads-table-body');
       if (tableBody) {
         tableBody.innerHTML = `<tr><td colspan="8" class="loading-row">Error loading leads: ${response.status}</td></tr>`;
@@ -75,7 +74,6 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
     }
   } catch (error) {
     console.error('[AdminLeads] Failed to load leads:', error);
-    // Show error in table
     const tableBody = document.getElementById('leads-table-body');
     if (tableBody) {
       tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">Network error loading leads</td></tr>';
@@ -363,16 +361,12 @@ export async function activateLead(
   ctx: AdminDashboardContext
 ): Promise<void> {
   try {
-    const response = await fetch(`/api/admin/leads/${leadId}/activate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include'
-    });
+    const response = await apiPost(`/api/admin/leads/${leadId}/activate`);
 
     if (response.ok) {
       ctx.showNotification('Lead activated successfully!', 'success');
       await loadLeads(ctx);
-    } else {
+    } else if (response.status !== 401) {
       const error = await response.json();
       ctx.showNotification(error.message || 'Failed to activate lead', 'error');
     }
@@ -388,16 +382,11 @@ export async function inviteLead(
   ctx: AdminDashboardContext
 ): Promise<void> {
   try {
-    const response = await fetch(`/api/admin/leads/${leadId}/invite`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ email })
-    });
+    const response = await apiPost(`/api/admin/leads/${leadId}/invite`, { email });
 
     if (response.ok) {
       ctx.showNotification('Invitation sent successfully!', 'success');
-    } else {
+    } else if (response.status !== 401) {
       const error = await response.json();
       ctx.showNotification(error.message || 'Failed to send invitation', 'error');
     }
