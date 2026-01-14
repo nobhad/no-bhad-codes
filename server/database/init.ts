@@ -9,7 +9,8 @@
  */
 
 import sqlite3 from 'sqlite3';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+import fs from 'fs';
 
 interface DatabaseRow {
   [key: string]: any;
@@ -311,6 +312,13 @@ export function getDatabase(): Database {
 export async function initializeDatabase(): Promise<void> {
   const dbPath = process.env.DATABASE_PATH || './data/client_portal.db';
   const maxConnections = parseInt(process.env.DB_MAX_CONNECTIONS || '5');
+
+  // Ensure the data directory exists
+  const dataDir = dirname(dbPath);
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+    console.log(`📁 Created data directory: ${dataDir}`);
+  }
 
   try {
     dbPool = new DatabaseConnectionPool(dbPath, maxConnections);
