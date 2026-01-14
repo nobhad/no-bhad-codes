@@ -2516,11 +2516,16 @@ body.modal-open .dashboard-content {
 
 /* Expanded sidebar - inline red text */
 [data-page="admin"] .sidebar-badge {
-  color: var(--color-danger, #ef4444);
+  color: var(--color-primary);
   font-family: var(--font--acme);
   font-size: inherit;
   font-weight: inherit;
   margin-left: 0.5rem;
+}
+
+/* Active button - badge should match button text color (dark) */
+[data-page="admin"] .sidebar-buttons .btn.active .sidebar-badge {
+  color: var(--portal-bg-dark);
 }
 
 /* Collapsed sidebar - red badge */
