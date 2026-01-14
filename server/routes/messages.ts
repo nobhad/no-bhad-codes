@@ -8,23 +8,20 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { getDatabase } from '../database/init.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { emailService } from '../services/email-service.js';
 import { cache, invalidateCache } from '../middleware/cache.js';
 import { auditLogger } from '../services/audit-logger.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { getUploadsSubdir, UPLOAD_DIRS } from '../config/uploads.js';
 
 const router = express.Router();
 
-// Configure multer for file attachments
+// Configure multer for file attachments using centralized config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../../uploads/messages/'));
+    cb(null, getUploadsSubdir(UPLOAD_DIRS.MESSAGES));
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
