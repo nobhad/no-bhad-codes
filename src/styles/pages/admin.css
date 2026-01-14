@@ -508,7 +508,8 @@
 
 /* Lock scroll when modal is open */
 body.modal-open,
-body.modal-open .admin-content {
+body.modal-open .admin-content,
+body.modal-open .dashboard-content {
   overflow: hidden !important;
 }
 
@@ -1510,7 +1511,6 @@ body.modal-open .admin-content {
   align-items: center;
   padding: var(--space-5) var(--space-5) var(--space-4);
   flex-shrink: 0;
-  border-bottom: 1px solid var(--portal-border-medium);
 }
 
 .admin-modal-header h3 {
@@ -1565,7 +1565,6 @@ body.modal-open .admin-content {
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5) var(--space-5);
   flex-shrink: 0;
-  border-top: 1px solid var(--portal-border-medium);
   background: var(--portal-bg-darker);
 }
 
@@ -1578,13 +1577,18 @@ body.modal-open .admin-content {
 
 /* Remove border from modal dropdown trigger */
 .modal-dropdown.custom-dropdown .custom-dropdown-trigger {
-  border: none;
+  border: 4px solid transparent;
 }
 
-/* Focus state - use box-shadow since no border */
+/* Focus state - matches messages tab (border turns brand primary) */
 .modal-dropdown.custom-dropdown .custom-dropdown-trigger:focus {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+}
+
+/* Hover state - matches messages tab */
+.modal-dropdown.custom-dropdown .custom-dropdown-trigger:hover {
+  border-color: var(--color-brand-primary);
 }
 
 /* When open, no border on trigger either */
