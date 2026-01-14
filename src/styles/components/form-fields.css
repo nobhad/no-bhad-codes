@@ -54,6 +54,18 @@ input[type="radio"] {
   height: auto;
 }
 
+/* Placeholder text - not bold */
+.form-input::placeholder,
+.form-textarea::placeholder,
+.form-container input::placeholder,
+.login-form input::placeholder,
+.form-container textarea::placeholder,
+.login-form textarea::placeholder {
+  font-weight: normal;
+  color: var(--portal-text-muted);
+  opacity: 1;
+}
+
 .form-container textarea,
 .login-form textarea {
   height: auto;

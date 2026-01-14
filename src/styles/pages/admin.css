@@ -1456,7 +1456,7 @@
 }
 
 .admin-modal {
-  background: var(--portal-bg-dark);
+  background: var(--portal-bg-darker);
   border: none;
   border-radius: var(--border-radius-card);
   box-shadow: var(--shadow-panel);
@@ -1485,6 +1485,8 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-5) var(--space-5) var(--space-4);
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--portal-border-medium);
 }
 
 .admin-modal-header h3 {
@@ -1536,6 +1538,9 @@
   justify-content: flex-end;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5) var(--space-5);
+  flex-shrink: 0;
+  border-top: 1px solid var(--portal-border-medium);
+  background: var(--portal-bg-darker);
 }
 
 /* Modal Detail Grid */
