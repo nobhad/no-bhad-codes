@@ -104,12 +104,13 @@ export class ContactAnimationModule extends BaseModule {
 
     // Get animatable elements
     const heading = this.container.querySelector('h2');
+    const hr = this.container.querySelector('hr');
     const contactOptions = this.container.querySelector('.contact-options');
     const cardColumn = this.container.querySelector('.contact-card-column');
     const avatarBlurb = this.container.querySelector('.avatar-blurb-container');
 
     // Debug: log what elements were found
-    this.log(`Elements found - h2: ${!!heading}, contactOptions: ${!!contactOptions}, cardColumn: ${!!cardColumn}, avatarBlurb: ${!!avatarBlurb}`);
+    this.log(`Elements found - h2: ${!!heading}, hr: ${!!hr}, contactOptions: ${!!contactOptions}, cardColumn: ${!!cardColumn}, avatarBlurb: ${!!avatarBlurb}`);
 
     this.timeline = gsap.timeline({
       onComplete: () => {
@@ -134,6 +135,10 @@ export class ContactAnimationModule extends BaseModule {
         filter: `blur(${blurAmount}px)`,
         willChange: 'filter, opacity' // GPU acceleration hint
       });
+    }
+    // Hide hr initially so it doesn't appear before h2
+    if (hr) {
+      gsap.set(hr, { opacity: 0 });
     }
     // Contact options (nav links) show immediately - no animation delay
     if (contactOptions) {
@@ -199,6 +204,15 @@ export class ContactAnimationModule extends BaseModule {
     this.timeline.set([heading, cardColumn].filter(Boolean), {
       willChange: 'auto'
     });
+
+    // Fade in hr after h2 animation completes (appears after h2 is fully visible)
+    if (hr) {
+      this.timeline.to(hr, {
+        opacity: 1,
+        duration: blurClearDuration,
+        ease: 'power2.out'
+      }, '>');
+    }
 
     // ========================================================================
     // PHASE 3: Form fields cascade animation
@@ -339,6 +353,40 @@ export class ContactAnimationModule extends BaseModule {
         duration: 0.5,
         ease: 'back.out(1.4)'
       }, formStartTime);
+      
+      // Star glow animation - starts after avatar blurb appears
+      const starGlow = avatarBlurb.querySelector('#STAR_GLOW') as SVGPathElement | null;
+      
+      if (starGlow) {
+        // Glow starts invisible
+        gsap.set(starGlow, {
+          opacity: 0
+        });
+        
+        // Fade in star glow
+        this.timeline.to(starGlow, {
+          opacity: 1,
+          duration: 0.8,
+          ease: 'power2.out'
+        }, formStartTime + 0.5);
+        
+        // Continuous pulsing glow animation (glow overflows beyond star shape)
+        const glowTimeline = gsap.timeline({ repeat: -1, repeatDelay: 0 });
+        glowTimeline
+          .to(starGlow, {
+            opacity: 0.7,
+            duration: 1.5,
+            ease: 'sine.inOut'
+          })
+          .to(starGlow, {
+            opacity: 1,
+            duration: 1.5,
+            ease: 'sine.inOut'
+          });
+        
+        // Start glow pulse animation after fade-in
+        this.timeline.add(glowTimeline, formStartTime + 1.3);
+      }
     }
 
     // All fields animate together with stagger
@@ -584,10 +632,13 @@ export class ContactAnimationModule extends BaseModule {
 
     // Reset header elements to blur state with will-change for GPU acceleration
     const heading = this.container.querySelector('h2');
+    const hr = this.container.querySelector('hr');
     const contactOptions = this.container.querySelector('.contact-options');
     const cardColumn = this.container.querySelector('.contact-card-column');
 
     if (heading) gsap.set(heading, { opacity: 0, filter: `blur(${blurAmount}px)`, willChange: 'filter, opacity' });
+    // Hide hr so it doesn't appear before h2 - hr should appear after h2 or not animate
+    if (hr) gsap.set(hr, { opacity: 0 });
     // Contact options (nav links) show immediately - no animation
     if (contactOptions) gsap.set(contactOptions, { opacity: 1, filter: 'blur(0px)' });
     if (cardColumn) gsap.set(cardColumn, { opacity: 0, filter: `blur(${blurAmount}px)`, willChange: 'filter, opacity' });
