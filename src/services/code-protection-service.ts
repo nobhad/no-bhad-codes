@@ -36,6 +36,8 @@
  *       is disabled by default and anti-debugging is user-hostile.
  */
 
+import { APP_CONSTANTS } from '../config/constants';
+
 export interface CodeProtectionConfig {
   enabled: boolean;
   level: 'basic' | 'standard' | 'advanced' | 'maximum';
@@ -265,10 +267,10 @@ export class CodeProtectionService {
     });
     document.body.appendChild(div);
 
-    // Schedule checks
+    // Schedule checks using centralized intervals
     this.protectionIntervals.push(
-      setInterval(checkWindowSize, 1000),
-      setInterval(checkPerformanceTiming, 2000)
+      setInterval(checkWindowSize, APP_CONSTANTS.TIMERS.MONITORING_INTERVALS.FAST),
+      setInterval(checkPerformanceTiming, APP_CONSTANTS.TIMERS.MONITORING_INTERVALS.MEDIUM)
     );
   }
 
@@ -461,7 +463,7 @@ export class CodeProtectionService {
       }
     };
 
-    this.protectionIntervals.push(setInterval(checkIntegrity, 3000));
+    this.protectionIntervals.push(setInterval(checkIntegrity, APP_CONSTANTS.TIMERS.MONITORING_INTERVALS.SLOW));
   }
 
   /**
@@ -539,7 +541,7 @@ export class CodeProtectionService {
       }
     };
 
-    this.protectionIntervals.push(setInterval(monitor, 5000));
+    this.protectionIntervals.push(setInterval(monitor, APP_CONSTANTS.TIMERS.MONITORING_INTERVALS.VERY_SLOW));
   }
 
   /**
