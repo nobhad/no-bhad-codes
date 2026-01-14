@@ -89,6 +89,23 @@ function getApiConfig(): ApiConfig {
 export const apiConfig = getApiConfig();
 
 /**
+ * Third-party API base URLs
+ * Centralized to avoid hardcoding throughout the codebase
+ * These can be overridden via environment variables if needed
+ */
+export const THIRD_PARTY_APIS = {
+  FORMSPREE: import.meta.env.VITE_FORMSPREE_BASE_URL || 'https://formspree.io',
+  EMAILJS: import.meta.env.VITE_EMAILJS_BASE_URL || 'https://api.emailjs.com'
+} as const;
+
+/**
+ * Build Formspree form submission URL
+ */
+export function getFormspreeUrl(formId: string): string {
+  return `${THIRD_PARTY_APIS.FORMSPREE}/f/${formId}`;
+}
+
+/**
  * Build full API URL from endpoint
  */
 export function buildApiUrl(endpoint: string): string {
