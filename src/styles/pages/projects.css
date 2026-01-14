@@ -591,9 +591,9 @@
   }
 
   .wip-sign {
-    width: 98vw;
+    width: 70vw;
     max-width: none;
-    margin: 0 auto;
+    margin: 10rem auto 0;
     display: block;
     /* Scale up and shift right to center the sign visually */
     transform: translateX(8%) scale(1.15);
@@ -628,9 +628,9 @@
   }
 
   .wip-sign {
-    width: 100vw;
+    width: 70vw;
     max-width: none;
-    margin: 0 auto;
+    margin: 10rem auto 0;
     display: block;
     /* Scale up and shift right to center the sign visually */
     transform: translateX(8%) scale(1.2);

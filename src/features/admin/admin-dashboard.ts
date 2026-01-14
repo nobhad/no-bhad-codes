@@ -316,6 +316,8 @@ class AdminDashboard {
       dashboard.classList.remove('hidden');
       dashboard.style.display = '';
     }
+    // Add logged-in class to body to hide header/footer
+    document.body.classList.add('admin-logged-in');
   }
 
   private async initializeModules(): Promise<void> {
