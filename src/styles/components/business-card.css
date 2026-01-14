@@ -699,8 +699,11 @@ html[data-theme="dark"] .business-card-container {
   opacity: 0.9;
 }
 
+.intro-nav-link:focus,
 .intro-nav-link:focus-visible {
   outline: none;
+  box-shadow: none;
+  border: none;
 }
 
 /* GSAP handles all intro-nav-link animations */
