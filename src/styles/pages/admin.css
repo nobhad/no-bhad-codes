@@ -14,6 +14,50 @@ body[data-page="admin"] {
   background: var(--portal-bg-medium);
 }
 
+/* ================================================
+   ADMIN LOGIN PAGE - HEADER & FOOTER
+   Show header and footer only on login page (before logged in)
+   ================================================ */
+
+/* Show header on admin login page */
+[data-page="admin"] .admin-header {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: transparent;
+  height: var(--header-height, 60px);
+}
+
+/* Hide header when logged in */
+body.admin-logged-in[data-page="admin"] .admin-header {
+  display: none;
+}
+
+/* Show footer on admin login page - override the global hide rule */
+[data-page="admin"] .admin-footer {
+  display: flex !important;
+}
+
+/* Hide footer when logged in */
+body.admin-logged-in[data-page="admin"] .admin-footer {
+  display: none !important;
+}
+
+/* Adjust auth-gate position to account for header/footer */
+[data-page="admin"]:not(.admin-logged-in) .auth-gate {
+  top: var(--header-height, 60px);
+  bottom: var(--footer-height, 40px);
+  min-height: calc(100vh - var(--header-height, 60px) - var(--footer-height, 40px));
+}
+
+/* Match main site background for login page (before logged in) */
+body[data-page="admin"]:not(.admin-logged-in) {
+  background: var(--bg, var(--color-neutral-300));
+}
+
 /* Ensure all admin text is light on dark backgrounds */
 [data-page="admin"] .stat-card,
 [data-page="admin"] .admin-table-card,
@@ -232,13 +276,22 @@ body[data-page="admin"] {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: var(--color-neutral-300);
+  background: var(--bg);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 9999;
+}
+
+/* Center placeholder text in auth-gate input */
+.auth-gate input::placeholder {
+  text-align: center;
+}
+
+.auth-gate input {
+  text-align: center;
 }
 
 .auth-gate.hidden {
