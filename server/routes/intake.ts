@@ -11,13 +11,14 @@
 import express, { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { getDatabase } from '../database/init.js';
 import { generateProjectPlan, ProjectPlan } from '../services/project-generator.js';
 import { generateInvoice, Invoice } from '../services/invoice-generator.js';
 import { sendWelcomeEmail, sendNewIntakeNotification } from '../services/email-service.js';
 import { auditLogger } from '../services/audit-logger.js';
+import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../config/uploads.js';
 
 const router = express.Router();
 
@@ -31,11 +32,8 @@ async function saveIntakeAsFile(
 ): Promise<void> {
   const db = getDatabase();
 
-  // Create uploads directory if it doesn't exist
-  const uploadsDir = join(process.cwd(), 'uploads', 'intake');
-  if (!existsSync(uploadsDir)) {
-    mkdirSync(uploadsDir, { recursive: true });
-  }
+  // Get uploads directory (uses persistent storage on Railway)
+  const uploadsDir = getUploadsSubdir(UPLOAD_DIRS.INTAKE);
 
   // Create formatted intake document
   const intakeDocument = {
@@ -68,7 +66,7 @@ async function saveIntakeAsFile(
   const safeProjectName = projectName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
   const filename = `intake_${projectId}_${safeProjectName}_${timestamp}.json`;
   const filePath = join(uploadsDir, filename);
-  const relativePath = `uploads/intake/${filename}`;
+  const relativePath = getRelativePath(UPLOAD_DIRS.INTAKE, filename);
 
   // Write file
   writeFileSync(filePath, JSON.stringify(intakeDocument, null, 2), 'utf-8');
