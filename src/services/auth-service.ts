@@ -9,6 +9,7 @@
 
 import { BaseService } from './base-service';
 import { authEndpoints } from '../config/api';
+import { APP_CONSTANTS } from '../config/constants';
 
 interface LoginCredentials {
   email: string;
@@ -50,7 +51,7 @@ export class AuthService extends BaseService {
    */
   private loadStoredUser(): void {
     try {
-      const storedUser = sessionStorage.getItem('auth_user');
+      const storedUser = sessionStorage.getItem(APP_CONSTANTS.STORAGE_KEYS.AUTH_USER);
 
       if (storedUser) {
         this.user = JSON.parse(storedUser);
@@ -93,7 +94,7 @@ export class AuthService extends BaseService {
       this.user = loginData.user;
       this.isAuth = true;
 
-      sessionStorage.setItem('auth_user', JSON.stringify(loginData.user));
+      sessionStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.AUTH_USER, JSON.stringify(loginData.user));
 
       // Schedule token refresh
       this.scheduleTokenRefresh();
@@ -134,7 +135,7 @@ export class AuthService extends BaseService {
     this.user = null;
     this.isAuth = false;
 
-    sessionStorage.removeItem('auth_user');
+    sessionStorage.removeItem(APP_CONSTANTS.STORAGE_KEYS.AUTH_USER);
 
     if (this.refreshTimer) {
       clearTimeout(this.refreshTimer);
@@ -249,7 +250,7 @@ export class AuthService extends BaseService {
 
       const data = await response.json();
       this.user = data.user;
-      sessionStorage.setItem('auth_user', JSON.stringify(data.user));
+      sessionStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.AUTH_USER, JSON.stringify(data.user));
 
       return data.user;
     } catch (error) {
@@ -332,7 +333,7 @@ export class AuthService extends BaseService {
       this.user = data.user;
       this.isAuth = true;
 
-      sessionStorage.setItem('auth_user', JSON.stringify(data.user));
+      sessionStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.AUTH_USER, JSON.stringify(data.user));
 
       // Schedule token refresh
       this.scheduleTokenRefresh();

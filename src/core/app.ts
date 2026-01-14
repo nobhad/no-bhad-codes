@@ -21,6 +21,7 @@ import {
 } from './modules-config';
 import { setupDebugHelpers } from './debug';
 import { isDev } from './env';
+import { APP_CONSTANTS } from '../config/constants';
 
 // Type definitions
 interface ServiceInstance {
@@ -109,7 +110,7 @@ export class Application {
         }
 
         this.setupStickyFooter();
-      }, 3000);
+      }, APP_CONSTANTS.TIMERS.INTRO_COMPLETE_WAIT);
     } catch (error) {
       console.error('[Application] Initialization failed:', error);
       throw error;
@@ -175,12 +176,12 @@ export class Application {
       const html = document.documentElement;
 
       if (html.classList.contains('intro-finished')) {
-        setTimeout(resolve, 2000);
+        setTimeout(resolve, APP_CONSTANTS.TIMERS.INTRO_FINISHED_DELAY);
         return;
       }
 
       if (!html.classList.contains('intro-loading')) {
-        setTimeout(resolve, 10000);
+        setTimeout(resolve, APP_CONSTANTS.TIMERS.INTRO_MAX_WAIT);
         return;
       }
 
@@ -189,7 +190,7 @@ export class Application {
           if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
             if (html.classList.contains('intro-finished')) {
               observer.disconnect();
-              setTimeout(resolve, 2000);
+              setTimeout(resolve, APP_CONSTANTS.TIMERS.INTRO_FINISHED_DELAY);
               return;
             }
           }
@@ -201,7 +202,7 @@ export class Application {
       setTimeout(() => {
         observer.disconnect();
         resolve();
-      }, 20000);
+      }, APP_CONSTANTS.TIMERS.INTRO_OBSERVER_TIMEOUT);
     });
   }
 

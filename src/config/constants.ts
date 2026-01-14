@@ -31,7 +31,14 @@ export const APP_CONSTANTS = {
     TYPING_SPEED_MIN: 15,
     TYPING_SPEED_VARIANCE: 10,
     COMMAND_TYPING_SPEED: 50,
-    COMMAND_TYPING_VARIANCE: 30
+    COMMAND_TYPING_VARIANCE: 30,
+    // Intro animation timing
+    INTRO_COMPLETE_WAIT: 3000, // Wait after intro for section card enable
+    INTRO_FINISHED_DELAY: 2000, // Delay after intro-finished class detected
+    INTRO_MAX_WAIT: 10000, // Max wait if no intro-loading class
+    INTRO_OBSERVER_TIMEOUT: 20000, // Max time to observe for intro completion
+    // API request timeouts
+    API_REQUEST_TIMEOUT: 5000 // Default fetch abort timeout
   },
 
   // Performance thresholds (in milliseconds)
@@ -87,7 +94,12 @@ export const APP_CONSTANTS = {
     AUTH_TOKEN: 'auth_token',
     AUTH_USER: 'auth_user',
     THEME: 'theme',
-    FORM_BACKUP: 'form_backup_'
+    FORM_BACKUP: 'form_backup_',
+    // Visitor tracking
+    VISITOR_ID: 'nbw_visitor_id',
+    SESSION_ID: 'nbw_session_id',
+    SESSION_DATA: 'nbw_session',
+    TRACKING_EVENTS: 'nbw_tracking_events'
   },
 
   // API configuration
