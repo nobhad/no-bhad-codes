@@ -549,13 +549,18 @@ async function saveProjectChanges(projectId: number): Promise<void> {
   }
 }
 
-function setupProjectDetailTabs(_ctx: AdminDashboardContext): void {
+function setupProjectDetailTabs(ctx: AdminDashboardContext): void {
   const tabBtns = document.querySelectorAll('.pd-tab-btn');
   const tabContents = document.querySelectorAll('.pd-tab-content');
 
   tabBtns.forEach((btn) => {
+    const btnEl = btn as HTMLElement;
+    // Skip if already set up
+    if (btnEl.dataset.listenerAdded) return;
+    btnEl.dataset.listenerAdded = 'true';
+
     btn.addEventListener('click', () => {
-      const tabName = (btn as HTMLElement).dataset.pdTab;
+      const tabName = btnEl.dataset.pdTab;
       if (!tabName) return;
 
       tabBtns.forEach((b) => b.classList.remove('active'));
@@ -566,6 +571,40 @@ function setupProjectDetailTabs(_ctx: AdminDashboardContext): void {
       });
     });
   });
+
+  // Back button handler
+  const backBtn = document.getElementById('btn-back-to-projects') as HTMLElement;
+  if (backBtn && !backBtn.dataset.listenerAdded) {
+    backBtn.dataset.listenerAdded = 'true';
+    backBtn.addEventListener('click', () => {
+      currentProjectId = null;
+      ctx.switchTab('projects');
+    });
+  }
+
+  // Create invoice handler
+  const createInvoiceBtn = document.getElementById('btn-create-invoice') as HTMLElement;
+  if (createInvoiceBtn && !createInvoiceBtn.dataset.listenerAdded) {
+    createInvoiceBtn.dataset.listenerAdded = 'true';
+    createInvoiceBtn.addEventListener('click', () => showCreateInvoicePrompt());
+  }
+
+  // Add milestone handler
+  const addMilestoneBtn = document.getElementById('btn-add-milestone') as HTMLElement;
+  if (addMilestoneBtn && !addMilestoneBtn.dataset.listenerAdded) {
+    addMilestoneBtn.dataset.listenerAdded = 'true';
+    addMilestoneBtn.addEventListener('click', () => showAddMilestonePrompt());
+  }
+
+  // Send message handler
+  const sendMsgBtn = document.getElementById('btn-pd-send-message') as HTMLElement;
+  if (sendMsgBtn && !sendMsgBtn.dataset.listenerAdded) {
+    sendMsgBtn.dataset.listenerAdded = 'true';
+    sendMsgBtn.addEventListener('click', () => sendProjectMessage());
+  }
+
+  // File upload handlers
+  setupProjectFileUpload();
 }
 
 function formatProjectType(type: string | undefined): string {
@@ -918,5 +957,278 @@ async function navigateToClientByEmail(email: string): Promise<void> {
   } catch (error) {
     console.error('[AdminProjects] Error navigating to client:', error);
     storedContext?.showNotification('Error loading client details', 'error');
+  }
+}
+
+// =====================================================
+// INVOICE CREATION
+// =====================================================
+
+/**
+ * Show prompt to create a new invoice
+ */
+function showCreateInvoicePrompt(): void {
+  if (!currentProjectId || !storedContext) return;
+
+  const project = projectsData.find((p) => p.id === currentProjectId) as any;
+  if (!project) return;
+
+  const description = prompt('Enter line item description:', 'Web Development Services');
+  if (!description) return;
+
+  const amountStr = prompt('Enter amount ($):', '1000');
+  if (!amountStr) return;
+
+  const amount = parseFloat(amountStr);
+  if (isNaN(amount) || amount <= 0) {
+    alert('Please enter a valid amount');
+    return;
+  }
+
+  createInvoice(project.client_id || project.id, description, amount);
+}
+
+/**
+ * Create a new invoice for the current project
+ */
+async function createInvoice(
+  clientId: number,
+  description: string,
+  amount: number
+): Promise<void> {
+  if (!currentProjectId || !storedContext) return;
+
+  try {
+    const response = await fetch('/api/invoices', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        projectId: currentProjectId,
+        clientId,
+        lineItems: [
+          {
+            description,
+            quantity: 1,
+            rate: amount,
+            amount
+          }
+        ],
+        notes: '',
+        terms: 'Payment due within 30 days'
+      })
+    });
+
+    if (response.ok) {
+      storedContext.showNotification('Invoice created successfully!', 'success');
+      loadProjectInvoices(currentProjectId, storedContext);
+    } else {
+      const error = await response.json();
+      storedContext.showNotification(`Failed to create invoice: ${error.message || 'Unknown error'}`, 'error');
+    }
+  } catch (error) {
+    console.error('[AdminProjects] Error creating invoice:', error);
+    storedContext.showNotification('Error creating invoice', 'error');
+  }
+}
+
+// =====================================================
+// MILESTONE CREATION
+// =====================================================
+
+/**
+ * Show prompt to add a new milestone
+ */
+function showAddMilestonePrompt(): void {
+  if (!currentProjectId || !storedContext) return;
+
+  const title = prompt('Enter milestone title:');
+  if (!title) return;
+
+  const description = prompt('Enter milestone description (optional):', '');
+  const dueDateStr = prompt('Enter due date (YYYY-MM-DD):', new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+  if (!dueDateStr) return;
+
+  addMilestone(title, description || '', dueDateStr);
+}
+
+/**
+ * Add a new milestone to the current project
+ */
+async function addMilestone(
+  title: string,
+  description: string,
+  dueDate: string
+): Promise<void> {
+  if (!currentProjectId || !storedContext) return;
+
+  try {
+    const response = await fetch(`/api/projects/${currentProjectId}/milestones`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        title,
+        description,
+        due_date: dueDate
+      })
+    });
+
+    if (response.ok) {
+      storedContext.showNotification('Milestone added!', 'success');
+      loadProjectMilestones(currentProjectId, storedContext);
+    } else {
+      storedContext.showNotification('Failed to add milestone', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminProjects] Error adding milestone:', error);
+    storedContext.showNotification('Error adding milestone', 'error');
+  }
+}
+
+// =====================================================
+// PROJECT MESSAGING
+// =====================================================
+
+/**
+ * Send a message on the current project
+ */
+async function sendProjectMessage(): Promise<void> {
+  if (!currentProjectId || !storedContext) return;
+
+  const messageInput = document.getElementById('pd-message-input') as HTMLTextAreaElement;
+  if (!messageInput || !messageInput.value.trim()) return;
+
+  const message = messageInput.value.trim();
+
+  try {
+    const response = await fetch(`/api/projects/${currentProjectId}/messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({ message })
+    });
+
+    if (response.ok) {
+      messageInput.value = '';
+      storedContext.showNotification('Message sent!', 'success');
+      loadProjectMessages(currentProjectId, storedContext);
+    } else {
+      storedContext.showNotification('Failed to send message', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminProjects] Error sending message:', error);
+    storedContext.showNotification('Error sending message', 'error');
+  }
+}
+
+// =====================================================
+// PROJECT FILE UPLOAD
+// =====================================================
+
+/**
+ * Set up file upload handlers for project detail view
+ */
+function setupProjectFileUpload(): void {
+  const dropzone = document.getElementById('pd-upload-dropzone');
+  const fileInput = document.getElementById('pd-file-input') as HTMLInputElement;
+  const browseBtn = document.getElementById('btn-pd-browse-files');
+
+  if (!dropzone) return;
+
+  // Skip if already set up
+  if (dropzone.dataset.listenerAdded) return;
+  dropzone.dataset.listenerAdded = 'true';
+
+  // Browse button click
+  if (browseBtn && fileInput) {
+    browseBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      fileInput.click();
+    });
+
+    // File input change
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files && fileInput.files.length > 0) {
+        uploadProjectFiles(Array.from(fileInput.files));
+        fileInput.value = '';
+      }
+    });
+  }
+
+  // Drag & drop handlers
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropzone.classList.add('dragover');
+  });
+
+  dropzone.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropzone.classList.remove('dragover');
+  });
+
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropzone.classList.remove('dragover');
+
+    const files = e.dataTransfer?.files;
+    if (files && files.length > 0) {
+      uploadProjectFiles(Array.from(files));
+    }
+  });
+}
+
+/**
+ * Upload files for the current project
+ */
+async function uploadProjectFiles(files: File[]): Promise<void> {
+  if (!currentProjectId || !storedContext) return;
+
+  // Check file count limit
+  if (files.length > 5) {
+    alert('Maximum 5 files allowed per upload.');
+    return;
+  }
+
+  // Check file sizes (10MB limit)
+  const maxSize = 10 * 1024 * 1024;
+  const oversizedFiles = files.filter((f) => f.size > maxSize);
+  if (oversizedFiles.length > 0) {
+    alert(`Some files exceed the 10MB limit: ${oversizedFiles.map((f) => f.name).join(', ')}`);
+    return;
+  }
+
+  try {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+    formData.append('projectId', String(currentProjectId));
+
+    const response = await fetch('/api/uploads/multiple', {
+      method: 'POST',
+      credentials: 'include',
+      body: formData
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Upload failed');
+    }
+
+    storedContext.showNotification(`${files.length} file(s) uploaded successfully`, 'success');
+    loadProjectFiles(currentProjectId, storedContext);
+  } catch (error) {
+    console.error('[AdminProjects] Upload error:', error);
+    storedContext.showNotification(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
   }
 }
