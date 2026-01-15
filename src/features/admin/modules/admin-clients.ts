@@ -12,6 +12,15 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import type { AdminDashboardContext } from '../admin-types';
 import { formatCurrency } from '../../../utils/format-utils';
 import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
+import {
+  createFilterUI,
+  createSortableHeaders,
+  applyFilters,
+  loadFilterState,
+  saveFilterState,
+  CLIENTS_FILTER_CONFIG,
+  type FilterState
+} from '../../../utils/table-filter';
 
 export interface Client {
   id: number;
@@ -48,6 +57,8 @@ interface ClientsData {
 let clientsData: Client[] = [];
 let storedContext: AdminDashboardContext | null = null;
 let currentClientId: number | null = null;
+let filterState: FilterState = loadFilterState(CLIENTS_FILTER_CONFIG.storageKey);
+let filterUIInitialized = false;
 
 export function getCurrentClientId(): number | null {
   return currentClientId;
@@ -63,6 +74,12 @@ export function getClientsData(): Client[] {
 
 export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
   storedContext = ctx;
+
+  // Initialize filter UI once
+  if (!filterUIInitialized) {
+    initializeFilterUI(ctx);
+    filterUIInitialized = true;
+  }
 
   console.log('[AdminClients] Loading clients...');
 
@@ -106,6 +123,46 @@ export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
   }
 }
 
+/**
+ * Initialize filter UI for clients table
+ */
+function initializeFilterUI(ctx: AdminDashboardContext): void {
+  const container = document.getElementById('clients-filter-container');
+  if (!container) return;
+
+  // Create filter UI
+  const filterUI = createFilterUI(
+    CLIENTS_FILTER_CONFIG,
+    filterState,
+    (newState) => {
+      filterState = newState;
+      // Re-render table with new filters
+      if (clientsData.length > 0) {
+        renderClientsTable(clientsData, ctx);
+      }
+    }
+  );
+
+  // Insert before the refresh button
+  const refreshBtn = container.querySelector('#refresh-clients-btn');
+  if (refreshBtn) {
+    container.insertBefore(filterUI, refreshBtn);
+  } else {
+    container.appendChild(filterUI);
+  }
+
+  // Setup sortable headers after table is rendered
+  setTimeout(() => {
+    createSortableHeaders(CLIENTS_FILTER_CONFIG, filterState, (column, direction) => {
+      filterState = { ...filterState, sortColumn: column, sortDirection: direction };
+      saveFilterState(CLIENTS_FILTER_CONFIG.storageKey, filterState);
+      if (clientsData.length > 0) {
+        renderClientsTable(clientsData, ctx);
+      }
+    });
+  }, 100);
+}
+
 function updateClientsDisplay(data: ClientsData, ctx: AdminDashboardContext): void {
   // Update stats
   const clientsTotal = document.getElementById('clients-total');
@@ -145,7 +202,15 @@ function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): voi
     return;
   }
 
-  tableBody.innerHTML = clients
+  // Apply filters
+  const filteredClients = applyFilters(clients, filterState, CLIENTS_FILTER_CONFIG);
+
+  if (filteredClients.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="6" class="loading-row">No clients match the current filters</td></tr>';
+    return;
+  }
+
+  tableBody.innerHTML = filteredClients
     .map((client) => {
       const date = new Date(client.created_at).toLocaleDateString();
 
