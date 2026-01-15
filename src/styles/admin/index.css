@@ -8,5 +8,8 @@
  * Split into modules for maintainability.
  */
 
+@import "./auth.css";
+@import "./modals.css";
+@import "./analytics.css";
 @import "./project-detail.css";
 @import "./client-detail.css";
