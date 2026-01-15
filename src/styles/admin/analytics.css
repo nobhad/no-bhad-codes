@@ -1,0 +1,231 @@
+/**
+ * ===============================================
+ * ADMIN ANALYTICS STYLES
+ * ===============================================
+ * @file src/styles/admin/analytics.css
+ *
+ * Charts, performance metrics, vitals, and analytics dashboard.
+ */
+
+/* Charts */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--portal-spacing-lg);
+}
+
+.chart-container {
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--border-radius-card);
+  padding: var(--space-4);
+}
+
+.chart-container h3 {
+  color: var(--portal-text-light);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-3) 0;
+}
+
+.chart {
+  height: 320px;
+  background: var(--portal-bg-medium);
+  border: none;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--portal-text-secondary);
+  font-style: italic;
+  padding: var(--space-2);
+  box-sizing: border-box;
+}
+
+.chart canvas,
+#visitors-chart,
+#sources-chart {
+  padding: var(--space-1);
+}
+
+/* Performance Tab */
+.performance-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.metric-group {
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--border-radius-card);
+  padding: var(--space-4);
+  margin-top: var(--portal-spacing-lg);
+}
+
+.metric-group h3 {
+  color: var(--portal-text-light);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-2);
+}
+
+.vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-4);
+}
+
+.vital-card,
+[data-page="admin"] .vital-card {
+  background: var(--portal-bg-medium);
+  border: none;
+  border-radius: var(--border-radius-md);
+  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  text-align: center;
+  position: relative;
+}
+
+/* Position info icon in top right corner of vital cards */
+[data-page="admin"] .vital-card .info-icon-wrapper {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  margin-left: 0;
+}
+
+/* Position tooltip to the left for vital card icons */
+[data-page="admin"] .vital-card .info-icon-wrapper[data-tooltip]::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+[data-page="admin"] .vital-card .info-icon-wrapper[data-tooltip]::before {
+  left: auto;
+  right: 4px;
+  transform: none;
+}
+
+.vital-card h4 {
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-2);
+}
+
+.vital-value {
+  color: var(--portal-text-light);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-1);
+}
+
+.vital-status {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vital-status.good {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-success);
+}
+
+.vital-status.needs-improvement {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--color-warning);
+}
+
+.vital-status.poor {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger);
+}
+
+.bundle-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.bundle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--portal-bg-medium);
+  border-radius: var(--border-radius-md);
+  border: none;
+  color: var(--portal-text-light);
+}
+
+.timeline-chart {
+  height: 200px;
+  background: var(--portal-bg-dark);
+  border-radius: var(--border-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--portal-text-secondary);
+  font-style: italic;
+}
+
+/* Analytics Tab */
+.analytics-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.analytics-controls {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: var(--portal-spacing-lg);
+  margin-top: var(--portal-spacing-lg);
+}
+
+.analytics-section {
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--border-radius-card);
+  padding: var(--space-4);
+}
+
+.analytics-section h3 {
+  color: var(--portal-text-light);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-3) 0;
+}
+
+.data-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.data-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background: var(--portal-bg-medium);
+  border-radius: var(--border-radius-sm);
+  border: none;
+  box-shadow: var(--shadow-card);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-xs);
+}
