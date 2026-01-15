@@ -11,6 +11,7 @@
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatFileSize } from '../../../utils/format-utils';
 import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
+import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
 import {
   createFilterUI,
   createSortableHeaders,
@@ -93,9 +94,7 @@ export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
   }
 
   try {
-    const response = await fetch('/api/admin/leads', {
-      credentials: 'include'
-    });
+    const response = await apiFetch('/api/admin/leads');
 
     if (response.ok) {
       const data: ProjectsData = await response.json();
@@ -251,14 +250,7 @@ export async function updateProjectStatus(
   ctx: AdminDashboardContext
 ): Promise<void> {
   try {
-    const response = await fetch(`/api/projects/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify({ status })
-    });
+    const response = await apiPut(`/api/projects/${id}`, { status });
 
     if (response.ok) {
       ctx.showNotification('Project status updated', 'success');
@@ -597,12 +589,7 @@ async function saveProjectChanges(projectId: number): Promise<void> {
   if (statusSelect?.value) updates.status = statusSelect.value;
 
   try {
-    const response = await fetch(`/api/projects/${projectId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(updates)
-    });
+    const response = await apiPut(`/api/projects/${projectId}`, updates);
 
     if (response.ok) {
       storedContext.showNotification('Project updated successfully', 'success');
