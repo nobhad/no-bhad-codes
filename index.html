@@ -231,14 +231,14 @@
 
       <!-- Password Form -->
       <form class="portal-dropdown-form form-active" id="portal-password-form" autocomplete="off">
-        <label for="portal-email" class="visually-hidden">Email or Username</label>
+        <label for="portal-email" class="sr-only">Email or Username</label>
         <input type="text" id="portal-email" name="email" class="dropdown-input" placeholder="Email or Username" required autocomplete="username" />
         <div class="password-field">
-          <label for="portal-password" class="visually-hidden">Password</label>
+          <label for="portal-password" class="sr-only">Password</label>
           <input type="password" id="portal-password" name="password" class="dropdown-input" placeholder="Password" required autocomplete="current-password" />
           <button type="button" class="password-toggle" aria-label="Toggle password visibility">
-            <svg class="password-icon-show" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-            <svg class="password-icon-hide" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+            <svg class="password-icon-show" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <svg class="password-icon-hide" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
           </button>
         </div>
         <button type="submit" class="dropdown-submit">Sign In</button>
@@ -248,7 +248,7 @@
       <!-- Forgot Password Form -->
       <form class="portal-dropdown-form" id="portal-forgot-form" autocomplete="off">
         <p class="forgot-info">Enter your email to receive a password reset link.</p>
-        <label for="portal-forgot-email" class="visually-hidden">Email or Username</label>
+        <label for="portal-forgot-email" class="sr-only">Email or Username</label>
         <input type="text" id="portal-forgot-email" name="email" class="dropdown-input" placeholder="Email or Username" required autocomplete="username" />
         <button type="submit" class="dropdown-submit">Send Reset Link</button>
         <button type="button" class="dropdown-link" id="back-to-login">Back to login</button>
@@ -269,7 +269,7 @@
 
       <!-- Magic Link Form -->
       <form class="portal-dropdown-form" id="portal-magic-form" autocomplete="off">
-        <label for="portal-magic-email" class="visually-hidden">Email or Username</label>
+        <label for="portal-magic-email" class="sr-only">Email or Username</label>
         <input type="text" id="portal-magic-email" name="email" class="dropdown-input" placeholder="Email or Username" required autocomplete="username" />
         <button type="submit" class="dropdown-submit">Send Link</button>
         <p class="magic-info">A secure login link will be sent to your email.</p>
@@ -285,7 +285,7 @@
             <!-- CLIENT PORTAL BUTTON -->
             <button class="portal-button" aria-label="Client Portal Login" id="portal-trigger">
               <div class="icon-wrap">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/>
                 </svg>
               </div>
@@ -300,6 +300,7 @@
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
                 >
                   <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"></circle>
                   <path
@@ -314,12 +315,13 @@
                   height="20"
                   viewBox="0 0 24 24"
                   fill="currentColor"
+                  aria-hidden="true"
                 >
                   <path d="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79z"></path>
                 </svg>
               </div>
             </button>
-            <button role="button" data-menu-toggle="" class="menu-button">
+            <button data-menu-toggle="" class="menu-button" aria-label="Toggle navigation menu" aria-expanded="false">
               <div class="icon-wrap">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -327,6 +329,7 @@
                   viewBox="0 0 16 16"
                   fill="none"
                   class="menu-button-icon"
+                  aria-hidden="true"
                 >
                   <path
                     d="M7.33333 16L7.33333 -3.2055e-07L8.66667 -3.78832e-07L8.66667 16L7.33333 16Z"
@@ -409,14 +412,14 @@
             <p class="p-small">Socials</p>
             <div class="socials-row">
               <a href="https://github.com/nobhad" target="_blank" rel="noopener noreferrer" class="p-large text-link">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="social-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="social-icon" aria-hidden="true">
                   <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
                   <path d="M9 18c-4.51 2-5-2-7-2"/>
                 </svg>
                 GitHub
               </a>
               <a href="https://www.linkedin.com/in/noelle-b-676286106/" target="_blank" rel="noopener noreferrer" class="p-large text-link">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="social-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="social-icon" aria-hidden="true">
                   <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
                   <rect width="4" height="12" x="2" y="9"/>
                   <circle cx="4" cy="4" r="2"/>
@@ -433,7 +436,7 @@
     <!-- SECTION ORDER: Business Card -> Hero -> About -> Tech Stack -> Contact -->
     <!-- data-virtual-pages enables desktop virtual page mode -->
     <main id="main-content" data-virtual-pages>
-      <h1 class="visually-hidden">No Bhad Codes - Professional Web Development</h1>
+      <h1 class="sr-only">No Bhad Codes - Professional Web Development</h1>
       <!-- BUSINESS CARD INTRO SECTION (order: 1 - First on page load) -->
       <section id="intro" class="business-card-section page-active" data-page="intro">
         <div class="business-card-container">
@@ -579,8 +582,7 @@
                         placeholder="..."
                         required
                         autocomplete="name"
-                        tabindex="1"
-                        type="text"
+                                                type="text"
                         name="Name"
                         maxlength="256"
                         aria-label="Name"
@@ -600,8 +602,7 @@
                         id="company"
                         placeholder="..."
                         autocomplete="organization"
-                        tabindex="2"
-                        type="text"
+                                                type="text"
                         name="Company-Name"
                         maxlength="256"
                         aria-label="Company (optional)"
@@ -620,8 +621,7 @@
                         placeholder="..."
                         required
                         autocomplete="email"
-                        tabindex="3"
-                        type="email"
+                                                type="email"
                         name="Email"
                         maxlength="256"
                         aria-label="Email"
@@ -638,7 +638,7 @@
 
                 <!-- Right column: submit button -->
                 <div class="contact-right">
-                  <button class="submit-button" type="submit" tabindex="5" aria-label="Submit contact form">
+                  <button class="submit-button" type="submit"  aria-label="Submit contact form">
                     <span></span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bow-arrow-icon lucide-bow-arrow" aria-hidden="true">
                       <!-- Bow group (the two curves) -->
@@ -667,8 +667,7 @@
                       placeholder="..."
                       required
                       rows="4"
-                      tabindex="4"
-                      maxlength="1000"
+                                            maxlength="1000"
                       aria-label="Message"
                       aria-required="true"
                       data-required="true"
