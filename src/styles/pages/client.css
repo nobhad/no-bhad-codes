@@ -768,186 +768,7 @@ body[data-page="client-landing"] .auth-form .form-input:focus {
   }
 }
 
-/* ===============================================
-   PORTAL LAYOUT - CARD ON LEFT, FORM ON RIGHT (LEGACY)
-   =============================================== */
-
-.portal-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  width: 80vw;
-  max-width: 1000px;
-  margin-top: 1rem;
-  align-items: stretch;
-  grid-auto-rows: 1fr;
-}
-
-.portal-layout > * {
-  width: 100%;
-  min-width: 0;
-}
-
-.portal-layout.desktop-only {
-  display: grid;
-}
-
-/* Form area on the right - no card wrapper */
-.portal-form-area {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-}
-
-.portal-form-area .login-form {
-  width: 100%;
-  height: 100%;
-  padding: 1.5rem;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  background: var(--color-neutral-100);
-  border: 4px solid var(--color-border);
-  box-shadow:
-    6px 6px 12px rgba(0, 0, 0, 0.2),
-    12px 12px 24px rgba(0, 0, 0, 0.15);
-}
-
-[data-theme="dark"] .portal-form-area .login-form {
-  box-shadow:
-    6px 6px 12px rgba(0, 0, 0, 0.5),
-    12px 12px 24px rgba(0, 0, 0, 0.4);
-}
-
-.portal-form-area .login-form .btn-full {
-  margin-top: auto;
-}
-
-.portal-form-area h2 {
-  margin: 0;
-  font-family: var(--font--acme);
-  font-size: 1.3rem;
-  text-transform: uppercase;
-  color: var(--color-dark);
-}
-
-.portal-form-area .login-description {
-  color: var(--color-dark);
-  font-size: 0.95rem;
-  line-height: 1.5;
-  margin: 0;
-}
-
-/* ===============================================
-   PORTAL CARDS - INTAKE & LOGIN (LEGACY)
-   =============================================== */
-
-.portal-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  width: 80vw;
-  max-width: 1000px;
-  margin-top: 1rem;
-}
-
-.portal-card {
-  background: var(--color-neutral-100);
-  border: 4px solid var(--color-border);
-  display: flex;
-  flex-direction: column;
-  box-shadow:
-    6px 6px 12px rgba(0, 0, 0, 0.2),
-    12px 12px 24px rgba(0, 0, 0, 0.15);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-/* Dark mode: keep border black and darker shadows */
-html[data-theme="dark"] body[data-page="client-landing"] .portal-card {
-  border: 4px solid var(--color-border);
-  box-shadow:
-    6px 6px 12px rgba(0, 0, 0, 0.5),
-    12px 12px 24px rgba(0, 0, 0, 0.4);
-}
-
-html[data-theme="dark"] .portal-card:hover {
-  box-shadow:
-    8px 8px 16px rgba(0, 0, 0, 0.55),
-    16px 16px 32px rgba(0, 0, 0, 0.45);
-}
-
-.portal-card:hover {
-  /* No transform - cards stay in place */
-}
-
-.portal-card-header {
-  padding: 1rem 1.5rem;
-  background: var(--color-neutral-200);
-  border-bottom: 2px solid var(--color-border);
-}
-
-/* Dark mode: keep header border black */
-html[data-theme="dark"] .portal-card-header {
-  border-bottom-color: var(--color-border);
-}
-
-.portal-card-header h2 {
-  margin: 0;
-  font-family: var(--font--acme);
-  font-size: 1.3rem;
-  text-transform: uppercase;
-  color: var(--color-dark);
-}
-
-.portal-card-body {
-  padding: 1.5rem;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.portal-card-body p {
-  color: var(--color-dark);
-  font-size: 0.95rem;
-  line-height: 1.5;
-  margin: 0 0 1rem 0;
-}
-
-.portal-card-avatar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex: 1;
-  padding: 0;
-}
-
-.portal-card-avatar img {
-  width: clamp(160px, 25vw, 240px);
-  height: auto;
-  filter: brightness(0); /* Black in light mode */
-}
-
-/* Dark mode: avatar should be almost white */
-html[data-theme="dark"] .portal-card-avatar img {
-  filter: brightness(0) invert(1) brightness(0.9); /* Almost white */
-}
-
-.portal-card-body .btn {
-  margin-top: 1rem;
-}
-
-.portal-card-body .btn-full {
-  width: 100%;
-}
-
-/* Login Form in Card */
+/* Login Form */
 .login-form {
   display: flex;
   flex-direction: column;
@@ -1052,33 +873,6 @@ html[data-theme="dark"] body[data-page="client-landing"] .login-form {
   /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
 }
 
-.portal-card .login-footer {
-  margin-top: 1rem;
-  text-align: center;
-  font-size: 0.85rem;
-}
-
-.portal-card .login-footer a {
-  color: var(--color-primary);
-  text-decoration: underline;
-}
-
-.portal-card .login-footer a:hover {
-  color: var(--color-dark);
-}
-
-/* Responsive - Tablet */
-@media (max-width: 900px) {
-  .portal-cards {
-    width: 90vw;
-    gap: 1.5rem;
-  }
-
-  .portal-card-avatar img {
-    width: clamp(120px, 20vw, 160px);
-  }
-}
-
 /* Desktop/Mobile visibility helpers */
 .mobile-only {
   display: none;
@@ -1092,10 +886,6 @@ br.desktop-only {
   display: inline;
 }
 
-/* Portal cards needs grid display even with desktop-only class */
-.portal-cards.desktop-only {
-  display: grid;
-}
 
 /* Responsive - Mobile */
 @media (--mobile) {
@@ -1249,30 +1039,6 @@ br.desktop-only {
     align-items: center;
   }
 
-  .client-login:has(.portal-cards) .container {
-    width: 100%;
-    max-width: 100%;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  .client-login:has(.portal-cards) .client-content {
-    justify-content: flex-start;
-    width: 100%;
-    max-width: 100%;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  .portal-cards {
-    grid-template-columns: 1fr;
-    width: 100%;
-    max-width: 100%;
-    gap: 1rem;
-    margin-top: 0.5rem;
-    box-sizing: border-box;
-  }
-
   .login-title {
     font-size: 1.5rem;
     margin-bottom: 0.25rem;
@@ -1282,89 +1048,10 @@ br.desktop-only {
     font-size: 0.85rem;
     margin-bottom: 0.5rem;
   }
-
-  .portal-card-header {
-    padding: 0.75rem 1rem;
-  }
-
-  .portal-card-header h2 {
-    font-size: 1rem;
-  }
-
-  .portal-card-body {
-    padding: 1rem;
-  }
-
-  .portal-card-body p {
-    font-size: 0.85rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .portal-card-avatar {
-    display: none;
-  }
-
-  .portal-card .form-group {
-    margin-bottom: 0.75rem;
-  }
-
-  .portal-card .form-group label {
-    font-size: 0.8rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .portal-card .form-input {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
-  }
-
-  .portal-card .btn {
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
-  }
-
-  .portal-card .login-footer {
-    margin-top: 0.75rem;
-    font-size: 0.75rem;
-  }
 }
 
 /* Responsive - Small Mobile */
 @media (--small-mobile) {
-  .client-login:has(.portal-cards) {
-    padding: 0.5rem;
-    padding-top: calc(var(--header-height, 60px) + 0.5rem);
-    padding-bottom: 0.5rem;
-  }
-
-  .portal-cards {
-    width: 100%;
-    max-width: 100%;
-    gap: 0.75rem;
-    box-sizing: border-box;
-  }
-
-  .portal-card {
-    border-width: 3px;
-  }
-
-  .portal-card-header {
-    padding: 0.5rem 0.75rem;
-  }
-
-  .portal-card-body {
-    padding: 0.75rem;
-  }
-
-  .portal-card-avatar img {
-    width: 100px;
-  }
-
-  .portal-card .btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
-  }
-
   .login-title {
     font-size: 1.3rem;
   }

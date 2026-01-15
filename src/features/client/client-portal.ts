@@ -74,18 +74,20 @@ export class ClientPortalModule extends BaseModule {
   protected override async onInit(): Promise<void> {
     this.cacheElements();
     this.setupEventListeners();
-    // Disable animations that might cause issues
-    // this.setupAnimations();
-
-    // Check existing auth and handle redirects
-    await this.checkExistingAuth();
+    // Check for existing authentication using the auth module
+    const authModule = await loadAuthModule();
+    await authModule.checkExistingAuth({
+      onAuthValid: async (user) => {
+        this.isLoggedIn = true;
+        this.currentUser = user.email;
+        await this.loadRealUserProjects(user);
+        this.showDashboard();
+      }
+    });
   }
 
   protected override async onDestroy(): Promise<void> {
-    // Cleanup event listeners and animations
-    if (this.loginForm) {
-      this.loginForm.removeEventListener('submit', this.handleLogin);
-    }
+    // Cleanup handled by page unload
   }
 
   private cacheElements(): void {
@@ -118,7 +120,34 @@ export class ClientPortalModule extends BaseModule {
 
   private setupEventListeners(): void {
     if (this.loginForm) {
-      this.loginForm.addEventListener('submit', this.handleLogin.bind(this));
+      this.loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const formData = new FormData(this.loginForm!);
+        const authModule = await loadAuthModule();
+        await authModule.handleLogin(
+          {
+            email: formData.get('email') as string,
+            password: formData.get('password') as string
+          },
+          {
+            onLoginSuccess: async (user) => {
+              this.isLoggedIn = true;
+              this.currentUser = user.email;
+              await this.loadRealUserProjects(user);
+              const isOnPortalPage = document.body.getAttribute('data-page') === 'client-portal';
+              if (!isOnPortalPage) {
+                window.location.href = '/client/portal.html';
+                return;
+              }
+              this.showDashboard();
+            },
+            onLoginError: (message) => authModule.showLoginError(message),
+            setLoading: (loading) => authModule.setLoginLoading(loading),
+            clearErrors: () => authModule.clearErrors(),
+            showFieldError: (fieldId, message) => authModule.showFieldError(fieldId, message)
+          }
+        );
+      });
     }
 
     // Use setTimeout to ensure DOM elements are ready after dashboard is shown
@@ -298,8 +327,10 @@ export class ClientPortalModule extends BaseModule {
       });
     }
 
-    // Setup file upload handlers (drag & drop)
-    this.setupFileUploadHandlers();
+    // Setup file upload handlers (drag & drop) - uses module
+    loadFilesModule().then((filesModule) => {
+      filesModule.setupFileUploadHandlers(this.moduleContext);
+    });
 
     // Setup settings form handlers
     this.setupSettingsFormHandlers();
@@ -651,205 +682,6 @@ export class ClientPortalModule extends BaseModule {
       alert(
         error instanceof Error ? error.message : 'Failed to save billing info. Please try again.'
       );
-    }
-  }
-
-  private setupAnimations(): void {
-    // Disable animations temporarily to prevent flashing
-    // this.setupButtonAnimations();
-  }
-
-  private setupButtonAnimations(): void {
-    const buttons = document.querySelectorAll('.client-buttons .btn');
-    buttons.forEach((button) => {
-      this.animateButton(button as HTMLElement);
-    });
-  }
-
-  private animateButton(button: HTMLElement): void {
-    // GSAP button animation logic here
-    const buttonText = button.textContent?.trim() || '';
-    button.innerHTML = `<span style="position: relative; z-index: 2;">${buttonText}</span>`;
-
-    // Create fill element for hover effect
-    const fillElement = document.createElement('div');
-    fillElement.className = 'button-fill';
-    fillElement.style.cssText = `
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 0%;
-      height: 100%;
-      background-color: #dc2626;
-      z-index: 0;
-      pointer-events: none;
-      border-radius: inherit;
-      transform-origin: left center;
-    `;
-    button.appendChild(fillElement);
-
-    // Add hover animations
-    button.addEventListener('mouseenter', (e: MouseEvent) => {
-      const rect = button.getBoundingClientRect();
-      const mouseX = e.clientX;
-      const buttonCenter = rect.left + rect.width / 2;
-      const enteredFromLeft = mouseX < buttonCenter;
-
-      gsap.set(fillElement, {
-        left: enteredFromLeft ? '0' : 'auto',
-        right: enteredFromLeft ? 'auto' : '0',
-        transformOrigin: enteredFromLeft ? 'left center' : 'right center'
-      });
-
-      gsap.to(fillElement, {
-        width: '100%',
-        duration: APP_CONSTANTS.TIMERS.ANIMATION_DURATION / 1000,
-        ease: APP_CONSTANTS.EASING.SMOOTH
-      });
-
-      gsap.to(button, {
-        color: APP_CONSTANTS.THEME.DARK,
-        duration: APP_CONSTANTS.TIMERS.ANIMATION_DURATION / 1000,
-        ease: APP_CONSTANTS.EASING.SMOOTH
-      });
-    });
-
-    button.addEventListener('mouseleave', (e: MouseEvent) => {
-      const rect = button.getBoundingClientRect();
-      const mouseX = e.clientX;
-      const buttonCenter = rect.left + rect.width / 2;
-      const exitingFromLeft = mouseX < buttonCenter;
-
-      gsap.set(fillElement, {
-        left: exitingFromLeft ? '0' : 'auto',
-        right: exitingFromLeft ? 'auto' : '0',
-        transformOrigin: exitingFromLeft ? 'left center' : 'right center'
-      });
-
-      gsap.to(fillElement, {
-        width: '0%',
-        duration: APP_CONSTANTS.TIMERS.ANIMATION_DURATION / 1000,
-        ease: APP_CONSTANTS.EASING.SMOOTH
-      });
-
-      gsap.to(button, {
-        color: 'inherit',
-        duration: APP_CONSTANTS.TIMERS.ANIMATION_DURATION / 1000,
-        ease: APP_CONSTANTS.EASING.SMOOTH
-      });
-    });
-  }
-
-  /** API base URL for authentication */
-  private static readonly API_BASE = '/api/auth';
-
-  private async handleLogin(event: Event): Promise<void> {
-    event.preventDefault();
-    if (!this.loginForm) return;
-
-    const formData = new FormData(this.loginForm);
-    const credentials = {
-      email: formData.get('email') as string,
-      password: formData.get('password') as string
-    };
-
-    // Clear previous errors
-    this.clearErrors();
-    document.getElementById('login-error')!.style.display = 'none';
-
-    // Basic validation
-    if (!credentials.email.trim()) {
-      this.showFieldError('client-email', 'Email address is required');
-      return;
-    }
-
-    if (!credentials.password.trim()) {
-      this.showFieldError('client-password', 'Password is required');
-      return;
-    }
-
-    this.setLoginLoading(true);
-
-    try {
-      // Try backend authentication first
-      try {
-        const response = await fetch(`${ClientPortalModule.API_BASE}/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include', // Include HttpOnly cookies
-          body: JSON.stringify(credentials)
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-
-          // Store auth mode and user info (token is in HttpOnly cookie)
-          sessionStorage.setItem('client_auth_mode', 'authenticated');
-          sessionStorage.setItem('client_auth_user', JSON.stringify(data.user));
-
-          this.isLoggedIn = true;
-          this.currentUser = data.user.email;
-
-          // Check for redirect parameter first
-          const urlParams = new URLSearchParams(window.location.search);
-          const redirectUrl = urlParams.get('redirect');
-          console.log('[ClientPortal] Login success, redirect param:', redirectUrl, 'user:', data.user);
-          if (redirectUrl && redirectUrl.startsWith('/')) {
-            console.log('[ClientPortal] Redirecting to:', redirectUrl);
-            window.location.href = redirectUrl;
-            return;
-          }
-
-          // If user is admin, redirect to admin dashboard
-          if (data.user.isAdmin || data.user.type === 'admin') {
-            console.log('[ClientPortal] User is admin, redirecting to /admin/');
-            window.location.href = '/admin/';
-            return;
-          }
-
-          // Load real user projects from API for authenticated users
-          await this.loadRealUserProjects({
-            id: data.user.id,
-            email: data.user.email,
-            name: data.user.contactName || data.user.companyName || data.user.email.split('@')[0]
-          });
-
-          // Redirect to client portal if not already there
-          const isOnPortalPage = document.body.getAttribute('data-page') === 'client-portal';
-          if (!isOnPortalPage) {
-            window.location.href = '/client/portal.html';
-            return;
-          }
-
-          // If already on portal page, try to show dashboard
-          this.showDashboard();
-          return;
-        }
-
-        // Handle specific error responses from backend
-        const errorData = await response.json();
-        if (errorData.code === 'INVALID_CREDENTIALS') {
-          throw new Error('Invalid email or password');
-        } else if (errorData.code === 'ACCOUNT_INACTIVE') {
-          throw new Error('Your account is inactive. Please contact support.');
-        } else {
-          throw new Error(errorData.error || 'Login failed');
-        }
-      } catch (fetchError) {
-        // If backend is unavailable, show error
-        if (fetchError instanceof TypeError && fetchError.message.includes('fetch')) {
-          console.error('[ClientPortal] Backend unavailable');
-          throw new Error('Unable to connect to server. Please try again later.');
-        }
-
-        // Re-throw authentication errors
-        throw fetchError;
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      this.showLoginError(error instanceof Error ? error.message : 'Login failed');
-    } finally {
-      this.setLoginLoading(false);
     }
   }
 
@@ -1219,193 +1051,6 @@ export class ClientPortalModule extends BaseModule {
     return div.innerHTML;
   }
 
-  /**
-   * Setup file upload handlers (drag & drop + browse)
-   */
-  private setupFileUploadHandlers(): void {
-    const dropzone = document.getElementById('upload-dropzone');
-    const fileInput = document.getElementById('file-input') as HTMLInputElement;
-    const browseBtn = document.getElementById('btn-browse-files');
-
-    if (!dropzone) return;
-
-    // Make dropzone keyboard accessible
-    dropzone.setAttribute('tabindex', '0');
-    dropzone.setAttribute('role', 'button');
-    dropzone.setAttribute('aria-label', 'File upload dropzone - press Enter or Space to browse files, or drag and drop files here');
-
-    // Browse button click
-    if (browseBtn && fileInput) {
-      browseBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        fileInput.click();
-      });
-
-      // File input change
-      fileInput.addEventListener('change', () => {
-        if (fileInput.files && fileInput.files.length > 0) {
-          this.uploadFiles(Array.from(fileInput.files));
-          fileInput.value = ''; // Reset input
-        }
-      });
-    }
-
-    // Drag & drop handlers
-    dropzone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropzone.classList.add('drag-active');
-    });
-
-    dropzone.addEventListener('dragleave', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropzone.classList.remove('drag-active');
-    });
-
-    dropzone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropzone.classList.remove('drag-active');
-
-      const files = e.dataTransfer?.files;
-      if (files && files.length > 0) {
-        this.uploadFiles(Array.from(files));
-      }
-    });
-
-    // Keyboard support - Enter or Space triggers file browser
-    dropzone.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        fileInput?.click();
-      }
-    });
-
-    // Prevent default drag behavior on window
-    window.addEventListener('dragover', (e) => e.preventDefault());
-    window.addEventListener('drop', (e) => e.preventDefault());
-  }
-
-  /**
-   * Upload files to the server
-   */
-  private async uploadFiles(files: File[]): Promise<void> {
-    const authMode = sessionStorage.getItem('client_auth_mode');
-
-    if (!authMode) {
-      alert('Please log in to upload files.');
-      return;
-    }
-
-    // Check file count limit
-    if (files.length > 5) {
-      alert('Maximum 5 files allowed per upload.');
-      return;
-    }
-
-    // Check file sizes
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    const oversizedFiles = files.filter((f) => f.size > maxSize);
-    if (oversizedFiles.length > 0) {
-      alert(`Some files exceed the 10MB limit: ${oversizedFiles.map((f) => f.name).join(', ')}`);
-      return;
-    }
-
-    // Show upload progress
-    const dropzone = document.getElementById('upload-dropzone');
-    if (dropzone) {
-      dropzone.innerHTML = `
-        <div class="upload-progress">
-          <p>Uploading ${files.length} file(s)...</p>
-          <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
-        </div>
-      `;
-    }
-
-    try {
-      const formData = new FormData();
-      files.forEach((file) => {
-        formData.append('files', file);
-      });
-
-      const response = await fetch(`${ClientPortalModule.FILES_API_BASE}/multiple`, {
-        method: 'POST',
-        credentials: 'include', // Include HttpOnly cookies
-        body: formData
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Upload failed');
-      }
-
-      const result = await response.json();
-
-      // Reset dropzone
-      this.resetDropzone();
-
-      // Show success message
-      this.showUploadSuccess(result.files?.length || files.length);
-
-      // Reload files list
-      await this.loadFiles();
-    } catch (error) {
-      console.error('Upload error:', error);
-      this.resetDropzone();
-      alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
-   * Reset dropzone to initial state
-   */
-  private resetDropzone(): void {
-    const dropzone = document.getElementById('upload-dropzone');
-    if (dropzone) {
-      dropzone.innerHTML = `
-        <div class="dropzone-content">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
-          <p class="dropzone-desktop">Drag and drop files here or</p>
-          <p class="dropzone-mobile">Tap to select files</p>
-          <button type="button" class="btn btn-secondary" id="btn-browse-files">Browse Files</button>
-          <input type="file" id="file-input" multiple hidden />
-        </div>
-      `;
-      // Re-attach browse button listener
-      const browseBtn = document.getElementById('btn-browse-files');
-      const fileInput = document.getElementById('file-input') as HTMLInputElement;
-      if (browseBtn && fileInput) {
-        browseBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          fileInput.click();
-        });
-      }
-    }
-  }
-
-  /**
-   * Show upload success message
-   */
-  private showUploadSuccess(count: number): void {
-    const filesSection = document.getElementById('tab-files');
-    if (filesSection) {
-      const successMsg = document.createElement('div');
-      successMsg.className = 'upload-success-message';
-      successMsg.innerHTML = `<span>✓ ${count} file(s) uploaded successfully</span>`;
-      filesSection.insertBefore(successMsg, filesSection.firstChild);
-
-      // Remove after 3 seconds
-      setTimeout(() => {
-        successMsg.remove();
-      }, 3000);
-    }
-  }
-
   // =====================================================
   // INVOICE MANAGEMENT
   // =====================================================
@@ -1517,10 +1162,10 @@ export class ClientPortalModule extends BaseModule {
     );
   }
 
-  private logout(): void {
-    // Clear authentication data
-    sessionStorage.removeItem('client_auth_mode');
-    sessionStorage.removeItem('client_auth_user');
+  private async logout(): Promise<void> {
+    // Clear authentication data using auth module
+    const authModule = await loadAuthModule();
+    authModule.clearAuthData();
 
     this.isLoggedIn = false;
     this.currentProject = null;
@@ -1531,7 +1176,7 @@ export class ClientPortalModule extends BaseModule {
     if (this.loginForm) {
       this.loginForm.reset();
     }
-    this.clearErrors();
+    authModule.clearErrors();
 
     // Simple transition without animations
     if (this.dashboardSection) this.dashboardSection.style.display = 'none';
@@ -1579,107 +1224,12 @@ export class ClientPortalModule extends BaseModule {
     }
   }
 
-  private showFieldError(fieldId: string, message: string): void {
-    const field = document.getElementById(fieldId);
-    const errorElement = document.getElementById(`${fieldId.replace('client-', '')}-error`);
-
-    if (field) field.classList.add('error');
-    if (errorElement) {
-      errorElement.textContent = message;
-      errorElement.style.display = 'block';
-    }
-  }
-
-  private showLoginError(message: string): void {
-    const errorElement = document.getElementById('login-error');
-    if (errorElement) {
-      errorElement.textContent = message;
-      errorElement.style.display = 'block';
-    }
-  }
-
-  private setLoginLoading(loading: boolean): void {
-    const submitBtn = document.getElementById('login-btn') as HTMLButtonElement;
-    const loader = document.querySelector('.btn-loader') as HTMLElement;
-
-    if (submitBtn) {
-      submitBtn.disabled = loading;
-      if (loading) {
-        submitBtn.classList.add('loading');
-      } else {
-        submitBtn.classList.remove('loading');
-      }
-    }
-
-    if (loader) {
-      loader.style.display = loading ? 'block' : 'none';
-    }
-  }
-
-  private async checkExistingAuth(): Promise<void> {
-    const authMode = sessionStorage.getItem('client_auth_mode');
-    if (!authMode) return;
-
-    // Check for redirect parameter first - if user is already logged in and there's a redirect, go there
-    const urlParams = new URLSearchParams(window.location.search);
-    const redirectUrl = urlParams.get('redirect');
-    if (redirectUrl && redirectUrl.startsWith('/')) {
-      console.log('[ClientPortal] Already authenticated, redirecting to:', redirectUrl);
-      window.location.href = redirectUrl;
-      return;
-    }
-
-    try {
-      const response = await fetch(`${ClientPortalModule.API_BASE}/profile`, {
-        credentials: 'include' // Include HttpOnly cookies
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        this.isLoggedIn = true;
-        this.currentUser = data.user.email;
-
-        // If user is admin, redirect to admin dashboard
-        if (data.user.isAdmin || data.user.type === 'admin') {
-          console.log('[ClientPortal] User is admin, redirecting to /admin/');
-          window.location.href = '/admin/';
-          return;
-        }
-
-        await this.loadRealUserProjects({
-          id: data.user.id,
-          email: data.user.email,
-          name: data.user.contactName || data.user.companyName || data.user.email.split('@')[0]
-        });
-        this.showDashboard();
-      } else {
-        // Auth is invalid, clear it
-        sessionStorage.removeItem('client_auth_mode');
-        sessionStorage.removeItem('client_auth_user');
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      // Don't remove auth on network errors - might just be backend down
-      if (!(error instanceof TypeError)) {
-        sessionStorage.removeItem('client_auth_mode');
-        sessionStorage.removeItem('client_auth_user');
-      }
-    }
-  }
-
   private formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
-    });
-  }
-
-  private clearErrors(): void {
-    document.querySelectorAll('.error').forEach((el) => el.classList.remove('error'));
-    document.querySelectorAll('.error-message').forEach((el) => {
-      (el as HTMLElement).style.display = 'none';
     });
   }
 

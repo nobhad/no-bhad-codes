@@ -57,6 +57,7 @@
 
 /* Business card component */
 @import "./components/business-card.css" layer(components);
+@import "./components/intro-nav.css" layer(components);
 
 /* Footer component */
 @import "./components/footer.css" layer(components);
