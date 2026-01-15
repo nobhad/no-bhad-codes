@@ -1,0 +1,266 @@
+/**
+ * ===============================================
+ * ADMIN AUTH STYLES
+ * ===============================================
+ * @file src/styles/admin/auth.css
+ *
+ * Authentication gate and login form styles.
+ */
+
+/* Auth Gate - matches main site body background */
+.auth-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+}
+
+.auth-gate input::placeholder {
+  text-align: center;
+}
+
+.auth-gate input {
+  text-align: center;
+}
+
+.auth-gate.hidden {
+  display: none;
+}
+
+/* Override portal label positioning for auth form */
+body[data-page="admin"] .auth-gate .auth-form-group {
+  position: relative;
+}
+
+body[data-page="admin"] .auth-gate .auth-form-group label {
+  position: static;
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+}
+
+body[data-page="admin"] .auth-gate .portal-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+body[data-page="admin"] .auth-gate .portal-password-wrapper input {
+  padding-right: 3rem;
+  padding-top: var(--space-3);
+  min-height: auto;
+  height: auto;
+}
+
+.auth-gate .portal-password-toggle {
+  position: absolute;
+  right: var(--space-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1);
+  color: var(--color-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.auth-gate .portal-password-toggle:hover {
+  color: var(--color-brand-primary);
+}
+
+/* Auth Container - old style */
+.auth-container {
+  background: var(--color-bg-secondary);
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-2xl);
+  padding: var(--space-12);
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid var(--portal-border-dark);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.auth-header h1 {
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--space-2);
+  font-weight: var(--font-weight-bold);
+}
+
+.auth-header p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.auth-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--color-danger);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.auth-error:empty {
+  display: none;
+}
+
+/* Auth Gate Container - Matches client login dropdown styling */
+.auth-gate-container {
+  background: var(--color-dark);
+  border-radius: 8px;
+  border: 1px solid var(--portal-border-medium);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  width: 100%;
+  max-width: min(500px, 90vw);
+}
+
+.auth-gate-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-gate-header h1 {
+  font-family: var(--font--acme);
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  text-transform: uppercase;
+  color: var(--color-neutral-200);
+  margin: 0 0 0.5rem 0;
+}
+
+.auth-gate-header p {
+  color: var(--color-neutral-400);
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+  margin: 0;
+}
+
+.auth-gate-form {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+
+.auth-gate .password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Auth form input - matches client login dropdown */
+[data-page="admin"] .auth-gate .password-input-wrapper input,
+.auth-gate .password-input-wrapper input {
+  width: 100%;
+  padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px);
+  padding-right: 45px;
+  border: 1px solid var(--portal-border-medium);
+  border-radius: 30px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  background-color: var(--color-dark);
+  color: var(--color-neutral-200);
+  font-family: inherit;
+  height: clamp(40px, 8vw, 48px);
+  transition: all var(--transition-fast);
+  box-sizing: border-box;
+}
+
+[data-page="admin"] .auth-gate .password-input-wrapper input::placeholder,
+.auth-gate .password-input-wrapper input::placeholder {
+  color: var(--color-neutral-500);
+}
+
+[data-page="admin"] .auth-gate .password-input-wrapper input:focus,
+.auth-gate .password-input-wrapper input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.auth-gate .password-toggle {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: var(--space-1);
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  color: var(--color-neutral-400);
+}
+
+.auth-gate .password-toggle:hover {
+  opacity: 1;
+  color: var(--color-primary);
+}
+
+/* Auth submit button - matches client login dropdown */
+.auth-submit {
+  width: 100%;
+  padding: clamp(10px, 2.5vw, 14px) clamp(20px, 4vw, 28px);
+  border: 1px solid var(--portal-border-medium);
+  border-radius: 30px;
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+  text-transform: uppercase;
+  background-color: var(--color-dark);
+  color: var(--color-neutral-200);
+  margin-top: clamp(8px, 2vw, 16px);
+}
+
+.auth-submit:hover {
+  background-color: var(--color-neutral-600);
+  border-color: var(--portal-border-light);
+}
+
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.back-link {
+  display: block;
+  text-align: center;
+  margin-top: 1.5rem;
+  color: var(--color-neutral-400);
+  text-decoration: none;
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: var(--color-primary);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

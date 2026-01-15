@@ -9,20 +9,31 @@
 **Terminal CSS:**
 Merged `src/styles/components/terminal.css` into `src/styles/pages/terminal-intake.css` since the terminal component is only used for the intake form.
 
-**Admin CSS (2899 → 2646 lines, -253 lines):**
-Consolidated duplicate table styles to use `.admin-table` base class.
+**Admin CSS (2899 → 1846 lines, -1053 lines, 36% reduction):**
 
+Phase 1 - Consolidated duplicate table styles to use `.admin-table` base class:
 - Created `.admin-table-container` for common container styles
 - Extended `.admin-table` with all common table styles (th, td, hover, links)
 - Removed duplicate `.leads-table`, `.visitors-table`, `.clients-table`, `.contacts-table`, `.projects-table` definitions
 - Simplified status dropdown selectors from ~110 lines to ~90 lines
-- Kept only table-specific styles (projects column widths, contacts message-cell, clients btn-sm)
+
+Phase 2 - Split into modules:
+- Created `src/styles/admin/auth.css` (266 lines) - Auth gate, login form, password toggle
+- Created `src/styles/admin/modals.css` (251 lines) - Modal overlay, body, footer, dropdowns
+- Created `src/styles/admin/analytics.css` (231 lines) - Charts, vitals, performance metrics
 
 **Files Modified:**
 
 - `src/styles/pages/terminal-intake.css` - Now contains all terminal styles
-- `src/styles/pages/admin.css` - Consolidated table styles, simplified selectors
+- `src/styles/pages/admin.css` - Consolidated tables, extracted modules (1846 lines)
+- `src/styles/admin/index.css` - Added imports for new modules
 - `src/styles/main.css` - Removed terminal.css import
+
+**Files Created:**
+
+- `src/styles/admin/auth.css` - Authentication styles
+- `src/styles/admin/modals.css` - Modal styles
+- `src/styles/admin/analytics.css` - Analytics/charts styles
 
 **Files Deleted:**
 
@@ -132,7 +143,7 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 ### Code Quality (Ongoing)
 
 - [x] Split `client-portal.ts` - Phase 1 complete (1,952 lines, 3 new modules)
-- [ ] **CSS !important cleanup** - 174 instances remain (down from 313)
+- [ ] **CSS !important cleanup** - 85 instances remain (down from 313)
 - [x] Admin project editing - All fields working
 - [x] Additional project tracking fields - Added notes, URLs, financial fields
 - [x] Three-tier animation system - Desktop/Tablet/Mobile breakpoints aligned with CSS
@@ -154,6 +165,12 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 | admin.css | 29 | 4 | DONE |
 | terminal-intake.css | 41 | 0 | DONE |
 | client.css | 32 | 0 | DONE |
+| client-portal-section.css | 30 | 1 | DONE (reduced motion kept) |
+| contact.css | 24 | 7 | DONE (autofill, high contrast, reduced motion kept) |
+| business-card.css | 20 | 3 | DONE (reduced motion, print kept) |
+| projects.css | 13 | 0 | DONE |
+| nav-portal.css | 13 | 0 | DONE |
+| reset.css | 10 | 10 | DONE (all accessibility/print - kept) |
 
 **Architectural Solutions Implemented:**
 
@@ -162,6 +179,10 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 3. High-specificity selectors - `section[data-page].page-hidden` instead of !important
 4. GSAP inline styles first - Apply before class changes for animation states
 5. Page-states layer - Added `page-states` layer after `pages` for transition state overrides
+6. Section prefixes - `section.client-portal-section`, `.contact-section` for component isolation
+7. Parent context selectors - `.contact-section .contact-business-card .business-card-container` for nested overrides
+8. Doubled class selectors - `.intake-modal.intake-modal` for modal override specificity
+9. Element type prefixes - `section.page-hero-desktop`, `div.page-hero-desktop` for hidden elements
 
 ---
 
@@ -174,7 +195,7 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 
 ### Medium Term
 
-3. **CSS !important cleanup** - Next targets: client-portal-section.css (30), contact.css (24)
+3. **CSS !important cleanup** - 85 remaining across various files
 4. **SEO optimization** - Meta tags, sitemap, structured data
 
 ---
