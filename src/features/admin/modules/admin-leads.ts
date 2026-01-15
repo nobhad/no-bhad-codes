@@ -11,6 +11,15 @@
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
 import { createTableDropdown, LEAD_STATUS_OPTIONS } from '../../../utils/table-dropdown';
+import {
+  createFilterUI,
+  createSortableHeaders,
+  applyFilters,
+  loadFilterState,
+  saveFilterState,
+  LEADS_FILTER_CONFIG,
+  type FilterState
+} from '../../../utils/table-filter';
 import type { Lead, AdminDashboardContext } from '../admin-types';
 
 interface LeadsData {
@@ -25,6 +34,8 @@ interface LeadsData {
 
 let leadsData: Lead[] = [];
 let storedContext: AdminDashboardContext | null = null;
+let filterState: FilterState = loadFilterState(LEADS_FILTER_CONFIG.storageKey);
+let filterUIInitialized = false;
 
 /**
  * Format budget/timeline values with proper capitalization
@@ -51,6 +62,12 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
   setLeadsContext(ctx);
 
   console.log('[AdminLeads] Loading leads...');
+
+  // Initialize filter UI once
+  if (!filterUIInitialized) {
+    initializeFilterUI(ctx);
+    filterUIInitialized = true;
+  }
 
   try {
     const response = await apiFetch('/api/admin/leads');
@@ -81,6 +98,46 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
       tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">Network error loading leads</td></tr>';
     }
   }
+}
+
+/**
+ * Initialize filter UI for leads table
+ */
+function initializeFilterUI(ctx: AdminDashboardContext): void {
+  const container = document.getElementById('leads-filter-container');
+  if (!container) return;
+
+  // Create filter UI
+  const filterUI = createFilterUI(
+    LEADS_FILTER_CONFIG,
+    filterState,
+    (newState) => {
+      filterState = newState;
+      // Re-render table with new filters
+      if (leadsData.length > 0) {
+        renderLeadsTable(leadsData, ctx);
+      }
+    }
+  );
+
+  // Insert before the refresh button
+  const refreshBtn = container.querySelector('#refresh-leads-btn');
+  if (refreshBtn) {
+    container.insertBefore(filterUI, refreshBtn);
+  } else {
+    container.appendChild(filterUI);
+  }
+
+  // Setup sortable headers after table is rendered
+  setTimeout(() => {
+    createSortableHeaders(LEADS_FILTER_CONFIG, filterState, (column, direction) => {
+      filterState = { ...filterState, sortColumn: column, sortDirection: direction };
+      saveFilterState(LEADS_FILTER_CONFIG.storageKey, filterState);
+      if (leadsData.length > 0) {
+        renderLeadsTable(leadsData, ctx);
+      }
+    });
+  }, 100);
 }
 
 function updateLeadsDisplay(data: LeadsData, ctx: AdminDashboardContext): void {
@@ -142,10 +199,18 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
     return;
   }
 
+  // Apply filters
+  const filteredLeads = applyFilters(leads, filterState, LEADS_FILTER_CONFIG);
+
+  if (filteredLeads.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">No leads match the current filters</td></tr>';
+    return;
+  }
+
   // Clear and rebuild table
   tableBody.innerHTML = '';
 
-  leads.forEach((lead) => {
+  filteredLeads.forEach((lead) => {
     const date = new Date(lead.created_at).toLocaleDateString();
     const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.contact_name || '-'));
     const safeCompanyName = lead.company_name ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.company_name)) : '-';

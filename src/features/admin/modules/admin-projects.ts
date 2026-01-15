@@ -11,6 +11,15 @@
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatFileSize } from '../../../utils/format-utils';
 import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
+import {
+  createFilterUI,
+  createSortableHeaders,
+  applyFilters,
+  loadFilterState,
+  saveFilterState,
+  PROJECTS_FILTER_CONFIG,
+  type FilterState
+} from '../../../utils/table-filter';
 import type { ProjectMilestone, ProjectFile, ProjectInvoice, AdminDashboardContext, Message } from '../admin-types';
 
 /** Lead/Project data from admin leads API */
@@ -43,6 +52,8 @@ interface ProjectsData {
 let projectsData: LeadProject[] = [];
 let currentProjectId: number | null = null;
 let storedContext: AdminDashboardContext | null = null;
+let filterState: FilterState = loadFilterState(PROJECTS_FILTER_CONFIG.storageKey);
+let filterUIInitialized = false;
 
 /**
  * Format budget/timeline values with proper capitalization
@@ -73,6 +84,14 @@ export function setCurrentProjectId(id: number | null): void {
 }
 
 export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
+  storedContext = ctx;
+
+  // Initialize filter UI once
+  if (!filterUIInitialized) {
+    initializeFilterUI(ctx);
+    filterUIInitialized = true;
+  }
+
   try {
     const response = await fetch('/api/admin/leads', {
       credentials: 'include'
@@ -86,6 +105,52 @@ export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
   } catch (error) {
     console.error('[AdminProjects] Failed to load projects:', error);
   }
+}
+
+/**
+ * Initialize filter UI for projects table
+ */
+function initializeFilterUI(ctx: AdminDashboardContext): void {
+  const container = document.getElementById('projects-filter-container');
+  if (!container) return;
+
+  // Create filter UI
+  const filterUI = createFilterUI(
+    PROJECTS_FILTER_CONFIG,
+    filterState,
+    (newState) => {
+      filterState = newState;
+      // Re-render table with new filters
+      if (projectsData.length > 0) {
+        const projects = projectsData.filter(
+          (p) => normalizeStatus(p.status) !== 'pending' || p.project_name
+        );
+        renderProjectsTable(projects, ctx);
+      }
+    }
+  );
+
+  // Insert before the refresh button
+  const refreshBtn = container.querySelector('#refresh-projects-btn');
+  if (refreshBtn) {
+    container.insertBefore(filterUI, refreshBtn);
+  } else {
+    container.appendChild(filterUI);
+  }
+
+  // Setup sortable headers after table is rendered
+  setTimeout(() => {
+    createSortableHeaders(PROJECTS_FILTER_CONFIG, filterState, (column, direction) => {
+      filterState = { ...filterState, sortColumn: column, sortDirection: direction };
+      saveFilterState(PROJECTS_FILTER_CONFIG.storageKey, filterState);
+      if (projectsData.length > 0) {
+        const projects = projectsData.filter(
+          (p) => normalizeStatus(p.status) !== 'pending' || p.project_name
+        );
+        renderProjectsTable(projects, ctx);
+      }
+    });
+  }, 100);
 }
 
 function updateProjectsDisplay(data: ProjectsData, ctx: AdminDashboardContext): void {
@@ -123,7 +188,15 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
     return;
   }
 
-  tableBody.innerHTML = projects
+  // Apply filters
+  const filteredProjects = applyFilters(projects, filterState, PROJECTS_FILTER_CONFIG);
+
+  if (filteredProjects.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="6" class="loading-row">No projects match the current filters</td></tr>';
+    return;
+  }
+
+  tableBody.innerHTML = filteredProjects
     .map((project) => {
       const safeName = SanitizationUtils.escapeHtml(
         project.project_name || project.description?.substring(0, 30) || 'Untitled Project'

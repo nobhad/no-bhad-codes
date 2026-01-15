@@ -11,6 +11,15 @@
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { apiFetch, apiPut } from '../../../utils/api-client';
 import { createTableDropdown, CONTACT_STATUS_OPTIONS } from '../../../utils/table-dropdown';
+import {
+  createFilterUI,
+  createSortableHeaders,
+  applyFilters,
+  loadFilterState,
+  saveFilterState,
+  CONTACTS_FILTER_CONFIG,
+  type FilterState
+} from '../../../utils/table-filter';
 import type { ContactSubmission, AdminDashboardContext } from '../admin-types';
 
 interface ContactsData {
@@ -25,6 +34,8 @@ interface ContactsData {
 
 let contactsData: ContactSubmission[] = [];
 let storedContext: AdminDashboardContext | null = null;
+let filterState: FilterState = loadFilterState(CONTACTS_FILTER_CONFIG.storageKey);
+let filterUIInitialized = false;
 
 export function getContactsData(): ContactSubmission[] {
   return contactsData;
@@ -32,6 +43,13 @@ export function getContactsData(): ContactSubmission[] {
 
 export async function loadContacts(ctx: AdminDashboardContext): Promise<void> {
   storedContext = ctx;
+
+  // Initialize filter UI once
+  if (!filterUIInitialized) {
+    initializeFilterUI(ctx);
+    filterUIInitialized = true;
+  }
+
   try {
     const response = await apiFetch('/api/admin/contact-submissions');
 
@@ -44,6 +62,51 @@ export async function loadContacts(ctx: AdminDashboardContext): Promise<void> {
   } catch (error) {
     console.error('[AdminContacts] Failed to load contact submissions:', error);
   }
+}
+
+/**
+ * Initialize filter UI for contacts table
+ */
+function initializeFilterUI(ctx: AdminDashboardContext): void {
+  const container = document.getElementById('contacts-filter-container');
+  if (!container) return;
+
+  // Create filter UI
+  const filterUI = createFilterUI(
+    CONTACTS_FILTER_CONFIG,
+    filterState,
+    (newState) => {
+      filterState = newState;
+      // Re-render table with new filters
+      if (contactsData.length > 0) {
+        renderContactsTable(contactsData, ctx);
+      }
+    }
+  );
+
+  // Insert before the new count badge
+  const newCountBadge = container.querySelector('#contact-new-count');
+  if (newCountBadge) {
+    container.insertBefore(filterUI, newCountBadge);
+  } else {
+    const refreshBtn = container.querySelector('#refresh-contacts-btn');
+    if (refreshBtn) {
+      container.insertBefore(filterUI, refreshBtn);
+    } else {
+      container.appendChild(filterUI);
+    }
+  }
+
+  // Setup sortable headers after table is rendered
+  setTimeout(() => {
+    createSortableHeaders(CONTACTS_FILTER_CONFIG, filterState, (column, direction) => {
+      filterState = { ...filterState, sortColumn: column, sortDirection: direction };
+      saveFilterState(CONTACTS_FILTER_CONFIG.storageKey, filterState);
+      if (contactsData.length > 0) {
+        renderContactsTable(contactsData, ctx);
+      }
+    });
+  }, 100);
 }
 
 function updateContactsDisplay(data: ContactsData, ctx: AdminDashboardContext): void {
@@ -83,10 +146,18 @@ function renderContactsTable(
     return;
   }
 
+  // Apply filters
+  const filteredSubmissions = applyFilters(submissions, filterState, CONTACTS_FILTER_CONFIG);
+
+  if (filteredSubmissions.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="6" class="loading-row">No submissions match the current filters</td></tr>';
+    return;
+  }
+
   // Clear and rebuild table
   tableBody.innerHTML = '';
 
-  submissions.forEach((submission) => {
+  filteredSubmissions.forEach((submission) => {
     const date = new Date(submission.created_at).toLocaleDateString();
     const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(submission.name || '-'));
     const safeEmail = SanitizationUtils.escapeHtml(submission.email || '-');
