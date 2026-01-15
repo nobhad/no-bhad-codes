@@ -20,9 +20,10 @@
 }
 
 /* Settings Section */
-.settings-section {
-  background: var(--portal-bg-medium) !important;
-  border: none !important;
+/* High specificity to override base section styles */
+.client-portal-main .settings-section {
+  background: var(--portal-bg-medium);
+  border: none;
   border-radius: var(--portal-radius-lg);
   padding: var(--portal-spacing-xl);
   display: flex;

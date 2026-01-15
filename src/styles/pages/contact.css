@@ -133,26 +133,22 @@
    ========================================== */
 
 /* contact-hero-desktop - DISABLED - hero animations removed */
-.contact-hero-desktop {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
+section.contact-section .contact-hero-desktop {
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
   /* Mobile: Show hero overlay - same as desktop */
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  display: flex;
   justify-content: center;
   align-items: center;
   background: var(--color-neutral-300);
   z-index: 10;
   cursor: default;
-  /* Initially hidden - PageHeroModule will show it when ready */
-  opacity: 0;
-  visibility: hidden;
 }
 
 @media (--tablet) {
@@ -231,9 +227,9 @@
   }
 
   /* Position h2 - consistent with other sections */
-  .contact-section h2 {
-    margin: 0 !important;
-    margin-bottom: 0 !important;
+  section.contact-section h2 {
+    margin: 0;
+    margin-bottom: 0;
     padding: 0;
     text-align: left;
     width: 100%;
@@ -613,12 +609,12 @@ textarea:focus-visible + label {
 }
 
 /* Focus outline - follows border-radius using box-shadow */
-.input-item input:focus,
-.input-item input:focus-visible,
-.input-item textarea:focus,
-.input-item textarea:focus-visible {
-  outline: none !important;
-  box-shadow: 0 0 0 2px var(--color-primary) !important;
+.contact-form .input-item input:focus,
+.contact-form .input-item input:focus-visible,
+.contact-form .input-item textarea:focus,
+.contact-form .input-item textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-primary);
 }
 
 /* Autofill styling */
@@ -687,8 +683,8 @@ input:-webkit-autofill:active {
   background-color: var(--color-brand-primary, #dc2626);
 }
 
-.submit-button.form-sent span {
-  display: block !important;
+.contact-form .submit-button.form-sent span {
+  display: block;
   color: var(--color-black, #000);
   font-family: var(--font-family-display, 'Acme', sans-serif);
   font-size: 1.5rem;
@@ -697,8 +693,8 @@ input:-webkit-autofill:active {
   letter-spacing: 0.05em;
 }
 
-.submit-button.form-sent svg {
-  display: none !important;
+.contact-form .submit-button.form-sent svg {
+  display: none;
 }
 
 /* Loading state - disable interaction */
@@ -830,16 +826,16 @@ html[data-theme="dark"] .submit-button:focus-visible {
 }
 
 /* Field with error - red outline */
-.field-has-error {
-  outline: 2px solid var(--color-danger, #ef4444) !important;
+.contact-form .field-has-error {
+  outline: 2px solid var(--color-danger, #ef4444);
 }
 
-.contact-form .form-input.error,
-.contact-form .form-textarea.error,
-.contact-form input.error,
-.contact-form textarea.error {
-  border-color: var(--color-danger) !important;
-  background-color: rgba(239, 68, 68, 0.05) !important;
+section.contact-section .contact-form .form-input.error,
+section.contact-section .contact-form .form-textarea.error,
+section.contact-section .contact-form input.error,
+section.contact-section .contact-form textarea.error {
+  border-color: var(--color-danger);
+  background-color: rgba(239, 68, 68, 0.05);
 }
 
 /* Form Message Styles */
@@ -882,16 +878,16 @@ html[data-theme="dark"] .submit-button:focus-visible {
   }
 
   /* h2/hr spacing - matches projects page */
-  .contact-section h2 {
-    margin: 0 !important;
-    margin-bottom: 0 !important;
+  section.contact-section h2 {
+    margin: 0;
+    margin-bottom: 0;
   }
 
   /* hr spans width of input fields only */
-  .contact-section hr {
+  section.contact-section hr {
     width: 350px;
-    margin: 0 !important;
-    margin-bottom: 1rem !important;
+    margin: 0;
+    margin-bottom: 1rem;
   }
 
   /* Remove top margin on form inputs */

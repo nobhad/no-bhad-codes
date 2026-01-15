@@ -120,8 +120,9 @@
   }
 
   /* Menu link text on mobile - preserve rolling effect */
-  .menu-link-heading {
-    font-size: clamp(3rem, 12vw, 4.5rem) !important;
+  /* High specificity with element and class */
+  .menu .menu-link .menu-link-heading {
+    font-size: clamp(3rem, 12vw, 4.5rem);
     /* Keep the 1em offset for rolling duplicate text effect */
     text-shadow: 0 1em 0 var(--color-neutral-100);
   }
@@ -212,17 +213,18 @@
 /* =====================================================
    17. ACCESSIBILITY & FOCUS STATES
    ===================================================== */
-.menu-link:focus,
-.menu-button:focus,
-.theme-button:focus,
-.menu-link:active,
-.menu-button:active,
-.theme-button:active,
-.menu-link.active,
-.menu-button.active,
-.theme-button.active {
-  border: none !important;
-  outline: none !important;
+/* High specificity with doubled selectors to override base button styles */
+.nav .menu-link:focus,
+.nav .menu-button:focus,
+.nav .theme-button:focus,
+.nav .menu-link:active,
+.nav .menu-button:active,
+.nav .theme-button:active,
+.nav .menu-link.active,
+.nav .menu-button.active,
+.nav .theme-button.active {
+  border: none;
+  outline: none;
 }
 
 /* =====================================================
