@@ -4,111 +4,13 @@
  * ===============================================
  * @file contact.css
  * @description Contact form styles for desktop (min-width: 768px)
- * @author Noelle Bhaduri
  *
- * MOBILE STYLES: /src/styles/mobile/contact.css
- * ANIMATION: /src/modules/animation/contact-animation.ts
- * HERO ANIMATION: /src/modules/animation/page-hero.ts
+ * Related files:
+ * - Mobile: /src/styles/mobile/contact.css
+ * - Animation: /src/modules/animation/contact-animation.ts
  *
- * ===============================================
- * DESKTOP LAYOUT STRUCTURE
- * ===============================================
- *
- * The contact section uses a TWO-COLUMN grid layout:
- *
- * ┌─────────────────────────────────────────────────────────────┐
- * │                        CONTACT (h2)                         │
- * ├─────────────────────────────────┬───────────────────────────┤
- * │      LEFT COLUMN (form)         │   RIGHT COLUMN (card)     │
- * │                                 │                           │
- * │  ┌─────────────────┬─────────┐  │  ┌───────────────────┐    │
- * │  │  Name           │         │  │  │                   │    │
- * │  ├─────────────────┤ SUBMIT  │  │  │   Business Card   │    │
- * │  │  Company        │ BUTTON  │  │  │   (with text)     │    │
- * │  ├─────────────────┤         │  │  │                   │    │
- * │  │  Email          │         │  │  └───────────────────┘    │
- * │  └─────────────────┴─────────┘  │                           │
- * │                                 │                           │
- * │  ┌───────────────────────────┐  │                           │
- * │  │       Message             │  │                           │
- * │  │       (textarea)          │  │                           │
- * │  └───────────────────────────┘  │                           │
- * │                                 │                           │
- * └─────────────────────────────────┴───────────────────────────┘
- *
- * ===============================================
- * KEY LAYOUT RULES (DO NOT CHANGE)
- * ===============================================
- *
- * 1. SECTION (.contact-section):
- *    - Full viewport height (minus header/footer)
- *    - CSS Grid with place-content: center
- *
- * 2. TWO-COLUMN CONTAINER (.contact-layout):
- *    - CSS Grid: grid-template-columns: 1fr 1fr
- *    - Gap: clamp(4rem, 8vw, 6rem)
- *    - Width: clamp(600px, 80vw, 1100px)
- *
- * 3. FORM ROW (.contact-row):
- *    - CSS Grid: grid-template-columns: 460px auto
- *    - Contains: .contact-left (inputs) + .contact-right (button)
- *    - align-items: CENTER (button aligns with middle Company field)
- *
- * 4. SUBMIT BUTTON POSITION:
- *    - MUST be to the RIGHT of Name/Company/Email inputs
- *    - MUST be vertically centered (aligned with Company row)
- *    - Lives inside .contact-right within .contact-row
- *
- * 5. MESSAGE TEXTAREA (.contact-message-row):
- *    - Width: 640px (spans inputs + button width)
- *    - Below the input row
- *
- * ===============================================
- * ANIMATION BEHAVIOR (contact-animation.ts)
- * ===============================================
- *
- * DESKTOP ANIMATION SEQUENCE:
- * 1. Form fields start at height: 0, width: 150px
- * 2. Fields expand one-by-one (Name → Company → Email → Message)
- * 3. Each field expands to full width (460px for inputs, 640px for message)
- * 4. Labels fade in during expansion
- * 5. Submit button fades in and scales up (opacity: 0→1, scale: 0.8→1)
- * 6. Business card flips from back to front after form animation
- *
- * MOBILE: Different animation - see contact-animation.ts setupMobileAnimation()
- *
- * ===============================================
- * BUSINESS CARD BEHAVIOR
- * ===============================================
- *
- * - Shows "Leave me a message..." text on front
- * - Starts with back showing (rotated 180deg)
- * - Flips to front after form animation completes
- * - Click to flip manually after initial animation
- * - Has 3D tilt effect on mouse move
- *
- * ===============================================
- * CSS CLASS HIERARCHY
- * ===============================================
- *
- * .contact-section
- *   h2 (heading)
- *   .contact-layout (two-column grid)
- *     .contact-form-column (left)
- *       .contact-form
- *         .contact-row (grid: inputs + button)
- *           .contact-left (inputs container)
- *             .input-item (Name)
- *             .input-item (Company)
- *             .input-item (Email)
- *           .contact-right (button container)
- *             .submit-button
- *         .contact-message-row
- *           .input-item (Message textarea)
- *     .contact-card-column (right)
- *       .contact-business-card
- *         #contact-business-card
- *
+ * Layout: Two-column grid (form left, business card right)
+ * Animation: GSAP-controlled field expansion sequence
  **/
 
 /* ==========================================
