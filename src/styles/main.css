@@ -14,7 +14,7 @@
  * Layers are listed in priority order - later layers win.
  * This eliminates the need for !important in overrides.
  */
-@layer reset, tokens, base, components, pages, portals, mobile, utilities;
+@layer reset, tokens, base, components, pages, page-states, portals, mobile, utilities;
 
 /* ============================================
  * 0. FONT FACE DEFINITIONS (MUST BE FIRST, NO LAYER)
@@ -70,11 +70,7 @@
 /* Intro morph animation */
 @import "./components/intro-morph.css" layer(components);
 
-/* Page transitions (virtual pages) */
-@import "./components/page-transitions.css" layer(components);
-
-/* Terminal component (reusable) */
-@import "./components/terminal.css" layer(components);
+/* Page transitions moved to page-states layer (after pages) */
 
 /* Shared components */
 @import "./shared/progress.css" layer(components);
@@ -107,6 +103,14 @@
 
 /* Client portal section on main page */
 @import "./pages/client-portal-section.css" layer(pages);
+
+/* ============================================
+ * 5.5. PAGE STATES LAYER (overrides page-specific display)
+ * ============================================
+ * Page transitions control display/visibility states.
+ * Must override page-specific CSS without !important.
+ */
+@import "./components/page-transitions.css" layer(page-states);
 
 /* ============================================
  * 6. PORTALS LAYER (Admin & Client portals)
