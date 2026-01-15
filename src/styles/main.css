@@ -139,6 +139,28 @@
     white-space: nowrap;
     border: 0;
   }
+
+  /* Skip link for keyboard navigation accessibility */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    padding: 12px 24px;
+    background-color: var(--color-dark);
+    color: var(--color-light);
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: top 0.2s ease;
+  }
+
+  .skip-link:focus {
+    top: 10px;
+    outline: 2px solid var(--app-color-primary);
+    outline-offset: 2px;
+  }
 }
 
 /* ============================================
