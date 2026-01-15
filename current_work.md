@@ -6,11 +6,22 @@
 
 ### CSS Consolidation - January 15, 2026
 
+**Terminal CSS:**
 Merged `src/styles/components/terminal.css` into `src/styles/pages/terminal-intake.css` since the terminal component is only used for the intake form.
+
+**Admin CSS (2899 → 2646 lines, -253 lines):**
+Consolidated duplicate table styles to use `.admin-table` base class.
+
+- Created `.admin-table-container` for common container styles
+- Extended `.admin-table` with all common table styles (th, td, hover, links)
+- Removed duplicate `.leads-table`, `.visitors-table`, `.clients-table`, `.contacts-table`, `.projects-table` definitions
+- Simplified status dropdown selectors from ~110 lines to ~90 lines
+- Kept only table-specific styles (projects column widths, contacts message-cell, clients btn-sm)
 
 **Files Modified:**
 
-- `src/styles/pages/terminal-intake.css` - Now contains all terminal styles (base + intake-specific)
+- `src/styles/pages/terminal-intake.css` - Now contains all terminal styles
+- `src/styles/pages/admin.css` - Consolidated table styles, simplified selectors
 - `src/styles/main.css` - Removed terminal.css import
 
 **Files Deleted:**
@@ -121,7 +132,7 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 ### Code Quality (Ongoing)
 
 - [x] Split `client-portal.ts` - Phase 1 complete (1,952 lines, 3 new modules)
-- [ ] **CSS !important cleanup** - 288 instances remain (down from 341)
+- [ ] **CSS !important cleanup** - 174 instances remain (down from 313)
 - [x] Admin project editing - All fields working
 - [x] Additional project tracking fields - Added notes, URLs, financial fields
 - [x] Three-tier animation system - Desktop/Tablet/Mobile breakpoints aligned with CSS
@@ -139,8 +150,10 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 | mobile/layout.css | 61 | 3 | DONE |
 | client-portal/sidebar.css | 47 | 0 | DONE |
 | admin/project-detail.css | 45 | 0 | DONE |
-| page-transitions.css | 47 | 0 | DONE |
+| page-transitions.css | 44 | 2 | DONE (accessibility rules kept) |
 | admin.css | 29 | 4 | DONE |
+| terminal-intake.css | 41 | 0 | DONE |
+| client.css | 32 | 0 | DONE |
 
 **Architectural Solutions Implemented:**
 
@@ -148,6 +161,7 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 2. Scoped Styles - `[data-page="admin"]` prefix for admin-specific overrides
 3. High-specificity selectors - `section[data-page].page-hidden` instead of !important
 4. GSAP inline styles first - Apply before class changes for animation states
+5. Page-states layer - Added `page-states` layer after `pages` for transition state overrides
 
 ---
 
@@ -160,7 +174,7 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 
 ### Medium Term
 
-3. **CSS !important cleanup** - Next targets: page-transitions.css (44), client.css (32)
+3. **CSS !important cleanup** - Next targets: client-portal-section.css (30), contact.css (24)
 4. **SEO optimization** - Meta tags, sitemap, structured data
 
 ---

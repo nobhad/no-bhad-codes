@@ -37,13 +37,13 @@ body.admin-logged-in[data-page="admin"] .admin-header {
 }
 
 /* Show footer on admin login page - override the global hide rule */
-[data-page="admin"] .admin-footer {
-  display: flex !important;
+body[data-page="admin"]:not(.admin-logged-in) .admin-footer {
+  display: flex;
 }
 
 /* Hide footer when logged in */
 body.admin-logged-in[data-page="admin"] .admin-footer {
-  display: none !important;
+  display: none;
 }
 
 /* Adjust auth-gate position to account for header/footer */
@@ -109,11 +109,11 @@ body[data-page="admin"]:not(.admin-logged-in) {
    Separate from portfolio site styling.
    Inputs should NOT be bold.
    ================================================ */
-[data-page="admin"] input,
-[data-page="admin"] textarea,
-[data-page="admin"] select,
-[data-page="admin"] .form-input {
-  font-weight: 400 !important;
+body[data-page="admin"] input,
+body[data-page="admin"] textarea,
+body[data-page="admin"] select,
+body[data-page="admin"] .form-input {
+  font-weight: 400;
   background: var(--portal-bg-medium);
   color: var(--portal-text-light);
   border: none;
@@ -125,9 +125,9 @@ body[data-page="admin"]:not(.admin-logged-in) {
   box-sizing: border-box;
 }
 
-[data-page="admin"] input::placeholder,
-[data-page="admin"] textarea::placeholder {
-  font-weight: 400 !important;
+body[data-page="admin"] input::placeholder,
+body[data-page="admin"] textarea::placeholder {
+  font-weight: 400;
   color: var(--portal-text-muted);
   opacity: 0.7;
 }
@@ -172,37 +172,50 @@ body[data-page="admin"]:not(.admin-logged-in) {
 /* ================================================
    ADMIN PORTAL - CARD SHADOWS (matches sidebar)
    ================================================ */
-[data-page="admin"] .stat-card,
-[data-page="admin"] .admin-table-card,
-[data-page="admin"] .chart-container,
-[data-page="admin"] .metric-group,
-[data-page="admin"] .analytics-section,
-[data-page="admin"] .analytics-overview,
-[data-page="admin"] .settings-section,
-[data-page="admin"] .visitors-table-container,
-[data-page="admin"] .project-detail-overview,
-[data-page="admin"] .portal-project-card,
-[data-page="admin"] .recent-activity,
-[data-page="admin"] .summary-card,
-[data-page="admin"] .pd-tab-content,
-[data-page="admin"] .messages-container {
-  box-shadow: var(--shadow-panel) !important;
+body[data-page="admin"] .stat-card,
+body[data-page="admin"] .admin-table-card,
+body[data-page="admin"] .chart-container,
+body[data-page="admin"] .metric-group,
+body[data-page="admin"] .analytics-section,
+body[data-page="admin"] .analytics-overview,
+body[data-page="admin"] .settings-section,
+body[data-page="admin"] .visitors-table-container,
+body[data-page="admin"] .project-detail-overview,
+body[data-page="admin"] .portal-project-card,
+body[data-page="admin"] .recent-activity,
+body[data-page="admin"] .summary-card,
+body[data-page="admin"] .pd-tab-content,
+body[data-page="admin"] .messages-container {
+  box-shadow: var(--shadow-panel);
 }
 
 /* Less intense shadows for Core Web Vitals & Bundle Analysis cards */
-[data-page="admin"] .vital-card,
-[data-page="admin"] .bundle-item {
-  box-shadow: var(--shadow-card) !important;
+body[data-page="admin"] .vital-card,
+body[data-page="admin"] .bundle-item {
+  box-shadow: var(--shadow-card);
 }
 
 /* ================================================
-   ADMIN TABLE - Reusable table class
+   ADMIN TABLE - Reusable base class
    ================================================
-   Apply .admin-table to any table for consistent styling
+   Apply .admin-table to: leads-table, visitors-table,
+   clients-table, contacts-table, projects-table
    ================================================ */
+
+/* Container - wraps all admin tables */
+.admin-table-container {
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+/* Base table */
 .admin-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 700px;
   background: var(--portal-bg-dark);
 }
 
@@ -239,6 +252,10 @@ body[data-page="admin"]:not(.admin-logged-in) {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.admin-table tbody tr:active td {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .admin-table td a {
   color: var(--color-brand-primary);
   text-decoration: none;
@@ -246,6 +263,72 @@ body[data-page="admin"]:not(.admin-logged-in) {
 
 .admin-table td a:hover {
   text-decoration: underline;
+}
+
+.admin-table .loading-row,
+.admin-table .empty-row {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  padding: var(--space-8);
+}
+
+/* Table-specific: wider min-width */
+.admin-table.leads-table,
+.admin-table.clients-table,
+.admin-table.projects-table {
+  min-width: 800px;
+}
+
+/* Table-specific: clients action buttons */
+.admin-table.clients-table .btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  margin-right: 0.25rem;
+}
+
+.admin-table.clients-table .btn-sm:last-child {
+  margin-right: 0;
+}
+
+/* Table-specific: contacts message preview */
+.admin-table.contacts-table td.message-cell {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Table-specific: projects column widths */
+.admin-table.projects-table th:nth-child(1),
+.admin-table.projects-table td:nth-child(1) { width: 30%; }
+
+.admin-table.projects-table th:nth-child(2),
+.admin-table.projects-table td:nth-child(2) { width: 20%; }
+
+.admin-table.projects-table th:nth-child(3),
+.admin-table.projects-table td:nth-child(3) { width: 12%; }
+
+.admin-table.projects-table th:nth-child(4),
+.admin-table.projects-table td:nth-child(4) { width: 12%; }
+
+.admin-table.projects-table th:nth-child(5),
+.admin-table.projects-table td:nth-child(5) { width: 12%; }
+
+.admin-table.projects-table th:nth-child(6),
+.admin-table.projects-table td:nth-child(6) {
+  width: auto;
+  white-space: nowrap;
+}
+
+.admin-table.projects-table td {
+  vertical-align: middle;
+}
+
+.admin-table.projects-table td:last-child,
+.admin-table.projects-table th:last-child {
+  text-align: left;
+  white-space: nowrap;
 }
 
 /* Base Admin Styles */
@@ -299,30 +382,30 @@ body[data-page="admin"]:not(.admin-logged-in) {
 }
 
 /* Override portal label positioning for auth form */
-.auth-gate .auth-form-group {
-  position: relative !important;
+body[data-page="admin"] .auth-gate .auth-form-group {
+  position: relative;
 }
 
-.auth-gate .auth-form-group label {
-  position: static !important;
-  display: block !important;
-  margin-bottom: var(--space-2) !important;
-  color: var(--color-text-primary) !important;
-  font-weight: var(--font-weight-medium) !important;
-  font-size: var(--font-size-sm) !important;
+body[data-page="admin"] .auth-gate .auth-form-group label {
+  position: static;
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
 }
 
-.auth-gate .portal-password-wrapper {
+body[data-page="admin"] .auth-gate .portal-password-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.auth-gate .portal-password-wrapper input {
-  padding-right: 3rem !important;
-  padding-top: var(--space-3) !important;
-  min-height: auto !important;
-  height: auto !important;
+body[data-page="admin"] .auth-gate .portal-password-wrapper input {
+  padding-right: 3rem;
+  padding-top: var(--space-3);
+  min-height: auto;
+  height: auto;
 }
 
 .auth-gate .portal-password-toggle {
@@ -942,41 +1025,14 @@ body.modal-open .dashboard-content {
   flex-wrap: wrap;
 }
 
+/* Visitors table uses .admin-table-container and .admin-table base classes */
 .visitors-table-container {
-  background: var(--portal-bg-dark);
-  border: none;
   border-radius: var(--border-radius-card);
   overflow: hidden;
 }
 
-.visitors-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: var(--portal-bg-dark);
-}
-
-.visitors-table th,
-.visitors-table td {
-  padding: var(--space-3) var(--space-4);
-  text-align: left;
-  background: var(--portal-bg-dark);
-}
-
-.visitors-table th {
-  background: var(--portal-bg-dark);
-  color: var(--portal-text-light);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.admin-table.visitors-table th {
   border-top: none;
-  border-bottom: 1px solid var(--portal-border-medium);
-}
-
-.visitors-table td {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-  border: none;
 }
 
 .visitors-pagination {
@@ -1058,132 +1114,8 @@ body.modal-open .dashboard-content {
   font-weight: var(--font-weight-bold);
 }
 
-.leads-table-container {
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: 0;
-  overflow-x: auto;
-  overflow-y: visible;
-}
-
-.leads-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 800px;
-  background: var(--portal-bg-dark);
-}
-
-.leads-table th,
-.leads-table td {
-  padding: var(--space-3) var(--space-4);
-  text-align: left;
-  background: var(--portal-bg-dark);
-}
-
-.leads-table th {
-  background: var(--portal-bg-dark);
-  color: var(--portal-text-light);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-  border-top: 1px solid var(--portal-border-medium);
-  border-bottom: 1px solid var(--portal-border-medium);
-}
-
-.leads-table td {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-  border: none;
-}
-
-.leads-table tr:hover td {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.leads-table td a {
-  color: var(--color-brand-primary);
-  text-decoration: none;
-}
-
-.leads-table td a:hover {
-  text-decoration: underline;
-}
-
-/* Clients Table - matches leads-table styling */
-.clients-table-container {
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: 0;
-  overflow-x: auto;
-  overflow-y: visible;
-}
-
-.clients-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 800px;
-  background: var(--portal-bg-dark);
-}
-
-.clients-table th,
-.clients-table td {
-  padding: var(--space-3) var(--space-4);
-  text-align: left;
-  background: var(--portal-bg-dark);
-}
-
-.clients-table th {
-  background: var(--portal-bg-dark);
-  color: var(--portal-text-light);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-  border-top: 1px solid var(--portal-border-medium);
-  border-bottom: 1px solid var(--portal-border-medium);
-}
-
-.clients-table td {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-  border: none;
-}
-
-.clients-table tr:hover td {
-  background: rgba(255, 255, 255, 0.05);
-  cursor: pointer;
-}
-
-.clients-table td a {
-  color: var(--color-brand-primary);
-  text-decoration: none;
-}
-
-.clients-table td a:hover {
-  text-decoration: underline;
-}
-
-/* Clients table action buttons */
-.clients-table .btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
-  margin-right: 0.25rem;
-}
-
-.clients-table .btn-sm:last-child {
-  margin-right: 0;
-}
-
-.loading-row,
-.empty-row {
-  text-align: center;
-  color: var(--color-text-secondary);
-  font-style: italic;
-  padding: var(--space-8) !important;
-}
+/* Leads and Clients tables use .admin-table-container and .admin-table base classes */
+/* See table-specific styles in ADMIN TABLE section above */
 
 .status-badge {
   display: inline-block;
@@ -1358,74 +1290,18 @@ body.modal-open .dashboard-content {
   display: inline-block;
 }
 
-/* Contacts Table - Same styling as Leads Table */
-.contacts-table-container {
-  background: var(--portal-bg-dark);
-  border-radius: 0;
-  overflow-x: auto;
-  overflow-y: visible;
-}
+/* Contacts table uses .admin-table-container and .admin-table base classes */
+/* See table-specific message-cell style in ADMIN TABLE section above */
 
-.contacts-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 700px;
-  background: var(--portal-bg-dark);
-}
+/* ================================================
+   STATUS SELECT DROPDOWNS
+   ================================================
+   Styled to match status badges. Uses .admin-table base.
+   ================================================ */
 
-.contacts-table th,
-.contacts-table td {
-  padding: var(--space-3) var(--space-4);
-  text-align: left;
-  background: var(--portal-bg-dark);
-}
-
-.contacts-table th {
-  background: var(--portal-bg-dark);
-  color: var(--portal-text-light);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-  border-top: 1px solid var(--portal-border-medium);
-  border-bottom: 1px solid var(--portal-border-medium);
-}
-
-.contacts-table td {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-  border: none;
-}
-
-.contacts-table tr:hover td {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.contacts-table td a {
-  color: var(--color-brand-primary);
-  text-decoration: none;
-}
-
-.contacts-table td a:hover {
-  text-decoration: underline;
-}
-
-/* Message preview cell */
-.contacts-table td.message-cell {
-  max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Status dropdown in tables - styled to match badges */
-/* Base styles with default background and text color for visibility */
-[data-page="admin"] .projects-table select.status-select,
-[data-page="admin"] .leads-table select.status-select,
-[data-page="admin"] .contacts-table select.status-select,
-[data-page="admin"] select.status-select.project-status-select,
-[data-page="admin"] select.status-select.contact-status-select {
+/* Base status select styles */
+[data-page="admin"] .admin-table select.status-select,
+[data-page="admin"] select.status-select {
   padding: var(--space-2) var(--space-8) var(--space-2) var(--space-6);
   border: 1px solid var(--portal-border-dark);
   border-radius: 9999px;
@@ -1434,15 +1310,13 @@ body.modal-open .dashboard-content {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23f5f5f5'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
-  width: 160px !important;
-  min-width: 160px !important;
+  width: 160px;
+  min-width: 160px;
   font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
   text-transform: capitalize;
   appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
   height: auto;
   line-height: 1.2;
   box-sizing: border-box;
@@ -1453,99 +1327,65 @@ body.modal-open .dashboard-content {
   border-color: var(--color-brand-primary);
 }
 
-/* Style option elements inside status dropdowns for better visibility */
 [data-page="admin"] select.status-select option {
   background-color: var(--portal-bg-dark);
   color: var(--portal-text-light);
   padding: var(--space-2);
 }
 
-/* Status-specific colors for select dropdowns - uses same CSS variables as badges */
-/* Yellow - Awaiting Action (black text, black arrow) */
-[data-page="admin"] .projects-table select.status-select.status-pending,
-[data-page="admin"] .projects-table select.status-select.status-new,
-[data-page="admin"] .projects-table select.status-select.status-on_hold,
-[data-page="admin"] .projects-table select.status-select.status-on-hold,
-[data-page="admin"] .leads-table select.status-select.status-pending,
-[data-page="admin"] .leads-table select.status-select.status-new,
-[data-page="admin"] .leads-table select.status-select.status-on_hold,
-[data-page="admin"] .leads-table select.status-select.status-on-hold,
-[data-page="admin"] .contacts-table select.status-select.status-pending,
-[data-page="admin"] .contacts-table select.status-select.status-new {
+/* Yellow - Awaiting Action (pending, new, on_hold) */
+[data-page="admin"] select.status-select.status-pending,
+[data-page="admin"] select.status-select.status-new,
+[data-page="admin"] select.status-select.status-on_hold,
+[data-page="admin"] select.status-select.status-on-hold {
   background-color: var(--color-warning);
   color: var(--color-black);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
-/* Blue - In Progress (black text, black arrow) */
-[data-page="admin"] .projects-table select.status-select.status-active,
-[data-page="admin"] .projects-table select.status-select.status-in_progress,
-[data-page="admin"] .projects-table select.status-select.status-in-progress,
-[data-page="admin"] .projects-table select.status-select.status-contacted,
-[data-page="admin"] .leads-table select.status-select.status-active,
-[data-page="admin"] .leads-table select.status-select.status-in_progress,
-[data-page="admin"] .leads-table select.status-select.status-in-progress,
-[data-page="admin"] .leads-table select.status-select.status-contacted,
-[data-page="admin"] .contacts-table select.status-select.status-active,
-[data-page="admin"] .contacts-table select.status-select.status-contacted {
+/* Blue - In Progress (active, in_progress, contacted) */
+[data-page="admin"] select.status-select.status-active,
+[data-page="admin"] select.status-select.status-in_progress,
+[data-page="admin"] select.status-select.status-in-progress,
+[data-page="admin"] select.status-select.status-contacted {
   background-color: var(--color-info);
   color: var(--color-black);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
-/* Green - Success/Complete (black text, black arrow) */
-[data-page="admin"] .projects-table select.status-select.status-completed,
-[data-page="admin"] .projects-table select.status-select.status-converted,
-[data-page="admin"] .leads-table select.status-select.status-completed,
-[data-page="admin"] .leads-table select.status-select.status-converted,
-[data-page="admin"] .contacts-table select.status-select.status-replied {
+/* Green - Success (completed, converted, replied) */
+[data-page="admin"] select.status-select.status-completed,
+[data-page="admin"] select.status-select.status-converted,
+[data-page="admin"] select.status-select.status-replied {
   background-color: var(--color-success);
   color: var(--color-black);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
-/* Red - Cancelled/Lost (white text, white arrow) */
-[data-page="admin"] .projects-table select.status-select.status-cancelled,
-[data-page="admin"] .projects-table select.status-select.status-lost,
-[data-page="admin"] .leads-table select.status-select.status-cancelled,
-[data-page="admin"] .leads-table select.status-select.status-lost,
-[data-page="admin"] .contacts-table select.status-select.status-archived {
+/* Red - Cancelled/Lost (cancelled, lost, archived) */
+[data-page="admin"] select.status-select.status-cancelled,
+[data-page="admin"] select.status-select.status-lost,
+[data-page="admin"] select.status-select.status-archived {
   background-color: var(--color-danger);
   color: var(--color-white);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
-/* Purple - Qualified (white text, white arrow) */
-[data-page="admin"] .projects-table select.status-select.status-qualified,
-[data-page="admin"] .leads-table select.status-select.status-qualified {
+/* Purple - Qualified */
+[data-page="admin"] select.status-select.status-qualified {
   background-color: var(--color-status-review-border);
   color: var(--color-white);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
-/* Gray - Read (black text, black arrow) */
-[data-page="admin"] .contacts-table select.status-select.status-read {
+/* Gray - Read */
+[data-page="admin"] select.status-select.status-read {
   background-color: var(--portal-text-muted);
   color: var(--color-black);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
-/* Clickable table rows */
-.leads-table tbody tr,
-.contacts-table tbody tr {
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.leads-table tbody tr:hover td,
-.contacts-table tbody tr:hover td {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.leads-table tbody tr:active td,
-.contacts-table tbody tr:active td {
-  background: rgba(255, 255, 255, 0.1);
-}
+/* Clickable rows covered by .admin-table base class */
 
 /* Admin Modal Styles */
 .admin-modal-overlay {
@@ -1650,11 +1490,11 @@ body.modal-open .dashboard-content {
 }
 
 /* Ensure modal inputs are NOT bold */
-.admin-modal-body input,
-.admin-modal-body textarea,
-.admin-modal-body select,
-.admin-modal-body .custom-dropdown-trigger {
-  font-weight: 400 !important;
+body[data-page="admin"] .admin-modal-body input,
+body[data-page="admin"] .admin-modal-body textarea,
+body[data-page="admin"] .admin-modal-body select,
+body[data-page="admin"] .admin-modal-body .custom-dropdown-trigger {
+  font-weight: 400;
 }
 
 .admin-modal-body .form-row {
@@ -1684,9 +1524,9 @@ body.modal-open .dashboard-content {
    ================================================ */
 
 /* Remove border from modal dropdown trigger */
-.custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger {
+body[data-page="admin"] .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger {
   border: 4px solid transparent;
-  font-weight: 400 !important;
+  font-weight: 400;
 }
 
 /* Focus state - matches messages tab (border turns brand primary) */
@@ -1808,101 +1648,8 @@ body.modal-open .dashboard-content {
   text-decoration: underline;
 }
 
-/* Projects Table - Same styling as Leads/Contacts Tables */
-.projects-table-container {
-  background: var(--portal-bg-dark);
-  overflow-x: auto;
-}
-
-.projects-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 800px;
-  background: var(--portal-bg-dark);
-}
-
-.projects-table th,
-.projects-table td {
-  padding: var(--space-3) var(--space-4);
-  text-align: left;
-  background: var(--portal-bg-dark);
-}
-
-/* Column widths for projects table */
-.projects-table th:nth-child(1),
-.projects-table td:nth-child(1) {
-  width: 30%;
-}
-
-.projects-table th:nth-child(2),
-.projects-table td:nth-child(2) {
-  width: 20%;
-}
-
-.projects-table th:nth-child(3),
-.projects-table td:nth-child(3) {
-  width: 12%;
-}
-
-.projects-table th:nth-child(4),
-.projects-table td:nth-child(4) {
-  width: 12%;
-}
-
-.projects-table th:nth-child(5),
-.projects-table td:nth-child(5) {
-  width: 12%;
-}
-
-.projects-table th:nth-child(6),
-.projects-table td:nth-child(6) {
-  width: auto;
-  white-space: nowrap;
-}
-
-.projects-table th {
-  background: var(--portal-bg-dark);
-  color: var(--portal-text-light);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-  border-top: 1px solid var(--portal-border-medium);
-  border-bottom: 1px solid var(--portal-border-medium);
-}
-
-.projects-table td {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-  vertical-align: middle;
-  border: none;
-}
-
-/* Status column alignment */
-.projects-table td:last-child,
-.projects-table th:last-child {
-  text-align: left;
-  white-space: nowrap;
-}
-
-.projects-table tbody tr {
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.projects-table tbody tr:hover td {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.projects-table td a {
-  color: var(--color-brand-primary);
-  text-decoration: none;
-}
-
-.projects-table td a:hover {
-  text-decoration: underline;
-}
+/* Projects table uses .admin-table-container and .admin-table base classes */
+/* See table-specific column widths in ADMIN TABLE section above */
 
 /* ================================================
    Custom Status Dropdown (Projects Table)
@@ -1912,7 +1659,7 @@ body.modal-open .dashboard-content {
   display: inline-block;
 }
 
-.status-dropdown-trigger {
+.custom-status-dropdown .status-dropdown-trigger {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -1923,8 +1670,8 @@ body.modal-open .dashboard-content {
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.2s ease;
-  width: 160px !important;
-  min-width: 160px !important;
+  width: 160px;
+  min-width: 160px;
   justify-content: space-between;
 }
 
@@ -2434,17 +2181,16 @@ body.modal-open .dashboard-content {
 
 /* Small screens - stack all grids to single column */
 @media (max-width: 600px) {
-  [data-page="admin"] .analytics-grid,
-  [data-page="admin"] .vitals-grid,
-  [data-page="admin"] .quick-stats,
-  [data-page="admin"] .leads-stats,
-  [data-page="admin"] .charts-grid,
-  [data-page="admin"] #tab-overview > .quick-stats,
-  [data-page="admin"] #tab-analytics .quick-stats,
-  [data-page="admin"] #tab-leads .quick-stats {
-    grid-template-columns: 1fr !important;
+  body[data-page="admin"] .analytics-grid,
+  body[data-page="admin"] .vitals-grid,
+  body[data-page="admin"] .quick-stats,
+  body[data-page="admin"] .leads-stats,
+  body[data-page="admin"] .charts-grid,
+  body[data-page="admin"] #tab-overview > .quick-stats,
+  body[data-page="admin"] #tab-analytics .quick-stats,
+  body[data-page="admin"] #tab-leads .quick-stats {
+    grid-template-columns: 1fr;
   }
-
 }
 
 /* Mobile - reduce padding on system page to prevent badge overflow */
