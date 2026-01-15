@@ -4,6 +4,21 @@
 
 ## Recently Completed
 
+### CSS Consolidation - January 15, 2026
+
+Merged `src/styles/components/terminal.css` into `src/styles/pages/terminal-intake.css` since the terminal component is only used for the intake form.
+
+**Files Modified:**
+
+- `src/styles/pages/terminal-intake.css` - Now contains all terminal styles (base + intake-specific)
+- `src/styles/main.css` - Removed terminal.css import
+
+**Files Deleted:**
+
+- `src/styles/components/terminal.css` - Merged into terminal-intake.css
+
+---
+
 ### Admin Portal Mobile Optimization - January 14, 2026
 
 **Mobile-specific styles added to `src/styles/pages/admin.css`:**
@@ -106,7 +121,7 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 ### Code Quality (Ongoing)
 
 - [x] Split `client-portal.ts` - Phase 1 complete (1,952 lines, 3 new modules)
-- [ ] **CSS !important cleanup** - 341 instances remain, severe overuse needs addressing
+- [ ] **CSS !important cleanup** - 288 instances remain (down from 341)
 - [x] Admin project editing - All fields working
 - [x] Additional project tracking fields - Added notes, URLs, financial fields
 - [x] Three-tier animation system - Desktop/Tablet/Mobile breakpoints aligned with CSS
@@ -125,7 +140,7 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 | client-portal/sidebar.css | 47 | 0 | DONE |
 | admin/project-detail.css | 45 | 0 | DONE |
 | page-transitions.css | 47 | 0 | DONE |
-| admin.css | 64 | - | Pending |
+| admin.css | 29 | 4 | DONE |
 
 **Architectural Solutions Implemented:**
 
@@ -145,14 +160,14 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 
 ### Medium Term
 
-3. **CSS !important cleanup** - Continue with admin.css
+3. **CSS !important cleanup** - Next targets: page-transitions.css (44), client.css (32)
 4. **SEO optimization** - Meta tags, sitemap, structured data
 
 ---
 
 ## System Status
 
-**Last Updated:** January 14, 2026
+**Last Updated:** January 15, 2026
 
 ### Build Status
 
