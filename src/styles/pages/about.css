@@ -99,9 +99,12 @@
 
 
   /* Hidden tech stack - preserved but not displayed */
-  .tech-stack-viewport,
-  .tech-stack-desktop {
-    display: none !important;
+  /* High specificity with section prefix */
+  .about-section .tech-stack-viewport,
+  .about-section .tech-stack-desktop,
+  section.about-section .tech-stack-viewport,
+  section.about-section .tech-stack-desktop {
+    display: none;
   }
 }
 

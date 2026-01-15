@@ -4,16 +4,16 @@
  **/
 
 /* Client Portal Section - match contact section width */
-.client-portal-section {
-  align-items: flex-start !important;
-  width: min(1000px, 90vw) !important;
-  max-width: min(1000px, 90vw) !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+section.client-portal-section {
+  align-items: flex-start;
+  width: min(1000px, 90vw);
+  max-width: min(1000px, 90vw);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 0;
+  padding-right: 0;
   box-sizing: border-box;
-  overflow: visible !important;
+  overflow: visible;
 }
 
 /* Client Portal heading with decorative line - matches contact */
@@ -167,40 +167,40 @@
 }
 
 /* Portal sign-in button - exact match to toggle button sizing */
-.client-portal-section .btn.btn-primary,
-.client-portal-section .portal-login-submit button,
-.client-portal-section button[type="submit"] {
-  background-color: var(--color-border) !important;
-  color: var(--color-text-inverse) !important;
-  border: 3px solid var(--color-border) !important;
-  border-radius: 0 !important;
-  height: 60px !important;
-  padding: 0 1.5rem !important;
-  font-family: var(--font--acme) !important;
-  font-size: 0.9rem !important;
-  font-weight: normal !important;
-  line-height: 60px !important;
-  text-transform: uppercase !important;
+section.client-portal-section .btn.btn-primary,
+section.client-portal-section .portal-login-submit button,
+section.client-portal-section button[type="submit"] {
+  background-color: var(--color-border);
+  color: var(--color-text-inverse);
+  border: 3px solid var(--color-border);
+  border-radius: 0;
+  height: 60px;
+  padding: 0 1.5rem;
+  font-family: var(--font--acme);
+  font-size: 0.9rem;
+  font-weight: normal;
+  line-height: 60px;
+  text-transform: uppercase;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
-  box-shadow: none !important;
-  text-shadow: none !important;
-  outline: none !important;
-  width: 100% !important;
-  max-width: 400px !important;
+  box-shadow: none;
+  text-shadow: none;
+  outline: none;
+  width: 100%;
+  max-width: 400px;
 }
 
-.client-portal-section .btn.btn-primary:hover,
-.client-portal-section .btn.btn-primary:focus,
-.client-portal-section .portal-login-submit button:hover,
-.client-portal-section .portal-login-submit button:focus,
-.client-portal-section button[type="submit"]:hover,
-.client-portal-section button[type="submit"]:focus {
-  background-color: var(--color-primary) !important;
-  color: var(--color-black) !important;
-  border: 3px solid var(--color-primary) !important;
-  box-shadow: none !important;
-  outline: none !important;
+section.client-portal-section .btn.btn-primary:hover,
+section.client-portal-section .btn.btn-primary:focus,
+section.client-portal-section .portal-login-submit button:hover,
+section.client-portal-section .portal-login-submit button:focus,
+section.client-portal-section button[type="submit"]:hover,
+section.client-portal-section button[type="submit"]:focus {
+  background-color: var(--color-primary);
+  color: var(--color-black);
+  border: 3px solid var(--color-primary);
+  box-shadow: none;
+  outline: none;
 }
 
 /* Dark mode button */

@@ -392,8 +392,9 @@ li {
   opacity: 0.4;
 }
 
-.menu-link.disabled:hover .menu-link-bg {
-  transform: scale3d(1, 0, 1) !important;
+/* High specificity to override hover effects for disabled links */
+.menu .menu-link.disabled:hover .menu-link-bg {
+  transform: scale3d(1, 0, 1);
 }
 
 /* =====================================================

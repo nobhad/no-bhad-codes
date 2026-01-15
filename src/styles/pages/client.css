@@ -90,24 +90,24 @@
   margin: 0 clamp(1rem, 3vw, 2rem);
 }
 
-.dashboard-layout {
-  display: flex !important;
-  flex-direction: row !important;
+body[data-page="client"] .dashboard-layout {
+  display: flex;
+  flex-direction: row;
   height: calc(100vh - var(--header-height) - var(--footer-height));
   width: 100%;
   overflow: hidden;
-  border: 4px solid var(--color-border) !important;
+  border: 4px solid var(--color-border);
   background: var(--color-neutral-100);
 }
 
 /* Left Sidebar - Projects List (1/3 width) */
-.projects-sidebar {
-  width: 33.333% !important;
-  background: var(--color-neutral-200) !important;
-  border-right: 2px solid var(--color-border) !important;
-  display: flex !important;
-  flex-direction: column !important;
-  flex-shrink: 0 !important;
+body[data-page="client"] .projects-sidebar {
+  width: 33.333%;
+  background: var(--color-neutral-200);
+  border-right: 2px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
 }
 
 .sidebar-header {
@@ -248,10 +248,10 @@
 }
 
 /* Right Panel - Project Details (2/3 width) */
-.project-details {
-  width: 66.666% !important;
+body[data-page="client"] .project-details {
+  width: 66.666%;
   overflow-y: auto;
-  background: var(--color-neutral-100) !important;
+  background: var(--color-neutral-100);
   display: flex;
   flex-direction: column;
 }
@@ -560,10 +560,10 @@ body[data-page="client-landing"] .client-login .client-content {
   height: clamp(32px, 8vw, 44px);
 }
 
-.auth-form .form-input:focus {
-  outline: none !important;
-  border-color: var(--color-primary) !important;
-  box-shadow: 0 0 0 2px rgba(var(--color-brand-primary-rgb), 0.25) !important;
+body[data-page="client-landing"] .auth-form .form-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-brand-primary-rgb), 0.25);
 }
 
 .auth-form .form-input::placeholder {
@@ -700,7 +700,7 @@ body[data-page="client-landing"] .client-login .client-content {
   }
 
   body[data-page="client-landing"] .header {
-    position: static !important;
+    position: static;
   }
 
   .auth-container {
@@ -870,8 +870,8 @@ body[data-page="client-landing"] .client-login .client-content {
 }
 
 /* Dark mode: keep border black and darker shadows */
-html[data-theme="dark"] .portal-card {
-  border: 4px solid var(--color-border) !important;
+html[data-theme="dark"] body[data-page="client-landing"] .portal-card {
+  border: 4px solid var(--color-border);
   box-shadow:
     6px 6px 12px rgba(0, 0, 0, 0.5),
     12px 12px 24px rgba(0, 0, 0, 0.4);
@@ -963,8 +963,8 @@ html[data-theme="dark"] .portal-card-avatar img {
 }
 
 /* Dark mode: login form container border black */
-html[data-theme="dark"] .login-form {
-  border-color: var(--color-border) !important;
+html[data-theme="dark"] body[data-page="client-landing"] .login-form {
+  border-color: var(--color-border);
 }
 
 .login-form .form-group {
@@ -1120,12 +1120,12 @@ br.desktop-only {
 
   /* Client landing page - header static, normal document flow */
   body[data-page="client-landing"] .header {
-    position: static !important;
+    position: static;
   }
 
   /* Mobile portal layout - stacked layout */
-  .mobile-portal-layout {
-    display: flex !important;
+  body[data-page="client-landing"] .mobile-portal-layout {
+    display: flex;
     flex-direction: column;
     width: 100%;
     padding: 0.5rem 0.5rem 2rem;
@@ -1217,25 +1217,25 @@ br.desktop-only {
     flex: 1;
     display: flex;
     flex-direction: column;
-    position: static !important;
-    top: auto !important;
-    bottom: auto !important;
-    height: auto !important;
+    position: static;
+    top: auto;
+    bottom: auto;
+    height: auto;
   }
 
   /* Footer at end of content - need to scroll to see it */
   body[data-page="client-landing"] .footer {
-    position: static !important;
+    position: static;
     flex-shrink: 0;
   }
 
   /* Client login section fills viewport so footer is below fold */
   body[data-page="client-landing"] .client-login {
-    position: static !important;
-    top: auto !important;
-    left: auto !important;
-    right: auto !important;
-    bottom: auto !important;
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
     width: 100%;
     height: auto;
     min-height: calc(100vh - var(--header-height));
@@ -1514,9 +1514,9 @@ br.desktop-only {
 }
 
 /* Dynamic content forms - override contact.css width constraints */
-.dynamic-content .contact-form {
-  max-width: none !important; /* Remove max-width constraint */
-  width: 100% !important; /* Use full width of container */
+body[data-page="client-landing"] .dynamic-content .contact-form {
+  max-width: none;
+  width: 100%;
 }
 
 /* Form Styling - Let main.css and contact.css handle all form styling */
@@ -1671,7 +1671,7 @@ body[data-page="client-landing"] .intake-modal.minimized {
   align-items: flex-end;
   justify-content: flex-start;
   padding: 0;
-  background: transparent !important;
+  background: transparent;
   pointer-events: none;
 }
 

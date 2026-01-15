@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** January 13, 2026
+**Last Updated:** January 15, 2026
 
 ## Table of Contents
 
@@ -15,7 +15,8 @@
 9. [Naming Conventions](#naming-conventions)
 10. [File Organization](#file-organization)
 11. [Best Practices](#best-practices)
-12. [Known Issues](#known-issues)
+12. [!important Usage Policy](#important-usage-policy)
+13. [Known Issues](#known-issues)
 
 ---
 
@@ -844,9 +845,165 @@ box-shadow:
 
 ---
 
+## !important Usage Policy
+
+**Last Updated:** January 15, 2026
+
+This section documents all legitimate `!important` declarations in the codebase. As of January 15, 2026, we have reduced from 313 to 58 instances through specificity refactoring.
+
+### Legitimate Uses (Do Not Remove)
+
+The following categories of `!important` are **intentional and necessary**:
+
+#### 1. Accessibility - Reduced Motion (32 instances)
+
+Users who prefer reduced motion must have animations disabled regardless of other CSS rules.
+
+| File | Lines | Rules |
+|------|-------|-------|
+| `design-system/tokens/shadows.css` | 207 | `transition: box-shadow 0.01ms` |
+| `design-system/tokens/animations.css` | 450-453 | animation-duration, iteration-count, transition-duration, scroll-behavior |
+| `base/reset.css` | 245-248 | animation-duration, iteration-count, transition-duration, scroll-behavior |
+| `variables.css` | 507-510 | animation-duration, iteration-count, transition-duration, scroll-behavior |
+| `components/page-transitions.css` | 321-322 | `transition: none`, `animation: none` |
+| `components/business-card.css` | 575, 581, 623 | `transition: none`, `transform: none` (2x) |
+| `components/portfolio-carousel.css` | 298 | `transition: none` |
+| `components/nav-animations.css` | 121-122 | `transform: none`, `transition: none` |
+| `components/nav-base.css` | 770-773 | animation-duration, iteration-count, scroll-behavior |
+| `pages/contact.css` | 983-984 | `transition: none`, `animation: none` |
+| `pages/client-portal-section.css` | 311 | `transition: none` |
+
+#### 2. Print Styles (15 instances)
+
+Print media requires overriding all screen styles for clean output.
+
+| File | Lines | Rules |
+|------|-------|-------|
+| `design-system/tokens/breakpoints.css` | 491-494, 522 | background, color, box-shadow, text-shadow, max-width |
+| `base/reset.css` | 268-271, 280 | background, color, box-shadow, text-shadow, `.no-print` display |
+| `variables.css` | 524-527, 536 | background, color, box-shadow, text-shadow, `.no-print` display |
+
+#### 3. Accessibility - Focus Visibility (1 instance)
+
+Keyboard focus must be visible regardless of component styling.
+
+| File | Line | Rule |
+|------|------|------|
+| `base/reset.css` | 228 | `:focus-visible { box-shadow: 0 0 0 2px inset var(--color-brand-primary) }` |
+
+#### 4. Accessibility - High Contrast (1 instance)
+
+High contrast mode requires enhanced visual boundaries.
+
+| File | Line | Rule |
+|------|------|------|
+| `pages/contact.css` | 969 | `border-width: 3px` (in `@media (prefers-contrast: high)`) |
+
+#### 5. Browser Autofill Override (4 instances)
+
+Browsers apply inline styles for autofilled inputs that can only be overridden with `!important`.
+
+| File | Lines | Rules |
+|------|-------|-------|
+| `pages/contact.css` | 626-629 | color, -webkit-text-fill-color, box-shadow, -webkit-box-shadow |
+
+#### 6. Utility Classes (8 instances)
+
+Global utility classes must win over any component styles.
+
+| File | Lines | Class | Rules |
+|------|-------|-------|-------|
+| `main.css` | 203-206 | `.hidden` | display, visibility, opacity, pointer-events |
+| `components/form-fields.css` | 17, 22-24 | `.honeypot-field` | display, opacity, position, z-index |
+
+#### 7. Animation State Lock (2 instances)
+
+GSAP animation requires initial state to be locked during intro.
+
+| File | Lines | Rules |
+|------|-------|-------|
+| `components/footer.css` | 6 | `.intro-loading footer { display: none }` |
+
+### Remaining Legitimate Uses (Not Technical Debt)
+
+The following `!important` declarations are **intentional** and should remain:
+
+#### Utility Classes (6 instances)
+
+| File | Lines | Class | Reason |
+|------|-------|-------|--------|
+| `components/nav-base.css` | 758 | `.no-transition` | Utility class must override all transitions |
+| `components/nav-base.css` | 762 | `.force-transition` | Utility class must force transitions |
+| `pages/admin.css` | 2144 | `.hidden` | Utility class must hide elements |
+
+#### Modal Scroll Lock (1 instance)
+
+| File | Line | Reason |
+|------|------|--------|
+| `pages/admin.css` | 720 | `body.modal-open { overflow: hidden }` - Prevents scroll behind modals |
+
+#### Chart.js Inline Style Overrides (2 instances)
+
+| File | Lines | Reason |
+|------|-------|--------|
+| `pages/admin.css` | 2272, 2279 | Chart.js sets inline styles on legend elements |
+
+#### Print Styles (1 instance)
+
+| File | Line | Reason |
+|------|------|--------|
+| `components/nav-responsive.css` | 272 | Print media hides navigation |
+
+### Specificity Solutions Reference
+
+When removing `!important`, use these techniques:
+
+1. **CSS Cascade Layers** - `@layer` in main.css controls cascade order
+2. **Scoped Styles** - `body[data-page="admin"]` prefix for page-specific overrides
+3. **Element Type Prefixes** - `section.class-name`, `div.class-name` for +1 specificity
+4. **Doubled Class Selectors** - `.modal.modal` for +1 class specificity
+5. **Parent Context Selectors** - `.section .wrapper .element` for nested overrides
+6. **Page-States Layer** - `page-states` layer for transition state overrides
+
+### Progress Tracking
+
+| Date | Total | Removed | Notes |
+|------|-------|---------|-------|
+| Start | 650+ | - | Initial audit |
+| Jan 14 | 313 | 337 | First cleanup pass |
+| Jan 15 | 58 | 255 | Specificity refactoring complete |
+
+**Files Cleaned (Before → After):**
+
+| File | Before | After | Status |
+|------|--------|-------|--------|
+| mobile/contact.css | 85 | 0 | DONE |
+| mobile/layout.css | 61 | 3 | DONE |
+| client-portal/sidebar.css | 47 | 0 | DONE |
+| admin/project-detail.css | 45 | 0 | DONE |
+| page-transitions.css | 44 | 2 | DONE (accessibility kept) |
+| terminal-intake.css | 41 | 0 | DONE |
+| client.css | 32 | 0 | DONE |
+| client-portal-section.css | 30 | 1 | DONE (reduced motion kept) |
+| admin.css | 29 | 4 | DONE (modal scroll, utility, Chart.js kept) |
+| contact.css | 24 | 7 | DONE (autofill, accessibility kept) |
+| business-card.css | 20 | 3 | DONE (reduced motion, print kept) |
+| projects.css | 13 | 0 | DONE |
+| nav-portal.css | 13 | 0 | DONE |
+| reset.css | 10 | 10 | DONE (all accessibility/print - kept) |
+| client-portal/invoices.css | 2 | 0 | DONE |
+| client-portal/settings.css | 2 | 0 | DONE |
+| client-portal/dashboard.css | 8 | 0 | DONE |
+| nav-animations.css | 4 | 0 | DONE |
+| nav-responsive.css | 4 | 1 | DONE (print kept) |
+| nav-base.css | 7 | 6 | DONE (utility classes, accessibility kept) |
+| about.css | 1 | 0 | DONE |
+
+---
+
 ## Known Issues
 
-**Updated January 13, 2026**
+**Updated January 15, 2026**
 
 ### Resolved Issues (December 2025 - January 2026)
 

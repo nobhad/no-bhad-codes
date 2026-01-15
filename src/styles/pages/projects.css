@@ -21,12 +21,15 @@
    =============================================== */
 
 /* projects-hero-desktop - DISABLED - hero animations removed */
-.projects-hero-desktop,
-.page-hero-desktop[data-hero-page="projects"] {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
+/* High specificity to ensure these elements stay hidden */
+section.projects-hero-desktop,
+section.page-hero-desktop[data-hero-page="projects"],
+div.projects-hero-desktop,
+div.page-hero-desktop[data-hero-page="projects"] {
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .projects-hero {
@@ -369,11 +372,13 @@
    =============================================== */
 
 /* Hide all page-hero-desktop elements (hero text animations) */
-.page-hero-desktop {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
+/* High specificity with element type prefix */
+section.page-hero-desktop,
+div.page-hero-desktop {
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
 @media (--mobile) {
@@ -621,18 +626,19 @@
 }
 
 /* Mobile: match about section h2 size from mobile/layout.css */
+/* High specificity with section prefix */
 @media (--mobile) {
-  .projects-section h2 {
-    font-size: clamp(2.5rem, 10vw, 4rem) !important;
-    font-family: var(--font--acme) !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
+  section.projects-section h2 {
+    font-size: clamp(2.5rem, 10vw, 4rem);
+    font-family: var(--font--acme);
+    font-weight: 700;
+    text-transform: uppercase;
   }
 }
 
 @media (--small-mobile) {
-  .projects-section h2 {
-    font-size: clamp(2.5rem, 10vw, 4rem) !important;
+  section.projects-section h2 {
+    font-size: clamp(2.5rem, 10vw, 4rem);
   }
 
   .projects-content {

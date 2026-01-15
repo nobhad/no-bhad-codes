@@ -177,51 +177,51 @@
   white-space: nowrap;
 }
 
-/* Terminal text input */
-.terminal-input,
-.terminal-input-area input,
-.terminal-input-area input[type="text"],
-input.terminal-input {
+/* Terminal text input - high specificity to override form-fields.css */
+.terminal .terminal-input,
+.terminal .terminal-input-area input,
+.terminal .terminal-input-area input[type="text"],
+.terminal input.terminal-input {
   flex: 1;
-  background: transparent !important;
-  border: none !important;
-  color: var(--color-terminal-text) !important;
-  font-family: var(--terminal-font-family) !important;
+  background: transparent;
+  border: none;
+  color: var(--color-terminal-text);
+  font-family: var(--terminal-font-family);
   font-size: var(--terminal-font-size);
-  outline: none !important;
-  caret-color: transparent !important;
-  box-shadow: none !important;
-  padding: 4px 0 !important;
+  outline: none;
+  caret-color: transparent;
+  box-shadow: none;
+  padding: 4px 0;
 }
 
-.terminal-input::placeholder,
-.terminal-input-area input::placeholder {
+.terminal .terminal-input::placeholder,
+.terminal .terminal-input-area input::placeholder {
   color: var(--color-terminal-text-dimmer);
 }
 
 /* Hide native caret - using custom block cursor instead */
-.terminal-input,
-.terminal-input:focus,
-.terminal-input-area input,
-.terminal-input-area input:focus,
-input.terminal-input,
-input.terminal-input:focus {
-  caret-color: transparent !important;
+.terminal .terminal-input,
+.terminal .terminal-input:focus,
+.terminal .terminal-input-area input,
+.terminal .terminal-input-area input:focus,
+.terminal input.terminal-input,
+.terminal input.terminal-input:focus {
+  caret-color: transparent;
 }
 
 /* Input states */
-.terminal-input:focus,
-.terminal-input:hover,
-.terminal-input:active,
-.terminal-input-area input:focus,
-.terminal-input-area input:hover,
-.terminal-input-area input:active,
-input.terminal-input:focus {
-  background: transparent !important;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-  caret-color: transparent !important;
+.terminal .terminal-input:focus,
+.terminal .terminal-input:hover,
+.terminal .terminal-input:active,
+.terminal .terminal-input-area input:focus,
+.terminal .terminal-input-area input:hover,
+.terminal .terminal-input-area input:active,
+.terminal input.terminal-input:focus {
+  background: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  caret-color: transparent;
 }
 
 .terminal-input:disabled {
@@ -338,35 +338,35 @@ input.terminal-input:focus {
    TERMINAL PROGRESS BAR
    ============================================================================ */
 
-.terminal-progress {
+.terminal .terminal-progress {
   padding: 1rem 16px 8px 16px;
   background: var(--color-terminal-bg-input);
   border-bottom: 2px solid var(--color-terminal-border-dark);
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  align-items: center !important;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: 12px;
 }
 
-.terminal-progress .progress-label,
-.progress-label {
+.terminal .terminal-progress .progress-label,
+.terminal .progress-label {
   color: var(--color-terminal-text-muted);
   font-size: 14px;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-.terminal-progress .progress-bar {
-  flex: 1 1 auto !important;
-  width: auto !important;
+.terminal .terminal-progress .progress-bar {
+  flex: 1 1 auto;
+  width: auto;
   min-width: 0;
   height: 6px;
   background: var(--color-terminal-bg-hover);
   border-radius: 3px;
   overflow: hidden;
-  display: block !important;
-  border: none !important;
+  display: block;
+  border: none;
 }
 
 .terminal-progress .progress-fill {
@@ -509,16 +509,16 @@ body[data-page="client-intake"] .terminal-window {
 }
 
 /* Override any global styles on message content */
-.terminal-intake .message-content,
-.terminal-chat .message-content,
-.terminal-window .message-content {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  outline: none !important;
-  padding: 0 !important;
+.terminal .terminal-intake .message-content,
+.terminal .terminal-chat .message-content,
+.terminal .terminal-window .message-content {
+  background: transparent;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  outline: none;
+  padding: 0;
   display: inline;
 }
 
@@ -540,8 +540,8 @@ body[data-page="client-intake"] .terminal-window {
   margin-bottom: 12px;
 }
 
-.chat-message.user .message-content {
-  color: var(--color-terminal-text) !important;
+.terminal .chat-message.user .message-content {
+  color: var(--color-terminal-text);
 }
 
 .chat-message.user .message-content::before {
@@ -656,11 +656,11 @@ body[data-page="client-intake"] .terminal-window {
 }
 
 /* Confirm button for multiselect */
-.confirm-btn {
-  background: var(--color-terminal-green-dark) !important;
-  border: none !important;
-  color: var(--color-terminal-bg) !important;
-  padding: 8px 16px !important;
+.terminal .confirm-btn {
+  background: var(--color-terminal-green-dark);
+  border: none;
+  color: var(--color-terminal-bg);
+  padding: 8px 16px;
   font-family: inherit;
   font-size: 16px;
   font-weight: bold;
@@ -669,9 +669,9 @@ body[data-page="client-intake"] .terminal-window {
   border-radius: 4px;
 }
 
-.confirm-btn:hover {
-  background: var(--color-terminal-green) !important;
-  color: var(--color-terminal-bg) !important;
+.terminal .confirm-btn:hover {
+  background: var(--color-terminal-green);
+  color: var(--color-terminal-bg);
 }
 
 /* ============================================================================
@@ -754,22 +754,22 @@ svg.terminal-avatar-img #Eye image {
     padding: 12px;
   }
 
-  /* Mobile: Force filters on SVG elements with !important */
-  svg.terminal-avatar-img image,
-  svg.terminal-avatar-img #Head,
-  svg.terminal-avatar-img #Head image,
-  svg.terminal-avatar-img #Ear,
-  svg.terminal-avatar-img #Ear image,
-  svg.terminal-avatar-img #Nose,
-  svg.terminal-avatar-img #Nose image {
-    filter: brightness(0) invert(1) brightness(0.9) !important;
-    -webkit-filter: brightness(0) invert(1) brightness(0.9) !important;
+  /* Mobile: Force filters on SVG elements */
+  .terminal svg.terminal-avatar-img image,
+  .terminal svg.terminal-avatar-img #Head,
+  .terminal svg.terminal-avatar-img #Head image,
+  .terminal svg.terminal-avatar-img #Ear,
+  .terminal svg.terminal-avatar-img #Ear image,
+  .terminal svg.terminal-avatar-img #Nose,
+  .terminal svg.terminal-avatar-img #Nose image {
+    filter: brightness(0) invert(1) brightness(0.9);
+    -webkit-filter: brightness(0) invert(1) brightness(0.9);
   }
 
-  svg.terminal-avatar-img #Eye,
-  svg.terminal-avatar-img #Eye image {
-    filter: brightness(0) !important;
-    -webkit-filter: brightness(0) !important;
+  .terminal svg.terminal-avatar-img #Eye,
+  .terminal svg.terminal-avatar-img #Eye image {
+    filter: brightness(0);
+    -webkit-filter: brightness(0);
   }
 
   body[data-page="client-intake"] #main-content {
