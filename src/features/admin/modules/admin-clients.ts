@@ -12,6 +12,7 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import type { AdminDashboardContext } from '../admin-types';
 import { formatCurrency } from '../../../utils/format-utils';
 import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
+import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import {
   createFilterUI,
   createSortableHeaders,
@@ -84,9 +85,7 @@ export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
   console.log('[AdminClients] Loading clients...');
 
   try {
-    const response = await fetch('/api/clients', {
-      credentials: 'include'
-    });
+    const response = await apiFetch('/api/clients');
 
     console.log('[AdminClients] Response status:', response.status);
 
@@ -420,9 +419,7 @@ async function loadClientProjects(clientId: number): Promise<void> {
   if (!container) return;
 
   try {
-    const response = await fetch(`/api/clients/${clientId}/projects`, {
-      credentials: 'include'
-    });
+    const response = await apiFetch(`/api/clients/${clientId}/projects`);
 
     if (response.ok) {
       const data = await response.json();
@@ -484,9 +481,7 @@ async function loadClientBilling(clientId: number): Promise<void> {
   const outstandingEl = document.getElementById('cd-outstanding');
 
   try {
-    const response = await fetch(`/api/invoices/client/${clientId}`, {
-      credentials: 'include'
-    });
+    const response = await apiFetch(`/api/invoices/client/${clientId}`);
 
     if (response.ok) {
       const data = await response.json();
@@ -560,10 +555,7 @@ async function resetClientPassword(clientId: number): Promise<void> {
   if (!confirm('Send a password reset email to this client?')) return;
 
   try {
-    const response = await fetch(`/api/clients/${clientId}/reset-password`, {
-      method: 'POST',
-      credentials: 'include'
-    });
+    const response = await apiPost(`/api/clients/${clientId}/reset-password`);
 
     if (response.ok) {
       storedContext?.showNotification('Password reset email sent', 'success');
@@ -580,10 +572,7 @@ async function resendClientInvite(clientId: number): Promise<void> {
   if (!confirm('Resend the portal invitation to this client?')) return;
 
   try {
-    const response = await fetch(`/api/clients/${clientId}/resend-invite`, {
-      method: 'POST',
-      credentials: 'include'
-    });
+    const response = await apiPost(`/api/clients/${clientId}/resend-invite`);
 
     if (response.ok) {
       storedContext?.showNotification('Invitation resent successfully', 'success');
@@ -665,17 +654,12 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
     const newStatus = statusSelect?.value;
 
     try {
-      const response = await fetch(`/api/clients/${clientId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: newEmail || null,
-          contact_name: newName || null,
-          company_name: newCompany || null,
-          phone: newPhone || null,
-          status: newStatus
-        })
+      const response = await apiPut(`/api/clients/${clientId}`, {
+        email: newEmail || null,
+        contact_name: newName || null,
+        company_name: newCompany || null,
+        phone: newPhone || null,
+        status: newStatus
       });
 
       if (response.ok) {
@@ -759,19 +743,14 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
     const newBillingCountry = countryInput?.value.trim();
 
     try {
-      const response = await fetch(`/api/clients/${clientId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          billing_name: newBillingName || null,
-          billing_email: newBillingEmail || null,
-          billing_address: newBillingAddress || null,
-          billing_city: newBillingCity || null,
-          billing_state: newBillingState || null,
-          billing_zip: newBillingZip || null,
-          billing_country: newBillingCountry || null
-        })
+      const response = await apiPut(`/api/clients/${clientId}`, {
+        billing_name: newBillingName || null,
+        billing_email: newBillingEmail || null,
+        billing_address: newBillingAddress || null,
+        billing_city: newBillingCity || null,
+        billing_state: newBillingState || null,
+        billing_zip: newBillingZip || null,
+        billing_country: newBillingCountry || null
       });
 
       if (response.ok) {
@@ -803,10 +782,7 @@ async function deleteClient(clientId: number): Promise<void> {
   }
 
   try {
-    const response = await fetch(`/api/clients/${clientId}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    });
+    const response = await apiDelete(`/api/clients/${clientId}`);
 
     if (response.ok) {
       storedContext?.showNotification('Client deleted successfully', 'success');
@@ -870,17 +846,12 @@ function addClient(ctx: AdminDashboardContext): void {
     }
 
     try {
-      const response = await fetch('/api/clients', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          email,
-          contact_name: contactName || null,
-          company_name: companyName || null,
-          phone: phone || null,
-          status: 'pending'
-        })
+      const response = await apiPost('/api/clients', {
+        email,
+        contact_name: contactName || null,
+        company_name: companyName || null,
+        phone: phone || null,
+        status: 'pending'
       });
 
       if (response.ok) {
