@@ -1,8 +1,34 @@
-# Current Work - January 14, 2026
+# Current Work - January 15, 2026
 
 ---
 
 ## Recently Completed
+
+### CSS Cleanup & Code Organization - January 15, 2026
+
+**CSS File Optimization (-499 lines total):**
+
+| File | Before | After | Reduction |
+|------|--------|-------|-----------|
+| client.css | 1716 | 1403 | -313 lines (18%) - Removed unused LEGACY portal styles |
+| contact.css | 1000 | 902 | -98 lines (10%) - Trimmed excessive header docs |
+| business-card.css | 743 | 655 | -88 lines (12%) - Extracted intro-nav to separate module |
+
+**Files Created:**
+
+- `src/styles/components/intro-nav.css` - Navigation links below business card
+
+**Files Modified:**
+
+- `src/styles/main.css` - Added intro-nav.css import
+
+**Client Portal Code Consolidation (-185 lines):**
+
+- Removed duplicate file upload handlers from `client-portal.ts`
+- Now uses module version in `portal-files.ts`
+- Main file reduced from 1855 to 1670 lines
+
+---
 
 ### CSS Consolidation - January 15, 2026
 
@@ -96,7 +122,7 @@ Phase 2 - Split into modules:
 
 | File | Lines | Priority | Status |
 |------|-------|----------|--------|
-| `client-portal.ts` | 1,952 | High | IN PROGRESS - 3 new modules extracted |
+| `client-portal.ts` | 1,405 | High | DONE - login, auth, animations consolidated to modules |
 | `admin-dashboard.ts` | 1,917 | Medium | Already has 9 extracted modules |
 | `intro-animation.ts` | 1,815 | Medium | Animation logic |
 | `terminal-intake.ts` | 1,685 | Medium | Terminal UI logic |
@@ -107,15 +133,15 @@ Phase 2 - Split into modules:
 
 New modules created (total 7 modules now):
 
-- `portal-navigation.ts` (398 lines) - Navigation, views, sidebar, mobile menu
-- `portal-projects.ts` (497 lines) - Project loading, display, preview
-- `portal-auth.ts` (346 lines) - Login, logout, session management
-- `portal-files.ts` (455 lines) - File management (existing)
-- `portal-invoices.ts` (250 lines) - Invoice management (existing)
-- `portal-messages.ts` (268 lines) - Messaging (existing)
-- `portal-settings.ts` (261 lines) - Settings forms (existing)
+- `portal-navigation.ts` (357 lines) - Navigation, views, sidebar, mobile menu
+- `portal-projects.ts` (308 lines) - Project loading, display, preview
+- `portal-auth.ts` (308 lines) - Login, logout, session management, helper functions
+- `portal-files.ts` (397 lines) - File management + upload handlers
+- `portal-invoices.ts` (208 lines) - Invoice management
+- `portal-messages.ts` (207 lines) - Messaging
+- `portal-settings.ts` (261 lines) - Settings forms
 
-Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
+Main file reduced from 2,293 to 1,405 lines (~888 lines removed/extracted).
 
 ---
 
@@ -138,7 +164,200 @@ Main file reduced from 2,293 to 1,952 lines (~340 lines extracted).
 
 ### Main Site Features (Medium Priority)
 
+- [ ] **PROJECTS SECTION REDESIGN** - Sal Costa-style portfolio (see breakdown below)
 - [ ] SEO optimization
+
+---
+
+## Projects Section Redesign (Sal Costa Style)
+
+**Reference:** `docs/design/salcosta/` - HTML structure and CSS patterns
+
+**Current State:** Projects section shows placeholder "Work in Progress" sign
+
+**Target:** Interactive portfolio showcasing custom software projects with:
+
+- Horizontal project cards with hover animations
+- Project detail pages with hero images
+- Metadata labels (role, tools, year)
+- Drop-in/drop-out page transitions
+
+### Phase 1: Content Creation
+
+- [ ] **Screenshot Projects** - Capture high-quality screenshots of each software project
+  - Desktop view (hero image, 12:7 aspect ratio)
+  - Mobile views if applicable
+  - Key feature screenshots for detail pages
+- [ ] **Write Project Descriptions** - For each project:
+  - Title (short, memorable)
+  - Category/Type (Web App, Mobile App, Dashboard, etc.)
+  - One-line tagline for card view
+  - Full description paragraph for detail page
+  - Role/Contribution
+  - Tools/Technologies used
+  - Year completed
+- [ ] **Create Project Data Structure** - JSON/TypeScript data file:
+
+  ```typescript
+  interface Project {
+    id: string;
+    title: string;
+    tagline: string;
+    category: string;
+    description: string;
+    role: string;
+    tools: string[];
+    year: number;
+    heroImage: string;
+    screenshots: string[];
+    liveUrl?: string;
+    repoUrl?: string;
+  }
+  ```
+
+### Phase 2: CSS Components (Sal Costa Patterns)
+
+**File:** `src/styles/pages/projects.css`
+
+- [ ] **Work Cards** - Horizontal project list items
+
+  ```css
+  .work-card { overflow: hidden; }
+  .card-container {
+    height: 90px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--color-dark);
+  }
+  ```
+
+- [ ] **Project Card Title** - With hover slide animation
+
+  ```css
+  .project-card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transform: translate(-30px);
+    transition: transform var(--transition-mouse);
+  }
+  .card-container:hover .project-card-title {
+    transform: translate(0);
+  }
+  ```
+
+- [ ] **Round Labels** - Metadata badges (role, tools, year)
+
+  ```css
+  .round-label {
+    background-color: var(--color-dark);
+    padding: 6px 12px;
+    border-radius: 20px;
+    color: var(--color-light);
+  }
+  ```
+
+- [ ] **Project Detail Layout** - `.worksub-*` classes
+  - Header with hero image (40px border-radius top)
+  - Intro section with two-column layout
+  - Info sections with screenshots
+  - Back button (fixed left position)
+
+- [ ] **Drop-in/Drop-out Animations**
+
+  ```css
+  @keyframes drop-in {
+    0% { transform: translateY(-105%); }
+    100% { transform: translateY(0); }
+  }
+  @keyframes drop-out {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(105%); }
+  }
+  ```
+
+### Phase 3: HTML Structure
+
+- [ ] **Update Projects Section** - Replace WIP sign with project list
+
+  ```html
+  <section class="projects-section">
+    <div class="projects-content">
+      <div class="heading-wrapper">
+        <h2>PROJECTS</h2>
+        <hr class="heading-divider" />
+      </div>
+      <div class="work-half-wrapper">
+        <!-- Project cards rendered here -->
+      </div>
+    </div>
+  </section>
+  ```
+
+- [ ] **Create Project Detail Template** - For individual project pages
+
+  ```html
+  <div class="page-wrapper worksub">
+    <div class="worksub-header">
+      <figure><img src="..." alt="..." /></figure>
+    </div>
+    <div class="worksub-intro">
+      <h1>Project Title</h1>
+      <div class="intro-content">
+        <div class="intro-left">
+          <div class="intro-left-group">
+            <span class="round-label">Role</span>
+            <span>Full Stack Developer</span>
+          </div>
+          <!-- More metadata -->
+        </div>
+        <p>Project description...</p>
+      </div>
+      <hr class="worksub-divider" />
+    </div>
+    <div class="worksub-info">
+      <!-- Screenshots and details -->
+    </div>
+  </div>
+  ```
+
+### Phase 4: JavaScript Implementation
+
+**File:** `src/features/main-site/projects.ts` (new)
+
+- [ ] **Project Data Loading** - Import project data
+- [ ] **Render Project Cards** - Generate card HTML from data
+- [ ] **Card Hover Interactions** - Title slide, scale effects
+- [ ] **Project Detail View** - Transition to detail page
+- [ ] **Back Navigation** - Return to project list
+- [ ] **GSAP Animations** - Drop-in/out, blur transitions
+
+### Phase 5: Assets
+
+- [ ] **Create `/public/projects/` directory**
+- [ ] **Store project screenshots** - Naming convention: `{project-id}-{type}.{ext}`
+  - `project-name-hero.webp` - Main hero image
+  - `project-name-desktop-1.webp` - Desktop screenshots
+  - `project-name-mobile-1.webp` - Mobile screenshots
+- [ ] **Optimize images** - WebP format, appropriate sizes
+- [ ] **Create OG images** - For social sharing (1200x630)
+
+### Phase 6: Integration
+
+- [ ] **Update Navigation** - Projects link behavior
+- [ ] **Page Transitions** - Integrate with existing transition system
+- [ ] **Mobile Responsiveness** - Cards stack, images scale
+- [ ] **Accessibility** - Keyboard navigation, screen reader support
+
+### Implementation Order
+
+1. Content first (screenshots, descriptions)
+2. CSS components (can test with placeholder data)
+3. HTML structure updates
+4. JavaScript logic
+5. Animation polish
+6. Testing and refinement
 
 ### Code Quality (Ongoing)
 
