@@ -412,7 +412,8 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 /* Intake Modal */
-.intake-modal {
+/* High z-index to ensure modal appears above all other content */
+.intake-modal.intake-modal {
   display: none;
   position: fixed;
   top: 50%;
@@ -422,7 +423,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   max-width: 900px;
   height: 90vh;
   max-height: 85vh;
-  z-index: 20001 !important;
+  z-index: 20001;
   border-radius: 10px;
   overflow: hidden;
   box-shadow: var(--shadow-dropdown-xl);
@@ -465,23 +466,24 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 /* Override terminal styles when in modal */
-.intake-modal .terminal-intake {
-  min-height: 100% !important;
-  height: 100% !important;
-  width: 100% !important;
-  background-color: var(--color-terminal-bg) !important;
+/* High specificity with doubled class selector */
+.intake-modal.intake-modal .terminal-intake {
+  min-height: 100%;
+  height: 100%;
+  width: 100%;
+  background-color: var(--color-terminal-bg);
 }
 
-.intake-modal .terminal-window {
-  height: 100% !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
+.intake-modal.intake-modal .terminal-window {
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
 }
 
-.intake-modal .terminal-chat {
-  max-height: calc(100% - 150px) !important;
-  min-height: 300px !important;
+.intake-modal.intake-modal .terminal-chat {
+  max-height: calc(100% - 150px);
+  min-height: 300px;
 }
 
 /* Ensure modal container shows content */
@@ -490,9 +492,10 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 /* Force terminal visibility in modal */
-.intake-modal.open .intake-modal-container > * {
-  opacity: 1 !important;
-  visibility: visible !important;
+/* High specificity with doubled class and open state */
+.intake-modal.intake-modal.open .intake-modal-container > * {
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Mobile adjustments */

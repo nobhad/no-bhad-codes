@@ -80,9 +80,10 @@
   transition: none;
 }
 
-.nav[data-nav="closed"] .menu-link-heading::before {
-  transform: translateY(0) !important;
-  transition: none !important;
+/* High specificity to ensure closed state overrides hover effects */
+.nav.nav[data-nav="closed"] .menu-link-heading::before {
+  transform: translateY(0);
+  transition: none;
 }
 
 /* Ensure text elements are positioned for smooth animation */
@@ -116,10 +117,11 @@
   }
 
   /* COMPLETELY DISABLE hover effects when menu is closing */
-  .nav[data-nav="closed"] .menu-link:hover .menu-link-heading,
-  .nav[data-nav="closed"] .menu-link:hover .menu-link-heading::before {
-    transform: none !important;
-    transition: none !important;
+  /* High specificity with doubled class selector */
+  .nav.nav[data-nav="closed"] .menu-link:hover .menu-link-heading,
+  .nav.nav[data-nav="closed"] .menu-link:hover .menu-link-heading::before {
+    transform: none;
+    transition: none;
   }
 
   .text-link:hover {

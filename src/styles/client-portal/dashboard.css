@@ -61,9 +61,10 @@
 }
 
 /* Recent Activity */
-.recent-activity {
-  background: var(--portal-bg-dark) !important;
-  border: none !important;
+/* High specificity to override base card styles */
+.client-portal-main .recent-activity {
+  background: var(--portal-bg-dark);
+  border: none;
   border-radius: var(--portal-radius-lg);
   padding: var(--portal-spacing-xl);
   margin-bottom: var(--portal-spacing-2xl);
@@ -113,12 +114,13 @@
 }
 
 /* Stat Card */
-.stat-card,
-button.stat-card,
-.stat-card.cp-shadow {
-  background: var(--portal-bg-dark) !important;
-  background-color: var(--portal-bg-dark) !important;
-  border: none !important;
+/* High specificity to override base card and button styles */
+.client-portal-main .stat-card,
+.client-portal-main button.stat-card,
+.client-portal-main .stat-card.cp-shadow {
+  background: var(--portal-bg-dark);
+  background-color: var(--portal-bg-dark);
+  border: none;
   border-radius: var(--portal-radius-lg);
   padding: var(--portal-spacing-xl);
   text-align: center;
@@ -132,8 +134,8 @@ button.stat-card,
   transition: all var(--transition-fast);
 }
 
-.stat-card-clickable:hover {
-  background: var(--portal-bg-readonly) !important;
+.client-portal-main .stat-card-clickable:hover {
+  background: var(--portal-bg-readonly);
 }
 
 .stat-card-clickable:hover .stat-number {
@@ -181,9 +183,10 @@ button.stat-card,
 }
 
 /* Overview Card */
-.overview-card {
-  background: var(--portal-bg-dark) !important;
-  border: none !important;
+/* High specificity to override base card styles */
+.client-portal-main .overview-card {
+  background: var(--portal-bg-dark);
+  border: none;
   border-radius: var(--portal-radius-lg);
   padding: var(--portal-spacing-xl);
   color: var(--portal-text-light);

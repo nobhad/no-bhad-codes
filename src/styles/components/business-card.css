@@ -122,14 +122,14 @@
 /* ==========================================
    INTRO ANIMATION CONTAINER - POSITIONING HANDLED BY INTROMODULE
    ========================================== */
-.intro-animation-container {
+.business-card-section .intro-animation-container {
   /* Positioning handled by IntroModule via GSAP */
   /* z-index handled by IntroModule via GSAP */
 
-  /* Visible immediately */
-  display: flex !important;
-  opacity: 1 !important;
-  visibility: visible !important;
+  /* Visible immediately - high specificity to override GSAP inline cleanup */
+  display: flex;
+  opacity: 1;
+  visibility: visible;
 
   /* Business card aspect ratio: 1069.5:599.3 = 1.784582:1 (SVG viewBox) */
   /* Fixed dimensions to prevent CLS - maintaining exact aspect ratio */
@@ -295,10 +295,10 @@
   outline: none;
 
   /* ENSURE VISIBILITY - Important for initial page load */
-  opacity: 1 !important;
-  transform: scale(1) !important;
-  display: block !important;
-  visibility: visible !important;
+  opacity: 1;
+  transform: scale(1);
+  display: block;
+  visibility: visible;
 
   /* CRITICAL: No CSS transitions - GSAP controls all animations */
   transition: none;
@@ -347,10 +347,10 @@
   width: 100%;
   height: 100%;
 
-  /* FORCE VISIBILITY */
-  display: flex !important;
-  opacity: 1 !important;
-  visibility: visible !important;
+  /* Ensure visibility - specificity handles override */
+  display: flex;
+  opacity: 1;
+  visibility: visible;
 
   /* 3D flip setup - CRITICAL for proper transform inheritance */
   backface-visibility: hidden;
@@ -496,13 +496,14 @@
   }
 
   /* Contact business card - smaller and flexible sizing */
-  .contact-business-card .business-card-container {
-    width: 100% !important;
-    max-width: 260px !important;
-    height: auto !important;
-    min-width: unset !important;
-    min-height: unset !important;
-    max-height: unset !important;
+  /* Higher specificity (0,3,0) to override general container rules (0,1,0) */
+  .contact-section .contact-business-card .business-card-container {
+    width: 100%;
+    max-width: 260px;
+    height: auto;
+    min-width: unset;
+    min-height: unset;
+    max-height: unset;
     aspect-ratio: 1.785;
   }
 
@@ -543,8 +544,8 @@
   }
 
   /* Contact business card - even smaller on very small screens */
-  .contact-business-card .business-card-container {
-    max-width: 220px !important;
+  .contact-section .contact-business-card .business-card-container {
+    max-width: 220px;
   }
 
   .business-card-front,

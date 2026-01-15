@@ -12,9 +12,10 @@
 }
 
 /* Summary Card */
-.summary-card {
-  background: var(--portal-bg-dark) !important;
-  border: none !important;
+/* High specificity to override base card styles */
+.client-portal-main .summary-card {
+  background: var(--portal-bg-dark);
+  border: none;
   border-radius: var(--portal-radius-lg);
   padding: var(--portal-spacing-xl);
   text-align: center;

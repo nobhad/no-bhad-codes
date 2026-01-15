@@ -212,38 +212,40 @@
 [data-page="admin"] .pd-tab-content .portal-project-card,
 [data-page="admin"] .pd-tab-content .portal-shadow,
 [data-page="admin"] .pd-tab-content .files-upload-section,
-[data-page="admin"] .pd-tab-content .files-list-section,
-[data-page="admin"] .pd-tab-content .intake-form-section,
-[data-page="admin"] .pd-tab-content .messages-container,
-[data-page="admin"] .pd-tab-content .recent-activity,
-[data-page="admin"] .pd-tab-content .settings-section {
+/* High specificity with body element selector */
+body[data-page="admin"] .pd-tab-content .files-list-section,
+body[data-page="admin"] .pd-tab-content .intake-form-section,
+body[data-page="admin"] .pd-tab-content .messages-container,
+body[data-page="admin"] .pd-tab-content .recent-activity,
+body[data-page="admin"] .pd-tab-content .settings-section {
   background: transparent;
   border: none;
   border-radius: 0;
   padding: 0;
   margin: 0;
-  box-shadow: none !important;
+  box-shadow: none;
 }
 
 /* Invoice summary cards - styled like Weekly Overview cards */
-[data-page="admin"] .pd-tab-content .invoice-summary {
+/* High specificity with body element selector */
+body[data-page="admin"] .pd-tab-content .invoice-summary {
   display: flex;
   gap: var(--portal-spacing-xl);
   margin: 0;
   background: transparent;
-  box-shadow: none !important;
+  box-shadow: none;
 }
 
-[data-page="admin"] .pd-tab-content .summary-card {
-  background: var(--portal-bg-medium) !important;
+body[data-page="admin"] .pd-tab-content .summary-card {
+  background: var(--portal-bg-medium);
   border: none;
   border-radius: var(--portal-radius-md);
-  padding: var(--portal-spacing-xl) !important;
+  padding: var(--portal-spacing-xl);
   text-align: center;
   display: flex;
   flex-direction: column;
   gap: var(--portal-spacing-sm);
-  box-shadow: var(--shadow-card) !important;
+  box-shadow: var(--shadow-card);
   flex: 1;
 }
 
@@ -775,10 +777,11 @@
   margin: 0 0 var(--portal-spacing-md) 0;
 }
 
-.project-notes h4,
-#tab-project-detail .project-notes h4 {
+/* High specificity with body and ID selectors */
+body[data-page="admin"] .project-notes h4,
+body[data-page="admin"] #tab-project-detail .project-notes h4 {
   font-size: 0.75rem;
-  color: var(--portal-text-secondary) !important;
+  color: var(--portal-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 500;

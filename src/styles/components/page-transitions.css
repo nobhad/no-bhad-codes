@@ -30,27 +30,27 @@
  * ============================================ */
 
 /* Hidden page state - completely hide non-active pages */
-/* Using !important to ensure page-specific CSS (projects.css, about.css) doesn't override */
+/* page-states layer ensures these override page-specific CSS */
 /* GSAP inline styles are cleared via clearProps before adding this class */
 section.page-hidden {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  z-index: -1 !important;
+  display: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Page entering state - MUST be invisible before GSAP animates in */
 /* This class is added before page-active and removed after animation completes */
 section.page-entering {
-  visibility: hidden !important;
-  opacity: 0 !important;
+  visibility: hidden;
+  opacity: 0;
 }
 
 /* Active page state - when page-active is present, page-hidden is removed */
 /* GSAP controls opacity AND visibility via autoAlpha - CSS only handles display */
 section.page-active:not(.contact-section):not(.about-section):not(.business-card-section) {
-  display: block !important;
+  display: block;
   /* visibility controlled by GSAP autoAlpha */
   pointer-events: auto;
   z-index: 100;
@@ -58,7 +58,7 @@ section.page-active:not(.contact-section):not(.about-section):not(.business-card
 
 /* Contact section needs grid display when active */
 section.contact-section.page-active {
-  display: grid !important;
+  display: grid;
   /* visibility controlled by GSAP autoAlpha */
   pointer-events: auto;
   z-index: 100;
@@ -66,7 +66,7 @@ section.contact-section.page-active {
 
 /* About section needs grid display when active */
 section.about-section.page-active {
-  display: grid !important;
+  display: grid;
   /* visibility controlled by GSAP autoAlpha */
   pointer-events: auto;
   z-index: 100;
@@ -74,7 +74,7 @@ section.about-section.page-active {
 
 /* Projects section needs flex display when active */
 section.projects-section.page-active {
-  display: flex !important;
+  display: flex;
   /* visibility controlled by GSAP autoAlpha */
   pointer-events: auto;
   z-index: 100;
@@ -91,14 +91,14 @@ main[data-virtual-pages] > section.about-section.page-active {
 
 /* About section scroll - ensure scrolling on mobile */
 @media (--mobile) {
-  /* Force about section to be scrollable on mobile - highest specificity */
+  /* Force about section to be scrollable on mobile */
   section#about.about-section.page-active,
   section.about-section#about.page-active {
-    overflow-y: scroll !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    touch-action: pan-y !important;
-    overscroll-behavior-y: contain !important;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    overscroll-behavior-y: contain;
   }
 }
 
@@ -110,17 +110,17 @@ section.business-card-section {
 
 section#intro.page-active,
 section.business-card-section.page-active {
-  z-index: 50 !important; /* Lower than other active pages, visible during transitions */
+  z-index: 50; /* Lower than other active pages, visible during transitions */
 }
 
-/* CRITICAL: Force hide intro page when page-hidden is present, even with !important rules */
+/* Hide intro page when page-hidden is present */
 section#intro.page-hidden,
 section.business-card-section.page-hidden {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  z-index: -1 !important;
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Also hide intro children when page is hidden */
@@ -130,9 +130,9 @@ section#intro.page-hidden .intro-nav,
 section.business-card-section.page-hidden .business-card-container,
 section.business-card-section.page-hidden .business-card,
 section.business-card-section.page-hidden .intro-nav {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
+  display: none;
+  visibility: hidden;
+  opacity: 0;
 }
 
 /* ============================================
@@ -186,25 +186,25 @@ section.business-card-section.page-hidden .intro-nav {
 
   /* Business card section - needs overflow visible for nav links below card */
   main[data-virtual-pages] > .business-card-section[data-page] {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
     overflow: visible;
     box-sizing: border-box;
   }
 
   /* Business card container - centered in viewport height */
   main[data-virtual-pages] > .business-card-section[data-page] > .business-card-container {
-    position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    margin: 0 !important;
-    display: block !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    display: block;
   }
 
   /* Intro nav positioned absolutely below centered card */
@@ -268,13 +268,13 @@ section.business-card-section.page-hidden .intro-nav {
 
   /* Tech stack section is mobile-only - keep hidden on desktop */
   main[data-virtual-pages] > .tech-stack-section {
-    display: none !important;
+    display: none;
   }
 
   /* Hero section with text animation - handled separately, not a virtual page */
   /* It's tied to the intro and controlled by TextAnimationModule */
   main[data-virtual-pages] > .hero-section {
-    display: none !important;
+    display: none;
   }
 
 
