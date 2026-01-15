@@ -2360,15 +2360,14 @@ body[data-page="admin"] .custom-dropdown[data-modal-dropdown] .custom-dropdown-t
    ================================================ */
 
 /* Ensure status cells allow dropdown overflow */
-[data-page="admin"] .leads-table td.status-cell,
-[data-page="admin"] .contacts-table td.status-cell {
+[data-page="admin"] .admin-table td.status-cell {
   overflow: visible;
   position: relative;
 }
 
 /* Add padding to table to allow dropdown room at bottom */
-[data-page="admin"] .leads-table,
-[data-page="admin"] .contacts-table {
+[data-page="admin"] .admin-table.leads-table,
+[data-page="admin"] .admin-table.contacts-table {
   margin-bottom: 200px;
 }
 
@@ -2450,35 +2449,16 @@ body[data-page="admin"] .custom-dropdown[data-modal-dropdown] .custom-dropdown-t
   box-sizing: border-box;
 }
 
-/* In details panel, use the panel background and ensure no rounded corners */
+/* In details panel, use panel background */
 [data-page="admin"] .details-panel .table-dropdown .custom-dropdown-menu {
   background-color: var(--portal-bg-readonly);
-  border-radius: 0;
   left: 0;
   right: auto;
   min-width: 100%;
 }
 
-[data-page="admin"] .details-panel .table-dropdown .custom-dropdown-trigger {
-  border-radius: 0;
-}
-
-[data-page="admin"] .details-panel .table-dropdown.open .custom-dropdown-trigger {
-  border-radius: 0;
-}
-
-[data-page="admin"] .details-panel .table-dropdown .custom-dropdown-item {
-  border-radius: 0;
-}
-
-[data-page="admin"] .details-panel .table-dropdown .custom-dropdown-menu .custom-dropdown-item:last-child {
-  border-radius: 0 0 0 0;
-}
-
 [data-page="admin"] .table-dropdown.custom-dropdown.open .custom-dropdown-menu {
   display: block;
-  border-radius: 0 0 0 0;
-  clip-path: none;
   margin-top: 0;
 }
 
@@ -2492,10 +2472,6 @@ body[data-page="admin"] .custom-dropdown[data-modal-dropdown] .custom-dropdown-t
 
 [data-page="admin"] .table-dropdown .custom-dropdown-item:hover {
   background-color: var(--color-brand-primary);
-}
-
-[data-page="admin"] .table-dropdown.custom-dropdown .custom-dropdown-menu .custom-dropdown-item:last-child {
-  border-radius: 0 0 0 0;
 }
 
 /* Status-specific colors for dropdown trigger */
