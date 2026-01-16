@@ -235,7 +235,7 @@ export class MyCustomModule extends BaseModule {
       const data = await this.apiClient.get('/my-endpoint');
       this.renderData(data);
     } catch (error) {
-      console.error('[MyCustomModule] Failed to load data:', error);
+      this.error('Failed to load data:', error); // Uses BaseModule.error() - always shows
     }
   }
 }
@@ -465,9 +465,13 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
 The application uses a centralized state manager:
 
 ```typescript
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('MyModule');
+
 // Subscribe to state changes
 const unsubscribe = StateManager.subscribe('user', (user) => {
-  console.log('User updated:', user);
+  logger.log('User updated:', user);
   this.updateUI(user);
 });
 
@@ -1219,7 +1223,28 @@ CREATE INDEX idx_projects_status_client ON projects(status, client_id);
    - Console for JavaScript errors
    - Application tab for localStorage/sessionStorage
 
-2. **Server Debugging**
+2. **Debug Logging**
+   The codebase uses a centralized debug logger that automatically respects debug mode:
+   
+   ```typescript
+   import { createLogger } from '../utils/logger';
+   
+   // Create a logger with a prefix
+   const logger = createLogger('MyModule');
+   
+   // Debug logs (only in development)
+   logger.log('Debug message');
+   logger.info('Info message');
+   logger.debug('Detailed debug');
+   
+   // Warnings and errors (always shown)
+   logger.warn('Warning message');
+   logger.error('Error message');
+   ```
+   
+   All debug logs are automatically excluded in production builds. Use `logger.log()` instead of `console.log()` for debug messages.
+
+3. **Server Debugging**
    ```bash
    # Enable debug logging
    DEBUG=* npm run dev:server

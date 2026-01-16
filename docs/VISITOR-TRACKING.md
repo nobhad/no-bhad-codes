@@ -98,10 +98,14 @@ Access visitor data through the debug interface:
 
 ```javascript
 // In browser console during development
+// Note: Debug logging automatically disabled in production
+import { createLogger } from '../utils/logger';
+const logger = createLogger('VisitorTracking');
+
 const visitorData = await NBW_DEBUG.getVisitorData();
-console.log('Current Session:', visitorData.session);
-console.log('All Events:', visitorData.events);
-console.log('Metrics:', visitorData.metrics);
+logger.log('Current Session:', visitorData.session);
+logger.log('All Events:', visitorData.events);
+logger.log('Metrics:', visitorData.metrics);
 ```
 
 ## Configuration
@@ -375,14 +379,18 @@ const portfolioAnalytics = await createAnalyticsDashboard({
 
 ```javascript
 // Check tracking status
+// Note: Use debug logger for development-only logging
+import { createLogger } from '../utils/logger';
+const logger = createLogger('VisitorTracking');
+
 const trackingService = await container.resolve('VisitorTrackingService');
-console.log('Current session:', trackingService.getCurrentSession());
+logger.log('Current session:', trackingService.getCurrentSession());
 
 // Check consent status
-console.log('Consent:', ConsentBanner.getConsentStatus());
+logger.log('Consent:', ConsentBanner.getConsentStatus());
 
 // View stored events
-console.log('Events:', JSON.parse(localStorage.getItem('nbw_tracking_events') || '[]'));
+logger.log('Events:', JSON.parse(localStorage.getItem('nbw_tracking_events') || '[]'));
 
 // Reset tracking data
 trackingService.clearData();

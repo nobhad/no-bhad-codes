@@ -218,7 +218,7 @@ Three stat cards at the top of the dashboard, each clickable to navigate to the 
 // src/features/client/client-portal.ts:150-170
 const statCards = document.querySelectorAll('.stat-card-clickable[data-tab]');
 if (statCards.length > 0) {
-  console.log(`Found ${statCards.length} clickable stat cards`);
+  // Debug logging now uses logger utility (automatically disabled in production)
   statCards.forEach((card) => {
     card.addEventListener('click', (e) => {
       e.preventDefault();
@@ -920,7 +920,7 @@ Settings grid adapts to viewport:
 | `src/features/client/client-portal.ts` | Main TypeScript module (~2000 lines) |
 | `src/features/client/modules/` | Extracted portal modules (7 files) |
 | `src/styles/client-portal/` | Portal-specific styles (8 CSS files) |
-| `src/client-portal.ts` | Entry point script |
+| `src/portal.ts` | Entry point script (used by client/portal.html) |
 | `server/routes/uploads.ts` | File upload API endpoints |
 | `server/routes/clients.ts` | Client profile/settings API |
 | `server/routes/projects.ts` | Project management API |

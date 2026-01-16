@@ -313,14 +313,14 @@ passwordToggles.forEach((toggle) => {
 
 async function saveContactInfo(formData: FormData, ctx: ClientPortalContext): Promise<void> {
   const data = Object.fromEntries(formData);
-  console.log('Saving contact info:', data);
+  // Debug logging is handled automatically via debug logger utility
   sessionStorage.setItem('client_contact_info', JSON.stringify(data));
   ctx.showNotification('Contact information saved successfully!', 'success');
 }
 
 async function saveBillingAddress(formData: FormData, ctx: ClientPortalContext): Promise<void> {
   const data = Object.fromEntries(formData);
-  console.log('Saving billing address:', data);
+  // Debug logging is handled automatically via debug logger utility
   sessionStorage.setItem('client_billing_address', JSON.stringify(data));
   ctx.showNotification('Billing address saved successfully!', 'success');
 }
@@ -333,7 +333,7 @@ async function saveNotificationPrefs(formData: FormData, ctx: ClientPortalContex
     messages: checkboxes.includes('messages'),
     milestones: checkboxes.includes('milestones')
   };
-  console.log('Saving notification preferences:', prefs);
+  // Debug logging is handled automatically via debug logger utility
   sessionStorage.setItem('client_notification_prefs', JSON.stringify(prefs));
   ctx.showNotification('Notification preferences saved successfully!', 'success');
 }

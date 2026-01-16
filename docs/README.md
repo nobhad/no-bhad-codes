@@ -203,9 +203,12 @@ class MyComponent extends BaseComponent<Props, State> {
 </div>
 
 // Programmatic creation
+import { createLogger } from '../utils/logger';
+const logger = createLogger('MyComponent');
+
 const button = await createButton({
   variant: 'primary',
-  onClick: () => console.log('clicked!')
+  onClick: () => logger.log('clicked!') // Debug logs only in development
 }, '#container');
 ```
 

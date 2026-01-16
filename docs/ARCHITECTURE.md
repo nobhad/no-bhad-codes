@@ -1039,7 +1039,7 @@ test.describe('Client Portal', () => {
 ```bash
 # Modules (PascalCase classes, kebab-case files)
 src/modules/business-card-renderer.ts   → BusinessCardRenderer
-src/modules/client-portal.ts            → ClientPortalModule
+src/features/client/client-portal.ts    → ClientPortalModule
 
 # Services (PascalCase classes, kebab-case files)
 src/services/notification-service.ts    → NotificationService
@@ -1325,13 +1325,15 @@ npm run audit              # Security audit
 
 ## 🔍 CODEBASE HEALTH
 
-**Last Code Review: January 13, 2026**
+**Last Code Review: January 15, 2026**
 
 ### Critical Issues
 
 | File | Issue | Status |
 |------|-------|--------|
 | `src/modules/navigation.ts` | 15+ console.log calls, untracked event listeners | FIXED |
+| Dead code cleanup | app.ts.backup, unused entry points | FIXED (Jan 15, 2026) |
+| Console logging | ~80+ console.log statements in production code | FIXED (Jan 15, 2026 - refactored to debug logger) |
 | `src/modules/animation/intro-animation.ts` | 400+ lines, hardcoded SVG paths | FIXED (refactored Dec 19, SVG paths in config) |
 | `src/services/code-protection-service.ts` | Event listener cleanup issues | FIXED |
 | `src/features/admin/admin-security.ts` | localStorage for auth data | FIXED (all modules migrated to HttpOnly cookies) |
