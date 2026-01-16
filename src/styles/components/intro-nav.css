@@ -16,8 +16,9 @@
   justify-content: space-between;
   width: 525px;
   max-width: 525px;
-  margin-top: 1rem;
-  padding: 1.5rem 1.5rem;
+  /* margin-top handled by grid gap on desktop, explicit on mobile */
+  margin-top: 0;
+  padding: 1.5rem;
   box-sizing: border-box;
   /* Initial state - GSAP handles animation */
   opacity: 0;
@@ -57,11 +58,9 @@
   border: none;
 }
 
-/* Focus indicator for keyboard navigation - required for accessibility */
+/* Override global focus-visible for larger offset on intro nav links */
 .intro-nav-link:focus-visible {
-  outline: 2px solid var(--color-primary, var(--color-brand-primary));
   outline-offset: 4px;
-  border-radius: 2px;
 }
 
 /* GSAP handles all intro-nav-link animations */

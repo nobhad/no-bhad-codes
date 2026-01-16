@@ -168,6 +168,8 @@
   border-color: var(--color-primary);
 }
 
+/* Focus indicators inherited from global :focus-visible rule in reset.css */
+
 /* Readonly states */
 .portal-input[readonly],
 :is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) :is(
