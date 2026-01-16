@@ -81,17 +81,14 @@ export async function handleLogin(
         // Check for redirect parameter first
         const urlParams = new URLSearchParams(window.location.search);
         const redirectUrl = urlParams.get('redirect');
-        console.log('[ClientPortal] Login success, redirect param:', redirectUrl, 'user:', data.user);
 
         if (redirectUrl && redirectUrl.startsWith('/')) {
-          console.log('[ClientPortal] Redirecting to:', redirectUrl);
           window.location.href = redirectUrl;
           return;
         }
 
         // If user is admin, redirect to admin dashboard
         if (data.user.isAdmin || data.user.type === 'admin') {
-          console.log('[ClientPortal] User is admin, redirecting to /admin/');
           window.location.href = '/admin/';
           return;
         }
@@ -147,7 +144,6 @@ export async function checkExistingAuth(callbacks: {
   const urlParams = new URLSearchParams(window.location.search);
   const redirectUrl = urlParams.get('redirect');
   if (redirectUrl && redirectUrl.startsWith('/')) {
-    console.log('[ClientPortal] Already authenticated, redirecting to:', redirectUrl);
     window.location.href = redirectUrl;
     return true;
   }
@@ -222,7 +218,6 @@ export function setupAdminFeatures(): void {
       const parsed = JSON.parse(authData);
       if (parsed.isAdmin) {
         showAdminButtons();
-        console.log('[ClientPortal] Admin features enabled');
       }
     }
 
@@ -232,7 +227,6 @@ export function setupAdminFeatures(): void {
       const payload = decodeJwtPayload(token);
       if (payload && isAdminPayload(payload)) {
         showAdminButtons();
-        console.log('[ClientPortal] Admin features enabled (from token)');
       }
     }
   } catch (error) {

@@ -45,6 +45,7 @@ export function createLogger(prefix: string) {
      */
     info(...args: unknown[]): void {
       if (debug) {
+        // eslint-disable-next-line no-console
         console.info(`[${prefix}]`, ...args);
       }
     },
@@ -54,6 +55,7 @@ export function createLogger(prefix: string) {
      */
     debug(...args: unknown[]): void {
       if (debug) {
+        // eslint-disable-next-line no-console
         console.debug(`[${prefix}]`, ...args);
       }
     }
