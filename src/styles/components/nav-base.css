@@ -158,13 +158,27 @@ li {
   -webkit-tap-highlight-color: transparent;
 }
 
+.nav-logo-row:visited {
+  color: var(--color-nav-text);
+}
+
 .nav-logo-row:hover,
-.nav-logo-row:active,
-.nav-logo-row:visited,
+.nav-logo-row:active {
+  color: var(--color-primary, var(--color-brand-primary));
+  text-decoration: none;
+}
+
 .nav-logo-row:focus {
   color: var(--color-nav-text);
   text-decoration: none;
   outline: none;
+}
+
+/* Focus-visible: red color for keyboard navigation */
+.nav-logo-row:focus-visible {
+  color: var(--color-primary, var(--color-brand-primary));
+  outline: none !important;
+  box-shadow: none;
 }
 
 /* Focus indicator inherited from global :focus-visible rule in reset.css */
@@ -543,6 +557,29 @@ html[data-theme="dark"] .coming-soon-banner {
   transition: color 0.2s ease;
 }
 
+/* Active/focus states - red color */
+.theme-button:hover,
+.theme-button:active,
+.menu-button:hover,
+.menu-button:active {
+  color: var(--color-primary, var(--color-brand-primary));
+}
+
+/* Focus-visible: red color + subtle background for better visibility (WCAG 2.4.7 compliance) */
+/* Remove outline border from global focus-visible rule */
+.theme-button:focus-visible,
+.menu-button:focus-visible {
+  color: var(--color-primary, var(--color-brand-primary));
+  background-color: rgba(var(--color-brand-primary-rgb, 220, 38, 38), 0.1);
+  outline: none !important;
+  box-shadow: none;
+}
+
+.theme-button:focus,
+.menu-button:focus {
+  outline: none;
+}
+
 .theme-button {
   display: flex;
   align-items: center;
@@ -789,6 +826,7 @@ html[data-theme="dark"] .menu-button:hover {
   background: transparent;
   border: none;
   box-shadow: none;
+  color: var(--color-primary, var(--color-brand-primary));
 }
 
 /* Dark mode menu link text shadow - use darkest panel color for duplicate text, no drop shadow */
