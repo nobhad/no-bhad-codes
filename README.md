@@ -658,9 +658,13 @@ Centralized state management with pub-sub pattern:
 ```typescript
 import { StateManager } from '@/core/state.js';
 
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('MyModule');
+
 // Subscribe to state changes
 StateManager.subscribe('user', (user) => {
-  console.log('User updated:', user);
+  logger.log('User updated:', user); // Debug logs only in development
 });
 
 // Update state

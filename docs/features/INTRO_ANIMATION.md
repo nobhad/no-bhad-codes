@@ -412,7 +412,9 @@ private handleKeyPress(event: KeyboardEvent): void {
 gsap.registerPlugin(MorphSVGPlugin);
 
 // Check SVG loaded
-console.log('Paw paths loaded:', this.pawPaths.length);
+// Debug logging is handled via the debug logger utility
+// Use: import { createLogger } from '../../utils/logger'; const logger = createLogger('IntroAnimation');
+// logger.log('Paw paths loaded:', this.pawPaths.length);
 ```
 
 #### 2. Card Misaligned
@@ -474,7 +476,8 @@ gsap.to('#morph-paw', {
 sessionStorage.removeItem('introShown');
 
 // Check reduced motion
-console.log('Prefers reduced motion:',
+// Debug logging is handled via the debug logger utility
+// logger.log('Prefers reduced motion:',
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 );
 ```

@@ -144,7 +144,7 @@ const button = await createButton({
   variant: 'primary',
   size: 'large',
   children: 'Click me!',
-  onClick: (e) => console.log('clicked!')
+  onClick: (e) => logger.log('clicked!')
 }, '#my-container');
 
 // Create modal component
@@ -203,10 +203,14 @@ Or use declarative markup:
 The application tracks comprehensive performance data:
 
 ```javascript
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('PerformanceDebug');
+
 // Access current metrics
 const report = await NBW_DEBUG.getPerformanceReport();
-console.log('Performance Score:', report.score);
-console.log('Core Web Vitals:', {
+logger.log('Performance Score:', report.score);
+logger.log('Core Web Vitals:', {
   lcp: report.metrics.lcp,
   fid: report.metrics.fid,
   cls: report.metrics.cls
@@ -220,8 +224,8 @@ Analyze bundle composition and get optimization suggestions:
 ```javascript
 // Get bundle breakdown
 const analysis = await NBW_DEBUG.getBundleAnalysis();
-console.log('Total Size:', analysis.totalSize);
-console.log('Optimization Suggestions:', analysis.suggestions);
+logger.log('Total Size:', analysis.totalSize);
+logger.log('Optimization Suggestions:', analysis.suggestions);
 ```
 
 ### Component Debugging
@@ -231,8 +235,8 @@ Monitor component instances and performance:
 ```javascript
 // Get component statistics
 const stats = NBW_DEBUG.getComponentStats();
-console.log('Active Components:', stats.totalInstances);
-console.log('Component Types:', stats.registeredComponents);
+logger.log('Active Components:', stats.totalInstances);
+logger.log('Component Types:', stats.registeredComponents);
 ```
 
 ## Future Optimizations
