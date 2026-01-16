@@ -201,7 +201,7 @@
             </div>
 
             <!-- Lead Stats (Clickable) -->
-            <div class="quick-stats">
+            <div class="quick-stats" aria-live="polite" aria-atomic="false">
               <button
                 class="stat-card stat-card-clickable portal-shadow"
                 data-tab="leads"
@@ -261,7 +261,7 @@
             <!-- Recent Leads -->
             <div class="recent-activity portal-shadow">
               <h3>Recent Leads</h3>
-              <ul class="activity-list" id="recent-leads-list">
+              <ul class="activity-list" id="recent-leads-list" aria-live="polite" aria-atomic="false">
                 <li>Loading...</li>
               </ul>
             </div>
@@ -308,13 +308,13 @@
                 <table class="admin-table leads-table">
                   <thead>
                     <tr>
-                      <th>Date</th>
-                      <th>Name</th>
-                      <th>Company</th>
-                      <th>Email</th>
-                      <th>Type</th>
-                      <th>Budget</th>
-                      <th>Status</th>
+                      <th scope="col">Date</th>
+                      <th scope="col">Name</th>
+                      <th scope="col">Company</th>
+                      <th scope="col">Email</th>
+                      <th scope="col">Type</th>
+                      <th scope="col">Budget</th>
+                      <th scope="col">Status</th>
                     </tr>
                   </thead>
                   <tbody id="leads-table-body">
@@ -341,12 +341,12 @@
                 <table class="admin-table contacts-table">
                   <thead>
                     <tr>
-                      <th>Date</th>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Company</th>
-                      <th>Message</th>
-                      <th>Status</th>
+                      <th scope="col">Date</th>
+                      <th scope="col">Name</th>
+                      <th scope="col">Email</th>
+                      <th scope="col">Company</th>
+                      <th scope="col">Message</th>
+                      <th scope="col">Status</th>
                     </tr>
                   </thead>
                   <tbody id="contacts-table-body">
@@ -401,12 +401,12 @@
                 <table class="admin-table projects-table">
                   <thead>
                     <tr>
-                      <th>Project Name</th>
-                      <th>Client</th>
-                      <th>Type</th>
-                      <th>Budget</th>
-                      <th>Timeline</th>
-                      <th>Status</th>
+                      <th scope="col">Project Name</th>
+                      <th scope="col">Client</th>
+                      <th scope="col">Type</th>
+                      <th scope="col">Budget</th>
+                      <th scope="col">Timeline</th>
+                      <th scope="col">Status</th>
                     </tr>
                   </thead>
                   <tbody id="projects-table-body">
@@ -463,12 +463,12 @@
                 <table class="admin-table clients-table">
                   <thead>
                     <tr>
-                      <th>Client</th>
-                      <th>Type</th>
-                      <th>Email</th>
-                      <th>Status</th>
-                      <th>Projects</th>
-                      <th>Created</th>
+                      <th scope="col">Client</th>
+                      <th scope="col">Type</th>
+                      <th scope="col">Email</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Projects</th>
+                      <th scope="col">Created</th>
                     </tr>
                   </thead>
                   <tbody id="clients-table-body">
@@ -633,30 +633,47 @@
 
             <!-- Client Selector (Custom Dropdown) -->
             <div class="client-selector-wrapper">
+              <label for="admin-client-trigger" class="sr-only">Select a client</label>
               <div class="custom-dropdown" id="admin-client-dropdown">
-                <button type="button" class="custom-dropdown-trigger" id="admin-client-trigger">
+                <button
+                  type="button"
+                  class="custom-dropdown-trigger"
+                  id="admin-client-trigger"
+                  role="combobox"
+                  aria-expanded="false"
+                  aria-haspopup="listbox"
+                  aria-label="Select a client to view messages"
+                  aria-controls="admin-client-menu"
+                >
                   <span class="custom-dropdown-text">-- Select a client --</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="custom-dropdown-caret"><path d="m6 9 6 6 6-6"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="custom-dropdown-caret" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
-                <ul class="custom-dropdown-menu" id="admin-client-menu">
+                <ul
+                  class="custom-dropdown-menu"
+                  id="admin-client-menu"
+                  role="listbox"
+                  aria-label="Client list"
+                >
                 </ul>
-                <input type="hidden" id="admin-client-select" value="" />
+                <input type="hidden" id="admin-client-select" value="" aria-label="Selected client ID" />
               </div>
             </div>
 
             <!-- Messages Container (like client portal) -->
             <div class="messages-container portal-shadow">
-              <div class="messages-thread" id="admin-messages-thread">
+              <div class="messages-thread" id="admin-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread">
                 <p class="empty-state">Select a client to view messages</p>
               </div>
 
               <!-- Compose Message -->
               <div class="message-compose" id="admin-compose-area">
                 <div class="message-input-wrapper">
+                  <label for="admin-message-text" class="sr-only">Message</label>
                   <textarea
                     id="admin-message-text"
                     class="form-textarea"
                     placeholder="Select a client to send messages..."
+                    aria-label="Type your message to the client"
                     disabled
                   ></textarea>
                 </div>
@@ -787,12 +804,12 @@
                 <table class="admin-table visitors-table">
                   <thead>
                     <tr>
-                      <th>Session ID</th>
-                      <th>Started</th>
-                      <th>Duration</th>
-                      <th>Pages</th>
-                      <th>Device</th>
-                      <th>Location</th>
+                      <th scope="col">Session ID</th>
+                      <th scope="col">Started</th>
+                      <th scope="col">Duration</th>
+                      <th scope="col">Pages</th>
+                      <th scope="col">Device</th>
+                      <th scope="col">Location</th>
                     </tr>
                   </thead>
                   <tbody id="visitors-table-body">
@@ -986,7 +1003,16 @@
                 <h3>Project Progress</h3>
                 <div class="project-progress-display">
                   <div class="progress-percentage" id="pd-progress-percent">0%</div>
-                  <div class="progress-bar">
+                  <div
+                    class="progress-bar"
+                    role="progressbar"
+                    id="pd-progress-bar-container"
+                    aria-valuenow="0"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-label="Project completion progress"
+                    aria-describedby="pd-progress-percent"
+                  >
                     <div class="progress-fill" id="pd-progress-bar" style="width: 0%"></div>
                   </div>
                 </div>
@@ -1010,7 +1036,7 @@
               <!-- Recent Activity -->
               <div class="recent-activity portal-shadow">
                 <h3>Recent Activity</h3>
-                <ul class="activity-list" id="pd-activity-list">
+                <ul class="activity-list" id="pd-activity-list" aria-live="polite" aria-atomic="false">
                   <li>No activity recorded yet.</li>
                 </ul>
               </div>
@@ -1037,10 +1063,10 @@
               </div>
             </div>
 
-            <!-- Messages Sub-Tab -->
+              <!-- Messages Sub-Tab -->
             <div class="pd-tab-content" id="pd-tab-messages">
               <div class="messages-container portal-shadow">
-                <div class="messages-thread" id="pd-messages-thread">
+                <div class="messages-thread" id="pd-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Project messages thread">
                   <p class="empty-state">
                     No messages yet. Start the conversation with your client.
                   </p>
@@ -1048,10 +1074,12 @@
 
                 <div class="message-compose">
                   <div class="message-input-wrapper">
+                    <label for="pd-message-input" class="sr-only">Message</label>
                     <textarea
                       id="pd-message-input"
                       class="form-textarea"
                       placeholder="Type your message to the client..."
+                      aria-label="Type your message to the client"
                     ></textarea>
                   </div>
                   <button class="btn btn-secondary" id="btn-pd-send-message">Send Message</button>

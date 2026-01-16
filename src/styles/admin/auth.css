@@ -189,7 +189,8 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
 
 [data-page="admin"] .auth-gate .password-input-wrapper input:focus,
 .auth-gate .password-input-wrapper input:focus {
-  outline: none;
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
   border-color: var(--color-primary);
 }
 

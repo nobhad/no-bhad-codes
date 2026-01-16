@@ -16,6 +16,9 @@ import { SanitizationUtils } from '../../utils/sanitization-utils';
 import type { AdminDashboardContext } from './admin-types';
 import { getChartColor, getChartColorWithAlpha } from '../../config/constants';
 import { configureApiClient, apiFetch, apiPost, apiPut } from '../../utils/api-client';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('AdminDashboard');
 
 // Dynamic module loaders for code splitting
 import {
@@ -129,7 +132,7 @@ class AdminDashboard {
   }
 
   private async init(): Promise<void> {
-    console.log('[AdminDashboard] init() called');
+    logger.log('init() called');
     // Initialize security measures first
     AdminSecurity.init();
 
@@ -137,7 +140,7 @@ class AdminDashboard {
     const isAuthenticated = await this.checkAuthentication();
 
     if (!isAuthenticated) {
-      console.log('[AdminDashboard] Not authenticated, showing auth gate');
+      logger.log('Not authenticated, showing auth gate');
       this.setupAuthGate();
       return;
     }
@@ -149,9 +152,9 @@ class AdminDashboard {
     await this.initializeModules();
 
     // Set up the dashboard
-    console.log('[AdminDashboard] Setting up dashboard');
+    logger.log('Setting up dashboard');
     this.setupEventListeners();
-    console.log('[AdminDashboard] setupEventListeners complete');
+    logger.log('setupEventListeners complete');
     await this.loadDashboardData();
     this.setupTruncatedTextTooltips();
     this.updateSidebarBadges();
@@ -220,7 +223,7 @@ class AdminDashboard {
         // 503 = backend starting up, retry
         if (response.status === 503) {
           if (attempt < MAX_RETRIES) {
-            console.log(`[AdminDashboard] Backend starting up (attempt ${attempt}), retrying in ${RETRY_DELAY_MS}ms...`);
+            logger.log(`Backend starting up (attempt ${attempt}), retrying in ${RETRY_DELAY_MS}ms...`);
             await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
             continue;
           }
@@ -232,10 +235,10 @@ class AdminDashboard {
       } catch (error) {
         // Network error - backend might not be ready yet
         if (attempt < MAX_RETRIES) {
-          console.log(`[AdminDashboard] Auth check attempt ${attempt} failed, retrying in ${RETRY_DELAY_MS}ms...`);
+          logger.log(`Auth check attempt ${attempt} failed, retrying in ${RETRY_DELAY_MS}ms...`);
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
         } else {
-          console.log('[AdminDashboard] Auth check failed after all retries:', error);
+          logger.log('Auth check failed after all retries:', error);
         }
       }
     }
@@ -320,16 +323,16 @@ class AdminDashboard {
   }
 
   private setupEventListeners(): void {
-    console.log('[AdminDashboard] setupEventListeners() called');
+    logger.log('setupEventListeners() called');
     // Logout button (both old and new IDs)
     const logoutBtn =
       document.getElementById('logout-btn') || document.getElementById('btn-logout');
-    console.log('[AdminDashboard] logoutBtn found:', !!logoutBtn);
+    logger.log('logoutBtn found:', !!logoutBtn);
     if (logoutBtn) {
       logoutBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('[AdminDashboard] Logout button clicked');
+        logger.log('Logout button clicked');
         // Use AdminAuth.logout() to properly clear admin session
         AdminAuth.logout();
       });
@@ -340,7 +343,7 @@ class AdminDashboard {
       const target = e.target as HTMLElement;
       const logoutButton = target.closest('#btn-logout, #logout-btn, .btn-logout');
       if (logoutButton) {
-        console.log('[AdminDashboard] Logout detected via document delegation');
+        logger.log('Logout detected via document delegation');
         e.preventDefault();
         e.stopPropagation();
         AdminAuth.logout();
@@ -361,16 +364,16 @@ class AdminDashboard {
 
     // Tab navigation - new portal style (sidebar buttons with data-tab)
     const sidebarButtons = document.querySelectorAll('.sidebar-buttons .btn[data-tab]');
-    console.log('[AdminDashboard] Found sidebar buttons:', sidebarButtons.length);
+    logger.log('Found sidebar buttons:', sidebarButtons.length);
     sidebarButtons.forEach((btn, index) => {
       const tabName = (btn as HTMLElement).dataset.tab;
-      console.log(`[AdminDashboard] Setting up button ${index}: ${tabName}`);
+      logger.log(`Setting up button ${index}: ${tabName}`);
       btn.addEventListener('click', (e) => {
-        console.log('[AdminDashboard] Button clicked!', tabName);
+        logger.log('Button clicked!', tabName);
         e.preventDefault();
         e.stopPropagation();
         if (tabName) {
-          console.log('[AdminDashboard] Switching to tab:', tabName);
+          logger.log('Switching to tab:', tabName);
           this.switchTab(tabName);
           // Update active state on sidebar buttons
           sidebarButtons.forEach((b) => b.classList.remove('active'));
@@ -622,7 +625,7 @@ class AdminDashboard {
       const response = await apiPut(`/api/admin/contact-submissions/${id}/status`, { status });
 
       if (response.ok) {
-        console.log('[AdminDashboard] Contact status updated');
+        logger.log('Contact status updated');
         // Refresh to update counts
         this.loadContactSubmissions();
       } else {
@@ -762,7 +765,7 @@ class AdminDashboard {
       const response = await apiPut(`/api/projects/${id}`, { status });
 
       if (response.ok) {
-        console.log('[AdminDashboard] Project status updated');
+        logger.log('Project status updated');
         // Refresh both leads and projects
         this.loadLeads();
         this.loadProjects();
@@ -870,7 +873,7 @@ class AdminDashboard {
         }
       }
 
-      console.log('[AdminDashboard] Visitor stats loaded:', {
+      logger.log('Visitor stats loaded:', {
         visitorsToday,
         totalVisitors,
         totalPageViews

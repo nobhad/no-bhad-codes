@@ -45,6 +45,8 @@
     <script type="module" src="/src/portal.ts"></script>
   </head>
   <body data-page="client-portal">
+    <!-- Skip to main content link for accessibility -->
+    <a href="#dashboard-content" class="skip-link">Skip to main content</a>
     <!-- Dashboard Layout -->
     <div class="dashboard-container">
 
@@ -126,7 +128,14 @@
                 <h3>Your Website Project</h3>
                 <p class="project-status">Status: <span class="status-badge">In Progress</span></p>
                 <p class="project-progress">Progress: 25%</p>
-                <div class="progress-bar">
+                <div
+                  class="progress-bar"
+                  role="progressbar"
+                  aria-valuenow="25"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-label="Project progress: 25 percent"
+                >
                   <div class="progress-fill" style="width: 25%"></div>
                 </div>
               </div>
@@ -163,7 +172,7 @@
             <!-- Recent Activity -->
             <div class="recent-activity portal-shadow">
               <h3>Recent Activity</h3>
-              <ul class="activity-list">
+              <ul class="activity-list" aria-live="polite" aria-atomic="false">
                 <li>Project outline uploaded - Dec 1, 2025</li>
                 <li>Project intake received - Nov 30, 2025</li>
                 <li>Account activated - Nov 28, 2025</li>
@@ -263,7 +272,7 @@
 
             <!-- Messages Thread -->
             <div class="messages-container portal-shadow">
-              <div class="messages-thread" id="messages-thread">
+              <div class="messages-thread" id="messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread">
                 <div class="message message-received">
                   <div class="message-avatar" data-name="Noelle">
                     <img src="/images/avatar.svg" alt="Noelle" class="avatar-img" />
@@ -313,10 +322,12 @@
               <!-- Compose Message -->
               <div class="message-compose">
                 <div class="message-input-wrapper">
+                  <label for="message-input" class="sr-only">Message</label>
                   <textarea
                     id="message-input"
                     class="form-textarea"
                     placeholder="Type your message..."
+                    aria-label="Type your message"
                   ></textarea>
                   <button
                     type="button"
@@ -826,14 +837,14 @@
                 <table class="admin-table leads-table">
                   <thead>
                     <tr>
-                      <th>Date</th>
-                      <th>Name</th>
-                      <th>Company</th>
-                      <th>Email</th>
-                      <th>Project Type</th>
-                      <th>Budget</th>
-                      <th>Timeline</th>
-                      <th>Status</th>
+                      <th scope="col">Date</th>
+                      <th scope="col">Name</th>
+                      <th scope="col">Company</th>
+                      <th scope="col">Email</th>
+                      <th scope="col">Project Type</th>
+                      <th scope="col">Budget</th>
+                      <th scope="col">Timeline</th>
+                      <th scope="col">Status</th>
                     </tr>
                   </thead>
                   <tbody id="leads-table-body">

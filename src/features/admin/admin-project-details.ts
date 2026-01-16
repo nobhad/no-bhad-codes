@@ -270,10 +270,9 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Set up project detail sub-tab navigation
    */
   private setupProjectDetailTabs(): void {
-    console.log('[ProjectDetails] setupProjectDetailTabs called');
+    // Set up project detail sub-tab navigation
     const tabBtns = document.querySelectorAll('.pd-tab-btn');
     const tabContents = document.querySelectorAll('.pd-tab-content');
-    console.log('[ProjectDetails] Found tabBtns:', tabBtns.length, 'tabContents:', tabContents.length);
 
     tabBtns.forEach((btn) => {
       const btnEl = btn as HTMLElement;
@@ -308,14 +307,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     // Edit project button handler
     const editProjectBtn = document.getElementById('btn-edit-project') as HTMLElement;
-    console.log('[ProjectDetails] editProjectBtn found:', !!editProjectBtn, 'listenerAdded:', editProjectBtn?.dataset.listenerAdded);
     if (editProjectBtn && !editProjectBtn.dataset.listenerAdded) {
       editProjectBtn.dataset.listenerAdded = 'true';
       editProjectBtn.addEventListener('click', () => {
-        console.log('[ProjectDetails] Edit project button clicked');
         this.openEditProjectModal();
       });
-      console.log('[ProjectDetails] Edit project listener attached');
     }
 
     // Send message handler
@@ -343,14 +339,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     // Add milestone handler
     const addMilestoneBtn = document.getElementById('btn-add-milestone') as HTMLElement;
-    console.log('[ProjectDetails] addMilestoneBtn found:', !!addMilestoneBtn, 'listenerAdded:', addMilestoneBtn?.dataset.listenerAdded);
     if (addMilestoneBtn && !addMilestoneBtn.dataset.listenerAdded) {
       addMilestoneBtn.dataset.listenerAdded = 'true';
       addMilestoneBtn.addEventListener('click', () => {
-        console.log('[ProjectDetails] Add milestone button clicked, projectId:', this.currentProjectId);
         this.showAddMilestonePrompt();
       });
-      console.log('[ProjectDetails] Add milestone listener attached');
     }
 
     // Create invoice handler
@@ -369,21 +362,17 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    */
   private setupCustomStatusDropdown(): void {
     const dropdown = document.getElementById('pd-status-dropdown');
-    console.log('[ProjectDetails] setupCustomStatusDropdown called, dropdown:', dropdown);
 
     if (!dropdown) return;
 
     // Skip if already set up
     if (dropdown.dataset.listenerAdded) {
-      console.log('[ProjectDetails] Dropdown already set up, skipping');
       return;
     }
     dropdown.dataset.listenerAdded = 'true';
-    console.log('[ProjectDetails] Setting up dropdown listeners');
 
     // Use event delegation on the dropdown container
     dropdown.addEventListener('click', (e) => {
-      console.log('[ProjectDetails] Dropdown clicked', e.target);
       const target = e.target as HTMLElement;
 
       // Handle trigger click
@@ -391,7 +380,6 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         e.preventDefault();
         e.stopPropagation();
         dropdown.classList.toggle('open');
-        console.log('[ProjectDetails] Toggled dropdown, open:', dropdown.classList.contains('open'));
         return;
       }
 

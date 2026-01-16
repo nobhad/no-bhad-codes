@@ -210,17 +210,26 @@
 }
 
 /* Input states */
-.terminal .terminal-input:focus,
 .terminal .terminal-input:hover,
 .terminal .terminal-input:active,
-.terminal .terminal-input-area input:focus,
 .terminal .terminal-input-area input:hover,
-.terminal .terminal-input-area input:active,
-.terminal input.terminal-input:focus {
+.terminal .terminal-input-area input:active {
   background: transparent;
   border: none;
   outline: none;
   box-shadow: none;
+  caret-color: transparent;
+}
+
+/* Focus state - ensure accessibility while maintaining terminal aesthetic */
+.terminal .terminal-input:focus,
+.terminal .terminal-input-area input:focus,
+.terminal input.terminal-input:focus {
+  background: transparent;
+  border: none;
+  outline: 2px solid var(--color-terminal-green);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px rgba(127, 247, 9, 0.2);
   caret-color: transparent;
 }
 

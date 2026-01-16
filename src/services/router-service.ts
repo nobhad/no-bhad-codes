@@ -212,26 +212,25 @@ export class RouterService extends BaseService {
     path: string,
     options: { replace?: boolean; smooth?: boolean } = {}
   ): Promise<void> {
-    console.log('[RouterService] navigate() called with path:', path, 'options:', options);
+    this.log('navigate() called with path:', path, 'options:', options);
 
     // Allow re-navigation to hash links (for re-scrolling to sections)
     const isHashLink = path.startsWith('#');
 
     if (this.isNavigating) {
-      console.log('[RouterService] Already navigating, skipping');
+      this.log('Already navigating, skipping');
       return;
     }
 
     // Don't navigate if already on the same route (unless it's a hash link)
     if (!isHashLink && path === this.currentRoute) {
-      console.log('[RouterService] Already on route, skipping');
+      this.log('Already on route, skipping');
       return;
     }
 
     this.isNavigating = true;
 
     try {
-      console.log('[RouterService] Navigating to:', path);
       this.log(`Navigating to: ${path}`);
 
       // Update browser history
@@ -242,9 +241,9 @@ export class RouterService extends BaseService {
       }
 
       // Perform navigation
-      console.log('[RouterService] Calling performNavigation...');
+      this.log('Calling performNavigation...');
       await this.performNavigation(path, options);
-      console.log('[RouterService] Navigation complete');
+      this.log('Navigation complete');
     } catch (error) {
       console.error('[RouterService] Navigation failed:', error);
       this.error('Navigation failed:', error);
@@ -258,7 +257,7 @@ export class RouterService extends BaseService {
    * Uses virtual pages with PageTransitionModule on all devices
    */
   async navigateToSection(sectionId: string, options: { smooth?: boolean } = {}): Promise<void> {
-    console.log('[RouterService] navigateToSection called with sectionId:', sectionId);
+    this.log('navigateToSection called with sectionId:', sectionId);
 
     // Try multiple selector strategies to find the section
     const section =
@@ -268,34 +267,33 @@ export class RouterService extends BaseService {
       document.querySelector(`[data-section="${sectionId}"]`);
 
     if (!section) {
-      console.warn('[RouterService] Section not found:', sectionId);
       this.warn(`Section not found: ${sectionId}`);
       return;
     }
 
-    console.log('[RouterService] Found section:', section);
+    this.log('Found section:', section);
 
     // Use virtual pages on all devices
     const hasVirtualPages = document.querySelector('main[data-virtual-pages]');
 
     if (hasVirtualPages) {
       // Dispatch event for PageTransitionModule (works on mobile + desktop)
-      console.log('[RouterService] Dispatching navigate event for virtual pages');
+      this.log('Dispatching navigate event for virtual pages');
       this.dispatchNavigationEvent('navigate', { pageId: sectionId });
     } else {
       // Fallback to scroll-based navigation if virtual pages not enabled
       const shouldSmooth = options.smooth ?? this.config.smoothScrolling;
-      console.log('[RouterService] Fallback - using scrollIntoView, smooth:', shouldSmooth);
+      this.log('Fallback - using scrollIntoView, smooth:', shouldSmooth);
 
       try {
         section.scrollIntoView({
           behavior: shouldSmooth ? 'smooth' : 'instant',
           block: 'start'
         });
-        console.log('[RouterService] scrollIntoView complete');
+        this.log('scrollIntoView complete');
       } catch (_e) {
         // Fallback for older browsers
-        console.log('[RouterService] Fallback scroll...');
+        this.log('Fallback scroll...');
         section.scrollIntoView(true);
       }
     }
@@ -321,7 +319,7 @@ export class RouterService extends BaseService {
    */
   private async handleHashChange(): Promise<void> {
     const { hash } = window.location;
-    console.log('[RouterService] handleHashChange called with hash:', hash);
+    this.log('handleHashChange called with hash:', hash);
 
     if (hash) {
       // Extract section ID from salcosta-style hash
@@ -334,7 +332,7 @@ export class RouterService extends BaseService {
         sectionId = hash.replace('#/', '').replace('#', '');
       }
 
-      console.log('[RouterService] Extracted sectionId:', sectionId);
+      this.log('Extracted sectionId:', sectionId);
       await this.navigateToSection(sectionId);
     }
   }
@@ -353,16 +351,15 @@ export class RouterService extends BaseService {
    * Perform the actual navigation
    */
   private async performNavigation(path: string, options: any = {}): Promise<void> {
-    console.log('[RouterService] performNavigation called with path:', path);
+    this.log('performNavigation called with path:', path);
     const route = this.findRoute(path);
 
     if (!route) {
-      console.warn('[RouterService] Route not found:', path);
       this.warn(`Route not found: ${path}`);
       return;
     }
 
-    console.log('[RouterService] Found route:', route);
+    this.log('Found route:', route);
 
     // Call beforeEnter guard
     if (route.beforeEnter) {
@@ -384,7 +381,7 @@ export class RouterService extends BaseService {
 
     // Navigate to section
     if (route.section) {
-      console.log('[RouterService] Navigating to section:', route.section);
+      this.log('Navigating to section:', route.section);
       await this.navigateToSection(route.section, options);
     }
 
@@ -413,19 +410,19 @@ export class RouterService extends BaseService {
    * Also supports legacy hashes: #about, #contact
    */
   private findRoute(path: string): Route | null {
-    console.log('[RouterService] findRoute searching for path:', path);
+    this.log('findRoute searching for path:', path);
 
     // Extract hash from paths like "/#/about" -> "#/about"
     let searchPath = path;
     if (path.includes('#')) {
       const hashIndex = path.indexOf('#');
       searchPath = path.substring(hashIndex); // Get everything from # onward
-      console.log('[RouterService] Extracted hash:', searchPath);
+      this.log('Extracted hash:', searchPath);
     }
 
     // Direct match (try salcosta-style first)
     if (this.routes.has(searchPath)) {
-      console.log('[RouterService] Found direct match for:', searchPath);
+      this.log('Found direct match for:', searchPath);
       return this.routes.get(searchPath)!;
     }
 
@@ -434,7 +431,7 @@ export class RouterService extends BaseService {
     if (searchPath.startsWith('#') && !searchPath.startsWith('#/')) {
       const salcostaPath = `#/${searchPath.substring(1)}`;
       if (this.routes.has(salcostaPath)) {
-        console.log('[RouterService] Found salcosta-style match for:', salcostaPath);
+        this.log('Found salcosta-style match for:', salcostaPath);
         return this.routes.get(salcostaPath)!;
       }
     }
@@ -443,10 +440,10 @@ export class RouterService extends BaseService {
     if (searchPath.startsWith('#')) {
       // Extract section ID: #/about -> about, #about -> about
       const sectionId = searchPath.replace('#/', '').replace('#', '');
-      console.log('[RouterService] Searching for section:', sectionId);
+      this.log('Searching for section:', sectionId);
       for (const route of this.routes.values()) {
         if (route.section === sectionId) {
-          console.log('[RouterService] Found route by section:', route);
+          this.log('Found route by section:', route);
           return route;
         }
       }
@@ -454,12 +451,12 @@ export class RouterService extends BaseService {
 
     // Try original path for non-hash routes
     if (this.routes.has(path)) {
-      console.log('[RouterService] Found match for original path:', path);
+      this.log('Found match for original path:', path);
       return this.routes.get(path)!;
     }
 
     // Default route fallback
-    console.log('[RouterService] No match found, using default route');
+    this.log('No match found, using default route');
     return this.routes.get(this.config.defaultRoute) || null;
   }
 

@@ -58,6 +58,9 @@ export interface PerformanceAlert {
 }
 
 import { APP_CONSTANTS } from '../config/constants';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('PerformanceService');
 
 export class PerformanceService {
   private metrics: PerformanceMetrics = {};
@@ -85,7 +88,7 @@ export class PerformanceService {
   async init(): Promise<void> {
     // Skip performance monitoring in development to prevent flashing/reloading
     if ((import.meta as any).env?.DEV || process.env.NODE_ENV === 'development') {
-      console.log('[PerformanceService] Skipping monitoring in development mode');
+      logger.log('Skipping monitoring in development mode');
       return;
     }
 
@@ -118,7 +121,7 @@ export class PerformanceService {
     // Set up continuous monitoring
     this.setupContinuousMonitoring();
 
-    console.log('[PerformanceService] Monitoring started');
+    logger.log('Monitoring started');
   }
 
   /**
@@ -137,7 +140,7 @@ export class PerformanceService {
             this.checkBudget('lcp', this.metrics.lcp);
           }
 
-          console.log('[Performance] LCP:', this.metrics.lcp);
+          logger.log('LCP:', this.metrics.lcp);
         });
 
         lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
@@ -154,7 +157,7 @@ export class PerformanceService {
             this.metrics.fid = entry.processingStart - entry.startTime;
             this.checkBudget('fid', this.metrics.fid);
 
-            console.log('[Performance] FID:', this.metrics.fid);
+            logger.log('FID:', this.metrics.fid);
           });
         });
 
@@ -210,7 +213,7 @@ export class PerformanceService {
           entries.forEach((entry) => {
             if (entry.name === 'first-contentful-paint') {
               this.metrics.fcp = entry.startTime;
-              console.log('[Performance] FCP:', this.metrics.fcp);
+              logger.log('FCP:', this.metrics.fcp);
             }
           });
         });
@@ -241,7 +244,7 @@ export class PerformanceService {
       this.metrics.bundleSize = totalJSSize;
       this.checkBudget('bundleSize', totalJSSize);
 
-      console.log('[Performance] Estimated bundle size:', totalJSSize);
+      logger.log('Estimated bundle size:', totalJSSize);
     }
 
     // Parse and execution timing
@@ -402,7 +405,7 @@ export class PerformanceService {
     }
 
     this.metrics.customMetrics[name] = value;
-    console.log(`[Performance] Custom metric ${name}:`, value);
+    logger.log(`Custom metric ${name}:`, value);
   }
 
   /**
@@ -520,7 +523,7 @@ export class PerformanceService {
     }
 
     this.isMonitoring = false;
-    console.log('[PerformanceService] Monitoring stopped');
+    logger.log('Monitoring stopped');
   }
 
   /**

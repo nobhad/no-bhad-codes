@@ -142,7 +142,8 @@ body[data-page="admin"] .custom-dropdown[data-modal-dropdown] .custom-dropdown-t
 }
 
 .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger:focus {
-  outline: none;
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
   border-color: var(--color-brand-primary);
 }
 
@@ -193,7 +194,8 @@ body[data-page="admin"] .custom-dropdown[data-modal-dropdown] .custom-dropdown-t
 .admin-modal select:focus,
 .admin-modal .form-select:focus,
 .admin-modal-body select:focus {
-  outline: none;
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
   box-shadow: 0 0 0 2px rgba(var(--color-brand-primary-rgb), 0.25);
 }
 
