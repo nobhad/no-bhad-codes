@@ -134,21 +134,20 @@ describe('Form Validation', () => {
       const input = document.createElement('input');
       input.type = 'text';
       input.required = true;
+      input.value = 'test';
       form.appendChild(input);
-
-      const validateSpy = vi.spyOn(
-        { validateFormCompletion },
-        'validateFormCompletion' as any
-      );
 
       initFormValidation(form);
 
-      // Trigger input event
+      // Verify initial state
+      expect(submitButton.classList.contains('form-valid')).toBe(true);
+
+      // Clear input and trigger change
+      input.value = '';
       input.dispatchEvent(new Event('input'));
 
-      // Note: We can't easily spy on the imported function, but we can verify
-      // the event listener was added
-      expect(input.addEventListener).toHaveBeenCalled();
+      // Should update button state
+      expect(submitButton.classList.contains('form-valid')).toBe(false);
     });
 
     it('should perform initial validation check', () => {

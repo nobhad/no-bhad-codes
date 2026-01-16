@@ -145,7 +145,7 @@ describe('AuthService', () => {
     });
   });
 
-  describe('getUser', () => {
+  describe('getCurrentUser', () => {
     it('should return user when authenticated', () => {
       const mockUser = {
         id: 1,
@@ -159,25 +159,34 @@ describe('AuthService', () => {
       (authService as any).user = mockUser;
       (authService as any).isAuth = true;
 
-      expect(authService.getUser()).toEqual(mockUser);
+      expect(authService.getCurrentUser()).toEqual(mockUser);
     });
 
     it('should return null when not authenticated', () => {
       (authService as any).user = null;
       (authService as any).isAuth = false;
 
-      expect(authService.getUser()).toBeNull();
+      expect(authService.getCurrentUser()).toBeNull();
     });
   });
 
   describe('isAuthenticated', () => {
     it('should return true when authenticated', () => {
-      authService['isAuth'] = true;
+      const mockUser = {
+        id: 1,
+        email: 'test@example.com',
+        companyName: 'Test',
+        contactName: 'Test',
+        status: 'active',
+      };
+      (authService as any).user = mockUser;
+      (authService as any).isAuth = true;
       expect(authService.isAuthenticated()).toBe(true);
     });
 
     it('should return false when not authenticated', () => {
-      authService['isAuth'] = false;
+      (authService as any).user = null;
+      (authService as any).isAuth = false;
       expect(authService.isAuthenticated()).toBe(false);
     });
   });
@@ -196,7 +205,7 @@ describe('AuthService', () => {
 
       const newService = new AuthService();
 
-      expect(newService.getUser()).toEqual(mockUser);
+      expect(newService.getCurrentUser()).toEqual(mockUser);
       expect(newService.isAuthenticated()).toBe(true);
     });
 
@@ -207,7 +216,7 @@ describe('AuthService', () => {
 
       const newService = new AuthService();
 
-      expect(newService.getUser()).toBeNull();
+      expect(newService.getCurrentUser()).toBeNull();
       expect(newService.isAuthenticated()).toBe(false);
 
       consoleSpy.mockRestore();
