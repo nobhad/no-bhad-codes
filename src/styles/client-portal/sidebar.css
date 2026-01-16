@@ -190,6 +190,8 @@
   outline: none;
 }
 
+/* Focus indicators inherited from global :focus-visible rule in reset.css */
+
 .sidebar.collapsed .sidebar-buttons .btn.active .btn-icon {
   color: var(--color-primary);
 }
