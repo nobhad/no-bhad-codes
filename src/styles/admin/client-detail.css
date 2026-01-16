@@ -42,8 +42,8 @@
   text-decoration: underline;
 }
 
-/* Back button in client detail */
-.btn-back {
+/* Back button in client detail - scoped to admin */
+[data-page="admin"] .btn-back {
   display: flex;
   align-items: center;
   gap: var(--space-1);
@@ -58,12 +58,12 @@
   margin-right: var(--space-3);
 }
 
-.btn-back:hover {
+[data-page="admin"] .btn-back:hover {
   background: var(--portal-bg-lighter);
   border-color: var(--portal-border-light);
 }
 
-.btn-back svg {
+[data-page="admin"] .btn-back svg {
   width: 16px;
   height: 16px;
 }
@@ -132,14 +132,14 @@
   height: 16px;
 }
 
-/* Danger button variant */
-.btn-danger {
+/* Danger button variant - scoped to admin */
+[data-page="admin"] .btn-danger {
   background: transparent;
   border: 1px solid var(--color-danger);
   color: var(--color-danger);
 }
 
-.btn-danger:hover {
+[data-page="admin"] .btn-danger:hover {
   background: var(--color-danger);
   color: var(--color-white);
 }
@@ -248,15 +248,15 @@
   }
 }
 
-/* Card header with action button */
-.card-header-with-action {
+/* Card header with action button - scoped to admin */
+[data-page="admin"] .card-header-with-action {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-4);
 }
 
-.card-header-with-action h3 {
+[data-page="admin"] .card-header-with-action h3 {
   margin: 0;
 }
 

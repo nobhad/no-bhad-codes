@@ -95,7 +95,8 @@
   border-color: var(--portal-border-dark);
 }
 
-.btn-outline {
+/* Scoped to client-portal to prevent conflicts */
+[data-page="client-portal"] .btn-outline {
   background: transparent;
   color: var(--portal-border-dark);
   border: var(--portal-border);
@@ -108,7 +109,7 @@
   border-radius: var(--portal-radius-sm);
 }
 
-.btn-outline:hover {
+[data-page="client-portal"] .btn-outline:hover {
   background: var(--portal-border-dark);
   color: var(--color-white);
 }

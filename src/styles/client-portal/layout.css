@@ -293,7 +293,8 @@ body[data-page="client-portal"] {
 }
 
 /* Generic Card - Dark theme to match admin */
-.card {
+/* Scoped to client-portal to prevent conflicts with main site */
+[data-page="client-portal"] .card {
   background: var(--portal-bg-dark);
   border: 1px solid var(--portal-border-medium);
   border-radius: var(--portal-radius-md, 8px);
@@ -301,11 +302,11 @@ body[data-page="client-portal"] {
   transition: all var(--transition-fast);
 }
 
-.card:hover {
+[data-page="client-portal"] .card:hover {
   border-color: var(--portal-border-light);
 }
 
-.card h3 {
+[data-page="client-portal"] .card h3 {
   font-family: var(--font--acme);
   font-size: 1.1rem;
   color: var(--portal-text-light);
@@ -313,7 +314,7 @@ body[data-page="client-portal"] {
   text-transform: uppercase;
 }
 
-.card p {
+[data-page="client-portal"] .card p {
   color: var(--portal-text-secondary);
   margin: 0 0 1rem 0;
   line-height: 1.5;

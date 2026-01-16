@@ -1,0 +1,45 @@
+/**
+ * ===============================================
+ * SHARED CSS BUNDLE
+ * ===============================================
+ * @file src/styles/bundles/shared.css
+ *
+ * Common styles shared by all apps (main site, admin, client portal).
+ * Contains base reset, design tokens, typography, layout, and form components.
+ */
+
+/* ============================================
+ * CASCADE LAYER ORDER DECLARATION
+ * ============================================ */
+@layer reset, tokens, base, components;
+
+/* ============================================
+ * 0. FONT FACE DEFINITIONS (MUST BE FIRST, NO LAYER)
+ * ============================================ */
+@import "../base/fonts.css";
+
+/* ============================================
+ * 1. RESET LAYER
+ * ============================================ */
+@import "../base/reset.css" layer(reset);
+
+/* ============================================
+ * 2. DESIGN TOKENS LAYER
+ * ============================================ */
+@import "../../design-system/index.css" layer(tokens);
+@import "../variables.css" layer(tokens);
+
+/* ============================================
+ * 3. BASE LAYER
+ * ============================================ */
+@import "../base/typography.css" layer(base);
+@import "../base/layout.css" layer(base);
+
+/* ============================================
+ * 4. SHARED COMPONENTS LAYER
+ * ============================================ */
+@import "../components/form-fields.css" layer(components);
+@import "../components/form-buttons.css" layer(components);
+@import "../components/form-validation.css" layer(components);
+@import "../components/loading.css" layer(components);
+@import "../shared/progress.css" layer(components);

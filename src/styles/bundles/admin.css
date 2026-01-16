@@ -1,0 +1,79 @@
+/**
+ * ===============================================
+ * ADMIN DASHBOARD CSS BUNDLE
+ * ===============================================
+ * @file src/styles/bundles/admin.css
+ *
+ * Styles for the admin dashboard (admin/index.html).
+ * Includes admin-specific components, tables, modals, analytics.
+ * Does NOT include main site marketing styles or client portal.
+ */
+
+/* ============================================
+ * CASCADE LAYER ORDER DECLARATION
+ * ============================================ */
+@layer reset, tokens, base, components, admin, utilities;
+
+/* ============================================
+ * SHARED STYLES (reset, tokens, base, form components)
+ * ============================================ */
+@import "./shared.css";
+
+/* ============================================
+ * NAVIGATION (portal-style nav for admin)
+ * ============================================ */
+@import "../components/nav-portal.css" layer(components);
+
+/* ============================================
+ * ADMIN-SPECIFIC STYLES
+ * ============================================ */
+@import "../pages/admin.css" layer(admin);
+@import "../admin/index.css" layer(admin);
+
+/* ============================================
+ * UTILITIES (highest priority)
+ * ============================================ */
+@layer utilities {
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    padding: 12px 24px;
+    background-color: var(--color-dark);
+    color: var(--color-light);
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: top 0.2s ease;
+  }
+
+  .skip-link:focus {
+    top: 10px;
+    outline: 2px solid var(--app-color-primary);
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================
+ * UNLAYERED STYLES (global overrides)
+ * ============================================ */
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-neutral-200, #f1f3f4);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-400, #9aa0a6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-500, #5f6368);
+}
