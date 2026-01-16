@@ -30,6 +30,23 @@ All admin feature files now use centralized `api-client.ts` utilities instead of
 
 Benefits: Centralized token expiration handling, automatic session management, consistent error handling.
 
+**JWT Utilities (COMPLETE):**
+
+Created `src/utils/jwt-utils.ts` with centralized token handling:
+
+- `decodeJwtPayload(token)` - Parse JWT payload safely
+- `isTokenExpired(token)` - Check expiration
+- `isAdminPayload(payload)` - Check admin flag
+- `isAdminToken(token)` - Combined check
+- `getTokenTimeRemaining(token)` - Time until expiration
+- `validateToken(token)` - Full validation
+
+Files updated to use jwt-utils:
+
+- `admin-auth.ts` - 4 inline decodes → jwt-utils
+- `portal-auth.ts` - 1 inline decode → jwt-utils
+- `client-portal.ts` - 1 inline decode → jwt-utils
+
 **Files Modified:**
 
 - `src/styles/base/reset.css` - Removed duplicate scrollbar styles
