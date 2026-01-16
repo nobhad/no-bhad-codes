@@ -4,6 +4,61 @@
 
 ## Recently Completed
 
+### Codebase Audit & Consolidation - January 15, 2026
+
+**Deep dive audit completed** - Identified and addressed duplicates across CSS, TypeScript, and HTML.
+
+**CSS Duplicates Removed (~70 lines):**
+
+- Removed duplicate scrollbar styling from `reset.css` (kept `main.css` version with design system variables)
+- Consolidated `.visually-hidden` and `.sr-only` to single `.sr-only` class in `reset.css`
+- Removed duplicate `.sr-only` from `nav-base.css`
+- Removed duplicate `.visually-hidden` from `main.css`, `client-portal/components.css`, `admin/auth.css`
+- Updated all HTML/TS to use `.sr-only` (WCAG 2.x compliant)
+
+**API Client Migration (partial):**
+
+- Migrated `admin-clients.ts` to use `apiFetch`, `apiPost`, `apiPut`, `apiDelete`
+- Started migration of `admin-projects.ts`
+- Remaining: `admin-dashboard.ts`, `admin-project-details.ts`, `admin-messaging.ts`
+
+**Files Modified:**
+
+- `src/styles/base/reset.css` - Removed duplicate scrollbar styles
+- `src/styles/main.css` - Removed `.visually-hidden`
+- `src/styles/components/nav-base.css` - Removed duplicate `.sr-only`
+- `src/styles/client-portal/components.css` - Removed `.visually-hidden`
+- `src/styles/admin/auth.css` - Removed `.visually-hidden`
+- `src/features/admin/modules/admin-clients.ts` - Uses api-client utilities
+- `index.html`, `admin/index.html`, `client-portal.ts` - Updated to use `.sr-only`
+
+---
+
+### Admin Table Filtering - January 15, 2026
+
+**Implemented evergreen-style filtering for all admin tables:**
+
+- Text search across multiple fields (debounced 200ms)
+- Status filter dropdown with checkboxes (multi-select)
+- Date range filtering (start/end dates)
+- Column sorting with direction toggle
+- LocalStorage persistence
+
+**Files Created:**
+
+- `src/utils/table-filter.ts` - Core filtering utilities (~500 lines)
+
+**Files Modified:**
+
+- `src/styles/pages/admin.css` - Filter component CSS (~300 lines)
+- `admin/index.html` - Filter container IDs
+- `src/features/admin/modules/admin-leads.ts` - Filtering integrated
+- `src/features/admin/modules/admin-contacts.ts` - Filtering integrated
+- `src/features/admin/modules/admin-projects.ts` - Filtering integrated
+- `src/features/admin/modules/admin-clients.ts` - Filtering integrated
+
+---
+
 ### CSS Cleanup & Code Organization - January 15, 2026
 
 **CSS File Optimization (-499 lines total):**

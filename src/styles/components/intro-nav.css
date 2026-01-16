@@ -51,11 +51,17 @@
   opacity: 0.9;
 }
 
-.intro-nav-link:focus,
-.intro-nav-link:focus-visible {
+.intro-nav-link:focus {
   outline: none;
   box-shadow: none;
   border: none;
+}
+
+/* Focus indicator for keyboard navigation - required for accessibility */
+.intro-nav-link:focus-visible {
+  outline: 2px solid var(--color-primary, var(--color-brand-primary));
+  outline-offset: 4px;
+  border-radius: 2px;
 }
 
 /* GSAP handles all intro-nav-link animations */

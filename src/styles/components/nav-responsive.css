@@ -227,6 +227,8 @@
   outline: none;
 }
 
+/* Focus indicators inherited from global :focus-visible rule in reset.css */
+
 /* =====================================================
    18. TOUCH & RESPONSIVE UTILITIES
    ===================================================== */

@@ -219,8 +219,12 @@ export class ClientPortalModule extends BaseModule {
           if (tabName) {
             this.switchTab(tabName);
             // Update active state on buttons
-            sidebarButtons.forEach((b) => b.classList.remove('active'));
+            sidebarButtons.forEach((b) => {
+              b.classList.remove('active');
+              b.removeAttribute('aria-current');
+            });
             btn.classList.add('active');
+            btn.setAttribute('aria-current', 'page');
           }
         });
       });
@@ -239,8 +243,10 @@ export class ClientPortalModule extends BaseModule {
             // Update active state on sidebar buttons
             sidebarButtons.forEach((b) => {
               b.classList.remove('active');
+              b.removeAttribute('aria-current');
               if ((b as HTMLElement).dataset.tab === tabName) {
                 b.classList.add('active');
+                b.setAttribute('aria-current', 'page');
               }
             });
           }

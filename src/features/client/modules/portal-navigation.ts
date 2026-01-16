@@ -60,11 +60,13 @@ export function switchTab(tabName: string, callbacks: {
   }
 
   // Update nav button active states
-  const navButtons = document.querySelectorAll('.nav-btn[data-tab]');
+  const navButtons = document.querySelectorAll('.nav-btn[data-tab], .sidebar-buttons .btn[data-tab]');
   navButtons.forEach((btn) => {
     btn.classList.remove('active');
+    btn.removeAttribute('aria-current');
     if ((btn as HTMLElement).dataset.tab === tabName) {
       btn.classList.add('active');
+      btn.setAttribute('aria-current', 'page');
     }
   });
 

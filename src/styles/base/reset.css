@@ -195,21 +195,26 @@ a {
   border: 0;
 }
 
-/* Focus management - consistent inset focus ring */
+/* ============================================
+ * FOCUS MANAGEMENT - ACCESSIBILITY
+ * ============================================ */
+
+/* Remove outline on mouse clicks, keep on keyboard navigation */
 :focus {
   outline: none;
 }
 
-/* Keyboard focus - inset box-shadow for consistent look */
+/* Global focus indicator for ALL interactive elements - WCAG 2.4.7 */
+/* Applies to: a, button, input, select, textarea, [tabindex] */
 :focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px inset var(--color-brand-primary) !important;
+  outline: 2px solid var(--color-primary, var(--color-brand-primary));
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
-/* Remove focus ring for mouse users */
+/* Remove focus ring for mouse users (non-keyboard focus) */
 :focus:not(:focus-visible) {
   outline: none;
-  box-shadow: none;
 }
 
 /* ============================================

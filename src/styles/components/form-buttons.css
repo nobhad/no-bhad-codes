@@ -63,6 +63,8 @@
   outline: none;
 }
 
+/* Focus indicators inherited from global :focus-visible rule in reset.css */
+
 /* Secondary button styling */
 .btn-secondary {
   background-color: var(--color-neutral-100);
@@ -75,6 +77,12 @@ input[type="submit"]:active {
   border-color: var(--color-border);
   outline: none;
   box-shadow: 0 4px 8px var(--color-shadow);
+}
+
+/* Submit button focus indicator for keyboard navigation */
+input[type="submit"]:focus-visible {
+  outline: 2px solid var(--color-primary, var(--color-brand-primary));
+  outline-offset: 2px;
 }
 
 /* Submit button valid state - lime green background */
