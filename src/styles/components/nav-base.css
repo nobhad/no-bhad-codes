@@ -167,6 +167,8 @@ li {
   outline: none;
 }
 
+/* Focus indicator inherited from global :focus-visible rule in reset.css */
+
 .nav-logo__wordmark {
   width: 4em;
   text-transform: uppercase;
