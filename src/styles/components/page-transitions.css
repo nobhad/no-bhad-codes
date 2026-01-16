@@ -195,14 +195,18 @@ section.business-card-section.page-hidden .intro-nav {
     margin: 0;
     overflow: visible;
     box-sizing: border-box;
+    display: block;
   }
 
-  /* Business card container - centered in viewport height */
+  /* Business card container - centered using explicit calc
+   * Card height: 294.19px, so offset from center: 147.1px
+   * Section height = 100% of main = viewport - header - footer */
   main[data-virtual-pages] > .business-card-section[data-page] > .business-card-container {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    /* Center: 50% of section height minus half card height */
+    top: calc(50% - 147.1px);
+    left: calc(50% - 262.5px);
+    transform: none;
     margin: 0;
     display: block;
   }
