@@ -1,0 +1,135 @@
+/**
+ * ===============================================
+ * MAIN SITE CSS BUNDLE
+ * ===============================================
+ * @file src/styles/bundles/site.css
+ *
+ * Styles for the main marketing site (index.html).
+ * Includes navigation, business card, about, contact, projects pages.
+ * Does NOT include admin or client portal styles.
+ */
+
+/* ============================================
+ * CASCADE LAYER ORDER DECLARATION
+ * ============================================
+ * Layers are listed in priority order - later layers win.
+ */
+@layer reset, tokens, base, components, pages, page-states, mobile, utilities;
+
+/* ============================================
+ * SHARED STYLES (reset, tokens, base, form components)
+ * ============================================ */
+@import "./shared.css";
+
+/* ============================================
+ * NAVIGATION COMPONENTS
+ * ============================================ */
+@import "../components/nav-base.css" layer(components);
+@import "../components/nav-animations.css" layer(components);
+@import "../components/nav-responsive.css" layer(components);
+@import "../components/nav-portal.css" layer(components);
+
+/* ============================================
+ * BUSINESS CARD & INTRO COMPONENTS
+ * ============================================ */
+@import "../components/business-card.css" layer(components);
+@import "../components/intro-nav.css" layer(components);
+@import "../components/intro-morph.css" layer(components);
+
+/* ============================================
+ * OTHER COMPONENTS
+ * ============================================ */
+@import "../components/portfolio-carousel.css" layer(components);
+@import "../components/footer.css" layer(components);
+
+/* ============================================
+ * PAGE-SPECIFIC STYLES
+ * ============================================ */
+@import "../pages/about.css" layer(pages);
+@import "../pages/contact.css" layer(pages);
+@import "../pages/projects.css" layer(pages);
+@import "../pages/terminal-intake.css" layer(pages);
+@import "../pages/client-portal-section.css" layer(pages);
+
+/* ============================================
+ * PAGE STATES (transitions, visibility)
+ * ============================================ */
+@import "../components/page-transitions.css" layer(page-states);
+
+/* ============================================
+ * MOBILE OVERRIDES
+ * ============================================ */
+@import "../mobile/index.css" layer(mobile);
+
+/* ============================================
+ * UTILITIES (highest priority)
+ * ============================================ */
+@layer utilities {
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    padding: 12px 24px;
+    background-color: var(--color-dark);
+    color: var(--color-light);
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: top 0.2s ease;
+  }
+
+  .skip-link:focus {
+    top: 10px;
+    outline: 2px solid var(--app-color-primary);
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================
+ * UNLAYERED STYLES (global overrides)
+ * ============================================ */
+
+/* Section transition variables */
+:root {
+  --blur-amount: 4px;
+  --drop-distance: 20px;
+  --transition-enter: 0.3s;
+  --transition-exit: 0.2s;
+  --stagger-delay: 0.05s;
+}
+
+/* Theme integration */
+body {
+  background-color: var(--color-neutral-300);
+  color: var(--color-dark);
+}
+
+/* Footer integration with theme */
+.footer .footer-text {
+  opacity: 1;
+  visibility: visible;
+  color: var(--color-dark);
+  font-size: 0.75rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-neutral-200, #f1f3f4);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-400, #9aa0a6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-500, #5f6368);
+}

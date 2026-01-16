@@ -37,9 +37,22 @@
   transition: color 0.2s ease, background-color 0.2s ease;
 }
 
-.portal-button:hover,
-.portal-button:focus {
+.portal-button:hover {
   color: var(--color-primary);
+}
+
+/* Remove default outline - using color change for focus instead */
+.portal-button:focus {
+  outline: none;
+}
+
+/* Focus indicator - red color + subtle background for better visibility (WCAG 2.4.7 compliance) */
+/* Remove outline border from global focus-visible rule */
+.portal-button:focus-visible {
+  color: var(--color-primary, #dc2626);
+  background-color: rgba(220, 38, 38, 0.1);
+  outline: none !important;
+  box-shadow: none;
 }
 
 .portal-button .icon-wrap {
