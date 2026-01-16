@@ -14,6 +14,7 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 | **[Invoices](./features/INVOICES.md)** | Invoice history, status tracking, PDF download |
 | **[Settings](./features/SETTINGS.md)** | Account, notifications, billing information |
 | **[New Project](./features/NEW_PROJECT.md)** | Project request form, validation |
+| **[Terminal Intake](./features/TERMINAL_INTAKE.md)** | Terminal-style project intake form with conversational UI |
 
 ### Admin Dashboard
 
@@ -26,7 +27,6 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 | Document | Description |
 |----------|-------------|
 | **[Intro Animation](./features/INTRO_ANIMATION.md)** | Coyote paw intro animation (desktop/mobile) |
-| **[Scroll Snap](./features/SCROLL_SNAP.md)** | GSAP-powered section snapping (mobile) |
 
 ### Design System
 
@@ -38,10 +38,26 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 
 ### Architecture & Development
 
+- **[System Architecture](./ARCHITECTURE.md)** - Core architecture, module system, service layer, and component system
+- **[System Documentation](./SYSTEM_DOCUMENTATION.md)** - Complete system overview, invoice/file systems, database schema, and deployment
+- **[Developer Guide](./DEVELOPER_GUIDE.md)** - Development practices, module patterns, service layer, and component system
 - **[Configuration Guide](./CONFIGURATION.md)** - Environment variables, frontend config files, TypeScript and Vite configuration
 - **[Performance & Bundle Optimization](./OPTIMIZATION.md)** - Bundle optimization strategies, performance monitoring, Core Web Vitals tracking, and development best practices
 - **[Visitor Tracking System](./VISITOR-TRACKING.md)** - Privacy-compliant analytics, consent management, and engagement metrics
 - **[API Documentation](./API_DOCUMENTATION.md)** - Complete API reference with request/response examples
+- **[Code Protection Guide](./code-protection-guide.md)** - Code obfuscation, source map protection, and security practices
+
+### Development & Maintenance
+
+- **[Current Work](./current_work.md)** - Active development tracking and TODO list
+- **[Codebase Review](./CODEBASE_REVIEW.md)** - Code review findings, dead code cleanup, and improvements
+- **[Test Coverage](./COVERAGE.md)** - Automated testing coverage guide and requirements
+- **[Documentation Analysis](./DOCUMENTATION_ANALYSIS.md)** - Documentation review and organization analysis
+
+### Archive
+
+- **[Archived Work 2025-12](./archive/ARCHIVED_WORK_2025-12.md)** - Completed work from December 2025
+- **[Archived Work 2026-01](./archive/ARCHIVED_WORK_2026-01.md)** - Completed work from January 2026
 
 ### Quick Links
 

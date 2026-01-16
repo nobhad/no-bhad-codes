@@ -28,7 +28,6 @@
   ],
   "rewrites": [
     { "source": "/api/:path*", "destination": "https://no-bhad-codes-production.up.railway.app/api/:path*" },
-    { "source": "/client/landing", "destination": "/client/landing.html" },
     { "source": "/client/portal", "destination": "/client/portal.html" },
     { "source": "/client/intake", "destination": "/client/intake.html" },
     { "source": "/client/set-password", "destination": "/client/set-password.html" },

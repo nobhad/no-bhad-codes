@@ -1,6 +1,6 @@
 # Archived Work - December 2025
 
-This file contains completed work from December 2025. Items are moved here from `current_work.md` once fully verified and operational.
+This file contains completed work from December 2025. Items are moved here from `../current_work.md` once fully verified and operational.
 
 ---
 
