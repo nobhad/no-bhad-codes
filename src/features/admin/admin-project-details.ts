@@ -10,6 +10,7 @@
 import { SanitizationUtils } from '../../utils/sanitization-utils';
 import { formatFileSize } from '../../utils/format-utils';
 import { AdminAuth } from './admin-auth';
+import { apiFetch, apiPost, apiPut, apiDelete } from '../../utils/api-client';
 
 export interface ProjectDetailsHandler {
   showProjectDetails(projectId: number, projectsData: any[], switchTab: (tab: string) => void, loadProjects: () => Promise<void>, formatProjectType: (type: string) => string, inviteLead: (leadId: number, email: string) => Promise<void>): void;
@@ -568,12 +569,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (notesInput?.value !== undefined) updates.notes = notesInput.value;
 
     try {
-      const response = await fetch(`/api/projects/${this.currentProjectId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(updates)
-      });
+      const response = await apiPut(`/api/projects/${this.currentProjectId}`, updates);
 
       if (response.ok) {
         // Refresh project data
@@ -618,9 +614,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       }
 
       // Get all threads and find one for this project/client
-      const threadsResponse = await fetch('/api/messages/threads', {
-        credentials: 'include'
-      });
+      const threadsResponse = await apiFetch('/api/messages/threads');
 
       if (!threadsResponse.ok) {
         messagesThread.innerHTML = '<p class="empty-state">Error loading messages.</p>';
@@ -646,9 +640,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       this.currentThreadId = thread.id;
 
       // Get messages in this thread
-      const messagesResponse = await fetch(`/api/messages/threads/${thread.id}/messages`, {
-        credentials: 'include'
-      });
+      const messagesResponse = await apiFetch(`/api/messages/threads/${thread.id}/messages`);
 
       if (!messagesResponse.ok) {
         messagesThread.innerHTML = '<p class="empty-state">Error loading messages.</p>';
@@ -711,19 +703,12 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     try {
       // If no existing thread, create one
       if (!this.currentThreadId) {
-        const createResponse = await fetch('/api/messages/threads', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            client_id: project.client_id,
-            project_id: this.currentProjectId,
-            subject: `Project: ${project.project_name || 'Untitled'}`,
-            thread_type: 'project',
-            message: messageInput.value.trim()
-          })
+        const createResponse = await apiPost('/api/messages/threads', {
+          client_id: project.client_id,
+          project_id: this.currentProjectId,
+          subject: `Project: ${project.project_name || 'Untitled'}`,
+          thread_type: 'project',
+          message: messageInput.value.trim()
         });
 
         if (createResponse.ok) {
@@ -738,15 +723,8 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       }
 
       // Send message to existing thread
-      const response = await fetch(`/api/messages/threads/${this.currentThreadId}/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          message: messageInput.value.trim()
-        })
+      const response = await apiPost(`/api/messages/threads/${this.currentThreadId}/messages`, {
+        message: messageInput.value.trim()
       });
 
       if (response.ok) {
@@ -775,9 +753,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
 
     try {
-      const response = await fetch(`/api/uploads/project/${projectId}`, {
-        credentials: 'include'
-      });
+      const response = await apiFetch(`/api/uploads/project/${projectId}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -828,9 +804,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
 
     try {
-      const response = await fetch(`/api/projects/${projectId}/milestones`, {
-        credentials: 'include'
-      });
+      const response = await apiFetch(`/api/projects/${projectId}/milestones`);
 
       if (response.ok) {
         const data = await response.json();
@@ -900,14 +874,8 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     // Save progress to database
     if (this.currentProjectId) {
-      fetch(`/api/projects/${this.currentProjectId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ progress })
-      }).catch(err => console.error('[AdminProjectDetails] Error saving progress:', err));
+      apiPut(`/api/projects/${this.currentProjectId}`, { progress })
+        .catch(err => console.error('[AdminProjectDetails] Error saving progress:', err));
     }
   }
 
@@ -935,18 +903,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (!AdminAuth.isAuthenticated()) return;
 
     try {
-      const response = await fetch(`/api/projects/${this.currentProjectId}/milestones`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          title,
-          description: description || null,
-          due_date: dueDate || null,
-          deliverables: []
-        })
+      const response = await apiPost(`/api/projects/${this.currentProjectId}/milestones`, {
+        title,
+        description: description || null,
+        due_date: dueDate || null,
+        deliverables: []
       });
 
       if (response.ok) {
@@ -970,16 +931,9 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (!AdminAuth.isAuthenticated()) return;
 
     try {
-      const response = await fetch(
+      const response = await apiPut(
         `/api/projects/${this.currentProjectId}/milestones/${milestoneId}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({ is_completed: isCompleted })
-        }
+        { is_completed: isCompleted }
       );
 
       if (response.ok) {
@@ -1000,12 +954,8 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (!AdminAuth.isAuthenticated()) return;
 
     try {
-      const response = await fetch(
-        `/api/projects/${this.currentProjectId}/milestones/${milestoneId}`,
-        {
-          method: 'DELETE',
-          credentials: 'include'
-        }
+      const response = await apiDelete(
+        `/api/projects/${this.currentProjectId}/milestones/${milestoneId}`
       );
 
       if (response.ok) {
@@ -1035,9 +985,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
 
     try {
-      const response = await fetch(`/api/invoices/project/${projectId}`, {
-        credentials: 'include'
-      });
+      const response = await apiFetch(`/api/invoices/project/${projectId}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -1133,26 +1081,19 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (!AdminAuth.isAuthenticated()) return;
 
     try {
-      const response = await fetch('/api/invoices', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          projectId: this.currentProjectId,
-          clientId,
-          lineItems: [
-            {
-              description,
-              quantity: 1,
-              rate: amount,
-              amount
-            }
-          ],
-          notes: '',
-          terms: 'Payment due within 30 days'
-        })
+      const response = await apiPost('/api/invoices', {
+        projectId: this.currentProjectId,
+        clientId,
+        lineItems: [
+          {
+            description,
+            quantity: 1,
+            rate: amount,
+            amount
+          }
+        ],
+        notes: '',
+        terms: 'Payment due within 30 days'
       });
 
       if (response.ok) {
@@ -1175,10 +1116,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (!AdminAuth.isAuthenticated()) return;
 
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}/send`, {
-        method: 'POST',
-        credentials: 'include'
-      });
+      const response = await apiPost(`/api/invoices/${invoiceId}/send`);
 
       if (response.ok) {
         alert('Invoice sent successfully!');
@@ -1265,9 +1203,8 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
 
     try {
-      const response = await fetch(`/api/projects/${this.currentProjectId}/files`, {
+      const response = await apiFetch(`/api/projects/${this.currentProjectId}/files`, {
         method: 'POST',
-        credentials: 'include',
         body: formData
       });
 

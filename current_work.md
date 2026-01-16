@@ -16,11 +16,19 @@
 - Removed duplicate `.visually-hidden` from `main.css`, `client-portal/components.css`, `admin/auth.css`
 - Updated all HTML/TS to use `.sr-only` (WCAG 2.x compliant)
 
-**API Client Migration (partial):**
+**API Client Migration (COMPLETE):**
 
-- Migrated `admin-clients.ts` to use `apiFetch`, `apiPost`, `apiPut`, `apiDelete`
-- Started migration of `admin-projects.ts`
-- Remaining: `admin-dashboard.ts`, `admin-project-details.ts`, `admin-messaging.ts`
+All admin feature files now use centralized `api-client.ts` utilities instead of raw `fetch()`:
+
+- `admin-auth.ts` - 2 calls migrated (login, logout)
+- `admin-dashboard.ts` - 10 calls migrated
+- `admin-project-details.ts` - 14 calls migrated
+- `admin-projects.ts` - 8 calls migrated
+- `admin-clients.ts` - 8 calls migrated
+- `admin-messaging.ts` - 4 calls migrated
+- `admin-system-status.ts` - 2 calls migrated
+
+Benefits: Centralized token expiration handling, automatic session management, consistent error handling.
 
 **Files Modified:**
 
@@ -29,7 +37,8 @@
 - `src/styles/components/nav-base.css` - Removed duplicate `.sr-only`
 - `src/styles/client-portal/components.css` - Removed `.visually-hidden`
 - `src/styles/admin/auth.css` - Removed `.visually-hidden`
-- `src/features/admin/modules/admin-clients.ts` - Uses api-client utilities
+- `src/features/admin/modules/*.ts` - All use api-client utilities
+- `src/features/admin/*.ts` - All use api-client utilities
 - `index.html`, `admin/index.html`, `client-portal.ts` - Updated to use `.sr-only`
 
 ---

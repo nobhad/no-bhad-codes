@@ -8,6 +8,7 @@
  */
 
 import { AdminSecurity } from './admin-security';
+import { apiPost } from '../../utils/api-client';
 
 /**
  * Admin authentication and session management using JWT backend
@@ -28,13 +29,7 @@ export class AdminAuth {
 
       // Try backend authentication first
       try {
-        const response = await fetch(`${this.API_BASE}/admin/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ password: inputKey })
-        });
+        const response = await apiPost(`${this.API_BASE}/admin/login`, { password: inputKey });
 
         if (response.ok) {
           const data = await response.json();
@@ -192,10 +187,7 @@ export class AdminAuth {
 
     // Call server logout to clear HttpOnly cookie
     try {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
+      await apiPost('/api/auth/logout');
     } catch (error) {
       console.warn('[AdminAuth] Server logout failed:', error);
     }

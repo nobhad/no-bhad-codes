@@ -15,7 +15,7 @@ import type { PerformanceMetrics, PerformanceAlert } from '../../services/perfor
 import { SanitizationUtils } from '../../utils/sanitization-utils';
 import type { AdminDashboardContext } from './admin-types';
 import { getChartColor, getChartColorWithAlpha } from '../../config/constants';
-import { configureApiClient } from '../../utils/api-client';
+import { configureApiClient, apiFetch, apiPost, apiPut } from '../../utils/api-client';
 
 // Dynamic module loaders for code splitting
 import {
@@ -215,9 +215,7 @@ class AdminDashboard {
 
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
-        const response = await fetch('/api/admin/leads', {
-          credentials: 'include'
-        });
+        const response = await apiFetch('/api/admin/leads');
 
         // 503 = backend starting up, retry
         if (response.status === 503) {
@@ -281,12 +279,7 @@ class AdminDashboard {
         if (btnLoading) btnLoading.style.display = 'inline';
 
         try {
-          const response = await fetch('/api/auth/admin/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ password })
-          });
+          const response = await apiPost('/api/auth/admin/login', { password });
 
           if (response.ok) {
             // Reload page to show dashboard
@@ -529,9 +522,7 @@ class AdminDashboard {
 
   private async loadContactSubmissions(): Promise<void> {
     try {
-      const response = await fetch('/api/admin/contact-submissions', {
-        credentials: 'include'
-      });
+      const response = await apiFetch('/api/admin/contact-submissions');
 
       if (response.ok) {
         const data = await response.json();
@@ -628,14 +619,7 @@ class AdminDashboard {
 
   private async updateContactStatus(id: number, status: string): Promise<void> {
     try {
-      const response = await fetch(`/api/admin/contact-submissions/${id}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ status })
-      });
+      const response = await apiPut(`/api/admin/contact-submissions/${id}/status`, { status });
 
       if (response.ok) {
         console.log('[AdminDashboard] Contact status updated');
@@ -658,13 +642,7 @@ class AdminDashboard {
     }
 
     try {
-      const response = await fetch(`/api/admin/leads/${leadId}/invite`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      });
+      const response = await apiPost(`/api/admin/leads/${leadId}/invite`);
 
       const data = await response.json();
 
@@ -781,14 +759,7 @@ class AdminDashboard {
 
   private async updateProjectStatus(id: number, status: string): Promise<void> {
     try {
-      const response = await fetch(`/api/projects/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ status })
-      });
+      const response = await apiPut(`/api/projects/${id}`, { status });
 
       if (response.ok) {
         console.log('[AdminDashboard] Project status updated');
@@ -997,19 +968,14 @@ class AdminDashboard {
 
     try {
       // Backend endpoint: /api/messages/threads/:threadId/messages
-      const response = await fetch(`/api/messages/threads/${threadId}/messages`, {
-        credentials: 'include'
-      });
+      const response = await apiFetch(`/api/messages/threads/${threadId}/messages`);
 
       if (response.ok) {
         const data = await response.json();
         this.renderMessages(data.messages || []);
 
         // Mark messages as read
-        await fetch(`/api/messages/threads/${threadId}/read`, {
-          method: 'PUT',
-          credentials: 'include'
-        });
+        await apiPut(`/api/messages/threads/${threadId}/read`);
       } else {
         container.innerHTML =
           '<div style="text-align: center; padding: 2rem; color: #666;">Failed to load messages</div>';
@@ -1096,14 +1062,8 @@ class AdminDashboard {
     input.disabled = true;
 
     try {
-      const response = await fetch(`/api/messages/threads/${this.selectedThreadId}/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ message }) // Backend expects 'message' field
-      });
+      // Backend expects 'message' field
+      const response = await apiPost(`/api/messages/threads/${this.selectedThreadId}/messages`, { message });
 
       if (response.ok) {
         // Reload messages
@@ -1741,9 +1701,7 @@ class AdminDashboard {
    */
   private async updateSidebarBadges(): Promise<void> {
     try {
-      const response = await fetch('/api/admin/sidebar-counts', {
-        credentials: 'include'
-      });
+      const response = await apiFetch('/api/admin/sidebar-counts');
 
       if (!response.ok) return;
 

@@ -10,6 +10,7 @@
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import type { Message, AdminDashboardContext } from '../admin-types';
+import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
 
 let selectedClientId: number | null = null;
 let selectedThreadId: number | null = null;
@@ -196,15 +197,10 @@ function setupCustomDropdown(
         if (threadIdStr === 'new') {
           // Create a new thread for this client
           try {
-            const response = await fetch('/api/messages/threads', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({
-                client_id: clientId,
-                subject: `Conversation with ${clientName}`,
-                thread_type: 'general'
-              })
+            const response = await apiPost('/api/messages/threads', {
+              client_id: clientId,
+              subject: `Conversation with ${clientName}`,
+              thread_type: 'general'
             });
 
             if (response.ok) {
@@ -287,19 +283,14 @@ export async function loadThreadMessages(
     '<div style="text-align: center; padding: 2rem;">Loading messages...</div>';
 
   try {
-    const response = await fetch(`/api/messages/threads/${threadId}/messages`, {
-      credentials: 'include'
-    });
+    const response = await apiFetch(`/api/messages/threads/${threadId}/messages`);
 
     if (response.ok) {
       const data = await response.json();
       renderMessages(data.messages || [], container);
 
       // Mark messages as read
-      await fetch(`/api/messages/threads/${threadId}/read`, {
-        method: 'PUT',
-        credentials: 'include'
-      });
+      await apiPut(`/api/messages/threads/${threadId}/read`);
     } else {
       container.innerHTML =
         '<div style="text-align: center; padding: 2rem; color: #666;">Failed to load messages</div>';
@@ -378,12 +369,7 @@ export async function sendMessage(ctx: AdminDashboardContext): Promise<void> {
   input.disabled = true;
 
   try {
-    const response = await fetch(`/api/messages/threads/${selectedThreadId}/messages`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ message })
-    });
+    const response = await apiPost(`/api/messages/threads/${selectedThreadId}/messages`, { message });
 
     if (response.ok) {
       loadThreadMessages(selectedThreadId, ctx);

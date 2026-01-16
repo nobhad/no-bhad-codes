@@ -75,7 +75,9 @@
      PageTransitionModule controls visibility with opacity/transforms
      ========================================== */
 
-  /* Intro/Business card section - centered card */
+  /* Intro/Business card section - card centered in viewport
+   * Mobile card: 380px × 213px
+   * Nav calculation: 50% + (213px / 2) + 0.75rem ≈ 50% + 118.5px */
   .business-card-section {
     display: grid;
     place-items: center;
@@ -99,11 +101,10 @@
     justify-self: center;
   }
 
-  /* Intro nav positioned absolutely below centered card (like desktop) */
-  /* Card height on mobile is ~209px (380px width / 1.816 aspect ratio) */
+  /* Intro nav positioned absolutely below centered card */
   .business-card-section .intro-nav {
     position: absolute;
-    top: calc(50% + 105px + 0.75rem);
+    top: calc(50% + 213px / 2 + 0.75rem);
     left: 50%;
     transform: translateX(-50%);
   }
@@ -379,8 +380,9 @@
     max-width: 98vw;
   }
 
-  /* Intro nav position for smaller card (315px width, ~173px height) */
+  /* Small mobile card: 315px × 177px
+   * Nav calculation: 50% + (177px / 2) + 0.5rem */
   .business-card-section .intro-nav {
-    top: calc(50% + 87px + 0.5rem);
+    top: calc(50% + 177px / 2 + 0.5rem);
   }
 }
