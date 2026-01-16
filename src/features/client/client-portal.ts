@@ -177,11 +177,11 @@ export class ClientPortalModule extends BaseModule {
 
   private setupDashboardEventListeners(): void {
     if (this.dashboardListenersSetup) {
-      console.log('Dashboard event listeners already set up, skipping...');
+      this.log('Dashboard event listeners already set up, skipping...');
       return;
     }
 
-    console.log('Setting up dashboard event listeners...');
+    this.log('Setting up dashboard event listeners...');
 
     // Sidebar toggle (desktop)
     const sidebarToggle = document.getElementById('sidebar-toggle');
@@ -212,7 +212,7 @@ export class ClientPortalModule extends BaseModule {
     // Sidebar buttons with data-tab attribute
     const sidebarButtons = document.querySelectorAll('.sidebar-buttons .btn[data-tab]');
     if (sidebarButtons.length > 0) {
-      console.log(`Found ${sidebarButtons.length} sidebar buttons with data-tab`);
+      this.log(`Found ${sidebarButtons.length} sidebar buttons with data-tab`);
       sidebarButtons.forEach((btn) => {
         btn.addEventListener('click', (e) => {
           e.preventDefault();
@@ -234,7 +234,7 @@ export class ClientPortalModule extends BaseModule {
     // Clickable stat cards
     const statCards = document.querySelectorAll('.stat-card-clickable[data-tab]');
     if (statCards.length > 0) {
-      console.log(`Found ${statCards.length} clickable stat cards`);
+      this.log(`Found ${statCards.length} clickable stat cards`);
       statCards.forEach((card) => {
         card.addEventListener('click', (e) => {
           e.preventDefault();
@@ -342,7 +342,7 @@ export class ClientPortalModule extends BaseModule {
     // Setup settings form handlers
     this.setupSettingsFormHandlers();
 
-    console.log('Dashboard event listeners setup complete');
+    this.log('Dashboard event listeners setup complete');
     this.dashboardListenersSetup = true;
   }
 
@@ -1130,7 +1130,7 @@ export class ClientPortalModule extends BaseModule {
           // Show admin buttons
           const adminButtons = document.querySelectorAll('.btn-admin');
           adminButtons.forEach((btn) => btn.classList.remove('hidden'));
-          console.log('[ClientPortal] Admin features enabled');
+          this.log('[ClientPortal] Admin features enabled');
         }
       }
 
@@ -1141,7 +1141,7 @@ export class ClientPortalModule extends BaseModule {
         if (payload && isAdminPayload(payload)) {
           const adminButtons = document.querySelectorAll('.btn-admin');
           adminButtons.forEach((btn) => btn.classList.remove('hidden'));
-          console.log('[ClientPortal] Admin features enabled (from token)');
+          this.log('[ClientPortal] Admin features enabled (from token)');
         }
       }
     } catch (error) {

@@ -9,6 +9,9 @@
 
 import { AdminSecurity } from './admin-security';
 import { apiPost } from '../../utils/api-client';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('AdminAuth');
 import { decodeJwtPayload, isTokenExpired, isAdminPayload } from '../../utils/jwt-utils';
 
 /**
@@ -165,13 +168,13 @@ export class AdminAuth {
    * Logout and clear all auth data
    */
   static async logout(): Promise<void> {
-    console.log('[AdminAuth] Logout called - clearing ALL session data');
+    logger.log('Logout called - clearing ALL session data');
 
     // Call server logout to clear HttpOnly cookie
     try {
       await apiPost('/api/auth/logout');
     } catch (error) {
-      console.warn('[AdminAuth] Server logout failed:', error);
+      logger.warn('Server logout failed:', error);
     }
 
     // Clear all sessionStorage (ensures nothing is missed)
@@ -180,7 +183,7 @@ export class AdminAuth {
     localStorage.removeItem('adminAuth');
     localStorage.removeItem('admin_token');
     localStorage.removeItem('client_auth_token');
-    console.log('[AdminAuth] All storage cleared, navigating to login');
+    logger.log('All storage cleared, navigating to login');
     // Navigate to /admin instead of reload to ensure fresh state
     window.location.href = '/admin';
   }
