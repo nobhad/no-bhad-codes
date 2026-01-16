@@ -76,29 +76,23 @@
      ========================================== */
 
   /* Intro/Business card section - card centered in viewport
+   * Inherits position: absolute from section rule for virtual pages
    * Mobile card: 380px × 213px
    * Nav calculation: 50% + (213px / 2) + 0.75rem ≈ 50% + 118.5px */
   .business-card-section {
+    /* Reset flex from base layout.css */
+    flex: 0 0 auto;
     display: grid;
     place-items: center;
-    align-content: center;
-    justify-content: center;
     padding: 0;
     margin: 0;
     overflow: visible;
-    position: relative;
+    /* position: absolute inherited from section rule - needed for virtual pages */
   }
 
   /* Ensure business card section stays on top during exit animation */
   .business-card-section.page-active {
     z-index: 50;
-  }
-
-  /* Card container centered in viewport */
-  .business-card-section .business-card-container {
-    margin: 0 auto;
-    align-self: center;
-    justify-self: center;
   }
 
   /* Intro nav positioned absolutely below centered card */

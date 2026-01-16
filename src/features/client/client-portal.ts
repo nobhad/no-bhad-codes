@@ -23,6 +23,7 @@ import {
   loadProjectsModule,
   loadAuthModule
 } from './modules';
+import { decodeJwtPayload, isAdminPayload } from '../../utils/jwt-utils';
 
 export class ClientPortalModule extends BaseModule {
   private isLoggedIn = false;
@@ -1136,15 +1137,11 @@ export class ClientPortalModule extends BaseModule {
       // Also check JWT token for admin flag
       const token = sessionStorage.getItem('client_auth_token');
       if (token) {
-        try {
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          if (payload.isAdmin || payload.type === 'admin') {
-            const adminButtons = document.querySelectorAll('.btn-admin');
-            adminButtons.forEach((btn) => btn.classList.remove('hidden'));
-            console.log('[ClientPortal] Admin features enabled (from token)');
-          }
-        } catch {
-          // Invalid token format, ignore
+        const payload = decodeJwtPayload(token);
+        if (payload && isAdminPayload(payload)) {
+          const adminButtons = document.querySelectorAll('.btn-admin');
+          adminButtons.forEach((btn) => btn.classList.remove('hidden'));
+          console.log('[ClientPortal] Admin features enabled (from token)');
         }
       }
     } catch (error) {

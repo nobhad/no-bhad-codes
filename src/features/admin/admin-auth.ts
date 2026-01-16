@@ -9,6 +9,7 @@
 
 import { AdminSecurity } from './admin-security';
 import { apiPost } from '../../utils/api-client';
+import { decodeJwtPayload, isTokenExpired, isAdminPayload } from '../../utils/jwt-utils';
 
 /**
  * Admin authentication and session management using JWT backend
@@ -100,37 +101,22 @@ export class AdminAuth {
       // Check for admin JWT token first
       const token = sessionStorage.getItem(this.TOKEN_KEY);
       if (token) {
-        // Validate token hasn't expired (basic check)
-        try {
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          if (payload.exp && payload.exp * 1000 > Date.now()) {
-            return true;
-          }
-          // Token expired, clean up
-          this.logout();
-          return false;
-        } catch {
-          // Invalid token format
-          this.logout();
-          return false;
+        // Validate token hasn't expired
+        if (!isTokenExpired(token)) {
+          return true;
         }
+        // Token expired, clean up
+        this.logout();
+        return false;
       }
 
       // Also check for client portal auth token (for admin users logged in via client portal)
       const clientToken = sessionStorage.getItem('client_auth_token');
       if (clientToken) {
-        try {
-          const payload = JSON.parse(atob(clientToken.split('.')[1]));
-          // Check if user is admin and token not expired
-          if (
-            (payload.isAdmin || payload.type === 'admin') &&
-            payload.exp &&
-            payload.exp * 1000 > Date.now()
-          ) {
-            return true;
-          }
-        } catch {
-          // Invalid token format, continue to other checks
+        const payload = decodeJwtPayload(clientToken);
+        // Check if user is admin and token not expired
+        if (payload && isAdminPayload(payload) && !isTokenExpired(clientToken)) {
+          return true;
         }
       }
 
@@ -165,14 +151,10 @@ export class AdminAuth {
     // Also check for client portal token (admin users use this)
     const clientToken = sessionStorage.getItem('client_auth_token');
     if (clientToken) {
-      try {
-        const payload = JSON.parse(atob(clientToken.split('.')[1]));
-        // Only return if this is an admin user
-        if (payload.isAdmin || payload.type === 'admin') {
-          return clientToken;
-        }
-      } catch {
-        // Invalid token format
+      const payload = decodeJwtPayload(clientToken);
+      // Only return if this is an admin user
+      if (payload && isAdminPayload(payload)) {
+        return clientToken;
       }
     }
 

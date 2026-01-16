@@ -8,6 +8,8 @@
  * Handles login, logout, session validation, and admin features.
  */
 
+import { decodeJwtPayload, isAdminPayload } from '../../../utils/jwt-utils';
+
 /** API base URL for authentication */
 const AUTH_API_BASE = '/api/auth';
 
@@ -227,14 +229,10 @@ export function setupAdminFeatures(): void {
     // Also check JWT token for admin flag
     const token = sessionStorage.getItem('client_auth_token');
     if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.isAdmin || payload.type === 'admin') {
-          showAdminButtons();
-          console.log('[ClientPortal] Admin features enabled (from token)');
-        }
-      } catch {
-        // Invalid token format, ignore
+      const payload = decodeJwtPayload(token);
+      if (payload && isAdminPayload(payload)) {
+        showAdminButtons();
+        console.log('[ClientPortal] Admin features enabled (from token)');
       }
     }
   } catch (error) {

@@ -23,11 +23,15 @@
    * Card dimensions: 525px × 294.19px
    * Nav calculation: 50% + (294.19px / 2) + 1rem = 50% + 147.1px + 16px ≈ 50% + 163px */
   .business-card-section {
+    /* Reset flex from base layout.css - needed for explicit height to work */
+    flex: 0 0 auto;
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     height: calc(100vh - var(--header-height) - var(--footer-height));
     display: grid;
+    /* place-content centers grid tracks in container, place-items centers items in cells */
+    place-content: center;
     place-items: center;
-    padding: 1rem;
+    padding: 0;
     box-sizing: border-box;
     width: 100%;
     position: relative;
