@@ -852,12 +852,17 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   private updateProgressBar(progress: number): void {
     const progressPercent = document.getElementById('pd-progress-percent');
     const progressBar = document.getElementById('pd-progress-bar');
+    const progressBarContainer = document.getElementById('pd-progress-bar-container');
 
     if (progressPercent) {
       progressPercent.textContent = `${progress}%`;
     }
     if (progressBar) {
       progressBar.style.width = `${progress}%`;
+    }
+    // Update aria-valuenow for screen readers
+    if (progressBarContainer) {
+      progressBarContainer.setAttribute('aria-valuenow', progress.toString());
     }
 
     // Save progress to database
