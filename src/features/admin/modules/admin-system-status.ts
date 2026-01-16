@@ -11,6 +11,7 @@
 
 import type { AdminDashboardContext, ApplicationStatus, StatusItem } from '../admin-types';
 import { APP_CONSTANTS } from '../../../config/constants';
+import { apiFetch } from '../../../utils/api-client';
 
 /**
  * Load system status data for admin dashboard
@@ -117,7 +118,7 @@ async function checkApiHealth(): Promise<StatusItem> {
 
   try {
     const startTime = Date.now();
-    const response = await fetch('/api/health', {
+    const response = await apiFetch('/api/health', {
       method: 'GET',
       signal: controller.signal
     });
@@ -143,7 +144,7 @@ async function checkApiHealth(): Promise<StatusItem> {
     const rootTimeoutId = setTimeout(() => rootController.abort(), APP_CONSTANTS.TIMERS.API_REQUEST_TIMEOUT);
 
     try {
-      const response = await fetch('/api', {
+      const response = await apiFetch('/api', {
         method: 'GET',
         signal: rootController.signal
       });
