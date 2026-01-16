@@ -64,6 +64,10 @@ admin/index.html          # Dashboard HTML entry point
 src/styles/pages/admin.css # Dashboard styles
 ```
 
+## Related Documentation
+
+- [Admin Dashboard Feature](../../../docs/features/ADMIN_DASHBOARD.md) - Complete admin dashboard documentation
+
 ### Integration Points
 - **NBW_DEBUG Global:** Integrates with main app debug utilities
 - **Performance Service:** Real Core Web Vitals data

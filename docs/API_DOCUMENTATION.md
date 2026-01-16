@@ -319,7 +319,138 @@ Invite a lead to create a client portal account.
 
 ## Client Management Endpoints
 
-### GET `/clients`
+### Client Settings API
+
+#### GET `/clients/me`
+Get current authenticated client's profile.
+
+**Authentication:** Required (Client only)
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "client": {
+    "id": 5,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "company": "Acme Corp",
+    "phone": "+1 555-0123",
+    "notification_messages": 1,
+    "notification_status": 1,
+    "notification_invoices": 1,
+    "notification_weekly": 0,
+    "billing_company": "Acme Corp",
+    "billing_address": "123 Main St",
+    "billing_city": "New York",
+    "billing_state": "NY",
+    "billing_zip": "10001",
+    "billing_country": "USA"
+  }
+}
+```
+
+#### PUT `/clients/me`
+Update current client's profile information.
+
+**Authentication:** Required (Client only)
+
+**Request Body:**
+```json
+{
+  "name": "John Doe",
+  "company": "Acme Corp",
+  "phone": "+1 555-0123"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Profile updated successfully"
+}
+```
+
+#### PUT `/clients/me/password`
+Change client's password.
+
+**Authentication:** Required (Client only)
+
+**Request Body:**
+```json
+{
+  "currentPassword": "oldPassword123",
+  "newPassword": "newSecurePassword456"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Password changed successfully"
+}
+```
+
+**Error (400 Bad Request):**
+```json
+{
+  "error": "Current password is incorrect"
+}
+```
+
+#### PUT `/clients/me/notifications`
+Update notification preferences.
+
+**Authentication:** Required (Client only)
+
+**Request Body:**
+```json
+{
+  "messages": true,
+  "status": true,
+  "invoices": true,
+  "weekly": false
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Notification preferences updated"
+}
+```
+
+#### PUT `/clients/me/billing`
+Update billing information.
+
+**Authentication:** Required (Client only)
+
+**Request Body:**
+```json
+{
+  "company": "Acme Corp",
+  "address": "123 Main St",
+  "city": "New York",
+  "state": "NY",
+  "zip": "10001",
+  "country": "USA"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Billing information updated"
+}
+```
+
+### Admin Client Management
+
+#### GET `/clients`
 Retrieve all clients (admin only).
 
 **Headers:** `Authorization: Bearer <admin-token>`

@@ -744,5 +744,4 @@ a:hover {
 | Analysis | Location |
 |----------|----------|
 | Sal Costa Deep Dive | `docs/design/salcosta/SALCOSTA_DESIGN_ANALYSIS.md` |
-| Christina Kosik Deep Dive | `docs/design/CHRISTINA_KOSIK_DESIGN_ANALYSIS.md` |
 | This Document | `docs/design/PORTFOLIO_DESIGN_PATTERNS.md` |

@@ -32,11 +32,6 @@ const templates = [
     data: 'admin',
   },
   {
-    input: resolve(projectRoot, 'client/landing.html'),
-    output: resolve(projectRoot, 'dist-temp/client/landing.html'),
-    data: 'clientLanding',
-  },
-  {
     input: resolve(projectRoot, 'client/intake.html'),
     output: resolve(projectRoot, 'dist-temp/client/intake.html'),
     data: 'clientIntake',
@@ -44,11 +39,6 @@ const templates = [
   {
     input: resolve(projectRoot, 'client/portal.html'),
     output: resolve(projectRoot, 'dist-temp/client/portal.html'),
-    data: 'clientPortal',
-  },
-  {
-    input: resolve(projectRoot, 'client-portal/index.html'),
-    output: resolve(projectRoot, 'dist-temp/client-portal/index.html'),
     data: 'clientPortal',
   },
 ];
