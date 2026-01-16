@@ -18,7 +18,7 @@ const STATIC_ASSETS = [
   '/images/coyote_paw.svg',
   '/images/avatar.svg',
   '/favicon.ico',
-  '/manifest.json'
+  '/site.webmanifest'
 ];
 
 // Install event - cache static assets
