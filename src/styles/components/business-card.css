@@ -19,7 +19,9 @@
    ========================================== */
 
 @media (--tablet) {
-  /* Business card section - full viewport height, card centered (ignoring nav height) */
+  /* Business card section - card centered in viewport
+   * Card dimensions: 525px × 294.19px
+   * Nav calculation: 50% + (294.19px / 2) + 1rem = 50% + 147.1px + 16px ≈ 50% + 163px */
   .business-card-section {
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     height: calc(100vh - var(--header-height) - var(--footer-height));

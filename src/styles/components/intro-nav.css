@@ -16,9 +16,8 @@
   justify-content: space-between;
   width: 525px;
   max-width: 525px;
-  /* margin-top handled by grid gap on desktop, explicit on mobile */
-  margin-top: 0;
-  padding: 1.5rem;
+  margin-top: 1rem;
+  padding: 1.5rem 1.5rem;
   box-sizing: border-box;
   /* Initial state - GSAP handles animation */
   opacity: 0;

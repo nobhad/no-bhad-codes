@@ -693,9 +693,7 @@ export async function loadProjectMessages(
   if (!container) return;
 
   try {
-    const response = await fetch(`/api/projects/${projectId}/messages`, {
-      credentials: 'include'
-    });
+    const response = await apiFetch(`/api/projects/${projectId}/messages`);
 
     if (response.ok) {
       const data = await response.json();
@@ -744,9 +742,7 @@ export async function loadProjectFiles(
   if (!container) return;
 
   try {
-    const response = await fetch(`/api/projects/${projectId}/files`, {
-      credentials: 'include'
-    });
+    const response = await apiFetch(`/api/projects/${projectId}/files`);
 
     if (response.ok) {
       const data = await response.json();
@@ -809,9 +805,7 @@ export async function loadProjectMilestones(
   if (!container) return;
 
   try {
-    const response = await fetch(`/api/projects/${projectId}/milestones`, {
-      credentials: 'include'
-    });
+    const response = await apiFetch(`/api/projects/${projectId}/milestones`);
 
     if (response.ok) {
       const data = await response.json();
@@ -905,14 +899,7 @@ export async function toggleMilestone(
   if (!currentProjectId) return;
 
   try {
-    const response = await fetch(`/api/projects/${currentProjectId}/milestones/${milestoneId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify({ is_completed: isCompleted })
-    });
+    const response = await apiPut(`/api/projects/${currentProjectId}/milestones/${milestoneId}`, { is_completed: isCompleted });
 
     if (response.ok) {
       ctx.showNotification('Milestone updated', 'success');
@@ -935,9 +922,7 @@ export async function loadProjectInvoices(
   if (!container) return;
 
   try {
-    const response = await fetch(`/api/invoices/project/${projectId}`, {
-      credentials: 'include'
-    });
+    const response = await apiFetch(`/api/invoices/project/${projectId}`);
 
     if (response.ok) {
       const data = await response.json();
@@ -1059,26 +1044,19 @@ async function createInvoice(
   if (!currentProjectId || !storedContext) return;
 
   try {
-    const response = await fetch('/api/invoices', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify({
-        projectId: currentProjectId,
-        clientId,
-        lineItems: [
-          {
-            description,
-            quantity: 1,
-            rate: amount,
-            amount
-          }
-        ],
-        notes: '',
-        terms: 'Payment due within 30 days'
-      })
+    const response = await apiPost('/api/invoices', {
+      projectId: currentProjectId,
+      clientId,
+      lineItems: [
+        {
+          description,
+          quantity: 1,
+          rate: amount,
+          amount
+        }
+      ],
+      notes: '',
+      terms: 'Payment due within 30 days'
     });
 
     if (response.ok) {
@@ -1125,17 +1103,10 @@ async function addMilestone(
   if (!currentProjectId || !storedContext) return;
 
   try {
-    const response = await fetch(`/api/projects/${currentProjectId}/milestones`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify({
-        title,
-        description,
-        due_date: dueDate
-      })
+    const response = await apiPost(`/api/projects/${currentProjectId}/milestones`, {
+      title,
+      description,
+      due_date: dueDate
     });
 
     if (response.ok) {
@@ -1166,14 +1137,7 @@ async function sendProjectMessage(): Promise<void> {
   const message = messageInput.value.trim();
 
   try {
-    const response = await fetch(`/api/projects/${currentProjectId}/messages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify({ message })
-    });
+    const response = await apiPost(`/api/projects/${currentProjectId}/messages`, { message });
 
     if (response.ok) {
       messageInput.value = '';
@@ -1274,9 +1238,8 @@ async function uploadProjectFiles(files: File[]): Promise<void> {
     });
     formData.append('projectId', String(currentProjectId));
 
-    const response = await fetch('/api/uploads/multiple', {
+    const response = await apiFetch('/api/uploads/multiple', {
       method: 'POST',
-      credentials: 'include',
       body: formData
     });
 
