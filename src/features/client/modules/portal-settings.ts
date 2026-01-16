@@ -215,7 +215,6 @@ export function loadNotificationSettings(): void {
 
 async function saveContactInfo(formData: FormData, ctx: ClientPortalContext): Promise<void> {
   const data = Object.fromEntries(formData);
-  console.log('Saving contact info:', data);
 
   sessionStorage.setItem('client_contact_info', JSON.stringify(data));
   ctx.showNotification('Contact information saved successfully!', 'success');
@@ -223,7 +222,6 @@ async function saveContactInfo(formData: FormData, ctx: ClientPortalContext): Pr
 
 async function saveBillingAddress(formData: FormData, ctx: ClientPortalContext): Promise<void> {
   const data = Object.fromEntries(formData);
-  console.log('Saving billing address:', data);
 
   sessionStorage.setItem('client_billing_address', JSON.stringify(data));
   ctx.showNotification('Billing address saved successfully!', 'success');
@@ -238,15 +236,12 @@ async function saveNotificationPrefs(formData: FormData, ctx: ClientPortalContex
     milestones: checkboxes.includes('milestones')
   };
 
-  console.log('Saving notification preferences:', prefs);
-
   sessionStorage.setItem('client_notification_prefs', JSON.stringify(prefs));
   ctx.showNotification('Notification preferences saved successfully!', 'success');
 }
 
 async function saveBillingViewAddress(formData: FormData, ctx: ClientPortalContext): Promise<void> {
   const data = Object.fromEntries(formData);
-  console.log('Saving billing view address:', data);
 
   sessionStorage.setItem('client_billing_view_address', JSON.stringify(data));
   ctx.showNotification('Billing address updated successfully!', 'success');
@@ -254,7 +249,6 @@ async function saveBillingViewAddress(formData: FormData, ctx: ClientPortalConte
 
 async function saveTaxInfo(formData: FormData, ctx: ClientPortalContext): Promise<void> {
   const data = Object.fromEntries(formData);
-  console.log('Saving tax info:', data);
 
   sessionStorage.setItem('client_tax_info', JSON.stringify(data));
   ctx.showNotification('Tax information saved successfully!', 'success');

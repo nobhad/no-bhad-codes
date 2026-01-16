@@ -222,7 +222,7 @@ async function deleteFile(
       }
     }
 
-    console.log(`File ${filename} deleted successfully`);
+    // File deleted successfully
   } catch (error) {
     console.error('Error deleting file:', error);
     alert(error instanceof Error ? error.message : 'Failed to delete file. Please try again.');

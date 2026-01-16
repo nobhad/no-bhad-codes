@@ -61,8 +61,6 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
   // Store context for global functions (activate from details panel)
   setLeadsContext(ctx);
 
-  console.log('[AdminLeads] Loading leads...');
-
   // Initialize filter UI once
   if (!filterUIInitialized) {
     initializeFilterUI(ctx);
@@ -72,14 +70,8 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
   try {
     const response = await apiFetch('/api/admin/leads');
 
-    console.log('[AdminLeads] Response status:', response.status);
-
     if (response.ok) {
       const data: LeadsData = await response.json();
-      console.log('[AdminLeads] Received data:', {
-        leadsCount: data.leads?.length || 0,
-        stats: data.stats
-      });
       leadsData = data.leads || [];
       updateLeadsDisplay(data, ctx);
     } else if (response.status !== 401) {
@@ -179,7 +171,6 @@ function updateLeadsDisplay(data: LeadsData, ctx: AdminDashboardContext): void {
       recentList.querySelectorAll('li[data-lead-id]').forEach((li) => {
         li.addEventListener('click', () => {
           const leadId = parseInt((li as HTMLElement).dataset.leadId || '0');
-          console.log('[AdminLeads] Recent lead clicked, id:', leadId);
           if (leadId) showLeadDetails(leadId);
         });
       });

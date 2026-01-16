@@ -82,18 +82,11 @@ export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
     filterUIInitialized = true;
   }
 
-  console.log('[AdminClients] Loading clients...');
-
   try {
     const response = await apiFetch('/api/clients');
 
-    console.log('[AdminClients] Response status:', response.status);
-
     if (response.ok) {
       const data = await response.json();
-      console.log('[AdminClients] Received data:', {
-        clientsCount: data.clients?.length || 0
-      });
       clientsData = data.clients || [];
 
       // Calculate stats
@@ -263,7 +256,6 @@ export function showClientDetails(clientId: number, ctx?: AdminDashboardContext)
     return;
   }
 
-  console.log('[AdminClients] Showing details for client:', clientId, client);
 
   currentClientId = clientId;
 
