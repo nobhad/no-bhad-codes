@@ -21,12 +21,25 @@ vi.mock('nodemailer', () => ({
 describe('Email Service', () => {
   let mockTransporter: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockTransporter = {
       sendMail: vi.fn(),
     };
 
     vi.mocked(nodemailer.createTransport).mockReturnValue(mockTransporter as any);
+    
+    // Initialize email service with transporter
+    await emailService.init({
+      host: 'smtp.test.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: 'test@example.com',
+        pass: 'password',
+      },
+      from: 'test@example.com',
+    });
+    
     vi.clearAllMocks();
   });
 
