@@ -123,20 +123,8 @@ select::-ms-expand {
   box-shadow: 0 0 0 2px rgba(var(--color-brand-primary-rgb), 0.25);
 }
 
-/* Form field focus indicators for keyboard navigation */
-.form-input:focus-visible,
-.form-textarea:focus-visible,
-.form-select:focus-visible,
-.form-container input:not([type="submit"]):focus-visible,
-.login-form input:not([type="submit"]):focus-visible,
-.form-container textarea:focus-visible,
-.login-form textarea:focus-visible,
-.form-container select:focus-visible,
-.login-form select:focus-visible {
-  outline: 2px solid var(--color-primary, var(--color-brand-primary));
-  outline-offset: 2px;
-  border-color: var(--color-primary);
-}
+/* Focus indicators inherited from global :focus-visible rule in reset.css */
+/* Border color change on focus is handled above via :focus */
 
 /* ============================================
  * FORM CONTAINER SYSTEM
