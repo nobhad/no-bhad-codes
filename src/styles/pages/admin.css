@@ -332,9 +332,10 @@ body[data-page="admin"] #tab-analytics .stat-card {
 body[data-page="admin"] input,
 body[data-page="admin"] textarea,
 body[data-page="admin"] select,
-body[data-page="admin"] .form-input {
+body[data-page="admin"] .form-input,
+body[data-page="admin"] .form-textarea {
   font-weight: 400;
-  background: var(--portal-bg-medium);
+  background: var(--portal-bg-dark);
   color: var(--portal-text-light);
   border: none;
   border-radius: var(--border-radius-sm);
@@ -1752,44 +1753,36 @@ body.modal-open .dashboard-content {
 
 /* Mobile - reduce padding on system page to prevent badge overflow */
 @media (max-width: 480px) {
+  /* Cards fill available width evenly */
   [data-page="admin"] #tab-system .portal-project-card {
     padding: 0.75rem;
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  /* Stack status items - badge on new row for mobile */
+  /* Status items - single row on mobile */
   [data-page="admin"] #tab-system .status-item {
     background: transparent;
     padding: 0.5rem 0;
     border: none;
     border-radius: 0;
     box-shadow: none;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    grid-template-rows: auto auto;
-    gap: 0.25rem 0.5rem;
+    display: flex;
     align-items: center;
+    gap: 0.5rem;
   }
 
-  /* Icon stays in first column */
-  [data-page="admin"] #tab-system .status-icon {
-    grid-row: 1;
-    grid-column: 1;
-  }
-
-  /* Name in second column, full width */
   [data-page="admin"] #tab-system .status-name {
-    grid-row: 1;
-    grid-column: 2;
-    white-space: normal;
-    word-break: break-word;
+    flex: 1;
+    min-width: 0;
+    font-size: 0.8rem;
   }
 
-  /* Badge on second row, spans both columns, aligned right */
   [data-page="admin"] #tab-system .status-badge {
-    grid-row: 2;
-    grid-column: 1 / -1;
-    justify-self: end;
+    flex-shrink: 0;
+    width: fit-content;
     font-size: 10px;
+    font-weight: 700;
     padding: 0.25rem 0.5rem;
     white-space: nowrap;
   }
