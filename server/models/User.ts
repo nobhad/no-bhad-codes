@@ -38,8 +38,8 @@ export class User extends BaseModel<UserAttributes> {
       email_verified_at: 'date' as const,
       last_login_at: 'date' as const,
       created_at: 'date' as const,
-      updated_at: 'date' as const,
-    },
+      updated_at: 'date' as const
+    }
   };
 
   // Accessor methods
@@ -189,7 +189,7 @@ export class User extends BaseModel<UserAttributes> {
 
     return {
       valid: errors.length === 0,
-      errors,
+      errors
     };
   }
 

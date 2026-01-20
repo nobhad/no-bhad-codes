@@ -37,14 +37,14 @@ const router = Router();
 const trackingRateLimit = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   maxRequests: 100, // 100 requests per minute per IP
-  message: 'Too many tracking requests',
+  message: 'Too many tracking requests'
 });
 
 // Stricter rate limit for admin endpoints
 const adminRateLimit = rateLimit({
   windowMs: 60 * 1000,
   maxRequests: 30,
-  message: 'Too many requests',
+  message: 'Too many requests'
 });
 
 interface TrackingPayload {
@@ -124,7 +124,7 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
           session.pageViews,
           session.totalTimeOnSite,
           session.bounced ? 1 : 0,
-          session.sessionId,
+          session.sessionId
         ]
       );
     } else {
@@ -151,7 +151,7 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
           ipAddress,
           deviceType,
           browser,
-          os,
+          os
         ]
       );
     }
@@ -170,7 +170,7 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
             event.timestamp / 1000,
             event.timeOnPage || 0,
             event.scrollDepth || 0,
-            event.interactions || 0,
+            event.interactions || 0
           ]
         );
       } else if ('type' in event) {
@@ -184,7 +184,7 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
             event.element,
             event.timestamp / 1000,
             event.url,
-            event.data ? JSON.stringify(event.data) : null,
+            event.data ? JSON.stringify(event.data) : null
           ]
         );
       }
@@ -194,15 +194,15 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
       category: 'analytics',
       metadata: {
         sessionId: session.sessionId,
-        eventCount: events.length,
-      },
+        eventCount: events.length
+      }
     });
 
     res.status(200).json({ success: true });
   } catch (error) {
     logger.error('Failed to process tracking events', {
       category: 'analytics',
-      metadata: { error },
+      metadata: { error }
     });
     res.status(500).json({ error: 'Failed to process tracking events' });
   }
@@ -320,12 +320,12 @@ router.get(
         topReferrers,
         devices,
         browsers,
-        topInteractions,
+        topInteractions
       });
     } catch (error) {
       logger.error('Failed to get analytics summary', {
         category: 'analytics',
-        metadata: { error },
+        metadata: { error }
       });
       res.status(500).json({ error: 'Failed to get analytics summary' });
     }
@@ -377,12 +377,12 @@ router.get(
       res.json({
         activeSessions: sessions.length,
         sessions,
-        recentPages,
+        recentPages
       });
     } catch (error) {
       logger.error('Failed to get realtime analytics', {
         category: 'analytics',
-        metadata: { error },
+        metadata: { error }
       });
       res.status(500).json({ error: 'Failed to get realtime analytics' });
     }
@@ -424,17 +424,17 @@ router.delete(
 
       logger.info('Analytics data cleared', {
         category: 'analytics',
-        metadata: { deletedSessions: result.changes, olderThanDays: days },
+        metadata: { deletedSessions: result.changes, olderThanDays: days }
       });
 
       res.json({
         success: true,
-        deletedSessions: result.changes,
+        deletedSessions: result.changes
       });
     } catch (error) {
       logger.error('Failed to clear analytics data', {
         category: 'analytics',
-        metadata: { error },
+        metadata: { error }
       });
       res.status(500).json({ error: 'Failed to clear analytics data' });
     }
@@ -505,13 +505,13 @@ router.get(
           page: pageNum,
           limit: limitNum,
           total,
-          totalPages: Math.ceil(total / limitNum),
-        },
+          totalPages: Math.ceil(total / limitNum)
+        }
       });
     } catch (error) {
       logger.error('Failed to get sessions list', {
         category: 'analytics',
-        metadata: { error },
+        metadata: { error }
       });
       res.status(500).json({ error: 'Failed to get sessions list' });
     }
@@ -568,12 +568,12 @@ router.get(
       res.json({
         session,
         pageViews,
-        interactions,
+        interactions
       });
     } catch (error) {
       logger.error('Failed to get session details', {
         category: 'analytics',
-        metadata: { error },
+        metadata: { error }
       });
       res.status(500).json({ error: 'Failed to get session details' });
     }
@@ -627,11 +627,11 @@ router.get(
         summary: {
           totalSessions: sessions.length,
           totalPageViews: pageViews.length,
-          totalInteractions: interactions.length,
+          totalInteractions: interactions.length
         },
         sessions,
         pageViews,
-        interactions,
+        interactions
       };
 
       // Set headers for file download
@@ -645,7 +645,7 @@ router.get(
     } catch (error) {
       logger.error('Failed to export analytics data', {
         category: 'analytics',
-        metadata: { error },
+        metadata: { error }
       });
       res.status(500).json({ error: 'Failed to export analytics data' });
     }

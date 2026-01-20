@@ -21,7 +21,7 @@ import {
   TIME_MS,
   RATE_LIMIT_CONFIG,
   COOKIE_CONFIG,
-  validatePassword,
+  validatePassword
 } from '../utils/auth-constants.js';
 import {
   sendSuccess,
@@ -29,7 +29,7 @@ import {
   sendUnauthorized,
   sendServerError,
   sendNotFound,
-  ErrorCodes,
+  ErrorCodes
 } from '../utils/response.js';
 
 const router = express.Router();
@@ -117,7 +117,7 @@ router.post(
     windowMs: RATE_LIMIT_CONFIG.LOGIN.WINDOW_MS,
     maxRequests: RATE_LIMIT_CONFIG.LOGIN.MAX_ATTEMPTS,
     message: 'Too many login attempts. Please try again later.',
-    keyGenerator: (req) => `login:${req.ip}`,
+    keyGenerator: (req) => `login:${req.ip}`
   }),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { email, password } = req.body;
@@ -165,7 +165,7 @@ router.post(
         id: client.id,
         email: client.email,
         type: client.is_admin ? 'admin' : 'client',
-        isAdmin: Boolean(client.is_admin),
+        isAdmin: Boolean(client.is_admin)
       },
       secret,
       { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
@@ -191,9 +191,9 @@ router.post(
         companyName: client.company_name,
         contactName: client.contact_name,
         status: client.status,
-        isAdmin: Boolean(client.is_admin),
+        isAdmin: Boolean(client.is_admin)
       },
-      expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY,
+      expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY
     }, 'Login successful');
   })
 );
@@ -261,8 +261,8 @@ router.get(
         contactName: client.contact_name,
         phone: client.phone,
         status: client.status,
-        createdAt: client.created_at,
-      },
+        createdAt: client.created_at
+      }
     });
   })
 );
@@ -326,7 +326,7 @@ router.post(
       {
         id: req.user!.id,
         email: req.user!.email,
-        type: req.user!.type,
+        type: req.user!.type
       },
       secret,
       { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
@@ -334,7 +334,7 @@ router.post(
 
     return sendSuccess(res, {
       token: newToken,
-      expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY,
+      expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY
     });
   })
 );
@@ -373,7 +373,7 @@ router.post('/logout', authenticateToken, (req, res) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    path: '/',
+    path: '/'
   });
   return sendSuccess(res, undefined, 'Logout successful');
 });
@@ -475,7 +475,7 @@ router.post(
     windowMs: RATE_LIMIT_CONFIG.FORGOT_PASSWORD.WINDOW_MS,
     maxRequests: RATE_LIMIT_CONFIG.FORGOT_PASSWORD.MAX_ATTEMPTS,
     message: 'Too many password reset requests. Please try again later.',
-    keyGenerator: (req) => `forgot-password:${req.ip}`,
+    keyGenerator: (req) => `forgot-password:${req.ip}`
   }),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { email } = req.body;
@@ -518,7 +518,7 @@ router.post(
         // Send reset email
         await emailService.sendPasswordResetEmail(client.email, {
           name: client.contact_name || 'Client',
-          resetToken,
+          resetToken
         });
 
         // Send admin notification
@@ -528,9 +528,9 @@ router.post(
           details: {
             clientId: client.id,
             email: client.email,
-            name: client.contact_name || 'Unknown',
+            name: client.contact_name || 'Unknown'
           },
-          timestamp: new Date(),
+          timestamp: new Date()
         });
       } catch (error) {
         console.error('Failed to send password reset email:', error);
@@ -652,7 +652,7 @@ router.post(
         companyName: client.company_name || 'Unknown Company',
         projectType: 'Password Reset',
         budget: 'N/A',
-        timeline: 'Completed',
+        timeline: 'Completed'
       });
     } catch (emailError) {
       console.error('Failed to send password reset confirmation:', emailError);
@@ -710,7 +710,7 @@ router.post(
     windowMs: RATE_LIMIT_CONFIG.ADMIN_LOGIN.WINDOW_MS,
     maxRequests: RATE_LIMIT_CONFIG.ADMIN_LOGIN.MAX_ATTEMPTS,
     message: 'Too many admin login attempts. Please try again later.',
-    keyGenerator: (req) => `admin-login:${req.ip}`,
+    keyGenerator: (req) => `admin-login:${req.ip}`
   }),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { password } = req.body;
@@ -749,7 +749,7 @@ router.post(
       {
         id: 0, // Admin doesn't have a client ID
         email: adminEmail,
-        type: 'admin',
+        type: 'admin'
       },
       secret,
       { expiresIn: JWT_CONFIG.ADMIN_TOKEN_EXPIRY } as SignOptions // Shorter expiry for admin sessions
@@ -764,7 +764,7 @@ router.post(
     // Also return token in response body for frontend storage
     return sendSuccess(res, {
       token,
-      expiresIn: JWT_CONFIG.ADMIN_TOKEN_EXPIRY,
+      expiresIn: JWT_CONFIG.ADMIN_TOKEN_EXPIRY
     }, 'Admin login successful');
   })
 );
@@ -812,7 +812,7 @@ router.post(
     windowMs: RATE_LIMIT_CONFIG.MAGIC_LINK.WINDOW_MS,
     maxRequests: RATE_LIMIT_CONFIG.MAGIC_LINK.MAX_ATTEMPTS,
     message: 'Too many magic link requests. Please try again later.',
-    keyGenerator: (req) => `magic-link:${req.ip}`,
+    keyGenerator: (req) => `magic-link:${req.ip}`
   }),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { email } = req.body;
@@ -854,7 +854,7 @@ router.post(
         // Send magic link email
         await emailService.sendMagicLinkEmail(client.email, {
           magicLinkToken,
-          name: client.contact_name || undefined,
+          name: client.contact_name || undefined
         });
 
         await auditLogger.log({
@@ -867,7 +867,7 @@ router.post(
           userType: 'client',
           metadata: { email: client.email },
           ipAddress: req.ip || 'unknown',
-          userAgent: req.get('user-agent') || 'unknown',
+          userAgent: req.get('user-agent') || 'unknown'
         });
       } catch (error) {
         console.error('Failed to send magic link email:', error);
@@ -979,7 +979,7 @@ router.post(
         id: client.id,
         email: client.email,
         type: client.is_admin ? 'admin' : 'client',
-        isAdmin: Boolean(client.is_admin),
+        isAdmin: Boolean(client.is_admin)
       },
       secret,
       { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
@@ -999,9 +999,9 @@ router.post(
         companyName: client.company_name,
         contactName: client.contact_name,
         status: client.status,
-        isAdmin: Boolean(client.is_admin),
+        isAdmin: Boolean(client.is_admin)
       },
-      expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY,
+      expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY
     }, 'Login successful');
   })
 );
@@ -1046,7 +1046,7 @@ router.post(
     return sendSuccess(res, {
       email: client.email,
       name: client.contact_name,
-      company: client.company_name,
+      company: client.company_name
     });
   })
 );

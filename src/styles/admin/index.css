@@ -8,6 +8,11 @@
  * Split into modules for maintainability.
  */
 
+/* Portal layout and sidebar (shared with client portal) */
+@import "../client-portal/layout.css";
+@import "../client-portal/sidebar.css";
+
+/* Admin-specific modules */
 @import "./auth.css";
 @import "./modals.css";
 @import "./analytics.css";

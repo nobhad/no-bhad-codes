@@ -59,7 +59,7 @@ export const ErrorCodes = {
   ACCOUNT_INACTIVE: 'ACCOUNT_INACTIVE',
   ACCOUNT_LOCKED: 'ACCOUNT_LOCKED',
   EMAIL_NOT_VERIFIED: 'EMAIL_NOT_VERIFIED',
-  OPERATION_FAILED: 'OPERATION_FAILED',
+  OPERATION_FAILED: 'OPERATION_FAILED'
 } as const;
 
 export type ErrorCode = (typeof ErrorCodes)[keyof typeof ErrorCodes];
@@ -74,7 +74,7 @@ export function sendSuccess<T>(
   statusCode = 200
 ): Response {
   const response: ApiResponse<T> = {
-    success: true,
+    success: true
   };
 
   if (message) {
@@ -108,7 +108,7 @@ export function sendError(
   const response: ApiResponse & { details?: Record<string, unknown> } = {
     success: false,
     error: message,
-    code,
+    code
   };
 
   if (details) {

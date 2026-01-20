@@ -113,7 +113,7 @@ export class MigrationManager {
           name: migrationName || file.replace('.sql', ''),
           filename: file,
           up: upSql.trim(),
-          down: downSql.trim(),
+          down: downSql.trim()
         });
       }
 
@@ -142,7 +142,7 @@ export class MigrationManager {
             filename: row.filename,
             appliedAt: row.applied_at,
             up: '',
-            down: '',
+            down: ''
           }));
           resolve(migrations);
         }
@@ -198,7 +198,7 @@ export class MigrationManager {
             this.db.run('ROLLBACK');
             logger.logError(err, {
               category: 'DATABASE_MIGRATION',
-              metadata: { migrationName: migration.name },
+              metadata: { migrationName: migration.name }
             });
             reject(err);
             return;
@@ -206,14 +206,14 @@ export class MigrationManager {
 
           // Record migration as applied
           const query = 'INSERT INTO migrations (id, name, filename) VALUES (?, ?, ?)';
-          this.db.run(query, [migration.id, migration.name, migration.filename], (err) => {
-            if (err) {
+          this.db.run(query, [migration.id, migration.name, migration.filename], (insertErr) => {
+            if (insertErr) {
               this.db.run('ROLLBACK');
-              logger.logError(err, {
+              logger.logError(insertErr, {
                 category: 'DATABASE_MIGRATION',
-                metadata: { migrationName: migration.name },
+                metadata: { migrationName: migration.name }
               });
-              reject(err);
+              reject(insertErr);
             } else {
               this.db.run('COMMIT');
               logger.info(`Migration applied: ${migration.name}`);
@@ -272,7 +272,7 @@ export class MigrationManager {
             this.db.run('ROLLBACK');
             logger.logError(err, {
               category: 'DATABASE_MIGRATION',
-              metadata: { migrationName: migration.name },
+              metadata: { migrationName: migration.name }
             });
             reject(err);
             return;
@@ -280,14 +280,14 @@ export class MigrationManager {
 
           // Remove migration record
           const query = 'DELETE FROM migrations WHERE id = ?';
-          this.db.run(query, [migration.id], (err) => {
-            if (err) {
+          this.db.run(query, [migration.id], (deleteErr) => {
+            if (deleteErr) {
               this.db.run('ROLLBACK');
-              logger.logError(err, {
+              logger.logError(deleteErr, {
                 category: 'DATABASE_MIGRATION',
-                metadata: { migrationName: migration.name },
+                metadata: { migrationName: migration.name }
               });
-              reject(err);
+              reject(deleteErr);
             } else {
               this.db.run('COMMIT');
               logger.info(`Migration rolled back: ${migration.name}`);

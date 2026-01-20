@@ -16,7 +16,6 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middle
 import { InvoiceService, InvoiceCreateData } from '../services/invoice-service.js';
 import { emailService } from '../services/email-service.js';
 import { getDatabase } from '../database/init.js';
-import { auditLogger } from '../services/audit-logger.js';
 
 const router = express.Router();
 
@@ -40,7 +39,7 @@ router.get('/test', (req: express.Request, res: express.Response) => {
   res.json({
     success: true,
     message: 'Invoice system is operational',
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -67,17 +66,17 @@ router.post(
           description: 'Website Design & Development',
           quantity: 1,
           rate: 3500,
-          amount: 3500,
+          amount: 3500
         },
         {
           description: 'Content Management System Setup',
           quantity: 1,
           rate: 1000,
-          amount: 1000,
-        },
+          amount: 1000
+        }
       ],
       notes: 'Test invoice created for development testing',
-      terms: 'Payment due within 30 days',
+      terms: 'Payment due within 30 days'
     };
 
     try {
@@ -86,13 +85,13 @@ router.post(
       res.status(201).json({
         success: true,
         message: 'Test invoice created successfully',
-        invoice,
+        invoice
       });
     } catch (error: any) {
       res.status(500).json({
         error: 'Failed to create test invoice',
         code: 'TEST_CREATION_FAILED',
-        message: error.message,
+        message: error.message
       });
     }
   })
@@ -120,7 +119,7 @@ router.get(
     if (isNaN(invoiceId)) {
       return res.status(400).json({
         error: 'Invalid invoice ID',
-        code: 'INVALID_ID',
+        code: 'INVALID_ID'
       });
     }
 
@@ -131,14 +130,14 @@ router.get(
       if (error.message.includes('not found')) {
         return res.status(404).json({
           error: 'Invoice not found',
-          code: 'NOT_FOUND',
+          code: 'NOT_FOUND'
         });
       }
 
       res.status(500).json({
         error: 'Failed to retrieve invoice',
         code: 'RETRIEVAL_FAILED',
-        message: error.message,
+        message: error.message
       });
     }
   })
@@ -213,7 +212,7 @@ router.post(
       return res.status(400).json({
         error: 'Missing required fields',
         code: 'MISSING_FIELDS',
-        required: ['projectId', 'clientId', 'lineItems'],
+        required: ['projectId', 'clientId', 'lineItems']
       });
     }
 
@@ -230,7 +229,7 @@ router.post(
       return res.status(400).json({
         error: 'Invalid line items',
         code: 'INVALID_LINE_ITEMS',
-        message: 'Each line item must have description, quantity, rate, and amount',
+        message: 'Each line item must have description, quantity, rate, and amount'
       });
     }
 
@@ -240,13 +239,13 @@ router.post(
       res.status(201).json({
         success: true,
         message: 'Invoice created successfully',
-        invoice,
+        invoice
       });
     } catch (error: any) {
       res.status(500).json({
         error: 'Failed to create invoice',
         code: 'CREATION_FAILED',
-        message: error.message,
+        message: error.message
       });
     }
   })
@@ -275,7 +274,7 @@ router.get(
     if (isNaN(invoiceId)) {
       return res.status(400).json({
         error: 'Invalid invoice ID',
-        code: 'INVALID_ID',
+        code: 'INVALID_ID'
       });
     }
 
@@ -286,14 +285,14 @@ router.get(
       if (error.message.includes('not found')) {
         return res.status(404).json({
           error: 'Invoice not found',
-          code: 'NOT_FOUND',
+          code: 'NOT_FOUND'
         });
       }
 
       res.status(500).json({
         error: 'Failed to retrieve invoice',
         code: 'RETRIEVAL_FAILED',
-        message: error.message,
+        message: error.message
       });
     }
   })
@@ -320,14 +319,14 @@ router.get(
       if (error.message.includes('not found')) {
         return res.status(404).json({
           error: 'Invoice not found',
-          code: 'NOT_FOUND',
+          code: 'NOT_FOUND'
         });
       }
 
       res.status(500).json({
         error: 'Failed to retrieve invoice',
         code: 'RETRIEVAL_FAILED',
-        message: error.message,
+        message: error.message
       });
     }
   })
@@ -356,7 +355,7 @@ router.get(
     if (!clientId) {
       return res.status(401).json({
         error: 'Authentication required',
-        code: 'AUTH_REQUIRED',
+        code: 'AUTH_REQUIRED'
       });
     }
 
@@ -386,14 +385,14 @@ router.get(
         count: invoices.length,
         summary: {
           totalOutstanding,
-          totalPaid,
-        },
+          totalPaid
+        }
       });
     } catch (error: any) {
       res.status(500).json({
         error: 'Failed to retrieve invoices',
         code: 'RETRIEVAL_FAILED',
-        message: error.message,
+        message: error.message
       });
     }
   })
@@ -416,7 +415,7 @@ router.get(
     if (isNaN(clientId)) {
       return res.status(400).json({
         error: 'Invalid client ID',
-        code: 'INVALID_ID',
+        code: 'INVALID_ID'
       });
     }
 
@@ -425,13 +424,13 @@ router.get(
       res.json({
         success: true,
         invoices,
-        count: invoices.length,
+        count: invoices.length
       });
     } catch (error: any) {
       res.status(500).json({
         error: 'Failed to retrieve client invoices',
         code: 'RETRIEVAL_FAILED',
-        message: error.message,
+        message: error.message
       });
     }
   })
@@ -454,7 +453,7 @@ router.get(
     if (isNaN(projectId)) {
       return res.status(400).json({
         error: 'Invalid project ID',
-        code: 'INVALID_ID',
+        code: 'INVALID_ID'
       });
     }
 
@@ -463,13 +462,13 @@ router.get(
       res.json({
         success: true,
         invoices,
-        count: invoices.length,
+        count: invoices.length
       });
     } catch (error: any) {
       res.status(500).json({
         error: 'Failed to retrieve project invoices',
         code: 'RETRIEVAL_FAILED',
-        message: error.message,
+        message: error.message
       });
     }
   })
@@ -493,7 +492,7 @@ router.put(
     if (isNaN(invoiceId)) {
       return res.status(400).json({
         error: 'Invalid invoice ID',
-        code: 'INVALID_ID',
+        code: 'INVALID_ID'
       });
     }
 
@@ -502,7 +501,7 @@ router.put(
       return res.status(400).json({
         error: 'Invalid status',
         code: 'INVALID_STATUS',
-        validStatuses,
+        validStatuses
       });
     }
 
@@ -511,20 +510,20 @@ router.put(
       res.json({
         success: true,
         message: 'Invoice status updated successfully',
-        invoice,
+        invoice
       });
     } catch (error: any) {
       if (error.message.includes('not found')) {
         return res.status(404).json({
           error: 'Invoice not found',
-          code: 'NOT_FOUND',
+          code: 'NOT_FOUND'
         });
       }
 
       res.status(500).json({
         error: 'Failed to update invoice status',
         code: 'UPDATE_FAILED',
-        message: error.message,
+        message: error.message
       });
     }
   })
@@ -547,7 +546,7 @@ router.post(
     if (isNaN(invoiceId)) {
       return res.status(400).json({
         error: 'Invalid invoice ID',
-        code: 'INVALID_ID',
+        code: 'INVALID_ID'
       });
     }
 
@@ -623,7 +622,7 @@ router.post(
               </div>
             </body>
             </html>
-          `,
+          `
         });
 
         console.log(`Invoice email sent to ${client.email} for invoice #${invoiceId}`);
@@ -635,20 +634,20 @@ router.post(
       res.json({
         success: true,
         message: 'Invoice sent successfully',
-        invoice,
+        invoice
       });
     } catch (error: any) {
       if (error.message.includes('not found')) {
         return res.status(404).json({
           error: 'Invoice not found',
-          code: 'NOT_FOUND',
+          code: 'NOT_FOUND'
         });
       }
 
       res.status(500).json({
         error: 'Failed to send invoice',
         code: 'SEND_FAILED',
-        message: error.message,
+        message: error.message
       });
     }
   })
@@ -672,7 +671,7 @@ router.post(
     if (isNaN(invoiceId)) {
       return res.status(400).json({
         error: 'Invalid invoice ID',
-        code: 'INVALID_ID',
+        code: 'INVALID_ID'
       });
     }
 
@@ -680,7 +679,7 @@ router.post(
       return res.status(400).json({
         error: 'Missing payment data',
         code: 'MISSING_PAYMENT_DATA',
-        required: ['amountPaid', 'paymentMethod'],
+        required: ['amountPaid', 'paymentMethod']
       });
     }
 
@@ -688,26 +687,26 @@ router.post(
       const invoice = await getInvoiceService().markInvoiceAsPaid(invoiceId, {
         amountPaid: parseFloat(amountPaid),
         paymentMethod,
-        paymentReference,
+        paymentReference
       });
 
       res.json({
         success: true,
         message: 'Invoice marked as paid',
-        invoice,
+        invoice
       });
     } catch (error: any) {
       if (error.message.includes('not found')) {
         return res.status(404).json({
           error: 'Invoice not found',
-          code: 'NOT_FOUND',
+          code: 'NOT_FOUND'
         });
       }
 
       res.status(500).json({
         error: 'Failed to process payment',
         code: 'PAYMENT_FAILED',
-        message: error.message,
+        message: error.message
       });
     }
   })
@@ -731,13 +730,13 @@ router.get(
       const stats = await getInvoiceService().getInvoiceStats(clientId);
       res.json({
         success: true,
-        stats,
+        stats
       });
     } catch (error: any) {
       res.status(500).json({
         error: 'Failed to retrieve invoice statistics',
         code: 'STATS_FAILED',
-        message: error.message,
+        message: error.message
       });
     }
   })
@@ -761,7 +760,7 @@ router.post(
     if (isNaN(intakeId)) {
       return res.status(400).json({
         error: 'Invalid intake ID',
-        code: 'INVALID_ID',
+        code: 'INVALID_ID'
       });
     }
 
@@ -771,13 +770,13 @@ router.post(
       res.status(201).json({
         success: true,
         message: 'Invoice generated from intake successfully',
-        invoice,
+        invoice
       });
     } catch (error: any) {
       if (error.message.includes('not found')) {
         return res.status(404).json({
           error: 'Intake not found',
-          code: 'NOT_FOUND',
+          code: 'NOT_FOUND'
         });
       }
 
@@ -785,14 +784,14 @@ router.post(
         return res.status(400).json({
           error: 'Intake not ready for invoice generation',
           code: 'INTAKE_NOT_CONVERTED',
-          message: error.message,
+          message: error.message
         });
       }
 
       res.status(500).json({
         error: 'Failed to generate invoice from intake',
         code: 'GENERATION_FAILED',
-        message: error.message,
+        message: error.message
       });
     }
   })
@@ -821,7 +820,7 @@ router.get(
     if (isNaN(invoiceId)) {
       return res.status(400).json({
         error: 'Invalid invoice ID',
-        code: 'INVALID_ID',
+        code: 'INVALID_ID'
       });
     }
 
@@ -1039,14 +1038,14 @@ router.get(
       if (error.message.includes('not found')) {
         return res.status(404).json({
           error: 'Invoice not found',
-          code: 'NOT_FOUND',
+          code: 'NOT_FOUND'
         });
       }
 
       res.status(500).json({
         error: 'Failed to generate PDF',
         code: 'PDF_GENERATION_FAILED',
-        message: error.message,
+        message: error.message
       });
     }
   })

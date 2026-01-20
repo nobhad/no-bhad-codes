@@ -30,7 +30,7 @@ const ROUTE_ENTITY_MAP: Record<string, AuditEntityType> = {
   '/api/uploads': 'file',
   '/api/intake': 'intake',
   '/api/contact': 'contact_submission',
-  '/api/auth': 'session',
+  '/api/auth': 'session'
 };
 
 /**
@@ -60,15 +60,15 @@ function getAction(method: string, path: string): AuditAction {
 
   // Default based on method
   switch (method) {
-    case 'POST':
-      return 'create';
-    case 'PUT':
-    case 'PATCH':
-      return 'update';
-    case 'DELETE':
-      return 'delete';
-    default:
-      return 'view';
+  case 'POST':
+    return 'create';
+  case 'PUT':
+  case 'PATCH':
+    return 'update';
+  case 'DELETE':
+    return 'delete';
+  default:
+    return 'view';
   }
 }
 
@@ -135,8 +135,8 @@ export function auditMiddleware() {
           requestMethod: req.method,
           metadata: {
             statusCode: res.statusCode,
-            responseId: body?.id || body?.data?.id,
-          },
+            responseId: body?.id || body?.data?.id
+          }
         }).catch((err) => console.error('[AUDIT] Failed to log:', err));
       }
 

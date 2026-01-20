@@ -64,5 +64,5 @@ export const UPLOAD_DIRS = {
   AVATARS: 'avatars',
   MESSAGES: 'messages',
   INVOICES: 'invoices',
-  GENERAL: 'general',
+  GENERAL: 'general'
 } as const;
