@@ -1,6 +1,6 @@
 # Current Work
 
-**Last Updated:** January 15, 2026
+**Last Updated:** January 20, 2026
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-01.md`.
 
@@ -9,6 +9,23 @@ This file tracks active development work and TODOs. Completed items are moved to
 ## In Progress
 
 *(No active work at this time)*
+
+---
+
+## Recently Completed (January 20, 2026)
+
+### Admin Messaging Fixes - COMPLETE
+
+- [x] Fixed message send button not working (ID mismatch in selectors)
+- [x] Fixed dual `selectedThreadId` conflict between dashboard and messaging module
+- [x] Added cache busting parameter when fetching messages after send
+- [x] Added search icon to filter dropdown in table toolbar
+- [x] Fixed admin avatar to use self-contained SVG with inverted colors
+- [x] Show only unread message counts in client dropdown (not total)
+- [x] Fixed border radius on messages container bottom corners
+- [x] Added tabindex for proper tab navigation (textarea → send button)
+- [x] Fixed focus styling on message compose textarea
+- [x] Updated CSS_ARCHITECTURE.md with admin messaging patterns
 
 ---
 
@@ -230,7 +247,7 @@ This file tracks active development work and TODOs. Completed items are moved to
 
 ## System Status
 
-**Last Updated:** January 15, 2026
+**Last Updated:** January 20, 2026
 
 ### Build Status
 

@@ -1,6 +1,6 @@
 # Admin Dashboard
 
-**Last Updated:** January 13, 2026
+**Last Updated:** January 20, 2026
 
 ## Table of Contents
 
@@ -406,54 +406,96 @@ router.post('/leads/:id/invite', authenticateAdmin, async (req, res) => {
 
 ## Messaging
 
-### Client Selector
+### Custom Client Dropdown
 
-The Messages tab includes a client selector dropdown:
+The Messages tab uses a custom dropdown component for better styling:
 
 ```html
-<select id="admin-client-select" class="form-select">
-  <option value="">-- Select a client --</option>
-  <!-- Options populated from API -->
-</select>
+<div class="custom-dropdown" id="admin-client-dropdown">
+  <button class="custom-dropdown-trigger" id="admin-client-trigger">
+    <span class="custom-dropdown-text">Select a client...</span>
+    <span class="custom-dropdown-caret">▼</span>
+  </button>
+  <ul class="custom-dropdown-menu" id="admin-client-menu">
+    <!-- Client items with unread counts populated dynamically -->
+  </ul>
+</div>
 ```
+
+### Unread Message Counts
+
+The dropdown displays unread message counts from clients:
+
+- Only shows count badge when unread > 0
+- Clients with unread messages sorted first
+- Badge displays number of unread messages
 
 ### Loading Messages
 
 ```typescript
 // src/features/admin/modules/admin-messaging.ts
-private async loadClientThreads(): Promise<void> {
-  const response = await fetch('/api/messages/threads', {
-    credentials: 'include' // HttpOnly cookie authentication
-  });
+export async function loadClientThreads(ctx: AdminDashboardContext): Promise<void> {
+  // Fetch both clients and threads in parallel
+  const [clientsResponse, threadsResponse] = await Promise.all([
+    fetch('/api/clients', { credentials: 'include' }),
+    fetch('/api/messages/threads', { credentials: 'include' })
+  ]);
 
-  if (response.ok) {
-    const data = await response.json();
-    // Populate client selector with threads
-  }
+  // Merge clients with their thread data
+  // Sort: clients with unread messages first
 }
 ```
 
-### Sending Messages
+### Cache Busting
 
-Admin messages are sent with `sender_type: 'admin'`:
+Messages are fetched with cache-busting after sending to ensure fresh data:
 
 ```typescript
-// src/features/admin/modules/admin-messaging.ts
-private async sendMessage(): Promise<void> {
-  await fetch('/api/messages', {
-    method: 'POST',
-    credentials: 'include', // HttpOnly cookie authentication
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      client_id: this.selectedClientId,
-      content: messageText,
-      sender_type: 'admin'
-    })
-  });
+// After sending, bust cache to get latest messages
+const url = bustCache
+  ? `/api/messages/threads/${threadId}/messages?_=${Date.now()}`
+  : `/api/messages/threads/${threadId}/messages`;
+```
+
+### Admin Avatar
+
+Admin messages display an SVG avatar with inverted colors:
+
+```html
+<img src="/images/avatar_small_sidebar.svg" alt="Admin" class="avatar-img" />
+```
+
+```css
+.messages-thread .message-avatar .avatar-img {
+  filter: invert(1);  /* Dark body with light eye */
 }
 ```
+
+**Note:** Use self-contained SVGs for `<img>` tags. SVGs with external `<image>` references will not load.
+
+### Keyboard Navigation
+
+| Shortcut | Action |
+|----------|--------|
+| Tab | Move focus from textarea to send button |
+| Enter | Send message |
+| Shift+Enter | New line in message |
+
+### Module Architecture
+
+The messaging module (`admin-messaging.ts`) manages its own state:
+
+```typescript
+let selectedClientId: number | null = null;
+let selectedThreadId: number | null = null;
+let selectedClientName: string = 'Client';
+
+export function getSelectedThreadId(): number | null {
+  return selectedThreadId;
+}
+```
+
+The main dashboard delegates to this module's `setupMessagingListeners()` for proper state tracking.
 
 ---
 

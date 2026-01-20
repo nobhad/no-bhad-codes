@@ -1,6 +1,6 @@
 # Messaging System
 
-**Last Updated:** January 13, 2026
+**Last Updated:** January 20, 2026
 
 ## Table of Contents
 
@@ -14,7 +14,8 @@
 8. [Backend Integration](#backend-integration)
 9. [Mobile Responsiveness](#mobile-responsiveness)
 10. [Styling](#styling)
-11. [File Locations](#file-locations)
+11. [Admin Messaging](#admin-messaging)
+12. [File Locations](#file-locations)
 
 ---
 
@@ -855,13 +856,107 @@ function addDemoMessage(message: string, ctx: ClientPortalContext): void {
 
 ---
 
+## Admin Messaging
+
+The admin dashboard includes a messaging interface for communicating with clients. This section documents the admin-specific implementation.
+
+### Custom Client Dropdown
+
+The admin Messages tab uses a custom dropdown instead of a native `<select>` for better styling control:
+
+```html
+<div class="custom-dropdown" id="admin-client-dropdown">
+  <button class="custom-dropdown-trigger" id="admin-client-trigger">
+    <span class="custom-dropdown-text">Select a client...</span>
+    <span class="custom-dropdown-caret">▼</span>
+  </button>
+  <ul class="custom-dropdown-menu" id="admin-client-menu">
+    <!-- Client items populated dynamically -->
+  </ul>
+</div>
+```
+
+### Unread Message Counts
+
+The dropdown shows unread message counts for each client (only when > 0):
+
+```typescript
+// Only show unread count badge when client has unread messages
+if (client.unread_count > 0) {
+  const countSpan = document.createElement('span');
+  countSpan.className = 'dropdown-item-count has-unread';
+  countSpan.textContent = String(client.unread_count);
+}
+```
+
+### Cache Busting
+
+After sending a message, the messages are fetched with a cache-busting parameter to ensure fresh data:
+
+```typescript
+// Add cache-busting parameter when needed (e.g., after sending a message)
+const url = bustCache
+  ? `/api/messages/threads/${threadId}/messages?_=${Date.now()}`
+  : `/api/messages/threads/${threadId}/messages`;
+```
+
+### Admin Avatar
+
+Admin messages display a self-contained SVG avatar with inverted colors:
+
+```html
+<div class="message-avatar" data-name="Admin">
+  <img src="/images/avatar_small_sidebar.svg" alt="Admin" class="avatar-img" />
+</div>
+```
+
+```css
+/* Invert colors: dark body with light eye (matches div bg) */
+.messages-thread .message-avatar .avatar-img {
+  filter: invert(1);
+}
+```
+
+**Important:** Use self-contained SVGs for `<img>` tags. SVGs with external `<image>` references will not load.
+
+### Module Architecture
+
+The admin messaging uses a dedicated module that tracks its own state:
+
+```typescript
+// src/features/admin/modules/admin-messaging.ts
+let selectedClientId: number | null = null;
+let selectedThreadId: number | null = null;
+let selectedClientName: string = 'Client';
+
+export function getSelectedThreadId(): number | null {
+  return selectedThreadId;
+}
+```
+
+The main dashboard delegates to this module for sending messages to ensure the correct thread ID is used.
+
+### Keyboard Navigation
+
+- **Tab**: Move focus from textarea to send button (via `tabindex` attributes)
+- **Enter**: Send message
+- **Shift+Enter**: New line in message
+
+### Admin Messaging CSS
+
+Located in `src/styles/admin/project-detail.css`. See [CSS Architecture](../design/CSS_ARCHITECTURE.md#admin-messaging-component) for full styling documentation.
+
+---
+
 ## File Locations
 
 | File | Purpose |
 |------|---------|
 | `client/portal.html` | Messages HTML (tab-messages section) |
-| `src/features/client/modules/portal-messages.ts` | Message module (~270 lines) |
-| `src/styles/client-portal/messages.css` | Message styling |
+| `src/features/client/modules/portal-messages.ts` | Client message module (~270 lines) |
+| `src/features/admin/modules/admin-messaging.ts` | Admin message module (~400 lines) |
+| `src/styles/client-portal/messages.css` | Client message styling |
+| `src/styles/admin/project-detail.css` | Admin message styling |
 | `server/routes/messages.ts` | API endpoints |
 | `server/services/email-service.ts` | Email notifications |
 

@@ -30,12 +30,24 @@ Terminal-style intake form with conversational UI:
 
 ```text
 src/features/client/
-├── client-portal.ts          # Main portal dashboard (~3,000 lines)
-├── terminal-intake.ts        # Terminal-style intake (~1,450 lines)
+├── client-portal.ts          # Main portal dashboard (~1,400 lines)
+├── terminal-intake.ts        # Terminal-style intake (~1,700 lines)
 ├── terminal-intake-types.ts  # Type definitions (~50 lines)
-├── terminal-intake-data.ts   # Questions and options (~470 lines)
-├── terminal-intake-ui.ts     # UI utilities (~500 lines)
+├── terminal-intake-data.ts   # Questions and options (~300 lines)
+├── terminal-intake-ui.ts     # UI utilities (~600 lines)
+├── terminal-intake-commands.ts # Terminal commands (~150 lines)
+├── portal-types.ts           # Portal type definitions
 └── README.md                 # This file
+
+src/features/client/modules/  # Extracted modules (7 modules)
+├── portal-auth.ts            # Login, logout, session (~310 lines)
+├── portal-files.ts           # File management (~400 lines)
+├── portal-invoices.ts        # Invoice display (~210 lines)
+├── portal-messages.ts        # Messaging (~270 lines)
+├── portal-navigation.ts      # Navigation, views, sidebar (~360 lines)
+├── portal-projects.ts        # Project loading, display (~310 lines)
+├── portal-settings.ts        # Settings forms (~260 lines)
+└── index.ts                  # Module exports
 ```
 
 ## Entry Points
@@ -88,18 +100,22 @@ Password: demo123
 - [Settings Feature](../../../docs/features/SETTINGS.md)
 - [New Project Feature](../../../docs/features/NEW_PROJECT.md)
 
-## Known Issues
+## Architecture Notes
 
-### File Size
+### Module Refactor (Completed January 2026)
 
-The `client-portal.ts` module exceeds the 300-line guideline:
+The `client-portal.ts` module was refactored from ~2,300 lines to ~1,400 lines by extracting 7 specialized modules:
 
-| File | Lines | Status |
-|------|-------|--------|
-| `client-portal.ts` | ~3,000 | Needs splitting |
+| Module | Lines | Responsibility |
+|--------|-------|----------------|
+| `portal-auth.ts` | ~310 | Login, logout, session management |
+| `portal-files.ts` | ~400 | File upload, download, management |
+| `portal-invoices.ts` | ~210 | Invoice display and download |
+| `portal-messages.ts` | ~270 | Messaging with cache busting |
+| `portal-navigation.ts` | ~360 | Navigation, views, sidebar |
+| `portal-projects.ts` | ~310 | Project loading and display |
+| `portal-settings.ts` | ~260 | Settings forms |
 
-**Planned refactor**: Split into smaller modules by concern (messaging, files, invoices, etc.)
+### Terminal Intake
 
-### Inheritance
-
-`TerminalIntakeModule` does not extend `BaseModule` like other modules. This should be addressed for consistency.
+`TerminalIntakeModule` does not extend `BaseModule` like other modules due to its unique conversational UI requirements.
