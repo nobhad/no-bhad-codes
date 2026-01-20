@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** January 15, 2026
+**Last Updated:** January 20, 2026
 
 ## Table of Contents
 
@@ -16,7 +16,8 @@
 10. [File Organization](#file-organization)
 11. [Best Practices](#best-practices)
 12. [!important Usage Policy](#important-usage-policy)
-13. [Known Issues](#known-issues)
+13. [Admin Messaging Component](#admin-messaging-component)
+14. [Known Issues](#known-issues)
 
 ---
 
@@ -572,6 +573,33 @@ The `.cp-project-card` class was created because `.project-card` in `projects.cs
 | `.status-overdue` | Red overdue status | `#fee2e2` / `#991b1b` |
 | `.status-draft` | Gray draft status | neutral-200 |
 
+### Table Filter Components
+
+| Class | Usage |
+|-------|-------|
+| `.table-filter-controls` | Container for filter controls |
+| `.filter-search` | Search input wrapper |
+| `.filter-search-icon` | Search icon inside dropdown (positioned absolute left) |
+| `.filter-search-input` | Search input field (padding-left for icon) |
+| `.filter-dropdown-menu` | Dropdown menu for filter options |
+| `.filter-date-group` | Date range filter wrapper |
+
+**Filter Search with Icon Pattern:**
+
+```css
+.filter-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.filter-search-input {
+  padding: 0.5rem 2.5rem 0.5rem 2.25rem;  /* Left padding for icon */
+}
+```
+
 ---
 
 ## Responsive Design
@@ -1001,9 +1029,95 @@ When removing `!important`, use these techniques:
 
 ---
 
+## Admin Messaging Component
+
+**Location:** `src/styles/admin/project-detail.css` (lines 864-1730)
+
+The admin messaging component uses a light background with dark text, styled as a chat interface.
+
+### Message Thread Container
+
+```css
+/* Light background container with rounded corners */
+[data-page="admin"] .messages-thread {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: var(--portal-spacing-lg);
+  background: var(--color-neutral-200);
+  border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0;
+}
+```
+
+### Message Bubbles
+
+```css
+/* Received messages - left aligned with avatar on left */
+.messages-thread .message-received {
+  align-self: flex-start;
+  flex-direction: row;
+}
+
+/* Sent messages - right aligned with avatar on right */
+.messages-thread .message-sent {
+  align-self: flex-end;
+  flex-direction: row;  /* Avatar follows message content */
+}
+
+.messages-thread .message-sent .message-content {
+  background: var(--color-neutral-100);  /* Lighter than white */
+  color: var(--portal-text-dark);
+}
+```
+
+### Avatar Image Usage
+
+For SVG avatars loaded via `<img>` tags, use self-contained SVGs (not SVGs that reference external resources):
+
+```css
+/* Invert colors for dark body with light features */
+.messages-thread .message-avatar .avatar-img {
+  display: block;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: invert(1);  /* Flips colors - use when SVG is light on dark */
+}
+```
+
+**Important:** SVGs with external `<image>` references (e.g., `xlink:href="file.png"`) will NOT load when used in `<img>` tags. Use self-contained SVGs like `avatar_small_sidebar.svg` instead.
+
+### Message Compose Area
+
+```css
+/* Compose area matches thread background */
+[data-page="admin"] .message-compose {
+  background: var(--color-neutral-200);
+  border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
+}
+
+/* Focus state for textarea */
+[data-page="admin"] .message-compose textarea:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+```
+
+### Client Dropdown (Custom)
+
+The client selector uses a custom dropdown component with unread message counts:
+
+```css
+/* Only show unread count badge when > 0 */
+.dropdown-item-count.has-unread {
+  /* Badge styling for unread messages */
+}
+```
+
+---
+
 ## Known Issues
 
-**Updated January 15, 2026**
+**Updated January 20, 2026**
 
 ### Resolved Issues (December 2025 - January 2026)
 

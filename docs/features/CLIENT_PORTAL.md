@@ -1,6 +1,6 @@
 # Client Portal Dashboard
 
-**Last Updated:** January 13, 2026
+**Last Updated:** January 20, 2026
 
 ## Table of Contents
 
@@ -74,9 +74,9 @@ The Client Portal is a dedicated dashboard for clients to manage their projects,
 
 ### Module Structure
 
-```
+```text
 src/features/client/
-├── client-portal.ts              # Main portal module (~2000 lines)
+├── client-portal.ts              # Main portal module (~1400 lines)
 ├── terminal-intake.ts            # Terminal-style intake form (~1700 lines)
 ├── terminal-intake-ui.ts         # Terminal UI components (~600 lines)
 ├── terminal-intake-commands.ts   # Terminal commands (~150 lines)
@@ -84,13 +84,13 @@ src/features/client/
 ├── terminal-intake-types.ts      # Type definitions
 └── portal-types.ts               # Portal type definitions
 
-src/features/client/modules/      # Extracted modules
-├── portal-auth.ts                # Login, logout, session (~350 lines)
-├── portal-files.ts               # File management (~450 lines)
-├── portal-invoices.ts            # Invoice display (~250 lines)
+src/features/client/modules/      # Extracted modules (7 modules)
+├── portal-auth.ts                # Login, logout, session (~310 lines)
+├── portal-files.ts               # File management (~400 lines)
+├── portal-invoices.ts            # Invoice display (~210 lines)
 ├── portal-messages.ts            # Messaging (~270 lines)
-├── portal-navigation.ts          # Navigation, views, sidebar (~400 lines)
-├── portal-projects.ts            # Project loading, display (~500 lines)
+├── portal-navigation.ts          # Navigation, views, sidebar (~360 lines)
+├── portal-projects.ts            # Project loading, display (~310 lines)
 ├── portal-settings.ts            # Settings forms (~260 lines)
 └── index.ts                      # Module exports
 

@@ -4,6 +4,41 @@ This file contains completed work from January 2026. Items are moved here from `
 
 ---
 
+## Admin Messaging Fixes - COMPLETE (January 20, 2026)
+
+Fixed multiple issues with admin messaging functionality and UI.
+
+**Issues Fixed:**
+
+1. **Send button not working** - ID mismatch between HTML (`admin-send-message`) and JS selector (`btn-admin-send-message`)
+2. **Dual selectedThreadId conflict** - Dashboard and messaging module both tracked thread ID, causing send to fail
+3. **Messages not appearing after send** - Race condition with cache; added cache-busting parameter
+4. **Admin avatar not loading** - SVG referenced external PNGs; switched to self-contained SVG
+5. **Message counts showing total** - Changed to show only unread message counts from clients
+6. **Border radius mismatch** - Added matching border radius to compose area bottom corners
+7. **Tab navigation** - Added tabindex attributes for keyboard navigation
+8. **Focus styling** - Added proper focus styling on message compose textarea
+
+**Key Patterns Implemented:**
+
+- **Cache Busting**: `?_=${Date.now()}` parameter after sending messages
+- **Self-contained SVGs**: Use `avatar_small_sidebar.svg` instead of SVGs with external references
+- **CSS `filter: invert(1)`**: For dark avatar body with light eye on light background
+- **Module delegation**: Dashboard delegates to messaging module's `setupMessagingListeners()`
+
+**Files Modified:**
+
+- `src/features/admin/modules/admin-messaging.ts` - Core messaging module
+- `src/features/admin/admin-dashboard.ts` - Setup delegation
+- `src/features/client/modules/portal-messages.ts` - Cache busting
+- `src/styles/admin/project-detail.css` - Message styling
+- `src/styles/pages/admin.css` - Filter search icon
+- `src/utils/table-filter.ts` - Search icon in dropdown
+- `admin/index.html` - Tabindex attributes
+- `docs/design/CSS_ARCHITECTURE.md` - Documentation
+
+---
+
 ## Page Transition Animation Flash - RESOLVED (January 13, 2026)
 
 **Issue:** HR element and button briefly flashed before content animated in with blur effect.

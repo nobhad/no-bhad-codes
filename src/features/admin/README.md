@@ -57,11 +57,32 @@ The dashboard is accessible at `/admin.html` and requires authentication.
 
 ```text
 src/features/admin/
-├── admin-dashboard.ts    # Main dashboard controller
-└── README.md             # This file
+├── admin-dashboard.ts        # Main dashboard controller (~1,900 lines)
+├── admin-project-details.ts  # Project detail view (~1,300 lines)
+├── admin-auth.ts             # Authentication
+├── admin-security.ts         # Rate limiting
+└── README.md                 # This file
 
-admin/index.html          # Dashboard HTML entry point
-src/styles/pages/admin.css # Dashboard styles
+src/features/admin/modules/   # Extracted modules (10 modules)
+├── admin-analytics.ts        # Analytics and charts (~900 lines)
+├── admin-clients.ts          # Client management (~850 lines)
+├── admin-contacts.ts         # Contact form submissions (~250 lines)
+├── admin-leads.ts            # Leads management (~450 lines)
+├── admin-messaging.ts        # Messaging system (~400 lines)
+├── admin-overview.ts         # Dashboard overview (~200 lines)
+├── admin-performance.ts      # Performance monitoring (~400 lines)
+├── admin-projects.ts         # Projects management (~1000 lines)
+├── admin-system-status.ts    # System status display (~340 lines)
+└── index.ts                  # Module exports
+
+admin/index.html              # Dashboard HTML entry point
+src/styles/pages/admin.css    # Dashboard styles (~1,850 lines)
+src/styles/admin/             # Admin style modules
+├── auth.css                  # Authentication styles
+├── modals.css                # Modal styles
+├── analytics.css             # Analytics/charts styles
+├── project-detail.css        # Project detail styles
+└── index.css                 # Module imports
 ```
 
 ## Related Documentation
