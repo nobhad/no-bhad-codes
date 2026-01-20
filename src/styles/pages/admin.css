@@ -975,6 +975,11 @@ body.modal-open .dashboard-content {
   font-weight: var(--font-weight-semibold);
 }
 
+/* Default: show full titles, hide mobile titles */
+.admin-table-header h3 .title-mobile {
+  display: none;
+}
+
 .admin-table-actions {
   display: flex;
   gap: 0.5rem;
@@ -1693,17 +1698,35 @@ body.modal-open .dashboard-content {
   }
 }
 
-/* Small screens - stack all grids to single column */
+/* Small screens - stack all grids to single column with tighter spacing */
 @media (max-width: 600px) {
+  /* Reduce all gaps and margins on mobile */
+  body[data-page="admin"] .tab-content > *,
+  body[data-page="admin"] .content-wrapper > * {
+    margin-bottom: 0.75rem;
+  }
+
   body[data-page="admin"] .analytics-grid,
   body[data-page="admin"] .vitals-grid,
   body[data-page="admin"] .quick-stats,
   body[data-page="admin"] .leads-stats,
   body[data-page="admin"] .charts-grid,
+  body[data-page="admin"] .overview-grid,
+  body[data-page="admin"] .portal-project-card,
   body[data-page="admin"] #tab-overview > .quick-stats,
   body[data-page="admin"] #tab-analytics .quick-stats,
   body[data-page="admin"] #tab-leads .quick-stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  /* Tighter card padding on mobile */
+  body[data-page="admin"] .stat-card,
+  body[data-page="admin"] .portal-project-card,
+  body[data-page="admin"] .chart-container,
+  body[data-page="admin"] .admin-table-card {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
   }
 }
 
@@ -1713,34 +1736,42 @@ body.modal-open .dashboard-content {
     padding: 0.75rem;
   }
 
-  /* Remove grey bg and extra padding from status items */
+  /* Stack status items - badge on new row for mobile */
   [data-page="admin"] #tab-system .status-item {
     background: transparent;
     padding: 0.5rem 0;
     border: none;
     border-radius: 0;
     box-shadow: none;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    gap: 0.25rem 0.5rem;
+    align-items: center;
   }
 
-  /* Fix badges on mobile */
+  /* Icon stays in first column */
+  [data-page="admin"] #tab-system .status-icon {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  /* Name in second column, full width */
+  [data-page="admin"] #tab-system .status-name {
+    grid-row: 1;
+    grid-column: 2;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* Badge on second row, spans both columns, aligned right */
   [data-page="admin"] #tab-system .status-badge {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    justify-self: end;
     font-size: 10px;
     padding: 0.25rem 0.5rem;
     white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  /* Let name truncate, keep badge visible */
-  [data-page="admin"] #tab-system .status-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex: 1;
-    min-width: 0;
-  }
-
-  /* Ensure status items don't clip badges */
-  [data-page="admin"] #tab-system .status-item {
-    overflow: visible;
   }
 
   [data-page="admin"] #tab-system .status-list {
@@ -1836,14 +1867,28 @@ body.modal-open .dashboard-content {
   margin-left: 0.5rem;
 }
 
-/* Active button - badge should match button text color (dark) */
-[data-page="admin"] .sidebar-buttons .btn.active .sidebar-badge {
-  color: var(--portal-bg-dark);
+/* Active button in expanded sidebar - badge matches button text color */
+[data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons .btn.active .sidebar-badge {
+  display: inline;
+  color: inherit;
+}
+
+/* Active button in collapsed sidebar - ensure badge is visible */
+[data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn.active {
+  overflow: visible;
+}
+
+[data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn.active .sidebar-badge {
+  display: block;
+  color: white;
+  background: var(--color-danger, #ef4444);
+  z-index: 2;
 }
 
 /* Collapsed sidebar - red badge */
 [data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn {
   position: relative;
+  overflow: visible;
 }
 
 [data-page="admin"] .sidebar.collapsed .sidebar-badge {
@@ -2516,13 +2561,106 @@ body.modal-open .dashboard-content {
 }
 
 @media (max-width: 480px) {
+  /* Table header - grid layout: row 1 = title + icons, row 2 = badge */
   .admin-table-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    gap: 0.25rem 0.5rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Title in first column */
+  .admin-table-header h3 {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 1.125rem;
+  }
+
+  /* Show short mobile titles, hide full titles */
+  .admin-table-header h3 .title-full {
+    display: none;
+  }
+
+  .admin-table-header h3 .title-mobile {
+    display: inline;
+  }
+
+  /* Actions in second column */
+  .admin-table-header .admin-table-actions {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Badge spans full width on row 2 */
+  .admin-table-header > .status-badge {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    text-align: center;
+    margin-top: 0.25rem;
+  }
+
+  /* All direct children of table actions must align vertically */
+  .admin-table-actions > * {
+    align-self: center;
+  }
+
+
+  /* Wrapper containers must have consistent height */
+  /* Override width: 100% from 768px media query */
+  .table-filter-controls,
+  .filter-search-wrapper,
+  .filter-dropdown-wrapper {
+    display: flex;
+    align-items: center;
+    height: 28px;
+    width: auto;
+    margin: 0;
+    padding: 0;
   }
 
   .table-filter-controls {
-    margin-left: 0;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+    margin-top: 0;
+  }
+
+  /* UNIFIED icon button styling for ALL buttons in table header */
+  /* Override all sizing from base rules to ensure consistency */
+  .admin-table-actions .icon-btn,
+  .admin-table-actions > .icon-btn,
+  .admin-table-actions button.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    flex-shrink: 0;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--portal-text-light);
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+    max-width: 28px;
+    max-height: 28px;
+    line-height: 1;
+    vertical-align: middle;
+  }
+
+  /* ALL icon SVGs same size on mobile */
+  .admin-table-actions .icon-btn svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    margin: 0;
   }
 }
