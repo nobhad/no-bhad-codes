@@ -84,17 +84,13 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
     }
   );
 
-  // Insert before the new count badge
-  const newCountBadge = container.querySelector('#contact-new-count');
-  if (newCountBadge) {
-    container.insertBefore(filterUI, newCountBadge);
+  // Insert filter UI at the beginning (before refresh button)
+  const refreshBtn = container.querySelector('#refresh-contacts-btn');
+  if (refreshBtn) {
+    container.insertBefore(filterUI, refreshBtn);
   } else {
-    const refreshBtn = container.querySelector('#refresh-contacts-btn');
-    if (refreshBtn) {
-      container.insertBefore(filterUI, refreshBtn);
-    } else {
-      container.appendChild(filterUI);
-    }
+    // Fallback: insert at the beginning
+    container.insertBefore(filterUI, container.firstChild);
   }
 
   // Setup sortable headers after table is rendered

@@ -156,6 +156,12 @@
   color: var(--portal-bg-dark);
 }
 
+/* Badge color on hover - match text color */
+[data-page="client-portal"] .sidebar-buttons .btn:hover .sidebar-badge,
+[data-page="admin"] .sidebar-buttons .btn:hover .sidebar-badge {
+  color: var(--portal-bg-dark);
+}
+
 [data-page="client-portal"] .sidebar-buttons .btn.active,
 [data-page="admin"] .sidebar-buttons .btn.active {
   background: var(--color-primary);
@@ -163,6 +169,12 @@
   color: var(--portal-bg-dark);
   border-color: var(--color-primary);
   outline: 2px solid var(--color-primary);
+}
+
+/* Badge color when active - match text color */
+[data-page="client-portal"] .sidebar-buttons .btn.active .sidebar-badge,
+[data-page="admin"] .sidebar-buttons .btn.active .sidebar-badge {
+  color: var(--portal-bg-dark);
 }
 
 /* Collapsed state - show only icons */
