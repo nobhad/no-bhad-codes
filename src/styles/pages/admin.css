@@ -284,13 +284,19 @@ body[data-page="admin"] #tab-analytics .stat-card {
   color: var(--portal-text-light);
 }
 
+/* Small uppercase section headers */
 [data-page="admin"] .stat-label,
-[data-page="admin"] .admin-table-card h3,
 [data-page="admin"] .chart-container h3,
 [data-page="admin"] .metric-group h3,
 [data-page="admin"] .analytics-section h3,
-[data-page="admin"] .analytics-overview h3 {
-  color: var(--portal-text-light);
+[data-page="admin"] .analytics-overview h3,
+[data-page="admin"] .recent-activity h3 {
+  color: var(--portal-text-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
 }
 
 /* ================================================
@@ -776,6 +782,8 @@ body.modal-open .dashboard-content {
   padding: var(--space-4);
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: var(--space-1);
   transition: background 0.2s ease;
 }
@@ -968,7 +976,19 @@ body.modal-open .dashboard-content {
   background: var(--portal-bg-dark);
 }
 
+/* Badge appears before icon buttons on desktop */
+.admin-table-header > .status-badge {
+  order: 1;
+  margin-left: auto;
+  margin-right: 1rem;
+}
+
+.admin-table-header .admin-table-actions {
+  order: 2;
+}
+
 .admin-table-header h3 {
+  order: 0;
   margin: 0;
   color: var(--portal-text-light);
   font-size: var(--font-size-lg);
