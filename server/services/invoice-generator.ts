@@ -178,7 +178,8 @@ export async function generateInvoice(
   return invoice;
 }
 
-function generateFeatureLineItems(features: string[], _projectType: string): LineItem[] {
+function generateFeatureLineItems(features: string[], projectType: string): LineItem[] {
+  // Base feature pricing
   const featurePricing: Record<string, FeaturePricing> = {
     // Universal features
     'contact-form': { price: 200, description: 'Contact Form Integration' },
@@ -228,19 +229,32 @@ function generateFeatureLineItems(features: string[], _projectType: string): Lin
     'basic-only': { price: 0, description: 'Basic Static Pages (included)' }
   };
 
+  // Project type complexity multipliers - more complex project types cost more for the same features
+  const projectTypeMultipliers: Record<string, number> = {
+    'simple-site': 0.8, // Simpler implementation
+    'business-site': 1.0, // Standard pricing
+    portfolio: 0.9, // Slightly simpler
+    ecommerce: 1.3, // More complex due to payment/inventory integration
+    'web-app': 1.5, // Most complex implementations
+    'browser-extension': 1.2, // Moderate complexity
+    other: 1.0 // Default
+  };
+
+  const multiplier = projectTypeMultipliers[projectType] || 1.0;
   const lineItems: LineItem[] = [];
 
   features.forEach((feature) => {
     if (featurePricing[feature]) {
       const item = featurePricing[feature];
       if (item.price > 0) {
-        // Only add if there's a cost
+        // Apply project type multiplier to feature pricing
+        const adjustedPrice = Math.round(item.price * multiplier);
         lineItems.push({
           description: item.description,
           type: 'feature',
           quantity: 1,
-          unitPrice: item.price,
-          totalPrice: item.price
+          unitPrice: adjustedPrice,
+          totalPrice: adjustedPrice
         });
       }
     }

@@ -521,18 +521,38 @@ export function validateRequest(
     validateBody = true,
     validateQuery = false,
     validateParams = false,
-    allowUnknownFields: _allowUnknownFields = false,
+    allowUnknownFields = false,
     stripUnknownFields = true
   } = options;
 
   const validator = ApiValidator.getInstance();
+  const schemaFields = new Set(Object.keys(schema));
+
+  /**
+   * Check for unknown fields in the data
+   */
+  const checkUnknownFields = (data: Record<string, any>, source: string): ValidationError[] => {
+    if (allowUnknownFields) return [];
+
+    const unknownFields = Object.keys(data).filter((field) => !schemaFields.has(field));
+    return unknownFields.map((field) => ({
+      field,
+      message: `Unknown field '${field}' in ${source}`,
+      code: 'UNKNOWN_FIELD',
+      value: data[field]
+    }));
+  };
 
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const validationResults: ValidationResult[] = [];
+      const unknownFieldErrors: ValidationError[] = [];
 
       // Validate request body
       if (validateBody && req.body) {
+        // Check for unknown fields
+        unknownFieldErrors.push(...checkUnknownFields(req.body, 'request body'));
+
         const result = validator.validate(req.body, schema);
         validationResults.push(result);
 
@@ -545,6 +565,9 @@ export function validateRequest(
 
       // Validate query parameters
       if (validateQuery && req.query) {
+        // Check for unknown fields
+        unknownFieldErrors.push(...checkUnknownFields(req.query as Record<string, any>, 'query parameters'));
+
         const result = validator.validate(req.query, schema);
         validationResults.push(result);
 
@@ -557,6 +580,9 @@ export function validateRequest(
 
       // Validate route parameters
       if (validateParams && req.params) {
+        // Check for unknown fields
+        unknownFieldErrors.push(...checkUnknownFields(req.params, 'route parameters'));
+
         const result = validator.validate(req.params, schema);
         validationResults.push(result);
 
@@ -567,8 +593,11 @@ export function validateRequest(
         }
       }
 
-      // Check for validation errors
-      const allErrors = validationResults.flatMap((result) => result.errors);
+      // Check for validation errors (including unknown field errors)
+      const allErrors = [
+        ...unknownFieldErrors,
+        ...validationResults.flatMap((result) => result.errors)
+      ];
 
       if (allErrors.length > 0) {
         await logger.error('Request validation failed');

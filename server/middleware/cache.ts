@@ -66,7 +66,7 @@ export function cache(
     skipCache,
     tags,
     varyBy = [],
-    onlySuccessfulResponses: _onlySuccessfulResponses = true
+    onlySuccessfulResponses = true
   } = options;
 
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -116,16 +116,14 @@ export function cache(
       const originalJson = res.json.bind(res);
       const originalSend = res.send.bind(res);
 
-      let _responseBody: any;
       let responseSent = false;
 
       // Override res.json
       res.json = function (body: any) {
         if (!responseSent) {
-          _responseBody = body;
           responseSent = true;
 
-          // Cache the response asynchronously
+          // Cache the response asynchronously (respecting onlySuccessfulResponses)
           setImmediate(() => {
             cacheResponse(
               cacheKey,
@@ -136,7 +134,8 @@ export function cache(
               },
               ttl,
               tags,
-              req
+              req,
+              onlySuccessfulResponses
             ).catch((error) => {
               console.error('Error caching response:', error);
             });
@@ -149,10 +148,9 @@ export function cache(
       // Override res.send
       res.send = function (body: any) {
         if (!responseSent) {
-          _responseBody = body;
           responseSent = true;
 
-          // Cache the response asynchronously
+          // Cache the response asynchronously (respecting onlySuccessfulResponses)
           setImmediate(() => {
             cacheResponse(
               cacheKey,
@@ -163,7 +161,8 @@ export function cache(
               },
               ttl,
               tags,
-              req
+              req,
+              onlySuccessfulResponses
             ).catch((error) => {
               console.error('Error caching response:', error);
             });
@@ -190,12 +189,16 @@ async function cacheResponse(
   response: { status: number; headers: Record<string, string>; body: any },
   ttl: number,
   tags: string[] | ((req: Request) => string[]) | undefined,
-  req: Request
+  req: Request,
+  onlySuccessfulResponses: boolean = true
 ): Promise<void> {
   const { status, headers, body } = response;
 
-  // Only cache successful responses if specified
-  if (status >= 200 && status < 300) {
+  // Check if we should cache this response based on status code
+  const isSuccessful = status >= 200 && status < 300;
+  const shouldCache = onlySuccessfulResponses ? isSuccessful : true;
+
+  if (shouldCache) {
     const cacheTags = typeof tags === 'function' ? tags(req) : tags;
 
     await cacheService.set(
@@ -211,7 +214,9 @@ async function cacheResponse(
       }
     );
 
-    console.log(`📋 Cached response: ${key} (TTL: ${ttl}s)`);
+    console.log(`📋 Cached response: ${key} (TTL: ${ttl}s, status: ${status})`);
+  } else {
+    console.log(`📋 Skipped caching non-successful response: ${key} (status: ${status})`);
   }
 }
 
