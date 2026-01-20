@@ -290,11 +290,11 @@ export class BaseModel<_T = any> {
       this.exists = true;
     }
 
-    // Apply casts
+    // Apply casts directly using the type from config
     const casts = (this.constructor as typeof BaseModel).config.casts || {};
-    Object.entries(casts).forEach(([key, _type]) => {
+    Object.entries(casts).forEach(([key, castType]) => {
       if (this.attributes[key] !== undefined) {
-        this.attributes[key] = this.castAttribute(key, this.attributes[key]);
+        this.attributes[key] = this.castValueToType(this.attributes[key], castType);
       }
     });
 
@@ -309,6 +309,20 @@ export class BaseModel<_T = any> {
     const castType = casts[key];
 
     if (!castType || value === null || value === undefined) {
+      return value;
+    }
+
+    return this.castValueToType(value, castType);
+  }
+
+  /**
+   * Cast a value to a specific type (internal helper)
+   */
+  protected castValueToType(
+    value: any,
+    castType: 'string' | 'number' | 'boolean' | 'date' | 'json'
+  ): any {
+    if (value === null || value === undefined) {
       return value;
     }
 

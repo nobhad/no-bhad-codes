@@ -252,7 +252,7 @@ export async function generateProjectPlan(
   return projectPlan;
 }
 
-function calculateFeatureAdditions(features: string[], _projectType: string): FeatureAddition {
+function calculateFeatureAdditions(features: string[], projectType: string): FeatureAddition {
   const featurePricing: Record<string, { price: number; deliverable: string }> = {
     'contact-form': { price: 200, deliverable: 'Contact Form Integration' },
     blog: { price: 800, deliverable: 'Blog/CMS System' },
@@ -271,12 +271,25 @@ function calculateFeatureAdditions(features: string[], _projectType: string): Fe
     'inventory-management': { price: 1800, deliverable: 'Inventory Management' }
   };
 
+  // Project type complexity multipliers - more complex project types cost more for features
+  const projectTypeMultipliers: Record<string, number> = {
+    'simple-site': 0.8,
+    'business-site': 1.0,
+    portfolio: 0.9,
+    ecommerce: 1.3,
+    'web-app': 1.5,
+    'browser-extension': 1.2,
+    other: 1.0
+  };
+
+  const multiplier = projectTypeMultipliers[projectType] || 1.0;
   let totalPrice = 0;
   const deliverables: string[] = [];
 
   features.forEach((feature) => {
     if (featurePricing[feature]) {
-      totalPrice += featurePricing[feature].price;
+      // Apply project type multiplier
+      totalPrice += Math.round(featurePricing[feature].price * multiplier);
       deliverables.push(featurePricing[feature].deliverable);
     }
   });
@@ -350,9 +363,9 @@ function getComplexityMultiplier(intakeData: IntakeData): number {
 
 function generateDetailedPhases(
   phases: string[],
-  _intakeData: IntakeData,
-  _features: string[],
-  _addons: string[]
+  intakeData: IntakeData,
+  features: string[],
+  addons: string[]
 ): PhaseDetail[] {
   const phaseDetails: Record<string, Omit<PhaseDetail, 'name'>> = {
     'Planning & Design': {
@@ -397,14 +410,150 @@ function generateDetailedPhases(
     }
   };
 
-  return phases.map((phase) => ({
-    name: phase,
-    ...(phaseDetails[phase] || {
+  // Feature-specific tasks and deliverables to add to phases
+  const featureTaskMapping: Record<string, { phase: string; task: string; deliverable: string }> = {
+    'user-authentication': {
+      phase: 'Development',
+      task: 'User authentication system implementation',
+      deliverable: 'Login/registration system'
+    },
+    'database-integration': {
+      phase: 'Development',
+      task: 'Database schema design and implementation',
+      deliverable: 'Database structure'
+    },
+    'api-integration': {
+      phase: 'Development',
+      task: 'Third-party API integration',
+      deliverable: 'API integrations'
+    },
+    'payment-processing': {
+      phase: 'Development',
+      task: 'Payment gateway setup and testing',
+      deliverable: 'Payment processing system'
+    },
+    'shopping-cart': {
+      phase: 'Development',
+      task: 'Shopping cart functionality development',
+      deliverable: 'E-commerce cart system'
+    },
+    cms: {
+      phase: 'Development',
+      task: 'Content management system setup',
+      deliverable: 'CMS implementation'
+    },
+    blog: {
+      phase: 'Content Integration',
+      task: 'Blog system setup and configuration',
+      deliverable: 'Blog functionality'
+    },
+    'seo-pages': {
+      phase: 'Content Integration',
+      task: 'SEO optimization and meta setup',
+      deliverable: 'SEO configuration'
+    },
+    'admin-panel': {
+      phase: 'Development',
+      task: 'Admin dashboard development',
+      deliverable: 'Administrative panel'
+    },
+    'real-time-features': {
+      phase: 'Development',
+      task: 'Real-time functionality implementation',
+      deliverable: 'Real-time features'
+    }
+  };
+
+  // Addon-specific tasks and deliverables
+  const addonTaskMapping: Record<string, { phase: string; task: string; deliverable: string }> = {
+    'maintenance-guide': {
+      phase: 'Testing & Launch',
+      task: 'Documentation and training preparation',
+      deliverable: 'Maintenance guide'
+    },
+    'seo-setup': {
+      phase: 'Content Integration',
+      task: 'Comprehensive SEO configuration',
+      deliverable: 'SEO optimization'
+    },
+    analytics: {
+      phase: 'Testing & Launch',
+      task: 'Analytics setup and configuration',
+      deliverable: 'Analytics integration'
+    },
+    'backup-system': {
+      phase: 'Testing & Launch',
+      task: 'Backup system configuration',
+      deliverable: 'Automated backup system'
+    },
+    copywriting: {
+      phase: 'Content Integration',
+      task: 'Professional copywriting',
+      deliverable: 'Website copy'
+    }
+  };
+
+  // Build enhanced phases
+  return phases.map((phase) => {
+    const baseDetails = phaseDetails[phase] || {
       duration: '1 week',
       tasks: ['Phase-specific tasks'],
       deliverables: ['Phase deliverables']
-    })
-  }));
+    };
+
+    // Clone base arrays to avoid mutation
+    const tasks = [...baseDetails.tasks];
+    const deliverables = [...baseDetails.deliverables];
+
+    // Add feature-specific tasks and deliverables for this phase
+    features.forEach((feature) => {
+      const mapping = featureTaskMapping[feature];
+      if (mapping && mapping.phase === phase) {
+        if (!tasks.includes(mapping.task)) {
+          tasks.push(mapping.task);
+        }
+        if (!deliverables.includes(mapping.deliverable)) {
+          deliverables.push(mapping.deliverable);
+        }
+      }
+    });
+
+    // Add addon-specific tasks and deliverables for this phase
+    addons.forEach((addon) => {
+      const mapping = addonTaskMapping[addon];
+      if (mapping && mapping.phase === phase) {
+        if (!tasks.includes(mapping.task)) {
+          tasks.push(mapping.task);
+        }
+        if (!deliverables.includes(mapping.deliverable)) {
+          deliverables.push(mapping.deliverable);
+        }
+      }
+    });
+
+    // Add intake-specific adjustments
+    if (phase === 'Design' && intakeData.designLevel === 'full-design') {
+      tasks.push('Custom brand design development');
+      deliverables.push('Custom brand assets');
+    }
+
+    if (phase === 'Content Integration' && intakeData.contentStatus === 'need-help') {
+      tasks.push('Content creation and writing');
+      deliverables.push('Original website content');
+    }
+
+    if (phase === 'Development' && intakeData.integrations && intakeData.integrations.toLowerCase() !== 'none') {
+      tasks.push(`Third-party integrations: ${intakeData.integrations}`);
+      deliverables.push('External service integrations');
+    }
+
+    return {
+      name: phase,
+      duration: baseDetails.duration,
+      tasks,
+      deliverables
+    };
+  });
 }
 
 function generateMilestones(
@@ -500,24 +649,91 @@ function generateRisks(intakeData: IntakeData): string[] {
   return risks;
 }
 
-function generatePaymentSchedule(totalPrice: number, _estimatedWeeks: number): PaymentPhase[] {
+interface ExtendedPaymentPhase extends PaymentPhase {
+  estimatedWeek?: number;
+  description?: string;
+}
+
+function generatePaymentSchedule(totalPrice: number, estimatedWeeks: number): ExtendedPaymentPhase[] {
   if (totalPrice < 3000) {
+    // Small projects (< 3 weeks typically): 50/50 split
     return [
-      { phase: 'Project Start', percentage: 50, amount: totalPrice * 0.5 },
-      { phase: 'Project Completion', percentage: 50, amount: totalPrice * 0.5 }
+      {
+        phase: 'Project Start',
+        percentage: 50,
+        amount: totalPrice * 0.5,
+        estimatedWeek: 0,
+        description: 'Due upon project initiation'
+      },
+      {
+        phase: 'Project Completion',
+        percentage: 50,
+        amount: totalPrice * 0.5,
+        estimatedWeek: estimatedWeeks,
+        description: `Due upon delivery (Week ${estimatedWeeks})`
+      }
     ];
   } else if (totalPrice < 10000) {
+    // Medium projects (4-8 weeks typically): 40/40/20 split
+    const midpointWeek = Math.ceil(estimatedWeeks / 2);
     return [
-      { phase: 'Project Start', percentage: 40, amount: totalPrice * 0.4 },
-      { phase: 'Midpoint Review', percentage: 40, amount: totalPrice * 0.4 },
-      { phase: 'Project Completion', percentage: 20, amount: totalPrice * 0.2 }
+      {
+        phase: 'Project Start',
+        percentage: 40,
+        amount: totalPrice * 0.4,
+        estimatedWeek: 0,
+        description: 'Due upon project initiation'
+      },
+      {
+        phase: 'Midpoint Review',
+        percentage: 40,
+        amount: totalPrice * 0.4,
+        estimatedWeek: midpointWeek,
+        description: `Due at midpoint review (Week ${midpointWeek})`
+      },
+      {
+        phase: 'Project Completion',
+        percentage: 20,
+        amount: totalPrice * 0.2,
+        estimatedWeek: estimatedWeeks,
+        description: `Due upon delivery (Week ${estimatedWeeks})`
+      }
     ];
   }
+
+  // Large projects (8+ weeks): 25/25/25/25 split with milestone-based timing
+  const designWeek = Math.ceil(estimatedWeeks * 0.25);
+  const developmentWeek = Math.ceil(estimatedWeeks * 0.75);
+
   return [
-    { phase: 'Project Start', percentage: 25, amount: totalPrice * 0.25 },
-    { phase: 'Design Approval', percentage: 25, amount: totalPrice * 0.25 },
-    { phase: 'Development Milestone', percentage: 25, amount: totalPrice * 0.25 },
-    { phase: 'Project Completion', percentage: 25, amount: totalPrice * 0.25 }
+    {
+      phase: 'Project Start',
+      percentage: 25,
+      amount: totalPrice * 0.25,
+      estimatedWeek: 0,
+      description: 'Due upon project initiation'
+    },
+    {
+      phase: 'Design Approval',
+      percentage: 25,
+      amount: totalPrice * 0.25,
+      estimatedWeek: designWeek,
+      description: `Due upon design approval (Week ${designWeek})`
+    },
+    {
+      phase: 'Development Milestone',
+      percentage: 25,
+      amount: totalPrice * 0.25,
+      estimatedWeek: developmentWeek,
+      description: `Due at development milestone (Week ${developmentWeek})`
+    },
+    {
+      phase: 'Project Completion',
+      percentage: 25,
+      amount: totalPrice * 0.25,
+      estimatedWeek: estimatedWeeks,
+      description: `Due upon final delivery (Week ${estimatedWeeks})`
+    }
   ];
 }
 

@@ -94,26 +94,75 @@ export function createFilterUI(
   const container = document.createElement('div');
   container.className = 'table-filter-controls';
 
-  // Search input
+  // Search dropdown (icon button with expandable input)
   const searchWrapper = document.createElement('div');
-  searchWrapper.className = 'filter-search';
+  searchWrapper.className = 'filter-search-wrapper';
+  const hasSearchTerm = state.searchTerm && state.searchTerm.length > 0;
   searchWrapper.innerHTML = `
-    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="11" cy="11" r="8"></circle>
-      <path d="m21 21-4.3-4.3"></path>
-    </svg>
-    <input type="text" placeholder="Search..." class="filter-search-input" value="${escapeAttr(state.searchTerm)}" />
+    <button type="button" class="icon-btn filter-search-trigger ${hasSearchTerm ? 'has-value' : ''}" title="Search" aria-label="Search">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </svg>
+    </button>
+    <div class="filter-search-dropdown">
+      <input type="text" placeholder="Search..." class="filter-search-input" value="${escapeAttr(state.searchTerm)}" />
+      <button type="button" class="filter-search-clear" title="Clear search" aria-label="Clear search">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18"></path>
+          <path d="m6 6 12 12"></path>
+        </svg>
+      </button>
+    </div>
   `;
 
+  const searchTrigger = searchWrapper.querySelector('.filter-search-trigger') as HTMLButtonElement;
+  const _searchDropdown = searchWrapper.querySelector('.filter-search-dropdown') as HTMLElement;
   const searchInput = searchWrapper.querySelector('input') as HTMLInputElement;
+  const searchClear = searchWrapper.querySelector('.filter-search-clear') as HTMLButtonElement;
+
+  // Toggle search dropdown
+  searchTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    searchWrapper.classList.toggle('open');
+    if (searchWrapper.classList.contains('open')) {
+      searchInput.focus();
+    }
+  });
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!searchWrapper.contains(e.target as Node)) {
+      searchWrapper.classList.remove('open');
+    }
+  });
+
+  // Clear search
+  searchClear.addEventListener('click', (e) => {
+    e.stopPropagation();
+    searchInput.value = '';
+    searchTrigger.classList.remove('has-value');
+    const newState = { ...state, searchTerm: '' };
+    saveFilterState(config.storageKey, newState);
+    onStateChange(newState);
+  });
+
   let searchTimeout: ReturnType<typeof setTimeout>;
   searchInput.addEventListener('input', () => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
       const newState = { ...state, searchTerm: searchInput.value };
+      searchTrigger.classList.toggle('has-value', searchInput.value.length > 0);
       saveFilterState(config.storageKey, newState);
       onStateChange(newState);
     }, 200);
+  });
+
+  // Close on Enter key
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      searchWrapper.classList.remove('open');
+    }
   });
 
   container.appendChild(searchWrapper);
@@ -124,11 +173,10 @@ export function createFilterUI(
 
   const activeCount = countActiveFilters(state);
   dropdownWrapper.innerHTML = `
-    <button type="button" class="filter-dropdown-trigger">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <button type="button" class="filter-dropdown-trigger icon-btn" title="Filters" aria-label="Filters">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
       </svg>
-      <span>Filters</span>
       <span class="filter-count-badge ${activeCount > 0 ? 'visible' : ''}">${activeCount}</span>
     </button>
     <div class="filter-dropdown-menu">
@@ -137,7 +185,9 @@ export function createFilterUI(
         <div class="filter-checkbox-group">
           ${config.statusOptions.map(opt => `
             <label class="filter-checkbox">
-              <input type="checkbox" value="${opt.value}" ${state.statusFilters.includes(opt.value) ? 'checked' : ''} />
+              <div class="portal-checkbox">
+                <input type="checkbox" value="${opt.value}" ${state.statusFilters.includes(opt.value) ? 'checked' : ''} />
+              </div>
               <span>${opt.label}</span>
             </label>
           `).join('')}
