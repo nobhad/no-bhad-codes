@@ -1418,7 +1418,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  cursor: help;
 }
 
 /* ================================================
@@ -1658,6 +1657,54 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 [data-page="admin"] #tab-messages .messages-container {
   height: 60vh;
   min-height: 400px;
+  background: var(--color-neutral-200);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Admin messages thread - more padding, scrollable, takes remaining space */
+[data-page="admin"] #tab-messages .messages-thread,
+[data-page="admin"] .messages-thread {
+  padding: var(--portal-spacing-xl);
+  flex: 1;
+  max-height: none;
+  overflow-y: auto;
+}
+
+/* Admin message compose - pinned to bottom */
+[data-page="admin"] #tab-messages .message-compose,
+[data-page="admin"] .message-compose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-lg);
+  padding: var(--portal-spacing-lg);
+  background: var(--color-neutral-200) !important;
+  flex-shrink: 0;
+}
+
+[data-page="admin"] .message-compose textarea {
+  background-color: var(--color-white);
+  color: var(--portal-text-dark);
+  border: 3px solid var(--color-black);
+  border-radius: var(--portal-radius-md);
+  min-height: 100px;
+  padding: var(--portal-spacing-lg);
+}
+
+[data-page="admin"] .message-compose button {
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  color: var(--portal-text-dark);
+  border: 3px solid var(--color-black);
+  border-radius: var(--portal-radius-lg);
+  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+}
+
+[data-page="admin"] .message-compose button:hover {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark);
+  border-color: var(--color-primary);
 }
 
 /* ================================================

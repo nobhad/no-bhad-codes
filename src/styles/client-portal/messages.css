@@ -21,7 +21,6 @@
   overflow-y: auto;
   padding: var(--portal-spacing-lg);
   background: var(--color-neutral-200);
-  border-bottom: 3px solid var(--color-black);
   display: flex;
   flex-direction: column;
   gap: var(--portal-spacing-md);
@@ -140,7 +139,7 @@
   border-left: 4px solid var(--color-primary);
 }
 
-/* Message Compose - Light grey background matching thread */
+/* Message Compose - Same light background as thread */
 .message-compose {
   display: flex;
   flex-direction: column;
@@ -150,11 +149,11 @@
   position: relative;
 }
 
-/* Black text area with thick border */
+/* White text area with black border */
 .message-compose .form-textarea,
 .message-compose textarea {
-  background-color: var(--color-black);
-  color: var(--portal-text-light);
+  background-color: var(--color-white);
+  color: var(--portal-text-dark);
   border: 3px solid var(--color-black);
   border-radius: var(--portal-radius-md);
   min-height: 100px;
@@ -166,15 +165,17 @@
   color: var(--portal-text-secondary);
 }
 
-/* Send button - transparent with black border */
+/* Send button - transparent with black border, full width like textarea */
 .message-compose .btn,
 .message-compose button[type="submit"],
 .message-compose button {
   width: 100%;
+  box-sizing: border-box;
   background: transparent;
   color: var(--portal-text-dark);
   border: 3px solid var(--color-black);
   border-radius: var(--portal-radius-lg);
+  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
 }
 
 .message-compose .btn:hover,

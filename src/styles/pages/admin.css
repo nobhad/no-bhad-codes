@@ -58,6 +58,220 @@ body[data-page="admin"]:not(.admin-logged-in) {
   background: var(--bg, var(--color-neutral-300));
 }
 
+/* ================================================
+   ADMIN SIDEBAR LAYOUT
+   Core layout styles for sidebar + content flex container
+   ================================================ */
+
+/* Dashboard Layout - Flex Container */
+[data-page="admin"] .dashboard-container {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  height: 100vh;
+}
+
+/* Sidebar */
+[data-page="admin"] .sidebar {
+  width: 240px;
+  min-width: 240px;
+  background: var(--portal-bg-dark);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 100vh;
+  z-index: 60;
+  position: relative;
+}
+
+[data-page="admin"] .sidebar.collapsed {
+  width: 56px;
+  min-width: 56px;
+}
+
+/* Sidebar Content */
+[data-page="admin"] .sidebar-content {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  gap: 2rem;
+}
+
+/* Sidebar Logo */
+[data-page="admin"] .sidebar-logo {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 1rem;
+}
+
+[data-page="admin"] .sidebar-logo-img {
+  width: 120px;
+  height: auto;
+  filter: invert(1);
+}
+
+/* Collapsed logo */
+[data-page="admin"] .sidebar-collapsed-logo {
+  display: none;
+}
+
+[data-page="admin"] .sidebar.collapsed .sidebar-collapsed-logo {
+  display: flex;
+  justify-content: center;
+  padding-top: 1rem;
+}
+
+[data-page="admin"] .sidebar-collapsed-logo-img {
+  width: 32px;
+  height: 40px;
+  object-fit: contain;
+}
+
+[data-page="admin"] .sidebar.collapsed .sidebar-logo {
+  display: none;
+}
+
+/* Sidebar Buttons - Vertical layout */
+[data-page="admin"] .sidebar-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+[data-page="admin"] .sidebar-buttons .btn {
+  width: 100%;
+  padding: 0.85rem 1.1rem;
+  font-family: var(--font--acme);
+  font-size: 1rem;
+  letter-spacing: 1px;
+  text-align: left;
+  background: transparent;
+  color: var(--portal-text-light);
+  border: var(--portal-border-light-style);
+  border-radius: var(--portal-radius-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-md);
+}
+
+[data-page="admin"] .sidebar-buttons .btn:hover {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark);
+  border-color: var(--color-primary);
+}
+
+[data-page="admin"] .sidebar-buttons .btn.active {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark);
+  border-color: var(--color-primary);
+}
+
+/* Sidebar Footer */
+[data-page="admin"] .sidebar-footer {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  right: 1.5rem;
+}
+
+/* Dashboard Content Area */
+[data-page="admin"] .dashboard-content {
+  flex: 1;
+  padding: clamp(1rem, 3vw, 2rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--portal-bg-medium);
+  color: var(--portal-text-light);
+  height: 100vh;
+  min-height: 100vh;
+}
+
+/* Quick Stats Grid - Horizontal row of stat cards */
+[data-page="admin"] .quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Analytics tab has 3 cards - force 3 columns */
+body[data-page="admin"] #tab-analytics .quick-stats {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 1.5rem;
+}
+
+/* Smaller stat cards on Analytics page */
+body[data-page="admin"] #tab-analytics .stat-card {
+  padding: 1rem 1.25rem;
+  min-width: 0;
+}
+
+/* Overview/Leads tabs have 4 cards - force 4 columns on desktop */
+@media (min-width: 900px) {
+  [data-page="admin"] #tab-overview .quick-stats,
+  [data-page="admin"] #tab-leads .quick-stats,
+  [data-page="admin"] #tab-projects .quick-stats,
+  [data-page="admin"] #tab-clients .quick-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Portal Shadow utility */
+[data-page="admin"] .portal-shadow {
+  box-shadow: var(--shadow-card, 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06));
+}
+
+/* Portal Project Card - Admin panel cards */
+[data-page="admin"] .portal-project-card {
+  display: block;
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--portal-radius-lg, 12px);
+  padding: var(--portal-spacing-xl, 1.5rem);
+  color: var(--portal-text-light);
+  margin-bottom: 1.5rem;
+}
+
+[data-page="admin"] .portal-project-card h3 {
+  font-family: var(--font--acme);
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--portal-text-light);
+  text-transform: uppercase;
+  margin: 0 0 1rem 0;
+  letter-spacing: 1px;
+}
+
+/* Icon buttons - consistent styling */
+[data-page="admin"] .icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--portal-radius-lg, 12px);
+  color: var(--portal-text-light, #fff);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+[data-page="admin"] .icon-btn:hover {
+  color: var(--color-primary);
+}
+
+[data-page="admin"] .icon-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+}
+
 /* Ensure all admin text is light on dark backgrounds */
 [data-page="admin"] .stat-card,
 [data-page="admin"] .admin-table-card,
@@ -763,8 +977,14 @@ body.modal-open .dashboard-content {
 
 .admin-table-actions {
   display: flex;
-  gap: var(--space-3);
+  gap: 0.5rem;
   align-items: center;
+  margin-left: auto;
+}
+
+/* Icon button group - tighter spacing */
+.admin-table-actions .icon-btn {
+  flex-shrink: 0;
 }
 
 .admin-table-actions .status-badge {
@@ -1276,18 +1496,85 @@ body.modal-open .dashboard-content {
   white-space: nowrap;
 }
 
+.status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .status-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  padding: 0.75rem 1rem;
   background: var(--portal-bg-medium);
-  border-radius: var(--border-radius-md);
-  border: 1px solid var(--portal-border-medium);
+  border-radius: var(--portal-radius-md, 8px);
+  border: none;
+}
+
+/* System info grid and rows */
+.system-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.system-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--portal-border-dark, rgba(255, 255, 255, 0.1));
+}
+
+.system-info-row:last-child {
+  border-bottom: none;
+}
+
+.system-info-row span:first-child {
+  color: var(--portal-text-muted);
+}
+
+.system-info-row span:last-child {
+  color: var(--portal-text-light);
+  text-align: right;
+}
+
+.status-item .status-icon {
+  flex-shrink: 0;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .status-item .status-name {
-  white-space: nowrap;
+  flex: 1;
+  color: var(--portal-text-light);
+  margin-left: 0.75rem;
+}
+
+.status-item .status-badge {
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--portal-radius-md, 8px);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-item .status-badge.healthy {
+  background: var(--color-success, #22c55e);
+  color: white;
+}
+
+.status-item .status-badge.unknown {
+  background: var(--color-warning, #f59e0b);
+  color: var(--portal-bg-dark);
+}
+
+.status-item .status-badge.error {
+  background: var(--color-danger, #ef4444);
+  color: white;
 }
 
 .status-indicator {
@@ -1382,23 +1669,26 @@ body.modal-open .dashboard-content {
 
 /* Responsive Design */
 
-/* Force 2x2 grid for groups of 4 - always 2 columns */
+/* Vitals and analytics grids - 2x2 layout */
 [data-page="admin"] .vitals-grid,
-[data-page="admin"] .analytics-grid,
-[data-page="admin"] .quick-stats,
-[data-page="admin"] .leads-stats {
+[data-page="admin"] .analytics-grid {
+  display: grid;
   grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
 }
 
 [data-page="admin"] .quick-stats > * {
   height: 100%;
 }
 
-/* Groups of 3 should go directly to 1 column, never 2+1 */
-@media (max-width: 1100px) {
+/* Groups of 3 should go to 1 column on small screens */
+@media (max-width: 768px) {
   [data-page="admin"] .overview-stats-grid,
-  [data-page="admin"] .charts-grid,
-  [data-page="admin"] #tab-analytics .quick-stats {
+  [data-page="admin"] .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  [data-page="admin"] #tab-analytics > .quick-stats {
     grid-template-columns: 1fr;
   }
 }
@@ -1853,35 +2143,61 @@ body.modal-open .dashboard-content {
 .table-filter-controls {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-left: auto;
+  gap: 0.5rem;
+  height: 36px;
 }
 
-/* Search input wrapper */
-.filter-search {
+/* Search dropdown wrapper */
+.filter-search-wrapper {
   position: relative;
   display: flex;
   align-items: center;
+  height: 36px;
 }
 
-.filter-search .search-icon {
+/* Search trigger button */
+.filter-search-trigger {
+  position: relative;
+}
+
+/* Show indicator when has value */
+.filter-search-trigger.has-value::after {
+  content: '';
   position: absolute;
-  left: 0.75rem;
-  width: 16px;
-  height: 16px;
-  color: var(--portal-text-muted);
-  pointer-events: none;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+/* Search dropdown */
+.filter-search-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  display: none;
+  width: 280px;
+  z-index: 100;
+}
+
+.filter-search-wrapper.open .filter-search-dropdown {
+  display: block;
 }
 
 .filter-search-input {
-  width: 200px;
-  padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+  width: 100%;
+  padding: 0.5rem 2.5rem 0.5rem 1rem;
   background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border);
-  border-radius: 6px;
+  border: 1px solid var(--portal-border-light, rgba(255,255,255,0.2));
+  border-radius: var(--portal-radius-lg, 12px);
   color: var(--portal-text);
   font-size: 0.875rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  height: 40px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
 }
 
 .filter-search-input::placeholder {
@@ -1890,8 +2206,31 @@ body.modal-open .dashboard-content {
 
 .filter-search-input:focus {
   outline: none;
-  border-color: var(--portal-accent);
-  box-shadow: 0 0 0 2px rgba(var(--portal-accent-rgb, 220, 38, 38), 0.15);
+  border-color: var(--color-primary);
+}
+
+/* Clear button - positioned inside input */
+.filter-search-clear {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--portal-radius-sm, 6px);
+  color: var(--portal-text-muted);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.filter-search-clear:hover {
+  color: var(--portal-text);
 }
 
 /* Filter dropdown wrapper */
@@ -1899,43 +2238,32 @@ body.modal-open .dashboard-content {
   position: relative;
 }
 
+/* Filter dropdown trigger inherits from icon-btn */
 .filter-dropdown-trigger {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border);
-  border-radius: 6px;
-  color: var(--portal-text);
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
-}
-
-.filter-dropdown-trigger:hover {
-  background: var(--portal-bg-medium);
-  border-color: var(--portal-border-light);
+  position: relative;
 }
 
 .filter-dropdown-trigger svg {
-  width: 16px;
-  height: 16px;
-  color: var(--portal-text-muted);
+  width: 18px;
+  height: 18px;
 }
 
 .filter-count-badge {
   display: none;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 6px;
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
   background: var(--portal-accent, #dc2626);
   color: white;
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 600;
-  border-radius: 9px;
-  line-height: 18px;
+  border-radius: 8px;
+  line-height: 16px;
   text-align: center;
+  z-index: 1;
 }
 
 .filter-count-badge.visible {
@@ -1948,12 +2276,12 @@ body.modal-open .dashboard-content {
   top: calc(100% + 4px);
   right: 0;
   z-index: 1000;
-  min-width: 280px;
-  padding: 1rem;
+  min-width: 240px;
+  padding: 1rem 0.75rem 0.75rem 0.75rem;
   background: var(--portal-bg-dark);
   border: 1px solid var(--portal-border);
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-8px);
@@ -1968,11 +2296,11 @@ body.modal-open .dashboard-content {
 
 /* Filter sections */
 .filter-section {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .filter-section:last-of-type {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .filter-section-label {
@@ -2007,34 +2335,71 @@ body.modal-open .dashboard-content {
   background: var(--portal-bg-medium);
 }
 
-.filter-checkbox input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  accent-color: var(--portal-accent, #dc2626);
+/* Custom checkbox wrapper - matches .milestone-checkbox pattern */
+.filter-checkbox .portal-checkbox {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
+  background: var(--color-black);
+  border-radius: 4px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hide the actual checkbox input */
+.filter-checkbox .portal-checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+/* Checked state - change wrapper background */
+.filter-checkbox .portal-checkbox:has(input:checked) {
+  background: var(--color-primary);
+}
+
+/* Checkmark for checked state */
+.filter-checkbox .portal-checkbox:has(input:checked)::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 3px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 .filter-checkbox span {
-  color: var(--portal-text);
-  font-size: 0.875rem;
+  color: var(--portal-text-light, #fff);
+  font-size: 0.85rem;
 }
 
-/* Date range inputs */
+/* Date range inputs - stacked vertically */
 .filter-date-group {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 0.5rem;
 }
 
 .filter-date-input {
-  flex: 1;
-  padding: 0.5rem;
+  width: 100%;
+  padding: 0.35rem 0.5rem;
   background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border);
   border-radius: 4px;
-  color: var(--portal-text);
-  font-size: 0.875rem;
+  color: var(--portal-text-light, #fff);
+  font-size: 0.8rem;
+  height: 32px;
 }
 
 .filter-date-input:focus {
@@ -2043,8 +2408,7 @@ body.modal-open .dashboard-content {
 }
 
 .filter-date-separator {
-  color: var(--portal-text-muted);
-  font-size: 0.875rem;
+  display: none;
 }
 
 /* Clear button */
