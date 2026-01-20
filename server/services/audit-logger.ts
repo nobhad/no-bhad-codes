@@ -76,7 +76,7 @@ const SENSITIVE_FIELDS = [
   'credential',
   'access_token',
   'refresh_token',
-  'api_key',
+  'api_key'
 ];
 
 /**
@@ -140,7 +140,7 @@ function extractRequestContext(req?: Request): Partial<AuditLogEntry> {
     ipAddress: (req.ip || req.socket?.remoteAddress || '').replace('::ffff:', ''),
     userAgent: req.get('user-agent') || undefined,
     requestPath: req.path,
-    requestMethod: req.method,
+    requestMethod: req.method
   };
 
   // Extract user info from authenticated request
@@ -180,7 +180,7 @@ async function createAuditLog(entry: AuditLogEntry): Promise<boolean> {
       user_agent: entry.userAgent || null,
       request_path: entry.requestPath || null,
       request_method: entry.requestMethod || null,
-      metadata: entry.metadata ? JSON.stringify(entry.metadata) : null,
+      metadata: entry.metadata ? JSON.stringify(entry.metadata) : null
     };
 
     await db.run(
@@ -203,7 +203,7 @@ async function createAuditLog(entry: AuditLogEntry): Promise<boolean> {
         auditData.user_agent,
         auditData.request_path,
         auditData.request_method,
-        auditData.metadata,
+        auditData.metadata
       ]
     );
 
@@ -241,7 +241,7 @@ export const auditLogger = {
       entityId,
       entityName,
       newValue,
-      metadata,
+      metadata
     });
   },
 
@@ -265,7 +265,7 @@ export const auditLogger = {
       entityName,
       oldValue,
       newValue,
-      metadata,
+      metadata
     });
   },
 
@@ -287,7 +287,7 @@ export const auditLogger = {
       entityId,
       entityName,
       oldValue,
-      metadata,
+      metadata
     });
   },
 
@@ -310,7 +310,7 @@ export const auditLogger = {
       entityType: 'session',
       entityId: String(userId),
       entityName: userEmail,
-      metadata,
+      metadata
     });
   },
 
@@ -330,7 +330,7 @@ export const auditLogger = {
       action: 'login_failed',
       entityType: 'session',
       entityName: email,
-      metadata: { ...metadata, reason },
+      metadata: { ...metadata, reason }
     });
   },
 
@@ -353,7 +353,7 @@ export const auditLogger = {
       entityType: 'session',
       entityId: String(userId),
       entityName: userEmail,
-      metadata,
+      metadata
     });
   },
 
@@ -377,7 +377,7 @@ export const auditLogger = {
       entityName,
       oldValue: { status: oldStatus },
       newValue: { status: newStatus },
-      metadata,
+      metadata
     });
   },
 
@@ -396,7 +396,7 @@ export const auditLogger = {
       entityType: 'file',
       entityId,
       entityName: fileName,
-      metadata,
+      metadata
     });
   },
 
@@ -415,7 +415,7 @@ export const auditLogger = {
       entityType: 'file',
       entityId,
       entityName: fileName,
-      metadata,
+      metadata
     });
   },
 
@@ -434,7 +434,7 @@ export const auditLogger = {
       entityType: 'message',
       entityId: messageId,
       entityName: subject,
-      metadata,
+      metadata
     });
   },
 
@@ -452,7 +452,7 @@ export const auditLogger = {
       action: 'send_email',
       entityType: 'message',
       entityName: subject,
-      metadata: { ...metadata, recipient: recipientEmail },
+      metadata: { ...metadata, recipient: recipientEmail }
     });
   },
 
@@ -473,7 +473,7 @@ export const auditLogger = {
       entityType: 'client',
       entityId: String(userId),
       entityName: userEmail,
-      metadata,
+      metadata
     });
   },
 
@@ -493,7 +493,7 @@ export const auditLogger = {
       entityType,
       entityId,
       entityName,
-      metadata,
+      metadata
     });
   },
 
@@ -512,7 +512,7 @@ export const auditLogger = {
       action: 'export',
       entityType,
       entityName: `${recordCount} ${entityType}s to ${format}`,
-      metadata: { ...metadata, format, recordCount },
+      metadata: { ...metadata, format, recordCount }
     });
   },
 
@@ -585,9 +585,9 @@ export const auditLogger = {
       old_value: log.old_value ? JSON.parse(log.old_value) : null,
       new_value: log.new_value ? JSON.parse(log.new_value) : null,
       changes: log.changes ? JSON.parse(log.changes) : null,
-      metadata: log.metadata ? JSON.parse(log.metadata) : null,
+      metadata: log.metadata ? JSON.parse(log.metadata) : null
     }));
-  },
+  }
 };
 
 export default auditLogger;

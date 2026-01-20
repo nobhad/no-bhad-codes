@@ -199,7 +199,7 @@ router.put(
         state || null,
         zip || null,
         country || null,
-        req.user!.id,
+        req.user!.id
       ]
     );
 
@@ -219,7 +219,7 @@ router.get(
   cache({
     ttl: 300, // 5 minutes
     tags: ['clients', 'projects'],
-    keyGenerator: (req) => 'clients:all',
+    keyGenerator: (_req) => 'clients:all'
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const db = getDatabase();
@@ -240,7 +240,7 @@ router.get(
       },
       {
         ttl: 300,
-        tags: ['clients', 'projects'],
+        tags: ['clients', 'projects']
       }
     );
 
@@ -255,7 +255,7 @@ router.get(
   cache({
     ttl: 600, // 10 minutes
     tags: (req) => [`client:${req.params.id}`, 'projects'],
-    keyGenerator: (req) => `client:${req.params.id}:details`,
+    keyGenerator: (req) => `client:${req.params.id}:details`
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.id);
@@ -264,7 +264,7 @@ router.get(
     if (req.user!.type === 'client' && req.user!.id !== clientId) {
       return res.status(403).json({
         error: 'Access denied',
-        code: 'ACCESS_DENIED',
+        code: 'ACCESS_DENIED'
       });
     }
 
@@ -286,14 +286,14 @@ router.get(
       },
       {
         ttl: 600,
-        tags: [`client:${clientId}`],
+        tags: [`client:${clientId}`]
       }
     );
 
     if (!client) {
       return res.status(404).json({
         error: 'Client not found',
-        code: 'CLIENT_NOT_FOUND',
+        code: 'CLIENT_NOT_FOUND'
       });
     }
 
@@ -316,13 +316,13 @@ router.get(
       },
       {
         ttl: 300,
-        tags: [`client:${clientId}`, 'projects'],
+        tags: [`client:${clientId}`, 'projects']
       }
     );
 
     res.json({
       client,
-      projects,
+      projects
     });
   })
 );
@@ -341,7 +341,7 @@ router.post(
     if (!email) {
       return res.status(400).json({
         error: 'Email is required',
-        code: 'MISSING_REQUIRED_FIELDS',
+        code: 'MISSING_REQUIRED_FIELDS'
       });
     }
 
@@ -350,7 +350,7 @@ router.post(
     if (!emailRegex.test(email)) {
       return res.status(400).json({
         error: 'Invalid email format',
-        code: 'INVALID_EMAIL',
+        code: 'INVALID_EMAIL'
       });
     }
 
@@ -358,7 +358,7 @@ router.post(
     if (password && password.length < 8) {
       return res.status(400).json({
         error: 'Password must be at least 8 characters long',
-        code: 'WEAK_PASSWORD',
+        code: 'WEAK_PASSWORD'
       });
     }
 
@@ -366,13 +366,13 @@ router.post(
 
     // Check if email already exists
     const existingClient = await db.get('SELECT id FROM clients WHERE email = ?', [
-      email.toLowerCase(),
+      email.toLowerCase()
     ]);
 
     if (existingClient) {
       return res.status(409).json({
         error: 'Email already registered',
-        code: 'EMAIL_EXISTS',
+        code: 'EMAIL_EXISTS'
       });
     }
 
@@ -394,7 +394,7 @@ router.post(
         contact_name || null,
         phone || null,
         client_type || 'business',
-        clientStatus,
+        clientStatus
       ]
     );
 
@@ -410,7 +410,7 @@ router.post(
     if (!newClient) {
       return res.status(500).json({
         error: 'Client created but could not retrieve details',
-        code: 'CLIENT_CREATION_ERROR',
+        code: 'CLIENT_CREATION_ERROR'
       });
     }
 
@@ -428,7 +428,7 @@ router.post(
           name: newClient.contact_name || 'Client',
           companyName: newClient.company_name,
           loginUrl: portalUrl,
-          supportEmail: supportEmail,
+          supportEmail: supportEmail
         });
       }
 
@@ -440,7 +440,7 @@ router.post(
         companyName: newClient.company_name || 'Unknown Company',
         projectType: 'New Registration',
         budget: 'TBD',
-        timeline: 'New Client',
+        timeline: 'New Client'
       });
     } catch (emailError) {
       console.error('Failed to send welcome email:', emailError);
@@ -449,7 +449,7 @@ router.post(
 
     res.status(201).json({
       message: 'Client created successfully',
-      client: newClient,
+      client: newClient
     });
   })
 );
@@ -466,7 +466,7 @@ router.put(
     if (req.user!.type === 'client' && req.user!.id !== clientId) {
       return res.status(403).json({
         error: 'Access denied',
-        code: 'ACCESS_DENIED',
+        code: 'ACCESS_DENIED'
       });
     }
 
@@ -495,7 +495,7 @@ router.put(
       if (!['active', 'inactive', 'pending'].includes(status)) {
         return res.status(400).json({
           error: 'Invalid status value',
-          code: 'INVALID_STATUS',
+          code: 'INVALID_STATUS'
         });
       }
       updates.push('status = ?');
@@ -505,7 +505,7 @@ router.put(
     if (updates.length === 0) {
       return res.status(400).json({
         error: 'No valid fields to update',
-        code: 'NO_UPDATES',
+        code: 'NO_UPDATES'
       });
     }
 
@@ -531,7 +531,7 @@ router.put(
 
     res.json({
       message: 'Client updated successfully',
-      client: updatedClient,
+      client: updatedClient
     });
   })
 );
@@ -576,14 +576,14 @@ router.delete(
     if (!client) {
       return res.status(404).json({
         error: 'Client not found',
-        code: 'CLIENT_NOT_FOUND',
+        code: 'CLIENT_NOT_FOUND'
       });
     }
 
     await db.run('DELETE FROM clients WHERE id = ?', [clientId]);
 
     res.json({
-      message: 'Client deleted successfully',
+      message: 'Client deleted successfully'
     });
   })
 );

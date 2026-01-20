@@ -8,7 +8,6 @@
  */
 
 import express from 'express';
-import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
@@ -16,19 +15,6 @@ import { cacheService } from '../services/cache-service.js';
 import { emailService } from '../services/email-service.js';
 import { errorTracker } from '../services/error-tracking.js';
 import { getDatabase } from '../database/init.js';
-
-/**
- * Generate a random temporary password
- */
-function generateTempPassword(): string {
-  // Generate a readable password: 3 words separated by dashes + 2 numbers
-  const adjectives = ['Quick', 'Bright', 'Swift', 'Bold', 'Fresh', 'Smart', 'Cool', 'Calm'];
-  const nouns = ['Tiger', 'Eagle', 'Wolf', 'Hawk', 'Bear', 'Fox', 'Lion', 'Deer'];
-  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-  const noun = nouns[Math.floor(Math.random() * nouns.length)];
-  const nums = Math.floor(Math.random() * 90 + 10); // 10-99
-  return `${adj}${noun}${nums}`;
-}
 
 const router = express.Router();
 
@@ -93,19 +79,19 @@ router.get(
           cache: {
             connected: cacheConnected,
             available: cacheService.isAvailable(),
-            stats: cacheStats,
+            stats: cacheStats
           },
           email: {
             initialized: emailStatus.initialized,
             queueSize: emailStatus.queueSize,
             templatesLoaded: emailStatus.templatesLoaded,
-            isProcessingQueue: emailStatus.isProcessingQueue,
+            isProcessingQueue: emailStatus.isProcessingQueue
           },
           database: {
             connected: true, // We'll assume it's connected if we got this far
-            type: 'sqlite',
-          },
-        },
+            type: 'sqlite'
+          }
+        }
       };
 
       res.json(systemStatus);
@@ -114,13 +100,13 @@ router.get(
 
       errorTracker.captureException(error as Error, {
         tags: { component: 'admin-status' },
-        user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
+        user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' }
       });
 
       res.status(500).json({
         status: 'error',
         timestamp,
-        error: 'Failed to retrieve system status',
+        error: 'Failed to retrieve system status'
       });
     }
   })
@@ -165,13 +151,13 @@ router.get(
       res.json({
         success: true,
         leads: leadsCount?.count || 0,
-        messages: messagesCount?.count || 0,
+        messages: messagesCount?.count || 0
       });
     } catch (error) {
       console.error('Error fetching sidebar counts:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to fetch sidebar counts',
+        error: 'Failed to fetch sidebar counts'
       });
     }
   })
@@ -196,7 +182,7 @@ router.get(
     if (!cacheService.isAvailable()) {
       return res.status(503).json({
         error: 'Cache service not available',
-        code: 'CACHE_UNAVAILABLE',
+        code: 'CACHE_UNAVAILABLE'
       });
     }
 
@@ -204,13 +190,13 @@ router.get(
       const stats = await cacheService.getStats();
       res.json({
         cache: stats,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       });
     } catch (error) {
       console.error('Error getting cache stats:', error);
       res.status(500).json({
         error: 'Failed to retrieve cache statistics',
-        code: 'CACHE_STATS_ERROR',
+        code: 'CACHE_STATS_ERROR'
       });
     }
   })
@@ -235,7 +221,7 @@ router.post(
     if (!cacheService.isAvailable()) {
       return res.status(503).json({
         error: 'Cache service not available',
-        code: 'CACHE_UNAVAILABLE',
+        code: 'CACHE_UNAVAILABLE'
       });
     }
 
@@ -246,24 +232,24 @@ router.post(
         // Log the cache clear action
         errorTracker.captureMessage('Admin cleared cache', 'info', {
           tags: { component: 'admin-cache' },
-          user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
+          user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' }
         });
 
         res.json({
           message: 'Cache cleared successfully',
-          timestamp: new Date().toISOString(),
+          timestamp: new Date().toISOString()
         });
       } else {
         res.status(500).json({
           error: 'Failed to clear cache',
-          code: 'CACHE_CLEAR_FAILED',
+          code: 'CACHE_CLEAR_FAILED'
         });
       }
     } catch (error) {
       console.error('Error clearing cache:', error);
       res.status(500).json({
         error: 'Failed to clear cache',
-        code: 'CACHE_CLEAR_ERROR',
+        code: 'CACHE_CLEAR_ERROR'
       });
     }
   })
@@ -303,14 +289,14 @@ router.post(
     if (!tag && !pattern) {
       return res.status(400).json({
         error: 'Either tag or pattern is required',
-        code: 'MISSING_PARAMETERS',
+        code: 'MISSING_PARAMETERS'
       });
     }
 
     if (!cacheService.isAvailable()) {
       return res.status(503).json({
         error: 'Cache service not available',
-        code: 'CACHE_UNAVAILABLE',
+        code: 'CACHE_UNAVAILABLE'
       });
     }
 
@@ -327,7 +313,7 @@ router.post(
       errorTracker.captureMessage('Admin invalidated cache', 'info', {
         tags: { component: 'admin-cache' },
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
-        extra: { tag, pattern, invalidatedCount: count },
+        extra: { tag, pattern, invalidatedCount: count }
       });
 
       res.json({
@@ -335,13 +321,13 @@ router.post(
         count,
         tag,
         pattern,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       });
     } catch (error) {
       console.error('Error invalidating cache:', error);
       res.status(500).json({
         error: 'Failed to invalidate cache',
-        code: 'CACHE_INVALIDATE_ERROR',
+        code: 'CACHE_INVALIDATE_ERROR'
       });
     }
   })
@@ -407,14 +393,14 @@ router.get(
           total: stats?.total || 0,
           pending: stats?.pending || 0,
           active: stats?.active || 0,
-          completed: stats?.completed || 0,
-        },
+          completed: stats?.completed || 0
+        }
       });
     } catch (error) {
       console.error('Error fetching leads:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to fetch leads',
+        error: 'Failed to fetch leads'
       });
     }
   })
@@ -478,14 +464,14 @@ router.get(
           new: stats?.new || 0,
           read: stats?.read || 0,
           replied: stats?.replied || 0,
-          archived: stats?.archived || 0,
-        },
+          archived: stats?.archived || 0
+        }
       });
     } catch (error) {
       console.error('Error fetching contact submissions:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to fetch contact submissions',
+        error: 'Failed to fetch contact submissions'
       });
     }
   })
@@ -514,7 +500,7 @@ router.put(
       if (!['new', 'read', 'replied', 'archived'].includes(status)) {
         return res.status(400).json({
           success: false,
-          error: 'Invalid status value',
+          error: 'Invalid status value'
         });
       }
 
@@ -535,13 +521,13 @@ router.put(
 
       res.json({
         success: true,
-        message: 'Status updated successfully',
+        message: 'Status updated successfully'
       });
     } catch (error) {
       console.error('Error updating contact submission status:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to update status',
+        error: 'Failed to update status'
       });
     }
   })
@@ -571,7 +557,7 @@ router.put(
       if (!validStatuses.includes(status)) {
         return res.status(400).json({
           success: false,
-          error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`,
+          error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
         });
       }
 
@@ -582,7 +568,7 @@ router.put(
       if (!project) {
         return res.status(404).json({
           success: false,
-          error: 'Project not found',
+          error: 'Project not found'
         });
       }
 
@@ -595,13 +581,13 @@ router.put(
         success: true,
         message: 'Lead status updated successfully',
         previousStatus: project.status,
-        newStatus: status,
+        newStatus: status
       });
     } catch (error) {
       console.error('Error updating lead status:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to update lead status',
+        error: 'Failed to update lead status'
       });
     }
   })
@@ -653,14 +639,14 @@ router.post(
       if (!lead) {
         return res.status(404).json({
           success: false,
-          error: 'Lead not found',
+          error: 'Lead not found'
         });
       }
 
       if (!lead.email) {
         return res.status(400).json({
           success: false,
-          error: 'Lead does not have an email address',
+          error: 'Lead does not have an email address'
         });
       }
 
@@ -760,14 +746,14 @@ No Bhad Codes Team
   </div>
 </body>
 </html>
-        `,
+        `
       });
 
       // Log the invitation
       errorTracker.captureMessage('Admin sent client invitation', 'info', {
         tags: { component: 'admin-invite' },
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
-        extra: { leadId: id, clientEmail: lead.email },
+        extra: { leadId: id, clientEmail: lead.email }
       });
 
       res.json({
@@ -775,13 +761,13 @@ No Bhad Codes Team
         message: 'Invitation sent successfully',
         clientId,
         email: lead.email,
-        emailResult,
+        emailResult
       });
     } catch (error) {
       console.error('Error inviting lead:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to send invitation',
+        error: 'Failed to send invitation'
       });
     }
   })
@@ -813,40 +799,40 @@ router.post(
       if (!lead) {
         return res.status(404).json({
           success: false,
-          error: 'Lead not found',
+          error: 'Lead not found'
         });
       }
 
       if (lead.status === 'active' || lead.status === 'in_progress') {
         return res.status(400).json({
           success: false,
-          error: 'Lead is already activated',
+          error: 'Lead is already activated'
         });
       }
 
       // Update project status to active
       await db.run('UPDATE projects SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
         'active',
-        id,
+        id
       ]);
 
       // Log the activation
       errorTracker.captureMessage('Admin activated lead as project', 'info', {
         tags: { component: 'admin-leads' },
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
-        extra: { leadId: id, projectName: lead.project_name },
+        extra: { leadId: id, projectName: lead.project_name }
       });
 
       res.json({
         success: true,
         message: 'Lead activated as project successfully',
-        projectId: id,
+        projectId: id
       });
     } catch (error) {
       console.error('Error activating lead:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to activate lead',
+        error: 'Failed to activate lead'
       });
     }
   })
@@ -899,7 +885,7 @@ router.get(
         jsFormatted: formatBytes(totalJs),
         cssFormatted: formatBytes(totalCss),
         jsFiles: jsFiles.slice(0, 10).map(f => ({ ...f, sizeFormatted: formatBytes(f.size) })),
-        cssFiles: cssFiles.slice(0, 5).map(f => ({ ...f, sizeFormatted: formatBytes(f.size) })),
+        cssFiles: cssFiles.slice(0, 5).map(f => ({ ...f, sizeFormatted: formatBytes(f.size) }))
       });
     } catch (error) {
       console.error('Error reading bundle stats:', error);

@@ -53,22 +53,22 @@ const options = {
       contact: {
         name: 'No Bhad Codes Support',
         email: process.env.SUPPORT_EMAIL || 'nobhaduri@gmail.com',
-        url: process.env.FRONTEND_URL || 'https://nobhad.codes',
+        url: process.env.FRONTEND_URL || 'https://nobhad.codes'
       },
       license: {
         name: 'MIT',
-        url: 'https://opensource.org/licenses/MIT',
-      },
+        url: 'https://opensource.org/licenses/MIT'
+      }
     },
     servers: [
       {
         url: process.env.API_BASE_URL || 'http://localhost:4001',
-        description: 'Development server',
+        description: 'Development server'
       },
       {
         url: process.env.PRODUCTION_API_URL || 'https://api.nobhad.codes',
-        description: 'Production server',
-      },
+        description: 'Production server'
+      }
     ],
     components: {
       securitySchemes: {
@@ -76,8 +76,8 @@ const options = {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-          description: 'JWT token obtained from /api/auth/login',
-        },
+          description: 'JWT token obtained from /api/auth/login'
+        }
       },
       schemas: {
         // Common response schemas
@@ -87,22 +87,22 @@ const options = {
           properties: {
             error: {
               type: 'string',
-              description: 'Error type',
+              description: 'Error type'
             },
             message: {
               type: 'string',
-              description: 'Human-readable error message',
+              description: 'Human-readable error message'
             },
             code: {
               type: 'string',
-              description: 'Machine-readable error code',
+              description: 'Machine-readable error code'
             },
             timestamp: {
               type: 'string',
               format: 'date-time',
-              description: 'Error timestamp in ISO format',
-            },
-          },
+              description: 'Error timestamp in ISO format'
+            }
+          }
         },
         SuccessResponse: {
           type: 'object',
@@ -110,17 +110,17 @@ const options = {
           properties: {
             success: {
               type: 'boolean',
-              example: true,
+              example: true
             },
             message: {
               type: 'string',
-              example: 'Operation completed successfully',
+              example: 'Operation completed successfully'
             },
             data: {
               type: 'object',
-              description: 'Response data (varies by endpoint)',
-            },
-          },
+              description: 'Response data (varies by endpoint)'
+            }
+          }
         },
 
         // Authentication schemas
@@ -131,15 +131,15 @@ const options = {
             email: {
               type: 'string',
               format: 'email',
-              example: 'client@example.com',
+              example: 'client@example.com'
             },
             password: {
               type: 'string',
               minLength: 12,
               description: 'Requires 12+ chars, uppercase, lowercase, number, and special character',
-              example: 'SecurePassword123!',
-            },
-          },
+              example: 'SecurePassword123!'
+            }
+          }
         },
         LoginResponse: {
           type: 'object',
@@ -147,24 +147,24 @@ const options = {
           properties: {
             success: {
               type: 'boolean',
-              example: true,
+              example: true
             },
             token: {
               type: 'string',
-              description: 'JWT access token',
+              description: 'JWT access token'
             },
             refreshToken: {
               type: 'string',
-              description: 'JWT refresh token',
+              description: 'JWT refresh token'
             },
             expiresIn: {
               type: 'string',
-              example: '24h',
+              example: '24h'
             },
             user: {
-              $ref: '#/components/schemas/User',
-            },
-          },
+              $ref: '#/components/schemas/User'
+            }
+          }
         },
 
         // User schemas
@@ -174,35 +174,35 @@ const options = {
           properties: {
             id: {
               type: 'integer',
-              example: 1,
+              example: 1
             },
             email: {
               type: 'string',
               format: 'email',
-              example: 'client@example.com',
+              example: 'client@example.com'
             },
             companyName: {
               type: 'string',
-              example: 'Acme Corp',
+              example: 'Acme Corp'
             },
             contactName: {
               type: 'string',
-              example: 'John Smith',
+              example: 'John Smith'
             },
             phone: {
               type: 'string',
-              example: '+1-555-0123',
+              example: '+1-555-0123'
             },
             status: {
               type: 'string',
               enum: ['active', 'inactive', 'pending'],
-              example: 'active',
+              example: 'active'
             },
             createdAt: {
               type: 'string',
-              format: 'date-time',
-            },
-          },
+              format: 'date-time'
+            }
+          }
         },
 
         // Project schemas
@@ -212,61 +212,61 @@ const options = {
           properties: {
             id: {
               type: 'integer',
-              example: 1,
+              example: 1
             },
             clientId: {
               type: 'integer',
-              example: 1,
+              example: 1
             },
             projectName: {
               type: 'string',
-              example: 'E-commerce Website',
+              example: 'E-commerce Website'
             },
             description: {
               type: 'string',
-              example: 'Modern e-commerce platform with payment integration',
+              example: 'Modern e-commerce platform with payment integration'
             },
             status: {
               type: 'string',
               enum: ['pending', 'in-progress', 'in-review', 'completed', 'on-hold'],
-              example: 'in-progress',
+              example: 'in-progress'
             },
             priority: {
               type: 'string',
               enum: ['low', 'medium', 'high', 'urgent'],
-              example: 'medium',
+              example: 'medium'
             },
             progress: {
               type: 'integer',
               minimum: 0,
               maximum: 100,
-              example: 75,
+              example: 75
             },
             startDate: {
               type: 'string',
-              format: 'date',
+              format: 'date'
             },
             estimatedEndDate: {
               type: 'string',
-              format: 'date',
+              format: 'date'
             },
             budgetRange: {
               type: 'string',
-              example: '10k-25k',
+              example: '10k-25k'
             },
             projectType: {
               type: 'string',
-              example: 'website',
+              example: 'website'
             },
             createdAt: {
               type: 'string',
-              format: 'date-time',
+              format: 'date-time'
             },
             updatedAt: {
               type: 'string',
-              format: 'date-time',
-            },
-          },
+              format: 'date-time'
+            }
+          }
         },
 
         ProjectUpdate: {
@@ -275,34 +275,34 @@ const options = {
           properties: {
             id: {
               type: 'integer',
-              example: 1,
+              example: 1
             },
             projectId: {
               type: 'integer',
-              example: 1,
+              example: 1
             },
             title: {
               type: 'string',
-              example: 'Homepage design completed',
+              example: 'Homepage design completed'
             },
             description: {
               type: 'string',
-              example: 'Finished the homepage design and got client approval',
+              example: 'Finished the homepage design and got client approval'
             },
             updateType: {
               type: 'string',
               enum: ['progress', 'milestone', 'issue', 'resolution', 'general'],
-              example: 'progress',
+              example: 'progress'
             },
             author: {
               type: 'string',
-              example: 'Development Team',
+              example: 'Development Team'
             },
             createdAt: {
               type: 'string',
-              format: 'date-time',
-            },
-          },
+              format: 'date-time'
+            }
+          }
         },
 
         // File schema
@@ -312,51 +312,51 @@ const options = {
           properties: {
             id: {
               type: 'integer',
-              example: 1,
+              example: 1
             },
             projectId: {
               type: 'integer',
-              example: 1,
+              example: 1
             },
             filename: {
               type: 'string',
-              example: 'project-wireframes.pdf',
+              example: 'project-wireframes.pdf'
             },
             originalFilename: {
               type: 'string',
-              example: 'wireframes_v2.pdf',
+              example: 'wireframes_v2.pdf'
             },
             filePath: {
               type: 'string',
-              example: '/uploads/projects/1/documents/project-wireframes.pdf',
+              example: '/uploads/projects/1/documents/project-wireframes.pdf'
             },
             fileSize: {
               type: 'integer',
               example: 2048576,
-              description: 'File size in bytes',
+              description: 'File size in bytes'
             },
             mimeType: {
               type: 'string',
-              example: 'application/pdf',
+              example: 'application/pdf'
             },
             fileType: {
               type: 'string',
               enum: ['document', 'image', 'video', 'archive', 'other'],
-              example: 'document',
+              example: 'document'
             },
             description: {
               type: 'string',
-              example: 'Project wireframes and mockups',
+              example: 'Project wireframes and mockups'
             },
             uploadedBy: {
               type: 'string',
-              example: 'client@example.com',
+              example: 'client@example.com'
             },
             createdAt: {
               type: 'string',
-              format: 'date-time',
-            },
-          },
+              format: 'date-time'
+            }
+          }
         },
 
         // Message schema
@@ -366,70 +366,70 @@ const options = {
           properties: {
             id: {
               type: 'integer',
-              example: 1,
+              example: 1
             },
             projectId: {
               type: 'integer',
-              example: 1,
+              example: 1
             },
             senderName: {
               type: 'string',
-              example: 'John Smith',
+              example: 'John Smith'
             },
             senderRole: {
               type: 'string',
               enum: ['client', 'developer', 'system'],
-              example: 'client',
+              example: 'client'
             },
             message: {
               type: 'string',
-              example: 'The wireframes look great! Can we adjust the header layout?',
+              example: 'The wireframes look great! Can we adjust the header layout?'
             },
             isRead: {
               type: 'boolean',
-              example: false,
+              example: false
             },
             createdAt: {
               type: 'string',
-              format: 'date-time',
-            },
-          },
-        },
-      },
+              format: 'date-time'
+            }
+          }
+        }
+      }
     },
     tags: [
       {
         name: 'Authentication',
-        description: 'Client authentication and session management',
+        description: 'Client authentication and session management'
       },
       {
         name: 'Users',
-        description: 'User profile management',
+        description: 'User profile management'
       },
       {
         name: 'Projects',
-        description: 'Project creation, management, and tracking',
+        description: 'Project creation, management, and tracking'
       },
       {
         name: 'Files',
-        description: 'File upload, download, and management',
+        description: 'File upload, download, and management'
       },
       {
         name: 'Messages',
-        description: 'Client-team communication',
+        description: 'Client-team communication'
       },
       {
         name: 'Health',
-        description: 'API health and monitoring endpoints',
-      },
-    ],
+        description: 'API health and monitoring endpoints'
+      }
+    ]
   },
   apis: [
     './server/routes/*.ts',
     './server/routes/*.js',
     './server/middleware/*.ts',
-    './server/**/*.ts',
-  ],
+    './server/**/*.ts'
+  ]
 };
 
 // Generate OpenAPI specification
@@ -459,8 +459,8 @@ export function setupSwagger(app: Express): void {
       showCommonExtensions: true,
       docExpansion: 'list',
       defaultModelsExpandDepth: 2,
-      defaultModelExpandDepth: 2,
-    },
+      defaultModelExpandDepth: 2
+    }
   };
 
   // Serve Swagger JSON

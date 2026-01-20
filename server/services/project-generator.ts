@@ -121,7 +121,7 @@ export async function generateProjectPlan(
       phases: ['Planning & Design', 'Development', 'Testing & Launch'],
       estimatedWeeks: 2,
       basePrice: 1500,
-      deliverables: ['Responsive Website', 'Mobile Optimization', 'Basic SEO Setup'],
+      deliverables: ['Responsive Website', 'Mobile Optimization', 'Basic SEO Setup']
     },
     'business-site': {
       phases: ['Discovery', 'Design', 'Development', 'Content Integration', 'Testing & Launch'],
@@ -132,8 +132,8 @@ export async function generateProjectPlan(
         'CMS Integration',
         'SEO Setup',
         'Analytics',
-        'Mobile Responsive',
-      ],
+        'Mobile Responsive'
+      ]
     },
     portfolio: {
       phases: ['Planning', 'Design', 'Development', 'Content Integration', 'Launch'],
@@ -143,8 +143,8 @@ export async function generateProjectPlan(
         'Portfolio Website',
         'Project Galleries',
         'Contact Integration',
-        'Mobile Responsive',
-      ],
+        'Mobile Responsive'
+      ]
     },
     ecommerce: {
       phases: [
@@ -153,7 +153,7 @@ export async function generateProjectPlan(
         'E-commerce Setup',
         'Payment Integration',
         'Testing',
-        'Launch',
+        'Launch'
       ],
       estimatedWeeks: 8,
       basePrice: 8000,
@@ -161,8 +161,8 @@ export async function generateProjectPlan(
         'E-commerce Website',
         'Payment Processing',
         'Inventory Management',
-        'Admin Dashboard',
-      ],
+        'Admin Dashboard'
+      ]
     },
     'web-app': {
       phases: [
@@ -172,7 +172,7 @@ export async function generateProjectPlan(
         'Frontend Development',
         'Integration',
         'Testing',
-        'Deployment',
+        'Deployment'
       ],
       estimatedWeeks: 12,
       basePrice: 15000,
@@ -180,15 +180,15 @@ export async function generateProjectPlan(
         'Web Application',
         'User Authentication',
         'Database Integration',
-        'Admin Panel',
-      ],
+        'Admin Panel'
+      ]
     },
     'browser-extension': {
       phases: ['Planning', 'Architecture', 'Development', 'Testing', 'Store Submission'],
       estimatedWeeks: 6,
       basePrice: 6000,
-      deliverables: ['Browser Extension', 'Cross-browser Support', 'Store Listing'],
-    },
+      deliverables: ['Browser Extension', 'Cross-browser Support', 'Store Listing']
+    }
   };
 
   const template = baseTemplates[projectType] || baseTemplates['business-site'];
@@ -226,14 +226,14 @@ export async function generateProjectPlan(
       estimatedDuration: `${estimatedWeeks} weeks`,
       estimatedPrice: `$${estimatedPrice.toLocaleString()}`,
       startDate: startDate.toISOString().split('T')[0],
-      estimatedDelivery: estimatedDelivery.toISOString().split('T')[0],
+      estimatedDelivery: estimatedDelivery.toISOString().split('T')[0]
     },
     phases: detailedPhases,
     milestones,
     deliverables: [
       ...template.deliverables,
       ...featureAdditions.deliverables,
-      ...addonAdditions.deliverables,
+      ...addonAdditions.deliverables
     ],
     technicalRequirements: generateTechnicalRequirements(intakeData),
     assumptions: generateAssumptions(intakeData),
@@ -242,17 +242,17 @@ export async function generateProjectPlan(
       'Review project plan and provide feedback',
       'Schedule discovery call to discuss details',
       'Sign project agreement and make initial payment',
-      'Begin project development',
+      'Begin project development'
     ],
     paymentSchedule: generatePaymentSchedule(estimatedPrice, estimatedWeeks),
     createdAt: new Date().toISOString(),
-    estimatedDelivery: estimatedDelivery.toISOString().split('T')[0],
+    estimatedDelivery: estimatedDelivery.toISOString().split('T')[0]
   };
 
   return projectPlan;
 }
 
-function calculateFeatureAdditions(features: string[], projectType: string): FeatureAddition {
+function calculateFeatureAdditions(features: string[], _projectType: string): FeatureAddition {
   const featurePricing: Record<string, { price: number; deliverable: string }> = {
     'contact-form': { price: 200, deliverable: 'Contact Form Integration' },
     blog: { price: 800, deliverable: 'Blog/CMS System' },
@@ -268,7 +268,7 @@ function calculateFeatureAdditions(features: string[], projectType: string): Fea
     'admin-panel': { price: 1800, deliverable: 'Admin Panel' },
     'shopping-cart': { price: 1500, deliverable: 'Shopping Cart System' },
     'payment-processing': { price: 1200, deliverable: 'Payment Processing' },
-    'inventory-management': { price: 1800, deliverable: 'Inventory Management' },
+    'inventory-management': { price: 1800, deliverable: 'Inventory Management' }
   };
 
   let totalPrice = 0;
@@ -291,7 +291,7 @@ function calculateAddonAdditions(addons: string[]): AddonAddition {
     analytics: { price: 300, deliverable: 'Analytics Setup' },
     'backup-system': { price: 400, deliverable: 'Backup System Setup' },
     'ongoing-support': { price: 200, deliverable: 'Ongoing Support Plan' },
-    copywriting: { price: 1000, deliverable: 'Professional Copywriting' },
+    copywriting: { price: 1000, deliverable: 'Professional Copywriting' }
   };
 
   let totalPrice = 0;
@@ -313,7 +313,7 @@ function getTimelineMultiplier(timeline: string): number {
     '1-month': 1.2,
     '1-3-months': 1.0,
     '3-6-months': 0.9,
-    flexible: 0.8,
+    flexible: 0.8
   };
   return multipliers[timeline] || 1.0;
 }
@@ -341,7 +341,7 @@ function getComplexityMultiplier(intakeData: IntakeData): number {
     '6-10': 1.2,
     '11-20': 1.5,
     '20-plus': 2.0,
-    dynamic: 1.8,
+    dynamic: 1.8
   };
   multiplier *= pageMultipliers[intakeData.pages || ''] || 1.0;
 
@@ -350,15 +350,15 @@ function getComplexityMultiplier(intakeData: IntakeData): number {
 
 function generateDetailedPhases(
   phases: string[],
-  intakeData: IntakeData,
-  features: string[],
-  addons: string[]
+  _intakeData: IntakeData,
+  _features: string[],
+  _addons: string[]
 ): PhaseDetail[] {
   const phaseDetails: Record<string, Omit<PhaseDetail, 'name'>> = {
     'Planning & Design': {
       duration: '3-5 days',
       tasks: ['Requirements analysis', 'Wireframes', 'Design mockups', 'Content planning'],
-      deliverables: ['Project plan', 'Wireframes', 'Design concepts'],
+      deliverables: ['Project plan', 'Wireframes', 'Design concepts']
     },
     Discovery: {
       duration: '5-7 days',
@@ -366,24 +366,24 @@ function generateDetailedPhases(
         'Stakeholder interviews',
         'Competitive analysis',
         'Technical architecture',
-        'Content audit',
+        'Content audit'
       ],
-      deliverables: ['Discovery document', 'Technical specifications', 'Content strategy'],
+      deliverables: ['Discovery document', 'Technical specifications', 'Content strategy']
     },
     Design: {
       duration: '1-2 weeks',
       tasks: ['Visual design', 'User interface design', 'Responsive layouts', 'Brand integration'],
-      deliverables: ['Design mockups', 'Style guide', 'Asset library'],
+      deliverables: ['Design mockups', 'Style guide', 'Asset library']
     },
     Development: {
       duration: '1-3 weeks',
       tasks: ['Frontend development', 'Backend development', 'Database setup', 'Integration work'],
-      deliverables: ['Functional website', 'Database structure', 'Core features'],
+      deliverables: ['Functional website', 'Database structure', 'Core features']
     },
     'Content Integration': {
       duration: '3-5 days',
       tasks: ['Content input', 'Image optimization', 'SEO setup', 'Quality assurance'],
-      deliverables: ['Complete content', 'Optimized images', 'SEO implementation'],
+      deliverables: ['Complete content', 'Optimized images', 'SEO implementation']
     },
     'Testing & Launch': {
       duration: '3-5 days',
@@ -391,10 +391,10 @@ function generateDetailedPhases(
         'Cross-browser testing',
         'Mobile testing',
         'Performance optimization',
-        'Launch preparation',
+        'Launch preparation'
       ],
-      deliverables: ['Tested website', 'Performance report', 'Launch checklist'],
-    },
+      deliverables: ['Tested website', 'Performance report', 'Launch checklist']
+    }
   };
 
   return phases.map((phase) => ({
@@ -402,8 +402,8 @@ function generateDetailedPhases(
     ...(phaseDetails[phase] || {
       duration: '1 week',
       tasks: ['Phase-specific tasks'],
-      deliverables: ['Phase deliverables'],
-    }),
+      deliverables: ['Phase deliverables']
+    })
   }));
 }
 
@@ -426,7 +426,7 @@ function generateMilestones(
       description: phase.deliverables.join(', '),
       dueDate: milestoneDate.toISOString().split('T')[0],
       isCompleted: false,
-      deliverables: phase.deliverables,
+      deliverables: phase.deliverables
     });
 
     currentDate = milestoneDate;
@@ -469,7 +469,7 @@ function generateAssumptions(intakeData: IntakeData): string[] {
   const assumptions = [
     'Client will provide feedback within 2 business days for each phase',
     'All content and assets will be provided in digital format',
-    'Project scope will remain as defined in initial requirements',
+    'Project scope will remain as defined in initial requirements'
   ];
 
   if (intakeData.contentStatus === 'ready') {
@@ -486,7 +486,7 @@ function generateAssumptions(intakeData: IntakeData): string[] {
 function generateRisks(intakeData: IntakeData): string[] {
   const risks = [
     'Delays in content delivery may impact project timeline',
-    'Third-party service integration may require additional testing time',
+    'Third-party service integration may require additional testing time'
   ];
 
   if (intakeData.timeline === 'asap') {
@@ -500,24 +500,24 @@ function generateRisks(intakeData: IntakeData): string[] {
   return risks;
 }
 
-function generatePaymentSchedule(totalPrice: number, estimatedWeeks: number): PaymentPhase[] {
+function generatePaymentSchedule(totalPrice: number, _estimatedWeeks: number): PaymentPhase[] {
   if (totalPrice < 3000) {
     return [
       { phase: 'Project Start', percentage: 50, amount: totalPrice * 0.5 },
-      { phase: 'Project Completion', percentage: 50, amount: totalPrice * 0.5 },
+      { phase: 'Project Completion', percentage: 50, amount: totalPrice * 0.5 }
     ];
   } else if (totalPrice < 10000) {
     return [
       { phase: 'Project Start', percentage: 40, amount: totalPrice * 0.4 },
       { phase: 'Midpoint Review', percentage: 40, amount: totalPrice * 0.4 },
-      { phase: 'Project Completion', percentage: 20, amount: totalPrice * 0.2 },
+      { phase: 'Project Completion', percentage: 20, amount: totalPrice * 0.2 }
     ];
   }
   return [
     { phase: 'Project Start', percentage: 25, amount: totalPrice * 0.25 },
     { phase: 'Design Approval', percentage: 25, amount: totalPrice * 0.25 },
     { phase: 'Development Milestone', percentage: 25, amount: totalPrice * 0.25 },
-    { phase: 'Project Completion', percentage: 25, amount: totalPrice * 0.25 },
+    { phase: 'Project Completion', percentage: 25, amount: totalPrice * 0.25 }
   ];
 }
 
@@ -529,7 +529,7 @@ function getProjectTypeDisplayName(projectType: string): string {
     ecommerce: 'E-commerce Store',
     'web-app': 'Web Application',
     'browser-extension': 'Browser Extension',
-    other: 'Custom Project',
+    other: 'Custom Project'
   };
   return displayNames[projectType] || 'Web Project';
 }

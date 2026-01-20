@@ -9,14 +9,7 @@
  */
 
 import { Database } from 'sqlite3';
-import {
-  QueryBuilder,
-  SelectQueryBuilder,
-  InsertQueryBuilder,
-  UpdateQueryBuilder,
-  DeleteQueryBuilder,
-  QueryResult,
-} from './query-builder.js';
+import { QueryBuilder, SelectQueryBuilder, QueryResult } from './query-builder.js';
 import { logger } from '../services/logger.js';
 
 // Model configuration interface
@@ -46,7 +39,7 @@ export interface PaginationResult<T> {
 /**
  * Base Model class providing Active Record pattern
  */
-export class BaseModel<T = any> {
+export class BaseModel<_T = any> {
   protected static db: Database;
   protected static queryBuilder: QueryBuilder;
 
@@ -58,7 +51,7 @@ export class BaseModel<T = any> {
     softDeletes: false,
     fillable: [],
     hidden: [],
-    casts: {},
+    casts: {}
   };
 
   // Instance properties
@@ -253,7 +246,7 @@ export class BaseModel<T = any> {
         instance.setAttributes(row as any, true);
         return instance;
       }),
-      pagination: result.pagination,
+      pagination: result.pagination
     };
   }
 
@@ -299,7 +292,7 @@ export class BaseModel<T = any> {
 
     // Apply casts
     const casts = (this.constructor as typeof BaseModel).config.casts || {};
-    Object.entries(casts).forEach(([key, type]) => {
+    Object.entries(casts).forEach(([key, _type]) => {
       if (this.attributes[key] !== undefined) {
         this.attributes[key] = this.castAttribute(key, this.attributes[key]);
       }
@@ -320,18 +313,18 @@ export class BaseModel<T = any> {
     }
 
     switch (castType) {
-      case 'string':
-        return String(value);
-      case 'number':
-        return Number(value);
-      case 'boolean':
-        return Boolean(value);
-      case 'date':
-        return value instanceof Date ? value : new Date(value);
-      case 'json':
-        return typeof value === 'string' ? JSON.parse(value) : value;
-      default:
-        return value;
+    case 'string':
+      return String(value);
+    case 'number':
+      return Number(value);
+    case 'boolean':
+      return Boolean(value);
+    case 'date':
+      return value instanceof Date ? value : new Date(value);
+    case 'json':
+      return typeof value === 'string' ? JSON.parse(value) : value;
+    default:
+      return value;
     }
   }
 
@@ -527,7 +520,6 @@ export class BaseModel<T = any> {
       throw new Error('Cannot refresh model that does not exist in database');
     }
 
-    const primaryKey = (this.constructor as typeof BaseModel).getPrimaryKey();
     const fresh = await (this.constructor as any).find(this.getKey());
 
     if (!fresh) {

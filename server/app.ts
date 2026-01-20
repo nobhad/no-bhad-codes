@@ -55,7 +55,7 @@ errorTracker.init({
   release: process.env.npm_package_version,
   enableProfiling: process.env.NODE_ENV === 'production',
   sampleRate: process.env.NODE_ENV === 'production' ? 1.0 : 0.1,
-  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0
 });
 
 // Request logging and error tracking
@@ -67,17 +67,17 @@ app.use(
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     contentSecurityPolicy: {
       directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:', 'https:'],
-        connectSrc: ["'self'", 'https://api.sentry.io'],
-        fontSrc: ["'self'"],
-        mediaSrc: ["'self'"],
-        objectSrc: ["'none'"],
-        frameSrc: ["'none'"],
-      },
-    },
+        defaultSrc: ['\'self\''],
+        scriptSrc: ['\'self\'', '\'unsafe-inline\'', '\'unsafe-eval\''],
+        styleSrc: ['\'self\'', '\'unsafe-inline\''],
+        imgSrc: ['\'self\'', 'data:', 'https:'],
+        connectSrc: ['\'self\'', 'https://api.sentry.io'],
+        fontSrc: ['\'self\''],
+        mediaSrc: ['\'self\''],
+        objectSrc: ['\'none\''],
+        frameSrc: ['\'none\'']
+      }
+    }
   })
 );
 
@@ -87,7 +87,7 @@ app.use(
     origin: process.env.FRONTEND_URL || 'http://localhost:4000',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
   })
 );
 
@@ -105,7 +105,7 @@ app.use(
     sanitizeBody: true,
     sanitizeQuery: true,
     sanitizeParams: true,
-    skipPaths: ['/uploads'], // Skip file upload paths
+    skipPaths: ['/uploads'] // Skip file upload paths
   })
 );
 
@@ -126,8 +126,8 @@ app.get('/', (req, res) => {
       health: '/health',
       documentation: '/api-docs',
       invoices: '/api/invoices',
-      uploads: '/api/uploads',
-    },
+      uploads: '/api/uploads'
+    }
   });
 });
 
@@ -136,7 +136,7 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    version: '1.0.0',
+    version: '1.0.0'
   });
 });
 
@@ -165,14 +165,14 @@ app.use((req, res) => {
       request: {
         method: req.method,
         url: req.originalUrl,
-        headers: req.headers as Record<string, string>,
-      },
+        headers: req.headers as Record<string, string>
+      }
     }
   );
 
   res.status(404).json({
     error: 'Route not found',
-    message: `Cannot ${req.method} ${req.originalUrl}`,
+    message: `Cannot ${req.method} ${req.originalUrl}`
   });
 });
 
@@ -213,10 +213,10 @@ async function startServer() {
       secure: process.env.SMTP_SECURE === 'true',
       auth: {
         user: process.env.SMTP_USER || '',
-        pass: process.env.SMTP_PASS || '',
+        pass: process.env.SMTP_PASS || ''
       },
       from: process.env.SMTP_FROM || 'nobhaduri@gmail.com',
-      replyTo: process.env.SMTP_REPLY_TO,
+      replyTo: process.env.SMTP_REPLY_TO
     };
 
     try {
@@ -235,7 +235,7 @@ async function startServer() {
         password: process.env.REDIS_PASSWORD,
         db: parseInt(process.env.REDIS_DB || '0'),
         keyPrefix: process.env.REDIS_KEY_PREFIX || 'nbc:',
-        lazyConnect: true,
+        lazyConnect: true
       };
 
       try {
@@ -256,7 +256,7 @@ async function startServer() {
 
       errorTracker.captureMessage(`Server started on port ${PORT}`, 'info', {
         tags: { component: 'server' },
-        extra: { port: PORT, environment: process.env.NODE_ENV },
+        extra: { port: PORT, environment: process.env.NODE_ENV }
       });
     });
 
@@ -294,7 +294,7 @@ async function startServer() {
   } catch (error) {
     console.error('❌ Failed to start server:', error);
     errorTracker.captureException(error as Error, {
-      tags: { component: 'server', phase: 'startup' },
+      tags: { component: 'server', phase: 'startup' }
     });
     process.exit(1);
   }
@@ -304,7 +304,7 @@ async function startServer() {
 process.on('uncaughtException', (error) => {
   console.error('❌ Uncaught Exception:', error);
   errorTracker.captureException(error, {
-    tags: { type: 'uncaughtException' },
+    tags: { type: 'uncaughtException' }
   });
   process.exit(1);
 });
@@ -314,7 +314,7 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
   errorTracker.captureException(new Error(`Unhandled Rejection: ${reason}`), {
     tags: { type: 'unhandledRejection' },
-    extra: { promise: promise.toString(), reason },
+    extra: { promise: promise.toString(), reason }
   });
   process.exit(1);
 });

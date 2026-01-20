@@ -17,7 +17,7 @@ if (dsn && !dsn.includes('your-sentry') && !dsn.includes('placeholder') && dsn.s
     sendDefaultPii: false,
     tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
     // Disable profiling to avoid "require is not defined" warning in ES modules
-    profilesSampleRate: 0,
+    profilesSampleRate: 0
   });
   console.log(`✅ Sentry instrumentation loaded for ${process.env.NODE_ENV || 'development'}`);
 } else {

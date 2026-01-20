@@ -66,7 +66,7 @@ export function cache(
     skipCache,
     tags,
     varyBy = [],
-    onlySuccessfulResponses = true,
+    onlySuccessfulResponses: _onlySuccessfulResponses = true
   } = options;
 
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -116,13 +116,13 @@ export function cache(
       const originalJson = res.json.bind(res);
       const originalSend = res.send.bind(res);
 
-      let responseBody: any;
+      let _responseBody: any;
       let responseSent = false;
 
       // Override res.json
       res.json = function (body: any) {
         if (!responseSent) {
-          responseBody = body;
+          _responseBody = body;
           responseSent = true;
 
           // Cache the response asynchronously
@@ -132,7 +132,7 @@ export function cache(
               {
                 status: res.statusCode,
                 headers: getResponseHeaders(res),
-                body,
+                body
               },
               ttl,
               tags,
@@ -149,7 +149,7 @@ export function cache(
       // Override res.send
       res.send = function (body: any) {
         if (!responseSent) {
-          responseBody = body;
+          _responseBody = body;
           responseSent = true;
 
           // Cache the response asynchronously
@@ -159,7 +159,7 @@ export function cache(
               {
                 status: res.statusCode,
                 headers: getResponseHeaders(res),
-                body,
+                body
               },
               ttl,
               tags,
@@ -203,11 +203,11 @@ async function cacheResponse(
       {
         status,
         headers,
-        body,
+        body
       },
       {
         ttl,
-        tags: cacheTags,
+        tags: cacheTags
       }
     );
 
@@ -228,7 +228,7 @@ function getResponseHeaders(res: Response): Record<string, string> {
     'cache-control',
     'expires',
     'last-modified',
-    'etag',
+    'etag'
   ];
 
   cacheableHeaders.forEach((header) => {

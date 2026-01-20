@@ -12,8 +12,7 @@ import { getDatabase } from '../database/init.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { emailService } from '../services/email-service.js';
-import { cache, invalidateCache, QueryCache } from '../middleware/cache.js';
-import { auditLogger } from '../services/audit-logger.js';
+import { cache, invalidateCache } from '../middleware/cache.js';
 import { getUploadsSubdir, UPLOAD_DIRS } from '../config/uploads.js';
 
 const router = express.Router();
@@ -26,14 +25,14 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
+  }
 });
 
 const upload = multer({
   storage,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
-    files: 5, // Max 5 files per upload
+    files: 5 // Max 5 files per upload
   },
   fileFilter: (req, file, cb) => {
     // Allow common file types
@@ -45,7 +44,7 @@ const upload = multer({
       return cb(null, true);
     }
     cb(new Error('Invalid file type'));
-  },
+  }
 });
 
 // Get projects for current client
@@ -54,7 +53,7 @@ router.get(
   authenticateToken,
   cache({
     ttl: 300, // 5 minutes
-    tags: ['projects', 'clients'],
+    tags: ['projects', 'clients']
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const db = getDatabase();
@@ -167,7 +166,7 @@ router.get(
     if (!project) {
       return res.status(404).json({
         error: 'Project not found',
-        code: 'PROJECT_NOT_FOUND',
+        code: 'PROJECT_NOT_FOUND'
       });
     }
 
@@ -208,7 +207,7 @@ router.get(
       project,
       files,
       messages,
-      updates,
+      updates
     });
   })
 );
@@ -229,7 +228,7 @@ router.post(
     if (!name || !projectType || !description) {
       return res.status(400).json({
         error: 'Project name, type, and description are required',
-        code: 'MISSING_REQUIRED_FIELDS',
+        code: 'MISSING_REQUIRED_FIELDS'
       });
     }
 
@@ -259,7 +258,7 @@ router.post(
         companyName: client?.company_name || 'Unknown Company',
         projectType: projectType,
         budget: budget || 'Not specified',
-        timeline: timeline || 'Not specified',
+        timeline: timeline || 'Not specified'
       });
     } catch (emailError) {
       console.error('Failed to send admin notification:', emailError);
@@ -268,7 +267,7 @@ router.post(
     res.status(201).json({
       success: true,
       message: 'Project request submitted successfully. We will review and get back to you soon!',
-      project: newProject,
+      project: newProject
     });
   })
 );
@@ -286,13 +285,13 @@ router.post(
       priority = 'medium',
       start_date,
       due_date,
-      budget,
+      budget
     } = req.body;
 
     if (!client_id || !name) {
       return res.status(400).json({
         error: 'Client ID and project name are required',
-        code: 'MISSING_REQUIRED_FIELDS',
+        code: 'MISSING_REQUIRED_FIELDS'
       });
     }
 
@@ -303,7 +302,7 @@ router.post(
     if (!client) {
       return res.status(400).json({
         error: 'Invalid client ID',
-        code: 'INVALID_CLIENT',
+        code: 'INVALID_CLIENT'
       });
     }
 
@@ -324,7 +323,7 @@ router.post(
 
     res.status(201).json({
       message: 'Project created successfully',
-      project: newProject,
+      project: newProject
     });
   })
 );
@@ -345,14 +344,14 @@ router.put(
     } else {
       project = await db.get('SELECT * FROM projects WHERE id = ? AND client_id = ?', [
         projectId,
-        req.user!.id,
+        req.user!.id
       ]);
     }
 
     if (!project) {
       return res.status(404).json({
         error: 'Project not found',
-        code: 'PROJECT_NOT_FOUND',
+        code: 'PROJECT_NOT_FOUND'
       });
     }
 
@@ -379,7 +378,7 @@ router.put(
       staging_url: 'staging_url',
       production_url: 'production_url',
       deposit_amount: 'deposit_amount',
-      contract_signed_at: 'contract_signed_at',
+      contract_signed_at: 'contract_signed_at'
     };
     const allowedUpdates =
       req.user!.type === 'admin'
@@ -397,7 +396,7 @@ router.put(
     if (updates.length === 0) {
       return res.status(400).json({
         error: 'No valid fields to update',
-        code: 'NO_UPDATES',
+        code: 'NO_UPDATES'
       });
     }
 
@@ -439,10 +438,10 @@ router.put(
           const statusDescriptions: { [key: string]: string } = {
             pending: 'Your project has been queued and will begin soon.',
             'in-progress': 'Work has begun on your project and is progressing well.',
-            'in-review': "Your project is complete and under review. We'll have updates soon.",
+            'in-review': 'Your project is complete and under review. We\'ll have updates soon.',
             completed: 'Congratulations! Your project has been completed successfully.',
             'on-hold':
-              "Your project has been temporarily paused. We'll keep you updated on next steps.",
+              'Your project has been temporarily paused. We\'ll keep you updated on next steps.'
           };
 
           await emailService.sendProjectUpdateEmail(client.email, {
@@ -455,16 +454,16 @@ router.put(
             nextSteps:
               req.body.status === 'completed'
                 ? [
-                    'Review the final deliverables',
-                    'Provide feedback',
-                    'Schedule follow-up if needed',
-                  ]
+                  'Review the final deliverables',
+                  'Provide feedback',
+                  'Schedule follow-up if needed'
+                ]
                 : req.body.status === 'in-review'
                   ? [
-                      'Review will be completed within 2 business days',
-                      'We may contact you for clarifications',
-                    ]
-                  : [],
+                    'Review will be completed within 2 business days',
+                    'We may contact you for clarifications'
+                  ]
+                  : []
           });
 
           // Send admin notification for milestone completion
@@ -478,9 +477,9 @@ router.put(
                 clientId: client.id,
                 clientName: client.contact_name || 'Unknown',
                 companyName: client.company_name || 'Unknown Company',
-                completedAt: new Date().toISOString(),
+                completedAt: new Date().toISOString()
               },
-              timestamp: new Date(),
+              timestamp: new Date()
             });
           }
         }
@@ -492,7 +491,7 @@ router.put(
 
     res.json({
       message: 'Project updated successfully',
-      project: updatedProject,
+      project: updatedProject
     });
   })
 );
@@ -512,14 +511,14 @@ router.get(
     } else {
       project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
         projectId,
-        req.user!.id,
+        req.user!.id
       ]);
     }
 
     if (!project) {
       return res.status(404).json({
         error: 'Project not found',
-        code: 'PROJECT_NOT_FOUND',
+        code: 'PROJECT_NOT_FOUND'
       });
     }
 
@@ -550,7 +549,7 @@ router.post(
     if (!files || files.length === 0) {
       return res.status(400).json({
         error: 'No files uploaded',
-        code: 'NO_FILES',
+        code: 'NO_FILES'
       });
     }
 
@@ -563,14 +562,14 @@ router.post(
     } else {
       project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
         projectId,
-        req.user!.id,
+        req.user!.id
       ]);
     }
 
     if (!project) {
       return res.status(404).json({
         error: 'Project not found',
-        code: 'PROJECT_NOT_FOUND',
+        code: 'PROJECT_NOT_FOUND'
       });
     }
 
@@ -589,7 +588,7 @@ router.post(
           file.path,
           file.size,
           file.mimetype,
-          req.user!.type,
+          req.user!.type
         ]
       );
 
@@ -598,13 +597,13 @@ router.post(
         filename: file.filename,
         originalName: file.originalname,
         size: file.size,
-        mimeType: file.mimetype,
+        mimeType: file.mimetype
       });
     }
 
     res.status(201).json({
       message: `${files.length} file(s) uploaded successfully`,
-      files: uploadedFiles,
+      files: uploadedFiles
     });
   })
 );
@@ -624,14 +623,14 @@ router.get(
     } else {
       project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
         projectId,
-        req.user!.id,
+        req.user!.id
       ]);
     }
 
     if (!project) {
       return res.status(404).json({
         error: 'Project not found',
-        code: 'PROJECT_NOT_FOUND',
+        code: 'PROJECT_NOT_FOUND'
       });
     }
 
@@ -660,7 +659,7 @@ router.post(
     if (!message || message.trim().length === 0) {
       return res.status(400).json({
         error: 'Message content is required',
-        code: 'MISSING_MESSAGE',
+        code: 'MISSING_MESSAGE'
       });
     }
 
@@ -673,14 +672,14 @@ router.post(
     } else {
       project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
         projectId,
-        req.user!.id,
+        req.user!.id
       ]);
     }
 
     if (!project) {
       return res.status(404).json({
         error: 'Project not found',
-        code: 'PROJECT_NOT_FOUND',
+        code: 'PROJECT_NOT_FOUND'
       });
     }
 
@@ -693,7 +692,7 @@ router.post(
         projectId,
         req.user!.type,
         req.user!.email, // or get actual name from user profile
-        message.trim(),
+        message.trim()
       ]
     );
 
@@ -707,7 +706,7 @@ router.post(
 
     res.status(201).json({
       message: 'Message sent successfully',
-      messageData: newMessage,
+      messageData: newMessage
     });
   })
 );
@@ -727,14 +726,14 @@ router.put(
     } else {
       project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
         projectId,
-        req.user!.id,
+        req.user!.id
       ]);
     }
 
     if (!project) {
       return res.status(404).json({
         error: 'Project not found',
-        code: 'PROJECT_NOT_FOUND',
+        code: 'PROJECT_NOT_FOUND'
       });
     }
 
@@ -748,7 +747,7 @@ router.put(
     );
 
     res.json({
-      message: 'Messages marked as read',
+      message: 'Messages marked as read'
     });
   })
 );
@@ -772,14 +771,14 @@ router.get(
     } else {
       project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
         projectId,
-        req.user!.id,
+        req.user!.id
       ]);
     }
 
     if (!project) {
       return res.status(404).json({
         error: 'Project not found',
-        code: 'PROJECT_NOT_FOUND',
+        code: 'PROJECT_NOT_FOUND'
       });
     }
 
@@ -799,7 +798,7 @@ router.get(
       if (milestone.deliverables) {
         try {
           milestone.deliverables = JSON.parse(milestone.deliverables);
-        } catch (e) {
+        } catch (_e) {
           milestone.deliverables = [];
         }
       } else {
@@ -823,7 +822,7 @@ router.post(
     if (!title) {
       return res.status(400).json({
         error: 'Milestone title is required',
-        code: 'MISSING_TITLE',
+        code: 'MISSING_TITLE'
       });
     }
 
@@ -834,7 +833,7 @@ router.post(
     if (!project) {
       return res.status(404).json({
         error: 'Project not found',
-        code: 'PROJECT_NOT_FOUND',
+        code: 'PROJECT_NOT_FOUND'
       });
     }
 
@@ -858,7 +857,7 @@ router.post(
     if (!newMilestone) {
       return res.status(500).json({
         error: 'Milestone created but could not retrieve details',
-        code: 'MILESTONE_CREATION_ERROR',
+        code: 'MILESTONE_CREATION_ERROR'
       });
     }
 
@@ -866,7 +865,7 @@ router.post(
     if (newMilestone.deliverables) {
       try {
         newMilestone.deliverables = JSON.parse(newMilestone.deliverables);
-      } catch (e) {
+      } catch (_e) {
         newMilestone.deliverables = [];
       }
     } else {
@@ -875,7 +874,7 @@ router.post(
 
     res.status(201).json({
       message: 'Milestone created successfully',
-      milestone: newMilestone,
+      milestone: newMilestone
     });
   })
 );
@@ -895,13 +894,13 @@ router.put(
     // Verify milestone belongs to project
     const milestone = await db.get('SELECT * FROM milestones WHERE id = ? AND project_id = ?', [
       milestoneId,
-      projectId,
+      projectId
     ]);
 
     if (!milestone) {
       return res.status(404).json({
         error: 'Milestone not found',
-        code: 'MILESTONE_NOT_FOUND',
+        code: 'MILESTONE_NOT_FOUND'
       });
     }
 
@@ -942,7 +941,7 @@ router.put(
     if (updates.length === 0) {
       return res.status(400).json({
         error: 'No valid fields to update',
-        code: 'NO_UPDATES',
+        code: 'NO_UPDATES'
       });
     }
 
@@ -969,7 +968,7 @@ router.put(
     if (!updatedMilestone) {
       return res.status(500).json({
         error: 'Milestone updated but could not retrieve details',
-        code: 'MILESTONE_UPDATE_ERROR',
+        code: 'MILESTONE_UPDATE_ERROR'
       });
     }
 
@@ -977,7 +976,7 @@ router.put(
     if (updatedMilestone.deliverables) {
       try {
         updatedMilestone.deliverables = JSON.parse(updatedMilestone.deliverables);
-      } catch (e) {
+      } catch (_e) {
         updatedMilestone.deliverables = [];
       }
     } else {
@@ -986,7 +985,7 @@ router.put(
 
     res.json({
       message: 'Milestone updated successfully',
-      milestone: updatedMilestone,
+      milestone: updatedMilestone
     });
   })
 );
@@ -1004,20 +1003,20 @@ router.delete(
     // Verify milestone belongs to project
     const milestone = await db.get('SELECT id FROM milestones WHERE id = ? AND project_id = ?', [
       milestoneId,
-      projectId,
+      projectId
     ]);
 
     if (!milestone) {
       return res.status(404).json({
         error: 'Milestone not found',
-        code: 'MILESTONE_NOT_FOUND',
+        code: 'MILESTONE_NOT_FOUND'
       });
     }
 
     await db.run('DELETE FROM milestones WHERE id = ?', [milestoneId]);
 
     res.json({
-      message: 'Milestone deleted successfully',
+      message: 'Milestone deleted successfully'
     });
   })
 );
@@ -1038,7 +1037,7 @@ router.post(
     if (!title) {
       return res.status(400).json({
         error: 'Update title is required',
-        code: 'MISSING_TITLE',
+        code: 'MISSING_TITLE'
       });
     }
 
@@ -1049,7 +1048,7 @@ router.post(
     if (!project) {
       return res.status(404).json({
         error: 'Project not found',
-        code: 'PROJECT_NOT_FOUND',
+        code: 'PROJECT_NOT_FOUND'
       });
     }
 
@@ -1057,7 +1056,7 @@ router.post(
     if (!validUpdateTypes.includes(update_type)) {
       return res.status(400).json({
         error: 'Invalid update type',
-        code: 'INVALID_UPDATE_TYPE',
+        code: 'INVALID_UPDATE_TYPE'
       });
     }
 
@@ -1079,7 +1078,7 @@ router.post(
 
     res.status(201).json({
       message: 'Project update added successfully',
-      update: newUpdate,
+      update: newUpdate
     });
   })
 );
@@ -1121,7 +1120,7 @@ router.get(
     if (!project) {
       return res.status(404).json({
         error: 'Project not found',
-        code: 'PROJECT_NOT_FOUND',
+        code: 'PROJECT_NOT_FOUND'
       });
     }
 
@@ -1193,7 +1192,7 @@ router.get(
       progressPercentage,
       upcomingMilestones,
       recentUpdates,
-      recentMessages,
+      recentMessages
     });
   })
 );

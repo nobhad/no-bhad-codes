@@ -38,8 +38,8 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
     metadata: {
       ip: req.ip,
       userAgent: req.get('User-Agent'),
-      ...(hasBody && { body: sanitizeBody(req.body) }),
-    },
+      ...(hasBody && { body: sanitizeBody(req.body) })
+    }
   });
 
   // Override res.json to log response
@@ -50,7 +50,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 
     loggerService[logMethod](`${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`, {
       category: 'response',
-      metadata: { statusCode: res.statusCode, duration },
+      metadata: { statusCode: res.statusCode, duration }
     });
 
     return originalJson.call(this, body);

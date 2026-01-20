@@ -82,7 +82,7 @@ async function sendEmail(emailContent: EmailContent): Promise<EmailResult> {
       subject: emailContent.subject,
       text: emailContent.text,
       html: emailContent.html,
-      replyTo: emailConfig.replyTo,
+      replyTo: emailConfig.replyTo
     });
 
     console.log('[EMAIL] Message sent successfully:', info.messageId);
@@ -95,7 +95,7 @@ async function sendEmail(emailContent: EmailContent): Promise<EmailResult> {
     console.log(`Subject: ${emailContent.subject}`);
     return {
       success: false,
-      message: `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      message: `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`
     };
   }
 }
@@ -140,7 +140,7 @@ export async function sendWelcomeEmail(
       Best regards,
       No Bhad Codes Team
     `,
-    html: generateWelcomeEmailHTML(name, portalUrl),
+    html: generateWelcomeEmailHTML(name, portalUrl)
   };
 
   return sendEmail(emailContent);
@@ -191,7 +191,7 @@ export async function sendNewIntakeNotification(
 
       Review the full details in the admin dashboard.
     `,
-    html: generateIntakeNotificationHTML(intakeData, projectId),
+    html: generateIntakeNotificationHTML(intakeData, projectId)
   };
 
   return sendEmail(emailContent);
@@ -395,8 +395,8 @@ export const emailService = {
       secure: config.secure,
       auth: {
         user: config.auth.user,
-        pass: config.auth.pass,
-      },
+        pass: config.auth.pass
+      }
     });
 
     console.log('[EMAIL] Email service initialized successfully');
@@ -425,7 +425,7 @@ export const emailService = {
       initialized: transporter !== null,
       queueSize: 0,
       templatesLoaded: 4,
-      isProcessingQueue: false,
+      isProcessingQueue: false
     };
   },
 
@@ -501,7 +501,7 @@ export const emailService = {
           </div>
         </body>
         </html>
-      `,
+      `
     };
 
     return sendEmail(emailContent);
@@ -609,9 +609,9 @@ export const emailService = {
           </div>
         </body>
         </html>
-      `,
+      `
     };
 
     return sendEmail(emailContent);
-  },
+  }
 };

@@ -88,7 +88,7 @@ export function rateLimit(
     keyGenerator = (req) => req.ip || 'unknown',
     skipIf = () => false,
     message = 'Too many requests',
-    onLimitReached,
+    onLimitReached
   } = options;
 
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -112,7 +112,7 @@ export function rateLimit(
             path: req.path,
             method: req.method,
             userAgent: req.get('User-Agent'),
-            remainingBlockTime: remainingTime,
+            remainingBlockTime: remainingTime
           },
           req
         );
@@ -121,7 +121,7 @@ export function rateLimit(
           success: false,
           error: 'IP blocked due to too many requests',
           retryAfter: remainingTime,
-          code: 'RATE_LIMIT_BLOCKED',
+          code: 'RATE_LIMIT_BLOCKED'
         });
       }
 
@@ -131,13 +131,13 @@ export function rateLimit(
         // Create new window
         currentEntry = {
           count: 1,
-          resetTime: now + windowMs,
+          resetTime: now + windowMs
         };
       } else {
         // Increment existing window
         currentEntry = {
           ...entry,
-          count: entry.count + 1,
+          count: entry.count + 1
         };
       }
 
@@ -147,7 +147,7 @@ export function rateLimit(
       res.set({
         'X-RateLimit-Limit': maxRequests.toString(),
         'X-RateLimit-Remaining': Math.max(0, maxRequests - currentEntry.count).toString(),
-        'X-RateLimit-Reset': new Date(currentEntry.resetTime).toISOString(),
+        'X-RateLimit-Reset': new Date(currentEntry.resetTime).toISOString()
       });
 
       if (currentEntry.count > maxRequests) {
@@ -165,7 +165,7 @@ export function rateLimit(
             requestCount: currentEntry.count,
             maxRequests,
             blockDuration: blockDuration / 1000,
-            userAgent: req.get('User-Agent'),
+            userAgent: req.get('User-Agent')
           },
           req
         );
@@ -178,13 +178,12 @@ export function rateLimit(
           success: false,
           error: message,
           retryAfter: Math.ceil(blockDuration / 1000),
-          code: 'RATE_LIMIT_EXCEEDED',
+          code: 'RATE_LIMIT_EXCEEDED'
         });
       }
 
       next();
-    } catch (error) {
-      const err = error as Error;
+    } catch (_error) {
       await logger.error('Rate limit middleware error');
 
       // On error, allow request through but log it
@@ -228,7 +227,7 @@ export function csrfProtection(
             method: req.method,
             hasHeaderToken: !!token,
             hasCookieToken: !!cookieToken,
-            userAgent: req.get('User-Agent'),
+            userAgent: req.get('User-Agent')
           },
           req
         );
@@ -236,19 +235,18 @@ export function csrfProtection(
         return res.status(403).json({
           success: false,
           error: 'Invalid CSRF token',
-          code: 'CSRF_TOKEN_INVALID',
+          code: 'CSRF_TOKEN_INVALID'
         });
       }
 
       next();
-    } catch (error) {
-      const err = error as Error;
+    } catch (_error) {
       await logger.error('CSRF protection middleware error');
 
       res.status(500).json({
         success: false,
         error: 'CSRF protection error',
-        code: 'CSRF_SYSTEM_ERROR',
+        code: 'CSRF_SYSTEM_ERROR'
       });
     }
   };
@@ -276,7 +274,7 @@ export function ipFilter(
           {
             path: req.path,
             method: req.method,
-            headers: req.headers,
+            headers: req.headers
           },
           req
         );
@@ -284,7 +282,7 @@ export function ipFilter(
         return res.status(400).json({
           success: false,
           error: 'Unable to determine IP address',
-          code: 'IP_UNKNOWN',
+          code: 'IP_UNKNOWN'
         });
       }
 
@@ -296,7 +294,7 @@ export function ipFilter(
             ip,
             path: req.path,
             method: req.method,
-            userAgent: req.get('User-Agent'),
+            userAgent: req.get('User-Agent')
           },
           req
         );
@@ -304,7 +302,7 @@ export function ipFilter(
         return res.status(403).json({
           success: false,
           error: 'Access denied',
-          code: 'IP_BLACKLISTED',
+          code: 'IP_BLACKLISTED'
         });
       }
 
@@ -317,7 +315,7 @@ export function ipFilter(
             path: req.path,
             method: req.method,
             whitelist: whitelist.length,
-            userAgent: req.get('User-Agent'),
+            userAgent: req.get('User-Agent')
           },
           req
         );
@@ -325,13 +323,12 @@ export function ipFilter(
         return res.status(403).json({
           success: false,
           error: 'Access denied',
-          code: 'IP_NOT_WHITELISTED',
+          code: 'IP_NOT_WHITELISTED'
         });
       }
 
       next();
-    } catch (error) {
-      const err = error as Error;
+    } catch (_error) {
       await logger.error('IP filter middleware error');
 
       next(); // Allow through on error
@@ -352,7 +349,7 @@ export function requestSizeLimit(
   const {
     maxBodySize = 10 * 1024 * 1024, // 10MB
     maxUrlLength = 2048,
-    maxHeaderSize = 8192,
+    maxHeaderSize = 8192
   } = options;
 
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -366,7 +363,7 @@ export function requestSizeLimit(
             urlLength: req.url.length,
             maxUrlLength,
             path: req.path,
-            method: req.method,
+            method: req.method
           },
           req
         );
@@ -374,7 +371,7 @@ export function requestSizeLimit(
         return res.status(414).json({
           success: false,
           error: 'URL too long',
-          code: 'URL_TOO_LONG',
+          code: 'URL_TOO_LONG'
         });
       }
 
@@ -388,7 +385,7 @@ export function requestSizeLimit(
             headerSize,
             maxHeaderSize,
             path: req.path,
-            method: req.method,
+            method: req.method
           },
           req
         );
@@ -396,7 +393,7 @@ export function requestSizeLimit(
         return res.status(431).json({
           success: false,
           error: 'Request headers too large',
-          code: 'HEADERS_TOO_LARGE',
+          code: 'HEADERS_TOO_LARGE'
         });
       }
 
@@ -411,7 +408,7 @@ export function requestSizeLimit(
             contentLength: parseInt(contentLength),
             maxBodySize,
             path: req.path,
-            method: req.method,
+            method: req.method
           },
           req
         );
@@ -419,13 +416,12 @@ export function requestSizeLimit(
         return res.status(413).json({
           success: false,
           error: 'Request body too large',
-          code: 'BODY_TOO_LARGE',
+          code: 'BODY_TOO_LARGE'
         });
       }
 
       next();
-    } catch (error) {
-      const err = error as Error;
+    } catch (_error) {
       await logger.error('Request size limit middleware error');
 
       next();
@@ -448,7 +444,7 @@ export function suspiciousActivityDetector(
     maxPathTraversal = 3,
     maxSqlInjectionAttempts = 3,
     maxXssAttempts = 3,
-    blockDuration = 24 * 60 * 60 * 1000, // 24 hours
+    blockDuration = 24 * 60 * 60 * 1000 // 24 hours
   } = options;
 
   const suspiciousActivity = new Map<
@@ -471,7 +467,7 @@ export function suspiciousActivityDetector(
         pathTraversal: 0,
         sqlInjection: 0,
         xssAttempts: 0,
-        lastActivity: now,
+        lastActivity: now
       };
 
       // Check if IP is blocked
@@ -482,7 +478,7 @@ export function suspiciousActivityDetector(
             ip,
             path: req.path,
             method: req.method,
-            blockExpiry: activity.blockExpiry,
+            blockExpiry: activity.blockExpiry
           },
           req
         );
@@ -490,7 +486,7 @@ export function suspiciousActivityDetector(
         return res.status(403).json({
           success: false,
           error: 'Access denied due to suspicious activity',
-          code: 'SUSPICIOUS_ACTIVITY_BLOCKED',
+          code: 'SUSPICIOUS_ACTIVITY_BLOCKED'
         });
       }
 
@@ -509,7 +505,7 @@ export function suspiciousActivityDetector(
             ip,
             path: req.path,
             fullUrl,
-            attempts: activity.pathTraversal,
+            attempts: activity.pathTraversal
           },
           req
         );
@@ -519,7 +515,7 @@ export function suspiciousActivityDetector(
       const sqlPatterns = [
         /(\b(select|insert|update|delete|drop|union|exec)\b)/gi,
         /('|(\\')|(;)|(--)|(\|\|))/g,
-        /(script|javascript|vbscript|onload|onerror)/gi,
+        /(script|javascript|vbscript|onload|onerror)/gi
       ];
 
       if (sqlPatterns.some((pattern) => pattern.test(fullUrl) || pattern.test(body))) {
@@ -531,7 +527,7 @@ export function suspiciousActivityDetector(
           {
             ip,
             path: req.path,
-            attempts: activity.sqlInjection,
+            attempts: activity.sqlInjection
           },
           req
         );
@@ -543,7 +539,7 @@ export function suspiciousActivityDetector(
         /javascript:/gi,
         /<iframe/gi,
         /onerror\s*=/gi,
-        /onload\s*=/gi,
+        /onload\s*=/gi
       ];
 
       if (xssPatterns.some((pattern) => pattern.test(fullUrl) || pattern.test(body))) {
@@ -555,7 +551,7 @@ export function suspiciousActivityDetector(
           {
             ip,
             path: req.path,
-            attempts: activity.xssAttempts,
+            attempts: activity.xssAttempts
           },
           req
         );
@@ -582,7 +578,7 @@ export function suspiciousActivityDetector(
               pathTraversal: activity.pathTraversal,
               sqlInjection: activity.sqlInjection,
               xssAttempts: activity.xssAttempts,
-              blockDuration: blockDuration / 1000,
+              blockDuration: blockDuration / 1000
             },
             req
           );
@@ -590,14 +586,13 @@ export function suspiciousActivityDetector(
           return res.status(403).json({
             success: false,
             error: 'Access denied due to suspicious activity',
-            code: 'SUSPICIOUS_ACTIVITY_DETECTED',
+            code: 'SUSPICIOUS_ACTIVITY_DETECTED'
           });
         }
       }
 
       next();
-    } catch (error) {
-      const err = error as Error;
+    } catch (_error) {
       await logger.error('Suspicious activity detector error');
 
       next();
@@ -616,14 +611,14 @@ export function requestFingerprint(req: Request, res: Response, next: NextFuncti
       acceptLanguage: req.get('Accept-Language'),
       acceptEncoding: req.get('Accept-Encoding'),
       connection: req.get('Connection'),
-      timestamp: Date.now(),
+      timestamp: Date.now()
     };
 
     // Add fingerprint to request for use by other middleware
     (req as any).fingerprint = fingerprint;
 
     next();
-  } catch (error) {
+  } catch (_error) {
     // Don't block request on fingerprinting error
     next();
   }

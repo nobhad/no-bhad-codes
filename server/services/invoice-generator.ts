@@ -108,7 +108,7 @@ export async function generateInvoice(
     ecommerce: { price: 8000, description: 'E-commerce Store Development' },
     'web-app': { price: 15000, description: 'Web Application Development' },
     'browser-extension': { price: 6000, description: 'Browser Extension Development' },
-    other: { price: 3000, description: 'Custom Web Project Development' },
+    other: { price: 3000, description: 'Custom Web Project Development' }
   };
 
   const baseItem = basePricing[projectType] || basePricing['other'];
@@ -121,8 +121,8 @@ export async function generateInvoice(
       type: 'base',
       quantity: 1,
       unitPrice: baseItem.price,
-      totalPrice: baseItem.price,
-    },
+      totalPrice: baseItem.price
+    }
   ];
 
   let itemId = 2;
@@ -172,13 +172,13 @@ export async function generateInvoice(
     paymentTerms,
     notes: generateInvoiceNotes(intakeData),
     termsAndConditions: getTermsAndConditions(),
-    createdAt: new Date().toISOString(),
+    createdAt: new Date().toISOString()
   };
 
   return invoice;
 }
 
-function generateFeatureLineItems(features: string[], projectType: string): LineItem[] {
+function generateFeatureLineItems(features: string[], _projectType: string): LineItem[] {
   const featurePricing: Record<string, FeaturePricing> = {
     // Universal features
     'contact-form': { price: 200, description: 'Contact Form Integration' },
@@ -225,7 +225,7 @@ function generateFeatureLineItems(features: string[], projectType: string): Line
 
     // Simple site features
     'age-verification': { price: 400, description: 'Age Verification System' },
-    'basic-only': { price: 0, description: 'Basic Static Pages (included)' },
+    'basic-only': { price: 0, description: 'Basic Static Pages (included)' }
   };
 
   const lineItems: LineItem[] = [];
@@ -240,7 +240,7 @@ function generateFeatureLineItems(features: string[], projectType: string): Line
           type: 'feature',
           quantity: 1,
           unitPrice: item.price,
-          totalPrice: item.price,
+          totalPrice: item.price
         });
       }
     }
@@ -256,7 +256,7 @@ function generateAddonLineItems(addons: string[]): LineItem[] {
     analytics: { price: 300, description: 'Advanced Analytics Configuration' },
     'backup-system': { price: 400, description: 'Automated Backup System Setup' },
     'ongoing-support': { price: 0, description: 'Ongoing Support Plan (Monthly billing)' },
-    copywriting: { price: 1000, description: 'Professional Copywriting Services' },
+    copywriting: { price: 1000, description: 'Professional Copywriting Services' }
   };
 
   const lineItems: LineItem[] = [];
@@ -271,7 +271,7 @@ function generateAddonLineItems(addons: string[]): LineItem[] {
           type: 'addon',
           quantity: 1,
           unitPrice: item.price,
-          totalPrice: item.price,
+          totalPrice: item.price
         });
       }
     }
@@ -290,7 +290,7 @@ function calculateComplexityAdjustments(intakeData: IntakeData): LineItem[] {
       type: 'adjustment',
       quantity: 1,
       unitPrice: 1500,
-      totalPrice: 1500,
+      totalPrice: 1500
     });
   } else if (intakeData.designLevel === 'partial-design') {
     adjustments.push({
@@ -298,7 +298,7 @@ function calculateComplexityAdjustments(intakeData: IntakeData): LineItem[] {
       type: 'adjustment',
       quantity: 1,
       unitPrice: 500,
-      totalPrice: 500,
+      totalPrice: 500
     });
   }
 
@@ -309,7 +309,7 @@ function calculateComplexityAdjustments(intakeData: IntakeData): LineItem[] {
       type: 'adjustment',
       quantity: 1,
       unitPrice: 1200,
-      totalPrice: 1200,
+      totalPrice: 1200
     });
   } else if (intakeData.contentStatus === 'partial') {
     adjustments.push({
@@ -317,7 +317,7 @@ function calculateComplexityAdjustments(intakeData: IntakeData): LineItem[] {
       type: 'adjustment',
       quantity: 1,
       unitPrice: 600,
-      totalPrice: 600,
+      totalPrice: 600
     });
   }
 
@@ -334,7 +334,7 @@ function calculateComplexityAdjustments(intakeData: IntakeData): LineItem[] {
       type: 'adjustment',
       quantity: complexityMultiplier,
       unitPrice: 400,
-      totalPrice: complexityMultiplier * 400,
+      totalPrice: complexityMultiplier * 400
     });
   }
 
@@ -342,7 +342,7 @@ function calculateComplexityAdjustments(intakeData: IntakeData): LineItem[] {
   const pageAdjustments: Record<string, PageAdjustment> = {
     '11-20': { price: 800, description: 'Additional Pages Development (11-20 pages)' },
     '20-plus': { price: 1500, description: 'Large Site Development (20+ pages)' },
-    dynamic: { price: 1200, description: 'Dynamic Content Management' },
+    dynamic: { price: 1200, description: 'Dynamic Content Management' }
   };
 
   if (intakeData.pages && pageAdjustments[intakeData.pages]) {
@@ -352,7 +352,7 @@ function calculateComplexityAdjustments(intakeData: IntakeData): LineItem[] {
       type: 'adjustment',
       quantity: 1,
       unitPrice: adjustment.price,
-      totalPrice: adjustment.price,
+      totalPrice: adjustment.price
     });
   }
 
@@ -365,7 +365,7 @@ function calculateComplexityAdjustments(intakeData: IntakeData): LineItem[] {
       unitPrice: 0, // Will be calculated as percentage
       totalPrice: 0, // Will be calculated later
       isPercentage: true,
-      percentage: 0.5,
+      percentage: 0.5
     });
   }
 
@@ -383,7 +383,7 @@ function generatePaymentTerms(total: number, timeline: string): PaymentTerm[] {
         phase: 'Project Completion',
         amount: total * 0.5,
         percentage: 50,
-        dueInDays: getProjectDurationDays(timeline),
+        dueInDays: getProjectDurationDays(timeline)
       }
     );
   } else if (total < 10000) {
@@ -394,13 +394,13 @@ function generatePaymentTerms(total: number, timeline: string): PaymentTerm[] {
         phase: 'Midpoint Review',
         amount: total * 0.4,
         percentage: 40,
-        dueInDays: Math.floor(getProjectDurationDays(timeline) * 0.5),
+        dueInDays: Math.floor(getProjectDurationDays(timeline) * 0.5)
       },
       {
         phase: 'Project Completion',
         amount: total * 0.2,
         percentage: 20,
-        dueInDays: getProjectDurationDays(timeline),
+        dueInDays: getProjectDurationDays(timeline)
       }
     );
   } else {
@@ -412,13 +412,13 @@ function generatePaymentTerms(total: number, timeline: string): PaymentTerm[] {
         phase: 'Design Approval',
         amount: total * 0.25,
         percentage: 25,
-        dueInDays: Math.floor(duration * 0.25),
+        dueInDays: Math.floor(duration * 0.25)
       },
       {
         phase: 'Development Milestone',
         amount: total * 0.25,
         percentage: 25,
-        dueInDays: Math.floor(duration * 0.75),
+        dueInDays: Math.floor(duration * 0.75)
       },
       { phase: 'Project Completion', amount: total * 0.25, percentage: 25, dueInDays: duration }
     );
@@ -433,7 +433,7 @@ function getProjectDurationDays(timeline: string): number {
     '1-month': 30,
     '1-3-months': 60,
     '3-6-months': 120,
-    flexible: 90,
+    flexible: 90
   };
   return durations[timeline] || 60;
 }
@@ -460,7 +460,7 @@ function generateInvoiceNotes(intakeData: IntakeData): string[] {
   const notes = [
     `Project: ${intakeData.company} - ${getProjectTypeDisplayName(intakeData.projectType)}`,
     `Timeline: ${intakeData.timeline}`,
-    'This quote is valid for 30 days from the issue date.',
+    'This quote is valid for 30 days from the issue date.'
   ];
 
   if (intakeData.timeline === 'asap') {
@@ -482,7 +482,7 @@ function getTermsAndConditions(): string[] {
     'Client is responsible for providing content and assets in timely manner.',
     'Final payment is due before project files are delivered.',
     'Hosting and domain costs are separate and billed directly by providers.',
-    'Maintenance and support services are available under separate agreement.',
+    'Maintenance and support services are available under separate agreement.'
   ];
 }
 
@@ -494,7 +494,7 @@ function getProjectTypeDisplayName(projectType: string): string {
     ecommerce: 'E-commerce Store',
     'web-app': 'Web Application',
     'browser-extension': 'Browser Extension',
-    other: 'Custom Project',
+    other: 'Custom Project'
   };
   return displayNames[projectType] || 'Web Project';
 }

@@ -9,7 +9,7 @@
 
 import Database from 'sqlite3';
 import { readFileSync, readdirSync, existsSync } from 'fs';
-import { join, resolve } from 'path';
+import { join, resolve as pathResolve } from 'path';
 
 export interface Migration {
   id: number;
@@ -32,7 +32,7 @@ export class MigrationManager {
 
   constructor(database: Database.Database, migrationsDir: string = './server/database/migrations') {
     this.db = database;
-    this.migrationsDir = resolve(migrationsDir);
+    this.migrationsDir = pathResolve(migrationsDir);
   }
 
   /**
@@ -96,7 +96,7 @@ export class MigrationManager {
         name,
         filename,
         up,
-        down,
+        down
       };
     });
   }
@@ -258,7 +258,7 @@ export class MigrationManager {
     return {
       executed,
       pending,
-      total,
+      total
     };
   }
 

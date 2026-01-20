@@ -9,7 +9,7 @@
  */
 
 import sqlite3 from 'sqlite3';
-import { resolve, dirname } from 'path';
+import { dirname } from 'path';
 import fs from 'fs';
 
 interface DatabaseRow {
@@ -88,7 +88,7 @@ class DatabaseConnectionPool implements Database {
           db,
           inUse: false,
           lastUsed: Date.now(),
-          id: Math.random().toString(36).substring(7),
+          id: Math.random().toString(36).substring(7)
         };
 
         resolve(connection);
@@ -229,7 +229,7 @@ class DatabaseConnectionPool implements Database {
             else resolve({ lastID: this.lastID, changes: this.changes });
           });
         });
-      },
+      }
     };
 
     try {
@@ -289,7 +289,7 @@ class DatabaseConnectionPool implements Database {
       idleConnections,
       totalConnections: this.connections.length,
       maxConnections: this.maxConnections,
-      queuedRequests: this.waitingQueue.length,
+      queuedRequests: this.waitingQueue.length
     };
   }
 }

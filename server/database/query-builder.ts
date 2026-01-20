@@ -360,11 +360,11 @@ export abstract class BaseQueryBuilder<T = any> {
       await logger.debug('Executing database query');
 
       const rows = await new Promise<R[]>((resolve, reject) => {
-        this.db.all(sql, params, (error, rows) => {
+        this.db.all(sql, params, (error, resultRows) => {
           if (error) {
             reject(error);
           } else {
-            resolve(rows as R[]);
+            resolve(resultRows as R[]);
           }
         });
       });
@@ -378,14 +378,14 @@ export abstract class BaseQueryBuilder<T = any> {
         rowCount: rows.length,
         executionTime,
         sql,
-        params,
+        params
       };
     } catch (error) {
-      const executionTime = Date.now() - startTime;
+      const _executionTime = Date.now() - startTime;
 
       const err = error as Error;
       await logger.error('Database query failed', {
-        message: err.message,
+        message: err.message
       });
 
       throw new Error(`Database query failed: ${err.message}`);
@@ -402,26 +402,26 @@ export abstract class BaseQueryBuilder<T = any> {
       await logger.debug('Executing single row query');
 
       const row = await new Promise<R | null>((resolve, reject) => {
-        this.db.get(sql, params, (error, row) => {
+        this.db.get(sql, params, (error, resultRow) => {
           if (error) {
             reject(error);
           } else {
-            resolve((row as R) || null);
+            resolve((resultRow as R) || null);
           }
         });
       });
 
-      const executionTime = Date.now() - startTime;
+      const _executionTime = Date.now() - startTime;
 
       await logger.debug('Single row query completed');
 
       return row;
     } catch (error) {
-      const executionTime = Date.now() - startTime;
+      const _executionTime = Date.now() - startTime;
 
       const err = error as Error;
       await logger.error('Single row query failed', {
-        message: err.message,
+        message: err.message
       });
 
       throw new Error(`Database query failed: ${err.message}`);
@@ -457,7 +457,7 @@ export class SelectQueryBuilder<T = any> extends BaseQueryBuilder<T> {
 
     return {
       sql,
-      params: [...whereClause.params, ...havingClause.params],
+      params: [...whereClause.params, ...havingClause.params]
     };
   }
 
@@ -533,8 +533,8 @@ export class SelectQueryBuilder<T = any> extends BaseQueryBuilder<T> {
         total,
         totalPages,
         hasNext: page < totalPages,
-        hasPrev: page > 1,
-      },
+        hasPrev: page > 1
+      }
     };
   }
 
@@ -639,23 +639,23 @@ export class InsertQueryBuilder<T = any> extends BaseQueryBuilder<T> {
           } else {
             resolve({
               insertId: this.lastID,
-              changes: this.changes,
+              changes: this.changes
             });
           }
         });
       });
 
-      const executionTime = Date.now() - startTime;
+      const _executionTime = Date.now() - startTime;
 
       await logger.debug('Insert query completed');
 
       return result;
     } catch (error) {
-      const executionTime = Date.now() - startTime;
+      const _catchExecutionTime = Date.now() - startTime;
 
       const err = error as Error;
       await logger.error('Insert query failed', {
-        message: err.message,
+        message: err.message
       });
 
       throw new Error(`Insert query failed: ${err.message}`);
@@ -729,7 +729,7 @@ export class UpdateQueryBuilder<T = any> extends BaseQueryBuilder<T> {
 
     return {
       sql,
-      params: [...updateParams, ...whereClause.params],
+      params: [...updateParams, ...whereClause.params]
     };
   }
 
@@ -753,17 +753,17 @@ export class UpdateQueryBuilder<T = any> extends BaseQueryBuilder<T> {
         });
       });
 
-      const executionTime = Date.now() - startTime;
+      const _executionTime = Date.now() - startTime;
 
       await logger.debug('Update query completed');
 
       return result;
     } catch (error) {
-      const executionTime = Date.now() - startTime;
+      const _catchExecutionTime = Date.now() - startTime;
 
       const err = error as Error;
       await logger.error('Update query failed', {
-        message: err.message,
+        message: err.message
       });
 
       throw new Error(`Update query failed: ${err.message}`);
@@ -790,7 +790,7 @@ export class DeleteQueryBuilder<T = any> extends BaseQueryBuilder<T> {
 
     return {
       sql,
-      params: whereClause.params,
+      params: whereClause.params
     };
   }
 
@@ -814,17 +814,17 @@ export class DeleteQueryBuilder<T = any> extends BaseQueryBuilder<T> {
         });
       });
 
-      const executionTime = Date.now() - startTime;
+      const _executionTime = Date.now() - startTime;
 
       await logger.debug('Delete query completed');
 
       return result;
     } catch (error) {
-      const executionTime = Date.now() - startTime;
+      const _catchExecutionTime = Date.now() - startTime;
 
       const err = error as Error;
       await logger.error('Delete query failed', {
-        message: err.message,
+        message: err.message
       });
 
       throw new Error(`Delete query failed: ${err.message}`);
@@ -880,11 +880,11 @@ export class QueryBuilder {
       await logger.debug('Executing raw SQL query');
 
       const rows = await new Promise<T[]>((resolve, reject) => {
-        this.db.all(sql, params, (error, rows) => {
+        this.db.all(sql, params, (error, resultRows) => {
           if (error) {
             reject(error);
           } else {
-            resolve(rows as T[]);
+            resolve(resultRows as T[]);
           }
         });
       });
@@ -898,14 +898,14 @@ export class QueryBuilder {
         rowCount: rows.length,
         executionTime,
         sql,
-        params,
+        params
       };
     } catch (error) {
-      const executionTime = Date.now() - startTime;
+      const _executionTime = Date.now() - startTime;
 
       const err = error as Error;
       await logger.error('Database query failed', {
-        message: err.message,
+        message: err.message
       });
 
       throw new Error(`Database query failed: ${err.message}`);

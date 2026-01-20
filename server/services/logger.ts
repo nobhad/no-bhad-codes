@@ -19,7 +19,7 @@ export const LogLevel = {
   ERROR: 0,
   WARN: 1,
   INFO: 2,
-  DEBUG: 3,
+  DEBUG: 3
 } as const;
 
 export type LogLevelType = keyof typeof LogLevel;
@@ -71,7 +71,7 @@ export class LoggerService {
       errorFilePath: config.LOG_ERROR_FILE || './logs/error.log',
       maxFileSize: config.LOG_MAX_SIZE || '10m',
       maxFiles: config.LOG_MAX_FILES || '14d',
-      enableColors: config.NODE_ENV === 'development',
+      enableColors: config.NODE_ENV === 'development'
     };
 
     this.currentLogLevel = LogLevel[this.config.level];
@@ -143,7 +143,7 @@ export class LoggerService {
       ERROR: '\\x1b[31m', // Red
       WARN: '\\x1b[33m', // Yellow
       INFO: '\\x1b[36m', // Cyan
-      DEBUG: '\\x1b[35m', // Magenta
+      DEBUG: '\\x1b[35m' // Magenta
     };
 
     const reset = '\\x1b[0m';
@@ -225,7 +225,7 @@ export class LoggerService {
         .map((file) => ({
           name: file,
           path: path.join(dir, file),
-          stats: fs.statSync(path.join(dir, file)),
+          stats: fs.statSync(path.join(dir, file))
         }))
         .sort((a, b) => b.stats.mtime.getTime() - a.stats.mtime.getTime());
 
@@ -260,7 +260,7 @@ export class LoggerService {
       timestamp: new Date().toISOString(),
       level,
       message,
-      ...options,
+      ...options
     };
   }
 
@@ -331,7 +331,7 @@ export class LoggerService {
       statusCode: res.statusCode,
       userAgent: req.get('user-agent'),
       ip: req.ip,
-      duration: duration ? `${duration}ms` : undefined,
+      duration: duration ? `${duration}ms` : undefined
     };
 
     const level = res.statusCode >= 400 ? 'WARN' : 'INFO';
@@ -343,7 +343,7 @@ export class LoggerService {
         requestId: req.id,
         userId: req.user?.id,
         ip: req.ip,
-        userAgent: req.get('user-agent'),
+        userAgent: req.get('user-agent')
       })
     );
   }
@@ -355,7 +355,7 @@ export class LoggerService {
     await this.error(error.message, {
       ...context,
       error,
-      category: context.category || 'APPLICATION',
+      category: context.category || 'APPLICATION'
     });
   }
 
@@ -368,7 +368,7 @@ export class LoggerService {
       metadata: details,
       ip: req?.ip,
       userAgent: req?.get('user-agent'),
-      userId: req?.user?.id,
+      userId: req?.user?.id
     });
   }
 
@@ -378,7 +378,7 @@ export class LoggerService {
   async logDatabase(operation: string, details: Record<string, any> = {}): Promise<void> {
     await this.info(`Database: ${operation}`, {
       category: 'DATABASE',
-      metadata: details,
+      metadata: details
     });
   }
 
@@ -393,7 +393,7 @@ export class LoggerService {
       const enhancedEntry = {
         ...entry,
         ...context,
-        metadata: { ...context.metadata, ...entry.metadata },
+        metadata: { ...context.metadata, ...entry.metadata }
       };
       await originalWriteLog(enhancedEntry);
     };

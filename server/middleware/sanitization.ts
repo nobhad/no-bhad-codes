@@ -101,7 +101,7 @@ export function sanitizeInputs(
     sanitizeBody = true,
     sanitizeQuery = true,
     sanitizeParams = true,
-    skipPaths = [],
+    skipPaths = []
   } = options;
 
   return (req: Request, res: Response, next: NextFunction) => {

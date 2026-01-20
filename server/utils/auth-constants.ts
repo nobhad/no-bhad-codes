@@ -26,8 +26,8 @@ export const PASSWORD_CONFIG = {
     REQUIRE_UPPERCASE: true,
     REQUIRE_LOWERCASE: true,
     REQUIRE_NUMBER: true,
-    REQUIRE_SPECIAL: true,
-  },
+    REQUIRE_SPECIAL: true
+  }
 } as const;
 
 /**
@@ -47,7 +47,7 @@ export const JWT_CONFIG = {
   MAGIC_LINK_EXPIRY: '15m',
 
   /** Password reset token expiry */
-  RESET_TOKEN_EXPIRY: '1h',
+  RESET_TOKEN_EXPIRY: '1h'
 } as const;
 
 /**
@@ -70,7 +70,7 @@ export const TIME_MS = {
   WEEK: 7 * 24 * 60 * 60 * 1000,
 
   /** 30 days */
-  MONTH: 30 * 24 * 60 * 60 * 1000,
+  MONTH: 30 * 24 * 60 * 60 * 1000
 } as const;
 
 /**
@@ -80,44 +80,44 @@ export const RATE_LIMIT_CONFIG = {
   /** Login attempts before lockout */
   LOGIN: {
     MAX_ATTEMPTS: config.RATE_LIMIT_LOGIN_MAX || 5,
-    WINDOW_MS: TIME_MS.FIFTEEN_MINUTES,
+    WINDOW_MS: TIME_MS.FIFTEEN_MINUTES
   },
 
   /** Forgot password requests */
   FORGOT_PASSWORD: {
     MAX_ATTEMPTS: 3,
-    WINDOW_MS: TIME_MS.FIFTEEN_MINUTES,
+    WINDOW_MS: TIME_MS.FIFTEEN_MINUTES
   },
 
   /** Admin login (stricter) */
   ADMIN_LOGIN: {
     MAX_ATTEMPTS: 3,
-    WINDOW_MS: TIME_MS.FIFTEEN_MINUTES,
+    WINDOW_MS: TIME_MS.FIFTEEN_MINUTES
   },
 
   /** Magic link requests */
   MAGIC_LINK: {
     MAX_ATTEMPTS: 3,
-    WINDOW_MS: TIME_MS.FIFTEEN_MINUTES,
+    WINDOW_MS: TIME_MS.FIFTEEN_MINUTES
   },
 
   /** Contact form submissions */
   CONTACT_FORM: {
     MAX_ATTEMPTS: config.RATE_LIMIT_CONTACT_MAX || 5,
-    WINDOW_MS: TIME_MS.HOUR,
+    WINDOW_MS: TIME_MS.HOUR
   },
 
   /** Intake form submissions */
   INTAKE_FORM: {
     MAX_ATTEMPTS: 3,
-    WINDOW_MS: TIME_MS.DAY,
+    WINDOW_MS: TIME_MS.DAY
   },
 
   /** File uploads */
   FILE_UPLOAD: {
     MAX_ATTEMPTS: 10,
-    WINDOW_MS: 10 * TIME_MS.MINUTE,
-  },
+    WINDOW_MS: 10 * TIME_MS.MINUTE
+  }
 } as const;
 
 /**
@@ -128,7 +128,7 @@ export const SESSION_CONFIG = {
   TIMEOUT_MS: TIME_MS.HOUR,
 
   /** Session extension threshold (extend when less than this remaining) */
-  EXTENSION_THRESHOLD_MS: 10 * TIME_MS.MINUTE,
+  EXTENSION_THRESHOLD_MS: 10 * TIME_MS.MINUTE
 } as const;
 
 /**
@@ -144,7 +144,7 @@ export const COOKIE_CONFIG = {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict' as const,
     maxAge: TIME_MS.WEEK, // 7 days
-    path: '/',
+    path: '/'
   },
 
   /** Cookie options for admin tokens (shorter lived) */
@@ -153,8 +153,8 @@ export const COOKIE_CONFIG = {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict' as const,
     maxAge: TIME_MS.HOUR, // 1 hour
-    path: '/',
-  },
+    path: '/'
+  }
 } as const;
 
 /**
@@ -192,6 +192,6 @@ export function validatePassword(password: string): { valid: boolean; errors: st
 
   return {
     valid: errors.length === 0,
-    errors,
+    errors
   };
 }
