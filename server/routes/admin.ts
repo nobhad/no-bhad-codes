@@ -14,6 +14,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middle
 import { cacheService } from '../services/cache-service.js';
 import { emailService } from '../services/email-service.js';
 import { errorTracker } from '../services/error-tracking.js';
+import { queryStats } from '../services/query-stats.js';
 import { getDatabase } from '../database/init.js';
 
 const router = express.Router();
@@ -891,6 +892,70 @@ router.get(
       console.error('Error reading bundle stats:', error);
       res.status(500).json({ error: 'Failed to read bundle stats' });
     }
+  })
+);
+
+/**
+ * @swagger
+ * /api/admin/query-stats:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: Get database query performance statistics
+ *     description: Returns query execution times, slow query logs, and performance metrics
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Query statistics retrieved successfully
+ */
+router.get(
+  '/query-stats',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
+    const stats = queryStats.getStats();
+
+    res.json({
+      success: true,
+      data: {
+        ...stats,
+        threshold: queryStats.getThreshold(),
+        summary: {
+          totalQueries: stats.totalQueries,
+          slowQueries: stats.slowQueries,
+          slowQueryPercentage: stats.totalQueries > 0
+            ? `${((stats.slowQueries / stats.totalQueries) * 100).toFixed(2)}%`
+            : '0%',
+          avgExecutionTime: `${stats.avgExecutionTime}ms`,
+          maxExecutionTime: `${stats.maxExecutionTime}ms`
+        }
+      }
+    });
+  })
+);
+
+/**
+ * @swagger
+ * /api/admin/query-stats/reset:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: Reset query statistics
+ *     security:
+ *       - BearerAuth: []
+ */
+router.post(
+  '/query-stats/reset',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
+    queryStats.reset();
+
+    res.json({
+      success: true,
+      message: 'Query statistics reset successfully'
+    });
   })
 );
 

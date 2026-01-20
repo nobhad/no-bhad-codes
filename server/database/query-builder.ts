@@ -10,6 +10,7 @@
 
 import { Database } from 'sqlite3';
 import { logger } from '../services/logger.js';
+import { queryStats } from '../services/query-stats.js';
 
 // Type definitions
 export type WhereOperator =
@@ -371,6 +372,9 @@ export abstract class BaseQueryBuilder<T = any> {
 
       const executionTime = Date.now() - startTime;
 
+      // Track query performance
+      queryStats.record('select', this.tableName, executionTime, sql);
+
       await logger.debug('Database query completed');
 
       return {
@@ -381,7 +385,10 @@ export abstract class BaseQueryBuilder<T = any> {
         params
       };
     } catch (error) {
-      const _executionTime = Date.now() - startTime;
+      const executionTime = Date.now() - startTime;
+
+      // Track failed query
+      queryStats.record('select', this.tableName, executionTime, sql);
 
       const err = error as Error;
       await logger.error('Database query failed', {
@@ -411,13 +418,19 @@ export abstract class BaseQueryBuilder<T = any> {
         });
       });
 
-      const _executionTime = Date.now() - startTime;
+      const executionTime = Date.now() - startTime;
+
+      // Track query performance
+      queryStats.record('select', this.tableName, executionTime, sql);
 
       await logger.debug('Single row query completed');
 
       return row;
     } catch (error) {
-      const _executionTime = Date.now() - startTime;
+      const executionTime = Date.now() - startTime;
+
+      // Track failed query
+      queryStats.record('select', this.tableName, executionTime, sql);
 
       const err = error as Error;
       await logger.error('Single row query failed', {
@@ -645,13 +658,19 @@ export class InsertQueryBuilder<T = any> extends BaseQueryBuilder<T> {
         });
       });
 
-      const _executionTime = Date.now() - startTime;
+      const executionTime = Date.now() - startTime;
+
+      // Track query performance
+      queryStats.record('insert', this.tableName, executionTime, sql);
 
       await logger.debug('Insert query completed');
 
       return result;
     } catch (error) {
-      const _catchExecutionTime = Date.now() - startTime;
+      const executionTime = Date.now() - startTime;
+
+      // Track failed query
+      queryStats.record('insert', this.tableName, executionTime, sql);
 
       const err = error as Error;
       await logger.error('Insert query failed', {
@@ -753,13 +772,19 @@ export class UpdateQueryBuilder<T = any> extends BaseQueryBuilder<T> {
         });
       });
 
-      const _executionTime = Date.now() - startTime;
+      const executionTime = Date.now() - startTime;
+
+      // Track query performance
+      queryStats.record('update', this.tableName, executionTime, sql);
 
       await logger.debug('Update query completed');
 
       return result;
     } catch (error) {
-      const _catchExecutionTime = Date.now() - startTime;
+      const executionTime = Date.now() - startTime;
+
+      // Track failed query
+      queryStats.record('update', this.tableName, executionTime, sql);
 
       const err = error as Error;
       await logger.error('Update query failed', {
@@ -814,13 +839,19 @@ export class DeleteQueryBuilder<T = any> extends BaseQueryBuilder<T> {
         });
       });
 
-      const _executionTime = Date.now() - startTime;
+      const executionTime = Date.now() - startTime;
+
+      // Track query performance
+      queryStats.record('delete', this.tableName, executionTime, sql);
 
       await logger.debug('Delete query completed');
 
       return result;
     } catch (error) {
-      const _catchExecutionTime = Date.now() - startTime;
+      const executionTime = Date.now() - startTime;
+
+      // Track failed query
+      queryStats.record('delete', this.tableName, executionTime, sql);
 
       const err = error as Error;
       await logger.error('Delete query failed', {
@@ -891,6 +922,11 @@ export class QueryBuilder {
 
       const executionTime = Date.now() - startTime;
 
+      // Track query performance (extract table name from SQL if possible)
+      const tableMatch = sql.match(/(?:FROM|INTO|UPDATE)\s+(\w+)/i);
+      const tableName = tableMatch ? tableMatch[1] : 'raw';
+      queryStats.record('raw', tableName, executionTime, sql);
+
       await logger.debug('Raw SQL query completed');
 
       return {
@@ -901,7 +937,12 @@ export class QueryBuilder {
         params
       };
     } catch (error) {
-      const _executionTime = Date.now() - startTime;
+      const executionTime = Date.now() - startTime;
+
+      // Track failed query
+      const tableMatch = sql.match(/(?:FROM|INTO|UPDATE)\s+(\w+)/i);
+      const tableName = tableMatch ? tableMatch[1] : 'raw';
+      queryStats.record('raw', tableName, executionTime, sql);
 
       const err = error as Error;
       await logger.error('Database query failed', {
