@@ -898,38 +898,14 @@ class AdminDashboard {
   private selectedClientId: number | null = null;
   private selectedThreadId: number | null = null;
 
-  private setupMessaging(): void {
-    // Custom dropdown is now handled by admin-messaging.ts module
-    // The hidden input #admin-client-select stores the selected value
-    // No additional setup needed here as the module handles everything
+  private async setupMessaging(): Promise<void> {
+    // Load the messaging module to handle send functionality
+    const messagingModule = await loadMessagingModule();
 
-    // Send message button (new UI)
-    const sendBtn = document.getElementById('btn-admin-send-message');
-    if (sendBtn) {
-      sendBtn.addEventListener('click', () => {
-        this.sendMessage();
-      });
-    }
+    // Setup event listeners using the module (which tracks selectedThreadId)
+    messagingModule.setupMessagingListeners(this.moduleContext);
 
-    // Send message form (old UI fallback)
-    const sendForm = document.getElementById('admin-send-message-form');
-    if (sendForm) {
-      sendForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        this.sendMessage();
-      });
-    }
-
-    // Send on Enter key (but not Shift+Enter for new line)
-    const messageInput = document.getElementById('admin-message-text') as HTMLTextAreaElement;
-    if (messageInput) {
-      messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          this.sendMessage();
-        }
-      });
-    }
+    logger.log('Messaging listeners setup complete');
   }
 
   private async loadClientThreads(): Promise<void> {
@@ -1029,7 +1005,7 @@ class AdminDashboard {
               <div class="message-body">${safeContent}</div>
             </div>
             <div class="message-avatar" data-name="Admin">
-              <div class="avatar-placeholder">ADM</div>
+              <img src="/images/avatar_small_sidebar.svg" alt="Admin" class="avatar-img" />
             </div>
           </div>
         `;

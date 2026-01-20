@@ -126,16 +126,12 @@ function populateClientDropdown(clients: ClientWithThread[], ctx: AdminDashboard
     nameSpan.textContent = clientName;
     item.appendChild(nameSpan);
 
-    // Create count span (right-aligned) - show message count if any
-    if (client.message_count > 0) {
+    // Create count span (right-aligned) - only show unread message count from clients
+    if (client.unread_count > 0) {
       const countSpan = document.createElement('span');
-      countSpan.className = 'dropdown-item-count';
-      countSpan.textContent = String(client.message_count);
-      // Add unread indicator if there are unread messages
-      if (client.unread_count > 0) {
-        countSpan.classList.add('has-unread');
-        countSpan.title = `${client.unread_count} unread`;
-      }
+      countSpan.className = 'dropdown-item-count has-unread';
+      countSpan.textContent = String(client.unread_count);
+      countSpan.title = `${client.unread_count} unread`;
       item.appendChild(countSpan);
     }
 
@@ -267,7 +263,8 @@ export function selectThread(
 
 export async function loadThreadMessages(
   threadId: number,
-  _ctx: AdminDashboardContext
+  _ctx: AdminDashboardContext,
+  bustCache: boolean = false
 ): Promise<void> {
   const container =
     document.getElementById('admin-messages-thread') ||
@@ -283,7 +280,11 @@ export async function loadThreadMessages(
     '<div style="text-align: center; padding: 2rem;">Loading messages...</div>';
 
   try {
-    const response = await apiFetch(`/api/messages/threads/${threadId}/messages`);
+    // Add cache-busting parameter when needed (e.g., after sending a message)
+    const url = bustCache
+      ? `/api/messages/threads/${threadId}/messages?_=${Date.now()}`
+      : `/api/messages/threads/${threadId}/messages`;
+    const response = await apiFetch(url);
 
     if (response.ok) {
       const data = await response.json();
@@ -333,8 +334,7 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
               <div class="message-body">${safeContent}</div>
             </div>
             <div class="message-avatar" data-name="Admin">
-              <div class="avatar-placeholder">ADM</div>
-              <span class="message-sender">${safeSenderName}</span>
+              <img src="/images/avatar_small_sidebar.svg" alt="Admin" class="avatar-img" />
             </div>
           </div>
         `;
@@ -372,7 +372,8 @@ export async function sendMessage(ctx: AdminDashboardContext): Promise<void> {
     const response = await apiPost(`/api/messages/threads/${selectedThreadId}/messages`, { message });
 
     if (response.ok) {
-      loadThreadMessages(selectedThreadId, ctx);
+      // Use cache busting to ensure we get the latest messages after sending
+      loadThreadMessages(selectedThreadId, ctx, true);
       loadClientThreads(ctx);
     } else {
       ctx.showNotification('Failed to send message', 'error');

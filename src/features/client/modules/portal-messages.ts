@@ -31,12 +31,16 @@ export function setCurrentThreadId(id: number | null): void {
 /**
  * Load messages from API
  */
-export async function loadMessagesFromAPI(ctx: ClientPortalContext): Promise<void> {
+export async function loadMessagesFromAPI(ctx: ClientPortalContext, bustCache: boolean = false): Promise<void> {
   const messagesContainer = document.getElementById('messages-thread');
   if (!messagesContainer) return;
 
   try {
-    const threadsResponse = await fetch(`${MESSAGES_API_BASE}/threads`, {
+    // Add cache-busting parameter when needed (e.g., after sending a message)
+    const threadsUrl = bustCache
+      ? `${MESSAGES_API_BASE}/threads?_=${Date.now()}`
+      : `${MESSAGES_API_BASE}/threads`;
+    const threadsResponse = await fetch(threadsUrl, {
       credentials: 'include' // Include HttpOnly cookies
     });
 
@@ -59,7 +63,11 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext): Promise<voi
     const thread = threads[0];
     currentThreadId = thread.id;
 
-    const messagesResponse = await fetch(`${MESSAGES_API_BASE}/threads/${thread.id}/messages`, {
+    // Add cache-busting parameter when needed
+    const messagesUrl = bustCache
+      ? `${MESSAGES_API_BASE}/threads/${thread.id}/messages?_=${Date.now()}`
+      : `${MESSAGES_API_BASE}/threads/${thread.id}/messages`;
+    const messagesResponse = await fetch(messagesUrl, {
       credentials: 'include' // Include HttpOnly cookies
     });
 
@@ -161,7 +169,8 @@ export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
     }
 
     messageInput.value = '';
-    await loadMessagesFromAPI(ctx);
+    // Use cache busting to ensure we get the latest messages after sending
+    await loadMessagesFromAPI(ctx, true);
   } catch (error) {
     console.error('Error sending message:', error);
     alert(error instanceof Error ? error.message : 'Failed to send message. Please try again.');

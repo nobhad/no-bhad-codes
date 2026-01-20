@@ -912,6 +912,21 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   letter-spacing: 0.5px;
 }
 
+.messages-thread .message-avatar .avatar-img {
+  display: block;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  /* Invert colors: dark body with light eye (matches div bg) */
+  filter: invert(1);
+}
+
+/* Ensure avatar is visible for sent messages */
+.messages-thread .message-sent .message-avatar {
+  display: flex;
+  flex-shrink: 0;
+}
+
 /* Message Content (the bubble) */
 .messages-thread .message-content {
   background: white;
@@ -928,11 +943,11 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .messages-thread .message-sent {
   align-self: flex-end;
-  flex-direction: row-reverse;
+  flex-direction: row;
 }
 
 .messages-thread .message-sent .message-content {
-  background: var(--color-primary);
+  background: var(--color-neutral-100);
   color: var(--portal-text-dark);
   border-color: var(--portal-border-dark);
   border-bottom-right-radius: var(--portal-radius-xs);
@@ -1660,6 +1675,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   background: var(--color-neutral-200);
   display: flex;
   flex-direction: column;
+  border-radius: var(--portal-radius-lg);
 }
 
 /* Admin messages thread - more padding, scrollable, takes remaining space */
@@ -1680,6 +1696,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   padding: var(--portal-spacing-lg);
   background: var(--color-neutral-200) !important;
   flex-shrink: 0;
+  border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
 }
 
 [data-page="admin"] .message-compose textarea {
@@ -1689,6 +1706,11 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   border-radius: var(--portal-radius-md);
   min-height: 100px;
   padding: var(--portal-spacing-lg);
+}
+
+[data-page="admin"] .message-compose textarea:focus {
+  border-color: var(--color-primary);
+  outline: none;
 }
 
 [data-page="admin"] .message-compose button {
