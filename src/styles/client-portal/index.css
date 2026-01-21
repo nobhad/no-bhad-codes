@@ -6,6 +6,7 @@
 /* Shared Portal Styles (admin + client) */
 @import '../shared/portal-buttons.css';
 @import '../shared/portal-messages.css';
+@import '../shared/portal-cards.css';
 
 /* Base Components (cp- prefixed reusable classes) */
 @import './components.css';

@@ -11,6 +11,7 @@
 /* Shared portal styles */
 @import "../shared/portal-buttons.css";
 @import "../shared/portal-messages.css";
+@import "../shared/portal-cards.css";
 
 /* Portal layout and sidebar (shared with client portal) */
 @import "../client-portal/layout.css";
