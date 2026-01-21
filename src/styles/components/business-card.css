@@ -331,8 +331,7 @@
   /* This prevents conflicts between CSS and GSAP during rotationY animations */
   transition: none;
 
-  /* 3D shadow for the flipping card using variables */
-  box-shadow: 0 10px 30px var(--color-shadow);
+  /* No shadow here - shadows are on individual faces so they look correct after flip */
 
   /* NEVER round corners */
   border-radius: 0;
@@ -369,8 +368,8 @@
   background: linear-gradient(135deg, var(--color-card-bg) 0%, var(--color-card-bg-gradient-end) 100%);
   color: var(--color-card-text);
 
-  /* Individual card face shadows using variables */
-  box-shadow: 0 5px 15px var(--color-shadow);
+  /* Shadow on each face so it looks correct after flip */
+  box-shadow: 0 10px 30px var(--color-shadow);
 
   /* Layout */
   flex-direction: column;
@@ -597,10 +596,8 @@
    ========================================== */
 @media (prefers-contrast: high) {
   .business-card-inner {
-    /* Strong border for high contrast */
-    box-shadow:
-      0 0 0 2px #000,
-      0 10px 30px var(--color-shadow);
+    /* Strong border for high contrast - no shadow here, shadows on faces */
+    box-shadow: 0 0 0 2px #000;
   }
 
   .business-card-front,
@@ -609,7 +606,7 @@
     color: var(--color-black);
     box-shadow:
       0 0 0 1px #000,
-      0 5px 15px var(--color-shadow);
+      0 10px 30px var(--color-shadow);
   }
 }
 
@@ -646,8 +643,9 @@
   }
 }
 
-/* Dark Mode Enhancements - deeper shadow */
-html[data-theme="dark"] .business-card-inner {
+/* Dark Mode Enhancements - deeper shadow on faces */
+html[data-theme="dark"] .business-card-front,
+html[data-theme="dark"] .business-card-back {
   box-shadow: 0 8px 32px var(--color-shadow-xl);
 }
 
