@@ -1086,8 +1086,14 @@ interface ApiResponse<T> {
 type PartialProject = Partial<ClientProject>;
 type ProjectStatus = ClientProject['status'];
 
-// ❌ Bad: Any types
+// ❌ Bad: Any types (avoid this pattern)
 const data: any = getProjectData();
+
+// ✅ Good: Use type-safe database row helpers
+import { getString, getNumber } from '../database/row-helpers.js';
+const project = await db.get('SELECT * FROM projects WHERE id = ?', [id]);
+const projectName = getString(project, 'name');
+const projectId = getNumber(project, 'id');
 
 // ❌ Bad: Unclear interfaces
 interface Project {

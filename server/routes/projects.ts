@@ -14,6 +14,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middle
 import { emailService } from '../services/email-service.js';
 import { cache, invalidateCache } from '../middleware/cache.js';
 import { getUploadsSubdir, UPLOAD_DIRS } from '../config/uploads.js';
+import { getString, getNumber } from '../database/row-helpers.js';
 
 const router = express.Router();
 
@@ -58,7 +59,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const db = getDatabase();
     let query = '';
-    let params: any[] = [];
+    let params: (string | number | null)[] = [];
 
     if (req.user!.type === 'admin') {
       // Admin can see all projects with stats in single query (fixes N+1)
@@ -356,7 +357,7 @@ router.put(
     }
 
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: (string | number | boolean | null)[] = [];
     // Map frontend field names to database column names
     const fieldMapping: Record<string, string> = {
       name: 'project_name',
@@ -431,7 +432,7 @@ router.put(
         // Get client information
         const client = await db.get(
           'SELECT email, contact_name, company_name FROM clients WHERE id = ?',
-          [project.client_id]
+          [getNumber(project, 'client_id')]
         );
 
         if (client) {
@@ -444,12 +445,15 @@ router.put(
               'Your project has been temporarily paused. We\'ll keep you updated on next steps.'
           };
 
-          await emailService.sendProjectUpdateEmail(client.email, {
-            projectName: updatedProject?.name || 'Your Project',
+          const clientEmail = getString(client, 'email');
+          const clientContactName = getString(client, 'contact_name');
+          const updatedProjectName = updatedProject ? getString(updatedProject, 'name') : null;
+          await emailService.sendProjectUpdateEmail(clientEmail, {
+            projectName: updatedProjectName || 'Your Project',
             status: req.body.status,
             description:
               statusDescriptions[req.body.status] || 'Your project status has been updated.',
-            clientName: client.contact_name || 'Client',
+            clientName: clientContactName || 'Client',
             portalUrl: `${process.env.CLIENT_PORTAL_URL || 'https://nobhad.codes/client/portal.html'}?project=${projectId}`,
             nextSteps:
               req.body.status === 'completed'
@@ -795,9 +799,10 @@ router.get(
 
     // Parse deliverables JSON
     milestones.forEach((milestone) => {
-      if (milestone.deliverables) {
+      const deliverablesStr = getString(milestone, 'deliverables');
+      if (deliverablesStr) {
         try {
-          milestone.deliverables = JSON.parse(milestone.deliverables);
+          milestone.deliverables = JSON.parse(deliverablesStr);
         } catch (_e) {
           milestone.deliverables = [];
         }
@@ -862,9 +867,10 @@ router.post(
     }
 
     // Parse deliverables JSON
-    if (newMilestone.deliverables) {
+    const newMilestoneDeliverablesStr = getString(newMilestone, 'deliverables');
+    if (newMilestoneDeliverablesStr) {
       try {
-        newMilestone.deliverables = JSON.parse(newMilestone.deliverables);
+        newMilestone.deliverables = JSON.parse(newMilestoneDeliverablesStr);
       } catch (_e) {
         newMilestone.deliverables = [];
       }
@@ -905,7 +911,7 @@ router.put(
     }
 
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: (string | number | boolean | null)[] = [];
 
     if (title !== undefined) {
       updates.push('title = ?');
@@ -973,9 +979,10 @@ router.put(
     }
 
     // Parse deliverables JSON
-    if (updatedMilestone.deliverables) {
+    const updatedMilestoneDeliverablesStr = getString(updatedMilestone, 'deliverables');
+    if (updatedMilestoneDeliverablesStr) {
       try {
-        updatedMilestone.deliverables = JSON.parse(updatedMilestone.deliverables);
+        updatedMilestone.deliverables = JSON.parse(updatedMilestoneDeliverablesStr);
       } catch (_e) {
         updatedMilestone.deliverables = [];
       }
@@ -1181,10 +1188,13 @@ router.get(
     );
 
     // Calculate progress percentage
+    const totalMilestones = getNumber(stats, 'total_milestones');
+    const completedMilestones = getNumber(stats, 'completed_milestones');
+    const projectProgress = project ? getNumber(project, 'progress') : 0;
     const progressPercentage =
-      stats && stats.total_milestones > 0
-        ? Math.round((stats.completed_milestones / stats.total_milestones) * 100)
-        : project.progress || 0;
+      totalMilestones > 0
+        ? Math.round((completedMilestones / totalMilestones) * 100)
+        : projectProgress || 0;
 
     res.json({
       project,

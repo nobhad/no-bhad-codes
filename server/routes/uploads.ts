@@ -15,6 +15,7 @@ import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { getDatabase } from '../database/init.js';
 import { getUploadsDir, getUploadsSubdir, UPLOAD_DIRS } from '../config/uploads.js';
+import { getString, getNumber } from '../database/row-helpers.js';
 
 const router = express.Router();
 
@@ -559,8 +560,9 @@ router.get(
       }
 
       // Validate path to prevent path traversal attacks
-      if (!isPathSafe(file.file_path)) {
-        console.error('Path traversal attempt detected:', file.file_path);
+      const filePathStr = getString(file, 'file_path');
+      if (!isPathSafe(filePathStr)) {
+        console.error('Path traversal attempt detected:', filePathStr);
         return res.status(403).json({
           error: 'Invalid file path',
           code: 'PATH_TRAVERSAL_DETECTED'
@@ -568,7 +570,7 @@ router.get(
       }
 
       // Construct the full file path using centralized uploads directory
-      const filePath = resolveFilePath(file.file_path);
+      const filePath = resolveFilePath(filePathStr);
 
       if (!existsSync(filePath)) {
         return res.status(404).json({
@@ -585,7 +587,8 @@ router.get(
         res.setHeader('Content-Disposition', `inline; filename="${file.original_filename}"`);
       }
 
-      res.setHeader('Content-Type', file.mime_type);
+      const mimeType = getString(file, 'mime_type');
+      res.setHeader('Content-Type', mimeType || 'application/octet-stream');
       res.sendFile(filePath);
     } catch (dbError) {
       console.error('Failed to fetch file:', dbError);
@@ -656,9 +659,10 @@ router.delete(
       await db.run('DELETE FROM files WHERE id = ?', [fileId]);
 
       // Validate path before deletion to prevent path traversal attacks
-      if (isPathSafe(file.file_path)) {
+      const deleteFilePathStr = getString(file, 'file_path');
+      if (isPathSafe(deleteFilePathStr)) {
         // Try to delete the physical file
-        const filePath = resolve(process.cwd(), file.file_path.replace(/^\//, ''));
+        const filePath = resolve(process.cwd(), deleteFilePathStr.replace(/^\//, ''));
         if (existsSync(filePath)) {
           const fs = await import('fs/promises');
           await fs.unlink(filePath);
@@ -715,7 +719,7 @@ router.get('/test', (req: express.Request, res: express.Response) => {
 
 // Error handler for multer
 router.use(
-  (error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  (error: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (error instanceof multer.MulterError) {
       if (error.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({
@@ -740,11 +744,12 @@ router.use(
       });
     }
 
-    if (error.message.includes('File type not allowed')) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    if (errorMessage.includes('File type not allowed')) {
       return res.status(400).json({
         error: 'File type not allowed',
         code: 'INVALID_FILE_TYPE',
-        message: error.message
+        message: errorMessage
       });
     }
 

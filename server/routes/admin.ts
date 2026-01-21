@@ -508,7 +508,7 @@ router.put(
       const db = getDatabase();
 
       let updateFields = 'status = ?, updated_at = CURRENT_TIMESTAMP';
-      const values: any[] = [status];
+      const values: (string | number)[] = [status];
 
       if (status === 'read') {
         updateFields += ', read_at = CURRENT_TIMESTAMP';
@@ -644,7 +644,12 @@ router.post(
         });
       }
 
-      if (!lead.email) {
+      const leadEmail = typeof lead.email === 'string' ? lead.email : null;
+      const leadContactName = typeof lead.contact_name === 'string' ? lead.contact_name : null;
+      const leadCompanyName = typeof lead.company_name === 'string' ? lead.company_name : null;
+      const leadPhone = typeof lead.phone === 'string' ? lead.phone : null;
+
+      if (!leadEmail) {
         return res.status(400).json({
           success: false,
           error: 'Lead does not have an email address'
@@ -652,10 +657,10 @@ router.post(
       }
 
       // Check if client already exists
-      let clientId = lead.client_id;
+      let clientId = typeof lead.client_id === 'number' ? lead.client_id : null;
       const existingClient = await db.get(
         'SELECT id, invitation_token FROM clients WHERE email = ?',
-        [lead.email]
+        [leadEmail]
       );
 
       // Generate invitation token (valid for 7 days)
@@ -664,15 +669,18 @@ router.post(
 
       if (existingClient) {
         // Update existing client with new invitation token
-        clientId = existingClient.id;
-        await db.run(
-          `
-          UPDATE clients
-          SET invitation_token = ?, invitation_expires_at = ?, invitation_sent_at = CURRENT_TIMESTAMP, status = 'pending'
-          WHERE id = ?
-        `,
-          [invitationToken, expiresAt, clientId]
-        );
+        const existingClientId = typeof existingClient.id === 'number' ? existingClient.id : null;
+        if (existingClientId) {
+          clientId = existingClientId;
+          await db.run(
+            `
+            UPDATE clients
+            SET invitation_token = ?, invitation_expires_at = ?, invitation_sent_at = CURRENT_TIMESTAMP, status = 'pending'
+            WHERE id = ?
+          `,
+            [invitationToken, expiresAt, clientId]
+          );
+        }
       } else {
         // Create new client with pending status (no password yet)
         const result = await db.run(
@@ -680,16 +688,20 @@ router.post(
           INSERT INTO clients (email, password_hash, contact_name, company_name, phone, status, invitation_token, invitation_expires_at, invitation_sent_at)
           VALUES (?, '', ?, ?, ?, 'pending', ?, ?, CURRENT_TIMESTAMP)
         `,
-          [lead.email, lead.contact_name, lead.company_name, lead.phone, invitationToken, expiresAt]
+          [leadEmail, leadContactName, leadCompanyName, leadPhone, invitationToken, expiresAt]
         );
-        clientId = result.lastID;
+        clientId = result.lastID || null;
 
         // Update project to link to new client
-        await db.run('UPDATE projects SET client_id = ? WHERE id = ?', [clientId, id]);
+        if (clientId && typeof id === 'string') {
+          await db.run('UPDATE projects SET client_id = ? WHERE id = ?', [clientId, id]);
+        }
       }
 
       // Update project status to active
-      await db.run('UPDATE projects SET status = ? WHERE id = ?', ['active', id]);
+      if (typeof id === 'string') {
+        await db.run('UPDATE projects SET status = ? WHERE id = ?', ['active', id]);
+      }
 
       // Build invitation link
       const baseUrl = process.env.BASE_URL || 'http://localhost:4000';
@@ -697,10 +709,10 @@ router.post(
 
       // Send invitation email
       const emailResult = await emailService.sendEmail({
-        to: lead.email,
+        to: leadEmail,
         subject: 'Welcome to No Bhad Codes - Set Up Your Client Portal',
         text: `
-Hello ${lead.contact_name || 'there'},
+Hello ${leadContactName || 'there'},
 
 You've been invited to access the No Bhad Codes client portal for your project.
 
@@ -731,7 +743,7 @@ No Bhad Codes Team
     <div class="header">
       <h1>Welcome to No Bhad Codes</h1>
     </div>
-    <p>Hello ${lead.contact_name || 'there'},</p>
+    <p>Hello ${leadContactName || 'there'},</p>
     <p>You've been invited to access the No Bhad Codes client portal for your project.</p>
     <p>Click the button below to set your password and access your dashboard:</p>
     <p style="text-align: center;">
@@ -754,14 +766,14 @@ No Bhad Codes Team
       errorTracker.captureMessage('Admin sent client invitation', 'info', {
         tags: { component: 'admin-invite' },
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
-        extra: { leadId: id, clientEmail: lead.email }
+        extra: { leadId: id, clientEmail: leadEmail }
       });
 
       res.json({
         success: true,
         message: 'Invitation sent successfully',
         clientId,
-        email: lead.email,
+        email: leadEmail,
         emailResult
       });
     } catch (error) {

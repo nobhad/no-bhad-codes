@@ -218,28 +218,29 @@ export class UnifiedLoggerService implements ServerLogger {
   /**
    * Log HTTP request
    */
-  logRequest(req: any, res: any, duration?: number): void {
-    const level: LogLevelType = res.statusCode >= 400 ? 'WARN' : 'INFO';
+  logRequest(req: { method?: string; url?: string; ip?: string; get?: (key: string) => string | undefined; id?: string; user?: { id?: unknown } }, res: { statusCode?: number }, duration?: number): void {
+    const statusCode = res.statusCode || 200;
+    const level: LogLevelType = statusCode >= 400 ? 'WARN' : 'INFO';
 
     const entry: AnyLogEntry = {
       timestamp: new Date().toISOString(),
       level,
-      message: `${req.method} ${req.url} ${res.statusCode}`,
+      message: `${req.method || 'UNKNOWN'} ${req.url || 'UNKNOWN'} ${statusCode}`,
       category: 'HTTP',
       request: {
-        method: req.method,
-        url: req.url,
+        method: req.method || 'UNKNOWN',
+        url: req.url || 'UNKNOWN',
         ip: req.ip,
         userAgent: req.get?.('user-agent'),
         contentLength: parseInt(req.get?.('content-length') || '0'),
         contentType: req.get?.('content-type')
       },
       response: {
-        statusCode: res.statusCode,
+        statusCode,
         duration
       },
       requestId: req.id,
-      userId: req.user?.id,
+      userId: typeof req.user?.id === 'string' || typeof req.user?.id === 'number' ? String(req.user.id) : undefined,
       metadata: {
         ...this.context
       }
@@ -251,7 +252,7 @@ export class UnifiedLoggerService implements ServerLogger {
   /**
    * Log security event
    */
-  logSecurity(event: string, details: Record<string, unknown> = {}, req?: any): void {
+  logSecurity(event: string, details: Record<string, unknown> = {}, req?: { ip?: string; url?: string; method?: string; get?: (key: string) => string | undefined; user?: { id?: unknown } }): void {
     const entry: AnyLogEntry = {
       timestamp: new Date().toISOString(),
       level: 'WARN',
@@ -260,7 +261,7 @@ export class UnifiedLoggerService implements ServerLogger {
       event,
       ip: req?.ip,
       userAgent: req?.get?.('user-agent'),
-      userId: req?.user?.id,
+      userId: typeof req?.user?.id === 'string' || typeof req?.user?.id === 'number' ? String(req.user.id) : undefined,
       details,
       metadata: {
         ...this.context,

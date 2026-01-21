@@ -28,6 +28,7 @@ import { Router, Request, Response } from 'express';
 import { rateLimit } from '../middleware/security.js';
 import { logger } from '../services/logger.js';
 import { getDatabase } from '../database/init.js';
+import { getNumber } from '../database/row-helpers.js';
 import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 import { UAParser } from 'ua-parser-js';
 
@@ -160,31 +161,46 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
     for (const event of events) {
       if ('title' in event) {
         // Page view event
+        const sessionId = typeof event.sessionId === 'string' ? event.sessionId : null;
+        const url = typeof event.url === 'string' ? event.url : null;
+        const title = typeof event.title === 'string' ? event.title : null;
+        const timestamp = typeof event.timestamp === 'number' ? event.timestamp / 1000 : 0;
+        const timeOnPage = typeof event.timeOnPage === 'number' ? event.timeOnPage : 0;
+        const scrollDepth = typeof event.scrollDepth === 'number' ? event.scrollDepth : 0;
+        const interactions = typeof event.interactions === 'number' ? event.interactions : 0;
+
         await db.run(
           `INSERT INTO page_views (session_id, url, title, timestamp, time_on_page, scroll_depth, interactions)
            VALUES (?, ?, ?, datetime(?, 'unixepoch', 'subsec'), ?, ?, ?)`,
           [
-            event.sessionId,
-            event.url,
-            event.title,
-            event.timestamp / 1000,
-            event.timeOnPage || 0,
-            event.scrollDepth || 0,
-            event.interactions || 0
+            sessionId,
+            url,
+            title,
+            timestamp,
+            timeOnPage,
+            scrollDepth,
+            interactions
           ]
         );
       } else if ('type' in event) {
         // Interaction event
+        const sessionId = typeof event.sessionId === 'string' ? event.sessionId : null;
+        const eventType = typeof event.type === 'string' ? event.type : null;
+        const element = typeof event.element === 'string' ? event.element : null;
+        const timestamp = typeof event.timestamp === 'number' ? event.timestamp / 1000 : 0;
+        const url = typeof event.url === 'string' ? event.url : null;
+        const data = event.data ? JSON.stringify(event.data) : null;
+
         await db.run(
           `INSERT INTO interaction_events (session_id, event_type, element, timestamp, url, data)
            VALUES (?, ?, ?, datetime(?, 'unixepoch', 'subsec'), ?, ?)`,
           [
-            event.sessionId,
-            event.type,
-            event.element,
-            event.timestamp / 1000,
-            event.url,
-            event.data ? JSON.stringify(event.data) : null
+            sessionId,
+            eventType,
+            element,
+            timestamp,
+            url,
+            data
           ]
         );
       }
@@ -474,7 +490,7 @@ router.get(
         `SELECT COUNT(*) as total FROM visitor_sessions
          WHERE start_time >= datetime('now', '-${daysNum} days')`
       );
-      const total = countResult?.total || 0;
+      const total = getNumber(countResult, 'total');
 
       // Get sessions
       const sessions = await db.all(
@@ -505,7 +521,7 @@ router.get(
           page: pageNum,
           limit: limitNum,
           total,
-          totalPages: Math.ceil(total / limitNum)
+          totalPages: typeof total === 'number' && typeof limitNum === 'number' ? Math.ceil(total / limitNum) : 0
         }
       });
     } catch (error) {

@@ -158,7 +158,7 @@ export class CacheService {
   /**
    * Set value in cache
    */
-  async set(key: string, value: any, options: CacheOptions = {}): Promise<boolean> {
+  async set(key: string, value: string | number | boolean | object | null, options: CacheOptions = {}): Promise<boolean> {
     if (!this.isConnected || !this.client) {
       console.warn('⚠️  Cache not available, skipping set');
       return false;
@@ -487,7 +487,7 @@ export class CacheService {
       const fresh = await fetcher();
 
       // Store in cache for next time
-      await this.set(key, fresh, options);
+      await this.set(key, fresh as string | number | boolean | object | null, options);
 
       return fresh;
     } catch (error) {

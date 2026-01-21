@@ -11,6 +11,7 @@
 import { Database } from 'sqlite3';
 import { QueryBuilder, SelectQueryBuilder, QueryResult } from './query-builder.js';
 import { logger } from '../services/logger.js';
+import type { DatabaseRow } from '../types/database.js';
 
 // Model configuration interface
 export interface ModelConfig {
@@ -97,7 +98,7 @@ export class BaseModel<_T = any> {
    */
   static async find<M extends BaseModel>(
     this: typeof BaseModel & (new () => M),
-    id: any
+    id: string | number
   ): Promise<M | null> {
     const result = await (this as any)
       .query()
@@ -118,7 +119,7 @@ export class BaseModel<_T = any> {
    */
   static async findOrFail<M extends BaseModel>(
     this: typeof BaseModel & (new () => M),
-    id: any
+    id: string | number
   ): Promise<M> {
     const result = await (this as any).find(id);
     if (!result) {
@@ -133,8 +134,8 @@ export class BaseModel<_T = any> {
   static async where<M extends BaseModel>(
     this: typeof BaseModel & (new () => M),
     column: string,
-    operator: any,
-    value?: any
+    operator: string,
+    value?: string | number | boolean | null
   ): Promise<SelectQueryBuilder<M>> {
     return (this as any).query().where(column, operator, value);
   }
@@ -144,9 +145,9 @@ export class BaseModel<_T = any> {
    */
   static async all<M extends BaseModel>(this: typeof BaseModel & (new () => M)): Promise<M[]> {
     const result = await (this as any).query().get();
-    return result.rows.map((row: any) => {
+    return result.rows.map((row: DatabaseRow) => {
       const instance = new this() as M;
-      instance.setAttributes(row as any, true);
+      instance.setAttributes(row, true);
       return instance;
     });
   }
@@ -241,9 +242,9 @@ export class BaseModel<_T = any> {
     const result = await (this as any).query().getPaginated(page, perPage);
 
     return {
-      data: result.data.map((row: any) => {
+      data: result.data.map((row: DatabaseRow) => {
         const instance = new this() as M;
-        instance.setAttributes(row as any, true);
+        instance.setAttributes(row, true);
         return instance;
       }),
       pagination: result.pagination

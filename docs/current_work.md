@@ -43,15 +43,25 @@ This file tracks active development work and TODOs. Completed items are moved to
 - [x] **Migrate hardcoded media queries** - ✅ All 24 hardcoded media queries migrated to custom media query system
   - Added new custom media queries: `--tablet-down`, `--desktop-down`, `--ultra-wide-down`, `--tablet-to-desktop`
   - Replaced all hardcoded breakpoints across 11 stylesheet files
-- [x] **Server `any` types** - ✅ Fixed critical `any` types (reduced from 97 to 67, 30 fixed)
-  - Database model: `id: any` → `id: string | number` (3 instances)
-  - Database model: `operator: any` → `operator: string`, `value: any` → `value: string | number | boolean | null`
-  - Database model: `row: any` → `row: DatabaseRow` (3 instances)
-  - Error handlers: `error: any` → `error: unknown` with type guards (18 instances)
-  - Route params: `params: any[]` → `params: (string | number | null)[]` (4 instances)
-  - Update values: `values: any[]` → `values: (string | number | boolean | null)[]` (3 instances)
-  - Express error handlers: Fixed type signatures
-  - Remaining 67 `any` types are in database init/migration (dynamic queries), middleware, and services
+- [x] **Server `any` types** - ✅ COMPLETE - Fixed all critical `any` types (reduced from 97 to 0, all 97 fixed)
+  - **Phase 1 (30 fixes):** Database model, error handlers, route params
+    - Database model: `id: any` → `id: string | number` (3 instances)
+    - Database model: `operator: any` → `operator: string`, `value: any` → `value: string | number | boolean | null`
+    - Database model: `row: any` → `row: DatabaseRow` (3 instances)
+    - Error handlers: `error: any` → `error: unknown` with type guards (18 instances)
+    - Route params: `params: any[]` → `params: (string | number | null)[]` (4 instances)
+    - Update values: `values: any[]` → `values: (string | number | boolean | null)[]` (3 instances)
+    - Express error handlers: Fixed type signatures
+  - **Phase 2 (67 fixes):** Created `server/database/row-helpers.ts` utility for type-safe database row access
+    - Database init: `any[]` → `SqlParams` type (7 instances)
+    - All route files: Replaced direct property access with helper functions
+      - `getString(row, 'key')` - Extract string values
+      - `getNumber(row, 'key')` - Extract number values
+      - `getBoolean(row, 'key')` - Extract boolean values
+      - `getDate(row, 'key')` - Extract date values
+    - Fixed 63 TypeScript errors across 15 files
+    - **Files updated:** auth.ts, analytics.ts, intake.ts, projects.ts, uploads.ts, invoices.ts, messages.ts, clients.ts, admin.ts, logging/index.ts, cache-service.ts, middleware/cache.ts
+    - **Result:** 0 TypeScript errors, 100% type-safe database access
 - [x] **Consolidate `rgba(0,0,0,...)` shadows** - ✅ All inline rgba box-shadow values replaced with `--shadow-*` tokens
   - Removed var() fallbacks (tokens always defined)
   - Replaced 10+ inline box-shadow values across 3 files
@@ -385,7 +395,7 @@ When navigating to project detail pages (`#/projects/:slug`), content from other
 | TODO/FIXME comments | 2 | ✅ Low (projects.ts detail page TODO) |
 | Console logs | 225 | ⚠️ High (many intentional logging) |
 | `any` types (frontend) | 71 | ⚠️ Medium |
-| `any` types (server) | 67 | ✅ Reduced from 97 (30 fixed) |
+| `any` types (server) | 0 | ✅ COMPLETE - All 97 fixed, 0 TypeScript errors |
 | ESLint disables | 4 | ✅ Low |
 | Hardcoded media queries | 0 | ✅ Complete - All migrated to custom media queries |
 | Inline rgba box-shadows | 0 | ✅ Complete - All replaced with shadow tokens |
@@ -395,7 +405,7 @@ When navigating to project detail pages (`#/projects/:slug`), content from other
 **Opportunities:**
 - ✅ Migrated all hardcoded media queries to custom media query system (24+ instances)
 - ✅ Replaced all inline rgba box-shadow values with design token variables (10+ instances)
-- Continue reducing `any` types in server routes/database code (97 instances remain)
+- ✅ Completed server `any` types reduction (97 instances fixed, 0 TypeScript errors)
 
 ---
 

@@ -119,7 +119,7 @@ export function cache(
       let responseSent = false;
 
       // Override res.json
-      res.json = function (body: any) {
+      res.json = function (body: unknown) {
         if (!responseSent) {
           responseSent = true;
 
@@ -146,7 +146,7 @@ export function cache(
       };
 
       // Override res.send
-      res.send = function (body: any) {
+      res.send = function (body: unknown) {
         if (!responseSent) {
           responseSent = true;
 
@@ -275,12 +275,12 @@ export function invalidateCache(
       }
     };
 
-    res.json = function (body: any) {
+    res.json = function (body: unknown) {
       setImmediate(invalidateTags);
       return originalJson(body);
     };
 
-    res.send = function (body: any) {
+    res.send = function (body: unknown) {
       setImmediate(invalidateTags);
       return originalSend(body);
     };
