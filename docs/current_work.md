@@ -43,7 +43,15 @@ This file tracks active development work and TODOs. Completed items are moved to
 - [x] **Migrate hardcoded media queries** - ✅ All 24 hardcoded media queries migrated to custom media query system
   - Added new custom media queries: `--tablet-down`, `--desktop-down`, `--ultra-wide-down`, `--tablet-to-desktop`
   - Replaced all hardcoded breakpoints across 11 stylesheet files
-- [ ] **Server `any` types** - 97 `any` types remain in server code (mostly in routes and database)
+- [x] **Server `any` types** - ✅ Fixed critical `any` types (reduced from 97 to 67, 30 fixed)
+  - Database model: `id: any` → `id: string | number` (3 instances)
+  - Database model: `operator: any` → `operator: string`, `value: any` → `value: string | number | boolean | null`
+  - Database model: `row: any` → `row: DatabaseRow` (3 instances)
+  - Error handlers: `error: any` → `error: unknown` with type guards (18 instances)
+  - Route params: `params: any[]` → `params: (string | number | null)[]` (4 instances)
+  - Update values: `values: any[]` → `values: (string | number | boolean | null)[]` (3 instances)
+  - Express error handlers: Fixed type signatures
+  - Remaining 67 `any` types are in database init/migration (dynamic queries), middleware, and services
 - [x] **Consolidate `rgba(0,0,0,...)` shadows** - ✅ All inline rgba box-shadow values replaced with `--shadow-*` tokens
   - Removed var() fallbacks (tokens always defined)
   - Replaced 10+ inline box-shadow values across 3 files
@@ -239,6 +247,122 @@ This file tracks active development work and TODOs. Completed items are moved to
 - This is related to how the page transition module handles the dynamic `#/projects/:slug` routes.
 - The content renders correctly, but the z-index/visibility management between sections needs refinement.
 
+**Fix Plan:**
+
+#### Problem Statement
+When navigating to project detail pages (`#/projects/:slug`), content from other sections (particularly the business card from the intro section) sometimes overlaps with the project detail content. The content renders correctly, but z-index/visibility management between sections needs refinement.
+
+#### Root Cause Analysis
+
+**Issue 1: Dual Page Management**
+- `ProjectsModule` manually manages `page-active` and `page-hidden` classes on both `projects-section` and `project-detail-section`
+- `PageTransitionModule` also manages page visibility through the same classes
+- Both modules respond to hash changes independently, creating a race condition
+
+**Issue 2: Event Format Mismatch**
+- `ProjectsModule` dispatches `router:navigate` with `{ section: 'project-detail', slug }`
+- `PageTransitionModule` expects `{ pageId: 'project-detail' }` in the event detail
+- The mismatch means `PageTransitionModule` may not properly handle project detail transitions
+
+**Issue 3: Incomplete Page Hiding**
+- When transitioning to `project-detail`, `PageTransitionModule.transitionTo()` hides the current page but may not ensure ALL other pages (especially intro) are properly hidden
+- The intro page has special z-index handling (`z-index: 50` when active) which might cause it to appear above other pages
+
+**Issue 4: Hash Change Handler Race**
+- Both `ProjectsModule.handleHashChange()` and `PageTransitionModule.handleHashChange()` listen to `hashchange` events
+- They execute independently, potentially conflicting with each other
+
+#### Solution Strategy
+
+**Phase 1: Centralize Page Visibility Management**
+- Remove manual `page-active`/`page-hidden` class toggling from `ProjectsModule.showProjectDetail()` and `ProjectsModule.hideProjectDetail()`
+- Keep only content rendering logic in `ProjectsModule`
+- Ensure `ProjectsModule` dispatches correct event format for `PageTransitionModule`
+- **Files:** `src/modules/ui/projects.ts`
+
+**Phase 2: Fix Event Coordination**
+- Update `ProjectsModule` to dispatch `router:navigate` with `{ pageId: 'project-detail' }` format
+- Ensure `PageTransitionModule` properly handles project detail routes
+- Add explicit page hiding logic in `PageTransitionModule.transitionTo()` to hide ALL non-target pages
+- **Files:** `src/modules/ui/projects.ts`, `src/modules/animation/page-transition.ts`
+
+**Phase 3: Strengthen Page Hiding Logic**
+- In `PageTransitionModule.transitionTo()`, explicitly hide ALL pages in the `pages` Map before showing the target page
+- Add defensive check to ensure intro page gets `page-hidden` class even if it's not the current page
+- Ensure z-index is properly managed - intro should have lower z-index when not active
+- **Files:** `src/modules/animation/page-transition.ts`, `src/styles/components/page-transitions.css`
+
+**Phase 4: Remove Duplicate Hash Change Handlers**
+- Remove `ProjectsModule.handleHashChange()` - let `PageTransitionModule` handle all hash changes
+- Update `ProjectsModule` to listen for `page-changed` events from `PageTransitionModule` instead
+- When `page-changed` event fires with `pageId: 'project-detail'`, extract slug from hash and render content
+- **Files:** `src/modules/ui/projects.ts`, `src/modules/animation/page-transition.ts`
+
+#### Implementation Steps
+
+1. **Update ProjectsModule Event Handling**
+   - Remove hash change listener
+   - Remove handleHashChange method
+   - Add page-changed event listener
+   - Update showProjectDetail to not manage classes
+   - Update hideProjectDetail to not manage classes
+
+2. **Fix PageTransitionModule Transition Logic**
+   - In transitionTo(), before showing target page:
+   - Hide ALL pages in pages Map (not just currentPage)
+   - Ensure intro page gets page-hidden class
+   - Then show target page
+
+3. **Update Event Dispatch Format**
+   - In ProjectsModule.navigateToProject():
+   - Dispatch router:navigate with `{ pageId: 'project-detail' }`
+   - Let PageTransitionModule handle the hash change
+
+4. **Add Defensive CSS Rules**
+   ```css
+   /* Ensure intro page is hidden when project-detail is active */
+   section#intro.page-hidden,
+   section.business-card-section.page-hidden {
+     display: none !important;
+     visibility: hidden !important;
+     opacity: 0 !important;
+     z-index: -1 !important;
+   }
+   
+   /* Ensure project-detail has higher z-index than intro */
+   section.project-detail-section.page-active {
+     z-index: 100;
+   }
+   ```
+
+#### Testing Checklist
+
+- [ ] Navigate from intro to project detail - intro should be completely hidden
+- [ ] Navigate from projects list to project detail - projects list should be hidden
+- [ ] Navigate from project detail back to projects list - project detail should be hidden
+- [ ] Navigate from project detail to intro - project detail should be hidden
+- [ ] Navigate directly to `#/projects/:slug` on page load - only project detail should be visible
+- [ ] Browser back/forward navigation works correctly
+- [ ] No visual overlap or flickering during transitions
+- [ ] All page transitions use blur animation correctly
+
+#### Estimated Time
+
+- **Phase 1:** 30 minutes
+- **Phase 2:** 45 minutes
+- **Phase 3:** 30 minutes
+- **Phase 4:** 45 minutes
+- **Testing:** 30 minutes
+- **Total:** ~3 hours
+
+#### Success Criteria
+
+1. No visual overlap between sections during transitions
+2. Intro page (business card) never appears on top of project detail
+3. All page transitions are smooth and consistent
+4. Browser navigation (back/forward) works correctly
+5. Direct navigation to `#/projects/:slug` shows only project detail
+
 ### Implementation Order
 
 1. Content first (screenshots, descriptions)
@@ -261,7 +385,7 @@ This file tracks active development work and TODOs. Completed items are moved to
 | TODO/FIXME comments | 2 | ✅ Low (projects.ts detail page TODO) |
 | Console logs | 225 | ⚠️ High (many intentional logging) |
 | `any` types (frontend) | 71 | ⚠️ Medium |
-| `any` types (server) | 97 | ⚠️ Medium |
+| `any` types (server) | 67 | ✅ Reduced from 97 (30 fixed) |
 | ESLint disables | 4 | ✅ Low |
 | Hardcoded media queries | 0 | ✅ Complete - All migrated to custom media queries |
 | Inline rgba box-shadows | 0 | ✅ Complete - All replaced with shadow tokens |
