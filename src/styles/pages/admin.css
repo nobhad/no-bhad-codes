@@ -174,13 +174,8 @@ body[data-page="admin"]:not(.admin-logged-in) {
   min-height: 100vh;
 }
 
-/* Quick Stats Grid - Horizontal row of stat cards */
-[data-page="admin"] .quick-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-}
+/* Quick Stats Grid - Base styles in shared/portal-cards.css */
+/* Admin-specific column overrides below */
 
 /* Analytics tab has 3 cards - force 3 columns */
 body[data-page="admin"] #tab-analytics .quick-stats {
@@ -210,26 +205,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
   box-shadow: var(--shadow-card);
 }
 
-/* Portal Project Card - Admin panel cards */
-[data-page="admin"] .portal-project-card {
-  display: block;
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: var(--portal-radius-lg, 12px);
-  padding: var(--portal-spacing-xl, 1.5rem);
-  color: var(--portal-text-light);
-  margin-bottom: 1.5rem;
-}
-
-[data-page="admin"] .portal-project-card h3 {
-  font-family: var(--font--acme);
-  font-size: 1.1rem;
-  font-weight: 400;
-  color: var(--portal-text-light);
-  text-transform: uppercase;
-  margin: 0 0 1rem 0;
-  letter-spacing: 1px;
-}
+/* Portal Project Card - Base styles in shared/portal-cards.css */
 
 /* Icon buttons - consistent styling */
 [data-page="admin"] .icon-btn {
@@ -329,22 +305,18 @@ body[data-page="admin"] #tab-analytics .stat-card {
 }
 
 /* ================================================
-   ADMIN PORTAL - CARD SHADOWS (matches sidebar)
+   ADMIN PORTAL - CARD SHADOWS
+   Base shadows in shared/portal-cards.css
+   Admin-specific sections below
    ================================================ */
-body[data-page="admin"] .stat-card,
 body[data-page="admin"] .admin-table-card,
 body[data-page="admin"] .chart-container,
 body[data-page="admin"] .metric-group,
 body[data-page="admin"] .analytics-section,
 body[data-page="admin"] .analytics-overview,
-body[data-page="admin"] .settings-section,
 body[data-page="admin"] .visitors-table-container,
 body[data-page="admin"] .project-detail-overview,
-body[data-page="admin"] .portal-project-card,
-body[data-page="admin"] .recent-activity,
-body[data-page="admin"] .summary-card,
-body[data-page="admin"] .pd-tab-content,
-body[data-page="admin"] .messages-container {
+body[data-page="admin"] .pd-tab-content {
   box-shadow: var(--shadow-panel);
 }
 
