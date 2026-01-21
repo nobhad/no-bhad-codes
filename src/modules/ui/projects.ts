@@ -67,7 +67,6 @@ export class ProjectsModule extends BaseModule {
   private projectDetailSection: HTMLElement | null = null;
   private portfolioData: PortfolioData | null = null;
   private currentProjectSlug: string | null = null;
-  private boundHashChangeHandler: (() => void) | null = null;
 
   constructor() {
     super('ProjectsModule', { debug: false });
@@ -97,14 +96,74 @@ export class ProjectsModule extends BaseModule {
     // Set up back button handler
     this.setupBackButton();
 
-    // Listen for hash changes to handle project detail navigation
-    this.boundHashChangeHandler = this.handleHashChange.bind(this);
-    window.addEventListener('hashchange', this.boundHashChangeHandler);
+    // Listen for page-changed events from PageTransitionModule
+    // This replaces direct hash change handling to avoid race conditions
+    window.addEventListener('page-changed', this.handlePageChanged.bind(this) as EventListener);
 
-    // Check initial hash for project detail
-    this.handleHashChange();
+    // Check initial hash for project detail (on page load only)
+    this.checkInitialHash();
 
     this.log('Initialized');
+  }
+
+  /**
+   * Check initial hash on page load for project detail
+   */
+  private checkInitialHash(): void {
+    const hash = window.location.hash;
+    const projectMatch = hash.match(/^#\/projects\/(.+)$/);
+
+    if (projectMatch) {
+      const slug = projectMatch[1];
+      // Just render the content - PageTransitionModule handles visibility
+      this.renderProjectDetailForSlug(slug);
+    }
+  }
+
+  /**
+   * Handle page-changed events from PageTransitionModule
+   */
+  private handlePageChanged(event: CustomEvent): void {
+    const { to } = event.detail || {};
+
+    if (to === 'project-detail') {
+      // Extract slug from current hash and render content
+      const hash = window.location.hash;
+      const projectMatch = hash.match(/^#\/projects\/(.+)$/);
+
+      if (projectMatch) {
+        const slug = projectMatch[1];
+        this.renderProjectDetailForSlug(slug);
+      }
+    } else if (to === 'projects') {
+      // Returning to projects list - reset detail state
+      this.currentProjectSlug = null;
+      document.title = 'Projects - No Bhad Codes';
+    }
+  }
+
+  /**
+   * Render project detail content for a given slug
+   * Does NOT manage page visibility - only content rendering
+   */
+  private renderProjectDetailForSlug(slug: string): void {
+    if (!this.portfolioData || !this.projectDetailSection) return;
+
+    const project = this.portfolioData.projects.find(p => p.slug === slug);
+    if (!project) {
+      console.warn('[ProjectsModule] Project not found:', slug);
+      // Navigate back to projects list
+      window.location.hash = '#/projects';
+      return;
+    }
+
+    this.currentProjectSlug = slug;
+
+    // Populate project detail content
+    this.renderProjectDetail(project);
+
+    // Update page title
+    document.title = `${project.title} - No Bhad Codes`;
   }
 
   /**
@@ -256,74 +315,6 @@ export class ProjectsModule extends BaseModule {
     window.location.hash = `#/projects/${slug}`;
   }
 
-  /**
-   * Handle hash changes for project detail navigation
-   */
-  private handleHashChange(): void {
-    const hash = window.location.hash;
-
-    // Check if we're on a project detail page
-    const projectMatch = hash.match(/^#\/projects\/(.+)$/);
-
-    if (projectMatch) {
-      const slug = projectMatch[1];
-      this.showProjectDetail(slug);
-    } else if (hash === '#/projects') {
-      this.hideProjectDetail();
-    }
-  }
-
-  /**
-   * Show project detail page
-   */
-  private showProjectDetail(slug: string): void {
-    if (!this.portfolioData || !this.projectDetailSection) return;
-
-    const project = this.portfolioData.projects.find(p => p.slug === slug);
-    if (!project) {
-      console.warn('[ProjectsModule] Project not found:', slug);
-      // Navigate back to projects list
-      window.location.hash = '#/projects';
-      return;
-    }
-
-    this.currentProjectSlug = slug;
-
-    // Populate project detail content
-    this.renderProjectDetail(project);
-
-    // Update page title
-    document.title = `${project.title} - No Bhad Codes`;
-
-    // Show project detail section, hide projects list
-    this.projectsSection?.classList.remove('page-active');
-    this.projectsSection?.classList.add('page-hidden');
-    this.projectDetailSection.classList.remove('page-hidden');
-    this.projectDetailSection.classList.add('page-active');
-
-    // Dispatch event for page transition module
-    window.dispatchEvent(new CustomEvent('router:navigate', {
-      detail: { section: 'project-detail', slug }
-    }));
-  }
-
-  /**
-   * Hide project detail and return to projects list
-   */
-  private hideProjectDetail(): void {
-    if (!this.projectDetailSection || !this.projectsSection) return;
-
-    this.currentProjectSlug = null;
-
-    // Update page title
-    document.title = 'Projects - No Bhad Codes';
-
-    // Show projects list, hide project detail
-    this.projectDetailSection.classList.remove('page-active');
-    this.projectDetailSection.classList.add('page-hidden');
-    this.projectsSection.classList.remove('page-hidden');
-    this.projectsSection.classList.add('page-active');
-  }
 
   /**
    * Render project detail content
@@ -463,27 +454,16 @@ export class ProjectsModule extends BaseModule {
 
   /**
    * Navigate back to projects list
+   * PageTransitionModule handles the transition animation
    */
   private goBackToProjects(): void {
-    // Add leaving class for exit animation
-    const backBtn = document.getElementById('project-back-btn');
-    if (backBtn) {
-      backBtn.classList.add('leaving');
-    }
-
-    // Navigate after brief delay for animation
-    setTimeout(() => {
-      window.location.hash = '#/projects';
-    }, 200);
+    window.location.hash = '#/projects';
   }
 
   /**
    * Clean up module
    */
   protected async onDestroy(): Promise<void> {
-    if (this.boundHashChangeHandler) {
-      window.removeEventListener('hashchange', this.boundHashChangeHandler);
-    }
     this.projectsSection = null;
     this.projectsContent = null;
     this.projectDetailSection = null;

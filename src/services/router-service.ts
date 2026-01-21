@@ -275,8 +275,15 @@ export class RouterService extends BaseService {
    * Navigate to a section
    * Uses virtual pages with PageTransitionModule on all devices
    */
-  async navigateToSection(sectionId: string, options: { smooth?: boolean } = {}): Promise<void> {
-    this.log('navigateToSection called with sectionId:', sectionId);
+  async navigateToSection(sectionId: string, options: { smooth?: boolean; initial?: boolean } = {}): Promise<void> {
+    this.log('navigateToSection called with sectionId:', sectionId, 'initial:', options.initial);
+
+    // Skip dispatching router:navigate during initial page load
+    // PageTransitionModule already handles initial page state based on hash
+    if (options.initial) {
+      this.log('Skipping navigation event dispatch during initial load');
+      return;
+    }
 
     // Try multiple selector strategies to find the section
     const section =
@@ -401,7 +408,7 @@ export class RouterService extends BaseService {
     // Navigate to section
     if (route.section) {
       this.log('Navigating to section:', route.section);
-      await this.navigateToSection(route.section, options);
+      await this.navigateToSection(route.section, { smooth: options.smooth, initial: options.initial });
     }
 
     // Update document title
