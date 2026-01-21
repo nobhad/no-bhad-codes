@@ -43,80 +43,11 @@
 }
 
 /* ----- COMPONENT: Buttons ----- */
-.portal-btn,
-.client-portal-main .btn,
-.client-portal-main .btn-primary,
-.client-portal-main .btn-secondary,
-.client-portal-main .btn-outline,
-.client-portal-main button[type="submit"] {
-  padding: var(--portal-spacing-md) var(--portal-spacing-xl);
-  background: var(--color-neutral-200);
-  color: var(--portal-border-dark);
-  border: var(--portal-border);
-  border-radius: var(--portal-radius-sm);
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  text-transform: uppercase;
-  font-family: inherit;
-  line-height: 1.2;
-}
-
-.portal-btn-primary,
-.client-portal-main .btn-primary,
-.client-portal-main button[type="submit"] {
-  background: var(--color-primary);
-  color: var(--color-white);
-  border-color: var(--color-primary);
-}
-
-.portal-btn-sm,
-.client-portal-main .btn-sm {
-  padding: var(--portal-spacing-sm) var(--portal-spacing-lg);
-  font-size: 0.8rem;
-  border-width: 2px;
-}
-
-.portal-btn:hover,
-.portal-btn-sm:hover,
-.client-portal-main .btn:hover,
-.client-portal-main .btn-secondary:hover,
-.client-portal-main .btn-outline:hover {
-  background: var(--color-primary);
-  color: var(--color-white);
-  border-color: var(--color-primary);
-}
-
-.portal-btn-primary:hover,
-.client-portal-main .btn-primary:hover,
-.client-portal-main button[type="submit"]:hover {
-  background: var(--portal-border-dark);
-  border-color: var(--portal-border-dark);
-}
-
-/* Scoped to client-portal to prevent conflicts */
-[data-page="client-portal"] .btn-outline {
-  background: transparent;
-  color: var(--portal-border-dark);
-  border: var(--portal-border);
-  padding: var(--portal-spacing-sm) var(--portal-spacing-lg);
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  text-transform: uppercase;
-  border-radius: var(--portal-radius-sm);
-}
-
-[data-page="client-portal"] .btn-outline:hover {
-  background: var(--portal-border-dark);
-  color: var(--color-white);
-}
+/* All portal button styles consolidated in buttons.css */
 
 /* ----- COMPONENT: Form Input ----- */
-/* Matches main site contact form styling - dark bg, light text */
-/* FORM FIELD STYLING - BLACK BACKGROUND FOR ALL PORTAL INPUTS */
+/* PORTAL-ONLY FORM STYLING - Separate from main site contact form */
+/* Dark bg, light text, label inside input, larger padding */
 /* Using :is() to reduce selector complexity (was 25 selectors, now simplified) */
 .portal-input,
 :is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) :is(
@@ -367,24 +298,26 @@
   margin-bottom: var(--portal-spacing-lg);
 }
 
-.portal-project-card {
+[data-page="client-portal"] .portal-project-card {
   display: block;
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--portal-radius-lg);
-  padding: var(--portal-spacing-xl);
+  border-radius: var(--portal-radius-lg, 12px);
+  padding: var(--portal-spacing-xl, 1.5rem);
   color: var(--portal-text-light);
   transition: background-color 0.2s ease;
   position: relative;
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-panel);
 }
 
-.portal-project-card:hover {
+/* Only show hover on clickable project cards (admin uses these as links) */
+[data-page="admin"] .portal-project-card:hover {
   background: var(--portal-bg-hover);
 }
 
-/* No hover on system info cards */
-#tab-system .portal-project-card:hover {
+/* No hover on system info cards or client portal project cards (not clickable) */
+#tab-system .portal-project-card:hover,
+[data-page="client-portal"] .portal-project-card:hover {
   background: var(--portal-bg-dark);
 }
 

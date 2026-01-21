@@ -62,14 +62,14 @@
 
 /* Recent Activity */
 /* High specificity to override base card styles */
-.client-portal-main .recent-activity {
+[data-page="client-portal"] .recent-activity {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--portal-radius-lg);
-  padding: var(--portal-spacing-xl);
+  border-radius: var(--border-radius-card);
+  padding: var(--space-4);
   margin-bottom: var(--portal-spacing-2xl);
   color: var(--portal-text-light);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-panel);
 }
 
 .recent-activity h3 {
@@ -86,10 +86,10 @@
   margin: 0;
 }
 
-.activity-list li {
-  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
-  background: var(--portal-bg-dark);
-  border-radius: var(--border-radius-md);
+[data-page="client-portal"] .activity-list li {
+  padding: var(--space-3) var(--space-4);
+  background: var(--portal-bg-medium);
+  border-radius: var(--border-radius-card);
   border: none;
   margin-bottom: var(--portal-spacing-sm);
   font-size: 0.9rem;
@@ -97,9 +97,7 @@
   transition: background-color 0.2s ease;
 }
 
-.activity-list li:hover {
-  background: var(--portal-bg-hover);
-}
+/* Activity items are not clickable - no hover effect */
 
 .activity-list li:last-child {
   margin-bottom: 0;
@@ -115,26 +113,32 @@
 
 /* Stat Card */
 /* High specificity to override base card and button styles */
-.client-portal-main .stat-card,
-.client-portal-main button.stat-card,
-.client-portal-main .stat-card.cp-shadow {
+/* Matches admin portal styling exactly */
+[data-page="client-portal"] .stat-card,
+[data-page="client-portal"] button.stat-card,
+[data-page="client-portal"] .stat-card.portal-shadow {
   background: var(--portal-bg-dark);
   background-color: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--portal-radius-lg);
-  padding: var(--portal-spacing-xl);
+  border-radius: var(--border-radius-card);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
+  gap: var(--space-1);
   color: var(--portal-text-light);
   font-family: inherit;
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-panel);
+  transition: background 0.2s ease;
 }
 
-.stat-card-clickable {
+[data-page="client-portal"] .stat-card-clickable {
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
-.client-portal-main .stat-card-clickable:hover {
+[data-page="client-portal"] .stat-card-clickable:hover {
   background: var(--portal-bg-readonly);
 }
 
@@ -184,13 +188,13 @@
 
 /* Overview Card */
 /* High specificity to override base card styles */
-.client-portal-main .overview-card {
+[data-page="client-portal"] .overview-card {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--portal-radius-lg);
-  padding: var(--portal-spacing-xl);
+  border-radius: var(--border-radius-card);
+  padding: var(--space-4);
   color: var(--portal-text-light);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-panel);
 }
 
 .overview-card h3 {

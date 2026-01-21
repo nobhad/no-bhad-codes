@@ -3,6 +3,10 @@
    Import order matters: base components first, then views
    ===================================================== */
 
+/* Shared Portal Styles (admin + client) */
+@import '../shared/portal-buttons.css';
+@import '../shared/portal-messages.css';
+
 /* Base Components (cp- prefixed reusable classes) */
 @import './components.css';
 
@@ -16,7 +20,6 @@
 /* Dashboard Views */
 @import './dashboard.css';
 @import './files.css';
-@import './messages.css';
 @import './invoices.css';
 @import './settings.css';
 

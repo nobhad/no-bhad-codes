@@ -61,20 +61,7 @@
   font-family: var(--font--acme);
 }
 
-.project-detail-overview .btn-icon {
-  background: transparent;
-  border: none;
-  color: var(--portal-text-secondary);
-  cursor: pointer;
-  padding: var(--portal-spacing-sm);
-  border-radius: var(--portal-radius-sm);
-  transition: color 0.2s ease, background 0.2s ease;
-}
-
-.project-detail-overview .btn-icon:hover {
-  color: var(--color-primary);
-  background: rgba(255, 255, 255, 0.1);
-}
+/* Standalone .btn-icon styles now in shared/portal-buttons.css */
 
 /* Root meta-item styling - applies everywhere */
 .meta-item {
@@ -860,156 +847,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   gap: var(--portal-spacing-sm);
 }
 
-/* Messages in Project Detail - Light background */
-[data-page="admin"] .messages-thread {
-  max-height: 400px;
-  overflow-y: auto;
-  padding: var(--portal-spacing-lg);
-  background: var(--color-neutral-200);
-  border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0;
-  margin-bottom: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--portal-spacing-md);
-}
-
-.messages-thread .message {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  gap: var(--portal-spacing-md);
-  max-width: 85%;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-}
-
-.messages-thread .message-received {
-  align-self: flex-start;
-}
-
-/* Message Avatar */
-.messages-thread .message-avatar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--portal-spacing-xs);
-  flex-shrink: 0;
-}
-
-.messages-thread .message-avatar .avatar-placeholder {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--color-dark);
-  color: var(--color-neutral-100);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.75rem;
-  letter-spacing: 0.5px;
-}
-
-.messages-thread .message-avatar .avatar-img {
-  display: block;
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  /* Invert colors: dark body with light eye (matches div bg) */
-  filter: invert(1);
-}
-
-/* Ensure avatar is visible for sent messages */
-.messages-thread .message-sent .message-avatar {
-  display: flex;
-  flex-shrink: 0;
-}
-
-/* Message Content (the bubble) */
-.messages-thread .message-content {
-  background: white;
-  border: var(--portal-border);
-  border-radius: 18px;
-  padding: var(--portal-spacing-lg) 1.25rem;
-  flex: 1;
-}
-
-.messages-thread .message-received .message-content {
-  color: var(--portal-text-dark);
-  border-bottom-left-radius: var(--portal-radius-xs);
-}
-
-.messages-thread .message-sent {
-  align-self: flex-end;
-  flex-direction: row;
-}
-
-.messages-thread .message-sent .message-content {
-  background: var(--color-neutral-100);
-  color: var(--portal-text-dark);
-  border-color: var(--portal-border-dark);
-  border-bottom-right-radius: var(--portal-radius-xs);
-}
-
-.messages-thread .message-header {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-bottom: var(--portal-spacing-xs);
-}
-
-.messages-thread .message-sender {
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-.messages-thread .message-received .message-sender {
-  color: var(--portal-text-dark);
-}
-
-.messages-thread .message-sent .message-sender {
-  color: var(--portal-text-dark);
-}
-
-.messages-thread .message-time {
-  font-size: 0.75rem;
-  color: var(--portal-text-dark);
-}
-
-/* Sender name below avatar */
-.messages-thread .message-avatar .message-sender {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--portal-text-dark);
-  text-align: center;
-  max-width: 60px;
-  word-wrap: break-word;
-  line-height: 1.2;
-}
-
-.messages-thread .message-content {
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-.messages-thread .message-received .message-content {
-  color: var(--portal-text-dark);
-}
-
-.messages-thread .message-sent .message-content {
-  color: var(--portal-text-dark);
-}
-
-/* Empty state in messages - dark text on light bg */
-.messages-thread .empty-state,
-.messages-thread > p {
-  color: var(--portal-text-dark);
-  text-align: center;
-  font-style: italic;
-  padding: var(--portal-spacing-xl);
-}
+/* Message styles now in client-portal/messages.css (unified for all portals) */
 
 /* Client Account Info */
 .client-account-info {
@@ -1678,56 +1516,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   border-radius: var(--portal-radius-lg);
 }
 
-/* Admin messages thread - more padding, scrollable, takes remaining space */
-[data-page="admin"] #tab-messages .messages-thread,
-[data-page="admin"] .messages-thread {
-  padding: var(--portal-spacing-xl);
-  flex: 1;
-  max-height: none;
-  overflow-y: auto;
-}
-
-/* Admin message compose - pinned to bottom */
-[data-page="admin"] #tab-messages .message-compose,
-[data-page="admin"] .message-compose {
-  display: flex;
-  flex-direction: column;
-  gap: var(--portal-spacing-lg);
-  padding: var(--portal-spacing-lg);
-  background: var(--color-neutral-200) !important;
-  flex-shrink: 0;
-  border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
-}
-
-[data-page="admin"] .message-compose textarea {
-  background-color: var(--color-white);
-  color: var(--portal-text-dark);
-  border: 3px solid var(--color-black);
-  border-radius: var(--portal-radius-md);
-  min-height: 100px;
-  padding: var(--portal-spacing-lg);
-}
-
-[data-page="admin"] .message-compose textarea:focus {
-  border-color: var(--color-primary);
-  outline: none;
-}
-
-[data-page="admin"] .message-compose button {
-  width: 100%;
-  box-sizing: border-box;
-  background: transparent;
-  color: var(--portal-text-dark);
-  border: 3px solid var(--color-black);
-  border-radius: var(--portal-radius-lg);
-  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
-}
-
-[data-page="admin"] .message-compose button:hover {
-  background: var(--color-primary);
-  color: var(--portal-bg-dark);
-  border-color: var(--color-primary);
-}
+/* Message styles now in client-portal/messages.css (unified for all portals) */
 
 /* ================================================
    Admin Sidebar Footer & Logout Button

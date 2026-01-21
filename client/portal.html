@@ -96,11 +96,6 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
               <span class="btn-text">PROJECT PREVIEW</span>
             </button>
-            <!-- Admin-only buttons (hidden by default, shown via JS for admin users) -->
-            <button class="btn btn-secondary btn-admin hidden" id="btn-leads" data-tab="leads">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              <span class="btn-text">LEADS</span>
-            </button>
           </div>
           <!-- Sign Out Button -->
           <div class="sidebar-footer">
@@ -329,32 +324,6 @@
                     placeholder="Type your message..."
                     aria-label="Type your message"
                   ></textarea>
-                  <button
-                    type="button"
-                    class="emoji-toggle-btn"
-                    id="emoji-toggle"
-                    aria-label="Open emoji picker"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
-                      <line x1="9" y1="9" x2="9.01" y2="9"></line>
-                      <line x1="15" y1="9" x2="15.01" y2="9"></line>
-                    </svg>
-                  </button>
-                </div>
-                <div class="emoji-picker-wrapper hidden" id="emoji-picker-wrapper">
-                  <emoji-picker id="emoji-picker"></emoji-picker>
                 </div>
                 <button class="btn btn-secondary" id="btn-send-message">Send Message</button>
               </div>
@@ -758,6 +727,7 @@
                       stroke-width="2"
                       stroke-linecap="round"
                       stroke-linejoin="round"
+                      class="btn-icon"
                     >
                       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                       <polyline points="15 3 21 3 21 9"></polyline>
@@ -779,6 +749,7 @@
                       stroke-width="2"
                       stroke-linecap="round"
                       stroke-linejoin="round"
+                      class="btn-icon"
                     >
                       <polyline points="23 4 23 10 17 10"></polyline>
                       <polyline points="1 20 1 14 7 14"></polyline>
@@ -800,62 +771,6 @@
             </div>
           </div>
 
-          <!-- Leads View (Admin Only) -->
-          <div class="tab-content" id="tab-leads">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
-              <h2>Intake Form Submissions</h2>
-            </div>
-
-            <!-- Leads Stats -->
-            <div class="leads-stats quick-stats">
-              <div class="stat-card portal-shadow">
-                <span class="stat-number" id="leads-total">-</span>
-                <span class="stat-label">Total Leads</span>
-              </div>
-              <div class="stat-card portal-shadow">
-                <span class="stat-number" id="leads-pending">-</span>
-                <span class="stat-label">Pending</span>
-              </div>
-              <div class="stat-card portal-shadow">
-                <span class="stat-number" id="leads-active">-</span>
-                <span class="stat-label">In Progress</span>
-              </div>
-              <div class="stat-card portal-shadow">
-                <span class="stat-number" id="leads-completed">-</span>
-                <span class="stat-label">Completed</span>
-              </div>
-            </div>
-
-            <!-- Leads Table -->
-            <div class="leads-table-section portal-shadow">
-              <div class="leads-table-header">
-                <h3>All Submissions</h3>
-                <button class="btn btn-secondary btn-sm" id="btn-refresh-leads">Refresh</button>
-              </div>
-              <div class="admin-table-container leads-table-wrapper">
-                <table class="admin-table leads-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Date</th>
-                      <th scope="col">Name</th>
-                      <th scope="col">Company</th>
-                      <th scope="col">Email</th>
-                      <th scope="col">Project Type</th>
-                      <th scope="col">Budget</th>
-                      <th scope="col">Timeline</th>
-                      <th scope="col">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="leads-table-body">
-                    <tr>
-                      <td colspan="8" class="loading-row">Loading...</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

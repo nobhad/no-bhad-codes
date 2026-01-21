@@ -351,11 +351,12 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
           <div class="message message-sent">
             <div class="message-content">
               <div class="message-header">
+                <span class="message-sender">You (Admin)</span>
                 <span class="message-time">${date} at ${time}</span>
               </div>
               <div class="message-body">${safeContent}</div>
             </div>
-            <div class="message-avatar" data-name="Admin">
+            <div class="message-avatar">
               <img src="/images/avatar_small_sidebar.svg" alt="Admin" class="avatar-img" />
             </div>
           </div>
@@ -364,12 +365,12 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
 
       return `
         <div class="message message-received">
-          <div class="message-avatar" data-name="${safeSenderName}">
+          <div class="message-avatar">
             <div class="avatar-placeholder">${safeInitials}</div>
-            <span class="message-sender">${safeSenderName}</span>
           </div>
           <div class="message-content">
             <div class="message-header">
+              <span class="message-sender">${safeSenderName}</span>
               <span class="message-time">${date} at ${time}</span>
             </div>
             <div class="message-body">${safeContent}</div>

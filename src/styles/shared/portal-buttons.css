@@ -1,0 +1,395 @@
+/**
+ * ===============================================
+ * SHARED PORTAL BUTTON STYLES
+ * ===============================================
+ * @file src/styles/shared/portal-buttons.css
+ *
+ * Shared button styles for admin and client portal.
+ * CSS variables defined in design-system/tokens/buttons.css
+ * Single source of truth - no button styles elsewhere.
+ */
+
+/* ============================================
+ * BASE PORTAL BUTTON STYLES
+ * ============================================
+ * Applied to ALL buttons in admin and client portal.
+ */
+
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline,
+  button[type="submit"]
+) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--portal-spacing-sm, 0.5rem);
+  padding: var(--portal-spacing-md, 0.75rem) var(--portal-spacing-xl, 1.5rem);
+  font-family: var(--font--acme, inherit);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: left;
+  background: transparent;
+  color: var(--portal-text-light, #fff);
+  border: none;
+  border-radius: var(--portal-radius-lg, 12px);
+  cursor: pointer;
+  transition: all 150ms;
+  box-shadow: var(--btn-portal-shadow);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* Hover state */
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline,
+  button[type="submit"]
+):hover {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark, #1a1a1a);
+  box-shadow: var(--btn-portal-shadow-hover);
+}
+
+/* Focus state */
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline,
+  button[type="submit"]
+):focus {
+  box-shadow: var(--btn-portal-shadow-focus);
+  outline: none;
+}
+
+/* Active/selected state */
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .btn,
+  .btn-secondary
+).active {
+  background: var(--color-primary);
+  color: var(--portal-bg-dark, #1a1a1a);
+  box-shadow: var(--btn-portal-shadow-hover);
+}
+
+/* ============================================
+ * PRIMARY BUTTON VARIANT
+ * ============================================
+ */
+
+:is([data-page="admin"], [data-page="client-portal"]) .btn-primary,
+:is([data-page="admin"], [data-page="client-portal"]) button[type="submit"] {
+  background: var(--color-primary);
+  color: var(--color-white, #fff);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .btn-primary:hover,
+:is([data-page="admin"], [data-page="client-portal"]) button[type="submit"]:hover {
+  background: var(--portal-bg-dark, #1a1a1a);
+  color: var(--portal-text-light, #fff);
+}
+
+/* ============================================
+ * SMALL BUTTON VARIANT
+ * ============================================
+ */
+
+:is([data-page="admin"], [data-page="client-portal"]) .btn-sm {
+  padding: var(--portal-spacing-sm, 0.5rem) var(--portal-spacing-lg, 1rem);
+  font-size: 0.8rem;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .btn-sm .btn-icon {
+  width: 1em;
+  height: 1em;
+}
+
+/* ============================================
+ * SIDEBAR BUTTON OVERRIDES
+ * ============================================
+ * Sidebar nav buttons - full width, left-aligned.
+ * Explicitly set shadow to match logout button.
+ */
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn {
+  width: 100%;
+  padding: 0.85rem 1.1rem;
+  font-size: 1rem;
+  text-align: left;
+  justify-content: flex-start;
+  box-shadow: var(--btn-portal-shadow);
+}
+
+/* Button icon styling - size matches text */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn .btn-icon {
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+}
+
+/* Button text styling */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn .btn-text {
+  flex: 1;
+}
+
+/* Icon color on hover - dark for contrast on red background */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn:hover .btn-icon {
+  color: var(--portal-bg-dark);
+}
+
+/* Icon color when active */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn.active .btn-icon {
+  color: var(--portal-bg-dark);
+}
+
+/* ============================================
+ * LOGOUT BUTTON
+ * ============================================
+ */
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-footer .btn-logout {
+  width: 100%;
+  padding: 0.85rem 1.1rem;
+  font-size: 1rem;
+  text-align: left;
+  justify-content: flex-start;
+  box-shadow: var(--btn-portal-shadow);
+}
+
+/* Logout button icon styling - size matches text */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-footer .btn-logout .btn-icon {
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+}
+
+/* Logout button text styling */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-footer .btn-logout .btn-text {
+  flex: 1;
+}
+
+/* Logout icon color on hover */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-footer .btn-logout:hover .btn-icon {
+  color: var(--portal-bg-dark);
+}
+
+/* ============================================
+ * SEND MESSAGE BUTTON EXCEPTION
+ * ============================================
+ * Border in default state only, no shadow.
+ */
+
+:is([data-page="admin"], [data-page="client-portal"]) #btn-send-message,
+:is([data-page="admin"], [data-page="client-portal"]) #admin-send-message {
+  border: 2px solid var(--color-black);
+  color: var(--color-black);
+  box-shadow: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) #btn-send-message:hover,
+:is([data-page="admin"], [data-page="client-portal"]) #admin-send-message:hover {
+  border: 2px solid var(--color-primary);
+  color: var(--color-white);
+  box-shadow: var(--btn-portal-shadow-hover);
+}
+
+/* ============================================
+ * STANDALONE ICON BUTTON
+ * ============================================
+ * Used for action icons (edit, delete, etc.)
+ * Matches admin table .icon-btn styling - no border, no shadow.
+ * Only applies to button elements, not SVG icons inside buttons.
+ */
+
+:is([data-page="admin"], [data-page="client-portal"]) button.btn-icon {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--portal-text-light);
+  cursor: pointer;
+  padding: var(--space-2, 0.5rem);
+  border-radius: 4px;
+  transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) button.btn-icon:hover {
+  color: var(--color-primary);
+  background: transparent;
+  box-shadow: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) button.btn-icon svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+}
+
+/* ============================================
+ * COLLAPSED SIDEBAR BUTTON STYLES
+ * ============================================
+ * Icon-only buttons when sidebar is collapsed.
+ */
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  justify-content: center;
+  margin: 0 auto;
+  border-radius: var(--portal-radius-md, 8px);
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn.active {
+  background: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn.active .btn-icon {
+  color: var(--color-primary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn:hover {
+  background: transparent;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn:hover .btn-icon {
+  color: var(--color-primary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn .btn-text {
+  display: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn .btn-icon {
+  margin: 0;
+  width: 20px;
+  height: 20px;
+}
+
+/* ============================================
+ * COLLAPSED LOGOUT BUTTON STYLES
+ * ============================================
+ */
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-footer .btn-logout {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  justify-content: center;
+  margin: 0 auto;
+  border-radius: var(--portal-radius-md, 8px);
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  box-shadow: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-footer .btn-logout:hover {
+  background: transparent;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-footer .btn-logout:hover .btn-icon {
+  color: var(--color-primary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-footer .btn-text {
+  display: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-footer .btn-logout .btn-icon {
+  margin: 0;
+  width: 20px;
+  height: 20px;
+}
+
+/* ============================================
+ * MOBILE AUTO-COLLAPSE BUTTON STYLES
+ * ============================================
+ * On small screens, sidebar auto-collapses to icon-only.
+ */
+
+@media (--compact-mobile) {
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    position: relative;
+    box-shadow: none;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn.active {
+    border: none;
+    outline: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn.active .btn-icon {
+    color: var(--color-primary);
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn:hover .btn-icon,
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn:focus .btn-icon {
+    color: var(--color-primary);
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn .btn-text {
+    display: none;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons .btn .btn-icon {
+    margin-right: 0;
+    width: 20px;
+    height: 20px;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-footer .btn-logout {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 8px;
+    margin: 0 auto;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-footer .btn-text,
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .logout-text {
+    display: none;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-footer .btn-logout .btn-icon {
+    margin: 0;
+    width: 20px;
+    height: 20px;
+  }
+}

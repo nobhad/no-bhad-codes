@@ -217,7 +217,12 @@ router.post(
       );
     }
 
-    const sender_name = req.user!.type === 'admin' ? 'Admin' : req.user!.email;
+    // Get the actual sender name from the clients table
+    const senderClient = await db.get(
+      'SELECT contact_name, email FROM clients WHERE id = ?',
+      [req.user!.id]
+    ) as { contact_name: string | null; email: string } | undefined;
+    const sender_name: string = senderClient?.contact_name || senderClient?.email || req.user!.email;
 
     const result = await db.run(
       `
@@ -459,11 +464,18 @@ router.post(
       );
     }
 
+    // Get the actual sender name from the clients table
+    const inquirySender = await db.get(
+      'SELECT contact_name, email FROM clients WHERE id = ?',
+      [req.user!.id]
+    );
+    const inquirySenderName = inquirySender?.contact_name || inquirySender?.email || req.user!.email;
+
     // Send message
     await db.run(
       `
     INSERT INTO general_messages (
-      client_id, sender_type, sender_name, subject, message, 
+      client_id, sender_type, sender_name, subject, message,
       message_type, priority, attachments, thread_id
     )
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -471,7 +483,7 @@ router.post(
       [
         req.user!.id,
         req.user!.type,
-        req.user!.email,
+        inquirySenderName,
         subject.trim(),
         message.trim(),
         message_type,

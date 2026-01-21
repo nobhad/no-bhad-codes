@@ -19,7 +19,6 @@ import type {
 } from '../../types/api';
 import { gsap } from 'gsap';
 import { APP_CONSTANTS } from '../../config/constants';
-import 'emoji-picker-element';
 import type { ClientPortalContext } from './portal-types';
 import {
   loadFilesModule,
@@ -75,9 +74,6 @@ export class ClientPortalModule extends BaseModule {
       clientPassword: '#client-password',
       sidebarToggle: '#sidebar-toggle',
       btnLogout: '#btn-logout',
-      emojiToggle: '#emoji-toggle',
-      emojiPickerWrapper: '#emoji-picker-wrapper',
-      emojiPicker: '#emoji-picker',
       messageInput: '#message-input',
       btnSendMessage: '#btn-send-message',
       profileForm: '#profile-form',
@@ -339,44 +335,8 @@ export class ClientPortalModule extends BaseModule {
       });
     });
 
-    // Emoji picker (using emoji-picker-element web component)
-    const emojiToggle = this.domCache.get('emojiToggle');
-    const emojiPickerWrapper = this.domCache.get('emojiPickerWrapper');
-    const emojiPicker = this.domCache.get('emojiPicker');
     const messageInput = this.domCache.getAs<HTMLTextAreaElement>('messageInput');
     const sendButton = this.domCache.get('btnSendMessage');
-
-    if (emojiToggle && emojiPickerWrapper && emojiPicker) {
-      // Toggle picker visibility
-      emojiToggle.addEventListener('click', () => {
-        emojiPickerWrapper.classList.toggle('hidden');
-      });
-
-      // Handle emoji selection from web component
-      emojiPicker.addEventListener('emoji-click', (event: Event) => {
-        const customEvent = event as CustomEvent;
-        if (messageInput && customEvent.detail?.unicode) {
-          const emoji = customEvent.detail.unicode;
-          const start = messageInput.selectionStart;
-          const end = messageInput.selectionEnd;
-          const text = messageInput.value;
-          messageInput.value = text.substring(0, start) + emoji + text.substring(end);
-          messageInput.focus();
-          messageInput.selectionStart = messageInput.selectionEnd = start + emoji.length;
-        }
-      });
-
-      // Close picker when clicking outside
-      document.addEventListener('click', (e) => {
-        if (
-          !emojiPickerWrapper.contains(e.target as Node) &&
-          e.target !== emojiToggle &&
-          !emojiToggle.contains(e.target as Node)
-        ) {
-          emojiPickerWrapper.classList.add('hidden');
-        }
-      });
-    }
 
     // Enter key to send message
     if (messageInput && sendButton) {

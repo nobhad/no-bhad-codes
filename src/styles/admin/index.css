@@ -8,6 +8,10 @@
  * Split into modules for maintainability.
  */
 
+/* Shared portal styles */
+@import "../shared/portal-buttons.css";
+@import "../shared/portal-messages.css";
+
 /* Portal layout and sidebar (shared with client portal) */
 @import "../client-portal/layout.css";
 @import "../client-portal/sidebar.css";

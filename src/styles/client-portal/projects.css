@@ -462,11 +462,38 @@
   gap: 0.5rem;
 }
 
-.preview-actions .btn-sm {
+/* Preview toolbar icon buttons - no border, no shadow
+   Override base portal button styles completely */
+:is([data-page="client-portal"], [data-page="admin"]) .preview-actions .btn.btn-secondary.btn-sm {
   padding: 0.5rem;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--portal-bg-dark);
+  border-radius: 4px;
+  transition: color 0.2s ease;
+}
+
+:is([data-page="client-portal"], [data-page="admin"]) .preview-actions .btn.btn-secondary.btn-sm .btn-icon {
+  width: 18px;
+  height: 18px;
+  color: inherit;
+  stroke-width: 2.5;
+}
+
+:is([data-page="client-portal"], [data-page="admin"]) .preview-actions .btn.btn-secondary.btn-sm:hover {
+  background: transparent;
+  color: var(--color-primary);
+  box-shadow: none;
+}
+
+:is([data-page="client-portal"], [data-page="admin"]) .preview-actions .btn.btn-secondary.btn-sm:hover .btn-icon {
+  color: var(--color-primary);
 }
 
 .preview-frame-wrapper {
