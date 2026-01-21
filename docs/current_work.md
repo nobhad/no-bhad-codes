@@ -372,10 +372,10 @@ When navigating to project detail pages (`#/projects/:slug`), content from other
 | Metric | Count | Status |
 |--------|-------|--------|
 | TODO/FIXME comments | 2 | ✅ Low (projects.ts detail page TODO) |
-| Console logs | 225 | ⚠️ High (many intentional logging) |
+| Console logs | 225 | ⚠️ High (many intentional logging with safeguards: logger utility checks debug mode, app-state middleware only logs in development) |
 | `any` types (frontend) | 41 | ✅ Reduced from 71 to 41 (30 fixed, 41 intentional) |
 | `any` types (server) | 0 | ✅ COMPLETE - All 97 fixed, 0 TypeScript errors |
-| ESLint disables | 4 | ✅ Low |
+| ESLint disables | 4 | ✅ Low (all intentional: 4 console.log in logger/dev middleware, 4 any types for flexible validation) |
 | Hardcoded media queries | 0 | ✅ Complete - All migrated to custom media queries |
 | Inline rgba box-shadows | 0 | ✅ Complete - All replaced with shadow tokens |
 
