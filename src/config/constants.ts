@@ -86,7 +86,10 @@ export const APP_CONSTANTS = {
     GRAY_400: '--color-gray-400',
     GRAY_300: '--color-gray-300',
     WHITE: '--color-white',
-    GRID: '--color-shadow-sm'
+    GRID: '--color-shadow-sm',
+    SUCCESS: '--color-success',
+    DANGER: '--color-danger',
+    WARNING: '--color-warning'
   },
 
   // Storage keys
@@ -210,7 +213,10 @@ const CHART_COLOR_FALLBACKS: Record<string, string> = {
   '--color-gray-400': '#a3a3a3',
   '--color-gray-300': '#d4d4d4',
   '--color-white': '#ffffff',
-  '--color-shadow-sm': 'rgba(0, 0, 0, 0.05)'
+  '--color-shadow-sm': 'rgba(0, 0, 0, 0.05)',
+  '--color-success': '#10b981',
+  '--color-danger': '#ef4444',
+  '--color-warning': '#f59e0b'
 };
 
 /**

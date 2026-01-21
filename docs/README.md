@@ -121,9 +121,11 @@ src/
 │   └── modules-config.ts   # Module definitions
 ├── features/               # Feature modules (domain-driven)
 │   ├── admin/              # Admin dashboard
-│   │   ├── admin-dashboard.ts
+│   │   ├── admin-dashboard.ts      # Main coordinator
 │   │   ├── admin-project-details.ts
 │   │   ├── admin-auth.ts
+│   │   ├── services/       # Extracted services (data, chart, export)
+│   │   ├── renderers/      # UI renderers (contacts, messaging)
 │   │   └── modules/        # 10 extracted modules
 │   └── client/             # Client portal
 │       ├── client-portal.ts

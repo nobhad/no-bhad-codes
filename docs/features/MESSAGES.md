@@ -921,10 +921,11 @@ Admin messages display a self-contained SVG avatar with inverted colors:
 
 ### Module Architecture
 
-The admin messaging uses a dedicated module that tracks its own state:
+The admin messaging system has been split into modules and renderers (January 2026 refactor):
+
+**Module** (`src/features/admin/modules/admin-messaging.ts`):
 
 ```typescript
-// src/features/admin/modules/admin-messaging.ts
 let selectedClientId: number | null = null;
 let selectedThreadId: number | null = null;
 let selectedClientName: string = 'Client';
@@ -934,7 +935,17 @@ export function getSelectedThreadId(): number | null {
 }
 ```
 
-The main dashboard delegates to this module for sending messages to ensure the correct thread ID is used.
+**Renderer** (`src/features/admin/renderers/admin-messaging.renderer.ts`):
+
+The renderer handles all UI concerns:
+
+- `renderThreadsList(threads)` - Renders the thread list sidebar
+- `renderMessages(messages)` - Renders messages in the thread view
+- `appendMessage(message)` - Optimistic UI update for sent messages
+- `clearMessageInput()` - Clears compose textarea
+- `updateUnreadBadge(count)` - Updates sidebar badge
+
+The main dashboard coordinates between the module (state) and renderer (UI).
 
 ### Keyboard Navigation
 
@@ -955,6 +966,7 @@ Located in `src/styles/admin/project-detail.css`. See [CSS Architecture](../desi
 | `client/portal.html` | Messages HTML (tab-messages section) |
 | `src/features/client/modules/portal-messages.ts` | Client message module (~270 lines) |
 | `src/features/admin/modules/admin-messaging.ts` | Admin message module (~400 lines) |
+| `src/features/admin/renderers/admin-messaging.renderer.ts` | Admin messaging UI renderer |
 | `src/styles/client-portal/messages.css` | Client message styling |
 | `src/styles/admin/project-detail.css` | Admin message styling |
 | `server/routes/messages.ts` | API endpoints |

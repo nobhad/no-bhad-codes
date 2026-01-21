@@ -5,13 +5,18 @@
  * @file src/features/client/modules/portal-auth.ts
  *
  * Authentication functionality for client portal.
- * Handles login, logout, session validation, and admin features.
+ * Delegates to centralized authStore for state management.
+ *
+ * @deprecated Consider using authStore directly for new code.
+ * This module is maintained for backward compatibility.
  */
 
-import { decodeJwtPayload, isAdminPayload } from '../../../utils/jwt-utils';
+import { authStore } from '../../../auth';
+import type { AnyUser, ClientUser } from '../../../auth/auth-types';
+import { isClientUser } from '../../../auth/auth-types';
+import { createLogger } from '../../../utils/logging';
 
-/** API base URL for authentication */
-const AUTH_API_BASE = '/api/auth';
+const logger = createLogger('PortalAuth');
 
 /** Login credentials */
 interface LoginCredentials {
@@ -40,7 +45,37 @@ export interface LoginCallbacks {
 }
 
 /**
+ * Get display name from user based on role
+ */
+function getUserDisplayName(user: AnyUser): string {
+  if (isClientUser(user)) {
+    return user.contactName || user.companyName || user.email.split('@')[0];
+  }
+  // Admin user - use username or email
+  return user.username || user.email.split('@')[0];
+}
+
+/**
+ * Convert AnyUser to AuthUser for backward compatibility
+ */
+function toAuthUser(user: AnyUser): AuthUser {
+  const isClient = isClientUser(user);
+  const clientUser = isClient ? (user as ClientUser) : null;
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: getUserDisplayName(user),
+    contactName: clientUser?.contactName,
+    companyName: clientUser?.companyName,
+    isAdmin: user.role === 'admin',
+    type: user.role
+  };
+}
+
+/**
  * Handle login form submission
+ * Delegates to authStore.login()
  */
 export async function handleLogin(
   credentials: LoginCredentials,
@@ -62,69 +97,34 @@ export async function handleLogin(
   callbacks.setLoading(true);
 
   try {
-    // Try backend authentication first
-    try {
-      const response = await fetch(`${AUTH_API_BASE}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Include HttpOnly cookies
-        body: JSON.stringify(credentials)
-      });
+    const result = await authStore.login(credentials);
 
-      if (response.ok) {
-        const data = await response.json();
+    if (result.success && result.data) {
+      // Check for redirect parameter first
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlParams.get('redirect');
 
-        // Store auth mode and user info (token is in HttpOnly cookie)
-        sessionStorage.setItem('client_auth_mode', 'authenticated');
-        sessionStorage.setItem('client_auth_user', JSON.stringify(data.user));
-
-        // Check for redirect parameter first
-        const urlParams = new URLSearchParams(window.location.search);
-        const redirectUrl = urlParams.get('redirect');
-
-        if (redirectUrl && redirectUrl.startsWith('/')) {
-          window.location.href = redirectUrl;
-          return;
-        }
-
-        // If user is admin, redirect to admin dashboard
-        if (data.user.isAdmin || data.user.type === 'admin') {
-          window.location.href = '/admin/';
-          return;
-        }
-
-        // Call success handler
-        await callbacks.onLoginSuccess({
-          id: data.user.id,
-          email: data.user.email,
-          name: data.user.contactName || data.user.companyName || data.user.email.split('@')[0],
-          isAdmin: data.user.isAdmin,
-          type: data.user.type
-        });
+      if (redirectUrl && redirectUrl.startsWith('/')) {
+        window.location.href = redirectUrl;
         return;
       }
 
-      // Handle specific error responses from backend
-      const errorData = await response.json();
-      if (errorData.code === 'INVALID_CREDENTIALS') {
-        throw new Error('Invalid email or password');
-      } else if (errorData.code === 'ACCOUNT_INACTIVE') {
-        throw new Error('Your account is inactive. Please contact support.');
-      } else {
-        throw new Error(errorData.error || 'Login failed');
-      }
-    } catch (fetchError) {
-      // If backend is unavailable, show error
-      if (fetchError instanceof TypeError && fetchError.message.includes('fetch')) {
-        console.error('[ClientPortal] Backend unavailable');
-        throw new Error('Unable to connect to server. Please try again later.');
+      // If user is admin, redirect to admin dashboard
+      if (result.data.role === 'admin') {
+        window.location.href = '/admin/';
+        return;
       }
 
-      // Re-throw authentication errors
-      throw fetchError;
+      // Call success handler
+      await callbacks.onLoginSuccess(toAuthUser(result.data));
+      return;
     }
+
+    // Handle error
+    const errorMessage = result.error || 'Login failed';
+    throw new Error(errorMessage);
   } catch (error) {
-    console.error('Login error:', error);
+    logger.error('Login error', { error: error instanceof Error ? error.message : String(error) });
     callbacks.onLoginError(error instanceof Error ? error.message : 'Login failed');
   } finally {
     callbacks.setLoading(false);
@@ -133,12 +133,15 @@ export async function handleLogin(
 
 /**
  * Check for existing authentication
+ * Delegates to authStore.validateSession()
  */
 export async function checkExistingAuth(callbacks: {
   onAuthValid: (user: AuthUser) => Promise<void>;
 }): Promise<boolean> {
-  const authMode = sessionStorage.getItem('client_auth_mode');
-  if (!authMode) return false;
+  // Check if already authenticated via authStore
+  if (!authStore.isAuthenticated()) {
+    return false;
+  }
 
   // Check for redirect parameter first - if user is already logged in and there's a redirect, go there
   const urlParams = new URLSearchParams(window.location.search);
@@ -149,55 +152,49 @@ export async function checkExistingAuth(callbacks: {
   }
 
   try {
-    const response = await fetch(`${AUTH_API_BASE}/profile`, {
-      credentials: 'include' // Include HttpOnly cookies
-    });
+    // Validate session with server
+    const isValid = await authStore.validateSession();
 
-    if (response.ok) {
-      const data = await response.json();
+    if (isValid) {
+      const user = authStore.getCurrentUser();
+
+      if (!user) {
+        return false;
+      }
 
       // If user is admin, redirect to admin dashboard
-      if (data.user.isAdmin || data.user.type === 'admin') {
-        console.log('[ClientPortal] User is admin, redirecting to /admin/');
+      if (user.role === 'admin') {
+        logger.info('User is admin, redirecting to /admin/');
         window.location.href = '/admin/';
         return true;
       }
 
-      await callbacks.onAuthValid({
-        id: data.user.id,
-        email: data.user.email,
-        name: data.user.contactName || data.user.companyName || data.user.email.split('@')[0],
-        isAdmin: data.user.isAdmin,
-        type: data.user.type
-      });
+      await callbacks.onAuthValid(toAuthUser(user));
       return true;
     }
-    // Auth is invalid, clear it
-    clearAuthData();
-    return false;
 
+    return false;
   } catch (error) {
-    console.error('Auth check failed:', error);
-    // Don't remove auth on network errors - might just be backend down
-    if (!(error instanceof TypeError)) {
-      clearAuthData();
-    }
+    logger.error('Auth check failed', { error: error instanceof Error ? error.message : String(error) });
     return false;
   }
 }
 
 /**
  * Handle user logout - clear session and redirect to landing page
+ * Delegates to authStore.logout()
  */
-export function handleLogout(): void {
-  clearAuthData();
+export async function handleLogout(): Promise<void> {
+  await authStore.logout();
   window.location.href = '/';
 }
 
 /**
  * Clear all authentication data from sessionStorage
+ * @deprecated Use authStore.logout() instead
  */
 export function clearAuthData(): void {
+  // Legacy keys - authStore handles these now
   sessionStorage.removeItem('clientAuth');
   sessionStorage.removeItem('clientAuthToken');
   sessionStorage.removeItem('client_auth_mode');
@@ -209,28 +206,25 @@ export function clearAuthData(): void {
 
 /**
  * Check if user is admin and show admin-only UI elements
+ * Delegates to authStore.isAdmin()
  */
 export function setupAdminFeatures(): void {
   try {
-    // Check sessionStorage for admin flag
-    const authData = sessionStorage.getItem('clientAuth');
-    if (authData) {
-      const parsed = JSON.parse(authData);
-      if (parsed.isAdmin) {
-        showAdminButtons();
-      }
+    // Check via authStore
+    if (authStore.isAdmin()) {
+      showAdminButtons();
+      return;
     }
 
-    // Also check JWT token for admin flag
-    const token = sessionStorage.getItem('client_auth_token');
-    if (token) {
-      const payload = decodeJwtPayload(token);
-      if (payload && isAdminPayload(payload)) {
+    // Also check if user is authenticated with admin role
+    if (authStore.isAuthenticated()) {
+      const user = authStore.getCurrentUser();
+      if (user?.role === 'admin') {
         showAdminButtons();
       }
     }
   } catch (error) {
-    console.error('[ClientPortal] Error checking admin status:', error);
+    logger.error('Error checking admin status', { error: error instanceof Error ? error.message : String(error) });
   }
 }
 

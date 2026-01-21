@@ -6,13 +6,31 @@
  *
  * Fluent, type-safe database query builder for SQLite.
  * Provides a clean API for building and executing database queries.
+ * Uses generic types for compile-time type safety.
  */
 
 import { Database } from 'sqlite3';
 import { logger } from '../services/logger.js';
 import { queryStats } from '../services/query-stats.js';
+import type { DatabaseRow } from '../types/database.js';
 
-// Type definitions
+// ============================================
+// Type Definitions
+// ============================================
+
+/**
+ * SQL value types that can be used in WHERE conditions
+ */
+export type SqlValue = string | number | boolean | null;
+
+/**
+ * Array of SQL values for IN/NOT IN operations
+ */
+export type SqlValueArray = SqlValue[];
+
+/**
+ * SQL comparison operators
+ */
 export type WhereOperator =
   | '='
   | '!='
@@ -26,34 +44,52 @@ export type WhereOperator =
   | 'NOT IN'
   | 'IS NULL'
   | 'IS NOT NULL';
+
+/**
+ * Sort direction
+ */
 export type OrderDirection = 'ASC' | 'DESC';
+
+/**
+ * Join types
+ */
 export type JoinType = 'INNER' | 'LEFT' | 'RIGHT' | 'FULL';
 
+/**
+ * WHERE condition definition
+ */
 export interface WhereCondition {
   column: string;
   operator: WhereOperator;
-  value?: any;
+  value?: SqlValue | SqlValueArray;
   logical?: 'AND' | 'OR';
 }
 
+/**
+ * JOIN condition definition
+ */
 export interface JoinCondition {
   type: JoinType;
   table: string;
   on: string;
 }
 
-export interface QueryResult<T = any> {
+/**
+ * Query execution result with typed rows
+ */
+export interface QueryResult<T = DatabaseRow> {
   rows: T[];
   rowCount: number;
   executionTime: number;
   sql: string;
-  params: any[];
+  params: SqlValue[];
 }
 
 /**
  * Base query builder class
+ * @template T The type of entity this builder operates on
  */
-export abstract class BaseQueryBuilder<T = any> {
+export abstract class BaseQueryBuilder<T = DatabaseRow> {
   protected db: Database;
   protected tableName: string;
   protected selectColumns: string[] = ['*'];
@@ -110,7 +146,7 @@ export abstract class BaseQueryBuilder<T = any> {
   /**
    * Add WHERE condition
    */
-  where(column: string, operator: WhereOperator, value?: any): this {
+  where(column: string, operator: WhereOperator, value?: SqlValue | SqlValueArray): this {
     const cloned = this.clone();
     cloned.whereConditions.push({ column, operator, value, logical: 'AND' });
     return cloned;
@@ -119,7 +155,7 @@ export abstract class BaseQueryBuilder<T = any> {
   /**
    * Add OR WHERE condition
    */
-  orWhere(column: string, operator: WhereOperator, value?: any): this {
+  orWhere(column: string, operator: WhereOperator, value?: SqlValue | SqlValueArray): this {
     const cloned = this.clone();
     cloned.whereConditions.push({ column, operator, value, logical: 'OR' });
     return cloned;
@@ -128,14 +164,14 @@ export abstract class BaseQueryBuilder<T = any> {
   /**
    * Add WHERE IN condition
    */
-  whereIn(column: string, values: any[]): this {
+  whereIn(column: string, values: SqlValueArray): this {
     return this.where(column, 'IN', values);
   }
 
   /**
    * Add WHERE NOT IN condition
    */
-  whereNotIn(column: string, values: any[]): this {
+  whereNotIn(column: string, values: SqlValueArray): this {
     return this.where(column, 'NOT IN', values);
   }
 
@@ -204,7 +240,7 @@ export abstract class BaseQueryBuilder<T = any> {
   /**
    * Add HAVING clause
    */
-  having(column: string, operator: WhereOperator, value?: any): this {
+  having(column: string, operator: WhereOperator, value?: SqlValue): this {
     const cloned = this.clone();
     cloned.havingConditions.push({ column, operator, value, logical: 'AND' });
     return cloned;
@@ -240,13 +276,13 @@ export abstract class BaseQueryBuilder<T = any> {
   /**
    * Build WHERE clause SQL
    */
-  protected buildWhereClause(conditions: WhereCondition[]): { sql: string; params: any[] } {
+  protected buildWhereClause(conditions: WhereCondition[]): { sql: string; params: SqlValue[] } {
     if (conditions.length === 0) {
       return { sql: '', params: [] };
     }
 
     let sql = ' WHERE ';
-    const params: any[] = [];
+    const params: SqlValue[] = [];
 
     conditions.forEach((condition, index) => {
       if (index > 0) {
@@ -256,12 +292,13 @@ export abstract class BaseQueryBuilder<T = any> {
       if (condition.operator === 'IS NULL' || condition.operator === 'IS NOT NULL') {
         sql += `${condition.column} ${condition.operator}`;
       } else if (condition.operator === 'IN' || condition.operator === 'NOT IN') {
-        const placeholders = Array(condition.value.length).fill('?').join(', ');
+        const values = condition.value as SqlValueArray;
+        const placeholders = Array(values.length).fill('?').join(', ');
         sql += `${condition.column} ${condition.operator} (${placeholders})`;
-        params.push(...condition.value);
+        params.push(...values);
       } else {
         sql += `${condition.column} ${condition.operator} ?`;
-        params.push(condition.value);
+        params.push(condition.value as SqlValue);
       }
     });
 
@@ -310,13 +347,13 @@ export abstract class BaseQueryBuilder<T = any> {
   /**
    * Build HAVING clause SQL
    */
-  protected buildHavingClause(): { sql: string; params: any[] } {
+  protected buildHavingClause(): { sql: string; params: SqlValue[] } {
     if (this.havingConditions.length === 0) {
       return { sql: '', params: [] };
     }
 
     let sql = ' HAVING ';
-    const params: any[] = [];
+    const params: SqlValue[] = [];
 
     this.havingConditions.forEach((condition, index) => {
       if (index > 0) {
@@ -327,7 +364,7 @@ export abstract class BaseQueryBuilder<T = any> {
         sql += `${condition.column} ${condition.operator}`;
       } else {
         sql += `${condition.column} ${condition.operator} ?`;
-        params.push(condition.value);
+        params.push(condition.value as SqlValue);
       }
     });
 
@@ -354,7 +391,7 @@ export abstract class BaseQueryBuilder<T = any> {
   /**
    * Execute query with error handling and logging
    */
-  protected async executeQuery<R = T>(sql: string, params: any[] = []): Promise<QueryResult<R>> {
+  protected async executeQuery<R = T>(sql: string, params: SqlValue[] = []): Promise<QueryResult<R>> {
     const startTime = Date.now();
 
     try {
@@ -402,7 +439,7 @@ export abstract class BaseQueryBuilder<T = any> {
   /**
    * Execute a single row query
    */
-  protected async executeQuerySingle<R = T>(sql: string, params: any[] = []): Promise<R | null> {
+  protected async executeQuerySingle<R = T>(sql: string, params: SqlValue[] = []): Promise<R | null> {
     const startTime = Date.now();
 
     try {
@@ -444,12 +481,13 @@ export abstract class BaseQueryBuilder<T = any> {
 
 /**
  * Select query builder
+ * @template T The type of entity being queried
  */
-export class SelectQueryBuilder<T = any> extends BaseQueryBuilder<T> {
+export class SelectQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
   /**
    * Build and return the SELECT SQL query
    */
-  toSql(): { sql: string; params: any[] } {
+  toSql(): { sql: string; params: SqlValue[] } {
     const columns = this.distinctValue
       ? `DISTINCT ${this.selectColumns.join(', ')}`
       : this.selectColumns.join(', ');
@@ -574,15 +612,16 @@ export class SelectQueryBuilder<T = any> extends BaseQueryBuilder<T> {
 
 /**
  * Insert query builder
+ * @template T The type of entity being inserted
  */
-export class InsertQueryBuilder<T = any> extends BaseQueryBuilder<T> {
-  private insertData: Record<string, any>[] = [];
+export class InsertQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
+  private insertData: Record<string, SqlValue>[] = [];
   private conflictAction: 'IGNORE' | 'REPLACE' | null = null;
 
   /**
    * Set data to insert
    */
-  values(data: Record<string, any> | Record<string, any>[]): this {
+  values(data: Record<string, SqlValue> | Record<string, SqlValue>[]): this {
     const cloned = this.clone();
     cloned.insertData = Array.isArray(data) ? data : [data];
     return cloned;
@@ -609,7 +648,7 @@ export class InsertQueryBuilder<T = any> extends BaseQueryBuilder<T> {
   /**
    * Build INSERT SQL
    */
-  toSql(): { sql: string; params: any[] } {
+  toSql(): { sql: string; params: SqlValue[] } {
     if (this.insertData.length === 0) {
       throw new Error('No data provided for insert');
     }
@@ -630,7 +669,7 @@ export class InsertQueryBuilder<T = any> extends BaseQueryBuilder<T> {
     const valueGroups = this.insertData.map(() => `(${placeholders})`);
     sql += valueGroups.join(', ');
 
-    const params = this.insertData.flatMap((row) => columns.map((col) => row[col]));
+    const params: SqlValue[] = this.insertData.flatMap((row) => columns.map((col) => row[col]));
 
     return { sql, params };
   }
@@ -684,20 +723,21 @@ export class InsertQueryBuilder<T = any> extends BaseQueryBuilder<T> {
 
 /**
  * Update query builder
+ * @template T The type of entity being updated
  */
-export class UpdateQueryBuilder<T = any> extends BaseQueryBuilder<T> {
-  private updateData: Record<string, any> = {};
+export class UpdateQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
+  private updateData: Record<string, SqlValue | string> = {};
 
   /**
    * Set data to update
    */
-  set(data: Record<string, any>): this;
-  set(column: string, value: any): this;
-  set(columnOrData: string | Record<string, any>, value?: any): this {
+  set(data: Record<string, SqlValue>): this;
+  set(column: string, value: SqlValue): this;
+  set(columnOrData: string | Record<string, SqlValue>, value?: SqlValue): this {
     const cloned = this.clone();
 
     if (typeof columnOrData === 'string') {
-      cloned.updateData = { ...cloned.updateData, [columnOrData]: value };
+      cloned.updateData = { ...cloned.updateData, [columnOrData]: value as SqlValue };
     } else {
       cloned.updateData = { ...cloned.updateData, ...columnOrData };
     }
@@ -726,7 +766,7 @@ export class UpdateQueryBuilder<T = any> extends BaseQueryBuilder<T> {
   /**
    * Build UPDATE SQL
    */
-  toSql(): { sql: string; params: any[] } {
+  toSql(): { sql: string; params: SqlValue[] } {
     if (Object.keys(this.updateData).length === 0) {
       throw new Error('No data provided for update');
     }
@@ -744,7 +784,7 @@ export class UpdateQueryBuilder<T = any> extends BaseQueryBuilder<T> {
     const whereClause = this.buildWhereClause(this.whereConditions);
     sql += whereClause.sql;
 
-    const updateParams = Object.values(this.updateData);
+    const updateParams = Object.values(this.updateData) as SqlValue[];
 
     return {
       sql,
@@ -798,12 +838,13 @@ export class UpdateQueryBuilder<T = any> extends BaseQueryBuilder<T> {
 
 /**
  * Delete query builder
+ * @template T The type of entity being deleted
  */
-export class DeleteQueryBuilder<T = any> extends BaseQueryBuilder<T> {
+export class DeleteQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
   /**
    * Build DELETE SQL
    */
-  toSql(): { sql: string; params: any[] } {
+  toSql(): { sql: string; params: SqlValue[] } {
     if (this.whereConditions.length === 0) {
       throw new Error('Delete query must have WHERE conditions');
     }
@@ -865,6 +906,7 @@ export class DeleteQueryBuilder<T = any> extends BaseQueryBuilder<T> {
 
 /**
  * Main query builder factory
+ * Provides a fluent API for building type-safe database queries
  */
 export class QueryBuilder {
   private db: Database;
@@ -875,36 +917,41 @@ export class QueryBuilder {
 
   /**
    * Create a SELECT query
+   * @template T The type of entity being queried
    */
-  select<T = any>(table: string): SelectQueryBuilder<T> {
+  select<T = DatabaseRow>(table: string): SelectQueryBuilder<T> {
     return new SelectQueryBuilder<T>(this.db, table);
   }
 
   /**
    * Create an INSERT query
+   * @template T The type of entity being inserted
    */
-  insert<T = any>(table: string): InsertQueryBuilder<T> {
+  insert<T = DatabaseRow>(table: string): InsertQueryBuilder<T> {
     return new InsertQueryBuilder<T>(this.db, table);
   }
 
   /**
    * Create an UPDATE query
+   * @template T The type of entity being updated
    */
-  update<T = any>(table: string): UpdateQueryBuilder<T> {
+  update<T = DatabaseRow>(table: string): UpdateQueryBuilder<T> {
     return new UpdateQueryBuilder<T>(this.db, table);
   }
 
   /**
    * Create a DELETE query
+   * @template T The type of entity being deleted
    */
-  delete<T = any>(table: string): DeleteQueryBuilder<T> {
+  delete<T = DatabaseRow>(table: string): DeleteQueryBuilder<T> {
     return new DeleteQueryBuilder<T>(this.db, table);
   }
 
   /**
    * Execute raw SQL query
+   * @template T The expected return type
    */
-  async raw<T = any>(sql: string, params: any[] = []): Promise<QueryResult<T>> {
+  async raw<T = DatabaseRow>(sql: string, params: SqlValue[] = []): Promise<QueryResult<T>> {
     const startTime = Date.now();
 
     try {

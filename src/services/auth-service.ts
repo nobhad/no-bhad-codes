@@ -3,348 +3,151 @@
  * AUTHENTICATION SERVICE
  * ===============================================
  * Handles client authentication using HttpOnly cookies.
- * Tokens are stored in secure HttpOnly cookies (set by server),
- * not in JavaScript-accessible storage.
+ * Delegates to centralized authStore for state management.
+ *
+ * @deprecated Consider using authStore directly for new code.
+ * This service is maintained for backward compatibility.
  */
 
 import { BaseService } from './base-service';
-import { authEndpoints } from '../config/api';
-import { APP_CONSTANTS } from '../config/constants';
+import { authStore } from '../auth';
+import type { AnyUser, AuthResult, LoginResult } from '../auth/auth-types';
 
 interface LoginCredentials {
   email: string;
   password: string;
 }
 
-interface AuthUser {
-  id: number;
-  email: string;
-  companyName: string;
-  contactName: string;
-  status: string;
-}
-
-interface LoginResponse {
-  message: string;
-  user: AuthUser;
-  expiresIn: string;
-}
-
-interface ApiError {
-  error: string;
-  code: string;
-  timestamp: string;
-}
+// Re-export AuthUser type for backward compatibility
+export type AuthUser = AnyUser;
 
 export class AuthService extends BaseService {
-  private user: AuthUser | null = null;
-  private refreshTimer: number | null = null;
-  private isAuth: boolean = false;
-
   constructor() {
     super('auth-service');
-    this.loadStoredUser();
-  }
-
-  /**
-   * Load user data from sessionStorage (not token - that's in HttpOnly cookie)
-   */
-  private loadStoredUser(): void {
-    try {
-      const storedUser = sessionStorage.getItem(APP_CONSTANTS.STORAGE_KEYS.AUTH_USER);
-
-      if (storedUser) {
-        this.user = JSON.parse(storedUser);
-        this.isAuth = true;
-        this.scheduleTokenRefresh();
-      }
-    } catch (error) {
-      console.error('Error loading stored user:', error);
-      this.clearAuthData();
-    }
   }
 
   /**
    * Login user with email and password
+   * Delegates to authStore.login()
    */
   async login(credentials: LoginCredentials): Promise<{ success: boolean; error?: string }> {
-    try {
-      const response = await fetch(authEndpoints.login, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include', // Include HttpOnly cookies
-        body: JSON.stringify(credentials)
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        const error = data as ApiError;
-        return {
-          success: false,
-          error: error.error || 'Login failed'
-        };
-      }
-
-      const loginData = data as LoginResponse;
-
-      // Store user data (token is now in HttpOnly cookie set by server)
-      this.user = loginData.user;
-      this.isAuth = true;
-
-      sessionStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.AUTH_USER, JSON.stringify(loginData.user));
-
-      // Schedule token refresh
-      this.scheduleTokenRefresh();
-
-      return { success: true };
-    } catch (error) {
-      console.error('Login error:', error);
-      return {
-        success: false,
-        error: 'Network error. Please check your connection.'
-      };
-    }
+    const result: LoginResult = await authStore.login(credentials);
+    return {
+      success: result.success,
+      error: result.error
+    };
   }
 
   /**
    * Logout user and clear authentication data
+   * Delegates to authStore.logout()
    */
   async logout(): Promise<void> {
-    try {
-      if (this.isAuth) {
-        // Notify server of logout (server clears HttpOnly cookie)
-        await fetch(authEndpoints.logout, {
-          method: 'POST',
-          credentials: 'include' // Include HttpOnly cookies
-        });
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      this.clearAuthData();
-    }
-  }
-
-  /**
-   * Clear authentication data
-   */
-  private clearAuthData(): void {
-    this.user = null;
-    this.isAuth = false;
-
-    sessionStorage.removeItem(APP_CONSTANTS.STORAGE_KEYS.AUTH_USER);
-
-    if (this.refreshTimer) {
-      clearTimeout(this.refreshTimer);
-      this.refreshTimer = null;
-    }
+    await authStore.logout();
   }
 
   /**
    * Check if user is authenticated
+   * Delegates to authStore.isAuthenticated()
    */
   isAuthenticated(): boolean {
-    return this.isAuth && this.user !== null;
+    return authStore.isAuthenticated();
   }
 
   /**
    * Get current user
+   * Delegates to authStore.getCurrentUser()
    */
   getCurrentUser(): AuthUser | null {
-    return this.user;
+    return authStore.getCurrentUser();
   }
 
   /**
    * Refresh authentication token
-   * Note: Token is in HttpOnly cookie, server handles refresh
+   * Delegates to authStore.refreshSession()
    */
   async refreshToken(): Promise<boolean> {
-    if (!this.isAuth) {
-      return false;
-    }
-
-    try {
-      const response = await fetch(authEndpoints.refresh, {
-        method: 'POST',
-        credentials: 'include' // Include HttpOnly cookies
-      });
-
-      if (!response.ok) {
-        this.clearAuthData();
-        return false;
-      }
-
-      // Server sets new HttpOnly cookie, we just schedule next refresh
-      this.scheduleTokenRefresh();
-      return true;
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      this.clearAuthData();
-      return false;
-    }
-  }
-
-  /**
-   * Schedule automatic token refresh
-   */
-  private scheduleTokenRefresh(): void {
-    if (this.refreshTimer) {
-      clearTimeout(this.refreshTimer);
-    }
-
-    // Refresh token 1 hour before expiry (assuming 7 day tokens)
-    const refreshInterval = 6 * 24 * 60 * 60 * 1000; // 6 days in milliseconds
-
-    this.refreshTimer = window.setTimeout(() => {
-      this.refreshToken();
-    }, refreshInterval);
+    return authStore.refreshSession();
   }
 
   /**
    * Validate current token with server
+   * Delegates to authStore.validateSession()
    */
   async validateToken(): Promise<boolean> {
-    if (!this.isAuth) {
-      return false;
-    }
-
-    try {
-      const response = await fetch(authEndpoints.validate, {
-        method: 'GET',
-        credentials: 'include' // Include HttpOnly cookies
-      });
-
-      if (!response.ok) {
-        this.clearAuthData();
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Token validation error:', error);
-      this.clearAuthData();
-      return false;
-    }
+    return authStore.validateSession();
   }
 
   /**
    * Get user profile data
+   * Note: This fetches fresh data from server
    */
   async getProfile(): Promise<AuthUser | null> {
-    if (!this.isAuth) {
+    if (!authStore.isAuthenticated()) {
       return null;
     }
 
-    try {
-      const response = await fetch(authEndpoints.profile, {
-        method: 'GET',
-        credentials: 'include' // Include HttpOnly cookies
-      });
-
-      if (!response.ok) {
-        return null;
-      }
-
-      const data = await response.json();
-      this.user = data.user;
-      sessionStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.AUTH_USER, JSON.stringify(data.user));
-
-      return data.user;
-    } catch (error) {
-      console.error('Profile fetch error:', error);
-      return null;
-    }
+    // Profile is available from current user data
+    return authStore.getCurrentUser();
   }
 
   /**
    * Initialize authentication state on app start
+   * AuthStore auto-initializes, but this validates with server
    */
   async initialize(): Promise<void> {
-    if (this.isAuth) {
-      const isValid = await this.validateToken();
+    if (authStore.isAuthenticated()) {
+      const isValid = await authStore.validateSession();
       if (!isValid) {
-        this.clearAuthData();
+        await authStore.logout();
       }
     }
   }
 
   /**
    * Request magic link for passwordless login
-   * @param email - User's email address
+   * Delegates to authStore.requestMagicLink()
    */
-  async requestMagicLink(email: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      const response = await fetch(authEndpoints.magicLink, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include', // Include HttpOnly cookies
-        body: JSON.stringify({ email })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        return {
-          success: false,
-          error: data.error || 'Failed to send magic link'
-        };
-      }
-
-      return { success: true };
-    } catch (error) {
-      console.error('Magic link request error:', error);
-      return {
-        success: false,
-        error: 'Network error. Please check your connection.'
-      };
-    }
+  async requestMagicLink(email: string): Promise<AuthResult> {
+    return authStore.requestMagicLink(email);
   }
 
   /**
    * Verify magic link token and authenticate user
-   * @param token - Magic link token from URL
+   * Delegates to authStore.verifyMagicLink()
    */
   async verifyMagicLink(token: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      const response = await fetch(authEndpoints.verifyMagicLink, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include', // Include HttpOnly cookies
-        body: JSON.stringify({ token })
+    const result: LoginResult = await authStore.verifyMagicLink(token);
+    return {
+      success: result.success,
+      error: result.error
+    };
+  }
+
+  /**
+   * Subscribe to auth state changes
+   * New method for reactive updates
+   */
+  subscribe(listener: (state: { isAuthenticated: boolean; user: AuthUser | null }) => void): () => void {
+    return authStore.subscribe((state) => {
+      listener({
+        isAuthenticated: state.isAuthenticated,
+        user: state.user
       });
+    });
+  }
 
-      const data = await response.json();
+  /**
+   * Get session time remaining in milliseconds
+   */
+  getSessionTimeRemaining(): number {
+    return authStore.getSessionTimeRemaining();
+  }
 
-      if (!response.ok) {
-        return {
-          success: false,
-          error: data.error || 'Invalid or expired login link'
-        };
-      }
-
-      // Store user data (token is now in HttpOnly cookie set by server)
-      this.user = data.user;
-      this.isAuth = true;
-
-      sessionStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.AUTH_USER, JSON.stringify(data.user));
-
-      // Schedule token refresh
-      this.scheduleTokenRefresh();
-
-      return { success: true };
-    } catch (error) {
-      console.error('Magic link verification error:', error);
-      return {
-        success: false,
-        error: 'Network error. Please check your connection.'
-      };
-    }
+  /**
+   * Extend current session
+   */
+  extendSession(): void {
+    authStore.extendSession();
   }
 }

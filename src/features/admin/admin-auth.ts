@@ -4,24 +4,28 @@
  * ===============================================
  * @file src/features/admin/admin-auth.ts
  *
- * Admin authentication and session management using JWT backend.
+ * Admin authentication wrapper.
+ * Delegates to centralized authStore for state management.
+ * Adds AdminSecurity rate limiting and fallback hash authentication.
+ *
+ * @deprecated Consider using authStore directly for new code.
+ * This class is maintained for backward compatibility.
  */
 
 import { AdminSecurity } from './admin-security';
-import { apiPost } from '../../utils/api-client';
+import { authStore } from '../../auth';
 import { createLogger } from '../../utils/logger';
 
 const logger = createLogger('AdminAuth');
-import { decodeJwtPayload, isTokenExpired, isAdminPayload } from '../../utils/jwt-utils';
+
+// Legacy storage keys for fallback mode
+const LEGACY_SESSION_KEY = 'nbw_admin_session';
 
 /**
- * Admin authentication and session management using JWT backend
+ * Admin authentication wrapper
+ * Delegates to authStore with additional security features
  */
 export class AdminAuth {
-  private static readonly SESSION_KEY = 'nbw_admin_session';
-  private static readonly TOKEN_KEY = 'nbw_admin_token';
-  private static readonly API_BASE = '/api/auth';
-
   /**
    * Authenticate with backend JWT API
    * Falls back to client-side hash for offline/development mode
@@ -31,34 +35,21 @@ export class AdminAuth {
       // Check rate limiting first
       AdminSecurity.checkRateLimit();
 
-      // Try backend authentication first
+      // Try backend authentication via authStore
       try {
-        const response = await apiPost(`${this.API_BASE}/admin/login`, { password: inputKey });
+        const result = await authStore.adminLogin({ password: inputKey });
 
-        if (response.ok) {
-          const data = await response.json();
-
+        if (result.success) {
           // Clear failed attempts on successful login
           AdminSecurity.clearAttempts();
-
-          // Store JWT token and session
-          sessionStorage.setItem(this.TOKEN_KEY, data.token);
-          const session = {
-            authenticated: true,
-            timestamp: Date.now(),
-            expiresIn: data.expiresIn
-          };
-          sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
-
           return true;
-        } else if (response.status === 401) {
-          // Invalid credentials
-          AdminSecurity.recordFailedAttempt();
-          return false;
         }
-        // For other errors, fall through to fallback
+
+        // Invalid credentials
+        AdminSecurity.recordFailedAttempt();
+        return false;
       } catch (fetchError) {
-        console.warn('[AdminAuth] Backend auth failed, using fallback:', fetchError);
+        logger.warn('Backend auth failed, using fallback:', fetchError);
       }
 
       // Fallback: Client-side hash authentication for development only
@@ -66,7 +57,7 @@ export class AdminAuth {
       const fallbackHash = import.meta.env && import.meta.env.VITE_ADMIN_PASSWORD_HASH;
 
       if (!fallbackHash) {
-        console.error('[AdminAuth] VITE_ADMIN_PASSWORD_HASH not configured - admin access disabled');
+        logger.error('VITE_ADMIN_PASSWORD_HASH not configured - admin access disabled');
         return false;
       }
 
@@ -78,53 +69,46 @@ export class AdminAuth {
 
       if (hashHex === fallbackHash) {
         AdminSecurity.clearAttempts();
+        // Store fallback session for legacy compatibility
         const session = {
           authenticated: true,
           timestamp: Date.now(),
-          fallback: true // Mark as fallback auth
+          fallback: true
         };
-        sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
+        sessionStorage.setItem(LEGACY_SESSION_KEY, JSON.stringify(session));
         return true;
       }
 
       AdminSecurity.recordFailedAttempt();
       return false;
     } catch (error) {
-      console.error('[AdminAuth] Authentication error:', error);
+      logger.error('Authentication error:', error);
       AdminSecurity.recordFailedAttempt();
       throw error;
     }
   }
 
   /**
-   * Check if user is authenticated (valid session or token)
+   * Check if user is authenticated
+   * Delegates to authStore.isAdmin()
    */
   static isAuthenticated(): boolean {
+    // First check authStore (primary)
+    if (authStore.isAdmin()) {
+      return true;
+    }
+
+    // Check if authenticated via client portal as admin
+    if (authStore.isAuthenticated()) {
+      const user = authStore.getCurrentUser();
+      if (user?.role === 'admin') {
+        return true;
+      }
+    }
+
+    // Fallback: Check legacy session storage (for fallback hash auth)
     try {
-      // Check for admin JWT token first
-      const token = sessionStorage.getItem(this.TOKEN_KEY);
-      if (token) {
-        // Validate token hasn't expired
-        if (!isTokenExpired(token)) {
-          return true;
-        }
-        // Token expired, clean up
-        this.logout();
-        return false;
-      }
-
-      // Also check for client portal auth token (for admin users logged in via client portal)
-      const clientToken = sessionStorage.getItem('client_auth_token');
-      if (clientToken) {
-        const payload = decodeJwtPayload(clientToken);
-        // Check if user is admin and token not expired
-        if (payload && isAdminPayload(payload) && !isTokenExpired(clientToken)) {
-          return true;
-        }
-      }
-
-      // Fallback: Check session storage
-      const sessionData = sessionStorage.getItem(this.SESSION_KEY);
+      const sessionData = sessionStorage.getItem(LEGACY_SESSION_KEY);
       if (!sessionData) return false;
 
       const session = JSON.parse(sessionData);
@@ -132,75 +116,64 @@ export class AdminAuth {
       const isValid = session.authenticated && Date.now() - session.timestamp < sessionDuration;
 
       if (!isValid) {
-        this.logout();
+        sessionStorage.removeItem(LEGACY_SESSION_KEY);
       }
 
       return isValid;
-    } catch (error) {
-      console.error('[AdminAuth] Session validation error:', error);
+    } catch (_error) {
       return false;
     }
   }
 
   /**
    * Get the current JWT token for API calls
-   * Checks both admin token and client token (for admin users logged in via client portal)
+   * @deprecated With HttpOnly cookies, tokens are managed by the browser.
+   * This method is kept for backward compatibility but returns null
+   * as tokens are no longer stored client-side.
    */
   static getToken(): string | null {
-    // First check for admin-specific token
-    const adminToken = sessionStorage.getItem(this.TOKEN_KEY);
-    if (adminToken) return adminToken;
-
-    // Also check for client portal token (admin users use this)
-    const clientToken = sessionStorage.getItem('client_auth_token');
-    if (clientToken) {
-      const payload = decodeJwtPayload(clientToken);
-      // Only return if this is an admin user
-      if (payload && isAdminPayload(payload)) {
-        return clientToken;
-      }
-    }
-
+    // With HttpOnly cookies, tokens are sent automatically by the browser.
+    // This method is deprecated - API calls should use credentials: 'include'
+    logger.warn('getToken() is deprecated - use credentials: "include" for API calls');
     return null;
   }
 
   /**
    * Logout and clear all auth data
+   * Delegates to authStore.logout()
    */
   static async logout(): Promise<void> {
-    logger.log('Logout called - clearing ALL session data');
+    logger.info('Logout called - delegating to authStore');
 
-    // Call server logout to clear HttpOnly cookie
-    try {
-      await apiPost('/api/auth/logout');
-    } catch (error) {
-      logger.warn('Server logout failed:', error);
-    }
+    // Clear legacy session
+    sessionStorage.removeItem(LEGACY_SESSION_KEY);
 
-    // Clear all sessionStorage (ensures nothing is missed)
-    sessionStorage.clear();
-    // Also clear localStorage in case anything is stored there
-    localStorage.removeItem('adminAuth');
-    localStorage.removeItem('admin_token');
-    localStorage.removeItem('client_auth_token');
-    logger.log('All storage cleared, navigating to login');
-    // Navigate to /admin instead of reload to ensure fresh state
+    // Delegate to authStore
+    await authStore.logout();
+
+    logger.info('Logout complete, navigating to login');
+    // Navigate to /admin to ensure fresh state
     window.location.href = '/admin';
   }
 
   /**
    * Extend session timestamp for activity
+   * Delegates to authStore.extendSession()
    */
   static extendSession(): void {
+    // Extend via authStore
+    authStore.extendSession();
+
+    // Also extend legacy session if present
     try {
-      const sessionData = sessionStorage.getItem(this.SESSION_KEY);
+      const sessionData = sessionStorage.getItem(LEGACY_SESSION_KEY);
       if (sessionData) {
         const session = JSON.parse(sessionData);
         session.timestamp = Date.now();
-        sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
+        sessionStorage.setItem(LEGACY_SESSION_KEY, JSON.stringify(session));
       }
-    } catch (error) {
-      console.error('[AdminAuth] Session extension error:', error);
+    } catch (_error) {
+      // Ignore legacy session errors
     }
   }
 }
