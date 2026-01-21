@@ -4,6 +4,119 @@ This file contains completed work from January 2026. Items are moved here from `
 
 ---
 
+## Architecture & Admin UI Improvements - COMPLETE (January 21, 2026)
+
+### Architecture Concerns (High Priority)
+
+- [x] **ADMIN LOGIN AS MAIN SITE PAGE** - ✅ COMPLETE (January 21, 2026)
+  - The admin login page is now a route on the main site (`#/admin-login`) rather than a separate `admin/index.html` page
+  - Uses the EXACT same header/footer/nav as the main site ✅
+  - Allows the main site navigation to work (Menu button opens nav menu) ✅
+  - Maintains consistent user experience ✅
+  - Simplifies header/footer maintenance (single source of truth) ✅
+  - **Implementation:** Added `#/admin-login` route, admin-login section in index.html, AdminLoginModule, redirects to `/admin/` after successful login
+
+### Admin UI Polish (High Priority) - COMPLETE (January 21, 2026)
+
+- [x] **PORTAL VISUAL CONSISTENCY** - ✅ COMPLETE
+  - Aligned admin and client portal styling
+  - Admin login now uses portal tokens (12px radius, 60px height, black bg)
+  - Admin buttons now use portal button style (12px radius, transparent bg)
+  - Form inputs match portal design system
+  
+- [x] **Leads Management** - ✅ COMPLETE
+  - Cards filter table when clicked
+  - Custom dropdown for leads page panels with compact table dropdowns, red focus state, transparent bg
+  
+- [x] **Fix tooltip for truncated text** - ✅ COMPLETE
+  - Now uses fast CSS tooltips instead of native title delay
+  
+- [x] **Mobile sidebar behavior** - ✅ COMPLETE
+  - Collapsed sidebar hides completely, content fills viewport
+  
+- [x] **Admin portal mobile optimization** - ✅ COMPLETE
+  - Grids stack on mobile
+  - Reduced padding
+  - Horizontal stat cards
+  
+- [x] **Custom dropdown for leads page panels** - ✅ COMPLETE
+  - Compact table dropdowns with red focus state, transparent bg
+  
+- [x] **Add API endpoint for lead/intake status updates** - ✅ COMPLETE
+  - PUT /api/admin/leads/:id/status endpoint added
+  
+- [x] **Info icons on Analytics pages Core Web Vitals** - ✅ COMPLETE
+  - Tooltip hovers explaining what each metric means
+  
+- [x] **Unread message count badge on sidebar Messages button** - ✅ COMPLETE
+  - Red badge, right-aligned, only shows if unread > 0
+  
+- [x] **Leads count badge on sidebar** - ✅ COMPLETE
+  - Combined count of new intake/contact submissions
+  - Red badge, right-aligned
+  
+- [x] **Auto-add clients to messages dropdown** - ✅ COMPLETE
+  - When new client added, they appear in messages dropdown automatically
+  
+- [x] **Intake form submission as project file** - ✅ COMPLETE
+  - Saves intake form data as downloadable/previewable file in project files automatically
+
+### Code Quality Improvements - COMPLETE (January 21, 2026)
+
+- [x] **Migrate hardcoded media queries** - ✅ COMPLETE
+  - All 24 hardcoded media queries migrated to custom media query system
+  - Added new custom media queries: `--tablet-down`, `--desktop-down`, `--ultra-wide-down`, `--tablet-to-desktop`
+  - Replaced all hardcoded breakpoints across 11 stylesheet files
+
+- [x] **Server `any` types** - ✅ COMPLETE
+  - Fixed all critical `any` types (reduced from 97 to 0, all 97 fixed)
+  - **Phase 1 (30 fixes):** Database model, error handlers, route params
+    - Database model: `id: any` → `id: string | number` (3 instances)
+    - Database model: `operator: any` → `operator: string`, `value: any` → `value: string | number | boolean | null`
+    - Database model: `row: any` → `row: DatabaseRow` (3 instances)
+    - Error handlers: `error: any` → `error: unknown` with type guards (18 instances)
+    - Route params: `params: any[]` → `params: (string | number | null)[]` (4 instances)
+    - Update values: `values: any[]` → `values: (string | number | boolean | null)[]` (3 instances)
+    - Express error handlers: Fixed type signatures
+  - **Phase 2 (67 fixes):** Created `server/database/row-helpers.ts` utility for type-safe database row access
+    - Database init: `any[]` → `SqlParams` type (7 instances)
+    - All route files: Replaced direct property access with helper functions
+      - `getString(row, 'key')` - Extract string values
+      - `getNumber(row, 'key')` - Extract number values
+      - `getBoolean(row, 'key')` - Extract boolean values
+      - `getDate(row, 'key')` - Extract date values
+    - Fixed 63 TypeScript errors across 15 files
+    - **Files updated:** auth.ts, analytics.ts, intake.ts, projects.ts, uploads.ts, invoices.ts, messages.ts, clients.ts, admin.ts, logging/index.ts, cache-service.ts, middleware/cache.ts
+    - **Result:** 0 TypeScript errors, 100% type-safe database access
+
+- [x] **Consolidate `rgba(0,0,0,...)` shadows** - ✅ COMPLETE
+  - All inline rgba box-shadow values replaced with `--shadow-*` tokens
+  - Removed var() fallbacks (tokens always defined)
+  - Replaced 10+ inline box-shadow values across 3 files
+  - Remaining rgba references are in variables.css (token definitions) or non-shadow properties
+
+- [x] **Frontend `any` types** - ✅ Progress (January 21, 2026)
+  - Reduced from 71 to 41 (30 fixed, 41 intentional)
+  - **Created comprehensive API response types** in `src/types/api.ts`:
+    - `ProjectResponse` with all optional fields
+    - `ProjectMilestoneResponse`, `ProjectUpdateResponse`
+    - `MessageResponse`, `MessageThreadResponse`
+    - `InvoiceResponse`, `ClientResponse`
+    - `ProjectDetailResponse` (extends ProjectResponse)
+  - **Fixed all API response `any` types in feature files:**
+    - `client-portal.ts` (6 instances fixed)
+    - `admin-project-details.ts` (19 instances fixed)
+    - `admin-messaging.ts` (3 instances fixed)
+    - `admin-clients.ts` (3 instances fixed)
+    - `portal-projects.ts` (2 instances fixed)
+  - **Fixed all type errors:** 0 TypeScript errors remaining
+  - **Remaining 41 `any` types are intentional:**
+    - `ComponentProps` and `ComponentState` for flexibility (5 instances)
+    - Type assertions in core modules for dependency injection (3 instances)
+    - Utility functions with generic types (logging, etc.) (33 instances)
+
+---
+
 ## Portal Visual Consistency - COMPLETE (January 21, 2026)
 
 **Goal:** Make admin and client portals share consistent design language. Main site has its own creative aesthetic.
