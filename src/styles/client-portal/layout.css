@@ -95,31 +95,21 @@ body[data-page="client-portal"] {
 }
 
 /* ================================================
-   CLIENT PORTAL - CARD SHADOWS (matches admin)
+   CLIENT PORTAL - CARD SHADOWS
+   Base shadows in shared/portal-cards.css
+   Client-specific sections below
    ================================================ */
-[data-page="client-portal"] .stat-card,
-[data-page="client-portal"] .summary-card,
-[data-page="client-portal"] .overview-card,
-[data-page="client-portal"] .settings-section,
 [data-page="client-portal"] .file-section,
 [data-page="client-portal"] .invoices-list,
 [data-page="client-portal"] .content-section,
-[data-page="client-portal"] .portal-project-card,
-[data-page="client-portal"] .recent-activity,
 [data-page="client-portal"] .files-upload-section,
 [data-page="client-portal"] .files-list-section {
   box-shadow: var(--shadow-panel);
 }
 
-/* No shadows on child divs inside main containers */
-[data-page="client-portal"] .overview-card > div,
-[data-page="client-portal"] .stat-card > div,
-[data-page="client-portal"] .summary-card > div,
-[data-page="client-portal"] .settings-section > div,
+/* No shadows on child divs - client-specific sections */
 [data-page="client-portal"] .invoices-list > div,
 [data-page="client-portal"] .content-section > div,
-[data-page="client-portal"] .portal-project-card > div,
-[data-page="client-portal"] .recent-activity > div,
 [data-page="client-portal"] .files-upload-section > div,
 [data-page="client-portal"] .files-list-section > div {
   box-shadow: none;

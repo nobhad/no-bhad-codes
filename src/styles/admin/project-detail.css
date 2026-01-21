@@ -1022,41 +1022,11 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   margin: 0 0 var(--space-4) 0;
 }
 
-/* Admin page recent-activity styling */
+/* Recent activity - Base styles in shared/portal-cards.css */
+/* Admin-specific margin overrides */
 [data-page="admin"] .recent-activity {
   margin-top: var(--portal-spacing-lg);
   margin-bottom: 0;
-  background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-lg);
-  padding: var(--portal-spacing-xl);
-}
-
-[data-page="admin"] .recent-activity h3 {
-  font-family: var(--font--acme);
-  font-size: 1.2rem;
-  font-weight: 400;
-  color: var(--portal-text-light);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0 0 var(--portal-spacing-lg) 0;
-}
-
-[data-page="admin"] .activity-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--portal-spacing-md);
-}
-
-/* Activity list items - use main content bg color, no shadow */
-[data-page="admin"] .activity-list li {
-  color: var(--portal-text-light);
-  padding: var(--portal-spacing-lg);
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
-  box-shadow: none;
 }
 
 .overview-stats-grid {

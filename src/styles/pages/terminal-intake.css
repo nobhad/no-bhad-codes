@@ -357,27 +357,29 @@ input.terminal-input:-webkit-autofill,
   gap: 12px;
 }
 
-.terminal .terminal-progress .progress-label,
-.terminal .progress-label {
+.terminal-progress .progress-label,
+.progress-label {
   color: var(--color-terminal-text-muted);
   font-size: 14px;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-.terminal .terminal-progress .progress-bar {
+.terminal-progress .progress-bar,
+.progress-bar {
   flex: 1 1 auto;
   width: auto;
   min-width: 0;
   height: 6px;
-  background: var(--color-terminal-bg-hover);
+  background: var(--color-terminal-border);
   border-radius: 3px;
   overflow: hidden;
   display: block;
   border: none;
 }
 
-.terminal-progress .progress-fill {
+.terminal-progress .progress-fill,
+.progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--color-terminal-green-dark), var(--color-terminal-green));
   transition: width 0.3s ease;

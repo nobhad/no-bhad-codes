@@ -158,8 +158,21 @@
 :is([data-page="admin"], [data-page="client-portal"]) .overview-card,
 :is([data-page="admin"], [data-page="client-portal"]) .recent-activity,
 :is([data-page="admin"], [data-page="client-portal"]) .portal-project-card,
-:is([data-page="admin"], [data-page="client-portal"]) .messages-container {
+:is([data-page="admin"], [data-page="client-portal"]) .messages-container,
+:is([data-page="admin"], [data-page="client-portal"]) .summary-card,
+:is([data-page="admin"], [data-page="client-portal"]) .settings-section {
   box-shadow: var(--shadow-panel);
+}
+
+/* No shadows on child divs inside main containers */
+:is([data-page="admin"], [data-page="client-portal"]) .stat-card > div,
+:is([data-page="admin"], [data-page="client-portal"]) .overview-card > div,
+:is([data-page="admin"], [data-page="client-portal"]) .recent-activity > div,
+:is([data-page="admin"], [data-page="client-portal"]) .portal-project-card > div,
+:is([data-page="admin"], [data-page="client-portal"]) .messages-container > div,
+:is([data-page="admin"], [data-page="client-portal"]) .summary-card > div,
+:is([data-page="admin"], [data-page="client-portal"]) .settings-section > div {
+  box-shadow: none;
 }
 
 /* =====================================================
