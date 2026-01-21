@@ -1024,7 +1024,7 @@ div.page-hero-desktop {
 @media (--tablet) {
   .projects-flex-row {
     flex-direction: row;
-    gap: 5rem;
+    gap: 8rem;
     align-items: flex-start;
   }
 }
