@@ -88,7 +88,7 @@
 
 .activity-list li {
   padding: var(--portal-spacing-md) var(--portal-spacing-lg);
-  background: var(--portal-bg-medium);
+  background: var(--portal-bg-dark);
   border-radius: var(--border-radius-md);
   border: none;
   margin-bottom: var(--portal-spacing-sm);
@@ -98,7 +98,7 @@
 }
 
 .activity-list li:hover {
-  background: var(--portal-bg-light);
+  background: var(--portal-bg-hover);
 }
 
 .activity-list li:last-child {

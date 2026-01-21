@@ -72,8 +72,8 @@
     transform: translateX(-50%);
     z-index: 9999;
     padding: 12px 24px;
-    background-color: var(--color-dark);
-    color: var(--color-light);
+    background-color: var(--color-dark, #333333);
+    color: var(--color-light, #ffffff);
     text-decoration: none;
     font-weight: 600;
     border-radius: 4px;
@@ -82,7 +82,7 @@
 
   .skip-link:focus {
     top: 10px;
-    outline: 2px solid var(--app-color-primary);
+    outline: 2px solid var(--app-color-primary, #dc2626);
     outline-offset: 2px;
   }
 }

@@ -72,6 +72,13 @@ Copy `.env.example` to `.env` and configure the following variables:
 | `SMTP_REPLY_TO` | No | - | Reply-to email address |
 | `SUPPORT_EMAIL` | No | - | Support email recipient |
 
+### Frontend Configuration (Vite)
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `VITE_CONTACT_EMAIL` | No | `nobhaduri@gmail.com` | Contact/support email displayed in frontend |
+| `VITE_ADMIN_EMAIL` | No | `nobhaduri@gmail.com` | Admin email for frontend login validation |
+
 ### Third-Party Services
 
 | Variable | Required | Default | Description |

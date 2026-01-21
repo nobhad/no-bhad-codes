@@ -210,6 +210,7 @@ html[data-theme="light"] {
 
   /* Legacy semantic colors */
   --color-dark: #333333;
+  --color-light: #ffffff;
   --color-primary: var(--color-brand-primary);
   --color-primary-rgb: var(--color-brand-primary-rgb);
   --color-secondary: var(--color-brand-secondary);
@@ -219,6 +220,10 @@ html[data-theme="light"] {
   --color-border: #000000;
   --color-border-light: #e0e0e0;
   --color-shadow: rgba(0, 0, 0, 0.2);
+
+  /* App-level aliases (for components that need a single variable) */
+  --app-color-primary: var(--color-brand-primary);
+  --app-color-primary-hover: var(--color-interactive-primary-hover);
 
   /* Legacy base colors */
   --color-black: #000000;
@@ -332,6 +337,7 @@ html[data-theme="dark"] {
   --color-neutral-200: #3a3a3a;
   --color-neutral-800: #f0f0f0;
   --color-dark: #e0e0e0;
+  --color-light: #1a1a1a;
   --color-secondary: var(--color-brand-secondary);
   --color-secondary-rgb: var(--color-brand-secondary-rgb);
   --color-accent: var(--color-brand-accent);

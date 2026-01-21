@@ -333,7 +333,7 @@ export async function addMessageWithTyping(
   const cursor = document.createElement('span');
   cursor.className = 'typing-cursor';
   cursor.textContent = '█';
-  cursor.style.color = '#00ff00';
+  // Color now set via CSS class .typing-cursor
   contentEl.appendChild(cursor);
 
   const cursorBlink = gsap.to(cursor, {
@@ -419,7 +419,7 @@ export async function addSystemMessageWithTyping(
   const cursor = document.createElement('span');
   cursor.className = 'typing-cursor';
   cursor.textContent = '█';
-  cursor.style.color = '#00ff00';
+  // Color now set via CSS class .typing-cursor
   contentEl.appendChild(cursor);
 
   const cursorBlink = gsap.to(cursor, {

@@ -11,6 +11,10 @@ interface ImportMetaEnv {
   readonly VITE_EMAILJS_TEMPLATE_ID?: string;
   readonly VITE_EMAILJS_PUBLIC_KEY?: string;
 
+  // Contact/Admin emails (for frontend display and validation)
+  readonly VITE_CONTACT_EMAIL?: string;
+  readonly VITE_ADMIN_EMAIL?: string;
+
   // Base URL for the app
   readonly BASE_URL: string;
   readonly MODE: string;

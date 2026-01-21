@@ -13,7 +13,7 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: var(--bg);
+  background: var(--color-neutral-300);
   position: fixed;
   top: 0;
   left: 0;
@@ -187,11 +187,10 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
   color: var(--color-neutral-500);
 }
 
+/* Match portal dropdown focus style */
 [data-page="admin"] .auth-gate .password-input-wrapper input:focus,
 .auth-gate .password-input-wrapper input:focus {
   outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-  border-color: var(--color-primary);
 }
 
 .auth-gate .password-toggle {

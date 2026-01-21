@@ -9,6 +9,8 @@
  * tab custom-dropdown but adds 'no-border' modifier.
  */
 
+import { ICONS } from '../constants/icons';
+
 export interface ModalDropdownOptions {
   onChange?: (value: string, label: string) => void;
   placeholder?: string;
@@ -39,7 +41,7 @@ export function initModalDropdown(
   trigger.className = 'custom-dropdown-trigger';
   trigger.innerHTML = `
     <span class="custom-dropdown-text">${displayText}</span>
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="custom-dropdown-caret"><path d="m6 9 6 6 6-6"/></svg>
+    ${ICONS.CARET_DOWN}
   `;
 
   // Create dropdown menu - ul like messages tab

@@ -8,6 +8,8 @@
  * Provides reusable utilities for all admin table modules.
  */
 
+import { ICONS } from '../constants/icons';
+
 // ===============================================
 // TYPES
 // ===============================================
@@ -100,24 +102,15 @@ export function createFilterUI(
   const hasSearchTerm = state.searchTerm && state.searchTerm.length > 0;
   searchWrapper.innerHTML = `
     <button type="button" class="icon-btn filter-search-trigger ${hasSearchTerm ? 'has-value' : ''}" title="Search" aria-label="Search">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"></circle>
-        <path d="m21 21-4.3-4.3"></path>
-      </svg>
+      ${ICONS.SEARCH}
     </button>
     <div class="filter-search-dropdown">
       <span class="filter-search-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"></circle>
-          <path d="m21 21-4.3-4.3"></path>
-        </svg>
+        ${ICONS.SEARCH_SMALL}
       </span>
       <input type="text" placeholder="Search..." class="filter-search-input" value="${escapeAttr(state.searchTerm)}" />
       <button type="button" class="filter-search-clear" title="Clear search" aria-label="Clear search">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 6 6 18"></path>
-          <path d="m6 6 12 12"></path>
-        </svg>
+        ${ICONS.X_SMALL}
       </button>
     </div>
   `;
@@ -180,9 +173,7 @@ export function createFilterUI(
   const activeCount = countActiveFilters(state);
   dropdownWrapper.innerHTML = `
     <button type="button" class="filter-dropdown-trigger icon-btn" title="Filters" aria-label="Filters">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-      </svg>
+      ${ICONS.FILTER}
       <span class="filter-count-badge ${activeCount > 0 ? 'visible' : ''}">${activeCount}</span>
     </button>
     <div class="filter-dropdown-menu">
@@ -372,22 +363,12 @@ export function createSortableHeaders(
 
 function getSortIcon(columnKey: string, state: FilterState): string {
   if (state.sortColumn !== columnKey) {
-    // Not sorted - show neutral icon
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sort-neutral">
-      <path d="m7 15 5 5 5-5"></path>
-      <path d="m7 9 5-5 5 5"></path>
-    </svg>`;
+    return ICONS.SORT_NEUTRAL;
   }
-
   if (state.sortDirection === 'asc') {
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sort-asc">
-      <path d="m7 9 5-5 5 5"></path>
-    </svg>`;
+    return ICONS.SORT_ASC;
   }
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sort-desc">
-    <path d="m7 15 5 5 5-5"></path>
-  </svg>`;
+  return ICONS.SORT_DESC;
 }
 
 // ===============================================
