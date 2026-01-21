@@ -179,66 +179,54 @@
   white-space: nowrap;
 }
 
-/* Terminal text input - high specificity to override form-fields.css */
-.terminal .terminal-input,
-.terminal .terminal-input-area input,
-.terminal .terminal-input-area input[type="text"],
-.terminal input.terminal-input {
+/* Terminal text input - single source of truth */
+/* Target by class name directly - works in any context */
+input.terminal-input,
+.terminal-input {
   flex: 1;
   background: transparent;
+  background-color: transparent;
   border: none;
   color: var(--color-terminal-text);
   font-family: var(--terminal-font-family);
   font-size: var(--terminal-font-size);
-  font-weight: normal; /* Not bold */
+  font-weight: normal;
   outline: none;
   caret-color: transparent;
   box-shadow: none;
   padding: 4px 0;
 }
 
-.terminal .terminal-input::placeholder,
-.terminal .terminal-input-area input::placeholder {
+input.terminal-input::placeholder,
+.terminal-input::placeholder {
   color: var(--color-terminal-text-dimmer);
-  font-weight: normal; /* Not bold */
+  font-weight: normal;
 }
 
-/* Hide native caret - using custom block cursor instead */
-.terminal .terminal-input,
-.terminal .terminal-input:focus,
-.terminal .terminal-input-area input,
-.terminal .terminal-input-area input:focus,
-.terminal input.terminal-input,
-.terminal input.terminal-input:focus {
-  caret-color: transparent;
-}
-
-/* Input states */
-.terminal .terminal-input:hover,
-.terminal .terminal-input:active,
-.terminal .terminal-input-area input:hover,
-.terminal .terminal-input-area input:active {
+/* All states - transparent background, no outline */
+input.terminal-input:hover,
+input.terminal-input:focus,
+input.terminal-input:active,
+input.terminal-input:focus-visible,
+.terminal-input:hover,
+.terminal-input:focus,
+.terminal-input:active,
+.terminal-input:focus-visible {
   background: transparent;
-  border: none;
-  outline: none;
-  box-shadow: none;
-  caret-color: transparent;
-}
-
-/* Focus state - minimal styling, terminal uses custom block cursor */
-/* Must override reset.css :focus-visible global rule */
-.terminal .terminal-input:focus,
-.terminal .terminal-input-area input:focus,
-.terminal input.terminal-input:focus,
-.terminal .terminal-input:focus-visible,
-.terminal .terminal-input-area input:focus-visible,
-.terminal input.terminal-input:focus-visible {
-  background: transparent;
+  background-color: transparent;
   border: none;
   outline: none;
   outline-offset: 0;
   box-shadow: none;
   caret-color: transparent;
+}
+
+/* Autofill override - prevent browser white background */
+input.terminal-input:-webkit-autofill,
+.terminal-input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--color-terminal-bg) inset;
+  -webkit-text-fill-color: var(--color-terminal-text);
+  background-color: transparent;
 }
 
 .terminal-input:disabled {

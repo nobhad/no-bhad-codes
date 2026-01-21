@@ -480,29 +480,34 @@ html[data-theme="dark"] .portal-dropdown-header {
 
 /* Override terminal styles when in modal */
 /* High specificity with doubled class selector */
+.intake-modal.intake-modal .terminal-intake-container,
 .intake-modal.intake-modal .terminal-intake {
   height: 100%;
+  max-height: 100%;
   width: 100%;
-  min-height: 0;
+  min-height: 0; /* Override base calc(100vh - ...) */
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   background-color: var(--color-terminal-bg);
 }
 
 .intake-modal.intake-modal .terminal-window {
   flex: 1;
-  height: 100%;
   width: 100%;
   max-width: 100%;
+  max-height: 100%;
   min-height: 0; /* Critical for flex shrinking */
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   margin: 0;
 }
 
 .intake-modal.intake-modal .terminal-chat {
   flex: 1;
   min-height: 0; /* Allow flex to shrink - input area must stay visible */
+  max-height: none;
   overflow-y: auto;
 }
 
