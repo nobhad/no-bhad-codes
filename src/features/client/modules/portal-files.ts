@@ -15,6 +15,20 @@ import { showContainerError } from '../../../utils/error-utils';
 
 const FILES_API_BASE = '/api/uploads';
 
+// ============================================================================
+// CACHED DOM REFERENCES
+// ============================================================================
+
+const cachedElements: Map<string, HTMLElement | null> = new Map();
+
+/** Get cached element by ID */
+function getElement(id: string): HTMLElement | null {
+  if (!cachedElements.has(id)) {
+    cachedElements.set(id, document.getElementById(id));
+  }
+  return cachedElements.get(id) ?? null;
+}
+
 /**
  * Load files from API
  */
@@ -228,9 +242,9 @@ async function deleteFile(
  * Setup file upload handlers (drag & drop + browse)
  */
 export function setupFileUploadHandlers(ctx: ClientPortalContext): void {
-  const dropzone = document.getElementById('upload-dropzone');
-  const fileInput = document.getElementById('file-input') as HTMLInputElement;
-  const browseBtn = document.getElementById('btn-browse-files');
+  const dropzone = getElement('upload-dropzone');
+  const fileInput = getElement('file-input') as HTMLInputElement;
+  const browseBtn = getElement('btn-browse-files');
 
   if (!dropzone) return;
 
@@ -309,7 +323,7 @@ async function uploadFiles(files: File[], ctx: ClientPortalContext): Promise<voi
     return;
   }
 
-  const dropzone = document.getElementById('upload-dropzone');
+  const dropzone = getElement('upload-dropzone');
   if (dropzone) {
     dropzone.innerHTML = `
       <div class="upload-progress">
@@ -355,7 +369,7 @@ async function uploadFiles(files: File[], ctx: ClientPortalContext): Promise<voi
  * Show error message in dropzone with retry option
  */
 function showDropzoneError(message: string, ctx: ClientPortalContext, filesToRetry?: File[]): void {
-  const dropzone = document.getElementById('upload-dropzone');
+  const dropzone = getElement('upload-dropzone');
   if (!dropzone) return;
 
   const retryBtn = filesToRetry && filesToRetry.length > 0
@@ -374,6 +388,7 @@ function showDropzoneError(message: string, ctx: ClientPortalContext, filesToRet
     </div>
   `;
 
+  // Dynamic buttons need fresh queries (not cached - they were just created)
   const retryButton = document.getElementById('btn-retry-upload');
   if (retryButton && filesToRetry && filesToRetry.length > 0) {
     retryButton.addEventListener('click', () => {
@@ -394,7 +409,7 @@ function showDropzoneError(message: string, ctx: ClientPortalContext, filesToRet
  * Reset dropzone to initial state
  */
 function resetDropzone(): void {
-  const dropzone = document.getElementById('upload-dropzone');
+  const dropzone = getElement('upload-dropzone');
   if (dropzone) {
     dropzone.innerHTML = `
       <div class="dropzone-content">
@@ -409,8 +424,12 @@ function resetDropzone(): void {
         <input type="file" id="file-input" multiple hidden />
       </div>
     `;
-    const browseBtn = document.getElementById('btn-browse-files');
-    const fileInput = document.getElementById('file-input') as HTMLInputElement;
+    // Clear cache for these elements since they were recreated
+    cachedElements.delete('btn-browse-files');
+    cachedElements.delete('file-input');
+
+    const browseBtn = getElement('btn-browse-files');
+    const fileInput = getElement('file-input') as HTMLInputElement;
     if (browseBtn && fileInput) {
       browseBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -424,7 +443,7 @@ function resetDropzone(): void {
  * Show upload success message
  */
 function showUploadSuccess(count: number): void {
-  const filesSection = document.getElementById('tab-files');
+  const filesSection = getElement('tab-files');
   if (filesSection) {
     const successMsg = document.createElement('div');
     successMsg.className = 'upload-success-message';

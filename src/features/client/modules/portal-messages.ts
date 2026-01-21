@@ -9,8 +9,32 @@
  */
 
 import type { PortalMessage, ClientPortalContext } from '../portal-types';
+import { createDOMCache } from '../../../utils/dom-cache';
 
 const MESSAGES_API_BASE = '/api/messages';
+
+// ============================================
+// DOM CACHE - Cached element references
+// ============================================
+
+/** DOM element selector keys for the messages module */
+type MessagesDOMKeys = {
+  messagesThread: string;
+  messageInput: string;
+  sendBtn: string;
+  emojiPicker: string;
+};
+
+/** Cached DOM element references for performance */
+const domCache = createDOMCache<MessagesDOMKeys>();
+
+// Register all element selectors (called once when module loads)
+domCache.register({
+  messagesThread: '#messages-thread',
+  messageInput: '#message-input',
+  sendBtn: '#btn-send-message',
+  emojiPicker: 'emoji-picker' // CSS selector, not ID
+});
 
 let currentThreadId: number | null = null;
 
@@ -32,7 +56,7 @@ export function setCurrentThreadId(id: number | null): void {
  * Load messages from API
  */
 export async function loadMessagesFromAPI(ctx: ClientPortalContext, bustCache: boolean = false): Promise<void> {
-  const messagesContainer = document.getElementById('messages-thread');
+  const messagesContainer = domCache.get('messagesThread');
   if (!messagesContainer) return;
 
   try {
@@ -135,7 +159,7 @@ function renderMessages(
  * Send a message
  */
 export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
-  const messageInput = document.getElementById('message-input') as HTMLTextAreaElement;
+  const messageInput = domCache.getAs<HTMLTextAreaElement>('messageInput');
   if (!messageInput) return;
 
   const message = messageInput.value.trim();
@@ -186,7 +210,7 @@ export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
  * Setup messaging event listeners
  */
 export function setupMessagingListeners(ctx: ClientPortalContext): void {
-  const sendBtn = document.getElementById('btn-send-message');
+  const sendBtn = domCache.get('sendBtn');
   if (sendBtn) {
     sendBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -194,7 +218,7 @@ export function setupMessagingListeners(ctx: ClientPortalContext): void {
     });
   }
 
-  const messageInput = document.getElementById('message-input') as HTMLTextAreaElement;
+  const messageInput = domCache.getAs<HTMLTextAreaElement>('messageInput');
   if (messageInput) {
     messageInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -204,7 +228,7 @@ export function setupMessagingListeners(ctx: ClientPortalContext): void {
     });
   }
 
-  const emojiPicker = document.querySelector('emoji-picker');
+  const emojiPicker = domCache.get('emojiPicker');
   if (emojiPicker && messageInput) {
     emojiPicker.addEventListener('emoji-click', ((e: CustomEvent) => {
       const emoji = e.detail?.unicode;

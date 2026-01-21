@@ -11,6 +11,156 @@ import { SanitizationUtils } from '../../utils/sanitization-utils';
 import { formatFileSize } from '../../utils/format-utils';
 import { AdminAuth } from './admin-auth';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../utils/api-client';
+import { createDOMCache, getElement } from '../../utils/dom-cache';
+
+// ============================================
+// DOM CACHE - Cached element references
+// ============================================
+
+/** DOM element selector keys for the project details module */
+type ProjectDetailsDOMKeys = {
+  // Overview elements
+  detailTitle: string;
+  projectName: string;
+  clientName: string;
+  clientEmail: string;
+  company: string;
+  status: string;
+  projectType: string;
+  budget: string;
+  timeline: string;
+  startDate: string;
+  endDate: string;
+  progressPercent: string;
+  progressBar: string;
+  progressBarContainer: string;
+  description: string;
+  previewUrlLink: string;
+  // URLs section
+  urlsSection: string;
+  repoUrlLink: string;
+  productionUrlLink: string;
+  // Financial section
+  financialSection: string;
+  deposit: string;
+  contractDate: string;
+  // Admin notes
+  adminNotesSection: string;
+  adminNotes: string;
+  notes: string;
+  // Settings form
+  settingName: string;
+  settingStatus: string;
+  settingProgress: string;
+  // Client account info
+  clientAccountEmail: string;
+  clientAccountStatus: string;
+  clientLastLogin: string;
+  // Buttons
+  backBtn: string;
+  editProjectBtn: string;
+  sendMsgBtn: string;
+  resendInviteBtn: string;
+  addMilestoneBtn: string;
+  createInvoiceBtn: string;
+  // Custom dropdown
+  statusDropdown: string;
+  statusTrigger: string;
+  statusMenu: string;
+  // Messages
+  messagesThread: string;
+  messageInput: string;
+  // Files
+  filesList: string;
+  uploadDropzone: string;
+  fileInput: string;
+  browseFilesBtn: string;
+  // Milestones
+  milestonesList: string;
+  // Invoices
+  invoicesList: string;
+  outstanding: string;
+  paid: string;
+  // Edit modal
+  editModal: string;
+  editForm: string;
+  editClose: string;
+  editCancel: string;
+};
+
+/** Cached DOM element references for performance */
+const domCache = createDOMCache<ProjectDetailsDOMKeys>();
+
+// Register all element selectors (called once when module loads)
+domCache.register({
+  // Overview elements
+  detailTitle: '#project-detail-title',
+  projectName: '#pd-project-name',
+  clientName: '#pd-client-name',
+  clientEmail: '#pd-client-email',
+  company: '#pd-company',
+  status: '#pd-status',
+  projectType: '#pd-type',
+  budget: '#pd-budget',
+  timeline: '#pd-timeline',
+  startDate: '#pd-start-date',
+  endDate: '#pd-end-date',
+  progressPercent: '#pd-progress-percent',
+  progressBar: '#pd-progress-bar',
+  progressBarContainer: '#pd-progress-bar-container',
+  description: '#pd-description',
+  previewUrlLink: '#pd-preview-url-link',
+  // URLs section
+  urlsSection: '#pd-urls-section',
+  repoUrlLink: '#pd-repo-url-link',
+  productionUrlLink: '#pd-production-url-link',
+  // Financial section
+  financialSection: '#pd-financial-section',
+  deposit: '#pd-deposit',
+  contractDate: '#pd-contract-date',
+  // Admin notes
+  adminNotesSection: '#pd-admin-notes-section',
+  adminNotes: '#pd-admin-notes',
+  notes: '#pd-notes',
+  // Settings form
+  settingName: '#pd-setting-name',
+  settingStatus: '#pd-setting-status',
+  settingProgress: '#pd-setting-progress',
+  // Client account info
+  clientAccountEmail: '#pd-client-account-email',
+  clientAccountStatus: '#pd-client-account-status',
+  clientLastLogin: '#pd-client-last-login',
+  // Buttons
+  backBtn: '#btn-back-to-projects',
+  editProjectBtn: '#btn-edit-project',
+  sendMsgBtn: '#btn-pd-send-message',
+  resendInviteBtn: '#btn-resend-invite',
+  addMilestoneBtn: '#btn-add-milestone',
+  createInvoiceBtn: '#btn-create-invoice',
+  // Custom dropdown
+  statusDropdown: '#pd-status-dropdown',
+  statusTrigger: '#pd-status-trigger',
+  statusMenu: '#pd-status-menu',
+  // Messages
+  messagesThread: '#pd-messages-thread',
+  messageInput: '#pd-message-input',
+  // Files
+  filesList: '#pd-files-list',
+  uploadDropzone: '#pd-upload-dropzone',
+  fileInput: '#pd-file-input',
+  browseFilesBtn: '#btn-pd-browse-files',
+  // Milestones
+  milestonesList: '#pd-milestones-list',
+  // Invoices
+  invoicesList: '#pd-invoices-list',
+  outstanding: '#pd-outstanding',
+  paid: '#pd-paid',
+  // Edit modal
+  editModal: '#edit-project-modal',
+  editForm: '#edit-project-form',
+  editClose: '#edit-project-close',
+  editCancel: '#edit-project-cancel'
+});
 
 export interface ProjectDetailsHandler {
   showProjectDetails(projectId: number, projectsData: any[], switchTab: (tab: string) => void, loadProjects: () => Promise<void>, formatProjectType: (type: string) => string, inviteLead: (leadId: number, email: string) => Promise<void>): void;
@@ -64,20 +214,20 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Populate the project detail view with project data
    */
   private populateProjectDetailView(project: any): void {
-    // Header info
-    const titleEl = document.getElementById('project-detail-title');
+    // Header info (use cached refs)
+    const titleEl = domCache.get('detailTitle');
     if (titleEl) titleEl.textContent = 'Project Details';
 
-    // Overview card
-    const projectName = document.getElementById('pd-project-name');
-    const clientName = document.getElementById('pd-client-name');
-    const clientEmail = document.getElementById('pd-client-email');
-    const company = document.getElementById('pd-company');
-    const status = document.getElementById('pd-status');
-    const projectType = document.getElementById('pd-type');
-    const budget = document.getElementById('pd-budget');
-    const timeline = document.getElementById('pd-timeline');
-    const startDate = document.getElementById('pd-start-date');
+    // Overview card (use cached refs)
+    const projectName = domCache.get('projectName');
+    const clientName = domCache.get('clientName');
+    const clientEmail = domCache.get('clientEmail');
+    const company = domCache.get('company');
+    const status = domCache.get('status');
+    const projectType = domCache.get('projectType');
+    const budget = domCache.get('budget');
+    const timeline = domCache.get('timeline');
+    const startDate = domCache.get('startDate');
 
     if (projectName) projectName.textContent = project.project_name || 'Untitled Project';
     if (clientName) clientName.textContent = project.contact_name || '-';
@@ -100,7 +250,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
 
     // Target end date
-    const endDate = document.getElementById('pd-end-date');
+    const endDate = domCache.get('endDate');
     if (endDate) {
       endDate.textContent = project.estimated_end_date
         ? new Date(project.estimated_end_date).toLocaleDateString()
@@ -108,20 +258,20 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
 
     // Progress
-    const progressPercent = document.getElementById('pd-progress-percent');
-    const progressBar = document.getElementById('pd-progress-bar');
+    const progressPercent = domCache.get('progressPercent');
+    const progressBar = domCache.get('progressBar');
     const progress = project.progress || 0;
     if (progressPercent) progressPercent.textContent = `${progress}%`;
     if (progressBar) progressBar.style.width = `${progress}%`;
 
     // Project description
-    const descriptionEl = document.getElementById('pd-description');
+    const descriptionEl = domCache.get('description');
     if (descriptionEl) {
       descriptionEl.textContent = project.description || '-';
     }
 
     // Preview URL
-    const previewUrlLink = document.getElementById('pd-preview-url-link') as HTMLAnchorElement;
+    const previewUrlLink = domCache.getAs<HTMLAnchorElement>('previewUrlLink');
     if (previewUrlLink) {
       if (project.preview_url) {
         previewUrlLink.href = project.preview_url;
@@ -133,9 +283,9 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
 
     // URLs section (repository, production)
-    const urlsSection = document.getElementById('pd-urls-section');
-    const repoUrlLink = document.getElementById('pd-repo-url-link') as HTMLAnchorElement;
-    const productionUrlLink = document.getElementById('pd-production-url-link') as HTMLAnchorElement;
+    const urlsSection = domCache.get('urlsSection');
+    const repoUrlLink = domCache.getAs<HTMLAnchorElement>('repoUrlLink');
+    const productionUrlLink = domCache.getAs<HTMLAnchorElement>('productionUrlLink');
 
     const hasUrls = project.repository_url || project.production_url;
     if (urlsSection) {
@@ -161,9 +311,9 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
 
     // Financial section (deposit, contract date)
-    const financialSection = document.getElementById('pd-financial-section');
-    const depositEl = document.getElementById('pd-deposit');
-    const contractDateEl = document.getElementById('pd-contract-date');
+    const financialSection = domCache.get('financialSection');
+    const depositEl = domCache.get('deposit');
+    const contractDateEl = domCache.get('contractDate');
 
     const hasFinancial = project.deposit_amount || project.contract_signed_at;
     if (financialSection) {
@@ -179,8 +329,8 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
 
     // Admin notes section
-    const adminNotesSection = document.getElementById('pd-admin-notes-section');
-    const adminNotesEl = document.getElementById('pd-admin-notes');
+    const adminNotesSection = domCache.get('adminNotesSection');
+    const adminNotesEl = domCache.get('adminNotes');
 
     if (adminNotesSection) {
       adminNotesSection.style.display = project.notes ? 'flex' : 'none';
@@ -190,7 +340,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
 
     // Features - add to notes container if features exist
-    const notes = document.getElementById('pd-notes');
+    const notes = domCache.get('notes');
     if (notes && project.features) {
       // Remove existing features container if present
       const existingFeatures = notes.querySelector('.features-container');
@@ -219,10 +369,10 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       }
     }
 
-    // Settings form
-    const settingName = document.getElementById('pd-setting-name') as HTMLInputElement;
-    const settingStatus = document.getElementById('pd-setting-status') as HTMLInputElement;
-    const settingProgress = document.getElementById('pd-setting-progress') as HTMLInputElement;
+    // Settings form (use cached refs)
+    const settingName = domCache.getAs<HTMLInputElement>('settingName');
+    const settingStatus = domCache.getAs<HTMLInputElement>('settingStatus');
+    const settingProgress = domCache.getAs<HTMLInputElement>('settingProgress');
 
     if (settingName) settingName.value = project.project_name || '';
     if (settingStatus) {
@@ -235,10 +385,10 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
     if (settingProgress) settingProgress.value = (project.progress || 0).toString();
 
-    // Client account info in settings
-    const clientAccountEmail = document.getElementById('pd-client-account-email');
-    const clientAccountStatus = document.getElementById('pd-client-account-status');
-    const clientLastLogin = document.getElementById('pd-client-last-login');
+    // Client account info in settings (use cached refs)
+    const clientAccountEmail = domCache.get('clientAccountEmail');
+    const clientAccountStatus = domCache.get('clientAccountStatus');
+    const clientLastLogin = domCache.get('clientLastLogin');
 
     if (clientAccountEmail) clientAccountEmail.textContent = project.email || '-';
     if (clientAccountStatus) {
@@ -295,8 +445,8 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       });
     });
 
-    // Back button handler
-    const backBtn = document.getElementById('btn-back-to-projects') as HTMLElement;
+    // Back button handler (use cached ref)
+    const backBtn = domCache.get('backBtn');
     if (backBtn && this.switchTabFn && !backBtn.dataset.listenerAdded) {
       backBtn.dataset.listenerAdded = 'true';
       backBtn.addEventListener('click', () => {
@@ -305,8 +455,8 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       });
     }
 
-    // Edit project button handler
-    const editProjectBtn = document.getElementById('btn-edit-project') as HTMLElement;
+    // Edit project button handler (use cached ref)
+    const editProjectBtn = domCache.get('editProjectBtn');
     if (editProjectBtn && !editProjectBtn.dataset.listenerAdded) {
       editProjectBtn.dataset.listenerAdded = 'true';
       editProjectBtn.addEventListener('click', () => {
@@ -314,15 +464,15 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       });
     }
 
-    // Send message handler
-    const sendMsgBtn = document.getElementById('btn-pd-send-message') as HTMLElement;
+    // Send message handler (use cached ref)
+    const sendMsgBtn = domCache.get('sendMsgBtn');
     if (sendMsgBtn && !sendMsgBtn.dataset.listenerAdded) {
       sendMsgBtn.dataset.listenerAdded = 'true';
       sendMsgBtn.addEventListener('click', () => this.sendProjectMessage());
     }
 
-    // Resend invite handler
-    const resendInviteBtn = document.getElementById('btn-resend-invite') as HTMLElement;
+    // Resend invite handler (use cached ref)
+    const resendInviteBtn = domCache.get('resendInviteBtn');
     if (resendInviteBtn && this.inviteLeadFn && !resendInviteBtn.dataset.listenerAdded) {
       resendInviteBtn.dataset.listenerAdded = 'true';
       resendInviteBtn.addEventListener('click', () => {
@@ -337,8 +487,8 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       });
     }
 
-    // Add milestone handler
-    const addMilestoneBtn = document.getElementById('btn-add-milestone') as HTMLElement;
+    // Add milestone handler (use cached ref)
+    const addMilestoneBtn = domCache.get('addMilestoneBtn');
     if (addMilestoneBtn && !addMilestoneBtn.dataset.listenerAdded) {
       addMilestoneBtn.dataset.listenerAdded = 'true';
       addMilestoneBtn.addEventListener('click', () => {
@@ -346,8 +496,8 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       });
     }
 
-    // Create invoice handler
-    const createInvoiceBtn = document.getElementById('btn-create-invoice') as HTMLElement;
+    // Create invoice handler (use cached ref)
+    const createInvoiceBtn = domCache.get('createInvoiceBtn');
     if (createInvoiceBtn && !createInvoiceBtn.dataset.listenerAdded) {
       createInvoiceBtn.dataset.listenerAdded = 'true';
       createInvoiceBtn.addEventListener('click', () => this.showCreateInvoicePrompt());
@@ -361,7 +511,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Set up custom status dropdown behavior
    */
   private setupCustomStatusDropdown(): void {
-    const dropdown = document.getElementById('pd-status-dropdown');
+    const dropdown = domCache.get('statusDropdown');
 
     if (!dropdown) return;
 
@@ -387,7 +537,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       const option = target.closest('.custom-dropdown-option') as HTMLElement;
       if (option) {
         const value = option.dataset.value || '';
-        const hiddenInput = document.getElementById('pd-setting-status') as HTMLInputElement;
+        const hiddenInput = domCache.getAs<HTMLInputElement>('settingStatus');
         if (hiddenInput) {
           hiddenInput.value = value;
         }
@@ -408,9 +558,9 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Update custom dropdown display based on selected value
    */
   private updateCustomDropdown(status: string): void {
-    const trigger = document.getElementById('pd-status-trigger');
+    const trigger = domCache.get('statusTrigger');
     const valueSpan = trigger?.querySelector('.custom-dropdown-value');
-    const menu = document.getElementById('pd-status-menu');
+    const menu = domCache.get('statusMenu');
 
     if (!trigger || !valueSpan) return;
 
@@ -448,27 +598,27 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const project = this.projectsData.find((p: any) => p.id === this.currentProjectId);
     if (!project) return;
 
-    const modal = document.getElementById('edit-project-modal');
+    const modal = domCache.get('editModal');
     if (!modal) {
       console.error('[ProjectDetails] Edit project modal not found');
       return;
     }
 
-    // Populate form fields
-    const nameInput = document.getElementById('edit-project-name') as HTMLInputElement;
-    const typeSelect = document.getElementById('edit-project-type') as HTMLSelectElement;
-    const budgetInput = document.getElementById('edit-project-budget') as HTMLInputElement;
-    const priceInput = document.getElementById('edit-project-price') as HTMLInputElement;
-    const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
-    const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
-    const statusSelect = document.getElementById('edit-project-status') as HTMLSelectElement;
-    const startDateInput = document.getElementById('edit-project-start-date') as HTMLInputElement;
-    const endDateInput = document.getElementById('edit-project-end-date') as HTMLInputElement;
-    const depositInput = document.getElementById('edit-project-deposit') as HTMLInputElement;
-    const contractDateInput = document.getElementById('edit-project-contract-date') as HTMLInputElement;
-    const repoUrlInput = document.getElementById('edit-project-repo-url') as HTMLInputElement;
-    const productionUrlInput = document.getElementById('edit-project-production-url') as HTMLInputElement;
-    const notesInput = document.getElementById('edit-project-notes') as HTMLTextAreaElement;
+    // Populate form fields - query fresh since values change between openings
+    const nameInput = getElement('edit-project-name') as HTMLInputElement;
+    const typeSelect = getElement('edit-project-type') as HTMLSelectElement;
+    const budgetInput = getElement('edit-project-budget') as HTMLInputElement;
+    const priceInput = getElement('edit-project-price') as HTMLInputElement;
+    const timelineInput = getElement('edit-project-timeline') as HTMLInputElement;
+    const previewUrlInput = getElement('edit-project-preview-url') as HTMLInputElement;
+    const statusSelect = getElement('edit-project-status') as HTMLSelectElement;
+    const startDateInput = getElement('edit-project-start-date') as HTMLInputElement;
+    const endDateInput = getElement('edit-project-end-date') as HTMLInputElement;
+    const depositInput = getElement('edit-project-deposit') as HTMLInputElement;
+    const contractDateInput = getElement('edit-project-contract-date') as HTMLInputElement;
+    const repoUrlInput = getElement('edit-project-repo-url') as HTMLInputElement;
+    const productionUrlInput = getElement('edit-project-production-url') as HTMLInputElement;
+    const notesInput = getElement('edit-project-notes') as HTMLTextAreaElement;
 
     if (nameInput) nameInput.value = project.project_name || '';
     if (typeSelect) typeSelect.value = project.project_type || '';
@@ -489,10 +639,10 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     modal.classList.remove('hidden');
     document.body.classList.add('modal-open');
 
-    // Setup close handlers
-    const closeBtn = document.getElementById('edit-project-close');
-    const cancelBtn = document.getElementById('edit-project-cancel');
-    const form = document.getElementById('edit-project-form') as HTMLFormElement;
+    // Setup close handlers (use cached refs)
+    const closeBtn = domCache.get('editClose');
+    const cancelBtn = domCache.get('editCancel');
+    const form = domCache.getAs<HTMLFormElement>('editForm');
 
     const closeModal = () => {
       modal.classList.add('hidden');
@@ -525,20 +675,21 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     if (!AdminAuth.isAuthenticated()) return;
 
-    const nameInput = document.getElementById('edit-project-name') as HTMLInputElement;
-    const typeSelect = document.getElementById('edit-project-type') as HTMLSelectElement;
-    const budgetInput = document.getElementById('edit-project-budget') as HTMLInputElement;
-    const priceInput = document.getElementById('edit-project-price') as HTMLInputElement;
-    const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
-    const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
-    const statusSelect = document.getElementById('edit-project-status') as HTMLSelectElement;
-    const startDateInput = document.getElementById('edit-project-start-date') as HTMLInputElement;
-    const endDateInput = document.getElementById('edit-project-end-date') as HTMLInputElement;
-    const depositInput = document.getElementById('edit-project-deposit') as HTMLInputElement;
-    const contractDateInput = document.getElementById('edit-project-contract-date') as HTMLInputElement;
-    const repoUrlInput = document.getElementById('edit-project-repo-url') as HTMLInputElement;
-    const productionUrlInput = document.getElementById('edit-project-production-url') as HTMLInputElement;
-    const notesInput = document.getElementById('edit-project-notes') as HTMLTextAreaElement;
+    // Form inputs - query fresh for current values
+    const nameInput = getElement('edit-project-name') as HTMLInputElement;
+    const typeSelect = getElement('edit-project-type') as HTMLSelectElement;
+    const budgetInput = getElement('edit-project-budget') as HTMLInputElement;
+    const priceInput = getElement('edit-project-price') as HTMLInputElement;
+    const timelineInput = getElement('edit-project-timeline') as HTMLInputElement;
+    const previewUrlInput = getElement('edit-project-preview-url') as HTMLInputElement;
+    const statusSelect = getElement('edit-project-status') as HTMLSelectElement;
+    const startDateInput = getElement('edit-project-start-date') as HTMLInputElement;
+    const endDateInput = getElement('edit-project-end-date') as HTMLInputElement;
+    const depositInput = getElement('edit-project-deposit') as HTMLInputElement;
+    const contractDateInput = getElement('edit-project-contract-date') as HTMLInputElement;
+    const repoUrlInput = getElement('edit-project-repo-url') as HTMLInputElement;
+    const productionUrlInput = getElement('edit-project-production-url') as HTMLInputElement;
+    const notesInput = getElement('edit-project-notes') as HTMLTextAreaElement;
 
     const updates: Record<string, string> = {};
     if (nameInput?.value) updates.project_name = nameInput.value;
@@ -583,7 +734,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   private currentThreadId: number | null = null;
 
   private async loadProjectMessages(projectId: number): Promise<void> {
-    const messagesThread = document.getElementById('pd-messages-thread');
+    const messagesThread = domCache.get('messagesThread');
     if (!messagesThread) return;
 
     if (!AdminAuth.isAuthenticated()) {
@@ -677,7 +828,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   private async sendProjectMessage(): Promise<void> {
     if (!this.currentProjectId) return;
 
-    const messageInput = document.getElementById('pd-message-input') as HTMLTextAreaElement;
+    const messageInput = domCache.getAs<HTMLTextAreaElement>('messageInput');
     if (!messageInput || !messageInput.value.trim()) return;
 
     if (!AdminAuth.isAuthenticated()) return;
@@ -732,7 +883,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Load files for the current project
    */
   private async loadProjectFiles(projectId: number): Promise<void> {
-    const filesList = document.getElementById('pd-files-list');
+    const filesList = domCache.get('filesList');
     if (!filesList) return;
 
     if (!AdminAuth.isAuthenticated()) {
@@ -783,7 +934,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Load milestones for the current project
    */
   private async loadProjectMilestones(projectId: number): Promise<void> {
-    const milestonesList = document.getElementById('pd-milestones-list');
+    const milestonesList = domCache.get('milestonesList');
     if (!milestonesList) return;
 
     if (!AdminAuth.isAuthenticated()) {
@@ -850,9 +1001,9 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Update the progress bar display and save to database
    */
   private updateProgressBar(progress: number): void {
-    const progressPercent = document.getElementById('pd-progress-percent');
-    const progressBar = document.getElementById('pd-progress-bar');
-    const progressBarContainer = document.getElementById('pd-progress-bar-container');
+    const progressPercent = domCache.get('progressPercent');
+    const progressBar = domCache.get('progressBar');
+    const progressBarContainer = domCache.get('progressBarContainer');
 
     if (progressPercent) {
       progressPercent.textContent = `${progress}%`;
@@ -966,9 +1117,9 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Load invoices for the current project
    */
   private async loadProjectInvoices(projectId: number): Promise<void> {
-    const invoicesList = document.getElementById('pd-invoices-list');
-    const outstandingEl = document.getElementById('pd-outstanding');
-    const paidEl = document.getElementById('pd-paid');
+    const invoicesList = domCache.get('invoicesList');
+    const outstandingEl = domCache.get('outstanding');
+    const paidEl = domCache.get('paid');
 
     if (!invoicesList) return;
 
@@ -1129,9 +1280,9 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Set up file upload handlers for project detail view
    */
   private setupFileUploadHandlers(): void {
-    const dropzone = document.getElementById('pd-upload-dropzone') as HTMLElement;
-    const fileInput = document.getElementById('pd-file-input') as HTMLInputElement;
-    const browseBtn = document.getElementById('btn-pd-browse-files') as HTMLElement;
+    const dropzone = domCache.get('uploadDropzone');
+    const fileInput = domCache.getAs<HTMLInputElement>('fileInput');
+    const browseBtn = domCache.get('browseFilesBtn');
 
     if (browseBtn && fileInput && !browseBtn.dataset.listenerAdded) {
       browseBtn.dataset.listenerAdded = 'true';

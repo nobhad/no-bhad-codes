@@ -1808,7 +1808,7 @@ body.modal-open .dashboard-content {
 }
 
 /* Small screens - stack all grids to single column with tighter spacing */
-@media (max-width: 600px) {
+@media (--compact-mobile) {
   /* Reduce all gaps and margins on mobile */
   body[data-page="admin"] .tab-content > *,
   body[data-page="admin"] .content-wrapper > * {

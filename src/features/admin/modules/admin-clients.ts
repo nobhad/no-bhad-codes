@@ -24,6 +24,86 @@ import {
 } from '../../../utils/table-filter';
 import { showTableLoading } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
+import { createDOMCache, batchUpdateText, getElement } from '../../../utils/dom-cache';
+
+// ============================================
+// DOM CACHE - Cached element references
+// ============================================
+
+/** DOM element selector keys for the clients module */
+type ClientsDOMKeys = {
+  // Table elements
+  tableBody: string;
+  filterContainer: string;
+  refreshBtn: string;
+  addBtn: string;
+  // Client detail buttons
+  editInfoBtn: string;
+  editBillingBtn: string;
+  resetPwBtn: string;
+  resendBtn: string;
+  deleteBtn: string;
+  // Client detail containers
+  projectsList: string;
+  invoicesList: string;
+  totalInvoiced: string;
+  totalPaid: string;
+  outstanding: string;
+  // Edit client info modal
+  editInfoModal: string;
+  editInfoForm: string;
+  editInfoClose: string;
+  editInfoCancel: string;
+  // Edit billing modal
+  editBillingModal: string;
+  editBillingForm: string;
+  editBillingClose: string;
+  editBillingCancel: string;
+  // Add client modal
+  addClientModal: string;
+  addClientForm: string;
+  addClientClose: string;
+  addClientCancel: string;
+};
+
+/** Cached DOM element references for performance */
+const domCache = createDOMCache<ClientsDOMKeys>();
+
+// Register all element selectors (called once when module loads)
+domCache.register({
+  // Table elements
+  tableBody: '#clients-table-body',
+  filterContainer: '#clients-filter-container',
+  refreshBtn: '#refresh-clients-btn',
+  addBtn: '#add-client-btn',
+  // Client detail buttons
+  editInfoBtn: '#cd-btn-edit-info',
+  editBillingBtn: '#cd-btn-edit-billing',
+  resetPwBtn: '#cd-btn-reset-password',
+  resendBtn: '#cd-btn-resend-invite',
+  deleteBtn: '#cd-btn-delete',
+  // Client detail containers
+  projectsList: '#cd-projects-list',
+  invoicesList: '#cd-invoices-list',
+  totalInvoiced: '#cd-total-invoiced',
+  totalPaid: '#cd-total-paid',
+  outstanding: '#cd-outstanding',
+  // Edit client info modal
+  editInfoModal: '#edit-client-info-modal',
+  editInfoForm: '#edit-client-info-form',
+  editInfoClose: '#edit-client-info-close',
+  editInfoCancel: '#edit-client-info-cancel',
+  // Edit billing modal
+  editBillingModal: '#edit-billing-modal',
+  editBillingForm: '#edit-billing-form',
+  editBillingClose: '#edit-billing-close',
+  editBillingCancel: '#edit-billing-cancel',
+  // Add client modal
+  addClientModal: '#add-client-modal',
+  addClientForm: '#add-client-form',
+  addClientClose: '#add-client-modal-close',
+  addClientCancel: '#add-client-cancel'
+});
 
 export interface Client {
   id: number;
@@ -84,8 +164,8 @@ export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
     filterUIInitialized = true;
   }
 
-  // Show loading state
-  const tableBody = document.getElementById('clients-table-body');
+  // Show loading state (use cached ref)
+  const tableBody = domCache.get('tableBody');
   if (tableBody) {
     showTableLoading(tableBody, 6, 'Loading clients...');
   }
@@ -135,7 +215,7 @@ export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
  * Initialize filter UI for clients table
  */
 function initializeFilterUI(ctx: AdminDashboardContext): void {
-  const container = document.getElementById('clients-filter-container');
+  const container = domCache.get('filterContainer');
   if (!container) return;
 
   // Create filter UI
@@ -151,8 +231,8 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
     }
   );
 
-  // Insert before the refresh button
-  const refreshBtn = container.querySelector('#refresh-clients-btn');
+  // Insert before the refresh button (use cached ref)
+  const refreshBtn = domCache.get('refreshBtn');
   if (refreshBtn) {
     container.insertBefore(filterUI, refreshBtn);
   } else {
@@ -172,29 +252,26 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
 }
 
 function updateClientsDisplay(data: ClientsData, ctx: AdminDashboardContext): void {
-  // Update stats
-  const clientsTotal = document.getElementById('clients-total');
-  const clientsActive = document.getElementById('clients-active');
-  const clientsPending = document.getElementById('clients-pending');
-  const clientsInactive = document.getElementById('clients-inactive');
-
-  if (clientsTotal) clientsTotal.textContent = data.stats.total.toString();
-  if (clientsActive) clientsActive.textContent = data.stats.active.toString();
-  if (clientsPending) clientsPending.textContent = data.stats.pending.toString();
-  if (clientsInactive) clientsInactive.textContent = data.stats.inactive.toString();
+  // Update stats using batch update
+  batchUpdateText({
+    'clients-total': data.stats.total.toString(),
+    'clients-active': data.stats.active.toString(),
+    'clients-pending': data.stats.pending.toString(),
+    'clients-inactive': data.stats.inactive.toString()
+  });
 
   // Update table
   renderClientsTable(data.clients, ctx);
 
-  // Setup refresh button
-  const refreshBtn = document.getElementById('refresh-clients-btn');
+  // Setup refresh button (only add listener once, use cached ref)
+  const refreshBtn = domCache.get('refreshBtn');
   if (refreshBtn && !refreshBtn.dataset.listenerAdded) {
     refreshBtn.dataset.listenerAdded = 'true';
     refreshBtn.addEventListener('click', () => loadClients(ctx));
   }
 
-  // Setup add client button
-  const addBtn = document.getElementById('add-client-btn');
+  // Setup add client button (only add listener once, use cached ref)
+  const addBtn = domCache.get('addBtn');
   if (addBtn && !addBtn.dataset.listenerAdded) {
     addBtn.dataset.listenerAdded = 'true';
     addBtn.addEventListener('click', () => addClient(ctx));
@@ -202,7 +279,7 @@ function updateClientsDisplay(data: ClientsData, ctx: AdminDashboardContext): vo
 }
 
 function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): void {
-  const tableBody = document.getElementById('clients-table-body');
+  const tableBody = domCache.get('tableBody');
   if (!tableBody) return;
 
   if (!clients || clients.length === 0) {
@@ -290,6 +367,7 @@ export function showClientDetails(clientId: number, ctx?: AdminDashboardContext)
 }
 
 function populateClientDetailView(client: Client): void {
+  // Prepare sanitized values
   const safeName = SanitizationUtils.escapeHtml(
     client.contact_name ? SanitizationUtils.capitalizeName(client.contact_name) : 'Unknown Client'
   );
@@ -298,97 +376,66 @@ function populateClientDetailView(client: Client): void {
     ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(client.company_name))
     : '-';
   const safePhone = SanitizationUtils.formatPhone(client.phone || '');
+  const status = client.status || 'pending';
+  const clientType = client.client_type || 'business';
+  const clientAny = client as { last_login_at?: string };
 
-  // Update header
-  const titleEl = document.getElementById('client-detail-title');
-  if (titleEl) titleEl.textContent = 'Client Details';
-
-  // Update client name
-  const nameEl = document.getElementById('cd-client-name');
-  if (nameEl) nameEl.textContent = safeName;
-
-  // Update meta fields
-  const emailEl = document.getElementById('cd-email');
-  if (emailEl) emailEl.textContent = safeEmail;
-
-  const companyEl = document.getElementById('cd-company');
-  if (companyEl) companyEl.textContent = safeCompany;
-
-  const phoneEl = document.getElementById('cd-phone');
-  if (phoneEl) phoneEl.textContent = safePhone;
-
-  const statusEl = document.getElementById('cd-status');
-  if (statusEl) {
-    const status = client.status || 'pending';
-    statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-  }
-
-  // Client type - plain text
-  const typeEl = document.getElementById('cd-client-type');
-  if (typeEl) {
-    const clientType = client.client_type || 'business';
-    const typeLabel = clientType === 'personal' ? 'Personal' : 'Business';
-    typeEl.textContent = typeLabel;
-  }
-
-  const createdEl = document.getElementById('cd-created');
-  if (createdEl) createdEl.textContent = new Date(client.created_at).toLocaleDateString();
-
-  const lastLoginEl = document.getElementById('cd-last-login');
-  if (lastLoginEl) {
-    const clientAny = client as any;
-    lastLoginEl.textContent = clientAny.last_login_at
+  // Batch update all client detail fields
+  batchUpdateText({
+    'client-detail-title': 'Client Details',
+    'cd-client-name': safeName,
+    'cd-email': safeEmail,
+    'cd-company': safeCompany,
+    'cd-phone': safePhone,
+    'cd-status': status.charAt(0).toUpperCase() + status.slice(1),
+    'cd-client-type': clientType === 'personal' ? 'Personal' : 'Business',
+    'cd-created': new Date(client.created_at).toLocaleDateString(),
+    'cd-last-login': clientAny.last_login_at
       ? new Date(clientAny.last_login_at).toLocaleString()
-      : 'Never';
-  }
-
-  const projectCountEl = document.getElementById('cd-project-count');
-  if (projectCountEl) projectCountEl.textContent = (client.project_count || 0).toString();
-
-  // Billing details
-  const billingFields: Record<string, string | null | undefined> = {
-    'cd-billing-name': client.billing_name || client.contact_name,
-    'cd-billing-email': client.billing_email || client.email,
-    'cd-billing-address': client.billing_address,
-    'cd-billing-city': client.billing_city,
-    'cd-billing-state': client.billing_state,
-    'cd-billing-zip': client.billing_zip,
-    'cd-billing-country': client.billing_country
-  };
-
-  Object.entries(billingFields).forEach(([id, value]) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = value ? SanitizationUtils.escapeHtml(value) : '-';
+      : 'Never',
+    'cd-project-count': (client.project_count || 0).toString(),
+    // Billing details
+    'cd-billing-name': SanitizationUtils.escapeHtml(client.billing_name || client.contact_name || '') || '-',
+    'cd-billing-email': SanitizationUtils.escapeHtml(client.billing_email || client.email || '') || '-',
+    'cd-billing-address': client.billing_address ? SanitizationUtils.escapeHtml(client.billing_address) : '-',
+    'cd-billing-city': client.billing_city ? SanitizationUtils.escapeHtml(client.billing_city) : '-',
+    'cd-billing-state': client.billing_state ? SanitizationUtils.escapeHtml(client.billing_state) : '-',
+    'cd-billing-zip': client.billing_zip ? SanitizationUtils.escapeHtml(client.billing_zip) : '-',
+    'cd-billing-country': client.billing_country ? SanitizationUtils.escapeHtml(client.billing_country) : '-'
   });
 }
 
 function setupClientDetailHandlers(client: Client, ctx: AdminDashboardContext): void {
+  // Force refresh cached refs since we're using cloneNode which changes DOM elements
   // Edit client info button (in overview header)
-  const editInfoBtn = document.getElementById('cd-btn-edit-info');
+  const editInfoBtn = domCache.get('editInfoBtn', true);
   if (editInfoBtn) {
     const newEditInfoBtn = editInfoBtn.cloneNode(true) as HTMLElement;
     editInfoBtn.parentNode?.replaceChild(newEditInfoBtn, editInfoBtn);
+    domCache.invalidate('editInfoBtn'); // Invalidate since element was replaced
     newEditInfoBtn.addEventListener('click', () => editClientInfo(client.id, ctx));
   }
 
   // Edit billing button
-  const editBillingBtn = document.getElementById('cd-btn-edit-billing');
+  const editBillingBtn = domCache.get('editBillingBtn', true);
   if (editBillingBtn) {
     const newEditBillingBtn = editBillingBtn.cloneNode(true) as HTMLElement;
     editBillingBtn.parentNode?.replaceChild(newEditBillingBtn, editBillingBtn);
+    domCache.invalidate('editBillingBtn');
     newEditBillingBtn.addEventListener('click', () => editClientBilling(client.id, ctx));
   }
 
   // Reset password button
-  const resetPwBtn = document.getElementById('cd-btn-reset-password');
+  const resetPwBtn = domCache.get('resetPwBtn', true);
   if (resetPwBtn) {
     const newResetBtn = resetPwBtn.cloneNode(true) as HTMLElement;
     resetPwBtn.parentNode?.replaceChild(newResetBtn, resetPwBtn);
+    domCache.invalidate('resetPwBtn');
     newResetBtn.addEventListener('click', () => resetClientPassword(client.id));
   }
 
   // Send/Resend invite button
-  const resendBtn = document.getElementById('cd-btn-resend-invite');
+  const resendBtn = domCache.get('resendBtn', true);
   if (resendBtn) {
     // Check if invitation was already sent (has password_hash means invited)
     const clientAny = client as any;
@@ -406,14 +453,16 @@ function setupClientDetailHandlers(client: Client, ctx: AdminDashboardContext): 
     // Clone to reset event listeners
     const newResendBtn = resendBtn.cloneNode(true) as HTMLElement;
     resendBtn.parentNode?.replaceChild(newResendBtn, resendBtn);
+    domCache.invalidate('resendBtn');
     newResendBtn.addEventListener('click', () => resendClientInvite(client.id));
   }
 
   // Delete button
-  const deleteBtn = document.getElementById('cd-btn-delete');
+  const deleteBtn = domCache.get('deleteBtn', true);
   if (deleteBtn) {
     const newDeleteBtn = deleteBtn.cloneNode(true) as HTMLElement;
     deleteBtn.parentNode?.replaceChild(newDeleteBtn, deleteBtn);
+    domCache.invalidate('deleteBtn');
     newDeleteBtn.addEventListener('click', () => {
       deleteClient(client.id);
       // Go back to clients list after delete
@@ -423,7 +472,7 @@ function setupClientDetailHandlers(client: Client, ctx: AdminDashboardContext): 
 }
 
 async function loadClientProjects(clientId: number): Promise<void> {
-  const container = document.getElementById('cd-projects-list');
+  const container = domCache.get('projectsList');
   if (!container) return;
 
   try {
@@ -483,10 +532,10 @@ function renderClientProjects(projects: any[], container: HTMLElement): void {
 }
 
 async function loadClientBilling(clientId: number): Promise<void> {
-  const container = document.getElementById('cd-invoices-list');
-  const totalInvoicedEl = document.getElementById('cd-total-invoiced');
-  const totalPaidEl = document.getElementById('cd-total-paid');
-  const outstandingEl = document.getElementById('cd-outstanding');
+  const container = domCache.get('invoicesList');
+  const totalInvoicedEl = domCache.get('totalInvoiced');
+  const totalPaidEl = domCache.get('totalPaid');
+  const outstandingEl = domCache.get('outstanding');
 
   try {
     const response = await apiFetch(`/api/invoices/client/${clientId}`);
@@ -600,19 +649,19 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
     return;
   }
 
-  const modal = document.getElementById('edit-client-info-modal');
-  const form = document.getElementById('edit-client-info-form') as HTMLFormElement;
-  const closeBtn = document.getElementById('edit-client-info-close');
-  const cancelBtn = document.getElementById('edit-client-info-cancel');
+  const modal = domCache.get('editInfoModal');
+  const form = domCache.getAs<HTMLFormElement>('editInfoForm');
+  const closeBtn = domCache.get('editInfoClose');
+  const cancelBtn = domCache.get('editInfoCancel');
 
   if (!modal || !form) return;
 
-  // Populate form with current values
-  const emailInput = document.getElementById('edit-client-email') as HTMLInputElement;
-  const nameInput = document.getElementById('edit-client-name') as HTMLInputElement;
-  const companyInput = document.getElementById('edit-client-company') as HTMLInputElement;
-  const phoneInput = document.getElementById('edit-client-phone') as HTMLInputElement;
-  const statusSelect = document.getElementById('edit-client-status') as HTMLSelectElement;
+  // Form inputs - query fresh since values change between openings
+  const emailInput = getElement('edit-client-email') as HTMLInputElement;
+  const nameInput = getElement('edit-client-name') as HTMLInputElement;
+  const companyInput = getElement('edit-client-company') as HTMLInputElement;
+  const phoneInput = getElement('edit-client-phone') as HTMLInputElement;
+  const statusSelect = getElement('edit-client-status') as HTMLSelectElement;
 
   if (emailInput) emailInput.value = client.email || '';
   if (nameInput) nameInput.value = client.contact_name || '';
@@ -694,21 +743,21 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
     return;
   }
 
-  const modal = document.getElementById('edit-billing-modal');
-  const form = document.getElementById('edit-billing-form') as HTMLFormElement;
-  const closeBtn = document.getElementById('edit-billing-close');
-  const cancelBtn = document.getElementById('edit-billing-cancel');
+  const modal = domCache.get('editBillingModal');
+  const form = domCache.getAs<HTMLFormElement>('editBillingForm');
+  const closeBtn = domCache.get('editBillingClose');
+  const cancelBtn = domCache.get('editBillingCancel');
 
   if (!modal || !form) return;
 
-  // Populate form with current values
-  const nameInput = document.getElementById('edit-billing-name') as HTMLInputElement;
-  const emailInput = document.getElementById('edit-billing-email') as HTMLInputElement;
-  const addressInput = document.getElementById('edit-billing-address') as HTMLInputElement;
-  const cityInput = document.getElementById('edit-billing-city') as HTMLInputElement;
-  const stateInput = document.getElementById('edit-billing-state') as HTMLInputElement;
-  const zipInput = document.getElementById('edit-billing-zip') as HTMLInputElement;
-  const countryInput = document.getElementById('edit-billing-country') as HTMLInputElement;
+  // Form inputs - query fresh since values change between openings
+  const nameInput = getElement('edit-billing-name') as HTMLInputElement;
+  const emailInput = getElement('edit-billing-email') as HTMLInputElement;
+  const addressInput = getElement('edit-billing-address') as HTMLInputElement;
+  const cityInput = getElement('edit-billing-city') as HTMLInputElement;
+  const stateInput = getElement('edit-billing-state') as HTMLInputElement;
+  const zipInput = getElement('edit-billing-zip') as HTMLInputElement;
+  const countryInput = getElement('edit-billing-country') as HTMLInputElement;
 
   if (nameInput) nameInput.value = client.billing_name || client.contact_name || '';
   if (emailInput) emailInput.value = client.billing_email || client.email || '';
@@ -805,10 +854,10 @@ async function deleteClient(clientId: number): Promise<void> {
 }
 
 function addClient(ctx: AdminDashboardContext): void {
-  const modal = document.getElementById('add-client-modal');
-  const form = document.getElementById('add-client-form') as HTMLFormElement;
-  const closeBtn = document.getElementById('add-client-modal-close');
-  const cancelBtn = document.getElementById('add-client-cancel');
+  const modal = domCache.get('addClientModal');
+  const form = domCache.getAs<HTMLFormElement>('addClientForm');
+  const closeBtn = domCache.get('addClientClose');
+  const cancelBtn = domCache.get('addClientCancel');
 
   if (!modal || !form) return;
 
@@ -838,10 +887,11 @@ function addClient(ctx: AdminDashboardContext): void {
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
 
-    const emailInput = document.getElementById('new-client-email') as HTMLInputElement;
-    const nameInput = document.getElementById('new-client-name') as HTMLInputElement;
-    const companyInput = document.getElementById('new-client-company') as HTMLInputElement;
-    const phoneInput = document.getElementById('new-client-phone') as HTMLInputElement;
+    // Form inputs - query fresh for current values
+    const emailInput = getElement('new-client-email') as HTMLInputElement;
+    const nameInput = getElement('new-client-name') as HTMLInputElement;
+    const companyInput = getElement('new-client-company') as HTMLInputElement;
+    const phoneInput = getElement('new-client-phone') as HTMLInputElement;
 
     const email = emailInput?.value.trim();
     const contactName = nameInput?.value.trim();

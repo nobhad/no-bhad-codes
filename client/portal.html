@@ -860,7 +860,10 @@
       </div>
     </div>
     <footer class="footer">
-      <div class="footer-content"><p>&copy; 2025 No Bhad Codes. All rights reserved.</p></div>
+      <div class="footer-content"><p>&copy; <span id="copyright-year"></span> No Bhad Codes. All rights reserved.</p></div>
     </footer>
+    <script>
+      document.getElementById('copyright-year').textContent = new Date().getFullYear();
+    </script>
   </body>
 </html>

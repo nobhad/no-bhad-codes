@@ -37,6 +37,20 @@ let storedContext: AdminDashboardContext | null = null;
 let filterState: FilterState = loadFilterState(LEADS_FILTER_CONFIG.storageKey);
 let filterUIInitialized = false;
 
+// ============================================================================
+// CACHED DOM REFERENCES
+// ============================================================================
+
+const cachedElements: Map<string, HTMLElement | null> = new Map();
+
+/** Get cached element by ID */
+function getElement(id: string): HTMLElement | null {
+  if (!cachedElements.has(id)) {
+    cachedElements.set(id, document.getElementById(id));
+  }
+  return cachedElements.get(id) ?? null;
+}
+
 /**
  * Format budget/timeline values with proper capitalization
  * Capitalizes first letter of each word, ASAP becomes all caps
@@ -78,14 +92,14 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
       // Don't show error for 401 - handled by apiFetch
       const errorText = await response.text();
       console.error('[AdminLeads] API error:', response.status, errorText);
-      const tableBody = document.getElementById('leads-table-body');
+      const tableBody = getElement('leads-table-body');
       if (tableBody) {
         tableBody.innerHTML = `<tr><td colspan="8" class="loading-row">Error loading leads: ${response.status}</td></tr>`;
       }
     }
   } catch (error) {
     console.error('[AdminLeads] Failed to load leads:', error);
-    const tableBody = document.getElementById('leads-table-body');
+    const tableBody = getElement('leads-table-body');
     if (tableBody) {
       tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">Network error loading leads</td></tr>';
     }
@@ -96,7 +110,7 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
  * Initialize filter UI for leads table
  */
 function initializeFilterUI(ctx: AdminDashboardContext): void {
-  const container = document.getElementById('leads-filter-container');
+  const container = getElement('leads-filter-container');
   if (!container) return;
 
   // Create filter UI
@@ -134,15 +148,15 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
 
 function updateLeadsDisplay(data: LeadsData, ctx: AdminDashboardContext): void {
   // Update overview stats
-  const statTotal = document.getElementById('stat-total-leads');
-  const statPending = document.getElementById('stat-pending-leads');
-  const statVisitors = document.getElementById('stat-visitors');
+  const statTotal = getElement('stat-total-leads');
+  const statPending = getElement('stat-pending-leads');
+  const statVisitors = getElement('stat-visitors');
 
   // Update leads tab stats
-  const leadsTotal = document.getElementById('leads-total');
-  const leadsPending = document.getElementById('leads-pending');
-  const leadsActive = document.getElementById('leads-active');
-  const leadsCompleted = document.getElementById('leads-completed');
+  const leadsTotal = getElement('leads-total');
+  const leadsPending = getElement('leads-pending');
+  const leadsActive = getElement('leads-active');
+  const leadsCompleted = getElement('leads-completed');
 
   if (statTotal) statTotal.textContent = data.stats?.total?.toString() || '0';
   if (statPending) statPending.textContent = data.stats?.pending?.toString() || '0';
@@ -153,7 +167,7 @@ function updateLeadsDisplay(data: LeadsData, ctx: AdminDashboardContext): void {
   if (leadsCompleted) leadsCompleted.textContent = data.stats?.completed?.toString() || '0';
 
   // Update recent leads list
-  const recentList = document.getElementById('recent-leads-list');
+  const recentList = getElement('recent-leads-list');
   if (recentList && data.leads) {
     const recentLeads = data.leads.slice(0, 5);
     if (recentLeads.length === 0) {
@@ -182,7 +196,7 @@ function updateLeadsDisplay(data: LeadsData, ctx: AdminDashboardContext): void {
 }
 
 function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
-  const tableBody = document.getElementById('leads-table-body');
+  const tableBody = getElement('leads-table-body');
   if (!tableBody) return;
 
   if (!leads || leads.length === 0) {
@@ -271,8 +285,8 @@ export function showLeadDetails(leadId: number): void {
   const lead = leadsData.find((l) => l.id === leadId);
   if (!lead) return;
 
-  const detailsPanel = document.getElementById('lead-details-panel');
-  const overlay = document.getElementById('details-overlay');
+  const detailsPanel = getElement('lead-details-panel');
+  const overlay = getElement('details-overlay');
   if (!detailsPanel) return;
 
   const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.contact_name || '-'));
@@ -427,13 +441,13 @@ declare global {
 
 window.closeDetailsPanel = function (): void {
   // Close lead details panel
-  const leadDetailsPanel = document.getElementById('lead-details-panel');
+  const leadDetailsPanel = getElement('lead-details-panel');
   if (leadDetailsPanel) leadDetailsPanel.classList.add('hidden');
   // Close contact details panel
-  const contactDetailsPanel = document.getElementById('contact-details-panel');
+  const contactDetailsPanel = getElement('contact-details-panel');
   if (contactDetailsPanel) contactDetailsPanel.classList.add('hidden');
   // Close overlay
-  const overlay = document.getElementById('details-overlay');
+  const overlay = getElement('details-overlay');
   if (overlay) overlay.classList.add('hidden');
 };
 

@@ -149,10 +149,14 @@ import {
   REPLAY_CONFIG
 } from '../../config/intro-animation-config';
 import { ANIMATION_CONSTANTS, calculateShadowOffset } from '../../config/animation-constants';
+import { createDOMCache } from '../../utils/dom-cache';
 
 // Import extracted intro animation modules
 import * as SvgBuilder from './intro/svg-builder';
 import * as MorphTimeline from './intro/morph-timeline';
+
+// DOM element keys for caching
+type IntroAnimationDOMKeys = Record<string, string>;
 
 // Register MorphSVG plugin with GSAP
 gsap.registerPlugin(MorphSVGPlugin);
@@ -190,8 +194,21 @@ export class IntroAnimationModule extends BaseModule {
   /** Cached SVG content to avoid re-fetching on exit/entry animations */
   private cachedSvgText: string | null = null;
 
+  /** DOM element cache for efficient element access */
+  private domCache = createDOMCache<IntroAnimationDOMKeys>();
+
   constructor(options: ModuleOptions = {}) {
     super('IntroAnimationModule', { debug: false, ...options });
+
+    // Register DOM element selectors
+    this.domCache.register({
+      morphOverlay: `#${DOM_ELEMENT_IDS.morphOverlay}`,
+      morphSvg: `#${DOM_ELEMENT_IDS.morphSvg}`,
+      morphPaw: `#${DOM_ELEMENT_IDS.morphPaw}`,
+      morphCardGroup: `#${DOM_ELEMENT_IDS.morphCardGroup}`,
+      businessCard: `#${DOM_ELEMENT_IDS.businessCard}`,
+      businessCardInner: `#${DOM_ELEMENT_IDS.businessCardInner}`
+    });
 
     // Bind methods to maintain correct 'this' context
     this.handleSkip = this.handleSkip.bind(this);
@@ -334,10 +351,10 @@ export class IntroAnimationModule extends BaseModule {
     // GET OVERLAY ELEMENTS
     // These are placeholder elements in the HTML that we'll populate
     // ========================================================================
-    this.morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
-    const morphSvg = document.getElementById(DOM_ELEMENT_IDS.morphSvg) as SVGSVGElement | null;
-    const morphPaw = document.getElementById(DOM_ELEMENT_IDS.morphPaw);
-    const morphCardGroup = document.getElementById(DOM_ELEMENT_IDS.morphCardGroup);
+    this.morphOverlay = this.domCache.get('morphOverlay');
+    const morphSvg = this.domCache.get('morphSvg') as SVGSVGElement | null;
+    const morphPaw = this.domCache.get('morphPaw');
+    const morphCardGroup = this.domCache.get('morphCardGroup');
 
     if (!this.morphOverlay || !morphSvg || !morphPaw || !morphCardGroup) {
       this.log('Morph overlay elements not found, falling back to card flip');
@@ -355,7 +372,7 @@ export class IntroAnimationModule extends BaseModule {
     // GET BUSINESS CARD FOR ALIGNMENT
     // We need to align the SVG card with the actual DOM element
     // ========================================================================
-    const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
+    const businessCard = this.domCache.get('businessCard');
     if (!businessCard) {
       this.log('Business card element not found, falling back to card flip');
       this.runCardFlip();
@@ -476,8 +493,8 @@ export class IntroAnimationModule extends BaseModule {
    * with the static business card for pixel-perfect transition.
    */
   private completeMorphAnimation(): void {
-    const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
-    const cardInner = document.getElementById(DOM_ELEMENT_IDS.businessCardInner);
+    const businessCard = this.domCache.get('businessCard');
+    const cardInner = this.domCache.get('businessCardInner');
 
     // CRITICAL: Reveal business card inner FIRST (clear inline visibility:hidden;opacity:0)
     // Must happen before showing businessCard to prevent flash
@@ -538,7 +555,7 @@ export class IntroAnimationModule extends BaseModule {
     this.isComplete = true;
 
     // Hide morph overlay
-    const morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
+    const morphOverlay = this.domCache.get('morphOverlay');
     if (morphOverlay) {
       morphOverlay.classList.add('hidden');
     }
@@ -548,14 +565,14 @@ export class IntroAnimationModule extends BaseModule {
     document.documentElement.classList.add('intro-complete', 'intro-finished');
 
     // Make sure card is visible
-    const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
+    const businessCard = this.domCache.get('businessCard');
     if (businessCard) {
       businessCard.style.opacity = '1';
     }
 
     // Reset card to front-facing position (no flip)
     // Also clear inline visibility:hidden and opacity:0 that was set to prevent flash
-    const cardInner = document.getElementById(DOM_ELEMENT_IDS.businessCardInner);
+    const cardInner = this.domCache.get('businessCardInner');
     if (cardInner) {
       cardInner.style.transition = 'none';
       cardInner.style.transform = 'rotateY(0deg)';
@@ -620,7 +637,7 @@ export class IntroAnimationModule extends BaseModule {
    */
   private runCardFlip(): void {
     // Hide morph overlay on mobile (not used)
-    const morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
+    const morphOverlay = this.domCache.get('morphOverlay');
     if (morphOverlay) {
       morphOverlay.classList.add('hidden');
     }
@@ -634,7 +651,7 @@ export class IntroAnimationModule extends BaseModule {
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
 
-    const cardInner = document.getElementById(DOM_ELEMENT_IDS.businessCardInner);
+    const cardInner = this.domCache.get('businessCardInner');
 
     if (!cardInner) {
       this.completeIntro();
@@ -711,13 +728,13 @@ export class IntroAnimationModule extends BaseModule {
     document.documentElement.classList.add('intro-complete');
 
     // Ensure business card is visible
-    const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
+    const businessCard = this.domCache.get('businessCard');
     if (businessCard) {
       businessCard.style.opacity = '1';
     }
 
     // Ensure business card inner is visible (clear inline styles set to prevent flash)
-    const cardInner = document.getElementById(DOM_ELEMENT_IDS.businessCardInner);
+    const cardInner = this.domCache.get('businessCardInner');
     if (cardInner) {
       cardInner.style.visibility = 'visible';
       cardInner.style.opacity = '1';
@@ -798,15 +815,16 @@ export class IntroAnimationModule extends BaseModule {
 
     this.log('Playing exit animation');
 
-    this.morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
-    const morphSvg = document.getElementById(DOM_ELEMENT_IDS.morphSvg) as SVGSVGElement | null;
+    // Force refresh to ensure we get current DOM state
+    this.morphOverlay = this.domCache.get('morphOverlay', true);
+    const morphSvg = this.domCache.get('morphSvg', true) as SVGSVGElement | null;
 
     if (!this.morphOverlay || !morphSvg) {
       this.log('Morph overlay not found');
       return;
     }
 
-    const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
+    const businessCard = this.domCache.get('businessCard', true);
     if (!businessCard) {
       this.log('Business card not found');
       return;
@@ -1237,8 +1255,8 @@ export class IntroAnimationModule extends BaseModule {
    * On mobile, this includes fade-in animations matching desktop timing
    */
   private showIntroFallback(): void {
-    const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
-    const cardInner = document.getElementById(DOM_ELEMENT_IDS.businessCardInner);
+    const businessCard = this.domCache.get('businessCard');
+    const cardInner = this.domCache.get('businessCardInner');
     const introNav = document.querySelector('.intro-nav') as HTMLElement;
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
 
@@ -1342,8 +1360,8 @@ export class IntroAnimationModule extends BaseModule {
 
     this.log('Playing entry animation (paw)');
 
-    // Get elements first
-    const businessCard = document.getElementById(DOM_ELEMENT_IDS.businessCard);
+    // Get elements first - force refresh for fresh DOM state
+    const businessCard = this.domCache.get('businessCard', true);
     const introNav = document.querySelector('.intro-nav') as HTMLElement;
 
     // CRITICAL: Hide static card and nav IMMEDIATELY to prevent flash
@@ -1355,8 +1373,8 @@ export class IntroAnimationModule extends BaseModule {
       gsap.set(introNav, { opacity: 0 });
     }
 
-    this.morphOverlay = document.getElementById(DOM_ELEMENT_IDS.morphOverlay);
-    let morphSvg = document.getElementById(DOM_ELEMENT_IDS.morphSvg) as SVGSVGElement | null;
+    this.morphOverlay = this.domCache.get('morphOverlay', true);
+    let morphSvg = this.domCache.get('morphSvg', true) as SVGSVGElement | null;
 
     if (!this.morphOverlay) {
       // Restore card if overlay not found
@@ -1592,7 +1610,7 @@ export class IntroAnimationModule extends BaseModule {
         onComplete: () => {
           // CRITICAL: Reveal business card inner FIRST (clear inline visibility:hidden;opacity:0)
           // Must happen before showing businessCard to prevent flash
-          const entryCardInner = document.getElementById(DOM_ELEMENT_IDS.businessCardInner);
+          const entryCardInner = this.domCache.get('businessCardInner');
           if (entryCardInner) {
             entryCardInner.style.visibility = 'visible';
             entryCardInner.style.opacity = '1';

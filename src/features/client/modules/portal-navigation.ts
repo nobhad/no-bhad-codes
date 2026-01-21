@@ -38,7 +38,80 @@ const VIEW_IDS = [
   'files-view',
   'messages-view',
   'content-view'
-];
+] as const;
+
+// ============================================================================
+// CACHED DOM REFERENCES
+// ============================================================================
+
+/** Cached view elements by ID */
+const cachedViews: Map<string, HTMLElement | null> = new Map();
+
+/** Cached button elements by ID */
+const cachedButtons: Map<string, HTMLElement | null> = new Map();
+
+/** Other cached elements */
+let cachedSidebar: HTMLElement | null | undefined;
+let cachedMobileHeaderTitle: HTMLElement | null | undefined;
+let cachedBreadcrumbList: HTMLElement | null | undefined;
+let cachedAccountList: HTMLElement | null | undefined;
+let cachedAccountHeader: HTMLElement | null | undefined;
+
+/** Get cached view element */
+function getView(viewId: string): HTMLElement | null {
+  if (!cachedViews.has(viewId)) {
+    cachedViews.set(viewId, document.getElementById(viewId));
+  }
+  return cachedViews.get(viewId) ?? null;
+}
+
+/** Get cached button element */
+function getButton(buttonId: string): HTMLElement | null {
+  if (!cachedButtons.has(buttonId)) {
+    cachedButtons.set(buttonId, document.getElementById(buttonId));
+  }
+  return cachedButtons.get(buttonId) ?? null;
+}
+
+/** Get cached sidebar */
+function getSidebar(): HTMLElement | null {
+  if (cachedSidebar === undefined) {
+    cachedSidebar = document.getElementById('sidebar');
+  }
+  return cachedSidebar;
+}
+
+/** Get cached mobile header title */
+function getMobileHeaderTitle(): HTMLElement | null {
+  if (cachedMobileHeaderTitle === undefined) {
+    cachedMobileHeaderTitle = document.getElementById('mobile-header-title');
+  }
+  return cachedMobileHeaderTitle;
+}
+
+/** Get cached breadcrumb list */
+function getBreadcrumbList(): HTMLElement | null {
+  if (cachedBreadcrumbList === undefined) {
+    cachedBreadcrumbList = document.getElementById('breadcrumb-list');
+  }
+  return cachedBreadcrumbList;
+}
+
+/** Get cached account list */
+function getAccountList(): HTMLElement | null {
+  if (cachedAccountList === undefined) {
+    cachedAccountList = document.querySelector('.account-list') as HTMLElement | null;
+  }
+  return cachedAccountList;
+}
+
+/** Get cached account header */
+function getAccountHeader(): HTMLElement | null {
+  if (cachedAccountHeader === undefined) {
+    cachedAccountHeader = document.querySelector('.account-header') as HTMLElement | null;
+  }
+  return cachedAccountHeader;
+}
 
 /**
  * Switch to a specific tab in the dashboard
@@ -53,8 +126,11 @@ export function switchTab(tabName: string, callbacks: {
   const allTabContent = document.querySelectorAll('.tab-content');
   allTabContent.forEach((tab) => tab.classList.remove('active'));
 
-  // Show the selected tab content
-  const targetTab = document.getElementById(`tab-${tabName}`);
+  // Show the selected tab content - use cache for tabs
+  if (!cachedViews.has(`tab-${tabName}`)) {
+    cachedViews.set(`tab-${tabName}`, document.getElementById(`tab-${tabName}`));
+  }
+  const targetTab = cachedViews.get(`tab-${tabName}`);
   if (targetTab) {
     targetTab.classList.add('active');
   }
@@ -89,7 +165,7 @@ export function switchTab(tabName: string, callbacks: {
  * Update the mobile header title based on current tab
  */
 export function updateMobileHeaderTitle(tabName: string): void {
-  const mobileHeaderTitle = document.getElementById('mobile-header-title');
+  const mobileHeaderTitle = getMobileHeaderTitle();
   if (!mobileHeaderTitle) return;
   mobileHeaderTitle.textContent = TAB_TITLES[tabName] || 'Dashboard';
 }
@@ -99,7 +175,7 @@ export function updateMobileHeaderTitle(tabName: string): void {
  */
 export function hideAllViews(): void {
   VIEW_IDS.forEach((viewId) => {
-    const view = document.getElementById(viewId);
+    const view = getView(viewId);
     if (view) {
       view.style.display = 'none';
     }
@@ -120,7 +196,7 @@ function clearActiveStates(): void {
  */
 export function showSettings(loadUserSettings: () => void): void {
   hideAllViews();
-  const settingsView = document.getElementById('settings-view');
+  const settingsView = getView('settings-view');
   if (settingsView) {
     settingsView.style.display = 'block';
     loadUserSettings();
@@ -136,7 +212,7 @@ export function showSettings(loadUserSettings: () => void): void {
 export function showBillingView(loadBillingSettings: () => void): void {
   hideAllViews();
 
-  const billingView = document.getElementById('billing-view');
+  const billingView = getView('billing-view');
   if (billingView) {
     billingView.style.display = 'block';
     loadBillingSettings();
@@ -145,7 +221,7 @@ export function showBillingView(loadBillingSettings: () => void): void {
   document
     .querySelectorAll('.project-item, .account-item')
     .forEach((item) => item.classList.remove('active'));
-  const billingBtn = document.getElementById('billing-btn');
+  const billingBtn = getButton('billing-btn');
   if (billingBtn) billingBtn.classList.add('active');
 }
 
@@ -154,7 +230,7 @@ export function showBillingView(loadBillingSettings: () => void): void {
  */
 export function showContactView(loadContactSettings: () => void): void {
   hideAllViews();
-  const contactView = document.getElementById('contact-view');
+  const contactView = getView('contact-view');
   if (contactView) {
     contactView.style.display = 'block';
     loadContactSettings();
@@ -162,7 +238,7 @@ export function showContactView(loadContactSettings: () => void): void {
   document
     .querySelectorAll('.project-item, .account-item')
     .forEach((item) => item.classList.remove('active'));
-  const contactBtn = document.getElementById('contact-btn');
+  const contactBtn = getButton('contact-btn');
   if (contactBtn) contactBtn.classList.add('active');
 }
 
@@ -171,7 +247,7 @@ export function showContactView(loadContactSettings: () => void): void {
  */
 export function showNotificationsView(loadNotificationSettings: () => void): void {
   hideAllViews();
-  const notificationsView = document.getElementById('notifications-view');
+  const notificationsView = getView('notifications-view');
   if (notificationsView) {
     notificationsView.style.display = 'block';
     loadNotificationSettings();
@@ -179,7 +255,7 @@ export function showNotificationsView(loadNotificationSettings: () => void): voi
   document
     .querySelectorAll('.project-item, .account-item')
     .forEach((item) => item.classList.remove('active'));
-  const notificationsBtn = document.getElementById('notifications-btn');
+  const notificationsBtn = getButton('notifications-btn');
   if (notificationsBtn) notificationsBtn.classList.add('active');
 }
 
@@ -188,12 +264,12 @@ export function showNotificationsView(loadNotificationSettings: () => void): voi
  */
 export function showUpdatesView(): void {
   hideAllViews();
-  const updatesView = document.getElementById('updates-view');
+  const updatesView = getView('updates-view');
   if (updatesView) {
     updatesView.style.display = 'block';
   }
   clearActiveStates();
-  const updatesBtn = document.getElementById('updates-btn');
+  const updatesBtn = getButton('updates-btn');
   if (updatesBtn) updatesBtn.classList.add('active');
 }
 
@@ -202,12 +278,12 @@ export function showUpdatesView(): void {
  */
 export function showFilesView(): void {
   hideAllViews();
-  const filesView = document.getElementById('files-view');
+  const filesView = getView('files-view');
   if (filesView) {
     filesView.style.display = 'block';
   }
   clearActiveStates();
-  const filesBtn = document.getElementById('files-btn');
+  const filesBtn = getButton('files-btn');
   if (filesBtn) filesBtn.classList.add('active');
 }
 
@@ -216,12 +292,12 @@ export function showFilesView(): void {
  */
 export function showMessagesView(): void {
   hideAllViews();
-  const messagesView = document.getElementById('messages-view');
+  const messagesView = getView('messages-view');
   if (messagesView) {
     messagesView.style.display = 'block';
   }
   clearActiveStates();
-  const messagesBtn = document.getElementById('messages-btn');
+  const messagesBtn = getButton('messages-btn');
   if (messagesBtn) messagesBtn.classList.add('active');
 }
 
@@ -230,12 +306,12 @@ export function showMessagesView(): void {
  */
 export function showContentView(): void {
   hideAllViews();
-  const contentView = document.getElementById('content-view');
+  const contentView = getView('content-view');
   if (contentView) {
     contentView.style.display = 'block';
   }
   clearActiveStates();
-  const contentBtn = document.getElementById('content-btn');
+  const contentBtn = getButton('content-btn');
   if (contentBtn) contentBtn.classList.add('active');
 }
 
@@ -244,12 +320,12 @@ export function showContentView(): void {
  */
 export function showProjectDetailView(showWelcomeViewFn: () => void): void {
   hideAllViews();
-  const projectDetailView = document.getElementById('project-detail-view');
+  const projectDetailView = getView('project-detail-view');
   if (projectDetailView) {
     projectDetailView.style.display = 'block';
   }
   clearActiveStates();
-  const projectMain = document.getElementById('project-main');
+  const projectMain = getButton('project-main');
   if (projectMain) projectMain.classList.add('active');
 
   updateBreadcrumbs([
@@ -263,7 +339,7 @@ export function showProjectDetailView(showWelcomeViewFn: () => void): void {
  */
 export function showWelcomeView(): void {
   hideAllViews();
-  const welcomeView = document.getElementById('welcome-view');
+  const welcomeView = getView('welcome-view');
   if (welcomeView) {
     welcomeView.style.display = 'block';
   }
@@ -275,7 +351,7 @@ export function showWelcomeView(): void {
  * Update breadcrumb navigation
  */
 export function updateBreadcrumbs(breadcrumbs: BreadcrumbItem[]): void {
-  const breadcrumbList = document.getElementById('breadcrumb-list');
+  const breadcrumbList = getBreadcrumbList();
   if (!breadcrumbList) return;
 
   breadcrumbList.innerHTML = '';
@@ -313,7 +389,7 @@ export function updateBreadcrumbs(breadcrumbs: BreadcrumbItem[]): void {
  * Toggle sidebar collapsed/expanded state (desktop)
  */
 export function toggleSidebar(): void {
-  const sidebar = document.getElementById('sidebar');
+  const sidebar = getSidebar();
 
   if (!sidebar) {
     console.error('Sidebar element not found');
@@ -327,8 +403,8 @@ export function toggleSidebar(): void {
  * Toggle account folder expanded/collapsed state
  */
 export function toggleAccountFolder(): void {
-  const accountList = document.querySelector('.account-list') as HTMLElement;
-  const accountHeader = document.querySelector('.account-header');
+  const accountList = getAccountList();
+  const accountHeader = getAccountHeader();
 
   if (!accountList || !accountHeader) return;
 
@@ -346,9 +422,9 @@ export function toggleAccountFolder(): void {
     document.querySelectorAll('.account-item').forEach((item) => item.classList.remove('active'));
 
     // Hide the main content views when collapsing account
-    const welcomeView = document.getElementById('welcome-view');
-    const settingsView = document.getElementById('settings-view');
-    const billingView = document.getElementById('billing-view');
+    const welcomeView = getView('welcome-view');
+    const settingsView = getView('settings-view');
+    const billingView = getView('billing-view');
 
     if (settingsView && settingsView.style.display !== 'none') {
       if (welcomeView) welcomeView.style.display = 'block';

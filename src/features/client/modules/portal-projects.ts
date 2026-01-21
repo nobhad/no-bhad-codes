@@ -14,6 +14,20 @@ import type { ClientPortalContext, PortalProject } from '../portal-types';
 /** API endpoints */
 const PROJECTS_API_BASE = '/api/projects';
 
+// ============================================================================
+// CACHED DOM REFERENCES
+// ============================================================================
+
+const cachedElements: Map<string, HTMLElement | null> = new Map();
+
+/** Get cached element by ID */
+function getElement(id: string): HTMLElement | null {
+  if (!cachedElements.has(id)) {
+    cachedElements.set(id, document.getElementById(id));
+  }
+  return cachedElements.get(id) ?? null;
+}
+
 /** Callbacks for project interactions */
 export interface ProjectCallbacks {
   onProjectSelected: (project: ClientProject) => void;
@@ -117,27 +131,27 @@ export function populateProjectDetails(
   callbacks: ProjectCallbacks
 ): void {
   // Populate project title
-  const titleElement = document.getElementById('project-title');
+  const titleElement = getElement('project-title');
   if (titleElement) {
     titleElement.textContent = currentProject.projectName;
   }
 
   // Populate status
-  const statusElement = document.getElementById('project-status');
+  const statusElement = getElement('project-status');
   if (statusElement) {
     statusElement.textContent = currentProject.status.replace('-', ' ');
     statusElement.className = `status-badge status-${currentProject.status}`;
   }
 
   // Populate project description
-  const descriptionElement = document.getElementById('project-description');
+  const descriptionElement = getElement('project-description');
   if (descriptionElement) {
     descriptionElement.textContent =
       currentProject.description || 'Project details will be updated soon.';
   }
 
   // Populate current phase
-  const currentPhaseElement = document.getElementById('current-phase');
+  const currentPhaseElement = getElement('current-phase');
   if (currentPhaseElement) {
     const phase =
       currentProject.status === 'pending'
@@ -151,7 +165,7 @@ export function populateProjectDetails(
   }
 
   // Populate next milestone
-  const nextMilestoneElement = document.getElementById('next-milestone');
+  const nextMilestoneElement = getElement('next-milestone');
   if (
     nextMilestoneElement &&
     currentProject.milestones &&
@@ -164,20 +178,20 @@ export function populateProjectDetails(
   }
 
   // Populate progress
-  const progressFill = document.getElementById('progress-fill') as HTMLElement;
-  const progressText = document.getElementById('progress-text');
+  const progressFill = getElement('progress-fill');
+  const progressText = getElement('progress-text');
   if (progressFill && progressText) {
     progressFill.style.width = `${currentProject.progress}%`;
     progressText.textContent = `${currentProject.progress}% Complete`;
   }
 
   // Populate dates
-  const startDateElement = document.getElementById('start-date');
+  const startDateElement = getElement('start-date');
   if (startDateElement) {
     startDateElement.textContent = callbacks.formatDate(currentProject.startDate);
   }
 
-  const lastUpdateElement = document.getElementById('last-update');
+  const lastUpdateElement = getElement('last-update');
   if (lastUpdateElement) {
     const lastUpdate =
       currentProject.updates && currentProject.updates.length > 0
@@ -194,7 +208,7 @@ export function loadUpdates(
   currentProject: ClientProject,
   callbacks: ProjectCallbacks
 ): void {
-  const timelineContainer = document.getElementById('updates-timeline');
+  const timelineContainer = getElement('updates-timeline');
   if (!timelineContainer) return;
 
   timelineContainer.innerHTML = '';
@@ -228,7 +242,7 @@ export function loadMessages(
   currentProject: ClientProject,
   callbacks: ProjectCallbacks
 ): void {
-  const messagesContainer = document.getElementById('messages-list');
+  const messagesContainer = getElement('messages-list');
   if (!messagesContainer) return;
 
   messagesContainer.innerHTML = '';
@@ -254,10 +268,10 @@ export function loadMessages(
  * Load project preview into iframe
  */
 export async function loadProjectPreview(_ctx: ClientPortalContext): Promise<void> {
-  const iframe = document.getElementById('preview-iframe') as HTMLIFrameElement;
-  const urlDisplay = document.getElementById('preview-url');
-  const openNewTabBtn = document.getElementById('btn-open-new-tab');
-  const refreshBtn = document.getElementById('btn-refresh-preview');
+  const iframe = getElement('preview-iframe') as HTMLIFrameElement;
+  const urlDisplay = getElement('preview-url');
+  const openNewTabBtn = getElement('btn-open-new-tab');
+  const refreshBtn = getElement('btn-refresh-preview');
 
   if (!iframe) return;
 

@@ -515,7 +515,7 @@
    SMALL SCREEN AUTO-COLLAPSE
    Auto-collapse sidebar on small screens (no hamburger menu)
    ===================================================== */
-@media (max-width: 600px) {
+@media (--compact-mobile) {
   [data-page="client-portal"] .sidebar,
   [data-page="admin"] .sidebar {
     width: 56px;

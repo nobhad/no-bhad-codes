@@ -38,6 +38,20 @@ let storedContext: AdminDashboardContext | null = null;
 let filterState: FilterState = loadFilterState(CONTACTS_FILTER_CONFIG.storageKey);
 let filterUIInitialized = false;
 
+// ============================================================================
+// CACHED DOM REFERENCES
+// ============================================================================
+
+const cachedElements: Map<string, HTMLElement | null> = new Map();
+
+/** Get cached element by ID */
+function getElement(id: string): HTMLElement | null {
+  if (!cachedElements.has(id)) {
+    cachedElements.set(id, document.getElementById(id));
+  }
+  return cachedElements.get(id) ?? null;
+}
+
 export function getContactsData(): ContactSubmission[] {
   return contactsData;
 }
@@ -69,7 +83,7 @@ export async function loadContacts(ctx: AdminDashboardContext): Promise<void> {
  * Initialize filter UI for contacts table
  */
 function initializeFilterUI(ctx: AdminDashboardContext): void {
-  const container = document.getElementById('contacts-filter-container');
+  const container = getElement('contacts-filter-container');
   if (!container) return;
 
   // Create filter UI
@@ -108,13 +122,13 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
 
 function updateContactsDisplay(data: ContactsData, ctx: AdminDashboardContext): void {
   // Update overview stat for messages
-  const statMessages = document.getElementById('stat-messages');
+  const statMessages = getElement('stat-messages');
   if (statMessages) {
     statMessages.textContent = data.stats?.total?.toString() || '0';
   }
 
   // Update new count badge
-  const newCountBadge = document.getElementById('contact-new-count');
+  const newCountBadge = getElement('contact-new-count');
   if (newCountBadge) {
     const newCount = data.stats?.new || 0;
     if (newCount > 0) {
@@ -134,7 +148,7 @@ function renderContactsTable(
   submissions: ContactSubmission[],
   ctx: AdminDashboardContext
 ): void {
-  const tableBody = document.getElementById('contacts-table-body');
+  const tableBody = getElement('contacts-table-body');
   if (!tableBody) return;
 
   if (!submissions || submissions.length === 0) {
@@ -207,8 +221,8 @@ export function showContactDetails(contactId: number): void {
   const contact = contactsData.find((c) => c.id === contactId);
   if (!contact) return;
 
-  const detailsPanel = document.getElementById('contact-details-panel');
-  const overlay = document.getElementById('details-overlay');
+  const detailsPanel = getElement('contact-details-panel');
+  const overlay = getElement('details-overlay');
   if (!detailsPanel) return;
 
   const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(contact.name || '-'));
@@ -337,8 +351,8 @@ declare global {
 }
 
 window.closeContactDetailsPanel = function (): void {
-  const detailsPanel = document.getElementById('contact-details-panel');
-  const overlay = document.getElementById('details-overlay');
+  const detailsPanel = getElement('contact-details-panel');
+  const overlay = getElement('details-overlay');
   if (detailsPanel) detailsPanel.classList.add('hidden');
   if (overlay) overlay.classList.add('hidden');
 };

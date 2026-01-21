@@ -16,6 +16,25 @@ let selectedClientId: number | null = null;
 let selectedThreadId: number | null = null;
 let selectedClientName: string = 'Client';
 
+// ============================================================================
+// CACHED DOM REFERENCES
+// ============================================================================
+
+const cachedElements: Map<string, HTMLElement | null> = new Map();
+
+/** Get cached element by ID */
+function getElement(id: string): HTMLElement | null {
+  if (!cachedElements.has(id)) {
+    cachedElements.set(id, document.getElementById(id));
+  }
+  return cachedElements.get(id) ?? null;
+}
+
+/** Get messages container (checks two possible IDs) */
+function getMessagesContainer(): HTMLElement | null {
+  return getElement('admin-messages-thread') || getElement('admin-messages-container');
+}
+
 export function getSelectedThreadId(): number | null {
   return selectedThreadId;
 }
@@ -35,7 +54,7 @@ interface ClientWithThread {
 }
 
 export async function loadClientThreads(ctx: AdminDashboardContext): Promise<void> {
-  const dropdown = document.getElementById('admin-client-dropdown');
+  const dropdown = getElement('admin-client-dropdown');
   if (!dropdown) return;
 
   // Add ARIA label for accessibility
@@ -91,10 +110,10 @@ export async function loadClientThreads(ctx: AdminDashboardContext): Promise<voi
 }
 
 function populateClientDropdown(clients: ClientWithThread[], ctx: AdminDashboardContext): void {
-  const dropdown = document.getElementById('admin-client-dropdown');
-  const menu = document.getElementById('admin-client-menu');
-  const trigger = document.getElementById('admin-client-trigger');
-  const hiddenInput = document.getElementById('admin-client-select') as HTMLInputElement;
+  const dropdown = getElement('admin-client-dropdown');
+  const menu = getElement('admin-client-menu');
+  const trigger = getElement('admin-client-trigger');
+  const hiddenInput = getElement('admin-client-select') as HTMLInputElement;
 
   if (!dropdown || !menu || !trigger || !hiddenInput) return;
 
@@ -248,8 +267,8 @@ export function selectThread(
   selectedThreadId = threadId;
 
   // Enable compose area inputs
-  const textarea = document.getElementById('admin-message-text') as HTMLTextAreaElement;
-  const sendButton = document.getElementById('admin-send-message') as HTMLButtonElement;
+  const textarea = getElement('admin-message-text') as HTMLTextAreaElement;
+  const sendButton = getElement('admin-send-message') as HTMLButtonElement;
   if (textarea) {
     textarea.disabled = false;
     textarea.placeholder = 'Type your message...';
@@ -266,9 +285,7 @@ export async function loadThreadMessages(
   _ctx: AdminDashboardContext,
   bustCache: boolean = false
 ): Promise<void> {
-  const container =
-    document.getElementById('admin-messages-thread') ||
-    document.getElementById('admin-messages-container');
+  const container = getMessagesContainer();
   if (!container) return;
 
   // Add ARIA attributes for accessibility - live region for screen readers
@@ -361,7 +378,7 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
 }
 
 export async function sendMessage(ctx: AdminDashboardContext): Promise<void> {
-  const input = document.getElementById('admin-message-text') as HTMLInputElement;
+  const input = getElement('admin-message-text') as HTMLInputElement;
   if (!input || !input.value.trim() || !selectedThreadId) return;
 
   const message = input.value.trim();
@@ -389,7 +406,7 @@ export async function sendMessage(ctx: AdminDashboardContext): Promise<void> {
 
 export function setupMessagingListeners(ctx: AdminDashboardContext): void {
   // Send button
-  const sendBtn = document.getElementById('admin-send-message');
+  const sendBtn = getElement('admin-send-message');
   if (sendBtn) {
     // Add ARIA label for accessibility
     sendBtn.setAttribute('aria-label', 'Send message');
@@ -397,14 +414,14 @@ export function setupMessagingListeners(ctx: AdminDashboardContext): void {
   }
 
   // Enter key to send
-  const input = document.getElementById('admin-message-text') as HTMLInputElement;
+  const input = getElement('admin-message-text') as HTMLInputElement;
   if (input) {
     // Add ARIA attributes for accessibility
     input.setAttribute('aria-label', 'Type your message');
     input.setAttribute('aria-describedby', 'message-hint');
 
     // Add hidden hint for screen readers
-    if (!document.getElementById('message-hint')) {
+    if (!getElement('message-hint')) {
       const hint = document.createElement('span');
       hint.id = 'message-hint';
       hint.className = 'sr-only';

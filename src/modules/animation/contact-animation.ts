@@ -37,6 +37,10 @@ import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
 import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
 import { getDebugMode } from '../../core/env';
+import { createDOMCache } from '../../utils/dom-cache';
+
+// DOM element keys for caching
+type ContactAnimationDOMKeys = Record<string, string>;
 
 // ============================================================================
 // CONTACT ANIMATION MODULE CLASS
@@ -47,8 +51,20 @@ export class ContactAnimationModule extends BaseModule {
   private timeline: gsap.core.Timeline | null = null;
   private blurAnimationComplete = false; // Track if blur animation has completed
 
+  /** DOM element cache */
+  private domCache = createDOMCache<ContactAnimationDOMKeys>();
+
   constructor(options: ModuleOptions = {}) {
     super('ContactAnimationModule', { debug: getDebugMode(), ...options });
+
+    // Register DOM element selectors
+    this.domCache.register({
+      contactSection: '.contact-section',
+      nameInput: '#name',
+      companyInput: '#company',
+      emailInput: '#email',
+      messageInput: '#message'
+    });
   }
 
   override async init(): Promise<void> {
@@ -96,7 +112,7 @@ export class ContactAnimationModule extends BaseModule {
       this.timeline = null;
     }
 
-    this.container = document.querySelector('.contact-section') as HTMLElement;
+    this.container = this.domCache.get('contactSection');
     if (!this.container) {
       this.log('Contact section not found');
       return;
@@ -220,10 +236,10 @@ export class ContactAnimationModule extends BaseModule {
     // ========================================================================
 
     // === BATCH 1: DOM QUERIES (no layout forcing) ===
-    const nameField = this.container.querySelector('#name')?.closest('.input-item');
-    const companyField = this.container.querySelector('#company')?.closest('.input-item');
-    const emailField = this.container.querySelector('#email')?.closest('.input-item');
-    const messageField = this.container.querySelector('#message')?.closest('.input-item') ||
+    const nameField = this.domCache.get('nameInput')?.closest('.input-item');
+    const companyField = this.domCache.get('companyInput')?.closest('.input-item');
+    const emailField = this.domCache.get('emailInput')?.closest('.input-item');
+    const messageField = this.domCache.get('messageInput')?.closest('.input-item') ||
                          this.container.querySelector('textarea')?.closest('.input-item');
     const submitButton = this.container.querySelector('button[type="submit"]') ||
                          this.container.querySelector('.contact-submit');
@@ -653,10 +669,10 @@ export class ContactAnimationModule extends BaseModule {
 
     // Reset form fields
     const fields = [
-      this.container.querySelector('#name')?.closest('.input-item'),
-      this.container.querySelector('#company')?.closest('.input-item'),
-      this.container.querySelector('#email')?.closest('.input-item'),
-      this.container.querySelector('#message')?.closest('.input-item') ||
+      this.domCache.get('nameInput')?.closest('.input-item'),
+      this.domCache.get('companyInput')?.closest('.input-item'),
+      this.domCache.get('emailInput')?.closest('.input-item'),
+      this.domCache.get('messageInput')?.closest('.input-item') ||
         this.container.querySelector('textarea')?.closest('.input-item')
     ];
 
@@ -707,7 +723,7 @@ export class ContactAnimationModule extends BaseModule {
       this.timeline = null;
     }
 
-    this.container = document.querySelector('.contact-section') as HTMLElement;
+    this.container = this.domCache.get('contactSection');
     if (!this.container) {
       this.log('Contact section not found');
       return;
@@ -855,7 +871,7 @@ export class ContactAnimationModule extends BaseModule {
       this.timeline = null;
     }
 
-    this.container = document.querySelector('.contact-section') as HTMLElement;
+    this.container = this.domCache.get('contactSection');
     if (!this.container) {
       this.log('Contact section not found');
       return;

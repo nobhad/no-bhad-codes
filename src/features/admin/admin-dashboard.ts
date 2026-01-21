@@ -25,6 +25,10 @@ import type {
 import { APP_CONSTANTS, getChartColor, getChartColorWithAlpha } from '../../config/constants';
 import { configureApiClient, apiFetch, apiPost, apiPut } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
+import { createDOMCache } from '../../utils/dom-cache';
+
+// DOM element keys for caching
+type DashboardDOMKeys = Record<string, string>;
 
 const logger = createLogger('AdminDashboard');
 
@@ -101,6 +105,9 @@ class AdminDashboard {
   // Project details handler
   private projectDetails: AdminProjectDetails;
 
+  // DOM element cache
+  private domCache = createDOMCache<DashboardDOMKeys>();
+
   // Delegate currentProjectId to project details handler
   private get currentProjectId(): number | null {
     return this.projectDetails.getCurrentProjectId();
@@ -115,6 +122,59 @@ class AdminDashboard {
   }
 
   constructor() {
+    // Register DOM element selectors for caching
+    this.domCache.register({
+      authGate: '#auth-gate',
+      adminDashboard: '#admin-dashboard',
+      adminLoginForm: '#admin-login-form',
+      adminPassword: '#admin-password',
+      passwordToggle: '#password-toggle',
+      authError: '#auth-error',
+      sidebar: '#sidebar',
+      refreshLeadsBtn: '#refresh-leads-btn',
+      refreshAnalytics: '#refresh-analytics',
+      refreshContactsBtn: '#refresh-contacts-btn',
+      refreshProjectsBtn: '#refresh-projects-btn',
+      logoutBtn: '#logout-btn',
+      btnLogout: '#btn-logout',
+      detailModal: '#detail-modal',
+      modalCloseBtn: '#modal-close-btn',
+      modalCloseBtnFooter: '#modal-close-btn-footer',
+      modalTitle: '#modal-title',
+      modalBody: '#modal-body',
+      inviteLeadBtn: '#invite-lead-btn',
+      contactNewCount: '#contact-new-count',
+      contactsTableBody: '#contacts-table-body',
+      sysVersion: '#sys-version',
+      sysEnvironment: '#sys-environment',
+      sysBuildDate: '#sys-build-date',
+      sysUseragent: '#sys-useragent',
+      sysScreen: '#sys-screen',
+      sysViewport: '#sys-viewport',
+      statVisitors: '#stat-visitors',
+      analyticsVisitors: '#analytics-visitors',
+      analyticsPageviews: '#analytics-pageviews',
+      analyticsSessions: '#analytics-sessions',
+      adminMessagesThread: '#admin-messages-thread',
+      adminMessagesContainer: '#admin-messages-container',
+      adminMessageText: '#admin-message-text',
+      adminSendMessage: '#admin-send-message',
+      exportAnalytics: '#export-analytics',
+      exportVisitors: '#export-visitors',
+      exportPerformance: '#export-performance',
+      clearOldData: '#clear-old-data',
+      resetAnalytics: '#reset-analytics',
+      loadingIndicator: '#loading-indicator',
+      performanceDashboardContainer: '#performance-dashboard-container',
+      performanceTab: '#performance-tab',
+      performanceAlerts: '#performance-alerts',
+      leadsTableBody: '#leads-table-body',
+      projectsTableBody: '#projects-table-body',
+      clientsTableBody: '#clients-table-body',
+      leadsBadge: '#leads-badge',
+      messagesBadge: '#messages-badge'
+    });
+
     // Initialize module context
     this.moduleContext = {
       getAuthToken: () =>
@@ -254,12 +314,12 @@ class AdminDashboard {
   }
 
   private setupAuthGate(): void {
-    const authGate = document.getElementById('auth-gate');
-    const dashboard = document.getElementById('admin-dashboard');
-    const loginForm = document.getElementById('admin-login-form');
-    const passwordInput = document.getElementById('admin-password') as HTMLInputElement;
-    const passwordToggle = document.getElementById('password-toggle');
-    const authError = document.getElementById('auth-error');
+    const authGate = this.domCache.get('authGate');
+    const dashboard = this.domCache.get('adminDashboard');
+    const loginForm = this.domCache.get('adminLoginForm');
+    const passwordInput = this.domCache.getAs<HTMLInputElement>('adminPassword');
+    const passwordToggle = this.domCache.get('passwordToggle');
+    const authError = this.domCache.get('authError');
 
     if (authGate) authGate.style.display = 'flex';
     if (dashboard) dashboard.style.display = 'none';
@@ -312,8 +372,8 @@ class AdminDashboard {
   }
 
   private showDashboard(): void {
-    const authGate = document.getElementById('auth-gate');
-    const dashboard = document.getElementById('admin-dashboard');
+    const authGate = this.domCache.get('authGate');
+    const dashboard = this.domCache.get('adminDashboard');
 
     if (authGate) authGate.style.display = 'none';
     if (dashboard) {
@@ -333,8 +393,7 @@ class AdminDashboard {
   private setupEventListeners(): void {
     logger.log('setupEventListeners() called');
     // Logout button (both old and new IDs)
-    const logoutBtn =
-      document.getElementById('logout-btn') || document.getElementById('btn-logout');
+    const logoutBtn = this.domCache.get('logoutBtn') || this.domCache.get('btnLogout');
     logger.log('logoutBtn found:', !!logoutBtn);
     if (logoutBtn) {
       logoutBtn.addEventListener('click', (e) => {
@@ -431,7 +490,7 @@ class AdminDashboard {
     });
 
     // Refresh leads button
-    const refreshLeadsBtn = document.getElementById('refresh-leads-btn');
+    const refreshLeadsBtn = this.domCache.get('refreshLeadsBtn');
     if (refreshLeadsBtn) {
       refreshLeadsBtn.addEventListener('click', () => {
         this.loadLeads();
@@ -439,7 +498,7 @@ class AdminDashboard {
     }
 
     // Refresh buttons
-    const refreshAnalytics = document.getElementById('refresh-analytics');
+    const refreshAnalytics = this.domCache.get('refreshAnalytics');
     if (refreshAnalytics) {
       refreshAnalytics.addEventListener('click', () => {
         this.loadAnalyticsData();
@@ -470,7 +529,7 @@ class AdminDashboard {
     this.setupMessaging();
 
     // Refresh contacts button
-    const refreshContactsBtn = document.getElementById('refresh-contacts-btn');
+    const refreshContactsBtn = this.domCache.get('refreshContactsBtn');
     if (refreshContactsBtn) {
       refreshContactsBtn.addEventListener('click', () => {
         this.loadContactSubmissions();
@@ -478,7 +537,7 @@ class AdminDashboard {
     }
 
     // Refresh projects button
-    const refreshProjectsBtn = document.getElementById('refresh-projects-btn');
+    const refreshProjectsBtn = this.domCache.get('refreshProjectsBtn');
     if (refreshProjectsBtn) {
       refreshProjectsBtn.addEventListener('click', () => {
         this.loadProjects();
@@ -493,10 +552,10 @@ class AdminDashboard {
   }
 
   private setupModalHandlers(): void {
-    const modal = document.getElementById('detail-modal');
-    const closeBtn = document.getElementById('modal-close-btn');
-    const closeFooterBtn = document.getElementById('modal-close-btn-footer');
-    const overlay = document.getElementById('detail-modal');
+    const modal = this.domCache.get('detailModal');
+    const closeBtn = this.domCache.get('modalCloseBtn');
+    const closeFooterBtn = this.domCache.get('modalCloseBtnFooter');
+    const overlay = this.domCache.get('detailModal');
 
     const closeModal = () => {
       if (modal) modal.style.display = 'none';
@@ -519,7 +578,7 @@ class AdminDashboard {
   }
 
   private toggleSidebar(): void {
-    const sidebar = document.getElementById('sidebar');
+    const sidebar = this.domCache.get('sidebar');
     sidebar?.classList.toggle('collapsed');
   }
 
@@ -549,7 +608,7 @@ class AdminDashboard {
     this.contactsData = data.submissions || [];
 
     // Update new count badge
-    const newCountBadge = document.getElementById('contact-new-count');
+    const newCountBadge = this.domCache.get('contactNewCount');
     if (newCountBadge) {
       const newCount = data.stats?.new || 0;
       if (newCount > 0) {
@@ -561,7 +620,7 @@ class AdminDashboard {
     }
 
     // Update contacts table
-    const tableBody = document.getElementById('contacts-table-body');
+    const tableBody = this.domCache.get('contactsTableBody');
     if (tableBody && data.submissions) {
       if (data.submissions.length === 0) {
         tableBody.innerHTML =
@@ -647,7 +706,7 @@ class AdminDashboard {
 
 
   private async inviteLead(leadId: number, email: string): Promise<void> {
-    const inviteBtn = document.getElementById('invite-lead-btn') as HTMLButtonElement;
+    const inviteBtn = this.domCache.getAs<HTMLButtonElement>('inviteLeadBtn');
     if (inviteBtn) {
       inviteBtn.disabled = true;
       inviteBtn.textContent = 'Sending Invitation...';
@@ -661,7 +720,7 @@ class AdminDashboard {
       if (response.ok && data.success) {
         alert(`Invitation sent to ${email}! They will receive a link to set up their account.`);
         // Close modal and refresh leads
-        const modal = document.getElementById('detail-modal');
+        const modal = this.domCache.get('detailModal');
         if (modal) modal.style.display = 'none';
         this.loadLeads();
         this.loadProjects();
@@ -686,9 +745,9 @@ class AdminDashboard {
     const contact = this.contactsData.find((c) => c.id === contactId);
     if (!contact) return;
 
-    const modal = document.getElementById('detail-modal');
-    const modalTitle = document.getElementById('modal-title');
-    const modalBody = document.getElementById('modal-body');
+    const modal = this.domCache.get('detailModal');
+    const modalTitle = this.domCache.get('modalTitle');
+    const modalBody = this.domCache.get('modalBody');
 
     if (!modal || !modalTitle || !modalBody) return;
 
@@ -809,12 +868,12 @@ class AdminDashboard {
 
 
   private loadSystemInfo(): void {
-    const sysVersion = document.getElementById('sys-version');
-    const sysEnv = document.getElementById('sys-environment');
-    const sysBuildDate = document.getElementById('sys-build-date');
-    const sysUserAgent = document.getElementById('sys-useragent');
-    const sysScreen = document.getElementById('sys-screen');
-    const sysViewport = document.getElementById('sys-viewport');
+    const sysVersion = this.domCache.get('sysVersion');
+    const sysEnv = this.domCache.get('sysEnvironment');
+    const sysBuildDate = this.domCache.get('sysBuildDate');
+    const sysUserAgent = this.domCache.get('sysUseragent');
+    const sysScreen = this.domCache.get('sysScreen');
+    const sysViewport = this.domCache.get('sysViewport');
 
     if (sysVersion) sysVersion.textContent = '10.0.0';
     if (sysEnv) sysEnv.textContent = import.meta.env?.MODE || 'development';
@@ -854,13 +913,13 @@ class AdminDashboard {
       const totalVisitors = allSessions.size;
 
       // Update overview stats
-      const statVisitors = document.getElementById('stat-visitors');
+      const statVisitors = this.domCache.get('statVisitors');
       if (statVisitors) statVisitors.textContent = visitorsToday.toString();
 
       // Update analytics tab stats
-      const analyticsVisitors = document.getElementById('analytics-visitors');
-      const analyticsPageviews = document.getElementById('analytics-pageviews');
-      const analyticsSessions = document.getElementById('analytics-sessions');
+      const analyticsVisitors = this.domCache.get('analyticsVisitors');
+      const analyticsPageviews = this.domCache.get('analyticsPageviews');
+      const analyticsSessions = this.domCache.get('analyticsSessions');
 
       if (analyticsVisitors) analyticsVisitors.textContent = totalVisitors.toString();
       if (analyticsPageviews) analyticsPageviews.textContent = totalPageViews.toString();
@@ -891,10 +950,10 @@ class AdminDashboard {
       console.error('[AdminDashboard] Failed to load visitor stats:', error);
 
       // Set defaults on error
-      const statVisitors = document.getElementById('stat-visitors');
-      const analyticsVisitors = document.getElementById('analytics-visitors');
-      const analyticsPageviews = document.getElementById('analytics-pageviews');
-      const analyticsSessions = document.getElementById('analytics-sessions');
+      const statVisitors = this.domCache.get('statVisitors');
+      const analyticsVisitors = this.domCache.get('analyticsVisitors');
+      const analyticsPageviews = this.domCache.get('analyticsPageviews');
+      const analyticsSessions = this.domCache.get('analyticsSessions');
 
       if (statVisitors) statVisitors.textContent = '0';
       if (analyticsVisitors) analyticsVisitors.textContent = '0';
@@ -930,8 +989,8 @@ class AdminDashboard {
     this.selectedThreadId = threadId;
 
     // Enable compose area inputs
-    const textarea = document.getElementById('admin-message-text') as HTMLTextAreaElement;
-    const sendButton = document.getElementById('admin-send-message') as HTMLButtonElement;
+    const textarea = this.domCache.getAs<HTMLTextAreaElement>('adminMessageText');
+    const sendButton = this.domCache.getAs<HTMLButtonElement>('adminSendMessage');
     if (textarea) {
       textarea.disabled = false;
       textarea.placeholder = 'Type your message...';
@@ -947,8 +1006,8 @@ class AdminDashboard {
   private async loadThreadMessages(threadId: number): Promise<void> {
     // Try new container ID first, then old one
     const container =
-      document.getElementById('admin-messages-thread') ||
-      document.getElementById('admin-messages-container');
+      this.domCache.get('adminMessagesThread') ||
+      this.domCache.get('adminMessagesContainer');
     if (!container) return;
 
     container.innerHTML =
@@ -977,8 +1036,8 @@ class AdminDashboard {
 
   private renderMessages(messages: Message[]): void {
     const container =
-      document.getElementById('admin-messages-thread') ||
-      document.getElementById('admin-messages-container');
+      this.domCache.get('adminMessagesThread') ||
+      this.domCache.get('adminMessagesContainer');
     if (!container) return;
 
     if (messages.length === 0) {
@@ -1042,7 +1101,7 @@ class AdminDashboard {
   }
 
   private async sendMessage(): Promise<void> {
-    const input = document.getElementById('admin-message-text') as HTMLInputElement;
+    const input = this.domCache.getAs<HTMLInputElement>('adminMessageText');
     if (!input || !input.value.trim() || !this.selectedThreadId) return;
 
     const message = input.value.trim();
@@ -1073,9 +1132,9 @@ class AdminDashboard {
   }
 
   private setupExportButtons(): void {
-    const exportAnalytics = document.getElementById('export-analytics');
-    const exportVisitors = document.getElementById('export-visitors');
-    const exportPerformance = document.getElementById('export-performance');
+    const exportAnalytics = this.domCache.get('exportAnalytics');
+    const exportVisitors = this.domCache.get('exportVisitors');
+    const exportPerformance = this.domCache.get('exportPerformance');
 
     if (exportAnalytics) {
       exportAnalytics.addEventListener('click', () => {
@@ -1097,8 +1156,8 @@ class AdminDashboard {
   }
 
   private setupDataManagementButtons(): void {
-    const clearOldData = document.getElementById('clear-old-data');
-    const resetAnalytics = document.getElementById('reset-analytics');
+    const clearOldData = this.domCache.get('clearOldData');
+    const resetAnalytics = this.domCache.get('resetAnalytics');
 
     if (clearOldData) {
       clearOldData.addEventListener('click', () => {
@@ -1143,13 +1202,13 @@ class AdminDashboard {
     let statusColumnIndex = -1;
 
     if (tableName === 'leads') {
-      tableBody = document.getElementById('leads-table-body');
+      tableBody = this.domCache.get('leadsTableBody');
       statusColumnIndex = 6; // Status column is 7th (0-indexed: 6)
     } else if (tableName === 'projects') {
-      tableBody = document.getElementById('projects-table-body');
+      tableBody = this.domCache.get('projectsTableBody');
       statusColumnIndex = 4; // Status column is 5th (0-indexed: 4)
     } else if (tableName === 'clients') {
-      tableBody = document.getElementById('clients-table-body');
+      tableBody = this.domCache.get('clientsTableBody');
       statusColumnIndex = 2; // Status column is 3rd (0-indexed: 2)
     }
 
@@ -1596,11 +1655,11 @@ class AdminDashboard {
   private async initializePerformanceDashboard(): Promise<void> {
     try {
       // Check if performance dashboard container exists
-      let dashboardContainer = document.getElementById('performance-dashboard-container');
+      let dashboardContainer = this.domCache.get('performanceDashboardContainer');
 
       if (!dashboardContainer) {
         // Create container for the performance dashboard in the performance tab
-        const performanceTab = document.getElementById('performance-tab');
+        const performanceTab = this.domCache.get('performanceTab');
         if (performanceTab) {
           dashboardContainer = document.createElement('div');
           dashboardContainer.id = 'performance-dashboard-container';
@@ -1629,7 +1688,7 @@ class AdminDashboard {
   }
 
   private displayPerformanceAlerts(alerts: PerformanceAlert[]): void {
-    const container = document.getElementById('performance-alerts');
+    const container = this.domCache.get('performanceAlerts');
     if (!container || !alerts.length) return;
 
     container.innerHTML = alerts
@@ -1663,7 +1722,7 @@ class AdminDashboard {
   }
 
   private showLoading(show: boolean): void {
-    const loading = document.getElementById('loading-indicator');
+    const loading = this.domCache.get('loadingIndicator');
     if (loading) {
       if (show) {
         loading.classList.remove('hidden');
@@ -1697,7 +1756,7 @@ class AdminDashboard {
       if (!data.success) return;
 
       // Update leads badge
-      const leadsBadge = document.getElementById('leads-badge');
+      const leadsBadge = this.domCache.get('leadsBadge');
       if (leadsBadge) {
         if (data.leads > 0) {
           leadsBadge.textContent = String(data.leads);
@@ -1708,7 +1767,7 @@ class AdminDashboard {
       }
 
       // Update messages badge
-      const messagesBadge = document.getElementById('messages-badge');
+      const messagesBadge = this.domCache.get('messagesBadge');
       if (messagesBadge) {
         if (data.messages > 0) {
           messagesBadge.textContent = String(data.messages);
