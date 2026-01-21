@@ -19,10 +19,15 @@
   }
 }
 
-/* Settings Section - Layout only (shadows in shared/portal-cards.css) */
+/* Settings Section - Dark panel styling (shadow in shared/portal-cards.css) */
 [data-page="client-portal"] .settings-section {
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--border-radius-card);
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
+  color: var(--portal-text-light);
 }
 
 .settings-section-wide {
@@ -258,10 +263,10 @@
 .settings-section h2 {
   font-family: var(--font--acme);
   font-size: 1.4rem;
-  color: var(--color-dark);
+  color: var(--portal-text-light);
   margin: 0 0 var(--portal-spacing-xl) 0;
   text-transform: uppercase;
-  border-bottom: 1px solid var(--color-neutral-300);
+  border-bottom: 1px solid var(--portal-border-medium);
   padding-bottom: var(--portal-spacing-sm);
 }
 
@@ -282,7 +287,7 @@
 .notifications-view-header {
   margin-bottom: var(--portal-spacing-2xl);
   padding-bottom: var(--portal-spacing-xl);
-  border-bottom: 1px solid var(--color-neutral-300);
+  border-bottom: 1px solid var(--portal-border-medium);
 }
 
 .contact-view-header h1,
@@ -290,7 +295,7 @@
 .notifications-view-header h1 {
   font-family: var(--font--acme);
   font-size: 2rem;
-  color: var(--color-dark);
+  color: var(--portal-text-light);
   margin: 0 0 var(--portal-spacing-sm) 0;
   text-transform: uppercase;
 }
@@ -299,7 +304,7 @@
 .billing-view-header p,
 .notifications-view-header p {
   font-size: 1rem;
-  color: var(--color-neutral-600);
+  color: var(--portal-text-secondary);
   margin: 0;
 }
 
@@ -314,10 +319,12 @@
 .contact-view-section,
 .billing-view-section,
 .notifications-view-section {
-  background: var(--color-neutral-100);
-  border: 1px solid var(--color-neutral-300);
-  border-radius: var(--portal-radius-md);
-  padding: var(--portal-spacing-2xl);
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--border-radius-card);
+  padding: var(--space-4);
+  color: var(--portal-text-light);
+  box-shadow: var(--shadow-panel);
 }
 
 .contact-view-section h2,
@@ -325,9 +332,9 @@
 .notifications-view-section h2 {
   font-family: var(--font--acme);
   font-size: 1.4rem;
-  color: var(--color-dark);
+  color: var(--portal-text-light);
   margin: 0 0 var(--portal-spacing-xl) 0;
   text-transform: uppercase;
-  border-bottom: 1px solid var(--color-neutral-300);
+  border-bottom: 1px solid var(--portal-border-medium);
   padding-bottom: var(--portal-spacing-sm);
 }

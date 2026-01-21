@@ -625,8 +625,21 @@
               function getClientDataForIntake() {
                 const token = localStorage.getItem('client_auth_token');
 
-                // If demo mode (token starts with demo_token_), return empty data
-                if (!token || token.startsWith('demo_token_')) {
+                // Demo mode - return demo client data
+                if (token && token.startsWith('demo_token_')) {
+                  return {
+                    name: 'Demo User',
+                    email: 'demo@example.com',
+                    company: 'Demo Company',
+                    lastBilling: {
+                      type: 'Monthly Retainer',
+                      amount: '$2,500/month',
+                      description: 'Monthly Retainer - $2,500/month'
+                    }
+                  };
+                }
+
+                if (!token) {
                   return undefined;
                 }
 

@@ -69,13 +69,13 @@
   z-index: 101;
 }
 
-/* Avatar - invert main logo to white for portal dark sidebar */
+/* Invert logos to white for portal dark sidebar */
 [data-page="client-portal"] .sidebar-logo-img,
-[data-page="admin"] .sidebar-logo-img {
+[data-page="admin"] .sidebar-logo-img,
+[data-page="client-portal"] .sidebar-collapsed-logo-img,
+[data-page="admin"] .sidebar-collapsed-logo-img {
   filter: invert(1);
 }
-
-/* Collapsed logo SVG is already white with dark eye - no filter needed */
 
 /* Logout Button */
 .btn-logout {
