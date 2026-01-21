@@ -17,35 +17,6 @@ This file tracks active development work and TODOs. Completed items are moved to
 - [ ] **PROJECTS SECTION REDESIGN** - Sal Costa-style portfolio (see breakdown below)
 - [ ] SEO optimization - DO NOT DO THIS UNTIL AFTER I HAVE PROJECTS AND CONTENT COMPLETED (2 PROJECTS)
 
-### Code Quality (Low Priority)
-
-- [x] **Migrate hardcoded media queries** - ✅ All 24 hardcoded media queries migrated to custom media query system
-  - Added new custom media queries: `--tablet-down`, `--desktop-down`, `--ultra-wide-down`, `--tablet-to-desktop`
-  - Replaced all hardcoded breakpoints across 11 stylesheet files
-- [x] **Server `any` types** - ✅ COMPLETE - Fixed all critical `any` types (reduced from 97 to 0, all 97 fixed)
-  - **Phase 1 (30 fixes):** Database model, error handlers, route params
-    - Database model: `id: any` → `id: string | number` (3 instances)
-    - Database model: `operator: any` → `operator: string`, `value: any` → `value: string | number | boolean | null`
-    - Database model: `row: any` → `row: DatabaseRow` (3 instances)
-    - Error handlers: `error: any` → `error: unknown` with type guards (18 instances)
-    - Route params: `params: any[]` → `params: (string | number | null)[]` (4 instances)
-    - Update values: `values: any[]` → `values: (string | number | boolean | null)[]` (3 instances)
-    - Express error handlers: Fixed type signatures
-  - **Phase 2 (67 fixes):** Created `server/database/row-helpers.ts` utility for type-safe database row access
-    - Database init: `any[]` → `SqlParams` type (7 instances)
-    - All route files: Replaced direct property access with helper functions
-      - `getString(row, 'key')` - Extract string values
-      - `getNumber(row, 'key')` - Extract number values
-      - `getBoolean(row, 'key')` - Extract boolean values
-      - `getDate(row, 'key')` - Extract date values
-    - Fixed 63 TypeScript errors across 15 files
-    - **Files updated:** auth.ts, analytics.ts, intake.ts, projects.ts, uploads.ts, invoices.ts, messages.ts, clients.ts, admin.ts, logging/index.ts, cache-service.ts, middleware/cache.ts
-    - **Result:** 0 TypeScript errors, 100% type-safe database access
-- [x] **Consolidate `rgba(0,0,0,...)` shadows** - ✅ All inline rgba box-shadow values replaced with `--shadow-*` tokens
-  - Removed var() fallbacks (tokens always defined)
-  - Replaced 10+ inline box-shadow values across 3 files
-  - Remaining rgba references are in variables.css (token definitions) or non-shadow properties
-
 ---
 
 ## Projects Section Redesign (Sal Costa Style)
