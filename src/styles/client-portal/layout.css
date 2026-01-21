@@ -117,27 +117,8 @@ body[data-page="client-portal"] {
 
 /* ================================================
    CLIENT PORTAL - GLOBAL BUTTON STYLES
+   Base styles in shared/portal-buttons.css
    ================================================ */
-[data-page="client-portal"] .btn,
-[data-page="client-portal"] .btn-secondary,
-[data-page="client-portal"] button[type="submit"] {
-  background: transparent;
-  color: var(--portal-text-light);
-  border: var(--portal-border-light-style);
-  border-radius: var(--portal-radius-lg);
-  padding: var(--portal-spacing-md) var(--portal-spacing-xl);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-[data-page="client-portal"] .btn:hover,
-[data-page="client-portal"] .btn-secondary:hover,
-[data-page="client-portal"] button[type="submit"]:hover {
-  background: var(--color-primary);
-  color: var(--portal-bg-dark);
-  border-color: var(--color-primary);
-}
 
 /* Remove card backgrounds */
 [data-page="client-portal"] .card,
