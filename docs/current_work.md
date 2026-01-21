@@ -137,41 +137,87 @@ None - All 5 major refactoring tasks have been completed.
   - `/src/features/admin/admin-dashboard.ts` - Added proper types (`Lead`, `ContactSubmission`, `Project`, `Message`, `AnalyticsEvent`)
   - Updated `/src/features/admin/admin-types.ts` with new interfaces
 
-### Priority 3: Code Cleanup (Medium)
+### Priority 3: UX/UI Improvements (High)
 
-- [ ] **Delete test/development files**
-  - `/server/test-*.ts` files - Test scripts in production code
-  - `/server/routes/test-routes.ts` - Development endpoints
-  - `/scripts/dev-*.js` - Development utilities
-  - Fix: Remove or move to `/tests/` directory
+- [ ] **Add loading states to async operations** - 11 modules affected
+  - `/src/features/client/client-portal.ts` - No loading indicator during data fetch
+  - `/src/features/admin/admin-dashboard.ts` - Multiple async ops without spinners
+  - `/src/features/admin/modules/admin-clients.ts` - "No clients found" but no loading
+  - `/src/features/admin/modules/admin-projects.ts` - Table loads without feedback
+  - `/src/features/admin/modules/admin-analytics.ts` - Chart rendering without skeleton
+  - Fix: Add loading skeletons/spinners to all async operations
 
-- [ ] **Remove dead code**
-  - Empty export functions (stub implementations never completed)
-  - Commented-out code blocks
-  - Unused imports across multiple files
-  - Fix: Run `npm run lint` and remove all unused code
+- [ ] **Implement consistent error states** - 8 modules
+  - `/src/features/admin/admin-project-details.ts` (line 608) - Error but no retry button
+  - `/src/features/admin/modules/admin-clients.ts` - Network errors show no recovery UI
+  - `/src/features/client/modules/portal-files.ts` - Upload failures lack feedback
+  - Fix: Add error UI with retry mechanisms
 
-### Priority 4: Architecture (Medium)
+- [ ] **Fix accessibility gaps** - 10+ locations
+  - `/src/features/admin/modules/admin-projects.ts` - Table rows missing role/aria
+  - `/src/features/client/modules/portal-messages.ts` - Thread not marked as region
+  - `/src/features/admin/modules/admin-analytics.ts` - Charts lack aria-label
+  - Fix: Add missing aria attributes to tables and interactive regions
 
-- [ ] **Split remaining oversized files**
-  - `/src/features/main-site/intro-animation.ts` - 1,815 lines
-  - `/server/services/invoices.ts` - 800+ lines
-  - Fix: Extract to separate modules following admin-dashboard pattern
+- [ ] **Remove hardcoded colors in TypeScript** - 30+ instances
+  - `/src/components/performance-dashboard.ts` - 10+ hardcoded colors
+  - `/src/components/analytics-dashboard.ts` - 10+ hardcoded colors
+  - `/src/components/button-component.ts` - 10+ hardcoded colors
+  - Fix: Extract to CSS variables
 
-- [ ] **Standardize error handling**
-  - Inconsistent patterns: some throw, some return null, some use Result type
-  - Fix: Adopt consistent Result<T, E> pattern across codebase
+- [ ] **Fix CSS variable fallbacks** - `/src/styles/bundles/portal.css`
+  - Lines 68, 72, 77 use hex fallbacks: `var(--color-neutral-200, #f1f3f4)`
+  - Fix: Ensure all fallbacks use CSS variables
+
+### Priority 4: Code Quality (Medium)
+
+- [ ] **Remaining `any` types** - 60+ instances
+  - `/src/services/performance-service.ts` (lines 156, 176)
+  - `/src/services/base-service.ts` (lines 43, 49, 53)
+  - `/src/services/router-service.ts` (lines 353, 507)
+  - `/src/features/client/client-portal.ts` (lines 739, 741, 755, 766, 893, 905)
+  - `/src/modules/ui/contact-form.ts` (lines 485, 506, 527)
+  - `/src/features/admin/admin-project-details.ts` (16+ instances)
+  - Server routes: invoices.ts, projects.ts, messages.ts
+  - Fix: Create shared types for common patterns
+
+- [ ] **Cache DOM references** - 239 querySelector/getElementById calls
+  - `/src/features/admin/modules/admin-clients.ts` - getElementById 50+ times
+  - `/src/features/client/modules/portal-messages.ts` - querySelector in loops
+  - Fix: Cache DOM refs in class properties
+
+- [ ] **Split remaining oversized files** - 15 files exceed 300 lines
+  - `/src/modules/animation/intro-animation.ts` (1,815 lines)
+  - `/src/features/client/terminal-intake.ts` (1,685 lines)
+  - `/src/features/client/client-portal.ts` (1,408 lines)
+  - `/src/features/admin/admin-project-details.ts` (1,280 lines)
+  - `/server/routes/projects.ts` (1,201 lines)
+  - `/server/routes/auth.ts` (1,115 lines)
+  - Fix: Extract to smaller, focused modules
 
 ### Priority 5: Technical Debt (Low)
 
-- [ ] **Extract email templates**
-  - HTML templates hardcoded in invoices.ts and email.ts
-  - Fix: Move to `/server/templates/` directory
+- [ ] **Extract duplicate SVG icons** - Multiple locations
+  - Eye icon SVG duplicated in `/index.html` and `/src/features/client/client-portal.ts`
+  - Fix: Create `/src/constants/icons.ts` with all SVG strings
 
-- [ ] **Remove duplicate code**
-  - Similar validation logic in multiple places
-  - Repeated DOM manipulation patterns
-  - Fix: Extract to shared utilities
+- [ ] **Replace magic numbers with constants**
+  - `setTimeout(..., 3000)` for reset delays (multiple instances)
+  - `.substring(0, 50)` for truncation (11+ instances)
+  - `300ms`, `600ms` animation durations hardcoded
+  - Fix: Create constants file with `RESET_DELAY`, `TRUNCATE_LENGTH`, `ANIMATION_DURATIONS`
+
+- [ ] **Move hardcoded admin email to env var**
+  - `/index.html` (line 1066) - `'nobhaduri@gmail.com'`
+  - Fix: Use `import.meta.env.VITE_ADMIN_EMAIL`
+
+- [ ] **Address TODO comments**
+  - `/src/modules/ui/navigation.ts` (line 11) - "TODO: Track event listeners..."
+  - Fix: Address or remove
+
+- [ ] **Add null checks for `.find()` results**
+  - `/src/features/admin/admin-project-details.ts` (lines 43, 330, 448)
+  - Fix: Add explicit null checks and user feedback
 
 ---
 
