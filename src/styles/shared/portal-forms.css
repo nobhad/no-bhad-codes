@@ -24,7 +24,7 @@
   border: 2px solid var(--portal-border-color, var(--color-neutral-600));
   border-radius: var(--border-radius-card);
   font-size: 1rem;
-  font-family: inherit;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-weight: 400;
   background-color: var(--color-black);
   color: var(--portal-text-light);
