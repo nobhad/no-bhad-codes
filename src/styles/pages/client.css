@@ -1309,7 +1309,7 @@ body[data-page="client-landing"] .intake-modal-content {
 }
 
 /* Mobile: full screen */
-@media (max-width: 1024px) {
+@media (--desktop-down) {
   body[data-page="client-landing"] .intake-modal {
     padding: 0;
   }

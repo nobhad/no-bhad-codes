@@ -151,6 +151,14 @@ export function registerModules(debug: boolean = false): void {
       }
     },
     {
+      name: 'AdminLoginModule',
+      type: 'dom',
+      factory: async () => {
+        const { AdminLoginOnMainSite } = await import('../features/main-site/admin-login');
+        return new AdminLoginOnMainSite();
+      }
+    },
+    {
       name: 'ProjectsModule',
       type: 'dom',
       factory: async () => {
@@ -253,7 +261,10 @@ export function registerModules(debug: boolean = false): void {
  * Get module list for main site (home page)
  */
 export function getMainSiteModules(): string[] {
-  return [
+  const hash = window.location.hash;
+  const isAdminLogin = hash === '#/admin-login' || hash === '#admin-login';
+
+  const modules = [
     'ThemeModule',
     'SectionCardRenderer',
     'SectionCardInteractions',
@@ -264,6 +275,13 @@ export function getMainSiteModules(): string[] {
     'PageTransitionModule',
     'ProjectsModule'
   ];
+
+  // Add admin login module if on admin-login route
+  if (isAdminLogin) {
+    modules.push('AdminLoginModule');
+  }
+
+  return modules;
 }
 
 /**

@@ -123,6 +123,12 @@ export class RouterService extends BaseService {
       title: 'Contact - No Bhad Codes'
     });
 
+    this.routes.set('#/admin-login', {
+      path: '#/admin-login',
+      section: 'admin-login',
+      title: 'Admin Login - No Bhad Codes'
+    });
+
     // Legacy hash routes (without /) for backwards compatibility
     this.routes.set('#intro', {
       path: '#intro',
@@ -158,6 +164,12 @@ export class RouterService extends BaseService {
       path: '#contact',
       section: 'contact',
       title: 'Contact - No Bhad Codes'
+    });
+
+    this.routes.set('#admin-login', {
+      path: '#admin-login',
+      section: 'admin-login',
+      title: 'Admin Login - No Bhad Codes'
     });
 
     // Client pages - no section navigation needed

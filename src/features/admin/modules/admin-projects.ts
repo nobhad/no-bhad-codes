@@ -24,7 +24,7 @@ import {
 import type { ProjectMilestone, ProjectFile, ProjectInvoice, AdminDashboardContext, Message } from '../admin-types';
 import { showTableLoading } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
-import { createDOMCache, batchUpdateText, getElement } from '../../../utils/dom-cache';
+import { createDOMCache, batchUpdateText } from '../../../utils/dom-cache';
 
 // ============================================
 // DOM CACHE - Cached element references

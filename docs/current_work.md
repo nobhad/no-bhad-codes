@@ -1,6 +1,6 @@
 # Current Work
 
-**Last Updated:** January 20, 2026
+**Last Updated:** January 21, 2026
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-01.md`.
 
@@ -10,17 +10,17 @@ This file tracks active development work and TODOs. Completed items are moved to
 
 ### Architecture Concerns (High Priority)
 
-- [ ] **ADMIN LOGIN AS MAIN SITE PAGE** - The admin login page should be a route on the main site (`#/admin-login`) rather than a separate `admin/index.html` page. This would:
-  - Use the EXACT same header/footer/nav as the main site
-  - Allow the main site navigation to work (Menu button opens nav menu)
-  - Maintain consistent user experience
-  - Simplify header/footer maintenance (single source of truth)
-  - Current workaround: Copied header HTML to admin/index.html, but nav menu doesn't function
+- [x] **ADMIN LOGIN AS MAIN SITE PAGE** - The admin login page should be a route on the main site (`#/admin-login`) rather than a separate `admin/index.html` page. This would:
+  - Use the EXACT same header/footer/nav as the main site ✅
+  - Allow the main site navigation to work (Menu button opens nav menu) ✅
+  - Maintain consistent user experience ✅
+  - Simplify header/footer maintenance (single source of truth) ✅
+  - **COMPLETE:** Added `#/admin-login` route, admin-login section in index.html, AdminLoginModule, redirects to `/admin/` after successful login
 
 ### Admin UI Polish (High Priority)
 
 - [ ] **REDESIGN ALL PORTAL BUTTONS** - Full button redesign across admin and client portals
-- [ ] **PORTAL VISUAL CONSISTENCY** - Align admin and client portal styling (see breakdown below)
+- [x] **PORTAL VISUAL CONSISTENCY** - Align admin and client portal styling (see breakdown below)
 - [x] Leads Management - cards should filter table
 - [x] Fix tooltip for truncated text - now uses fast CSS tooltips instead of native title delay
 - [x] Mobile sidebar behavior - collapsed sidebar hides completely, content fills viewport
@@ -36,7 +36,18 @@ This file tracks active development work and TODOs. Completed items are moved to
 ### Main Site Features (Medium Priority)
 
 - [ ] **PROJECTS SECTION REDESIGN** - Sal Costa-style portfolio (see breakdown below)
-- [ ] SEO optimization
+- [ ] SEO optimization - DO NOT DO THIS UNTIL AFTER I HAVE PROJECTS AND CONTENT COMPLETED (2 PROJECTS)
+
+### Code Quality (Low Priority)
+
+- [x] **Migrate hardcoded media queries** - ✅ All 24 hardcoded media queries migrated to custom media query system
+  - Added new custom media queries: `--tablet-down`, `--desktop-down`, `--ultra-wide-down`, `--tablet-to-desktop`
+  - Replaced all hardcoded breakpoints across 11 stylesheet files
+- [ ] **Server `any` types** - 97 `any` types remain in server code (mostly in routes and database)
+- [x] **Consolidate `rgba(0,0,0,...)` shadows** - ✅ All inline rgba box-shadow values replaced with `--shadow-*` tokens
+  - Removed var() fallbacks (tokens always defined)
+  - Replaced 10+ inline box-shadow values across 3 files
+  - Remaining rgba references are in variables.css (token definitions) or non-shadow properties
 
 ---
 
@@ -221,6 +232,13 @@ This file tracks active development work and TODOs. Completed items are moved to
 - [ ] **Mobile Responsiveness** - Cards stack, images scale
 - [ ] **Accessibility** - Keyboard navigation, screen reader support
 
+### Known Issues
+
+⚠️ **Page Transition Overlap Issue**
+- There's a page transition overlap issue where navigating to project detail pages sometimes shows content from other sections (like the business card) overlapping.
+- This is related to how the page transition module handles the dynamic `#/projects/:slug` routes.
+- The content renders correctly, but the z-index/visibility management between sections needs refinement.
+
 ### Implementation Order
 
 1. Content first (screenshots, descriptions)
@@ -232,53 +250,39 @@ This file tracks active development work and TODOs. Completed items are moved to
 
 ---
 
-## Portal Visual Consistency (Admin ↔ Client)
+## Deep Dive Analysis - January 21, 2026
 
-**Goal:** Make admin and client portals share consistent design language. Main site has its own creative aesthetic and does NOT need to match portals.
+**Status:** Complete
 
-### Current Issues
+### Codebase Health Metrics
 
-| Element | Client Portal | Admin Portal | Problem |
-|---------|--------------|--------------|---------|
-| Login Input | 12px radius, 60px height | 30px pill, 40-48px height | Different shapes |
-| Login Button | 6px radius | 30px pill | Different shapes |
-| Form Inputs | Black bg, portal tokens | Different padding/border | Mismatch |
-| Footer Year | Hardcoded 2025 | Dynamic | Inconsistent |
+| Metric | Count | Status |
+|--------|-------|--------|
+| TODO/FIXME comments | 2 | ✅ Low (projects.ts detail page TODO) |
+| Console logs | 225 | ⚠️ High (many intentional logging) |
+| `any` types (frontend) | 71 | ⚠️ Medium |
+| `any` types (server) | 97 | ⚠️ Medium |
+| ESLint disables | 4 | ✅ Low |
+| Hardcoded media queries | 0 | ✅ Complete - All migrated to custom media queries |
+| Inline rgba box-shadows | 0 | ✅ Complete - All replaced with shadow tokens |
 
-### Phase 1: Admin Auth Styling
+### Findings
 
-**File:** `src/styles/admin/auth.css`
-
-- [x] Update `.auth-gate .password-input-wrapper input` to use portal tokens
-- [x] Update `.auth-submit` to match portal button style
-- [x] Ensure consistent height (60px) and border-radius (12px)
-
-### Phase 2: Unified Portal Button Tokens
-
-**File:** `src/design-system/tokens/buttons.css` (created)
-
-- [x] Create shared button tokens for portals:
-  - `--btn-portal-radius`, `--btn-portal-padding`, `--btn-portal-font-weight`
-  - Primary, secondary, danger variants
-  - Small and icon button variants
-- [ ] Update portal components to use new tokens (optional - tokens are available for use)
-
-### Phase 3: Minor Fixes
-
-- [x] Fix hardcoded copyright year in `client/portal.html` and `client/intake.html`
-- [x] Standardize mobile breakpoints - added `--compact-mobile` custom media query
-- [ ] Audit status badge consistency between portals
+**Opportunities:**
+- ✅ Migrated all hardcoded media queries to custom media query system (24+ instances)
+- ✅ Replaced all inline rgba box-shadow values with design token variables (10+ instances)
+- Continue reducing `any` types in server routes/database code (97 instances remain)
 
 ---
 
 ## System Status
 
-**Last Updated:** January 20, 2026
+**Last Updated:** January 21, 2026
 
 ### Build Status
 
 - **TypeScript:** 0 errors
-- **ESLint:** 2 warnings (unused variables)
+- **ESLint:** 0 errors, 0 warnings
 - **Build:** Success
 
 ### Development Server

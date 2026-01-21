@@ -4,6 +4,36 @@ This file contains completed work from January 2026. Items are moved here from `
 
 ---
 
+## Portal Visual Consistency - COMPLETE (January 21, 2026)
+
+**Goal:** Make admin and client portals share consistent design language. Main site has its own creative aesthetic.
+
+### Issues Resolved
+
+| Element | Resolution |
+|---------|------------|
+| Login Input | Admin now uses portal tokens (12px radius, 60px height, black bg) |
+| Login Button | Admin now uses portal button style (12px radius, transparent bg) |
+| Form Inputs | Admin auth inputs match portal design system |
+| Footer Year | Dynamic year in `client/portal.html` and `client/intake.html` |
+| Mobile Breakpoints | Added `--compact-mobile` custom media query (600px) |
+
+### Files Created
+
+- `src/design-system/tokens/buttons.css` - Shared portal button tokens with primary/secondary/danger variants
+
+### Files Modified
+
+- `src/styles/admin/auth.css` - Updated to use portal tokens
+- `src/styles/variables.css` - Added `--compact-mobile` custom media query
+- `src/styles/pages/admin.css` - Uses `--compact-mobile` instead of hardcoded 600px
+- `src/styles/client-portal/sidebar.css` - Uses `--compact-mobile` instead of hardcoded 600px
+- `client/portal.html` - Dynamic copyright year
+- `client/intake.html` - Dynamic copyright year
+- `src/design-system/tokens/index.css` - Added buttons.css import
+
+---
+
 ## Major Refactoring - Code Architecture Improvements - COMPLETE (January 20, 2026)
 
 **Status:** COMPLETE

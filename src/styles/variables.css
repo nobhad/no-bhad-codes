@@ -46,21 +46,30 @@ This CSS file defines global variables and font-face rules for consistent stylin
  * ============================================
  * Use these instead of hardcoded breakpoints:
  * @media (--small-mobile) { } - max-width: 479px
+ * @media (--compact-mobile) { } - max-width: 600px
  * @media (--mobile) { }       - max-width: 767px
  * @media (--tablet) { }       - min-width: 768px
  * @media (--tablet-only) { }  - 768px to 991px
+ * @media (--tablet-down) { }  - max-width: 991px
  * @media (--desktop) { }      - min-width: 992px
+ * @media (--desktop-down) { } - max-width: 1023px
+ * @media (--tablet-to-desktop) { } - 600px to 1100px (medium viewport range)
  * @media (--wide) { }         - min-width: 1200px
  * @media (--ultra-wide) { }   - min-width: 1400px
+ * @media (--ultra-wide-down) { } - max-width: 1399px
  */
 @custom-media --small-mobile (max-width: 479px);
 @custom-media --compact-mobile (max-width: 600px); /* Portal sidebar collapse */
 @custom-media --mobile (max-width: 767px);
 @custom-media --tablet (min-width: 768px);
 @custom-media --tablet-only (min-width: 768px) and (max-width: 991px);
+@custom-media --tablet-down (max-width: 991px); /* Everything below desktop */
 @custom-media --desktop (min-width: 992px);
+@custom-media --desktop-down (max-width: 1023px); /* Everything below desktop */
+@custom-media --tablet-to-desktop (min-width: 600px) and (max-width: 1100px); /* Medium viewport range */
 @custom-media --wide (min-width: 1200px);
 @custom-media --ultra-wide (min-width: 1400px);
+@custom-media --ultra-wide-down (max-width: 1399px); /* Everything below ultra-wide */
 
 /* Font defined in typography.css */
 
