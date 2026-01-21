@@ -252,7 +252,7 @@ class AdminMessagingRenderer {
             </div>
             <div class="message-body">${safeContent}</div>
           </div>
-          <div class="message-avatar" data-name="Admin">
+          <div class="message-avatar">
             <img src="/images/avatar_small_sidebar.svg" alt="Admin" class="avatar-img" />
           </div>
         </div>
@@ -261,7 +261,7 @@ class AdminMessagingRenderer {
 
     return `
       <div class="message message-received">
-        <div class="message-avatar" data-name="${safeSenderName}">
+        <div class="message-avatar">
           <div class="avatar-placeholder">${safeInitials}</div>
         </div>
         <div class="message-content">

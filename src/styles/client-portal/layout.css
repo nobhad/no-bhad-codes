@@ -73,28 +73,8 @@ body[data-page="client-portal"] {
 
 /* Portal theme variables are defined in variables.css */
 
-/* Remove ALL shadows from dashboard pages */
-[data-page="client-portal"] .btn,
-[data-page="client-portal"] .form-button,
-[data-page="client-portal"] .login-btn,
-[data-page="client-portal"] .btn-primary,
-[data-page="client-portal"] .btn-secondary,
-[data-page="client-portal"] .sidebar-buttons .btn,
-[data-page="client-portal"] .card,
-[data-page="client-portal"] .stat-card,
-[data-page="client-portal"] .summary-card,
-[data-page="client-portal"] .overview-card,
-[data-page="client-portal"] .content-section,
-[data-page="client-portal"] .messages-container,
-[data-page="client-portal"] .invoices-list,
-[data-page="client-portal"] .file-section,
-[data-page="client-portal"] .settings-section,
-[data-page="client-portal"] .project-item,
-[data-page="client-portal"] .auth-container,
-[data-page="client-portal"] .portal-card,
-[data-page="client-portal"] .portal-form-area .login-form,
-[data-page="client-portal"] .dynamic-content,
-[data-page="client-portal"] input[type="submit"],
+/* Remove shadows from headings and text elements */
+/* NOTE: Button shadows are handled in shared/portal-buttons.css */
 [data-page="client-portal"] h1,
 [data-page="client-portal"] h2,
 [data-page="client-portal"] h3,
@@ -103,24 +83,6 @@ body[data-page="client-portal"] {
 [data-page="client-portal"] h6,
 [data-page="client-portal"] .page-header h2,
 [data-page="client-portal"] .client-name,
-[data-page="admin"] .btn,
-[data-page="admin"] .form-button,
-[data-page="admin"] .login-btn,
-[data-page="admin"] .btn-primary,
-[data-page="admin"] .btn-secondary,
-[data-page="admin"] .sidebar-buttons .btn,
-[data-page="admin"] .card,
-[data-page="admin"] .overview-card,
-[data-page="admin"] .content-section,
-[data-page="admin"] .messages-container,
-[data-page="admin"] .invoices-list,
-[data-page="admin"] .file-section,
-[data-page="admin"] .project-item,
-[data-page="admin"] .auth-container,
-[data-page="admin"] .portal-card,
-[data-page="admin"] .portal-form-area .login-form,
-[data-page="admin"] .dynamic-content,
-[data-page="admin"] input[type="submit"],
 [data-page="admin"] h1,
 [data-page="admin"] h2,
 [data-page="admin"] h3,
@@ -129,7 +91,6 @@ body[data-page="client-portal"] {
 [data-page="admin"] h6,
 [data-page="admin"] .page-header h2,
 [data-page="admin"] .client-name {
-  box-shadow: none;
   text-shadow: none;
 }
 
@@ -139,7 +100,6 @@ body[data-page="client-portal"] {
 [data-page="client-portal"] .stat-card,
 [data-page="client-portal"] .summary-card,
 [data-page="client-portal"] .overview-card,
-[data-page="client-portal"] .messages-container,
 [data-page="client-portal"] .settings-section,
 [data-page="client-portal"] .file-section,
 [data-page="client-portal"] .invoices-list,
@@ -155,7 +115,6 @@ body[data-page="client-portal"] {
 [data-page="client-portal"] .overview-card > div,
 [data-page="client-portal"] .stat-card > div,
 [data-page="client-portal"] .summary-card > div,
-[data-page="client-portal"] .messages-container > div,
 [data-page="client-portal"] .settings-section > div,
 [data-page="client-portal"] .invoices-list > div,
 [data-page="client-portal"] .content-section > div,
@@ -199,7 +158,6 @@ body[data-page="client-portal"] {
 [data-page="client-portal"] .update-item,
 [data-page="client-portal"] .content-item,
 [data-page="client-portal"] .settings-form,
-[data-page="client-portal"] .message-compose,
 [data-page="admin"] .card,
 [data-page="admin"] .cp-card,
 [data-page="admin"] .cp-stat,
@@ -302,9 +260,7 @@ body[data-page="client-portal"] {
   transition: all var(--transition-fast);
 }
 
-[data-page="client-portal"] .card:hover {
-  border-color: var(--portal-border-light);
-}
+/* Cards are not clickable - no hover effect needed */
 
 [data-page="client-portal"] .card h3 {
   font-family: var(--font--acme);

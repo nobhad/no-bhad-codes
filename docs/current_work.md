@@ -1,6 +1,6 @@
 # Current Work
 
-**Last Updated:** January 20, 2026
+**Last Updated:** January 21, 2026
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-01.md`.
 
@@ -87,6 +87,44 @@ This file tracks active development work and TODOs. Completed items are moved to
 - [x] **Back Navigation** - Hash-based routing back to projects list
 - [x] **Page Transitions** - Integrates with PageTransitionModule (blur in/out)
 
+### Phase 4.5: CRT TV Preview Feature - ✅ COMPLETE (January 21, 2026)
+
+**Feature:** Retro Panasonic CRT TV displays project title cards on hover (desktop only, 768px+)
+
+**Files Added:**
+
+- `public/images/crt-tv.png` - TV frame image (transparent screen cutout)
+- `public/images/crt-tv-screen.png` - Screen shape layer (for accurate CRT barrel distortion)
+
+**Implementation:**
+
+| Component | Description |
+|-----------|-------------|
+| TV Rendering | `renderCrtTv()` in `projects.ts` - injects TV HTML into flex layout |
+| Hover Events | `setupCardHoverEvents()` - mouseenter/mouseleave on project cards |
+| Channel Change | `changeTvChannel()` - GSAP timeline: static flicker → load image → fade in |
+| Turn Off | `turnOffTv()` - GSAP animation: vertical shrink effect (classic CRT turn-off) |
+| Layered Structure | Screen shape (z-1) → Title card + effects (z-2) → TV frame (z-3) |
+
+**CSS Classes:**
+
+- `.crt-tv` - Container, sticky positioning, 550px width
+- `.crt-tv__wrapper` - Relative container for layered elements
+- `.crt-tv__screen-bg` - Screen shape image (behind)
+- `.crt-tv__screen` - Title card container with scanlines/static/glare
+- `.crt-tv__frame` - TV frame image (on top)
+- `.projects-flex-row` - Flex container for cards + TV (8rem gap)
+- `.projects-list-column` - Column wrapper for heading + cards
+
+**Data:**
+
+- Added `titleCard` property to each project in `portfolio.json`
+- Title card images go in `/public/projects/{project-id}-title.png`
+
+**Pending:**
+
+- [ ] Create title card images for each project (4:3 aspect ratio, Looney Tunes style)
+
 ### Phase 5: Assets - ⏳ PENDING (User Action Required)
 
 - [x] **Create `/public/projects/` directory** - ✅ COMPLETE
@@ -142,6 +180,8 @@ This file tracks active development work and TODOs. Completed items are moved to
 - Removed title scale animation on hover to prevent overlap
 - Added `margin-left: 3rem` gap between title and right content
 - Added `overflow: hidden` and `text-overflow: ellipsis` to title
+- Added `.back-link` styles for project detail page (subtle text link for smaller screens)
+- Fixed router to skip project detail routes (handled by PageTransitionModule)
 
 ### Implementation Order
 

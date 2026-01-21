@@ -64,7 +64,12 @@
   --btn-portal-danger-hover-border: var(--color-error);
 
   /* Button effects */
-  --btn-portal-transition: all var(--transition-fast);
+  --btn-portal-transition: all 150ms;
+
+  /* Button shadows - uses same bold shadow as portal panels + inset */
+  --btn-portal-shadow: var(--shadow-panel), inset 0 10px 20px rgba(0, 0, 0, 0.1), inset 0 3px 6px rgba(0, 0, 0, 0.05);
+  --btn-portal-shadow-hover: var(--shadow-card), inset 0 2px 8px rgba(0, 0, 0, 0.2);
+  --btn-portal-shadow-focus: var(--shadow-panel), 0 0 0 3px rgba(0, 0, 0, 0.5);
 
   /* Small button variant */
   --btn-portal-sm-padding-y: var(--portal-spacing-sm);
@@ -78,94 +83,8 @@
 }
 
 /* ============================================
- * PORTAL BUTTON BASE STYLES
+ * PORTAL BUTTON STYLES
  * ============================================
- * Applied to buttons within portal contexts.
+ * Applied styles moved to: src/styles/client-portal/buttons.css
+ * This file contains only CSS variables (tokens).
  */
-
-/* Base portal button */
-.btn-portal {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--portal-spacing-sm);
-  padding: var(--btn-portal-padding);
-  min-height: var(--btn-portal-min-height);
-  font-family: var(--btn-portal-font-family);
-  font-size: var(--btn-portal-font-size);
-  font-weight: var(--btn-portal-font-weight);
-  letter-spacing: var(--btn-portal-letter-spacing);
-  text-transform: var(--btn-portal-text-transform);
-  border-width: var(--btn-portal-border-width);
-  border-style: solid;
-  border-radius: var(--btn-portal-border-radius);
-  cursor: pointer;
-  transition: var(--btn-portal-transition);
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-/* Secondary variant (default) */
-.btn-portal,
-.btn-portal-secondary {
-  background-color: var(--btn-portal-secondary-bg);
-  color: var(--btn-portal-secondary-color);
-  border-color: var(--btn-portal-secondary-border);
-}
-
-.btn-portal:hover,
-.btn-portal-secondary:hover {
-  background-color: var(--btn-portal-secondary-hover-bg);
-  color: var(--btn-portal-secondary-hover-color);
-  border-color: var(--btn-portal-secondary-hover-border);
-}
-
-/* Primary variant */
-.btn-portal-primary {
-  background-color: var(--btn-portal-primary-bg);
-  color: var(--btn-portal-primary-color);
-  border-color: var(--btn-portal-primary-border);
-}
-
-.btn-portal-primary:hover {
-  background-color: var(--btn-portal-primary-hover-bg);
-  color: var(--btn-portal-primary-hover-color);
-  border-color: var(--btn-portal-primary-hover-border);
-}
-
-/* Danger variant */
-.btn-portal-danger {
-  background-color: var(--btn-portal-danger-bg);
-  color: var(--btn-portal-danger-color);
-  border-color: var(--btn-portal-danger-border);
-}
-
-.btn-portal-danger:hover {
-  background-color: var(--btn-portal-danger-hover-bg);
-  color: var(--btn-portal-danger-hover-color);
-  border-color: var(--btn-portal-danger-hover-border);
-}
-
-/* Small variant */
-.btn-portal-sm {
-  padding: var(--btn-portal-sm-padding-y) var(--btn-portal-sm-padding-x);
-  font-size: var(--btn-portal-sm-font-size);
-  min-height: var(--btn-portal-sm-min-height);
-}
-
-/* Icon button (square) */
-.btn-portal-icon {
-  width: var(--btn-portal-icon-size);
-  height: var(--btn-portal-icon-size);
-  min-height: var(--btn-portal-icon-size);
-  padding: 0;
-  border-radius: var(--btn-portal-icon-radius);
-}
-
-/* Disabled state */
-.btn-portal:disabled,
-.btn-portal[disabled] {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
-}

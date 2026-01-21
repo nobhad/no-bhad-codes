@@ -152,33 +152,7 @@ body[data-page="admin"]:not(.admin-logged-in) {
   gap: 1rem;
 }
 
-[data-page="admin"] .sidebar-buttons .btn {
-  width: 100%;
-  padding: 0.85rem 1.1rem;
-  font-family: var(--font--acme);
-  font-size: 1rem;
-  letter-spacing: 1px;
-  text-align: left;
-  background: transparent;
-  color: var(--portal-text-light);
-  border: var(--portal-border-light-style);
-  border-radius: var(--portal-radius-lg);
-  display: flex;
-  align-items: center;
-  gap: var(--portal-spacing-md);
-}
-
-[data-page="admin"] .sidebar-buttons .btn:hover {
-  background: var(--color-primary);
-  color: var(--portal-bg-dark);
-  border-color: var(--color-primary);
-}
-
-[data-page="admin"] .sidebar-buttons .btn.active {
-  background: var(--color-primary);
-  color: var(--portal-bg-dark);
-  border-color: var(--color-primary);
-}
+/* Sidebar button styles consolidated in buttons.css */
 
 /* Sidebar Footer */
 [data-page="admin"] .sidebar-footer {
@@ -316,26 +290,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
 /* ================================================
    ADMIN PORTAL - GLOBAL BUTTON STYLES
    ================================================ */
-[data-page="admin"] .btn,
-[data-page="admin"] .btn-secondary,
-[data-page="admin"] button[type="submit"] {
-  background: transparent;
-  color: var(--portal-text-light);
-  border: var(--portal-border-light-style);
-  border-radius: var(--portal-radius-lg);
-  padding: var(--portal-spacing-md) var(--portal-spacing-xl);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-[data-page="admin"] .btn:hover,
-[data-page="admin"] .btn-secondary:hover,
-[data-page="admin"] button[type="submit"]:hover {
-  background: var(--color-primary);
-  color: var(--portal-bg-dark);
-  border-color: var(--color-primary);
-}
+/* All portal button styles consolidated in buttons.css */
 
 /* ================================================
    ADMIN PORTAL - FORM INPUT STYLES
@@ -367,78 +322,7 @@ body[data-page="admin"] textarea::placeholder {
   opacity: 0.7;
 }
 
-/* Override client-portal message compose styles for admin */
-body[data-page="admin"] .message-compose .form-textarea,
-body[data-page="admin"] .message-compose textarea,
-body[data-page="admin"] .message-input-wrapper .form-textarea,
-body[data-page="admin"] .message-input-wrapper textarea,
-body[data-page="admin"] #tab-messages textarea {
-  background: var(--portal-bg-dark);
-  color: var(--portal-text-light);
-  border: 1px solid var(--portal-border-medium);
-}
-
-body[data-page="admin"] .message-compose .form-textarea::placeholder,
-body[data-page="admin"] .message-compose textarea::placeholder,
-body[data-page="admin"] #tab-messages textarea::placeholder {
-  color: var(--portal-text-muted);
-}
-
-/* Mobile - reduce padding in messages area */
-@media (--small-mobile) {
-  body[data-page="admin"] #tab-messages .messages-container {
-    padding: 0;
-  }
-
-  body[data-page="admin"] #tab-messages .messages-container .messages-thread {
-    padding: 0.375rem;
-    padding-top: 0.75rem;
-    gap: 0.375rem;
-  }
-
-  body[data-page="admin"] #tab-messages .messages-container .message-compose {
-    padding: 0.375rem;
-    padding-bottom: 0.75rem;
-    gap: 0.375rem;
-  }
-
-  body[data-page="admin"] #tab-messages .message-compose .message-input-wrapper {
-    margin: 0;
-  }
-
-  body[data-page="admin"] #tab-messages .message-compose button,
-  body[data-page="admin"] #tab-messages .message-compose .btn {
-    margin: 0;
-  }
-
-  body[data-page="admin"] #tab-messages .messages-container .message,
-  body[data-page="admin"] #tab-messages .messages-container .message-sent,
-  body[data-page="admin"] #tab-messages .messages-container .message-received {
-    padding: 0;
-    margin: 0;
-    gap: 0.375rem;
-  }
-
-  body[data-page="admin"] #tab-messages .message-avatar {
-    margin: 0;
-    padding: 0;
-    width: 32px;
-    flex-shrink: 0;
-  }
-
-  body[data-page="admin"] #tab-messages .message-avatar .avatar-placeholder {
-    width: 32px;
-    height: 32px;
-    font-size: 0.75rem;
-  }
-
-  body[data-page="admin"] #tab-messages .message-avatar .avatar-name {
-    font-size: 0.6rem;
-    word-wrap: break-word;
-    white-space: normal;
-    line-height: 1.2;
-  }
-}
+/* Message styles now in client-portal/messages.css (unified for all portals) */
 
 [data-page="admin"] input:focus,
 [data-page="admin"] textarea:focus,

@@ -22,7 +22,6 @@ type MessagesDOMKeys = {
   messagesThread: string;
   messageInput: string;
   sendBtn: string;
-  emojiPicker: string;
 };
 
 /** Cached DOM element references for performance */
@@ -32,8 +31,7 @@ const domCache = createDOMCache<MessagesDOMKeys>();
 domCache.register({
   messagesThread: '#messages-thread',
   messageInput: '#message-input',
-  sendBtn: '#btn-send-message',
-  emojiPicker: 'emoji-picker' // CSS selector, not ID
+  sendBtn: '#btn-send-message'
 });
 
 let currentThreadId: number | null = null;
@@ -134,11 +132,13 @@ function renderMessages(
   container.innerHTML = messages
     .map((msg) => {
       const isSent = msg.sender_type === 'client';
+      const isAdmin = msg.sender_type === 'admin';
       const initials = (msg.sender_name || 'Unknown').substring(0, 3).toUpperCase();
+      const avatarClass = isAdmin ? 'avatar-placeholder avatar-admin' : 'avatar-placeholder';
       return `
       <div class="message message-${isSent ? 'sent' : 'received'}">
         <div class="message-avatar">
-          <div class="avatar-placeholder">${initials}</div>
+          <div class="${avatarClass}">${initials}</div>
         </div>
         <div class="message-content">
           <div class="message-header">
@@ -226,20 +226,5 @@ export function setupMessagingListeners(ctx: ClientPortalContext): void {
         sendMessage(ctx);
       }
     });
-  }
-
-  const emojiPicker = domCache.get('emojiPicker');
-  if (emojiPicker && messageInput) {
-    emojiPicker.addEventListener('emoji-click', ((e: CustomEvent) => {
-      const emoji = e.detail?.unicode;
-      if (emoji) {
-        const start = messageInput.selectionStart;
-        const end = messageInput.selectionEnd;
-        const text = messageInput.value;
-        messageInput.value = text.substring(0, start) + emoji + text.substring(end);
-        messageInput.selectionStart = messageInput.selectionEnd = start + emoji.length;
-        messageInput.focus();
-      }
-    }) as EventListener);
   }
 }
