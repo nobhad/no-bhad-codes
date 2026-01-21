@@ -61,7 +61,7 @@ This file contains completed work from January 2026. Items are moved here from `
 - [x] **Intake form submission as project file** - ✅ COMPLETE
   - Saves intake form data as downloadable/previewable file in project files automatically
 
-### Code Quality Improvements - COMPLETE (January 21, 2026)
+### Code Quality Improvements (Low Priority) - COMPLETE (January 21, 2026)
 
 - [x] **Migrate hardcoded media queries** - ✅ COMPLETE
   - All 24 hardcoded media queries migrated to custom media query system
