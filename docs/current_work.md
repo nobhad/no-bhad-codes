@@ -159,13 +159,13 @@ None - All 5 major refactoring tasks have been completed.
 
 ### Priority 3: UX/UI Improvements (High)
 
-- [ ] **Add loading states to async operations** - 11 modules affected
-  - `/src/features/client/client-portal.ts` - No loading indicator during data fetch
-  - `/src/features/admin/admin-dashboard.ts` - Multiple async ops without spinners
-  - `/src/features/admin/modules/admin-clients.ts` - "No clients found" but no loading
-  - `/src/features/admin/modules/admin-projects.ts` - Table loads without feedback
-  - `/src/features/admin/modules/admin-analytics.ts` - Chart rendering without skeleton
-  - Fix: Add loading skeletons/spinners to all async operations
+- [x] **Add loading states to async operations** - COMPLETE
+  - Created `/src/utils/loading-utils.ts` with reusable loading utilities
+  - Added CSS loading states to `/src/styles/components/loading.css`
+  - `/src/features/admin/modules/admin-clients.ts` - Added table loading spinner
+  - `/src/features/admin/modules/admin-projects.ts` - Added table loading spinner
+  - `/src/features/admin/modules/admin-analytics.ts` - Added chart skeletons and table loading
+  - `/src/features/client/modules/portal-invoices.ts` - Added container loading state
 
 - [ ] **Implement consistent error states** - 8 modules
   - `/src/features/admin/admin-project-details.ts` (line 608) - Error but no retry button
@@ -237,6 +237,15 @@ None - All 5 major refactoring tasks have been completed.
 ---
 
 ## TODOs
+
+### Architecture Concerns (High Priority)
+
+- [ ] **ADMIN LOGIN AS MAIN SITE PAGE** - The admin login page should be a route on the main site (`#/admin-login`) rather than a separate `admin/index.html` page. This would:
+  - Use the EXACT same header/footer/nav as the main site
+  - Allow the main site navigation to work (Menu button opens nav menu)
+  - Maintain consistent user experience
+  - Simplify header/footer maintenance (single source of truth)
+  - Current workaround: Copied header HTML to admin/index.html, but nav menu doesn't function
 
 ### Admin UI Polish (High Priority)
 
