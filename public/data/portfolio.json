@@ -18,7 +18,8 @@
       "screenshots": [],
       "liveUrl": "https://nobhad.codes",
       "repoUrl": "https://github.com/nobhad",
-      "isDocumented": true
+      "isDocumented": true,
+      "titleCard": "/projects/nobhad-codes-title.png"
     },
     {
       "id": "the-backend",
@@ -37,14 +38,15 @@
       "heroImage": "",
       "screenshots": [],
       "liveUrl": "https://nobhad.codes/admin",
-      "isDocumented": true
+      "isDocumented": true,
+      "titleCard": "/projects/the-backend-title.png"
     },
     {
       "id": "recycle-content",
       "title": "Recycle Content",
       "slug": "recycle-content",
-      "tagline": "Content transformation tool",
-      "description": "A utility that transforms dated content into timeless, reusable material. Solves the problem of content decay—where useful articles become stale due to time-specific references rather than outdated information.",
+      "tagline": "Message analytics for creators",
+      "description": "A message management and analytics platform for content creators and the agencies that manage them. Track mass message performance, recycle high-performing content to new audiences with automatic buyer exclusion, and manage product SKUs. Features a browser extension for seamless data capture and multi-tenant architecture for agency-level operations.",
       "category": "applications",
       "role": "Full Stack Developer",
       "tools": ["React", "TypeScript", "Express.js", "Supabase", "Vite", "GSAP", "Tailwind CSS", "Zod"],
@@ -55,7 +57,8 @@
       "featured": true,
       "heroImage": "",
       "screenshots": [],
-      "isDocumented": false
+      "isDocumented": false,
+      "titleCard": "/projects/recycle-content-title.png"
     },
     {
       "id": "linktrees",
@@ -73,7 +76,8 @@
       "featured": false,
       "heroImage": "",
       "screenshots": [],
-      "isDocumented": false
+      "isDocumented": false,
+      "titleCard": "/projects/linktrees-title.png"
     }
   ],
   "categories": [

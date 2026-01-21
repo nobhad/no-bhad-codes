@@ -977,6 +977,142 @@ div.page-hero-desktop {
 }
 
 /* ===============================================
+   CRT TV PREVIEW - DESKTOP ONLY
+   =============================================== */
+
+/* CRT TV Container - Hidden on mobile */
+.crt-tv {
+  display: none;
+}
+
+@media (--tablet) {
+  .crt-tv {
+    display: block;
+    position: sticky;
+    top: 120px;
+    width: 550px;
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+}
+
+/* Flex row container for project list + TV */
+.projects-flex-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+}
+
+/* Left column: heading + hr + project cards */
+.projects-list-column {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.projects-list-column h2 {
+  margin: 0 0 0.25rem 0;
+}
+
+.projects-list-column hr,
+.projects-list-column .heading-divider {
+  margin: 0 0 2rem 0;
+}
+
+@media (--tablet) {
+  .projects-flex-row {
+    flex-direction: row;
+    gap: 5rem;
+    align-items: flex-start;
+  }
+}
+
+/* TV wrapper - contains layered elements */
+.crt-tv__wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Screen background shape - goes behind everything */
+.crt-tv__screen-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  z-index: 1;
+}
+
+/* Screen area - matches the screen-bg position */
+.crt-tv__screen {
+  position: absolute;
+  top: 19.1%;
+  left: 9.2%;
+  width: 81.4%;
+  height: 59%;
+  overflow: hidden;
+  z-index: 2;
+}
+
+/* The TV frame PNG - goes on top */
+.crt-tv__frame {
+  position: relative;
+  width: 100%;
+  height: auto;
+  display: block;
+  z-index: 3;
+}
+
+/* Title card image displayed on screen */
+.crt-tv__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+}
+
+.crt-tv__image.is-visible {
+  opacity: 1;
+}
+
+/* Scanlines overlay for CRT effect */
+.crt-tv__scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.1) 0px,
+    rgba(0, 0, 0, 0.1) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+}
+
+/* Static noise for channel change effect */
+.crt-tv__static {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Screen glare effect */
+.crt-tv__glare {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 30% 30%,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+}
+
+/* ===============================================
    PROJECT DETAIL PAGE (SAL COSTA STYLE)
    =============================================== */
 
@@ -1087,10 +1223,47 @@ div.page-hero-desktop {
   animation: back-button-slide-out var(--transition-length, 0.5s) forwards;
 }
 
-/* Hide back button on smaller screens (< 1400px) */
+/* Hide circular back button on smaller screens (< 1400px) */
 @media (--ultra-wide-down) {
   .back-button {
     display: none;
+  }
+}
+
+/* Subtle text back link for smaller screens */
+.back-link {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+  cursor: pointer;
+  transition: color var(--transition-mouse, 0.2s);
+}
+
+.back-link:hover {
+  color: var(--color-dark);
+}
+
+.back-link svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  transition: transform var(--transition-mouse, 0.2s);
+}
+
+.back-link:hover svg {
+  transform: translateX(-4px);
+}
+
+/* Show text back link only on smaller screens */
+@media (--ultra-wide-down) {
+  .back-link {
+    display: flex;
   }
 }
 
