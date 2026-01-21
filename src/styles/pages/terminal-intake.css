@@ -49,6 +49,8 @@
   flex-direction: column;
   width: 100%;
   min-width: 100%;
+  min-height: 0; /* Allow flex to shrink */
+  max-height: 100%; /* Don't exceed parent */
   background: var(--color-terminal-bg-panel);
   border: 1px solid var(--color-terminal-border);
   border-radius: 10px;
@@ -165,7 +167,7 @@
 .terminal-input-area {
   border-top: 1px solid var(--color-terminal-border);
   padding: 10px 16px;
-  background: var(--color-terminal-bg-panel);
+  background: var(--color-terminal-bg); /* Same as terminal body */
   display: flex;
   align-items: center;
   gap: 12px;
@@ -188,6 +190,7 @@
   color: var(--color-terminal-text);
   font-family: var(--terminal-font-family);
   font-size: var(--terminal-font-size);
+  font-weight: normal; /* Not bold */
   outline: none;
   caret-color: transparent;
   box-shadow: none;
@@ -197,6 +200,7 @@
 .terminal .terminal-input::placeholder,
 .terminal .terminal-input-area input::placeholder {
   color: var(--color-terminal-text-dimmer);
+  font-weight: normal; /* Not bold */
 }
 
 /* Hide native caret - using custom block cursor instead */
@@ -221,15 +225,19 @@
   caret-color: transparent;
 }
 
-/* Focus state - ensure accessibility while maintaining terminal aesthetic */
+/* Focus state - minimal styling, terminal uses custom block cursor */
+/* Must override reset.css :focus-visible global rule */
 .terminal .terminal-input:focus,
 .terminal .terminal-input-area input:focus,
-.terminal input.terminal-input:focus {
+.terminal input.terminal-input:focus,
+.terminal .terminal-input:focus-visible,
+.terminal .terminal-input-area input:focus-visible,
+.terminal input.terminal-input:focus-visible {
   background: transparent;
   border: none;
-  outline: 2px solid var(--color-terminal-green);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 2px rgba(127, 247, 9, 0.2);
+  outline: none;
+  outline-offset: 0;
+  box-shadow: none;
   caret-color: transparent;
 }
 
@@ -464,8 +472,7 @@ body[data-page="client-intake"] .terminal-window {
   flex-direction: column;
   justify-content: flex-start;
   gap: 16px;
-  min-height: 400px;
-  max-height: calc(100vh - 250px);
+  min-height: 0; /* Allow flex to shrink - input area must stay visible */
 }
 
 .terminal-chat > * {
@@ -519,9 +526,25 @@ body[data-page="client-intake"] .terminal-window {
 }
 
 /* Override any global styles on message content */
-.terminal .terminal-intake .message-content,
-.terminal .terminal-chat .message-content,
-.terminal .terminal-window .message-content {
+/* Terminal messages should NEVER have bubbles, backgrounds, or shadows */
+.terminal .message-content,
+.terminal-intake .message-content,
+.terminal-chat .message-content,
+.terminal-window .message-content,
+.chat-message .message-content,
+/* High specificity override for portal context */
+[data-page="client-portal"] .terminal .message-content,
+[data-page="client-portal"] .terminal-intake .message-content,
+[data-page="client-portal"] .terminal-chat .message-content,
+[data-page="client-portal"] .portal-intake .message-content,
+[data-page="client-portal"] .portal-intake .chat-message .message-content,
+[data-page="client-portal"] .portal-intake .terminal-chat .message-content,
+[data-page="client-portal"] .chat-message .message-content,
+/* Admin portal context */
+[data-page="admin"] .terminal .message-content,
+[data-page="admin"] .terminal-intake .message-content,
+[data-page="admin"] .terminal-chat .message-content,
+[data-page="admin"] .chat-message .message-content {
   background: transparent;
   background-color: transparent;
   border: none;
@@ -529,6 +552,8 @@ body[data-page="client-intake"] .terminal-window {
   border-radius: 0;
   outline: none;
   padding: 0;
+  max-width: none;
+  color: inherit;
   display: inline;
 }
 
