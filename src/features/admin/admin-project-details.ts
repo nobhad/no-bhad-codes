@@ -167,8 +167,7 @@ import type {
   ProjectMilestoneResponse,
   MessageResponse,
   MessageThreadResponse,
-  InvoiceResponse,
-  ProjectFileResponse
+  InvoiceResponse
 } from '../../types/api';
 
 export interface ProjectDetailsHandler {
@@ -969,10 +968,10 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
               // Sanitize user data to prevent XSS
               const safeTitle = SanitizationUtils.escapeHtml(m.title || '');
               const safeDescription = SanitizationUtils.escapeHtml(m.description || '');
-              const deliverablesArray = Array.isArray(m.deliverables) 
-                ? m.deliverables 
-                : (typeof m.deliverables === 'string' && m.deliverables.trim() 
-                  ? [m.deliverables] 
+              const deliverablesArray = Array.isArray(m.deliverables)
+                ? m.deliverables
+                : (typeof m.deliverables === 'string' && m.deliverables.trim()
+                  ? [m.deliverables]
                   : []);
               const safeDeliverables =
                 deliverablesArray.length > 0

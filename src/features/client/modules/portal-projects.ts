@@ -12,8 +12,7 @@ import type { ClientProject } from '../../../types/client';
 import type { ClientPortalContext, PortalProject } from '../portal-types';
 import type {
   ProjectUpdateResponse,
-  MessageResponse,
-  ProjectDetailResponse
+  MessageResponse
 } from '../../../types/api';
 
 /** API endpoints */
@@ -109,12 +108,12 @@ export async function fetchProjectDetails(
       }));
     }
 
-      // Transform and update messages
-      if (data.messages && Array.isArray(data.messages)) {
-        currentProject.messages = data.messages.map((m: MessageResponse) => ({
+    // Transform and update messages
+    if (data.messages && Array.isArray(data.messages)) {
+      currentProject.messages = data.messages.map((m: MessageResponse) => ({
         id: String(m.id),
         sender: m.sender_name || 'Unknown',
-          senderRole: (m.sender_role === 'admin' ? 'developer' : (m.sender_role || 'system')) as 'client' | 'developer' | 'system',
+        senderRole: (m.sender_role === 'admin' ? 'developer' : (m.sender_role || 'system')) as 'client' | 'developer' | 'system',
         message: m.message || '',
         timestamp: m.created_at || new Date().toISOString(),
         isRead: Boolean(m.is_read)

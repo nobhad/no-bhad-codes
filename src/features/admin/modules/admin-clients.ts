@@ -443,7 +443,7 @@ function setupClientDetailHandlers(client: Client, ctx: AdminDashboardContext): 
   const resendBtn = domCache.get('resendBtn', true);
   if (resendBtn) {
     // Check if invitation was already sent (has password_hash means invited)
-    const hasBeenInvited = (client as ClientResponse & { password_hash?: string; invited_at?: string }).password_hash || 
+    const hasBeenInvited = (client as ClientResponse & { password_hash?: string; invited_at?: string }).password_hash ||
                            (client as ClientResponse & { password_hash?: string; invited_at?: string }).invited_at;
     const buttonText = hasBeenInvited ? 'Resend Invitation' : 'Send Invitation';
 
