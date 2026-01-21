@@ -59,6 +59,14 @@ export interface AppConfig {
   ADMIN_EMAIL: string;
   ADMIN_PASSWORD: string;
 
+  // Business Info (for invoices)
+  BUSINESS_NAME: string;
+  BUSINESS_CONTACT: string;
+  BUSINESS_EMAIL: string;
+  BUSINESS_WEBSITE: string;
+  VENMO_HANDLE: string;
+  PAYPAL_EMAIL: string;
+
   // Email
   EMAIL_ENABLED: boolean;
   SMTP_HOST?: string;
@@ -146,6 +154,14 @@ const configSchema: ConfigSchema = {
   // Admin
   ADMIN_EMAIL: { required: true, type: 'email' },
   ADMIN_PASSWORD: { required: true, minLength: 8 },
+
+  // Business Info (for invoices) - REQUIRED: set these in .env
+  BUSINESS_NAME: { required: false, default: '' },
+  BUSINESS_CONTACT: { required: false, default: '' },
+  BUSINESS_EMAIL: { required: false, type: 'email' },
+  BUSINESS_WEBSITE: { required: false, default: '' },
+  VENMO_HANDLE: { required: false, default: '' },
+  PAYPAL_EMAIL: { required: false, type: 'email' },
 
   // Email
   EMAIL_ENABLED: { required: false, default: false, type: 'boolean' },

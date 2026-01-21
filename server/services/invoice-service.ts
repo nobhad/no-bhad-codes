@@ -9,17 +9,78 @@
 
 import { getDatabase } from '../database/init.js';
 
-interface Database {
-  get(sql: string, params?: any[]): Promise<any>;
-  all(sql: string, params?: any[]): Promise<any[]>;
-  run(sql: string, params?: any[]): Promise<{ lastID?: number; changes?: number }>;
-}
+// Business info from environment variables
+const BUSINESS_INFO = {
+  name: process.env.BUSINESS_NAME || '',
+  contact: process.env.BUSINESS_CONTACT || '',
+  email: process.env.BUSINESS_EMAIL || '',
+  website: process.env.BUSINESS_WEBSITE || '',
+  venmoHandle: process.env.VENMO_HANDLE || '',
+  paypalEmail: process.env.PAYPAL_EMAIL || ''
+};
+
+// Type definitions for database operations
+type SqlValue = string | number | boolean | null;
+
+// Use actual database interface from init.js - we'll cast as needed
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Database = any;
 
 export interface InvoiceLineItem {
   description: string;
   quantity: number;
   rate: number;
   amount: number;
+}
+
+/** Database row type for intake records */
+interface IntakeRecord {
+  id: number;
+  project_type?: string;
+  budget_range?: string;
+  project_description?: string;
+  project_id?: number;
+  client_id?: number;
+}
+
+/** Database row type for invoice records */
+interface InvoiceRow {
+  id: number;
+  invoice_number: string;
+  project_id: number;
+  client_id: number;
+  amount_total: string | number;
+  amount_paid?: string | number;
+  currency: string;
+  status: Invoice['status'];
+  due_date?: string;
+  issued_date?: string;
+  paid_date?: string;
+  payment_method?: string;
+  payment_reference?: string;
+  line_items: string;
+  notes?: string;
+  terms?: string;
+  created_at?: string;
+  updated_at?: string;
+  business_name?: string;
+  business_contact?: string;
+  business_email?: string;
+  business_website?: string;
+  venmo_handle?: string;
+  paypal_email?: string;
+  services_title?: string;
+  services_description?: string;
+  deliverables?: string;
+  features?: string;
+  bill_to_name?: string;
+  bill_to_email?: string;
+  // Joined fields from client/project tables
+  company_name?: string;
+  contact_name?: string;
+  client_email?: string;
+  project_name?: string;
+  project_description?: string;
 }
 
 export interface Invoice {
@@ -149,12 +210,12 @@ export class InvoiceService {
       JSON.stringify(data.lineItems),
       data.notes || null,
       data.terms || 'Payment due within 14 days of receipt.',
-      data.businessName || 'No Bhad Codes',
-      data.businessContact || 'Noelle Bhaduri',
-      data.businessEmail || 'nobhaduri@gmail.com',
-      data.businessWebsite || 'nobhad.codes',
-      data.venmoHandle || '@nobhad',
-      data.paypalEmail || 'nobhaduri@gmail.com',
+      data.businessName || BUSINESS_INFO.name,
+      data.businessContact || BUSINESS_INFO.contact,
+      data.businessEmail || BUSINESS_INFO.email,
+      data.businessWebsite || BUSINESS_INFO.website,
+      data.venmoHandle || BUSINESS_INFO.venmoHandle,
+      data.paypalEmail || BUSINESS_INFO.paypalEmail,
       data.servicesTitle || null,
       data.servicesDescription || null,
       data.deliverables ? JSON.stringify(data.deliverables) : null,
@@ -226,7 +287,7 @@ export class InvoiceService {
 
     const rows = await this.db.all(sql, [clientId]);
 
-    return rows.map((row) => this.mapRowToInvoice(row));
+    return rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
   }
 
   /**
@@ -245,7 +306,7 @@ export class InvoiceService {
 
     const rows = await this.db.all(sql, [projectId]);
 
-    return rows.map((row) => this.mapRowToInvoice(row));
+    return rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
   }
 
   /**
@@ -262,7 +323,7 @@ export class InvoiceService {
     }
   ): Promise<Invoice> {
     let sql = 'UPDATE invoices SET status = ?, updated_at = CURRENT_TIMESTAMP';
-    const params: any[] = [status];
+    const params: SqlValue[] = [status];
 
     if (paymentData) {
       if (paymentData.amountPaid !== undefined) {
@@ -337,7 +398,7 @@ export class InvoiceService {
       FROM invoices
     `;
 
-    const params: any[] = [];
+    const params: SqlValue[] = [];
 
     if (clientId) {
       sql += ' WHERE client_id = ?';
@@ -347,11 +408,11 @@ export class InvoiceService {
     const row = await this.db.get(sql, params);
 
     return {
-      totalInvoices: row.total_invoices || 0,
-      totalAmount: row.total_amount || 0,
-      totalPaid: row.total_paid || 0,
-      totalOutstanding: row.total_outstanding || 0,
-      overdue: row.overdue || 0
+      totalInvoices: row?.total_invoices || 0,
+      totalAmount: row?.total_amount || 0,
+      totalPaid: row?.total_paid || 0,
+      totalOutstanding: row?.total_outstanding || 0,
+      overdue: row?.overdue || 0
     };
   }
 
@@ -394,7 +455,7 @@ export class InvoiceService {
   /**
    * Generate line items from intake data
    */
-  private generateLineItemsFromIntake(intake: any): InvoiceLineItem[] {
+  private generateLineItemsFromIntake(intake: IntakeRecord): InvoiceLineItem[] {
     const lineItems: InvoiceLineItem[] = [];
     const projectType = intake.project_type || 'website';
     const budgetRange = intake.budget_range || '5k-10k';
@@ -542,14 +603,14 @@ export class InvoiceService {
   /**
    * Map database row to Invoice object
    */
-  private mapRowToInvoice(row: any): Invoice {
+  private mapRowToInvoice(row: InvoiceRow): Invoice {
     return {
       id: row.id,
       invoiceNumber: row.invoice_number,
       projectId: row.project_id,
       clientId: row.client_id,
-      amountTotal: parseFloat(row.amount_total),
-      amountPaid: parseFloat(row.amount_paid || 0),
+      amountTotal: typeof row.amount_total === 'string' ? parseFloat(row.amount_total) : row.amount_total,
+      amountPaid: typeof row.amount_paid === 'string' ? parseFloat(row.amount_paid) : (row.amount_paid || 0),
       currency: row.currency,
       status: row.status,
       dueDate: row.due_date,
@@ -563,13 +624,13 @@ export class InvoiceService {
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       // Custom business info
-      businessName: row.business_name || 'No Bhad Codes',
-      businessContact: row.business_contact || 'Noelle Bhaduri',
-      businessEmail: row.business_email || 'nobhaduri@gmail.com',
-      businessWebsite: row.business_website || 'nobhad.codes',
+      businessName: row.business_name || BUSINESS_INFO.name,
+      businessContact: row.business_contact || BUSINESS_INFO.contact,
+      businessEmail: row.business_email || BUSINESS_INFO.email,
+      businessWebsite: row.business_website || BUSINESS_INFO.website,
       // Payment methods
-      venmoHandle: row.venmo_handle || '@nobhad',
-      paypalEmail: row.paypal_email || 'nobhaduri@gmail.com',
+      venmoHandle: row.venmo_handle || BUSINESS_INFO.venmoHandle,
+      paypalEmail: row.paypal_email || BUSINESS_INFO.paypalEmail,
       // Services fields
       servicesTitle: row.services_title,
       servicesDescription: row.services_description,

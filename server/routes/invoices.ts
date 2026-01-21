@@ -13,9 +13,19 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
-import { InvoiceService, InvoiceCreateData } from '../services/invoice-service.js';
+import { InvoiceService, InvoiceCreateData, InvoiceLineItem } from '../services/invoice-service.js';
 import { emailService } from '../services/email-service.js';
 import { getDatabase } from '../database/init.js';
+
+// Business info from environment variables
+const BUSINESS_INFO = {
+  name: process.env.BUSINESS_NAME || '',
+  contact: process.env.BUSINESS_CONTACT || '',
+  email: process.env.BUSINESS_EMAIL || '',
+  website: process.env.BUSINESS_WEBSITE || '',
+  venmoHandle: process.env.VENMO_HANDLE || '',
+  paypalEmail: process.env.PAYPAL_EMAIL || ''
+};
 
 const router = express.Router();
 
@@ -867,10 +877,10 @@ router.get(
       }
 
       // Business header line
-      const businessName = invoice.businessName || 'No Bhad Codes';
-      const businessContact = invoice.businessContact || 'Noelle Bhaduri';
-      const businessEmail = invoice.businessEmail || 'nobhaduri@gmail.com';
-      const businessWebsite = invoice.businessWebsite || 'nobhad.codes';
+      const businessName = invoice.businessName || BUSINESS_INFO.name;
+      const businessContact = invoice.businessContact || BUSINESS_INFO.contact;
+      const businessEmail = invoice.businessEmail || BUSINESS_INFO.email;
+      const businessWebsite = invoice.businessWebsite || BUSINESS_INFO.website;
 
       doc.y = 100;
       doc.fontSize(10).font('Helvetica-Bold')
@@ -957,8 +967,8 @@ router.get(
       let y = tableTop + 25;
       doc.font('Helvetica');
 
-      const lineItems = Array.isArray(invoice.lineItems) ? invoice.lineItems : [];
-      lineItems.forEach((item: any) => {
+      const lineItems: InvoiceLineItem[] = Array.isArray(invoice.lineItems) ? invoice.lineItems : [];
+      lineItems.forEach((item: InvoiceLineItem) => {
         doc.text(item.description || '', leftCol, y, { width: 380 });
         doc.text(`$${(item.amount || 0).toFixed(2)}`, 450, y, { width: 100, align: 'right' });
         y += 20;
@@ -988,12 +998,12 @@ router.get(
       // Venmo box
       doc.rect(leftCol, boxTop, boxWidth, boxHeight).stroke();
       doc.fontSize(10).font('Helvetica-Bold').text('Venmo', leftCol + 10, boxTop + 10);
-      doc.font('Helvetica').text(invoice.venmoHandle || '@nobhad', leftCol + 10, boxTop + 25);
+      doc.font('Helvetica').text(invoice.venmoHandle || BUSINESS_INFO.venmoHandle, leftCol + 10, boxTop + 25);
 
       // PayPal box
       doc.rect(rightCol - 50, boxTop, boxWidth, boxHeight).stroke();
       doc.font('Helvetica-Bold').text('PayPal', rightCol - 40, boxTop + 10);
-      doc.font('Helvetica').text(invoice.paypalEmail || 'nobhaduri@gmail.com', rightCol - 40, boxTop + 25);
+      doc.font('Helvetica').text(invoice.paypalEmail || BUSINESS_INFO.paypalEmail, rightCol - 40, boxTop + 25);
       doc.fontSize(8).text('(Friends & Family or Goods & Services)', rightCol - 40, boxTop + 38);
 
       doc.y = boxTop + boxHeight + 20;

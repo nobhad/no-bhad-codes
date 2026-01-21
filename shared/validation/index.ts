@@ -44,6 +44,13 @@ export {
   checkXss,
   checkPathTraversal,
 
+  // Sanitization functions
+  escapeHtml,
+  sanitizeHtml,
+  stripHtmlTags,
+  escapeHtmlAttribute,
+  sanitizeUrl,
+
   // Array validators
   validateArray,
 
