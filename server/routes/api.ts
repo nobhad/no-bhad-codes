@@ -7,7 +7,7 @@
  * Main API routes with comprehensive validation and security.
  */
 
-import { Router } from 'express';
+import express, { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import multer from 'multer';
@@ -571,7 +571,7 @@ router.get(
       // Build query with search
       let query = 'SELECT * FROM projects';
       let countQuery = 'SELECT COUNT(*) as count FROM projects';
-      const params: any[] = [];
+      const params: (string | number)[] = [];
 
       if (search) {
         query += ' WHERE project_name LIKE ? OR description LIKE ?';
@@ -593,7 +593,7 @@ router.get(
       // Get total count
       const countParams = search ? [`%${search}%`, `%${search}%`] : [];
       const countRow = await db.get(countQuery, countParams);
-      const total = countRow?.count || 0;
+      const total = typeof countRow?.count === 'number' ? countRow.count : 0;
 
       // Get data
       const data = await db.all(query, params);
@@ -664,11 +664,11 @@ router.get(
             db.get('SELECT COUNT(*) as count FROM invoices')
           ]);
 
-        totalUsers = usersRow?.count || 0;
-        activeUsers = activeUsersRow?.count || 0;
-        totalProjects = projectsRow?.count || 0;
-        activeProjects = activeProjectsRow?.count || 0;
-        totalInvoices = invoicesRow?.count || 0;
+        totalUsers = typeof usersRow?.count === 'number' ? usersRow.count : 0;
+        activeUsers = typeof activeUsersRow?.count === 'number' ? activeUsersRow.count : 0;
+        totalProjects = typeof projectsRow?.count === 'number' ? projectsRow.count : 0;
+        activeProjects = typeof activeProjectsRow?.count === 'number' ? activeProjectsRow.count : 0;
+        totalInvoices = typeof invoicesRow?.count === 'number' ? invoicesRow.count : 0;
       } catch (err) {
         console.error('Failed to gather metrics:', err);
         // Use default values of 0
@@ -730,17 +730,21 @@ router.use(async (req, res) => {
 });
 
 // Error handler for API routes
-router.use(async (error: any, req: any, res: any, next: any) => {
+router.use(async (error: unknown, req: express.Request, res: express.Response, next: express.NextFunction): Promise<void> => {
   await logger.error('API route error');
 
   if (res.headersSent) {
-    return next(error);
+    return next(error as Error);
   }
 
-  res.status(error.status || 500).json({
+  const status = (error as { status?: number })?.status ?? 500;
+  const message = error instanceof Error ? error.message : 'Internal server error';
+  const code = (error as { code?: string })?.code ?? 'INTERNAL_ERROR';
+
+  res.status(status).json({
     success: false,
-    error: error.message || 'Internal server error',
-    code: error.code || 'INTERNAL_ERROR',
+    error: message,
+    code,
     requestId: req.headers['x-request-id']
   });
 });

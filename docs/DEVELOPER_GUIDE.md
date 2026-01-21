@@ -763,6 +763,7 @@ await emailService.sendEmail({
 ### Database Best Practices
 
 - Always use parameterized queries to prevent SQL injection
+- Use type-safe row helpers for database row access (see below)
 - Create indexes for frequently queried columns
 - Use foreign key constraints for data integrity
 - Include created_at and updated_at timestamps
@@ -775,6 +776,39 @@ const users = await db.all('SELECT * FROM users WHERE status = ?', ['active']);
 // Bad: String concatenation (vulnerable to SQL injection)
 const users = await db.all(`SELECT * FROM users WHERE status = '${status}'`);
 ```
+
+### Type-Safe Database Row Access
+
+**New in January 2026:** All database row accesses use type-safe helper utilities from `server/database/row-helpers.ts`:
+
+```typescript
+import { getString, getNumber, getBoolean, getDate } from '../database/row-helpers.js';
+
+// Get a row from database
+const client = await db.get('SELECT * FROM clients WHERE id = ?', [clientId]);
+
+// Type-safe property extraction
+const clientId = getNumber(client, 'id');
+const email = getString(client, 'email');
+const isActive = getBoolean(client, 'is_active');
+const createdAt = getDate(client, 'created_at');
+
+// Benefits:
+// - Type safety: All values properly typed
+// - Null safety: Handles undefined/missing values gracefully
+// - Consistent: Same pattern across all route files
+// - Maintainable: Centralized type extraction logic
+```
+
+**Available Helpers:**
+- `getString(row, 'key')` - Extract string values (returns empty string if not found)
+- `getStringOrNull(row, 'key')` - Extract string or null
+- `getNumber(row, 'key')` - Extract number values (returns 0 if not found)
+- `getNumberOrNull(row, 'key')` - Extract number or null
+- `getBoolean(row, 'key')` - Extract boolean values (returns false if not found)
+- `getBooleanOrNull(row, 'key')` - Extract boolean or null
+- `getDate(row, 'key')` - Extract Date values from ISO strings or timestamps
+- `getUnknown(row, 'key')` - Extract unknown values (when type is truly unknown)
 
 ## Testing Guide
 

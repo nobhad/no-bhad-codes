@@ -14,6 +14,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middle
 import { emailService } from '../services/email-service.js';
 import { cache, invalidateCache } from '../middleware/cache.js';
 import { getUploadsSubdir, UPLOAD_DIRS } from '../config/uploads.js';
+import { getString, getNumber } from '../database/row-helpers.js';
 
 const router = express.Router();
 
@@ -59,7 +60,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const db = getDatabase();
     let query = '';
-    let params: any[] = [];
+    let params: (string | number | null)[] = [];
 
     if (req.user!.type === 'admin') {
       // Admin can see all threads
@@ -262,13 +263,16 @@ router.post(
 
       if (recipientType === 'client') {
         // Notify client
+        const clientId = getNumber(thread, 'client_id');
         const client = await db.get('SELECT email, contact_name FROM clients WHERE id = ?', [
-          thread.client_id
+          clientId
         ]);
 
         if (client) {
-          await emailService.sendMessageNotification(client.email, {
-            recipientName: client.contact_name || 'Client',
+          const clientEmail = getString(client, 'email');
+          const clientContactName = getString(client, 'contact_name');
+          await emailService.sendMessageNotification(clientEmail, {
+            recipientName: clientContactName || 'Client',
             senderName: sender_name,
             subject: thread.subject,
             message: message.trim(),
@@ -345,9 +349,10 @@ router.get(
 
     // Parse attachments JSON
     messages.forEach((msg) => {
-      if (msg.attachments) {
+      const attachmentsStr = getString(msg, 'attachments');
+      if (attachmentsStr) {
         try {
-          msg.attachments = JSON.parse(msg.attachments);
+          msg.attachments = JSON.parse(attachmentsStr);
         } catch (_e) {
           msg.attachments = [];
         }
@@ -546,7 +551,7 @@ router.put(
     const db = getDatabase();
 
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: (string | number | boolean | null)[] = [];
     const allowedFields = [
       'email_notifications',
       'project_updates',

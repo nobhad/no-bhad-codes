@@ -16,6 +16,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middle
 import { InvoiceService, InvoiceCreateData, InvoiceLineItem } from '../services/invoice-service.js';
 import { emailService } from '../services/email-service.js';
 import { getDatabase } from '../database/init.js';
+import { getString, getNumber } from '../database/row-helpers.js';
 
 // Business info from environment variables
 const BUSINESS_INFO = {
@@ -97,11 +98,12 @@ router.post(
         message: 'Test invoice created successfully',
         invoice
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         error: 'Failed to create test invoice',
         code: 'TEST_CREATION_FAILED',
-        message: error.message
+        message
       });
     }
   })
@@ -136,8 +138,9 @@ router.get(
     try {
       const invoice = await getInvoiceService().getInvoiceById(invoiceId);
       res.json({ success: true, invoice });
-    } catch (error: any) {
-      if (error.message.includes('not found')) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('not found')) {
         return res.status(404).json({
           error: 'Invoice not found',
           code: 'NOT_FOUND'
@@ -147,7 +150,7 @@ router.get(
       res.status(500).json({
         error: 'Failed to retrieve invoice',
         code: 'RETRIEVAL_FAILED',
-        message: error.message
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -251,11 +254,12 @@ router.post(
         message: 'Invoice created successfully',
         invoice
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         error: 'Failed to create invoice',
         code: 'CREATION_FAILED',
-        message: error.message
+        message
       });
     }
   })
@@ -291,8 +295,9 @@ router.get(
     try {
       const invoice = await getInvoiceService().getInvoiceById(invoiceId);
       res.json({ success: true, invoice });
-    } catch (error: any) {
-      if (error.message.includes('not found')) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('not found')) {
         return res.status(404).json({
           error: 'Invoice not found',
           code: 'NOT_FOUND'
@@ -302,7 +307,7 @@ router.get(
       res.status(500).json({
         error: 'Failed to retrieve invoice',
         code: 'RETRIEVAL_FAILED',
-        message: error.message
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -325,8 +330,9 @@ router.get(
     try {
       const invoice = await getInvoiceService().getInvoiceByNumber(invoiceNumber);
       res.json({ success: true, invoice });
-    } catch (error: any) {
-      if (error.message.includes('not found')) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('not found')) {
         return res.status(404).json({
           error: 'Invoice not found',
           code: 'NOT_FOUND'
@@ -336,7 +342,7 @@ router.get(
       res.status(500).json({
         error: 'Failed to retrieve invoice',
         code: 'RETRIEVAL_FAILED',
-        message: error.message
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -398,11 +404,11 @@ router.get(
           totalPaid
         }
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       res.status(500).json({
         error: 'Failed to retrieve invoices',
         code: 'RETRIEVAL_FAILED',
-        message: error.message
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -436,11 +442,11 @@ router.get(
         invoices,
         count: invoices.length
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       res.status(500).json({
         error: 'Failed to retrieve client invoices',
         code: 'RETRIEVAL_FAILED',
-        message: error.message
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -474,11 +480,11 @@ router.get(
         invoices,
         count: invoices.length
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       res.status(500).json({
         error: 'Failed to retrieve project invoices',
         code: 'RETRIEVAL_FAILED',
-        message: error.message
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -522,8 +528,9 @@ router.put(
         message: 'Invoice status updated successfully',
         invoice
       });
-    } catch (error: any) {
-      if (error.message.includes('not found')) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('not found')) {
         return res.status(404).json({
           error: 'Invoice not found',
           code: 'NOT_FOUND'
@@ -533,7 +540,7 @@ router.put(
       res.status(500).json({
         error: 'Failed to update invoice status',
         code: 'UPDATE_FAILED',
-        message: error.message
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -576,13 +583,15 @@ router.post(
           throw new Error('Client not found');
         }
 
-        const client = { email: clientRow.email, name: clientRow.name };
+        const clientEmail = getString(clientRow, 'email');
+        const clientName = getString(clientRow, 'name');
+        const client = { email: clientEmail, name: clientName };
 
         const invoiceUrl = `${process.env.CLIENT_PORTAL_URL || 'http://localhost:3000/client/portal'}?invoice=${invoiceId}`;
 
         // Send invoice email
         await emailService.sendEmail({
-          to: client.email,
+          to: clientEmail,
           subject: `Invoice #${invoice.invoiceNumber} from No Bhad Codes`,
           text: `
             Hi ${client.name},
@@ -646,8 +655,9 @@ router.post(
         message: 'Invoice sent successfully',
         invoice
       });
-    } catch (error: any) {
-      if (error.message.includes('not found')) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('not found')) {
         return res.status(404).json({
           error: 'Invoice not found',
           code: 'NOT_FOUND'
@@ -657,7 +667,7 @@ router.post(
       res.status(500).json({
         error: 'Failed to send invoice',
         code: 'SEND_FAILED',
-        message: error.message
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -705,8 +715,9 @@ router.post(
         message: 'Invoice marked as paid',
         invoice
       });
-    } catch (error: any) {
-      if (error.message.includes('not found')) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('not found')) {
         return res.status(404).json({
           error: 'Invoice not found',
           code: 'NOT_FOUND'
@@ -716,7 +727,7 @@ router.post(
       res.status(500).json({
         error: 'Failed to process payment',
         code: 'PAYMENT_FAILED',
-        message: error.message
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -742,11 +753,11 @@ router.get(
         success: true,
         stats
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       res.status(500).json({
         error: 'Failed to retrieve invoice statistics',
         code: 'STATS_FAILED',
-        message: error.message
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -782,26 +793,27 @@ router.post(
         message: 'Invoice generated from intake successfully',
         invoice
       });
-    } catch (error: any) {
-      if (error.message.includes('not found')) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage.includes('not found')) {
         return res.status(404).json({
           error: 'Intake not found',
           code: 'NOT_FOUND'
         });
       }
 
-      if (error.message.includes('must be converted')) {
+      if (errorMessage.includes('must be converted')) {
         return res.status(400).json({
           error: 'Intake not ready for invoice generation',
           code: 'INTAKE_NOT_CONVERTED',
-          message: error.message
+          message: errorMessage
         });
       }
 
       res.status(500).json({
         error: 'Failed to generate invoice from intake',
         code: 'GENERATION_FAILED',
-        message: error.message
+        message: errorMessage
       });
     }
   })
@@ -907,8 +919,8 @@ router.get(
 
       // Right column: Bill To
       doc.fontSize(10).font('Helvetica-Bold').text('Bill To:', rightCol, colTop);
-      const billToName = invoice.billToName || client?.contact_name || 'Client';
-      const billToEmail = invoice.billToEmail || client?.email || '';
+      const billToName = invoice.billToName || (client ? getString(client, 'contact_name') : '') || 'Client';
+      const billToEmail = invoice.billToEmail || (client ? getString(client, 'email') : '') || '';
       doc.font('Helvetica').text(billToName, rightCol, colTop + 15);
       doc.text(billToEmail, rightCol, colTop + 30);
 
@@ -921,8 +933,8 @@ router.get(
       doc.moveDown(0.5);
 
       // Services title and description
-      const servicesTitle = invoice.servicesTitle || project?.project_name || 'Web Development Services';
-      const servicesDesc = invoice.servicesDescription || project?.description || '';
+      const servicesTitle = invoice.servicesTitle || (project ? getString(project, 'project_name') : '') || 'Web Development Services';
+      const servicesDesc = invoice.servicesDescription || (project ? getString(project, 'description') : '') || '';
 
       doc.fontSize(10).font('Helvetica-Bold').text(servicesTitle, { continued: servicesDesc ? true : false });
       if (servicesDesc) {
@@ -941,10 +953,11 @@ router.get(
       }
 
       // Features
-      const features = invoice.features || project?.features || '';
-      if (features) {
+      const featuresStr = invoice.features || (project ? getString(project, 'features') : '') || '';
+      if (featuresStr) {
+        const featuresValue = typeof featuresStr === 'string' ? featuresStr : JSON.stringify(featuresStr);
         doc.font('Helvetica-Bold').text('Features: ', { continued: true });
-        doc.font('Helvetica').text(features);
+        doc.font('Helvetica').text(featuresValue);
       }
 
       doc.moveDown(2);
@@ -1044,8 +1057,9 @@ router.get(
 
       // Finalize PDF
       doc.end();
-    } catch (error: any) {
-      if (error.message.includes('not found')) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('not found')) {
         return res.status(404).json({
           error: 'Invoice not found',
           code: 'NOT_FOUND'
@@ -1055,7 +1069,7 @@ router.get(
       res.status(500).json({
         error: 'Failed to generate PDF',
         code: 'PDF_GENERATION_FAILED',
-        message: error.message
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })

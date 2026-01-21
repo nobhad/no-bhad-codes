@@ -12,20 +12,23 @@ import sqlite3 from 'sqlite3';
 import { dirname } from 'path';
 import fs from 'fs';
 
-interface DatabaseRow {
-  [key: string]: any;
+export interface DatabaseRow {
+  [key: string]: unknown;
 }
 
+type SqlParam = string | number | boolean | null | undefined;
+type SqlParams = SqlParam[];
+
 interface TransactionContext {
-  get(sql: string, params?: any[]): Promise<DatabaseRow | undefined>;
-  all(sql: string, params?: any[]): Promise<DatabaseRow[]>;
-  run(sql: string, params?: any[]): Promise<{ lastID?: number; changes?: number }>;
+  get(sql: string, params?: SqlParams): Promise<DatabaseRow | undefined>;
+  all(sql: string, params?: SqlParams): Promise<DatabaseRow[]>;
+  run(sql: string, params?: SqlParams): Promise<{ lastID?: number; changes?: number }>;
 }
 
 interface Database {
-  get(sql: string, params?: any[]): Promise<DatabaseRow | undefined>;
-  all(sql: string, params?: any[]): Promise<DatabaseRow[]>;
-  run(sql: string, params?: any[]): Promise<{ lastID?: number; changes?: number }>;
+  get(sql: string, params?: SqlParams): Promise<DatabaseRow | undefined>;
+  all(sql: string, params?: SqlParams): Promise<DatabaseRow[]>;
+  run(sql: string, params?: SqlParams): Promise<{ lastID?: number; changes?: number }>;
   transaction<T>(fn: (ctx: TransactionContext) => Promise<T>): Promise<T>;
   close(): Promise<void>;
   getConnectionStats(): ConnectionStats;
@@ -155,7 +158,7 @@ class DatabaseConnectionPool implements Database {
     });
   }
 
-  async get(sql: string, params: any[] = []): Promise<DatabaseRow | undefined> {
+  async get(sql: string, params: SqlParams = []): Promise<DatabaseRow | undefined> {
     const connection = await this.getConnection();
     try {
       return await new Promise<DatabaseRow | undefined>((resolve, reject) => {
@@ -169,7 +172,7 @@ class DatabaseConnectionPool implements Database {
     }
   }
 
-  async all(sql: string, params: any[] = []): Promise<DatabaseRow[]> {
+  async all(sql: string, params: SqlParams = []): Promise<DatabaseRow[]> {
     const connection = await this.getConnection();
     try {
       return await new Promise<DatabaseRow[]>((resolve, reject) => {
@@ -183,7 +186,7 @@ class DatabaseConnectionPool implements Database {
     }
   }
 
-  async run(sql: string, params: any[] = []): Promise<{ lastID?: number; changes?: number }> {
+  async run(sql: string, params: SqlParams = []): Promise<{ lastID?: number; changes?: number }> {
     const connection = await this.getConnection();
     try {
       return await new Promise<{ lastID?: number; changes?: number }>((resolve, reject) => {
@@ -206,7 +209,7 @@ class DatabaseConnectionPool implements Database {
 
     // Create a context that uses this specific connection
     const ctx: TransactionContext = {
-      get: (sql: string, params: any[] = []): Promise<DatabaseRow | undefined> => {
+      get: (sql: string, params: SqlParams = []): Promise<DatabaseRow | undefined> => {
         return new Promise((resolve, reject) => {
           connection.db.get(sql, params, (err, row) => {
             if (err) reject(err);
@@ -214,7 +217,7 @@ class DatabaseConnectionPool implements Database {
           });
         });
       },
-      all: (sql: string, params: any[] = []): Promise<DatabaseRow[]> => {
+      all: (sql: string, params: SqlParams = []): Promise<DatabaseRow[]> => {
         return new Promise((resolve, reject) => {
           connection.db.all(sql, params, (err, rows) => {
             if (err) reject(err);
@@ -222,7 +225,7 @@ class DatabaseConnectionPool implements Database {
           });
         });
       },
-      run: (sql: string, params: any[] = []): Promise<{ lastID?: number; changes?: number }> => {
+      run: (sql: string, params: SqlParams = []): Promise<{ lastID?: number; changes?: number }> => {
         return new Promise((resolve, reject) => {
           connection.db.run(sql, params, function (err) {
             if (err) reject(err);

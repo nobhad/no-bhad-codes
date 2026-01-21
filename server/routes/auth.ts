@@ -23,6 +23,7 @@ import {
   COOKIE_CONFIG,
   validatePassword
 } from '../utils/auth-constants.js';
+import { getString, getNumber, getBoolean, getDate } from '../database/row-helpers.js';
 import {
   sendSuccess,
   sendBadRequest,
@@ -140,17 +141,28 @@ router.post(
       return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
     }
 
+    // Extract typed values using helpers
+    const clientId = getNumber(client, 'id');
+    const clientEmail = getString(client, 'email');
+    const clientStatus = getString(client, 'status');
+    const clientIsAdmin = getBoolean(client, 'is_admin');
+    const passwordHash = getString(client, 'password_hash');
+
     // Check if client is active
-    if (client.status !== 'active') {
+    if (clientStatus !== 'active') {
       await auditLogger.logLoginFailed(email, req, 'Account inactive');
       return sendUnauthorized(res, 'Account is not active. Please contact support.', ErrorCodes.ACCOUNT_INACTIVE);
     }
 
     // Verify password
-    const isValidPassword = await bcrypt.compare(password, client.password_hash);
+    const isValidPassword = await bcrypt.compare(password, passwordHash);
     if (!isValidPassword) {
       await auditLogger.logLoginFailed(email, req, 'Invalid password');
       return sendUnauthorized(res, 'Invalid credentials', ErrorCodes.INVALID_CREDENTIALS);
+    }
+
+    if (!clientId) {
+      return sendUnauthorized(res, 'Invalid user data', ErrorCodes.INVALID_CREDENTIALS);
     }
 
     // Generate JWT token
@@ -162,10 +174,10 @@ router.post(
 
     const token = jwt.sign(
       {
-        id: client.id,
-        email: client.email,
-        type: client.is_admin ? 'admin' : 'client',
-        isAdmin: Boolean(client.is_admin)
+        id: clientId,
+        email: clientEmail,
+        type: clientIsAdmin ? 'admin' : 'client',
+        isAdmin: clientIsAdmin
       },
       secret,
       { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
@@ -173,9 +185,9 @@ router.post(
 
     // Log successful login
     await auditLogger.logLogin(
-      client.id,
-      client.email,
-      client.is_admin ? 'admin' : 'client',
+      clientId,
+      clientEmail,
+      clientIsAdmin ? 'admin' : 'client',
       req
     );
 
@@ -185,13 +197,13 @@ router.post(
     // Return user data (without password) - token is in HttpOnly cookie
     return sendSuccess(res, {
       user: {
-        id: client.id,
-        email: client.email,
-        name: client.contact_name,
-        companyName: client.company_name,
-        contactName: client.contact_name,
-        status: client.status,
-        isAdmin: Boolean(client.is_admin)
+        id: clientId,
+        email: clientEmail,
+        name: getString(client, 'contact_name'),
+        companyName: getString(client, 'company_name'),
+        contactName: getString(client, 'contact_name'),
+        status: clientStatus,
+        isAdmin: clientIsAdmin
       },
       expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY
     }, 'Login successful');
@@ -255,13 +267,13 @@ router.get(
 
     return sendSuccess(res, {
       user: {
-        id: client.id,
-        email: client.email,
-        companyName: client.company_name,
-        contactName: client.contact_name,
-        phone: client.phone,
-        status: client.status,
-        createdAt: client.created_at
+        id: getNumber(client, 'id'),
+        email: getString(client, 'email'),
+        companyName: getString(client, 'company_name'),
+        contactName: getString(client, 'contact_name'),
+        phone: getString(client, 'phone'),
+        status: getString(client, 'status'),
+        createdAt: getDate(client, 'created_at')?.toISOString() || null
       }
     });
   })
@@ -512,23 +524,25 @@ router.post(
         SET reset_token = ?, reset_token_expiry = ?
         WHERE id = ?
       `,
-          [resetToken, resetTokenExpiry.toISOString(), client.id]
+          [resetToken, resetTokenExpiry.toISOString(), getNumber(client, 'id')]
         );
 
         // Send reset email
-        await emailService.sendPasswordResetEmail(client.email, {
-          name: client.contact_name || 'Client',
+        const clientEmail = getString(client, 'email');
+        const clientContactName = getString(client, 'contact_name');
+        await emailService.sendPasswordResetEmail(clientEmail, {
+          name: clientContactName || 'Client',
           resetToken
         });
 
         // Send admin notification
         await emailService.sendAdminNotification('Password Reset Request', {
           type: 'system-alert',
-          message: `Password reset requested for client: ${client.email}`,
+          message: `Password reset requested for client: ${clientEmail}`,
           details: {
-            clientId: client.id,
-            email: client.email,
-            name: client.contact_name || 'Unknown'
+            clientId: getNumber(client, 'id'),
+            email: clientEmail,
+            name: clientContactName || 'Unknown'
           },
           timestamp: new Date()
         });
@@ -624,9 +638,10 @@ router.post(
 
     // Check if token is expired
     const now = new Date();
-    const expiry = new Date(client.reset_token_expiry);
+    const resetTokenExpiryStr = getString(client, 'reset_token_expiry');
+    const expiry = resetTokenExpiryStr ? new Date(resetTokenExpiryStr) : null;
 
-    if (now > expiry) {
+    if (!expiry || now > expiry) {
       return sendBadRequest(res, 'Reset token has expired', ErrorCodes.TOKEN_EXPIRED);
     }
 
@@ -640,16 +655,19 @@ router.post(
     SET password_hash = ?, reset_token = NULL, reset_token_expiry = NULL
     WHERE id = ?
   `,
-      [password_hash, client.id]
+      [password_hash, getNumber(client, 'id')]
     );
 
     // Send confirmation email
+    const clientId = getNumber(client, 'id');
+    const clientContactName = getString(client, 'contact_name');
+    const clientCompanyName = getString(client, 'company_name');
     try {
       await emailService.sendAdminNotification({
         subject: 'Password Reset Completed',
-        intakeId: client.id.toString(),
-        clientName: client.contact_name || 'Unknown',
-        companyName: client.company_name || 'Unknown Company',
+        intakeId: clientId.toString(),
+        clientName: clientContactName || 'Unknown',
+        companyName: clientCompanyName || 'Unknown Company',
         projectType: 'Password Reset',
         budget: 'N/A',
         timeline: 'Completed'
@@ -848,24 +866,27 @@ router.post(
           `UPDATE clients
            SET magic_link_token = ?, magic_link_expires_at = ?
            WHERE id = ?`,
-          [magicLinkToken, magicLinkExpiresAt.toISOString(), client.id]
+          [magicLinkToken, magicLinkExpiresAt.toISOString(), getNumber(client, 'id')]
         );
 
         // Send magic link email
-        await emailService.sendMagicLinkEmail(client.email, {
+        const clientEmailForMagic = getString(client, 'email');
+        const clientContactNameForMagic = getString(client, 'contact_name');
+        const clientIdForMagic = getNumber(client, 'id');
+        await emailService.sendMagicLinkEmail(clientEmailForMagic, {
           magicLinkToken,
-          name: client.contact_name || undefined
+          name: clientContactNameForMagic || undefined
         });
 
         await auditLogger.log({
           action: 'magic_link_requested',
           entityType: 'session',
-          entityId: String(client.id),
-          entityName: client.email,
-          userId: client.id,
-          userEmail: client.email,
+          entityId: String(clientIdForMagic),
+          entityName: clientEmailForMagic,
+          userId: clientIdForMagic,
+          userEmail: clientEmailForMagic,
           userType: 'client',
-          metadata: { email: client.email },
+          metadata: { email: clientEmailForMagic },
           ipAddress: req.ip || 'unknown',
           userAgent: req.get('user-agent') || 'unknown'
         });
@@ -944,28 +965,41 @@ router.post(
 
     // Check if token is expired
     const now = new Date();
-    const expiresAt = new Date(client.magic_link_expires_at);
+    const magicLinkExpiresAtStr = getString(client, 'magic_link_expires_at');
+    const expiresAt = magicLinkExpiresAtStr ? new Date(magicLinkExpiresAtStr) : null;
+    const clientId = getNumber(client, 'id');
+    const clientStatus = getString(client, 'status');
 
-    if (now > expiresAt) {
+    if (!expiresAt || now > expiresAt) {
       // Clear expired token
-      await db.run(
-        'UPDATE clients SET magic_link_token = NULL, magic_link_expires_at = NULL WHERE id = ?',
-        [client.id]
-      );
+      if (clientId) {
+        await db.run(
+          'UPDATE clients SET magic_link_token = NULL, magic_link_expires_at = NULL WHERE id = ?',
+          [clientId]
+        );
+      }
 
       return sendBadRequest(res, 'Login link has expired. Please request a new one.', ErrorCodes.TOKEN_EXPIRED);
     }
 
     // Check if account is active
-    if (client.status !== 'active') {
+    if (clientStatus !== 'active') {
       return sendUnauthorized(res, 'Account is not active. Please contact support.', ErrorCodes.ACCOUNT_INACTIVE);
     }
 
     // Clear the magic link token (single use)
-    await db.run(
-      'UPDATE clients SET magic_link_token = NULL, magic_link_expires_at = NULL, last_login_at = ? WHERE id = ?',
-      [new Date().toISOString(), client.id]
-    );
+    const clientIdForMagicLink = getNumber(client, 'id');
+    const clientEmailForMagicLink = getString(client, 'email');
+    const clientContactNameForMagicLink = getString(client, 'contact_name');
+    const clientCompanyNameForMagicLink = getString(client, 'company_name');
+    const clientIsAdminForMagicLink = getBoolean(client, 'is_admin');
+    
+    if (clientIdForMagicLink) {
+      await db.run(
+        'UPDATE clients SET magic_link_token = NULL, magic_link_expires_at = NULL, last_login_at = ? WHERE id = ?',
+        [new Date().toISOString(), clientIdForMagicLink]
+      );
+    }
 
     // Generate JWT token
     const secret = process.env.JWT_SECRET;
@@ -974,32 +1008,36 @@ router.post(
       return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
     }
 
+    if (!clientIdForMagicLink) {
+      return sendBadRequest(res, 'Invalid user data', ErrorCodes.INVALID_TOKEN);
+    }
+
     const jwtToken = jwt.sign(
       {
-        id: client.id,
-        email: client.email,
-        type: client.is_admin ? 'admin' : 'client',
-        isAdmin: Boolean(client.is_admin)
+        id: clientIdForMagicLink,
+        email: clientEmailForMagicLink,
+        type: clientIsAdminForMagicLink ? 'admin' : 'client',
+        isAdmin: clientIsAdminForMagicLink
       },
       secret,
       { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
     );
 
     // Log successful magic link login
-    await auditLogger.logLogin(client.id, client.email, 'client', req, { method: 'magic_link' });
+    await auditLogger.logLogin(clientIdForMagicLink, clientEmailForMagicLink, 'client', req, { method: 'magic_link' });
 
     // Set HttpOnly cookie with auth token
     res.cookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, jwtToken, COOKIE_CONFIG.USER_OPTIONS);
 
     return sendSuccess(res, {
       user: {
-        id: client.id,
-        email: client.email,
-        name: client.contact_name,
-        companyName: client.company_name,
-        contactName: client.contact_name,
-        status: client.status,
-        isAdmin: Boolean(client.is_admin)
+        id: clientIdForMagicLink,
+        email: clientEmailForMagicLink,
+        name: clientContactNameForMagicLink,
+        companyName: clientCompanyNameForMagicLink,
+        contactName: clientContactNameForMagicLink,
+        status: clientStatus,
+        isAdmin: clientIsAdminForMagicLink
       },
       expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY
     }, 'Login successful');
@@ -1039,14 +1077,15 @@ router.post(
     }
 
     // Check if token is expired
-    if (client.invitation_expires_at && new Date(client.invitation_expires_at) < new Date()) {
+    const invitationExpiresAtStr = getString(client, 'invitation_expires_at');
+    if (invitationExpiresAtStr && new Date(invitationExpiresAtStr) < new Date()) {
       return sendBadRequest(res, 'Invitation has expired. Please contact support for a new invitation.', ErrorCodes.TOKEN_EXPIRED);
     }
 
     return sendSuccess(res, {
-      email: client.email,
-      name: client.contact_name,
-      company: client.company_name
+      email: getString(client, 'email'),
+      name: getString(client, 'contact_name'),
+      company: getString(client, 'company_name')
     });
   })
 );
@@ -1090,7 +1129,8 @@ router.post(
     }
 
     // Check if token is expired
-    if (client.invitation_expires_at && new Date(client.invitation_expires_at) < new Date()) {
+    const invitationExpiresAtStrForSet = getString(client, 'invitation_expires_at');
+    if (invitationExpiresAtStrForSet && new Date(invitationExpiresAtStrForSet) < new Date()) {
       return sendBadRequest(res, 'Invitation has expired. Please contact support for a new invitation.', ErrorCodes.TOKEN_EXPIRED);
     }
 
@@ -1104,10 +1144,10 @@ router.post(
       SET password_hash = ?, status = 'active', invitation_token = NULL, invitation_expires_at = NULL
       WHERE id = ?
     `,
-      [hashedPassword, client.id]
+      [hashedPassword, getNumber(client, 'id')]
     );
 
-    return sendSuccess(res, { email: client.email }, 'Password set successfully. You can now log in.');
+    return sendSuccess(res, { email: getString(client, 'email') }, 'Password set successfully. You can now log in.');
   })
 );
 

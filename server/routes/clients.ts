@@ -13,6 +13,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middle
 import { emailService } from '../services/email-service.js';
 import { cache, invalidateCache, QueryCache } from '../middleware/cache.js';
 import { auditLogger } from '../services/audit-logger.js';
+import { getString, getNumber } from '../database/row-helpers.js';
 
 const router = express.Router();
 
@@ -119,7 +120,8 @@ router.put(
     }
 
     // Verify current password
-    const validPassword = await bcrypt.compare(currentPassword, client.password_hash);
+    const passwordHash = getString(client, 'password_hash');
+    const validPassword = await bcrypt.compare(currentPassword, passwordHash);
     if (!validPassword) {
       return res
         .status(401)
@@ -421,12 +423,17 @@ router.post(
       const portalUrl = process.env.CLIENT_PORTAL_URL || process.env.FRONTEND_URL;
       const supportEmail = process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL;
 
+      const newClientEmail = getString(newClient, 'email');
+      const newClientContactName = getString(newClient, 'contact_name');
+      const newClientCompanyName = getString(newClient, 'company_name');
+      const newClientId = getNumber(newClient, 'id');
+
       if (!portalUrl || !supportEmail) {
         console.warn('CLIENT_PORTAL_URL or SUPPORT_EMAIL not configured, skipping welcome email');
       } else {
-        await emailService.sendWelcomeEmail(newClient.email, {
-          name: newClient.contact_name || 'Client',
-          companyName: newClient.company_name,
+        await emailService.sendWelcomeEmail(newClientEmail, {
+          name: newClientContactName || 'Client',
+          companyName: newClientCompanyName,
           loginUrl: portalUrl,
           supportEmail: supportEmail
         });
@@ -435,9 +442,9 @@ router.post(
       // Send admin notification
       await emailService.sendAdminNotification({
         subject: 'New Client Registration',
-        intakeId: newClient.id.toString(),
-        clientName: newClient.contact_name || 'Unknown',
-        companyName: newClient.company_name || 'Unknown Company',
+        intakeId: newClientId.toString(),
+        clientName: newClientContactName || 'Unknown',
+        companyName: newClientCompanyName || 'Unknown Company',
         projectType: 'New Registration',
         budget: 'TBD',
         timeline: 'New Client'

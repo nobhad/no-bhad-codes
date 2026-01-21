@@ -18,6 +18,7 @@ import { generateProjectPlan, ProjectPlan } from '../services/project-generator.
 import { generateInvoice } from '../services/invoice-generator.js';
 import { sendWelcomeEmail, sendNewIntakeNotification } from '../services/email-service.js';
 import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../config/uploads.js';
+import { getString, getNumber } from '../database/row-helpers.js';
 
 const router = express.Router();
 
@@ -201,7 +202,7 @@ router.post('/', async (req: Request, res: Response) => {
       const isNewClient = !existingClient;
 
       if (existingClient) {
-        clientId = existingClient.id;
+        clientId = getNumber(existingClient as unknown as { [key: string]: unknown }, 'id');
         console.log(`Existing client found: ${clientId}`);
       } else {
         // Create new client account
@@ -349,12 +350,13 @@ router.post('/', async (req: Request, res: Response) => {
         ]
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Intake processing error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     res.status(500).json({
       success: false,
       message: 'Failed to process intake form',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? errorMessage : 'Internal server error'
     });
   }
 });
@@ -398,24 +400,24 @@ router.get('/status/:projectId', async (req: Request, res: Response) => {
 
     const responseData: ProjectStatusResponse = {
       project: {
-        id: project.id,
-        name: project.project_name,
-        status: project.status,
-        type: project.project_type,
-        timeline: project.timeline,
-        budget: project.budget_range
+        id: getNumber(project, 'id'),
+        name: getString(project, 'project_name'),
+        status: getString(project, 'status'),
+        type: getString(project, 'project_type'),
+        timeline: getString(project, 'timeline'),
+        budget: getString(project, 'budget_range')
       },
       client: {
-        name: project.contact_name,
-        company: project.company_name,
-        email: project.email
+        name: getString(project, 'contact_name'),
+        company: getString(project, 'company_name'),
+        email: getString(project, 'email')
       },
       latestUpdate: latestUpdate
         ? {
-          title: latestUpdate.title,
-          description: latestUpdate.description,
-          date: latestUpdate.created_at,
-          type: latestUpdate.type
+          title: getString(latestUpdate, 'title'),
+          description: getString(latestUpdate, 'description'),
+          date: getString(latestUpdate, 'created_at'),
+          type: getString(latestUpdate, 'type')
         }
         : null
     };
@@ -424,7 +426,7 @@ router.get('/status/:projectId', async (req: Request, res: Response) => {
       success: true,
       data: responseData
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Status check error:', error);
     res.status(500).json({
       success: false,
