@@ -40,6 +40,17 @@ Copy `.env.example` to `.env` and configure the following variables:
 | `ADMIN_PASSWORD` | Yes | - | Admin account password (development only) |
 | `ADMIN_PASSWORD_HASH` | No | - | Bcrypt hashed password (production) |
 
+### Business Information (Invoices)
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `BUSINESS_NAME` | No | - | Business name displayed on invoices |
+| `BUSINESS_CONTACT` | No | - | Business contact name displayed on invoices |
+| `BUSINESS_EMAIL` | No | - | Business email displayed on invoices |
+| `BUSINESS_WEBSITE` | No | - | Business website URL displayed on invoices |
+| `VENMO_HANDLE` | No | - | Venmo payment handle displayed on invoices |
+| `PAYPAL_EMAIL` | No | - | PayPal payment email displayed on invoices |
+
 ### Client Portal URLs
 
 | Variable | Required | Default | Description |

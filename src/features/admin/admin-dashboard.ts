@@ -13,7 +13,15 @@ import { AdminAuth } from './admin-auth';
 import { AdminProjectDetails } from './admin-project-details';
 import type { PerformanceMetrics, PerformanceAlert } from '../../services/performance-service';
 import { SanitizationUtils } from '../../utils/sanitization-utils';
-import type { AdminDashboardContext } from './admin-types';
+import type {
+  AdminDashboardContext,
+  AnalyticsEvent,
+  Lead,
+  ContactSubmission,
+  Project,
+  Message,
+  ContactStats
+} from './admin-types';
 import { getChartColor, getChartColorWithAlpha } from '../../config/constants';
 import { configureApiClient, apiFetch, apiPost, apiPut } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
@@ -83,9 +91,9 @@ class AdminDashboard {
   private charts: Map<string, { destroy: () => void }> = new Map();
 
   // Store data for detail views
-  private leadsData: any[] = [];
-  private contactsData: any[] = [];
-  private projectsData: any[] = [];
+  private leadsData: Lead[] = [];
+  private contactsData: ContactSubmission[] = [];
+  private projectsData: Project[] = [];
 
   // Module context for code-split modules
   private moduleContext: AdminDashboardContext;
@@ -536,7 +544,7 @@ class AdminDashboard {
     }
   }
 
-  private updateContactsDisplay(data: { submissions: any[]; stats: any }): void {
+  private updateContactsDisplay(data: { submissions: ContactSubmission[]; stats: ContactStats }): void {
     // Store contacts data for detail views
     this.contactsData = data.submissions || [];
 
@@ -560,7 +568,7 @@ class AdminDashboard {
           '<tr><td colspan="6" class="loading-row">No contact form submissions yet</td></tr>';
       } else {
         tableBody.innerHTML = data.submissions
-          .map((submission: any) => {
+          .map((submission: ContactSubmission) => {
             const date = new Date(submission.created_at).toLocaleDateString();
             // Sanitize user data to prevent XSS
             const safeName = SanitizationUtils.escapeHtml(submission.name || '-');
@@ -674,7 +682,7 @@ class AdminDashboard {
   }
 
   private showContactDetails(contactId: number): void {
-    const contact = this.contactsData.find((c: any) => c.id === contactId);
+    const contact = this.contactsData.find((c) => c.id === contactId);
     if (!contact) return;
 
     const modal = document.getElementById('detail-modal');
@@ -825,23 +833,23 @@ class AdminDashboard {
     try {
       // Read visitor tracking events from sessionStorage (set by visitor-tracking.ts)
       const eventsJson = sessionStorage.getItem('nbw_tracking_events');
-      const events = eventsJson ? JSON.parse(eventsJson) : [];
+      const events: AnalyticsEvent[] = eventsJson ? JSON.parse(eventsJson) : [];
 
       // Count unique sessions (visitors today)
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const todayStart = today.getTime();
 
-      const todayEvents = events.filter((e: any) => e.timestamp >= todayStart);
-      const todaySessions = new Set(todayEvents.map((e: any) => e.sessionId));
+      const todayEvents = events.filter((e) => e.timestamp >= todayStart);
+      const todaySessions = new Set(todayEvents.map((e) => e.sessionId));
       const visitorsToday = todaySessions.size;
 
       // Count total page views
-      const pageViews = events.filter((e: any) => 'title' in e);
+      const pageViews = events.filter((e) => 'title' in e);
       const totalPageViews = pageViews.length;
 
       // Count total unique sessions (all time)
-      const allSessions = new Set(events.map((e: any) => e.sessionId));
+      const allSessions = new Set(events.map((e) => e.sessionId));
       const totalVisitors = allSessions.size;
 
       // Update overview stats
@@ -857,10 +865,10 @@ class AdminDashboard {
       if (analyticsPageviews) analyticsPageviews.textContent = totalPageViews.toString();
       if (analyticsSessions) {
         // Calculate average session duration
-        const sessionsWithTime = pageViews.filter((pv: any) => pv.timeOnPage);
+        const sessionsWithTime = pageViews.filter((pv) => pv.timeOnPage);
         if (sessionsWithTime.length > 0) {
           const totalTime = sessionsWithTime.reduce(
-            (sum: number, pv: any) => sum + (pv.timeOnPage || 0),
+            (sum: number, pv) => sum + (pv.timeOnPage || 0),
             0
           );
           const avgTimeMs = totalTime / sessionsWithTime.length;
@@ -966,7 +974,7 @@ class AdminDashboard {
     }
   }
 
-  private renderMessages(messages: any[]): void {
+  private renderMessages(messages: Message[]): void {
     const container =
       document.getElementById('admin-messages-thread') ||
       document.getElementById('admin-messages-container');
@@ -980,7 +988,7 @@ class AdminDashboard {
 
     // Use client portal style messages
     container.innerHTML = messages
-      .map((msg: any) => {
+      .map((msg: Message) => {
         const isAdmin = msg.sender_type === 'admin';
         const time = new Date(msg.created_at).toLocaleTimeString([], {
           hour: '2-digit',

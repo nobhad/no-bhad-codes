@@ -137,8 +137,11 @@ export interface ContactSubmission {
   email: string;
   company?: string;
   phone?: string;
+  subject?: string;
   message: string;
-  status: 'new' | 'read' | 'responded' | 'archived';
+  status: 'new' | 'read' | 'responded' | 'replied' | 'archived';
+  read_at?: string;
+  replied_at?: string;
   created_at: string;
 }
 
@@ -205,6 +208,7 @@ export interface Message {
   sender_type: 'client' | 'admin' | 'system';
   sender_name: string;
   message: string;
+  content?: string;  // Alias for message in some contexts
   is_read: boolean;
   created_at: string;
 }
@@ -223,4 +227,24 @@ export interface AdminDashboardContext {
   showNotification: (message: string, type: 'success' | 'error' | 'info') => void;
   refreshData: () => Promise<void>;
   switchTab: (tab: string) => void;
+}
+
+// Analytics event type for analytics tracking
+export interface AnalyticsEvent {
+  type: string;
+  timestamp: number;
+  sessionId?: string;
+  title?: string;
+  url?: string;
+  timeOnPage?: number;
+  data?: Record<string, unknown>;
+}
+
+// Contact stats returned from API
+export interface ContactStats {
+  total: number;
+  new: number;
+  read: number;
+  responded: number;
+  archived: number;
 }

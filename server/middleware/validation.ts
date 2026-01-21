@@ -17,7 +17,7 @@ import { VALIDATION_PATTERNS } from '../../shared/validation/patterns.js';
 export interface ValidationError {
   field: string;
   message: string;
-  value?: any;
+  value?: unknown;
   code?: string;
 }
 
@@ -25,10 +25,11 @@ export interface ValidationError {
 export interface ValidationResult {
   isValid: boolean;
   errors: ValidationError[];
-  sanitizedData?: any;
+  sanitizedData?: Record<string, unknown>;
 }
 
 // Validation rule types
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ValidationRule = {
   type: 'required' | 'email' | 'string' | 'number' | 'boolean' | 'array' | 'object' | 'custom';
   minLength?: number;
@@ -36,9 +37,12 @@ export type ValidationRule = {
   min?: number;
   max?: number;
   pattern?: RegExp;
+  // Using any for customValidator to allow strongly-typed validators from calling code
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   customValidator?: (value: any) => boolean | string;
-  customSanitizer?: (value: any) => any;
-  allowedValues?: any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  customSanitizer?: (value: any) => unknown;
+  allowedValues?: unknown[];
   description?: string;
 };
 
@@ -63,9 +67,9 @@ export class ApiValidator {
   /**
    * Validate data against schema
    */
-  public validate(data: any, schema: ValidationSchema): ValidationResult {
+  public validate(data: Record<string, unknown>, schema: ValidationSchema): ValidationResult {
     const errors: ValidationError[] = [];
-    const sanitizedData: any = {};
+    const sanitizedData: Record<string, unknown> = {};
 
     for (const [field, rules] of Object.entries(schema)) {
       const fieldRules = Array.isArray(rules) ? rules : [rules];
@@ -94,12 +98,12 @@ export class ApiValidator {
    */
   private validateField(
     field: string,
-    value: any,
+    value: unknown,
     rule: ValidationRule
   ): {
     isValid: boolean;
     errors: ValidationError[];
-    sanitizedValue?: any;
+    sanitizedValue?: unknown;
   } {
     const errors: ValidationError[] = [];
     let sanitizedValue = value;
@@ -195,7 +199,7 @@ export class ApiValidator {
 
   private validateString(
     field: string,
-    value: any,
+    value: unknown,
     rule: ValidationRule,
     errors: ValidationError[]
   ): string {
@@ -206,7 +210,7 @@ export class ApiValidator {
         code: 'INVALID_TYPE',
         value
       });
-      return value;
+      return String(value);
     }
 
     let sanitized = value.trim();
@@ -258,7 +262,7 @@ export class ApiValidator {
 
   private validateNumber(
     field: string,
-    value: any,
+    value: unknown,
     rule: ValidationRule,
     errors: ValidationError[]
   ): number {
@@ -271,7 +275,7 @@ export class ApiValidator {
         code: 'INVALID_NUMBER',
         value
       });
-      return value;
+      return 0;
     }
 
     if (rule.min !== undefined && num < rule.min) {
@@ -297,7 +301,7 @@ export class ApiValidator {
 
   private validateBoolean(
     field: string,
-    value: any,
+    value: unknown,
     rule: ValidationRule,
     errors: ValidationError[]
   ): boolean {
@@ -324,12 +328,12 @@ export class ApiValidator {
       value
     });
 
-    return value;
+    return false;
   }
 
   private validateEmail(
     field: string,
-    value: any,
+    value: unknown,
     rule: ValidationRule,
     errors: ValidationError[]
   ): string {
@@ -340,7 +344,7 @@ export class ApiValidator {
         code: 'INVALID_TYPE',
         value
       });
-      return value;
+      return String(value);
     }
 
     const email = value.trim().toLowerCase();
@@ -390,10 +394,10 @@ export class ApiValidator {
 
   private validateArray(
     field: string,
-    value: any,
+    value: unknown,
     rule: ValidationRule,
     errors: ValidationError[]
-  ): any[] {
+  ): unknown[] {
     if (!Array.isArray(value)) {
       errors.push({
         field,
@@ -401,7 +405,7 @@ export class ApiValidator {
         code: 'INVALID_ARRAY',
         value
       });
-      return value;
+      return [];
     }
 
     if (rule.minLength !== undefined && value.length < rule.minLength) {
@@ -427,10 +431,10 @@ export class ApiValidator {
 
   private validateObject(
     field: string,
-    value: any,
+    value: unknown,
     rule: ValidationRule,
     errors: ValidationError[]
-  ): any {
+  ): Record<string, unknown> {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
       errors.push({
         field,
@@ -438,18 +442,18 @@ export class ApiValidator {
         code: 'INVALID_OBJECT',
         value
       });
-      return value;
+      return {};
     }
 
-    return value;
+    return value as Record<string, unknown>;
   }
 
   private validateCustom(
     field: string,
-    value: any,
+    value: unknown,
     rule: ValidationRule,
     errors: ValidationError[]
-  ): any {
+  ): unknown {
     if (!rule.customValidator) {
       return value;
     }
@@ -573,9 +577,8 @@ export function validateRequest(
         validationResults.push(result);
 
         if (result.isValid && result.sanitizedData) {
-          req.query = stripUnknownFields
-            ? result.sanitizedData
-            : { ...req.query, ...result.sanitizedData };
+          // Cast sanitizedData to preserve Express types
+          Object.assign(req.query, result.sanitizedData);
         }
       }
 
@@ -588,9 +591,8 @@ export function validateRequest(
         validationResults.push(result);
 
         if (result.isValid && result.sanitizedData) {
-          req.params = stripUnknownFields
-            ? result.sanitizedData
-            : { ...req.params, ...result.sanitizedData };
+          // Cast sanitizedData to preserve Express types
+          Object.assign(req.params, result.sanitizedData);
         }
       }
 

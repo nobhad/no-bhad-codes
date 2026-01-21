@@ -549,6 +549,86 @@ export function validateArray<T>(
 }
 
 // ============================================
+// Sanitization Functions
+// ============================================
+
+/**
+ * HTML entity map for escaping
+ */
+const HTML_ENTITIES: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#x27;',
+  '/': '&#x2F;',
+  '`': '&#x60;',
+  '=': '&#x3D;'
+};
+
+/**
+ * Escape HTML special characters to prevent XSS
+ * Use this for any user-generated content being inserted into HTML
+ */
+export function escapeHtml(str: string): string {
+  if (typeof str !== 'string') {
+    return '';
+  }
+  return str.replace(/[&<>"'`=/]/g, (char) => HTML_ENTITIES[char] || char);
+}
+
+/**
+ * Alias for escapeHtml for consistency with existing code
+ */
+export const sanitizeHtml = escapeHtml;
+
+/**
+ * Strip all HTML tags from a string
+ * Returns plain text only
+ */
+export function stripHtmlTags(str: string): string {
+  if (typeof str !== 'string') {
+    return '';
+  }
+  return str.replace(/<[^>]*>/g, '');
+}
+
+/**
+ * Escape HTML for use in HTML attributes
+ * More strict than escapeHtml - also escapes newlines and tabs
+ */
+export function escapeHtmlAttribute(str: string): string {
+  if (typeof str !== 'string') {
+    return '';
+  }
+  return escapeHtml(str)
+    .replace(/\n/g, '&#10;')
+    .replace(/\r/g, '&#13;')
+    .replace(/\t/g, '&#9;');
+}
+
+/**
+ * Sanitize a URL to prevent javascript: and data: XSS attacks
+ */
+export function sanitizeUrl(url: string): string {
+  if (typeof url !== 'string') {
+    return '';
+  }
+  const trimmed = url.trim().toLowerCase();
+
+  // Block dangerous protocols
+  if (
+    trimmed.startsWith('javascript:') ||
+    trimmed.startsWith('data:') ||
+    trimmed.startsWith('vbscript:')
+  ) {
+    return '';
+  }
+
+  return url;
+}
+
+// ============================================
 // Composite Validators
 // ============================================
 
