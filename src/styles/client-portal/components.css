@@ -65,7 +65,7 @@
   border: none;
   border-radius: var(--portal-radius-lg);
   font-size: 1.2rem;
-  font-weight: 600;
+  font-weight: 400;
   background-color: var(--color-black);
   color: var(--portal-text-light);
   font-family: inherit;
@@ -76,7 +76,7 @@
   caret-color: var(--portal-text-light);
 }
 
-/* Placeholder styling - matches contact form */
+/* Placeholder styling - NOT bold */
 .portal-input::placeholder,
 :is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) :is(
   .form-input,
@@ -85,7 +85,7 @@
 )::placeholder {
   color: var(--portal-text-light);
   opacity: 0.5;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 /* Focus states for portal inputs */
