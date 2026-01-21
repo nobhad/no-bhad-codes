@@ -1,0 +1,171 @@
+/* =====================================================
+   SHARED PORTAL FORMS
+   @file src/styles/shared/portal-forms.css
+   Single source of truth for admin and client portal forms
+   Isolates portal form styling from main site
+   ===================================================== */
+
+/* =====================================================
+   PORTAL FORM INPUTS
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .form-input,
+:is([data-page="admin"], [data-page="client-portal"]) .form-textarea,
+:is([data-page="admin"], [data-page="client-portal"]) .form-select,
+:is([data-page="admin"], [data-page="client-portal"]) input[type="text"],
+:is([data-page="admin"], [data-page="client-portal"]) input[type="email"],
+:is([data-page="admin"], [data-page="client-portal"]) input[type="password"],
+:is([data-page="admin"], [data-page="client-portal"]) input[type="tel"],
+:is([data-page="admin"], [data-page="client-portal"]) input[type="number"],
+:is([data-page="admin"], [data-page="client-portal"]) input[type="url"],
+:is([data-page="admin"], [data-page="client-portal"]) textarea,
+:is([data-page="admin"], [data-page="client-portal"]) select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--portal-border-color, var(--color-neutral-600));
+  border-radius: var(--border-radius-card);
+  font-size: 1rem;
+  font-family: inherit;
+  font-weight: 400;
+  background-color: var(--color-black);
+  color: var(--portal-text-light);
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+/* Textarea specific */
+:is([data-page="admin"], [data-page="client-portal"]) textarea,
+:is([data-page="admin"], [data-page="client-portal"]) .form-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* =====================================================
+   PLACEHOLDER TEXT - NOT BOLD
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .form-input::placeholder,
+:is([data-page="admin"], [data-page="client-portal"]) .form-textarea::placeholder,
+:is([data-page="admin"], [data-page="client-portal"]) input::placeholder,
+:is([data-page="admin"], [data-page="client-portal"]) textarea::placeholder {
+  font-weight: 400;
+  color: var(--portal-text-muted);
+  opacity: 1;
+}
+
+/* =====================================================
+   FOCUS STATES
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .form-input:focus,
+:is([data-page="admin"], [data-page="client-portal"]) .form-textarea:focus,
+:is([data-page="admin"], [data-page="client-portal"]) .form-select:focus,
+:is([data-page="admin"], [data-page="client-portal"]) input:focus,
+:is([data-page="admin"], [data-page="client-portal"]) textarea:focus,
+:is([data-page="admin"], [data-page="client-portal"]) select:focus,
+:is([data-page="admin"], [data-page="client-portal"]) .form-input:focus-visible,
+:is([data-page="admin"], [data-page="client-portal"]) .form-textarea:focus-visible,
+:is([data-page="admin"], [data-page="client-portal"]) .form-select:focus-visible,
+:is([data-page="admin"], [data-page="client-portal"]) input:focus-visible,
+:is([data-page="admin"], [data-page="client-portal"]) textarea:focus-visible,
+:is([data-page="admin"], [data-page="client-portal"]) select:focus-visible {
+  outline: none;
+  outline-offset: 0;
+  border-color: var(--color-primary);
+  box-shadow: none;
+}
+
+/* =====================================================
+   FORM LABELS
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) label,
+:is([data-page="admin"], [data-page="client-portal"]) .form-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+/* =====================================================
+   SELECT DROPDOWN
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) select,
+:is([data-page="admin"], [data-page="client-portal"]) .form-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f5f5f5' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 12px;
+  cursor: pointer;
+}
+
+/* =====================================================
+   FORM GROUP SPACING
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .form-group {
+  margin-bottom: var(--portal-spacing-lg);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* =====================================================
+   DISABLED STATE
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) input:disabled,
+:is([data-page="admin"], [data-page="client-portal"]) textarea:disabled,
+:is([data-page="admin"], [data-page="client-portal"]) select:disabled,
+:is([data-page="admin"], [data-page="client-portal"]) .form-input:disabled,
+:is([data-page="admin"], [data-page="client-portal"]) .form-textarea:disabled,
+:is([data-page="admin"], [data-page="client-portal"]) .form-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--portal-bg-readonly);
+}
+
+/* =====================================================
+   READONLY STATE
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) input:read-only,
+:is([data-page="admin"], [data-page="client-portal"]) textarea:read-only,
+:is([data-page="admin"], [data-page="client-portal"]) .form-input:read-only,
+:is([data-page="admin"], [data-page="client-portal"]) .form-textarea:read-only {
+  background-color: var(--portal-bg-readonly);
+  cursor: default;
+}
+
+/* =====================================================
+   ERROR STATE
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .form-input.error,
+:is([data-page="admin"], [data-page="client-portal"]) .form-textarea.error,
+:is([data-page="admin"], [data-page="client-portal"]) input.error,
+:is([data-page="admin"], [data-page="client-portal"]) textarea.error,
+:is([data-page="admin"], [data-page="client-portal"]) select.error {
+  border-color: var(--color-danger);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .form-error-message {
+  color: var(--color-danger);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+/* =====================================================
+   MOBILE RESPONSIVE
+   ===================================================== */
+@media (--small-mobile) {
+  :is([data-page="admin"], [data-page="client-portal"]) .form-input,
+  :is([data-page="admin"], [data-page="client-portal"]) .form-textarea,
+  :is([data-page="admin"], [data-page="client-portal"]) .form-select,
+  :is([data-page="admin"], [data-page="client-portal"]) input,
+  :is([data-page="admin"], [data-page="client-portal"]) textarea,
+  :is([data-page="admin"], [data-page="client-portal"]) select {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.9rem;
+  }
+}

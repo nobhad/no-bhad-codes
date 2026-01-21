@@ -12,6 +12,7 @@
 @import "../shared/portal-buttons.css";
 @import "../shared/portal-messages.css";
 @import "../shared/portal-cards.css";
+@import "../shared/portal-forms.css";
 
 /* Portal layout and sidebar (shared with client portal) */
 @import "../client-portal/layout.css";
