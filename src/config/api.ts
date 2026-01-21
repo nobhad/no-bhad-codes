@@ -113,7 +113,7 @@ export function buildApiUrl(endpoint: string): string {
 }
 
 /**
- * Get auth endpoints
+ * Get auth endpoints (client)
  */
 export const authEndpoints = {
   login: buildApiUrl(apiConfig.endpoints.auth.login),
@@ -123,4 +123,13 @@ export const authEndpoints = {
   profile: buildApiUrl(apiConfig.endpoints.auth.profile),
   magicLink: buildApiUrl(apiConfig.endpoints.auth.magicLink),
   verifyMagicLink: buildApiUrl(apiConfig.endpoints.auth.verifyMagicLink)
+};
+
+/**
+ * Get admin auth endpoints
+ */
+export const adminAuthEndpoints = {
+  login: buildApiUrl('/api/auth/admin/login'),
+  logout: buildApiUrl('/api/auth/admin/logout'),
+  validate: buildApiUrl('/api/auth/admin/validate')
 };

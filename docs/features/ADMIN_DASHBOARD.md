@@ -55,10 +55,19 @@ admin/
 └── index.html                    # Admin HTML entry point (~1300 lines)
 
 src/features/admin/
-├── admin-dashboard.ts            # Main dashboard controller (~1900 lines)
+├── admin-dashboard.ts            # Main dashboard coordinator (~200 lines)
 ├── admin-project-details.ts      # Project detail view handler (~1300 lines)
 ├── admin-auth.ts                 # Admin authentication
 └── admin-security.ts             # Rate limiting and security
+
+src/features/admin/services/      # Extracted services (January 2026 refactor)
+├── admin-data.service.ts         # Data fetching and caching with TTL
+├── admin-chart.service.ts        # Chart.js integration and rendering
+└── admin-export.service.ts       # CSV/data export functionality
+
+src/features/admin/renderers/     # Extracted UI renderers (January 2026 refactor)
+├── admin-contacts.renderer.ts    # Contact table and modal rendering
+└── admin-messaging.renderer.ts   # Messaging UI and thread rendering
 
 src/features/admin/modules/       # Extracted modules
 ├── admin-analytics.ts            # Analytics and charts (~900 lines)
@@ -504,8 +513,13 @@ The main dashboard delegates to this module's `setupMessagingListeners()` for pr
 | File | Purpose |
 |------|---------|
 | `admin/index.html` | Admin dashboard HTML |
-| `src/features/admin/admin-dashboard.ts` | Main controller (~2000 lines) |
+| `src/features/admin/admin-dashboard.ts` | Main coordinator |
 | `src/features/admin/admin-security.ts` | Rate limiting |
+| `src/features/admin/services/admin-data.service.ts` | Data fetching and caching |
+| `src/features/admin/services/admin-chart.service.ts` | Chart.js integration |
+| `src/features/admin/services/admin-export.service.ts` | Data export functionality |
+| `src/features/admin/renderers/admin-contacts.renderer.ts` | Contact table rendering |
+| `src/features/admin/renderers/admin-messaging.renderer.ts` | Messaging UI rendering |
 | `src/styles/pages/admin.css` | Admin styles |
 | `client/set-password.html` | Password setup page |
 | `server/routes/admin.ts` | Admin API endpoints |

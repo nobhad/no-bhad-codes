@@ -6,10 +6,12 @@
  *
  * Comprehensive API validation middleware for all endpoints.
  * Provides request validation, sanitization, and error handling.
+ * Uses shared validation patterns from /shared/validation.
  */
 
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../services/logger.js';
+import { VALIDATION_PATTERNS } from '../../shared/validation/patterns.js';
 
 // Validation error interface
 export interface ValidationError {
@@ -342,10 +344,9 @@ export class ApiValidator {
     }
 
     const email = value.trim().toLowerCase();
-    // Email regex: allows dots, hyphens, plus signs; requires valid TLD
-    const emailRegex = /^[a-z0-9]+([._+-]?[a-z0-9]+)*@[a-z0-9]+([.-]?[a-z0-9]+)*(\.[a-z]{2,})+$/;
 
-    if (!emailRegex.test(email)) {
+    // Use shared email pattern for validation
+    if (!VALIDATION_PATTERNS.EMAIL.test(email)) {
       errors.push({
         field,
         message: `${field} must be a valid email address`,
@@ -628,6 +629,7 @@ export function validateRequest(
 
 /**
  * Common validation schemas
+ * Uses shared patterns from /shared/validation/patterns.ts
  */
 export const ValidationSchemas = {
   // User registration/login
@@ -638,7 +640,7 @@ export const ValidationSchemas = {
       type: 'string' as const,
       minLength: 12,
       maxLength: 128,
-      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+      pattern: VALIDATION_PATTERNS.PASSWORD_STRONG,
       description:
         'Password must be 12+ characters with at least one uppercase, lowercase, number, and special character'
     }
@@ -660,17 +662,15 @@ export const ValidationSchemas = {
         minLength: 10,
         maxLength: 5000,
         customValidator: (value: string) => {
-          // Check for spam patterns
-          const spamPatterns = [
-            /\b(buy now|click here|limited time|act fast|urgent|winner|congratulations)\b/gi,
-            /\b(viagra|casino|loan|mortgage|weight loss|get rich)\b/gi,
-            /https?:\/\/[^\s]+/gi // URLs in message
-          ];
-
-          return (
-            !spamPatterns.some((pattern) => pattern.test(value)) ||
-            'Message appears to contain spam'
-          );
+          // Check for spam patterns using shared pattern
+          if (VALIDATION_PATTERNS.SPAM_PATTERNS.test(value)) {
+            return 'Message appears to contain spam';
+          }
+          // Also check for URLs in message
+          if (VALIDATION_PATTERNS.URL_HTTP.test(value)) {
+            return 'Message appears to contain spam';
+          }
+          return true;
         }
       }
     ]
@@ -746,7 +746,7 @@ export const ValidationSchemas = {
       { type: 'required' as const },
       {
         type: 'string' as const,
-        pattern: /^[a-zA-Z0-9._-]+$/,
+        pattern: VALIDATION_PATTERNS.FILENAME_SAFE,
         maxLength: 255
       }
     ],

@@ -1,6 +1,6 @@
 # Module Dependencies
 
-Last Updated: January 13, 2026
+Last Updated: January 20, 2026
 
 ## Overview
 
@@ -126,6 +126,46 @@ business-card-interactions.ts
 | Module | Purpose | Dependencies |
 |--------|---------|--------------|
 | `theme.ts` | Dark/light theme switching | BaseModule, appState |
+
+## Admin Feature Services
+
+The admin dashboard uses extracted services and renderers (January 2026 refactor).
+
+### Admin Services
+
+| Service | Purpose | Dependencies |
+|---------|---------|--------------|
+| `admin-data.service.ts` | Data fetching and caching with TTL | Fetch API, types |
+| `admin-chart.service.ts` | Chart.js integration and rendering | Chart.js, admin-data.service |
+| `admin-export.service.ts` | CSV/data export functionality | admin-data.service |
+
+### Admin Renderers
+
+| Renderer | Purpose | Dependencies |
+|----------|---------|--------------|
+| `admin-contacts.renderer.ts` | Contact table and modal rendering | SanitizationUtils, admin-data.service, logging |
+| `admin-messaging.renderer.ts` | Messaging UI and thread rendering | SanitizationUtils, admin-data.service, logging |
+
+### Admin Service Dependencies
+
+```text
+admin-dashboard.ts (coordinator)
+    ├── admin-data.service.ts (data layer)
+    │   └── Types from src/types/
+    ├── admin-chart.service.ts
+    │   ├── Chart.js (dynamic import)
+    │   └── admin-data.service.ts
+    ├── admin-export.service.ts
+    │   └── admin-data.service.ts
+    ├── admin-contacts.renderer.ts
+    │   ├── SanitizationUtils
+    │   ├── admin-data.service.ts
+    │   └── logging (client logger)
+    └── admin-messaging.renderer.ts
+        ├── SanitizationUtils
+        ├── admin-data.service.ts
+        └── logging (client logger)
+```
 
 ## Platform-Specific Modules
 
