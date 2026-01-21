@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" fill="none">
+  <rect width="1200" height="700" fill="#e0e0e0"/>
+  <rect x="50" y="50" width="1100" height="600" rx="20" fill="#d0d0d0"/>
+  <g transform="translate(600, 350)">
+    <!-- Code brackets icon -->
+    <path d="M-120 -60 L-180 0 L-120 60" stroke="#999" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M120 -60 L180 0 L120 60" stroke="#999" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Slash in middle -->
+    <path d="M40 -60 L-40 60" stroke="#999" stroke-width="12" stroke-linecap="round"/>
+  </g>
+  <text x="600" y="480" font-family="system-ui, sans-serif" font-size="24" fill="#888" text-anchor="middle" font-weight="500">Project Screenshot Coming Soon</text>
+</svg>

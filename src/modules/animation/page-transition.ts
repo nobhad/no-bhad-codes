@@ -127,6 +127,11 @@ export class PageTransitionModule extends BaseModule {
         title: 'Projects - No Bhad Codes'
       },
       {
+        id: 'project-detail',
+        route: '#/projects/',
+        title: 'Project - No Bhad Codes'
+      },
+      {
         id: 'contact',
         route: '#/contact',
         title: 'Contact - No Bhad Codes'
@@ -243,6 +248,11 @@ export class PageTransitionModule extends BaseModule {
     }
 
     const path = hash.replace('#/', '').replace('#', '');
+
+    // Check for project detail routes (#/projects/slug)
+    if (path.startsWith('projects/') && path !== 'projects/') {
+      return 'project-detail';
+    }
 
     const hashToPage: Record<string, string> = {
       '': 'intro',

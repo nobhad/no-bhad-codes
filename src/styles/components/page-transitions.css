@@ -80,6 +80,14 @@ section.projects-section.page-active {
   z-index: 100;
 }
 
+/* Project detail section needs flex display when active */
+section.project-detail-section.page-active {
+  display: flex;
+  /* visibility controlled by GSAP autoAlpha */
+  pointer-events: auto;
+  z-index: 100;
+}
+
 /* Ensure virtual pages sections use correct display when active */
 main[data-virtual-pages] > section.contact-section.page-active,
 main[data-virtual-pages] > section.about-section.page-active {
@@ -171,8 +179,25 @@ section.business-card-section.page-hidden .intro-nav {
     padding: clamp(1rem, 4vw, 2rem);
   }
 
+  /* Project detail section - scrollable content area */
+  main[data-virtual-pages] > .project-detail-section[data-page].page-active {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+  }
+
   /* Other virtual page sections - centered */
-  main[data-virtual-pages] > section[data-page]:not(.tech-stack-section):not(.contact-section):not(.about-section):not(.business-card-section):not(.projects-section) {
+  main[data-virtual-pages] > section[data-page]:not(.tech-stack-section):not(.contact-section):not(.about-section):not(.business-card-section):not(.projects-section):not(.project-detail-section) {
     position: absolute;
     top: 0;
     left: 0;
