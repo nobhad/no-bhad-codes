@@ -8,30 +8,9 @@ This file tracks active development work and TODOs. Completed items are moved to
 
 ## TODOs
 
-### Architecture Concerns (High Priority)
-
-- [x] **ADMIN LOGIN AS MAIN SITE PAGE** - The admin login page should be a route on the main site (`#/admin-login`) rather than a separate `admin/index.html` page. This would:
-  - Use the EXACT same header/footer/nav as the main site ✅
-  - Allow the main site navigation to work (Menu button opens nav menu) ✅
-  - Maintain consistent user experience ✅
-  - Simplify header/footer maintenance (single source of truth) ✅
-  - **COMPLETE:** Added `#/admin-login` route, admin-login section in index.html, AdminLoginModule, redirects to `/admin/` after successful login
-
 ### Admin UI Polish (High Priority)
 
 - [ ] **REDESIGN ALL PORTAL BUTTONS** - Full button redesign across admin and client portals
-- [x] **PORTAL VISUAL CONSISTENCY** - Align admin and client portal styling (see breakdown below)
-- [x] Leads Management - cards should filter table
-- [x] Fix tooltip for truncated text - now uses fast CSS tooltips instead of native title delay
-- [x] Mobile sidebar behavior - collapsed sidebar hides completely, content fills viewport
-- [x] Admin portal mobile optimization - grids stack, reduced padding, horizontal stat cards
-- [x] Custom dropdown for leads page panels - compact table dropdowns with red focus state, transparent bg
-- [x] Add API endpoint for lead/intake status updates - PUT /api/admin/leads/:id/status
-- [x] Info icons on Analytics pages Core Web Vitals - tooltip hovers explaining what each metric means
-- [x] Unread message count badge on sidebar Messages button - red badge, right-aligned, only shows if unread > 0
-- [x] Leads count badge on sidebar - combined count of new intake/contact submissions, red badge, right-aligned
-- [x] Auto-add clients to messages dropdown - when new client added, they should appear in messages dropdown automatically
-- [x] Intake form submission as project file - save intake form data as downloadable/previewable file in project files automatically
 
 ### Main Site Features (Medium Priority)
 
@@ -403,10 +382,7 @@ When navigating to project detail pages (`#/projects/:slug`), content from other
 ### Findings
 
 **Opportunities:**
-- ✅ Migrated all hardcoded media queries to custom media query system (24+ instances)
-- ✅ Replaced all inline rgba box-shadow values with design token variables (10+ instances)
-- ✅ Completed server `any` types reduction (97 instances fixed, 0 TypeScript errors)
-- ✅ Reduced frontend `any` types from 71 to 41 (30 instances fixed in feature files, 41 intentional)
+- All completed improvements have been moved to archived work
 
 ---
 
