@@ -15,7 +15,7 @@
  * MOBILE CONTACT (max-width: 599px)
  * ============================================ */
 
-@media screen and (max-width: 599px) {
+@media (--compact-mobile) {
   /* Mobile-only line breaks */
   br.mobile-only {
     display: block;
@@ -287,7 +287,7 @@
  * Form fields 90vw and centered
  * ============================================ */
 
-@media screen and (max-width: 500px) {
+@media (--small-mobile) {
   /* Center content at 90vw */
   .contact-section {
     align-items: center;

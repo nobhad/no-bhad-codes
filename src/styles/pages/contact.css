@@ -772,7 +772,7 @@ section.contact-section .contact-form textarea.error {
    Same as desktop layout, scaled to 92vw
    ========================================== */
 
-@media screen and (min-width: 600px) and (max-width: 1100px) {
+@media (--tablet-to-desktop) {
   /* Scale layout to 92vw while maintaining desktop structure */
   .contact-section .contact-content {
     width: 92vw;

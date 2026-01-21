@@ -18,7 +18,7 @@
    ===================================================== */
 
 /* Tablet Styles */
-@media screen and (max-width: 991px) {
+@media (--tablet-down) {
   :root {
     --nav-base-gap: clamp(0.35rem, 1.2vw, 0.7rem);
     --menu-multiplier: 0.14;
@@ -177,7 +177,7 @@
 }
 
 /* Large Screens */
-@media screen and (min-width: 1200px) {
+@media (--wide) {
   :root {
     --nav-base-gap: 0.9rem;
     --menu-padding: 2.5rem;
@@ -196,7 +196,7 @@
 }
 
 /* Ultra-wide Screens */
-@media screen and (min-width: 1600px) {
+@media (--ultra-wide) {
   :root {
     --nav-base-gap: 1.1rem;
     --menu-padding: 3rem;

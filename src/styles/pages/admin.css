@@ -222,7 +222,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
 }
 
 /* Overview/Leads tabs have 4 cards - force 4 columns on desktop */
-@media (min-width: 900px) {
+@media (--desktop) {
   [data-page="admin"] #tab-overview .quick-stats,
   [data-page="admin"] #tab-leads .quick-stats,
   [data-page="admin"] #tab-projects .quick-stats,
@@ -233,7 +233,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
 
 /* Portal Shadow utility */
 [data-page="admin"] .portal-shadow {
-  box-shadow: var(--shadow-card, 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06));
+  box-shadow: var(--shadow-card);
 }
 
 /* Portal Project Card - Admin panel cards */
@@ -385,7 +385,7 @@ body[data-page="admin"] #tab-messages textarea::placeholder {
 }
 
 /* Mobile - reduce padding in messages area */
-@media (max-width: 480px) {
+@media (--small-mobile) {
   body[data-page="admin"] #tab-messages .messages-container {
     padding: 0;
   }
@@ -1796,7 +1796,7 @@ body.modal-open .dashboard-content {
 }
 
 /* Groups of 3 should go to 1 column on small screens */
-@media (max-width: 768px) {
+@media (--mobile) {
   [data-page="admin"] .overview-stats-grid,
   [data-page="admin"] .charts-grid {
     grid-template-columns: 1fr;
@@ -1840,7 +1840,7 @@ body.modal-open .dashboard-content {
 }
 
 /* Mobile - reduce padding on system page to prevent badge overflow */
-@media (max-width: 480px) {
+@media (--small-mobile) {
   /* Cards fill available width evenly */
   [data-page="admin"] #tab-system .portal-project-card {
     padding: 0.75rem;
@@ -2009,7 +2009,7 @@ body.modal-open .dashboard-content {
   text-align: center;
   letter-spacing: -0.5px;
   border-radius: 6px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-elevated-sm);
 }
 
 /* ================================================
@@ -2231,7 +2231,7 @@ body.modal-open .dashboard-content {
   max-width: 280px;
   text-align: left;
   border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-elevated-sm);
   z-index: 10000;
   pointer-events: none;
   opacity: 0;
@@ -2355,7 +2355,7 @@ body.modal-open .dashboard-content {
   color: var(--portal-text);
   font-size: 0.875rem;
   height: 40px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-elevated-md);
   box-sizing: border-box;
 }
 
@@ -2440,7 +2440,7 @@ body.modal-open .dashboard-content {
   background: var(--portal-bg-dark);
   border: 1px solid var(--portal-border);
   border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-dropdown-xl);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-8px);
@@ -2629,7 +2629,7 @@ body.modal-open .dashboard-content {
    TABLE FILTER MOBILE RESPONSIVE
    =============================================== */
 
-@media (max-width: 768px) {
+@media (--mobile) {
   .table-filter-controls {
     flex-wrap: wrap;
     width: 100%;
@@ -2661,7 +2661,7 @@ body.modal-open .dashboard-content {
   }
 }
 
-@media (max-width: 480px) {
+@media (--small-mobile) {
   /* Table header - grid layout: row 1 = title + icons, row 2 = badge */
   .admin-table-header {
     display: grid;

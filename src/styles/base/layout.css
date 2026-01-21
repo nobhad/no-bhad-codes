@@ -25,7 +25,7 @@
 }
 
 /* Responsive header height adjustments */
-@media screen and (max-width: 1024px) {
+@media (--desktop-down) {
   :root {
     --header-height: 50px;
   }
@@ -486,7 +486,7 @@ main {
  * RESPONSIVE LAYOUT ADJUSTMENTS
  * ============================================ */
 
-@media screen and (max-width: 1024px) {
+@media (--desktop-down) {
   main {
     top: var(--header-height);
     height: calc(100vh - var(--header-height) - var(--footer-height));
