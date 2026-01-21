@@ -11,6 +11,7 @@
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createLogger } from '../../../utils/logging';
 import { adminDataService, type Contact, type ContactStats } from '../services/admin-data.service';
+import { APP_CONSTANTS } from '../../../config/constants';
 
 const logger = createLogger('AdminContactsRenderer');
 
@@ -93,8 +94,9 @@ class AdminContactsRenderer {
     const safeEmail = SanitizationUtils.escapeHtml(submission.email || '-');
     const safeSubject = SanitizationUtils.escapeHtml(submission.subject || '-');
     const safeMessage = SanitizationUtils.escapeHtml(submission.message || '-');
+    const truncateLen = APP_CONSTANTS.TEXT.TRUNCATE_LENGTH;
     const truncatedMessage =
-      safeMessage.length > 50 ? `${safeMessage.substring(0, 50)}...` : safeMessage;
+      safeMessage.length > truncateLen ? `${safeMessage.substring(0, truncateLen)}...` : safeMessage;
     const safeTitleMessage = SanitizationUtils.escapeHtml(submission.message || '');
 
     return `

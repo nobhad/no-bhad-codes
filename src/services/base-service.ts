@@ -40,17 +40,17 @@ export abstract class BaseService {
   /**
    * Service-specific logging
    */
-  protected log(...args: any[]): void {
+  protected log(...args: unknown[]): void {
     if (this.debug) {
       console.log(`[${this.name}]`, ...args);
     }
   }
 
-  protected warn(...args: any[]): void {
+  protected warn(...args: unknown[]): void {
     console.warn(`[${this.name}]`, ...args);
   }
 
-  protected error(...args: any[]): void {
+  protected error(...args: unknown[]): void {
     console.error(`[${this.name}]`, ...args);
   }
 

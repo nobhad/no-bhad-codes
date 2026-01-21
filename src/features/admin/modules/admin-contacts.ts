@@ -11,6 +11,7 @@
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { apiFetch, apiPut } from '../../../utils/api-client';
 import { createTableDropdown, CONTACT_STATUS_OPTIONS } from '../../../utils/table-dropdown';
+import { APP_CONSTANTS } from '../../../config/constants';
 import {
   createFilterUI,
   createSortableHeaders,
@@ -159,8 +160,9 @@ function renderContactsTable(
     const safeEmail = SanitizationUtils.escapeHtml(submission.email || '-');
     const safeCompany = submission.company ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(submission.company)) : '';
     const safeMessage = SanitizationUtils.escapeHtml(submission.message || '-');
+    const truncateLen = APP_CONSTANTS.TEXT.TRUNCATE_LENGTH;
     const truncatedMessage =
-      safeMessage.length > 50 ? `${safeMessage.substring(0, 50)}...` : safeMessage;
+      safeMessage.length > truncateLen ? `${safeMessage.substring(0, truncateLen)}...` : safeMessage;
     const safeTitleMessage = SanitizationUtils.escapeHtml(submission.message || '');
     const status = submission.status || 'new';
 

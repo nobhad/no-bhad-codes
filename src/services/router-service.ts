@@ -26,6 +26,13 @@ export interface RouterConfig {
   transitionDuration: number;
 }
 
+export interface NavigationOptions {
+  smooth?: boolean;
+  replace?: boolean;
+  fromPopState?: boolean;
+  initial?: boolean;
+}
+
 export class RouterService extends BaseService {
   private routes = new Map<string, Route>();
   private currentRoute = '';
@@ -350,7 +357,7 @@ export class RouterService extends BaseService {
   /**
    * Perform the actual navigation
    */
-  private async performNavigation(path: string, options: any = {}): Promise<void> {
+  private async performNavigation(path: string, options: NavigationOptions = {}): Promise<void> {
     this.log('performNavigation called with path:', path);
     const route = this.findRoute(path);
 
@@ -504,7 +511,7 @@ export class RouterService extends BaseService {
   /**
    * Dispatch navigation events
    */
-  private dispatchNavigationEvent(eventName: string, detail: any): void {
+  private dispatchNavigationEvent(eventName: string, detail: unknown): void {
     const event = new CustomEvent(`router:${eventName}`, { detail });
     document.dispatchEvent(event);
     this.log(`Event dispatched: ${eventName}`, detail);
