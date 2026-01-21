@@ -57,26 +57,40 @@
   box-shadow: var(--btn-portal-shadow-hover);
 }
 
-/* Focus state */
+/* Focus state - red outline */
 :is([data-page="admin"], [data-page="client-portal"]) :is(
   .btn,
   .btn-primary,
   .btn-secondary,
   .btn-outline,
   button[type="submit"]
-):focus {
+):focus,
+:is([data-page="admin"], [data-page="client-portal"]) :is(
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline,
+  button[type="submit"]
+):focus-visible {
   box-shadow: var(--btn-portal-shadow-focus);
   outline: none;
 }
 
-/* Active/selected state */
+/* Icon buttons - no focus outline */
+:is([data-page="admin"], [data-page="client-portal"]) .icon-btn:focus,
+:is([data-page="admin"], [data-page="client-portal"]) .icon-btn:focus-visible {
+  box-shadow: none;
+  outline: none;
+}
+
+/* Active/selected state - no red background, only on hover */
 :is([data-page="admin"], [data-page="client-portal"]) :is(
   .btn,
   .btn-secondary
 ).active {
-  background: var(--color-primary);
-  color: var(--portal-bg-dark, #1a1a1a);
-  box-shadow: var(--btn-portal-shadow-hover);
+  background: transparent;
+  color: var(--color-primary);
+  box-shadow: var(--btn-portal-shadow);
 }
 
 /* ============================================
@@ -84,16 +98,18 @@
  * ============================================
  */
 
+/* Primary buttons - transparent bg, red text, red bg only on hover */
 :is([data-page="admin"], [data-page="client-portal"]) .btn-primary,
 :is([data-page="admin"], [data-page="client-portal"]) button[type="submit"] {
-  background: var(--color-primary);
-  color: var(--color-white, #fff);
+  background: transparent;
+  color: var(--color-primary);
 }
 
+/* Primary button hover - same red bg as other buttons */
 :is([data-page="admin"], [data-page="client-portal"]) .btn-primary:hover,
 :is([data-page="admin"], [data-page="client-portal"]) button[type="submit"]:hover {
-  background: var(--portal-bg-dark, #1a1a1a);
-  color: var(--portal-text-light, #fff);
+  background: var(--color-primary);
+  color: var(--portal-bg-dark, #1a1a1a);
 }
 
 /* ============================================
@@ -127,11 +143,15 @@
   box-shadow: var(--btn-portal-shadow);
 }
 
-/* Button icon styling - size matches text */
+/* Button icon styling - size matches text, bold stroke */
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn .btn-icon {
   flex-shrink: 0;
   width: 1em;
   height: 1em;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn .btn-icon svg {
+  stroke-width: 2.5;
 }
 
 /* Button text styling */
@@ -139,14 +159,14 @@
   flex: 1;
 }
 
-/* Icon color on hover - dark for contrast on red background */
+/* Icon color on hover - same as text color */
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn:hover .btn-icon {
-  color: var(--portal-bg-dark);
+  color: var(--portal-bg-dark, #1a1a1a);
 }
 
-/* Icon color when active */
+/* Icon color when active - same red as text */
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn.active .btn-icon {
-  color: var(--portal-bg-dark);
+  color: var(--color-primary);
 }
 
 /* ============================================
@@ -163,11 +183,15 @@
   box-shadow: var(--btn-portal-shadow);
 }
 
-/* Logout button icon styling - size matches text */
+/* Logout button icon styling - size matches text, bold stroke */
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar-footer .btn-logout .btn-icon {
   flex-shrink: 0;
   width: 1em;
   height: 1em;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-footer .btn-logout .btn-icon svg {
+  stroke-width: 2.5;
 }
 
 /* Logout button text styling */
@@ -283,6 +307,7 @@
   margin: 0;
   width: 20px;
   height: 20px;
+  stroke-width: 2.5;
 }
 
 /* ============================================
@@ -323,6 +348,7 @@
   margin: 0;
   width: 20px;
   height: 20px;
+  stroke-width: 2.5;
 }
 
 /* ============================================
@@ -368,6 +394,7 @@
     margin-right: 0;
     width: 20px;
     height: 20px;
+    stroke-width: 2.5;
   }
 
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-footer .btn-logout {
@@ -391,5 +418,6 @@
     margin: 0;
     width: 20px;
     height: 20px;
+    stroke-width: 2.5;
   }
 }

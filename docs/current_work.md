@@ -10,6 +10,12 @@ This file tracks active development work and TODOs. Completed items are moved to
 
 ### Admin UI Polish (High Priority)
 
+- [x] **PORTAL CSS CONSOLIDATION** - Completed January 21, 2026
+  - Created shared portal CSS files for single source of truth
+  - Removed duplicate styling from admin and client portal files
+  - Fixed avatar styling (black icon/white eye in messages, inverted in sidebar)
+  - Added bold stroke-width (2.5) for sidebar icons
+  - Added red focus outline for portal buttons
 - [ ] **REDESIGN ALL PORTAL BUTTONS** - Full button redesign across admin and client portals
 
 ### Main Site Features (Medium Priority)
