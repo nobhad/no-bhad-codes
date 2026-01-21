@@ -107,6 +107,7 @@
   margin: 0;
 }
 
+/* Activity list items use main content background color */
 :is([data-page="admin"], [data-page="client-portal"]) .activity-list li {
   padding: var(--space-3) var(--space-4);
   background: var(--portal-bg-medium);
@@ -115,7 +116,11 @@
   margin-bottom: var(--portal-spacing-sm);
   font-size: 0.9rem;
   color: var(--portal-text-light);
-  transition: background-color 0.2s ease;
+}
+
+/* No hover effect - items are not clickable */
+:is([data-page="admin"], [data-page="client-portal"]) .activity-list li:hover {
+  background: var(--portal-bg-medium);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .activity-list li:last-child {

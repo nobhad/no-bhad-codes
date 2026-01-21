@@ -1050,12 +1050,13 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   gap: var(--portal-spacing-md);
 }
 
+/* Activity list items - use main content bg color, no shadow */
 [data-page="admin"] .activity-list li {
   color: var(--portal-text-light);
   padding: var(--portal-spacing-lg);
-  background: var(--portal-bg-light);
+  background: var(--portal-bg-medium);
   border-radius: var(--portal-radius-md);
-  box-shadow: var(--shadow-card);
+  box-shadow: none;
 }
 
 .overview-stats-grid {
