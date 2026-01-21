@@ -74,7 +74,10 @@ export const APP_CONSTANTS = {
     SECONDARY: 'var(--color-secondary, #ff6b6b)',
     DARK: 'var(--color-dark, #000000)',
     LIGHT: 'var(--color-light, #ffffff)',
-    NEUTRAL: 'var(--color-neutral-400, #6B7280)'
+    NEUTRAL: 'var(--color-neutral-400, #6B7280)',
+    // Meta theme-color values (must be hex, not CSS vars - used by browser chrome)
+    META_LIGHT: '#f8f5f4',
+    META_DARK: '#333333'
   },
 
   // Chart color CSS variable mappings
@@ -123,7 +126,22 @@ export const APP_CONSTANTS = {
   SECURITY: {
     PASSWORD_MIN_LENGTH: 8,
     SESSION_TIMEOUT: 24 * 60 * 60 * 1000, // 24 hours
-    CSRF_TOKEN_LENGTH: 32
+    CSRF_TOKEN_LENGTH: 32,
+    // Admin email from env var with fallback - used for frontend validation
+    ADMIN_EMAIL: import.meta.env.VITE_ADMIN_EMAIL || 'nobhaduri@gmail.com'
+  },
+
+  // Text formatting
+  TEXT: {
+    TRUNCATE_LENGTH: 50,
+    PREVIEW_LENGTH: 100
+  },
+
+  // Notification/Toast timing
+  NOTIFICATIONS: {
+    SUCCESS_DURATION: 3000,
+    ERROR_DURATION: 5000,
+    DEFAULT_DURATION: 3000
   },
 
   // Animation easing

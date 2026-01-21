@@ -8,8 +8,7 @@
  * Enhanced navigation module with client-side routing support.
  * Handles menu animations, theme switching, and route-aware navigation.
  *
- * TODO: [Code Review Dec 2025] Track event listeners added in
- *       setupLinkHandlers() for proper cleanup in onDestroy().
+ * Event listeners are tracked via this.addEventListener() for automatic cleanup.
  */
 
 import { BaseModule } from '../core/base';
@@ -197,16 +196,17 @@ export class NavigationModule extends BaseModule {
       });
     }
 
-    // Keyboard support
-    document.addEventListener('keydown', (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && appState.getState().navOpen) {
+    // Keyboard support (tracked for cleanup)
+    this.addEventListener(document, 'keydown', (event: Event) => {
+      const keyEvent = event as KeyboardEvent;
+      if (keyEvent.key === 'Escape' && appState.getState().navOpen) {
         this.closeMenu();
       }
     });
 
-    // Logo link - navigate to home using hash for consistent transitions
+    // Logo link - navigate to home using hash for consistent transitions (tracked for cleanup)
     if (this.logoLink) {
-      this.logoLink.addEventListener('click', (event: Event) => {
+      this.addEventListener(this.logoLink, 'click', (event: Event) => {
         event.preventDefault();
 
         // Check if we're on the home page
@@ -559,11 +559,12 @@ export class NavigationModule extends BaseModule {
    * Setup touch event handlers for mobile tap-to-animate behavior
    */
   private setupTouchHandlers(): void {
-    // Listen for taps outside menu links to clear touch-active state
-    document.addEventListener('touchstart', (event: TouchEvent) => {
+    // Listen for taps outside menu links to clear touch-active state (tracked for cleanup)
+    this.addEventListener(document, 'touchstart', (event: Event) => {
       if (!this.activeTouchLink) return;
 
-      const target = event.target as Element;
+      const touchEvent = event as TouchEvent;
+      const target = touchEvent.target as Element;
       const isMenuLink = target.closest('.menu-link');
 
       // If tapping outside any menu link, clear the active state

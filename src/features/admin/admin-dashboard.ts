@@ -22,7 +22,7 @@ import type {
   Message,
   ContactStats
 } from './admin-types';
-import { getChartColor, getChartColorWithAlpha } from '../../config/constants';
+import { APP_CONSTANTS, getChartColor, getChartColorWithAlpha } from '../../config/constants';
 import { configureApiClient, apiFetch, apiPost, apiPut } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 
@@ -576,8 +576,9 @@ class AdminDashboard {
             const safeSubject = SanitizationUtils.escapeHtml(submission.subject || '-');
             const safeMessage = SanitizationUtils.escapeHtml(submission.message || '-');
             // Truncate message for display (after sanitization)
+            const truncateLen = APP_CONSTANTS.TEXT.TRUNCATE_LENGTH;
             const truncatedMessage =
-              safeMessage.length > 50 ? `${safeMessage.substring(0, 50)}...` : safeMessage;
+              safeMessage.length > truncateLen ? `${safeMessage.substring(0, truncateLen)}...` : safeMessage;
             // For title attribute, also escape
             const safeTitleMessage = SanitizationUtils.escapeHtml(submission.message || '');
             return `
