@@ -289,21 +289,47 @@ export type ProjectStatus =
   | 'on_hold';
 
 /**
- * Project entity response
+ * Project entity response (matches server API response)
  */
 export interface ProjectResponse {
   id: number;
-  name: string;
+  name?: string; // Legacy field
+  project_name?: string; // Preferred field
   client_id: number;
   client_name?: string;
-  status: ProjectStatus;
+  contact_name?: string;
+  company_name?: string;
+  email?: string;
+  phone?: string;
+  status: ProjectStatus | string; // Allow string for flexibility
+  project_type?: string;
+  budget_range?: string;
+  timeline?: string;
+  priority?: string;
   start_date?: string;
   end_date?: string;
+  estimated_end_date?: string;
+  actual_end_date?: string;
   budget?: number;
   description?: string;
   progress?: number;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
+  // Stats from joins
+  file_count?: number;
+  message_count?: number;
+  unread_count?: number;
+  // Optional fields that may be present
+  preview_url?: string;
+  repository_url?: string;
+  production_url?: string;
+  deposit_amount?: number;
+  contract_signed_at?: string;
+  notes?: string;
+  features?: string | string[]; // Can be JSON string or parsed array
+  password_hash?: string; // Admin only field
+  last_login_at?: string;
+  price?: number;
 }
 
 /**
@@ -320,7 +346,7 @@ export interface ProjectUpdateRequest {
 }
 
 /**
- * Project milestone response
+ * Project milestone response (matches server API response)
  */
 export interface ProjectMilestoneResponse {
   id: number;
@@ -328,8 +354,9 @@ export interface ProjectMilestoneResponse {
   title: string;
   description?: string;
   due_date: string;
+  completed_date?: string;
   is_completed: boolean;
-  completed_at?: string;
+  deliverables?: string | string[] | null; // Can be JSON string or parsed array or null
 }
 
 /**
@@ -374,7 +401,7 @@ export interface ProjectStats {
 export type ClientStatus = 'active' | 'inactive' | 'pending';
 
 /**
- * Client entity response
+ * Client entity response (matches server API response)
  */
 export interface ClientResponse {
   id: number;
@@ -382,11 +409,35 @@ export interface ClientResponse {
   contact_name: string;
   email: string;
   phone?: string;
-  status: ClientStatus;
+  status: ClientStatus | string; // Allow string for flexibility
   created_at: string;
   updated_at?: string;
   project_count?: number;
   total_revenue?: number;
+}
+
+/**
+ * Project update response (matches server API response)
+ */
+export interface ProjectUpdateResponse {
+  id: number;
+  project_id: number;
+  title: string;
+  description: string;
+  update_type?: string;
+  author?: string; // May be present in some responses
+  created_at: string;
+  updated_at?: string;
+}
+
+/**
+ * Project detail response (includes messages and updates)
+ */
+export interface ProjectDetailResponse extends ProjectResponse {
+  files?: ProjectFileResponse[];
+  messages?: MessageResponse[];
+  updates?: ProjectUpdateResponse[];
+  milestones?: ProjectMilestoneResponse[];
 }
 
 /**
@@ -411,14 +462,15 @@ export interface ClientStats {
 // ============================================
 
 /**
- * Message thread response
+ * Message thread response (matches server API response)
  */
 export interface MessageThreadResponse {
   id: number;
   subject: string;
   client_id: number;
+  project_id?: number; // May be present if thread is associated with a project
   client_name?: string;
-  status: ThreadStatus;
+  status: ThreadStatus | string; // Allow string for flexibility
   last_message_at: string;
   unread_count: number;
 }
@@ -426,16 +478,19 @@ export interface MessageThreadResponse {
 export type ThreadStatus = 'active' | 'closed' | 'archived';
 
 /**
- * Message response
+ * Message response (matches server API response)
  */
 export interface MessageResponse {
   id: number;
-  thread_id: number;
-  sender_type: SenderType;
+  thread_id?: number;
+  project_id?: number;
+  sender_type?: SenderType;
+  sender_role?: string;
   sender_name: string;
   message: string;
-  is_read: boolean;
+  is_read: boolean | number; // Can be 0/1 or boolean
   created_at: string;
+  attachments?: string | unknown[]; // Can be JSON string or parsed array
 }
 
 export type SenderType = 'client' | 'admin' | 'system';
@@ -467,17 +522,20 @@ export interface CreateThreadRequest {
 export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
 
 /**
- * Invoice response
+ * Invoice response (matches server API response)
  */
 export interface InvoiceResponse {
   id: number;
   project_id: number;
+  client_id?: number;
   invoice_number: string;
-  amount_total: number;
-  status: InvoiceStatus;
+  amount_total: number | string; // Can be number or string from API
+  amount_paid?: number | string; // Can be number or string from API
+  status: InvoiceStatus | string; // Allow string for flexibility
   due_date: string;
   paid_date?: string;
   created_at: string;
+  updated_at?: string;
 }
 
 // ============================================

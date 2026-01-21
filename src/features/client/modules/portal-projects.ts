@@ -10,6 +10,11 @@
 
 import type { ClientProject } from '../../../types/client';
 import type { ClientPortalContext, PortalProject } from '../portal-types';
+import type {
+  ProjectUpdateResponse,
+  MessageResponse,
+  ProjectDetailResponse
+} from '../../../types/api';
 
 /** API endpoints */
 const PROJECTS_API_BASE = '/api/projects';
@@ -94,7 +99,7 @@ export async function fetchProjectDetails(
 
     // Transform and update updates
     if (data.updates && Array.isArray(data.updates)) {
-      currentProject.updates = data.updates.map((u: any) => ({
+      currentProject.updates = data.updates.map((u: ProjectUpdateResponse) => ({
         id: String(u.id),
         date: u.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
         title: u.title || 'Update',
@@ -104,12 +109,12 @@ export async function fetchProjectDetails(
       }));
     }
 
-    // Transform and update messages
-    if (data.messages && Array.isArray(data.messages)) {
-      currentProject.messages = data.messages.map((m: any) => ({
+      // Transform and update messages
+      if (data.messages && Array.isArray(data.messages)) {
+        currentProject.messages = data.messages.map((m: MessageResponse) => ({
         id: String(m.id),
         sender: m.sender_name || 'Unknown',
-        senderRole: m.sender_role === 'admin' ? 'developer' : (m.sender_role || 'system'),
+          senderRole: (m.sender_role === 'admin' ? 'developer' : (m.sender_role || 'system')) as 'client' | 'developer' | 'system',
         message: m.message || '',
         timestamp: m.created_at || new Date().toISOString(),
         isRead: Boolean(m.is_read)
