@@ -159,13 +159,14 @@
   flex: 1;
 }
 
-/* Icon color on hover - same as text color */
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn:hover .btn-icon {
+/* Icon color on hover - same as text color (includes active buttons) */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn:hover .btn-icon,
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn.active:hover .btn-icon {
   color: var(--portal-bg-dark, #1a1a1a);
 }
 
-/* Icon color when active - same red as text */
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn.active .btn-icon {
+/* Icon color when active (not hovering) - same red as text */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn.active:not(:hover) .btn-icon {
   color: var(--color-primary);
 }
 
