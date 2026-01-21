@@ -25,6 +25,10 @@ import {
 } from './modules';
 import { decodeJwtPayload, isAdminPayload } from '../../utils/jwt-utils';
 import { ICONS, getAccessibleIcon } from '../../constants/icons';
+import { createDOMCache } from '../../utils/dom-cache';
+
+// DOM element keys for caching
+type PortalDOMKeys = Record<string, string>;
 
 export class ClientPortalModule extends BaseModule {
   private isLoggedIn = false;
@@ -51,9 +55,64 @@ export class ClientPortalModule extends BaseModule {
   /** Context object for module communication */
   private moduleContext: ClientPortalContext;
 
+  /** DOM element cache */
+  private domCache = createDOMCache<PortalDOMKeys>();
+
   constructor() {
     super('client-portal');
     this.moduleContext = this.createModuleContext();
+
+    // Register DOM element selectors
+    this.domCache.register({
+      passwordToggle: '#password-toggle',
+      clientPassword: '#client-password',
+      sidebarToggle: '#sidebar-toggle',
+      btnLogout: '#btn-logout',
+      emojiToggle: '#emoji-toggle',
+      emojiPickerWrapper: '#emoji-picker-wrapper',
+      emojiPicker: '#emoji-picker',
+      messageInput: '#message-input',
+      btnSendMessage: '#btn-send-message',
+      profileForm: '#profile-form',
+      passwordForm: '#password-form',
+      notificationsForm: '#notifications-form',
+      billingForm: '#billing-form',
+      newProjectForm: '#new-project-form',
+      projectName: '#project-name',
+      projectType: '#project-type',
+      projectBudget: '#project-budget',
+      projectTimeline: '#project-timeline',
+      projectDescription: '#project-description',
+      settingsName: '#settings-name',
+      settingsCompany: '#settings-company',
+      settingsPhone: '#settings-phone',
+      currentPassword: '#current-password',
+      newPassword: '#new-password',
+      confirmPassword: '#confirm-password',
+      billingCompany: '#billing-company',
+      billingAddress: '#billing-address',
+      billingAddress2: '#billing-address2',
+      billingCity: '#billing-city',
+      billingState: '#billing-state',
+      billingZip: '#billing-zip',
+      billingCountry: '#billing-country',
+      clientName: '#client-name',
+      welcomeView: '#welcome-view',
+      projectDetailView: '#project-detail-view',
+      settingsView: '#settings-view',
+      billingView: '#billing-view',
+      projectTitle: '#project-title',
+      projectStatus: '#project-status',
+      projectDescriptionEl: '#project-description',
+      currentPhase: '#current-phase',
+      nextMilestone: '#next-milestone',
+      progressFill: '#progress-fill',
+      progressText: '#progress-text',
+      startDate: '#start-date',
+      lastUpdate: '#last-update',
+      updatesTimeline: '#updates-timeline',
+      messagesList: '#messages-list'
+    });
   }
 
   /** Create module context for passing to child modules */
@@ -158,8 +217,8 @@ export class ClientPortalModule extends BaseModule {
     }, 100);
 
     // Password toggle (login form)
-    const passwordToggle = document.getElementById('password-toggle');
-    const passwordInput = document.getElementById('client-password') as HTMLInputElement;
+    const passwordToggle = this.domCache.get('passwordToggle');
+    const passwordInput = this.domCache.getAs<HTMLInputElement>('clientPassword');
     if (passwordToggle && passwordInput) {
       passwordToggle.addEventListener('click', () => {
         const type = passwordInput.type === 'password' ? 'text' : 'password';
@@ -181,7 +240,7 @@ export class ClientPortalModule extends BaseModule {
     this.log('Setting up dashboard event listeners...');
 
     // Sidebar toggle (desktop)
-    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebarToggle = this.domCache.get('sidebarToggle');
     if (sidebarToggle) {
       sidebarToggle.addEventListener('click', (e) => {
         e.preventDefault();
@@ -199,7 +258,7 @@ export class ClientPortalModule extends BaseModule {
     });
 
     // Logout button
-    const logoutBtn = document.getElementById('btn-logout');
+    const logoutBtn = this.domCache.get('btnLogout');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
         this.handleLogout();
@@ -274,11 +333,11 @@ export class ClientPortalModule extends BaseModule {
     });
 
     // Emoji picker (using emoji-picker-element web component)
-    const emojiToggle = document.getElementById('emoji-toggle');
-    const emojiPickerWrapper = document.getElementById('emoji-picker-wrapper');
-    const emojiPicker = document.getElementById('emoji-picker');
-    const messageInput = document.getElementById('message-input') as HTMLTextAreaElement;
-    const sendButton = document.getElementById('btn-send-message');
+    const emojiToggle = this.domCache.get('emojiToggle');
+    const emojiPickerWrapper = this.domCache.get('emojiPickerWrapper');
+    const emojiPicker = this.domCache.get('emojiPicker');
+    const messageInput = this.domCache.getAs<HTMLTextAreaElement>('messageInput');
+    const sendButton = this.domCache.get('btnSendMessage');
 
     if (emojiToggle && emojiPickerWrapper && emojiPicker) {
       // Toggle picker visibility
@@ -344,7 +403,7 @@ export class ClientPortalModule extends BaseModule {
    */
   private setupSettingsFormHandlers(): void {
     // Profile form
-    const profileForm = document.getElementById('profile-form') as HTMLFormElement;
+    const profileForm = this.domCache.getAs<HTMLFormElement>('profileForm');
     if (profileForm) {
       profileForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -353,7 +412,7 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // Password form
-    const passwordForm = document.getElementById('password-form') as HTMLFormElement;
+    const passwordForm = this.domCache.getAs<HTMLFormElement>('passwordForm');
     if (passwordForm) {
       passwordForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -362,7 +421,7 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // Notifications form
-    const notificationsForm = document.getElementById('notifications-form') as HTMLFormElement;
+    const notificationsForm = this.domCache.getAs<HTMLFormElement>('notificationsForm');
     if (notificationsForm) {
       notificationsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -371,7 +430,7 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // Billing form
-    const billingForm = document.getElementById('billing-form') as HTMLFormElement;
+    const billingForm = this.domCache.getAs<HTMLFormElement>('billingForm');
     if (billingForm) {
       billingForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -380,7 +439,7 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // New project form
-    const newProjectForm = document.getElementById('new-project-form') as HTMLFormElement;
+    const newProjectForm = this.domCache.getAs<HTMLFormElement>('newProjectForm');
     if (newProjectForm) {
       newProjectForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -400,12 +459,11 @@ export class ClientPortalModule extends BaseModule {
       return;
     }
 
-    const name = (document.getElementById('project-name') as HTMLInputElement)?.value;
-    const projectType = (document.getElementById('project-type') as HTMLSelectElement)?.value;
-    const budget = (document.getElementById('project-budget') as HTMLSelectElement)?.value;
-    const timeline = (document.getElementById('project-timeline') as HTMLSelectElement)?.value;
-    const description = (document.getElementById('project-description') as HTMLTextAreaElement)
-      ?.value;
+    const name = this.domCache.getAs<HTMLInputElement>('projectName')?.value;
+    const projectType = this.domCache.getAs<HTMLSelectElement>('projectType')?.value;
+    const budget = this.domCache.getAs<HTMLSelectElement>('projectBudget')?.value;
+    const timeline = this.domCache.getAs<HTMLSelectElement>('projectTimeline')?.value;
+    const description = this.domCache.getAs<HTMLTextAreaElement>('projectDescription')?.value;
 
     if (!name || !projectType || !description) {
       alert('Please fill in all required fields');
@@ -463,14 +521,12 @@ export class ClientPortalModule extends BaseModule {
       return;
     }
 
-    const contactName = (document.getElementById('settings-name') as HTMLInputElement)?.value;
-    const companyName = (document.getElementById('settings-company') as HTMLInputElement)?.value;
-    const phone = (document.getElementById('settings-phone') as HTMLInputElement)?.value;
-    const currentPassword = (document.getElementById('current-password') as HTMLInputElement)
-      ?.value;
-    const newPassword = (document.getElementById('new-password') as HTMLInputElement)?.value;
-    const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement)
-      ?.value;
+    const contactName = this.domCache.getAs<HTMLInputElement>('settingsName')?.value;
+    const companyName = this.domCache.getAs<HTMLInputElement>('settingsCompany')?.value;
+    const phone = this.domCache.getAs<HTMLInputElement>('settingsPhone')?.value;
+    const currentPassword = this.domCache.getAs<HTMLInputElement>('currentPassword')?.value;
+    const newPassword = this.domCache.getAs<HTMLInputElement>('newPassword')?.value;
+    const confirmPassword = this.domCache.getAs<HTMLInputElement>('confirmPassword')?.value;
 
     try {
       // Update profile info
@@ -522,9 +578,12 @@ export class ClientPortalModule extends BaseModule {
         }
 
         // Clear password fields
-        (document.getElementById('current-password') as HTMLInputElement).value = '';
-        (document.getElementById('new-password') as HTMLInputElement).value = '';
-        (document.getElementById('confirm-password') as HTMLInputElement).value = '';
+        const currPassEl = this.domCache.getAs<HTMLInputElement>('currentPassword');
+        const newPassEl = this.domCache.getAs<HTMLInputElement>('newPassword');
+        const confPassEl = this.domCache.getAs<HTMLInputElement>('confirmPassword');
+        if (currPassEl) currPassEl.value = '';
+        if (newPassEl) newPassEl.value = '';
+        if (confPassEl) confPassEl.value = '';
       }
 
       alert('Profile updated successfully!');
@@ -545,9 +604,9 @@ export class ClientPortalModule extends BaseModule {
       return;
     }
 
-    const currentPassword = (document.getElementById('current-password') as HTMLInputElement)?.value;
-    const newPassword = (document.getElementById('new-password') as HTMLInputElement)?.value;
-    const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement)?.value;
+    const currentPassword = this.domCache.getAs<HTMLInputElement>('currentPassword')?.value;
+    const newPassword = this.domCache.getAs<HTMLInputElement>('newPassword')?.value;
+    const confirmPassword = this.domCache.getAs<HTMLInputElement>('confirmPassword')?.value;
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       alert('Please fill in all password fields');
@@ -583,9 +642,12 @@ export class ClientPortalModule extends BaseModule {
       }
 
       // Clear password fields
-      (document.getElementById('current-password') as HTMLInputElement).value = '';
-      (document.getElementById('new-password') as HTMLInputElement).value = '';
-      (document.getElementById('confirm-password') as HTMLInputElement).value = '';
+      const currPassEl2 = this.domCache.getAs<HTMLInputElement>('currentPassword');
+      const newPassEl2 = this.domCache.getAs<HTMLInputElement>('newPassword');
+      const confPassEl2 = this.domCache.getAs<HTMLInputElement>('confirmPassword');
+      if (currPassEl2) currPassEl2.value = '';
+      if (newPassEl2) newPassEl2.value = '';
+      if (confPassEl2) confPassEl2.value = '';
 
       alert('Password updated successfully!');
     } catch (error) {
@@ -605,7 +667,7 @@ export class ClientPortalModule extends BaseModule {
       return;
     }
 
-    const form = document.getElementById('notifications-form');
+    const form = this.domCache.get('notificationsForm');
     if (!form) return;
 
     const checkboxes = form.querySelectorAll('input[type="checkbox"]');
@@ -652,13 +714,13 @@ export class ClientPortalModule extends BaseModule {
     }
 
     const billing = {
-      company: (document.getElementById('billing-company') as HTMLInputElement)?.value,
-      address: (document.getElementById('billing-address') as HTMLInputElement)?.value,
-      address2: (document.getElementById('billing-address2') as HTMLInputElement)?.value,
-      city: (document.getElementById('billing-city') as HTMLInputElement)?.value,
-      state: (document.getElementById('billing-state') as HTMLInputElement)?.value,
-      zip: (document.getElementById('billing-zip') as HTMLInputElement)?.value,
-      country: (document.getElementById('billing-country') as HTMLInputElement)?.value
+      company: this.domCache.getAs<HTMLInputElement>('billingCompany')?.value,
+      address: this.domCache.getAs<HTMLInputElement>('billingAddress')?.value,
+      address2: this.domCache.getAs<HTMLInputElement>('billingAddress2')?.value,
+      city: this.domCache.getAs<HTMLInputElement>('billingCity')?.value,
+      state: this.domCache.getAs<HTMLInputElement>('billingState')?.value,
+      zip: this.domCache.getAs<HTMLInputElement>('billingZip')?.value,
+      country: this.domCache.getAs<HTMLInputElement>('billingCountry')?.value
     };
 
     try {
@@ -703,7 +765,7 @@ export class ClientPortalModule extends BaseModule {
       if (!projectsResponse.ok) {
         console.error('[ClientPortal] Failed to fetch projects:', projectsResponse.status);
         // Show error state
-        const clientNameElement = document.getElementById('client-name');
+        const clientNameElement = this.domCache.get('clientName');
         if (clientNameElement) {
           clientNameElement.textContent = user.name || user.email || 'Client';
         }
@@ -719,7 +781,7 @@ export class ClientPortalModule extends BaseModule {
 
       if (apiProjects.length === 0) {
         // No projects yet - show empty state
-        const clientNameElement = document.getElementById('client-name');
+        const clientNameElement = this.domCache.get('clientName');
         if (clientNameElement) {
           clientNameElement.textContent = user.name || user.email || 'Client';
         }
@@ -784,7 +846,7 @@ export class ClientPortalModule extends BaseModule {
       );
 
       // Set client name in header
-      const clientNameElement = document.getElementById('client-name');
+      const clientNameElement = this.domCache.get('clientName');
       if (clientNameElement) {
         clientNameElement.textContent = user.name || user.email || 'Client';
       }
@@ -793,7 +855,7 @@ export class ClientPortalModule extends BaseModule {
     } catch (error) {
       console.error('[ClientPortal] Failed to load projects:', error);
       // Show error state
-      const clientNameElement = document.getElementById('client-name');
+      const clientNameElement = this.domCache.get('clientName');
       if (clientNameElement) {
         clientNameElement.textContent = user.name || user.email || 'Client';
       }
@@ -840,10 +902,10 @@ export class ClientPortalModule extends BaseModule {
     this.currentProject = project;
 
     // Hide other views first
-    const welcomeView = document.getElementById('welcome-view');
-    const projectDetailView = document.getElementById('project-detail-view');
-    const settingsView = document.getElementById('settings-view');
-    const billingView = document.getElementById('billing-view');
+    const welcomeView = this.domCache.get('welcomeView');
+    const projectDetailView = this.domCache.get('projectDetailView');
+    const settingsView = this.domCache.get('settingsView');
+    const billingView = this.domCache.get('billingView');
 
     if (welcomeView) welcomeView.style.display = 'none';
     if (settingsView) settingsView.style.display = 'none';
@@ -914,27 +976,27 @@ export class ClientPortalModule extends BaseModule {
     if (!this.currentProject) return;
 
     // Populate project title
-    const titleElement = document.getElementById('project-title');
+    const titleElement = this.domCache.get('projectTitle');
     if (titleElement) {
       titleElement.textContent = this.currentProject.projectName;
     }
 
     // Populate status
-    const statusElement = document.getElementById('project-status');
+    const statusElement = this.domCache.get('projectStatus');
     if (statusElement) {
       statusElement.textContent = this.currentProject.status.replace('-', ' ');
       statusElement.className = `status-badge status-${this.currentProject.status}`;
     }
 
     // Populate project description
-    const descriptionElement = document.getElementById('project-description');
+    const descriptionElement = this.domCache.get('projectDescriptionEl');
     if (descriptionElement) {
       descriptionElement.textContent =
         this.currentProject.description || 'Project details will be updated soon.';
     }
 
     // Populate current phase
-    const currentPhaseElement = document.getElementById('current-phase');
+    const currentPhaseElement = this.domCache.get('currentPhase');
     if (currentPhaseElement) {
       const phase =
         this.currentProject.status === 'pending'
@@ -948,7 +1010,7 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // Populate next milestone
-    const nextMilestoneElement = document.getElementById('next-milestone');
+    const nextMilestoneElement = this.domCache.get('nextMilestone');
     if (
       nextMilestoneElement &&
       this.currentProject.milestones &&
@@ -961,20 +1023,20 @@ export class ClientPortalModule extends BaseModule {
     }
 
     // Populate progress
-    const progressFill = document.getElementById('progress-fill') as HTMLElement;
-    const progressText = document.getElementById('progress-text');
+    const progressFill = this.domCache.get('progressFill');
+    const progressText = this.domCache.get('progressText');
     if (progressFill && progressText) {
       progressFill.style.width = `${this.currentProject.progress}%`;
       progressText.textContent = `${this.currentProject.progress}% Complete`;
     }
 
     // Populate dates
-    const startDateElement = document.getElementById('start-date');
+    const startDateElement = this.domCache.get('startDate');
     if (startDateElement) {
       startDateElement.textContent = this.formatDate(this.currentProject.startDate);
     }
 
-    const lastUpdateElement = document.getElementById('last-update');
+    const lastUpdateElement = this.domCache.get('lastUpdate');
     if (lastUpdateElement) {
       const lastUpdate =
         this.currentProject.updates && this.currentProject.updates.length > 0
@@ -992,7 +1054,7 @@ export class ClientPortalModule extends BaseModule {
   private loadUpdates(): void {
     if (!this.currentProject) return;
 
-    const timelineContainer = document.getElementById('updates-timeline');
+    const timelineContainer = this.domCache.get('updatesTimeline');
     if (!timelineContainer) return;
 
     timelineContainer.innerHTML = '';
@@ -1068,7 +1130,7 @@ export class ClientPortalModule extends BaseModule {
   private loadMessages(): void {
     if (!this.currentProject) return;
 
-    const messagesContainer = document.getElementById('messages-list');
+    const messagesContainer = this.domCache.get('messagesList');
     if (!messagesContainer) return;
 
     messagesContainer.innerHTML = '';

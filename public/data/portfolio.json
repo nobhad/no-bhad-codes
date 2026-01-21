@@ -1,11 +1,107 @@
 {
-  "projects": [],
-  "categories": [],
+  "projects": [
+    {
+      "id": "no-bhad-codes",
+      "title": "No Bhad Codes",
+      "slug": "no-bhad-codes",
+      "tagline": "Developer portfolio with animated business card",
+      "description": "A creative portfolio site featuring an animated business card intro, smooth page transitions, and a custom design system. Built with TypeScript, Vite, and GSAP animations.",
+      "category": "websites",
+      "role": "Full Stack Developer",
+      "tools": ["TypeScript", "Vite", "GSAP", "CSS Custom Properties", "Express.js", "SQLite"],
+      "year": 2024,
+      "technologies": ["TypeScript", "Vite", "GSAP", "CSS Custom Properties", "Express.js", "SQLite"],
+      "date": "2024-12-01",
+      "status": "completed",
+      "featured": true,
+      "heroImage": "",
+      "screenshots": [],
+      "liveUrl": "https://nobhadcodes.com",
+      "repoUrl": "https://github.com/nobhad",
+      "isDocumented": true
+    },
+    {
+      "id": "client-portal-cms",
+      "title": "Client Portal CMS",
+      "slug": "client-portal-cms",
+      "tagline": "Full-featured client management system",
+      "description": "A secure client portal and content management system with real-time messaging, invoice tracking, project management, and file sharing. Features terminal-style intake forms and multi-auth support.",
+      "category": "applications",
+      "role": "Full Stack Developer",
+      "tools": ["TypeScript", "Express.js", "SQLite", "JWT", "Nodemailer", "PDFKit"],
+      "year": 2024,
+      "technologies": ["TypeScript", "Express.js", "SQLite", "JWT", "Nodemailer", "PDFKit"],
+      "date": "2024-11-01",
+      "status": "completed",
+      "featured": true,
+      "heroImage": "",
+      "screenshots": [],
+      "liveUrl": "https://nobhadcodes.com/client/portal",
+      "isDocumented": true
+    },
+    {
+      "id": "recycle-content",
+      "title": "Recycle Content",
+      "slug": "recycle-content",
+      "tagline": "Chrome extension for content repurposing",
+      "description": "A Chrome extension that helps content creators repurpose their work across platforms. Extracts key content from web pages and generates optimized versions for different social media formats.",
+      "category": "extensions",
+      "role": "Solo Developer",
+      "tools": ["TypeScript", "Chrome Extensions API", "Vite", "Claude API"],
+      "year": 2024,
+      "technologies": ["TypeScript", "Chrome Extensions API", "Vite", "Claude API"],
+      "date": "2024-10-01",
+      "status": "completed",
+      "featured": true,
+      "heroImage": "",
+      "screenshots": [],
+      "isDocumented": false
+    },
+    {
+      "id": "linktrees",
+      "title": "Linktrees",
+      "slug": "linktrees",
+      "tagline": "Custom link-in-bio pages",
+      "description": "Custom-designed link-in-bio pages for social media profiles. Features animated backgrounds, theme customization, and analytics integration.",
+      "category": "websites",
+      "role": "Designer & Developer",
+      "tools": ["HTML", "CSS", "JavaScript", "GSAP"],
+      "year": 2024,
+      "technologies": ["HTML", "CSS", "JavaScript", "GSAP"],
+      "date": "2024-09-01",
+      "status": "completed",
+      "featured": false,
+      "heroImage": "",
+      "screenshots": [],
+      "isDocumented": false
+    }
+  ],
+  "categories": [
+    {
+      "id": "websites",
+      "name": "Websites",
+      "description": "Custom websites and landing pages",
+      "count": 2
+    },
+    {
+      "id": "applications",
+      "name": "Applications",
+      "description": "Web applications and SaaS platforms",
+      "count": 1
+    },
+    {
+      "id": "extensions",
+      "name": "Extensions",
+      "description": "Browser extensions and plugins",
+      "count": 1
+    }
+  ],
   "navigation": {
     "main": [
       { "id": "home", "title": "home", "path": "/", "eyebrow": "00" },
       { "id": "about", "title": "about", "path": "#about", "eyebrow": "01" },
-      { "id": "contact", "title": "contact", "path": "#contact", "eyebrow": "02" }
+      { "id": "contact", "title": "contact", "path": "#contact", "eyebrow": "02" },
+      { "id": "projects", "title": "projects", "path": "#projects", "eyebrow": "03" }
     ]
   },
   "profile": {

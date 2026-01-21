@@ -24,6 +24,112 @@ import {
 import type { ProjectMilestone, ProjectFile, ProjectInvoice, AdminDashboardContext, Message } from '../admin-types';
 import { showTableLoading } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
+import { createDOMCache, batchUpdateText, getElement } from '../../../utils/dom-cache';
+
+// ============================================
+// DOM CACHE - Cached element references
+// ============================================
+
+/** DOM element selector keys for the projects module */
+type ProjectsDOMKeys = {
+  // Table elements
+  tableBody: string;
+  filterContainer: string;
+  // Stats
+  projectsTotal: string;
+  projectsActive: string;
+  projectsCompleted: string;
+  projectsOnHold: string;
+  // Project detail elements
+  detailTitle: string;
+  projectName: string;
+  clientName: string;
+  clientEmail: string;
+  company: string;
+  status: string;
+  projectType: string;
+  budget: string;
+  price: string;
+  timeline: string;
+  startDate: string;
+  previewUrlLink: string;
+  description: string;
+  notes: string;
+  progressPercent: string;
+  progressBar: string;
+  // Buttons
+  backBtn: string;
+  editProjectBtn: string;
+  createInvoiceBtn: string;
+  addMilestoneBtn: string;
+  sendMsgBtn: string;
+  // Containers
+  messagesThread: string;
+  messageInput: string;
+  filesList: string;
+  milestonesList: string;
+  invoicesList: string;
+  uploadDropzone: string;
+  fileInput: string;
+  browseFilesBtn: string;
+  // Edit modal
+  editModal: string;
+  editForm: string;
+  editClose: string;
+  editCancel: string;
+};
+
+/** Cached DOM element references for performance */
+const domCache = createDOMCache<ProjectsDOMKeys>();
+
+// Register all element selectors (called once when module loads)
+domCache.register({
+  // Table elements
+  tableBody: '#projects-table-body',
+  filterContainer: '#projects-filter-container',
+  // Stats
+  projectsTotal: '#projects-total',
+  projectsActive: '#projects-active',
+  projectsCompleted: '#projects-completed',
+  projectsOnHold: '#projects-on-hold',
+  // Project detail elements
+  detailTitle: '#project-detail-title',
+  projectName: '#pd-project-name',
+  clientName: '#pd-client-name',
+  clientEmail: '#pd-client-email',
+  company: '#pd-company',
+  status: '#pd-status',
+  projectType: '#pd-type',
+  budget: '#pd-budget',
+  price: '#pd-price',
+  timeline: '#pd-timeline',
+  startDate: '#pd-start-date',
+  previewUrlLink: '#pd-preview-url-link',
+  description: '#pd-description',
+  notes: '#pd-notes',
+  progressPercent: '#pd-progress-percent',
+  progressBar: '#pd-progress-bar',
+  // Buttons
+  backBtn: '#btn-back-to-projects',
+  editProjectBtn: '#btn-edit-project',
+  createInvoiceBtn: '#btn-create-invoice',
+  addMilestoneBtn: '#btn-add-milestone',
+  sendMsgBtn: '#btn-pd-send-message',
+  // Containers
+  messagesThread: '#pd-messages-thread',
+  messageInput: '#pd-message-input',
+  filesList: '#pd-files-list',
+  milestonesList: '#pd-milestones-list',
+  invoicesList: '#pd-invoices-list',
+  uploadDropzone: '#pd-upload-dropzone',
+  fileInput: '#pd-file-input',
+  browseFilesBtn: '#btn-pd-browse-files',
+  // Edit modal
+  editModal: '#edit-project-modal',
+  editForm: '#edit-project-form',
+  editClose: '#edit-project-close',
+  editCancel: '#edit-project-cancel'
+});
 
 /** Lead/Project data from admin leads API */
 interface LeadProject {
@@ -95,8 +201,8 @@ export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
     filterUIInitialized = true;
   }
 
-  // Show loading state
-  const tableBody = document.getElementById('projects-table-body');
+  // Show loading state (use cached ref)
+  const tableBody = domCache.get('tableBody');
   if (tableBody) {
     showTableLoading(tableBody, 6, 'Loading projects...');
   }
@@ -136,7 +242,7 @@ export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
  * Initialize filter UI for projects table
  */
 function initializeFilterUI(ctx: AdminDashboardContext): void {
-  const container = document.getElementById('projects-filter-container');
+  const container = domCache.get('filterContainer');
   if (!container) return;
 
   // Create filter UI
@@ -183,28 +289,26 @@ function updateProjectsDisplay(data: ProjectsData, ctx: AdminDashboardContext): 
     (p) => normalizeStatus(p.status) !== 'pending' || p.project_name
   );
 
-  // Update stats
-  const projectsTotal = document.getElementById('projects-total');
-  const projectsActive = document.getElementById('projects-active');
-  const projectsCompleted = document.getElementById('projects-completed');
-  const projectsOnHold = document.getElementById('projects-on-hold');
-
+  // Calculate stats
   const activeCount = projects.filter(
     (p) => normalizeStatus(p.status) === 'active' || normalizeStatus(p.status) === 'in_progress'
   ).length;
   const completedCount = projects.filter((p) => normalizeStatus(p.status) === 'completed').length;
   const onHoldCount = projects.filter((p) => normalizeStatus(p.status) === 'on_hold').length;
 
-  if (projectsTotal) projectsTotal.textContent = projects.length.toString();
-  if (projectsActive) projectsActive.textContent = activeCount.toString();
-  if (projectsCompleted) projectsCompleted.textContent = completedCount.toString();
-  if (projectsOnHold) projectsOnHold.textContent = onHoldCount.toString();
+  // Update stats using batch update
+  batchUpdateText({
+    'projects-total': projects.length.toString(),
+    'projects-active': activeCount.toString(),
+    'projects-completed': completedCount.toString(),
+    'projects-on-hold': onHoldCount.toString()
+  });
 
   renderProjectsTable(projects, ctx);
 }
 
 function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext): void {
-  const tableBody = document.getElementById('projects-table-body');
+  const tableBody = domCache.get('tableBody');
   if (!tableBody) return;
 
   if (projects.length === 0) {
@@ -257,7 +361,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
 }
 
 function setupProjectTableHandlers(ctx: AdminDashboardContext): void {
-  const tableBody = document.getElementById('projects-table-body');
+  const tableBody = domCache.get('tableBody');
   if (!tableBody) return;
 
   // Row click handlers - clicking row opens project details
@@ -314,31 +418,26 @@ export function showProjectDetails(
 }
 
 function populateProjectDetailView(project: LeadProject): void {
-  const titleEl = document.getElementById('project-detail-title');
+  const titleEl = domCache.get('detailTitle');
   if (titleEl) titleEl.textContent = 'Project Details';
 
   const projectData = project as any;
 
-  // Overview fields
-  const fields: Record<string, string> = {
-    'pd-project-name': project.project_name || 'Untitled Project',
-    'pd-client-name': project.contact_name || '-',
-    'pd-client-email': project.email || '-',
-    'pd-company': project.company_name || '-',
-    'pd-type': formatProjectType(project.project_type),
-    'pd-budget': formatDisplayValue(project.budget_range),
-    'pd-price': projectData.price || '-',
-    'pd-timeline': formatDisplayValue(project.timeline),
-    'pd-start-date': project.created_at ? new Date(project.created_at).toLocaleDateString() : '-'
-  };
-
-  Object.entries(fields).forEach(([id, value]) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = SanitizationUtils.escapeHtml(value);
+  // Overview fields - use batch update for text content
+  batchUpdateText({
+    'pd-project-name': SanitizationUtils.escapeHtml(project.project_name || 'Untitled Project'),
+    'pd-client-name': SanitizationUtils.escapeHtml(project.contact_name || '-'),
+    'pd-client-email': SanitizationUtils.escapeHtml(project.email || '-'),
+    'pd-company': SanitizationUtils.escapeHtml(project.company_name || '-'),
+    'pd-type': SanitizationUtils.escapeHtml(formatProjectType(project.project_type)),
+    'pd-budget': SanitizationUtils.escapeHtml(formatDisplayValue(project.budget_range)),
+    'pd-price': SanitizationUtils.escapeHtml(projectData.price || '-'),
+    'pd-timeline': SanitizationUtils.escapeHtml(formatDisplayValue(project.timeline)),
+    'pd-start-date': SanitizationUtils.escapeHtml(project.created_at ? new Date(project.created_at).toLocaleDateString() : '-')
   });
 
-  // Preview URL
-  const previewUrlLink = document.getElementById('pd-preview-url-link') as HTMLAnchorElement;
+  // Preview URL (use cached ref)
+  const previewUrlLink = domCache.getAs<HTMLAnchorElement>('previewUrlLink');
   if (previewUrlLink) {
     const previewUrl = projectData.preview_url || '';
     if (previewUrl) {
@@ -369,29 +468,29 @@ function populateProjectDetailView(project: LeadProject): void {
   // Setup edit button
   setupEditProjectButton(project);
 
-  // Status badge - normalize to underscore format
-  const statusEl = document.getElementById('pd-status');
+  // Status badge - normalize to underscore format (use cached ref)
+  const statusEl = domCache.get('status');
   if (statusEl) {
     const normalizedStatus = normalizeStatus(project.status);
     statusEl.textContent = normalizedStatus.replace(/_/g, ' ');
     statusEl.className = `status-badge status-${normalizedStatus}`;
   }
 
-  // Progress
+  // Progress (use cached refs)
   const progress = project.progress || 0;
-  const progressPercent = document.getElementById('pd-progress-percent');
-  const progressBar = document.getElementById('pd-progress-bar');
+  const progressPercent = domCache.get('progressPercent');
+  const progressBar = domCache.get('progressBar');
   if (progressPercent) progressPercent.textContent = `${progress}%`;
   if (progressBar) progressBar.style.width = `${progress}%`;
 
-  // Description (now in static HTML element)
-  const descriptionEl = document.getElementById('pd-description');
+  // Description (use cached ref)
+  const descriptionEl = domCache.get('description');
   if (descriptionEl) {
     descriptionEl.textContent = project.description || '-';
   }
 
-  // Features - append below the description row if present
-  const notes = document.getElementById('pd-notes');
+  // Features - append below the description row if present (use cached ref)
+  const notes = domCache.get('notes');
   if (notes && project.features) {
     // Parse features - handles both comma-separated and concatenated formats
     const parsedFeatures = parseFeatures(project.features);
@@ -472,7 +571,7 @@ function parseFeatures(featuresStr: string): string[] {
  * Setup edit project button and modal
  */
 function setupEditProjectButton(project: LeadProject): void {
-  const editBtn = document.getElementById('btn-edit-project');
+  const editBtn = domCache.get('editProjectBtn', true); // Force refresh since we clone
   if (!editBtn) return;
 
   // Clone to remove old listeners
@@ -489,7 +588,7 @@ let editingProjectId: number | null = null;
  * Open the edit project modal with current project data
  */
 function openEditProjectModal(project: LeadProject): void {
-  const modal = document.getElementById('edit-project-modal');
+  const modal = domCache.get('editModal');
   if (!modal) return;
 
   // Store project ID for form submission
@@ -564,9 +663,9 @@ function setupEditProjectModalHandlers(modal: HTMLElement): void {
   if (editProjectModalInitialized) return;
   editProjectModalInitialized = true;
 
-  const closeBtn = document.getElementById('edit-project-close');
-  const cancelBtn = document.getElementById('edit-project-cancel');
-  const form = document.getElementById('edit-project-form') as HTMLFormElement;
+  const closeBtn = domCache.get('editClose');
+  const cancelBtn = domCache.get('editCancel');
+  const form = domCache.getAs<HTMLFormElement>('editForm');
 
   const closeModal = () => {
     modal.classList.add('hidden');
@@ -658,8 +757,8 @@ function setupProjectDetailTabs(ctx: AdminDashboardContext): void {
     });
   });
 
-  // Back button handler
-  const backBtn = document.getElementById('btn-back-to-projects') as HTMLElement;
+  // Back button handler (use cached ref)
+  const backBtn = domCache.get('backBtn');
   if (backBtn && !backBtn.dataset.listenerAdded) {
     backBtn.dataset.listenerAdded = 'true';
     backBtn.addEventListener('click', () => {
@@ -668,22 +767,22 @@ function setupProjectDetailTabs(ctx: AdminDashboardContext): void {
     });
   }
 
-  // Create invoice handler
-  const createInvoiceBtn = document.getElementById('btn-create-invoice') as HTMLElement;
+  // Create invoice handler (use cached ref)
+  const createInvoiceBtn = domCache.get('createInvoiceBtn');
   if (createInvoiceBtn && !createInvoiceBtn.dataset.listenerAdded) {
     createInvoiceBtn.dataset.listenerAdded = 'true';
     createInvoiceBtn.addEventListener('click', () => showCreateInvoicePrompt());
   }
 
-  // Add milestone handler
-  const addMilestoneBtn = document.getElementById('btn-add-milestone') as HTMLElement;
+  // Add milestone handler (use cached ref)
+  const addMilestoneBtn = domCache.get('addMilestoneBtn');
   if (addMilestoneBtn && !addMilestoneBtn.dataset.listenerAdded) {
     addMilestoneBtn.dataset.listenerAdded = 'true';
     addMilestoneBtn.addEventListener('click', () => showAddMilestonePrompt());
   }
 
-  // Send message handler
-  const sendMsgBtn = document.getElementById('btn-pd-send-message') as HTMLElement;
+  // Send message handler (use cached ref)
+  const sendMsgBtn = domCache.get('sendMsgBtn');
   if (sendMsgBtn && !sendMsgBtn.dataset.listenerAdded) {
     sendMsgBtn.dataset.listenerAdded = 'true';
     sendMsgBtn.addEventListener('click', () => sendProjectMessage());
@@ -715,7 +814,7 @@ export async function loadProjectMessages(
   projectId: number,
   _ctx: AdminDashboardContext
 ): Promise<void> {
-  const container = document.getElementById('pd-messages-thread');
+  const container = domCache.get('messagesThread');
   if (!container) return;
 
   try {
@@ -764,7 +863,7 @@ export async function loadProjectFiles(
   projectId: number,
   _ctx: AdminDashboardContext
 ): Promise<void> {
-  const container = document.getElementById('pd-files-list');
+  const container = domCache.get('filesList');
   if (!container) return;
 
   try {
@@ -827,7 +926,7 @@ export async function loadProjectMilestones(
   projectId: number,
   ctx: AdminDashboardContext
 ): Promise<void> {
-  const container = document.getElementById('pd-milestones-list');
+  const container = domCache.get('milestonesList');
   if (!container) return;
 
   try {
@@ -894,8 +993,8 @@ function renderProjectMilestones(
 }
 
 function updateProgressBar(progress: number): void {
-  const progressPercent = document.getElementById('pd-progress-percent');
-  const progressBar = document.getElementById('pd-progress-bar');
+  const progressPercent = domCache.get('progressPercent');
+  const progressBar = domCache.get('progressBar');
 
   if (progressPercent) {
     progressPercent.textContent = `${progress}%`;
@@ -944,7 +1043,7 @@ export async function loadProjectInvoices(
   projectId: number,
   _ctx: AdminDashboardContext
 ): Promise<void> {
-  const container = document.getElementById('pd-invoices-list');
+  const container = domCache.get('invoicesList');
   if (!container) return;
 
   try {
@@ -1157,7 +1256,7 @@ async function addMilestone(
 async function sendProjectMessage(): Promise<void> {
   if (!currentProjectId || !storedContext) return;
 
-  const messageInput = document.getElementById('pd-message-input') as HTMLTextAreaElement;
+  const messageInput = domCache.getAs<HTMLTextAreaElement>('messageInput');
   if (!messageInput || !messageInput.value.trim()) return;
 
   const message = messageInput.value.trim();
@@ -1186,9 +1285,9 @@ async function sendProjectMessage(): Promise<void> {
  * Set up file upload handlers for project detail view
  */
 function setupProjectFileUpload(): void {
-  const dropzone = document.getElementById('pd-upload-dropzone');
-  const fileInput = document.getElementById('pd-file-input') as HTMLInputElement;
-  const browseBtn = document.getElementById('btn-pd-browse-files');
+  const dropzone = domCache.get('uploadDropzone');
+  const fileInput = domCache.getAs<HTMLInputElement>('fileInput');
+  const browseBtn = domCache.get('browseFilesBtn');
 
   if (!dropzone) return;
 

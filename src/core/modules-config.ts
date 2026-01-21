@@ -151,6 +151,25 @@ export function registerModules(debug: boolean = false): void {
       }
     },
     {
+      name: 'ProjectsModule',
+      type: 'dom',
+      factory: async () => {
+        // Only load projects module on index/home page
+        const currentPath = window.location.pathname;
+        if (currentPath === '/' || currentPath === '/index.html') {
+          const { ProjectsModule } = await import('../modules/ui/projects');
+          return new ProjectsModule();
+        }
+        // Return a dummy module for other pages
+        return {
+          init: async () => {},
+          destroy: () => {},
+          isInitialized: true,
+          name: 'ProjectsModule'
+        };
+      }
+    },
+    {
       name: 'PageTransitionModule',
       type: 'dom',
       factory: async () => {
@@ -242,7 +261,8 @@ export function getMainSiteModules(): string[] {
     'ContactFormModule',
     'TextAnimationModule',
     'ContactAnimationModule',
-    'PageTransitionModule'
+    'PageTransitionModule',
+    'ProjectsModule'
   ];
 }
 

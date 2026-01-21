@@ -476,7 +476,7 @@ div.page-hero-desktop {
 .projects-section {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
   padding: 2rem;
   box-sizing: border-box;
@@ -508,7 +508,7 @@ div.page-hero-desktop {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
   gap: 0;
   align-self: center;
@@ -524,15 +524,15 @@ div.page-hero-desktop {
   width: 100%;
 }
 
-/* hr - space below for SVG */
+/* hr - space below for project list */
 .projects-section hr {
   margin-top: 0;
-  margin-bottom: 5rem;
+  margin-bottom: 2rem;
   margin-left: 0;
   margin-right: auto;
 }
 
-/* WIP sign container */
+/* WIP sign container - only shown when not enough documented projects */
 .wip-sign-container {
   display: flex;
   justify-content: center;
@@ -566,7 +566,191 @@ div.page-hero-desktop {
   transform: scale(1.02);
 }
 
-/* Medium viewport adjustments (600px - 1100px) - matches mobile h2/hr spacing */
+/* ===============================================
+   SAL COSTA STYLE - WORK CARDS
+   =============================================== */
+
+/* Work cards wrapper - 60% width on desktop like Sal Costa */
+.work-half-wrapper {
+  width: 100%;
+}
+
+@media (--tablet) {
+  .work-half-wrapper {
+    width: 100%;
+  }
+}
+
+/* Individual work card - horizontal list item */
+.work-card {
+  overflow: hidden;
+}
+
+/* Card container - the actual interactive element */
+.card-container {
+  height: 90px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  pointer-events: auto;
+  border-bottom: 2px solid var(--color-dark);
+  transform: translateY(-105%);
+  animation: project-drop-in var(--transition-length, 0.5s) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
+  transition: border-color var(--transition-theme, 0.4s);
+}
+
+/* Staggered entrance delays */
+.card-container.index-0 { animation-delay: 0.3s; }
+.card-container.index-1 { animation-delay: 0.4s; }
+.card-container.index-2 { animation-delay: 0.5s; }
+.card-container.index-3 { animation-delay: 0.6s; }
+.card-container.index-4 { animation-delay: 0.7s; }
+
+/* Exit animation */
+.card-container.leaving {
+  pointer-events: none;
+  transform: translateY(0);
+  animation: project-drop-out var(--transition-length, 0.5s) cubic-bezier(0.3, 0.9, 0.3, 0.9) forwards;
+}
+
+.card-container.leaving.index-0 { animation-delay: 0.1s; }
+.card-container.leaving.index-1 { animation-delay: 0.15s; }
+.card-container.leaving.index-2 { animation-delay: 0.2s; }
+.card-container.leaving.index-3 { animation-delay: 0.25s; }
+.card-container.leaving.index-4 { animation-delay: 0.3s; }
+
+/* Project card title - left side with arrow */
+.project-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transform: translate(-30px);
+  margin-right: -30px;
+  transition: transform var(--transition-mouse, 0.2s);
+}
+
+/* Arrow icon - hidden by default, revealed on hover */
+.project-card-title svg {
+  height: 50px;
+  width: 50px;
+  fill: var(--color-dark);
+  flex-shrink: 0;
+  transition: fill var(--transition-theme, 0.4s);
+}
+
+/* Hover - reveal arrow by shifting title */
+.card-container:hover .project-card-title,
+.card-container:focus .project-card-title {
+  transform: translate(0);
+}
+
+/* Title text - scales up on hover */
+.card-container .project-card-title h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-dark);
+  margin: 0;
+  white-space: nowrap;
+  transform-origin: left;
+  transition: transform var(--transition-length, 0.5s), color var(--transition-theme, 0.4s);
+}
+
+.card-container:hover .project-card-title h3,
+.card-container:focus .project-card-title h3 {
+  transform: scale(1.2);
+}
+
+/* Right side content - category/year */
+.card-right-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  white-space: nowrap;
+  transform-origin: right;
+  transition: transform var(--transition-mouse, 0.2s);
+}
+
+.card-container:hover .card-right-content,
+.card-container:focus .card-right-content {
+  transform: translate(-10px);
+}
+
+/* Category text */
+.card-category {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-dark);
+  transition: color var(--transition-theme, 0.4s);
+}
+
+/* ===============================================
+   ROUND LABELS (Metadata badges)
+   =============================================== */
+
+.round-label {
+  background-color: var(--color-dark);
+  padding: 6px 12px;
+  border-radius: 20px;
+  box-shadow: var(--shadow-elevated-sm, 0 2px 8px rgba(0, 0, 0, 0.2));
+  color: var(--color-light);
+  flex-shrink: 0;
+  min-width: 40px;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background-color var(--transition-theme, 0.4s),
+              color var(--transition-theme, 0.4s),
+              box-shadow var(--transition-theme, 0.4s);
+}
+
+/* ===============================================
+   DROP-IN/DROP-OUT ANIMATIONS
+   =============================================== */
+
+@keyframes project-drop-in {
+  0% {
+    transform: translateY(-105%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes project-drop-out {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(105%);
+  }
+}
+
+/* Heading divider animation */
+.projects-section .heading-divider {
+  background-color: var(--color-dark);
+  height: 4px;
+  border-radius: 2px 0 4px 2px;
+  transform: scaleX(0);
+  transform-origin: bottom left;
+  animation: scale-in-left var(--transition-long, 0.8s) cubic-bezier(0.3, 0.9, 0.3, 0.9) 0.4s forwards;
+  transition: background-color var(--transition-theme, 0.4s);
+}
+
+@keyframes scale-in-left {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+/* ===============================================
+   RESPONSIVE - PROJECTS SECTION
+   =============================================== */
+
+/* Medium viewport adjustments (600px - 1100px) */
 @media screen and (min-width: 600px) and (max-width: 1100px) {
   .projects-section h2 {
     margin-top: 0;
@@ -575,13 +759,21 @@ div.page-hero-desktop {
 
   .projects-section hr {
     margin-top: 0;
-    margin-bottom: 5rem;
+    margin-bottom: 2rem;
   }
 
   .wip-sign {
     width: 70vw;
     max-width: none;
     margin: 10rem auto 0;
+  }
+
+  .card-container .project-card-title h3 {
+    font-size: 1.25rem;
+  }
+
+  .card-category {
+    font-size: 0.9rem;
   }
 }
 
@@ -603,13 +795,51 @@ div.page-hero-desktop {
     text-align: left;
   }
 
+  /* Work cards full width on mobile */
+  .work-half-wrapper {
+    width: 100%;
+  }
+
+  .card-container {
+    height: 70px;
+  }
+
+  .project-card-title svg {
+    height: 40px;
+    width: 40px;
+  }
+
+  .card-container .project-card-title h3 {
+    font-size: 1.1rem;
+  }
+
+  /* Less dramatic hover effects on mobile */
+  .card-container:hover .project-card-title h3,
+  .card-container:focus .project-card-title h3 {
+    transform: scale(1.1);
+  }
+
+  .card-container:hover .card-right-content,
+  .card-container:focus .card-right-content {
+    transform: none;
+  }
+
+  .card-category {
+    font-size: 0.85rem;
+  }
+
+  .round-label {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+  }
+
   .wip-sign-container {
     max-width: 100%;
     width: 100vw;
     display: flex;
     justify-content: center;
     align-items: center;
-    align-self: center; /* Center the container within flex parent */
+    align-self: center;
     padding: 0;
     margin-left: calc(-50vw + 50%);
     margin-right: calc(-50vw + 50%);
@@ -620,13 +850,11 @@ div.page-hero-desktop {
     max-width: none;
     margin: 10rem auto 0;
     display: block;
-    /* Scale up and shift right to center the sign visually */
     transform: translateX(8%) scale(1.15);
   }
 }
 
 /* Mobile: match about section h2 size from mobile/layout.css */
-/* High specificity with section prefix */
 @media (--mobile) {
   section.projects-section h2 {
     font-size: clamp(2.5rem, 10vw, 4rem);
@@ -646,6 +874,23 @@ div.page-hero-desktop {
     padding: 0;
   }
 
+  .card-container {
+    height: 60px;
+  }
+
+  .project-card-title svg {
+    height: 35px;
+    width: 35px;
+  }
+
+  .card-container .project-card-title h3 {
+    font-size: 1rem;
+  }
+
+  .card-category {
+    display: none; /* Hide category on very small screens */
+  }
+
   .wip-sign-container {
     width: 100vw;
     align-self: center;
@@ -658,7 +903,6 @@ div.page-hero-desktop {
     max-width: none;
     margin: 10rem auto 0;
     display: block;
-    /* Scale up and shift right to center the sign visually */
     transform: translateX(8%) scale(1.2);
   }
 }

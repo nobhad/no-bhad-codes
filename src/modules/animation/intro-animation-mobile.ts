@@ -69,6 +69,31 @@ export class MobileIntroAnimationModule extends BaseModule {
   /** Reference to the overlay element */
   private morphOverlay: HTMLElement | null = null;
 
+  // ============================================================================
+  // CACHED DOM REFERENCES
+  // ============================================================================
+  private cachedElements: {
+    mainContainer: HTMLElement | null;
+    businessCard: HTMLElement | null;
+    businessCardInner: HTMLElement | null;
+    header: HTMLElement | null;
+    introNav: HTMLElement | null;
+  } | null = null;
+
+  /** Lazy-initialize cached DOM references */
+  private getCachedElements() {
+    if (!this.cachedElements) {
+      this.cachedElements = {
+        mainContainer: document.querySelector('main') as HTMLElement | null,
+        businessCard: document.getElementById('business-card'),
+        businessCardInner: document.getElementById('business-card-inner'),
+        header: document.querySelector('.header') as HTMLElement | null,
+        introNav: document.querySelector('.intro-nav') as HTMLElement | null
+      };
+    }
+    return this.cachedElements;
+  }
+
   constructor(options: ModuleOptions = {}) {
     super('MobileIntroAnimationModule', { debug: false, ...options });
 
@@ -126,7 +151,7 @@ export class MobileIntroAnimationModule extends BaseModule {
     // ========================================================================
     // SCROLL RESET
     // ========================================================================
-    const mainContainer = document.querySelector('main') as HTMLElement;
+    const { mainContainer, businessCard } = this.getCachedElements();
     if (mainContainer) {
       mainContainer.scrollTop = 0;
     }
@@ -155,7 +180,6 @@ export class MobileIntroAnimationModule extends BaseModule {
     // ========================================================================
     // GET BUSINESS CARD FOR ALIGNMENT
     // ========================================================================
-    const businessCard = document.getElementById('business-card');
     if (!businessCard) {
       this.log('Business card element not found');
       this.completeIntro();
@@ -312,7 +336,7 @@ export class MobileIntroAnimationModule extends BaseModule {
       onComplete: () => this.completeMorphAnimation()
     });
 
-    const header = document.querySelector('.header') as HTMLElement;
+    const { header } = this.getCachedElements();
 
     // Animation timing
     const entryDuration = 0.8;
@@ -495,10 +519,10 @@ export class MobileIntroAnimationModule extends BaseModule {
   private completeMorphAnimation(): void {
     // CRITICAL: Reveal business card inner FIRST (clear inline visibility:hidden;opacity:0)
     // Must happen before hiding overlay to prevent flash
-    const cardInner = document.getElementById('business-card-inner');
-    if (cardInner) {
-      cardInner.style.visibility = 'visible';
-      cardInner.style.opacity = '1';
+    const { businessCardInner } = this.getCachedElements();
+    if (businessCardInner) {
+      businessCardInner.style.visibility = 'visible';
+      businessCardInner.style.opacity = '1';
     }
 
     if (this.morphOverlay) {
@@ -563,20 +587,18 @@ export class MobileIntroAnimationModule extends BaseModule {
     document.documentElement.classList.remove('intro-loading');
     document.documentElement.classList.add('intro-complete', 'intro-finished');
 
-    const businessCard = document.getElementById('business-card');
+    const { businessCard, businessCardInner, introNav, header } = this.getCachedElements();
     if (businessCard) {
       businessCard.style.opacity = '1';
     }
 
     // Reveal business card inner (clear inline visibility:hidden;opacity:0)
-    const cardInner = document.getElementById('business-card-inner');
-    if (cardInner) {
-      cardInner.style.visibility = 'visible';
-      cardInner.style.opacity = '1';
+    if (businessCardInner) {
+      businessCardInner.style.visibility = 'visible';
+      businessCardInner.style.opacity = '1';
     }
 
     // Make intro nav visible immediately
-    const introNav = document.querySelector('.intro-nav') as HTMLElement;
     if (introNav) {
       gsap.set(introNav, { opacity: 1 });
       const navLinks = introNav.querySelectorAll('.intro-nav-link');
@@ -585,7 +607,6 @@ export class MobileIntroAnimationModule extends BaseModule {
       }
     }
 
-    const header = document.querySelector('.header') as HTMLElement;
     if (header) {
       header.style.removeProperty('opacity');
       header.style.removeProperty('visibility');
@@ -647,15 +668,15 @@ export class MobileIntroAnimationModule extends BaseModule {
       });
     }
 
+    const { businessCardInner, businessCard, introNav } = this.getCachedElements();
+
     // CRITICAL: Reveal card inner first (clear inline visibility:hidden;opacity:0)
-    const cardInner = document.getElementById('business-card-inner');
-    if (cardInner) {
-      cardInner.style.visibility = 'visible';
-      cardInner.style.opacity = '1';
+    if (businessCardInner) {
+      businessCardInner.style.visibility = 'visible';
+      businessCardInner.style.opacity = '1';
     }
 
     // Show business card with animation
-    const businessCard = document.getElementById('business-card');
     if (businessCard) {
       gsap.fromTo(businessCard,
         { opacity: 0 },
@@ -664,7 +685,6 @@ export class MobileIntroAnimationModule extends BaseModule {
     }
 
     // Show intro nav with animation
-    const introNav = document.querySelector('.intro-nav') as HTMLElement;
     if (introNav) {
       gsap.set(introNav, { opacity: 0 });
       gsap.to(introNav, {
@@ -720,8 +740,7 @@ export class MobileIntroAnimationModule extends BaseModule {
 
       // Fallback to simple fade if paw animation fails
       return new Promise((resolve) => {
-        const businessCard = document.getElementById('business-card');
-        const introNav = document.querySelector('.intro-nav') as HTMLElement;
+        const { businessCard, introNav } = this.getCachedElements();
 
         const exitTimeline = gsap.timeline({
           onComplete: () => {
@@ -769,20 +788,18 @@ export class MobileIntroAnimationModule extends BaseModule {
     document.documentElement.classList.remove('intro-loading');
     document.documentElement.classList.add('intro-complete');
 
-    const businessCard = document.getElementById('business-card');
+    const { businessCard, businessCardInner, introNav, mainContainer } = this.getCachedElements();
     if (businessCard) {
       businessCard.style.opacity = '1';
     }
 
     // Reveal business card inner (clear inline visibility:hidden;opacity:0)
-    const cardInner = document.getElementById('business-card-inner');
-    if (cardInner) {
-      cardInner.style.visibility = 'visible';
-      cardInner.style.opacity = '1';
+    if (businessCardInner) {
+      businessCardInner.style.visibility = 'visible';
+      businessCardInner.style.opacity = '1';
     }
 
     // Fade in intro nav with GSAP - matching desktop timing
-    const introNav = document.querySelector('.intro-nav') as HTMLElement;
     if (introNav) {
       gsap.to(introNav, {
         opacity: 1,
@@ -801,7 +818,6 @@ export class MobileIntroAnimationModule extends BaseModule {
       }
     }
 
-    const mainContainer = document.querySelector('main') as HTMLElement;
     if (mainContainer) {
       mainContainer.scrollTop = 0;
     }
@@ -849,6 +865,9 @@ export class MobileIntroAnimationModule extends BaseModule {
       this.morphOverlay.removeEventListener('touchend', this.skipHandler);
       this.skipHandler = null;
     }
+
+    // Clear cached DOM references
+    this.cachedElements = null;
 
     await super.destroy();
   }

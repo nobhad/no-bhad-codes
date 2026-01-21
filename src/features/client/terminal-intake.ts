@@ -56,6 +56,35 @@ export class TerminalIntakeModule extends BaseModule {
   private progressFill: HTMLElement | null = null;
   private progressPercent: HTMLElement | null = null;
 
+  // Cached modal references
+  private _intakeModal: HTMLElement | null | undefined = undefined;
+  private _intakeModalBackdrop: HTMLElement | null | undefined = undefined;
+  private _terminalCursor: HTMLElement | null | undefined = undefined;
+
+  /** Lazy-cached modal element getter */
+  private get intakeModal(): HTMLElement | null {
+    if (this._intakeModal === undefined) {
+      this._intakeModal = document.getElementById('intake-modal');
+    }
+    return this._intakeModal;
+  }
+
+  /** Lazy-cached modal backdrop getter */
+  private get intakeModalBackdrop(): HTMLElement | null {
+    if (this._intakeModalBackdrop === undefined) {
+      this._intakeModalBackdrop = document.getElementById('intake-modal-backdrop');
+    }
+    return this._intakeModalBackdrop;
+  }
+
+  /** Lazy-cached terminal cursor getter */
+  private get terminalCursor(): HTMLElement | null {
+    if (this._terminalCursor === undefined) {
+      this._terminalCursor = document.getElementById('terminalCursor');
+    }
+    return this._terminalCursor;
+  }
+
   private currentQuestionIndex = 0;
   private intakeData: IntakeData = {};
   private messages: ChatMessage[] = [];
@@ -321,9 +350,8 @@ export class TerminalIntakeModule extends BaseModule {
     // Escape key toggles fullscreen
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        const modal = document.getElementById('intake-modal');
-        if (modal?.classList.contains('open')) {
-          modal.classList.toggle('fullscreen');
+        if (this.intakeModal?.classList.contains('open')) {
+          this.intakeModal.classList.toggle('fullscreen');
         }
       }
     });
@@ -358,8 +386,7 @@ export class TerminalIntakeModule extends BaseModule {
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
-        const modal = document.getElementById('intake-modal');
-        const isModalClosed = modal && !modal.classList.contains('open');
+        const isModalClosed = this.intakeModal && !this.intakeModal.classList.contains('open');
         if (isModalClosed) return;
 
         // Skip if processing or in a special prompt
@@ -390,8 +417,7 @@ export class TerminalIntakeModule extends BaseModule {
         }
       }
 
-      const modal = document.getElementById('intake-modal');
-      if (modal && !modal.classList.contains('open')) return;
+      if (this.intakeModal && !this.intakeModal.classList.contains('open')) return;
 
       const question = this.getCurrentQuestion();
       if (!question || !question.options) return;
@@ -426,8 +452,7 @@ export class TerminalIntakeModule extends BaseModule {
       // Skip if processing or in a special prompt
       if (this.isProcessing || this.isInSpecialPrompt) return;
 
-      const modal = document.getElementById('intake-modal');
-      if (modal && !modal.classList.contains('open')) return;
+      if (this.intakeModal && !this.intakeModal.classList.contains('open')) return;
 
       if (e.key !== 'ArrowUp') return;
 
@@ -459,17 +484,15 @@ export class TerminalIntakeModule extends BaseModule {
   private bindModalControls(): void {
     const closeBtn = this.terminalContainer.querySelector('#terminalClose');
     closeBtn?.addEventListener('click', () => {
-      const modal = document.getElementById('intake-modal');
-      const backdrop = document.getElementById('intake-modal-backdrop');
-      if (modal) {
-        modal.classList.remove('open', 'minimized', 'fullscreen');
+      if (this.intakeModal) {
+        this.intakeModal.classList.remove('open', 'minimized', 'fullscreen');
         document.body.style.overflow = '';
         (window as typeof globalThis & { terminalIntakeInitialized?: boolean }).terminalIntakeInitialized = false;
-        const container = document.querySelector('#intake-modal .terminal-intake-container');
+        const container = this.intakeModal.querySelector('.terminal-intake-container');
         if (container) container.innerHTML = '';
       }
-      if (backdrop) {
-        backdrop.classList.remove('open');
+      if (this.intakeModalBackdrop) {
+        this.intakeModalBackdrop.classList.remove('open');
       }
       // Dispatch event so index.html can reset terminalModule
       window.dispatchEvent(new CustomEvent('intakeModalClosed'));
@@ -477,19 +500,17 @@ export class TerminalIntakeModule extends BaseModule {
 
     const minimizeBtn = this.terminalContainer.querySelector('#terminalMinimize');
     minimizeBtn?.addEventListener('click', () => {
-      const modal = document.getElementById('intake-modal');
-      if (modal) {
-        modal.classList.remove('fullscreen');
-        modal.classList.toggle('minimized');
+      if (this.intakeModal) {
+        this.intakeModal.classList.remove('fullscreen');
+        this.intakeModal.classList.toggle('minimized');
       }
     });
 
     const maximizeBtn = this.terminalContainer.querySelector('#terminalMaximize');
     maximizeBtn?.addEventListener('click', () => {
-      const modal = document.getElementById('intake-modal');
-      if (modal) {
-        modal.classList.remove('minimized');
-        modal.classList.toggle('fullscreen');
+      if (this.intakeModal) {
+        this.intakeModal.classList.remove('minimized');
+        this.intakeModal.classList.toggle('fullscreen');
       }
     });
 
@@ -497,18 +518,16 @@ export class TerminalIntakeModule extends BaseModule {
     header?.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (!target.classList.contains('terminal-btn')) {
-        const modal = document.getElementById('intake-modal');
-        if (modal?.classList.contains('minimized')) {
-          modal.classList.remove('minimized');
+        if (this.intakeModal?.classList.contains('minimized')) {
+          this.intakeModal.classList.remove('minimized');
         }
       }
     });
   }
 
   private async startConversation(): Promise<void> {
-    const cursor = document.getElementById('terminalCursor');
-    if (cursor) {
-      cursor.style.display = 'none';
+    if (this.terminalCursor) {
+      this.terminalCursor.style.display = 'none';
     }
 
     await delay(100);

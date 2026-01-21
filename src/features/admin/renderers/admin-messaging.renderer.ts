@@ -23,6 +23,25 @@ interface ThreadSelectCallback {
 }
 
 // ============================================
+// Cached DOM References
+// ============================================
+
+const cachedElements: Map<string, HTMLElement | null> = new Map();
+
+/** Get cached element by ID */
+function getElement(id: string): HTMLElement | null {
+  if (!cachedElements.has(id)) {
+    cachedElements.set(id, document.getElementById(id));
+  }
+  return cachedElements.get(id) ?? null;
+}
+
+/** Get messages container (checks two possible IDs) */
+function getMessagesContainer(): HTMLElement | null {
+  return getElement('admin-messages-thread') || getElement('admin-messages-container');
+}
+
+// ============================================
 // Admin Messaging Renderer
 // ============================================
 
@@ -56,7 +75,7 @@ class AdminMessagingRenderer {
    * Render the threads list
    */
   renderThreadsList(threads: MessageThread[]): void {
-    const listContainer = document.getElementById('admin-threads-list');
+    const listContainer = getElement('admin-threads-list');
     if (!listContainer) {
       logger.warn('Threads list container not found');
       return;
@@ -148,8 +167,8 @@ class AdminMessagingRenderer {
    * Enable the message compose area
    */
   private enableComposeArea(): void {
-    const textarea = document.getElementById('admin-message-text') as HTMLTextAreaElement;
-    const sendButton = document.getElementById('admin-send-message') as HTMLButtonElement;
+    const textarea = getElement('admin-message-text') as HTMLTextAreaElement;
+    const sendButton = getElement('admin-send-message') as HTMLButtonElement;
 
     if (textarea) {
       textarea.disabled = false;
@@ -165,8 +184,8 @@ class AdminMessagingRenderer {
    * Disable the message compose area
    */
   disableComposeArea(): void {
-    const textarea = document.getElementById('admin-message-text') as HTMLTextAreaElement;
-    const sendButton = document.getElementById('admin-send-message') as HTMLButtonElement;
+    const textarea = getElement('admin-message-text') as HTMLTextAreaElement;
+    const sendButton = getElement('admin-send-message') as HTMLButtonElement;
 
     if (textarea) {
       textarea.disabled = true;
@@ -183,9 +202,7 @@ class AdminMessagingRenderer {
    * Render messages in the thread view
    */
   renderMessages(messages: Message[]): void {
-    const container =
-      document.getElementById('admin-messages-thread') ||
-      document.getElementById('admin-messages-container');
+    const container = getMessagesContainer();
 
     if (!container) {
       logger.warn('Messages container not found');
@@ -262,9 +279,7 @@ class AdminMessagingRenderer {
    * Show loading state in messages container
    */
   showMessagesLoading(): void {
-    const container =
-      document.getElementById('admin-messages-thread') ||
-      document.getElementById('admin-messages-container');
+    const container = getMessagesContainer();
 
     if (container) {
       container.innerHTML = `
@@ -279,9 +294,7 @@ class AdminMessagingRenderer {
    * Show error state in messages container
    */
   showMessagesError(message: string = 'Failed to load messages'): void {
-    const container =
-      document.getElementById('admin-messages-thread') ||
-      document.getElementById('admin-messages-container');
+    const container = getMessagesContainer();
 
     if (container) {
       container.innerHTML = `
@@ -296,9 +309,7 @@ class AdminMessagingRenderer {
    * Append a new message to the view (for optimistic updates)
    */
   appendMessage(message: Message): void {
-    const container =
-      document.getElementById('admin-messages-thread') ||
-      document.getElementById('admin-messages-container');
+    const container = getMessagesContainer();
 
     if (!container) return;
 
@@ -311,7 +322,7 @@ class AdminMessagingRenderer {
    * Clear the message input
    */
   clearMessageInput(): void {
-    const input = document.getElementById('admin-message-text') as HTMLTextAreaElement;
+    const input = getElement('admin-message-text') as HTMLTextAreaElement;
     if (input) {
       input.value = '';
     }
@@ -321,7 +332,7 @@ class AdminMessagingRenderer {
    * Get the current message input value
    */
   getMessageInputValue(): string {
-    const input = document.getElementById('admin-message-text') as HTMLTextAreaElement;
+    const input = getElement('admin-message-text') as HTMLTextAreaElement;
     return input?.value.trim() || '';
   }
 
@@ -329,8 +340,8 @@ class AdminMessagingRenderer {
    * Set message input disabled state
    */
   setMessageInputDisabled(disabled: boolean): void {
-    const input = document.getElementById('admin-message-text') as HTMLTextAreaElement;
-    const sendButton = document.getElementById('admin-send-message') as HTMLButtonElement;
+    const input = getElement('admin-message-text') as HTMLTextAreaElement;
+    const sendButton = getElement('admin-send-message') as HTMLButtonElement;
 
     if (input) {
       input.disabled = disabled;
@@ -344,7 +355,7 @@ class AdminMessagingRenderer {
    * Focus the message input
    */
   focusMessageInput(): void {
-    const input = document.getElementById('admin-message-text') as HTMLTextAreaElement;
+    const input = getElement('admin-message-text') as HTMLTextAreaElement;
     if (input) {
       input.focus();
     }
@@ -354,7 +365,7 @@ class AdminMessagingRenderer {
    * Update unread count in sidebar badge
    */
   updateUnreadBadge(count: number): void {
-    const badge = document.getElementById('messages-badge');
+    const badge = getElement('messages-badge');
     if (badge) {
       if (count > 0) {
         badge.textContent = String(count);
@@ -369,7 +380,7 @@ class AdminMessagingRenderer {
    * Render the client dropdown for new messages
    */
   renderClientDropdown(clients: Array<{ id: number; name: string }>): void {
-    const dropdown = document.getElementById('admin-client-select') as HTMLSelectElement;
+    const dropdown = getElement('admin-client-select') as HTMLSelectElement;
     if (!dropdown) return;
 
     dropdown.innerHTML = `

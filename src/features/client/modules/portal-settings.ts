@@ -10,11 +10,37 @@
 
 import type { ClientPortalContext } from '../portal-types';
 
+// ============================================================================
+// CACHED DOM REFERENCES
+// ============================================================================
+
+/** Cache for form elements */
+const cachedForms: Map<string, HTMLElement | null> = new Map();
+
+/** Cache for input elements */
+const cachedInputs: Map<string, HTMLInputElement | HTMLSelectElement | null> = new Map();
+
+/** Get cached form element */
+function getForm(formId: string): HTMLElement | null {
+  if (!cachedForms.has(formId)) {
+    cachedForms.set(formId, document.getElementById(formId));
+  }
+  return cachedForms.get(formId) ?? null;
+}
+
+/** Get cached input element */
+function getInput<T extends HTMLInputElement | HTMLSelectElement = HTMLInputElement>(inputId: string): T | null {
+  if (!cachedInputs.has(inputId)) {
+    cachedInputs.set(inputId, document.getElementById(inputId) as T | null);
+  }
+  return cachedInputs.get(inputId) as T | null;
+}
+
 /**
  * Setup settings forms
  */
 export function setupSettingsForms(ctx: ClientPortalContext): void {
-  const contactForm = document.getElementById('contact-info-form');
+  const contactForm = getForm('contact-info-form');
   if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -22,7 +48,7 @@ export function setupSettingsForms(ctx: ClientPortalContext): void {
     });
   }
 
-  const billingForm = document.getElementById('billing-address-form');
+  const billingForm = getForm('billing-address-form');
   if (billingForm) {
     billingForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -30,7 +56,7 @@ export function setupSettingsForms(ctx: ClientPortalContext): void {
     });
   }
 
-  const notificationForm = document.getElementById('notification-prefs-form');
+  const notificationForm = getForm('notification-prefs-form');
   if (notificationForm) {
     notificationForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -38,7 +64,7 @@ export function setupSettingsForms(ctx: ClientPortalContext): void {
     });
   }
 
-  const billingViewForm = document.getElementById('billing-view-form');
+  const billingViewForm = getForm('billing-view-form');
   if (billingViewForm) {
     billingViewForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -46,7 +72,7 @@ export function setupSettingsForms(ctx: ClientPortalContext): void {
     });
   }
 
-  const taxInfoForm = document.getElementById('tax-info-form');
+  const taxInfoForm = getForm('tax-info-form');
   if (taxInfoForm) {
     taxInfoForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -75,11 +101,11 @@ export function loadUserSettings(currentUser: string | null): void {
     }
   };
 
-  const nameInput = document.getElementById('contact-name') as HTMLInputElement;
-  const emailInput = document.getElementById('contact-email') as HTMLInputElement;
-  const companyInput = document.getElementById('contact-company') as HTMLInputElement;
-  const phoneInput = document.getElementById('contact-phone') as HTMLInputElement;
-  const secondaryEmailInput = document.getElementById('contact-secondary-email') as HTMLInputElement;
+  const nameInput = getInput('contact-name');
+  const emailInput = getInput('contact-email');
+  const companyInput = getInput('contact-company');
+  const phoneInput = getInput('contact-phone');
+  const secondaryEmailInput = getInput('contact-secondary-email');
 
   if (nameInput) nameInput.value = userData.name;
   if (emailInput) emailInput.value = userData.email;
@@ -87,12 +113,12 @@ export function loadUserSettings(currentUser: string | null): void {
   if (phoneInput) phoneInput.value = userData.phone;
   if (secondaryEmailInput) secondaryEmailInput.value = userData.secondaryEmail;
 
-  const address1Input = document.getElementById('billing-address1') as HTMLInputElement;
-  const address2Input = document.getElementById('billing-address2') as HTMLInputElement;
-  const cityInput = document.getElementById('billing-city') as HTMLInputElement;
-  const stateInput = document.getElementById('billing-state') as HTMLInputElement;
-  const zipInput = document.getElementById('billing-zip') as HTMLInputElement;
-  const countryInput = document.getElementById('billing-country') as HTMLInputElement;
+  const address1Input = getInput('billing-address1');
+  const address2Input = getInput('billing-address2');
+  const cityInput = getInput('billing-city');
+  const stateInput = getInput('billing-state');
+  const zipInput = getInput('billing-zip');
+  const countryInput = getInput('billing-country');
 
   if (address1Input) address1Input.value = userData.billing.address1;
   if (address2Input) address2Input.value = userData.billing.address2;
@@ -127,12 +153,12 @@ export function loadBillingSettings(): void {
       businessName: ''
     };
 
-  const address1Input = document.getElementById('billing-view-address1') as HTMLInputElement;
-  const address2Input = document.getElementById('billing-view-address2') as HTMLInputElement;
-  const cityInput = document.getElementById('billing-view-city') as HTMLInputElement;
-  const stateInput = document.getElementById('billing-view-state') as HTMLInputElement;
-  const zipInput = document.getElementById('billing-view-zip') as HTMLInputElement;
-  const countryInput = document.getElementById('billing-view-country') as HTMLInputElement;
+  const address1Input = getInput('billing-view-address1');
+  const address2Input = getInput('billing-view-address2');
+  const cityInput = getInput('billing-view-city');
+  const stateInput = getInput('billing-view-state');
+  const zipInput = getInput('billing-view-zip');
+  const countryInput = getInput('billing-view-country');
 
   if (address1Input) address1Input.value = billingData.address1;
   if (address2Input) address2Input.value = billingData.address2;
@@ -141,8 +167,8 @@ export function loadBillingSettings(): void {
   if (zipInput) zipInput.value = billingData.zip;
   if (countryInput) countryInput.value = billingData.country;
 
-  const taxIdInput = document.getElementById('tax-id') as HTMLInputElement;
-  const businessNameInput = document.getElementById('business-name') as HTMLInputElement;
+  const taxIdInput = getInput('tax-id');
+  const businessNameInput = getInput('business-name');
 
   if (taxIdInput) taxIdInput.value = taxData.taxId;
   if (businessNameInput) businessNameInput.value = taxData.businessName;
@@ -164,13 +190,11 @@ export function loadContactSettings(currentUser: string | null): void {
       secondaryEmail: ''
     };
 
-  const nameInput = document.getElementById('contact-view-name') as HTMLInputElement;
-  const emailInput = document.getElementById('contact-view-email') as HTMLInputElement;
-  const companyInput = document.getElementById('contact-view-company') as HTMLInputElement;
-  const phoneInput = document.getElementById('contact-view-phone') as HTMLInputElement;
-  const secondaryEmailInput = document.getElementById(
-    'contact-view-secondary-email'
-  ) as HTMLInputElement;
+  const nameInput = getInput('contact-view-name');
+  const emailInput = getInput('contact-view-email');
+  const companyInput = getInput('contact-view-company');
+  const phoneInput = getInput('contact-view-phone');
+  const secondaryEmailInput = getInput('contact-view-secondary-email');
 
   if (nameInput) nameInput.value = contactData.name;
   if (emailInput) emailInput.value = contactData.email;
@@ -198,15 +222,19 @@ export function loadNotificationSettings(): void {
       quietEnd: ''
     };
 
-  const checkboxes = document.querySelectorAll('#email-notifications-form input[type="checkbox"]');
-  checkboxes.forEach((checkbox) => {
-    const cb = checkbox as HTMLInputElement;
-    cb.checked = notificationPrefs.includes(cb.value);
-  });
+  // Use cached form reference for checkbox query
+  const notificationForm = getForm('email-notifications-form');
+  if (notificationForm) {
+    const checkboxes = notificationForm.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach((checkbox) => {
+      const cb = checkbox as HTMLInputElement;
+      cb.checked = notificationPrefs.includes(cb.value);
+    });
+  }
 
-  const frequencySelect = document.getElementById('notification-frequency') as HTMLSelectElement;
-  const quietStartInput = document.getElementById('quiet-hours-start') as HTMLInputElement;
-  const quietEndInput = document.getElementById('quiet-hours-end') as HTMLInputElement;
+  const frequencySelect = getInput<HTMLSelectElement>('notification-frequency');
+  const quietStartInput = getInput('quiet-hours-start');
+  const quietEndInput = getInput('quiet-hours-end');
 
   if (frequencySelect) frequencySelect.value = frequencyData.frequency;
   if (quietStartInput) quietStartInput.value = frequencyData.quietStart;
