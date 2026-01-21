@@ -162,8 +162,17 @@ domCache.register({
   editCancel: '#edit-project-cancel'
 });
 
+import type {
+  ProjectResponse,
+  ProjectMilestoneResponse,
+  MessageResponse,
+  MessageThreadResponse,
+  InvoiceResponse,
+  ProjectFileResponse
+} from '../../types/api';
+
 export interface ProjectDetailsHandler {
-  showProjectDetails(projectId: number, projectsData: any[], switchTab: (tab: string) => void, loadProjects: () => Promise<void>, formatProjectType: (type: string) => string, inviteLead: (leadId: number, email: string) => Promise<void>): void;
+  showProjectDetails(projectId: number, projectsData: ProjectResponse[], switchTab: (tab: string) => void, loadProjects: () => Promise<void>, formatProjectType: (type: string) => string, inviteLead: (leadId: number, email: string) => Promise<void>): void;
   toggleMilestone(milestoneId: number, isCompleted: boolean): Promise<void>;
   deleteMilestone(milestoneId: number): Promise<void>;
   sendInvoice(invoiceId: number): Promise<void>;
@@ -172,7 +181,7 @@ export interface ProjectDetailsHandler {
 
 export class AdminProjectDetails implements ProjectDetailsHandler {
   private currentProjectId: number | null = null;
-  private projectsData: any[] = [];
+  private projectsData: ProjectResponse[] = [];
   private switchTabFn?: (tab: string) => void;
   private loadProjectsFn?: () => Promise<void>;
   private formatProjectTypeFn?: (type: string) => string;
@@ -184,13 +193,13 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    */
   showProjectDetails(
     projectId: number,
-    projectsData: any[],
+    projectsData: ProjectResponse[],
     switchTab: (tab: string) => void,
     loadProjects: () => Promise<void>,
     formatProjectType: (type: string) => string,
     inviteLead: (leadId: number, email: string) => Promise<void>
   ): void {
-    const project = projectsData.find((p: any) => p.id === projectId);
+    const project = projectsData.find((p: ProjectResponse) => p.id === projectId);
     if (!project) return;
 
     this.currentProjectId = projectId;
@@ -213,7 +222,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   /**
    * Populate the project detail view with project data
    */
-  private populateProjectDetailView(project: any): void {
+  private populateProjectDetailView(project: ProjectResponse): void {
     // Header info (use cached refs)
     const titleEl = domCache.get('detailTitle');
     if (titleEl) titleEl.textContent = 'Project Details';
@@ -237,7 +246,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       status.textContent = (project.status || 'pending').replace('_', ' ');
       status.className = `status-badge status-${(project.status || 'pending').replace('_', '-')}`;
     }
-    if (projectType && this.formatProjectTypeFn) {
+    if (projectType && this.formatProjectTypeFn && project.project_type) {
       projectType.textContent = this.formatProjectTypeFn(project.project_type);
     }
     if (budget) budget.textContent = project.budget_range || '-';
@@ -320,7 +329,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       financialSection.style.display = hasFinancial ? 'flex' : 'none';
     }
     if (depositEl) {
-      depositEl.textContent = project.deposit_amount || '-';
+      depositEl.textContent = project.deposit_amount ? `$${project.deposit_amount.toFixed(2)}` : '-';
     }
     if (contractDateEl) {
       contractDateEl.textContent = project.contract_signed_at
@@ -347,7 +356,9 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       if (existingFeatures) existingFeatures.remove();
 
       // Parse features - handle both comma-separated and concatenated formats
-      const featuresArray = this.parseFeatures(project.features);
+      const featuresArray = this.parseFeatures(
+        typeof project.features === 'string' ? project.features : project.features.join(', ')
+      );
 
       // Filter out plan tiers and format as feature tags
       const excludedValues = ['basic-only', 'standard', 'premium', 'enterprise'];
@@ -477,7 +488,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       resendInviteBtn.dataset.listenerAdded = 'true';
       resendInviteBtn.addEventListener('click', () => {
         if (this.currentProjectId && this.inviteLeadFn) {
-          const project = this.projectsData.find((p: any) => p.id === this.currentProjectId);
+          const project = this.projectsData.find((p: ProjectResponse) => p.id === this.currentProjectId);
           if (project && project.email) {
             this.inviteLeadFn(this.currentProjectId, project.email);
           } else {
@@ -595,7 +606,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   private openEditProjectModal(): void {
     if (!this.currentProjectId) return;
 
-    const project = this.projectsData.find((p: any) => p.id === this.currentProjectId);
+    const project = this.projectsData.find((p: ProjectResponse) => p.id === this.currentProjectId);
     if (!project) return;
 
     const modal = domCache.get('editModal');
@@ -623,13 +634,13 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (nameInput) nameInput.value = project.project_name || '';
     if (typeSelect) typeSelect.value = project.project_type || '';
     if (budgetInput) budgetInput.value = project.budget_range || '';
-    if (priceInput) priceInput.value = project.price || '';
+    if (priceInput) priceInput.value = project.price ? String(project.price) : '';
     if (timelineInput) timelineInput.value = project.timeline || '';
     if (previewUrlInput) previewUrlInput.value = project.preview_url || '';
     if (statusSelect) statusSelect.value = project.status || 'pending';
     if (startDateInput) startDateInput.value = project.start_date ? project.start_date.split('T')[0] : '';
     if (endDateInput) endDateInput.value = project.estimated_end_date ? project.estimated_end_date.split('T')[0] : '';
-    if (depositInput) depositInput.value = project.deposit_amount || '';
+    if (depositInput) depositInput.value = project.deposit_amount ? String(project.deposit_amount) : '';
     if (contractDateInput) contractDateInput.value = project.contract_signed_at ? project.contract_signed_at.split('T')[0] : '';
     if (repoUrlInput) repoUrlInput.value = project.repository_url || '';
     if (productionUrlInput) productionUrlInput.value = project.production_url || '';
@@ -714,7 +725,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         // Refresh project data
         await this.loadProjectsFn();
         // Re-populate the view
-        const project = this.projectsData.find((p: any) => p.id === this.currentProjectId);
+        const project = this.projectsData.find((p: ProjectResponse) => p.id === this.currentProjectId);
         if (project) {
           this.populateProjectDetailView(project);
         }
@@ -745,7 +756,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     try {
       // Get the client ID for this project
-      const project = this.projectsData.find((p: any) => p.id === projectId);
+      const project = this.projectsData.find((p: ProjectResponse) => p.id === projectId);
       if (!project || !project.client_id) {
         messagesThread.innerHTML =
           '<p class="empty-state">No client account linked. Invite the client first to enable messaging.</p>';
@@ -760,13 +771,13 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         return;
       }
 
-      const threadsData = await threadsResponse.json();
-      const threads = threadsData.threads || [];
+      const threadsData = await threadsResponse.json() as { threads?: MessageThreadResponse[] };
+      const threads: MessageThreadResponse[] = threadsData.threads || [];
 
       // Find thread for this project or client
-      let thread = threads.find((t: any) => t.project_id === projectId);
-      if (!thread) {
-        thread = threads.find((t: any) => t.client_id === project.client_id);
+      let thread = threads.find((t: MessageThreadResponse) => t.project_id === projectId);
+      if (!thread && project.client_id) {
+        thread = threads.find((t: MessageThreadResponse) => t.client_id === project.client_id);
       }
 
       if (!thread) {
@@ -786,20 +797,20 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         return;
       }
 
-      const messagesData = await messagesResponse.json();
-      const messages = messagesData.messages || [];
+      const messagesData = await messagesResponse.json() as { messages?: MessageResponse[] };
+      const messages: MessageResponse[] = messagesData.messages || [];
 
       if (messages.length === 0) {
         messagesThread.innerHTML =
           '<p class="empty-state">No messages yet. Start the conversation with your client.</p>';
       } else {
         messagesThread.innerHTML = messages
-          .map((msg: any) => {
+          .map((msg: MessageResponse) => {
             // Sanitize user data to prevent XSS
             const safeSenderName = SanitizationUtils.escapeHtml(
               msg.sender_type === 'admin' ? 'You' : (msg.sender_name || project.contact_name || 'Client')
             );
-            const safeContent = SanitizationUtils.escapeHtml(msg.message || msg.content || '');
+            const safeContent = SanitizationUtils.escapeHtml(msg.message || '');
             return `
             <div class="message ${msg.sender_type === 'admin' ? 'message-sent' : 'message-received'}">
               <div class="message-content">
@@ -833,7 +844,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     if (!AdminAuth.isAuthenticated()) return;
 
-    const project = this.projectsData.find((p: any) => p.id === this.currentProjectId);
+    const project = this.projectsData.find((p: ProjectResponse) => p.id === this.currentProjectId);
     if (!project || !project.client_id) {
       alert('No client account linked. Invite the client first.');
       return;
@@ -954,13 +965,18 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
             '<p class="empty-state">No milestones yet. Add milestones to track project progress.</p>';
         } else {
           milestonesList.innerHTML = milestones
-            .map((m: any) => {
+            .map((m: ProjectMilestoneResponse) => {
               // Sanitize user data to prevent XSS
               const safeTitle = SanitizationUtils.escapeHtml(m.title || '');
               const safeDescription = SanitizationUtils.escapeHtml(m.description || '');
+              const deliverablesArray = Array.isArray(m.deliverables) 
+                ? m.deliverables 
+                : (typeof m.deliverables === 'string' && m.deliverables.trim() 
+                  ? [m.deliverables] 
+                  : []);
               const safeDeliverables =
-                m.deliverables && m.deliverables.length > 0
-                  ? m.deliverables
+                deliverablesArray.length > 0
+                  ? deliverablesArray
                     .map((d: string) => `<li>${SanitizationUtils.escapeHtml(d)}</li>`)
                     .join('')
                   : '';
@@ -985,7 +1001,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
             .join('');
 
           // Calculate and update progress based on completed milestones
-          const completedCount = milestones.filter((m: any) => m.is_completed).length;
+          const completedCount = milestones.filter((m: ProjectMilestoneResponse) => m.is_completed).length;
           const totalCount = milestones.length;
           const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
           this.updateProgressBar(progress);
@@ -1133,15 +1149,15 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
       if (response.ok) {
         const data = await response.json();
-        const invoices = data.invoices || [];
+        const invoices: InvoiceResponse[] = data.invoices || [];
 
         // Calculate totals
         let totalOutstanding = 0;
         let totalPaid = 0;
 
-        invoices.forEach((inv: any) => {
-          const amount = parseFloat(inv.amount_total) || 0;
-          const paid = parseFloat(inv.amount_paid) || 0;
+        invoices.forEach((inv: InvoiceResponse) => {
+          const amount = typeof inv.amount_total === 'string' ? parseFloat(inv.amount_total) : (inv.amount_total || 0);
+          const paid = typeof inv.amount_paid === 'string' ? parseFloat(inv.amount_paid) : (inv.amount_paid || 0);
           if (inv.status === 'paid') {
             totalPaid += amount;
           } else if (['sent', 'viewed', 'partial', 'overdue'].includes(inv.status)) {
@@ -1157,7 +1173,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
           invoicesList.innerHTML = '<p class="empty-state">No invoices created yet.</p>';
         } else {
           invoicesList.innerHTML = invoices
-            .map((inv: any) => {
+            .map((inv: InvoiceResponse) => {
               const statusClass =
                 inv.status === 'paid'
                   ? 'status-completed'
@@ -1170,7 +1186,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
                   <strong>${inv.invoice_number || `INV-${inv.id}`}</strong>
                   <span class="invoice-date">${new Date(inv.created_at).toLocaleDateString()}</span>
                 </div>
-                <div class="invoice-amount">$${(parseFloat(inv.amount_total) || 0).toFixed(2)}</div>
+                <div class="invoice-amount">$${(typeof inv.amount_total === 'string' ? parseFloat(inv.amount_total) : (inv.amount_total || 0)).toFixed(2)}</div>
                 <span class="status-badge ${statusClass}">${inv.status}</span>
                 <div class="invoice-actions">
                   <a href="/api/invoices/${inv.id}/pdf" class="btn btn-outline btn-sm" target="_blank">PDF</a>
@@ -1194,7 +1210,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   private showCreateInvoicePrompt(): void {
     if (!this.currentProjectId) return;
 
-    const project = this.projectsData.find((p: any) => p.id === this.currentProjectId);
+    const project = this.projectsData.find((p: ProjectResponse) => p.id === this.currentProjectId);
     if (!project) return;
 
     const description = prompt('Enter line item description:', 'Web Development Services');

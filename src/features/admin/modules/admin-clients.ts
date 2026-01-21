@@ -10,6 +10,11 @@
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import type { AdminDashboardContext } from '../admin-types';
+import type {
+  ClientResponse,
+  ProjectResponse,
+  InvoiceResponse
+} from '../../../types/api';
 import { formatCurrency } from '../../../utils/format-utils';
 import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
@@ -438,8 +443,8 @@ function setupClientDetailHandlers(client: Client, ctx: AdminDashboardContext): 
   const resendBtn = domCache.get('resendBtn', true);
   if (resendBtn) {
     // Check if invitation was already sent (has password_hash means invited)
-    const clientAny = client as any;
-    const hasBeenInvited = clientAny.password_hash || clientAny.invited_at;
+    const hasBeenInvited = (client as ClientResponse & { password_hash?: string; invited_at?: string }).password_hash || 
+                           (client as ClientResponse & { password_hash?: string; invited_at?: string }).invited_at;
     const buttonText = hasBeenInvited ? 'Resend Invitation' : 'Send Invitation';
 
     // Update the button's innerHTML to replace text while keeping SVG
@@ -479,7 +484,7 @@ async function loadClientProjects(clientId: number): Promise<void> {
     const response = await apiFetch(`/api/clients/${clientId}/projects`);
 
     if (response.ok) {
-      const data = await response.json();
+      const data = await response.json() as { projects?: ProjectResponse[] };
       renderClientProjects(data.projects || [], container);
     } else {
       container.innerHTML = '<p class="empty-state">No projects found for this client.</p>';
@@ -490,7 +495,7 @@ async function loadClientProjects(clientId: number): Promise<void> {
   }
 }
 
-function renderClientProjects(projects: any[], container: HTMLElement): void {
+function renderClientProjects(projects: ProjectResponse[], container: HTMLElement): void {
   if (projects.length === 0) {
     container.innerHTML = '<p class="empty-state">No projects found for this client.</p>';
     return;
@@ -541,17 +546,18 @@ async function loadClientBilling(clientId: number): Promise<void> {
     const response = await apiFetch(`/api/invoices/client/${clientId}`);
 
     if (response.ok) {
-      const data = await response.json();
-      const invoices = data.invoices || [];
+      const data = await response.json() as { invoices?: InvoiceResponse[] };
+      const invoices: InvoiceResponse[] = data.invoices || [];
 
       // Calculate billing totals
       let totalInvoiced = 0;
       let totalPaid = 0;
 
-      invoices.forEach((inv: any) => {
-        totalInvoiced += inv.amount_total || 0;
+      invoices.forEach((inv: InvoiceResponse) => {
+        const amount = typeof inv.amount_total === 'string' ? parseFloat(inv.amount_total) : (inv.amount_total || 0);
+        totalInvoiced += amount;
         if (inv.status === 'paid') {
-          totalPaid += inv.amount_total || 0;
+          totalPaid += amount;
         }
       });
 
@@ -579,7 +585,7 @@ async function loadClientBilling(clientId: number): Promise<void> {
   }
 }
 
-function renderClientInvoices(invoices: any[], container: HTMLElement): void {
+function renderClientInvoices(invoices: InvoiceResponse[], container: HTMLElement): void {
   if (invoices.length === 0) {
     container.innerHTML = '<p class="empty-state">No invoices found for this client.</p>';
     return;
@@ -588,7 +594,8 @@ function renderClientInvoices(invoices: any[], container: HTMLElement): void {
   container.innerHTML = invoices
     .map((invoice) => {
       const invoiceNumber = SanitizationUtils.escapeHtml(invoice.invoice_number || '-');
-      const amount = formatCurrency(invoice.amount_total || 0);
+      const amountValue = typeof invoice.amount_total === 'string' ? parseFloat(invoice.amount_total) : (invoice.amount_total || 0);
+      const amount = formatCurrency(amountValue);
       const date = new Date(invoice.created_at || invoice.due_date).toLocaleDateString();
       const status = invoice.status || 'pending';
 

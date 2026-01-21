@@ -170,6 +170,20 @@ body {
   color: var(--color-dark);
 }
 
+/* Admin login section - match main site background */
+.admin-login-section {
+  background-color: var(--color-neutral-300);
+}
+
+/* Admin login content - center the auth form */
+.admin-login-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100%;
+}
+
 /* Footer integration with theme */
 .footer .footer-text {
   opacity: 1;

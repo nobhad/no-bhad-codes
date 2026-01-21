@@ -10,6 +10,13 @@
 
 import { BaseModule } from '../../modules/core/base';
 import type { ClientProject, ClientProjectStatus, ProjectPriority } from '../../types/client';
+import type {
+  ProjectResponse,
+  ProjectMilestoneResponse,
+  MessageResponse,
+  ProjectUpdateResponse,
+  ProjectDetailResponse
+} from '../../types/api';
 import { gsap } from 'gsap';
 import { APP_CONSTANTS } from '../../config/constants';
 import 'emoji-picker-element';
@@ -791,15 +798,15 @@ export class ClientPortalModule extends BaseModule {
 
       // Transform API projects to ClientProject interface
       const clientProjects: ClientProject[] = await Promise.all(
-        apiProjects.map(async (apiProject: any) => {
+        apiProjects.map(async (apiProject: ProjectResponse) => {
           // Fetch milestones for this project
-          let milestones: any[] = [];
+          let milestones: ProjectMilestoneResponse[] = [];
           try {
             const milestonesResponse = await fetch(`/api/projects/${apiProject.id}/milestones`, {
               credentials: 'include'
             });
             if (milestonesResponse.ok) {
-              const milestonesData = await milestonesResponse.json();
+              const milestonesData = await milestonesResponse.json() as { milestones?: ProjectMilestoneResponse[] };
               milestones = milestonesData.milestones || [];
             }
           } catch (milestoneError) {
@@ -807,7 +814,7 @@ export class ClientPortalModule extends BaseModule {
           }
 
           // Transform milestone data to match ProjectMilestone interface
-          const transformedMilestones = milestones.map((m: any) => ({
+          const transformedMilestones = milestones.map((m: ProjectMilestoneResponse) => ({
             id: String(m.id),
             title: m.title || 'Untitled Milestone',
             description: m.description || '',
@@ -818,7 +825,7 @@ export class ClientPortalModule extends BaseModule {
           }));
 
           // Calculate progress from milestones if available
-          const completedMilestones = transformedMilestones.filter((m: any) => m.isCompleted).length;
+          const completedMilestones = transformedMilestones.filter((m) => m.isCompleted).length;
           const totalMilestones = transformedMilestones.length;
           const calculatedProgress = totalMilestones > 0
             ? Math.round((completedMilestones / totalMilestones) * 100)
@@ -941,26 +948,26 @@ export class ClientPortalModule extends BaseModule {
         return;
       }
 
-      const data = await response.json();
+      const data = await response.json() as ProjectDetailResponse;
 
       // Transform and update updates
       if (data.updates && Array.isArray(data.updates)) {
-        this.currentProject.updates = data.updates.map((u: any) => ({
+        this.currentProject.updates = data.updates.map((u: ProjectUpdateResponse) => ({
           id: String(u.id),
           date: u.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
           title: u.title || 'Update',
           description: u.description || '',
-          author: u.author || 'System',
-          type: u.update_type || 'general'
+          author: (u as { author?: string }).author || 'System',
+          type: (u.update_type || 'general') as 'progress' | 'milestone' | 'issue' | 'resolution' | 'general'
         }));
       }
 
       // Transform and update messages
       if (data.messages && Array.isArray(data.messages)) {
-        this.currentProject.messages = data.messages.map((m: any) => ({
+        this.currentProject.messages = data.messages.map((m: MessageResponse) => ({
           id: String(m.id),
           sender: m.sender_name || 'Unknown',
-          senderRole: m.sender_role === 'admin' ? 'developer' : (m.sender_role || 'system'),
+          senderRole: (m.sender_role === 'admin' ? 'developer' : (m.sender_role || 'system')) as 'client' | 'developer' | 'system',
           message: m.message || '',
           timestamp: m.created_at || new Date().toISOString(),
           isRead: Boolean(m.is_read)

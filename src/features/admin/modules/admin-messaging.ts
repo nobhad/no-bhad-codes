@@ -11,6 +11,11 @@
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import type { Message, AdminDashboardContext } from '../admin-types';
 import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
+import type {
+  ClientResponse,
+  MessageThreadResponse,
+  MessageResponse
+} from '../../../types/api';
 
 let selectedClientId: number | null = null;
 let selectedThreadId: number | null = null;
@@ -67,12 +72,12 @@ export async function loadClientThreads(ctx: AdminDashboardContext): Promise<voi
       fetch('/api/messages/threads', { credentials: 'include' })
     ]);
 
-    const clientsData = clientsResponse.ok ? await clientsResponse.json() : { clients: [] };
-    const threadsData = threadsResponse.ok ? await threadsResponse.json() : { threads: [] };
+    const clientsData = clientsResponse.ok ? (await clientsResponse.json() as { clients?: ClientResponse[] }) : { clients: [] };
+    const threadsData = threadsResponse.ok ? (await threadsResponse.json() as { threads?: (MessageThreadResponse & { message_count?: number })[] }) : { threads: [] };
 
     // Create a map of client_id -> thread info
-    const threadMap = new Map<number, any>();
-    (threadsData.threads || []).forEach((thread: any) => {
+    const threadMap = new Map<number, MessageThreadResponse & { message_count?: number }>();
+    (threadsData.threads || []).forEach((thread: MessageThreadResponse & { message_count?: number }) => {
       // Keep the thread with the most messages if client has multiple threads
       const existing = threadMap.get(thread.client_id);
       if (!existing || (thread.message_count || 0) > (existing.message_count || 0)) {
@@ -81,7 +86,7 @@ export async function loadClientThreads(ctx: AdminDashboardContext): Promise<voi
     });
 
     // Merge clients with their thread data
-    const clientsWithThreads: ClientWithThread[] = (clientsData.clients || []).map((client: any) => {
+    const clientsWithThreads: ClientWithThread[] = (clientsData.clients || []).map((client: ClientResponse) => {
       const thread = threadMap.get(client.id);
       return {
         client_id: client.id,
@@ -328,7 +333,7 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
   }
 
   container.innerHTML = messages
-    .map((msg: any) => {
+    .map((msg: MessageResponse) => {
       const isAdmin = msg.sender_type === 'admin';
       const time = new Date(msg.created_at).toLocaleTimeString([], {
         hour: '2-digit',
@@ -337,7 +342,7 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
       const date = new Date(msg.created_at).toLocaleDateString();
       const rawSenderName = isAdmin ? 'You (Admin)' : selectedClientName || 'Client';
       const safeSenderName = SanitizationUtils.escapeHtml(rawSenderName);
-      const safeContent = SanitizationUtils.escapeHtml(msg.message || msg.content || '');
+      const safeContent = SanitizationUtils.escapeHtml(msg.message || '');
       const initials = rawSenderName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
       const safeInitials = SanitizationUtils.escapeHtml(initials);
 
