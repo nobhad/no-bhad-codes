@@ -45,21 +45,90 @@
     <!-- Skip to main content link for accessibility -->
     <a href="#admin-main" class="skip-link">Skip to main content</a>
 
-    <!-- Header - Only visible on login page -->
+    <!-- Header - Exact copy from main site, only visible on login page -->
     <header class="header admin-header">
       <div class="container is--full">
         <nav class="nav-row">
           <a href="/" aria-label="no bhad codes - Go to homepage" class="nav-logo-row"> no bhad codes </a>
           <div class="nav-row__right">
+            <!-- CLIENT PORTAL BUTTON -->
+            <button class="portal-button" aria-label="Client Portal Login" id="portal-trigger">
+              <div class="icon-wrap">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/>
+                </svg>
+              </div>
+            </button>
+
             <button id="toggle-theme" class="theme-button" aria-label="Toggle dark/light theme">
               <div class="icon-wrap">
-                <svg class="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg
+                  class="theme-icon sun-icon"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
                   <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"></circle>
-                  <path d="M12 2V4M12 20V22M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2"></path>
+                  <path
+                    d="M12 2V4M12 20V22M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  ></path>
                 </svg>
-                <svg class="theme-icon moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  class="theme-icon moon-icon"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
                   <path d="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79z"></path>
                 </svg>
+              </div>
+            </button>
+            <button data-menu-toggle="" class="menu-button" aria-label="Toggle navigation menu" aria-expanded="false">
+              <div class="icon-wrap">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="100%"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  class="menu-button-icon"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M7.33333 16L7.33333 -3.2055e-07L8.66667 -3.78832e-07L8.66667 16L7.33333 16Z"
+                    fill="currentColor"
+                  ></path>
+                  <path
+                    d="M16 8.66667L-2.62269e-07 8.66667L-3.78832e-07 7.33333L16 7.33333L16 8.66667Z"
+                    fill="currentColor"
+                  ></path>
+                  <path
+                    d="M6 7.33333L7.33333 7.33333L7.33333 6C7.33333 6.73637 6.73638 7.33333 6 7.33333Z"
+                    fill="currentColor"
+                  ></path>
+                  <path
+                    d="M10 7.33333L8.66667 7.33333L8.66667 6C8.66667 6.73638 9.26362 7.33333 10 7.33333Z"
+                    fill="currentColor"
+                  ></path>
+                  <path
+                    d="M6 8.66667L7.33333 8.66667L7.33333 10C7.33333 9.26362 6.73638 8.66667 6 8.66667Z"
+                    fill="currentColor"
+                  ></path>
+                  <path
+                    d="M10 8.66667L8.66667 8.66667L8.66667 10C8.66667 9.26362 9.26362 8.66667 10 8.66667Z"
+                    fill="currentColor"
+                  ></path>
+                </svg>
+              </div>
+              <div class="menu-button-text">
+                <p class="p-large">Menu</p>
+                <p class="p-large">Close</p>
               </div>
             </button>
           </div>
@@ -111,7 +180,6 @@
             <span class="btn-loading" style="display: none;">Signing in...</span>
           </button>
         </form>
-        <a href="/" class="back-link">Back to site</a>
       </div>
     </div>
 

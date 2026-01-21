@@ -97,6 +97,11 @@ function renderMessages(
   messages: PortalMessage[],
   ctx: ClientPortalContext
 ): void {
+  // Add accessibility attributes to the message container
+  container.setAttribute('role', 'log');
+  container.setAttribute('aria-label', 'Message conversation');
+  container.setAttribute('aria-live', 'polite');
+
   if (messages.length === 0) {
     container.innerHTML = '<div class="no-messages"><p>No messages in this thread yet.</p></div>';
     return;

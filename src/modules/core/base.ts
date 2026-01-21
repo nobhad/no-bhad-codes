@@ -214,10 +214,10 @@ export class BaseModule {
    * @param {string} [key] - An optional unique key for the listener (useful for specific removals)
    */
   protected addEventListener(
-    element: Element,
+    element: EventTarget,
     event: string,
     handler: EventListener,
-    key = `${(element as any).id || element.tagName}-${event}-${this.eventListeners.size}`
+    key = `${(element as Element).id || (element as Element).tagName || 'target'}-${event}-${this.eventListeners.size}`
   ): void {
     if (!element || typeof element.addEventListener !== 'function') {
       this.warn(`Cannot add event listener: Invalid element provided for key "${key}".`);
@@ -230,7 +230,8 @@ export class BaseModule {
 
     element.addEventListener(event, handler);
     this.eventListeners.set(key, { element, event, handler });
-    this.log(`Added event listener: ${key} on ${element.tagName || element.nodeName}`);
+    const targetName = (element as Element).tagName || (element as Node).nodeName || 'EventTarget';
+    this.log(`Added event listener: ${key} on ${targetName}`);
   }
 
   /**

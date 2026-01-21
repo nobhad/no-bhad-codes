@@ -27,7 +27,7 @@ export interface ModuleStatus {
 }
 
 export interface EventHandler {
-  element: Element;
+  element: EventTarget;
   event: string;
   handler: EventListener;
 }

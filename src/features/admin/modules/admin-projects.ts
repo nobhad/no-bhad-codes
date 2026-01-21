@@ -22,6 +22,7 @@ import {
   type FilterState
 } from '../../../utils/table-filter';
 import type { ProjectMilestone, ProjectFile, ProjectInvoice, AdminDashboardContext, Message } from '../admin-types';
+import { showTableLoading } from '../../../utils/loading-utils';
 
 /** Lead/Project data from admin leads API */
 interface LeadProject {
@@ -91,6 +92,12 @@ export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
   if (!filterUIInitialized) {
     initializeFilterUI(ctx);
     filterUIInitialized = true;
+  }
+
+  // Show loading state
+  const tableBody = document.getElementById('projects-table-body');
+  if (tableBody) {
+    showTableLoading(tableBody, 6, 'Loading projects...');
   }
 
   try {
@@ -763,13 +770,13 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
   }
 
   container.innerHTML = `
-    <table class="files-table">
+    <table class="files-table" aria-label="Project files">
       <thead>
         <tr>
-          <th>File</th>
-          <th>Size</th>
-          <th>Uploaded</th>
-          <th>Actions</th>
+          <th scope="col">File</th>
+          <th scope="col">Size</th>
+          <th scope="col">Uploaded</th>
+          <th scope="col">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -785,7 +792,7 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
                 <td>${size}</td>
                 <td>${date}</td>
                 <td>
-                  <a href="/uploads/${file.filename}" class="action-btn" download="${safeName}">Download</a>
+                  <a href="/uploads/${file.filename}" class="action-btn" download="${safeName}" aria-label="Download ${safeName}">Download</a>
                 </td>
               </tr>
             `;
@@ -943,13 +950,13 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
   }
 
   container.innerHTML = `
-    <table class="invoices-table">
+    <table class="invoices-table" aria-label="Project invoices">
       <thead>
         <tr>
-          <th>Invoice #</th>
-          <th>Amount</th>
-          <th>Due Date</th>
-          <th>Status</th>
+          <th scope="col">Invoice #</th>
+          <th scope="col">Amount</th>
+          <th scope="col">Due Date</th>
+          <th scope="col">Status</th>
         </tr>
       </thead>
       <tbody>

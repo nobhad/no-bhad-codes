@@ -103,8 +103,9 @@ export class ThemeModule extends BaseModule {
     // Update theme-color meta tag to match site background
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');
     if (themeColorMeta) {
-      // Light mode: #f8f5f4, Dark mode: #333333 (same for mobile and desktop)
-      const themeColor = theme === 'dark' ? '#333333' : '#f8f5f4';
+      const themeColor = theme === 'dark'
+        ? APP_CONSTANTS.THEME.META_DARK
+        : APP_CONSTANTS.THEME.META_LIGHT;
       themeColorMeta.setAttribute('content', themeColor);
     }
 

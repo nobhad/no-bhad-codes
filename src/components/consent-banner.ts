@@ -10,6 +10,7 @@
 import { BaseComponent, type ComponentProps, type ComponentState } from './base-component';
 import { ComponentUtils } from './component-store';
 import { getDebugMode } from '../core/env';
+import { ICONS } from '../constants/icons';
 
 export interface ConsentBannerProps extends ComponentProps {
   position?: 'top' | 'bottom';
@@ -99,7 +100,7 @@ export class ConsentBanner extends BaseComponent<ConsentBannerProps, ConsentBann
       <div class="consent-banner ${positionClass} ${themeClass}" data-ref="banner">
         <div class="consent-banner__content">
           <div class="consent-banner__icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cookie"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/></svg>
+            ${ICONS.COOKIE}
           </div>
           
           <div class="consent-banner__text">

@@ -5,6 +5,12 @@
  * Centralized branding values to avoid hardcoding throughout the app
  */
 
+// Default email used as fallback when env vars not set
+const DEFAULT_EMAIL = 'nobhaduri@gmail.com';
+
+// Get email from environment with fallback
+const getEmail = () => import.meta.env.VITE_CONTACT_EMAIL || DEFAULT_EMAIL;
+
 export const BRANDING = {
   // Company identity
   APP_NAME: 'No Bhad Codes',
@@ -12,10 +18,10 @@ export const BRANDING = {
   APP_IDENTIFIER: 'NoBhadCodes',
   APP_DOMAIN: 'nobhad.codes',
 
-  // Contact information - all use nobhaduri@gmail.com as the only active email
-  CONTACT_EMAIL: 'nobhaduri@gmail.com',
-  SUPPORT_EMAIL: 'nobhaduri@gmail.com',
-  FALLBACK_EMAIL: 'nobhaduri@gmail.com',
+  // Contact information - uses VITE_CONTACT_EMAIL env var with fallback
+  CONTACT_EMAIL: getEmail(),
+  SUPPORT_EMAIL: getEmail(),
+  FALLBACK_EMAIL: DEFAULT_EMAIL,
 
   // Social/external links
   GITHUB_URL: 'https://github.com/nobhadcodes',

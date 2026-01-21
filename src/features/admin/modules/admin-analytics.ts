@@ -17,6 +17,7 @@ import type {
   RawVisitorData,
   AdminDashboardContext
 } from '../admin-types';
+import { showTableLoading, getChartSkeletonHTML } from '../../../utils/loading-utils';
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -285,6 +286,9 @@ function formatInteractionType(type: string, element?: string): string {
 export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<void> {
   const container = document.getElementById('visitors-table-body');
   if (!container) return;
+
+  // Show loading state
+  showTableLoading(container, 6, 'Loading visitor data...');
 
   try {
     const response = await apiFetch('/api/analytics/sessions?days=7&limit=50');
@@ -858,6 +862,20 @@ async function loadVisitorsChart(): Promise<void> {
   const canvas = document.getElementById('visitors-chart') as HTMLCanvasElement;
   if (!canvas) return;
 
+  // Add accessibility attributes to canvas
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', 'Visitors chart showing daily visitor counts for the past week');
+
+  // Show chart skeleton while loading
+  const chartContainer = canvas.parentElement;
+  if (chartContainer) {
+    canvas.style.display = 'none';
+    const skeleton = document.createElement('div');
+    skeleton.className = 'chart-skeleton-wrapper';
+    skeleton.innerHTML = getChartSkeletonHTML();
+    chartContainer.appendChild(skeleton);
+  }
+
   // Destroy existing chart
   if (charts.has('visitors')) {
     charts.get('visitors')?.destroy();
@@ -885,6 +903,13 @@ async function loadVisitorsChart(): Promise<void> {
     // 401 handled by apiFetch
   } catch (error) {
     console.warn('[AdminAnalytics] Failed to load chart data:', error);
+  }
+
+  // Remove skeleton and show canvas
+  if (chartContainer) {
+    const skeleton = chartContainer.querySelector('.chart-skeleton-wrapper');
+    if (skeleton) skeleton.remove();
+    canvas.style.display = '';
   }
 
   const chart = new Chart(canvas, {
@@ -929,6 +954,20 @@ async function loadSourcesChart(): Promise<void> {
   const canvas = document.getElementById('sources-chart') as HTMLCanvasElement;
   if (!canvas) return;
 
+  // Add accessibility attributes to canvas
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', 'Traffic sources breakdown by category');
+
+  // Show chart skeleton while loading
+  const chartContainer = canvas.parentElement;
+  if (chartContainer) {
+    canvas.style.display = 'none';
+    const skeleton = document.createElement('div');
+    skeleton.className = 'chart-skeleton-wrapper';
+    skeleton.innerHTML = getChartSkeletonHTML();
+    chartContainer.appendChild(skeleton);
+  }
+
   if (charts.has('sources')) {
     charts.get('sources')?.destroy();
   }
@@ -971,6 +1010,13 @@ async function loadSourcesChart(): Promise<void> {
     // 401 handled by apiFetch
   } catch (error) {
     console.warn('[AdminAnalytics] Failed to load sources chart data:', error);
+  }
+
+  // Remove skeleton and show canvas
+  if (chartContainer) {
+    const skeleton = chartContainer.querySelector('.chart-skeleton-wrapper');
+    if (skeleton) skeleton.remove();
+    canvas.style.display = '';
   }
 
   const chart = new Chart(canvas, {

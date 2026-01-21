@@ -22,6 +22,7 @@ import {
   CLIENTS_FILTER_CONFIG,
   type FilterState
 } from '../../../utils/table-filter';
+import { showTableLoading } from '../../../utils/loading-utils';
 
 export interface Client {
   id: number;
@@ -80,6 +81,12 @@ export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
   if (!filterUIInitialized) {
     initializeFilterUI(ctx);
     filterUIInitialized = true;
+  }
+
+  // Show loading state
+  const tableBody = document.getElementById('clients-table-body');
+  if (tableBody) {
+    showTableLoading(tableBody, 6, 'Loading clients...');
   }
 
   try {

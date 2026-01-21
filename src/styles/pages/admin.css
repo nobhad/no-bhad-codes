@@ -37,8 +37,22 @@ body.admin-logged-in[data-page="admin"] .admin-header {
 }
 
 /* Show footer on admin login page - override the global hide rule */
+/* Match main site footer styling exactly */
 body[data-page="admin"]:not(.admin-logged-in) .admin-footer {
-  display: flex;
+  display: flex !important;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--footer-height, 40px);
+  background: var(--color-neutral-300);
+  padding: var(--spacing-sm) 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-dark);
+  text-align: center;
+  z-index: 50;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Hide footer when logged in */
@@ -55,7 +69,7 @@ body.admin-logged-in[data-page="admin"] .admin-footer {
 
 /* Match main site background for login page (before logged in) */
 body[data-page="admin"]:not(.admin-logged-in) {
-  background: var(--bg, var(--color-neutral-300));
+  background: var(--color-neutral-300) !important;
 }
 
 /* ================================================

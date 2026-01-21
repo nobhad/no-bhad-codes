@@ -313,6 +313,7 @@
 .typing-cursor {
   display: inline;
   margin-left: 2px;
+  color: var(--color-terminal-green);
 }
 
 /* Typing indicator */
