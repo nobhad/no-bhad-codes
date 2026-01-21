@@ -23,6 +23,7 @@ import {
   type FilterState
 } from '../../../utils/table-filter';
 import { showTableLoading } from '../../../utils/loading-utils';
+import { showTableError } from '../../../utils/error-utils';
 
 export interface Client {
   id: number;
@@ -109,13 +110,23 @@ export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
       const errorText = await response.text();
       console.error('[AdminClients] API error:', response.status, errorText);
       if (tableBody) {
-        tableBody.innerHTML = `<tr><td colspan="7" class="loading-row">Error loading clients: ${response.status}</td></tr>`;
+        showTableError(
+          tableBody,
+          6,
+          `Error loading clients (${response.status})`,
+          () => loadClients(ctx)
+        );
       }
     }
   } catch (error) {
     console.error('[AdminClients] Failed to load clients:', error);
     if (tableBody) {
-      tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">Network error loading clients</td></tr>';
+      showTableError(
+        tableBody,
+        6,
+        'Network error loading clients',
+        () => loadClients(ctx)
+      );
     }
   }
 }
