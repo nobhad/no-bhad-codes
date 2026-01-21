@@ -20,8 +20,9 @@
 @import "./shared.css";
 
 /* ============================================
- * NAVIGATION (portal-style nav for admin)
+ * NAVIGATION (full nav styles for admin login page)
  * ============================================ */
+@import "../components/nav-base.css" layer(components);
 @import "../components/nav-portal.css" layer(components);
 
 /* ============================================

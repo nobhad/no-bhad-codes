@@ -108,14 +108,12 @@ export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
     } else {
       const errorText = await response.text();
       console.error('[AdminClients] API error:', response.status, errorText);
-      const tableBody = document.getElementById('clients-table-body');
       if (tableBody) {
         tableBody.innerHTML = `<tr><td colspan="7" class="loading-row">Error loading clients: ${response.status}</td></tr>`;
       }
     }
   } catch (error) {
     console.error('[AdminClients] Failed to load clients:', error);
-    const tableBody = document.getElementById('clients-table-body');
     if (tableBody) {
       tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">Network error loading clients</td></tr>';
     }

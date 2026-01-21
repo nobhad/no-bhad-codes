@@ -10,6 +10,7 @@
 
 import type { PortalInvoice, ClientPortalContext } from '../portal-types';
 import { formatCurrency } from '../../../utils/format-utils';
+import { getContainerLoadingHTML } from '../../../utils/loading-utils';
 
 const INVOICES_API_BASE = '/api/invoices';
 
@@ -23,8 +24,16 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
 
   if (!invoicesContainer) return;
 
+  // Show loading state
   const invoiceItems = invoicesContainer.querySelectorAll('.invoice-item');
   invoiceItems.forEach((item) => item.remove());
+  const noInvoicesMsg = invoicesContainer.querySelector('.no-invoices-message');
+  if (noInvoicesMsg) noInvoicesMsg.remove();
+
+  const loadingEl = document.createElement('div');
+  loadingEl.className = 'invoices-loading';
+  loadingEl.innerHTML = getContainerLoadingHTML('Loading invoices...');
+  invoicesContainer.appendChild(loadingEl);
 
   try {
     const response = await fetch(`${INVOICES_API_BASE}/me`, {
@@ -37,6 +46,10 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
 
     const data = await response.json();
 
+    // Remove loading indicator
+    const loading = invoicesContainer.querySelector('.invoices-loading');
+    if (loading) loading.remove();
+
     if (summaryOutstanding && data.summary) {
       summaryOutstanding.textContent = formatCurrency(data.summary.totalOutstanding);
     }
@@ -46,6 +59,9 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
 
     renderInvoicesList(invoicesContainer as HTMLElement, data.invoices || [], ctx);
   } catch (error) {
+    // Remove loading indicator on error
+    const loading = invoicesContainer.querySelector('.invoices-loading');
+    if (loading) loading.remove();
     console.error('Error loading invoices:', error);
     if (summaryOutstanding) summaryOutstanding.textContent = '$0.00';
     if (summaryPaid) summaryPaid.textContent = '$0.00';
