@@ -99,15 +99,20 @@ export class Application {
       // Update global state
       appState.setState({ introAnimating: true });
 
-      // Enable section card after intro completion
+      // Enable section card after intro completion - ONLY if on intro page
       setTimeout(() => {
-        const sectionRenderer = this.getModule('SectionCardRenderer');
-        if (
-          sectionRenderer &&
-          'enableAfterIntro' in sectionRenderer &&
-          typeof sectionRenderer.enableAfterIntro === 'function'
-        ) {
-          sectionRenderer.enableAfterIntro();
+        const hash = window.location.hash;
+        const isIntroPage = !hash || hash === '#/' || hash === '#' || hash === '#/intro';
+
+        if (isIntroPage) {
+          const sectionRenderer = this.getModule('SectionCardRenderer');
+          if (
+            sectionRenderer &&
+            'enableAfterIntro' in sectionRenderer &&
+            typeof sectionRenderer.enableAfterIntro === 'function'
+          ) {
+            sectionRenderer.enableAfterIntro();
+          }
         }
 
         this.setupStickyFooter();

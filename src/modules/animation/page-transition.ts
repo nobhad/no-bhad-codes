@@ -135,6 +135,11 @@ export class PageTransitionModule extends BaseModule {
         id: 'contact',
         route: '#/contact',
         title: 'Contact - No Bhad Codes'
+      },
+      {
+        id: 'admin-login',
+        route: '#/admin-login',
+        title: 'Admin Login - No Bhad Codes'
       }
     ];
 
@@ -260,7 +265,8 @@ export class PageTransitionModule extends BaseModule {
       'home': 'intro',
       'about': 'about',
       'projects': 'projects',
-      'contact': 'contact'
+      'contact': 'contact',
+      'admin-login': 'admin-login'
     };
 
     return hashToPage[path] || null;
@@ -374,12 +380,9 @@ export class PageTransitionModule extends BaseModule {
         await this.animateOut(currentPage);
       }
 
-      // Hide current page
-      if (currentPage && currentPage.element) {
-        gsap.set(currentPage.element, { clearProps: 'all' });
-        currentPage.element.classList.add('page-hidden');
-        currentPage.element.classList.remove('page-active');
-      }
+      // CRITICAL: Hide ALL pages before showing target
+      // This prevents any page (especially intro) from overlapping the target
+      this.hideAllPages();
 
       // Show and animate in target page
       if (pageId === 'intro') {
@@ -388,6 +391,34 @@ export class PageTransitionModule extends BaseModule {
         // ============================================
         // Don't make section visible yet - let intro animation module
         // show elements at the right time during/after animation.
+
+        // First, clear inline styles that were set during hideAllPages
+        targetPage.element.style.removeProperty('display');
+        targetPage.element.style.removeProperty('visibility');
+        targetPage.element.style.removeProperty('opacity');
+        targetPage.element.style.removeProperty('pointer-events');
+        targetPage.element.style.removeProperty('z-index');
+
+        // Also clear intro children inline styles
+        const businessCardContainer = targetPage.element.querySelector('.business-card-container') as HTMLElement;
+        const introNav = targetPage.element.querySelector('.intro-nav') as HTMLElement;
+        const businessCardEl = targetPage.element.querySelector('.business-card') as HTMLElement;
+
+        if (businessCardContainer) {
+          businessCardContainer.style.removeProperty('display');
+          businessCardContainer.style.removeProperty('visibility');
+          businessCardContainer.style.removeProperty('opacity');
+        }
+        if (introNav) {
+          introNav.style.removeProperty('display');
+          introNav.style.removeProperty('visibility');
+          introNav.style.removeProperty('opacity');
+        }
+        if (businessCardEl) {
+          businessCardEl.style.removeProperty('display');
+          businessCardEl.style.removeProperty('visibility');
+          businessCardEl.style.removeProperty('opacity');
+        }
 
         // Remove page-hidden but DON'T show content yet
         targetPage.element.classList.remove('page-hidden');
@@ -444,11 +475,15 @@ export class PageTransitionModule extends BaseModule {
         document.title = targetPage.title;
       }
 
-      // Dispatch page changed event
+      // Dispatch page changed event (both internally and as window event)
+      // Window event allows other modules like ProjectsModule to listen
       this.dispatchEvent('page-changed', {
         from: currentPage?.id,
         to: pageId
       });
+      window.dispatchEvent(new CustomEvent('page-changed', {
+        detail: { from: currentPage?.id, to: pageId }
+      }));
 
       // Dispatch contact-page-ready if needed
       if (pageId === 'contact') {
@@ -488,6 +523,63 @@ export class PageTransitionModule extends BaseModule {
         onComplete: resolve
       });
     });
+  }
+
+  /**
+   * ============================================
+   * HIDE ALL PAGES
+   * ============================================
+   * Explicitly hide ALL pages before showing target.
+   * This prevents any page (especially intro) from overlapping the target.
+   */
+  private hideAllPages(): void {
+    this.pages.forEach((page) => {
+      if (page.element) {
+        // Kill any running animations on this page
+        gsap.killTweensOf(page.element);
+        gsap.set(page.element, { clearProps: 'all' });
+        page.element.classList.add('page-hidden');
+        page.element.classList.remove('page-active');
+
+        // Special handling for intro page - forcefully hide everything
+        if (page.id === 'intro') {
+          const businessCardContainer = page.element.querySelector('.business-card-container') as HTMLElement;
+          const introNav = page.element.querySelector('.intro-nav') as HTMLElement;
+          const businessCardEl = page.element.querySelector('.business-card') as HTMLElement;
+
+          // Kill all animations on intro children
+          if (businessCardContainer) {
+            gsap.killTweensOf(businessCardContainer);
+            gsap.set(businessCardContainer, { clearProps: 'all' });
+            businessCardContainer.style.display = 'none';
+            businessCardContainer.style.visibility = 'hidden';
+            businessCardContainer.style.opacity = '0';
+          }
+          if (introNav) {
+            gsap.killTweensOf(introNav);
+            gsap.set(introNav, { clearProps: 'all' });
+            introNav.style.display = 'none';
+            introNav.style.visibility = 'hidden';
+            introNav.style.opacity = '0';
+          }
+          if (businessCardEl) {
+            gsap.killTweensOf(businessCardEl);
+            gsap.set(businessCardEl, { clearProps: 'all' });
+            businessCardEl.style.display = 'none';
+            businessCardEl.style.visibility = 'hidden';
+            businessCardEl.style.opacity = '0';
+          }
+
+          // Also forcefully hide the section itself
+          page.element.style.display = 'none';
+          page.element.style.visibility = 'hidden';
+          page.element.style.opacity = '0';
+          page.element.style.pointerEvents = 'none';
+          page.element.style.zIndex = '-1';
+        }
+      }
+    });
+    this.log('All pages hidden');
   }
 
   /**

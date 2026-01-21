@@ -499,12 +499,12 @@ div.page-hero-desktop {
   }
 }
 
-/* Projects content wrapper - matches about-content alignment */
+/* Projects content wrapper - wide enough to prevent title/category overlap */
 .projects-content {
-  max-width: min(1000px, 90vw);
+  max-width: min(1400px, 90vw);
   width: 100%;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 1rem 2rem;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -628,6 +628,9 @@ div.page-hero-desktop {
   transform: translate(-30px);
   margin-right: -30px;
   transition: transform var(--transition-mouse, 0.2s);
+  flex: 1;
+  min-width: 0; /* Allow flex item to shrink below content size */
+  overflow: hidden;
 }
 
 /* Arrow icon - hidden by default, revealed on hover */
@@ -645,21 +648,19 @@ div.page-hero-desktop {
   transform: translate(0);
 }
 
-/* Title text - scales up on hover */
+/* Title text */
 .card-container .project-card-title h3 {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--color-dark);
   margin: 0;
   white-space: nowrap;
-  transform-origin: left;
-  transition: transform var(--transition-length, 0.5s), color var(--transition-theme, 0.4s);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--transition-theme, 0.4s);
 }
 
-.card-container:hover .project-card-title h3,
-.card-container:focus .project-card-title h3 {
-  transform: scale(1.2);
-}
+/* Title no longer scales on hover - removed to prevent overlap with category */
 
 /* Right side content - category/year */
 .card-right-content {
@@ -669,6 +670,8 @@ div.page-hero-desktop {
   white-space: nowrap;
   transform-origin: right;
   transition: transform var(--transition-mouse, 0.2s);
+  flex-shrink: 0;
+  margin-left: 3rem; /* Ensure space between title and right content */
 }
 
 .card-container:hover .card-right-content,
@@ -813,11 +816,7 @@ div.page-hero-desktop {
     font-size: 1.1rem;
   }
 
-  /* Less dramatic hover effects on mobile */
-  .card-container:hover .project-card-title h3,
-  .card-container:focus .project-card-title h3 {
-    transform: scale(1.1);
-  }
+  /* Title scale removed on mobile to prevent overlap */
 
   .card-container:hover .card-right-content,
   .card-container:focus .card-right-content {
