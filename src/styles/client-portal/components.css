@@ -298,16 +298,10 @@
   margin-bottom: var(--portal-spacing-lg);
 }
 
+/* Base styles in shared/portal-cards.css - only client-specific overrides here */
 [data-page="client-portal"] .portal-project-card {
-  display: block;
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: var(--portal-radius-lg, 12px);
-  padding: var(--portal-spacing-xl, 1.5rem);
-  color: var(--portal-text-light);
   transition: background-color 0.2s ease;
   position: relative;
-  box-shadow: var(--shadow-panel);
 }
 
 /* Only show hover on clickable project cards (admin uses these as links) */

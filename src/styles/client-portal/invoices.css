@@ -11,16 +11,10 @@
   margin-bottom: var(--portal-spacing-xl);
 }
 
-/* Summary Card */
-/* High specificity to override base card styles */
+/* Summary Card - Base styles in shared/portal-cards.css */
+/* Only client-portal specific overrides here */
 [data-page="client-portal"] .summary-card {
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: var(--border-radius-card);
-  padding: var(--space-4);
   text-align: center;
-  color: var(--portal-text-light);
-  box-shadow: var(--shadow-panel);
 }
 
 .summary-label {

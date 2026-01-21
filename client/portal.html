@@ -636,10 +636,25 @@
                 const settingsEmailEl = document.getElementById('settings-email');
                 const settingsCompanyEl = document.getElementById('settings-company');
 
+                // Try to get last billing info from stored client data
+                const storedClientData = localStorage.getItem('clientData');
+                let lastBilling = undefined;
+                if (storedClientData) {
+                  try {
+                    const parsed = JSON.parse(storedClientData);
+                    if (parsed.lastBilling) {
+                      lastBilling = parsed.lastBilling;
+                    }
+                  } catch (e) {
+                    // Ignore parse errors
+                  }
+                }
+
                 const clientData = {
                   name: settingsNameEl?.value || clientNameEl?.textContent || undefined,
                   email: settingsEmailEl?.value || localStorage.getItem('clientEmail') || undefined,
                   company: settingsCompanyEl?.value || undefined,
+                  lastBilling: lastBilling,
                 };
 
                 // Only return data if we have at least name or email

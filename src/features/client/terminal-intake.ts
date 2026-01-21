@@ -605,7 +605,77 @@ export class TerminalIntakeModule extends BaseModule {
 
     await delay(300);
 
-    // Skip to the first unanswered question (after name/email)
+    // Ask about billing if we have previous billing info
+    if (this.clientData?.lastBilling) {
+      await this.askAboutPreviousBilling();
+    } else {
+      // Skip to the first unanswered question (after name/email)
+      await this.skipToRelevantQuestion();
+    }
+  }
+
+  private async askAboutPreviousBilling(): Promise<void> {
+    const billing = this.clientData?.lastBilling;
+    if (!billing) {
+      await this.skipToRelevantQuestion();
+      return;
+    }
+
+    const billingDescription = billing.description ||
+      (billing.amount ? `${billing.type} - ${billing.amount}` : billing.type);
+
+    const billingQuestion = `Your last project was billed as: ${billingDescription}. Would you like to use the same billing arrangement for this project?`;
+
+    if (this.chatContainer) {
+      await showTypingIndicator(this.chatContainer, 300);
+
+      const message: ChatMessage = {
+        type: 'ai',
+        content: billingQuestion,
+        options: [
+          { value: 'same', label: 'Yes, same billing arrangement' },
+          { value: 'different', label: 'No, I\'d like to discuss different options' }
+        ]
+      };
+
+      await addMessageWithTyping(
+        this.chatContainer,
+        message,
+        -1,
+        () => {},
+        (target) => this.handleBillingChoice(target),
+        () => {}
+      );
+      this.messages.push(message);
+    }
+  }
+
+  private async handleBillingChoice(target: HTMLElement): Promise<void> {
+    const choice = target.dataset.value;
+    const displayText = target.textContent || '';
+
+    this.addMessage({ type: 'user', content: displayText });
+
+    if (choice === 'same' && this.clientData?.lastBilling) {
+      // Store that they want the same billing
+      this.intakeData.billingPreference = 'same-as-last';
+      this.intakeData.previousBillingType = this.clientData.lastBilling.type;
+      if (this.clientData.lastBilling.amount) {
+        this.intakeData.previousBillingAmount = this.clientData.lastBilling.amount;
+      }
+
+      // Show confirmation
+      if (this.chatContainer) {
+        await showTypingIndicator(this.chatContainer, 200);
+        const confirmMsg = 'Great! We\'ll use the same billing arrangement.';
+        this.addMessage({ type: 'ai', content: confirmMsg });
+      }
+    } else {
+      // They want different billing - the budget question will still appear
+      this.intakeData.billingPreference = 'discuss-new';
+    }
+
+    await delay(300);
     await this.skipToRelevantQuestion();
   }
 
@@ -629,6 +699,12 @@ export class TerminalIntakeModule extends BaseModule {
 
       // Skip companyName if we already have it
       if (question.field === 'companyName' && this.intakeData.companyName) {
+        this.currentQuestionIndex++;
+        continue;
+      }
+
+      // Skip budget question if client chose same billing as last project
+      if (question.id === 'budget' && this.intakeData.billingPreference === 'same-as-last') {
         this.currentQuestionIndex++;
         continue;
       }

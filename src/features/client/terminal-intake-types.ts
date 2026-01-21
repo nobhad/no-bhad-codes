@@ -37,6 +37,11 @@ export interface TerminalIntakeOptions {
     name?: string;
     email?: string;
     company?: string;
+    lastBilling?: {
+      type: string;      // e.g., 'monthly-retainer', 'project-based', 'hourly'
+      amount?: string;   // e.g., '$2,500/month', '$5,000', '$150/hour'
+      description?: string; // Human-readable description
+    };
   };
 }
 
