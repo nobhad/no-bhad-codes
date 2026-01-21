@@ -575,14 +575,37 @@ export class TerminalIntakeModule extends BaseModule {
   }
 
   private async handleExistingClientData(): Promise<void> {
+    // Store client data
     if (this.clientData?.name) {
       this.intakeData.name = this.clientData.name;
     }
     if (this.clientData?.email) {
       this.intakeData.email = this.clientData.email;
     }
+    if (this.clientData?.company) {
+      this.intakeData.companyName = this.clientData.company;
+    }
 
-    // Skip to the first unanswered question
+    // Show personalized greeting
+    const firstName = this.clientData?.name?.split(' ')[0] || 'there';
+    const greetingMessage = `Hello, ${firstName}! I'm Arrow - Noelle's personal assistant. Since you're already a client, let's get your new project started. I just have a few quick questions.`;
+
+    if (this.chatContainer) {
+      await showTypingIndicator(this.chatContainer, 300);
+      await addMessageWithTyping(
+        this.chatContainer,
+        { type: 'ai', content: greetingMessage },
+        -1, // No question index for greeting
+        () => {}, // No go back for greeting
+        () => {}, // No option click for greeting
+        () => {}  // No confirm click for greeting
+      );
+      this.messages.push({ type: 'ai', content: greetingMessage });
+    }
+
+    await delay(300);
+
+    // Skip to the first unanswered question (after name/email)
     await this.skipToRelevantQuestion();
   }
 
@@ -591,6 +614,24 @@ export class TerminalIntakeModule extends BaseModule {
 
     while (this.currentQuestionIndex < QUESTIONS.length) {
       const question = QUESTIONS[this.currentQuestionIndex];
+
+      // Skip greeting question if we have name
+      if (question.id === 'greeting' && this.intakeData.name) {
+        this.currentQuestionIndex++;
+        continue;
+      }
+
+      // Skip email question if we have email
+      if (question.id === 'email' && this.intakeData.email) {
+        this.currentQuestionIndex++;
+        continue;
+      }
+
+      // Skip companyName if we already have it
+      if (question.field === 'companyName' && this.intakeData.companyName) {
+        this.currentQuestionIndex++;
+        continue;
+      }
 
       if (
         fieldsToSkip.includes(question.field) &&
