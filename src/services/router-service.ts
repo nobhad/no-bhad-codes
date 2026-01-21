@@ -348,6 +348,14 @@ export class RouterService extends BaseService {
     this.log('handleHashChange called with hash:', hash);
 
     if (hash) {
+      // Check for project detail routes (#/projects/:slug)
+      // These are handled by PageTransitionModule, not RouterService
+      const projectDetailMatch = hash.match(/^#\/projects\/(.+)$/);
+      if (projectDetailMatch) {
+        this.log('Project detail route detected, skipping (handled by PageTransitionModule)');
+        return;
+      }
+
       // Extract section ID from salcosta-style hash
       // #/ -> intro, #/about -> about, #/contact -> contact
       let sectionId: string;
@@ -444,6 +452,15 @@ export class RouterService extends BaseService {
       const hashIndex = path.indexOf('#');
       searchPath = path.substring(hashIndex); // Get everything from # onward
       this.log('Extracted hash:', searchPath);
+    }
+
+    // Check for project detail routes (#/projects/:slug)
+    // These are handled by PageTransitionModule, not RouterService
+    // Return null to skip RouterService handling
+    const projectDetailMatch = searchPath.match(/^#\/projects\/(.+)$/);
+    if (projectDetailMatch) {
+      this.log('Project detail route detected, returning null (handled by PageTransitionModule)');
+      return null;
     }
 
     // Direct match (try salcosta-style first)

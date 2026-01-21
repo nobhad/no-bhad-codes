@@ -10,6 +10,7 @@
  */
 
 import { BaseModule } from '../core/base';
+import { gsap } from 'gsap';
 
 interface PortfolioProject {
   id: string;
@@ -26,6 +27,7 @@ interface PortfolioProject {
   liveUrl?: string;
   repoUrl?: string;
   isDocumented: boolean;
+  titleCard?: string;
 }
 
 interface PortfolioData {
@@ -236,6 +238,139 @@ export class ProjectsModule extends BaseModule {
 
     // Add click handlers
     this.attachCardListeners();
+
+    // Render CRT TV and setup hover events (desktop only)
+    this.renderCrtTv();
+    this.setupCardHoverEvents();
+  }
+
+  /**
+   * Render CRT TV component using actual PNG image
+   */
+  private renderCrtTv(): void {
+    if (!this.projectsContent) return;
+
+    // Check if TV already exists
+    if (this.projectsContent.querySelector('.crt-tv')) return;
+
+    const workWrapper = this.projectsContent.querySelector('.work-half-wrapper');
+    const heading = this.projectsContent.querySelector('h2');
+    const hr = this.projectsContent.querySelector('hr, .heading-divider');
+    if (!workWrapper) return;
+
+    // Create a column wrapper for heading + hr + cards
+    const listColumn = document.createElement('div');
+    listColumn.className = 'projects-list-column';
+
+    // Create the flex row container
+    const flexRow = document.createElement('div');
+    flexRow.className = 'projects-flex-row';
+
+    // Insert flex row where work wrapper was
+    workWrapper.parentNode?.insertBefore(flexRow, workWrapper);
+
+    // Move heading and hr into list column
+    if (heading) listColumn.appendChild(heading);
+    if (hr) listColumn.appendChild(hr);
+    listColumn.appendChild(workWrapper);
+
+    // Add list column to flex row
+    flexRow.appendChild(listColumn);
+
+    // Add the TV to the flex row
+    const tvHtml = `
+      <div class="crt-tv">
+        <div class="crt-tv__wrapper">
+          <img class="crt-tv__screen-bg" src="/images/crt-tv-screen.png" alt="" />
+          <div class="crt-tv__screen">
+            <img class="crt-tv__image" src="" alt="Project preview" />
+            <div class="crt-tv__static"></div>
+            <div class="crt-tv__scanlines"></div>
+            <div class="crt-tv__glare"></div>
+          </div>
+          <img class="crt-tv__frame" src="/images/crt-tv.png" alt="CRT Television" />
+        </div>
+      </div>
+    `;
+
+    flexRow.insertAdjacentHTML('beforeend', tvHtml);
+  }
+
+  /**
+   * Setup hover events for project cards to trigger TV display
+   */
+  private setupCardHoverEvents(): void {
+    if (!this.projectsContent || !this.portfolioData) return;
+
+    const cards = this.projectsContent.querySelectorAll('.work-card');
+
+    cards.forEach(card => {
+      const projectId = (card as HTMLElement).dataset.projectId;
+      const project = this.portfolioData?.projects.find(p => p.id === projectId);
+
+      card.addEventListener('mouseenter', () => {
+        if (project?.titleCard) {
+          this.changeTvChannel(project.titleCard);
+        }
+      });
+
+      card.addEventListener('mouseleave', () => {
+        this.turnOffTv();
+      });
+    });
+  }
+
+  /**
+   * CRT channel change effect - flicker static then show image
+   */
+  private changeTvChannel(imageSrc: string): void {
+    const image = document.querySelector('.crt-tv__image') as HTMLImageElement;
+    const staticOverlay = document.querySelector('.crt-tv__static');
+
+    if (!image || !staticOverlay) return;
+
+    // Kill any existing animation
+    gsap.killTweensOf([image, staticOverlay]);
+
+    // CRT channel change effect
+    const tl = gsap.timeline();
+
+    tl.to(image, { opacity: 0, duration: 0.05 })
+      .to(staticOverlay, { opacity: 0.8, duration: 0.05 }, '<')
+      .call(() => { image.src = imageSrc; })
+      .to(staticOverlay, {
+        opacity: 0,
+        duration: 0.3,
+        ease: 'power2.out'
+      }, '+=0.1')
+      .to(image, {
+        opacity: 1,
+        duration: 0.2,
+        ease: 'power2.out'
+      }, '<');
+  }
+
+  /**
+   * CRT turn-off effect - shrink vertically then fade
+   */
+  private turnOffTv(): void {
+    const image = document.querySelector('.crt-tv__image') as HTMLImageElement;
+    const staticOverlay = document.querySelector('.crt-tv__static');
+
+    if (!image || !staticOverlay) return;
+
+    gsap.killTweensOf([image, staticOverlay]);
+
+    // CRT turn-off effect
+    gsap.to(image, {
+      opacity: 0,
+      scaleY: 0.01,
+      duration: 0.15,
+      ease: 'power2.in',
+      onComplete: () => {
+        gsap.set(image, { scaleY: 1 });
+      }
+    });
   }
 
   /**
