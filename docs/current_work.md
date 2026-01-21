@@ -167,11 +167,13 @@ None - All 5 major refactoring tasks have been completed.
   - `/src/features/admin/modules/admin-analytics.ts` - Added chart skeletons and table loading
   - `/src/features/client/modules/portal-invoices.ts` - Added container loading state
 
-- [ ] **Implement consistent error states** - 8 modules
-  - `/src/features/admin/admin-project-details.ts` (line 608) - Error but no retry button
-  - `/src/features/admin/modules/admin-clients.ts` - Network errors show no recovery UI
-  - `/src/features/client/modules/portal-files.ts` - Upload failures lack feedback
-  - Fix: Add error UI with retry mechanisms
+- [x] **Implement consistent error states** - COMPLETE
+  - Created `/src/utils/error-utils.ts` with reusable error utilities
+  - Added error CSS to `/src/styles/components/loading.css`
+  - `/src/features/admin/modules/admin-clients.ts` - Added retry button on API/network errors
+  - `/src/features/admin/modules/admin-projects.ts` - Added retry button on API/network errors
+  - `/src/features/admin/modules/admin-analytics.ts` - Added retry button on visitor data errors
+  - `/src/features/client/modules/portal-files.ts` - Replaced alerts with dropzone error UI with retry
 
 - [x] **Fix accessibility gaps** - COMPLETE
   - `/src/features/admin/modules/admin-projects.ts` - Added `aria-label` and `scope="col"` to tables

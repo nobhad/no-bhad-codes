@@ -18,6 +18,7 @@ import type {
   AdminDashboardContext
 } from '../admin-types';
 import { showTableLoading, getChartSkeletonHTML } from '../../../utils/loading-utils';
+import { showTableError } from '../../../utils/error-utils';
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -295,8 +296,12 @@ export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<voi
 
     if (!response.ok) {
       if (response.status !== 401) {
-        container.innerHTML =
-          '<tr><td colspan="6" class="loading-row">Failed to load visitor data</td></tr>';
+        showTableError(
+          container,
+          6,
+          `Failed to load visitor data (${response.status})`,
+          () => loadVisitorsData(_ctx)
+        );
       }
       return;
     }
@@ -342,8 +347,12 @@ export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<voi
 
   } catch (error) {
     console.error('[AdminAnalytics] Error loading visitors data:', error);
-    container.innerHTML =
-      '<tr><td colspan="6" class="loading-row">Error loading visitor data</td></tr>';
+    showTableError(
+      container,
+      6,
+      'Network error loading visitor data',
+      () => loadVisitorsData(_ctx)
+    );
   }
 }
 

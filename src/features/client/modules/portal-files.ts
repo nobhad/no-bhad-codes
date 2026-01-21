@@ -11,6 +11,7 @@
 import type { PortalFile, ClientPortalContext } from '../portal-types';
 import { formatFileSize } from '../../../utils/format-utils';
 import { ICONS } from '../../../constants/icons';
+import { showContainerError } from '../../../utils/error-utils';
 
 const FILES_API_BASE = '/api/uploads';
 
@@ -34,8 +35,11 @@ export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
     renderFilesList(filesContainer as HTMLElement, data.files || [], ctx);
   } catch (error) {
     console.error('Error loading files:', error);
-    (filesContainer as HTMLElement).innerHTML =
-      '<p class="no-files">Unable to load files. Please try again later.</p>';
+    showContainerError(
+      filesContainer as HTMLElement,
+      'Unable to load files',
+      () => loadFiles(ctx)
+    );
   }
 }
 
@@ -290,14 +294,18 @@ export function setupFileUploadHandlers(ctx: ClientPortalContext): void {
  */
 async function uploadFiles(files: File[], ctx: ClientPortalContext): Promise<void> {
   if (files.length > 5) {
-    alert('Maximum 5 files allowed per upload.');
+    showDropzoneError('Maximum 5 files allowed per upload.', ctx, files);
     return;
   }
 
   const maxSize = 10 * 1024 * 1024;
   const oversizedFiles = files.filter((f) => f.size > maxSize);
   if (oversizedFiles.length > 0) {
-    alert(`Some files exceed the 10MB limit: ${oversizedFiles.map((f) => f.name).join(', ')}`);
+    showDropzoneError(
+      `Some files exceed the 10MB limit: ${oversizedFiles.map((f) => f.name).join(', ')}`,
+      ctx,
+      files.filter((f) => f.size <= maxSize)
+    );
     return;
   }
 
@@ -335,8 +343,50 @@ async function uploadFiles(files: File[], ctx: ClientPortalContext): Promise<voi
     await loadFiles(ctx);
   } catch (error) {
     console.error('Upload error:', error);
-    resetDropzone();
-    alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    showDropzoneError(
+      `Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      ctx,
+      files
+    );
+  }
+}
+
+/**
+ * Show error message in dropzone with retry option
+ */
+function showDropzoneError(message: string, ctx: ClientPortalContext, filesToRetry?: File[]): void {
+  const dropzone = document.getElementById('upload-dropzone');
+  if (!dropzone) return;
+
+  const retryBtn = filesToRetry && filesToRetry.length > 0
+    ? '<button type="button" class="btn btn-sm btn-retry" id="btn-retry-upload">Try Again</button>'
+    : '';
+  const dismissBtn = '<button type="button" class="btn btn-sm btn-secondary" id="btn-dismiss-error">Dismiss</button>';
+
+  dropzone.innerHTML = `
+    <div class="dropzone-error" role="alert">
+      <span class="error-icon error-icon--large" aria-hidden="true">⚠</span>
+      <p class="error-message">${message}</p>
+      <div class="dropzone-error-actions">
+        ${retryBtn}
+        ${dismissBtn}
+      </div>
+    </div>
+  `;
+
+  const retryButton = document.getElementById('btn-retry-upload');
+  if (retryButton && filesToRetry && filesToRetry.length > 0) {
+    retryButton.addEventListener('click', () => {
+      uploadFiles(filesToRetry, ctx);
+    });
+  }
+
+  const dismissButton = document.getElementById('btn-dismiss-error');
+  if (dismissButton) {
+    dismissButton.addEventListener('click', () => {
+      resetDropzone();
+      setupFileUploadHandlers(ctx);
+    });
   }
 }
 

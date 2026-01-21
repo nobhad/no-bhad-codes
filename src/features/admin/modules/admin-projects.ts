@@ -23,6 +23,7 @@ import {
 } from '../../../utils/table-filter';
 import type { ProjectMilestone, ProjectFile, ProjectInvoice, AdminDashboardContext, Message } from '../admin-types';
 import { showTableLoading } from '../../../utils/loading-utils';
+import { showTableError } from '../../../utils/error-utils';
 
 /** Lead/Project data from admin leads API */
 interface LeadProject {
@@ -107,9 +108,27 @@ export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
       const data: ProjectsData = await response.json();
       projectsData = data.leads || [];
       updateProjectsDisplay(data, ctx);
+    } else {
+      console.error('[AdminProjects] API error:', response.status);
+      if (tableBody) {
+        showTableError(
+          tableBody,
+          6,
+          `Error loading projects (${response.status})`,
+          () => loadProjects(ctx)
+        );
+      }
     }
   } catch (error) {
     console.error('[AdminProjects] Failed to load projects:', error);
+    if (tableBody) {
+      showTableError(
+        tableBody,
+        6,
+        'Network error loading projects',
+        () => loadProjects(ctx)
+      );
+    }
   }
 }
 
