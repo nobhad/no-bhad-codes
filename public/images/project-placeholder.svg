@@ -1,12 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" fill="none">
-  <rect width="1200" height="700" fill="#e0e0e0"/>
-  <rect x="50" y="50" width="1100" height="600" rx="20" fill="#d0d0d0"/>
-  <g transform="translate(600, 350)">
-    <!-- Code brackets icon -->
-    <path d="M-120 -60 L-180 0 L-120 60" stroke="#999" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M120 -60 L180 0 L120 60" stroke="#999" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <!-- Slash in middle -->
-    <path d="M40 -60 L-40 60" stroke="#999" stroke-width="12" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f5f5f5"/>
+      <stop offset="100%" style="stop-color:#e8e8e8"/>
+    </linearGradient>
+    <linearGradient id="icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ccc"/>
+      <stop offset="100%" style="stop-color:#999"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="700" fill="url(#bg-gradient)"/>
+
+  <!-- Icon group centered -->
+  <g transform="translate(500, 250)">
+    <!-- Image icon frame -->
+    <rect x="0" y="0" width="200" height="150" rx="12" fill="none" stroke="url(#icon-gradient)" stroke-width="6"/>
+
+    <!-- Mountains -->
+    <path d="M30 130 L70 70 L110 110 L150 50 L170 130 Z" fill="url(#icon-gradient)" opacity="0.5"/>
+
+    <!-- Sun -->
+    <circle cx="50" cy="50" r="20" fill="url(#icon-gradient)" opacity="0.5"/>
   </g>
-  <text x="600" y="480" font-family="system-ui, sans-serif" font-size="24" fill="#888" text-anchor="middle" font-weight="500">Project Screenshot Coming Soon</text>
+
+  <!-- Text -->
+  <text x="600" y="480" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="500" fill="#999" text-anchor="middle">
+    Screenshot Coming Soon
+  </text>
 </svg>
