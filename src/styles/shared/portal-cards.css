@@ -160,6 +160,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .portal-project-card,
 :is([data-page="admin"], [data-page="client-portal"]) .messages-container,
 :is([data-page="admin"], [data-page="client-portal"]) .summary-card,
+:is([data-page="admin"], [data-page="client-portal"]) .invoices-list,
 :is([data-page="admin"], [data-page="client-portal"]) .settings-section {
   box-shadow: var(--shadow-panel);
 }
@@ -171,8 +172,58 @@
 :is([data-page="admin"], [data-page="client-portal"]) .portal-project-card > div,
 :is([data-page="admin"], [data-page="client-portal"]) .messages-container > div,
 :is([data-page="admin"], [data-page="client-portal"]) .summary-card > div,
+:is([data-page="admin"], [data-page="client-portal"]) .invoices-list > div,
 :is([data-page="admin"], [data-page="client-portal"]) .settings-section > div {
   box-shadow: none;
+}
+
+/* =====================================================
+   SUMMARY CARD
+   Used for invoice totals, stats summaries
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .summary-card {
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--border-radius-card);
+  padding: var(--space-4);
+  color: var(--portal-text-light);
+  box-shadow: var(--shadow-panel);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .summary-card .summary-label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--portal-text-secondary);
+  margin-bottom: var(--portal-spacing-sm);
+  text-transform: uppercase;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .summary-card .summary-value {
+  display: block;
+  font-family: var(--font--acme);
+  font-size: 1.8rem;
+  color: var(--portal-text-light);
+}
+
+/* =====================================================
+   INVOICES LIST
+   Container for invoice history items
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .invoices-list {
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--border-radius-card);
+  padding: var(--space-4);
+  color: var(--portal-text-light);
+  box-shadow: var(--shadow-panel);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .invoices-list h3 {
+  font-family: var(--font--acme);
+  font-size: 1.1rem;
+  color: var(--portal-text-light);
+  margin: 0 0 var(--portal-spacing-lg) 0;
+  text-transform: uppercase;
 }
 
 /* =====================================================

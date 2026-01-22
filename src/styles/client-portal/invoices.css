@@ -17,39 +17,12 @@
   text-align: center;
 }
 
-.summary-label {
-  display: block;
-  font-size: 0.9rem;
-  color: var(--portal-text-secondary);
-  margin-bottom: var(--portal-spacing-sm);
-  text-transform: uppercase;
-}
-
-.summary-value {
-  display: block;
-  font-family: var(--font--acme);
-  font-size: 1.8rem;
-  color: var(--portal-text-light);
-}
-
-/* Invoices List Container */
-.invoices-list {
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: var(--portal-radius-lg);
-  padding: var(--portal-spacing-xl);
-  color: var(--portal-text-light);
+/* Invoices List - Base styles in shared/portal-cards.css */
+/* Only client-portal specific layout overrides here */
+[data-page="client-portal"] .invoices-list {
   display: flex;
   flex-direction: column;
   gap: var(--portal-spacing-md);
-}
-
-.invoices-list h3 {
-  font-family: var(--font--acme);
-  font-size: 1.1rem;
-  margin: 0 0 var(--portal-spacing-sm) 0;
-  text-transform: uppercase;
-  color: var(--portal-text-light);
 }
 
 /* Invoice Item */

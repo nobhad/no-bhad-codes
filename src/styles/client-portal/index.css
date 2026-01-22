@@ -8,6 +8,7 @@
 @import '../shared/portal-messages.css';
 @import '../shared/portal-cards.css';
 @import '../shared/portal-forms.css';
+@import '../shared/portal-files.css';
 
 /* Base Components (cp- prefixed reusable classes) */
 @import './components.css';
