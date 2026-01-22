@@ -46,7 +46,7 @@
 }
 
 /* =====================================================
-   PLACEHOLDER TEXT - NOT BOLD
+   PLACEHOLDER TEXT - NOT BOLD, system font
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .form-input::placeholder,
 :is([data-page="admin"], [data-page="client-portal"]) .form-textarea::placeholder,
@@ -55,6 +55,7 @@
   font-weight: 400;
   color: var(--portal-text-light);
   opacity: 0.5;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 /* =====================================================
