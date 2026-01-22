@@ -66,10 +66,10 @@
   /* Button effects */
   --btn-portal-transition: all 150ms;
 
-  /* Button shadows - uses same bold shadow as portal panels */
-  --btn-portal-shadow: var(--shadow-panel);
+  /* Button shadows - uses lighter card shadow for buttons */
+  --btn-portal-shadow: var(--shadow-card);
   --btn-portal-shadow-hover: var(--shadow-card);
-  --btn-portal-shadow-focus: var(--shadow-panel), 0 0 0 3px var(--color-primary);
+  --btn-portal-shadow-focus: var(--shadow-card), 0 0 0 3px var(--color-primary);
 
   /* Small button variant */
   --btn-portal-sm-padding-y: var(--portal-spacing-sm);
