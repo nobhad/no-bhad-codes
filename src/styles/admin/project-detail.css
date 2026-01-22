@@ -202,7 +202,6 @@
 /* High specificity with body element selector */
 body[data-page="admin"] .pd-tab-content .files-list-section,
 body[data-page="admin"] .pd-tab-content .intake-form-section,
-body[data-page="admin"] .pd-tab-content .messages-container,
 body[data-page="admin"] .pd-tab-content .recent-activity,
 body[data-page="admin"] .pd-tab-content .settings-section {
   background: transparent;
@@ -211,6 +210,15 @@ body[data-page="admin"] .pd-tab-content .settings-section {
   padding: 0;
   margin: 0;
   box-shadow: none;
+}
+
+/* Messages container keeps its light background styling */
+body[data-page="admin"] .pd-tab-content .messages-container {
+  background: var(--color-neutral-200);
+  border-radius: var(--portal-radius-lg);
+  padding: 0;
+  margin: 0;
+  box-shadow: var(--shadow-panel);
 }
 
 /* Invoice summary cards - styled like Weekly Overview cards */
@@ -957,26 +965,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   flex-shrink: 0;
 }
 
-/* File Upload Dropzone */
-#pd-upload-dropzone {
-  border: 2px dashed var(--portal-border-dark);
-  border-radius: var(--border-radius-md);
-  padding: var(--space-8);
-  text-align: center;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-#pd-upload-dropzone:hover,
-#pd-upload-dropzone.dragover {
-  border-color: var(--color-brand-primary);
-  background: rgba(var(--color-brand-primary-rgb), 0.05);
-}
-
-#pd-upload-dropzone p {
-  color: var(--color-text-secondary);
-  margin: 0 0 var(--portal-spacing-lg) 0;
-}
+/* File upload dropzone styles in shared/portal-files.css */
 
 /* Invoice Summary */
 .invoice-summary {

@@ -206,20 +206,23 @@
 }
 
 /* ============================================
- * SEND MESSAGE BUTTON EXCEPTION
+ * SEND MESSAGE BUTTON
  * ============================================
- * Border in default state only, no shadow.
+ * Black border/text in default state, red bg on hover.
  */
 
 :is([data-page="admin"], [data-page="client-portal"]) #btn-send-message,
-:is([data-page="admin"], [data-page="client-portal"]) #admin-send-message {
+:is([data-page="admin"], [data-page="client-portal"]) #admin-send-message,
+:is([data-page="admin"], [data-page="client-portal"]) #btn-pd-send-message {
   border: 2px solid var(--color-black);
   color: var(--color-black);
   box-shadow: none;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) #btn-send-message:hover,
-:is([data-page="admin"], [data-page="client-portal"]) #admin-send-message:hover {
+:is([data-page="admin"], [data-page="client-portal"]) #admin-send-message:hover,
+:is([data-page="admin"], [data-page="client-portal"]) #btn-pd-send-message:hover {
+  background: var(--color-primary);
   border: 2px solid var(--color-primary);
   color: var(--color-white);
   box-shadow: var(--btn-portal-shadow-hover);

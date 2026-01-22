@@ -117,6 +117,7 @@
   margin-bottom: var(--portal-spacing-sm);
   font-size: 0.9rem;
   color: var(--portal-text-light);
+  box-shadow: var(--shadow-card);
 }
 
 /* No hover effect - items are not clickable */
