@@ -440,6 +440,9 @@ export class VisitorTrackingService {
     }
 
     this.storeSession();
+
+    // Clear current page view to prevent double-counting on visibility changes
+    this.currentPageView = null;
   }
 
   /**
