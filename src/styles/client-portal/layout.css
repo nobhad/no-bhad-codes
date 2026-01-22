@@ -96,22 +96,16 @@ body[data-page="client-portal"] {
 
 /* ================================================
    CLIENT PORTAL - CARD SHADOWS
-   Base shadows in shared/portal-cards.css
-   Client-specific sections below
+   Base shadows in shared/portal-cards.css & shared/portal-files.css
+   Client-specific sections below (not in shared)
    ================================================ */
 [data-page="client-portal"] .file-section,
-[data-page="client-portal"] .invoices-list,
-[data-page="client-portal"] .content-section,
-[data-page="client-portal"] .files-upload-section,
-[data-page="client-portal"] .files-list-section {
+[data-page="client-portal"] .content-section {
   box-shadow: var(--shadow-panel);
 }
 
 /* No shadows on child divs - client-specific sections */
-[data-page="client-portal"] .invoices-list > div,
-[data-page="client-portal"] .content-section > div,
-[data-page="client-portal"] .files-upload-section > div,
-[data-page="client-portal"] .files-list-section > div {
+[data-page="client-portal"] .content-section > div {
   box-shadow: none;
 }
 

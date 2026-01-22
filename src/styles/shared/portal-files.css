@@ -1,0 +1,260 @@
+/* =====================================================
+   SHARED PORTAL FILES
+   @file src/styles/shared/portal-files.css
+   Single source of truth for admin and client portal file components
+   ===================================================== */
+
+/* =====================================================
+   FILES UPLOAD SECTION
+   Container for file upload area
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .files-upload-section {
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--border-radius-card);
+  padding: var(--space-4);
+  margin-bottom: var(--portal-spacing-2xl);
+  color: var(--portal-text-light);
+  box-shadow: var(--shadow-panel);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .files-upload-section h3 {
+  font-family: var(--font--acme);
+  font-size: 1.1rem;
+  margin: 0 0 var(--portal-spacing-lg) 0;
+  text-transform: uppercase;
+  color: var(--portal-text-light);
+}
+
+/* =====================================================
+   UPLOAD DROPZONE
+   Drag-and-drop file upload area
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone {
+  border: 2px dashed var(--portal-bg-light);
+  border-radius: var(--portal-radius-md);
+  padding: var(--portal-spacing-2xl);
+  text-align: center;
+  background: var(--portal-bg-medium);
+  color: var(--portal-text-light);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone:hover,
+:is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone.dragover {
+  border-color: var(--color-primary);
+  background: var(--portal-bg-light);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone p {
+  margin: 0 0 var(--portal-spacing-lg) 0;
+  color: var(--portal-text-secondary);
+}
+
+/* =====================================================
+   FILES LIST SECTION
+   Container for file list
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .files-list-section {
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--border-radius-card);
+  padding: var(--space-4);
+  color: var(--portal-text-light);
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-md);
+  box-shadow: var(--shadow-panel);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .files-list-section h3 {
+  font-family: var(--font--acme);
+  font-size: 1.1rem;
+  margin: 0 0 var(--portal-spacing-lg) 0;
+  text-transform: uppercase;
+  color: var(--portal-text-light);
+}
+
+/* =====================================================
+   FILES LIST
+   List container for file items
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .files-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-sm);
+}
+
+/* =====================================================
+   FILE ITEM
+   Individual file entry
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .file-item {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-lg);
+  padding: var(--portal-spacing-lg);
+  padding-right: 3rem;
+  background: var(--portal-bg-medium);
+  border: none;
+  border-radius: var(--portal-radius-md);
+  color: var(--portal-text-light);
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+/* File items are not clickable - buttons inside handle actions */
+
+:is([data-page="admin"], [data-page="client-portal"]) .file-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  color: var(--portal-text-secondary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .file-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-xs);
+  flex: 1;
+  min-width: 0;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .file-name {
+  flex: 1;
+  font-weight: 500;
+  color: var(--portal-text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .file-date {
+  font-size: 0.9rem;
+  color: var(--portal-text-secondary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .file-meta {
+  font-size: 0.85rem;
+  color: var(--portal-text-secondary);
+}
+
+/* =====================================================
+   FILE ACTIONS
+   Action buttons for files
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .file-actions {
+  display: flex;
+  flex-direction: row;
+  gap: var(--portal-spacing-sm);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-preview,
+:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-download {
+  min-width: 90px;
+  text-align: center;
+  justify-content: center;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-preview:hover,
+:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-download:hover {
+  background: var(--color-primary);
+  color: var(--color-dark);
+}
+
+/* =====================================================
+   FILE DELETE ICON
+   Delete button for file items
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .file-delete-icon {
+  position: absolute;
+  right: var(--portal-spacing-lg);
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--portal-text-muted);
+  padding: 0.35rem 0.5rem;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .file-delete-icon:hover {
+  color: var(--color-error);
+}
+
+/* =====================================================
+   FILE DOWNLOAD LINK
+   Styled download link
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .file-download {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  padding: var(--portal-spacing-sm) var(--portal-spacing-lg);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--portal-radius-xs);
+  transition: all var(--transition-fast);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .file-download:hover {
+  background: var(--color-primary);
+  color: var(--color-dark);
+}
+
+/* =====================================================
+   NO FILES STATE
+   Empty state message
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .no-files {
+  text-align: center;
+  padding: var(--portal-spacing-2xl);
+  color: var(--portal-text-secondary);
+  font-style: italic;
+}
+
+/* =====================================================
+   CARD SHADOWS
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .files-upload-section,
+:is([data-page="admin"], [data-page="client-portal"]) .files-list-section {
+  box-shadow: var(--shadow-panel);
+}
+
+/* No shadows on child divs */
+:is([data-page="admin"], [data-page="client-portal"]) .files-upload-section > div,
+:is([data-page="admin"], [data-page="client-portal"]) .files-list-section > div {
+  box-shadow: none;
+}
+
+/* =====================================================
+   MOBILE RESPONSIVE
+   ===================================================== */
+@media (--mobile) {
+  :is([data-page="admin"], [data-page="client-portal"]) .file-item {
+    flex-wrap: wrap;
+    padding-right: var(--portal-spacing-lg);
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .file-actions {
+    width: 100%;
+    margin-left: 0;
+    margin-top: var(--portal-spacing-sm);
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-preview,
+  :is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-download {
+    flex: 1;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .file-delete-icon {
+    position: static;
+    transform: none;
+    margin-left: auto;
+  }
+}
