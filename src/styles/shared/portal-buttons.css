@@ -140,7 +140,7 @@
   font-size: 1rem;
   text-align: left;
   justify-content: flex-start;
-  box-shadow: var(--btn-portal-shadow);
+  box-shadow: none;
 }
 
 /* Button icon styling - size matches text, bold stroke */
@@ -181,7 +181,7 @@
   font-size: 1rem;
   text-align: left;
   justify-content: flex-start;
-  box-shadow: var(--btn-portal-shadow);
+  box-shadow: none;
 }
 
 /* Logout button icon styling - size matches text, bold stroke */
