@@ -22,13 +22,13 @@
 .files-header {
   margin-bottom: var(--portal-spacing-2xl);
   padding-bottom: var(--portal-spacing-lg);
-  border-bottom: 1px solid var(--color-neutral-300);
+  border-bottom: 1px solid var(--portal-border-medium);
 }
 
 .files-header h1 {
   font-size: 2rem;
   margin-bottom: var(--portal-spacing-sm);
-  color: var(--color-dark);
+  color: var(--portal-text-light);
 }
 
 .files-container {
@@ -39,22 +39,23 @@
 
 /* File Section - client portal specific alternate layout */
 .file-section {
-  background: var(--color-neutral-100);
-  border: 1px solid var(--color-neutral-300);
+  background: var(--portal-bg-dark);
+  border: none;
   border-radius: var(--portal-radius-md);
   overflow: hidden;
+  box-shadow: var(--shadow-panel);
 }
 
 .file-section-header {
   padding: var(--portal-spacing-lg) var(--portal-spacing-xl);
-  background: var(--color-neutral-200);
-  border-bottom: 1px solid var(--color-neutral-300);
+  background: var(--portal-bg-darker);
+  border-bottom: 1px solid var(--portal-border-medium);
 }
 
 .file-section-header h2 {
   font-size: 1.2rem;
   margin: 0;
-  color: var(--color-dark);
+  color: var(--portal-text-light);
 }
 
 .file-list {
@@ -63,8 +64,9 @@
 
 .file-list .file-item {
   padding: var(--portal-spacing-lg) var(--portal-spacing-xl);
-  border-bottom: 1px solid var(--color-neutral-300);
+  border-bottom: 1px solid var(--portal-border-medium);
   transition: background-color 0.2s ease;
+  color: var(--portal-text-light);
 }
 
 .file-list .file-item:last-child {
