@@ -31,7 +31,7 @@
    Drag-and-drop file upload area
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone {
-  border: 2px dashed var(--portal-bg-light);
+  border: 2px dashed var(--portal-text-light);
   border-radius: var(--portal-radius-md);
   padding: var(--portal-spacing-2xl);
   text-align: center;
@@ -49,7 +49,26 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone p {
   margin: 0 0 var(--portal-spacing-lg) 0;
-  color: var(--portal-text-secondary);
+  color: var(--portal-text-light);
+}
+
+/* Desktop/mobile text variants */
+:is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone .dropzone-desktop {
+  display: block;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone .dropzone-mobile {
+  display: none;
+}
+
+@media (--mobile) {
+  :is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone .dropzone-desktop {
+    display: none;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .upload-dropzone .dropzone-mobile {
+    display: block;
+  }
 }
 
 /* =====================================================
