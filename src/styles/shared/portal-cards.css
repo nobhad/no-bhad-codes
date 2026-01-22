@@ -93,7 +93,8 @@
   box-shadow: var(--shadow-panel);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .recent-activity h3 {
+:is([data-page="admin"], [data-page="client-portal"]) .recent-activity h3,
+:is([data-page="admin"], [data-page="client-portal"]) .analytics-overview h3 {
   font-family: var(--font--acme);
   font-size: 1.1rem;
   color: var(--portal-text-light);
