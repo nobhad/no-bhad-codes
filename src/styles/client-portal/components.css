@@ -64,11 +64,11 @@
   padding: var(--portal-spacing-lg) var(--portal-spacing-xl);
   border: none;
   border-radius: var(--portal-radius-lg);
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 400;
   background-color: var(--color-black);
   color: var(--portal-text-light);
-  font-family: inherit;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   box-sizing: border-box;
   transition: background-color 0.2s ease;
   min-height: 60px;
@@ -76,7 +76,7 @@
   caret-color: var(--portal-text-light);
 }
 
-/* Placeholder styling - NOT bold */
+/* Placeholder styling - NOT bold, system font */
 .portal-input::placeholder,
 :is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) :is(
   .form-input,
@@ -86,6 +86,7 @@
   color: var(--portal-text-light);
   opacity: 0.5;
   font-weight: 400;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 /* Focus states for portal inputs */
