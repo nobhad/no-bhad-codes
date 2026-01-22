@@ -147,8 +147,9 @@
 }
 
 /* Label positioned inside input at top - SMALL UPPERCASE style */
+/* Only targets labels inside .form-group, not all labels */
 .portal-form-group label,
-:is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) :is(.form-group label, label) {
+:is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) .form-group label {
   position: absolute;
   top: var(--portal-spacing-sm);
   left: var(--portal-spacing-xl);
