@@ -1,8 +1,117 @@
 # Current Work
 
-**Last Updated:** January 22, 2026
+**Last Updated:** January 23, 2026
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-01.md`.
+
+---
+
+## Known Concerns
+
+### Analytics - Average Session Calculation Still Off
+
+**Status:** Needs Investigation
+**Observed:** January 23, 2026
+
+The average session duration is showing extremely high values (e.g., 1663m 47s = ~27 hours) which is not realistic. A previous fix was applied to clear `currentPageView` after `completePageView()` to prevent double-counting on tab switches, but the calculation still appears incorrect.
+
+**Possible causes to investigate:**
+
+- Session data accumulating across days/visits
+- Old session data not being properly cleaned up
+- Calculation including incomplete/abandoned sessions incorrectly
+
+### Lead Activation Not Working
+
+**Status:** FIXED - January 23, 2026
+
+**Root cause:** Database CHECK constraint mismatch.
+
+The `projects.status` column has a CHECK constraint allowing only: `'pending', 'in-progress', 'in-review', 'completed', 'on-hold'`
+
+But the code was trying to set `status = 'active'` which violated the constraint.
+
+**Fix applied:**
+
+- Changed activation status from `'active'` to `'in-progress'`
+- Fixed status check from `'in_progress'` (underscore) to `'in-progress'` (hyphen)
+
+**File:** `server/routes/admin.ts`
+
+---
+
+### Backend/Frontend API Alignment
+
+**Status:** FIXED - January 23, 2026
+
+**Issues identified and fixed:**
+
+| Issue | Severity | Fix Applied |
+|-------|----------|-------------|
+| Project status `in_progress` vs `in-progress` | HIGH | Changed all code to use hyphen format matching DB CHECK constraint |
+| Lead stats query using wrong status values | HIGH | Updated to use `'in-progress', 'in-review'` instead of `'active', 'in_progress'` |
+| validStatuses array had non-existent values | HIGH | Updated to match DB: `['pending', 'in-progress', 'in-review', 'completed', 'on-hold']` |
+| Invoice API returned camelCase, frontend expected snake_case | MEDIUM | Added `toSnakeCaseInvoice()` transformation function |
+| database.ts types didn't match DB schema | MEDIUM | Updated LeadStatus and ProjectStatus types |
+
+**Files modified:**
+
+- `server/routes/admin.ts` - Fixed status values in queries and validations
+- `server/routes/invoices.ts` - Added snake_case transformation for frontend compatibility
+- `server/types/database.ts` - Updated type definitions to match DB CHECK constraints
+
+**Database CHECK constraints (source of truth):**
+
+```sql
+-- projects.status
+CHECK (status IN ('pending', 'in-progress', 'in-review', 'completed', 'on-hold'))
+
+-- message_threads.status
+CHECK (status IN ('active', 'closed', 'archived'))
+```
+
+---
+
+### Custom Design Dialog Boxes Needed
+
+**Status:** TODO
+**Observed:** January 23, 2026
+
+Currently using native browser `confirm()` and `alert()` dialogs which don't match the site's design aesthetic. Need to create custom styled modal dialogs.
+
+**Affected areas:**
+
+- "Activate this lead as a project?" confirmation
+- Other confirmation/alert dialogs throughout admin portal
+
+**Requirements:**
+
+- Custom modal component matching portal dark theme
+- Cancel/OK buttons with portal button styling
+- Consistent with overall design language
+
+---
+
+### Terminal Styling in Client Portal
+
+**Status:** Needs Review
+**Observed:** January 23, 2026
+
+The terminal intake in the client portal (New Project tab) has width/overflow issues.
+
+**Root cause identified:**
+
+- Base terminal styles set `min-width: 100%` on `.terminal` and `.terminal-window`
+- This forces full width regardless of `max-width` constraints
+- Portal context needs to override with `min-width: auto`
+
+**Current fix applied:**
+
+- Added portal-specific overrides in `terminal-intake.css`
+- Set width constraint (90%, max 900px) on `.terminal-intake`
+- Reset `min-width: auto` on child elements
+
+**Needs verification:** Confirm terminal displays correctly without overflow on both sides.
 
 ---
 

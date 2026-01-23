@@ -434,6 +434,42 @@ body[data-page="client-intake"] .terminal-window {
   margin: 0 auto;
 }
 
+/* Client Portal context: fill available tab content height */
+/* Only apply flex layout when tab is active to not break tab hiding */
+[data-page="client-portal"] #tab-new-project.active {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 6rem); /* Subtract header and padding */
+}
+
+/* Client Portal: Reset min-width: 100% from base terminal styles */
+[data-page="client-portal"] .portal-intake,
+[data-page="client-portal"] .terminal-intake-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+  width: 100%;
+}
+
+[data-page="client-portal"] .portal-intake .terminal-intake {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  width: 90%;
+  min-width: auto;
+  max-width: 900px;
+}
+
+[data-page="client-portal"] .portal-intake .terminal-intake .terminal-window {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  width: 100%;
+  min-width: auto;
+}
+
 /* ============================================================================
    LOGIN INFO
    ============================================================================ */

@@ -45,23 +45,15 @@
 /* ----- COMPONENT: Buttons ----- */
 /* All portal button styles consolidated in buttons.css */
 
-/* ----- COMPONENT: Form Input ----- */
-/* PORTAL-ONLY FORM STYLING - Separate from main site contact form */
-/* Dark bg, light text, label inside input, larger padding */
-/* Using :is() to reduce selector complexity (was 25 selectors, now simplified) */
-.portal-input,
-:is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) :is(
-  .form-input,
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  input[type="tel"],
-  input[type="number"],
-  textarea,
-  select:not(.status-select)
-) {
+/* ----- COMPONENT: Form Inputs ----- */
+/* Base form styles in shared/portal-forms.css */
+/* Only portal-prefixed utility classes here */
+
+.portal-input {
   width: 100%;
   padding: var(--portal-spacing-lg) var(--portal-spacing-xl);
+  padding-top: 1.5rem;
+  padding-bottom: var(--portal-spacing-sm);
   border: none;
   border-radius: var(--portal-radius-lg);
   font-size: 1rem;
@@ -76,108 +68,60 @@
   caret-color: var(--portal-text-light);
 }
 
-/* Placeholder styling - NOT bold, system font */
-.portal-input::placeholder,
-:is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) :is(
-  .form-input,
-  input,
-  textarea
-)::placeholder {
+.portal-input::placeholder {
   color: var(--portal-text-light);
   opacity: 0.5;
   font-weight: 400;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Focus states for portal inputs */
-.portal-input:focus,
-:is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) :is(
-  .form-input,
-  input,
-  textarea,
-  select:not(.status-select)
-):focus {
+.portal-input:focus {
   outline: none;
   border-color: var(--color-primary);
 }
 
-/* Focus indicators inherited from global :focus-visible rule in reset.css */
-
-/* Readonly states */
-.portal-input[readonly],
-:is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) :is(
-  .form-input,
-  input
-)[readonly] {
+.portal-input[readonly] {
   background: var(--portal-bg-readonly);
   color: var(--portal-text-muted);
   cursor: not-allowed;
 }
 
-.client-portal-main textarea {
-  height: auto;
-  min-height: clamp(60px, 15vw, 100px);
-  resize: vertical;
-}
-
-.client-portal-main select {
-  appearance: none;
-  -webkit-appearance: none;
-  padding-right: 2.5rem;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f5f5f5' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 12px;
-  cursor: pointer;
-}
-
 /* ----- COMPONENT: Form Group ----- */
-/* Label inside input like contact form */
-.portal-form-group,
-:is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) .form-group {
+/* Base form-group styles in shared/portal-forms.css */
+/* Only portal-prefixed utility class here */
+
+.portal-form-group {
   margin: 0;
   position: relative;
   display: flex;
   flex-direction: column;
 }
 
-.portal-form-group:last-child,
-.client-portal-main .form-group:last-child {
+.portal-form-group:last-child {
   margin-bottom: 0;
 }
 
-/* Label positioned inside input at top - SMALL UPPERCASE style */
-/* Only targets labels inside .form-group, not all labels */
-.portal-form-group label,
-:is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) .form-group label {
+.portal-form-group label {
   position: absolute;
   top: var(--portal-spacing-sm);
   left: var(--portal-spacing-xl);
   z-index: 1;
-  font-weight: var(--label-font-weight, 500);
+  font-weight: 500;
   color: var(--portal-text-secondary);
-  font-size: var(--label-font-size, 0.75rem);
-  text-transform: var(--label-text-transform, uppercase);
-  letter-spacing: var(--label-letter-spacing, 0.05em);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   pointer-events: none;
   margin: 0;
 }
 
-/* Adjust input padding to account for smaller label */
-.portal-form-group :is(.portal-input, input),
-:is(.client-portal-main, [data-page="client-portal"], [data-page="admin"]) .form-group :is(
-  input,
-  textarea,
-  select:not(.status-select)
-) {
+.portal-form-group .portal-input {
   padding-top: 1.5rem;
   padding-bottom: var(--portal-spacing-sm);
-  padding-left: var(--portal-spacing-xl);
 }
 
 /* ----- COMPONENT: Form Row ----- */
-.portal-form-row,
-.client-portal-main .form-row {
+.portal-form-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--portal-spacing-lg);
@@ -338,9 +282,19 @@
   background: transparent;
 }
 
-.portal-project-card .project-status .status-badge {
-  font-size: 1rem;
+/* Status badge in project cards - red Acme font, matches h3 title size */
+.portal-project-card .project-status .status-badge,
+[data-page="client-portal"] .portal-project-card .project-status .status-badge {
+  font-family: var(--font--acme);
+  font-size: 1.2rem;
+  color: var(--color-primary) !important;
+  background: transparent !important;
+  padding: 0;
   margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 400;
+  border: none;
 }
 
 .portal-project-card .project-progress {

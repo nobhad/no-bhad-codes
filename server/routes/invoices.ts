@@ -13,7 +13,7 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
-import { InvoiceService, InvoiceCreateData, InvoiceLineItem } from '../services/invoice-service.js';
+import { InvoiceService, InvoiceCreateData, InvoiceLineItem, Invoice } from '../services/invoice-service.js';
 import { emailService } from '../services/email-service.js';
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
@@ -33,6 +33,42 @@ const router = express.Router();
 // Lazy-load invoice service after database is initialized
 function getInvoiceService() {
   return InvoiceService.getInstance();
+}
+
+/**
+ * Transform Invoice object to snake_case for frontend compatibility
+ */
+function toSnakeCaseInvoice(invoice: Invoice): Record<string, unknown> {
+  return {
+    id: invoice.id,
+    invoice_number: invoice.invoiceNumber,
+    project_id: invoice.projectId,
+    client_id: invoice.clientId,
+    amount_total: invoice.amountTotal,
+    amount_paid: invoice.amountPaid || 0,
+    currency: invoice.currency,
+    status: invoice.status,
+    due_date: invoice.dueDate,
+    issued_date: invoice.issuedDate,
+    paid_date: invoice.paidDate,
+    payment_method: invoice.paymentMethod,
+    payment_reference: invoice.paymentReference,
+    line_items: invoice.lineItems,
+    notes: invoice.notes,
+    terms: invoice.terms,
+    created_at: invoice.createdAt,
+    updated_at: invoice.updatedAt,
+    // Additional fields for display
+    business_name: invoice.businessName,
+    business_email: invoice.businessEmail,
+    venmo_handle: invoice.venmoHandle,
+    paypal_email: invoice.paypalEmail,
+    services_title: invoice.servicesTitle,
+    services_description: invoice.servicesDescription,
+    deliverables: invoice.deliverables,
+    bill_to_name: invoice.billToName,
+    bill_to_email: invoice.billToEmail
+  };
 }
 
 /**
@@ -382,22 +418,25 @@ router.get(
       let totalOutstanding = 0;
       let totalPaid = 0;
 
-      invoices.forEach((invoice: any) => {
+      invoices.forEach((invoice) => {
         if (invoice.status === 'paid') {
-          totalPaid += parseFloat(invoice.amount_total) || 0;
+          totalPaid += invoice.amountTotal || 0;
         } else if (['sent', 'viewed', 'partial', 'overdue'].includes(invoice.status)) {
-          totalOutstanding += parseFloat(invoice.amount_total) || 0;
+          totalOutstanding += invoice.amountTotal || 0;
           // Subtract any partial payments
-          if (invoice.amount_paid) {
-            totalOutstanding -= parseFloat(invoice.amount_paid) || 0;
-            totalPaid += parseFloat(invoice.amount_paid) || 0;
+          if (invoice.amountPaid) {
+            totalOutstanding -= invoice.amountPaid || 0;
+            totalPaid += invoice.amountPaid || 0;
           }
         }
       });
 
+      // Transform invoices to snake_case for frontend compatibility
+      const transformedInvoices = invoices.map(toSnakeCaseInvoice);
+
       res.json({
         success: true,
-        invoices,
+        invoices: transformedInvoices,
         count: invoices.length,
         summary: {
           totalOutstanding,
@@ -437,9 +476,10 @@ router.get(
 
     try {
       const invoices = await getInvoiceService().getClientInvoices(clientId);
+      const transformedInvoices = invoices.map(toSnakeCaseInvoice);
       res.json({
         success: true,
-        invoices,
+        invoices: transformedInvoices,
         count: invoices.length
       });
     } catch (error: unknown) {
@@ -475,9 +515,10 @@ router.get(
 
     try {
       const invoices = await getInvoiceService().getProjectInvoices(projectId);
+      const transformedInvoices = invoices.map(toSnakeCaseInvoice);
       res.json({
         success: true,
-        invoices,
+        invoices: transformedInvoices,
         count: invoices.length
       });
     } catch (error: unknown) {
