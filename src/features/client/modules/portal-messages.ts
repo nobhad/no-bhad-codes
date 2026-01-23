@@ -134,11 +134,16 @@ function renderMessages(
       const isSent = msg.sender_type === 'client';
       const isAdmin = msg.sender_type === 'admin';
       const initials = (msg.sender_name || 'Unknown').substring(0, 3).toUpperCase();
-      const avatarClass = isAdmin ? 'avatar-placeholder avatar-admin' : 'avatar-placeholder';
+
+      // Admin uses avatar image, clients use initials placeholder
+      const avatarHtml = isAdmin
+        ? '<img src="/images/avatar_small_sidebar.svg" alt="Admin" class="avatar-img" />'
+        : `<div class="avatar-placeholder">${initials}</div>`;
+
       return `
       <div class="message message-${isSent ? 'sent' : 'received'}">
         <div class="message-avatar">
-          <div class="${avatarClass}">${initials}</div>
+          ${avatarHtml}
         </div>
         <div class="message-content">
           <div class="message-header">
