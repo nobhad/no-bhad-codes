@@ -382,7 +382,7 @@ router.get(
         SELECT
           COUNT(*) as total,
           SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
-          SUM(CASE WHEN status IN ('in-progress', 'in-review') THEN 1 ELSE 0 END) as active,
+          SUM(CASE WHEN status IN ('active', 'in-progress', 'in-review') THEN 1 ELSE 0 END) as active,
           SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
         FROM projects
       `);
@@ -554,7 +554,7 @@ router.put(
       const { id } = req.params;
       const { status } = req.body;
 
-      const validStatuses = ['pending', 'in-progress', 'in-review', 'completed', 'on-hold'];
+      const validStatuses = ['pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled'];
       if (!validStatuses.includes(status)) {
         return res.status(400).json({
           success: false,
@@ -816,16 +816,16 @@ router.post(
         });
       }
 
-      if (lead.status === 'in-progress' || lead.status === 'in-review' || lead.status === 'completed') {
+      if (lead.status === 'active' || lead.status === 'in-progress' || lead.status === 'in-review' || lead.status === 'completed') {
         return res.status(400).json({
           success: false,
           error: 'Lead is already activated'
         });
       }
 
-      // Update project status to in-progress (valid status per CHECK constraint)
+      // Update project status to active
       await db.run('UPDATE projects SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
-        'in-progress',
+        'active',
         id
       ]);
 

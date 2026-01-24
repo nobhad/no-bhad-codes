@@ -21,22 +21,30 @@ The average session duration is showing extremely high values (e.g., 1663m 47s =
 - Old session data not being properly cleaned up
 - Calculation including incomplete/abandoned sessions incorrectly
 
-### Lead Activation Not Working
+### Lead Activation Flow
 
 **Status:** FIXED - January 23, 2026
 
-**Root cause:** Database CHECK constraint mismatch.
+**Issues fixed:**
 
-The `projects.status` column has a CHECK constraint allowing only: `'pending', 'in-progress', 'in-review', 'completed', 'on-hold'`
+1. Database CHECK constraint didn't include 'active' or 'cancelled' status
+2. Activation set status to 'in-progress' instead of 'active'
+3. After activation, user wasn't navigated to project detail page
+4. Project names had "Personal Project - " prefix for personal clients
 
-But the code was trying to set `status = 'active'` which violated the constraint.
+**Fixes applied:**
 
-**Fix applied:**
+- Updated database CHECK constraint to include: `'pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled'`
+- Activation now sets status to `'active'`
+- After activation, loads projects and shows project detail page
+- Personal project names now just show type (e.g., "Simple Website" not "Personal Project - Simple Website")
 
-- Changed activation status from `'active'` to `'in-progress'`
-- Fixed status check from `'in_progress'` (underscore) to `'in-progress'` (hyphen)
+**Files modified:**
 
-**File:** `server/routes/admin.ts`
+- `server/routes/admin.ts` - Activation sets 'active' status
+- `server/routes/intake.ts` - `generateProjectName()` simplified for personal clients
+- `src/features/admin/modules/admin-leads.ts` - Navigate to project detail after activation
+- Database schema - Updated CHECK constraint
 
 ---
 
@@ -48,9 +56,9 @@ But the code was trying to set `status = 'active'` which violated the constraint
 
 | Issue | Severity | Fix Applied |
 |-------|----------|-------------|
-| Project status `in_progress` vs `in-progress` | HIGH | Changed all code to use hyphen format matching DB CHECK constraint |
-| Lead stats query using wrong status values | HIGH | Updated to use `'in-progress', 'in-review'` instead of `'active', 'in_progress'` |
-| validStatuses array had non-existent values | HIGH | Updated to match DB: `['pending', 'in-progress', 'in-review', 'completed', 'on-hold']` |
+| Project status `in_progress` vs `in-progress` | HIGH | Changed all code to use hyphen format |
+| Lead stats query using wrong status values | HIGH | Updated to include `'active', 'in-progress', 'in-review'` |
+| validStatuses array incomplete | HIGH | Updated to: `['pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled']` |
 | Invoice API returned camelCase, frontend expected snake_case | MEDIUM | Added `toSnakeCaseInvoice()` transformation function |
 | database.ts types didn't match DB schema | MEDIUM | Updated LeadStatus and ProjectStatus types |
 
@@ -60,11 +68,11 @@ But the code was trying to set `status = 'active'` which violated the constraint
 - `server/routes/invoices.ts` - Added snake_case transformation for frontend compatibility
 - `server/types/database.ts` - Updated type definitions to match DB CHECK constraints
 
-**Database CHECK constraints (source of truth):**
+**Database CHECK constraint (updated):**
 
 ```sql
--- projects.status
-CHECK (status IN ('pending', 'in-progress', 'in-review', 'completed', 'on-hold'))
+-- projects.status (updated January 23, 2026)
+CHECK (status IN ('pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled'))
 
 -- message_threads.status
 CHECK (status IN ('active', 'closed', 'archived'))
@@ -89,6 +97,90 @@ Currently using native browser `confirm()` and `alert()` dialogs which don't mat
 - Custom modal component matching portal dark theme
 - Cancel/OK buttons with portal button styling
 - Consistent with overall design language
+
+---
+
+### Budget/Timeline Capitalization in Edit Modal
+
+**Status:** FIXED - January 23, 2026
+
+The Edit Project modal was showing raw database values instead of formatted values:
+
+- "under-1k" now displays as "Under 1k"
+- "asap" now displays as "ASAP"
+
+**Fix applied:**
+
+- Updated `openEditProjectModal()` to use `formatDisplayValue()` when populating budget/timeline input values
+- `formatDisplayValue()` handles special cases for ASAP and Under-Xk patterns
+
+**Files modified:**
+
+- `src/features/admin/modules/admin-projects.ts` - `openEditProjectModal()` function
+
+---
+
+### Edit Modal Form Label Positioning
+
+**Status:** FIXED - January 23, 2026
+
+Labels in the Edit Project modal were using absolute positioning (designed for labels inside inputs) when they should be positioned above inputs (traditional layout).
+
+**Root cause:**
+
+- `portal-forms.css` sets `.form-group label` to `position: absolute` for labels inside inputs
+- Edit modal uses `class="field-label"` which is designed for traditional above-input labels
+- CSS specificity conflict caused labels to be positioned incorrectly
+
+**Fix applied:**
+
+- Added CSS override for `.field-label` in portal contexts to use `position: static`
+- Adjusted input padding when inside a form-group with `.field-label`
+
+**Files modified:**
+
+- `src/styles/shared/portal-forms.css` - Added `.field-label` override section
+
+---
+
+### Edit Modal Status Values
+
+**Status:** FIXED - January 23, 2026
+
+The Edit Project modal status dropdown used underscore format (`in_progress`, `on_hold`) instead of hyphen format (`in-progress`, `on-hold`).
+
+**Fix applied:**
+
+- Updated status select options to use hyphen format
+- Added missing "In Review" status option
+
+**Files modified:**
+
+- `admin/index.html` - Updated `#edit-project-status` select options
+
+---
+
+### Project Start/End Dates
+
+**Status:** TODO
+**Observed:** January 23, 2026
+
+Projects should track start and end dates:
+
+- Start date should be set when project is activated
+- End date should be target completion date
+
+**Requirements:**
+
+- Add `start_date` and `end_date` columns to projects table (if not already present)
+- Automatically set `start_date` when project status changes to 'active'
+- Allow manual editing of both dates in Edit Project modal
+
+**Files to modify:**
+
+- Database schema (if columns don't exist)
+- `server/routes/admin.ts` - Set start_date on activation
+- `src/features/admin/modules/admin-projects.ts` - Handle dates in edit modal
 
 ---
 

@@ -21,6 +21,7 @@ import {
   type FilterState
 } from '../../../utils/table-filter';
 import type { Lead, AdminDashboardContext } from '../admin-types';
+import { loadProjects, showProjectDetails } from './admin-projects';
 
 interface LeadsData {
   leads: Lead[];
@@ -53,15 +54,23 @@ function getElement(id: string): HTMLElement | null {
 
 /**
  * Format budget/timeline values with proper capitalization
- * Capitalizes first letter of each word, ASAP becomes all caps
  */
 function formatDisplayValue(value: string | undefined | null): string {
   if (!value || value === '-') return '-';
 
-  // Handle ASAP - make it all caps
-  let formatted = value.replace(/\basap\b/gi, 'ASAP');
+  // Handle special cases first
+  const lowerValue = value.toLowerCase();
 
-  // Capitalize first letter of each word
+  // ASAP should be all caps
+  if (lowerValue === 'asap') return 'ASAP';
+
+  // Budget ranges: "under-1k" -> "Under 1k", "1000-2500" -> "$1,000-$2,500"
+  if (lowerValue.includes('under')) {
+    return value.replace(/under-?/gi, 'Under ').replace(/-/g, '');
+  }
+
+  // Replace hyphens with spaces and capitalize each word
+  let formatted = value.replace(/-/g, ' ');
   formatted = formatted.replace(/\b\w/g, (char) => char.toUpperCase());
 
   return formatted;
@@ -480,8 +489,13 @@ export async function activateLead(
     const response = await apiPost(`/api/admin/leads/${leadId}/activate`);
 
     if (response.ok) {
+      const data = await response.json();
       ctx.showNotification('Lead activated successfully!', 'success');
-      await loadLeads(ctx);
+
+      // Load projects data and navigate to project detail page
+      await loadProjects(ctx);
+      const projectId = data.projectId || leadId;
+      showProjectDetails(projectId, ctx);
     } else if (response.status !== 401) {
       const error = await response.json();
       ctx.showNotification(error.message || 'Failed to activate lead', 'error');
