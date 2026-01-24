@@ -109,6 +109,26 @@
 }
 
 /* =====================================================
+   FIELD-LABEL OVERRIDE
+   When using .field-label class, labels are positioned
+   ABOVE inputs (traditional layout), not inside them.
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .form-group label.field-label,
+:is([data-page="admin"], [data-page="client-portal"]) label.field-label {
+  position: static;
+  margin-bottom: 0.5rem;
+  pointer-events: auto;
+}
+
+/* Inputs following .field-label don't need extra padding-top */
+:is([data-page="admin"], [data-page="client-portal"]) .form-group:has(label.field-label) input,
+:is([data-page="admin"], [data-page="client-portal"]) .form-group:has(label.field-label) select,
+:is([data-page="admin"], [data-page="client-portal"]) .form-group:has(label.field-label) textarea {
+  padding-top: var(--portal-spacing-md);
+  min-height: auto;
+}
+
+/* =====================================================
    SELECT DROPDOWN
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) select:not(.status-select),

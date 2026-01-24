@@ -37,14 +37,15 @@ export type DatabaseRow = Record<string, unknown>;
 // Lead/Intake Types
 // ============================================
 
-// Lead/project status values must match database CHECK constraint:
-// ('pending', 'in-progress', 'in-review', 'completed', 'on-hold')
+// Lead/project status values must match database CHECK constraint
 export type LeadStatus =
   | 'pending'
+  | 'active'
   | 'in-progress'
   | 'in-review'
   | 'completed'
-  | 'on-hold';
+  | 'on-hold'
+  | 'cancelled';
 
 export interface LeadRow extends BaseEntity {
   company_name: string;
@@ -167,14 +168,15 @@ export interface ContactSubmissionUpdate {
 // Project Types
 // ============================================
 
-// Project status values must match database CHECK constraint:
-// ('pending', 'in-progress', 'in-review', 'completed', 'on-hold')
+// Project status values must match database CHECK constraint
 export type ProjectStatus =
   | 'pending'
+  | 'active'
   | 'in-progress'
   | 'in-review'
   | 'completed'
-  | 'on-hold';
+  | 'on-hold'
+  | 'cancelled';
 
 export interface ProjectRow extends BaseEntity {
   name: string;

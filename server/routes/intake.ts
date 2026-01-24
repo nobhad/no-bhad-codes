@@ -462,9 +462,13 @@ function generateProjectName(
   };
 
   const typeName = typeNames[projectType] || 'Web Project';
-  // Personal: "Jane Doe - Portfolio Website"
+
+  // Personal: just use project type (e.g., "Simple Website")
   // Business: "Acme Corp - Business Website"
-  const identifier = clientType === 'personal' ? contactName : (companyName || contactName);
+  if (clientType === 'personal') {
+    return typeName;
+  }
+  const identifier = companyName || contactName;
   return `${identifier} - ${typeName}`;
 }
 

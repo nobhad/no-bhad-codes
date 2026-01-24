@@ -166,15 +166,23 @@ let filterUIInitialized = false;
 
 /**
  * Format budget/timeline values with proper capitalization
- * Capitalizes first letter of each word, ASAP becomes all caps
  */
 function formatDisplayValue(value: string | undefined | null): string {
   if (!value || value === '-') return '-';
 
-  // Handle ASAP - make it all caps
-  let formatted = value.replace(/\basap\b/gi, 'ASAP');
+  // Handle special cases first
+  const lowerValue = value.toLowerCase();
 
-  // Capitalize first letter of each word
+  // ASAP should be all caps
+  if (lowerValue === 'asap') return 'ASAP';
+
+  // Budget ranges: "under-1k" -> "Under 1k", "1000-2500" -> "$1,000-$2,500"
+  if (lowerValue.includes('under')) {
+    return value.replace(/under-?/gi, 'Under ').replace(/-/g, '');
+  }
+
+  // Replace hyphens with spaces and capitalize each word
+  let formatted = value.replace(/-/g, ' ');
   formatted = formatted.replace(/\b\w/g, (char) => char.toUpperCase());
 
   return formatted;
@@ -603,9 +611,9 @@ function openEditProjectModal(project: LeadProject): void {
   const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
 
   if (nameInput) nameInput.value = project.project_name || '';
-  if (budgetInput) budgetInput.value = project.budget_range || '';
+  if (budgetInput) budgetInput.value = formatDisplayValue(project.budget_range);
   if (priceInput) priceInput.value = projectData.price || '';
-  if (timelineInput) timelineInput.value = project.timeline || '';
+  if (timelineInput) timelineInput.value = formatDisplayValue(project.timeline);
   if (previewUrlInput) previewUrlInput.value = projectData.preview_url || '';
 
   // Initialize custom dropdowns for selects (only once)
