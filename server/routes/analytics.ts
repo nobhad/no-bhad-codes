@@ -240,12 +240,15 @@ router.get(
       const daysNum = Math.min(Math.max(parseInt(days as string, 10) || 30, 1), 365);
 
       // Get summary metrics
+      // Note: total_time_on_site is stored in milliseconds
+      // Filter out sessions > 1 hour (3600000ms) as outliers (tabs left open)
+      const MAX_SESSION_MS = 3600000; // 1 hour in milliseconds
       const summary = await db.get(
         `SELECT
           COUNT(DISTINCT session_id) as total_sessions,
           COUNT(DISTINCT visitor_id) as unique_visitors,
           SUM(page_views) as total_page_views,
-          CAST(AVG(total_time_on_site) AS INTEGER) as avg_session_duration,
+          CAST(AVG(CASE WHEN total_time_on_site <= ${MAX_SESSION_MS} THEN total_time_on_site ELSE NULL END) AS INTEGER) as avg_session_duration,
           ROUND(AVG(page_views), 2) as avg_pages_per_session,
           ROUND(COUNT(CASE WHEN bounced = 1 THEN 1 END) * 100.0 / MAX(COUNT(*), 1), 2) as bounce_rate
         FROM visitor_sessions

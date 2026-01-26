@@ -10,113 +10,22 @@ This file tracks active development work and TODOs. Completed items are moved to
 
 ### Analytics - Average Session Calculation Still Off
 
-**Status:** Needs Investigation
-**Observed:** January 23, 2026
-
-The average session duration is showing extremely high values (e.g., 1663m 47s = ~27 hours) which is not realistic. A previous fix was applied to clear `currentPageView` after `completePageView()` to prevent double-counting on tab switches, but the calculation still appears incorrect.
-
-**Possible causes to investigate:**
-
-- Session data accumulating across days/visits
-- Old session data not being properly cleaned up
-- Calculation including incomplete/abandoned sessions incorrectly
-
-### Admin Summary Cards - Poor Responsive Wrapping
-
 **Status:** FIXED - January 26, 2026
 
-Summary cards (e.g., Projects tab: Total Projects, Active, Completed, On Hold) were wrapping incorrectly at certain viewport widths (3+1 instead of 2+2).
+Average session duration was showing extremely high values (~27 hours) due to sessions with tabs left open accumulating time indefinitely.
+
+**Root cause:**
+
+- `totalTimeOnSite` accumulates as long as a session is active
+- Users leaving browser tabs open for hours/days created outlier sessions
+- AVG query included these outliers, skewing the average
 
 **Fix applied:**
 
-- Added `@media (--tablet-down)` breakpoint forcing `grid-template-columns: repeat(2, 1fr)` for tabs with 4 cards
-- Affects: Overview, Leads, Projects, Clients tabs
+- Modified AVG query to exclude sessions > 1 hour (3,600,000 ms) as outliers
+- Sessions longer than 1 hour are likely tabs left open, not active usage
 
-**File modified:** `src/styles/pages/admin.css`
-
----
-
-### Admin Tables - Extra Empty Space
-
-**Status:** FIXED - January 26, 2026
-
-Tables in the admin portal had excessive empty space below data rows because they were expanding in the flex container.
-
-**Fix applied:**
-
-- Added `flex-shrink: 0`, `flex-grow: 0`, and `height: fit-content` to `.admin-table-card`
-- Tables now only fit actual content
-
-**File modified:** `src/styles/pages/admin.css`
-
-**Expected behavior:**
-
-- Table height should be determined by content (number of rows)
-- No large empty gaps below the last row
-- Tables should grow/shrink based on data
-
-**Affected areas:**
-
-- Leads tab - Intake Submissions table
-- Leads tab - Contact Form Submissions table
-- Potentially other admin tables
-
-### Lead Activation Flow
-
-**Status:** FIXED - January 23, 2026
-
-**Issues fixed:**
-
-1. Database CHECK constraint didn't include 'active' or 'cancelled' status
-2. Activation set status to 'in-progress' instead of 'active'
-3. After activation, user wasn't navigated to project detail page
-4. Project names had "Personal Project - " prefix for personal clients
-
-**Fixes applied:**
-
-- Updated database CHECK constraint to include: `'pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled'`
-- Activation now sets status to `'active'`
-- After activation, loads projects and shows project detail page
-- Personal project names now just show type (e.g., "Simple Website" not "Personal Project - Simple Website")
-
-**Files modified:**
-
-- `server/routes/admin.ts` - Activation sets 'active' status
-- `server/routes/intake.ts` - `generateProjectName()` simplified for personal clients
-- `src/features/admin/modules/admin-leads.ts` - Navigate to project detail after activation
-- Database schema - Updated CHECK constraint
-
----
-
-### Backend/Frontend API Alignment
-
-**Status:** FIXED - January 23, 2026
-
-**Issues identified and fixed:**
-
-| Issue | Severity | Fix Applied |
-|-------|----------|-------------|
-| Project status `in_progress` vs `in-progress` | HIGH | Changed all code to use hyphen format |
-| Lead stats query using wrong status values | HIGH | Updated to include `'active', 'in-progress', 'in-review'` |
-| validStatuses array incomplete | HIGH | Updated to: `['pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled']` |
-| Invoice API returned camelCase, frontend expected snake_case | MEDIUM | Added `toSnakeCaseInvoice()` transformation function |
-| database.ts types didn't match DB schema | MEDIUM | Updated LeadStatus and ProjectStatus types |
-
-**Files modified:**
-
-- `server/routes/admin.ts` - Fixed status values in queries and validations
-- `server/routes/invoices.ts` - Added snake_case transformation for frontend compatibility
-- `server/types/database.ts` - Updated type definitions to match DB CHECK constraints
-
-**Database CHECK constraint (updated):**
-
-```sql
--- projects.status (updated January 23, 2026)
-CHECK (status IN ('pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled'))
-
--- message_threads.status
-CHECK (status IN ('active', 'closed', 'archived'))
-```
+**File modified:** `server/routes/analytics.ts` line 251
 
 ---
 
@@ -140,110 +49,54 @@ Currently using native browser `confirm()` and `alert()` dialogs which don't mat
 
 ---
 
-### Budget/Timeline Capitalization in Edit Modal
+### Project Details Missing Original Intake File
 
-**Status:** FIXED - January 23, 2026
+**Status:** TODO
+**Observed:** January 26, 2026
 
-The Edit Project modal was showing raw database values instead of formatted values:
+The Files section in project details is not showing the original intake form submission file. When a lead is activated into a project, the intake form data should be saved and visible as a downloadable/previewable file in the project's files.
 
-- "under-1k" now displays as "Under 1k"
-- "asap" now displays as "ASAP"
+**Expected behavior:**
 
-**Fix applied:**
-
-- Updated `openEditProjectModal()` to use `formatDisplayValue()` when populating budget/timeline input values
-- `formatDisplayValue()` handles special cases for ASAP and Under-Xk patterns
-
-**Files modified:**
-
-- `src/features/admin/modules/admin-projects.ts` - `openEditProjectModal()` function
+- Intake form submission automatically saved as a file when lead is activated
+- File appears in Project Details > Files section
+- File should be downloadable/previewable
 
 ---
 
-### Edit Modal Form Label Positioning
+### Project Details Tabs Styling - Gap and Shadows
 
-**Status:** FIXED - January 23, 2026
+**Status:** FIXED - January 26, 2026
 
-Labels in the Edit Project modal were using absolute positioning (designed for labels inside inputs) when they should be positioned above inputs (traditional layout).
+Tabs now properly connected to content with unified shadow and no gap.
 
 **Root cause:**
 
-- `portal-forms.css` sets `.form-group label` to `position: absolute` for labels inside inputs
-- Edit modal uses `class="field-label"` which is designed for traditional above-input labels
-- CSS specificity conflict caused labels to be positioned incorrectly
+- `admin.css` rule `.tab-content.active > * + *` was adding `margin-top` to all content divs
 
-**Fix applied:**
+**Fixes applied:**
 
-- Added CSS override for `.field-label` in portal contexts to use `position: static`
-- Adjusted input padding when inside a form-group with `.field-label`
+- Added `margin-top: 0` to `.pd-tab-content` to override the spacing rule
+- Removed individual shadows from inactive tabs (content shadow provides elevation)
+- Active tab extends into content with `margin-bottom: -1px`
+- Overview content (`#pd-tab-overview.active`) has square top-left corner
+- Other tab contents keep all rounded corners (correct - they're not in corner position)
 
-**Files modified:**
-
-- `src/styles/shared/portal-forms.css` - Added `.field-label` override section
-
----
-
-### Edit Modal Status Values
-
-**Status:** FIXED - January 23, 2026
-
-The Edit Project modal status dropdown used underscore format (`in_progress`, `on_hold`) instead of hyphen format (`in-progress`, `on-hold`).
-
-**Fix applied:**
-
-- Updated status select options to use hyphen format
-- Added missing "In Review" status option
-
-**Files modified:**
-
-- `admin/index.html` - Updated `#edit-project-status` select options
-
----
-
-### Project Start/End Dates
-
-**Status:** TODO
-**Observed:** January 23, 2026
-
-Projects should track start and end dates:
-
-- Start date should be set when project is activated
-- End date should be target completion date
-
-**Requirements:**
-
-- Add `start_date` and `end_date` columns to projects table (if not already present)
-- Automatically set `start_date` when project status changes to 'active'
-- Allow manual editing of both dates in Edit Project modal
-
-**Files to modify:**
-
-- Database schema (if columns don't exist)
-- `server/routes/admin.ts` - Set start_date on activation
-- `src/features/admin/modules/admin-projects.ts` - Handle dates in edit modal
+**File modified:** `src/styles/admin/project-detail.css`
 
 ---
 
 ### Terminal Styling in Client Portal
 
-**Status:** Needs Review
-**Observed:** January 23, 2026
+**Status:** VERIFIED - January 26, 2026
 
-The terminal intake in the client portal (New Project tab) has width/overflow issues.
+Terminal intake in client portal displays correctly without overflow issues.
 
-**Root cause identified:**
+**Fix applied:**
 
-- Base terminal styles set `min-width: 100%` on `.terminal` and `.terminal-window`
-- This forces full width regardless of `max-width` constraints
-- Portal context needs to override with `min-width: auto`
-
-**Current fix applied:**
-
-- Added portal-specific overrides in `terminal-intake.css`
-- Set width constraint (90%, max 900px) on `.terminal-intake`
+- Portal-specific overrides in `terminal-intake.css`
+- Width constraint (90%, max 900px) on `.terminal-intake`
 - Reset `min-width: auto` on child elements
-
-**Needs verification:** Confirm terminal displays correctly without overflow on both sides.
 
 ---
 
@@ -251,15 +104,6 @@ The terminal intake in the client portal (New Project tab) has width/overflow is
 
 ### Admin UI Polish (High Priority)
 
-- [x] **PORTAL CSS CONSOLIDATION** - Completed January 22, 2026
-  - Created shared portal CSS files for single source of truth
-  - Removed duplicate styling from admin and client portal files
-  - Fixed avatar styling (black icon/white eye in messages, inverted in sidebar)
-  - Added bold stroke-width (2.5) for sidebar icons
-  - Added red focus outline for portal buttons
-  - Added shared card styling for `.summary-card` and `.invoices-list` in `shared/portal-cards.css`
-  - Created `shared/portal-files.css` for file upload components (dropzone, file items, file lists)
-  - Cleaned up `client-portal/files.css` and `client-portal/invoices.css` to remove duplicates
 - [ ] **REDESIGN ALL PORTAL BUTTONS** - Full button redesign across admin and client portals
 
 ### Main Site Features (Medium Priority)
@@ -282,103 +126,24 @@ The terminal intake in the client portal (New Project tab) has width/overflow is
 - Metadata labels (role, tools, year)
 - Drop-in/drop-out page transitions
 
-### Phase 1: Content Creation
+### Phase 1-4: COMPLETE
 
-- [ ] **Screenshot Projects** - Capture high-quality screenshots of each software project
-  - Desktop view (hero image, 12:7 aspect ratio)
-  - Mobile views if applicable
-  - Key feature screenshots for detail pages
-- [x] **Write Project Descriptions** - ✅ COMPLETE (January 20, 2026)
-- [x] **Create Project Data Structure** - ✅ COMPLETE (January 20, 2026)
-
-  **File:** `public/data/portfolio.json`
-
-  **Projects Added:**
-
-  | Project | Category | Status |
-  |---------|----------|--------|
-  | nobhad.codes | Website | In Progress (2026) |
-  | The Backend | Application | In Progress (2026) |
-  | Recycle Content | Application | In Progress (2026) |
-
-  **Note:** First two projects set to `isDocumented: true` for testing. Set back to `false` until screenshots are added.
-
-### Phase 2: CSS Components - ✅ COMPLETE
-
-**File:** `src/styles/pages/projects.css`
-
-- [x] **Work Cards** - Horizontal project list items with drop-in animations
-- [x] **Project Card Title** - With hover slide animation (arrow reveals on hover)
-- [x] **Round Labels** - Metadata badges (role, tools, year)
-- [x] **Project Detail Layout** - `.worksub-*` classes (header, intro, info, links sections)
-- [x] **Drop-in/Drop-out Animations** - CSS keyframes with staggered delays
-- [x] **Back Button** - Fixed position with slide-in animation
-- [x] **Responsive Design** - Mobile/tablet breakpoints
-- [x] **Dark Mode** - Full dark mode support
-
-### Phase 3: HTML Structure - ✅ COMPLETE
-
-- [x] **Projects Section** - In `index.html` with WIP sign fallback
-- [x] **Project Detail Template** - Full Sal Costa-style layout with:
-  - Hero image header (12:7 aspect ratio)
-  - Two-column intro (metadata + description)
-  - Screenshots section
-  - Links section (live URL, GitHub)
-  - Back button
-
-### Phase 4: JavaScript Implementation - ✅ COMPLETE
-
-**File:** `src/modules/ui/projects.ts`
-
-- [x] **Project Data Loading** - Fetches from `/data/portfolio.json`
-- [x] **Render Project Cards** - Dynamically generates cards from data
-- [x] **Card Hover Interactions** - Arrow reveal, right content shift
-- [x] **Project Detail View** - Populates detail template from project data
-- [x] **Back Navigation** - Hash-based routing back to projects list
-- [x] **Page Transitions** - Integrates with PageTransitionModule (blur in/out)
+All code implementation phases are complete. See archived work for details.
 
 ### Phase 4.5: CRT TV Preview Feature - ✅ COMPLETE (January 21, 2026)
 
 **Feature:** Retro Panasonic CRT TV displays project title cards on hover (desktop only, 768px+)
 
-**Files Added:**
-
-- `public/images/crt-tv.png` - TV frame image (transparent screen cutout)
-- `public/images/crt-tv-screen.png` - Screen shape layer (for accurate CRT barrel distortion)
-
-**Implementation:**
-
-| Component | Description |
-|-----------|-------------|
-| TV Rendering | `renderCrtTv()` in `projects.ts` - injects TV HTML into flex layout |
-| Hover Events | `setupCardHoverEvents()` - mouseenter/mouseleave on project cards |
-| Channel Change | `changeTvChannel()` - GSAP timeline: static flicker → load image → fade in |
-| Turn Off | `turnOffTv()` - GSAP animation: vertical shrink effect (classic CRT turn-off) |
-| Layered Structure | Screen shape (z-1) → Title card + effects (z-2) → TV frame (z-3) |
-
-**CSS Classes:**
-
-- `.crt-tv` - Container, sticky positioning, 550px width
-- `.crt-tv__wrapper` - Relative container for layered elements
-- `.crt-tv__screen-bg` - Screen shape image (behind)
-- `.crt-tv__screen` - Title card container with scanlines/static/glare
-- `.crt-tv__frame` - TV frame image (on top)
-- `.projects-flex-row` - Flex container for cards + TV (8rem gap)
-- `.projects-list-column` - Column wrapper for heading + cards
-
-**Data:**
-
-- Added `titleCard` property to each project in `portfolio.json`
-- Title card images go in `/public/projects/{project-id}-title.png`
-
 **Pending:**
 
-- [ ] Create title card images for each project (4:3 aspect ratio, Looney Tunes style)
+- [ ] **Create title card images** for each project (4:3 aspect ratio, Looney Tunes style)
+  - Title cards go in `/public/projects/{project-id}-title.png`
 
 ### Phase 5: Assets - ⏳ PENDING (User Action Required)
 
-- [x] **Create `/public/projects/` directory** - ✅ COMPLETE
-- [x] **Create placeholder image** - ✅ COMPLETE (`/images/project-placeholder.svg`)
+- [x] **Create `/public/projects/` directory** - COMPLETE
+- [x] **Create placeholder image** - COMPLETE (`/images/project-placeholder.svg`)
+- [ ] **Create CRT TV title cards** - Looney Tunes style, 4:3 aspect ratio
 - [ ] **Store project screenshots** - Naming convention: `{project-id}-{type}.{ext}`
   - `nobhad-codes-hero.webp` - Main hero image
   - `nobhad-codes-desktop-1.webp` - Desktop screenshots
@@ -395,73 +160,6 @@ The terminal intake in the client portal (New Project tab) has width/overflow is
 - [x] **Mobile Responsiveness** - Cards stack, images scale, category hidden on small screens
 - [x] **Accessibility** - Keyboard navigation (Enter/Space), ARIA labels, focus states
 
-### Known Issues
-
-✅ **Page Transition Overlap Issue** - FIXED (January 21, 2026)
-
-**Problem:** Business card/intro section would appear over project detail pages until refresh.
-
-**Root Causes Identified & Fixed:**
-
-1. **Dual Page Management** - ProjectsModule and PageTransitionModule both managed page visibility classes independently
-2. **Event Format Mismatch** - Modules used different event formats for navigation
-3. **Incomplete Page Hiding** - Only current page was hidden, not ALL pages
-4. **Hash Change Handler Race** - Both modules listened to hashchange events
-5. **Initial Route Dispatch** - RouterService dispatched navigation events during initial load, overriding PageTransitionModule's correct initial state
-6. **Business Card Enablement** - `enableAfterIntro()` was called unconditionally regardless of current page
-
-**Solution Implemented:**
-
-| Phase | Change | Files |
-|-------|--------|-------|
-| 1 | Removed manual class management from ProjectsModule | `projects.ts` |
-| 2 | ProjectsModule now listens to `page-changed` events | `projects.ts` |
-| 3 | Added `hideAllPages()` that hides ALL pages + kills GSAP animations on intro children | `page-transition.ts` |
-| 4 | Added inline style hiding for intro elements (display, visibility, opacity) | `page-transition.ts` |
-| 5 | Added `admin-login` to PageTransitionModule page configs | `page-transition.ts` |
-| 6 | Skip `router:navigate` dispatch during initial page load | `router-service.ts` |
-| 7 | Only call `enableAfterIntro()` when on intro page | `app.ts` |
-| 8 | Added defensive CSS with `!important` for page-hidden state | `page-transitions.css` |
-| 9 | Increased z-index for project-detail to 150 (above intro's 50) | `page-transitions.css` |
-
-**Additional Fixes:**
-
-- Widened projects content container (`max-width: min(1400px, 90vw)`) to prevent title/category overlap
-- Removed title scale animation on hover to prevent overlap
-- Added `margin-left: 3rem` gap between title and right content
-- Added `overflow: hidden` and `text-overflow: ellipsis` to title
-- Added `.back-link` styles for project detail page (subtle text link for smaller screens)
-- Fixed router to skip project detail routes (handled by PageTransitionModule)
-
-### Implementation Order
-
-1. Content first (screenshots, descriptions)
-2. CSS components (can test with placeholder data)
-3. HTML structure updates
-4. JavaScript logic
-5. Animation polish
-6. Testing and refinement
-
----
-
-## Deep Dive Analysis - January 21, 2026
-
-**Status:** Complete
-
-### Codebase Health Metrics
-
-| Metric | Count | Status |
-|--------|-------|--------|
-| TODO/FIXME comments | 2 | ✅ Low (projects.ts detail page TODO) |
-| Console logs | 225 | ⚠️ High (many intentional logging with safeguards: logger utility checks debug mode, app-state middleware only logs in development) |
-| `any` types (frontend) | 41 | ✅ Reduced from 71 to 41 (30 fixed, 41 intentional) |
-| `any` types (server) | 0 | ✅ COMPLETE - All 97 fixed, 0 TypeScript errors |
-| ESLint disables | 4 | ✅ Low (all intentional: 4 console.log in logger/dev middleware, 4 any types for flexible validation) |
-| Hardcoded media queries | 0 | ✅ Complete - All migrated to custom media queries |
-| Inline rgba box-shadows | 0 | ✅ Complete - All replaced with shadow tokens |
-
-**Summary:** Most code quality metrics are in good shape. Console logs remain high but many are intentional for debugging. Frontend type safety significantly improved (30 `any` types fixed). Server code is 100% type-safe.
-
 ---
 
 ## Future Plans
@@ -473,7 +171,7 @@ The terminal intake in the client portal (New Project tab) has width/overflow is
 
 ## System Status
 
-**Last Updated:** January 20, 2026
+**Last Updated:** January 26, 2026
 
 ### Build Status
 

@@ -1021,6 +1021,194 @@ Main file reduced from 2,293 to 1,405 lines (~888 lines removed/extracted).
 
 ---
 
+---
+
+## Admin UI Fixes - COMPLETE (January 26, 2026)
+
+### Admin Summary Cards - Poor Responsive Wrapping
+
+**Status:** FIXED - January 26, 2026
+
+Summary cards (e.g., Projects tab: Total Projects, Active, Completed, On Hold) were wrapping incorrectly at certain viewport widths (3+1 instead of 2+2).
+
+**Fix applied:**
+
+- Added `@media (--tablet-down)` breakpoint forcing `grid-template-columns: repeat(2, 1fr)` for tabs with 4 cards
+- Affects: Overview, Leads, Projects, Clients tabs
+
+**File modified:** `src/styles/pages/admin.css`
+
+### Admin Tables - Extra Empty Space
+
+**Status:** FIXED - January 26, 2026
+
+Tables in the admin portal had excessive empty space below data rows because they were expanding in the flex container.
+
+**Fix applied:**
+
+- Added `flex-shrink: 0`, `flex-grow: 0`, and `height: fit-content` to `.admin-table-card`
+- Tables now only fit actual content
+
+**File modified:** `src/styles/pages/admin.css`
+
+### Project Start/End Dates
+
+**Status:** FIXED - January 26, 2026
+
+Projects now track start and end dates properly:
+
+- Start date is automatically set when project is activated
+- Both dates can be manually edited in Edit Project modal
+
+**Implementation:**
+
+- Database columns `start_date` and `end_date` already existed in schema
+- Edit modal now populates and saves date fields (YYYY-MM-DD format)
+- Activation endpoint now sets `start_date = date('now')` automatically
+
+**Files modified:**
+
+- `server/routes/admin.ts` - Set start_date on activation
+- `src/features/admin/modules/admin-projects.ts` - Handle dates in edit modal
+
+---
+
+## Lead & API Fixes - COMPLETE (January 23, 2026)
+
+### Lead Activation Flow
+
+**Status:** FIXED - January 23, 2026
+
+**Issues fixed:**
+
+1. Database CHECK constraint didn't include 'active' or 'cancelled' status
+2. Activation set status to 'in-progress' instead of 'active'
+3. After activation, user wasn't navigated to project detail page
+4. Project names had "Personal Project - " prefix for personal clients
+
+**Fixes applied:**
+
+- Updated database CHECK constraint to include: `'pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled'`
+- Activation now sets status to `'active'`
+- After activation, loads projects and shows project detail page
+- Personal project names now just show type (e.g., "Simple Website" not "Personal Project - Simple Website")
+
+**Files modified:**
+
+- `server/routes/admin.ts` - Activation sets 'active' status
+- `server/routes/intake.ts` - `generateProjectName()` simplified for personal clients
+- `src/features/admin/modules/admin-leads.ts` - Navigate to project detail after activation
+- Database schema - Updated CHECK constraint
+
+### Backend/Frontend API Alignment
+
+**Status:** FIXED - January 23, 2026
+
+**Issues identified and fixed:**
+
+| Issue | Severity | Fix Applied |
+|-------|----------|-------------|
+| Project status `in_progress` vs `in-progress` | HIGH | Changed all code to use hyphen format |
+| Lead stats query using wrong status values | HIGH | Updated to include `'active', 'in-progress', 'in-review'` |
+| validStatuses array incomplete | HIGH | Updated to: `['pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled']` |
+| Invoice API returned camelCase, frontend expected snake_case | MEDIUM | Added `toSnakeCaseInvoice()` transformation function |
+| database.ts types didn't match DB schema | MEDIUM | Updated LeadStatus and ProjectStatus types |
+
+**Files modified:**
+
+- `server/routes/admin.ts` - Fixed status values in queries and validations
+- `server/routes/invoices.ts` - Added snake_case transformation for frontend compatibility
+- `server/types/database.ts` - Updated type definitions to match DB CHECK constraints
+
+### Budget/Timeline Capitalization in Edit Modal
+
+**Status:** FIXED - January 23, 2026
+
+The Edit Project modal was showing raw database values instead of formatted values:
+
+- "under-1k" now displays as "Under 1k"
+- "asap" now displays as "ASAP"
+
+**Fix applied:**
+
+- Updated `openEditProjectModal()` to use `formatDisplayValue()` when populating budget/timeline input values
+
+**Files modified:**
+
+- `src/features/admin/modules/admin-projects.ts` - `openEditProjectModal()` function
+
+### Edit Modal Form Label Positioning
+
+**Status:** FIXED - January 23, 2026
+
+Labels in the Edit Project modal were using absolute positioning (designed for labels inside inputs) when they should be positioned above inputs (traditional layout).
+
+**Root cause:**
+
+- `portal-forms.css` sets `.form-group label` to `position: absolute` for labels inside inputs
+- Edit modal uses `class="field-label"` which is designed for traditional above-input labels
+- CSS specificity conflict caused labels to be positioned incorrectly
+
+**Fix applied:**
+
+- Added CSS override for `.field-label` in portal contexts to use `position: static`
+- Adjusted input padding when inside a form-group with `.field-label`
+
+**Files modified:**
+
+- `src/styles/shared/portal-forms.css` - Added `.field-label` override section
+
+### Edit Modal Status Values
+
+**Status:** FIXED - January 23, 2026
+
+The Edit Project modal status dropdown used underscore format (`in_progress`, `on_hold`) instead of hyphen format (`in-progress`, `on-hold`).
+
+**Fix applied:**
+
+- Updated status select options to use hyphen format
+- Added missing "In Review" status option
+
+**Files modified:**
+
+- `admin/index.html` - Updated `#edit-project-status` select options
+
+---
+
+## Portal CSS Consolidation - COMPLETE (January 22, 2026)
+
+**Status:** COMPLETE
+
+Created shared portal CSS files for single source of truth:
+
+- Removed duplicate styling from admin and client portal files
+- Fixed avatar styling (black icon/white eye in messages, inverted in sidebar)
+- Added bold stroke-width (2.5) for sidebar icons
+- Added red focus outline for portal buttons
+- Added shared card styling for `.summary-card` and `.invoices-list` in `shared/portal-cards.css`
+- Created `shared/portal-files.css` for file upload components (dropzone, file items, file lists)
+- Cleaned up `client-portal/files.css` and `client-portal/invoices.css` to remove duplicates
+
+---
+
+## Deep Dive Analysis - COMPLETE (January 21, 2026)
+
+### Codebase Health Metrics
+
+| Metric | Count | Status |
+|--------|-------|--------|
+| TODO/FIXME comments | 2 | Low (projects.ts detail page TODO) |
+| Console logs | 225 | High (many intentional logging with safeguards: logger utility checks debug mode, app-state middleware only logs in development) |
+| `any` types (frontend) | 41 | Reduced from 71 to 41 (30 fixed, 41 intentional) |
+| `any` types (server) | 0 | COMPLETE - All 97 fixed, 0 TypeScript errors |
+| ESLint disables | 4 | Low (all intentional: 4 console.log in logger/dev middleware, 4 any types for flexible validation) |
+| Hardcoded media queries | 0 | Complete - All migrated to custom media queries |
+| Inline rgba box-shadows | 0 | Complete - All replaced with shadow tokens |
+
+**Summary:** Most code quality metrics are in good shape. Console logs remain high but many are intentional for debugging. Frontend type safety significantly improved (30 `any` types fixed). Server code is 100% type-safe.
+
+---
+
 ## Previous December 2025 Work
 
 All December 2025 completed work has been archived to `ARCHIVED_WORK_2025-12.md` in this same directory.
