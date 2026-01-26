@@ -9,6 +9,7 @@
  */
 
 /* Shared portal styles */
+@import "../shared/portal-layout.css";
 @import "../shared/portal-buttons.css";
 @import "../shared/portal-messages.css";
 @import "../shared/portal-cards.css";

@@ -9,8 +9,8 @@
 /* Base sidebar - applies to client portal and admin */
 [data-page="client-portal"] .sidebar,
 [data-page="admin"] .sidebar {
-  width: 240px;
-  min-width: 240px;
+  width: clamp(200px, 18vw, 240px);
+  min-width: 180px;
   background: var(--portal-bg-dark);
   border-right: none;
   display: flex;
@@ -21,6 +21,7 @@
   min-height: 100vh;
   z-index: 60;
   box-shadow: var(--shadow-sidebar);
+  flex-shrink: 0;
 }
 
 .sidebar.collapsed {
@@ -363,6 +364,94 @@
 
 .projects-sidebar.collapsed .account-list {
   display: none;
+}
+
+/* =====================================================
+   INTERMEDIATE BREAKPOINT AUTO-COLLAPSE
+   Auto-collapse sidebar when viewport is constrained (zoom or narrow screens)
+   ===================================================== */
+@media (max-width: 1024px) {
+  [data-page="client-portal"] .sidebar,
+  [data-page="admin"] .sidebar {
+    width: 56px;
+    min-width: 56px;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-content,
+  [data-page="admin"] .sidebar .sidebar-content {
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem 0.5rem;
+    padding-bottom: 60px; /* Leave room for footer */
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-logo,
+  [data-page="admin"] .sidebar .sidebar-logo {
+    display: none;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-collapsed-logo,
+  [data-page="admin"] .sidebar .sidebar-collapsed-logo {
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem 0;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  [data-page="client-portal"] .sidebar .sidebar-buttons,
+  [data-page="admin"] .sidebar .sidebar-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  :is([data-page="client-portal"], [data-page="admin"]) .sidebar .sidebar-footer {
+    position: absolute;
+    bottom: 0.75rem;
+    left: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Hide text elements */
+  [data-page="client-portal"] .sidebar .client-name,
+  [data-page="client-portal"] .sidebar .project-name,
+  [data-page="client-portal"] .sidebar .subitem-name,
+  [data-page="client-portal"] .sidebar .account-item-title,
+  [data-page="client-portal"] .sidebar h3,
+  [data-page="admin"] .sidebar .client-name,
+  [data-page="admin"] .sidebar .project-name,
+  [data-page="admin"] .sidebar h3 {
+    display: none;
+  }
+
+  [data-page="client-portal"] .sidebar .project-subitems,
+  [data-page="client-portal"] .sidebar .account-list,
+  [data-page="admin"] .sidebar .project-subitems {
+    display: none;
+  }
+
+  /* Badge positioning when sidebar auto-collapses */
+  :is([data-page="client-portal"], [data-page="admin"]) .sidebar .sidebar-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    min-width: 14px;
+    height: 14px;
+    font-size: 9px;
+    padding: 0 3px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
 }
 
 /* =====================================================
