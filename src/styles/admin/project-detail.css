@@ -102,7 +102,7 @@
   gap: var(--portal-spacing-xl);
 }
 
-/* Project Detail Tabs */
+/* Project Detail Tabs - sits directly on top of content as one visual unit */
 .project-detail-tabs {
   display: flex;
   gap: var(--portal-spacing-sm);
@@ -129,10 +129,10 @@
   transition: all 0.15s ease;
   white-space: nowrap;
   position: relative;
-  z-index: 1;
-  /* Same shadow as main div but clipped to hide bottom */
-  box-shadow: var(--shadow-panel);
-  clip-path: inset(-20px -20px 0 -20px);
+  /* Inactive tabs sit BEHIND content - lower z-index */
+  z-index: 0;
+  /* No shadow on inactive tabs - they're behind the content */
+  box-shadow: none;
 }
 
 .pd-tab-btn .tab-icon {
@@ -150,19 +150,29 @@
   color: var(--portal-text-light);
   background: var(--portal-bg-dark);
   font-weight: 700;
-  border: none;
-  /* Active tab merges with content as one piece */
-  z-index: 10;
-  /* No shadow on active tab - it's part of the content area */
+  position: relative;
+  z-index: 2;
+  /* Remove direct shadow - use ::after for controlled shadow */
   box-shadow: none;
-  /* Extend into content area to cover the seam */
-  margin-bottom: -8px;
-  padding-bottom: calc(var(--portal-spacing-md) + 8px);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-bottom: 0;
 }
 
-/* First tab (Overview) when active - square bottom-left to connect seamlessly */
-.pd-tab-btn:first-child.active {
-  border-bottom-left-radius: 0;
+/* Active tab shadow - shows top, left, right only (clips bottom) */
+.pd-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  box-shadow: var(--shadow-panel);
+  /* Clip bottom shadow so it doesn't show at junction with content */
+  clip-path: inset(-20px -20px 0 -20px);
+  border-radius: inherit;
+  z-index: -1;
+  pointer-events: none;
 }
 
 /* Active tab should never change color on hover/focus */
@@ -174,19 +184,36 @@
   outline: none;
 }
 
-/* Project Detail Tab Content */
+/* Project Detail Tab Content - base styles
+   Tabs + content should appear as ONE unified elevated unit */
 .pd-tab-content {
   display: none;
   background: var(--portal-bg-dark);
-  /* Top-left: 0 (connects with first tab), others rounded */
-  border-top-left-radius: 0;
-  border-top-right-radius: var(--portal-radius-lg);
-  border-bottom-right-radius: var(--portal-radius-lg);
-  border-bottom-left-radius: var(--portal-radius-lg);
+  /* Top-left always square (tabs start there), other corners rounded */
+  border-radius: 0 var(--portal-radius-lg) var(--portal-radius-lg) var(--portal-radius-lg);
   padding: 4rem 2rem;
-  box-shadow: var(--shadow-panel);
+  /* Remove direct shadow - use ::after for controlled shadow */
+  box-shadow: none;
   position: relative;
   z-index: 1;
+  /* Override admin.css .tab-content.active > * + * margin rule */
+  margin-top: 0 !important;
+}
+
+/* Content shadow - shows left, right, bottom only (clips top) */
+.pd-tab-content::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  box-shadow: var(--shadow-panel);
+  /* Clip top shadow so it doesn't show at junction with tabs */
+  clip-path: inset(0 -20px -20px -20px);
+  border-radius: inherit;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .pd-tab-content.active {

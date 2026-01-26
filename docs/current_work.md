@@ -64,25 +64,38 @@ The Files section in project details is not showing the original intake form sub
 
 ---
 
-### Project Details Tabs Styling - Gap and Shadows
+### Project Details Tabs Styling - Seamless Shadow
 
-**Status:** FIXED - January 26, 2026
+**Status:** IN PROGRESS
+**Observed:** January 26, 2026
 
-Tabs now properly connected to content with unified shadow and no gap.
+Active tab + main content div need to appear as ONE seamless unit with continuous shadows (no borders).
 
-**Root cause:**
+**Current state:**
 
-- `admin.css` rule `.tab-content.active > * + *` was adding `margin-top` to all content divs
+- Gap between tabs and content: FIXED
+- Inactive tabs appear behind content: FIXED
+- Top-left corner of content is square: FIXED
+- Shadow continuity: NOT FIXED - still visible seam/break
 
-**Fixes applied:**
+**Requirements for seamless shadow:**
 
-- Added `margin-top: 0` to `.pd-tab-content` to override the spacing rule
-- Removed individual shadows from inactive tabs (content shadow provides elevation)
-- Active tab extends into content with `margin-bottom: -1px`
-- Overview content (`#pd-tab-overview.active`) has square top-left corner
-- Other tab contents keep all rounded corners (correct - they're not in corner position)
+- Active tab shows shadow on TOP, LEFT, RIGHT only (no bottom shadow)
+- Content div shows shadow on LEFT, RIGHT, BOTTOM only (no top shadow)
+- Shadows must be continuous around the perimeter of combined tab+content shape
+- No visible seam, line, or break at junction between tab and content
+- No overlap of tab into content (margin-bottom: 0)
+- Use `::after` pseudo-elements with `clip-path` to control which sides show shadow
 
-**File modified:** `src/styles/admin/project-detail.css`
+**Current approach (partially working):**
+
+- Active tab `::after` with `clip-path: inset(-20px -20px 0 -20px)` - clips bottom
+- Content `::after` with `clip-path: inset(0 -20px -20px -20px)` - clips top
+- Both use `var(--shadow-panel)` for consistent shadow values
+
+**Shadow variable:** `--shadow-panel` in `variables.css`
+
+**File:** `src/styles/admin/project-detail.css`
 
 ---
 
@@ -104,7 +117,7 @@ Terminal intake in client portal displays correctly without overflow issues.
 
 ### Admin UI Polish (High Priority)
 
-- [ ] **REDESIGN ALL PORTAL BUTTONS** - Full button redesign across admin and client portals
+- [x] **REDESIGN ALL PORTAL BUTTONS** - Full button redesign across admin and client portals (January 26, 2026)
 
 ### Main Site Features (Medium Priority)
 
