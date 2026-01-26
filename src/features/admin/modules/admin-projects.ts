@@ -146,6 +146,8 @@ interface LeadProject {
   features?: string;
   progress?: number;
   created_at?: string;
+  start_date?: string;
+  end_date?: string;
 }
 
 interface ProjectsData {
@@ -186,6 +188,16 @@ function formatDisplayValue(value: string | undefined | null): string {
   formatted = formatted.replace(/\b\w/g, (char) => char.toUpperCase());
 
   return formatted;
+}
+
+/**
+ * Format date string for display (YYYY-MM-DD -> MMM D, YYYY)
+ */
+function formatDate(dateStr: string | undefined | null): string {
+  if (!dateStr) return '-';
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '-';
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 export function getProjectsData(): LeadProject[] {
@@ -321,7 +333,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
 
   if (projects.length === 0) {
     tableBody.innerHTML =
-      '<tr><td colspan="6" class="loading-row">No projects yet. Convert leads to start projects.</td></tr>';
+      '<tr><td colspan="8" class="loading-row">No projects yet. Convert leads to start projects.</td></tr>';
     return;
   }
 
@@ -329,7 +341,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
   const filteredProjects = applyFilters(projects, filterState, PROJECTS_FILTER_CONFIG);
 
   if (filteredProjects.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="6" class="loading-row">No projects match the current filters</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">No projects match the current filters</td></tr>';
     return;
   }
 
@@ -359,6 +371,8 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
           <td>${formatProjectType(project.project_type)}</td>
           <td>${formatDisplayValue(project.budget_range)}</td>
           <td>${formatDisplayValue(project.timeline)}</td>
+          <td>${formatDate(project.start_date)}</td>
+          <td>${formatDate(project.end_date)}</td>
           <td>${statusLabels[status] || 'Pending'}</td>
         </tr>
       `;
@@ -609,12 +623,17 @@ function openEditProjectModal(project: LeadProject): void {
   const priceInput = document.getElementById('edit-project-price') as HTMLInputElement;
   const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
   const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
+  const startDateInput = document.getElementById('edit-project-start-date') as HTMLInputElement;
+  const endDateInput = document.getElementById('edit-project-end-date') as HTMLInputElement;
 
   if (nameInput) nameInput.value = project.project_name || '';
   if (budgetInput) budgetInput.value = formatDisplayValue(project.budget_range);
   if (priceInput) priceInput.value = projectData.price || '';
   if (timelineInput) timelineInput.value = formatDisplayValue(project.timeline);
   if (previewUrlInput) previewUrlInput.value = projectData.preview_url || '';
+  // Date inputs need YYYY-MM-DD format
+  if (startDateInput) startDateInput.value = projectData.start_date ? projectData.start_date.split('T')[0] : '';
+  if (endDateInput) endDateInput.value = projectData.end_date ? projectData.end_date.split('T')[0] : '';
 
   // Initialize custom dropdowns for selects (only once)
   initProjectModalDropdowns(project);
@@ -711,6 +730,8 @@ async function saveProjectChanges(projectId: number): Promise<void> {
   const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
   const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
   const statusSelect = document.getElementById('edit-project-status') as HTMLSelectElement;
+  const startDateInput = document.getElementById('edit-project-start-date') as HTMLInputElement;
+  const endDateInput = document.getElementById('edit-project-end-date') as HTMLInputElement;
 
   const updates: Record<string, string> = {};
   if (nameInput?.value) updates.project_name = nameInput.value;
@@ -720,6 +741,9 @@ async function saveProjectChanges(projectId: number): Promise<void> {
   if (timelineInput?.value) updates.timeline = timelineInput.value;
   if (previewUrlInput?.value !== undefined) updates.preview_url = previewUrlInput.value;
   if (statusSelect?.value) updates.status = statusSelect.value;
+  // Allow clearing dates by sending empty string
+  if (startDateInput) updates.start_date = startDateInput.value || '';
+  if (endDateInput) updates.end_date = endDateInput.value || '';
 
   try {
     const response = await apiPut(`/api/projects/${projectId}`, updates);

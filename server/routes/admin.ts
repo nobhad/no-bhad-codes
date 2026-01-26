@@ -823,8 +823,8 @@ router.post(
         });
       }
 
-      // Update project status to active
-      await db.run('UPDATE projects SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
+      // Update project status to active and set start_date
+      await db.run('UPDATE projects SET status = ?, start_date = date(\'now\'), updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
         'active',
         id
       ]);
