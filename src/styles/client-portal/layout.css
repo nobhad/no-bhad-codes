@@ -60,7 +60,7 @@ body[data-page="client-portal"] {
   overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;
-  min-width: 0;
+  min-width: 320px;
   height: 100vh;
   min-height: 100vh;
 }

@@ -1,0 +1,18 @@
+/* =====================================================
+   SHARED PORTAL LAYOUT
+   @file src/styles/shared/portal-layout.css
+   Shared layout styles for admin and client portals
+   ===================================================== */
+
+/* =====================================================
+   OVERSCROLL BEHAVIOR
+   Prevent elastic bounce showing background on scroll
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-content {
+  overscroll-behavior: contain;
+}

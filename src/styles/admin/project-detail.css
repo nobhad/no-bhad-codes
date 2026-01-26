@@ -152,27 +152,13 @@
   font-weight: 700;
   position: relative;
   z-index: 2;
-  /* Remove direct shadow - use ::after for controlled shadow */
-  box-shadow: none;
+  /* Same shadow as content, clip-path shows TOP, LEFT, RIGHT only */
+  box-shadow: var(--shadow-panel);
+  clip-path: inset(-20px -20px 0 -20px);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-  margin-bottom: 0;
-}
-
-/* Active tab shadow - shows top, left, right only (clips bottom) */
-.pd-tab-btn.active::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  box-shadow: var(--shadow-panel);
-  /* Clip bottom shadow so it doesn't show at junction with content */
-  clip-path: inset(-20px -20px 0 -20px);
-  border-radius: inherit;
-  z-index: -1;
-  pointer-events: none;
+  margin-bottom: -1px;
+  padding-bottom: calc(var(--portal-spacing-md) + 1px);
 }
 
 /* Active tab should never change color on hover/focus */
@@ -192,28 +178,13 @@
   /* Top-left always square (tabs start there), other corners rounded */
   border-radius: 0 var(--portal-radius-lg) var(--portal-radius-lg) var(--portal-radius-lg);
   padding: 4rem 2rem;
-  /* Remove direct shadow - use ::after for controlled shadow */
-  box-shadow: none;
+  /* Full shadow - clip-path hides top (tab handles top) */
+  box-shadow: var(--shadow-panel);
+  clip-path: inset(0 -20px -20px -20px);
   position: relative;
   z-index: 1;
   /* Override admin.css .tab-content.active > * + * margin rule */
   margin-top: 0 !important;
-}
-
-/* Content shadow - shows left, right, bottom only (clips top) */
-.pd-tab-content::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  box-shadow: var(--shadow-panel);
-  /* Clip top shadow so it doesn't show at junction with tabs */
-  clip-path: inset(0 -20px -20px -20px);
-  border-radius: inherit;
-  z-index: -1;
-  pointer-events: none;
 }
 
 .pd-tab-content.active {

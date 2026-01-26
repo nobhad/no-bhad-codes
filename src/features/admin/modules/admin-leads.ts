@@ -175,26 +175,29 @@ function updateLeadsDisplay(data: LeadsData, ctx: AdminDashboardContext): void {
   if (leadsActive) leadsActive.textContent = data.stats?.active?.toString() || '0';
   if (leadsCompleted) leadsCompleted.textContent = data.stats?.completed?.toString() || '0';
 
-  // Update recent leads list
-  const recentList = getElement('recent-leads-list');
+  // Update recent activity list (leads appear as activity items)
+  const recentList = getElement('recent-activity-list');
   if (recentList && data.leads) {
     const recentLeads = data.leads.slice(0, 5);
     if (recentLeads.length === 0) {
-      recentList.innerHTML = '<li>No leads yet</li>';
+      recentList.innerHTML = '<li>No recent activity</li>';
     } else {
       recentList.innerHTML = recentLeads
         .map((lead) => {
           const date = new Date(lead.created_at).toLocaleDateString();
           const safeName = SanitizationUtils.escapeHtml(lead.contact_name || 'Unknown');
-          return `<li data-lead-id="${lead.id}" class="clickable-lead">${safeName} - ${date}</li>`;
+          return `<li data-activity-type="lead" data-activity-id="${lead.id}" class="clickable-activity">${date} - New Lead: ${safeName}</li>`;
         })
         .join('');
 
-      // Add click handlers to recent leads
-      recentList.querySelectorAll('li[data-lead-id]').forEach((li) => {
+      // Add click handlers to recent activity items
+      recentList.querySelectorAll('li[data-activity-type]').forEach((li) => {
         li.addEventListener('click', () => {
-          const leadId = parseInt((li as HTMLElement).dataset.leadId || '0');
-          if (leadId) showLeadDetails(leadId);
+          const activityType = (li as HTMLElement).dataset.activityType;
+          const activityId = parseInt((li as HTMLElement).dataset.activityId || '0');
+          if (activityType === 'lead' && activityId) {
+            showLeadDetails(activityId);
+          }
         });
       });
     }

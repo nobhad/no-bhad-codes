@@ -204,13 +204,23 @@ body[data-page="admin"] #tab-analytics .stat-card {
    override these explicit column counts.
    ================================================ */
 
-/* Desktop: 4 cards in one row */
-@media (--desktop) {
+/* Desktop wide: 4 cards in one row */
+@media (min-width: 1025px) {
   [data-page="admin"] #tab-overview .quick-stats,
   [data-page="admin"] #tab-leads .quick-stats,
   [data-page="admin"] #tab-projects .quick-stats,
   [data-page="admin"] #tab-clients .quick-stats {
     grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Intermediate: 2x2 when sidebar collapses (zoom-friendly) */
+@media (max-width: 1024px) {
+  [data-page="admin"] #tab-overview .quick-stats,
+  [data-page="admin"] #tab-leads .quick-stats,
+  [data-page="admin"] #tab-projects .quick-stats,
+  [data-page="admin"] #tab-clients .quick-stats {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -1865,6 +1875,41 @@ body.modal-open .dashboard-content {
   letter-spacing: -0.5px;
   border-radius: 6px;
   box-shadow: var(--shadow-elevated-sm);
+}
+
+/* Intermediate breakpoint - badge positioning when sidebar auto-collapses */
+@media (max-width: 1024px) {
+  [data-page="admin"] .sidebar .sidebar-buttons .btn {
+    position: relative;
+    overflow: visible;
+  }
+
+  [data-page="admin"] .sidebar .sidebar-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    margin-left: 0;
+    min-width: 12px;
+    height: 12px;
+    padding: 0 3px;
+    background: var(--color-danger, #ef4444);
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 8px;
+    font-weight: 700;
+    line-height: 12px;
+    text-align: center;
+    letter-spacing: -0.5px;
+    border-radius: 6px;
+    box-shadow: var(--shadow-elevated-sm);
+  }
+
+  [data-page="admin"] .sidebar .sidebar-buttons .btn.active .sidebar-badge {
+    display: block;
+    color: white;
+    background: var(--color-danger, #ef4444);
+    z-index: 2;
+  }
 }
 
 /* ================================================

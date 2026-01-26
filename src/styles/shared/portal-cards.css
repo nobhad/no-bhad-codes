@@ -110,19 +110,24 @@
 
 /* Activity list items use main content background color */
 :is([data-page="admin"], [data-page="client-portal"]) .activity-list li {
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-medium);
   border-radius: var(--border-radius-card);
   border: none;
-  margin-bottom: var(--portal-spacing-sm);
+  margin-bottom: var(--portal-spacing-xs);
   font-size: 0.9rem;
   color: var(--portal-text-light);
   box-shadow: var(--shadow-card);
 }
 
-/* No hover effect - items are not clickable */
-:is([data-page="admin"], [data-page="client-portal"]) .activity-list li:hover {
-  background: var(--portal-bg-medium);
+/* Clickable activity items */
+:is([data-page="admin"], [data-page="client-portal"]) .activity-list li.clickable-activity {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .activity-list li.clickable-activity:hover {
+  background: var(--portal-bg-light);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .activity-list li:last-child {
