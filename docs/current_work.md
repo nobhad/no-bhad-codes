@@ -1,6 +1,6 @@
 # Current Work
 
-**Last Updated:** January 23, 2026
+**Last Updated:** January 26, 2026
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-01.md`.
 
@@ -20,6 +20,46 @@ The average session duration is showing extremely high values (e.g., 1663m 47s =
 - Session data accumulating across days/visits
 - Old session data not being properly cleaned up
 - Calculation including incomplete/abandoned sessions incorrectly
+
+### Admin Summary Cards - Poor Responsive Wrapping
+
+**Status:** FIXED - January 26, 2026
+
+Summary cards (e.g., Projects tab: Total Projects, Active, Completed, On Hold) were wrapping incorrectly at certain viewport widths (3+1 instead of 2+2).
+
+**Fix applied:**
+
+- Added `@media (--tablet-down)` breakpoint forcing `grid-template-columns: repeat(2, 1fr)` for tabs with 4 cards
+- Affects: Overview, Leads, Projects, Clients tabs
+
+**File modified:** `src/styles/pages/admin.css`
+
+---
+
+### Admin Tables - Extra Empty Space
+
+**Status:** FIXED - January 26, 2026
+
+Tables in the admin portal had excessive empty space below data rows because they were expanding in the flex container.
+
+**Fix applied:**
+
+- Added `flex-shrink: 0`, `flex-grow: 0`, and `height: fit-content` to `.admin-table-card`
+- Tables now only fit actual content
+
+**File modified:** `src/styles/pages/admin.css`
+
+**Expected behavior:**
+
+- Table height should be determined by content (number of rows)
+- No large empty gaps below the last row
+- Tables should grow/shrink based on data
+
+**Affected areas:**
+
+- Leads tab - Intake Submissions table
+- Leads tab - Contact Form Submissions table
+- Potentially other admin tables
 
 ### Lead Activation Flow
 
@@ -421,6 +461,13 @@ The terminal intake in the client portal (New Project tab) has width/overflow is
 | Inline rgba box-shadows | 0 | ✅ Complete - All replaced with shadow tokens |
 
 **Summary:** Most code quality metrics are in good shape. Console logs remain high but many are intentional for debugging. Frontend type safety significantly improved (30 `any` types fixed). Server code is 100% type-safe.
+
+---
+
+## Future Plans
+
+- [ ] **Kanban Board & Timeline View** - Visual management for projects
+- [ ] **Eisenhower Matrix** - Priority management (urgent/important quadrants)
 
 ---
 
