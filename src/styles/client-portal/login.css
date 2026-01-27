@@ -92,18 +92,18 @@
   display: block;
   margin-bottom: 0;
   font-weight: 600;
-  color: var(--color-dark);
+  color: var(--portal-text-light);
   font-size: clamp(0.875rem, 2.5vw, 1rem);
 }
 
 .login-form .form-input {
   width: 100%;
   padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px);
-  border: 2px solid var(--form-input-border);
+  border: 2px solid var(--portal-border-medium);
   border-radius: clamp(6px, 1.5vw, 12px);
   font-size: clamp(0.875rem, 2vw, 1rem);
-  background-color: var(--color-neutral-100);
-  color: var(--color-text-primary);
+  background-color: var(--color-black);
+  color: var(--portal-text-light);
   font-family: inherit;
   box-sizing: border-box;
   transition: all var(--transition-fast);
@@ -111,8 +111,8 @@
 }
 
 .login-form .form-input:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  outline: none;
+  border-color: var(--color-brand-primary);
 }
 
 .login-form .btn {
@@ -133,16 +133,16 @@
 
 /* Dark Theme Adjustments */
 html[data-theme="dark"] .client-login h1 {
-  color: var(--color-text-primary);
+  color: var(--portal-text-light);
 }
 
 html[data-theme="dark"] .login-form {
-  background: var(--color-neutral-300);
-  border-color: var(--color-neutral-100);
+  background: var(--portal-bg-dark);
+  border-color: var(--portal-border-medium);
 }
 
 html[data-theme="dark"] .login-form label {
-  color: var(--color-dark);
+  color: var(--portal-text-light);
 }
 
 /* Responsive */

@@ -161,8 +161,8 @@
   align-items: center;
   gap: var(--portal-spacing-lg);
   padding: var(--portal-spacing-lg);
-  background: var(--color-neutral-100);
-  border: 1px solid var(--color-neutral-300);
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--portal-radius-sm);
   margin-bottom: var(--portal-spacing-sm);
   transition: border-color 0.2s ease;
@@ -170,7 +170,7 @@
 }
 
 .portal-list-item:hover {
-  border-color: var(--color-neutral-400);
+  border-color: var(--color-brand-primary);
 }
 
 .portal-list-item:last-child {
@@ -205,8 +205,8 @@
 
 /* ----- COMPONENT: Stat Card ----- */
 .portal-stat {
-  background: var(--color-neutral-100);
-  border: 1px solid var(--color-neutral-300);
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--portal-radius-md);
   padding: var(--portal-spacing-xl);
   text-align: center;

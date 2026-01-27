@@ -10,6 +10,7 @@
 @import '../shared/portal-cards.css';
 @import '../shared/portal-forms.css';
 @import '../shared/portal-files.css';
+@import '../shared/portal-dropdown.css';
 
 /* Base Components (cp- prefixed reusable classes) */
 @import './components.css';
