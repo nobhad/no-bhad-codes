@@ -22,6 +22,7 @@ import {
 } from '../../../utils/table-filter';
 import type { Lead, AdminDashboardContext } from '../admin-types';
 import { loadProjects, showProjectDetails } from './admin-projects';
+import { confirmDialog } from '../../../utils/confirm-dialog';
 
 interface LeadsData {
   leads: Lead[];
@@ -413,9 +414,16 @@ export function showLeadDetails(leadId: number): void {
   // Add click handler for activate button
   const activateBtn = detailsPanel.querySelector('.details-activate-btn');
   if (activateBtn) {
-    activateBtn.addEventListener('click', () => {
+    activateBtn.addEventListener('click', async () => {
       const id = (activateBtn as HTMLElement).dataset.id;
-      if (id && confirm('Activate this lead as a project?')) {
+      if (!id) return;
+      const confirmed = await confirmDialog({
+        title: 'Activate Lead',
+        message: 'Activate this lead as a project?',
+        confirmText: 'Activate',
+        icon: 'question'
+      });
+      if (confirmed) {
         window.activateLeadFromPanel(parseInt(id));
       }
     });

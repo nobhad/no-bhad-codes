@@ -12,6 +12,7 @@ import { formatFileSize } from '../../utils/format-utils';
 import { AdminAuth } from './admin-auth';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../utils/api-client';
 import { createDOMCache, getElement } from '../../utils/dom-cache';
+import { confirmDanger, alertError, alertSuccess, alertWarning } from '../../utils/confirm-dialog';
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -491,7 +492,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
           if (project && project.email) {
             this.inviteLeadFn(this.currentProjectId, project.email);
           } else {
-            alert('No email address found for this project.');
+            alertWarning('No email address found for this project.');
           }
         }
       });
@@ -730,11 +731,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         }
       } else {
         const error = await response.json();
-        alert(`Failed to save: ${error.message || 'Unknown error'}`);
+        alertError(`Failed to save: ${error.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('[AdminProjectDetails] Error saving project:', error);
-      alert('Error saving project');
+      alertError('Error saving project');
     }
   }
 
@@ -845,7 +846,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     const project = this.projectsData.find((p: ProjectResponse) => p.id === this.currentProjectId);
     if (!project || !project.client_id) {
-      alert('No client account linked. Invite the client first.');
+      alertWarning('No client account linked. Invite the client first.');
       return;
     }
 
@@ -866,7 +867,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
           messageInput.value = '';
           this.loadProjectMessages(this.currentProjectId!);
         } else {
-          alert('Failed to create message thread');
+          alertError('Failed to create message thread');
         }
         return;
       }
@@ -881,11 +882,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         // Reload messages
         this.loadProjectMessages(this.currentProjectId!);
       } else {
-        alert('Failed to send message');
+        alertError('Failed to send message');
       }
     } catch (error) {
       console.error('[AdminProjectDetails] Error sending message:', error);
-      alert('Error sending message');
+      alertError('Error sending message');
     }
   }
 
@@ -1073,11 +1074,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         this.loadProjectMilestones(this.currentProjectId);
       } else {
         const error = await response.json();
-        alert(`Failed to add milestone: ${error.message || 'Unknown error'}`);
+        alertError(`Failed to add milestone: ${error.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('[AdminProjectDetails] Error adding milestone:', error);
-      alert('Error adding milestone');
+      alertError('Error adding milestone');
     }
   }
 
@@ -1108,7 +1109,12 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    */
   public async deleteMilestone(milestoneId: number): Promise<void> {
     if (!this.currentProjectId) return;
-    if (!confirm('Are you sure you want to delete this milestone?')) return;
+
+    const confirmed = await confirmDanger(
+      'Are you sure you want to delete this milestone?',
+      'Delete Milestone'
+    );
+    if (!confirmed) return;
 
     if (!AdminAuth.isAuthenticated()) return;
 
@@ -1120,11 +1126,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       if (response.ok) {
         this.loadProjectMilestones(this.currentProjectId);
       } else {
-        alert('Failed to delete milestone');
+        alertError('Failed to delete milestone');
       }
     } catch (error) {
       console.error('[AdminProjectDetails] Error deleting milestone:', error);
-      alert('Error deleting milestone');
+      alertError('Error deleting milestone');
     }
   }
 
@@ -1220,7 +1226,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
     const amount = parseFloat(amountStr);
     if (isNaN(amount) || amount <= 0) {
-      alert('Please enter a valid amount');
+      alertWarning('Please enter a valid amount');
       return;
     }
 
@@ -1256,15 +1262,15 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       });
 
       if (response.ok) {
-        alert('Invoice created successfully!');
+        alertSuccess('Invoice created successfully!');
         this.loadProjectInvoices(this.currentProjectId);
       } else {
         const error = await response.json();
-        alert(`Failed to create invoice: ${error.message || 'Unknown error'}`);
+        alertError(`Failed to create invoice: ${error.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('[AdminProjectDetails] Error creating invoice:', error);
-      alert('Error creating invoice');
+      alertError('Error creating invoice');
     }
   }
 
@@ -1278,16 +1284,16 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       const response = await apiPost(`/api/invoices/${invoiceId}/send`);
 
       if (response.ok) {
-        alert('Invoice sent successfully!');
+        alertSuccess('Invoice sent successfully!');
         if (this.currentProjectId) {
           this.loadProjectInvoices(this.currentProjectId);
         }
       } else {
-        alert('Failed to send invoice');
+        alertError('Failed to send invoice');
       }
     } catch (error) {
       console.error('[AdminProjectDetails] Error sending invoice:', error);
-      alert('Error sending invoice');
+      alertError('Error sending invoice');
     }
   }
 
@@ -1369,15 +1375,15 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
       if (response.ok) {
         const data = await response.json();
-        alert(`${data.files?.length || files.length} file(s) uploaded successfully!`);
+        alertSuccess(`${data.files?.length || files.length} file(s) uploaded successfully!`);
         this.loadProjectFiles(this.currentProjectId!);
       } else {
         const error = await response.json();
-        alert(`Failed to upload files: ${error.message || 'Unknown error'}`);
+        alertError(`Failed to upload files: ${error.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('[AdminProjectDetails] Error uploading files:', error);
-      alert('Error uploading files');
+      alertError('Error uploading files');
     }
   }
 

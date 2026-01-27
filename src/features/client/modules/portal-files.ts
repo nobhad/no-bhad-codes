@@ -12,6 +12,7 @@ import type { PortalFile, ClientPortalContext } from '../portal-types';
 import { formatFileSize } from '../../../utils/format-utils';
 import { ICONS } from '../../../constants/icons';
 import { showContainerError } from '../../../utils/error-utils';
+import { confirmDanger, alertError } from '../../../utils/confirm-dialog';
 
 const FILES_API_BASE = '/api/uploads';
 
@@ -197,9 +198,11 @@ async function deleteFile(
   filename: string,
   _ctx: ClientPortalContext
 ): Promise<void> {
-  if (!confirm(`Are you sure you want to delete "${filename}"? This action cannot be undone.`)) {
-    return;
-  }
+  const confirmed = await confirmDanger(
+    `Are you sure you want to delete "${filename}"? This action cannot be undone.`,
+    'Delete File'
+  );
+  if (!confirmed) return;
 
   try {
     const response = await fetch(`${FILES_API_BASE}/file/${fileId}`, {
@@ -234,7 +237,7 @@ async function deleteFile(
     // File deleted successfully
   } catch (error) {
     console.error('Error deleting file:', error);
-    alert(error instanceof Error ? error.message : 'Failed to delete file. Please try again.');
+    alertError(error instanceof Error ? error.message : 'Failed to delete file. Please try again.');
   }
 }
 

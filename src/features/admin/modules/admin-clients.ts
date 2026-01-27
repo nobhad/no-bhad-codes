@@ -28,6 +28,7 @@ import {
   type FilterState
 } from '../../../utils/table-filter';
 import { showTableLoading } from '../../../utils/loading-utils';
+import { confirmDialog, confirmDanger } from '../../../utils/confirm-dialog';
 import { showTableError } from '../../../utils/error-utils';
 import { createDOMCache, batchUpdateText, getElement } from '../../../utils/dom-cache';
 
@@ -616,7 +617,13 @@ function renderClientInvoices(invoices: InvoiceResponse[], container: HTMLElemen
 }
 
 async function resetClientPassword(clientId: number): Promise<void> {
-  if (!confirm('Send a password reset email to this client?')) return;
+  const confirmed = await confirmDialog({
+    title: 'Reset Password',
+    message: 'Send a password reset email to this client?',
+    confirmText: 'Send Email',
+    icon: 'question'
+  });
+  if (!confirmed) return;
 
   try {
     const response = await apiPost(`/api/clients/${clientId}/reset-password`);
@@ -633,7 +640,13 @@ async function resetClientPassword(clientId: number): Promise<void> {
 }
 
 async function resendClientInvite(clientId: number): Promise<void> {
-  if (!confirm('Resend the portal invitation to this client?')) return;
+  const confirmed = await confirmDialog({
+    title: 'Resend Invitation',
+    message: 'Resend the portal invitation to this client?',
+    confirmText: 'Resend',
+    icon: 'question'
+  });
+  if (!confirmed) return;
 
   try {
     const response = await apiPost(`/api/clients/${clientId}/resend-invite`);
@@ -841,9 +854,11 @@ async function deleteClient(clientId: number): Promise<void> {
     return;
   }
 
-  if (!confirm(`Are you sure you want to delete client "${client.contact_name || client.email}"? This cannot be undone.`)) {
-    return;
-  }
+  const confirmed = await confirmDanger(
+    `Are you sure you want to delete client "${client.contact_name || client.email}"? This cannot be undone.`,
+    'Delete Client'
+  );
+  if (!confirmed) return;
 
   try {
     const response = await apiDelete(`/api/clients/${clientId}`);
