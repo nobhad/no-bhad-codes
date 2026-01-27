@@ -25,6 +25,7 @@ import type { ProjectMilestone, ProjectFile, ProjectInvoice, AdminDashboardConte
 import { showTableLoading } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
 import { createDOMCache, batchUpdateText } from '../../../utils/dom-cache';
+import { alertWarning } from '../../../utils/confirm-dialog';
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -1198,7 +1199,7 @@ function showCreateInvoicePrompt(): void {
 
   const amount = parseFloat(amountStr);
   if (isNaN(amount) || amount <= 0) {
-    alert('Please enter a valid amount');
+    alertWarning('Please enter a valid amount');
     return;
   }
 
@@ -1391,7 +1392,7 @@ async function uploadProjectFiles(files: File[]): Promise<void> {
 
   // Check file count limit
   if (files.length > 5) {
-    alert('Maximum 5 files allowed per upload.');
+    alertWarning('Maximum 5 files allowed per upload.');
     return;
   }
 
@@ -1399,7 +1400,7 @@ async function uploadProjectFiles(files: File[]): Promise<void> {
   const maxSize = 10 * 1024 * 1024;
   const oversizedFiles = files.filter((f) => f.size > maxSize);
   if (oversizedFiles.length > 0) {
-    alert(`Some files exceed the 10MB limit: ${oversizedFiles.map((f) => f.name).join(', ')}`);
+    alertWarning(`Some files exceed the 10MB limit: ${oversizedFiles.map((f) => f.name).join(', ')}`);
     return;
   }
 

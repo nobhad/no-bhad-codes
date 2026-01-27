@@ -346,3 +346,8 @@ body[data-page="admin"] .admin-modal-body textarea:hover:not(:focus) {
 .detail-value a:hover {
   text-decoration: underline;
 }
+
+/* ================================================
+   CUSTOM CONFIRM DIALOG (Shared)
+   ================================================ */
+@import '../shared/confirm-dialog.css';

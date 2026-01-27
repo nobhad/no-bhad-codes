@@ -26,6 +26,7 @@ import { APP_CONSTANTS, getChartColor, getChartColorWithAlpha } from '../../conf
 import { configureApiClient, apiFetch, apiPost, apiPut } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 import { createDOMCache } from '../../utils/dom-cache';
+import { confirmDanger, alertError, alertSuccess, alertInfo } from '../../utils/confirm-dialog';
 
 // DOM element keys for caching
 type DashboardDOMKeys = Record<string, string>;
@@ -718,14 +719,14 @@ class AdminDashboard {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        alert(`Invitation sent to ${email}! They will receive a link to set up their account.`);
+        await alertSuccess(`Invitation sent to ${email}! They will receive a link to set up their account.`);
         // Close modal and refresh leads
         const modal = this.domCache.get('detailModal');
         if (modal) modal.style.display = 'none';
         this.loadLeads();
         this.loadProjects();
       } else {
-        alert(data.error || 'Failed to send invitation. Please try again.');
+        await alertError(data.error || 'Failed to send invitation. Please try again.');
         if (inviteBtn) {
           inviteBtn.disabled = false;
           inviteBtn.textContent = 'Invite to Client Portal';
@@ -733,7 +734,7 @@ class AdminDashboard {
       }
     } catch (error) {
       console.error('[AdminDashboard] Error inviting lead:', error);
-      alert('An error occurred. Please try again.');
+      await alertError('An error occurred. Please try again.');
       if (inviteBtn) {
         inviteBtn.disabled = false;
         inviteBtn.textContent = 'Invite to Client Portal';
@@ -839,7 +840,7 @@ class AdminDashboard {
         this.loadProjects();
       } else {
         console.error('[AdminDashboard] Failed to update project status');
-        alert('Failed to update project status');
+        alertError('Failed to update project status');
       }
     } catch (error) {
       console.error('[AdminDashboard] Error updating project status:', error);
@@ -1120,11 +1121,11 @@ class AdminDashboard {
       } else {
         const error = await response.json();
         console.error('[AdminDashboard] Failed to send message:', error);
-        alert('Failed to send message. Please try again.');
+        alertError('Failed to send message. Please try again.');
       }
     } catch (error) {
       console.error('[AdminDashboard] Error sending message:', error);
-      alert('Error sending message. Please try again.');
+      alertError('Error sending message. Please try again.');
     } finally {
       input.disabled = false;
       input.focus();
@@ -1737,9 +1738,13 @@ class AdminDashboard {
     const logFn = type === 'error' ? console.error : console.log;
     logFn(`[AdminDashboard] ${type.toUpperCase()}: ${message}`);
 
-    // Show alert for important messages (errors)
+    // Show styled alert dialog
     if (type === 'error') {
-      alert(message);
+      alertError(message);
+    } else if (type === 'success') {
+      alertSuccess(message);
+    } else {
+      alertInfo(message);
     }
   }
 
@@ -1828,7 +1833,7 @@ class AdminDashboard {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error(`[AdminDashboard] Error exporting ${type} data:`, error);
-      alert(`Failed to export ${type} data. Please try again.`);
+      alertError(`Failed to export ${type} data. Please try again.`);
     }
   }
 
@@ -1859,47 +1864,45 @@ class AdminDashboard {
   }
 
   private async clearOldData(): Promise<void> {
-    if (
-      !confirm(
-        'Are you sure you want to clear data older than 90 days? This action cannot be undone.'
-      )
-    ) {
-      return;
-    }
+    const confirmed = await confirmDanger(
+      'Are you sure you want to clear data older than 90 days? This action cannot be undone.',
+      'Clear Data',
+      'Clear Old Data'
+    );
+    if (!confirmed) return;
 
     try {
       // Clear old data logic here
-      alert('Old data cleared successfully.');
+      this.showNotification('Old data cleared successfully', 'success');
     } catch (error) {
       console.error('[AdminDashboard] Error clearing old data:', error);
-      alert('Failed to clear old data. Please try again.');
+      this.showNotification('Failed to clear old data', 'error');
     }
   }
 
   private async resetAnalytics(): Promise<void> {
-    if (
-      !confirm('Are you sure you want to reset ALL analytics data? This action cannot be undone.')
-    ) {
-      return;
-    }
+    const firstConfirm = await confirmDanger(
+      'Are you sure you want to reset ALL analytics data? This action cannot be undone.',
+      'Reset Analytics',
+      'Reset Analytics'
+    );
+    if (!firstConfirm) return;
 
-    if (
-      !confirm(
-        'This will permanently delete all visitor data, page views, and analytics. Type "RESET" to confirm.'
-      )
-    ) {
-      return;
-    }
+    const secondConfirm = await confirmDanger(
+      'This will permanently delete all visitor data, page views, and analytics. Are you absolutely sure?',
+      'Yes, Reset Everything',
+      'Final Confirmation'
+    );
+    if (!secondConfirm) return;
 
     try {
       // Reset analytics logic here
       sessionStorage.clear();
-      sessionStorage.clear();
-      alert('Analytics data has been reset.');
+      this.showNotification('Analytics data has been reset', 'success');
       window.location.reload();
     } catch (error) {
       console.error('[AdminDashboard] Error resetting analytics:', error);
-      alert('Failed to reset analytics. Please try again.');
+      this.showNotification('Failed to reset analytics', 'error');
     }
   }
 }
@@ -1912,7 +1915,7 @@ declare global {
 }
 
 window.viewVisitorDetails = (visitorId: string) => {
-  alert(`Viewing details for visitor: ${visitorId}`);
+  alertInfo(`Viewing details for visitor: ${visitorId}`);
 };
 
 // Extend Window interface for global admin dashboard access
