@@ -1207,9 +1207,9 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   color: var(--portal-text-light);
 }
 
+/* Hide currently selected item from dropdown menu - prevents double representation */
 [data-page="admin"] .custom-dropdown-item.selected {
-  background-color: rgba(var(--color-brand-primary-rgb, 0, 175, 240), 0.2);
-  color: var(--portal-text-light);
+  display: none;
 }
 
 [data-page="admin"] .custom-dropdown-item:last-child {

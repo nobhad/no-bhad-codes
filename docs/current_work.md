@@ -138,6 +138,46 @@ When a dropdown near the bottom of a modal is opened, its menu gets clipped/cut 
 
 ---
 
+### Table Dropdown Styling Inconsistency
+
+**Status:** IN PROGRESS
+**Observed:** January 26, 2026
+
+Table dropdowns (used in details panel for status selection) have inconsistent padding between the trigger (current selection) and menu items.
+
+**Issues:**
+
+- Trigger text has different left padding than menu items
+- Height changes when dropdown opens/closes
+- Current selection appears with different visual weight than options
+
+**Target:** Match Messages dropdown pattern for consistent spacing
+
+**Files to modify:**
+
+- `src/styles/pages/admin.css` - Table dropdown styles
+
+---
+
+### Messages Dropdown - Double Selection Display
+
+**Status:** TODO
+**Observed:** January 26, 2026
+
+The Messages dropdown shows the currently selected item twice - once in the trigger and again as the first item in the dropdown menu list.
+
+**Expected behavior:**
+
+- Current selection appears ONLY in the trigger
+- Dropdown menu should show other available options (not the current selection)
+- OR dropdown menu shows all options with current selection visually distinguished (not highlighted as if hovered)
+
+**Files to modify:**
+
+- `src/features/admin/modules/admin-messages.ts` - Dropdown rendering logic
+
+---
+
 ### Project Details Tabs Styling - Seamless Shadow
 
 **Status:** IN PROGRESS - Improved but not fully seamless
