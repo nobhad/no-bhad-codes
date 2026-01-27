@@ -7,13 +7,14 @@
  * Authentication gate and login form styles.
  */
 
-/* Auth Gate - matches main site body background, responds to theme toggle */
+/* Auth Gate - uses --bg variable from admin/index.html inline styles */
+/* This matches the main site body background exactly */
 .auth-gate {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: var(--color-neutral-300);
+  background: var(--bg, var(--color-neutral-300));
   position: fixed;
   top: 0;
   left: 0;
@@ -21,11 +22,6 @@
   bottom: 0;
   z-index: 9999;
   transition: background-color 0.3s ease;
-}
-
-/* Dark theme - use established dark variable */
-html[data-theme="dark"] .auth-gate {
-  background: var(--color-dark);
 }
 
 .auth-gate input::placeholder {
