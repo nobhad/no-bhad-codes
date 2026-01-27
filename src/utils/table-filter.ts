@@ -533,7 +533,7 @@ export const CONTACTS_FILTER_CONFIG: TableFilterConfig = {
 
 export const PROJECTS_FILTER_CONFIG: TableFilterConfig = {
   tableId: 'projects',
-  searchFields: ['name', 'client_name', 'project_type'],
+  searchFields: ['project_name', 'contact_name', 'project_type'],
   statusField: 'status',
   statusOptions: [
     { value: 'active', label: 'Active' },
@@ -544,10 +544,13 @@ export const PROJECTS_FILTER_CONFIG: TableFilterConfig = {
   ],
   dateField: 'created_at',
   sortableColumns: [
-    { key: 'name', label: 'Project', type: 'string' },
-    { key: 'client_name', label: 'Client', type: 'string' },
+    { key: 'project_name', label: 'Project Name', type: 'string' },
+    { key: 'contact_name', label: 'Client', type: 'string' },
     { key: 'project_type', label: 'Type', type: 'string' },
-    { key: 'budget', label: 'Budget', type: 'number' },
+    { key: 'budget_range', label: 'Budget', type: 'string' },
+    { key: 'timeline', label: 'Timeline', type: 'string' },
+    { key: 'start_date', label: 'Start Date', type: 'date' },
+    { key: 'end_date', label: 'End Date', type: 'date' },
     { key: 'status', label: 'Status', type: 'string' }
   ],
   storageKey: 'admin_projects_filter'

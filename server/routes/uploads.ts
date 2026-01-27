@@ -412,7 +412,7 @@ router.get(
     try {
       const db = await getDatabase();
       const files = await db.all(
-        `SELECT id, project_id, filename, original_filename, mimetype, size, file_path, uploaded_by, created_at
+        `SELECT id, project_id, filename, original_filename, mime_type, file_size, file_path, uploaded_by, created_at, description
          FROM files
          WHERE project_id = ?
          ORDER BY created_at DESC`,
@@ -430,7 +430,8 @@ router.get(
           size: file.file_size,
           url: file.file_path,
           uploadedBy: file.uploaded_by,
-          uploadedAt: file.created_at
+          uploadedAt: file.created_at,
+          description: file.description
         }))
       });
     } catch (dbError) {
@@ -550,9 +551,13 @@ router.get(
         });
       }
 
-      // Check access: client owns the project or uploaded the file
-      const clientId = req.user?.id;
-      if (file.client_id !== clientId && file.uploaded_by !== clientId) {
+      // Check access: admin, client owns the project, or uploaded the file
+      const userId = req.user?.id;
+      const isAdmin = req.user?.type === 'admin';
+      const isOwner = file.client_id === userId;
+      const isUploader = file.uploaded_by === userId || file.uploaded_by === String(userId);
+
+      if (!isAdmin && !isOwner && !isUploader) {
         return res.status(403).json({
           error: 'Access denied',
           code: 'ACCESS_DENIED'
@@ -646,11 +651,14 @@ router.delete(
         });
       }
 
-      // Check access: only the uploader can delete
-      const clientId = req.user?.id;
-      if (file.uploaded_by !== clientId) {
+      // Check access: admin or uploader can delete
+      const userId = req.user?.id;
+      const isAdmin = req.user?.type === 'admin';
+      const isUploader = file.uploaded_by === userId || file.uploaded_by === String(userId);
+
+      if (!isAdmin && !isUploader) {
         return res.status(403).json({
-          error: 'Access denied - only the uploader can delete this file',
+          error: 'Access denied - only admin or the uploader can delete this file',
           code: 'ACCESS_DENIED'
         });
       }

@@ -1,0 +1,23 @@
+{
+  "submittedAt": "2025-12-03 06:00:02",
+  "projectId": 2,
+  "projectName": "Simple Website",
+  "clientInfo": {
+    "name": "no",
+    "email": "nmbhaduri@gmail.com",
+    "companyName": null
+  },
+  "projectDetails": {
+    "type": "simple-site",
+    "description": "linktree with age verification",
+    "timeline": "asap",
+    "budget": "under-1k",
+    "features": [
+      "contact-form",
+      "social-links",
+      "analytics",
+      "mobile-optimized"
+    ]
+  },
+  "note": "Backfilled from project data"
+}

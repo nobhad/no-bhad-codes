@@ -1,0 +1,18 @@
+{
+  "submittedAt": "2025-12-22 08:56:05",
+  "projectId": 3,
+  "projectName": "Demo Project",
+  "clientInfo": {
+    "name": "Demo User",
+    "email": "demo@example.com",
+    "companyName": "Demo Company"
+  },
+  "projectDetails": {
+    "type": "other",
+    "description": "A demo project for testing the client portal",
+    "timeline": "",
+    "budget": "",
+    "features": []
+  },
+  "note": "Backfilled from project data"
+}

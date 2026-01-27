@@ -1,0 +1,18 @@
+{
+  "submittedAt": "2026-01-09 19:51:59",
+  "projectId": 4,
+  "projectName": "Simple Website",
+  "clientInfo": {
+    "name": "Test User",
+    "email": "test@example.com",
+    "companyName": null
+  },
+  "projectDetails": {
+    "type": "simple-site",
+    "description": "A test project submission without a company field",
+    "timeline": "2-4-weeks",
+    "budget": "1000-2500",
+    "features": []
+  },
+  "note": "Backfilled from project data"
+}

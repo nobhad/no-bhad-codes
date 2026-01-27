@@ -113,13 +113,13 @@
 
 /* Sidebar button and icon styles now in shared/portal-buttons.css */
 
-/* Badge color on hover - match text color */
-:is([data-page="client-portal"], [data-page="admin"]) .sidebar-buttons .btn:hover .sidebar-badge {
+/* Badge color on hover - match text color (client portal only) */
+[data-page="client-portal"] .sidebar-buttons .btn:hover .sidebar-badge {
   color: var(--portal-bg-dark);
 }
 
-/* Badge color when active - match text color */
-:is([data-page="client-portal"], [data-page="admin"]) .sidebar-buttons .btn.active .sidebar-badge {
+/* Badge color when active - match text color (client portal only) */
+[data-page="client-portal"] .sidebar-buttons .btn.active .sidebar-badge {
   color: var(--portal-bg-dark);
 }
 
@@ -466,8 +466,8 @@
     display: none;
   }
 
-  /* Badge positioning when sidebar auto-collapses */
-  :is([data-page="client-portal"], [data-page="admin"]) .sidebar .sidebar-badge {
+  /* Badge positioning when sidebar auto-collapses - client portal only */
+  [data-page="client-portal"] .sidebar .sidebar-badge {
     position: absolute;
     top: -2px;
     right: -2px;
@@ -525,8 +525,8 @@
     align-items: center;
   }
 
-  /* Badge positioning on mobile */
-  :is([data-page="client-portal"], [data-page="admin"]) .sidebar .sidebar-badge {
+  /* Badge positioning on mobile - client portal only */
+  [data-page="client-portal"] .sidebar .sidebar-badge {
     position: absolute;
     top: -2px;
     right: -2px;

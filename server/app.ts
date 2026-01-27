@@ -31,6 +31,7 @@ import messagesRouter from './routes/messages.js';
 import invoicesRouter from './routes/invoices.js';
 import uploadsRouter from './routes/uploads.js';
 import intakeRouter from './routes/intake.js';
+import proposalsRouter from './routes/proposals.js';
 import apiRouter from './routes/api.js';
 import analyticsRouter from './routes/analytics.js';
 import { setupSwagger } from './config/swagger.js';
@@ -152,6 +153,7 @@ app.use('/api/messages', messagesRouter);
 app.use('/api/invoices', invoicesRouter);
 app.use('/api/uploads', uploadsRouter);
 app.use('/api/intake', intakeRouter);
+app.use('/api/proposals', proposalsRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api', apiRouter); // General API routes (contact, health, etc.)
 

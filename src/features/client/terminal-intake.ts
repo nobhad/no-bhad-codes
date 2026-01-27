@@ -44,6 +44,8 @@ import {
   parseCommand,
   commandExists
 } from './terminal-intake-commands';
+import { ProposalBuilderModule } from './proposal-builder';
+import type { ProposalSelection } from './proposal-builder-types';
 
 // Re-export types for external consumers
 export type { TerminalIntakeOptions } from './terminal-intake-types';
@@ -102,6 +104,10 @@ export class TerminalIntakeModule extends BaseModule {
 
   // Guard against duplicate askToResume calls
   private resumePromptShown = false;
+
+  // Proposal builder selection
+  private proposalSelection: ProposalSelection | null = null;
+  private proposalBuilderContainer: HTMLElement | null = null;
 
   constructor(container: HTMLElement, options: TerminalIntakeOptions = {}) {
     super('TerminalIntake', { debug: false });
@@ -1291,7 +1297,7 @@ export class TerminalIntakeModule extends BaseModule {
           type: 'ai',
           content: 'Does everything look correct?',
           options: [
-            { value: 'yes', label: 'Yes, submit my request' },
+            { value: 'yes', label: 'Yes, continue to package selection' },
             { value: 'no', label: 'No, I need to make changes' }
           ]
         },
@@ -1329,8 +1335,8 @@ export class TerminalIntakeModule extends BaseModule {
           e.stopPropagation();
           e.stopImmediatePropagation();
           cleanup();
-          this.addMessage({ type: 'user', content: '[1] Yes, submit my request' });
-          await this.submitIntake();
+          this.addMessage({ type: 'user', content: '[1] Yes, continue to proposal' });
+          await this.showProposalBuilder();
           resolve();
         } else if (e.key === '2') {
           e.preventDefault();
@@ -1363,7 +1369,7 @@ export class TerminalIntakeModule extends BaseModule {
           this.addMessage({ type: 'user', content: displayText });
 
           if (choice === 'yes') {
-            await this.submitIntake();
+            await this.showProposalBuilder();
           } else {
             this.addMessage({
               type: 'ai',
@@ -1473,6 +1479,144 @@ export class TerminalIntakeModule extends BaseModule {
     });
   }
 
+  /**
+   * Show the proposal builder after review confirmation
+   */
+  private async showProposalBuilder(): Promise<void> {
+    this.isProcessing = true;
+
+    if (this.inputElement) this.inputElement.disabled = true;
+    if (this.sendButton) this.sendButton.disabled = true;
+
+    if (this.chatContainer) {
+      await showTypingIndicator(this.chatContainer, 400);
+    }
+
+    this.addMessage({
+      type: 'ai',
+      content: 'Now let\'s customize your project package. I\'ll show you our tier options so you can select the features that best fit your needs.'
+    });
+
+    await delay(500);
+
+    // Create a container for the proposal builder
+    this.proposalBuilderContainer = document.createElement('div');
+    this.proposalBuilderContainer.className = 'terminal-proposal-builder';
+
+    // Insert the proposal builder after the terminal window but inside the intake container
+    const terminalWindow = this.terminalContainer.querySelector('.terminal-window');
+    if (terminalWindow && terminalWindow.parentNode) {
+      terminalWindow.parentNode.insertBefore(this.proposalBuilderContainer, terminalWindow.nextSibling);
+    } else {
+      this.terminalContainer.appendChild(this.proposalBuilderContainer);
+    }
+
+    // Hide the terminal input area while in proposal builder
+    const inputArea = this.terminalContainer.querySelector('.terminal-input-area') as HTMLElement;
+    if (inputArea) {
+      inputArea.style.display = 'none';
+    }
+
+    // Initialize the proposal builder
+    const proposalBuilder = new ProposalBuilderModule(
+      this.proposalBuilderContainer,
+      this.intakeData,
+      {
+        onComplete: async (selection) => {
+          this.proposalSelection = selection;
+          this.cleanupProposalBuilder();
+          await this.submitIntake();
+        },
+        onCancel: () => {
+          this.proposalSelection = null;
+          this.cleanupProposalBuilder();
+          // Go back to review
+          this.addMessage({
+            type: 'ai',
+            content: 'No problem! Let me know when you\'re ready to continue.',
+            options: [
+              { value: 'continue', label: 'Continue to proposal builder' },
+              { value: 'changes', label: 'I need to make changes first' }
+            ]
+          });
+          this.waitForProposalDecision();
+        }
+      }
+    );
+
+    await proposalBuilder.init();
+  }
+
+  /**
+   * Wait for user decision after proposal cancel
+   */
+  private async waitForProposalDecision(): Promise<void> {
+    this.isInSpecialPrompt = true;
+    this.isProcessing = false;
+
+    return new Promise((resolve) => {
+      let handleClick: ((e: Event) => Promise<void>) | null = null;
+
+      const cleanup = () => {
+        this.isInSpecialPrompt = false;
+        if (handleClick) {
+          this.chatContainer?.removeEventListener('click', handleClick, true);
+        }
+      };
+
+      handleClick = async (e: Event) => {
+        const target = e.target as HTMLElement;
+        if (target.classList.contains('chat-option')) {
+          e.stopPropagation();
+          const choice = target.dataset.value;
+          const displayText = target.textContent || '';
+
+          cleanup();
+          this.addMessage({ type: 'user', content: displayText });
+
+          if (choice === 'continue') {
+            await this.showProposalBuilder();
+          } else {
+            // Let them scroll and make changes
+            this.addMessage({
+              type: 'ai',
+              content: 'Scroll back up to make changes, then select an option below when ready.',
+              options: [
+                { value: 'review', label: 'Done - show summary again' },
+                { value: 'restart', label: 'Start over completely' }
+              ]
+            });
+            await this.waitForChangeDecision();
+          }
+          resolve();
+        }
+      };
+
+      this.chatContainer?.addEventListener('click', handleClick, true);
+
+      if (this.inputElement) {
+        this.inputElement.disabled = false;
+        this.inputElement.focus();
+      }
+    });
+  }
+
+  /**
+   * Clean up the proposal builder container
+   */
+  private cleanupProposalBuilder(): void {
+    if (this.proposalBuilderContainer) {
+      this.proposalBuilderContainer.remove();
+      this.proposalBuilderContainer = null;
+    }
+
+    // Show the terminal input area again
+    const inputArea = this.terminalContainer.querySelector('.terminal-input-area') as HTMLElement;
+    if (inputArea) {
+      inputArea.style.display = '';
+    }
+  }
+
   private async submitIntake(): Promise<void> {
     this.isProcessing = true;
 
@@ -1497,7 +1641,8 @@ export class TerminalIntakeModule extends BaseModule {
         features: Array.isArray(this.intakeData.features)
           ? this.intakeData.features
           : [this.intakeData.features].filter(Boolean),
-        submittedAt: new Date().toISOString()
+        submittedAt: new Date().toISOString(),
+        proposalSelection: this.proposalSelection
       };
 
       this.log('Submitting data:', submitData);
@@ -1518,15 +1663,22 @@ export class TerminalIntakeModule extends BaseModule {
 
       this.clearProgress();
 
+      // Build success message based on proposal selection
+      const tierName = this.proposalSelection?.selectedTier
+        ? this.proposalSelection.selectedTier.charAt(0).toUpperCase() + this.proposalSelection.selectedTier.slice(1)
+        : 'Custom';
+
       this.addMessage({
         type: 'success',
         content: `
 PROJECT REQUEST SUBMITTED SUCCESSFULLY!
 
+Your ${tierName} package proposal has been received.
+
 What happens next:
 1. You'll receive a confirmation email shortly
-2. I'll review your requirements within 24-48 hours
-3. You'll get a detailed proposal and timeline
+2. I'll review your proposal within 24-48 hours
+3. You'll get a finalized quote and timeline
 4. We'll schedule a call to discuss the details
 
 Thank you for choosing No Bhad Codes!

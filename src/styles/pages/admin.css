@@ -450,15 +450,27 @@ body[data-page="admin"] .bundle-item {
   border-bottom: 1px solid var(--portal-border-medium);
 }
 
+/* First header row inherits table's top border radius */
+.admin-table thead tr:first-child th:first-child {
+  border-top-left-radius: var(--border-radius-card);
+}
+
+.admin-table thead tr:first-child th:last-child {
+  border-top-right-radius: var(--border-radius-card);
+}
+
 .admin-table td {
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   border: none;
+  height: 48px;
+  vertical-align: middle;
 }
 
 .admin-table tbody tr {
   cursor: pointer;
   transition: background-color 0.15s ease;
+  height: 48px;
 }
 
 .admin-table tbody tr:hover td {
@@ -467,6 +479,24 @@ body[data-page="admin"] .bundle-item {
 
 .admin-table tbody tr:active td {
   background: rgba(255, 255, 255, 0.1);
+}
+
+/* Last row inherits table's border radius */
+.admin-table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: var(--border-radius-card);
+}
+
+.admin-table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: var(--border-radius-card);
+}
+
+/* Preserve border radius on hover for last row */
+.admin-table tbody tr:last-child:hover td:first-child {
+  border-bottom-left-radius: var(--border-radius-card);
+}
+
+.admin-table tbody tr:last-child:hover td:last-child {
+  border-bottom-right-radius: var(--border-radius-card);
 }
 
 .admin-table td a {
@@ -654,15 +684,15 @@ body.modal-open .dashboard-content {
 
 /* Spacing between tab content children (replaces flex gap) */
 .tab-content.active > * + * {
-  margin-top: var(--space-lg);
+  margin-top: var(--portal-spacing-xl);
 }
 
 /* Overview Tab */
 .overview-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-4);
-  margin-bottom: var(--space-8);
+  gap: var(--portal-spacing-xl);
+  margin-bottom: var(--portal-spacing-xl);
 }
 
 .metric-card {
@@ -822,18 +852,22 @@ body.modal-open .dashboard-content {
 /* See table-specific styles in ADMIN TABLE section above */
 
 .status-badge {
-  display: inline-block;
-  padding: var(--space-1) var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1) var(--space-3);
   border-radius: var(--border-radius-full);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   text-transform: capitalize;
   border: var(--portal-border);
   color: var(--color-black);
-  width: 150px;
+  min-width: fit-content;
+  width: auto;
   text-align: center;
   box-sizing: border-box;
   white-space: nowrap;
+  transition: opacity 0.2s ease;
 }
 
 /* ================================================
@@ -979,11 +1013,9 @@ body.modal-open .dashboard-content {
   border-radius: var(--border-radius-card) var(--border-radius-card) 0 0;
 }
 
-/* Badge appears before icon buttons on desktop */
+/* Badge hidden - status visible in table rows via colored dots */
 .admin-table-header > .status-badge {
-  order: 1;
-  margin-left: auto;
-  margin-right: 1rem;
+  display: none;
 }
 
 .admin-table-header .admin-table-actions {
@@ -1019,9 +1051,7 @@ body.modal-open .dashboard-content {
   display: none;
 }
 
-.admin-table-actions .status-badge.has-new {
-  display: inline-block;
-}
+/* Badge removed - status visible in table rows via colored dots */
 
 /* Contacts table uses .admin-table-container and .admin-table base classes */
 /* See table-specific message-cell style in ADMIN TABLE section above */
@@ -1135,16 +1165,19 @@ body.modal-open .dashboard-content {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-2) var(--space-3);
   border: none;
   border-radius: 4px;
   font-size: var(--font-size-sm);
   font-weight: 600;
+  line-height: 1.5;
   cursor: pointer;
   transition: opacity 0.2s ease;
   width: 160px;
   min-width: 160px;
   justify-content: space-between;
+  box-sizing: border-box;
+  height: 32px;
 }
 
 .status-dropdown-trigger:hover {
@@ -1213,16 +1246,22 @@ body.modal-open .dashboard-content {
 
 /* Status options */
 .status-option {
-  display: block;
+  display: flex;
+  align-items: center;
   width: 100%;
   padding: var(--space-2) var(--space-3);
   border: none;
   background: transparent;
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: 1.5;
   text-align: left;
   cursor: pointer;
   transition: background-color 0.15s ease;
+  box-sizing: border-box;
+  height: 32px;
+  min-height: 32px;
 }
 
 .status-option:hover {
@@ -1895,8 +1934,6 @@ body.modal-open .dashboard-content {
 
 [data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn.active .sidebar-badge {
   display: block;
-  color: white;
-  background: var(--color-danger, #ef4444);
   z-index: 2;
 }
 
@@ -1906,24 +1943,26 @@ body.modal-open .dashboard-content {
   overflow: visible;
 }
 
+/* Collapsed sidebar - red number, positioned outside button flow */
 [data-page="admin"] .sidebar.collapsed .sidebar-badge {
   position: absolute;
-  top: -2px;
-  right: -2px;
-  margin-left: 0;
-  min-width: 12px;
-  height: 12px;
-  padding: 0 3px;
-  background: var(--color-danger, #ef4444);
-  color: white;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 8px;
+  top: -4px;
+  right: -4px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--color-danger, #ef4444);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 11px;
   font-weight: 700;
-  line-height: 12px;
-  text-align: center;
-  letter-spacing: -0.5px;
-  border-radius: 6px;
-  box-shadow: var(--shadow-elevated-sm);
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+}
+
+/* Badge stays red on hover, just scales up */
+[data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn:hover .sidebar-badge {
+  transform: scale(1.2);
 }
 
 /* Intermediate breakpoint - badge positioning when sidebar auto-collapses */
@@ -1933,31 +1972,32 @@ body.modal-open .dashboard-content {
     overflow: visible;
   }
 
+  /* Auto-collapsed sidebar - red number, positioned outside button flow */
   [data-page="admin"] .sidebar .sidebar-badge {
     position: absolute;
-    top: -2px;
-    right: -2px;
-    margin-left: 0;
-    min-width: 12px;
-    height: 12px;
-    padding: 0 3px;
-    background: var(--color-danger, #ef4444);
-    color: white;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 8px;
+    top: -4px;
+    right: -4px;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--color-danger, #ef4444);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 11px;
     font-weight: 700;
-    line-height: 12px;
-    text-align: center;
-    letter-spacing: -0.5px;
-    border-radius: 6px;
-    box-shadow: var(--shadow-elevated-sm);
+    line-height: 1;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+    pointer-events: none;
   }
 
   [data-page="admin"] .sidebar .sidebar-buttons .btn.active .sidebar-badge {
     display: block;
-    color: white;
-    background: var(--color-danger, #ef4444);
+    color: var(--color-danger, #ef4444);
+    background: transparent;
     z-index: 2;
+  }
+
+  [data-page="admin"] .sidebar .sidebar-buttons .btn:hover .sidebar-badge {
+    transform: scale(1.2);
   }
 }
 
@@ -1968,10 +2008,14 @@ body.modal-open .dashboard-content {
    Should not change row height.
    ================================================ */
 
-/* Ensure status cells allow dropdown overflow */
+/* Ensure status cells allow dropdown overflow and maintain consistent height */
 [data-page="admin"] .admin-table td.status-cell {
   overflow: visible;
   position: relative;
+  vertical-align: middle;
+  height: 48px;
+  padding: var(--space-2) var(--space-4);
+  box-sizing: border-box;
 }
 
 /* Dropdown overflow handled by overflow:visible on container - no margin needed */
@@ -1980,60 +2024,73 @@ body.modal-open .dashboard-content {
   position: relative;
   display: inline-block;
   min-width: 100px;
+  height: 32px;
+  vertical-align: middle;
 }
 
+/* Base trigger styles */
 [data-page="admin"] .table-dropdown .custom-dropdown-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 8px;
-  border: 1px solid var(--portal-border-dark);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid transparent;
   border-radius: 0;
-  background-color: transparent;
+  background-color: var(--color-black);
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   font-weight: 400;
+  line-height: 1.5;
   cursor: pointer;
   white-space: nowrap;
   box-shadow: none;
   width: auto;
   min-width: 80px;
   box-sizing: border-box;
-  height: 26px;
+  height: 32px;
+  margin: 0;
 }
 
+/* Hover state - red border */
 [data-page="admin"] .table-dropdown .custom-dropdown-trigger:hover {
-  border-color: var(--color-danger, #ef4444);
-  background-color: var(--portal-bg-medium);
+  border-color: #dc2626;
 }
 
+/* Focus state - red border */
 [data-page="admin"] .table-dropdown .custom-dropdown-trigger:focus {
   outline: none;
-  border-color: var(--color-danger, #ef4444);
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+  border-color: #dc2626;
 }
 
-[data-page="admin"] .table-dropdown.custom-dropdown.open .custom-dropdown-trigger {
-  border-color: var(--color-danger, #ef4444);
-  border-radius: 0;
-  border-bottom: 1px solid transparent;
-  box-shadow: none;
+/* Open state - red border with transparent bottom to connect with menu */
+[data-page="admin"] .table-dropdown.open .custom-dropdown-trigger {
+  border-color: #dc2626;
+  border-bottom-color: transparent;
   z-index: 10000;
   position: relative;
-  background-color: var(--portal-bg-dark);
-  height: 26px;
-  padding: 4px 8px;
+}
+
+[data-page="admin"] .table-dropdown .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-right: var(--space-2);
+  background-color: var(--portal-text-muted);
 }
 
 [data-page="admin"] .table-dropdown .custom-dropdown-text {
   flex: 1;
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: 1.5;
 }
 
 [data-page="admin"] .table-dropdown .custom-dropdown-caret {
   width: 12px;
   height: 12px;
   flex-shrink: 0;
-  margin-left: 0;
+  margin-left: var(--space-2);
 }
 
 [data-page="admin"] .table-dropdown.custom-dropdown .custom-dropdown-menu {
@@ -2046,7 +2103,7 @@ body.modal-open .dashboard-content {
   padding: 0;
   list-style: none;
   background-color: var(--portal-bg-dark);
-  border: 1px solid var(--color-danger, #ef4444);
+  border: 1px solid #dc2626;
   border-top: none;
   border-radius: 0;
   z-index: 9999;
@@ -2057,7 +2114,11 @@ body.modal-open .dashboard-content {
   box-sizing: border-box;
 }
 
-/* In details panel, use panel background */
+/* Details panel dropdown - inherits base styles, just override background */
+[data-page="admin"] .details-panel .table-dropdown .custom-dropdown-trigger {
+  background-color: var(--color-black);
+}
+
 [data-page="admin"] .details-panel .table-dropdown .custom-dropdown-menu {
   background-color: var(--portal-bg-readonly);
   left: 0;
@@ -2073,10 +2134,11 @@ body.modal-open .dashboard-content {
 [data-page="admin"] .table-dropdown .custom-dropdown-item {
   display: flex;
   align-items: center;
-  padding: 4px 8px;
-  min-height: 26px;
+  padding: var(--space-2) var(--space-3);
+  height: 32px;
   font-size: var(--font-size-sm);
   font-weight: 400;
+  line-height: 1.5;
   color: var(--portal-text-light);
   cursor: pointer;
   transition: background-color 0.15s ease;
@@ -2087,42 +2149,36 @@ body.modal-open .dashboard-content {
   background-color: var(--color-brand-primary);
 }
 
-/* Status-specific colors for dropdown trigger */
-[data-page="admin"] .table-dropdown[data-status="new"] .custom-dropdown-trigger {
-  border-color: var(--color-status-new, #3b82f6);
-  background-color: rgba(59, 130, 246, 0.1);
+/* Status-specific colors for status dot */
+[data-page="admin"] .table-dropdown[data-status="new"] .status-dot {
+  background-color: var(--color-status-new, #3b82f6);
 }
 
-[data-page="admin"] .table-dropdown[data-status="pending"] .custom-dropdown-trigger {
-  border-color: var(--color-status-pending, #f59e0b);
-  background-color: rgba(245, 158, 11, 0.1);
+[data-page="admin"] .table-dropdown[data-status="pending"] .status-dot {
+  background-color: var(--color-status-pending, #f59e0b);
 }
 
-[data-page="admin"] .table-dropdown[data-status="read"] .custom-dropdown-trigger,
-[data-page="admin"] .table-dropdown[data-status="qualified"] .custom-dropdown-trigger,
-[data-page="admin"] .table-dropdown[data-status="contacted"] .custom-dropdown-trigger {
-  border-color: var(--color-status-read, #8b5cf6);
-  background-color: rgba(139, 92, 246, 0.1);
+[data-page="admin"] .table-dropdown[data-status="read"] .status-dot,
+[data-page="admin"] .table-dropdown[data-status="qualified"] .status-dot,
+[data-page="admin"] .table-dropdown[data-status="contacted"] .status-dot {
+  background-color: var(--color-status-read, #8b5cf6);
 }
 
-[data-page="admin"] .table-dropdown[data-status="responded"] .custom-dropdown-trigger,
-[data-page="admin"] .table-dropdown[data-status="converted"] .custom-dropdown-trigger,
-[data-page="admin"] .table-dropdown[data-status="active"] .custom-dropdown-trigger,
-[data-page="admin"] .table-dropdown[data-status="in_progress"] .custom-dropdown-trigger {
-  border-color: var(--color-status-responded, #10b981);
-  background-color: rgba(16, 185, 129, 0.1);
+[data-page="admin"] .table-dropdown[data-status="responded"] .status-dot,
+[data-page="admin"] .table-dropdown[data-status="converted"] .status-dot,
+[data-page="admin"] .table-dropdown[data-status="active"] .status-dot,
+[data-page="admin"] .table-dropdown[data-status="in_progress"] .status-dot {
+  background-color: var(--color-status-responded, #10b981);
 }
 
-[data-page="admin"] .table-dropdown[data-status="completed"] .custom-dropdown-trigger {
-  border-color: var(--color-status-completed, #06b6d4);
-  background-color: rgba(6, 182, 212, 0.1);
+[data-page="admin"] .table-dropdown[data-status="completed"] .status-dot {
+  background-color: var(--color-status-completed, #06b6d4);
 }
 
-[data-page="admin"] .table-dropdown[data-status="archived"] .custom-dropdown-trigger,
-[data-page="admin"] .table-dropdown[data-status="lost"] .custom-dropdown-trigger,
-[data-page="admin"] .table-dropdown[data-status="cancelled"] .custom-dropdown-trigger {
-  border-color: var(--color-status-archived, #6b7280);
-  background-color: rgba(107, 114, 128, 0.1);
+[data-page="admin"] .table-dropdown[data-status="archived"] .status-dot,
+[data-page="admin"] .table-dropdown[data-status="lost"] .status-dot,
+[data-page="admin"] .table-dropdown[data-status="cancelled"] .status-dot {
+  background-color: var(--color-status-archived, #6b7280);
 }
 
 /* ================================================
@@ -2651,12 +2707,9 @@ body.modal-open .dashboard-content {
     gap: 0.5rem;
   }
 
-  /* Badge spans full width on row 2 */
+  /* Badge hidden on mobile too */
   .admin-table-header > .status-badge {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    text-align: center;
-    margin-top: 0.25rem;
+    display: none;
   }
 
   /* All direct children of table actions must align vertically */

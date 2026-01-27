@@ -123,11 +123,12 @@ export class ClientPortalModule extends BaseModule {
     return {
       getAuthToken: () => sessionStorage.getItem('client_auth_mode'),
       showNotification: (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+        const { showToast } = require('../../utils/toast-notifications');
         if (type === 'error') {
           console.error('[ClientPortal]', message);
-          alert(message); // Show error prominently
+          showToast(message, 'error', { duration: 5000 });
         } else {
-          this.showSuccessMessage(message);
+          showToast(message, type);
         }
       },
       formatDate: (dateString: string) => this.formatDate(dateString),

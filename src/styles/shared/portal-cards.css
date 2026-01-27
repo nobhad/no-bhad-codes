@@ -10,8 +10,8 @@
 :is([data-page="admin"], [data-page="client-portal"]) .quick-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--portal-spacing-lg);
-  margin-bottom: var(--portal-spacing-lg);
+  gap: var(--portal-spacing-xl);
+  margin-bottom: var(--portal-spacing-xl);
 }
 
 /* =====================================================
@@ -88,7 +88,7 @@
   border: none;
   border-radius: var(--border-radius-card);
   padding: var(--space-4);
-  margin-bottom: var(--portal-spacing-2xl);
+  margin-bottom: var(--portal-spacing-xl);
   color: var(--portal-text-light);
   box-shadow: var(--shadow-panel);
 }
@@ -144,7 +144,7 @@
   border-radius: var(--portal-radius-lg, 12px);
   padding: var(--portal-spacing-xl, 1.5rem);
   color: var(--portal-text-light);
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--portal-spacing-xl);
   box-shadow: var(--shadow-panel);
 }
 

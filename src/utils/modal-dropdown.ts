@@ -5,14 +5,83 @@
  * @file src/utils/modal-dropdown.ts
  *
  * Converts native select elements into custom styled dropdowns
- * for use within modals. Uses the same classes as the messages
- * tab custom-dropdown but adds 'no-border' modifier.
+ * for use within modals. Uses position: fixed to escape modal
+ * overflow constraints.
  */
 
 import { ICONS } from '../constants/icons';
 
 // Track if global handlers have been set up
 let globalHandlersInitialized = false;
+
+// Track active dropdown for repositioning on scroll/resize
+let activeDropdown: HTMLElement | null = null;
+
+/**
+ * Position the dropdown menu using fixed positioning
+ * This allows the menu to escape modal overflow constraints
+ */
+function positionDropdownMenu(wrapper: HTMLElement): void {
+  const trigger = wrapper.querySelector('.custom-dropdown-trigger') as HTMLElement;
+  const menu = wrapper.querySelector('.custom-dropdown-menu') as HTMLElement;
+  if (!trigger || !menu) return;
+
+  const triggerRect = trigger.getBoundingClientRect();
+  const menuHeight = menu.scrollHeight;
+  const viewportHeight = window.innerHeight;
+  const VIEWPORT_PADDING = 8;
+
+  // Calculate space available below and above the trigger
+  const spaceBelow = viewportHeight - triggerRect.bottom - VIEWPORT_PADDING;
+  const spaceAbove = triggerRect.top - VIEWPORT_PADDING;
+
+  // Determine if menu should flip above
+  const shouldFlipAbove = spaceBelow < menuHeight && spaceAbove > spaceBelow;
+
+  // Set fixed position
+  menu.style.position = 'fixed';
+  menu.style.left = `${triggerRect.left}px`;
+  menu.style.width = `${triggerRect.width}px`;
+
+  if (shouldFlipAbove) {
+    // Position above trigger
+    menu.style.top = 'auto';
+    menu.style.bottom = `${viewportHeight - triggerRect.top + 1}px`;
+    menu.style.maxHeight = `${Math.min(spaceAbove, 200)}px`;
+    wrapper.classList.add('flip-above');
+  } else {
+    // Position below trigger
+    menu.style.top = `${triggerRect.bottom - 1}px`;
+    menu.style.bottom = 'auto';
+    menu.style.maxHeight = `${Math.min(spaceBelow, 200)}px`;
+    wrapper.classList.remove('flip-above');
+  }
+}
+
+/**
+ * Reset menu positioning when dropdown closes
+ */
+function resetDropdownMenuPosition(wrapper: HTMLElement): void {
+  const menu = wrapper.querySelector('.custom-dropdown-menu') as HTMLElement;
+  if (!menu) return;
+
+  menu.style.position = '';
+  menu.style.top = '';
+  menu.style.bottom = '';
+  menu.style.left = '';
+  menu.style.width = '';
+  menu.style.maxHeight = '';
+  wrapper.classList.remove('flip-above');
+}
+
+/**
+ * Handle scroll/resize events to reposition active dropdown
+ */
+function handleScrollOrResize(): void {
+  if (activeDropdown && activeDropdown.classList.contains('open')) {
+    positionDropdownMenu(activeDropdown);
+  }
+}
 
 /**
  * Setup global click/escape handlers for all modal dropdowns (only once)
@@ -27,6 +96,10 @@ function setupGlobalDropdownHandlers(): void {
     document.querySelectorAll('.custom-dropdown[data-modal-dropdown].open').forEach((dropdown) => {
       if (!dropdown.contains(target)) {
         dropdown.classList.remove('open');
+        resetDropdownMenuPosition(dropdown as HTMLElement);
+        if (activeDropdown === dropdown) {
+          activeDropdown = null;
+        }
       }
     });
   });
@@ -36,9 +109,17 @@ function setupGlobalDropdownHandlers(): void {
     if (e.key === 'Escape') {
       document.querySelectorAll('.custom-dropdown[data-modal-dropdown].open').forEach((dropdown) => {
         dropdown.classList.remove('open');
+        resetDropdownMenuPosition(dropdown as HTMLElement);
       });
+      activeDropdown = null;
     }
   });
+
+  // Reposition on scroll (capture phase to catch modal scroll)
+  document.addEventListener('scroll', handleScrollOrResize, true);
+
+  // Reposition on resize
+  window.addEventListener('resize', handleScrollOrResize);
 }
 
 export interface ModalDropdownOptions {
@@ -139,13 +220,21 @@ function toggleDropdown(wrapper: HTMLElement): void {
   document.querySelectorAll('.custom-dropdown.open').forEach(el => {
     if (el !== wrapper) {
       el.classList.remove('open');
+      resetDropdownMenuPosition(el as HTMLElement);
     }
   });
 
   if (isOpen) {
     wrapper.classList.remove('open');
+    resetDropdownMenuPosition(wrapper);
+    activeDropdown = null;
   } else {
     wrapper.classList.add('open');
+    activeDropdown = wrapper;
+    // Position menu after adding open class (menu needs to be visible for scrollHeight)
+    requestAnimationFrame(() => {
+      positionDropdownMenu(wrapper);
+    });
   }
 }
 

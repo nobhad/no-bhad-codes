@@ -4,6 +4,120 @@ This file contains completed work from January 2026. Items are moved here from `
 
 ---
 
+## Admin UI Fixes - COMPLETE (January 27, 2026)
+
+### Sidebar Zoom Collapse (150%+)
+
+**Status:** FIXED - January 26, 2026
+
+Sidebar was not properly collapsing to icon-only mode when browser zoomed to 150% or more.
+
+**Fix applied:**
+
+- Changed base `min-width` to 56px (allows collapse)
+- Added `!important` to 1024px breakpoint width (56px) to override clamp()
+- Made sidebar buttons area scrollable when needed
+- Changed footer to `position: sticky; bottom: 0` with background for proper layering
+
+**File modified:** `src/styles/client-portal/sidebar.css`
+
+---
+
+### Analytics - Average Session Calculation
+
+**Status:** FIXED - January 26, 2026
+
+Average session duration was showing extremely high values (~27 hours) due to sessions with tabs left open.
+
+**Fix applied:**
+
+- Modified AVG query to exclude sessions > 1 hour (3,600,000 ms) as outliers
+
+**File modified:** `server/routes/analytics.ts` line 251
+
+---
+
+### Modal Dropdown Focus State - Visible Divider Line
+
+**Status:** FIXED - January 26, 2026
+
+Fixed by using the Messages dropdown pattern:
+
+- Border on trigger (not wrapper)
+- `border-bottom: none` on trigger when open
+- `margin-top: -1px` on menu to overlap
+- Same background color on trigger and menu
+
+**Files modified:**
+
+- `src/styles/admin/modals.css`
+- `src/styles/shared/portal-dropdown.css`
+
+---
+
+### Terminal Styling in Client Portal
+
+**Status:** VERIFIED - January 26, 2026
+
+Terminal intake in client portal displays correctly without overflow issues.
+
+**Fix applied:**
+
+- Portal-specific overrides in `terminal-intake.css`
+- Width constraint (90%, max 900px) on `.terminal-intake`
+- Reset `min-width: auto` on child elements
+
+---
+
+### Modal Dropdown Overflow - Menu Cut Off at Modal Bottom
+
+**Status:** FIXED - January 27, 2026
+
+When a dropdown near the bottom of a modal was opened, its menu was getting clipped by the modal boundary.
+
+**Fix applied:**
+
+- Implemented `position: fixed` with JavaScript-calculated coordinates
+- Menu now escapes modal overflow constraints entirely
+- Added flip behavior: menu opens above trigger when near viewport bottom
+- Repositions on scroll/resize events
+- Removed ineffective CSS `:has()` overflow hacks
+
+**Files modified:**
+
+- `src/utils/modal-dropdown.ts` - Added positioning logic
+- `src/styles/shared/portal-dropdown.css` - Added `.flip-above` styles
+- `src/styles/admin/modals.css` - Removed `:has()` hacks
+
+---
+
+### Custom Design Dialog Boxes
+
+**Status:** FIXED - January 27, 2026
+
+Replaced native browser `confirm()` and `alert()` dialogs with custom styled modal dialogs matching the portal design.
+
+**Implementation:**
+
+- Created `confirmDialog()` and `alertDialog()` functions
+- Buttons match portal button style (transparent bg, red on hover, shadow-panel)
+- Title uses Acme font, uppercase, letter-spacing
+- FolderPlus icon for activate actions
+- Backdrop blur with 0.25 opacity overlay
+- Focus trap and keyboard support (Escape to close)
+
+**Files created:**
+
+- `src/utils/confirm-dialog.ts`
+- `src/styles/shared/confirm-dialog.css`
+
+**Files modified:**
+
+- `src/styles/admin/modals.css` - Import confirm-dialog.css
+- `src/features/admin/modules/admin-leads.ts` - Uses confirmDialog
+
+---
+
 ## Architecture & Admin UI Improvements - COMPLETE (January 21, 2026)
 
 ### Architecture Concerns (High Priority)

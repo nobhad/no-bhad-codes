@@ -158,7 +158,7 @@ export class ModalComponent extends BaseComponent<ModalProps, ModalState> {
       .modal {
         background: var(--color-background, white);
         border-radius: 8px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        box-shadow: var(--shadow-modal, 0 10px 25px rgba(0, 0, 0, 0.2));
         max-width: 100%;
         max-height: 100%;
         display: flex;

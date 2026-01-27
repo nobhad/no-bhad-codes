@@ -2,12 +2,12 @@
    SHARED PORTAL FORMS
    @file src/styles/shared/portal-forms.css
    Single source of truth for admin and client portal forms
-   Newer approach: no border, larger inputs, labels inside
+   Matches dropdown styling: same border, radius, bg, font
    ===================================================== */
 
 /* =====================================================
-   PORTAL FORM INPUTS
-   Dark bg, light text, no border, larger padding
+   PORTAL FORM INPUTS - BASE STYLES
+   Vertically centered text, matches dropdown styling
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .form-input,
 :is([data-page="admin"], [data-page="client-portal"]) .form-textarea,
@@ -18,40 +18,44 @@
 :is([data-page="admin"], [data-page="client-portal"]) input[type="tel"],
 :is([data-page="admin"], [data-page="client-portal"]) input[type="number"],
 :is([data-page="admin"], [data-page="client-portal"]) input[type="url"],
+:is([data-page="admin"], [data-page="client-portal"]) input[type="date"],
 :is([data-page="admin"], [data-page="client-portal"]) textarea,
 :is([data-page="admin"], [data-page="client-portal"]) select:not(.status-select) {
   width: 100%;
-  padding: var(--portal-spacing-lg) var(--portal-spacing-xl);
-  padding-top: 1.5rem;
-  padding-bottom: var(--portal-spacing-sm);
-  border: none;
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--portal-border-dark);
   border-radius: var(--portal-radius-lg);
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-weight: 400;
+  line-height: 48px;
   background-color: var(--color-black);
   color: var(--portal-text-light);
   box-sizing: border-box;
-  transition: background-color 0.2s ease;
-  min-height: 60px;
-  height: auto;
+  transition: border-color 0.2s ease;
   caret-color: var(--portal-text-light);
 }
 
-/* Textarea specific */
+/* Textarea specific - needs different height/padding */
+/* Padding matches dropdown trigger visually: 12px vertical, 16px horizontal */
 :is([data-page="admin"], [data-page="client-portal"]) textarea,
 :is([data-page="admin"], [data-page="client-portal"]) .form-textarea {
+  height: auto;
   min-height: 100px;
+  padding: 12px 16px;
+  line-height: 1.5;
   resize: vertical;
 }
 
 /* =====================================================
-   PLACEHOLDER TEXT - NOT BOLD, system font
+   PLACEHOLDER TEXT - matches dropdown text styling
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .form-input::placeholder,
 :is([data-page="admin"], [data-page="client-portal"]) .form-textarea::placeholder,
 :is([data-page="admin"], [data-page="client-portal"]) input::placeholder,
 :is([data-page="admin"], [data-page="client-portal"]) textarea::placeholder {
+  font-size: var(--font-size-base);
   font-weight: 400;
   color: var(--portal-text-light);
   opacity: 0.5;
@@ -59,7 +63,19 @@
 }
 
 /* =====================================================
-   FOCUS STATES
+   HOVER STATES - matches dropdown hover
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .form-input:hover,
+:is([data-page="admin"], [data-page="client-portal"]) .form-textarea:hover,
+:is([data-page="admin"], [data-page="client-portal"]) .form-select:hover,
+:is([data-page="admin"], [data-page="client-portal"]) input:hover,
+:is([data-page="admin"], [data-page="client-portal"]) textarea:hover,
+:is([data-page="admin"], [data-page="client-portal"]) select:hover {
+  border-color: var(--color-brand-primary);
+}
+
+/* =====================================================
+   FOCUS STATES - matches dropdown focus
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .form-input:focus,
 :is([data-page="admin"], [data-page="client-portal"]) .form-textarea:focus,
@@ -75,12 +91,12 @@
 :is([data-page="admin"], [data-page="client-portal"]) select:focus-visible {
   outline: none;
   outline-offset: 0;
-  border-color: var(--color-primary);
+  border-color: var(--color-brand-primary);
   box-shadow: none;
 }
 
 /* =====================================================
-   FORM LABELS - Positioned inside input at top
+   FORM GROUP - Basic structure
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .form-group {
   position: relative;
@@ -93,11 +109,37 @@
   margin-bottom: 0;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .form-group label,
-:is([data-page="admin"], [data-page="client-portal"]) .form-label {
+/* =====================================================
+   FIELD-LABEL - Labels positioned ABOVE inputs
+   This is the standard/default pattern for modals
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .form-group label.field-label,
+:is([data-page="admin"], [data-page="client-portal"]) label.field-label,
+:is([data-page="admin"], [data-page="client-portal"]) .field-label {
+  position: static;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  pointer-events: auto;
+}
+
+/* =====================================================
+   LABEL-INSIDE PATTERN (opt-in)
+   For forms where labels appear inside the input
+   Add .label-inside class to .form-group
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .form-group.label-inside {
+  position: relative;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .form-group.label-inside label {
   position: absolute;
-  top: var(--portal-spacing-sm);
-  left: var(--portal-spacing-xl);
+  top: 8px;
+  left: 16px;
   z-index: 1;
   font-size: 0.75rem;
   font-weight: 500;
@@ -108,24 +150,17 @@
   margin: 0;
 }
 
-/* =====================================================
-   FIELD-LABEL OVERRIDE
-   When using .field-label class, labels are positioned
-   ABOVE inputs (traditional layout), not inside them.
-   ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .form-group label.field-label,
-:is([data-page="admin"], [data-page="client-portal"]) label.field-label {
-  position: static;
-  margin-bottom: 0.5rem;
-  pointer-events: auto;
+:is([data-page="admin"], [data-page="client-portal"]) .form-group.label-inside input,
+:is([data-page="admin"], [data-page="client-portal"]) .form-group.label-inside select,
+:is([data-page="admin"], [data-page="client-portal"]) .form-group.label-inside textarea {
+  height: 60px;
+  padding: 24px 16px 8px 16px;
+  line-height: normal;
 }
 
-/* Inputs following .field-label don't need extra padding-top */
-:is([data-page="admin"], [data-page="client-portal"]) .form-group:has(label.field-label) input,
-:is([data-page="admin"], [data-page="client-portal"]) .form-group:has(label.field-label) select,
-:is([data-page="admin"], [data-page="client-portal"]) .form-group:has(label.field-label) textarea {
-  padding-top: var(--portal-spacing-md);
-  min-height: auto;
+:is([data-page="admin"], [data-page="client-portal"]) .form-group.label-inside textarea {
+  height: auto;
+  min-height: 100px;
 }
 
 /* =====================================================
@@ -196,9 +231,17 @@
   :is([data-page="admin"], [data-page="client-portal"]) input,
   :is([data-page="admin"], [data-page="client-portal"]) textarea,
   :is([data-page="admin"], [data-page="client-portal"]) select {
-    padding: 0.625rem 0.875rem;
-    padding-top: 1.25rem;
-    font-size: 0.9rem;
-    min-height: 50px;
+    height: 44px;
+    padding: 0 12px;
+    font-size: var(--font-size-sm);
+    line-height: 44px;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) textarea,
+  :is([data-page="admin"], [data-page="client-portal"]) .form-textarea {
+    height: auto;
+    min-height: 80px;
+    padding: 10px 12px;
+    line-height: 1.5;
   }
 }

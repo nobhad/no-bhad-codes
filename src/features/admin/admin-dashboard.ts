@@ -27,6 +27,7 @@ import { configureApiClient, apiFetch, apiPost, apiPut } from '../../utils/api-c
 import { createLogger } from '../../utils/logger';
 import { createDOMCache } from '../../utils/dom-cache';
 import { confirmDanger, alertError, alertSuccess, alertInfo } from '../../utils/confirm-dialog';
+import { showToast } from '../../utils/toast-notifications';
 
 // DOM element keys for caching
 type DashboardDOMKeys = Record<string, string>;
@@ -43,7 +44,8 @@ import {
   loadAnalyticsModule,
   loadOverviewModule,
   loadPerformanceModule,
-  loadSystemStatusModule
+  loadSystemStatusModule,
+  loadProposalsModule
 } from './modules';
 
 // Chart.js is loaded dynamically to reduce initial bundle size
@@ -1313,6 +1315,13 @@ class AdminDashboard {
           await projectsModule.loadProjects(this.moduleContext);
         }
         break;
+      case 'proposals':
+        // Use proposals module
+        {
+          const proposalsModule = await loadProposalsModule();
+          await proposalsModule.loadProposals(this.moduleContext);
+        }
+        break;
       case 'clients':
         // Use clients module
         {
@@ -1738,13 +1747,13 @@ class AdminDashboard {
     const logFn = type === 'error' ? console.error : console.log;
     logFn(`[AdminDashboard] ${type.toUpperCase()}: ${message}`);
 
-    // Show styled alert dialog
+    // Use toast notifications for success/info, dialogs only for errors that need attention
     if (type === 'error') {
+      // Keep error dialogs for important errors
       alertError(message);
-    } else if (type === 'success') {
-      alertSuccess(message);
     } else {
-      alertInfo(message);
+      // Use toast for success/info messages
+      showToast(message, type);
     }
   }
 
