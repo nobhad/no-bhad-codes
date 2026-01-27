@@ -181,6 +181,8 @@ let filterUIInitialized = false;
 
 /**
  * Format budget/timeline values with proper capitalization
+ * Preserves hyphens between numbers (for ranges like "1000-2500", "2-4")
+ * Formats currency values with $ and commas where appropriate
  */
 function formatDisplayValue(value: string | undefined | null): string {
   if (!value || value === '-') return '-';
@@ -191,26 +193,54 @@ function formatDisplayValue(value: string | undefined | null): string {
   // ASAP should be all caps
   if (lowerValue === 'asap') return 'ASAP';
 
-  // Budget ranges: "under-1k" -> "Under 1k", "1000-2500" -> "$1,000-$2,500"
+  // Budget ranges: "under-1k" -> "Under $1k"
   if (lowerValue.includes('under')) {
-    return value.replace(/under-?/gi, 'Under ').replace(/-/g, '');
+    return value.replace(/under-?/gi, 'Under $').replace(/-/g, '');
   }
 
-  // Replace hyphens with spaces and capitalize each word
-  let formatted = value.replace(/-/g, ' ');
+  // Check if this looks like a pure numeric budget range (e.g., "1000-2500")
+  const numericRangeMatch = value.match(/^(\d+)-(\d+)$/);
+  if (numericRangeMatch) {
+    const min = parseInt(numericRangeMatch[1], 10);
+    const max = parseInt(numericRangeMatch[2], 10);
+    return `$${min.toLocaleString()}-$${max.toLocaleString()}`;
+  }
+
+  // Budget with "k" notation: "1k-2k" -> "$1k-$2k", "5k-10k" -> "$5k-$10k"
+  const kRangeMatch = value.match(/^(\d+)k-(\d+)k$/i);
+  if (kRangeMatch) {
+    return `$${kRangeMatch[1]}k-$${kRangeMatch[2]}k`;
+  }
+
+  // Single k value with plus: "35k-plus" -> "$35k+"
+  const kPlusMatch = value.match(/^(\d+)k-plus$/i);
+  if (kPlusMatch) {
+    return `$${kPlusMatch[1]}k+`;
+  }
+
+  // Replace hyphens with spaces EXCEPT when between numbers (for ranges)
+  // e.g., "1-3-months" -> "1-3 Months", "simple-site" -> "Simple Site"
+  // Uses a placeholder to preserve number-hyphen-number patterns
+  let formatted = value
+    .replace(/(\d)-(\d)/g, '$1__RANGE_HYPHEN__$2') // Preserve hyphens between numbers
+    .replace(/-/g, ' ') // Replace remaining hyphens with spaces
+    .replace(/__RANGE_HYPHEN__/g, '-'); // Restore range hyphens
   formatted = formatted.replace(/\b\w/g, (char) => char.toUpperCase());
 
   return formatted;
 }
 
 /**
- * Format date string for display (YYYY-MM-DD -> MMM D, YYYY)
+ * Format date string for display (YYYY-MM-DD -> MM/DD/YYYY)
  */
 function formatDate(dateStr: string | undefined | null): string {
   if (!dateStr) return '-';
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${month}/${day}/${year}`;
 }
 
 export function getProjectsData(): LeadProject[] {
@@ -469,7 +499,7 @@ function populateProjectDetailView(project: LeadProject): void {
     'pd-company': SanitizationUtils.escapeHtml(project.company_name || '-'),
     'pd-type': SanitizationUtils.escapeHtml(formatProjectType(project.project_type)),
     'pd-budget': SanitizationUtils.escapeHtml(formatDisplayValue(project.budget_range)),
-    'pd-price': SanitizationUtils.escapeHtml(projectData.price || '-'),
+    'pd-price': SanitizationUtils.escapeHtml(projectData.price ? `$${Number(projectData.price).toLocaleString()}` : '-'),
     'pd-timeline': SanitizationUtils.escapeHtml(formatDisplayValue(project.timeline)),
     'pd-start-date': SanitizationUtils.escapeHtml(project.created_at ? new Date(project.created_at).toLocaleDateString() : '-')
   });

@@ -1,0 +1,979 @@
+/**
+ * ===============================================
+ * PROPOSAL BUILDER STYLES
+ * ===============================================
+ * @file src/styles/pages/proposal-builder.css
+ *
+ * Tiered proposal builder with tier cards, feature tables,
+ * and maintenance options. Uses portal theme variables.
+ */
+
+/* ============================================================================
+   CSS CUSTOM PROPERTIES - PROPOSAL BUILDER SPECIFIC
+   ============================================================================ */
+
+:root {
+  /* Proposal builder colors */
+  --proposal-bg: var(--portal-bg-dark);
+  --proposal-card-bg: var(--portal-bg-medium);
+  --proposal-card-border: var(--portal-border-medium);
+  --proposal-card-hover: var(--portal-bg-hover);
+  --proposal-text: var(--portal-text-light);
+  --proposal-text-muted: var(--portal-text-muted);
+  --proposal-accent: var(--color-primary);
+  --proposal-success: var(--color-success, #22c55e);
+  --proposal-highlight: rgba(var(--color-primary-rgb), 0.15);
+
+  /* Spacing */
+  --proposal-spacing-sm: 0.5rem;
+  --proposal-spacing-md: 1rem;
+  --proposal-spacing-lg: 1.5rem;
+  --proposal-spacing-xl: 2rem;
+
+  /* Card sizing */
+  --tier-card-width: 300px;
+  --tier-card-gap: 1.5rem;
+}
+
+/* ============================================================================
+   MAIN CONTAINER
+   ============================================================================ */
+
+.proposal-builder {
+  background: var(--proposal-bg);
+  color: var(--proposal-text);
+  padding: var(--proposal-spacing-xl);
+  border-radius: var(--portal-radius-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.proposal-header {
+  text-align: center;
+  margin-bottom: var(--proposal-spacing-xl);
+}
+
+.proposal-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0 0 var(--proposal-spacing-sm);
+  color: var(--proposal-text);
+}
+
+.proposal-subtitle {
+  font-size: 1rem;
+  color: var(--proposal-text-muted);
+  margin: 0;
+}
+
+/* ============================================================================
+   STEP INDICATORS
+   ============================================================================ */
+
+.proposal-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--proposal-spacing-sm);
+  margin-bottom: var(--proposal-spacing-xl);
+  padding: var(--proposal-spacing-md);
+  flex-wrap: wrap;
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--proposal-spacing-sm);
+  padding: var(--proposal-spacing-sm) var(--proposal-spacing-md);
+  border-radius: var(--portal-radius-pill);
+  background: var(--portal-bg-medium);
+  opacity: 0.5;
+  transition: opacity 0.3s ease, background-color 0.3s ease;
+}
+
+.step-indicator.step--active {
+  opacity: 1;
+  background: var(--proposal-accent);
+}
+
+.step-indicator.step--completed {
+  opacity: 0.8;
+  background: var(--proposal-success);
+}
+
+.step-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.step-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.step-divider {
+  width: 40px;
+  height: 2px;
+  background: var(--portal-border-medium);
+}
+
+@media (--mobile) {
+  .step-label {
+    display: none;
+  }
+
+  .step-divider {
+    width: 20px;
+  }
+}
+
+/* ============================================================================
+   CONTENT AREA
+   ============================================================================ */
+
+.proposal-content {
+  min-height: 400px;
+  padding: var(--proposal-spacing-md) 0;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 var(--proposal-spacing-md);
+  color: var(--proposal-text);
+}
+
+.section-description {
+  font-size: 0.9375rem;
+  color: var(--proposal-text-muted);
+  margin: 0 0 var(--proposal-spacing-lg);
+}
+
+/* ============================================================================
+   TIER CARDS
+   ============================================================================ */
+
+.tier-selection {
+  margin-bottom: var(--proposal-spacing-lg);
+}
+
+.tier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--tier-card-width), 1fr));
+  gap: var(--tier-card-gap);
+}
+
+.tier-card {
+  background: var(--proposal-card-bg);
+  border: 2px solid var(--proposal-card-border);
+  border-radius: var(--portal-radius-lg);
+  padding: var(--proposal-spacing-lg);
+  position: relative;
+  transition:
+    border-color 0.3s ease,
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.tier-card:hover {
+  border-color: var(--proposal-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-elevated-md);
+}
+
+.tier-card--selected {
+  border-color: var(--proposal-accent);
+  background: var(--proposal-highlight);
+  box-shadow: 0 0 0 1px var(--proposal-accent);
+}
+
+.tier-card--recommended {
+  border-color: var(--proposal-accent);
+}
+
+.tier-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--proposal-accent);
+  color: var(--proposal-text);
+  padding: 4px 16px;
+  border-radius: var(--portal-radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.tier-header {
+  text-align: center;
+  margin-bottom: var(--proposal-spacing-md);
+}
+
+.tier-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 var(--proposal-spacing-sm);
+  color: var(--proposal-text);
+}
+
+.tier-tagline {
+  font-size: 0.875rem;
+  color: var(--proposal-text-muted);
+  margin: 0;
+}
+
+.tier-price {
+  text-align: center;
+  padding: var(--proposal-spacing-md) 0;
+  border-top: 1px solid var(--proposal-card-border);
+  border-bottom: 1px solid var(--proposal-card-border);
+  margin-bottom: var(--proposal-spacing-md);
+}
+
+.price-range {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--proposal-text);
+}
+
+.tier-description {
+  font-size: 0.875rem;
+  color: var(--proposal-text-muted);
+  margin-bottom: var(--proposal-spacing-md);
+  text-align: center;
+}
+
+.tier-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--proposal-spacing-lg);
+  flex: 1;
+}
+
+.tier-feature {
+  display: flex;
+  align-items: center;
+  gap: var(--proposal-spacing-sm);
+  padding: var(--proposal-spacing-sm) 0;
+  font-size: 0.875rem;
+  color: var(--proposal-text);
+}
+
+.feature-check {
+  color: var(--proposal-success);
+  flex-shrink: 0;
+}
+
+.tier-select-btn {
+  width: 100%;
+  padding: var(--proposal-spacing-md) var(--proposal-spacing-lg);
+  border: 2px solid var(--proposal-accent);
+  border-radius: var(--portal-radius-md);
+  background: transparent;
+  color: var(--proposal-accent);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.tier-select-btn:hover {
+  background: var(--proposal-accent);
+  color: var(--proposal-text);
+}
+
+.tier-select-btn.selected {
+  background: var(--proposal-accent);
+  color: var(--proposal-text);
+}
+
+/* ============================================================================
+   FEATURE COMPARISON TABLE
+   ============================================================================ */
+
+.feature-comparison {
+  margin-bottom: var(--proposal-spacing-lg);
+}
+
+.comparison-table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--portal-radius-md);
+  border: 1px solid var(--proposal-card-border);
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: var(--proposal-spacing-md);
+  text-align: center;
+  border-bottom: 1px solid var(--proposal-card-border);
+}
+
+.comparison-table th {
+  background: var(--portal-bg-medium);
+  font-weight: 600;
+  color: var(--proposal-text);
+}
+
+.comparison-table th.highlighted {
+  background: var(--proposal-highlight);
+  color: var(--proposal-accent);
+}
+
+.comparison-table td.highlighted {
+  background: rgba(var(--color-primary-rgb), 0.05);
+}
+
+.feature-column {
+  text-align: left;
+  min-width: 200px;
+}
+
+.tier-column {
+  min-width: 120px;
+}
+
+.category-row td {
+  background: var(--portal-bg-darker);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--proposal-text-muted);
+}
+
+.feature-name-cell {
+  text-align: left;
+}
+
+.feature-name-cell .feature-name {
+  display: block;
+  font-weight: 500;
+  color: var(--proposal-text);
+}
+
+.feature-name-cell .feature-description {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--proposal-text-muted);
+  margin-top: 2px;
+}
+
+.check-included {
+  color: var(--proposal-success);
+}
+
+.check-addon {
+  color: var(--proposal-accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.check-none {
+  color: var(--proposal-text-muted);
+  opacity: 0.5;
+}
+
+/* ============================================================================
+   FEATURE CUSTOMIZATION
+   ============================================================================ */
+
+.feature-customization {
+  margin-bottom: var(--proposal-spacing-lg);
+}
+
+.feature-section {
+  margin-bottom: var(--proposal-spacing-xl);
+}
+
+.feature-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 var(--proposal-spacing-md);
+  color: var(--proposal-text);
+}
+
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--proposal-spacing-sm);
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: var(--proposal-spacing-md);
+  padding: var(--proposal-spacing-md);
+  background: var(--proposal-card-bg);
+  border: 1px solid var(--proposal-card-border);
+  border-radius: var(--portal-radius-md);
+  transition:
+    border-color 0.3s ease,
+    background-color 0.3s ease;
+}
+
+.feature-item--included {
+  opacity: 0.9;
+}
+
+.feature-item--addon {
+  cursor: pointer;
+}
+
+.feature-item--addon:hover {
+  border-color: var(--proposal-accent);
+}
+
+.feature-item--selected {
+  border-color: var(--proposal-accent);
+  background: var(--proposal-highlight);
+}
+
+.feature-checkbox {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.feature-checkbox-custom {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--proposal-card-border);
+  border-radius: var(--portal-radius-xs);
+  flex-shrink: 0;
+  transition:
+    border-color 0.3s ease,
+    background-color 0.3s ease;
+  position: relative;
+}
+
+.feature-checkbox:checked + .feature-checkbox-custom {
+  border-color: var(--proposal-accent);
+  background: var(--proposal-accent);
+}
+
+.feature-checkbox:checked + .feature-checkbox-custom::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  width: 5px;
+  height: 10px;
+  border: solid var(--proposal-text);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.feature-info {
+  flex: 1;
+}
+
+.feature-info .feature-name {
+  display: block;
+  font-weight: 500;
+  color: var(--proposal-text);
+  margin-bottom: 2px;
+}
+
+.feature-info .feature-description {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--proposal-text-muted);
+}
+
+.feature-price {
+  font-weight: 600;
+  color: var(--proposal-accent);
+  white-space: nowrap;
+}
+
+.feature-item--included .feature-price {
+  color: var(--proposal-success);
+}
+
+/* ============================================================================
+   MAINTENANCE OPTIONS
+   ============================================================================ */
+
+.maintenance-selection {
+  margin-bottom: var(--proposal-spacing-lg);
+}
+
+.maintenance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--tier-card-gap);
+}
+
+.maintenance-card {
+  background: var(--proposal-card-bg);
+  border: 2px solid var(--proposal-card-border);
+  border-radius: var(--portal-radius-lg);
+  padding: var(--proposal-spacing-lg);
+  position: relative;
+  transition:
+    border-color 0.3s ease,
+    transform 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.maintenance-card:hover {
+  border-color: var(--proposal-accent);
+  transform: translateY(-2px);
+}
+
+.maintenance-card--selected {
+  border-color: var(--proposal-accent);
+  background: var(--proposal-highlight);
+}
+
+.maintenance-card--recommended {
+  border-color: var(--proposal-accent);
+}
+
+.maintenance-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--proposal-accent);
+  color: var(--proposal-text);
+  padding: 4px 16px;
+  border-radius: var(--portal-radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.maintenance-header {
+  text-align: center;
+  margin-bottom: var(--proposal-spacing-md);
+}
+
+.maintenance-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 var(--proposal-spacing-sm);
+  color: var(--proposal-text);
+}
+
+.maintenance-price {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--proposal-text);
+}
+
+.billing-cycle {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--proposal-text-muted);
+}
+
+.maintenance-description {
+  font-size: 0.875rem;
+  color: var(--proposal-text-muted);
+  text-align: center;
+  margin: 0 0 var(--proposal-spacing-md);
+}
+
+.maintenance-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--proposal-spacing-lg);
+  flex: 1;
+}
+
+.maintenance-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--proposal-spacing-sm);
+  padding: var(--proposal-spacing-sm) 0;
+  font-size: 0.8125rem;
+  color: var(--proposal-text);
+}
+
+.maintenance-feature .feature-check {
+  margin-top: 2px;
+}
+
+.maintenance-select-btn {
+  width: 100%;
+  padding: var(--proposal-spacing-md);
+  border: 2px solid var(--proposal-accent);
+  border-radius: var(--portal-radius-md);
+  background: transparent;
+  color: var(--proposal-accent);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.maintenance-select-btn:hover {
+  background: var(--proposal-accent);
+  color: var(--proposal-text);
+}
+
+.maintenance-select-btn.selected {
+  background: var(--proposal-accent);
+  color: var(--proposal-text);
+}
+
+/* ============================================================================
+   SUMMARY VIEW
+   ============================================================================ */
+
+.proposal-summary {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.summary-section {
+  background: var(--proposal-card-bg);
+  border: 1px solid var(--proposal-card-border);
+  border-radius: var(--portal-radius-md);
+  padding: var(--proposal-spacing-lg);
+  margin-bottom: var(--proposal-spacing-md);
+}
+
+.summary-tier {
+  text-align: center;
+}
+
+.summary-tier-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--proposal-spacing-sm);
+}
+
+.summary-tier-header h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--proposal-text);
+}
+
+.summary-tier-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--proposal-accent);
+}
+
+.summary-tier-description {
+  font-size: 0.875rem;
+  color: var(--proposal-text-muted);
+  margin: 0;
+}
+
+.summary-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 var(--proposal-spacing-md);
+  color: var(--proposal-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.summary-feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.summary-feature {
+  display: flex;
+  align-items: center;
+  gap: var(--proposal-spacing-sm);
+  padding: var(--proposal-spacing-sm) 0;
+  font-size: 0.9375rem;
+  color: var(--proposal-text);
+}
+
+.summary-feature .feature-check {
+  flex-shrink: 0;
+}
+
+.summary-addon {
+  justify-content: space-between;
+}
+
+.addon-price {
+  color: var(--proposal-accent);
+  font-weight: 600;
+}
+
+.summary-maintenance {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-maintenance .maintenance-name {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.summary-maintenance .maintenance-price {
+  font-size: 1rem;
+}
+
+.summary-notes-input {
+  width: 100%;
+  padding: var(--proposal-spacing-md);
+  border: 1px solid var(--proposal-card-border);
+  border-radius: var(--portal-radius-md);
+  background: var(--portal-bg-darker);
+  color: var(--proposal-text);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.summary-notes-input::placeholder {
+  color: var(--proposal-text-muted);
+}
+
+.summary-notes-input:focus {
+  outline: none;
+  border-color: var(--proposal-accent);
+}
+
+.summary-total {
+  background: var(--portal-bg-darker);
+  border: 2px solid var(--proposal-accent);
+  border-radius: var(--portal-radius-md);
+  padding: var(--proposal-spacing-lg);
+}
+
+.total-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--proposal-spacing-sm);
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9375rem;
+  color: var(--proposal-text);
+}
+
+.total-row--final {
+  font-size: 1.25rem;
+  font-weight: 700;
+  padding-top: var(--proposal-spacing-md);
+  border-top: 1px solid var(--proposal-card-border);
+  margin-top: var(--proposal-spacing-sm);
+  color: var(--proposal-accent);
+}
+
+.total-row--recurring {
+  font-size: 0.875rem;
+  color: var(--proposal-text-muted);
+  padding-top: var(--proposal-spacing-sm);
+}
+
+/* ============================================================================
+   PRICE BAR (STICKY)
+   ============================================================================ */
+
+.proposal-price-bar {
+  background: var(--portal-bg-darker);
+  border-top: 1px solid var(--proposal-card-border);
+  padding: var(--proposal-spacing-md) var(--proposal-spacing-lg);
+  margin: var(--proposal-spacing-lg) calc(var(--proposal-spacing-xl) * -1);
+  margin-bottom: 0;
+}
+
+.price-breakdown {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.price-details {
+  display: flex;
+  align-items: center;
+  gap: var(--proposal-spacing-md);
+}
+
+.price-tier {
+  font-weight: 600;
+  color: var(--proposal-text);
+}
+
+.price-addons {
+  font-size: 0.875rem;
+  color: var(--proposal-accent);
+}
+
+.price-total {
+  display: flex;
+  align-items: center;
+  gap: var(--proposal-spacing-sm);
+}
+
+.price-label {
+  font-size: 0.875rem;
+  color: var(--proposal-text-muted);
+}
+
+.price-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--proposal-text);
+}
+
+/* ============================================================================
+   ACTION BUTTONS
+   ============================================================================ */
+
+.proposal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--proposal-spacing-md);
+  padding: var(--proposal-spacing-lg) 0 0;
+}
+
+.proposal-btn {
+  padding: var(--proposal-spacing-md) var(--proposal-spacing-xl);
+  border-radius: var(--portal-radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.2s ease;
+}
+
+.proposal-btn:active {
+  transform: scale(0.98);
+}
+
+.proposal-btn-secondary {
+  background: transparent;
+  border: 2px solid var(--proposal-card-border);
+  color: var(--proposal-text);
+}
+
+.proposal-btn-secondary:hover {
+  border-color: var(--proposal-text);
+}
+
+.proposal-btn-primary {
+  background: var(--proposal-accent);
+  border: 2px solid var(--proposal-accent);
+  color: var(--proposal-text);
+}
+
+.proposal-btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.proposal-btn-submit {
+  background: var(--proposal-success);
+  border-color: var(--proposal-success);
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+
+@media (--mobile) {
+  .proposal-builder {
+    padding: var(--proposal-spacing-lg) var(--proposal-spacing-md);
+  }
+
+  .proposal-title {
+    font-size: 1.5rem;
+  }
+
+  .tier-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .maintenance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .proposal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .proposal-btn {
+    width: 100%;
+  }
+
+  .price-value {
+    font-size: 1.25rem;
+  }
+
+  .summary-tier-header {
+    flex-direction: column;
+    gap: var(--proposal-spacing-sm);
+  }
+}
+
+@media (--tablet-only) {
+  .tier-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Make third card span full width when only 3 cards */
+  .tier-grid > .tier-card:nth-child(3):last-child {
+    grid-column: 1 / -1;
+    max-width: var(--tier-card-width);
+    margin: 0 auto;
+  }
+}
+
+/* ============================================================================
+   TERMINAL INTEGRATION
+   ============================================================================ */
+
+.terminal-proposal-builder {
+  margin-top: var(--proposal-spacing-lg);
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

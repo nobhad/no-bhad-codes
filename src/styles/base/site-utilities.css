@@ -1,0 +1,30 @@
+/**
+ * ===============================================
+ * SITE UTILITIES
+ * ===============================================
+ * @file src/styles/base/site-utilities.css
+ *
+ * Utility classes and global overrides for the main site.
+ */
+
+/* Skip link for accessibility */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 12px 24px;
+  background-color: var(--color-dark, #333333);
+  color: var(--color-light, #ffffff);
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 4px;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 10px;
+  outline: 2px solid var(--app-color-primary, #dc2626);
+  outline-offset: 2px;
+}

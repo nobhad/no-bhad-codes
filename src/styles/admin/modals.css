@@ -7,6 +7,11 @@
  * Modal overlay, body, footer, and dropdown styles.
  */
 
+/* Import shared styles (MUST be at top of file) */
+@import '../shared/confirm-dialog.css';
+@import '../shared/portal-dropdown.css';
+@import '../shared/portal-forms.css';
+
 /* Admin Modal Styles */
 .admin-modal-overlay {
   position: fixed;
@@ -31,7 +36,7 @@
   background: var(--portal-bg-darker);
   border: none;
   border-radius: var(--border-radius-card);
-  box-shadow: var(--shadow-panel);
+  box-shadow: var(--shadow-modal);
   width: 100%;
   max-width: 860px;
   max-height: 90vh;
@@ -107,48 +112,7 @@
   margin-bottom: 0;
 }
 
-/* Ensure modal inputs are NOT bold */
-body[data-page="admin"] .admin-modal-body input,
-body[data-page="admin"] .admin-modal-body textarea,
-body[data-page="admin"] .admin-modal-body select,
-body[data-page="admin"] .admin-modal-body .custom-dropdown-trigger {
-  font-weight: 400;
-}
-
-/* Admin modal form inputs - invisible border that turns brand color on focus */
-body[data-page="admin"] .admin-modal-body .form-input,
-body[data-page="admin"] .admin-modal-body input[type="text"],
-body[data-page="admin"] .admin-modal-body input[type="email"],
-body[data-page="admin"] .admin-modal-body input[type="tel"],
-body[data-page="admin"] .admin-modal-body input[type="password"],
-body[data-page="admin"] .admin-modal-body textarea {
-  background: var(--portal-bg-medium);
-  border: 2px solid var(--portal-bg-medium);
-  border-radius: var(--border-radius-sm);
-  color: var(--portal-text-light);
-  padding: var(--space-3) var(--space-4);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-body[data-page="admin"] .admin-modal-body .form-input:focus,
-body[data-page="admin"] .admin-modal-body input[type="text"]:focus,
-body[data-page="admin"] .admin-modal-body input[type="email"]:focus,
-body[data-page="admin"] .admin-modal-body input[type="tel"]:focus,
-body[data-page="admin"] .admin-modal-body input[type="password"]:focus,
-body[data-page="admin"] .admin-modal-body textarea:focus {
-  outline: none;
-  border-color: var(--color-brand-primary);
-  box-shadow: none;
-}
-
-body[data-page="admin"] .admin-modal-body .form-input:hover:not(:focus),
-body[data-page="admin"] .admin-modal-body input[type="text"]:hover:not(:focus),
-body[data-page="admin"] .admin-modal-body input[type="email"]:hover:not(:focus),
-body[data-page="admin"] .admin-modal-body input[type="tel"]:hover:not(:focus),
-body[data-page="admin"] .admin-modal-body input[type="password"]:hover:not(:focus),
-body[data-page="admin"] .admin-modal-body textarea:hover:not(:focus) {
-  border-color: var(--portal-border-medium);
-}
+/* Modal inputs inherit base styling from portal-forms.css */
 
 .admin-modal-body .form-row {
   display: flex;
@@ -169,11 +133,6 @@ body[data-page="admin"] .admin-modal-body textarea:hover:not(:focus) {
 }
 
 /* ================================================
-   Modal Dropdown - Import shared component
-   ================================================ */
-@import '../shared/portal-dropdown.css';
-
-/* ================================================
    Modal Dropdown - Context Overrides
    ================================================
    Sets CSS variables for modal context.
@@ -188,26 +147,9 @@ body[data-page="admin"] .admin-modal-body textarea:hover:not(:focus) {
   --dropdown-radius: var(--portal-radius-lg);
 }
 
-/* Allow dropdown menu to appear above modal footer */
+/* Fixed-positioned dropdown menu escapes modal overflow via JS positioning */
 .admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-menu {
   z-index: 10002;
-}
-
-/* When dropdown is open, allow it to escape modal clipping */
-.admin-modal-overlay:has(.custom-dropdown[data-modal-dropdown].open) {
-  overflow: visible;
-}
-
-.admin-modal:has(.custom-dropdown[data-modal-dropdown].open) {
-  overflow: visible;
-}
-
-.admin-modal:has(.custom-dropdown[data-modal-dropdown].open) form {
-  overflow: visible;
-}
-
-.admin-modal-body:has(.custom-dropdown[data-modal-dropdown].open) {
-  overflow: visible;
 }
 
 .admin-modal-footer {
@@ -241,6 +183,19 @@ body[data-page="admin"] .admin-modal-body textarea:hover:not(:focus) {
   overflow-y: auto;
 }
 
+/* Flip-above: when dropdown opens upward (near bottom of modal) */
+.admin-modal .custom-dropdown[data-modal-dropdown].flip-above.open .custom-dropdown-trigger {
+  border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
+  border-bottom: 1px solid var(--color-brand-primary);
+  border-top: none;
+}
+
+.admin-modal .custom-dropdown[data-modal-dropdown].flip-above .custom-dropdown-menu {
+  border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
+  border-bottom: none;
+  border-top: 1px solid var(--color-brand-primary);
+}
+
 /* Heavier caret for admin modal dropdowns */
 .admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-caret {
   stroke-width: 3;
@@ -255,51 +210,7 @@ body[data-page="admin"] .admin-modal-body textarea:hover:not(:focus) {
   padding: var(--space-2) var(--space-3);
 }
 
-/* ================================================
-   Native Select Styling for Modals
-   ================================================ */
-
-.admin-modal select,
-.admin-modal .form-select,
-.admin-modal-body select {
-  appearance: none;
-  width: 100%;
-  padding: var(--space-3) var(--space-4);
-  padding-right: 2.5rem;
-  background: var(--portal-bg-medium);
-  border: none;
-  border-radius: var(--border-radius-sm);
-  font-size: var(--font-size-base);
-  font-weight: 500;
-  color: var(--portal-text-light);
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 12px;
-}
-
-.admin-modal select:hover,
-.admin-modal .form-select:hover,
-.admin-modal-body select:hover {
-  background-color: var(--portal-bg-light);
-}
-
-.admin-modal select:focus,
-.admin-modal .form-select:focus,
-.admin-modal-body select:focus {
-  outline: 2px solid var(--color-brand-primary);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 2px rgba(var(--color-brand-primary-rgb), 0.25);
-}
-
-.admin-modal select option,
-.admin-modal-body select option {
-  background-color: var(--portal-bg-dark);
-  color: var(--portal-text-light);
-  padding: var(--space-2);
-}
+/* Native selects inherit styling from portal-forms.css */
 
 /* Modal Detail Grid */
 .detail-grid {
@@ -347,7 +258,3 @@ body[data-page="admin"] .admin-modal-body textarea:hover:not(:focus) {
   text-decoration: underline;
 }
 
-/* ================================================
-   CUSTOM CONFIRM DIALOG (Shared)
-   ================================================ */
-@import '../shared/confirm-dialog.css';

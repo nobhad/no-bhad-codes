@@ -51,6 +51,7 @@ export function createTableDropdown(config: TableDropdownConfig): HTMLElement {
   trigger.type = 'button';
   trigger.className = 'custom-dropdown-trigger';
   trigger.innerHTML = `
+    <span class="status-dot"></span>
     <span class="custom-dropdown-text">${currentLabel}</span>
     ${ICONS.CARET_DOWN}
   `;

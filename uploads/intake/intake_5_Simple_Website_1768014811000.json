@@ -1,0 +1,22 @@
+{
+  "submittedAt": "2026-01-09 22:13:31",
+  "projectId": 5,
+  "projectName": "Simple Website",
+  "clientInfo": {
+    "name": "no",
+    "email": "nmbhaduri@gmail.com",
+    "companyName": null
+  },
+  "projectDetails": {
+    "type": "simple-site",
+    "description": "not get flagged by IG for porn",
+    "timeline": "asap",
+    "budget": "under-1k",
+    "features": [
+      "social-links",
+      "mobile-optimized",
+      "age-verification"
+    ]
+  },
+  "note": "Backfilled from project data"
+}

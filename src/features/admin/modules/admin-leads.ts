@@ -55,6 +55,8 @@ function getElement(id: string): HTMLElement | null {
 
 /**
  * Format budget/timeline values with proper capitalization
+ * Preserves hyphens between numbers (for ranges like "1000-2500", "2-4")
+ * Formats currency values with $ and commas where appropriate
  */
 function formatDisplayValue(value: string | undefined | null): string {
   if (!value || value === '-') return '-';
@@ -65,13 +67,38 @@ function formatDisplayValue(value: string | undefined | null): string {
   // ASAP should be all caps
   if (lowerValue === 'asap') return 'ASAP';
 
-  // Budget ranges: "under-1k" -> "Under 1k", "1000-2500" -> "$1,000-$2,500"
+  // Budget ranges: "under-1k" -> "Under $1k"
   if (lowerValue.includes('under')) {
-    return value.replace(/under-?/gi, 'Under ').replace(/-/g, '');
+    return value.replace(/under-?/gi, 'Under $').replace(/-/g, '');
   }
 
-  // Replace hyphens with spaces and capitalize each word
-  let formatted = value.replace(/-/g, ' ');
+  // Check if this looks like a pure numeric budget range (e.g., "1000-2500")
+  const numericRangeMatch = value.match(/^(\d+)-(\d+)$/);
+  if (numericRangeMatch) {
+    const min = parseInt(numericRangeMatch[1], 10);
+    const max = parseInt(numericRangeMatch[2], 10);
+    return `$${min.toLocaleString()}-$${max.toLocaleString()}`;
+  }
+
+  // Budget with "k" notation: "1k-2k" -> "$1k-$2k", "5k-10k" -> "$5k-$10k"
+  const kRangeMatch = value.match(/^(\d+)k-(\d+)k$/i);
+  if (kRangeMatch) {
+    return `$${kRangeMatch[1]}k-$${kRangeMatch[2]}k`;
+  }
+
+  // Single k value with plus: "35k-plus" -> "$35k+"
+  const kPlusMatch = value.match(/^(\d+)k-plus$/i);
+  if (kPlusMatch) {
+    return `$${kPlusMatch[1]}k+`;
+  }
+
+  // Replace hyphens with spaces EXCEPT when between numbers (for ranges)
+  // e.g., "1-3-months" -> "1-3 Months", "simple-site" -> "Simple Site"
+  // Uses a placeholder to preserve number-hyphen-number patterns
+  let formatted = value
+    .replace(/(\d)-(\d)/g, '$1__RANGE_HYPHEN__$2') // Preserve hyphens between numbers
+    .replace(/-/g, ' ') // Replace remaining hyphens with spaces
+    .replace(/__RANGE_HYPHEN__/g, '-'); // Restore range hyphens
   formatted = formatted.replace(/\b\w/g, (char) => char.toUpperCase());
 
   return formatted;
@@ -281,7 +308,41 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
 
 async function updateLeadStatus(id: number, status: string, ctx: AdminDashboardContext): Promise<void> {
   try {
-    const response = await apiPut(`/api/admin/leads/${id}/status`, { status });
+    let cancelled_by: string | null = null;
+    let cancellation_reason: string | null = null;
+
+    // If cancelling, ask who cancelled
+    if (status === 'cancelled') {
+      const { confirmDialog } = await import('../../../utils/confirm-dialog');
+
+      // First confirm they want to cancel
+      const confirmCancel = await confirmDialog({
+        title: 'Cancel Project',
+        message: 'Are you sure you want to cancel this project?',
+        confirmText: 'Yes, Cancel',
+        cancelText: 'No, Keep It',
+        danger: true,
+        icon: 'warning'
+      });
+
+      if (!confirmCancel) return;
+
+      // Ask who initiated the cancellation and why
+      const cancelInfo = await showCancelledByDialog();
+      if (!cancelInfo) return; // User cancelled the dialog
+      cancelled_by = cancelInfo.cancelled_by;
+      cancellation_reason = cancelInfo.reason;
+    }
+
+    const body: { status: string; cancelled_by?: string; cancellation_reason?: string } = { status };
+    if (cancelled_by) {
+      body.cancelled_by = cancelled_by;
+    }
+    if (cancellation_reason) {
+      body.cancellation_reason = cancellation_reason;
+    }
+
+    const response = await apiPut(`/api/admin/leads/${id}/status`, body);
     if (response.ok) {
       ctx.showNotification('Status updated', 'success');
     } else if (response.status !== 401) {
@@ -292,6 +353,146 @@ async function updateLeadStatus(id: number, status: string, ctx: AdminDashboardC
     console.error('[AdminLeads] Failed to update status:', error);
     ctx.showNotification('Failed to update status', 'error');
   }
+}
+
+interface CancellationInfo {
+  cancelled_by: string;
+  reason: string;
+}
+
+const CANCELLATION_REASONS = [
+  { value: 'budget', label: 'Budget constraints' },
+  { value: 'timeline', label: 'Timeline issues' },
+  { value: 'scope', label: 'Scope changed' },
+  { value: 'unresponsive', label: 'Client unresponsive' },
+  { value: 'found_alternative', label: 'Found alternative' },
+  { value: 'project_complete', label: 'Project no longer needed' },
+  { value: 'other', label: 'Other' }
+];
+
+/**
+ * Show dialog asking who cancelled and why
+ */
+async function showCancelledByDialog(): Promise<CancellationInfo | null> {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-dialog-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+
+    const reasonOptions = CANCELLATION_REASONS.map(r =>
+      `<option value="${r.value}">${r.label}</option>`
+    ).join('');
+
+    overlay.innerHTML = `
+      <div class="confirm-dialog" style="max-width: 450px;">
+        <h3 class="confirm-dialog-title">CANCELLATION DETAILS</h3>
+
+        <div style="text-align: left; margin-bottom: var(--space-4);">
+          <label class="field-label" style="margin-bottom: var(--space-2); display: block;">Who cancelled?</label>
+          <div class="confirm-dialog-actions" style="justify-content: flex-start; margin-bottom: var(--space-4);">
+            <button type="button" class="confirm-dialog-btn cancelled-by-btn" data-value="admin">I Cancelled</button>
+            <button type="button" class="confirm-dialog-btn cancelled-by-btn" data-value="client">Client Cancelled</button>
+          </div>
+
+          <label class="field-label" style="margin-bottom: var(--space-2); display: block;">Reason</label>
+          <select id="cancel-reason" class="form-input" style="width: 100%; margin-bottom: var(--space-3);">
+            <option value="">Select a reason...</option>
+            ${reasonOptions}
+          </select>
+
+          <div id="cancel-description-wrapper" style="display: none;">
+            <label class="field-label" style="margin-bottom: var(--space-2); display: block;">Description (optional)</label>
+            <textarea id="cancel-description" class="form-input" rows="2" placeholder="Additional details..." style="width: 100%; resize: vertical;"></textarea>
+          </div>
+        </div>
+
+        <div class="confirm-dialog-actions">
+          <button type="button" class="confirm-dialog-btn cancel-btn">Cancel</button>
+          <button type="button" class="confirm-dialog-btn confirm-btn" style="color: var(--color-danger);" disabled>Confirm Cancellation</button>
+        </div>
+      </div>
+    `;
+
+    let selectedCancelledBy: string | null = null;
+
+    const cancelledByBtns = overlay.querySelectorAll('.cancelled-by-btn');
+    const reasonSelect = overlay.querySelector('#cancel-reason') as HTMLSelectElement;
+    const descWrapper = overlay.querySelector('#cancel-description-wrapper') as HTMLElement;
+    const descTextarea = overlay.querySelector('#cancel-description') as HTMLTextAreaElement;
+    const confirmBtn = overlay.querySelector('.confirm-btn') as HTMLButtonElement;
+    const cancelBtn = overlay.querySelector('.cancel-btn') as HTMLButtonElement;
+
+    // Update confirm button state
+    const updateConfirmState = () => {
+      const hasWho = !!selectedCancelledBy;
+      const hasReason = !!reasonSelect.value;
+      confirmBtn.disabled = !(hasWho && hasReason);
+    };
+
+    // Who cancelled buttons
+    cancelledByBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        cancelledByBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedCancelledBy = (btn as HTMLElement).dataset.value || null;
+        updateConfirmState();
+      });
+    });
+
+    // Reason dropdown - show description for "other"
+    reasonSelect.addEventListener('change', () => {
+      descWrapper.style.display = reasonSelect.value === 'other' ? 'block' : 'none';
+      updateConfirmState();
+    });
+
+    const closeDialog = (result: CancellationInfo | null) => {
+      overlay.classList.add('closing');
+      setTimeout(() => {
+        overlay.remove();
+        resolve(result);
+      }, 150);
+    };
+
+    // Cancel button
+    cancelBtn.addEventListener('click', () => closeDialog(null));
+
+    // Confirm button
+    confirmBtn.addEventListener('click', () => {
+      if (!selectedCancelledBy || !reasonSelect.value) return;
+
+      let reason = reasonSelect.value;
+      if (reason === 'other' && descTextarea.value.trim()) {
+        reason = descTextarea.value.trim();
+      } else {
+        // Get the label for the selected reason
+        const selectedOption = CANCELLATION_REASONS.find(r => r.value === reason);
+        if (selectedOption) {
+          reason = selectedOption.label;
+          if (descTextarea.value.trim()) {
+            reason += `: ${descTextarea.value.trim()}`;
+          }
+        }
+      }
+
+      closeDialog({
+        cancelled_by: selectedCancelledBy,
+        reason
+      });
+    });
+
+    // Close on overlay click
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeDialog(null);
+    });
+
+    // Close on Escape
+    overlay.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDialog(null);
+    });
+
+    document.body.appendChild(overlay);
+  });
 }
 
 export function showLeadDetails(leadId: number): void {
@@ -421,7 +622,7 @@ export function showLeadDetails(leadId: number): void {
         title: 'Activate Lead',
         message: 'Activate this lead as a project?',
         confirmText: 'Activate',
-        icon: 'question'
+        icon: 'folder-plus'
       });
       if (confirmed) {
         window.activateLeadFromPanel(parseInt(id));

@@ -1,0 +1,51 @@
+/**
+ * ===============================================
+ * SITE GLOBAL STYLES
+ * ===============================================
+ * @file src/styles/base/site-globals.css
+ *
+ * Global variables and unlayered overrides for the main site.
+ */
+
+/* Section transition variables */
+:root {
+  --blur-amount: 4px;
+  --drop-distance: 20px;
+  --transition-enter: 0.3s;
+  --transition-exit: 0.2s;
+  --stagger-delay: 0.05s;
+}
+
+/* Theme integration */
+body {
+  background-color: var(--color-neutral-300);
+  color: var(--color-dark);
+}
+
+/* Footer integration with theme */
+.footer .footer-text {
+  opacity: 1;
+  visibility: visible;
+  color: var(--color-dark);
+  font-size: 0.75rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-neutral-200, #f1f3f4);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-400, #9aa0a6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-500, #5f6368);
+}

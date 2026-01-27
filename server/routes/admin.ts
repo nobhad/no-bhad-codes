@@ -371,6 +371,8 @@ router.get(
           p.timeline,
           p.features,
           p.created_at,
+          p.start_date,
+          p.estimated_end_date as end_date,
           c.contact_name,
           c.company_name,
           c.email,
@@ -555,7 +557,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const { id } = req.params;
-      const { status } = req.body;
+      const { status, cancelled_by, cancellation_reason } = req.body;
 
       const validStatuses = ['pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled'];
       if (!validStatuses.includes(status)) {
@@ -563,6 +565,17 @@ router.put(
           success: false,
           error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
         });
+      }
+
+      // Validate cancelled_by when status is 'cancelled'
+      if (status === 'cancelled') {
+        const validCancelledBy = ['admin', 'client'];
+        if (!cancelled_by || !validCancelledBy.includes(cancelled_by)) {
+          return res.status(400).json({
+            success: false,
+            error: 'When cancelling, must specify cancelled_by as "admin" or "client"'
+          });
+        }
       }
 
       const db = getDatabase();
@@ -576,16 +589,26 @@ router.put(
         });
       }
 
-      await db.run(
-        'UPDATE projects SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-        [status, id]
-      );
+      // Update status and cancellation fields (clear them if not cancelling)
+      if (status === 'cancelled') {
+        await db.run(
+          'UPDATE projects SET status = ?, cancelled_by = ?, cancellation_reason = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+          [status, cancelled_by, cancellation_reason || null, id]
+        );
+      } else {
+        await db.run(
+          'UPDATE projects SET status = ?, cancelled_by = NULL, cancellation_reason = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+          [status, id]
+        );
+      }
 
       res.json({
         success: true,
         message: 'Lead status updated successfully',
         previousStatus: project.status,
-        newStatus: status
+        newStatus: status,
+        cancelledBy: status === 'cancelled' ? cancelled_by : null,
+        cancellationReason: status === 'cancelled' ? cancellation_reason : null
       });
     } catch (error) {
       console.error('Error updating lead status:', error);

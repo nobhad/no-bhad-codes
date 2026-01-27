@@ -22,7 +22,7 @@
    Standard gap between major content sections
    ===================================================== */
 
-/* Base spacing for content sections */
+/* Base spacing for content sections - uniform 1.5rem gap */
 :is([data-page="admin"], [data-page="client-portal"]) .quick-stats,
 :is([data-page="admin"], [data-page="client-portal"]) .overview-grid,
 :is([data-page="admin"], [data-page="client-portal"]) .analytics-overview,
@@ -30,7 +30,7 @@
 :is([data-page="admin"], [data-page="client-portal"]) .admin-table-card,
 :is([data-page="admin"], [data-page="client-portal"]) .portal-project-card,
 :is([data-page="admin"], [data-page="client-portal"]) .content-section {
-  margin-bottom: var(--portal-spacing-lg);
+  margin-bottom: var(--portal-spacing-xl);
 }
 
 /* Remove bottom margin from last child to prevent double spacing */

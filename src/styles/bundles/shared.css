@@ -43,3 +43,4 @@
 @import "../components/form-validation.css" layer(components);
 @import "../components/loading.css" layer(components);
 @import "../shared/progress.css" layer(components);
+@import "../shared/toast-notifications.css" layer(components);

@@ -168,3 +168,25 @@
 .custom-dropdown[data-modal-dropdown] .custom-dropdown-menu::-webkit-scrollbar-thumb:hover {
   background: var(--portal-text-muted);
 }
+
+/* ================================================
+   Fixed Positioning Mode (escapes modal overflow)
+   ================================================
+   When JS applies position: fixed, the menu escapes
+   modal overflow constraints. These styles handle
+   the flip-above variant when menu appears above trigger.
+   ================================================ */
+
+/* When flipped above, adjust trigger border radius */
+.custom-dropdown[data-modal-dropdown].flip-above.open .custom-dropdown-trigger {
+  border-radius: 0 0 var(--dropdown-radius) var(--dropdown-radius);
+  border-bottom: var(--dropdown-border-width) solid var(--color-brand-primary);
+  border-top: none;
+}
+
+/* When flipped above, adjust menu border radius */
+.custom-dropdown[data-modal-dropdown].flip-above .custom-dropdown-menu {
+  border-radius: var(--dropdown-radius) var(--dropdown-radius) 0 0;
+  border-bottom: none;
+  border-top: var(--dropdown-border-width) solid var(--color-brand-primary);
+}

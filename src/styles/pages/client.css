@@ -328,7 +328,7 @@ body[data-page="client"] .project-details {
 .overview-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: clamp(1rem, 2vw, 1.5rem);
+  gap: var(--portal-spacing-xl);
 }
 
 .overview-item {

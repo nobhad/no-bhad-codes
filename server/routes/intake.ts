@@ -96,6 +96,15 @@ async function saveIntakeAsFile(
   console.log(`[Intake] Saved intake form as file: ${relativePath}`);
 }
 
+interface ProposalSelection {
+  selectedTier: string;
+  addedFeatures: string[];
+  removedFeatures: string[];
+  maintenanceOption: string | null;
+  calculatedPrice: number;
+  notes: string;
+}
+
 interface IntakeFormData {
   name: string;
   email: string;
@@ -110,6 +119,7 @@ interface IntakeFormData {
   features?: string | string[];
   designLevel?: string;
   additionalInfo?: string;
+  proposalSelection?: ProposalSelection;
 }
 
 interface ExistingClient {
@@ -279,10 +289,35 @@ router.post('/', async (req: Request, res: Response) => {
       }
       console.log(`Created ${milestones.length} milestones for project ${projectId}`);
 
-      return { clientId, projectId, isNewClient };
+      // Create proposal request if provided
+      let proposalRequestId: number | null = null;
+      if (intakeData.proposalSelection) {
+        const proposal = intakeData.proposalSelection;
+        const proposalResult = await ctx.run(
+          `INSERT INTO proposal_requests (
+            project_id, client_id, project_type, selected_tier,
+            base_price, final_price, maintenance_option,
+            status, client_notes, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, datetime('now'))`,
+          [
+            projectId,
+            clientId,
+            intakeData.projectType,
+            proposal.selectedTier || 'better',
+            proposal.calculatedPrice || 0,
+            proposal.calculatedPrice || 0,
+            proposal.maintenanceOption || null,
+            proposal.notes || null
+          ]
+        );
+        proposalRequestId = proposalResult.lastID!;
+        console.log(`Created proposal request ${proposalRequestId} for project ${projectId}`);
+      }
+
+      return { clientId, projectId, isNewClient, proposalRequestId };
     });
 
-    const { clientId, projectId, isNewClient } = result;
+    const { clientId, projectId, isNewClient, proposalRequestId } = result;
 
     // Generate project plan based on intake data (outside transaction)
     const projectPlan: ProjectPlan = await generateProjectPlan(intakeData, projectId);
@@ -337,17 +372,25 @@ router.post('/', async (req: Request, res: Response) => {
       data: {
         clientId,
         projectId,
+        proposalRequestId,
         projectName: generateProjectName(intakeData.projectType, clientType, companyName, intakeData.name),
         accessToken,
         isNewClient,
         projectPlan: projectPlan.summary,
         estimatedDelivery: projectPlan.estimatedDelivery,
-        nextSteps: [
-          'Review your project details in the client portal',
-          'We\'ll send a detailed proposal within 24-48 hours',
-          'Schedule a discovery call to discuss requirements',
-          'Begin project development upon agreement'
-        ]
+        nextSteps: proposalRequestId
+          ? [
+            'Review your proposal in the client portal',
+            'We\'ll finalize your quote within 24-48 hours',
+            'Schedule a call to discuss the details',
+            'Begin project development upon agreement'
+          ]
+          : [
+            'Review your project details in the client portal',
+            'We\'ll send a detailed proposal within 24-48 hours',
+            'Schedule a discovery call to discuss requirements',
+            'Begin project development upon agreement'
+          ]
       }
     });
   } catch (error: unknown) {

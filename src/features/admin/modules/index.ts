@@ -47,3 +47,7 @@ export async function loadPerformanceModule() {
 export async function loadSystemStatusModule() {
   return import('./admin-system-status');
 }
+
+export async function loadProposalsModule() {
+  return import('./admin-proposals');
+}
