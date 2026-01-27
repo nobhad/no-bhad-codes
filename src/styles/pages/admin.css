@@ -349,10 +349,10 @@ body[data-page="admin"] .metric-group,
 body[data-page="admin"] .analytics-section,
 body[data-page="admin"] .analytics-overview,
 body[data-page="admin"] .visitors-table-container,
-body[data-page="admin"] .project-detail-overview,
-body[data-page="admin"] .pd-tab-content {
+body[data-page="admin"] .project-detail-overview {
   box-shadow: var(--shadow-panel);
 }
+
 
 /* Less intense shadows for Core Web Vitals & Bundle Analysis cards */
 body[data-page="admin"] .vital-card,
@@ -904,8 +904,8 @@ body.modal-open .dashboard-content {
   border: none;
   border-radius: var(--border-radius-card);
   overflow: visible; /* Allow dropdowns to overflow */
-  margin-top: var(--portal-spacing-lg);
   transition: background 0.2s ease;
+  /* Spacing handled by shared/portal-layout.css */
 }
 
 .admin-table-card:hover {
@@ -928,6 +928,7 @@ body.modal-open .dashboard-content {
   border-top: none;
   border-bottom: none;
   background: var(--portal-bg-dark);
+  border-radius: var(--border-radius-card) var(--border-radius-card) 0 0;
 }
 
 /* Badge appears before icon buttons on desktop */
@@ -1936,19 +1937,21 @@ body.modal-open .dashboard-content {
 [data-page="admin"] .table-dropdown .custom-dropdown-trigger {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
+  gap: 4px;
+  padding: 2px 6px;
   border: 1px solid var(--portal-border-dark);
   border-radius: 0;
   background-color: transparent;
   color: var(--portal-text-light);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
+  font-weight: 400;
   cursor: pointer;
   white-space: nowrap;
   box-shadow: none;
-  width: 100%;
-  min-width: 90px;
+  width: auto;
+  min-width: 80px;
   box-sizing: border-box;
+  height: 22px;
 }
 
 [data-page="admin"] .table-dropdown .custom-dropdown-trigger:hover {
@@ -1971,6 +1974,8 @@ body.modal-open .dashboard-content {
   z-index: 10000;
   position: relative;
   background-color: var(--portal-bg-dark);
+  height: 22px;
+  padding: 2px 6px;
 }
 
 [data-page="admin"] .table-dropdown .custom-dropdown-text {
@@ -2019,8 +2024,9 @@ body.modal-open .dashboard-content {
 }
 
 [data-page="admin"] .table-dropdown .custom-dropdown-item {
-  padding: 6px 8px;
-  font-size: 12px;
+  padding: 2px 6px;
+  font-size: var(--font-size-sm);
+  font-weight: 400;
   color: var(--portal-text-light);
   cursor: pointer;
   transition: background-color 0.15s ease;

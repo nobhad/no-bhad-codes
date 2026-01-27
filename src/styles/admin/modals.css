@@ -93,6 +93,7 @@
 
 .admin-modal-body {
   padding: var(--space-4) var(--space-5);
+  padding-bottom: calc(var(--space-5) + 120px);
   overflow-y: auto;
   flex: 1;
   min-height: 0;
@@ -114,6 +115,41 @@ body[data-page="admin"] .admin-modal-body .custom-dropdown-trigger {
   font-weight: 400;
 }
 
+/* Admin modal form inputs - invisible border that turns brand color on focus */
+body[data-page="admin"] .admin-modal-body .form-input,
+body[data-page="admin"] .admin-modal-body input[type="text"],
+body[data-page="admin"] .admin-modal-body input[type="email"],
+body[data-page="admin"] .admin-modal-body input[type="tel"],
+body[data-page="admin"] .admin-modal-body input[type="password"],
+body[data-page="admin"] .admin-modal-body textarea {
+  background: var(--portal-bg-medium);
+  border: 2px solid var(--portal-bg-medium);
+  border-radius: var(--border-radius-sm);
+  color: var(--portal-text-light);
+  padding: var(--space-3) var(--space-4);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+body[data-page="admin"] .admin-modal-body .form-input:focus,
+body[data-page="admin"] .admin-modal-body input[type="text"]:focus,
+body[data-page="admin"] .admin-modal-body input[type="email"]:focus,
+body[data-page="admin"] .admin-modal-body input[type="tel"]:focus,
+body[data-page="admin"] .admin-modal-body input[type="password"]:focus,
+body[data-page="admin"] .admin-modal-body textarea:focus {
+  outline: none;
+  border-color: var(--color-brand-primary);
+  box-shadow: none;
+}
+
+body[data-page="admin"] .admin-modal-body .form-input:hover:not(:focus),
+body[data-page="admin"] .admin-modal-body input[type="text"]:hover:not(:focus),
+body[data-page="admin"] .admin-modal-body input[type="email"]:hover:not(:focus),
+body[data-page="admin"] .admin-modal-body input[type="tel"]:hover:not(:focus),
+body[data-page="admin"] .admin-modal-body input[type="password"]:hover:not(:focus),
+body[data-page="admin"] .admin-modal-body textarea:hover:not(:focus) {
+  border-color: var(--portal-border-medium);
+}
+
 .admin-modal-body .form-row {
   display: flex;
   gap: var(--space-4);
@@ -133,31 +169,90 @@ body[data-page="admin"] .admin-modal-body .custom-dropdown-trigger {
 }
 
 /* ================================================
-   Modal Dropdown Modifier
+   Modal Dropdown - Import shared component
+   ================================================ */
+@import '../shared/portal-dropdown.css';
+
+/* ================================================
+   Modal Dropdown - Context Overrides
+   ================================================
+   Sets CSS variables for modal context.
+   All structural styles come from portal-dropdown.css
    ================================================ */
 
-body[data-page="admin"] .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger {
-  border: 4px solid transparent;
-  font-weight: 400;
+.admin-modal .custom-dropdown[data-modal-dropdown] {
+  /* Override dropdown variables for modal context */
+  --dropdown-bg: var(--color-black);
+  --dropdown-border-color: var(--portal-border-dark);
+  --dropdown-border-width: 1px;
+  --dropdown-radius: var(--portal-radius-lg);
 }
 
-.custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger:focus {
-  outline: 2px solid var(--color-brand-primary);
-  outline-offset: 2px;
+/* Allow dropdown menu to appear above modal footer */
+.admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-menu {
+  z-index: 10002;
+}
+
+/* When dropdown is open, allow it to escape modal clipping */
+.admin-modal-overlay:has(.custom-dropdown[data-modal-dropdown].open) {
+  overflow: visible;
+}
+
+.admin-modal:has(.custom-dropdown[data-modal-dropdown].open) {
+  overflow: visible;
+}
+
+.admin-modal:has(.custom-dropdown[data-modal-dropdown].open) form {
+  overflow: visible;
+}
+
+.admin-modal-body:has(.custom-dropdown[data-modal-dropdown].open) {
+  overflow: visible;
+}
+
+.admin-modal-footer {
+  position: relative;
+  z-index: 1;
+  background: var(--portal-bg-darker);
+}
+
+/* Explicit trigger styles for admin modal */
+.admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger {
+  background-color: var(--color-black);
+  border: 1px solid var(--portal-border-dark);
+  border-radius: var(--portal-radius-lg);
+}
+
+.admin-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-trigger {
+  background-color: var(--color-black);
   border-color: var(--color-brand-primary);
+  border-bottom: none;
+  border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
 }
 
-.custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger:hover {
-  border-color: var(--color-brand-primary);
+/* Explicit menu styles for admin modal */
+.admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-menu {
+  background-color: var(--color-black);
+  border: 1px solid var(--color-brand-primary);
+  border-top: none;
+  border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
+  margin-top: -1px;
+  max-height: 150px;
+  overflow-y: auto;
 }
 
-.custom-dropdown[data-modal-dropdown].open .custom-dropdown-trigger {
-  border-color: var(--color-brand-primary);
-  border-bottom-color: transparent;
+/* Heavier caret for admin modal dropdowns */
+.admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-caret {
+  stroke-width: 3;
 }
 
-.custom-dropdown[data-modal-dropdown] .custom-dropdown-menu {
-  border: none;
+/* Reduced padding for trigger and items (matches Messages dropdown) */
+.admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger {
+  padding: var(--space-2) var(--space-3);
+}
+
+.admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-item {
+  padding: var(--space-2) var(--space-3);
 }
 
 /* ================================================
