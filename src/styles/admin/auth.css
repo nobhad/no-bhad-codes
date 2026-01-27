@@ -20,7 +20,7 @@
   right: 0;
   bottom: 0;
   z-index: 9999;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease;
 }
 
 .auth-gate input::placeholder {
@@ -126,6 +126,7 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
 }
 
 /* Auth Gate Container - Matches portal dashboard styling */
+/* Shadow matches button style (--shadow-button-dark) */
 .auth-gate-container {
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-lg);
@@ -133,7 +134,7 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
   padding: clamp(1.5rem, 4vw, 2.5rem);
   width: 100%;
   max-width: min(500px, 90vw);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-button-dark);
 }
 
 .auth-gate-header {
