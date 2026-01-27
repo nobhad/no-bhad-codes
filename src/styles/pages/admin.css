@@ -19,14 +19,14 @@ body[data-page="admin"] {
    Show header and footer only on login page (before logged in)
    ================================================ */
 
-/* Show header on admin login page */
+/* Show header on admin login page - above auth-gate (z-index: 9999) */
 [data-page="admin"] .admin-header {
   display: flex;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 100;
+  z-index: 10000;
   background: transparent;
   height: var(--header-height, 60px);
 }
