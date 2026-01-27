@@ -25,6 +25,7 @@ html[data-theme="dark"] body[data-page="admin"] {
 /* ================================================
    ADMIN LOGIN PAGE - HEADER & FOOTER
    Show header and footer only on login page (before logged in)
+   Login page header MUST match main site styling exactly.
    ================================================ */
 
 /* Show header on admin login page - above auth-gate (z-index: 9999) */
@@ -39,6 +40,34 @@ html[data-theme="dark"] body[data-page="admin"] {
   height: var(--header-height, 60px);
 }
 
+/* CRITICAL: Admin login page header must use main site text colors, NOT portal colors */
+/* Override portal theme variables for header elements on login page */
+/* Transition must match body (0.2s) so all elements change simultaneously */
+body[data-page="admin"]:not(.admin-logged-in) .admin-header,
+body[data-page="admin"]:not(.admin-logged-in) .admin-header * {
+  color: var(--color-nav-text);
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+/* Nav logo and buttons inherit proper color */
+body[data-page="admin"]:not(.admin-logged-in) .nav-logo-row {
+  color: var(--color-nav-text);
+}
+
+body[data-page="admin"]:not(.admin-logged-in) .theme-button,
+body[data-page="admin"]:not(.admin-logged-in) .menu-button,
+body[data-page="admin"]:not(.admin-logged-in) .portal-button {
+  color: var(--color-nav-text);
+}
+
+/* Hover states should still turn primary color */
+body[data-page="admin"]:not(.admin-logged-in) .nav-logo-row:hover,
+body[data-page="admin"]:not(.admin-logged-in) .theme-button:hover,
+body[data-page="admin"]:not(.admin-logged-in) .menu-button:hover,
+body[data-page="admin"]:not(.admin-logged-in) .portal-button:hover {
+  color: var(--color-primary, var(--color-brand-primary));
+}
+
 /* Hide header when logged in */
 body.admin-logged-in[data-page="admin"] .admin-header {
   display: none;
@@ -46,6 +75,7 @@ body.admin-logged-in[data-page="admin"] .admin-header {
 
 /* Show footer on admin login page - override the global hide rule */
 /* Match main site footer styling exactly */
+/* Transition must match body (0.2s) so all elements change simultaneously */
 body[data-page="admin"]:not(.admin-logged-in) .admin-footer {
   display: flex !important;
   position: fixed;
@@ -56,11 +86,21 @@ body[data-page="admin"]:not(.admin-logged-in) .admin-footer {
   background: var(--color-neutral-300);
   padding: var(--spacing-sm) 0;
   font-size: var(--font-size-sm);
-  color: var(--color-dark);
+  color: var(--color-nav-text);
   text-align: center;
   z-index: 50;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Footer links should match main site */
+body[data-page="admin"]:not(.admin-logged-in) .admin-footer a {
+  color: var(--color-nav-text);
+}
+
+body[data-page="admin"]:not(.admin-logged-in) .admin-footer a:hover {
+  color: var(--color-primary, var(--color-brand-primary));
 }
 
 /* Hide footer when logged in */
