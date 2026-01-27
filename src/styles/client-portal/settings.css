@@ -108,12 +108,12 @@
 
 .settings-form label {
   font-weight: 600;
-  color: var(--color-dark);
+  color: var(--portal-text-light);
   font-size: 0.95rem;
 }
 
 .settings-form .form-input[readonly] {
-  background: var(--color-neutral-300);
+  background: var(--portal-bg-readonly);
   opacity: 0.7;
   cursor: not-allowed;
 }
@@ -136,15 +136,15 @@
   align-items: center;
   gap: var(--portal-spacing-md);
   cursor: pointer;
-  background: var(--color-neutral-100);
-  border: 1px solid var(--color-neutral-300);
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--portal-radius-sm);
   padding: var(--portal-spacing-md) var(--portal-spacing-lg);
   transition: border-color 0.2s ease;
 }
 
 .settings-form .checkbox-item:hover {
-  border-color: var(--color-neutral-400);
+  border-color: var(--color-brand-primary);
 }
 
 .settings-form .checkbox-item input[type="checkbox"] {
@@ -155,7 +155,7 @@
 
 .settings-form .checkbox-item span {
   font-size: 1rem;
-  color: var(--color-dark);
+  color: var(--portal-text-light);
 }
 
 .settings-form .btn {
@@ -186,13 +186,13 @@
 
 .form-group label {
   font-weight: 600;
-  color: var(--color-dark);
+  color: var(--portal-text-light);
   font-size: 0.9rem;
 }
 
 .form-input[readonly] {
-  background: var(--color-neutral-300);
-  color: var(--color-neutral-600);
+  background: var(--portal-bg-readonly);
+  color: var(--portal-text-muted);
 }
 
 /* Checkbox Group (generic) */
@@ -208,8 +208,8 @@
   align-items: center;
   gap: var(--portal-spacing-md);
   cursor: pointer;
-  background: var(--color-neutral-100);
-  border: 1px solid var(--color-neutral-300);
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-medium);
   border-radius: var(--portal-radius-sm);
   padding: var(--portal-spacing-md) var(--portal-spacing-lg);
   flex: 1;
@@ -217,7 +217,7 @@
 }
 
 .checkbox-item:hover {
-  border-color: var(--color-neutral-400);
+  border-color: var(--color-brand-primary);
 }
 
 .checkbox-item input[type="checkbox"] {
@@ -236,7 +236,7 @@
 .settings-header h1 {
   font-family: var(--font--acme);
   font-size: 2rem;
-  color: var(--color-dark);
+  color: var(--portal-text-light);
   margin: 0 0 var(--portal-spacing-sm) 0;
   text-transform: uppercase;
 }
