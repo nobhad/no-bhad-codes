@@ -384,10 +384,11 @@
 /* ============================================
  * INTERMEDIATE BREAKPOINT BUTTON STYLES
  * ============================================
- * At 1024px and below, sidebar collapses to icon-only.
+ * At 1300px and below, sidebar collapses to icon-only.
+ * 1300px triggers at ~150% zoom on 1920px screens.
  */
 
-@media (max-width: 1024px) {
+@media (max-width: 1300px) {
   :is([data-page="admin"], [data-page="client-portal"]) .sidebar .sidebar-buttons {
     gap: 0.5rem;
   }

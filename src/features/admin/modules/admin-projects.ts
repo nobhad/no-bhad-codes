@@ -63,6 +63,7 @@ type ProjectsDOMKeys = {
   createInvoiceBtn: string;
   addMilestoneBtn: string;
   sendMsgBtn: string;
+  addProjectBtn: string;
   // Containers
   messagesThread: string;
   messageInput: string;
@@ -77,6 +78,11 @@ type ProjectsDOMKeys = {
   editForm: string;
   editClose: string;
   editCancel: string;
+  // Add project modal
+  addProjectModal: string;
+  addProjectForm: string;
+  addProjectClose: string;
+  addProjectCancel: string;
 };
 
 /** Cached DOM element references for performance */
@@ -115,6 +121,7 @@ domCache.register({
   createInvoiceBtn: '#btn-create-invoice',
   addMilestoneBtn: '#btn-add-milestone',
   sendMsgBtn: '#btn-pd-send-message',
+  addProjectBtn: '#add-project-btn',
   // Containers
   messagesThread: '#pd-messages-thread',
   messageInput: '#pd-message-input',
@@ -128,7 +135,12 @@ domCache.register({
   editModal: '#edit-project-modal',
   editForm: '#edit-project-form',
   editClose: '#edit-project-close',
-  editCancel: '#edit-project-cancel'
+  editCancel: '#edit-project-cancel',
+  // Add project modal
+  addProjectModal: '#add-project-modal',
+  addProjectForm: '#add-project-form',
+  addProjectClose: '#add-project-modal-close',
+  addProjectCancel: '#add-project-cancel'
 });
 
 /** Lead/Project data from admin leads API */
@@ -325,6 +337,9 @@ function updateProjectsDisplay(data: ProjectsData, ctx: AdminDashboardContext): 
   });
 
   renderProjectsTable(projects, ctx);
+
+  // Setup add project button handler
+  setupAddProjectButton(ctx);
 }
 
 function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext): void {
@@ -767,8 +782,8 @@ async function saveProjectChanges(projectId: number): Promise<void> {
 }
 
 function setupProjectDetailTabs(ctx: AdminDashboardContext): void {
-  const tabBtns = document.querySelectorAll('.pd-tab-btn');
-  const tabContents = document.querySelectorAll('.pd-tab-content');
+  const tabBtns = document.querySelectorAll('.project-detail-tabs button');
+  const tabContents = document.querySelectorAll('[id^="pd-tab-"]');
 
   tabBtns.forEach((btn) => {
     const btnEl = btn as HTMLElement;
@@ -1410,5 +1425,305 @@ async function uploadProjectFiles(files: File[]): Promise<void> {
   } catch (error) {
     console.error('[AdminProjects] Upload error:', error);
     storedContext.showNotification(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+  }
+}
+
+// =====================================================
+// ADD PROJECT (ADMIN MANUAL CREATION)
+// =====================================================
+
+interface ClientOption {
+  id: number;
+  email: string;
+  contact_name: string | null;
+  company_name: string | null;
+}
+
+/**
+ * Setup the add project button handler
+ */
+export function setupAddProjectButton(ctx: AdminDashboardContext): void {
+  const addBtn = domCache.get('addProjectBtn');
+  if (addBtn && !addBtn.dataset.listenerAdded) {
+    addBtn.dataset.listenerAdded = 'true';
+    addBtn.addEventListener('click', () => addProject(ctx));
+  }
+}
+
+/**
+ * Open the add project modal
+ */
+async function addProject(ctx: AdminDashboardContext): Promise<void> {
+  const modal = domCache.get('addProjectModal');
+  const form = domCache.getAs<HTMLFormElement>('addProjectForm');
+  const closeBtn = domCache.get('addProjectClose');
+  const cancelBtn = domCache.get('addProjectCancel');
+
+  if (!modal || !form) return;
+
+  // Reset form
+  form.reset();
+
+  // Hide new client fields by default
+  const newClientFields = document.getElementById('new-client-fields');
+  if (newClientFields) newClientFields.classList.add('hidden');
+
+  // Load existing clients into dropdown
+  await populateClientDropdown();
+
+  // Initialize custom dropdowns for the modal
+  initAddProjectModalDropdowns();
+
+  // Setup client dropdown change handler
+  const clientSelect = document.getElementById('new-project-client') as HTMLSelectElement;
+  if (clientSelect) {
+    // Remove old listener by cloning
+    const newClientSelect = clientSelect.cloneNode(true) as HTMLSelectElement;
+    clientSelect.parentNode?.replaceChild(newClientSelect, clientSelect);
+    newClientSelect.addEventListener('change', toggleNewClientFields);
+  }
+
+  // Show modal and lock body scroll
+  modal.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+
+  // Close handlers
+  const closeModal = () => {
+    modal.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+    form.reset();
+    // Reset dropdown values
+    resetAddProjectDropdowns();
+  };
+
+  closeBtn?.addEventListener('click', closeModal, { once: true });
+  cancelBtn?.addEventListener('click', closeModal, { once: true });
+
+  // Click outside to close
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  }, { once: true });
+
+  // Form submit handler
+  const handleSubmit = async (e: Event) => {
+    e.preventDefault();
+    await handleAddProjectSubmit(ctx, closeModal);
+  };
+
+  form.addEventListener('submit', handleSubmit, { once: true });
+}
+
+/**
+ * Initialize custom dropdowns for the add project modal
+ */
+function initAddProjectModalDropdowns(): void {
+  // First, close any open dropdowns from previous modal session
+  document.querySelectorAll('.custom-dropdown[data-modal-dropdown].open').forEach((el) => {
+    el.classList.remove('open');
+  });
+
+  const clientSelect = document.getElementById('new-project-client') as HTMLSelectElement;
+  const typeSelect = document.getElementById('new-project-type') as HTMLSelectElement;
+  const budgetSelect = document.getElementById('new-project-budget') as HTMLSelectElement;
+  const timelineSelect = document.getElementById('new-project-timeline') as HTMLSelectElement;
+
+  // Client dropdown
+  if (clientSelect && !clientSelect.dataset.dropdownInit) {
+    clientSelect.dataset.dropdownInit = 'true';
+    initModalDropdown(clientSelect, { placeholder: 'Select existing client...' });
+  }
+
+  // Project type dropdown
+  if (typeSelect && !typeSelect.dataset.dropdownInit) {
+    typeSelect.dataset.dropdownInit = 'true';
+    initModalDropdown(typeSelect, { placeholder: 'Select type...' });
+  }
+
+  // Budget dropdown
+  if (budgetSelect && !budgetSelect.dataset.dropdownInit) {
+    budgetSelect.dataset.dropdownInit = 'true';
+    initModalDropdown(budgetSelect, { placeholder: 'Select budget...' });
+  }
+
+  // Timeline dropdown
+  if (timelineSelect && !timelineSelect.dataset.dropdownInit) {
+    timelineSelect.dataset.dropdownInit = 'true';
+    initModalDropdown(timelineSelect, { placeholder: 'Select timeline...' });
+  }
+}
+
+/**
+ * Reset dropdown values and close all dropdowns when modal closes
+ */
+function resetAddProjectDropdowns(): void {
+  const clientSelect = document.getElementById('new-project-client') as HTMLSelectElement;
+  const typeSelect = document.getElementById('new-project-type') as HTMLSelectElement;
+  const budgetSelect = document.getElementById('new-project-budget') as HTMLSelectElement;
+  const timelineSelect = document.getElementById('new-project-timeline') as HTMLSelectElement;
+
+  // Reset each dropdown using setModalDropdownValue
+  [clientSelect, typeSelect, budgetSelect, timelineSelect].forEach((select) => {
+    if (select) {
+      const wrapper = select.previousElementSibling as HTMLElement;
+      if (wrapper?.classList.contains('custom-dropdown')) {
+        // Close the dropdown if open
+        wrapper.classList.remove('open');
+        // Reset value
+        setModalDropdownValue(wrapper, '');
+      }
+    }
+  });
+}
+
+/**
+ * Populate the client dropdown with existing clients
+ */
+async function populateClientDropdown(): Promise<void> {
+  const clientSelect = document.getElementById('new-project-client') as HTMLSelectElement;
+  if (!clientSelect) return;
+
+  try {
+    const response = await apiFetch('/api/clients');
+    if (response.ok) {
+      const data = await response.json();
+      const clients: ClientOption[] = data.clients || [];
+
+      // Clear existing options except first two
+      while (clientSelect.options.length > 2) {
+        clientSelect.remove(2);
+      }
+
+      // Add client options
+      clients.forEach((client) => {
+        const option = document.createElement('option');
+        option.value = String(client.id);
+        const displayName = client.contact_name || client.email;
+        const company = client.company_name ? ` (${client.company_name})` : '';
+        option.textContent = `${displayName}${company}`;
+        clientSelect.appendChild(option);
+      });
+    }
+  } catch (error) {
+    console.error('[AdminProjects] Failed to load clients for dropdown:', error);
+  }
+}
+
+/**
+ * Toggle visibility of new client fields based on dropdown selection
+ */
+function toggleNewClientFields(): void {
+  const clientSelect = document.getElementById('new-project-client') as HTMLSelectElement;
+  const newClientFields = document.getElementById('new-client-fields');
+
+  if (!clientSelect || !newClientFields) return;
+
+  if (clientSelect.value === 'new') {
+    newClientFields.classList.remove('hidden');
+    // Make new client fields required
+    const nameInput = document.getElementById('new-project-client-name') as HTMLInputElement;
+    const emailInput = document.getElementById('new-project-client-email') as HTMLInputElement;
+    if (nameInput) nameInput.required = true;
+    if (emailInput) emailInput.required = true;
+  } else {
+    newClientFields.classList.add('hidden');
+    // Remove required from new client fields
+    const nameInput = document.getElementById('new-project-client-name') as HTMLInputElement;
+    const emailInput = document.getElementById('new-project-client-email') as HTMLInputElement;
+    if (nameInput) nameInput.required = false;
+    if (emailInput) emailInput.required = false;
+  }
+}
+
+/**
+ * Get input value by ID
+ */
+function getInputValue(id: string): string {
+  const el = document.getElementById(id) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+  return el?.value?.trim() || '';
+}
+
+/**
+ * Handle add project form submission
+ */
+async function handleAddProjectSubmit(
+  ctx: AdminDashboardContext,
+  closeModal: () => void
+): Promise<void> {
+  const clientId = getInputValue('new-project-client');
+  const isNewClient = clientId === 'new';
+
+  // Validate required fields
+  if (!clientId) {
+    ctx.showNotification('Please select a client', 'error');
+    return;
+  }
+
+  const projectType = getInputValue('new-project-type');
+  const description = getInputValue('new-project-description');
+  const budget = getInputValue('new-project-budget');
+  const timeline = getInputValue('new-project-timeline');
+
+  if (!projectType || !description || !budget || !timeline) {
+    ctx.showNotification('Please fill in all required fields', 'error');
+    return;
+  }
+
+  // Gather project data
+  const projectData: {
+    newClient: {
+      name: string;
+      email: string;
+      company: string;
+      phone: string;
+    } | null;
+    clientId: number | null;
+    projectType: string;
+    description: string;
+    budget: string;
+    timeline: string;
+    notes: string;
+  } = {
+    newClient: isNewClient ? {
+      name: getInputValue('new-project-client-name'),
+      email: getInputValue('new-project-client-email'),
+      company: getInputValue('new-project-client-company'),
+      phone: getInputValue('new-project-client-phone')
+    } : null,
+    clientId: isNewClient ? null : parseInt(clientId),
+    projectType,
+    description,
+    budget,
+    timeline,
+    notes: getInputValue('new-project-notes')
+  };
+
+  // Validate new client fields if creating new client
+  if (isNewClient) {
+    if (!projectData.newClient?.name || !projectData.newClient?.email) {
+      ctx.showNotification('Client name and email are required', 'error');
+      return;
+    }
+  }
+
+  try {
+    const response = await apiPost('/api/admin/projects', projectData);
+
+    if (response.ok) {
+      const result = await response.json();
+      ctx.showNotification('Project created successfully', 'success');
+      closeModal();
+      await loadProjects(ctx);
+
+      // Optionally navigate to the new project
+      if (result.projectId) {
+        showProjectDetails(result.projectId, ctx);
+      }
+    } else {
+      const error = await response.json();
+      ctx.showNotification(error.error || 'Failed to create project', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminProjects] Error creating project:', error);
+    ctx.showNotification('Error creating project', 'error');
   }
 }

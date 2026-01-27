@@ -23,11 +23,11 @@
 }
 
 .auth-gate input::placeholder {
-  text-align: center;
+  text-align: left;
 }
 
 .auth-gate input {
-  text-align: center;
+  text-align: left;
 }
 
 .auth-gate.hidden {

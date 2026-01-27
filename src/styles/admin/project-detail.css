@@ -102,17 +102,20 @@
   gap: var(--portal-spacing-xl);
 }
 
-/* Project Detail Tabs - sits directly on top of content as one visual unit */
+/* ==============================================
+   PROJECT DETAIL TABS
+   All tab styling uses .project-detail-tabs as parent
+   ============================================== */
 .project-detail-tabs {
   display: flex;
   gap: var(--portal-spacing-sm);
   margin-bottom: 0;
   overflow: visible;
   position: relative;
-  z-index: 2;
 }
 
-.pd-tab-btn {
+/* Tab buttons (inactive) */
+.project-detail-tabs button {
   display: flex;
   align-items: center;
   gap: var(--portal-spacing-sm);
@@ -129,79 +132,96 @@
   transition: all 0.15s ease;
   white-space: nowrap;
   position: relative;
-  /* Inactive tabs sit BEHIND content - lower z-index */
   z-index: 0;
-  /* No shadow on inactive tabs - they're behind the content */
   box-shadow: none;
 }
 
-.pd-tab-btn .tab-icon {
+.project-detail-tabs button .tab-icon {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
 }
 
-.pd-tab-btn:hover:not(.active) {
+.project-detail-tabs button:hover:not(.active) {
   color: var(--portal-text-light);
   background: var(--color-primary);
 }
 
-.pd-tab-btn.active {
+/* Active tab */
+.project-detail-tabs button.active {
+  position: relative;
   color: var(--portal-text-light);
   background: var(--portal-bg-dark);
   font-weight: 700;
-  position: relative;
-  z-index: 2;
-  /* Same shadow as content, clip-path shows TOP, LEFT, RIGHT only */
-  box-shadow: var(--shadow-panel);
-  clip-path: inset(-20px -20px 0 -20px);
+  z-index: 10;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-  margin-bottom: -1px;
-  padding-bottom: calc(var(--portal-spacing-md) + 1px);
+  margin-bottom: 0;
+  /* Right shadow + left (slightly more intense to match content) + top outline, no bottom */
+  box-shadow:
+    2px 0 4px rgba(0, 0, 0, 0.4),
+    4px 0 12px rgba(0, 0, 0, 0.3),
+    -1px 0 1px rgba(0, 0, 0, 0.5),
+    0 -1px 1px rgba(0, 0, 0, 0.3);
 }
 
-/* Active tab should never change color on hover/focus */
-.pd-tab-btn.active:hover,
-.pd-tab-btn.active:focus,
-.pd-tab-btn.active:active {
+/* Cover element to hide seam between active tab and content */
+.project-detail-tabs button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 15px;
+  background: var(--portal-bg-dark);
+  z-index: 11;
+  box-shadow: none;
+}
+
+
+.project-detail-tabs button.active:hover,
+.project-detail-tabs button.active:focus,
+.project-detail-tabs button.active:active {
   background: var(--portal-bg-dark);
   color: var(--portal-text-light);
   outline: none;
 }
 
-/* Project Detail Tab Content - base styles
-   Tabs + content should appear as ONE unified elevated unit */
-.pd-tab-content {
+
+/* Tab content panels - targets divs with id starting with "pd-tab-" */
+[id^="pd-tab-"] {
   display: none;
   background: var(--portal-bg-dark);
-  /* Top-left always square (tabs start there), other corners rounded */
   border-radius: 0 var(--portal-radius-lg) var(--portal-radius-lg) var(--portal-radius-lg);
   padding: 4rem 2rem;
-  /* Full shadow - clip-path hides top (tab handles top) */
-  box-shadow: var(--shadow-panel);
-  clip-path: inset(0 -20px -20px -20px);
   position: relative;
-  z-index: 1;
-  /* Override admin.css .tab-content.active > * + * margin rule */
+  z-index: 2;
   margin-top: 0 !important;
+  /* Match --shadow-panel: right + bottom shadows, subtle left outline */
+  box-shadow:
+    2px 0 4px rgba(0, 0, 0, 0.4),
+    4px 0 12px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    -1px 0 1px rgba(0, 0, 0, 0.3);
 }
 
-.pd-tab-content.active {
+
+[id^="pd-tab-"].active {
   display: flex;
   flex-direction: column;
   gap: 4rem;
 }
 
 /* Remove individual card backgrounds and shadows inside tabs - content is now in unified container */
-[data-page="admin"] .pd-tab-content .portal-project-card,
-[data-page="admin"] .pd-tab-content .portal-shadow,
-[data-page="admin"] .pd-tab-content .files-upload-section,
+[data-page="admin"] [id^="pd-tab-"] .portal-project-card,
+[data-page="admin"] [id^="pd-tab-"] .portal-shadow,
+[data-page="admin"] [id^="pd-tab-"] .files-upload-section,
 /* High specificity with body element selector */
-body[data-page="admin"] .pd-tab-content .files-list-section,
-body[data-page="admin"] .pd-tab-content .intake-form-section,
-body[data-page="admin"] .pd-tab-content .recent-activity,
-body[data-page="admin"] .pd-tab-content .settings-section {
+body[data-page="admin"] [id^="pd-tab-"] .files-list-section,
+body[data-page="admin"] [id^="pd-tab-"] .intake-form-section,
+body[data-page="admin"] [id^="pd-tab-"] .recent-activity,
+body[data-page="admin"] [id^="pd-tab-"] .settings-section {
   background: transparent;
   border: none;
   border-radius: 0;
@@ -211,7 +231,7 @@ body[data-page="admin"] .pd-tab-content .settings-section {
 }
 
 /* Messages container keeps its light background styling */
-body[data-page="admin"] .pd-tab-content .messages-container {
+body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   background: var(--color-neutral-200);
   border-radius: var(--portal-radius-lg);
   padding: 0;
@@ -221,7 +241,7 @@ body[data-page="admin"] .pd-tab-content .messages-container {
 
 /* Invoice summary cards - styled like Weekly Overview cards */
 /* High specificity with body element selector */
-body[data-page="admin"] .pd-tab-content .invoice-summary {
+body[data-page="admin"] [id^="pd-tab-"] .invoice-summary {
   display: flex;
   gap: var(--portal-spacing-xl);
   margin: 0;
@@ -229,7 +249,7 @@ body[data-page="admin"] .pd-tab-content .invoice-summary {
   box-shadow: none;
 }
 
-body[data-page="admin"] .pd-tab-content .summary-card {
+body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   background: var(--portal-bg-medium);
   border: none;
   border-radius: var(--portal-radius-md);
@@ -243,7 +263,7 @@ body[data-page="admin"] .pd-tab-content .summary-card {
 }
 
 /* Summary card labels - match overview stat labels */
-[data-page="admin"] .pd-tab-content .summary-card h4 {
+[data-page="admin"] [id^="pd-tab-"] .summary-card h4 {
   color: var(--portal-text-secondary);
   font-size: 0.85rem;
   font-weight: 500;
@@ -253,27 +273,27 @@ body[data-page="admin"] .pd-tab-content .summary-card {
 }
 
 /* Summary card values - match overview stat numbers */
-[data-page="admin"] .pd-tab-content .summary-card .summary-value {
+[data-page="admin"] [id^="pd-tab-"] .summary-card .summary-value {
   color: var(--portal-text-light);
   font-size: 1.5rem;
   font-weight: 700;
 }
 
-[data-page="admin"] .pd-tab-content .summary-card .summary-value.outstanding {
+[data-page="admin"] [id^="pd-tab-"] .summary-card .summary-value.outstanding {
   color: var(--color-warning);
 }
 
-[data-page="admin"] .pd-tab-content .summary-card .summary-value.paid {
+[data-page="admin"] [id^="pd-tab-"] .summary-card .summary-value.paid {
   color: var(--color-primary);
 }
 
 /* Override any adjacent sibling margins inside tab content */
-.pd-tab-content .portal-project-card + .portal-project-card {
+[id^="pd-tab-"] .portal-project-card + .portal-project-card {
   margin-top: 0;
 }
 
 /* Unified heading style for all sections inside tab content */
-.pd-tab-content h3 {
+[id^="pd-tab-"] h3 {
   font-family: var(--font--acme);
   font-size: 1.2rem;
   font-weight: 400;
@@ -284,7 +304,7 @@ body[data-page="admin"] .pd-tab-content .summary-card {
 }
 
 /* Invoice summary within tab - keep flex layout */
-.pd-tab-content .invoice-summary {
+[id^="pd-tab-"] .invoice-summary {
   display: flex;
   gap: var(--portal-spacing-xl);
   margin: 0;
@@ -1051,15 +1071,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   font-weight: var(--font-weight-medium);
 }
 
-/* ================================================
-   Admin Page Uniform Spacing
-   ================================================ */
-
-/* Consistent spacing for stacked cards/sections */
-[data-page="admin"] .portal-project-card + .portal-project-card,
-[data-page="admin"] .admin-table-card + .admin-table-card {
-  margin-top: var(--portal-spacing-lg);
-}
+/* Spacing for stacked cards now handled by shared/portal-layout.css */
 
 /* Client selector wrapper - aligns with messages-container */
 [data-page="admin"] .client-selector-wrapper {
@@ -1078,14 +1090,14 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   margin-bottom: var(--space-1);
 }
 
-/* Custom dropdown component */
-[data-page="admin"] .custom-dropdown {
+/* Custom dropdown component (excludes modal dropdowns which have their own styles) */
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) {
   position: relative;
   width: 100%;
 }
 
 
-[data-page="admin"] .custom-dropdown-trigger {
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) .custom-dropdown-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1099,36 +1111,36 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   font-size: var(--font-size-base);
   cursor: pointer;
   text-align: left;
-  box-shadow: var(--shadow-panel);
+  box-shadow: none;
 }
 
-[data-page="admin"] .custom-dropdown-trigger:hover {
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) .custom-dropdown-trigger:hover {
   border-color: var(--color-brand-primary);
 }
 
-[data-page="admin"] .custom-dropdown-trigger:focus {
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) .custom-dropdown-trigger:focus {
   outline: none;
   border-color: var(--color-brand-primary);
 }
 
-[data-page="admin"] .custom-dropdown-text {
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) .custom-dropdown-text {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-[data-page="admin"] .custom-dropdown-caret {
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) .custom-dropdown-caret {
   flex-shrink: 0;
   margin-left: var(--space-2);
   transition: transform 0.2s ease;
 }
 
-[data-page="admin"] .custom-dropdown.open .custom-dropdown-caret {
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]).open .custom-dropdown-caret {
   transform: rotate(180deg);
 }
 
-[data-page="admin"] .custom-dropdown-menu {
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) .custom-dropdown-menu {
   display: none;
   position: absolute;
   top: 100%;
@@ -1145,10 +1157,10 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   max-height: 300px;
   overflow-y: auto;
   z-index: 100;
-  box-shadow: var(--shadow-panel);
+  box-shadow: none;
 }
 
-[data-page="admin"] .custom-dropdown.open .custom-dropdown-menu {
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]).open .custom-dropdown-menu {
   display: block;
   border-color: var(--color-brand-primary);
   /* Only sides and bottom shadow - clip top shadow with clip-path */
@@ -1157,7 +1169,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   margin-top: -4px;
 }
 
-[data-page="admin"] .custom-dropdown.open .custom-dropdown-trigger {
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]).open .custom-dropdown-trigger {
   border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
   border-color: var(--color-brand-primary);
   border-bottom: none;

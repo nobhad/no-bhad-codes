@@ -8,6 +8,32 @@ This file tracks active development work and TODOs. Completed items are moved to
 
 ## Known Concerns
 
+### Sidebar Zoom Collapse (150%+)
+
+**Status:** FIXED - January 26, 2026
+
+Sidebar was not properly collapsing to icon-only mode when browser zoomed to 150% or more. Text was showing truncated and footer buttons were overlapping.
+
+**Root cause:**
+
+- Base sidebar had `min-width: 180px` preventing collapse to 56px
+- `clamp(200px, 18vw, 240px)` width was overriding media query
+- Footer positioning caused overlap with last button (SYSTEM)
+
+**Fix applied:**
+
+- Changed base `min-width` to 56px (allows collapse)
+- Added `!important` to 1024px breakpoint width (56px) to override clamp()
+- Made sidebar buttons area scrollable when needed
+- Changed footer to `position: sticky; bottom: 0` with background for proper layering
+- Hidden scrollbars for clean appearance
+
+**Files modified:**
+
+- `src/styles/client-portal/sidebar.css`
+
+---
+
 ### Analytics - Average Session Calculation Still Off
 
 **Status:** FIXED - January 26, 2026
@@ -64,9 +90,57 @@ The Files section in project details is not showing the original intake form sub
 
 ---
 
+### Modal Dropdown Focus State - Visible Divider Line
+
+**Status:** FIXED - January 26, 2026
+
+Fixed by using the Messages dropdown pattern:
+
+- Border on trigger (not wrapper)
+- `border-bottom: none` on trigger when open
+- `margin-top: -1px` on menu to overlap
+- Same background color (`--color-black`) on trigger and menu
+
+**Files modified:**
+
+- `src/styles/admin/modals.css` - Modal dropdown overrides
+- `src/styles/shared/portal-dropdown.css` - Base dropdown component
+
+---
+
+### Modal Dropdown Overflow - Menu Cut Off at Modal Bottom
+
+**Status:** KNOWN ISSUE
+**Observed:** January 26, 2026
+
+When a dropdown near the bottom of a modal is opened, its menu gets clipped/cut off by the modal boundary. The `:has()` CSS selector approach to set `overflow: visible` on parent elements has limited effectiveness.
+
+**Current behavior:**
+
+- Dropdowns near the bottom of the modal have their menus cut off
+- The menu cannot escape the modal's `overflow: hidden` / `max-height: 90vh` constraint
+
+**Attempted fixes:**
+
+- Added `overflow: visible` via `:has()` selector on modal overlay, modal, form, and modal body
+- Increased z-index on dropdown menu
+
+**Possible solutions:**
+
+- Use `position: fixed` for dropdown menu (requires JavaScript to calculate position)
+- Render dropdown menu in a portal outside the modal
+- Limit dropdown menu height with scrolling
+- Reorder form fields so dropdowns aren't at the bottom
+
+**Affected files:**
+
+- `src/styles/admin/modals.css`
+
+---
+
 ### Project Details Tabs Styling - Seamless Shadow
 
-**Status:** IN PROGRESS
+**Status:** IN PROGRESS - Improved but not fully seamless
 **Observed:** January 26, 2026
 
 Active tab + main content div need to appear as ONE seamless unit with continuous shadows (no borders).
@@ -76,24 +150,39 @@ Active tab + main content div need to appear as ONE seamless unit with continuou
 - Gap between tabs and content: FIXED
 - Inactive tabs appear behind content: FIXED
 - Top-left corner of content is square: FIXED
-- Shadow continuity: NOT FIXED - still visible seam/break
+- Class consolidation: FIXED - Using `.project-detail-tabs` as parent with descendant selectors
+- Shadow continuity: IN PROGRESS
 
-**Requirements for seamless shadow:**
+**Completed changes:**
 
-- Active tab shows shadow on TOP, LEFT, RIGHT only (no bottom shadow)
-- Content div shows shadow on LEFT, RIGHT, BOTTOM only (no top shadow)
-- Shadows must be continuous around the perimeter of combined tab+content shape
-- No visible seam, line, or break at junction between tab and content
-- No overlap of tab into content (margin-bottom: 0)
-- Use `::after` pseudo-elements with `clip-path` to control which sides show shadow
+- Consolidated CSS classes: removed `.pd-tab-btn` and `.pd-tab-content`
+- HTML uses `class="active"` for active tabs, `id="pd-tab-*"` for content panels
+- JS selectors updated from `.pd-tab-btn` to `.project-detail-tabs button`
+- Content div left shadow matches `--shadow-panel` (subtle `-1px 0 1px`)
 
-**Current approach (partially working):**
+**Current approach:**
 
-- Active tab `::after` with `clip-path: inset(-20px -20px 0 -20px)` - clips bottom
-- Content `::after` with `clip-path: inset(0 -20px -20px -20px)` - clips top
-- Both use `var(--shadow-panel)` for consistent shadow values
+- Active tab has `position: relative` with `::after` pseudo-element
+- `::after` covers junction: `bottom: -8px`, `height: 15px`, same bg color, no shadow
+- Tab: right shadows + slightly intense left + top outline, NO bottom shadow
+- Content: right shadows + bottom shadows + subtle left outline, NO top shadow
 
-**Shadow variable:** `--shadow-panel` in `variables.css`
+**Shadow values:**
+
+- Right (both): `2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3)`
+- Left (tab): `-1px 0 1px rgba(0, 0, 0, 0.5)` (slightly more intense)
+- Left (content): `-1px 0 1px rgba(0, 0, 0, 0.3)` (subtle, matches `--shadow-panel`)
+- Bottom (content only): `0 2px 4px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3)`
+- Top (tab only): `0 -1px 1px rgba(0, 0, 0, 0.3)`
+
+**IMPORTANT: Do NOT change main content div shadow - only adjust TAB shadow for fine-tuning**
+
+**Files modified:**
+
+- `src/styles/admin/project-detail.css` - Tab and content shadow styling
+- `admin/index.html` - Removed `.pd-tab-btn` and `.pd-tab-content` classes
+- `src/features/admin/modules/admin-projects.ts` - Updated selectors
+- `src/features/admin/admin-project-details.ts` - Updated selectors
 
 **File:** `src/styles/admin/project-detail.css`
 

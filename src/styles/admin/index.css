@@ -15,6 +15,7 @@
 @import "../shared/portal-cards.css";
 @import "../shared/portal-forms.css";
 @import "../shared/portal-files.css";
+@import "../shared/portal-dropdown.css";
 
 /* Portal layout and sidebar (shared with client portal) */
 @import "../client-portal/layout.css";

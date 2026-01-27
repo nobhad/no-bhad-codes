@@ -11,6 +11,36 @@
 
 import { ICONS } from '../constants/icons';
 
+// Track if global handlers have been set up
+let globalHandlersInitialized = false;
+
+/**
+ * Setup global click/escape handlers for all modal dropdowns (only once)
+ */
+function setupGlobalDropdownHandlers(): void {
+  if (globalHandlersInitialized) return;
+  globalHandlersInitialized = true;
+
+  // Close dropdowns on click outside
+  document.addEventListener('click', (e) => {
+    const target = e.target as Node;
+    document.querySelectorAll('.custom-dropdown[data-modal-dropdown].open').forEach((dropdown) => {
+      if (!dropdown.contains(target)) {
+        dropdown.classList.remove('open');
+      }
+    });
+  });
+
+  // Close dropdowns on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.custom-dropdown[data-modal-dropdown].open').forEach((dropdown) => {
+        dropdown.classList.remove('open');
+      });
+    }
+  });
+}
+
 export interface ModalDropdownOptions {
   onChange?: (value: string, label: string) => void;
   placeholder?: string;
@@ -89,19 +119,8 @@ export function initModalDropdown(
     toggleDropdown(wrapper);
   });
 
-  // Close on click outside
-  document.addEventListener('click', (e) => {
-    if (!wrapper.contains(e.target as Node)) {
-      closeDropdown(wrapper);
-    }
-  });
-
-  // Close on escape key
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeDropdown(wrapper);
-    }
-  });
+  // Setup global handlers only once (not per dropdown)
+  setupGlobalDropdownHandlers();
 
   // Replace select with custom dropdown
   selectElement.style.display = 'none';

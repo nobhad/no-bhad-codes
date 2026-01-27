@@ -460,6 +460,9 @@
               <div class="admin-table-header">
                 <h3>Projects</h3>
                 <div class="admin-table-actions" id="projects-filter-container">
+                  <button class="icon-btn" id="add-project-btn" title="Add Project">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                  </button>
                   <button class="icon-btn" id="refresh-projects-btn" title="Refresh">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
                   </button>
@@ -1047,28 +1050,27 @@
               </div>
             </div>
 
-            <!-- Project Detail Tabs -->
             <div class="project-detail-tabs">
-              <button class="pd-tab-btn active" data-pd-tab="overview">
+              <button class="active" data-pd-tab="overview">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
                 <span>Overview</span>
               </button>
-              <button class="pd-tab-btn" data-pd-tab="files">
+              <button data-pd-tab="files">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
                 <span>Files</span>
               </button>
-              <button class="pd-tab-btn" data-pd-tab="messages">
+              <button data-pd-tab="messages">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
                 <span>Messages</span>
               </button>
-              <button class="pd-tab-btn" data-pd-tab="invoices">
+              <button data-pd-tab="invoices">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
                 <span>Invoices</span>
               </button>
             </div>
 
             <!-- Overview Sub-Tab -->
-            <div class="pd-tab-content active" id="pd-tab-overview">
+            <div class="active" id="pd-tab-overview">
               <!-- Progress Section -->
               <div class="portal-project-card portal-shadow">
                 <h3>Project Progress</h3>
@@ -1114,7 +1116,7 @@
             </div>
 
             <!-- Files Sub-Tab -->
-            <div class="pd-tab-content" id="pd-tab-files">
+            <div id="pd-tab-files">
               <!-- Upload Section -->
               <div class="files-upload-section portal-shadow">
                 <h3>Upload Files for Client</h3>
@@ -1135,7 +1137,7 @@
             </div>
 
               <!-- Messages Sub-Tab -->
-            <div class="pd-tab-content" id="pd-tab-messages">
+            <div id="pd-tab-messages">
               <div class="messages-container portal-shadow">
                 <div class="messages-thread" id="pd-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Project messages thread">
                   <p class="empty-state">
@@ -1159,7 +1161,7 @@
             </div>
 
             <!-- Invoices Sub-Tab -->
-            <div class="pd-tab-content" id="pd-tab-invoices">
+            <div id="pd-tab-invoices">
               <!-- Invoice Summary -->
               <div class="invoice-summary">
                 <div class="summary-card portal-shadow">
@@ -1248,6 +1250,99 @@
           <div class="admin-modal-footer">
             <button type="button" class="btn btn-secondary" id="add-client-cancel">Cancel</button>
             <button type="submit" class="btn btn-primary">Add Client</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Project Modal -->
+    <div class="admin-modal-overlay hidden" id="add-project-modal">
+      <div class="admin-modal">
+        <div class="admin-modal-header">
+          <h3>Add New Project</h3>
+          <button class="admin-modal-close" id="add-project-modal-close" aria-label="Close modal">
+            &times;
+          </button>
+        </div>
+        <form id="add-project-form">
+          <div class="admin-modal-body">
+            <!-- Client Selection -->
+            <div class="form-group">
+              <label class="field-label" for="new-project-client">Client *</label>
+              <select id="new-project-client" class="form-input" required>
+                <option value="">Select existing client...</option>
+                <option value="new">+ Create New Client</option>
+              </select>
+            </div>
+
+            <!-- New Client Fields (hidden by default) -->
+            <div id="new-client-fields" class="hidden">
+              <div class="form-group">
+                <label class="field-label" for="new-project-client-name">Contact Name *</label>
+                <input type="text" id="new-project-client-name" class="form-input" placeholder="John Smith" />
+              </div>
+              <div class="form-group">
+                <label class="field-label" for="new-project-client-email">Email *</label>
+                <input type="email" id="new-project-client-email" class="form-input" placeholder="client@example.com" />
+              </div>
+              <div class="form-group">
+                <label class="field-label" for="new-project-client-company">Company Name</label>
+                <input type="text" id="new-project-client-company" class="form-input" placeholder="Acme Inc." />
+              </div>
+              <div class="form-group">
+                <label class="field-label" for="new-project-client-phone">Phone</label>
+                <input type="tel" id="new-project-client-phone" class="form-input" placeholder="(555) 123-4567" />
+              </div>
+            </div>
+
+            <!-- Project Fields -->
+            <div class="form-group">
+              <label class="field-label" for="new-project-type">Project Type *</label>
+              <select id="new-project-type" class="form-input" required>
+                <option value="">Select type...</option>
+                <option value="simple-site">Simple Website</option>
+                <option value="business-site">Business Website</option>
+                <option value="portfolio">Portfolio</option>
+                <option value="ecommerce">E-Commerce</option>
+                <option value="web-app">Web Application</option>
+                <option value="browser-extension">Browser Extension</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="field-label" for="new-project-description">Description *</label>
+              <textarea id="new-project-description" class="form-input" rows="3" placeholder="Brief project description..." required></textarea>
+            </div>
+            <div class="form-group">
+              <label class="field-label" for="new-project-budget">Budget *</label>
+              <select id="new-project-budget" class="form-input" required>
+                <option value="">Select budget...</option>
+                <option value="under-1k">Under $1,000</option>
+                <option value="1k-2.5k">$1,000 - $2,500</option>
+                <option value="2.5k-5k">$2,500 - $5,000</option>
+                <option value="5k-10k">$5,000 - $10,000</option>
+                <option value="10k+">$10,000+</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="field-label" for="new-project-timeline">Timeline *</label>
+              <select id="new-project-timeline" class="form-input" required>
+                <option value="">Select timeline...</option>
+                <option value="asap">ASAP</option>
+                <option value="1-month">Within 1 Month</option>
+                <option value="1-3-months">1-3 Months</option>
+                <option value="3-6-months">3-6 Months</option>
+                <option value="flexible">Flexible</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="field-label" for="new-project-notes">Additional Notes</label>
+              <textarea id="new-project-notes" class="form-input" rows="2" placeholder="Any additional details..."></textarea>
+            </div>
+          </div>
+          <div class="admin-modal-footer">
+            <button type="button" class="btn btn-secondary" id="add-project-cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add Project</button>
           </div>
         </form>
       </div>

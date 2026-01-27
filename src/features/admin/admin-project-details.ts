@@ -431,8 +431,8 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    */
   private setupProjectDetailTabs(): void {
     // Set up project detail sub-tab navigation
-    const tabBtns = document.querySelectorAll('.pd-tab-btn');
-    const tabContents = document.querySelectorAll('.pd-tab-content');
+    const tabBtns = document.querySelectorAll('.project-detail-tabs button');
+    const tabContents = document.querySelectorAll('[id^="pd-tab-"]');
 
     tabBtns.forEach((btn) => {
       const btnEl = btn as HTMLElement;

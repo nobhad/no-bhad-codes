@@ -9,6 +9,8 @@
 
 import express from 'express';
 import crypto from 'crypto';
+import { writeFileSync } from 'fs';
+import { join } from 'path';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { cacheService } from '../services/cache-service.js';
@@ -16,6 +18,7 @@ import { emailService } from '../services/email-service.js';
 import { errorTracker } from '../services/error-tracking.js';
 import { queryStats } from '../services/query-stats.js';
 import { getDatabase } from '../database/init.js';
+import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../config/uploads.js';
 
 const router = express.Router();
 
@@ -850,6 +853,258 @@ router.post(
     }
   })
 );
+
+/**
+ * @swagger
+ * /api/admin/projects:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: Create a new project manually
+ *     description: Admin can create a project for an existing or new client, saves project details as JSON file
+ *     security:
+ *       - BearerAuth: []
+ */
+router.post(
+  '/projects',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { newClient, clientId, projectType, description, budget, timeline, notes } = req.body;
+
+    // Validate required project fields
+    if (!projectType || !description || !budget || !timeline) {
+      return res.status(400).json({
+        error: 'Project type, description, budget, and timeline are required'
+      });
+    }
+
+    // Validate client - must have either newClient or clientId
+    if (!newClient && !clientId) {
+      return res.status(400).json({
+        error: 'Either newClient data or clientId is required'
+      });
+    }
+
+    const db = getDatabase();
+    let finalClientId: number;
+    let clientData: { contact_name: string; company_name: string | null; email: string };
+
+    try {
+      // Create or validate client
+      if (newClient) {
+        // Validate new client fields
+        if (!newClient.name || !newClient.email) {
+          return res.status(400).json({
+            error: 'Client name and email are required'
+          });
+        }
+
+        // Check for existing client with same email
+        const existing = await db.get(
+          'SELECT id FROM clients WHERE LOWER(email) = LOWER(?)',
+          [newClient.email]
+        );
+        if (existing) {
+          return res.status(409).json({
+            error: 'Client with this email already exists'
+          });
+        }
+
+        // Create client
+        const result = await db.run(
+          `INSERT INTO clients (company_name, contact_name, email, phone, password_hash, status, client_type, created_at, updated_at)
+           VALUES (?, ?, LOWER(?), ?, '', 'pending', 'business', datetime('now'), datetime('now'))`,
+          [newClient.company || null, newClient.name, newClient.email, newClient.phone || null]
+        );
+        finalClientId = result.lastID!;
+
+        clientData = {
+          contact_name: newClient.name,
+          company_name: newClient.company || null,
+          email: newClient.email.toLowerCase()
+        };
+
+        console.log(`[AdminProjects] Created new client: ${finalClientId}`);
+      } else {
+        // Validate existing client
+        const client = await db.get(
+          'SELECT id, contact_name, company_name, email FROM clients WHERE id = ?',
+          [clientId]
+        );
+        if (!client) {
+          return res.status(404).json({
+            error: 'Client not found'
+          });
+        }
+        finalClientId = clientId;
+        clientData = {
+          contact_name: (client as { contact_name: string }).contact_name || '',
+          company_name: (client as { company_name: string | null }).company_name,
+          email: (client as { email: string }).email
+        };
+      }
+
+      // Generate project name
+      const projectName = generateAdminProjectName(projectType, clientData);
+
+      // Create project
+      const projectResult = await db.run(
+        `INSERT INTO projects (
+          client_id, project_name, description, status, project_type,
+          budget_range, timeline, additional_info, created_at, updated_at
+        ) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+        [finalClientId, projectName, description, projectType, budget, timeline, notes || null]
+      );
+      const projectId = projectResult.lastID!;
+
+      console.log(`[AdminProjects] Created project: ${projectId} - ${projectName}`);
+
+      // Save project data as JSON file (like intake form)
+      try {
+        await saveAdminProjectAsFile({
+          clientName: clientData.contact_name,
+          clientEmail: clientData.email,
+          companyName: clientData.company_name,
+          projectType,
+          description,
+          budget,
+          timeline,
+          notes: notes || null
+        }, projectId, projectName);
+      } catch (fileError) {
+        console.error('[AdminProjects] Failed to save project file:', fileError);
+        // Non-critical error - don't fail the whole request
+      }
+
+      // Create initial project update
+      await db.run(
+        `INSERT INTO project_updates (
+          project_id, title, description, update_type, author, created_at
+        ) VALUES (?, ?, ?, 'general', 'admin', datetime('now'))`,
+        [
+          projectId,
+          'Project Created',
+          'Project was manually created by admin.'
+        ]
+      );
+
+      // Log the action
+      errorTracker.captureMessage('Admin created project manually', 'info', {
+        tags: { component: 'admin-projects' },
+        user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
+        extra: { projectId, projectName, clientId: finalClientId }
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Project created successfully',
+        projectId,
+        projectName,
+        clientId: finalClientId
+      });
+    } catch (error) {
+      console.error('[AdminProjects] Error creating project:', error);
+      res.status(500).json({
+        error: 'Failed to create project'
+      });
+    }
+  })
+);
+
+/**
+ * Generate project name for admin-created projects
+ */
+function generateAdminProjectName(
+  projectType: string,
+  clientData: { contact_name: string; company_name: string | null }
+): string {
+  const typeNames: Record<string, string> = {
+    'simple-site': 'Simple Website',
+    'business-site': 'Business Website',
+    portfolio: 'Portfolio Website',
+    ecommerce: 'E-commerce Store',
+    'web-app': 'Web Application',
+    'browser-extension': 'Browser Extension',
+    other: 'Custom Project'
+  };
+
+  const typeName = typeNames[projectType] || 'Web Project';
+  const identifier = clientData.company_name || clientData.contact_name || 'Client';
+
+  return `${identifier} - ${typeName}`;
+}
+
+/**
+ * Save admin-created project as JSON file
+ */
+interface AdminProjectData {
+  clientName: string;
+  clientEmail: string;
+  companyName: string | null;
+  projectType: string;
+  description: string;
+  budget: string;
+  timeline: string;
+  notes: string | null;
+}
+
+async function saveAdminProjectAsFile(
+  data: AdminProjectData,
+  projectId: number,
+  projectName: string
+): Promise<void> {
+  const db = getDatabase();
+  const uploadsDir = getUploadsSubdir(UPLOAD_DIRS.INTAKE);
+
+  const document = {
+    submittedAt: new Date().toISOString(),
+    projectId,
+    projectName,
+    createdBy: 'admin',
+    clientInfo: {
+      name: data.clientName,
+      email: data.clientEmail,
+      companyName: data.companyName
+    },
+    projectDetails: {
+      type: data.projectType,
+      description: data.description,
+      timeline: data.timeline,
+      budget: data.budget
+    },
+    additionalInfo: data.notes
+  };
+
+  const timestamp = Date.now();
+  const safeProjectName = projectName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
+  const filename = `admin_project_${projectId}_${safeProjectName}_${timestamp}.json`;
+  const filePath = join(uploadsDir, filename);
+  const relativePath = getRelativePath(UPLOAD_DIRS.INTAKE, filename);
+
+  writeFileSync(filePath, JSON.stringify(document, null, 2), 'utf-8');
+  const fileSize = Buffer.byteLength(JSON.stringify(document, null, 2), 'utf-8');
+
+  await db.run(
+    `INSERT INTO files (
+      project_id, filename, original_filename, file_path,
+      file_size, mime_type, file_type, description, uploaded_by, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+    [
+      projectId,
+      filename,
+      'Project Details.json',
+      relativePath,
+      fileSize,
+      'application/json',
+      'document',
+      'Project details created by admin',
+      'admin'
+    ]
+  );
+
+  console.log(`[AdminProjects] Saved project file: ${relativePath}`);
+}
 
 /**
  * GET /api/admin/bundle-stats
