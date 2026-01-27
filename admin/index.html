@@ -5,18 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard - No Bhad Codes</title>
     <style>
-      :root {
-        --bg: #ffffff;
-        --fg: #000000;
-      }
-      [data-theme='dark'] {
-        --bg: #1a1a1a;
-        --fg: #ffffff;
-      }
+      /* Match main site: use --color-neutral-300 which is overridden in dark mode */
       html,
       body {
-        background-color: var(--bg);
-        color: var(--fg);
+        background-color: var(--color-neutral-300, #e0e0e0);
+        color: var(--color-dark, #333333);
         margin: 0;
         padding: 0;
       }

@@ -7,14 +7,13 @@
  * Authentication gate and login form styles.
  */
 
-/* Auth Gate - uses --bg variable from admin/index.html inline styles */
-/* This matches the main site body background exactly */
+/* Auth Gate - uses same --color-neutral-300 as main site body */
 .auth-gate {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: var(--bg, var(--color-neutral-300));
+  background: var(--color-neutral-300);
   position: fixed;
   top: 0;
   left: 0;

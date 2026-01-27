@@ -16,12 +16,10 @@ body[data-page="admin"] {
 
 /* ================================================
    ADMIN LOGIN PAGE - THEME TOGGLE SUPPORT
-   Auth-gate uses same --bg variable as body (defined in admin/index.html inline styles)
-   This ensures it matches the main site exactly
+   Override --color-neutral-300 in dark mode to match main site
    ================================================ */
-body[data-page="admin"] .auth-gate {
-  background: var(--bg);
-  transition: background-color 0.3s ease;
+html[data-theme="dark"] body[data-page="admin"] {
+  --color-neutral-300: var(--color-dark);
 }
 
 /* ================================================
