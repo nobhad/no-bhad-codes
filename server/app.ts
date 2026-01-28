@@ -69,16 +69,28 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ['\'self\''],
-        scriptSrc: ['\'self\'', '\'unsafe-inline\'', '\'unsafe-eval\''],
+        scriptSrc: ['\'self\'', '\'unsafe-inline\'', '\'unsafe-eval\''], // unsafe-eval needed for GSAP
         styleSrc: ['\'self\'', '\'unsafe-inline\''],
-        imgSrc: ['\'self\'', 'data:', 'https:'],
+        imgSrc: ['\'self\'', 'data:', 'https:', 'blob:'],
         connectSrc: ['\'self\'', 'https://api.sentry.io'],
         fontSrc: ['\'self\''],
         mediaSrc: ['\'self\''],
         objectSrc: ['\'none\''],
-        frameSrc: ['\'none\'']
+        frameSrc: ['\'none\''],
+        baseUri: ['\'self\''],
+        formAction: ['\'self\'']
       }
-    }
+    },
+    // Prevent clickjacking
+    frameguard: { action: 'deny' },
+    // Hide X-Powered-By header
+    hidePoweredBy: true,
+    // Prevent MIME type sniffing
+    noSniff: true,
+    // XSS filter (legacy browsers)
+    xssFilter: true,
+    // Referrer policy - don't leak referrer to external sites
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
   })
 );
 

@@ -1137,6 +1137,9 @@ router.post(
     // Hash the new password using centralized salt rounds
     const hashedPassword = await bcrypt.hash(password, PASSWORD_CONFIG.SALT_ROUNDS);
 
+    const clientId = getNumber(client, 'id');
+    const clientEmail = getString(client, 'email');
+
     // Update client with password and activate account
     await db.run(
       `
@@ -1144,10 +1147,79 @@ router.post(
       SET password_hash = ?, status = 'active', invitation_token = NULL, invitation_expires_at = NULL
       WHERE id = ?
     `,
-      [hashedPassword, getNumber(client, 'id')]
+      [hashedPassword, clientId]
     );
 
-    return sendSuccess(res, { email: getString(client, 'email') }, 'Password set successfully. You can now log in.');
+    // Get client name for personalization
+    const clientData = await db.get(
+      'SELECT contact_name, company_name FROM clients WHERE id = ?',
+      [clientId]
+    );
+    const clientName = getString(clientData, 'contact_name') || getString(clientData, 'company_name') || 'there';
+
+    // === ACCOUNT ACTIVATION WELCOME FLOW ===
+    // 1. Send welcome email with billing CTA
+    try {
+      await emailService.sendAccountActivationEmail(clientEmail, {
+        name: clientName
+      });
+      console.log(`[AUTH] Sent account activation email to ${clientEmail}`);
+    } catch (emailError) {
+      console.error('[AUTH] Failed to send account activation email:', emailError);
+      // Continue - account was activated successfully
+    }
+
+    // 2. Create welcome system message in portal inbox
+    try {
+      await db.run(
+        `INSERT INTO general_messages
+         (client_id, sender_type, sender_name, subject, message, message_type, priority, status, is_read)
+         VALUES (?, 'system', 'No Bhad Codes', ?, ?, 'system', 'normal', 'new', FALSE)`,
+        [
+          clientId,
+          'Welcome to Your Client Portal!',
+          `Hi ${clientName},
+
+Welcome to your No Bhad Codes client portal! Your account is now active.
+
+**What you can do here:**
+- View your project status and milestones
+- Send and receive messages with our team
+- Upload and download project files
+- View and pay invoices
+
+**Important: Please add your billing information**
+To ensure smooth invoicing and payments, please add your billing details in your Settings.
+
+Click on "Settings" in the sidebar to update your billing information.
+
+If you have any questions, feel free to send us a message through this portal.
+
+Best regards,
+No Bhad Codes Team`
+        ]
+      );
+      console.log(`[AUTH] Created welcome message for client ${clientId}`);
+    } catch (messageError) {
+      console.error('[AUTH] Failed to create welcome message:', messageError);
+      // Continue - account was activated successfully
+    }
+
+    // 3. Log the activation
+    await auditLogger.log({
+      action: 'account_activated',
+      entityType: 'client',
+      entityId: String(clientId),
+      entityName: clientEmail,
+      userId: clientId,
+      userEmail: clientEmail,
+      userType: 'client',
+      metadata: { activatedVia: 'invitation_link' },
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.get('user-agent') || 'unknown'
+    });
+
+    return sendSuccess(res, { email: clientEmail }, 'Password set successfully. You can now log in.');
   })
 );
 

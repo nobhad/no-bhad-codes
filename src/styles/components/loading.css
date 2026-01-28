@@ -149,6 +149,27 @@
   }
 }
 
+/* Button loading state */
+button[aria-busy="true"],
+input[type="submit"][aria-busy="true"] {
+  cursor: wait;
+  opacity: 0.8;
+}
+
+button[aria-busy="true"] .loading-spinner,
+button[aria-busy="true"] .btn-loading-text {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+button[aria-busy="true"] .loading-spinner {
+  margin-right: 0.5rem;
+}
+
+.btn-loading-text {
+  font-size: inherit;
+}
+
 /* Loading state in table row */
 .loading-row.loading-state {
   text-align: center;

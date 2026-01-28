@@ -540,6 +540,140 @@ export const emailService = {
    * @param email - Recipient email address
    * @param data - Magic link data including token and optional name
    */
+  /**
+   * Send account activation welcome email with billing CTA
+   * @param email - Recipient email address
+   * @param data - Activation data including name and portal URL
+   */
+  async sendAccountActivationEmail(
+    email: string,
+    data: { name?: string; portalUrl?: string }
+  ): Promise<EmailResult> {
+    console.log('[EMAIL] Preparing account activation welcome email for:', email);
+
+    const portalUrl = data.portalUrl || `${process.env.WEBSITE_URL || 'http://localhost:3000'}/client/portal`;
+    const settingsUrl = `${portalUrl}#settings`;
+    const name = data.name || 'there';
+
+    const emailContent: EmailContent = {
+      to: email,
+      subject: 'Welcome to Your Client Portal - No Bhad Codes',
+      text: `
+        Hi ${name},
+
+        Your account is now active! Welcome to your No Bhad Codes client portal.
+
+        Here's what you can do in your portal:
+        - View your project status and milestones
+        - Send and receive messages
+        - Upload and download files
+        - View and pay invoices
+
+        IMPORTANT: Please add your billing information
+        To ensure smooth invoicing and payments, please add your billing details:
+        ${settingsUrl}
+
+        Access your portal anytime:
+        ${portalUrl}
+
+        If you have any questions, feel free to reach out through the portal messaging system.
+
+        Best regards,
+        No Bhad Codes Team
+      `,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #1a1a2e; color: #fff; padding: 30px 20px; text-align: center; }
+            .header h1 { margin: 0; color: #7ff709; }
+            .content { padding: 30px 20px; background: #f9f9f9; }
+            .button {
+              display: inline-block;
+              padding: 14px 28px;
+              background: #7ff709;
+              color: #000;
+              text-decoration: none;
+              border-radius: 4px;
+              font-weight: bold;
+              margin: 10px 5px;
+            }
+            .button-secondary {
+              background: #1a1a2e;
+              color: #fff;
+            }
+            .highlight-box {
+              background: #fff3cd;
+              border-left: 4px solid #ffc107;
+              padding: 15px 20px;
+              margin: 20px 0;
+              border-radius: 0 4px 4px 0;
+            }
+            .feature-list {
+              background: #fff;
+              padding: 20px;
+              border-radius: 8px;
+              margin: 20px 0;
+            }
+            .feature-list li {
+              margin: 10px 0;
+              padding-left: 10px;
+            }
+            .footer { padding: 20px; text-align: center; font-size: 0.9em; color: #666; background: #f0f0f0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Welcome to No Bhad Codes!</h1>
+              <p style="margin: 10px 0 0; opacity: 0.9;">Your account is now active</p>
+            </div>
+
+            <div class="content">
+              <p>Hi ${name},</p>
+
+              <p>Your client portal account has been successfully activated. You now have access to all the tools you need to collaborate with us on your project.</p>
+
+              <div class="feature-list">
+                <strong>Here's what you can do in your portal:</strong>
+                <ul>
+                  <li>View your project status and milestones</li>
+                  <li>Send and receive messages</li>
+                  <li>Upload and download files</li>
+                  <li>View and pay invoices</li>
+                </ul>
+              </div>
+
+              <div class="highlight-box">
+                <strong>Action Required: Add Your Billing Information</strong>
+                <p style="margin: 10px 0 0;">To ensure smooth invoicing and payments, please take a moment to add your billing details in your portal settings.</p>
+              </div>
+
+              <p style="text-align: center; margin: 30px 0;">
+                <a href="${settingsUrl}" class="button">Add Billing Info</a>
+                <a href="${portalUrl}" class="button button-secondary">Go to Portal</a>
+              </p>
+
+              <p>If you have any questions, feel free to reach out through the portal messaging system.</p>
+            </div>
+
+            <div class="footer">
+              <p>Best regards,<br><strong>No Bhad Codes Team</strong></p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    };
+
+    return sendEmail(emailContent);
+  },
+
   async sendMagicLinkEmail(
     email: string,
     data: { magicLinkToken: string; name?: string }

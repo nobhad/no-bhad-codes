@@ -31,6 +31,8 @@ import { showTableLoading } from '../../../utils/loading-utils';
 import { confirmDialog, confirmDanger } from '../../../utils/confirm-dialog';
 import { showTableError } from '../../../utils/error-utils';
 import { createDOMCache, batchUpdateText, getElement } from '../../../utils/dom-cache';
+import { withButtonLoading } from '../../../utils/button-loading';
+import { manageFocusTrap } from '../../../utils/focus-trap';
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -123,6 +125,9 @@ export interface Client {
   created_at: string;
   updated_at: string;
   project_count?: number;
+  // Invitation fields
+  invitation_sent_at?: string | null;
+  invitation_expires_at?: string | null;
   // Billing fields
   billing_name?: string | null;
   billing_email?: string | null;
@@ -312,20 +317,55 @@ function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): voi
       const safeCompany = client.company_name
         ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(client.company_name))
         : '';
-      const status = client.status || 'pending';
-      const displayStatus = status.charAt(0).toUpperCase() + status.slice(1);
       const projectCount = client.project_count || 0;
 
       // Client type - plain text
       const clientType = client.client_type || 'business';
       const typeLabel = clientType === 'personal' ? 'Personal' : 'Business';
 
+      // Determine invitation/status display
+      // Status logic: active = activated, pending + invited = waiting, pending + not invited = not invited
+      const status = client.status || 'pending';
+      const hasBeenInvited = !!client.invitation_sent_at;
+
+      let statusDisplay: string;
+      let statusClass: string;
+      let showInviteBtn = false;
+
+      if (status === 'active') {
+        statusDisplay = 'Active';
+        statusClass = 'status-active';
+      } else if (status === 'inactive') {
+        statusDisplay = 'Inactive';
+        statusClass = 'status-inactive';
+      } else if (hasBeenInvited) {
+        // Pending but invitation was sent
+        statusDisplay = 'Invited';
+        statusClass = 'status-pending';
+      } else {
+        // Pending and never invited - show invite button
+        statusDisplay = 'Not Invited';
+        statusClass = 'status-not-invited';
+        showInviteBtn = true;
+      }
+
+      // Status cell with optional invite button
+      const statusCell = showInviteBtn
+        ? `<span class="${statusClass}">${statusDisplay}</span>
+           <button class="btn-invite-inline" data-client-id="${client.id}" title="Send invitation email">
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+               <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+             </svg>
+             Invite
+           </button>`
+        : `<span class="${statusClass}">${statusDisplay}</span>`;
+
       return `
         <tr data-client-id="${client.id}" class="clickable-row">
           <td>${safeName}${safeCompany ? `<br><small>${safeCompany}</small>` : ''}</td>
           <td>${typeLabel}</td>
           <td>${safeEmail}</td>
-          <td>${displayStatus}</td>
+          <td class="status-cell">${statusCell}</td>
           <td>${projectCount}</td>
           <td>${date}</td>
         </tr>
@@ -333,11 +373,24 @@ function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): voi
     })
     .join('');
 
-  // Row click to view details
+  // Row click to view details (but not on invite button)
   tableBody.querySelectorAll('tr[data-client-id]').forEach((row) => {
-    row.addEventListener('click', () => {
+    row.addEventListener('click', (e) => {
+      // Don't navigate if clicking the invite button
+      if ((e.target as HTMLElement).closest('.btn-invite-inline')) return;
       const clientId = parseInt((row as HTMLElement).dataset.clientId || '0');
       if (clientId) showClientDetails(clientId);
+    });
+  });
+
+  // Invite button click handlers
+  tableBody.querySelectorAll('.btn-invite-inline').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation(); // Prevent row click
+      const clientId = parseInt((btn as HTMLElement).dataset.clientId || '0');
+      if (clientId) {
+        await sendClientInvitation(clientId);
+      }
     });
   });
 }
@@ -649,7 +702,7 @@ async function resendClientInvite(clientId: number): Promise<void> {
   if (!confirmed) return;
 
   try {
-    const response = await apiPost(`/api/clients/${clientId}/resend-invite`);
+    const response = await apiPost(`/api/clients/${clientId}/send-invite`);
 
     if (response.ok) {
       storedContext?.showNotification('Invitation resent successfully', 'success');
@@ -659,6 +712,50 @@ async function resendClientInvite(clientId: number): Promise<void> {
   } catch (error) {
     console.error('[AdminClients] Error resending invite:', error);
     storedContext?.showNotification('Error resending invitation', 'error');
+  }
+}
+
+/**
+ * Send invitation to a client who hasn't been invited yet
+ * Called from the inline "Invite" button in the clients table
+ */
+async function sendClientInvitation(clientId: number): Promise<void> {
+  const client = clientsData.find(c => c.id === clientId);
+  if (!client) {
+    storedContext?.showNotification('Client not found', 'error');
+    return;
+  }
+
+  const clientName = client.contact_name || client.email;
+  const confirmed = await confirmDialog({
+    title: 'Send Invitation',
+    message: `Send portal invitation to ${clientName}?`,
+    confirmText: 'Send Invitation',
+    icon: 'question'
+  });
+  if (!confirmed) return;
+
+  try {
+    const response = await apiPost(`/api/clients/${clientId}/send-invite`);
+
+    if (response.ok) {
+      storedContext?.showNotification('Invitation sent successfully', 'success');
+      // Update local client data to reflect invitation sent
+      const clientIndex = clientsData.findIndex(c => c.id === clientId);
+      if (clientIndex !== -1) {
+        clientsData[clientIndex].invitation_sent_at = new Date().toISOString();
+      }
+      // Re-render table to update status
+      if (storedContext) {
+        renderClientsTable(clientsData, storedContext);
+      }
+    } else {
+      const error = await response.json().catch(() => ({}));
+      storedContext?.showNotification(error.message || 'Failed to send invitation', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminClients] Error sending invite:', error);
+    storedContext?.showNotification('Error sending invitation', 'error');
   }
 }
 
@@ -704,11 +801,21 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
   modal.classList.remove('hidden');
   document.body.classList.add('modal-open');
 
-  // Close handlers
+  // Store cleanup function - assigned after manageFocusTrap call
+  let cleanupFocusTrap: (() => void) | null = null;
+
+  // Close handlers - defined before manageFocusTrap so it can be referenced
   const closeModal = () => {
+    cleanupFocusTrap?.();
     modal.classList.add('hidden');
     document.body.classList.remove('modal-open');
   };
+
+  // Setup focus trap
+  cleanupFocusTrap = manageFocusTrap(modal, {
+    initialFocus: emailInput,
+    onClose: closeModal
+  });
 
   const closeHandler = () => closeModal();
   closeBtn?.addEventListener('click', closeHandler, { once: true });
@@ -724,13 +831,14 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
 
+    const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
     const newEmail = emailInput?.value.trim();
     const newName = nameInput?.value.trim();
     const newCompany = companyInput?.value.trim();
     const newPhone = phoneInput?.value.trim();
     const newStatus = statusSelect?.value;
 
-    try {
+    await withButtonLoading(submitBtn, async () => {
       const response = await apiPut(`/api/clients/${clientId}`, {
         email: newEmail || null,
         contact_name: newName || null,
@@ -738,19 +846,28 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
         phone: newPhone || null,
         status: newStatus
       });
+      const result = await response.json();
 
-      if (response.ok) {
+      if (response.ok && result.client) {
         ctx.showNotification('Client info updated successfully', 'success');
         closeModal();
-        await loadClients(ctx);
+        // Update local client data with response (no need to reload all clients)
+        const clientIndex = clientsData.findIndex(c => c.id === clientId);
+        if (clientIndex !== -1) {
+          // Preserve computed fields that the API might not return
+          const existingClient = clientsData[clientIndex];
+          clientsData[clientIndex] = {
+            ...existingClient,
+            ...result.client,
+            // Preserve project_count which is computed
+            project_count: existingClient.project_count
+          };
+        }
         showClientDetails(clientId, ctx);
       } else {
-        ctx.showNotification('Failed to update client info', 'error');
+        ctx.showNotification(result.error || 'Failed to update client info', 'error');
       }
-    } catch (error) {
-      console.error('[AdminClients] Error updating client info:', error);
-      ctx.showNotification('Error updating client info', 'error');
-    }
+    }, 'Saving...');
   };
 
   form.addEventListener('submit', handleSubmit, { once: true });
@@ -791,11 +908,21 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
   modal.classList.remove('hidden');
   document.body.classList.add('modal-open');
 
-  // Close handlers
+  // Store cleanup function - assigned after manageFocusTrap call
+  let cleanupFocusTrap: (() => void) | null = null;
+
+  // Close handlers - defined before manageFocusTrap so it can be referenced
   const closeModal = () => {
+    cleanupFocusTrap?.();
     modal.classList.add('hidden');
     document.body.classList.remove('modal-open');
   };
+
+  // Setup focus trap
+  cleanupFocusTrap = manageFocusTrap(modal, {
+    initialFocus: nameInput,
+    onClose: closeModal
+  });
 
   const closeHandler = () => closeModal();
   closeBtn?.addEventListener('click', closeHandler, { once: true });
@@ -811,6 +938,7 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
 
+    const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
     const newBillingName = nameInput?.value.trim();
     const newBillingEmail = emailInput?.value.trim();
     const newBillingAddress = addressInput?.value.trim();
@@ -819,7 +947,7 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
     const newBillingZip = zipInput?.value.trim();
     const newBillingCountry = countryInput?.value.trim();
 
-    try {
+    await withButtonLoading(submitBtn, async () => {
       const response = await apiPut(`/api/clients/${clientId}`, {
         billing_name: newBillingName || null,
         billing_email: newBillingEmail || null,
@@ -838,10 +966,7 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
       } else {
         ctx.showNotification('Failed to update billing details', 'error');
       }
-    } catch (error) {
-      console.error('[AdminClients] Error updating billing details:', error);
-      ctx.showNotification('Error updating billing details', 'error');
-    }
+    }, 'Saving...');
   };
 
   form.addEventListener('submit', handleSubmit, { once: true });
@@ -897,11 +1022,15 @@ function addClient(ctx: AdminDashboardContext): void {
   // Track if form was submitted successfully to avoid double cleanup
   let submitted = false;
 
+  // Setup focus trap
+  let cleanupFocusTrap: (() => void) | null = null;
+
   // Close modal and clean up event listeners (function declaration for hoisting)
   function closeModal(): void {
     if (!submitted) {
       form.removeEventListener('submit', handleSubmit);
     }
+    cleanupFocusTrap?.();
     modal.classList.add('hidden');
     document.body.classList.remove('modal-open');
     form.reset();
@@ -910,6 +1039,8 @@ function addClient(ctx: AdminDashboardContext): void {
   // Form submit handler (function declaration for hoisting)
   async function handleSubmit(e: Event): Promise<void> {
     e.preventDefault();
+
+    const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
 
     // Form inputs - query fresh for current values
     const emailInput = getElement('new-client-email') as HTMLInputElement;
@@ -927,7 +1058,7 @@ function addClient(ctx: AdminDashboardContext): void {
       return;
     }
 
-    try {
+    await withButtonLoading(submitBtn, async () => {
       const response = await apiPost('/api/clients', {
         email,
         contact_name: contactName || null,
@@ -946,10 +1077,7 @@ function addClient(ctx: AdminDashboardContext): void {
         const error = await response.json();
         ctx.showNotification(error.message || 'Failed to add client', 'error');
       }
-    } catch (error) {
-      console.error('[AdminClients] Error adding client:', error);
-      ctx.showNotification('Error adding client', 'error');
-    }
+    }, 'Adding...');
   }
 
   closeBtn?.addEventListener('click', closeModal, { once: true });
@@ -962,4 +1090,10 @@ function addClient(ctx: AdminDashboardContext): void {
 
   // Add form submit listener (not once - will be removed on success or modal close)
   form.addEventListener('submit', handleSubmit);
+
+  // Setup focus trap after event listeners are attached
+  cleanupFocusTrap = manageFocusTrap(modal, {
+    initialFocus: '#new-client-email',
+    onClose: closeModal
+  });
 }

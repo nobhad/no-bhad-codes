@@ -1484,7 +1484,7 @@ class AdminDashboard {
       'simple-site': 'Simple Website',
       'business-site': 'Business Website',
       portfolio: 'Portfolio',
-      ecommerce: 'E-commerce',
+      ecommerce: 'E-Commerce',
       'web-app': 'Web Application',
       'browser-extension': 'Browser Extension',
       other: 'Other'

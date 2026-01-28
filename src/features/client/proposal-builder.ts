@@ -12,20 +12,15 @@ import { gsap } from 'gsap';
 import type {
   TierId,
   ProjectType,
-  ProposalTier,
-  ProposalFeature,
-  MaintenanceOption,
   ProposalSelection,
   ProposalStep,
   ProposalBuilderState,
-  TierConfiguration,
   MaintenanceId,
   PriceBreakdown
 } from './proposal-builder-types';
 import {
   getTierConfiguration,
-  calculatePrice,
-  formatPrice
+  calculatePrice
 } from './proposal-builder-data';
 import {
   renderProposalBuilderHTML,

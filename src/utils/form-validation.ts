@@ -7,6 +7,11 @@
  * Universal form validation utilities for all forms across the site.
  */
 
+import { debounce } from './gsap-utilities';
+
+/** Debounce delay for form validation (ms) */
+const VALIDATION_DEBOUNCE_MS = 150;
+
 /**
  * Check if all required fields in a form are filled and update button state
  */
@@ -42,9 +47,13 @@ export function initFormValidation(form: HTMLFormElement): void {
     'input[required], select[required], textarea[required]'
   );
 
-  // Check validation on input changes
+  // Debounced validation to prevent excessive work on every keystroke
+  const debouncedValidate = debounce(() => validateFormCompletion(form), VALIDATION_DEBOUNCE_MS);
+
+  // Check validation on input changes (debounced for performance)
   requiredFields.forEach((field) => {
-    field.addEventListener('input', () => validateFormCompletion(form));
+    field.addEventListener('input', debouncedValidate);
+    // Change events (select, checkbox) can run immediately - they're infrequent
     field.addEventListener('change', () => validateFormCompletion(form));
   });
 

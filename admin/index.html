@@ -965,6 +965,7 @@
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                 </button>
               </div>
+              <!-- Client Info -->
               <div class="project-detail-client-row">
                 <div class="meta-item clickable-client" id="pd-client-link">
                   <span class="field-label">Client</span>
@@ -978,8 +979,20 @@
                   <span class="field-label">Email</span>
                   <span class="meta-value" id="pd-client-email">-</span>
                 </div>
+              </div>
+
+              <!-- Project Timeline & Type -->
+              <div class="project-detail-meta">
                 <div class="meta-item">
-                  <span class="field-label">Started</span>
+                  <span class="field-label">Project Type</span>
+                  <span class="meta-value" id="pd-type">-</span>
+                </div>
+                <div class="meta-item">
+                  <span class="field-label">Timeline</span>
+                  <span class="meta-value" id="pd-timeline">-</span>
+                </div>
+                <div class="meta-item">
+                  <span class="field-label">Start Date</span>
                   <span class="meta-value" id="pd-start-date">-</span>
                 </div>
                 <div class="meta-item">
@@ -987,45 +1000,25 @@
                   <span class="meta-value" id="pd-end-date">-</span>
                 </div>
               </div>
-              <div class="project-detail-meta">
-                <div class="meta-item">
-                  <span class="field-label">Project Type</span>
-                  <span class="meta-value" id="pd-type">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Budget</span>
-                  <span class="meta-value" id="pd-budget">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Price</span>
-                  <span class="meta-value" id="pd-price">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Timeline</span>
-                  <span class="meta-value" id="pd-timeline">-</span>
-                </div>
-              </div>
+
+              <!-- Project Description -->
               <div class="project-description-row" id="pd-notes">
                 <div class="meta-item description-item">
                   <span class="field-label">Project Description</span>
                   <span class="meta-value" id="pd-description">-</span>
                 </div>
-                <div class="meta-item preview-url-item">
-                  <span class="field-label">Preview URL</span>
-                  <span class="meta-value"><a href="#" id="pd-preview-url-link" target="_blank">-</a></span>
-                </div>
               </div>
-              <div class="project-detail-meta project-urls-row" id="pd-urls-section" style="display: none;">
+
+              <!-- Financial Info -->
+              <div class="project-detail-meta">
                 <div class="meta-item">
-                  <span class="field-label">Repository</span>
-                  <span class="meta-value"><a href="#" id="pd-repo-url-link" target="_blank">-</a></span>
+                  <span class="field-label">Budget</span>
+                  <span class="meta-value" id="pd-budget">-</span>
                 </div>
                 <div class="meta-item">
-                  <span class="field-label">Production</span>
-                  <span class="meta-value"><a href="#" id="pd-production-url-link" target="_blank">-</a></span>
+                  <span class="field-label">Quoted Price</span>
+                  <span class="meta-value" id="pd-price">-</span>
                 </div>
-              </div>
-              <div class="project-detail-meta project-financial-row" id="pd-financial-section" style="display: none;">
                 <div class="meta-item">
                   <span class="field-label">Deposit</span>
                   <span class="meta-value" id="pd-deposit">-</span>
@@ -1035,6 +1028,24 @@
                   <span class="meta-value" id="pd-contract-date">-</span>
                 </div>
               </div>
+
+              <!-- Project URLs -->
+              <div class="project-detail-meta project-urls-row" id="pd-urls-section">
+                <div class="meta-item">
+                  <span class="field-label">Preview URL</span>
+                  <span class="meta-value"><a href="#" id="pd-preview-url-link" target="_blank">-</a></span>
+                </div>
+                <div class="meta-item">
+                  <span class="field-label">Repository</span>
+                  <span class="meta-value"><a href="#" id="pd-repo-url-link" target="_blank">-</a></span>
+                </div>
+                <div class="meta-item">
+                  <span class="field-label">Production</span>
+                  <span class="meta-value"><a href="#" id="pd-production-url-link" target="_blank">-</a></span>
+                </div>
+              </div>
+
+              <!-- Admin Notes (Internal) -->
               <div class="project-description-row" id="pd-admin-notes-section" style="display: none;">
                 <div class="meta-item description-item">
                   <span class="field-label">Admin Notes (Internal)</span>
@@ -1296,7 +1307,7 @@
                 <option value="simple-site">Simple Website</option>
                 <option value="business-site">Business Website</option>
                 <option value="portfolio">Portfolio</option>
-                <option value="ecommerce">E-Commerce</option>
+                <option value="e-commerce">E-Commerce</option>
                 <option value="web-app">Web Application</option>
                 <option value="browser-extension">Browser Extension</option>
                 <option value="other">Other</option>
@@ -1448,51 +1459,43 @@
         </div>
         <form id="edit-project-form">
           <div class="admin-modal-body">
+            <!-- Project Basics -->
             <div class="form-group">
               <label class="field-label" for="edit-project-name">Project Name</label>
               <input type="text" id="edit-project-name" class="form-input" placeholder="Project Name" />
             </div>
-            <div class="form-group">
-              <label class="field-label" for="edit-project-type">Project Type</label>
-              <select id="edit-project-type" class="form-input">
-                <option value="">Select type...</option>
-                <option value="website">Website</option>
-                <option value="web-app">Web Application</option>
-                <option value="mobile-app">Mobile App</option>
-                <option value="e-commerce">E-Commerce</option>
-                <option value="branding">Branding</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="field-label" for="edit-project-budget">Client Budget</label>
-                <input type="text" id="edit-project-budget" class="form-input" placeholder="Under 1k, 1000-2500, etc." />
+                <label class="field-label" for="edit-project-type">Project Type</label>
+                <select id="edit-project-type" class="form-input">
+                  <option value="">Select type...</option>
+                  <option value="simple-site">Simple Website</option>
+                  <option value="business-site">Business Website</option>
+                  <option value="portfolio">Portfolio</option>
+                  <option value="e-commerce">E-Commerce</option>
+                  <option value="web-app">Web Application</option>
+                  <option value="browser-extension">Browser Extension</option>
+                  <option value="other">Other</option>
+                </select>
               </div>
               <div class="form-group">
-                <label class="field-label" for="edit-project-price">Quoted Price</label>
-                <input type="text" id="edit-project-price" class="form-input" placeholder="$7,500" />
+                <label class="field-label" for="edit-project-status">Status</label>
+                <select id="edit-project-status" class="form-input">
+                  <option value="pending">Pending</option>
+                  <option value="active">Active</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="in-review">In Review</option>
+                  <option value="on-hold">On Hold</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
               </div>
             </div>
+
+            <!-- Timeline -->
             <div class="form-group">
               <label class="field-label" for="edit-project-timeline">Timeline</label>
               <input type="text" id="edit-project-timeline" class="form-input" placeholder="4-6 weeks" />
-            </div>
-            <div class="form-group">
-              <label class="field-label" for="edit-project-preview-url">Preview URL</label>
-              <input type="url" id="edit-project-preview-url" class="form-input" placeholder="https://preview.example.com" />
-            </div>
-            <div class="form-group">
-              <label class="field-label" for="edit-project-status">Status</label>
-              <select id="edit-project-status" class="form-input">
-                <option value="pending">Pending</option>
-                <option value="active">Active</option>
-                <option value="in-progress">In Progress</option>
-                <option value="in-review">In Review</option>
-                <option value="on-hold">On Hold</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
             </div>
             <div class="form-row">
               <div class="form-group">
@@ -1504,6 +1507,24 @@
                 <input type="date" id="edit-project-end-date" class="form-input" />
               </div>
             </div>
+
+            <!-- Description -->
+            <div class="form-group">
+              <label class="field-label" for="edit-project-description">Project Description</label>
+              <textarea id="edit-project-description" class="form-textarea" rows="4" placeholder="Describe the project scope and requirements..."></textarea>
+            </div>
+
+            <!-- Financial -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="field-label" for="edit-project-budget">Client Budget</label>
+                <input type="text" id="edit-project-budget" class="form-input" placeholder="Under 1k, 1000-2500, etc." />
+              </div>
+              <div class="form-group">
+                <label class="field-label" for="edit-project-price">Quoted Price</label>
+                <input type="text" id="edit-project-price" class="form-input" placeholder="$7,500" />
+              </div>
+            </div>
             <div class="form-row">
               <div class="form-group">
                 <label class="field-label" for="edit-project-deposit">Deposit Amount</label>
@@ -1513,6 +1534,12 @@
                 <label class="field-label" for="edit-project-contract-date">Contract Signed</label>
                 <input type="date" id="edit-project-contract-date" class="form-input" />
               </div>
+            </div>
+
+            <!-- URLs -->
+            <div class="form-group">
+              <label class="field-label" for="edit-project-preview-url">Preview URL</label>
+              <input type="url" id="edit-project-preview-url" class="form-input" placeholder="https://preview.example.com" />
             </div>
             <div class="form-group">
               <label class="field-label" for="edit-project-repo-url">Repository URL</label>

@@ -14,6 +14,7 @@ import type {
   ProjectUpdateResponse,
   MessageResponse
 } from '../../../types/api';
+import { formatTextWithLineBreaks } from '../../../utils/format-utils';
 
 /** API endpoints */
 const PROJECTS_API_BASE = '/api/projects';
@@ -147,11 +148,12 @@ export function populateProjectDetails(
     statusElement.className = `status-badge status-${currentProject.status}`;
   }
 
-  // Populate project description
+  // Populate project description (use innerHTML with sanitized line breaks)
   const descriptionElement = getElement('project-description');
   if (descriptionElement) {
-    descriptionElement.textContent =
-      currentProject.description || 'Project details will be updated soon.';
+    descriptionElement.innerHTML = formatTextWithLineBreaks(
+      currentProject.description || 'Project details will be updated soon.'
+    );
   }
 
   // Populate current phase

@@ -9,9 +9,10 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { formatFileSize } from '../../../utils/format-utils';
+import { formatFileSize, formatDisplayValue, formatTextWithLineBreaks } from '../../../utils/format-utils';
 import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
 import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
+import { showToast } from '../../../utils/toast-notifications';
 import {
   createFilterUI,
   createSortableHeaders,
@@ -25,7 +26,7 @@ import type { ProjectMilestone, ProjectFile, ProjectInvoice, AdminDashboardConte
 import { showTableLoading } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
 import { createDOMCache, batchUpdateText } from '../../../utils/dom-cache';
-import { alertWarning } from '../../../utils/confirm-dialog';
+import { alertWarning, multiPromptDialog } from '../../../utils/confirm-dialog';
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -161,6 +162,10 @@ interface LeadProject {
   created_at?: string;
   start_date?: string;
   end_date?: string;
+  // Computed fields from API stats
+  file_count?: number;
+  message_count?: number;
+  unread_count?: number;
 }
 
 interface ProjectsData {
@@ -180,61 +185,27 @@ let filterState: FilterState = loadFilterState(PROJECTS_FILTER_CONFIG.storageKey
 let filterUIInitialized = false;
 
 /**
- * Format budget/timeline values with proper capitalization
- * Preserves hyphens between numbers (for ranges like "1000-2500", "2-4")
- * Formats currency values with $ and commas where appropriate
- */
-function formatDisplayValue(value: string | undefined | null): string {
-  if (!value || value === '-') return '-';
-
-  // Handle special cases first
-  const lowerValue = value.toLowerCase();
-
-  // ASAP should be all caps
-  if (lowerValue === 'asap') return 'ASAP';
-
-  // Budget ranges: "under-1k" -> "Under $1k"
-  if (lowerValue.includes('under')) {
-    return value.replace(/under-?/gi, 'Under $').replace(/-/g, '');
-  }
-
-  // Check if this looks like a pure numeric budget range (e.g., "1000-2500")
-  const numericRangeMatch = value.match(/^(\d+)-(\d+)$/);
-  if (numericRangeMatch) {
-    const min = parseInt(numericRangeMatch[1], 10);
-    const max = parseInt(numericRangeMatch[2], 10);
-    return `$${min.toLocaleString()}-$${max.toLocaleString()}`;
-  }
-
-  // Budget with "k" notation: "1k-2k" -> "$1k-$2k", "5k-10k" -> "$5k-$10k"
-  const kRangeMatch = value.match(/^(\d+)k-(\d+)k$/i);
-  if (kRangeMatch) {
-    return `$${kRangeMatch[1]}k-$${kRangeMatch[2]}k`;
-  }
-
-  // Single k value with plus: "35k-plus" -> "$35k+"
-  const kPlusMatch = value.match(/^(\d+)k-plus$/i);
-  if (kPlusMatch) {
-    return `$${kPlusMatch[1]}k+`;
-  }
-
-  // Replace hyphens with spaces EXCEPT when between numbers (for ranges)
-  // e.g., "1-3-months" -> "1-3 Months", "simple-site" -> "Simple Site"
-  // Uses a placeholder to preserve number-hyphen-number patterns
-  let formatted = value
-    .replace(/(\d)-(\d)/g, '$1__RANGE_HYPHEN__$2') // Preserve hyphens between numbers
-    .replace(/-/g, ' ') // Replace remaining hyphens with spaces
-    .replace(/__RANGE_HYPHEN__/g, '-'); // Restore range hyphens
-  formatted = formatted.replace(/\b\w/g, (char) => char.toUpperCase());
-
-  return formatted;
-}
-
-/**
  * Format date string for display (YYYY-MM-DD -> MM/DD/YYYY)
  */
 function formatDate(dateStr: string | undefined | null): string {
   if (!dateStr) return '-';
+
+  // Parse date string without timezone issues
+  // Handle ISO date strings (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss)
+  const datePart = dateStr.split('T')[0];
+  const parts = datePart.split('-');
+
+  if (parts.length === 3) {
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+
+    if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+      return `${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`;
+    }
+  }
+
+  // Fallback: try standard parsing (may have timezone issues)
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return '-';
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -393,11 +364,16 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
 
   tableBody.innerHTML = filteredProjects
     .map((project) => {
+      // Decode HTML entities first (data may have &amp; stored), then escape for safe HTML output
       const safeName = SanitizationUtils.escapeHtml(
-        project.project_name || project.description?.substring(0, 30) || 'Untitled Project'
+        SanitizationUtils.decodeHtmlEntities(project.project_name || project.description?.substring(0, 30) || 'Untitled Project')
       );
-      const safeContact = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(project.contact_name || '-'));
-      const safeCompany = project.company_name ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(project.company_name)) : '';
+      const safeContact = SanitizationUtils.escapeHtml(
+        SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(project.contact_name || '-'))
+      );
+      const safeCompany = project.company_name
+        ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(project.company_name)))
+        : '';
       // Normalize status to underscore format for CSS class consistency
       const status = normalizeStatus(project.status);
 
@@ -492,29 +468,54 @@ function populateProjectDetailView(project: LeadProject): void {
   const projectData = project as any;
 
   // Overview fields - use batch update for text content
+  // Note: textContent doesn't interpret HTML, so we decode entities but don't need to escape
+  // Empty string for missing values (no dashes)
   batchUpdateText({
-    'pd-project-name': SanitizationUtils.escapeHtml(project.project_name || 'Untitled Project'),
-    'pd-client-name': SanitizationUtils.escapeHtml(project.contact_name || '-'),
-    'pd-client-email': SanitizationUtils.escapeHtml(project.email || '-'),
-    'pd-company': SanitizationUtils.escapeHtml(project.company_name || '-'),
-    'pd-type': SanitizationUtils.escapeHtml(formatProjectType(project.project_type)),
-    'pd-budget': SanitizationUtils.escapeHtml(formatDisplayValue(project.budget_range)),
-    'pd-price': SanitizationUtils.escapeHtml(projectData.price ? `$${Number(projectData.price).toLocaleString()}` : '-'),
-    'pd-timeline': SanitizationUtils.escapeHtml(formatDisplayValue(project.timeline)),
-    'pd-start-date': SanitizationUtils.escapeHtml(project.created_at ? new Date(project.created_at).toLocaleDateString() : '-')
+    'pd-project-name': SanitizationUtils.decodeHtmlEntities(project.project_name || 'Untitled Project'),
+    'pd-client-name': SanitizationUtils.decodeHtmlEntities(project.contact_name || ''),
+    'pd-client-email': project.email || '',
+    'pd-company': SanitizationUtils.decodeHtmlEntities(project.company_name || ''),
+    'pd-type': formatProjectType(project.project_type),
+    'pd-budget': formatDisplayValue(project.budget_range),
+    'pd-price': projectData.price ? `$${Number(projectData.price).toLocaleString()}` : '',
+    'pd-timeline': formatDisplayValue(project.timeline),
+    'pd-start-date': formatDateForDisplay(projectData.start_date) || formatDateForDisplay(project.created_at),
+    'pd-end-date': formatDateForDisplay(projectData.end_date),
+    'pd-deposit': projectData.deposit_amount ? `$${Number(projectData.deposit_amount).toLocaleString()}` : '',
+    'pd-contract-date': formatDateForDisplay(projectData.contract_signed_date)
   });
 
-  // Preview URL (use cached ref)
-  const previewUrlLink = domCache.getAs<HTMLAnchorElement>('previewUrlLink');
-  if (previewUrlLink) {
-    const previewUrl = projectData.preview_url || '';
-    if (previewUrl) {
-      previewUrlLink.href = previewUrl;
-      previewUrlLink.textContent = previewUrl;
+  // Update URL links (preview, repo, production)
+  const updateUrlLink = (linkId: string, url: string | null): void => {
+    const link = document.getElementById(linkId) as HTMLAnchorElement;
+    if (link) {
+      // Decode HTML entities in URL (e.g., &#x2F; -> /)
+      const decodedUrl = url ? SanitizationUtils.decodeHtmlEntities(url) : null;
+      if (decodedUrl) {
+        link.href = decodedUrl;
+        link.textContent = decodedUrl;
+        link.onclick = null;
+      } else {
+        link.href = '#';
+        link.textContent = '';
+        link.onclick = (e) => e.preventDefault();
+      }
+    }
+  };
+
+  updateUrlLink('pd-preview-url-link', projectData.preview_url);
+  updateUrlLink('pd-repo-url-link', projectData.repo_url);
+  updateUrlLink('pd-production-url-link', projectData.production_url);
+
+  // Admin notes section - show only if notes exist
+  const adminNotesSection = document.getElementById('pd-admin-notes-section');
+  const adminNotesEl = document.getElementById('pd-admin-notes');
+  if (adminNotesSection && adminNotesEl) {
+    if (projectData.notes) {
+      adminNotesEl.innerHTML = formatTextWithLineBreaks(SanitizationUtils.decodeHtmlEntities(projectData.notes));
+      adminNotesSection.style.display = '';
     } else {
-      previewUrlLink.href = '#';
-      previewUrlLink.textContent = '-';
-      previewUrlLink.onclick = (e) => e.preventDefault();
+      adminNotesSection.style.display = 'none';
     }
   }
 
@@ -551,12 +552,12 @@ function populateProjectDetailView(project: LeadProject): void {
   if (progressPercent) progressPercent.textContent = `${progress}%`;
   if (progressBar) progressBar.style.width = `${progress}%`;
 
-  // Description (use cached ref) - decode any HTML entities that may have been over-encoded
+  // Description (use cached ref) - use innerHTML with sanitized line breaks
   const descriptionEl = domCache.get('description');
   if (descriptionEl) {
-    descriptionEl.textContent = project.description
-      ? SanitizationUtils.decodeHtmlEntities(project.description)
-      : '-';
+    descriptionEl.innerHTML = formatTextWithLineBreaks(
+      project.description ? SanitizationUtils.decodeHtmlEntities(project.description) : null
+    );
   }
 
   // Features - append below the description row if present (use cached ref)
@@ -667,21 +668,36 @@ function openEditProjectModal(project: LeadProject): void {
 
   // Populate form fields
   const nameInput = document.getElementById('edit-project-name') as HTMLInputElement;
+  const descriptionInput = document.getElementById('edit-project-description') as HTMLTextAreaElement;
   const budgetInput = document.getElementById('edit-project-budget') as HTMLInputElement;
   const priceInput = document.getElementById('edit-project-price') as HTMLInputElement;
   const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
-  const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
   const startDateInput = document.getElementById('edit-project-start-date') as HTMLInputElement;
   const endDateInput = document.getElementById('edit-project-end-date') as HTMLInputElement;
+  const depositInput = document.getElementById('edit-project-deposit') as HTMLInputElement;
+  const contractDateInput = document.getElementById('edit-project-contract-date') as HTMLInputElement;
+  const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
+  const repoUrlInput = document.getElementById('edit-project-repo-url') as HTMLInputElement;
+  const productionUrlInput = document.getElementById('edit-project-production-url') as HTMLInputElement;
+  const notesInput = document.getElementById('edit-project-notes') as HTMLTextAreaElement;
 
-  if (nameInput) nameInput.value = project.project_name || '';
-  if (budgetInput) budgetInput.value = formatDisplayValue(project.budget_range);
+  // Decode HTML entities for text fields that may contain encoded characters
+  if (nameInput) nameInput.value = SanitizationUtils.decodeHtmlEntities(project.project_name || '');
+  if (descriptionInput) descriptionInput.value = SanitizationUtils.decodeHtmlEntities(project.description || '');
+  if (budgetInput) budgetInput.value = project.budget_range || '';
   if (priceInput) priceInput.value = projectData.price || '';
-  if (timelineInput) timelineInput.value = formatDisplayValue(project.timeline);
-  if (previewUrlInput) previewUrlInput.value = projectData.preview_url || '';
+  if (timelineInput) timelineInput.value = project.timeline || '';
   // Date inputs need YYYY-MM-DD format
   if (startDateInput) startDateInput.value = projectData.start_date ? projectData.start_date.split('T')[0] : '';
   if (endDateInput) endDateInput.value = projectData.end_date ? projectData.end_date.split('T')[0] : '';
+  if (depositInput) depositInput.value = projectData.deposit_amount || '';
+  if (contractDateInput) contractDateInput.value = projectData.contract_signed_date ? projectData.contract_signed_date.split('T')[0] : '';
+  // URL fields
+  if (previewUrlInput) previewUrlInput.value = projectData.preview_url || '';
+  if (repoUrlInput) repoUrlInput.value = projectData.repo_url || '';
+  if (productionUrlInput) productionUrlInput.value = projectData.production_url || '';
+  // Admin notes field - decode entities
+  if (notesInput) notesInput.value = SanitizationUtils.decodeHtmlEntities(projectData.notes || '');
 
   // Initialize custom dropdowns for selects (only once)
   initProjectModalDropdowns(project);
@@ -772,41 +788,66 @@ async function saveProjectChanges(projectId: number): Promise<void> {
   if (!storedContext) return;
 
   const nameInput = document.getElementById('edit-project-name') as HTMLInputElement;
+  const descriptionInput = document.getElementById('edit-project-description') as HTMLTextAreaElement;
   const typeSelect = document.getElementById('edit-project-type') as HTMLSelectElement;
   const budgetInput = document.getElementById('edit-project-budget') as HTMLInputElement;
   const priceInput = document.getElementById('edit-project-price') as HTMLInputElement;
   const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
-  const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
   const statusSelect = document.getElementById('edit-project-status') as HTMLSelectElement;
   const startDateInput = document.getElementById('edit-project-start-date') as HTMLInputElement;
   const endDateInput = document.getElementById('edit-project-end-date') as HTMLInputElement;
+  const depositInput = document.getElementById('edit-project-deposit') as HTMLInputElement;
+  const contractDateInput = document.getElementById('edit-project-contract-date') as HTMLInputElement;
+  const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
+  const repoUrlInput = document.getElementById('edit-project-repo-url') as HTMLInputElement;
+  const productionUrlInput = document.getElementById('edit-project-production-url') as HTMLInputElement;
+  const notesInput = document.getElementById('edit-project-notes') as HTMLTextAreaElement;
 
   const updates: Record<string, string> = {};
   if (nameInput?.value) updates.project_name = nameInput.value;
+  // Allow clearing description by sending empty string
+  if (descriptionInput) updates.description = descriptionInput.value || '';
   if (typeSelect?.value) updates.project_type = typeSelect.value;
   if (budgetInput?.value) updates.budget = budgetInput.value;
   if (priceInput?.value) updates.price = priceInput.value;
   if (timelineInput?.value) updates.timeline = timelineInput.value;
-  if (previewUrlInput?.value !== undefined) updates.preview_url = previewUrlInput.value;
   if (statusSelect?.value) updates.status = statusSelect.value;
   // Allow clearing dates by sending empty string
   if (startDateInput) updates.start_date = startDateInput.value || '';
   if (endDateInput) updates.end_date = endDateInput.value || '';
+  // Deposit and contract date (allow clearing)
+  if (depositInput) updates.deposit_amount = depositInput.value || '';
+  if (contractDateInput) updates.contract_signed_date = contractDateInput.value || '';
+  // URL fields (allow clearing)
+  if (previewUrlInput) updates.preview_url = previewUrlInput.value || '';
+  if (repoUrlInput) updates.repo_url = repoUrlInput.value || '';
+  if (productionUrlInput) updates.production_url = productionUrlInput.value || '';
+  // Admin notes (allow clearing by sending empty string)
+  if (notesInput) updates.admin_notes = notesInput.value || '';
 
   try {
     const response = await apiPut(`/api/projects/${projectId}`, updates);
+    const result = await response.json();
 
-    if (response.ok) {
+    if (response.ok && result.project) {
       storedContext.showNotification('Project updated successfully', 'success');
-      // Reload projects and refresh view
-      await loadProjects(storedContext);
-      const project = projectsData.find((p) => p.id === projectId);
-      if (project) {
-        populateProjectDetailView(project);
+      // Update local project data with response (no need to reload all projects)
+      const projectIndex = projectsData.findIndex((p) => p.id === projectId);
+      if (projectIndex !== -1) {
+        // Preserve computed fields that the API might not return
+        const existingProject = projectsData[projectIndex];
+        projectsData[projectIndex] = {
+          ...existingProject,
+          ...result.project,
+          // Ensure computed fields are preserved
+          file_count: existingProject.file_count,
+          message_count: existingProject.message_count,
+          unread_count: existingProject.unread_count
+        };
+        populateProjectDetailView(projectsData[projectIndex]);
       }
     } else {
-      const error = await response.json();
-      storedContext.showNotification(error.message || 'Failed to update project', 'error');
+      storedContext.showNotification(result.message || 'Failed to update project', 'error');
     }
   } catch (error) {
     console.error('[AdminProjects] Error saving project:', error);
@@ -873,9 +914,31 @@ function setupProjectDetailTabs(ctx: AdminDashboardContext): void {
 }
 
 function formatProjectType(type: string | undefined): string {
-  if (!type) return '-';
+  if (!type) return '';
+
+  // Map known project types to display labels
+  const typeLabels: Record<string, string> = {
+    'simple-site': 'Simple Website',
+    'business-site': 'Business Website',
+    'portfolio': 'Portfolio',
+    'e-commerce': 'E-Commerce',
+    'ecommerce': 'E-Commerce',
+    'web-app': 'Web Application',
+    'browser-extension': 'Browser Extension',
+    'website': 'Website',
+    'mobile-app': 'Mobile App',
+    'branding': 'Branding',
+    'other': 'Other'
+  };
+
+  // Check if we have a known label
+  const label = typeLabels[type.toLowerCase()];
+  if (label) return label;
+
+  // Fallback: replace hyphens/underscores with spaces and capitalize
   return type
-    .split('_')
+    .replace(/[-_]/g, ' ')
+    .split(' ')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 }
@@ -887,6 +950,35 @@ function formatProjectType(type: string | undefined): string {
 function normalizeStatus(status: string | undefined): string {
   if (!status) return 'pending';
   return status.replace(/-/g, '_');
+}
+
+/**
+ * Format a date string for display without timezone issues.
+ * Handles YYYY-MM-DD format by parsing components directly to avoid UTC conversion.
+ * Returns empty string for missing/invalid dates.
+ */
+function formatDateForDisplay(dateStr: string | undefined | null): string {
+  if (!dateStr) return '';
+
+  // Handle ISO date strings (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss)
+  const datePart = dateStr.split('T')[0];
+  const parts = datePart.split('-');
+
+  if (parts.length === 3) {
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+
+    if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+      // Create date using local timezone (month is 0-indexed)
+      const date = new Date(year, month - 1, day);
+      return date.toLocaleDateString();
+    }
+  }
+
+  // Fallback: try standard parsing
+  const date = new Date(dateStr);
+  return isNaN(date.getTime()) ? '' : date.toLocaleDateString();
 }
 
 // Project Messages
@@ -943,7 +1035,8 @@ export async function loadProjectFiles(
   projectId: number,
   _ctx: AdminDashboardContext
 ): Promise<void> {
-  const container = domCache.get('filesList');
+  // Force refresh to get fresh DOM reference after uploads
+  const container = domCache.get('filesList', true);
   if (!container) return;
 
   try {
@@ -985,9 +1078,9 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
       const fileSize = file.file_size || file.size || 0;
       const size = formatFileSize(fileSize);
       const date = new Date(file.created_at).toLocaleDateString();
-      // Use file_path if available, otherwise construct from filename
-      const filePath = file.file_path || `uploads/projects/${file.filename}`;
-      const downloadUrl = `/${filePath}`;
+      // Use API endpoint for file access (authenticated)
+      const fileApiUrl = `/api/uploads/file/${file.id}`;
+      const downloadUrl = `${fileApiUrl}?download=true`;
       // Check if file is previewable (JSON, text, images)
       const isPreviewable = /\.(json|txt|md|png|jpg|jpeg|gif|webp|svg|pdf)$/i.test(safeName);
 
@@ -997,8 +1090,8 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
                 <td>${size}</td>
                 <td>${date}</td>
                 <td class="file-actions">
-                  ${isPreviewable ? `<button class="action-btn preview-btn" data-file-id="${file.id}" data-file-path="${downloadUrl}" data-file-name="${safeName}" aria-label="Preview ${safeName}">Preview</button>` : ''}
-                  <a href="${downloadUrl}" class="action-btn" download="${safeName}" aria-label="Download ${safeName}">Download</a>
+                  ${isPreviewable ? `<button class="action-btn preview-btn" data-file-id="${file.id}" data-file-url="${fileApiUrl}" data-file-name="${safeName}" aria-label="Preview ${safeName}">Preview</button>` : ''}
+                  <button class="action-btn download-btn" data-file-url="${downloadUrl}" data-file-name="${safeName}" aria-label="Download ${safeName}">Download</button>
                 </td>
               </tr>
             `;
@@ -1011,37 +1104,97 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
   // Add click handlers for preview buttons
   container.querySelectorAll('.preview-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const filePath = (btn as HTMLElement).dataset.filePath;
+      const fileUrl = (btn as HTMLElement).dataset.fileUrl;
       const fileName = (btn as HTMLElement).dataset.fileName;
-      if (filePath) {
-        openFilePreview(filePath, fileName || 'File Preview');
+      if (fileUrl) {
+        openFilePreview(fileUrl, fileName || 'File Preview');
+      }
+    });
+  });
+
+  // Add click handlers for download buttons
+  container.querySelectorAll('.download-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const fileUrl = (btn as HTMLElement).dataset.fileUrl;
+      const fileName = (btn as HTMLElement).dataset.fileName;
+      if (fileUrl) {
+        await downloadFile(fileUrl, fileName || 'download');
       }
     });
   });
 }
 
 /**
- * Open file preview in a modal or new tab
+ * Download file using authenticated fetch
  */
-function openFilePreview(filePath: string, fileName: string): void {
-  // For JSON files, fetch and display in a modal
-  if (/\.json$/i.test(fileName)) {
-    fetch(filePath)
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to load file');
-        return res.json();
-      })
-      .then((data) => {
-        showJsonPreviewModal(data, fileName);
-      })
-      .catch((err) => {
-        console.error('Preview error:', err);
-        // Fall back to opening in new tab
-        window.open(filePath, '_blank');
-      });
-  } else {
-    // For other files, open in new tab
-    window.open(filePath, '_blank');
+async function downloadFile(fileUrl: string, fileName: string): Promise<void> {
+  try {
+    const response = await apiFetch(fileUrl);
+    if (!response.ok) throw new Error('Failed to download file');
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
+  } catch (err) {
+    console.error('Download error:', err);
+    showToast('Failed to download file', 'error');
+  }
+}
+
+/**
+ * Open file preview in a modal or new tab
+ * Uses authenticated API fetch
+ */
+async function openFilePreview(fileUrl: string, fileName: string): Promise<void> {
+  try {
+    // For JSON files, fetch and display in a modal
+    if (/\.json$/i.test(fileName)) {
+      const response = await apiFetch(fileUrl);
+      if (!response.ok) throw new Error('Failed to load file');
+      const data = await response.json();
+      showJsonPreviewModal(data, fileName);
+    } else if (/\.(txt|md)$/i.test(fileName)) {
+      // For text files, fetch and display as text
+      const response = await apiFetch(fileUrl);
+      if (!response.ok) throw new Error('Failed to load file');
+      const text = await response.text();
+      showTextPreviewModal(text, fileName);
+    } else if (/\.(png|jpg|jpeg|gif|webp|svg)$/i.test(fileName)) {
+      // For images, fetch and create blob URL
+      const response = await apiFetch(fileUrl);
+      if (!response.ok) throw new Error('Failed to load file');
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      showImagePreviewModal(blobUrl, fileName);
+    } else if (/\.pdf$/i.test(fileName)) {
+      // For PDFs, fetch and open in new tab as blob
+      const response = await apiFetch(fileUrl);
+      if (!response.ok) throw new Error('Failed to load file');
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, '_blank');
+      // Revoke blob URL after delay to free memory (browser will have loaded PDF by then)
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    } else {
+      // For other files, try to download via authenticated fetch
+      const response = await apiFetch(`${fileUrl}?download=true`);
+      if (!response.ok) throw new Error('Failed to load file');
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(blobUrl);
+    }
+  } catch (err) {
+    console.error('Preview error:', err);
+    showToast('Failed to load file for preview', 'error');
   }
 }
 
@@ -1087,7 +1240,95 @@ function showJsonPreviewModal(data: unknown, fileName: string): void {
   document.getElementById('preview-modal-close-btn')?.addEventListener('click', closeModal);
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
-  });
+  }, { once: true });
+}
+
+/**
+ * Show text content in a preview modal
+ */
+function showTextPreviewModal(text: string, fileName: string): void {
+  let modal = document.getElementById('file-preview-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'file-preview-modal';
+    modal.className = 'admin-modal-overlay';
+    document.body.appendChild(modal);
+  }
+
+  modal.innerHTML = `
+    <div class="admin-modal" style="max-width: 700px;">
+      <div class="admin-modal-header">
+        <h3>${SanitizationUtils.escapeHtml(fileName)}</h3>
+        <button class="admin-modal-close" id="preview-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="admin-modal-body" style="max-height: 60vh; overflow: auto;">
+        <pre style="white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.5; margin: 0; color: var(--portal-text-light);">${SanitizationUtils.escapeHtml(text)}</pre>
+      </div>
+      <div class="admin-modal-footer">
+        <button class="btn btn-secondary" id="preview-modal-close-btn">Close</button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+
+  const closeModal = () => {
+    modal?.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+  };
+
+  document.getElementById('preview-modal-close')?.addEventListener('click', closeModal);
+  document.getElementById('preview-modal-close-btn')?.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  }, { once: true });
+}
+
+/**
+ * Show image in a preview modal
+ */
+function showImagePreviewModal(imageUrl: string, fileName: string): void {
+  let modal = document.getElementById('file-preview-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'file-preview-modal';
+    modal.className = 'admin-modal-overlay';
+    document.body.appendChild(modal);
+  }
+
+  modal.innerHTML = `
+    <div class="admin-modal" style="max-width: 900px;">
+      <div class="admin-modal-header">
+        <h3>${SanitizationUtils.escapeHtml(fileName)}</h3>
+        <button class="admin-modal-close" id="preview-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="admin-modal-body" style="max-height: 70vh; overflow: auto; display: flex; justify-content: center; align-items: center;">
+        <img src="${imageUrl}" alt="${SanitizationUtils.escapeHtml(fileName)}" style="max-width: 100%; max-height: 65vh; object-fit: contain;" />
+      </div>
+      <div class="admin-modal-footer">
+        <button class="btn btn-secondary" id="preview-modal-close-btn">Close</button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+
+  const closeModal = () => {
+    // Revoke blob URL to free memory
+    if (imageUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(imageUrl);
+    }
+    modal?.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+  };
+
+  document.getElementById('preview-modal-close')?.addEventListener('click', closeModal);
+  document.getElementById('preview-modal-close-btn')?.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  }, { once: true });
 }
 
 // Project Milestones
@@ -1174,14 +1415,13 @@ function updateProgressBar(progress: number): void {
 
   // Save progress to database
   if (currentProjectId) {
-    fetch(`/api/projects/${currentProjectId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify({ progress })
-    }).catch((err) => console.error('[AdminProjects] Error saving progress:', err));
+    apiPut(`/api/projects/${currentProjectId}`, { progress })
+      .then((response) => {
+        if (!response.ok) {
+          console.error('[AdminProjects] Failed to save progress:', response.status);
+        }
+      })
+      .catch((err) => console.error('[AdminProjects] Error saving progress:', err));
   }
 }
 
@@ -1306,25 +1546,44 @@ async function navigateToClientByEmail(email: string): Promise<void> {
 /**
  * Show prompt to create a new invoice
  */
-function showCreateInvoicePrompt(): void {
+async function showCreateInvoicePrompt(): Promise<void> {
   if (!currentProjectId || !storedContext) return;
 
   const project = projectsData.find((p) => p.id === currentProjectId) as any;
   if (!project) return;
 
-  const description = prompt('Enter line item description:', 'Web Development Services');
-  if (!description) return;
+  const result = await multiPromptDialog({
+    title: 'Create Invoice',
+    fields: [
+      {
+        name: 'description',
+        label: 'Line Item Description',
+        type: 'text',
+        defaultValue: 'Web Development Services',
+        required: true
+      },
+      {
+        name: 'amount',
+        label: 'Amount ($)',
+        type: 'number',
+        defaultValue: '1000',
+        placeholder: 'Enter amount',
+        required: true
+      }
+    ],
+    confirmText: 'Create Invoice',
+    cancelText: 'Cancel'
+  });
 
-  const amountStr = prompt('Enter amount ($):', '1000');
-  if (!amountStr) return;
+  if (!result) return;
 
-  const amount = parseFloat(amountStr);
+  const amount = parseFloat(result.amount);
   if (isNaN(amount) || amount <= 0) {
     alertWarning('Please enter a valid amount');
     return;
   }
 
-  createInvoice(project.client_id || project.id, description, amount);
+  createInvoice(project.client_id || project.id, result.description, amount);
 }
 
 /**
@@ -1373,17 +1632,42 @@ async function createInvoice(
 /**
  * Show prompt to add a new milestone
  */
-function showAddMilestonePrompt(): void {
+async function showAddMilestonePrompt(): Promise<void> {
   if (!currentProjectId || !storedContext) return;
 
-  const title = prompt('Enter milestone title:');
-  if (!title) return;
+  const defaultDueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-  const description = prompt('Enter milestone description (optional):', '');
-  const dueDateStr = prompt('Enter due date (YYYY-MM-DD):', new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-  if (!dueDateStr) return;
+  const result = await multiPromptDialog({
+    title: 'Add Milestone',
+    fields: [
+      {
+        name: 'title',
+        label: 'Milestone Title',
+        type: 'text',
+        placeholder: 'Enter milestone title',
+        required: true
+      },
+      {
+        name: 'description',
+        label: 'Description (optional)',
+        type: 'textarea',
+        placeholder: 'Enter milestone description'
+      },
+      {
+        name: 'dueDate',
+        label: 'Due Date',
+        type: 'date',
+        defaultValue: defaultDueDate,
+        required: true
+      }
+    ],
+    confirmText: 'Add Milestone',
+    cancelText: 'Cancel'
+  });
 
-  addMilestone(title, description || '', dueDateStr);
+  if (!result) return;
+
+  addMilestone(result.title, result.description || '', result.dueDate);
 }
 
 /**
@@ -1526,24 +1810,35 @@ async function uploadProjectFiles(files: File[]): Promise<void> {
   }
 
   try {
-    const formData = new FormData();
-    files.forEach((file) => {
-      formData.append('files', file);
-    });
-    formData.append('projectId', String(currentProjectId));
+    // Upload files one at a time to the project-specific endpoint
+    // This ensures files are properly associated with the project in the database
+    let successCount = 0;
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('project_file', file);
 
-    const response = await apiFetch('/api/uploads/multiple', {
-      method: 'POST',
-      body: formData
-    });
+      const response = await apiFetch(`/api/uploads/project/${currentProjectId}`, {
+        method: 'POST',
+        body: formData
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Upload failed');
+      if (response.ok) {
+        successCount++;
+      } else {
+        const error = await response.json();
+        console.error(`Failed to upload ${file.name}:`, error.message);
+      }
     }
 
-    storedContext.showNotification(`${files.length} file(s) uploaded successfully`, 'success');
-    loadProjectFiles(currentProjectId, storedContext);
+    if (successCount > 0) {
+      storedContext.showNotification(`${successCount} file(s) uploaded successfully`, 'success');
+      // Refresh the files list to show newly uploaded files
+      // Invalidate the cached DOM reference and reload
+      domCache.invalidate('filesList');
+      await loadProjectFiles(currentProjectId, storedContext);
+    } else {
+      throw new Error('All uploads failed');
+    }
   } catch (error) {
     console.error('[AdminProjects] Upload error:', error);
     storedContext.showNotification(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');

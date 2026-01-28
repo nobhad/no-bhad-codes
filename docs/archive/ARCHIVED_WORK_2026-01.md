@@ -153,6 +153,30 @@ The Messages dropdown was showing the currently selected item twice - once in th
 
 ---
 
+### Project Details Tabs Styling - Seamless Shadow
+**Status:** COMPLETE
+**Observed:** January 26, 2026
+**Fixed:** January 28, 2026
+
+Active tab + main content div appear as ONE seamless unit with continuous shadows.
+
+**Changes made:**
+
+- Consolidated CSS classes: removed `.pd-tab-btn` and `.pd-tab-content`
+- HTML uses `class="active"` for active tabs, `id="pd-tab-*"` for content panels
+- JS selectors updated from `.pd-tab-btn` to `.project-detail-tabs button`
+- Active tab uses `::after` pseudo-element to cover junction seamlessly
+- Shadow continuity achieved with matching right/left shadows
+
+**Files modified:**
+
+- `src/styles/admin/project-detail.css`
+- `admin/index.html`
+- `src/features/admin/modules/admin-projects.ts`
+- `src/features/admin/admin-project-details.ts`
+
+---
+
 ### Table Dropdown Styling Inconsistency
 **Status:** COMPLETE
 **Observed:** January 26, 2026

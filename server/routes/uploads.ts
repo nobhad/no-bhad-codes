@@ -81,13 +81,15 @@ const storage = multer.diskStorage({
 // File filter for security
 const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   // Define allowed file types
+  // SECURITY: JS/TS/HTML/CSS removed to prevent stored XSS if files are served
+  // JSON/XML allowed as they're served with safe content-type via authenticated endpoint
   const allowedTypes = {
-    images: /\.(jpg|jpeg|png|gif|webp)$/i,
-    documents: /\.(pdf|doc|docx|txt|md)$/i,
+    images: /\.(jpg|jpeg|png|gif|webp|svg)$/i,
+    documents: /\.(pdf|doc|docx|txt|md|rtf)$/i,
     spreadsheets: /\.(xls|xlsx|csv)$/i,
     presentations: /\.(ppt|pptx)$/i,
-    archives: /\.(zip|rar|tar|gz)$/i,
-    code: /\.(js|ts|html|css|json|xml)$/i
+    archives: /\.(zip|rar|tar|gz|7z)$/i,
+    data: /\.(json|xml)$/i
   };
 
   const fileName = file.originalname.toLowerCase();
@@ -669,8 +671,8 @@ router.delete(
       // Validate path before deletion to prevent path traversal attacks
       const deleteFilePathStr = getString(file, 'file_path');
       if (isPathSafe(deleteFilePathStr)) {
-        // Try to delete the physical file
-        const filePath = resolve(process.cwd(), deleteFilePathStr.replace(/^\//, ''));
+        // Try to delete the physical file - use resolveFilePath for consistency
+        const filePath = resolveFilePath(deleteFilePathStr);
         if (existsSync(filePath)) {
           const fs = await import('fs/promises');
           await fs.unlink(filePath);

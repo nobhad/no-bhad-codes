@@ -11,6 +11,7 @@
 
 import { BaseModule } from '../core/base';
 import { gsap } from 'gsap';
+import { formatTextWithLineBreaks } from '../../utils/format-utils';
 
 interface PortfolioProject {
   id: string;
@@ -498,10 +499,10 @@ export class ProjectsModule extends BaseModule {
         .join('');
     }
 
-    // Update description
+    // Update description (use innerHTML with sanitized line breaks)
     const descEl = this.projectDetailSection.querySelector('#project-description');
     if (descEl) {
-      descEl.textContent = project.description;
+      descEl.innerHTML = formatTextWithLineBreaks(project.description);
     }
 
     // Update screenshots

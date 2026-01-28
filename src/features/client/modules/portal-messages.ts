@@ -10,6 +10,7 @@
 
 import type { PortalMessage, ClientPortalContext } from '../portal-types';
 import { createDOMCache } from '../../../utils/dom-cache';
+import { showToast } from '../../../utils/toast-notifications';
 
 const MESSAGES_API_BASE = '/api/messages';
 
@@ -207,7 +208,7 @@ export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
     await loadMessagesFromAPI(ctx, true);
   } catch (error) {
     console.error('Error sending message:', error);
-    alert(error instanceof Error ? error.message : 'Failed to send message. Please try again.');
+    showToast(error instanceof Error ? error.message : 'Failed to send message. Please try again.', 'error');
   }
 }
 

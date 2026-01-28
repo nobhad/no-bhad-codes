@@ -72,7 +72,7 @@ const PROPOSAL_STATUS_OPTIONS = [
 // ============================================================================
 
 let proposalsData: Proposal[] = [];
-let storedContext: AdminDashboardContext | null = null;
+let _storedContext: AdminDashboardContext | null = null;
 let currentFilter: string = 'all';
 
 // ============================================================================
@@ -101,14 +101,14 @@ export function getProposalsData(): Proposal[] {
 }
 
 export function setProposalsContext(ctx: AdminDashboardContext): void {
-  storedContext = ctx;
+  _storedContext = ctx;
 }
 
 /**
  * Load and display proposals
  */
 export async function loadProposals(ctx: AdminDashboardContext): Promise<void> {
-  storedContext = ctx;
+  _storedContext = ctx;
   clearElementCache();
 
   const container = getElement('proposals-content');
@@ -245,8 +245,8 @@ function renderProposalsTable(proposals: Proposal[], ctx: AdminDashboardContext)
   setupRowEventListeners(proposals, ctx);
 }
 
-function renderProposalRow(proposal: Proposal, ctx: AdminDashboardContext): string {
-  const statusOption = PROPOSAL_STATUS_OPTIONS.find(s => s.value === proposal.status);
+function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): string {
+  const _statusOption = PROPOSAL_STATUS_OPTIONS.find(s => s.value === proposal.status);
   const tierLabel = proposal.selectedTier.charAt(0).toUpperCase() + proposal.selectedTier.slice(1);
   const formattedDate = new Date(proposal.createdAt).toLocaleDateString('en-US', {
     month: 'short',
@@ -638,6 +638,8 @@ async function updateProposalNotes(
 
     if (response.ok) {
       ctx.showNotification?.('Notes saved successfully', 'success');
+      // Refresh proposals to show updated notes in the details panel
+      await refreshProposals(ctx);
     } else {
       ctx.showNotification?.('Failed to save notes', 'error');
     }
@@ -694,7 +696,7 @@ function formatProjectType(type: string): string {
     'simple-site': 'Simple Site',
     'business-site': 'Business Website',
     'portfolio': 'Portfolio',
-    'ecommerce': 'E-commerce',
+    'ecommerce': 'E-Commerce',
     'web-app': 'Web Application',
     'browser-extension': 'Browser Extension',
     'other': 'Custom Project'

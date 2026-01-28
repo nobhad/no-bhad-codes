@@ -7,6 +7,7 @@
 
 import express from 'express';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { getDatabase } from '../database/init.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
@@ -233,6 +234,7 @@ router.get(
           SELECT
             c.id, c.email, c.company_name, c.contact_name, c.phone,
             c.status, c.client_type, c.created_at, c.updated_at,
+            c.invitation_sent_at, c.invitation_expires_at,
             COUNT(p.id) as project_count
           FROM clients c
           LEFT JOIN projects p ON c.id = p.client_id
@@ -567,6 +569,135 @@ router.get(
     res.json({ projects });
   })
 );
+
+// Send invitation to client (admin only)
+router.post(
+  '/:id/send-invite',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['clients']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    // Get client details
+    const client = await db.get(
+      'SELECT id, email, contact_name, company_name, status, invitation_sent_at FROM clients WHERE id = ?',
+      [clientId]
+    );
+
+    if (!client) {
+      return res.status(404).json({
+        error: 'Client not found',
+        code: 'CLIENT_NOT_FOUND'
+      });
+    }
+
+    const clientEmail = getString(client, 'email');
+    const clientName = getString(client, 'contact_name');
+
+    // Generate invitation token (valid for 7 days)
+    const invitationToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    // Update client with invitation token
+    await db.run(
+      `UPDATE clients
+       SET invitation_token = ?, invitation_expires_at = ?, invitation_sent_at = CURRENT_TIMESTAMP, status = 'pending'
+       WHERE id = ?`,
+      [invitationToken, expiresAt, clientId]
+    );
+
+    // Build invitation link
+    const baseUrl = process.env.BASE_URL || 'http://localhost:4000';
+    const invitationLink = `${baseUrl}/client/set-password.html?token=${invitationToken}`;
+
+    // Send invitation email
+    try {
+      await emailService.sendEmail({
+        to: clientEmail,
+        subject: 'Welcome to No Bhad Codes - Set Up Your Client Portal',
+        text: `
+Hello ${clientName || 'there'},
+
+You've been invited to access the No Bhad Codes client portal.
+
+Click the link below to set your password and access your dashboard:
+${invitationLink}
+
+This link will expire in 7 days.
+
+If you didn't expect this invitation, you can safely ignore this email.
+
+Best regards,
+No Bhad Codes Team
+        `,
+        html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { text-align: center; padding: 20px 0; }
+    .button { display: inline-block; padding: 12px 30px; background-color: #7ff709; color: #000; text-decoration: none; border-radius: 4px; font-weight: bold; margin: 20px 0; }
+    .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Welcome to No Bhad Codes</h1>
+    </div>
+    <p>Hello ${clientName || 'there'},</p>
+    <p>You've been invited to access the No Bhad Codes client portal.</p>
+    <p>Click the button below to set your password and access your dashboard:</p>
+    <p style="text-align: center;">
+      <a href="${invitationLink}" class="button">Set Up Your Account</a>
+    </p>
+    <p>Or copy and paste this link:</p>
+    <p style="word-break: break-all; color: #666;">${invitationLink}</p>
+    <p><strong>This link will expire in 7 days.</strong></p>
+    <div class="footer">
+      <p>If you didn't expect this invitation, you can safely ignore this email.</p>
+      <p>Best regards,<br>No Bhad Codes Team</p>
+    </div>
+  </div>
+</body>
+</html>
+        `
+      });
+
+      // Log the invitation
+      await auditLogger.log({
+        action: 'client_invited',
+        entityType: 'client',
+        entityId: String(clientId),
+        entityName: clientEmail,
+        userId: req.user?.id || 0,
+        userEmail: req.user?.email || 'admin',
+        userType: 'admin',
+        metadata: { clientName },
+        ipAddress: req.ip || 'unknown',
+        userAgent: req.get('user-agent') || 'unknown'
+      });
+
+      res.json({
+        success: true,
+        message: 'Invitation sent successfully',
+        clientId,
+        email: clientEmail
+      });
+    } catch (emailError) {
+      console.error('[Clients] Failed to send invitation email:', emailError);
+      res.status(500).json({
+        error: 'Failed to send invitation email',
+        code: 'EMAIL_FAILED'
+      });
+    }
+  })
+);
+
 
 // Delete client (admin only)
 router.delete(
