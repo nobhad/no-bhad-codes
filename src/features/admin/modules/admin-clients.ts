@@ -876,12 +876,16 @@ async function deleteClient(clientId: number): Promise<void> {
 }
 
 function addClient(ctx: AdminDashboardContext): void {
-  const modal = domCache.get('addClientModal');
-  const form = domCache.getAs<HTMLFormElement>('addClientForm');
+  const modalEl = domCache.get('addClientModal');
+  const formEl = domCache.getAs<HTMLFormElement>('addClientForm');
   const closeBtn = domCache.get('addClientClose');
   const cancelBtn = domCache.get('addClientCancel');
 
-  if (!modal || !form) return;
+  if (!modalEl || !formEl) return;
+
+  // Capture validated references for use in nested functions
+  const modal = modalEl;
+  const form = formEl;
 
   // Reset form
   form.reset();
@@ -890,23 +894,21 @@ function addClient(ctx: AdminDashboardContext): void {
   modal.classList.remove('hidden');
   document.body.classList.add('modal-open');
 
-  // Close handlers
-  const closeModal = () => {
+  // Track if form was submitted successfully to avoid double cleanup
+  let submitted = false;
+
+  // Close modal and clean up event listeners (function declaration for hoisting)
+  function closeModal(): void {
+    if (!submitted) {
+      form.removeEventListener('submit', handleSubmit);
+    }
     modal.classList.add('hidden');
     document.body.classList.remove('modal-open');
     form.reset();
-  };
+  }
 
-  closeBtn?.addEventListener('click', closeModal, { once: true });
-  cancelBtn?.addEventListener('click', closeModal, { once: true });
-
-  // Click outside to close
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  }, { once: true });
-
-  // Form submit handler
-  const handleSubmit = async (e: Event) => {
+  // Form submit handler (function declaration for hoisting)
+  async function handleSubmit(e: Event): Promise<void> {
     e.preventDefault();
 
     // Form inputs - query fresh for current values
@@ -936,6 +938,8 @@ function addClient(ctx: AdminDashboardContext): void {
 
       if (response.ok) {
         ctx.showNotification('Client added successfully', 'success');
+        submitted = true;
+        form.removeEventListener('submit', handleSubmit);
         closeModal();
         await loadClients(ctx);
       } else {
@@ -946,7 +950,16 @@ function addClient(ctx: AdminDashboardContext): void {
       console.error('[AdminClients] Error adding client:', error);
       ctx.showNotification('Error adding client', 'error');
     }
-  };
+  }
 
-  form.addEventListener('submit', handleSubmit, { once: true });
+  closeBtn?.addEventListener('click', closeModal, { once: true });
+  cancelBtn?.addEventListener('click', closeModal, { once: true });
+
+  // Click outside to close
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  }, { once: true });
+
+  // Add form submit listener (not once - will be removed on success or modal close)
+  form.addEventListener('submit', handleSubmit);
 }

@@ -873,6 +873,45 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   gap: var(--portal-spacing-sm);
 }
 
+/* Files Table */
+.files-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-md);
+  overflow: hidden;
+}
+
+.files-table thead {
+  background: var(--portal-bg-dark);
+}
+
+.files-table th {
+  padding: var(--portal-spacing-md);
+  text-align: left;
+  font-weight: 500;
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.files-table td {
+  padding: var(--portal-spacing-md);
+  color: var(--portal-text-light);
+  border-top: 1px solid var(--portal-bg-dark);
+}
+
+.files-table tbody tr:hover {
+  background: var(--portal-bg-light);
+}
+
+.files-table .file-actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
 /* Message styles now in client-portal/messages.css (unified for all portals) */
 
 /* Client Account Info */

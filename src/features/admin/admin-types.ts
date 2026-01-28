@@ -177,6 +177,8 @@ export interface ProjectFile {
   original_filename: string;
   mime_type: string;
   size: number;
+  file_size?: number; // Also available for compatibility
+  file_path?: string;
   uploaded_by: string;
   created_at: string;
 }

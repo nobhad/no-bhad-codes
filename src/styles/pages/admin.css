@@ -1361,6 +1361,24 @@ body.modal-open .dashboard-content {
   border-color: var(--color-admin-purple-dark);
 }
 
+/* File action buttons container */
+.file-actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.preview-btn {
+  background: transparent;
+  border-color: var(--portal-text-muted);
+}
+
+.preview-btn:hover {
+  background: var(--portal-bg-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
 /* Icon-only buttons (no border) */
 .icon-btn {
   background: transparent;

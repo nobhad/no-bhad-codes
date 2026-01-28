@@ -77,6 +77,19 @@ export class SanitizationUtils {
   }
 
   /**
+   * Decode HTML entities back to their original characters
+   * Use for displaying data that may have been over-encoded
+   */
+  static decodeHtmlEntities(input: string): string {
+    if (!input || typeof input !== 'string') return '';
+
+    // Use a textarea element to decode HTML entities (browser's built-in decoder)
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = input;
+    return textarea.value;
+  }
+
+  /**
    * Capitalize each word in a string (Title Case)
    * Handles names like "john doe" -> "John Doe"
    */
