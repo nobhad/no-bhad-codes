@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** January 20, 2026
+**Last Updated:** January 28, 2026
 
 ## Table of Contents
 
@@ -727,27 +727,29 @@ The `.cp-project-card` class was created because `.project-card` in `projects.cs
 src/styles/
 ├── main.css                    # Main entry point (imports all modules)
 ├── variables.css               # CSS variables and theme
-├── form-validation.css         # Form validation styles
 ├── base/
 │   ├── fonts.css              # @font-face definitions (imported first)
 │   ├── reset.css              # CSS reset
 │   ├── layout.css             # Layout utilities
-│   └── typography.css         # Typography styles
+│   ├── typography.css         # Typography styles
+│   ├── site-globals.css       # Site-wide global styles
+│   └── site-utilities.css     # Site utility classes
 ├── components/
 │   ├── form-fields.css        # Form input styling
 │   ├── form-buttons.css       # Button styles
-│   ├── form-validation.css    # Validation states
+│   ├── form-validation.css   # Validation states
 │   ├── nav-base.css           # Navigation base styles
 │   ├── nav-animations.css     # Navigation animations
 │   ├── nav-responsive.css     # Navigation responsive/mobile
 │   ├── nav-portal.css         # Client portal navigation
+│   ├── intro-nav.css          # Intro navigation links
 │   ├── footer.css             # Footer styles
 │   ├── loading.css            # Loading indicators
 │   ├── portfolio-carousel.css # Portfolio carousel
 │   ├── business-card.css      # Business card component
 │   ├── intro-morph.css        # Intro animation overlay
 │   └── page-transitions.css   # Virtual page transition styles
-├── client-portal/             # Client Portal (modular - 15 files)
+├── client-portal/             # Client Portal (modular - 10 files)
 │   ├── index.css              # Import orchestrator
 │   ├── components.css         # cp- prefixed reusable components
 │   ├── layout.css             # Dashboard layout, containers
@@ -755,19 +757,39 @@ src/styles/
 │   ├── login.css              # Login form
 │   ├── dashboard.css          # Stats, activity, project cards
 │   ├── files.css              # File upload/management
-│   ├── messages.css           # Messaging system
 │   ├── invoices.css           # Invoice display
 │   ├── settings.css           # Settings, account views
-│   ├── projects.css           # Project navigation, details
-│   ├── views.css              # Content views, welcome, updates
-│   ├── responsive.css         # Tablet/desktop media queries
-│   └── mobile.css             # Mobile hamburger, overlay
+│   └── projects.css           # Project navigation, details
+├── admin/                     # Admin Dashboard styles
+│   ├── index.css              # Admin import orchestrator
+│   ├── auth.css               # Admin authentication
+│   ├── analytics.css          # Analytics dashboard
+│   ├── client-detail.css      # Client detail views
+│   ├── modals.css             # Admin modals
+│   └── project-detail.css     # Project detail views
+├── shared/                    # Shared portal components
+│   ├── confirm-dialog.css     # Confirmation dialogs
+│   ├── portal-buttons.css     # Portal button styles
+│   ├── portal-cards.css       # Portal card components
+│   ├── portal-dropdown.css    # Portal dropdown menus
+│   ├── portal-files.css       # File upload components
+│   ├── portal-forms.css       # Portal form styles
+│   ├── portal-layout.css      # Portal layout utilities
+│   ├── portal-messages.css    # Messaging UI
+│   ├── progress.css           # Progress indicators
+│   └── toast-notifications.css # Toast notifications
+├── bundles/                   # Pre-compiled CSS bundles
+│   ├── admin.css              # Admin bundle
+│   ├── portal.css             # Portal bundle
+│   ├── shared.css             # Shared bundle
+│   └── site.css               # Site bundle
 ├── pages/
 │   ├── client.css             # Client landing page
 │   ├── terminal-intake.css    # Terminal-style intake form
 │   ├── client-dashboard.css   # Client dashboard
 │   ├── client-portal-section.css # Portal section on main page
 │   ├── projects.css           # Projects page
+│   ├── proposal-builder.css   # Proposal builder page
 │   ├── admin.css              # Admin dashboard
 │   ├── contact.css            # Contact page
 │   └── about.css              # About page
@@ -1163,27 +1185,24 @@ This is intentional to maintain Client Portal styling consistency.
 | File | Lines | Status |
 |------|-------|--------|
 | `pages/admin.css` | 1820+ | Could be split by section (low priority) |
-| `client-portal/` | ~3500 | Split into 15 modular files (all <300 lines) |
+| `client-portal/` | ~2000 | Split into 10 modular files (all <300 lines) |
 
 All navigation, form, and client portal CSS files are now properly sized (<300 lines each).
 
-**Client Portal Modular Structure (December 2025):**
+**Client Portal Modular Structure (January 2026):**
 
 | File | Purpose |
 |------|---------|
+| `index.css` | Import orchestrator |
 | `components.css` | cp- prefixed reusable components |
 | `layout.css` | Dashboard layout, containers |
-| `sidebar.css` | Sidebar navigation (with contrasting border) |
+| `sidebar.css` | Sidebar navigation |
 | `login.css` | Login form |
 | `dashboard.css` | Stats, activity, project cards |
 | `files.css` | File upload/management |
-| `messages.css` | Messaging system |
 | `invoices.css` | Invoice display |
 | `settings.css` | Settings, account views |
 | `projects.css` | Project navigation, details |
-| `views.css` | Content views, welcome, updates |
-| `responsive.css` | Tablet/desktop media queries |
-| `mobile.css` | Mobile hamburger, overlay |
 
 ---
 

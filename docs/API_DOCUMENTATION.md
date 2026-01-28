@@ -1495,6 +1495,288 @@ curl https://nobhad.codes/api/messages/analytics \
 }
 ```
 
+## Proposal Builder Endpoints
+
+The Proposal Builder system allows clients to create tiered proposals after completing the intake form. Admins can review, approve, reject, or convert proposals to invoices.
+
+### Valid Constants
+
+**Project Types:**
+
+- `simple-site`, `business-site`, `portfolio`, `ecommerce`, `web-app`, `browser-extension`, `other`
+
+**Tier IDs:**
+
+- `good`, `better`, `best`
+
+**Maintenance Options:**
+
+- `diy`, `essential`, `standard`, `premium`
+
+**Proposal Statuses:**
+
+- `pending`, `reviewed`, `accepted`, `rejected`, `converted`
+
+### POST `/proposals`
+
+Create a new proposal request.
+
+**Request:**
+
+```json
+{
+  "projectId": 1,
+  "clientId": 5,
+  "projectType": "business-site",
+  "selectedTier": "better",
+  "basePrice": 3500,
+  "finalPrice": 4200,
+  "maintenanceOption": "essential",
+  "clientNotes": "Looking for clean, modern design",
+  "features": [
+    {
+      "featureId": "responsive-design",
+      "featureName": "Responsive Design",
+      "featurePrice": 0,
+      "featureCategory": "design",
+      "isIncludedInTier": true,
+      "isAddon": false
+    },
+    {
+      "featureId": "blog-integration",
+      "featureName": "Blog Integration",
+      "featurePrice": 500,
+      "featureCategory": "content",
+      "isIncludedInTier": false,
+      "isAddon": true
+    }
+  ]
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "success": true,
+  "message": "Proposal submitted successfully",
+  "data": {
+    "proposalId": 12,
+    "projectId": 1,
+    "selectedTier": "better",
+    "finalPrice": 4200
+  }
+}
+```
+
+**Error Responses:**
+
+- `400` - Missing required fields or invalid values
+- `404` - Project or client not found
+
+### GET `/proposals/:id`
+
+Get a specific proposal by ID.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 12,
+    "projectId": 1,
+    "clientId": 5,
+    "projectType": "business-site",
+    "selectedTier": "better",
+    "basePrice": 3500,
+    "finalPrice": 4200,
+    "maintenanceOption": "essential",
+    "status": "pending",
+    "clientNotes": "Looking for clean, modern design",
+    "adminNotes": null,
+    "createdAt": "2026-01-28T10:30:00Z",
+    "reviewedAt": null,
+    "reviewedBy": null,
+    "project": {
+      "name": "Acme Corp Website"
+    },
+    "client": {
+      "name": "John Smith",
+      "email": "john@acme.com",
+      "company": "Acme Corp"
+    },
+    "features": [
+      {
+        "featureId": "responsive-design",
+        "featureName": "Responsive Design",
+        "featurePrice": 0,
+        "featureCategory": "design",
+        "isIncludedInTier": true,
+        "isAddon": false
+      }
+    ]
+  }
+}
+```
+
+### GET `/proposals/:id/pdf`
+
+Generate and download PDF for a proposal.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response:** PDF file stream with headers:
+
+```http
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="proposal-Acme-Corp-Website-12.pdf"
+```
+
+**PDF Contents:**
+
+- Logo header (centered)
+- Business contact information
+- Proposal title
+- Prepared For / Prepared By sections
+- Project details (name, description, type)
+- Selected package tier with base price
+- Included features list
+- Add-ons with individual prices
+- Maintenance plan selection
+- Pricing summary table with total
+- Client notes
+- Footer with validity notice (30 days)
+
+### GET `/proposals/admin/list`
+
+List all proposals (admin only).
+
+**Headers:** `Authorization: Bearer <admin-token>`
+
+**Query Parameters:**
+
+- `status` (optional): Filter by status (`pending`, `reviewed`, `accepted`, `rejected`, `converted`)
+- `limit` (optional): Number of results (default: 50)
+- `offset` (optional): Skip results for pagination (default: 0)
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "proposals": [
+      {
+        "id": 12,
+        "projectId": 1,
+        "clientId": 5,
+        "projectType": "business-site",
+        "selectedTier": "better",
+        "basePrice": 3500,
+        "finalPrice": 4200,
+        "maintenanceOption": "essential",
+        "status": "pending",
+        "createdAt": "2026-01-28T10:30:00Z",
+        "reviewedAt": null,
+        "project": {
+          "name": "Acme Corp Website"
+        },
+        "client": {
+          "name": "John Smith",
+          "email": "john@acme.com",
+          "company": "Acme Corp"
+        }
+      }
+    ],
+    "total": 25,
+    "limit": 50,
+    "offset": 0
+  }
+}
+```
+
+### PUT `/proposals/admin/:id`
+
+Update proposal status (admin only).
+
+**Headers:** `Authorization: Bearer <admin-token>`
+
+**Request:**
+
+```json
+{
+  "status": "accepted",
+  "adminNotes": "Great proposal, approved for development"
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Proposal updated successfully"
+}
+```
+
+**Error Responses:**
+
+- `400` - Invalid status or no updates provided
+- `404` - Proposal not found
+
+### POST `/proposals/admin/:id/convert`
+
+Convert an accepted proposal to an invoice (admin only).
+
+**Headers:** `Authorization: Bearer <admin-token>`
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Proposal converted to invoice",
+  "data": {
+    "invoiceId": 45,
+    "invoiceNumber": "INV-2026-0045"
+  }
+}
+```
+
+**Process:**
+
+1. Verifies proposal status is `accepted`
+2. Creates invoice with line items from proposal features
+3. Sets invoice status to `draft`
+4. Updates proposal status to `converted`
+5. Returns new invoice ID and number
+
+**Error Responses:**
+
+- `400` - Proposal status is not `accepted`
+- `404` - Proposal not found
+
+### GET `/proposals/config/:projectType`
+
+Get tier configuration for a specific project type.
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Configuration is managed client-side",
+  "projectType": "business-site"
+}
+```
+
+**Note:** Tier configurations are defined on the frontend in `proposal-builder-data.ts`. This endpoint is available for future server-side configuration if needed.
+
+---
+
 ## API Versioning
 
 The API uses URL-based versioning:
