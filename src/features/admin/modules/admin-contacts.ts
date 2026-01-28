@@ -235,7 +235,7 @@ export function showContactDetails(contactId: number): void {
   detailsPanel.innerHTML = `
     <div class="details-header">
       <h3>Contact Form Submission</h3>
-      <button class="close-btn" onclick="window.closeContactDetailsPanel && window.closeContactDetailsPanel()">×</button>
+      <button class="close-btn" onclick="window.closeContactDetailsPanel && window.closeContactDetailsPanel()" aria-label="Close panel">×</button>
     </div>
     <div class="details-content">
       <div class="project-detail-meta">

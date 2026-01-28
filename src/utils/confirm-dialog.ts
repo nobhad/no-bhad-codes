@@ -290,6 +290,360 @@ export function alertWarning(message: string, title = 'Warning'): Promise<void> 
 }
 
 /**
+ * Prompt dialog options
+ */
+export interface PromptDialogOptions {
+  /** Dialog title */
+  title?: string;
+  /** Label text above the input */
+  label: string;
+  /** Default value for the input */
+  defaultValue?: string;
+  /** Placeholder text */
+  placeholder?: string;
+  /** Input type (text, number, date, etc.) */
+  inputType?: 'text' | 'number' | 'date' | 'email' | 'tel';
+  /** Whether the input is required */
+  required?: boolean;
+  /** Confirm button text */
+  confirmText?: string;
+  /** Cancel button text */
+  cancelText?: string;
+}
+
+/**
+ * Shows a custom prompt dialog with an input field
+ * Replaces native browser prompt() with styled dialog
+ *
+ * @returns The input value or null if cancelled
+ *
+ * @example
+ * const name = await promptDialog({
+ *   title: 'Enter Name',
+ *   label: 'What is your name?',
+ *   defaultValue: 'John'
+ * });
+ * if (name !== null) {
+ *   console.log('Name:', name);
+ * }
+ */
+export function promptDialog(options: PromptDialogOptions): Promise<string | null> {
+  const {
+    title = 'Input Required',
+    label,
+    defaultValue = '',
+    placeholder = '',
+    inputType = 'text',
+    required = false,
+    confirmText = 'OK',
+    cancelText = 'Cancel'
+  } = options;
+
+  return new Promise((resolve) => {
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-dialog-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'prompt-dialog-title');
+
+    // Get icon SVG (edit/pencil icon)
+    const iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
+
+    // Create dialog HTML
+    overlay.innerHTML = `
+      <div class="confirm-dialog prompt-dialog">
+        <div class="confirm-dialog-icon info">${iconSvg}</div>
+        <h3 id="prompt-dialog-title" class="confirm-dialog-title">${escapeHtml(title)}</h3>
+        <div class="prompt-dialog-field">
+          <label for="prompt-dialog-input" class="prompt-dialog-label">${escapeHtml(label)}</label>
+          <input
+            type="${inputType}"
+            id="prompt-dialog-input"
+            class="prompt-dialog-input form-input"
+            value="${escapeHtml(defaultValue)}"
+            placeholder="${escapeHtml(placeholder)}"
+            ${required ? 'required' : ''}
+          />
+        </div>
+        <div class="confirm-dialog-actions">
+          <button type="button" class="confirm-dialog-btn confirm-dialog-cancel">${escapeHtml(cancelText)}</button>
+          <button type="button" class="confirm-dialog-btn confirm-dialog-confirm">${escapeHtml(confirmText)}</button>
+        </div>
+      </div>
+    `;
+
+    // Get elements
+    const cancelBtn = overlay.querySelector('.confirm-dialog-cancel') as HTMLButtonElement;
+    const confirmBtn = overlay.querySelector('.confirm-dialog-confirm') as HTMLButtonElement;
+    const input = overlay.querySelector('#prompt-dialog-input') as HTMLInputElement;
+
+    // Store previously focused element
+    const previouslyFocused = document.activeElement as HTMLElement;
+
+    // Close dialog helper
+    const closeDialog = (value: string | null) => {
+      overlay.classList.add('closing');
+      setTimeout(() => {
+        overlay.remove();
+        // Restore focus
+        if (previouslyFocused && previouslyFocused.focus) {
+          previouslyFocused.focus();
+        }
+        resolve(value);
+      }, 150);
+    };
+
+    // Event handlers
+    cancelBtn.addEventListener('click', () => closeDialog(null));
+    confirmBtn.addEventListener('click', () => {
+      const value = input.value.trim();
+      if (required && !value) {
+        input.classList.add('field--invalid');
+        input.focus();
+        return;
+      }
+      closeDialog(value);
+    });
+
+    // Close on overlay click (outside dialog)
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        closeDialog(null);
+      }
+    });
+
+    // Handle keyboard events
+    const handleKeydown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeDialog(null);
+      }
+      if (e.key === 'Enter' && document.activeElement === input) {
+        e.preventDefault();
+        const value = input.value.trim();
+        if (required && !value) {
+          input.classList.add('field--invalid');
+          return;
+        }
+        closeDialog(value);
+      }
+      // Tab trap
+      if (e.key === 'Tab') {
+        const focusableElements = [input, cancelBtn, confirmBtn];
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+    };
+
+    overlay.addEventListener('keydown', handleKeydown);
+
+    // Clear invalid state on input
+    input.addEventListener('input', () => {
+      input.classList.remove('field--invalid');
+    });
+
+    // Add to DOM and focus input
+    document.body.appendChild(overlay);
+    input.focus();
+    input.select();
+  });
+}
+
+/**
+ * Multi-field prompt dialog for complex inputs
+ */
+export interface MultiPromptField {
+  /** Field name (key in result object) */
+  name: string;
+  /** Label text */
+  label: string;
+  /** Input type */
+  type?: 'text' | 'number' | 'date' | 'email' | 'textarea';
+  /** Default value */
+  defaultValue?: string;
+  /** Placeholder */
+  placeholder?: string;
+  /** Whether required */
+  required?: boolean;
+}
+
+export interface MultiPromptDialogOptions {
+  /** Dialog title */
+  title: string;
+  /** Array of fields */
+  fields: MultiPromptField[];
+  /** Confirm button text */
+  confirmText?: string;
+  /** Cancel button text */
+  cancelText?: string;
+}
+
+/**
+ * Shows a multi-field prompt dialog
+ * Returns an object with field values or null if cancelled
+ */
+export function multiPromptDialog(
+  options: MultiPromptDialogOptions
+): Promise<Record<string, string> | null> {
+  const {
+    title,
+    fields,
+    confirmText = 'OK',
+    cancelText = 'Cancel'
+  } = options;
+
+  return new Promise((resolve) => {
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-dialog-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'multi-prompt-dialog-title');
+
+    // Get icon SVG
+    const iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
+
+    // Build fields HTML
+    const fieldsHtml = fields.map(field => {
+      const inputId = `multi-prompt-${field.name}`;
+      if (field.type === 'textarea') {
+        return `
+          <div class="prompt-dialog-field">
+            <label for="${inputId}" class="prompt-dialog-label">${escapeHtml(field.label)}${field.required ? ' *' : ''}</label>
+            <textarea
+              id="${inputId}"
+              name="${field.name}"
+              class="prompt-dialog-input form-input form-textarea"
+              placeholder="${escapeHtml(field.placeholder || '')}"
+              ${field.required ? 'required' : ''}
+              rows="3"
+            >${escapeHtml(field.defaultValue || '')}</textarea>
+          </div>
+        `;
+      }
+      return `
+        <div class="prompt-dialog-field">
+          <label for="${inputId}" class="prompt-dialog-label">${escapeHtml(field.label)}${field.required ? ' *' : ''}</label>
+          <input
+            type="${field.type || 'text'}"
+            id="${inputId}"
+            name="${field.name}"
+            class="prompt-dialog-input form-input"
+            value="${escapeHtml(field.defaultValue || '')}"
+            placeholder="${escapeHtml(field.placeholder || '')}"
+            ${field.required ? 'required' : ''}
+          />
+        </div>
+      `;
+    }).join('');
+
+    // Create dialog HTML
+    overlay.innerHTML = `
+      <div class="confirm-dialog prompt-dialog multi-prompt-dialog">
+        <div class="confirm-dialog-icon info">${iconSvg}</div>
+        <h3 id="multi-prompt-dialog-title" class="confirm-dialog-title">${escapeHtml(title)}</h3>
+        <form class="multi-prompt-form">
+          ${fieldsHtml}
+          <div class="confirm-dialog-actions">
+            <button type="button" class="confirm-dialog-btn confirm-dialog-cancel">${escapeHtml(cancelText)}</button>
+            <button type="submit" class="confirm-dialog-btn confirm-dialog-confirm">${escapeHtml(confirmText)}</button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    // Get elements
+    const cancelBtn = overlay.querySelector('.confirm-dialog-cancel') as HTMLButtonElement;
+    const form = overlay.querySelector('.multi-prompt-form') as HTMLFormElement;
+    const inputs = Array.from(overlay.querySelectorAll('input, textarea')) as (HTMLInputElement | HTMLTextAreaElement)[];
+
+    // Store previously focused element
+    const previouslyFocused = document.activeElement as HTMLElement;
+
+    // Close dialog helper
+    const closeDialog = (result: Record<string, string> | null) => {
+      overlay.classList.add('closing');
+      setTimeout(() => {
+        overlay.remove();
+        if (previouslyFocused && previouslyFocused.focus) {
+          previouslyFocused.focus();
+        }
+        resolve(result);
+      }, 150);
+    };
+
+    // Validate and get values
+    const getValues = (): Record<string, string> | null => {
+      const result: Record<string, string> = {};
+      let valid = true;
+
+      for (const field of fields) {
+        const input = overlay.querySelector(`[name="${field.name}"]`) as HTMLInputElement | HTMLTextAreaElement;
+        const value = input.value.trim();
+
+        if (field.required && !value) {
+          input.classList.add('field--invalid');
+          if (valid) input.focus(); // Focus first invalid
+          valid = false;
+        } else {
+          result[field.name] = value;
+        }
+      }
+
+      return valid ? result : null;
+    };
+
+    // Event handlers
+    cancelBtn.addEventListener('click', () => closeDialog(null));
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const values = getValues();
+      if (values) closeDialog(values);
+    });
+
+    // Close on overlay click
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        closeDialog(null);
+      }
+    });
+
+    // Handle keyboard
+    const handleKeydown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeDialog(null);
+      }
+    };
+
+    overlay.addEventListener('keydown', handleKeydown);
+
+    // Clear invalid on input
+    inputs.forEach(input => {
+      input.addEventListener('input', () => {
+        input.classList.remove('field--invalid');
+      });
+    });
+
+    // Add to DOM and focus first input
+    document.body.appendChild(overlay);
+    if (inputs.length > 0) {
+      inputs[0].focus();
+      if (inputs[0] instanceof HTMLInputElement) {
+        inputs[0].select();
+      }
+    }
+  });
+}
+
+/**
  * Simple HTML escape to prevent XSS
  */
 function escapeHtml(text: string): string {

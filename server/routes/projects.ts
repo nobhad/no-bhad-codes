@@ -7,7 +7,9 @@
 
 import express from 'express';
 import multer from 'multer';
-import path from 'path';
+import path, { join } from 'path';
+import { existsSync } from 'fs';
+import PDFDocument from 'pdfkit';
 import { getDatabase } from '../database/init.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
@@ -17,6 +19,14 @@ import { getUploadsSubdir, UPLOAD_DIRS } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 
 const router = express.Router();
+
+// Business info from environment variables
+const BUSINESS_INFO = {
+  name: process.env.BUSINESS_NAME || '',
+  contact: process.env.BUSINESS_CONTACT || '',
+  email: process.env.BUSINESS_EMAIL || '',
+  website: process.env.BUSINESS_WEBSITE || ''
+};
 
 // Configure multer for file uploads using centralized config
 const storage = multer.diskStorage({
@@ -364,6 +374,7 @@ router.put(
       project_name: 'project_name',
       project_type: 'project_type',
       due_date: 'estimated_end_date',
+      end_date: 'estimated_end_date', // Frontend sends end_date
       estimated_end_date: 'estimated_end_date',
       budget: 'budget_range',
       price: 'price',
@@ -375,15 +386,18 @@ router.put(
       start_date: 'start_date',
       progress: 'progress',
       notes: 'notes',
+      admin_notes: 'notes', // Frontend sends admin_notes, maps to notes column
       repository_url: 'repository_url',
+      repo_url: 'repository_url', // Frontend sends repo_url
       staging_url: 'staging_url',
       production_url: 'production_url',
       deposit_amount: 'deposit_amount',
-      contract_signed_at: 'contract_signed_at'
+      contract_signed_at: 'contract_signed_at',
+      contract_signed_date: 'contract_signed_at' // Frontend sends contract_signed_date
     };
     const allowedUpdates =
       req.user!.type === 'admin'
-        ? ['name', 'project_name', 'project_type', 'description', 'status', 'priority', 'start_date', 'due_date', 'estimated_end_date', 'budget', 'price', 'timeline', 'preview_url', 'progress', 'notes', 'repository_url', 'staging_url', 'production_url', 'deposit_amount', 'contract_signed_at']
+        ? ['name', 'project_name', 'project_type', 'description', 'status', 'priority', 'start_date', 'due_date', 'end_date', 'estimated_end_date', 'budget', 'price', 'timeline', 'preview_url', 'progress', 'notes', 'admin_notes', 'repository_url', 'repo_url', 'staging_url', 'production_url', 'deposit_amount', 'contract_signed_at', 'contract_signed_date']
         : ['description']; // Clients can only update description
 
     for (const field of allowedUpdates) {
@@ -424,7 +438,15 @@ router.put(
       );
     }
 
-    const updatedProject = await db.get('SELECT * FROM projects WHERE id = ?', [projectId]);
+    const updatedProject = await db.get(`
+      SELECT
+        p.*,
+        p.estimated_end_date as end_date,
+        p.repository_url as repo_url,
+        p.contract_signed_at as contract_signed_date
+      FROM projects p
+      WHERE p.id = ?
+    `, [projectId]);
 
     // Send email notification if status changed and it's an admin update
     if (req.user!.type === 'admin' && req.body.status && req.body.status !== project.status) {
@@ -1210,6 +1232,255 @@ router.get(
       recentUpdates,
       recentMessages
     });
+  })
+);
+
+/**
+ * GET /api/projects/:id/contract/pdf
+ * Generate PDF contract for a project
+ */
+router.get(
+  '/:id/contract/pdf',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    // Get project with client info
+    const project = await db.get(
+      `SELECT p.*, c.contact_name as client_name, c.email as client_email,
+              c.company_name, c.phone as client_phone, c.address as client_address
+       FROM projects p
+       JOIN clients c ON p.client_id = c.id
+       WHERE p.id = ?`,
+      [projectId]
+    );
+
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND'
+      });
+    }
+
+    // Check permissions - admin can access all, clients only their own
+    if (req.user!.type !== 'admin' && getNumber(project, 'client_id') !== req.user!.id) {
+      return res.status(403).json({
+        error: 'Access denied',
+        code: 'ACCESS_DENIED'
+      });
+    }
+
+    // Cast project for helper functions
+    const p = project as Record<string, unknown>;
+
+    // Create PDF document
+    const doc = new PDFDocument({ margin: 50, size: 'LETTER' });
+
+    // Set response headers
+    const projectName = getString(p, 'project_name').replace(/[^a-zA-Z0-9]/g, '-');
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="contract-${projectName}-${projectId}.pdf"`
+    );
+
+    // Pipe PDF to response
+    doc.pipe(res);
+
+    // Helper function to format date
+    const formatDate = (dateStr: string | undefined): string => {
+      if (!dateStr) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    };
+
+    // === HEADER WITH LOGO ===
+    const logoPath = join(process.cwd(), 'public/images/avatar_small-1.png');
+    if (existsSync(logoPath)) {
+      doc.image(logoPath, (doc.page.width - 60) / 2, 30, { width: 60 });
+      doc.moveDown(4);
+    }
+
+    // Business header line
+    doc.y = 100;
+    doc.fontSize(10).font('Helvetica-Bold')
+      .text(BUSINESS_INFO.name, { continued: true, align: 'center' })
+      .font('Helvetica')
+      .text(` | ${BUSINESS_INFO.contact} | ${BUSINESS_INFO.email} | ${BUSINESS_INFO.website}`, { align: 'center' });
+
+    doc.moveDown(2);
+
+    // === CONTRACT TITLE ===
+    doc.fontSize(20).font('Helvetica-Bold').fillColor('#0066cc')
+      .text('Project Contract', { align: 'center' });
+    doc.fillColor('black');
+    doc.moveDown(1);
+
+    // === CONTRACT INFO ===
+    const leftCol = 50;
+    const rightCol = 350;
+    let currentY = doc.y;
+
+    // Left column: Client Info
+    doc.fontSize(10).font('Helvetica-Bold').text('Client:', leftCol, currentY);
+    doc.font('Helvetica').text(getString(p, 'client_name') || 'Client', leftCol, currentY + 15);
+    if (p.company_name) {
+      doc.text(String(p.company_name), leftCol, currentY + 30);
+    }
+    doc.text(getString(p, 'client_email') || '', leftCol, currentY + (p.company_name ? 45 : 30));
+
+    // Right column: Contract Details
+    doc.font('Helvetica-Bold').text('Service Provider:', rightCol, currentY);
+    doc.font('Helvetica').text(BUSINESS_INFO.name, rightCol, currentY + 15);
+    doc.font('Helvetica-Bold').text('Contract Date:', rightCol, currentY + 45);
+    doc.font('Helvetica').text(formatDate(getString(p, 'contract_signed_at') || getString(p, 'created_at')), rightCol, currentY + 60);
+
+    doc.y = currentY + 90;
+    doc.moveDown(1);
+
+    // === PROJECT SCOPE ===
+    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('1. Project Scope');
+    doc.fillColor('black');
+    doc.moveDown(0.5);
+
+    doc.fontSize(10).font('Helvetica-Bold').text('Project Name: ', { continued: true });
+    doc.font('Helvetica').text(getString(p, 'project_name'));
+
+    const projectType = getString(p, 'project_type');
+    if (projectType) {
+      doc.font('Helvetica-Bold').text('Project Type: ', { continued: true });
+      doc.font('Helvetica').text(projectType.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()));
+    }
+
+    const description = getString(p, 'description');
+    if (description) {
+      doc.moveDown(0.5);
+      doc.font('Helvetica-Bold').text('Description:');
+      doc.font('Helvetica').text(description, { indent: 10 });
+    }
+
+    const features = getString(p, 'features');
+    if (features) {
+      doc.moveDown(0.5);
+      doc.font('Helvetica-Bold').text('Features:');
+      // Parse features if JSON, otherwise display as-is
+      try {
+        const featureList = JSON.parse(features);
+        if (Array.isArray(featureList)) {
+          featureList.forEach((feature: string) => {
+            doc.font('Helvetica').text(`• ${feature}`, { indent: 10 });
+          });
+        } else {
+          doc.font('Helvetica').text(features, { indent: 10 });
+        }
+      } catch {
+        doc.font('Helvetica').text(features, { indent: 10 });
+      }
+    }
+
+    doc.moveDown(1);
+
+    // === TIMELINE ===
+    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('2. Timeline');
+    doc.fillColor('black');
+    doc.moveDown(0.5);
+
+    doc.fontSize(10);
+    const startDate = getString(p, 'start_date');
+    const dueDate = getString(p, 'due_date');
+    const timeline = getString(p, 'timeline');
+
+    if (startDate) {
+      doc.font('Helvetica-Bold').text('Start Date: ', { continued: true });
+      doc.font('Helvetica').text(formatDate(startDate));
+    }
+    if (dueDate) {
+      doc.font('Helvetica-Bold').text('Target Completion: ', { continued: true });
+      doc.font('Helvetica').text(formatDate(dueDate));
+    }
+    if (timeline) {
+      doc.font('Helvetica-Bold').text('Estimated Timeline: ', { continued: true });
+      doc.font('Helvetica').text(timeline);
+    }
+
+    doc.moveDown(1);
+
+    // === PAYMENT TERMS ===
+    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('3. Payment Terms');
+    doc.fillColor('black');
+    doc.moveDown(0.5);
+
+    doc.fontSize(10);
+    const price = getString(p, 'price');
+    const depositAmount = getString(p, 'deposit_amount');
+
+    if (price) {
+      doc.font('Helvetica-Bold').text('Total Project Cost: ', { continued: true });
+      doc.font('Helvetica').text(`$${parseFloat(price).toLocaleString()}`);
+    }
+    if (depositAmount) {
+      doc.font('Helvetica-Bold').text('Deposit Amount: ', { continued: true });
+      doc.font('Helvetica').text(`$${parseFloat(depositAmount).toLocaleString()}`);
+    }
+
+    doc.moveDown(0.5);
+    doc.font('Helvetica').text('Payment is due according to the agreed milestones. Final payment is due upon project completion and client approval.');
+
+    doc.moveDown(1);
+
+    // === TERMS AND CONDITIONS ===
+    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('4. Terms and Conditions');
+    doc.fillColor('black');
+    doc.moveDown(0.5);
+
+    doc.fontSize(10).font('Helvetica');
+    const terms = [
+      'All work will be performed in a professional manner and according to industry standards.',
+      'Client agrees to provide timely feedback and necessary materials to avoid project delays.',
+      'Changes to the scope of work may require additional time and cost adjustments.',
+      'Client retains ownership of all final deliverables upon full payment.',
+      'Service Provider retains the right to showcase the completed project in their portfolio.'
+    ];
+
+    terms.forEach((term, index) => {
+      doc.text(`${index + 1}. ${term}`, { indent: 10 });
+      doc.moveDown(0.3);
+    });
+
+    doc.moveDown(1);
+
+    // === SIGNATURES ===
+    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('5. Signatures');
+    doc.fillColor('black');
+    doc.moveDown(1);
+
+    // Check if we need a new page for signatures
+    if (doc.y > doc.page.height - 200) {
+      doc.addPage();
+    }
+
+    currentY = doc.y;
+    const signatureWidth = 200;
+
+    // Client signature
+    doc.fontSize(10).font('Helvetica-Bold').text('Client:', leftCol, currentY);
+    doc.moveTo(leftCol, currentY + 50).lineTo(leftCol + signatureWidth, currentY + 50).stroke();
+    doc.font('Helvetica').text(getString(p, 'client_name') || 'Client Name', leftCol, currentY + 55);
+    doc.text('Date: _______________', leftCol, currentY + 70);
+
+    // Service provider signature
+    doc.font('Helvetica-Bold').text('Service Provider:', rightCol, currentY);
+    doc.moveTo(rightCol, currentY + 50).lineTo(rightCol + signatureWidth, currentY + 50).stroke();
+    doc.font('Helvetica').text(BUSINESS_INFO.name, rightCol, currentY + 55);
+    doc.text('Date: _______________', rightCol, currentY + 70);
+
+    // === FOOTER ===
+    doc.y = doc.page.height - 60;
+    doc.fontSize(9).font('Helvetica').fillColor('#666666')
+      .text(`Questions? Contact us at ${BUSINESS_INFO.email}`, { align: 'center' });
+
+    // Finalize PDF
+    doc.end();
   })
 );
 

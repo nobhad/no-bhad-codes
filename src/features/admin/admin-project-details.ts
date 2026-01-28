@@ -8,66 +8,11 @@
  */
 
 import { SanitizationUtils } from '../../utils/sanitization-utils';
-import { formatFileSize } from '../../utils/format-utils';
+import { formatFileSize, formatDisplayValue, formatTextWithLineBreaks } from '../../utils/format-utils';
 import { AdminAuth } from './admin-auth';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../utils/api-client';
 import { createDOMCache, getElement } from '../../utils/dom-cache';
-import { confirmDanger, alertError, alertSuccess, alertWarning } from '../../utils/confirm-dialog';
-
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
-
-/**
- * Format budget/timeline values with proper capitalization
- * Preserves hyphens between numbers (for ranges like "1000-2500", "2-4")
- * Formats currency values with $ and commas where appropriate
- */
-function formatDisplayValue(value: string | undefined | null): string {
-  if (!value || value === '-') return '-';
-
-  // Handle special cases first
-  const lowerValue = value.toLowerCase();
-
-  // ASAP should be all caps
-  if (lowerValue === 'asap') return 'ASAP';
-
-  // Budget ranges: "under-1k" -> "Under $1k"
-  if (lowerValue.includes('under')) {
-    return value.replace(/under-?/gi, 'Under $').replace(/-/g, '');
-  }
-
-  // Check if this looks like a pure numeric budget range (e.g., "1000-2500")
-  const numericRangeMatch = value.match(/^(\d+)-(\d+)$/);
-  if (numericRangeMatch) {
-    const min = parseInt(numericRangeMatch[1], 10);
-    const max = parseInt(numericRangeMatch[2], 10);
-    return `$${min.toLocaleString()}-$${max.toLocaleString()}`;
-  }
-
-  // Budget with "k" notation: "1k-2k" -> "$1k-$2k", "5k-10k" -> "$5k-$10k"
-  const kRangeMatch = value.match(/^(\d+)k-(\d+)k$/i);
-  if (kRangeMatch) {
-    return `$${kRangeMatch[1]}k-$${kRangeMatch[2]}k`;
-  }
-
-  // Single k value with plus: "35k-plus" -> "$35k+"
-  const kPlusMatch = value.match(/^(\d+)k-plus$/i);
-  if (kPlusMatch) {
-    return `$${kPlusMatch[1]}k+`;
-  }
-
-  // Replace hyphens with spaces EXCEPT when between numbers (for ranges)
-  // e.g., "1-3-months" -> "1-3 Months", "simple-site" -> "Simple Site"
-  // Uses a placeholder to preserve number-hyphen-number patterns
-  let formatted = value
-    .replace(/(\d)-(\d)/g, '$1__RANGE_HYPHEN__$2') // Preserve hyphens between numbers
-    .replace(/-/g, ' ') // Replace remaining hyphens with spaces
-    .replace(/__RANGE_HYPHEN__/g, '-'); // Restore range hyphens
-  formatted = formatted.replace(/\b\w/g, (char) => char.toUpperCase());
-
-  return formatted;
-}
+import { confirmDanger, alertError, alertSuccess, alertWarning, multiPromptDialog } from '../../utils/confirm-dialog';
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -293,10 +238,10 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const timeline = domCache.get('timeline');
     const startDate = domCache.get('startDate');
 
-    if (projectName) projectName.textContent = project.project_name || 'Untitled Project';
-    if (clientName) clientName.textContent = project.contact_name || '-';
+    if (projectName) projectName.textContent = SanitizationUtils.decodeHtmlEntities(project.project_name || 'Untitled Project');
+    if (clientName) clientName.textContent = SanitizationUtils.decodeHtmlEntities(project.contact_name || '-');
     if (clientEmail) clientEmail.textContent = project.email || '-';
-    if (company) company.textContent = project.company_name || '-';
+    if (company) company.textContent = SanitizationUtils.decodeHtmlEntities(project.company_name || '-');
     if (status) {
       status.textContent = (project.status || 'pending').replace('_', ' ');
       status.className = `status-badge status-${(project.status || 'pending').replace('_', '-')}`;
@@ -328,10 +273,10 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (progressPercent) progressPercent.textContent = `${progress}%`;
     if (progressBar) progressBar.style.width = `${progress}%`;
 
-    // Project description
+    // Project description (use innerHTML with sanitized line breaks)
     const descriptionEl = domCache.get('description');
     if (descriptionEl) {
-      descriptionEl.textContent = project.description || '-';
+      descriptionEl.innerHTML = formatTextWithLineBreaks(project.description);
     }
 
     // Preview URL
@@ -1097,16 +1042,41 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   /**
    * Show prompt to add a new milestone
    */
-  private showAddMilestonePrompt(): void {
+  private async showAddMilestonePrompt(): Promise<void> {
     if (!this.currentProjectId) return;
 
-    const title = prompt('Enter milestone title:');
-    if (!title) return;
+    const defaultDueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-    const description = prompt('Enter milestone description (optional):') || '';
-    const dueDateStr = prompt('Enter due date (YYYY-MM-DD, optional):') || '';
+    const result = await multiPromptDialog({
+      title: 'Add Milestone',
+      fields: [
+        {
+          name: 'title',
+          label: 'Milestone Title',
+          type: 'text',
+          placeholder: 'Enter milestone title',
+          required: true
+        },
+        {
+          name: 'description',
+          label: 'Description (optional)',
+          type: 'textarea',
+          placeholder: 'Enter milestone description'
+        },
+        {
+          name: 'dueDate',
+          label: 'Due Date (optional)',
+          type: 'date',
+          defaultValue: defaultDueDate
+        }
+      ],
+      confirmText: 'Add Milestone',
+      cancelText: 'Cancel'
+    });
 
-    this.addMilestone(title, description, dueDateStr);
+    if (!result) return;
+
+    this.addMilestone(result.title, result.description || '', result.dueDate || '');
   }
 
   /**
@@ -1267,25 +1237,44 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   /**
    * Show prompt to create a new invoice
    */
-  private showCreateInvoicePrompt(): void {
+  private async showCreateInvoicePrompt(): Promise<void> {
     if (!this.currentProjectId) return;
 
     const project = this.projectsData.find((p: ProjectResponse) => p.id === this.currentProjectId);
     if (!project) return;
 
-    const description = prompt('Enter line item description:', 'Web Development Services');
-    if (!description) return;
+    const result = await multiPromptDialog({
+      title: 'Create Invoice',
+      fields: [
+        {
+          name: 'description',
+          label: 'Line Item Description',
+          type: 'text',
+          defaultValue: 'Web Development Services',
+          required: true
+        },
+        {
+          name: 'amount',
+          label: 'Amount ($)',
+          type: 'number',
+          defaultValue: '1000',
+          placeholder: 'Enter amount',
+          required: true
+        }
+      ],
+      confirmText: 'Create Invoice',
+      cancelText: 'Cancel'
+    });
 
-    const amountStr = prompt('Enter amount ($):', '1000');
-    if (!amountStr) return;
+    if (!result) return;
 
-    const amount = parseFloat(amountStr);
+    const amount = parseFloat(result.amount);
     if (isNaN(amount) || amount <= 0) {
       alertWarning('Please enter a valid amount');
       return;
     }
 
-    this.createInvoice(project.client_id, description, amount);
+    this.createInvoice(project.client_id, result.description, amount);
   }
 
   /**

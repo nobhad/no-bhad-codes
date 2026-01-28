@@ -79,14 +79,34 @@ export class SanitizationUtils {
   /**
    * Decode HTML entities back to their original characters
    * Use for displaying data that may have been over-encoded
+   *
+   * SECURITY NOTE: This textarea-based approach is SAFE because:
+   * 1. Setting innerHTML on a textarea does NOT execute scripts
+   * 2. The textarea.value property returns plain decoded text
+   * 3. This is a well-known safe pattern for entity decoding
+   * Reference: https://stackoverflow.com/questions/1912501/unescape-html-entities-in-javascript
    */
   static decodeHtmlEntities(input: string): string {
     if (!input || typeof input !== 'string') return '';
 
     // Use a textarea element to decode HTML entities (browser's built-in decoder)
+    // This is safe because textarea doesn't execute scripts when innerHTML is set
     const textarea = document.createElement('textarea');
-    textarea.innerHTML = input;
-    return textarea.value;
+
+    // Decode recursively to handle double-encoded entities like &amp;#x2F;
+    let decoded = input;
+    let prev = '';
+    let iterations = 0;
+    const maxIterations = 5; // Prevent infinite loops
+
+    while (decoded !== prev && iterations < maxIterations) {
+      prev = decoded;
+      textarea.innerHTML = decoded;
+      decoded = textarea.value;
+      iterations++;
+    }
+
+    return decoded;
   }
 
   /**

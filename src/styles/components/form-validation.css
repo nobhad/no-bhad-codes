@@ -41,7 +41,22 @@
   font-size: 0.85rem;
   min-height: 1.2em;
   margin-top: 4px;
+  display: none; /* Hidden by default */
+}
+
+.field-error--visible {
   display: block;
+}
+
+/* Invalid field state - applied by form-errors.ts */
+.field--invalid {
+  border-color: var(--color-error-500) !important;
+  background-color: rgba(var(--color-error-rgb, 239, 68, 68), 0.05);
+}
+
+.field--invalid:focus {
+  outline-color: var(--color-error-500);
+  box-shadow: 0 0 0 2px rgba(var(--color-error-rgb, 239, 68, 68), 0.2);
 }
 
 /* ============================================

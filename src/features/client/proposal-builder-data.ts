@@ -854,7 +854,7 @@ export function calculatePrice(
   projectType: ProjectType,
   tierId: TierId,
   addedFeatureIds: string[],
-  maintenanceId: MaintenanceId | null
+  _maintenanceId: MaintenanceId | null
 ): number {
   const config = getTierConfiguration(projectType);
   const tier = config.tiers.find(t => t.id === tierId);

@@ -32,6 +32,9 @@ import {
 import { decodeJwtPayload, isAdminPayload } from '../../utils/jwt-utils';
 import { ICONS, getAccessibleIcon } from '../../constants/icons';
 import { createDOMCache } from '../../utils/dom-cache';
+import { formatTextWithLineBreaks } from '../../utils/format-utils';
+import { showToast } from '../../utils/toast-notifications';
+import { withButtonLoading } from '../../utils/button-loading';
 
 // DOM element keys for caching
 type PortalDOMKeys = Record<string, string>;
@@ -40,6 +43,7 @@ export class ClientPortalModule extends BaseModule {
   private isLoggedIn = false;
   private currentProject: ClientProject | null = null;
   private currentUser: string | null = null;
+  private currentUserData: { id: number; email: string; name: string } | null = null;
   private dashboardListenersSetup = false;
 
   // Configuration
@@ -123,7 +127,6 @@ export class ClientPortalModule extends BaseModule {
     return {
       getAuthToken: () => sessionStorage.getItem('client_auth_mode'),
       showNotification: (message: string, type: 'success' | 'error' | 'info' = 'success') => {
-        const { showToast } = require('../../utils/toast-notifications');
         if (type === 'error') {
           console.error('[ClientPortal]', message);
           showToast(message, 'error', { duration: 5000 });
@@ -145,6 +148,7 @@ export class ClientPortalModule extends BaseModule {
       onAuthValid: async (user) => {
         this.isLoggedIn = true;
         this.currentUser = user.email;
+        this.currentUserData = user;
         await this.loadRealUserProjects(user);
         this.showDashboard();
       }
@@ -198,6 +202,7 @@ export class ClientPortalModule extends BaseModule {
             onLoginSuccess: async (user) => {
               this.isLoggedIn = true;
               this.currentUser = user.email;
+              this.currentUserData = user;
               await this.loadRealUserProjects(user);
               const isOnPortalPage = document.body.getAttribute('data-page') === 'client-portal';
               if (!isOnPortalPage) {
@@ -375,7 +380,8 @@ export class ClientPortalModule extends BaseModule {
     if (profileForm) {
       profileForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        await this.saveProfileSettings();
+        const submitBtn = profileForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+        await withButtonLoading(submitBtn, () => this.saveProfileSettings(), 'Saving...');
       });
     }
 
@@ -384,7 +390,8 @@ export class ClientPortalModule extends BaseModule {
     if (passwordForm) {
       passwordForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        await this.savePasswordSettings();
+        const submitBtn = passwordForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+        await withButtonLoading(submitBtn, () => this.savePasswordSettings(), 'Updating...');
       });
     }
 
@@ -393,7 +400,8 @@ export class ClientPortalModule extends BaseModule {
     if (notificationsForm) {
       notificationsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        await this.saveNotificationSettings();
+        const submitBtn = notificationsForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+        await withButtonLoading(submitBtn, () => this.saveNotificationSettings(), 'Saving...');
       });
     }
 
@@ -402,7 +410,8 @@ export class ClientPortalModule extends BaseModule {
     if (billingForm) {
       billingForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        await this.saveBillingSettings();
+        const submitBtn = billingForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+        await withButtonLoading(submitBtn, () => this.saveBillingSettings(), 'Saving...');
       });
     }
 
@@ -411,7 +420,8 @@ export class ClientPortalModule extends BaseModule {
     if (newProjectForm) {
       newProjectForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        await this.submitProjectRequest();
+        const submitBtn = newProjectForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+        await withButtonLoading(submitBtn, () => this.submitProjectRequest(), 'Submitting...');
       });
     }
   }
@@ -423,7 +433,7 @@ export class ClientPortalModule extends BaseModule {
     const authMode = sessionStorage.getItem('client_auth_mode');
 
     if (!authMode) {
-      alert('Please log in to submit a project request.');
+      showToast('Please log in to submit a project request.', 'error');
       return;
     }
 
@@ -434,7 +444,7 @@ export class ClientPortalModule extends BaseModule {
     const description = this.domCache.getAs<HTMLTextAreaElement>('projectDescription')?.value;
 
     if (!name || !projectType || !description) {
-      alert('Please fill in all required fields');
+      showToast('Please fill in all required fields', 'error');
       return;
     }
 
@@ -460,20 +470,26 @@ export class ClientPortalModule extends BaseModule {
         throw new Error(data.error || 'Failed to submit project request');
       }
 
-      alert(data.message || 'Project request submitted successfully!');
+      showToast(data.message || 'Project request submitted successfully!', 'success');
 
       // Clear the form
       const form = document.getElementById('new-project-form') as HTMLFormElement;
       if (form) form.reset();
 
+      // Reload projects list to show the new project
+      if (this.currentUserData) {
+        await this.loadRealUserProjects(this.currentUserData);
+      }
+
       // Switch to dashboard tab
       this.switchTab('dashboard');
     } catch (error) {
       console.error('Error submitting project request:', error);
-      alert(
+      showToast(
         error instanceof Error
           ? error.message
-          : 'Failed to submit project request. Please try again.'
+          : 'Failed to submit project request. Please try again.',
+        'error'
       );
     }
   }
@@ -485,7 +501,7 @@ export class ClientPortalModule extends BaseModule {
     const authMode = sessionStorage.getItem('client_auth_mode');
 
     if (!authMode) {
-      alert('Please log in to save settings.');
+      showToast('Please log in to save settings.', 'error');
       return;
     }
 
@@ -519,12 +535,12 @@ export class ClientPortalModule extends BaseModule {
       // If password fields are filled, update password
       if (currentPassword && newPassword) {
         if (newPassword !== confirmPassword) {
-          alert('New passwords do not match');
+          showToast('New passwords do not match', 'error');
           return;
         }
 
         if (newPassword.length < 8) {
-          alert('Password must be at least 8 characters');
+          showToast('Password must be at least 8 characters', 'error');
           return;
         }
 
@@ -554,10 +570,13 @@ export class ClientPortalModule extends BaseModule {
         if (confPassEl) confPassEl.value = '';
       }
 
-      alert('Profile updated successfully!');
+      showToast('Profile updated successfully!', 'success');
+
+      // Refresh displayed profile data
+      await this.loadUserSettings();
     } catch (error) {
       console.error('Error saving profile:', error);
-      alert(error instanceof Error ? error.message : 'Failed to save profile. Please try again.');
+      showToast(error instanceof Error ? error.message : 'Failed to save profile. Please try again.', 'error');
     }
   }
 
@@ -568,7 +587,7 @@ export class ClientPortalModule extends BaseModule {
     const authMode = sessionStorage.getItem('client_auth_mode');
 
     if (!authMode) {
-      alert('Please log in to change your password.');
+      showToast('Please log in to change your password.', 'error');
       return;
     }
 
@@ -577,17 +596,17 @@ export class ClientPortalModule extends BaseModule {
     const confirmPassword = this.domCache.getAs<HTMLInputElement>('confirmPassword')?.value;
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      alert('Please fill in all password fields');
+      showToast('Please fill in all password fields', 'error');
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      alert('New passwords do not match');
+      showToast('New passwords do not match', 'error');
       return;
     }
 
     if (newPassword.length < 8) {
-      alert('Password must be at least 8 characters');
+      showToast('Password must be at least 8 characters', 'error');
       return;
     }
 
@@ -617,10 +636,10 @@ export class ClientPortalModule extends BaseModule {
       if (newPassEl2) newPassEl2.value = '';
       if (confPassEl2) confPassEl2.value = '';
 
-      alert('Password updated successfully!');
+      showToast('Password updated successfully!', 'success');
     } catch (error) {
       console.error('Error updating password:', error);
-      alert(error instanceof Error ? error.message : 'Failed to update password. Please try again.');
+      showToast(error instanceof Error ? error.message : 'Failed to update password. Please try again.', 'error');
     }
   }
 
@@ -631,7 +650,7 @@ export class ClientPortalModule extends BaseModule {
     const authMode = sessionStorage.getItem('client_auth_mode');
 
     if (!authMode) {
-      alert('Please log in to save settings.');
+      showToast('Please log in to save settings.', 'error');
       return;
     }
 
@@ -661,11 +680,12 @@ export class ClientPortalModule extends BaseModule {
         throw new Error(error.error || 'Failed to update notification preferences');
       }
 
-      alert('Notification preferences saved!');
+      showToast('Notification preferences saved!', 'success');
     } catch (error) {
       console.error('Error saving notifications:', error);
-      alert(
-        error instanceof Error ? error.message : 'Failed to save preferences. Please try again.'
+      showToast(
+        error instanceof Error ? error.message : 'Failed to save preferences. Please try again.',
+        'error'
       );
     }
   }
@@ -677,7 +697,7 @@ export class ClientPortalModule extends BaseModule {
     const authMode = sessionStorage.getItem('client_auth_mode');
 
     if (!authMode) {
-      alert('Please log in to save settings.');
+      showToast('Please log in to save settings.', 'error');
       return;
     }
 
@@ -706,11 +726,12 @@ export class ClientPortalModule extends BaseModule {
         throw new Error(error.error || 'Failed to update billing information');
       }
 
-      alert('Billing information saved!');
+      showToast('Billing information saved!', 'success');
     } catch (error) {
       console.error('Error saving billing:', error);
-      alert(
-        error instanceof Error ? error.message : 'Failed to save billing info. Please try again.'
+      showToast(
+        error instanceof Error ? error.message : 'Failed to save billing info. Please try again.',
+        'error'
       );
     }
   }
@@ -956,11 +977,12 @@ export class ClientPortalModule extends BaseModule {
       statusElement.className = `status-badge status-${this.currentProject.status}`;
     }
 
-    // Populate project description
+    // Populate project description (use innerHTML with sanitized line breaks)
     const descriptionElement = this.domCache.get('projectDescriptionEl');
     if (descriptionElement) {
-      descriptionElement.textContent =
-        this.currentProject.description || 'Project details will be updated soon.';
+      descriptionElement.innerHTML = formatTextWithLineBreaks(
+        this.currentProject.description || 'Project details will be updated soon.'
+      );
     }
 
     // Populate current phase
@@ -1196,6 +1218,7 @@ export class ClientPortalModule extends BaseModule {
     this.isLoggedIn = false;
     this.currentProject = null;
     this.currentUser = null;
+    this.currentUserData = null;
     this.dashboardListenersSetup = false; // Reset listeners flag
 
     // Clear form data

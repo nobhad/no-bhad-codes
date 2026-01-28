@@ -11,6 +11,7 @@
 import type { PortalInvoice, ClientPortalContext } from '../portal-types';
 import { formatCurrency } from '../../../utils/format-utils';
 import { getContainerLoadingHTML } from '../../../utils/loading-utils';
+import { showToast } from '../../../utils/toast-notifications';
 
 const INVOICES_API_BASE = '/api/invoices';
 
@@ -219,6 +220,6 @@ async function downloadInvoice(
     window.URL.revokeObjectURL(url);
   } catch (error) {
     console.error('Error downloading invoice:', error);
-    alert('Failed to download invoice. Please try again.');
+    showToast('Failed to download invoice. Please try again.', 'error');
   }
 }

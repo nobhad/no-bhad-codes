@@ -208,3 +208,68 @@
   background: transparent;
   color: var(--color-primary);
 }
+
+/* ================================================
+   PROMPT DIALOG STYLES
+   ================================================ */
+
+.prompt-dialog {
+  text-align: left;
+}
+
+.prompt-dialog .confirm-dialog-title {
+  text-align: center;
+}
+
+.prompt-dialog-field {
+  margin-bottom: var(--space-4);
+}
+
+.prompt-dialog-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.prompt-dialog-input {
+  width: 100%;
+  padding: var(--space-3);
+  background: var(--portal-bg-dark, #1a1a1a);
+  border: 1px solid var(--portal-border, #333);
+  border-radius: var(--portal-radius, 8px);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-base);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.prompt-dialog-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb, 220, 38, 38), 0.2);
+}
+
+.prompt-dialog-input::placeholder {
+  color: var(--portal-text-muted, #666);
+}
+
+/* Multi-prompt dialog */
+.multi-prompt-dialog {
+  max-width: 480px;
+}
+
+.multi-prompt-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.multi-prompt-form .confirm-dialog-actions {
+  margin-top: var(--space-2);
+}
+
+/* Textarea in prompt */
+.prompt-dialog-input.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}

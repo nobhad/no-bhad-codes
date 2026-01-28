@@ -90,6 +90,19 @@
   font-weight: 400;
 }
 
+/* URL links in project details - styled red and clickable */
+.meta-value a {
+  color: var(--color-primary, #dc2626);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  word-break: break-all;
+}
+
+.meta-value a:hover {
+  color: #ff4444;
+  text-decoration: underline;
+}
+
 .project-detail-client-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

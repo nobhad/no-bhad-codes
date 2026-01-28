@@ -9,6 +9,7 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { formatDisplayValue } from '../../../utils/format-utils';
 import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
 import { createTableDropdown, LEAD_STATUS_OPTIONS } from '../../../utils/table-dropdown';
 import {
@@ -51,57 +52,6 @@ function getElement(id: string): HTMLElement | null {
     cachedElements.set(id, document.getElementById(id));
   }
   return cachedElements.get(id) ?? null;
-}
-
-/**
- * Format budget/timeline values with proper capitalization
- * Preserves hyphens between numbers (for ranges like "1000-2500", "2-4")
- * Formats currency values with $ and commas where appropriate
- */
-function formatDisplayValue(value: string | undefined | null): string {
-  if (!value || value === '-') return '-';
-
-  // Handle special cases first
-  const lowerValue = value.toLowerCase();
-
-  // ASAP should be all caps
-  if (lowerValue === 'asap') return 'ASAP';
-
-  // Budget ranges: "under-1k" -> "Under $1k"
-  if (lowerValue.includes('under')) {
-    return value.replace(/under-?/gi, 'Under $').replace(/-/g, '');
-  }
-
-  // Check if this looks like a pure numeric budget range (e.g., "1000-2500")
-  const numericRangeMatch = value.match(/^(\d+)-(\d+)$/);
-  if (numericRangeMatch) {
-    const min = parseInt(numericRangeMatch[1], 10);
-    const max = parseInt(numericRangeMatch[2], 10);
-    return `$${min.toLocaleString()}-$${max.toLocaleString()}`;
-  }
-
-  // Budget with "k" notation: "1k-2k" -> "$1k-$2k", "5k-10k" -> "$5k-$10k"
-  const kRangeMatch = value.match(/^(\d+)k-(\d+)k$/i);
-  if (kRangeMatch) {
-    return `$${kRangeMatch[1]}k-$${kRangeMatch[2]}k`;
-  }
-
-  // Single k value with plus: "35k-plus" -> "$35k+"
-  const kPlusMatch = value.match(/^(\d+)k-plus$/i);
-  if (kPlusMatch) {
-    return `$${kPlusMatch[1]}k+`;
-  }
-
-  // Replace hyphens with spaces EXCEPT when between numbers (for ranges)
-  // e.g., "1-3-months" -> "1-3 Months", "simple-site" -> "Simple Site"
-  // Uses a placeholder to preserve number-hyphen-number patterns
-  let formatted = value
-    .replace(/(\d)-(\d)/g, '$1__RANGE_HYPHEN__$2') // Preserve hyphens between numbers
-    .replace(/-/g, ' ') // Replace remaining hyphens with spaces
-    .replace(/__RANGE_HYPHEN__/g, '-'); // Restore range hyphens
-  formatted = formatted.replace(/\b\w/g, (char) => char.toUpperCase());
-
-  return formatted;
 }
 
 export function getLeadsData(): Lead[] {
@@ -313,8 +263,6 @@ async function updateLeadStatus(id: number, status: string, ctx: AdminDashboardC
 
     // If cancelling, ask who cancelled
     if (status === 'cancelled') {
-      const { confirmDialog } = await import('../../../utils/confirm-dialog');
-
       // First confirm they want to cancel
       const confirmCancel = await confirmDialog({
         title: 'Cancel Project',
@@ -522,7 +470,7 @@ export function showLeadDetails(leadId: number): void {
   detailsPanel.innerHTML = `
     <div class="details-header">
       <h3>Intake Form Submission</h3>
-      <button class="close-btn" onclick="window.closeDetailsPanel()">×</button>
+      <button class="close-btn" onclick="window.closeDetailsPanel()" aria-label="Close panel">×</button>
     </div>
     <div class="details-content">
       <div class="project-detail-meta">
