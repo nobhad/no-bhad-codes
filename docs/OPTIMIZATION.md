@@ -95,7 +95,7 @@ NBW_DEBUG.getBundleAnalysis()     // Bundle size analysis
 {
   target: 'es2020',           // Modern JavaScript features
   cssCodeSplit: true,         // Separate CSS chunks
-  chunkSizeWarningLimit: 300, // Aggressive size limits
+  chunkSizeWarningLimit: 600, // Size limit warning threshold
   sourcemap: false,           // Smaller production builds
 }
 ```

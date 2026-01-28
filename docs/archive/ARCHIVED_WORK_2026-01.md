@@ -4,6 +4,173 @@ This file contains completed work from January 2026. Items are moved here from `
 
 ---
 
+## Archived from Current Work (January 28, 2026)
+
+### Dialogue Box Shadows - Consistency
+**Status:** COMPLETE
+**Observed:** January 27, 2026
+
+Dialogue boxes (modals, confirm dialogs) now use consistent shadow styling with `--shadow-modal` token throughout the application.
+
+**Changes made:**
+- Updated modal component to use `--shadow-modal`
+- Updated admin modals to use `--shadow-modal` instead of `--shadow-panel`
+- Updated confirm dialog to use `--shadow-modal`
+- Updated button shadows in confirm dialog to use `--shadow-button-*` tokens
+
+**Files modified:**
+- `src/components/modal-component.ts`
+- `src/styles/admin/modals.css`
+- `src/styles/shared/confirm-dialog.css`
+
+---
+
+### Toast Notifications for Status Changes
+**Status:** COMPLETE
+**Observed:** January 27, 2026
+
+Replaced excessive success dialogue boxes with non-intrusive toast notifications for status change confirmations.
+
+**Changes made:**
+- Created toast notification system (`src/utils/toast-notifications.ts`)
+- Added toast CSS styles (`src/styles/shared/toast-notifications.css`)
+- Updated admin dashboard to use toasts for success/info messages
+- Updated client portal to use toasts instead of alert dialogs
+- Error messages still use dialogs for important errors
+
+**Files created:**
+- `src/utils/toast-notifications.ts`
+- `src/styles/shared/toast-notifications.css`
+
+**Files modified:**
+- `src/features/admin/admin-dashboard.ts`
+- `src/features/client/client-portal.ts`
+- `src/styles/bundles/shared.css` (added toast import)
+
+---
+
+### Badge Styling Improvements
+**Status:** COMPLETE
+**Observed:** January 27, 2026
+
+Replaced full colored badge pills with minimal status dots in table dropdowns.
+
+**Changes made:**
+- Added colored status dots (8px circle) before status text
+- Removed colored backgrounds and borders from dropdown triggers
+- Removed "X New" badge from table headers (status visible via dots in rows)
+- Table rows now have fixed 48px height to prevent dropdown height changes
+- Dropdown hover background matches row hover (`rgba(255, 255, 255, 0.05)`)
+- Details panel dropdowns have transparent borders
+
+**Files modified:**
+- `src/styles/pages/admin.css` - Status dot styling, fixed row heights
+- `src/utils/table-dropdown.ts` - Added status dot element to trigger
+
+---
+
+### Unable to Add New Client
+**Status:** FIXED
+**Observed:** January 27, 2026
+**Fixed:** January 28, 2026
+
+Unable to add new client in the admin dashboard. The "Add New Client" functionality was not working due to form submit handler using `{ once: true }` which caused the handler to be removed after first validation failure.
+
+**Fix applied:**
+- Removed `{ once: true }` from form submit handler
+- Added proper cleanup of event listener when modal closes
+- Form now allows multiple submission attempts after validation errors
+
+**Files modified:**
+- `src/features/admin/modules/admin-clients.ts` - Fixed event listener lifecycle
+
+---
+
+### Add New Client in Project Feature - Missing Fields
+**Status:** FIXED
+**Observed:** January 27, 2026
+**Fixed:** January 28, 2026
+
+When adding a new project, the "Add New Client" option wasn't showing the client fields because the custom dropdown was initialized before the change event listener was added, then the select was cloned/replaced which broke the reference.
+
+**Fixes applied:**
+- Removed clone/replace pattern that broke dropdown reference
+- Added `onChange` callback to `initModalDropdown` for client dropdown
+- Fields now appear when "+ Create New Client" is selected
+- Fixed textarea line-height (double-spaced text) by changing class from `form-input` to `form-textarea`
+- Fixed HTML entity encoding (`&amp;` showing instead of `&`) in dropdown by using `textContent` instead of `innerHTML`
+- Fixed uneven spacing in modal by adding flex/gap to `#new-client-fields` container
+
+**Files modified:**
+- `src/features/admin/modules/admin-projects.ts` - Dropdown onChange callback
+- `src/utils/modal-dropdown.ts` - Fixed HTML encoding in trigger display
+- `src/styles/admin/modals.css` - Added flex/gap for new-client-fields
+- `admin/index.html` - Changed textarea class to form-textarea
+
+**Files investigated:**
+- `src/features/admin/modules/admin-projects.ts` - Project creation with client selection
+- `src/features/admin/admin-project-details.ts` - Project details and client management
+
+---
+
+### HTML Entity Encoding in Project Description
+**Status:** WORKAROUND APPLIED
+**Observed:** January 28, 2026
+**Fixed:** January 28, 2026
+
+Project descriptions show HTML entities like `&#x2F;` instead of `/`. The entities are stored in the database itself, not just displayed incorrectly.
+
+**Root cause:** Unknown - possibly from data import or intake form. The admin project creation form doesn't appear to encode.
+
+**Workaround applied:**
+- Added `decodeHtmlEntities()` method to `SanitizationUtils`
+- Description display now decodes entities before showing
+
+**Files modified:**
+- `src/utils/sanitization-utils.ts` - Added decodeHtmlEntities method
+- `src/features/admin/modules/admin-projects.ts` - Description uses decode function
+
+---
+
+### Messages Dropdown - Double Selection Display
+**Status:** COMPLETE
+**Observed:** January 26, 2026
+**Fixed:** January 28, 2026
+
+The Messages dropdown was showing the currently selected item twice - once in the trigger and again as the first item in the dropdown menu list.
+
+**Issue:**
+- Current selection appeared in both trigger and dropdown menu
+- Dropdown menu should show other available options (not the current selection)
+
+**Fix applied:**
+- Updated dropdown rendering logic to exclude current selection from menu items
+- Current selection now appears ONLY in the trigger
+- Dropdown menu shows other available options
+
+**Files modified:**
+- Messages dropdown implementation (location identified and fixed)
+
+---
+
+### Table Dropdown Styling Inconsistency
+**Status:** COMPLETE
+**Observed:** January 26, 2026
+
+Table dropdowns now follow Messages dropdown pattern with consistent styling.
+
+**Changes made:**
+- Fixed row heights (48px) to prevent changes when dropdown opens/closes
+- Consistent font sizing between trigger and menu items
+- Border states: transparent (default), red on hover/focus/open
+- Open state has transparent bottom border connecting seamlessly to menu
+- Cleaned up CSS - removed all `!important` overrides, proper cascade order
+
+**Files modified:**
+- `src/styles/pages/admin.css` - Table dropdown and status dropdown styles
+
+---
+
 ## Admin UI Fixes - COMPLETE (January 27, 2026)
 
 ### Sidebar Zoom Collapse (150%+)
