@@ -1,6 +1,6 @@
 # Current Work
 
-**Last Updated:** January 27, 2026 (Proposal Builder Added)
+**Last Updated:** January 28, 2026 (Proposal PDF Generation Added)
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-01.md`.
 
@@ -72,14 +72,29 @@ Replaced full colored badge pills with minimal status dots in table dropdowns.
 ---
 
 ### PDF Branding Logo - Proposal & Website Audit
-**Status:** TODO
+**Status:** PARTIAL - Proposal PDF Complete, Audit PDF TODO
 **Observed:** January 27, 2026
+**Updated:** January 28, 2026
 
 Need to make sure branding logo from invoice PDFs goes on top of:
-- Project proposal PDFs
-- Current website audit PDFs
+- [x] Project proposal PDFs - COMPLETE
+- [ ] Current website audit PDFs - TODO
 
-**Note:** Proposal and website audit PDF generation routes need to be verified. If they don't exist, they may need to be created following the invoice PDF pattern.
+**Proposal PDF Implementation (January 28, 2026):**
+
+Added `GET /api/proposals/:id/pdf` endpoint to `server/routes/proposals.ts` that generates branded PDF proposals with:
+- Logo at top (centered, 60px width)
+- Business header line (name, contact, email, website)
+- Proposal title
+- Prepared For / Prepared By sections
+- Project details (name, description, type)
+- Selected package tier with base price
+- Included features list
+- Add-ons with prices
+- Maintenance plan (if selected)
+- Pricing summary table with total
+- Client notes (if any)
+- Footer with validity notice
 
 **Reference:** Invoice PDF logo implementation in `server/routes/invoices.ts` (lines 925-930)
 - Logo path: `public/images/avatar_small-1.png`
@@ -140,49 +155,105 @@ Need to generate contract PDFs with the same branding header as invoice PDFs.
 
 ### Unable to Add New Client
 
-**Status:** TODO
+**Status:** FIXED
 **Observed:** January 27, 2026
+**Fixed:** January 28, 2026
 
-Unable to add new client in the admin dashboard. The "Add New Client" functionality is not working.
+Unable to add new client in the admin dashboard. The "Add New Client" functionality was not working due to form submit handler using `{ once: true }` which caused the handler to be removed after first validation failure.
 
-**Expected behavior:**
+**Fix applied:**
 
-- Admin should be able to add new clients from the Clients section
-- Form should validate required fields
-- Client should be saved to database
+- Removed `{ once: true }` from form submit handler
+- Added proper cleanup of event listener when modal closes
+- Form now allows multiple submission attempts after validation errors
 
-**Files to investigate:**
+**Files modified:**
 
-- `src/features/admin/modules/admin-clients.ts` - Client management module
-- `server/routes/clients.ts` - Client API endpoints
+- `src/features/admin/modules/admin-clients.ts` - Fixed event listener lifecycle
 
 ---
 
 ### Add New Client in Project Feature - Missing Fields
 
-**Status:** TODO
+**Status:** FIXED
 **Observed:** January 27, 2026
+**Fixed:** January 28, 2026
 
-When adding a new project, the "Add New Client" option doesn't work because name and email are required fields but no input fields are present to enter them.
+When adding a new project, the "Add New Client" option wasn't showing the client fields because the custom dropdown was initialized before the change event listener was added, then the select was cloned/replaced which broke the reference.
 
-**Issues:**
+**Fixes applied:**
 
-- Name and email are required for new clients
-- No form fields visible to enter client name and email
-- Validation fails because required fields are missing
+- Removed clone/replace pattern that broke dropdown reference
+- Added `onChange` callback to `initModalDropdown` for client dropdown
+- Fields now appear when "+ Create New Client" is selected
+- Fixed textarea line-height (double-spaced text) by changing class from `form-input` to `form-textarea`
+- Fixed HTML entity encoding (`&amp;` showing instead of `&`) in dropdown by using `textContent` instead of `innerHTML`
+- Fixed uneven spacing in modal by adding flex/gap to `#new-client-fields` container
 
-**Expected behavior:**
+**Files modified:**
 
-- When selecting "Add New Client" in project creation, form fields should appear for:
-  - Client name (required)
-  - Client email (required)
-  - Optional: Company name, phone, etc.
-- Form should validate before allowing project creation
+- `src/features/admin/modules/admin-projects.ts` - Dropdown onChange callback
+- `src/utils/modal-dropdown.ts` - Fixed HTML encoding in trigger display
+- `src/styles/admin/modals.css` - Added flex/gap for new-client-fields
+- `admin/index.html` - Changed textarea class to form-textarea
 
-**Files to investigate:**
+**Files investigated:**
 
 - `src/features/admin/modules/admin-projects.ts` - Project creation with client selection
 - `src/features/admin/admin-project-details.ts` - Project details and client management
+
+---
+
+### Project Files Download/Preview Not Working
+
+**Status:** FIXED
+**Observed:** January 28, 2026
+**Fixed:** January 28, 2026
+
+Project files show "0 B" size and download fails with "File wasn't available on site".
+
+**Issues identified:**
+
+1. API returns `file_size` but frontend uses `file.size` - causing "0 B" display
+2. API didn't return `file_path` - needed for correct download URL
+3. Download URL was wrong - used `/uploads/${filename}` but files are in `uploads/intake/`
+4. No preview button for previewable files (JSON, text, images)
+
+**Fixes applied:**
+
+- Added `file_path` to `/api/projects/:id/files` endpoint
+- Added `size` alias in API response for frontend compatibility
+- Fixed download URL to use `file_path`
+- Added Preview button for JSON/text/image/PDF files
+- Added JSON preview modal that displays formatted JSON
+
+**Files modified:**
+
+- `server/routes/projects.ts` - Added file_path and size alias to response
+- `src/features/admin/modules/admin-projects.ts` - Fixed renderProjectFiles, added preview modal
+- `src/features/admin/admin-types.ts` - Added file_size and file_path to ProjectFile interface
+
+---
+
+### HTML Entity Encoding in Project Description
+
+**Status:** WORKAROUND APPLIED
+**Observed:** January 28, 2026
+**Fixed:** January 28, 2026
+
+Project descriptions show HTML entities like `&#x2F;` instead of `/`. The entities are stored in the database itself, not just displayed incorrectly.
+
+**Root cause:** Unknown - possibly from data import or intake form. The admin project creation form doesn't appear to encode.
+
+**Workaround applied:**
+
+- Added `decodeHtmlEntities()` method to `SanitizationUtils`
+- Description display now decodes entities before showing
+
+**Files modified:**
+
+- `src/utils/sanitization-utils.ts` - Added decodeHtmlEntities method
+- `src/features/admin/modules/admin-projects.ts` - Description uses decode function
 
 ---
 

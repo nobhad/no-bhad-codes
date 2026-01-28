@@ -551,10 +551,12 @@ function populateProjectDetailView(project: LeadProject): void {
   if (progressPercent) progressPercent.textContent = `${progress}%`;
   if (progressBar) progressBar.style.width = `${progress}%`;
 
-  // Description (use cached ref)
+  // Description (use cached ref) - decode any HTML entities that may have been over-encoded
   const descriptionEl = domCache.get('description');
   if (descriptionEl) {
-    descriptionEl.textContent = project.description || '-';
+    descriptionEl.textContent = project.description
+      ? SanitizationUtils.decodeHtmlEntities(project.description)
+      : '-';
   }
 
   // Features - append below the description row if present (use cached ref)
@@ -979,16 +981,24 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
         ${files
     .map((file) => {
       const safeName = SanitizationUtils.escapeHtml(file.original_filename || file.filename);
-      const size = formatFileSize(file.size);
+      // Use file_size or size (API returns both for compatibility)
+      const fileSize = file.file_size || file.size || 0;
+      const size = formatFileSize(fileSize);
       const date = new Date(file.created_at).toLocaleDateString();
+      // Use file_path if available, otherwise construct from filename
+      const filePath = file.file_path || `uploads/projects/${file.filename}`;
+      const downloadUrl = `/${filePath}`;
+      // Check if file is previewable (JSON, text, images)
+      const isPreviewable = /\.(json|txt|md|png|jpg|jpeg|gif|webp|svg|pdf)$/i.test(safeName);
 
       return `
               <tr>
                 <td>${safeName}</td>
                 <td>${size}</td>
                 <td>${date}</td>
-                <td>
-                  <a href="/uploads/${file.filename}" class="action-btn" download="${safeName}" aria-label="Download ${safeName}">Download</a>
+                <td class="file-actions">
+                  ${isPreviewable ? `<button class="action-btn preview-btn" data-file-id="${file.id}" data-file-path="${downloadUrl}" data-file-name="${safeName}" aria-label="Preview ${safeName}">Preview</button>` : ''}
+                  <a href="${downloadUrl}" class="action-btn" download="${safeName}" aria-label="Download ${safeName}">Download</a>
                 </td>
               </tr>
             `;
@@ -997,6 +1007,87 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
       </tbody>
     </table>
   `;
+
+  // Add click handlers for preview buttons
+  container.querySelectorAll('.preview-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const filePath = (btn as HTMLElement).dataset.filePath;
+      const fileName = (btn as HTMLElement).dataset.fileName;
+      if (filePath) {
+        openFilePreview(filePath, fileName || 'File Preview');
+      }
+    });
+  });
+}
+
+/**
+ * Open file preview in a modal or new tab
+ */
+function openFilePreview(filePath: string, fileName: string): void {
+  // For JSON files, fetch and display in a modal
+  if (/\.json$/i.test(fileName)) {
+    fetch(filePath)
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load file');
+        return res.json();
+      })
+      .then((data) => {
+        showJsonPreviewModal(data, fileName);
+      })
+      .catch((err) => {
+        console.error('Preview error:', err);
+        // Fall back to opening in new tab
+        window.open(filePath, '_blank');
+      });
+  } else {
+    // For other files, open in new tab
+    window.open(filePath, '_blank');
+  }
+}
+
+/**
+ * Show JSON content in a preview modal
+ */
+function showJsonPreviewModal(data: unknown, fileName: string): void {
+  // Check if modal already exists
+  let modal = document.getElementById('file-preview-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'file-preview-modal';
+    modal.className = 'admin-modal-overlay';
+    document.body.appendChild(modal);
+  }
+
+  const formattedJson = JSON.stringify(data, null, 2);
+
+  modal.innerHTML = `
+    <div class="admin-modal" style="max-width: 700px;">
+      <div class="admin-modal-header">
+        <h3>${SanitizationUtils.escapeHtml(fileName)}</h3>
+        <button class="admin-modal-close" id="preview-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="admin-modal-body" style="max-height: 60vh; overflow: auto;">
+        <pre style="white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.5; margin: 0; color: var(--portal-text-light);">${SanitizationUtils.escapeHtml(formattedJson)}</pre>
+      </div>
+      <div class="admin-modal-footer">
+        <button class="btn btn-secondary" id="preview-modal-close-btn">Close</button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+
+  const closeModal = () => {
+    modal?.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+  };
+
+  document.getElementById('preview-modal-close')?.addEventListener('click', closeModal);
+  document.getElementById('preview-modal-close-btn')?.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
 }
 
 // Project Milestones
@@ -1502,17 +1593,8 @@ async function addProject(ctx: AdminDashboardContext): Promise<void> {
   // Load existing clients into dropdown
   await populateClientDropdown();
 
-  // Initialize custom dropdowns for the modal
+  // Initialize custom dropdowns for the modal (with onChange callback for client dropdown)
   initAddProjectModalDropdowns();
-
-  // Setup client dropdown change handler
-  const clientSelect = document.getElementById('new-project-client') as HTMLSelectElement;
-  if (clientSelect) {
-    // Remove old listener by cloning
-    const newClientSelect = clientSelect.cloneNode(true) as HTMLSelectElement;
-    clientSelect.parentNode?.replaceChild(newClientSelect, clientSelect);
-    newClientSelect.addEventListener('change', toggleNewClientFields);
-  }
 
   // Show modal and lock body scroll
   modal.classList.remove('hidden');
@@ -1558,10 +1640,31 @@ function initAddProjectModalDropdowns(): void {
   const budgetSelect = document.getElementById('new-project-budget') as HTMLSelectElement;
   const timelineSelect = document.getElementById('new-project-timeline') as HTMLSelectElement;
 
-  // Client dropdown
+  // Client dropdown - with onChange to toggle new client fields
   if (clientSelect && !clientSelect.dataset.dropdownInit) {
     clientSelect.dataset.dropdownInit = 'true';
-    initModalDropdown(clientSelect, { placeholder: 'Select existing client...' });
+    initModalDropdown(clientSelect, {
+      placeholder: 'Select existing client...',
+      onChange: (value: string) => {
+        // Toggle new client fields based on selection
+        const newClientFields = document.getElementById('new-client-fields');
+        if (!newClientFields) return;
+
+        if (value === 'new') {
+          newClientFields.classList.remove('hidden');
+          const nameInput = document.getElementById('new-project-client-name') as HTMLInputElement;
+          const emailInput = document.getElementById('new-project-client-email') as HTMLInputElement;
+          if (nameInput) nameInput.required = true;
+          if (emailInput) emailInput.required = true;
+        } else {
+          newClientFields.classList.add('hidden');
+          const nameInput = document.getElementById('new-project-client-name') as HTMLInputElement;
+          const emailInput = document.getElementById('new-project-client-email') as HTMLInputElement;
+          if (nameInput) nameInput.required = false;
+          if (emailInput) emailInput.required = false;
+        }
+      }
+    });
   }
 
   // Project type dropdown
@@ -1636,32 +1739,6 @@ async function populateClientDropdown(): Promise<void> {
     }
   } catch (error) {
     console.error('[AdminProjects] Failed to load clients for dropdown:', error);
-  }
-}
-
-/**
- * Toggle visibility of new client fields based on dropdown selection
- */
-function toggleNewClientFields(): void {
-  const clientSelect = document.getElementById('new-project-client') as HTMLSelectElement;
-  const newClientFields = document.getElementById('new-client-fields');
-
-  if (!clientSelect || !newClientFields) return;
-
-  if (clientSelect.value === 'new') {
-    newClientFields.classList.remove('hidden');
-    // Make new client fields required
-    const nameInput = document.getElementById('new-project-client-name') as HTMLInputElement;
-    const emailInput = document.getElementById('new-project-client-email') as HTMLInputElement;
-    if (nameInput) nameInput.required = true;
-    if (emailInput) emailInput.required = true;
-  } else {
-    newClientFields.classList.add('hidden');
-    // Remove required from new client fields
-    const nameInput = document.getElementById('new-project-client-name') as HTMLInputElement;
-    const emailInput = document.getElementById('new-project-client-email') as HTMLInputElement;
-    if (nameInput) nameInput.required = false;
-    if (emailInput) emailInput.required = false;
   }
 }
 

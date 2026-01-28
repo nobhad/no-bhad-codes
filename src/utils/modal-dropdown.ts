@@ -150,10 +150,17 @@ export function initModalDropdown(
   const trigger = document.createElement('button');
   trigger.type = 'button';
   trigger.className = 'custom-dropdown-trigger';
-  trigger.innerHTML = `
-    <span class="custom-dropdown-text">${displayText}</span>
-    ${ICONS.CARET_DOWN}
-  `;
+
+  // Create text span (use textContent to avoid HTML encoding issues)
+  const textSpan = document.createElement('span');
+  textSpan.className = 'custom-dropdown-text';
+  textSpan.textContent = displayText;
+  trigger.appendChild(textSpan);
+
+  // Add caret icon (use innerHTML only for the SVG icon)
+  const iconSpan = document.createElement('span');
+  iconSpan.innerHTML = ICONS.CARET_DOWN;
+  trigger.appendChild(iconSpan);
 
   // Create dropdown menu - ul like messages tab
   const menu = document.createElement('ul');

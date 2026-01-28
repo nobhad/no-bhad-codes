@@ -9,10 +9,21 @@
  */
 
 import express, { Request, Response } from 'express';
+import PDFDocument from 'pdfkit';
+import { join } from 'path';
+import { existsSync } from 'fs';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
+
+// Business info from environment variables
+const BUSINESS_INFO = {
+  name: process.env.BUSINESS_NAME || '',
+  contact: process.env.BUSINESS_CONTACT || '',
+  email: process.env.BUSINESS_EMAIL || '',
+  website: process.env.BUSINESS_WEBSITE || ''
+};
 
 const router = express.Router();
 
@@ -572,6 +583,246 @@ router.post(
         invoiceNumber
       }
     });
+  })
+);
+
+/**
+ * GET /api/proposals/:id/pdf
+ * Generate PDF for a proposal
+ */
+router.get(
+  '/:id/pdf',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { id } = req.params;
+    const db = getDatabase();
+
+    // Get proposal with full details
+    const proposal = await db.get(
+      `SELECT pr.*, p.project_name, p.description as project_description,
+              c.contact_name as client_name, c.email as client_email, c.company_name
+       FROM proposal_requests pr
+       JOIN projects p ON pr.project_id = p.id
+       JOIN clients c ON pr.client_id = c.id
+       WHERE pr.id = ?`,
+      [id]
+    ) as ProposalRow | undefined;
+
+    if (!proposal) {
+      return res.status(404).json({
+        success: false,
+        message: 'Proposal not found'
+      });
+    }
+
+    // Get feature selections
+    const features = await db.all(
+      `SELECT * FROM proposal_feature_selections WHERE proposal_request_id = ?`,
+      [id]
+    ) as unknown as FeatureRow[];
+
+    // Cast proposal for helper functions
+    const p = proposal as unknown as Record<string, unknown>;
+
+    // Create PDF document
+    const doc = new PDFDocument({ margin: 50, size: 'LETTER' });
+
+    // Set response headers
+    const projectName = getString(p, 'project_name').replace(/[^a-zA-Z0-9]/g, '-');
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="proposal-${projectName}-${id}.pdf"`
+    );
+
+    // Pipe PDF to response
+    doc.pipe(res);
+
+    // Helper function to format date
+    const formatDate = (dateStr: string | undefined): string => {
+      if (!dateStr) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    };
+
+    // Helper to format tier name
+    const formatTier = (tier: string): string => {
+      const tierNames: Record<string, string> = {
+        'good': 'GOOD',
+        'better': 'BETTER',
+        'best': 'BEST'
+      };
+      return tierNames[tier] || tier.toUpperCase();
+    };
+
+    // Helper to format maintenance option
+    const formatMaintenance = (option: string | null): string => {
+      if (!option) return 'None';
+      const maintenanceNames: Record<string, string> = {
+        'diy': 'DIY (Self-Managed)',
+        'essential': 'Essential Plan',
+        'standard': 'Standard Plan',
+        'premium': 'Premium Plan'
+      };
+      return maintenanceNames[option] || option;
+    };
+
+    // === HEADER WITH LOGO ===
+    const logoPath = join(process.cwd(), 'public/images/avatar_small-1.png');
+    if (existsSync(logoPath)) {
+      doc.image(logoPath, (doc.page.width - 60) / 2, 30, { width: 60 });
+      doc.moveDown(4);
+    }
+
+    // Business header line
+    doc.y = 100;
+    doc.fontSize(10).font('Helvetica-Bold')
+      .text(BUSINESS_INFO.name, { continued: true, align: 'center' })
+      .font('Helvetica')
+      .text(` | ${BUSINESS_INFO.contact} | ${BUSINESS_INFO.email} | ${BUSINESS_INFO.website}`, { align: 'center' });
+
+    doc.moveDown(2);
+
+    // === PROPOSAL TITLE ===
+    doc.fontSize(20).font('Helvetica-Bold').fillColor('#0066cc')
+      .text('Project Proposal', { align: 'center' });
+    doc.fillColor('black');
+    doc.moveDown(1);
+
+    // === PROPOSAL INFO ===
+    const leftCol = 50;
+    const rightCol = 350;
+    let currentY = doc.y;
+
+    // Left column: Prepared For
+    doc.fontSize(10).font('Helvetica-Bold').text('Prepared For:', leftCol, currentY);
+    doc.font('Helvetica').text(getString(p, 'client_name') || 'Client', leftCol, currentY + 15);
+    if (proposal.company_name) {
+      doc.text(proposal.company_name, leftCol, currentY + 30);
+    }
+    doc.text(getString(p, 'client_email') || '', leftCol, currentY + (proposal.company_name ? 45 : 30));
+
+    // Right column: Prepared By & Date
+    doc.font('Helvetica-Bold').text('Prepared By:', rightCol, currentY);
+    doc.font('Helvetica').text(BUSINESS_INFO.name, rightCol, currentY + 15);
+    doc.font('Helvetica-Bold').text('Date:', rightCol, currentY + 45);
+    doc.font('Helvetica').text(formatDate(getString(p, 'created_at')), rightCol, currentY + 60);
+
+    doc.y = currentY + 90;
+    doc.moveDown(1);
+
+    // === PROJECT DETAILS ===
+    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('Project Details');
+    doc.fillColor('black');
+    doc.moveDown(0.5);
+
+    doc.fontSize(10).font('Helvetica-Bold').text('Project: ', { continued: true });
+    doc.font('Helvetica').text(getString(p, 'project_name'));
+
+    const projectDesc = p.project_description as string | undefined;
+    if (projectDesc) {
+      doc.font('Helvetica-Bold').text('Description: ', { continued: true });
+      doc.font('Helvetica').text(projectDesc);
+    }
+
+    doc.font('Helvetica-Bold').text('Project Type: ', { continued: true });
+    doc.font('Helvetica').text(getString(p, 'project_type').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+
+    doc.moveDown(1);
+
+    // === SELECTED PACKAGE ===
+    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('Selected Package');
+    doc.fillColor('black');
+    doc.moveDown(0.5);
+
+    const selectedTier = formatTier(getString(p, 'selected_tier'));
+    doc.fontSize(12).font('Helvetica-Bold').text(`${selectedTier} Tier`);
+    doc.fontSize(10).font('Helvetica').text(`Base Price: $${getNumber(p, 'base_price').toLocaleString()}`);
+
+    doc.moveDown(1);
+
+    // === INCLUDED FEATURES ===
+    const includedFeatures = features.filter(f => f.is_included_in_tier);
+    if (includedFeatures.length > 0) {
+      doc.fontSize(12).font('Helvetica-Bold').text('Included Features:');
+      doc.moveDown(0.3);
+      doc.fontSize(10).font('Helvetica');
+      includedFeatures.forEach(f => {
+        const fr = f as unknown as Record<string, unknown>;
+        doc.text(`• ${getString(fr, 'feature_name')}`, { indent: 10 });
+      });
+      doc.moveDown(0.5);
+    }
+
+    // === ADD-ONS ===
+    const addons = features.filter(f => f.is_addon);
+    if (addons.length > 0) {
+      doc.fontSize(12).font('Helvetica-Bold').text('Add-Ons:');
+      doc.moveDown(0.3);
+      doc.fontSize(10).font('Helvetica');
+      addons.forEach(f => {
+        const fr = f as unknown as Record<string, unknown>;
+        const price = getNumber(fr, 'feature_price');
+        doc.text(`• ${getString(fr, 'feature_name')} - $${price.toLocaleString()}`, { indent: 10 });
+      });
+      doc.moveDown(0.5);
+    }
+
+    // === MAINTENANCE OPTION ===
+    if (proposal.maintenance_option) {
+      doc.fontSize(12).font('Helvetica-Bold').text('Maintenance Plan:');
+      doc.fontSize(10).font('Helvetica').text(formatMaintenance(proposal.maintenance_option), { indent: 10 });
+      doc.moveDown(0.5);
+    }
+
+    // === PRICING SUMMARY ===
+    doc.moveDown(1);
+    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('Pricing Summary');
+    doc.fillColor('black');
+    doc.moveDown(0.5);
+
+    // Table
+    const tableLeft = 50;
+    const tableRight = 450;
+    currentY = doc.y;
+
+    // Base price row
+    doc.fontSize(10).font('Helvetica').text('Base Package Price:', tableLeft, currentY);
+    doc.text(`$${getNumber(p, 'base_price').toLocaleString()}`, tableRight, currentY, { width: 100, align: 'right' });
+    currentY += 18;
+
+    // Add-ons total
+    if (addons.length > 0) {
+      const addonsTotal = addons.reduce((sum, f) => sum + (f.feature_price || 0), 0);
+      doc.text('Add-Ons:', tableLeft, currentY);
+      doc.text(`$${addonsTotal.toLocaleString()}`, tableRight, currentY, { width: 100, align: 'right' });
+      currentY += 18;
+    }
+
+    // Line
+    currentY += 5;
+    doc.moveTo(tableLeft, currentY).lineTo(550, currentY).stroke();
+    currentY += 15;
+
+    // Total
+    doc.fontSize(12).font('Helvetica-Bold')
+      .text('Total:', tableLeft, currentY);
+    doc.text(`$${getNumber(p, 'final_price').toLocaleString()}`, tableRight, currentY, { width: 100, align: 'right' });
+
+    // === CLIENT NOTES ===
+    if (proposal.client_notes) {
+      doc.y = currentY + 40;
+      doc.fontSize(12).font('Helvetica-Bold').text('Client Notes:');
+      doc.fontSize(10).font('Helvetica').text(proposal.client_notes, { indent: 10 });
+    }
+
+    // === FOOTER ===
+    doc.y = doc.page.height - 80;
+    doc.fontSize(9).font('Helvetica').fillColor('#666666')
+      .text('This proposal is valid for 30 days from the date above.', { align: 'center' });
+    doc.text(`Questions? Contact us at ${BUSINESS_INFO.email}`, { align: 'center' });
+
+    // Finalize PDF
+    doc.end();
   })
 );
 

@@ -529,7 +529,7 @@ router.get(
     const files = await db.all(
       `
     SELECT id, filename, original_filename, file_size, mime_type, file_type,
-           description, uploaded_by, created_at
+           file_path, description, uploaded_by, created_at
     FROM files
     WHERE project_id = ?
     ORDER BY created_at DESC
@@ -537,7 +537,13 @@ router.get(
       [projectId]
     );
 
-    res.json({ files });
+    // Map to consistent field names
+    res.json({
+      files: files.map((f: any) => ({
+        ...f,
+        size: f.file_size // Also include as 'size' for frontend compatibility
+      }))
+    });
   })
 );
 

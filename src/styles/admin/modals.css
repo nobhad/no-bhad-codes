@@ -112,6 +112,13 @@
   margin-bottom: 0;
 }
 
+/* Nested form group containers (e.g., new client fields) */
+#new-client-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 /* Modal inputs inherit base styling from portal-forms.css */
 
 .admin-modal-body .form-row {
