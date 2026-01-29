@@ -1215,35 +1215,27 @@ Created `multiPromptDialog()` in `src/utils/confirm-dialog.ts` and replaced all 
 - ARIA attributes for accessibility
 - Matches portal theme styling
 
-- [ ] #### Admin Tables - May Not Be Fully Responsive on Mobile
+- [x] #### Admin Tables - May Not Be Fully Responsive on Mobile
 
-**Status:** TODO
+**Status:** COMPLETE
 **Observed:** January 28, 2026
+**Fixed:** January 29, 2026
 
-Admin tables (projects, leads, clients) may not be fully responsive on mobile devices, potentially causing horizontal scrolling or poor usability.
+**Fix Applied:**
 
-**Locations Found:**
+Added mobile-responsive CSS in `src/styles/pages/admin.css` within `@media (--small-mobile)`:
 
-- `src/features/admin/modules/admin-projects.ts`: Projects table with many columns
-- `src/features/admin/modules/admin-leads.ts`: Leads table with 8 columns
-- `src/features/admin/modules/admin-clients.ts`: Clients table
-- `src/styles/pages/admin.css`: Has some responsive styles but may need more
+- **Leads table:** Hide Company (3rd) and Email (4th) columns
+- **Projects table:** Hide Type (3rd), Timeline (5th), Start Date (6th), End Date (7th) columns
+- **Contacts table:** Hide Company (4th) column
+- **Clients table:** Hide Email (3rd) and Created (6th) columns
+- Reduced `min-width` to 400px for better mobile fit
+- Tighter cell padding on mobile
+- Horizontal scroll support with proper touch scrolling
 
-**Issues:**
+**Files Modified:**
 
-- Tables with many columns may overflow on mobile
-- Text may be truncated or hard to read
-- Horizontal scrolling required on small screens
-- Touch targets may be too small
-
-**Expected behavior:**
-
-- Responsive table design (stack columns, card view, or horizontal scroll with proper indicators)
-- Mobile-optimized layouts for small screens
-- Adequate touch target sizes
-- Readable text without excessive truncation
-
-**Root Cause:** Tables designed for desktop may not adapt well to mobile. Should implement responsive table patterns or mobile-specific layouts.
+- `src/styles/pages/admin.css` - Added mobile table responsiveness CSS
 
 - [x] #### Toast Notifications - Good Implementation, But Inconsistent Usage
 
