@@ -7,7 +7,7 @@
  * Type definitions for portfolio projects and related data structures.
  */
 
-export type ProjectCategory = 'websites' | 'applications' | 'ecommerce' | 'extensions';
+export type ProjectCategory = 'websites' | 'applications' | 'e-commerce' | 'extensions';
 export type ProjectStatus = 'completed' | 'in-progress' | 'planned';
 
 export interface Project {
@@ -85,7 +85,7 @@ export const PROJECT_CATEGORIES: ProjectCategoryInfo[] = [
     icon: '💻'
   },
   {
-    id: 'ecommerce',
+    id: 'e-commerce',
     name: 'E-Commerce',
     description: 'Online stores and marketplace solutions',
     count: 0,

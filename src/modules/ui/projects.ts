@@ -409,7 +409,8 @@ export class ProjectsModule extends BaseModule {
       websites: 'Website',
       applications: 'App',
       extensions: 'Extension',
-      ecommerce: 'E-Commerce'
+      'e-commerce': 'E-Commerce',
+      ecommerce: 'E-Commerce' // Legacy support
     };
     return categoryMap[categoryId] || categoryId;
   }

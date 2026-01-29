@@ -9,6 +9,7 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { formatDate, formatDateTime } from '../../../utils/format-utils';
 import { createLogger } from '../../../utils/logging';
 import { type MessageThread, type Message } from '../services/admin-data.service';
 
@@ -101,10 +102,10 @@ class AdminMessagingRenderer {
    * Render a single thread list item
    */
   private renderThreadItem(thread: MessageThread): string {
-    const safeClientName = SanitizationUtils.escapeHtml(thread.client_name || 'Unknown Client');
-    const safeSubject = SanitizationUtils.escapeHtml(thread.subject || 'No Subject');
+    const safeClientName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(thread.client_name || 'Unknown Client'));
+    const safeSubject = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(thread.subject || 'No Subject'));
     const lastMessageDate = thread.last_message_at
-      ? new Date(thread.last_message_at).toLocaleDateString()
+      ? formatDate(thread.last_message_at)
       : '';
     const unreadBadge = thread.unread_count > 0
       ? `<span class="unread-badge">${thread.unread_count}</span>`
@@ -231,15 +232,11 @@ class AdminMessagingRenderer {
    */
   private renderMessage(msg: Message): string {
     const isAdmin = msg.sender_type === 'admin';
-    const time = new Date(msg.created_at).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-    const date = new Date(msg.created_at).toLocaleDateString();
+    const dateTime = formatDateTime(msg.created_at);
 
-    const rawSenderName = isAdmin ? 'You (Admin)' : (msg.sender_name || 'Client');
+    const rawSenderName = isAdmin ? 'You (Admin)' : SanitizationUtils.decodeHtmlEntities(msg.sender_name || 'Client');
     const safeSenderName = SanitizationUtils.escapeHtml(rawSenderName);
-    const safeContent = SanitizationUtils.escapeHtml(msg.message || msg.content || '');
+    const safeContent = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(msg.message || msg.content || ''));
     const safeInitials = SanitizationUtils.escapeHtml(rawSenderName.substring(0, 2).toUpperCase());
 
     if (isAdmin) {
@@ -248,7 +245,7 @@ class AdminMessagingRenderer {
           <div class="message-content">
             <div class="message-header">
               <span class="message-sender">${safeSenderName}</span>
-              <span class="message-time">${date} at ${time}</span>
+              <span class="message-time">${dateTime}</span>
             </div>
             <div class="message-body">${safeContent}</div>
           </div>
@@ -267,7 +264,7 @@ class AdminMessagingRenderer {
         <div class="message-content">
           <div class="message-header">
             <span class="message-sender">${safeSenderName}</span>
-            <span class="message-time">${date} at ${time}</span>
+            <span class="message-time">${dateTime}</span>
           </div>
           <div class="message-body">${safeContent}</div>
         </div>

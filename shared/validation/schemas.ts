@@ -459,10 +459,12 @@ export const projectUpdateSchema: FormSchema = {
     rules: [
       allowedValues([
         'planning',
-        'in_progress',
+        'in-progress',
+        'in_progress', // Legacy support
         'review',
         'completed',
-        'on_hold'
+        'on-hold',
+        'on_hold' // Legacy support
       ], 'Status')
     ],
     optional: true
@@ -492,8 +494,10 @@ export const leadStatusSchema: FormSchema = {
         'lost',
         'pending',
         'active',
-        'in_progress',
-        'on_hold',
+        'in-progress',
+        'in_progress', // Legacy support
+        'on-hold',
+        'on_hold', // Legacy support
         'completed',
         'cancelled'
       ], 'Status')

@@ -1247,11 +1247,13 @@ body.modal-open .dashboard-content {
 }
 
 .status-dropdown-trigger.status-active,
+.status-dropdown-trigger.status-in-progress,
 .status-dropdown-trigger.status-in_progress {
   background-color: var(--color-info);
   color: var(--color-white);
 }
 
+.status-dropdown-trigger.status-on-hold,
 .status-dropdown-trigger.status-on_hold {
   background-color: var(--color-warning);
   color: var(--color-black);
@@ -1325,12 +1327,14 @@ body.modal-open .dashboard-content {
   background: transparent;
 }
 
+[data-page="admin"] .status-dropdown-menu .status-option.status-in-progress,
 [data-page="admin"] .status-dropdown-menu .status-option.status-in_progress {
   border: none;
   border-left: 3px solid var(--color-info);
   background: transparent;
 }
 
+[data-page="admin"] .status-dropdown-menu .status-option.status-on-hold,
 [data-page="admin"] .status-dropdown-menu .status-option.status-on_hold {
   border: none;
   border-left: 3px solid var(--color-warning);
@@ -1409,30 +1413,6 @@ body.modal-open .dashboard-content {
   display: flex;
   gap: var(--space-2);
   justify-content: flex-end;
-}
-
-/* Preview button - outline style */
-.preview-btn {
-  background: transparent;
-  border-color: var(--portal-text-muted);
-}
-
-.preview-btn:hover {
-  background: var(--portal-bg-light);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-/* Download button - subtle accent style */
-.download-btn {
-  background: var(--portal-bg-medium);
-  border-color: var(--portal-text-muted);
-}
-
-.download-btn:hover {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--portal-bg-dark);
 }
 
 /* Icon-only buttons (no border) */

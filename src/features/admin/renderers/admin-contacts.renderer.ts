@@ -9,6 +9,7 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { formatDate, formatDateTime } from '../../../utils/format-utils';
 import { createLogger } from '../../../utils/logging';
 import { adminDataService, type Contact, type ContactStats } from '../services/admin-data.service';
 import { APP_CONSTANTS } from '../../../config/constants';
@@ -89,15 +90,15 @@ class AdminContactsRenderer {
    * Render a single contact row
    */
   private renderContactRow(submission: Contact): string {
-    const date = new Date(submission.created_at).toLocaleDateString();
-    const safeName = SanitizationUtils.escapeHtml(submission.name || '-');
-    const safeEmail = SanitizationUtils.escapeHtml(submission.email || '-');
-    const safeSubject = SanitizationUtils.escapeHtml(submission.subject || '-');
-    const safeMessage = SanitizationUtils.escapeHtml(submission.message || '-');
+    const date = formatDate(submission.created_at);
+    const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.name || '-'));
+    const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.email || '-'));
+    const safeSubject = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.subject || '-'));
+    const safeMessage = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.message || '-'));
     const truncateLen = APP_CONSTANTS.TEXT.TRUNCATE_LENGTH;
     const truncatedMessage =
       safeMessage.length > truncateLen ? `${safeMessage.substring(0, truncateLen)}...` : safeMessage;
-    const safeTitleMessage = SanitizationUtils.escapeHtml(submission.message || '');
+    const safeTitleMessage = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.message || ''));
 
     return `
       <tr data-contact-id="${submission.id}">
@@ -183,14 +184,14 @@ class AdminContactsRenderer {
    * Render contact modal content
    */
   private renderContactModal(contact: Contact): string {
-    const date = new Date(contact.created_at).toLocaleString();
+    const date = formatDateTime(contact.created_at);
     const statusClass = `status-${contact.status || 'new'}`;
 
-    const safeName = SanitizationUtils.escapeHtml(contact.name || '-');
-    const safeEmail = SanitizationUtils.escapeHtml(contact.email || '-');
-    const safeSubject = SanitizationUtils.escapeHtml(contact.subject || '-');
+    const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.name || '-'));
+    const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.email || '-'));
+    const safeSubject = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.subject || '-'));
     const safeStatus = SanitizationUtils.escapeHtml(contact.status || 'new');
-    const safeMessage = SanitizationUtils.escapeHtml(contact.message || '-');
+    const safeMessage = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.message || '-'));
 
     let html = `
       <div class="detail-grid">
@@ -224,7 +225,7 @@ class AdminContactsRenderer {
       html += `
         <div class="detail-row">
           <span class="detail-label">Read At</span>
-          <span class="detail-value">${new Date(contact.read_at).toLocaleString()}</span>
+          <span class="detail-value">${formatDateTime(contact.read_at)}</span>
         </div>
       `;
     }
@@ -233,7 +234,7 @@ class AdminContactsRenderer {
       html += `
         <div class="detail-row">
           <span class="detail-label">Replied At</span>
-          <span class="detail-value">${new Date(contact.replied_at).toLocaleString()}</span>
+          <span class="detail-value">${formatDateTime(contact.replied_at)}</span>
         </div>
       `;
     }

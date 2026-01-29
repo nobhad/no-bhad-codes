@@ -9,6 +9,7 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { formatDate, formatDateTime } from '../../../utils/format-utils';
 import { apiFetch, apiPut } from '../../../utils/api-client';
 import { createTableDropdown, CONTACT_STATUS_OPTIONS } from '../../../utils/table-dropdown';
 import { APP_CONSTANTS } from '../../../config/constants';
@@ -169,15 +170,18 @@ function renderContactsTable(
   tableBody.innerHTML = '';
 
   filteredSubmissions.forEach((submission) => {
-    const date = new Date(submission.created_at).toLocaleDateString();
-    const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(submission.name || '-'));
-    const safeEmail = SanitizationUtils.escapeHtml(submission.email || '-');
-    const safeCompany = submission.company ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(submission.company)) : '';
-    const safeMessage = SanitizationUtils.escapeHtml(submission.message || '-');
+    const date = formatDate(submission.created_at);
+    const decodedName = SanitizationUtils.decodeHtmlEntities(submission.name || '-');
+    const decodedCompany = SanitizationUtils.decodeHtmlEntities(submission.company || '');
+    const decodedMessage = SanitizationUtils.decodeHtmlEntities(submission.message || '-');
+    const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedName));
+    const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.email || '-'));
+    const safeCompany = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '';
+    const safeMessage = SanitizationUtils.escapeHtml(decodedMessage);
     const truncateLen = APP_CONSTANTS.TEXT.TRUNCATE_LENGTH;
     const truncatedMessage =
       safeMessage.length > truncateLen ? `${safeMessage.substring(0, truncateLen)}...` : safeMessage;
-    const safeTitleMessage = SanitizationUtils.escapeHtml(submission.message || '');
+    const safeTitleMessage = SanitizationUtils.escapeHtml(decodedMessage);
     const status = submission.status || 'new';
 
     const row = document.createElement('tr');
@@ -225,12 +229,15 @@ export function showContactDetails(contactId: number): void {
   const overlay = getElement('details-overlay');
   if (!detailsPanel) return;
 
-  const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(contact.name || '-'));
-  const safeEmail = SanitizationUtils.escapeHtml(contact.email || '-');
-  const safeCompany = contact.company ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(contact.company)) : '';
+  const decodedName = SanitizationUtils.decodeHtmlEntities(contact.name || '-');
+  const decodedCompany = SanitizationUtils.decodeHtmlEntities(contact.company || '');
+  const decodedMessage = SanitizationUtils.decodeHtmlEntities(contact.message || '-');
+  const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedName));
+  const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.email || '-'));
+  const safeCompany = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '';
   const safePhone = contact.phone ? SanitizationUtils.formatPhone(contact.phone) : '';
-  const safeMessage = SanitizationUtils.escapeHtml(contact.message || '-');
-  const date = new Date(contact.created_at).toLocaleString();
+  const safeMessage = SanitizationUtils.escapeHtml(decodedMessage);
+  const date = formatDateTime(contact.created_at);
 
   detailsPanel.innerHTML = `
     <div class="details-header">
@@ -373,11 +380,10 @@ export async function updateContactStatus(
         contact.status = status as ContactSubmission['status'];
       }
     } else if (response.status !== 401) {
-      const error = await response.json();
-      ctx.showNotification(error.message || 'Failed to update status', 'error');
+      ctx.showNotification('Failed to update status. Please try again.', 'error');
     }
   } catch (error) {
     console.error('[AdminContacts] Failed to update status:', error);
-    ctx.showNotification('Failed to update status', 'error');
+    ctx.showNotification('Failed to update status. Please try again.', 'error');
   }
 }

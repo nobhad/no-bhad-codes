@@ -20,7 +20,7 @@ export type ProjectType =
   | 'simple-site'
   | 'business-site'
   | 'portfolio'
-  | 'ecommerce'
+  | 'e-commerce'
   | 'web-app'
   | 'browser-extension'
   | 'other';

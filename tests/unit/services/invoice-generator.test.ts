@@ -92,7 +92,7 @@ describe('Invoice Generator Service', () => {
     });
 
     it('should handle different project types', async () => {
-      const types = ['simple-site', 'portfolio', 'ecommerce', 'web-app', 'browser-extension', 'other'];
+      const types = ['simple-site', 'portfolio', 'e-commerce', 'web-app', 'browser-extension', 'other'];
 
       for (const type of types) {
         const intakeData = { ...mockIntakeData, projectType: type };
@@ -435,7 +435,7 @@ describe('Invoice Generator Service', () => {
     it('should handle complex project with all adjustments', async () => {
       const intakeData: IntakeData = {
         company: 'Complex Company',
-        projectType: 'ecommerce',
+        projectType: 'e-commerce',
         projectDescription: 'Complex e-commerce site',
         timeline: 'asap',
         budget: '20000+',

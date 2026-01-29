@@ -198,7 +198,7 @@ export function createFilterUI(
           <input type="date" class="filter-date-input" data-filter="end" value="${state.dateEnd}" />
         </div>
       </div>
-      <button type="button" class="filter-clear-btn">Clear All</button>
+      <button type="button" class="filter-clear-btn" aria-label="Clear all filters">Clear All</button>
     </div>
   `;
 
@@ -403,8 +403,9 @@ export function applyFilters<T>(
     filtered = filtered.filter(item => {
       const status = getNestedValue(item as object, config.statusField);
       if (status === null || status === undefined) return false;
-      const normalizedStatus = String(status).toLowerCase().replace(/-/g, '_');
-      return state.statusFilters.some(f => normalizedStatus === f.toLowerCase());
+      // Normalize to hyphens (database format)
+      const normalizedStatus = String(status).toLowerCase().replace(/_/g, '-');
+      return state.statusFilters.some(f => normalizedStatus === f.toLowerCase().replace(/_/g, '-'));
     });
   }
 
@@ -493,7 +494,7 @@ export const LEADS_FILTER_CONFIG: TableFilterConfig = {
     { value: 'qualified', label: 'Qualified' },
     { value: 'contacted', label: 'Contacted' },
     { value: 'active', label: 'Active' },
-    { value: 'in_progress', label: 'In Progress' },
+    { value: 'in-progress', label: 'In Progress' },
     { value: 'converted', label: 'Converted' },
     { value: 'completed', label: 'Completed' },
     { value: 'lost', label: 'Lost' }
@@ -537,8 +538,8 @@ export const PROJECTS_FILTER_CONFIG: TableFilterConfig = {
   statusField: 'status',
   statusOptions: [
     { value: 'active', label: 'Active' },
-    { value: 'in_progress', label: 'In Progress' },
-    { value: 'on_hold', label: 'On Hold' },
+    { value: 'in-progress', label: 'In Progress' },
+    { value: 'on-hold', label: 'On Hold' },
     { value: 'completed', label: 'Completed' },
     { value: 'cancelled', label: 'Cancelled' }
   ],

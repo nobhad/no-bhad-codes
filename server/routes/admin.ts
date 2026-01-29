@@ -1054,7 +1054,8 @@ function generateAdminProjectName(
     'simple-site': 'Simple Website',
     'business-site': 'Business Website',
     portfolio: 'Portfolio Website',
-    ecommerce: 'E-commerce Store',
+    'e-commerce': 'E-commerce Store',
+    ecommerce: 'E-commerce Store', // Legacy support
     'web-app': 'Web Application',
     'browser-extension': 'Browser Extension',
     other: 'Custom Project'

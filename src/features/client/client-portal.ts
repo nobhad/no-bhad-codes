@@ -32,7 +32,7 @@ import {
 import { decodeJwtPayload, isAdminPayload } from '../../utils/jwt-utils';
 import { ICONS, getAccessibleIcon } from '../../constants/icons';
 import { createDOMCache } from '../../utils/dom-cache';
-import { formatTextWithLineBreaks } from '../../utils/format-utils';
+import { formatTextWithLineBreaks, formatDate } from '../../utils/format-utils';
 import { showToast } from '../../utils/toast-notifications';
 import { withButtonLoading } from '../../utils/button-loading';
 
@@ -134,7 +134,7 @@ export class ClientPortalModule extends BaseModule {
           showToast(message, type);
         }
       },
-      formatDate: (dateString: string) => this.formatDate(dateString),
+      formatDate: (dateString: string) => formatDate(dateString),
       escapeHtml: (text: string) => this.escapeHtml(text)
     };
   }
@@ -485,12 +485,7 @@ export class ClientPortalModule extends BaseModule {
       this.switchTab('dashboard');
     } catch (error) {
       console.error('Error submitting project request:', error);
-      showToast(
-        error instanceof Error
-          ? error.message
-          : 'Failed to submit project request. Please try again.',
-        'error'
-      );
+      showToast('Failed to submit project request. Please try again.', 'error');
     }
   }
 
@@ -576,7 +571,7 @@ export class ClientPortalModule extends BaseModule {
       await this.loadUserSettings();
     } catch (error) {
       console.error('Error saving profile:', error);
-      showToast(error instanceof Error ? error.message : 'Failed to save profile. Please try again.', 'error');
+      showToast('Failed to save profile. Please try again.', 'error');
     }
   }
 
@@ -639,7 +634,7 @@ export class ClientPortalModule extends BaseModule {
       showToast('Password updated successfully!', 'success');
     } catch (error) {
       console.error('Error updating password:', error);
-      showToast(error instanceof Error ? error.message : 'Failed to update password. Please try again.', 'error');
+      showToast('Failed to update password. Please try again.', 'error');
     }
   }
 
@@ -683,10 +678,7 @@ export class ClientPortalModule extends BaseModule {
       showToast('Notification preferences saved!', 'success');
     } catch (error) {
       console.error('Error saving notifications:', error);
-      showToast(
-        error instanceof Error ? error.message : 'Failed to save preferences. Please try again.',
-        'error'
-      );
+      showToast('Failed to save preferences. Please try again.', 'error');
     }
   }
 
@@ -729,10 +721,7 @@ export class ClientPortalModule extends BaseModule {
       showToast('Billing information saved!', 'success');
     } catch (error) {
       console.error('Error saving billing:', error);
-      showToast(
-        error instanceof Error ? error.message : 'Failed to save billing info. Please try again.',
-        'error'
-      );
+      showToast('Failed to save billing info. Please try again.', 'error');
     }
   }
 
@@ -859,7 +848,7 @@ export class ClientPortalModule extends BaseModule {
     if (!this.projectsList) return;
 
     if (projects.length === 0) {
-      this.projectsList.innerHTML = '<div class="no-projects"><p>No projects found.</p></div>';
+      this.projectsList.innerHTML = '<div class="no-projects"><p>No projects yet. Submit a project request to get started!</p></div>';
       return;
     }
 
@@ -1023,7 +1012,7 @@ export class ClientPortalModule extends BaseModule {
     // Populate dates
     const startDateElement = this.domCache.get('startDate');
     if (startDateElement) {
-      startDateElement.textContent = this.formatDate(this.currentProject.startDate);
+      startDateElement.textContent = formatDate(this.currentProject.startDate);
     }
 
     const lastUpdateElement = this.domCache.get('lastUpdate');
@@ -1032,7 +1021,7 @@ export class ClientPortalModule extends BaseModule {
         this.currentProject.updates && this.currentProject.updates.length > 0
           ? this.currentProject.updates[0].date
           : this.currentProject.startDate;
-      lastUpdateElement.textContent = this.formatDate(lastUpdate);
+      lastUpdateElement.textContent = formatDate(lastUpdate);
     }
 
     // Load sections
@@ -1061,7 +1050,7 @@ export class ClientPortalModule extends BaseModule {
         <div class="timeline-content">
           <div class="timeline-header">
             <h4>${safeTitle}</h4>
-            <span class="timeline-date">${this.formatDate(update.date)}</span>
+            <span class="timeline-date">${formatDate(update.date)}</span>
           </div>
           <p>${safeDescription}</p>
           <div class="timeline-author">by ${safeAuthor}</div>
@@ -1134,7 +1123,7 @@ export class ClientPortalModule extends BaseModule {
       messageElement.innerHTML = `
         <div class="message-header">
           <span class="message-sender">${safeSender}</span>
-          <span class="message-time">${this.formatDate(message.timestamp)}</span>
+          <span class="message-time">${formatDate(message.timestamp)}</span>
         </div>
         <div class="message-content">${safeMessage}</div>
       `;
@@ -1271,15 +1260,6 @@ export class ClientPortalModule extends BaseModule {
     if (targetPane) {
       targetPane.classList.add('active');
     }
-  }
-
-  private formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
   }
 
   // =====================================================

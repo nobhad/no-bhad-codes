@@ -796,7 +796,7 @@ const TIER_CONFIGURATIONS: Record<ProjectType, { tiers: ProposalTier[]; features
   'simple-site': { tiers: SIMPLE_SITE_TIERS, features: SIMPLE_SITE_FEATURES },
   'business-site': { tiers: BUSINESS_SITE_TIERS, features: BUSINESS_SITE_FEATURES },
   'portfolio': { tiers: PORTFOLIO_TIERS, features: PORTFOLIO_FEATURES },
-  'ecommerce': { tiers: ECOMMERCE_TIERS, features: ECOMMERCE_FEATURES },
+  'e-commerce': { tiers: ECOMMERCE_TIERS, features: ECOMMERCE_FEATURES },
   'web-app': { tiers: WEB_APP_TIERS, features: WEB_APP_FEATURES },
   'browser-extension': { tiers: BROWSER_EXTENSION_TIERS, features: BROWSER_EXTENSION_FEATURES },
   'other': { tiers: OTHER_TIERS, features: OTHER_FEATURES }

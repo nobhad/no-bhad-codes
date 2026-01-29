@@ -12,7 +12,7 @@ export type ProjectPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type ProjectType =
   | 'website'
   | 'application'
-  | 'ecommerce'
+  | 'e-commerce'
   | 'extension'
   | 'consultation'
   | 'other';

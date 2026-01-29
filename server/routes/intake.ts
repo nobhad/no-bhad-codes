@@ -498,7 +498,8 @@ function generateProjectName(
     'simple-site': 'Simple Website',
     'business-site': 'Business Website',
     portfolio: 'Portfolio Website',
-    ecommerce: 'E-commerce Store',
+    'e-commerce': 'E-commerce Store',
+    ecommerce: 'E-commerce Store', // Legacy support
     'web-app': 'Web Application',
     'browser-extension': 'Browser Extension',
     other: 'Custom Project'
@@ -593,7 +594,7 @@ function generateProjectMilestones(projectType: string, timeline: string): Miles
   // Add project-type specific milestones
   const additionalMilestones: Milestone[] = [];
 
-  if (projectType === 'ecommerce') {
+  if (projectType === 'e-commerce' || projectType === 'ecommerce') {
     additionalMilestones.push({
       title: 'Payment Integration',
       description: 'Set up payment processing and checkout flow',

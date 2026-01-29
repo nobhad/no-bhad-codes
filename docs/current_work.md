@@ -1,6 +1,6 @@
 # Current Work
 
-**Last Updated:** January 29, 2026 (Project Details Fixes - Dates, Encoding, URLs, Empty Values)
+**Last Updated:** January 29, 2026 (Error Handling Audit - User-Facing Messages)
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-01.md`.
 
@@ -34,10 +34,17 @@ Recent fixes that need user testing:
   - Verify ranges show en-dashes: "$2k–$5k" (not "$2k-$5k")
   - Verify decimal budgets display correctly: "$2.5k–$5k" (not "2.5k 5k")
 
-- [ ] **HTML Entity Decoding** - Verify special characters display correctly
+- [x] **HTML Entity Decoding** - FIXED January 29, 2026
   - Check client names with "&" show correctly (not "&amp;")
   - Check URLs with "/" show correctly (not "&#x2F;")
-  **ISSUE:** still seeing in random places in portal like clients page, client details page, recent activity, etc.
+  **Fixed:** Added `decodeHtmlEntities()` before `escapeHtml()` in all user-facing data rendering:
+  - `admin-clients.ts` - billing fields
+  - `admin-messaging.renderer.ts` - thread client name, subject, message content
+  - `admin-contacts.renderer.ts` - contact table and modal
+  - `admin-contacts.ts` - contact table and detail view
+  - `admin-dashboard.ts` - contact submissions table and modal, messages
+  - `admin-messaging.ts` - messages
+  - `admin-proposals.ts` - client name, company, project name, features, notes
 
 - [x] **URL Links Styling** - Verify URL links are red and clickable
   - Check Preview URL, Repository URL, Production URL links
@@ -81,16 +88,18 @@ Recent fixes that need user testing:
 
 ### PDFs & Documents
 
-- [ ] #### PDF Branding Logo - Proposal & Website Audit
-**Status:** PARTIAL - Proposal PDF Complete, Audit PDF TODO
+- [x] #### PDF Branding Logo - All Existing PDFs Complete
+**Status:** COMPLETE (for existing PDF types)
 **Observed:** January 27, 2026
-**Updated:** January 28, 2026
+**Updated:** January 29, 2026
 
-Need to make sure branding logo from invoice PDFs goes on top of:
+All existing PDF types now have branding logo:
 
-- [x] Project proposal PDFs - COMPLETE
+- [x] Invoice PDFs - Already had logo
+- [x] Project proposal PDFs - COMPLETE (January 28, 2026)
 - [x] Project contract PDFs - COMPLETE (January 28, 2026)
-- [ ] Current website audit PDFs - TODO
+
+**Note:** "Website Audit PDF" feature does not exist in codebase - would need to be built as a new feature if needed.
 
 **Proposal PDF Implementation (January 28, 2026):**
 
@@ -427,33 +436,43 @@ Same fix as "Client Budget - Missing Hyphen" - updated `formatDisplayValue()` in
 
 **Note:** All three modules now use the shared utility function `formatDisplayValue()` from `src/utils/format-utils.ts`. Local duplicate functions have been removed.
 
-- [ ] #### Project Status - Inconsistent Format (in-progress vs in_progress)
+- [x] #### Project Status - Inconsistent Format (in-progress vs in_progress)
 
-**Status:** TODO
+**Status:** FIXED
 **Observed:** January 28, 2026
+**Fixed:** January 29, 2026
 
-Project status values are inconsistent throughout the codebase - some places use hyphens (`in-progress`, `on-hold`) and others use underscores (`in_progress`, `on_hold`).
+Standardized to hyphens (`in-progress`, `on-hold`) to match database schema. Added backwards compatibility for legacy underscore values.
 
-**Locations Found:**
+**Files Updated (January 29, 2026):**
 
-- Database schema (`server/database/migrations/001_initial_schema.sql` line 24): Uses hyphens `'in-progress', 'on-hold'`
-- TypeScript types (`src/types/client.ts` line 10): Uses hyphens `'in-progress', 'on-hold'`
-- Admin types (`src/features/admin/admin-types.ts` line 119): Uses underscores `'in_progress', 'on_hold'`
-- Admin projects module (`src/features/admin/modules/admin-projects.ts` line 158): Uses underscores `'in_progress', 'on_hold'`
-- Admin projects module (`src/features/admin/modules/admin-projects.ts` line 407): Status labels use underscores `in_progress: 'In Progress'`
-- Table filter (`src/utils/table-filter.ts` lines 496, 540): Uses underscores `{ value: 'in_progress', label: 'In Progress' }`
-- Table dropdown (`src/utils/table-dropdown.ts` line 180): Uses underscores `in_progress: 'In Progress'`
-- CSS classes (`src/styles/pages/admin.css`): Supports both formats (lines 909-910, 1111-1112)
-- API types (`src/types/api.ts` line 221): Uses underscores `'in_progress'`
-- Shared validation (`shared/validation/schemas.ts` line 462): Uses underscores `'in_progress'`
+**TypeScript Types:**
 
-**Expected behavior:**
+- `src/types/api.ts` - LeadStatus and ProjectStatus now use hyphens
+- `src/features/admin/admin-types.ts` - Lead and Project interfaces now use hyphens
 
-- Single consistent format throughout codebase (preferably hyphens to match database schema)
-- All status comparisons, filters, and displays use the same format
-- Normalization function should handle conversion if needed
+**Utilities:**
 
-**Root Cause:** Mixed usage of hyphen and underscore formats. Database uses hyphens, but many TypeScript types and utilities use underscores. Need to standardize on one format (preferably hyphens to match database) and update all references.
+- `src/utils/table-dropdown.ts` - normalizeStatus converts underscores TO hyphens, label map supports both formats, LEAD_STATUS_OPTIONS uses hyphens
+- `src/utils/table-filter.ts` - Status filter normalization uses hyphens, LEADS_FILTER_CONFIG and PROJECTS_FILTER_CONFIG use hyphens
+
+**Admin Modules:**
+
+- `src/features/admin/modules/admin-projects.ts` - LeadProject interface uses hyphens, normalizeStatus converts to hyphens, status labels support both formats
+- `src/features/admin/modules/admin-leads.ts` - Status comparisons use hyphens
+- `src/features/admin/admin-project-details.ts` - Status labels support both formats, CSS class uses normalized hyphen format
+- `src/features/admin/services/admin-chart.service.ts` - Chart data interface uses hyphens
+
+**Validation:**
+
+- `shared/validation/schemas.ts` - projectUpdateSchema and leadStatusSchema accept both formats for backwards compatibility
+
+**CSS:**
+
+- `src/styles/pages/admin.css` - Added hyphen versions of status classes (supports both)
+- `src/styles/admin/project-detail.css` - Added hyphen versions of status classes (supports both)
+
+**Note:** All status label and CSS class mappings include both hyphen and underscore keys for backwards compatibility with any existing data.
 
 - [x] #### Admin Project Save - Not Using API Response Data
 
@@ -540,74 +559,95 @@ Updated `src/features/client/client-portal.ts`:
 
 **Files updated:** `admin-projects`, `admin-proposals`, `admin-project-details`, `admin-leads`, `admin-clients`, `admin-contacts`, `admin-dashboard`, `admin-messaging`, `admin-analytics` (session start_time), `admin-messaging.renderer`, `admin-contacts.renderer`, `client-portal`. Portal modules (invoices, messages, files) use `ctx.formatDate` from context, which now uses the shared util. Chart weekday labels (`toLocaleDateString('en-US', { weekday: 'short' })`) in admin-analytics left as-is for chart-specific format.
 
-- [ ] #### Error Handling - Inconsistent Error Message Display
+- [x] #### Error Handling - User-Facing Messages Instead of error.message
 
-**Status:** TODO
+**Status:** COMPLETE
 **Observed:** January 28, 2026
+**Fixed:** January 29, 2026
 
-Error handling is inconsistent - some catch blocks show user-friendly messages, others show technical error messages or don't show anything.
+Raw `error.message` and API `error.message` / `err?.message` no longer shown to users in most paths. `console.error` / logger still use the real error for debugging.
 
-**Locations Found:**
+**Completed Fixes:**
 
-- `src/features/admin/modules/admin-projects.ts` line 815: Shows `error.message` or generic message
-- `src/features/admin/modules/admin-projects.ts` line 1514: Shows `error.message || 'Unknown error'`
-- `src/features/admin/modules/admin-projects.ts` line 1713: Shows `error.message` or generic message
-- `src/features/admin/modules/admin-projects.ts` line 1264: Only logs to console, shows generic "Failed to load milestones" message
-- `src/features/admin/modules/admin-leads.ts` line 349: Shows `error.message` or generic message
-- `src/features/admin/modules/admin-leads.ts` line 712: Shows `error.message` or generic message
-- `src/features/admin/modules/admin-leads.ts` line 732: Shows `error.message` or generic message
+**Client / Auth (high traffic):**
 
-**Issues:**
+- [x] `portal-auth.ts` - Login catch: "Login failed. Please check your email and password."
+- [x] `client-portal.ts` - Profile save catch: "Failed to save profile. Please try again."
+- [x] `client-portal.ts` - Password update catch: "Failed to update password. Please try again."
+- [x] `portal-messages.ts` - Send message catch: "Failed to send message. Please try again."
 
-- Some errors show `error.message` which might contain technical details
-- Some errors only log to console without user notification
-- Error messages may not be user-friendly
-- Inconsistent error handling patterns
+**Admin - Projects:**
 
-**Expected behavior:**
+- [x] `admin-projects.ts` - Save project (!ok and catch): "Failed to update project. Please try again."
+- [x] `admin-projects.ts` - Create invoice (!ok and catch): "Failed to create invoice. Please try again."
+- [x] `admin-projects.ts` - File upload catch: "Upload failed. Please try again."
+- [x] `admin-projects.ts` - Add project (!ok and catch): "Failed to create project. Please try again."
 
-- All errors should show user-friendly messages
-- Technical details should only be logged, not displayed to users
-- Consistent error handling pattern across all modules
-- API error responses should be parsed and displayed appropriately
+**Admin - Leads:**
 
-**Root Cause:** Inconsistent error handling. Some places show raw error messages, others show generic messages. Need standardized error handling utility that extracts user-friendly messages from API errors.
+- [x] `admin-leads.ts` - Update status (!ok and catch): "Failed to update status. Please try again."
+- [x] `admin-leads.ts` - Activate lead (!ok and catch): "Failed to activate lead. Please try again."
+- [x] `admin-leads.ts` - Invite lead (!ok and catch): "Failed to send invitation. Please try again."
 
-- [ ] #### API Calls - Missing Response OK Checks Before JSON Parsing
+**Admin - Clients:**
 
-**Status:** PARTIAL - Key flows updated
+- [x] `admin-clients.ts` - Send invitation (!ok and catch): "Failed to send invitation. Please try again."
+- [x] `admin-clients.ts` - Add client (!ok): "Failed to add client. Please try again."
+
+**Admin - Contacts:**
+
+- [x] `admin-contacts.ts` - Update status (!ok and catch): "Failed to update status. Please try again."
+
+**Admin - Project Details:**
+
+- [x] `admin-project-details.ts` - Save project (!ok and catch): "Failed to save project. Please try again."
+- [x] `admin-project-details.ts` - Add milestone (!ok and catch): "Failed to add milestone. Please try again."
+- [x] `admin-project-details.ts` - Toggle milestone (!ok and catch): "Failed to update milestone. Please try again."
+- [x] `admin-project-details.ts` - Delete milestone (!ok and catch): "Failed to delete milestone. Please try again."
+- [x] `admin-project-details.ts` - Create invoice (!ok and catch): "Failed to create invoice. Please try again."
+- [x] `admin-project-details.ts` - Upload files (!ok and catch): "Failed to upload files. Please try again."
+
+**Additional Client Portal Fixes (January 29, 2026):**
+
+- [x] `client-portal.ts` - `submitProjectRequest()` catch: "Failed to submit project request. Please try again."
+- [x] `client-portal.ts` - `saveNotificationSettings()` catch: "Failed to save preferences. Please try again."
+- [x] `client-portal.ts` - `saveBillingSettings()` catch: "Failed to save billing info. Please try again."
+
+- [x] #### API Calls - Missing Response OK Checks Before JSON Parsing
+
+**Status:** FIXED
 **Observed:** January 28, 2026
 **Partial Fix:** January 28, 2026
+**Completed:** January 29, 2026
 
-Some API calls parse JSON responses without checking if the response is OK first, which can cause errors when the API returns error responses.
+All identified cases where `response.json()` was called before checking `response.ok` have been fixed.
 
-**Partial fix applied:**
+**Fixes Applied:**
 
 - `admin-projects` `saveProjectChanges`: Check `response.ok` first; on !ok parse error body and `showNotification(err?.error || err?.message || '...', 'error')`; only parse JSON as result when ok.
 - `admin-project-details` `toggleMilestone`: Add `else` branch on !ok — parse error body, `alertError(...)`; add `catch` → `alertError`.
 - `admin-project-details` `deleteMilestone`: On !ok parse error body and show in `alertError` (was generic message only).
+- `admin-dashboard` `inviteLead`: Check `response.ok` before parsing JSON; handle error responses separately.
+- `admin-data.service.ts` `inviteLead`: Check `response.ok` before parsing JSON; handle error responses separately.
+- `admin-clients` `handleSubmit` (edit client): Check `response.ok` before parsing JSON; handle error responses separately.
 
-**Remaining:** Audit other `apiPut`/`apiPost`/`fetch` usages for same pattern.
+**Files Updated (January 29, 2026):**
 
-**Locations Found (original):**
+- `src/features/admin/admin-dashboard.ts` - `inviteLead()` method fixed
+- `src/features/admin/services/admin-data.service.ts` - `inviteLead()` method fixed
+- `src/features/admin/modules/admin-clients.ts` - Client edit form submit fixed
 
-- ~~`src/features/admin/modules/admin-projects.ts` saveProjectChanges~~ FIXED
-- ~~`src/features/admin/admin-project-details.ts` toggleMilestone, deleteMilestone~~ FIXED
-- Multiple places call `response.json()` without checking `response.ok` first (though many are in `if (response.ok)` blocks)
+**Pattern Used:**
 
-**Issues:**
-
-- Non-OK responses (4xx, 5xx) might be parsed as JSON, causing confusing errors
-- Error responses might not be handled properly
-- Silent failures possible if error responses aren't caught
-
-**Expected behavior:**
-
-- Always check `response.ok` before parsing JSON
-- Handle error responses appropriately
-- Show user-friendly error messages for failed requests
-
-**Root Cause:** Some API calls don't verify response status before parsing JSON. Should always check `response.ok` or use a helper function that handles this automatically.
+```typescript
+if (response.ok) {
+  const data = await response.json();
+  // Handle success
+} else {
+  const errorData = await response.json().catch(() => ({}));
+  // Handle error with errorData.error or generic message
+}
+```
 
 - [x] #### Progress Save - Fire and Forget Without Error Handling
 
@@ -844,45 +884,39 @@ The click handler does NOT execute during initialization - it only runs when the
 
 **Note:** This was the same issue as "Admin Project Save - Not Using API Response Data" above. Both are now resolved by the same fix that uses the API response data directly instead of reloading all projects.
 
-- [ ] #### E-commerce vs E-commerce Inconsistency - Additional Instances
+- [x] #### E-commerce vs Ecommerce Inconsistency - Standardized
 
-**Status:** PARTIALLY FIXED
+**Status:** COMPLETE
 **Observed:** January 28, 2026
-**Partial Fix:** January 28, 2026
+**Fixed:** January 29, 2026
 
-**Partial Fix Applied:**
+Standardized to `'e-commerce'` (with hyphen) to match validation schema. Added backwards compatibility for legacy `'ecommerce'` values.
 
-- Fixed `admin/index.html` line 1299: Changed `value="ecommerce"` to `value="e-commerce"` to match validation schema
-- Fixed display label capitalization (E-commerce → E-Commerce with capital C):
-  - `src/features/admin/admin-dashboard.ts`: PROJECT_TYPE_MAP updated to `'E-Commerce'`
-  - `src/features/admin/modules/admin-proposals.ts`: projectTypeLabels updated to `'E-Commerce'`
+**Files Updated (January 29, 2026):**
 
-**Remaining Work:** This is a larger refactor requiring updates to TypeScript types and backend constants. The validation schema uses `'e-commerce'` (with hyphen) which should be the standard.
+**TypeScript Types:**
+- `src/types/client.ts` - ProjectType now uses `'e-commerce'`
+- `src/types/project.ts` - ProjectCategory now uses `'e-commerce'`, category data uses `'e-commerce'`
+- `src/features/client/proposal-builder-types.ts` - ProjectType now uses `'e-commerce'`
 
-**Additional Locations Found:**
+**Client Code:**
+- `src/features/client/proposal-builder-data.ts` - Config key now `'e-commerce'`
+- `src/features/client/terminal-intake-data.ts` - Options and features use `'e-commerce'`
+- `src/features/admin/admin-dashboard.ts` - Type map includes both (backwards compat)
+- `src/features/admin/modules/admin-proposals.ts` - Type labels include both
+- `src/modules/ui/projects.ts` - Category map includes both
 
-- ~~`admin/index.html` line 1299: FIXED~~
-- `admin/index.html` line 1462: `<option value="e-commerce">E-Commerce</option>` (with hyphen in value)
-- `server/routes/proposals.ts` line 37: Uses `'ecommerce'` (no hyphen)
-- `server/routes/admin.ts` line 1049: Mapping uses `ecommerce: 'E-commerce Store'` (no hyphen)
-- `src/features/admin/modules/admin-proposals.ts` line 697: Uses `'ecommerce': 'E-commerce'` (no hyphen)
-- `src/features/client/proposal-builder-data.ts` line 316: Uses `ECOMMERCE_TIERS` and `ECOMMERCE_FEATURES` constants
-- `src/features/client/proposal-builder-types.ts` line 23: Type uses `'ecommerce'` (no hyphen)
-- `src/types/client.ts` line 15: Type uses `'ecommerce'` (no hyphen)
-- `src/types/project.ts` line 88: Uses `id: 'ecommerce'` (no hyphen)
-- `server/routes/intake.ts` line 501: Mapping uses `ecommerce: 'E-commerce Store'` (no hyphen)
-- `server/routes/intake.ts` line 596: Condition checks `if (projectType === 'ecommerce')` (no hyphen)
-- `server/services/invoice-service.ts` line 531: Case uses `'e-commerce'` (with hyphen)
-- `server/services/invoice-service.ts` line 534: Description uses `'E-commerce Platform Development'`
-- `server/services/project-generator.ts` line 149: Uses `ecommerce:` key (no hyphen)
-- `server/services/invoice-generator.ts` line 108: Uses `ecommerce:` key (no hyphen)
-- `server/services/invoice-generator.ts` line 237: Uses `ecommerce: 1.3` (no hyphen)
-- `server/services/invoice-generator.ts` line 508: Uses `ecommerce: 'E-commerce Store'` (no hyphen)
-- `server/models/ClientIntake.ts` line 22: Type uses `'e-commerce'` (with hyphen)
-- `server/models/ClientIntake.ts` line 211: Uses `'e-commerce': 4` (with hyphen)
-- `server/models/ClientIntake.ts` line 250: Uses `'e-commerce': 80` (with hyphen)
-- `server/models/ClientIntake.ts` line 271: Uses `'e-commerce': 1.2` (with hyphen)
-- `server/models/ClientIntake.ts` line 422: Uses `'e-commerce'` (with hyphen)
+**Server Code:**
+- `server/services/project-generator.ts` - Templates, multipliers, display names use `'e-commerce'`
+- `server/services/invoice-generator.ts` - Pricing, multipliers, display names use `'e-commerce'`
+- `server/routes/intake.ts` - Type names include both; condition checks both values
+- `server/routes/admin.ts` - Type names include both
+- `server/routes/proposals.ts` - Valid types include both
+
+**Tests:**
+- `tests/unit/services/invoice-generator.test.ts` - Uses `'e-commerce'`
+
+**Note:** Display label mappings include both `'e-commerce'` and `'ecommerce'` keys for backwards compatibility with any existing database records.
 - `src/types/api.ts` line 188: Type uses `'e-commerce'` (with hyphen)
 - `shared/validation/schemas.ts` line 318: Uses `'e-commerce'` (with hyphen)
 - `shared/validation/schemas.ts` line 370: Uses `'e-commerce'` (with hyphen)
@@ -951,23 +985,24 @@ Added CSS in `src/styles/components/loading.css` for button loading states.
 
 - `src/features/admin/modules/admin-clients.ts`: Edit client info, edit billing, add client forms
 
-- [ ] #### Empty States - Generic or Unhelpful Messages
+- [x] #### Empty States - Generic or Unhelpful Messages
 
-**Status:** PARTIAL - Copy improved for key empty states
+**Status:** COMPLETE
 **Observed:** January 28, 2026
-**Partial Fix:** January 28, 2026
+**Fixed:** January 29, 2026
 
 Many empty states show generic messages that don't guide users on what to do next.
 
-**Partial fix applied:**
+**Fixes applied:**
 
 - **Milestones:** "No milestones defined yet." / "No milestones yet." → "No milestones yet. Add one to track progress." (admin-projects, admin-project-details)
 - **Files:** "No files uploaded yet." → "No files yet. Upload files in the Files tab." / "Upload files above." (project detail)
 - **Invoices:** "No invoices yet." / "No invoices created yet." → "No invoices yet. Create one in the Invoices tab." / "Create one above."
 - **Leads:** "No leads found" → "No leads yet. New form submissions will appear here."; "No leads match the current filters" → add "Try adjusting your filters."
 - **Projects table:** "No projects match the current filters" → add "Try adjusting your filters."
-
-**Remaining:** Add CTAs or refine copy for remaining empty states (e.g. client projects, client invoices).
+- **Client Portal Projects:** "No projects found." → "No projects yet. Submit a project request to get started!" (January 29, 2026)
+- **Client Portal Messages:** "No messages in this thread yet." → "No messages in this thread yet. Send a message below to start the conversation." (January 29, 2026)
+- **Client Portal Invoices:** Already had helpful message: "No invoices yet. Your first invoice will appear here once your project begins."
 
 **Locations Found:**
 
@@ -1207,7 +1242,7 @@ Admin tables (projects, leads, clients) may not be fully responsive on mobile de
 
 - [x] #### Toast Notifications - Good Implementation, But Inconsistent Usage
 
-**Status:** DONE (admin + code-protection)
+**Status:** COMPLETE (client portal + admin + code-protection)
 **Observed:** January 28, 2026
 **Fixed:** January 28, 2026
 
@@ -1215,6 +1250,10 @@ Toast notification system exists (`src/utils/toast-notifications.ts`) with prope
 
 **Fix applied:**
 
+- **Client Portal:** Replaced all 21 `alert()` calls with `showToast()` in:
+  - `src/features/client/client-portal.ts`
+  - `src/features/client/modules/portal-messages.ts`
+  - `src/features/client/modules/portal-invoices.ts`
 - **Admin:** No native `alert()` in admin code. Admin uses `showNotification()` / `showToast()` and custom `alertError` / `alertSuccess` / `alertWarning` (confirm-dialog modals) for feedback.
 - **Code protection:** Replaced the only remaining native `alert()` in `src` — `src/services/code-protection-service.ts` devtools message — with `showToast(..., 'warning', { duration: 5000 })`.
 

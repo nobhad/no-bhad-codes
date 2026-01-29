@@ -77,13 +77,13 @@ function renderFilesList(
 
   container.innerHTML = files
     .map((file) => {
+      const safeName = ctx.escapeHtml(file.originalName);
       const canDelete = file.uploadedBy === clientEmail || file.uploadedBy === 'client';
       const deleteIcon = canDelete
-        ? `<button class="file-delete-icon btn-delete" data-file-id="${file.id}" data-filename="${ctx.escapeHtml(file.originalName)}" aria-label="Delete file">
+        ? `<button class="file-delete-icon btn-delete" data-file-id="${file.id}" data-filename="${file.originalName}" aria-label="Delete ${safeName}">
             ${ICONS.TRASH}
           </button>`
         : '';
-
       return `
         <div class="file-item" data-file-id="${file.id}">
           ${deleteIcon}
@@ -91,17 +91,17 @@ function renderFilesList(
             ${getFileIcon(file.mimetype)}
           </div>
           <div class="file-info">
-            <span class="file-name">${ctx.escapeHtml(file.originalName)}</span>
+            <span class="file-name">${safeName}</span>
             <span class="file-meta">
               ${file.projectName ? `${file.projectName} • ` : ''}
               ${ctx.formatDate(file.uploadedAt)} • ${formatFileSize(file.size)}
             </span>
           </div>
           <div class="file-actions">
-            <button class="btn btn-sm btn-outline btn-preview" data-file-id="${file.id}" data-mimetype="${file.mimetype}">
+            <button class="btn btn-sm btn-outline btn-preview" data-file-id="${file.id}" data-mimetype="${file.mimetype}" aria-label="Preview ${safeName}">
               Preview
             </button>
-            <button class="btn btn-sm btn-outline btn-download" data-file-id="${file.id}" data-filename="${ctx.escapeHtml(file.originalName)}">
+            <button class="btn btn-sm btn-outline btn-download" data-file-id="${file.id}" data-filename="${file.originalName}" aria-label="Download ${safeName}">
               Download
             </button>
           </div>
