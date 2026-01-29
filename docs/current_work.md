@@ -1,6 +1,6 @@
 # Current Work
 
-**Last Updated:** January 29, 2026 (Error Handling Audit - User-Facing Messages)
+**Last Updated:** January 29, 2026 (CSS Shared Component Consolidation)
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-01.md`.
 
@@ -1458,6 +1458,15 @@ Post-intake tiered proposal builder with GOOD/BETTER/BEST tiers and mix & match 
 ## TODOs
 
 ### Code Quality & Refactoring
+
+- [x] **CSS SHARED COMPONENT CONSOLIDATION** - COMPLETE January 29, 2026
+  - **Documentation:** [CSS_ARCHITECTURE.md](./design/CSS_ARCHITECTURE.md)
+  - Created `shared/portal-badges.css` for cohesive status badge styling
+  - Removed duplicate `.stat-card` from `pages/admin.css` (uses `shared/portal-cards.css`)
+  - Removed duplicate `.icon-btn` from `pages/admin.css` (kept scoped version)
+  - Removed duplicate `.status-badge` definitions (consolidated to shared file)
+  - Client portal retains text-only badge design via scoped override
+  - **Result:** 149 lines added, 164 lines removed = net 15 lines reduction
 
 - [ ] **COMPONENT REFACTORING OPPORTUNITIES** - Replace manual DOM manipulation with reusable components
   - **Documentation:** [COMPONENT_REFACTORING_OPPORTUNITIES.md](./COMPONENT_REFACTORING_OPPORTUNITIES.md)
