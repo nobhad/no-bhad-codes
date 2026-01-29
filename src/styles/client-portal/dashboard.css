@@ -10,29 +10,31 @@
   font-size: 0.9rem;
 }
 
-/* Status badge - used in project cards */
-.status-badge {
+/* Status badge - CLIENT PORTAL OVERRIDE
+   Client portal uses text-only badges (no pill background)
+   Override shared/portal-badges.css pill styles */
+[data-page="client-portal"] .project-status .status-badge {
   font-family: var(--font--acme);
-  color: var(--color-primary);
   padding: 0;
   margin-left: var(--portal-spacing-sm);
   font-weight: 400;
   font-size: 1rem;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
   background: transparent;
+  border: none;
+  border-radius: 0;
 }
 
 /* Status variants - colored text only, no background */
-.status-badge.status-pending {
+[data-page="client-portal"] .project-status .status-badge.status-pending {
   color: var(--color-warning);
 }
 
-.status-badge.status-active {
+[data-page="client-portal"] .project-status .status-badge.status-active {
   color: var(--color-primary);
 }
 
-.status-badge.status-completed {
+[data-page="client-portal"] .project-status .status-badge.status-completed {
   color: var(--color-success);
 }
 

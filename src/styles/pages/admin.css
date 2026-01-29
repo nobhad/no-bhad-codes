@@ -802,18 +802,7 @@ body.modal-open .dashboard-content {
   gap: var(--space-4);
 }
 
-.stat-card {
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: var(--border-radius-card);
-  padding: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: var(--space-1);
-  transition: background 0.2s ease;
-}
+/* Base .stat-card styles are in shared/portal-cards.css */
 
 [data-page="admin"] .stat-card:hover,
 [data-page="admin"] .stat-card-clickable:hover {
@@ -851,100 +840,7 @@ body.modal-open .dashboard-content {
 /* Leads and Clients tables use .admin-table-container and .admin-table base classes */
 /* See table-specific styles in ADMIN TABLE section above */
 
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--border-radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  text-transform: capitalize;
-  border: var(--portal-border);
-  color: var(--color-black);
-  min-width: fit-content;
-  width: auto;
-  text-align: center;
-  box-sizing: border-box;
-  white-space: nowrap;
-  transition: opacity 0.2s ease;
-}
-
-/* ================================================
-   STANDARDIZED STATUS COLORS
-   ================================================
-   All status badges AND select dropdowns use these colors:
-
-   YELLOW (#fbbf24) - Awaiting Action:
-     pending, new, on_hold, on-hold
-
-   BLUE (#3b82f6) - In Progress:
-     active, in_progress, in-progress, contacted
-
-   GREEN (#10b981) - Success/Complete:
-     completed, converted, replied
-
-   RED (#ef4444) - Cancelled/Lost:
-     cancelled, lost, archived
-
-   PURPLE (#8b5cf6) - Qualified:
-     qualified
-
-   GRAY (#9ca3af) - Read/Inactive:
-     read
-   ================================================ */
-
-/* Yellow/Warning status badges */
-.status-badge.status-pending,
-.status-badge.status-new,
-.status-badge.status-on_hold,
-.status-badge.status-on-hold {
-  background: var(--color-warning);
-  border-color: var(--portal-border-dark);
-  color: var(--color-black);
-}
-
-/* Blue/Active status badges */
-.status-badge.status-active,
-.status-badge.status-in_progress,
-.status-badge.status-in-progress,
-.status-badge.status-contacted {
-  background: var(--color-info);
-  border-color: var(--portal-border-dark);
-  color: var(--color-black);
-}
-
-/* Green/Success status badges */
-.status-badge.status-completed,
-.status-badge.status-converted,
-.status-badge.status-replied {
-  background: var(--color-success);
-  border-color: var(--portal-border-dark);
-  color: var(--color-black);
-}
-
-/* Red/Danger status badges */
-.status-badge.status-cancelled,
-.status-badge.status-lost,
-.status-badge.status-archived {
-  background: var(--color-danger);
-  border-color: var(--portal-border-dark);
-  color: var(--color-white);
-}
-
-/* Purple status badge */
-.status-badge.status-qualified {
-  background: var(--color-status-review-border);
-  border-color: var(--portal-border-dark);
-  color: var(--color-white);
-}
-
-/* Gray status badges (for messages/contacts) */
-.status-badge.status-read {
-  background: var(--portal-text-muted);
-  border-color: var(--portal-border-dark);
-  color: var(--color-black);
-}
+/* Base .status-badge and color variants are in shared/portal-badges.css */
 
 /* Not Invited status - Gray/muted for clients who haven't been invited yet */
 .status-not-invited {
@@ -1415,27 +1311,7 @@ body.modal-open .dashboard-content {
   justify-content: flex-end;
 }
 
-/* Icon-only buttons (no border) */
-.icon-btn {
-  background: transparent;
-  border: none;
-  padding: var(--space-2);
-  cursor: pointer;
-  color: var(--portal-text-light);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: color 0.2s ease;
-}
-
-.icon-btn:hover {
-  color: var(--color-primary);
-}
-
-.icon-btn svg {
-  display: block;
-}
+/* Icon button base styles are scoped at [data-page="admin"] .icon-btn above */
 
 /* Set Password Page Styles */
 .set-password-page {
