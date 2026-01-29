@@ -105,7 +105,7 @@ export async function generateInvoice(
     'simple-site': { price: 1500, description: 'Simple Website Development' },
     'business-site': { price: 4000, description: 'Business Website Development' },
     portfolio: { price: 2500, description: 'Portfolio Website Development' },
-    ecommerce: { price: 8000, description: 'E-commerce Store Development' },
+    'e-commerce': { price: 8000, description: 'E-commerce Store Development' },
     'web-app': { price: 15000, description: 'Web Application Development' },
     'browser-extension': { price: 6000, description: 'Browser Extension Development' },
     other: { price: 3000, description: 'Custom Web Project Development' }
@@ -234,7 +234,7 @@ function generateFeatureLineItems(features: string[], projectType: string): Line
     'simple-site': 0.8, // Simpler implementation
     'business-site': 1.0, // Standard pricing
     portfolio: 0.9, // Slightly simpler
-    ecommerce: 1.3, // More complex due to payment/inventory integration
+    'e-commerce': 1.3, // More complex due to payment/inventory integration
     'web-app': 1.5, // Most complex implementations
     'browser-extension': 1.2, // Moderate complexity
     other: 1.0 // Default
@@ -505,7 +505,8 @@ function getProjectTypeDisplayName(projectType: string): string {
     'simple-site': 'Simple Website',
     'business-site': 'Business Website',
     portfolio: 'Portfolio Website',
-    ecommerce: 'E-commerce Store',
+    'e-commerce': 'E-commerce Store',
+    ecommerce: 'E-commerce Store', // Legacy support
     'web-app': 'Web Application',
     'browser-extension': 'Browser Extension',
     other: 'Custom Project'

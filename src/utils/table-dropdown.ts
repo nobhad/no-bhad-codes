@@ -22,10 +22,10 @@ export interface TableDropdownConfig {
 }
 
 /**
- * Normalize status value (convert hyphens to underscores for consistency)
+ * Normalize status value (convert underscores to hyphens to match database format)
  */
 function normalizeStatus(status: string): string {
-  return status.replace(/-/g, '_');
+  return status.replace(/_/g, '-');
 }
 
 /**
@@ -34,7 +34,7 @@ function normalizeStatus(status: string): string {
 export function createTableDropdown(config: TableDropdownConfig): HTMLElement {
   const { options, currentValue, onChange } = config;
 
-  // Normalize value (database may have hyphens, options use underscores)
+  // Normalize value (legacy data may have underscores, we use hyphens)
   const normalizedValue = normalizeStatus(currentValue);
 
   // Find current option label
@@ -177,8 +177,10 @@ export function getStatusLabel(status: string): string {
     responded: 'Responded',
     converted: 'Converted',
     active: 'Active',
-    in_progress: 'In Progress',
-    on_hold: 'On Hold',
+    'in-progress': 'In Progress',
+    in_progress: 'In Progress', // Legacy support
+    'on-hold': 'On Hold',
+    on_hold: 'On Hold', // Legacy support
     completed: 'Completed',
     cancelled: 'Cancelled',
     archived: 'Archived',
@@ -193,7 +195,7 @@ export const LEAD_STATUS_OPTIONS: TableDropdownOption[] = [
   { value: 'qualified', label: 'Qualified' },
   { value: 'contacted', label: 'Contacted' },
   { value: 'active', label: 'Active' },
-  { value: 'in_progress', label: 'In Progress' },
+  { value: 'in-progress', label: 'In Progress' },
   { value: 'converted', label: 'Converted' },
   { value: 'completed', label: 'Completed' },
   { value: 'lost', label: 'Lost' }

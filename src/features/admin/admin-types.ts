@@ -116,7 +116,7 @@ export interface Lead {
   contact_name: string;
   email: string;
   phone?: string;
-  status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost' | 'pending' | 'active' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
+  status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost' | 'pending' | 'active' | 'in-progress' | 'on-hold' | 'completed' | 'cancelled';
   source?: string;
   notes?: string;
   created_at: string;
@@ -151,7 +151,7 @@ export interface Project {
   name: string;
   client_id: number;
   client_name?: string;
-  status: 'planning' | 'in_progress' | 'review' | 'completed' | 'on_hold';
+  status: 'planning' | 'in-progress' | 'review' | 'completed' | 'on-hold';
   start_date?: string;
   end_date?: string;
   budget?: number;

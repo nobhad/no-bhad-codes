@@ -449,6 +449,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Status colors for settings dropdown */
 [data-page="admin"] #pd-setting-status.status-pending,
+[data-page="admin"] #pd-setting-status.status-on-hold,
 [data-page="admin"] #pd-setting-status.status-on_hold {
   background-color: var(--color-warning);
   color: var(--color-black);

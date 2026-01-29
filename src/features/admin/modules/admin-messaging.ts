@@ -9,6 +9,7 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { formatDateTime } from '../../../utils/format-utils';
 import type { Message, AdminDashboardContext } from '../admin-types';
 import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
 import type {
@@ -335,14 +336,10 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
   container.innerHTML = messages
     .map((msg: MessageResponse) => {
       const isAdmin = msg.sender_type === 'admin';
-      const time = new Date(msg.created_at).toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-      const date = new Date(msg.created_at).toLocaleDateString();
-      const rawSenderName = isAdmin ? 'You (Admin)' : selectedClientName || 'Client';
+      const dateTime = formatDateTime(msg.created_at);
+      const rawSenderName = isAdmin ? 'You (Admin)' : SanitizationUtils.decodeHtmlEntities(selectedClientName || 'Client');
       const safeSenderName = SanitizationUtils.escapeHtml(rawSenderName);
-      const safeContent = SanitizationUtils.escapeHtml(msg.message || '');
+      const safeContent = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(msg.message || ''));
       const initials = rawSenderName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
       const safeInitials = SanitizationUtils.escapeHtml(initials);
 
@@ -352,7 +349,7 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
             <div class="message-content">
               <div class="message-header">
                 <span class="message-sender">You (Admin)</span>
-                <span class="message-time">${date} at ${time}</span>
+                <span class="message-time">${dateTime}</span>
               </div>
               <div class="message-body">${safeContent}</div>
             </div>
@@ -371,7 +368,7 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
           <div class="message-content">
             <div class="message-header">
               <span class="message-sender">${safeSenderName}</span>
-              <span class="message-time">${date} at ${time}</span>
+              <span class="message-time">${dateTime}</span>
             </div>
             <div class="message-body">${safeContent}</div>
           </div>

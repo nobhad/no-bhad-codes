@@ -146,7 +146,7 @@ export async function generateProjectPlan(
         'Mobile Responsive'
       ]
     },
-    ecommerce: {
+    'e-commerce': {
       phases: [
         'Planning',
         'Design',
@@ -276,7 +276,7 @@ function calculateFeatureAdditions(features: string[], projectType: string): Fea
     'simple-site': 0.8,
     'business-site': 1.0,
     portfolio: 0.9,
-    ecommerce: 1.3,
+    'e-commerce': 1.3,
     'web-app': 1.5,
     'browser-extension': 1.2,
     other: 1.0
@@ -742,7 +742,8 @@ function getProjectTypeDisplayName(projectType: string): string {
     'simple-site': 'Simple Website',
     'business-site': 'Business Website',
     portfolio: 'Portfolio Website',
-    ecommerce: 'E-commerce Store',
+    'e-commerce': 'E-commerce Store',
+    ecommerce: 'E-commerce Store', // Legacy support
     'web-app': 'Web Application',
     'browser-extension': 'Browser Extension',
     other: 'Custom Project'

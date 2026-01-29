@@ -74,7 +74,7 @@ export const QUESTIONS: IntakeQuestion[] = [
       { value: 'simple-site', label: 'Simple Site (landing page, link page, 1-2 pages)' },
       { value: 'business-site', label: 'Business Website (multi-page site)' },
       { value: 'portfolio', label: 'Portfolio Website' },
-      { value: 'ecommerce', label: 'E-commerce Store' },
+      { value: 'e-commerce', label: 'E-commerce Store' },
       { value: 'web-app', label: 'Web Application' },
       { value: 'browser-extension', label: 'Browser Extension' },
       { value: 'other', label: 'Other' }
@@ -195,7 +195,7 @@ export const BUDGET_OPTIONS: Record<string, { value: string; label: string }[]> 
     { value: '6k-10k', label: '$6,000 - $10,000' },
     { value: 'discuss', label: 'Let\'s discuss' }
   ],
-  ecommerce: [
+  'e-commerce': [
     { value: '5k-10k', label: '$5,000 - $10,000' },
     { value: '10k-20k', label: '$10,000 - $20,000' },
     { value: '20k-35k', label: '$20,000 - $35,000' },
@@ -252,7 +252,7 @@ export const FEATURE_OPTIONS: Record<string, { value: string; label: string }[]>
     { value: 'contact-form', label: 'Contact Form' },
     { value: 'blog', label: 'Blog/Articles' }
   ],
-  ecommerce: [
+  'e-commerce': [
     { value: 'shopping-cart', label: 'Shopping Cart' },
     { value: 'payment-processing', label: 'Payment Processing' },
     { value: 'inventory-management', label: 'Inventory Management' },

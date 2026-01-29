@@ -15,7 +15,7 @@ import type {
   ProjectResponse,
   InvoiceResponse
 } from '../../../types/api';
-import { formatCurrency } from '../../../utils/format-utils';
+import { formatCurrency, formatDate, formatDateTime } from '../../../utils/format-utils';
 import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import {
@@ -308,14 +308,18 @@ function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): voi
 
   tableBody.innerHTML = filteredClients
     .map((client) => {
-      const date = new Date(client.created_at).toLocaleDateString();
+      const date = formatDate(client.created_at);
 
       const safeName = SanitizationUtils.escapeHtml(
-        client.contact_name ? SanitizationUtils.capitalizeName(client.contact_name) : '-'
+        client.contact_name
+          ? SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(client.contact_name))
+          : '-'
       );
       const safeEmail = SanitizationUtils.escapeHtml(client.email || '-');
       const safeCompany = client.company_name
-        ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(client.company_name))
+        ? SanitizationUtils.escapeHtml(
+          SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(client.company_name))
+        )
         : '';
       const projectCount = client.project_count || 0;
 
@@ -352,7 +356,7 @@ function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): voi
       // Status cell with optional invite button
       const statusCell = showInviteBtn
         ? `<span class="${statusClass}">${statusDisplay}</span>
-           <button class="btn-invite-inline" data-client-id="${client.id}" title="Send invitation email">
+           <button class="btn-invite-inline" data-client-id="${client.id}" title="Send invitation email" aria-label="Send invitation email to client">
              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
              </svg>
@@ -426,13 +430,16 @@ export function showClientDetails(clientId: number, ctx?: AdminDashboardContext)
 }
 
 function populateClientDetailView(client: Client): void {
-  // Prepare sanitized values
+  // Prepare sanitized values (decode entities before escape to fix &amp;amp; etc.)
+  const decodedContact = SanitizationUtils.decodeHtmlEntities(client.contact_name || '');
+  const decodedCompany = SanitizationUtils.decodeHtmlEntities(client.company_name || '');
+  const decodedBillingName = SanitizationUtils.decodeHtmlEntities(client.billing_name || client.contact_name || '');
   const safeName = SanitizationUtils.escapeHtml(
-    client.contact_name ? SanitizationUtils.capitalizeName(client.contact_name) : 'Unknown Client'
+    decodedContact ? SanitizationUtils.capitalizeName(decodedContact) : 'Unknown Client'
   );
   const safeEmail = SanitizationUtils.escapeHtml(client.email || '-');
-  const safeCompany = client.company_name
-    ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(client.company_name))
+  const safeCompany = decodedCompany
+    ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany))
     : '-';
   const safePhone = SanitizationUtils.formatPhone(client.phone || '');
   const status = client.status || 'pending';
@@ -448,19 +455,19 @@ function populateClientDetailView(client: Client): void {
     'cd-phone': safePhone,
     'cd-status': status.charAt(0).toUpperCase() + status.slice(1),
     'cd-client-type': clientType === 'personal' ? 'Personal' : 'Business',
-    'cd-created': new Date(client.created_at).toLocaleDateString(),
+    'cd-created': formatDate(client.created_at),
     'cd-last-login': clientAny.last_login_at
-      ? new Date(clientAny.last_login_at).toLocaleString()
+      ? formatDateTime(clientAny.last_login_at)
       : 'Never',
     'cd-project-count': (client.project_count || 0).toString(),
-    // Billing details
-    'cd-billing-name': SanitizationUtils.escapeHtml(client.billing_name || client.contact_name || '') || '-',
-    'cd-billing-email': SanitizationUtils.escapeHtml(client.billing_email || client.email || '') || '-',
-    'cd-billing-address': client.billing_address ? SanitizationUtils.escapeHtml(client.billing_address) : '-',
-    'cd-billing-city': client.billing_city ? SanitizationUtils.escapeHtml(client.billing_city) : '-',
-    'cd-billing-state': client.billing_state ? SanitizationUtils.escapeHtml(client.billing_state) : '-',
-    'cd-billing-zip': client.billing_zip ? SanitizationUtils.escapeHtml(client.billing_zip) : '-',
-    'cd-billing-country': client.billing_country ? SanitizationUtils.escapeHtml(client.billing_country) : '-'
+    // Billing details - decode entities before escaping to handle &amp; etc.
+    'cd-billing-name': decodedBillingName ? SanitizationUtils.escapeHtml(decodedBillingName) : '-',
+    'cd-billing-email': SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_email || client.email || '')) || '-',
+    'cd-billing-address': client.billing_address ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_address)) : '-',
+    'cd-billing-city': client.billing_city ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_city)) : '-',
+    'cd-billing-state': client.billing_state ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_state)) : '-',
+    'cd-billing-zip': client.billing_zip ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_zip)) : '-',
+    'cd-billing-country': client.billing_country ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_country)) : '-'
   });
 }
 
@@ -559,7 +566,7 @@ function renderClientProjects(projects: ProjectResponse[], container: HTMLElemen
     .map((project) => {
       const safeName = SanitizationUtils.escapeHtml(project.project_name || 'Untitled Project');
       const status = project.status || 'pending';
-      const date = new Date(project.created_at).toLocaleDateString();
+      const date = formatDate(project.created_at);
 
       return `
         <div class="client-project-item" data-project-id="${project.id}">
@@ -650,7 +657,7 @@ function renderClientInvoices(invoices: InvoiceResponse[], container: HTMLElemen
       const invoiceNumber = SanitizationUtils.escapeHtml(invoice.invoice_number || '-');
       const amountValue = typeof invoice.amount_total === 'string' ? parseFloat(invoice.amount_total) : (invoice.amount_total || 0);
       const amount = formatCurrency(amountValue);
-      const date = new Date(invoice.created_at || invoice.due_date).toLocaleDateString();
+      const date = formatDate(invoice.created_at || invoice.due_date);
       const status = invoice.status || 'pending';
 
       return `
@@ -750,12 +757,11 @@ async function sendClientInvitation(clientId: number): Promise<void> {
         renderClientsTable(clientsData, storedContext);
       }
     } else {
-      const error = await response.json().catch(() => ({}));
-      storedContext?.showNotification(error.message || 'Failed to send invitation', 'error');
+      storedContext?.showNotification('Failed to send invitation. Please try again.', 'error');
     }
   } catch (error) {
     console.error('[AdminClients] Error sending invite:', error);
-    storedContext?.showNotification('Error sending invitation', 'error');
+    storedContext?.showNotification('Failed to send invitation. Please try again.', 'error');
   }
 }
 
@@ -846,26 +852,31 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
         phone: newPhone || null,
         status: newStatus
       });
-      const result = await response.json();
 
-      if (response.ok && result.client) {
-        ctx.showNotification('Client info updated successfully', 'success');
-        closeModal();
-        // Update local client data with response (no need to reload all clients)
-        const clientIndex = clientsData.findIndex(c => c.id === clientId);
-        if (clientIndex !== -1) {
-          // Preserve computed fields that the API might not return
-          const existingClient = clientsData[clientIndex];
-          clientsData[clientIndex] = {
-            ...existingClient,
-            ...result.client,
-            // Preserve project_count which is computed
-            project_count: existingClient.project_count
-          };
+      if (response.ok) {
+        const result = await response.json();
+        if (result.client) {
+          ctx.showNotification('Client info updated successfully', 'success');
+          closeModal();
+          // Update local client data with response (no need to reload all clients)
+          const clientIndex = clientsData.findIndex(c => c.id === clientId);
+          if (clientIndex !== -1) {
+            // Preserve computed fields that the API might not return
+            const existingClient = clientsData[clientIndex];
+            clientsData[clientIndex] = {
+              ...existingClient,
+              ...result.client,
+              // Preserve project_count which is computed
+              project_count: existingClient.project_count
+            };
+          }
+          showClientDetails(clientId, ctx);
+        } else {
+          ctx.showNotification(result.error || 'Failed to update client info', 'error');
         }
-        showClientDetails(clientId, ctx);
       } else {
-        ctx.showNotification(result.error || 'Failed to update client info', 'error');
+        const errorData = await response.json().catch(() => ({}));
+        ctx.showNotification(errorData.error || 'Failed to update client info', 'error');
       }
     }, 'Saving...');
   };
@@ -1074,8 +1085,7 @@ function addClient(ctx: AdminDashboardContext): void {
         closeModal();
         await loadClients(ctx);
       } else {
-        const error = await response.json();
-        ctx.showNotification(error.message || 'Failed to add client', 'error');
+        ctx.showNotification('Failed to add client. Please try again.', 'error');
       }
     }, 'Adding...');
   }

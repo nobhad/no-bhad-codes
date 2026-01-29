@@ -125,7 +125,7 @@ export async function handleLogin(
     throw new Error(errorMessage);
   } catch (error) {
     logger.error('Login error', { error: error instanceof Error ? error.message : String(error) });
-    callbacks.onLoginError(error instanceof Error ? error.message : 'Login failed');
+    callbacks.onLoginError('Login failed. Please check your email and password.');
   } finally {
     callbacks.setLoading(false);
   }
@@ -237,16 +237,23 @@ function showAdminButtons(): void {
 }
 
 /**
- * Show field-specific error
+ * Show field-specific error with ARIA for accessibility
  */
 export function showFieldError(fieldId: string, message: string): void {
-  const field = document.getElementById(fieldId);
-  const errorElement = document.getElementById(`${fieldId.replace('client-', '')}-error`);
+  const field = document.getElementById(fieldId) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null;
+  const errorId = `${fieldId.replace('client-', '')}-error`;
+  const errorElement = document.getElementById(errorId);
 
-  if (field) field.classList.add('error');
+  if (field) {
+    field.classList.add('error');
+    field.setAttribute('aria-invalid', 'true');
+  }
   if (errorElement) {
     errorElement.textContent = message;
     errorElement.style.display = 'block';
+    errorElement.setAttribute('role', 'alert');
+    errorElement.setAttribute('aria-live', 'polite');
+    if (field) field.setAttribute('aria-describedby', errorId);
   }
 }
 
@@ -283,11 +290,18 @@ export function setLoginLoading(loading: boolean): void {
 }
 
 /**
- * Clear all error states
+ * Clear all error states and ARIA attributes
  */
 export function clearErrors(): void {
   document.querySelectorAll('.error').forEach((el) => el.classList.remove('error'));
+  document.querySelectorAll('[aria-invalid="true"]').forEach((el) => {
+    el.removeAttribute('aria-invalid');
+    el.removeAttribute('aria-describedby');
+  });
   document.querySelectorAll('.error-message').forEach((el) => {
-    (el as HTMLElement).style.display = 'none';
+    const span = el as HTMLElement;
+    span.style.display = 'none';
+    span.removeAttribute('role');
+    span.removeAttribute('aria-live');
   });
 }

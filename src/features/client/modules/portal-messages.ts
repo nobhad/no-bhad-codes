@@ -126,7 +126,7 @@ function renderMessages(
   container.setAttribute('aria-live', 'polite');
 
   if (messages.length === 0) {
-    container.innerHTML = '<div class="no-messages"><p>No messages in this thread yet.</p></div>';
+    container.innerHTML = '<div class="no-messages"><p>No messages in this thread yet. Send a message below to start the conversation.</p></div>';
     return;
   }
 
@@ -208,7 +208,7 @@ export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
     await loadMessagesFromAPI(ctx, true);
   } catch (error) {
     console.error('Error sending message:', error);
-    showToast(error instanceof Error ? error.message : 'Failed to send message. Please try again.', 'error');
+    showToast('Failed to send message. Please try again.', 'error');
   }
 }
 

@@ -253,10 +253,10 @@ class AdminChartService {
    */
   async createProjectsChart(containerId: string, data: {
     planning: number;
-    in_progress: number;
+    'in-progress': number;
     review: number;
     completed: number;
-    on_hold: number;
+    'on-hold': number;
   }): Promise<void> {
     await this.createChart(containerId, {
       type: 'pie',
@@ -264,7 +264,7 @@ class AdminChartService {
       datasets: [
         {
           label: 'Projects by Status',
-          data: [data.planning, data.in_progress, data.review, data.completed, data.on_hold],
+          data: [data.planning, data['in-progress'], data.review, data.completed, data['on-hold']],
           backgroundColor: [
             getChartColor('GRAY_400'),
             getChartColor('PRIMARY'),

@@ -9,7 +9,7 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { formatDisplayValue } from '../../../utils/format-utils';
+import { formatDisplayValue, formatDate, formatDateTime } from '../../../utils/format-utils';
 import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
 import { createTableDropdown, LEAD_STATUS_OPTIONS } from '../../../utils/table-dropdown';
 import {
@@ -162,8 +162,9 @@ function updateLeadsDisplay(data: LeadsData, ctx: AdminDashboardContext): void {
     } else {
       recentList.innerHTML = recentLeads
         .map((lead) => {
-          const date = new Date(lead.created_at).toLocaleDateString();
-          const safeName = SanitizationUtils.escapeHtml(lead.contact_name || 'Unknown');
+          const date = formatDate(lead.created_at);
+          const decoded = SanitizationUtils.decodeHtmlEntities(lead.contact_name || 'Unknown');
+          const safeName = SanitizationUtils.escapeHtml(decoded);
           return `<li data-activity-type="lead" data-activity-id="${lead.id}" class="clickable-activity">${date} - New Lead: ${safeName}</li>`;
         })
         .join('');
@@ -190,7 +191,7 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
   if (!tableBody) return;
 
   if (!leads || leads.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">No leads found</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">No leads yet. New form submissions will appear here.</td></tr>';
     return;
   }
 
@@ -198,7 +199,7 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
   const filteredLeads = applyFilters(leads, filterState, LEADS_FILTER_CONFIG);
 
   if (filteredLeads.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">No leads match the current filters</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">No leads match the current filters. Try adjusting your filters.</td></tr>';
     return;
   }
 
@@ -206,9 +207,11 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
   tableBody.innerHTML = '';
 
   filteredLeads.forEach((lead) => {
-    const date = new Date(lead.created_at).toLocaleDateString();
-    const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.contact_name || '-'));
-    const safeCompanyName = lead.company_name ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.company_name)) : '-';
+    const date = formatDate(lead.created_at);
+    const decodedContact = SanitizationUtils.decodeHtmlEntities(lead.contact_name || '-');
+    const decodedCompany = SanitizationUtils.decodeHtmlEntities(lead.company_name || '');
+    const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedContact));
+    const safeCompanyName = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '-';
     const safeEmail = SanitizationUtils.escapeHtml(lead.email || '-');
     const leadAny = lead as unknown as Record<string, string>;
     const projectType = leadAny.project_type || '-';
@@ -294,12 +297,11 @@ async function updateLeadStatus(id: number, status: string, ctx: AdminDashboardC
     if (response.ok) {
       ctx.showNotification('Status updated', 'success');
     } else if (response.status !== 401) {
-      const error = await response.json();
-      ctx.showNotification(error.message || 'Failed to update status', 'error');
+      ctx.showNotification('Failed to update status. Please try again.', 'error');
     }
   } catch (error) {
     console.error('[AdminLeads] Failed to update status:', error);
-    ctx.showNotification('Failed to update status', 'error');
+    ctx.showNotification('Failed to update status. Please try again.', 'error');
   }
 }
 
@@ -327,6 +329,7 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
     overlay.className = 'confirm-dialog-overlay';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'cancel-dialog-title');
 
     const reasonOptions = CANCELLATION_REASONS.map(r =>
       `<option value="${r.value}">${r.label}</option>`
@@ -334,7 +337,7 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
 
     overlay.innerHTML = `
       <div class="confirm-dialog" style="max-width: 450px;">
-        <h3 class="confirm-dialog-title">CANCELLATION DETAILS</h3>
+        <h3 id="cancel-dialog-title" class="confirm-dialog-title">CANCELLATION DETAILS</h3>
 
         <div style="text-align: left; margin-bottom: var(--space-4);">
           <label class="field-label" style="margin-bottom: var(--space-2); display: block;">Who cancelled?</label>
@@ -451,8 +454,10 @@ export function showLeadDetails(leadId: number): void {
   const overlay = getElement('details-overlay');
   if (!detailsPanel) return;
 
-  const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.contact_name || '-'));
-  const safeCompanyName = lead.company_name ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(lead.company_name)) : '';
+  const decodedContact = SanitizationUtils.decodeHtmlEntities(lead.contact_name || '-');
+  const decodedCompany = SanitizationUtils.decodeHtmlEntities(lead.company_name || '');
+  const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedContact));
+  const safeCompanyName = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '';
   const safeEmail = SanitizationUtils.escapeHtml(lead.email || '-');
   const safePhone = SanitizationUtils.formatPhone(lead.phone || '');
   const safeProjectType = SanitizationUtils.escapeHtml(lead.project_type || '-');
@@ -465,7 +470,7 @@ export function showLeadDetails(leadId: number): void {
   // Show activate button only for pending/new leads
   const showActivateBtn = !lead.status || lead.status === 'pending' || lead.status === 'new' || lead.status === 'qualified';
   // Show view project button for activated leads
-  const isActivated = lead.status === 'active' || lead.status === 'in_progress' || lead.status === 'on_hold' || lead.status === 'completed' || lead.status === 'converted';
+  const isActivated = lead.status === 'active' || lead.status === 'in-progress' || lead.status === 'on-hold' || lead.status === 'completed' || lead.status === 'converted';
 
   detailsPanel.innerHTML = `
     <div class="details-header">
@@ -514,7 +519,7 @@ export function showLeadDetails(leadId: number): void {
         </div>
         <div class="meta-item">
           <span class="field-label">Created</span>
-          <span class="meta-value">${new Date(lead.created_at).toLocaleString()}</span>
+          <span class="meta-value">${formatDateTime(lead.created_at)}</span>
         </div>
       </div>
       <div class="project-description-row">
@@ -657,12 +662,11 @@ export async function activateLead(
       const projectId = data.projectId || leadId;
       showProjectDetails(projectId, ctx);
     } else if (response.status !== 401) {
-      const error = await response.json();
-      ctx.showNotification(error.message || 'Failed to activate lead', 'error');
+      ctx.showNotification('Failed to activate lead. Please try again.', 'error');
     }
   } catch (error) {
     console.error('[AdminLeads] Failed to activate lead:', error);
-    ctx.showNotification('Failed to activate lead', 'error');
+    ctx.showNotification('Failed to activate lead. Please try again.', 'error');
   }
 }
 
@@ -677,11 +681,10 @@ export async function inviteLead(
     if (response.ok) {
       ctx.showNotification('Invitation sent successfully!', 'success');
     } else if (response.status !== 401) {
-      const error = await response.json();
-      ctx.showNotification(error.message || 'Failed to send invitation', 'error');
+      ctx.showNotification('Failed to send invitation. Please try again.', 'error');
     }
   } catch (error) {
     console.error('[AdminLeads] Failed to invite lead:', error);
-    ctx.showNotification('Failed to send invitation', 'error');
+    ctx.showNotification('Failed to send invitation. Please try again.', 'error');
   }
 }

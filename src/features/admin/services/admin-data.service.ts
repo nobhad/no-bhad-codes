@@ -216,15 +216,19 @@ class AdminDataService {
   async inviteLead(leadId: number): Promise<{ success: boolean; error?: string }> {
     try {
       const response = await apiPost(`/api/admin/leads/${leadId}/invite`);
-      const data = await response.json();
 
-      if (response.ok && data.success) {
-        this.cache.invalidate('leads');
-        this.cache.invalidate('projects');
-        return { success: true };
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          this.cache.invalidate('leads');
+          this.cache.invalidate('projects');
+          return { success: true };
+        }
+        return { success: false, error: data.error || 'Failed to send invitation' };
       }
 
-      return { success: false, error: data.error || 'Failed to send invitation' };
+      const errorData = await response.json().catch(() => ({}));
+      return { success: false, error: errorData.error || 'Failed to send invitation' };
     } catch (error) {
       logger.error('Failed to invite lead', { error, leadId });
       return { success: false, error: 'An error occurred' };

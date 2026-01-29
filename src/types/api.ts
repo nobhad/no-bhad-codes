@@ -218,8 +218,8 @@ export type LeadStatus =
   | 'lost'
   | 'pending'
   | 'active'
-  | 'in_progress'
-  | 'on_hold'
+  | 'in-progress'
+  | 'on-hold'
   | 'completed'
   | 'cancelled';
 
@@ -283,10 +283,10 @@ export interface LeadStats {
  */
 export type ProjectStatus =
   | 'planning'
-  | 'in_progress'
+  | 'in-progress'
   | 'review'
   | 'completed'
-  | 'on_hold';
+  | 'on-hold';
 
 /**
  * Project entity response (matches server API response)

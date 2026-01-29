@@ -10,6 +10,7 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { formatDate } from '../../../utils/format-utils';
 import { apiFetch, apiPut, apiPost } from '../../../utils/api-client';
 import { createTableDropdown } from '../../../utils/table-dropdown';
 import type { AdminDashboardContext } from '../admin-types';
@@ -248,22 +249,18 @@ function renderProposalsTable(proposals: Proposal[], ctx: AdminDashboardContext)
 function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): string {
   const _statusOption = PROPOSAL_STATUS_OPTIONS.find(s => s.value === proposal.status);
   const tierLabel = proposal.selectedTier.charAt(0).toUpperCase() + proposal.selectedTier.slice(1);
-  const formattedDate = new Date(proposal.createdAt).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  });
+  const formattedDate = formatDate(proposal.createdAt);
 
   return `
     <tr data-proposal-id="${proposal.id}">
       <td>
         <div class="client-info">
-          <span class="client-name">${SanitizationUtils.escapeHtml(proposal.client.name)}</span>
-          ${proposal.client.company ? `<span class="client-company">${SanitizationUtils.escapeHtml(proposal.client.company)}</span>` : ''}
+          <span class="client-name">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.name))}</span>
+          ${proposal.client.company ? `<span class="client-company">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.company))}</span>` : ''}
         </div>
       </td>
       <td>
-        <span class="project-name">${SanitizationUtils.escapeHtml(proposal.project.name)}</span>
+        <span class="project-name">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.project.name))}</span>
         <span class="project-type">${formatProjectType(proposal.projectType)}</span>
       </td>
       <td>
@@ -280,11 +277,11 @@ function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): str
       </td>
       <td class="date-cell">${formattedDate}</td>
       <td class="actions-cell">
-        <button class="btn-icon btn-view" data-proposal-id="${proposal.id}" title="View Details">
+        <button class="btn-icon btn-view" data-proposal-id="${proposal.id}" title="View Details" aria-label="View proposal details">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
         ${proposal.status === 'accepted' ? `
-          <button class="btn-icon btn-convert" data-proposal-id="${proposal.id}" title="Convert to Invoice">
+          <button class="btn-icon btn-convert" data-proposal-id="${proposal.id}" title="Convert to Invoice" aria-label="Convert to invoice">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
           </button>
         ` : ''}
@@ -413,12 +410,7 @@ function hideProposalDetails(): void {
 
 function renderProposalDetailsContent(proposal: Proposal): string {
   const tierLabel = proposal.selectedTier.charAt(0).toUpperCase() + proposal.selectedTier.slice(1);
-  const formattedDate = new Date(proposal.createdAt).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+  const formattedDate = formatDate(proposal.createdAt);
 
   const includedFeatures = proposal.features?.filter(f => f.isIncludedInTier) || [];
   const addonFeatures = proposal.features?.filter(f => f.isAddon) || [];
@@ -430,16 +422,16 @@ function renderProposalDetailsContent(proposal: Proposal): string {
         <div class="details-grid">
           <div class="detail-item">
             <span class="detail-label">Name</span>
-            <span class="detail-value">${SanitizationUtils.escapeHtml(proposal.client.name)}</span>
+            <span class="detail-value">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.name))}</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Email</span>
-            <span class="detail-value">${SanitizationUtils.escapeHtml(proposal.client.email)}</span>
+            <span class="detail-value">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.email))}</span>
           </div>
           ${proposal.client.company ? `
             <div class="detail-item">
               <span class="detail-label">Company</span>
-              <span class="detail-value">${SanitizationUtils.escapeHtml(proposal.client.company)}</span>
+              <span class="detail-value">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.company))}</span>
             </div>
           ` : ''}
         </div>
@@ -450,7 +442,7 @@ function renderProposalDetailsContent(proposal: Proposal): string {
         <div class="details-grid">
           <div class="detail-item">
             <span class="detail-label">Project</span>
-            <span class="detail-value">${SanitizationUtils.escapeHtml(proposal.project.name)}</span>
+            <span class="detail-value">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.project.name))}</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Type</span>
@@ -486,7 +478,7 @@ function renderProposalDetailsContent(proposal: Proposal): string {
             ${includedFeatures.map(f => `
               <li class="feature-item feature-included">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                <span>${SanitizationUtils.escapeHtml(f.featureName)}</span>
+                <span>${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(f.featureName))}</span>
               </li>
             `).join('')}
           </ul>
@@ -500,7 +492,7 @@ function renderProposalDetailsContent(proposal: Proposal): string {
             ${addonFeatures.map(f => `
               <li class="feature-item feature-addon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                <span>${SanitizationUtils.escapeHtml(f.featureName)}</span>
+                <span>${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(f.featureName))}</span>
                 <span class="addon-price">+${formatPrice(f.featurePrice)}</span>
               </li>
             `).join('')}
@@ -531,7 +523,7 @@ function renderProposalDetailsContent(proposal: Proposal): string {
       ${proposal.clientNotes ? `
         <div class="details-section">
           <h4>Client Notes</h4>
-          <div class="notes-content">${SanitizationUtils.escapeHtml(proposal.clientNotes)}</div>
+          <div class="notes-content">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.clientNotes))}</div>
         </div>
       ` : ''}
 
@@ -696,7 +688,8 @@ function formatProjectType(type: string): string {
     'simple-site': 'Simple Site',
     'business-site': 'Business Website',
     'portfolio': 'Portfolio',
-    'ecommerce': 'E-Commerce',
+    'e-commerce': 'E-Commerce',
+    'ecommerce': 'E-Commerce', // Legacy support
     'web-app': 'Web Application',
     'browser-extension': 'Browser Extension',
     'other': 'Custom Project'

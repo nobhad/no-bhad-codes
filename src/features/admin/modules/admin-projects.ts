@@ -163,7 +163,7 @@ interface LeadProject {
   project_type?: string;
   budget_range?: string;
   timeline?: string;
-  status: 'pending' | 'active' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
+  status: 'pending' | 'active' | 'in-progress' | 'on-hold' | 'completed' | 'cancelled';
   description?: string;
   features?: string;
   progress?: number;
@@ -182,7 +182,7 @@ interface ProjectsData {
     total: number;
     active: number;
     completed: number;
-    on_hold: number;
+    'on-hold': number;
   };
 }
 
@@ -303,10 +303,10 @@ function updateProjectsDisplay(data: ProjectsData, ctx: AdminDashboardContext): 
 
   // Calculate stats
   const activeCount = projects.filter(
-    (p) => normalizeStatus(p.status) === 'active' || normalizeStatus(p.status) === 'in_progress'
+    (p) => normalizeStatus(p.status) === 'active' || normalizeStatus(p.status) === 'in-progress'
   ).length;
   const completedCount = projects.filter((p) => normalizeStatus(p.status) === 'completed').length;
-  const onHoldCount = projects.filter((p) => normalizeStatus(p.status) === 'on_hold').length;
+  const onHoldCount = projects.filter((p) => normalizeStatus(p.status) === 'on-hold').length;
 
   // Update stats using batch update
   batchUpdateText({
@@ -358,8 +358,10 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
       const statusLabels: Record<string, string> = {
         pending: 'Pending',
         active: 'Active',
-        in_progress: 'In Progress',
-        on_hold: 'On Hold',
+        'in-progress': 'In Progress',
+        in_progress: 'In Progress', // Legacy support
+        'on-hold': 'On Hold',
+        on_hold: 'On Hold', // Legacy support
         completed: 'Completed',
         cancelled: 'Cancelled'
       };
@@ -943,12 +945,12 @@ function formatProjectType(type: string | undefined): string {
 }
 
 /**
- * Normalize status value to underscore format for CSS class consistency.
- * Database may store hyphens (in-progress) but CSS/JS uses underscores (in_progress).
+ * Normalize status value to hyphen format to match database.
+ * Legacy data may have underscores, convert to hyphens for consistency.
  */
 function normalizeStatus(status: string | undefined): string {
   if (!status) return 'pending';
-  return status.replace(/-/g, '_');
+  return status.replace(/_/g, '-');
 }
 
 // Project Messages

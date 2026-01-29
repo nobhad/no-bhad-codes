@@ -26,6 +26,7 @@ import { APP_CONSTANTS, getChartColor, getChartColorWithAlpha } from '../../conf
 import { configureApiClient, apiFetch, apiPost, apiPut } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 import { createDOMCache } from '../../utils/dom-cache';
+import { formatDate, formatDateTime } from '../../utils/format-utils';
 import { confirmDanger, alertError, alertSuccess, alertInfo } from '../../utils/confirm-dialog';
 import { showToast } from '../../utils/toast-notifications';
 
@@ -631,18 +632,20 @@ class AdminDashboard {
       } else {
         tableBody.innerHTML = data.submissions
           .map((submission: ContactSubmission) => {
-            const date = new Date(submission.created_at).toLocaleDateString();
-            // Sanitize user data to prevent XSS
-            const safeName = SanitizationUtils.escapeHtml(submission.name || '-');
-            const safeEmail = SanitizationUtils.escapeHtml(submission.email || '-');
-            const safeSubject = SanitizationUtils.escapeHtml(submission.subject || '-');
-            const safeMessage = SanitizationUtils.escapeHtml(submission.message || '-');
+            const date = formatDate(submission.created_at);
+            // Decode HTML entities then sanitize to prevent XSS
+            const decodedName = SanitizationUtils.decodeHtmlEntities(submission.name || '-');
+            const decodedMessage = SanitizationUtils.decodeHtmlEntities(submission.message || '-');
+            const safeName = SanitizationUtils.escapeHtml(decodedName);
+            const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.email || '-'));
+            const safeSubject = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.subject || '-'));
+            const safeMessage = SanitizationUtils.escapeHtml(decodedMessage);
             // Truncate message for display (after sanitization)
             const truncateLen = APP_CONSTANTS.TEXT.TRUNCATE_LENGTH;
             const truncatedMessage =
               safeMessage.length > truncateLen ? `${safeMessage.substring(0, truncateLen)}...` : safeMessage;
             // For title attribute, also escape
-            const safeTitleMessage = SanitizationUtils.escapeHtml(submission.message || '');
+            const safeTitleMessage = SanitizationUtils.escapeHtml(decodedMessage);
             return `
             <tr data-contact-id="${submission.id}">
               <td>${date}</td>
@@ -718,17 +721,25 @@ class AdminDashboard {
     try {
       const response = await apiPost(`/api/admin/leads/${leadId}/invite`);
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        await alertSuccess(`Invitation sent to ${email}! They will receive a link to set up their account.`);
-        // Close modal and refresh leads
-        const modal = this.domCache.get('detailModal');
-        if (modal) modal.style.display = 'none';
-        this.loadLeads();
-        this.loadProjects();
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          await alertSuccess(`Invitation sent to ${email}! They will receive a link to set up their account.`);
+          // Close modal and refresh leads
+          const modal = this.domCache.get('detailModal');
+          if (modal) modal.style.display = 'none';
+          this.loadLeads();
+          this.loadProjects();
+        } else {
+          await alertError(data.error || 'Failed to send invitation. Please try again.');
+          if (inviteBtn) {
+            inviteBtn.disabled = false;
+            inviteBtn.textContent = 'Invite to Client Portal';
+          }
+        }
       } else {
-        await alertError(data.error || 'Failed to send invitation. Please try again.');
+        const errorData = await response.json().catch(() => ({}));
+        await alertError(errorData.error || 'Failed to send invitation. Please try again.');
         if (inviteBtn) {
           inviteBtn.disabled = false;
           inviteBtn.textContent = 'Invite to Client Portal';
@@ -756,15 +767,15 @@ class AdminDashboard {
 
     modalTitle.textContent = 'Contact Form Submission';
 
-    const date = new Date(contact.created_at).toLocaleString();
+    const date = formatDateTime(contact.created_at);
     const statusClass = `status-${contact.status || 'new'}`;
 
-    // Sanitize user data to prevent XSS
-    const safeName = SanitizationUtils.escapeHtml(contact.name || '-');
-    const safeEmail = SanitizationUtils.escapeHtml(contact.email || '-');
-    const safeSubject = SanitizationUtils.escapeHtml(contact.subject || '-');
+    // Decode HTML entities then sanitize to prevent XSS
+    const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.name || '-'));
+    const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.email || '-'));
+    const safeSubject = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.subject || '-'));
     const safeStatus = SanitizationUtils.escapeHtml(contact.status || 'new');
-    const safeMessage = SanitizationUtils.escapeHtml(contact.message || '-');
+    const safeMessage = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.message || '-'));
 
     modalBody.innerHTML = `
       <div class="detail-grid">
@@ -797,7 +808,7 @@ class AdminDashboard {
     ? `
         <div class="detail-row">
           <span class="detail-label">Read At</span>
-          <span class="detail-value">${new Date(contact.read_at).toLocaleString()}</span>
+          <span class="detail-value">${formatDateTime(contact.read_at)}</span>
         </div>
         `
     : ''
@@ -807,7 +818,7 @@ class AdminDashboard {
     ? `
         <div class="detail-row">
           <span class="detail-label">Replied At</span>
-          <span class="detail-value">${new Date(contact.replied_at).toLocaleString()}</span>
+          <span class="detail-value">${formatDateTime(contact.replied_at)}</span>
         </div>
         `
     : ''
@@ -880,7 +891,7 @@ class AdminDashboard {
 
     if (sysVersion) sysVersion.textContent = '10.0.0';
     if (sysEnv) sysEnv.textContent = import.meta.env?.MODE || 'development';
-    if (sysBuildDate) sysBuildDate.textContent = new Date().toLocaleDateString();
+    if (sysBuildDate) sysBuildDate.textContent = formatDate(new Date());
     if (sysUserAgent) {
       sysUserAgent.textContent = navigator.userAgent;
       sysUserAgent.title = navigator.userAgent;
@@ -1053,15 +1064,11 @@ class AdminDashboard {
     container.innerHTML = messages
       .map((msg: Message) => {
         const isAdmin = msg.sender_type === 'admin';
-        const time = new Date(msg.created_at).toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-        const date = new Date(msg.created_at).toLocaleDateString();
-        const rawSenderName = isAdmin ? 'You (Admin)' : (msg.sender_name || 'Client');
-        // Sanitize user data to prevent XSS
+        const dateTime = formatDateTime(msg.created_at);
+        const rawSenderName = isAdmin ? 'You (Admin)' : SanitizationUtils.decodeHtmlEntities(msg.sender_name || 'Client');
+        // Decode HTML entities then sanitize to prevent XSS
         const safeSenderName = SanitizationUtils.escapeHtml(rawSenderName);
-        const safeContent = SanitizationUtils.escapeHtml(msg.message || msg.content || '');
+        const safeContent = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(msg.message || msg.content || ''));
         const safeInitials = SanitizationUtils.escapeHtml(rawSenderName.substring(0, 2).toUpperCase());
 
         if (isAdmin) {
@@ -1071,7 +1078,7 @@ class AdminDashboard {
             <div class="message-content">
               <div class="message-header">
                 <span class="message-sender">${safeSenderName}</span>
-                <span class="message-time">${date} at ${time}</span>
+                <span class="message-time">${dateTime}</span>
               </div>
               <div class="message-body">${safeContent}</div>
             </div>
@@ -1090,7 +1097,7 @@ class AdminDashboard {
             <div class="message-content">
               <div class="message-header">
                 <span class="message-sender">${safeSenderName}</span>
-                <span class="message-time">${date} at ${time}</span>
+                <span class="message-time">${dateTime}</span>
               </div>
               <div class="message-body">${safeContent}</div>
             </div>
@@ -1484,7 +1491,8 @@ class AdminDashboard {
       'simple-site': 'Simple Website',
       'business-site': 'Business Website',
       portfolio: 'Portfolio',
-      ecommerce: 'E-Commerce',
+      'e-commerce': 'E-Commerce',
+      ecommerce: 'E-Commerce', // Legacy support
       'web-app': 'Web Application',
       'browser-extension': 'Browser Extension',
       other: 'Other'

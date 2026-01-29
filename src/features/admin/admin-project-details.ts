@@ -581,16 +581,18 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const statusLabels: Record<string, string> = {
       'pending': 'Pending',
       'active': 'Active',
-      'on_hold': 'On Hold',
+      'on-hold': 'On Hold',
+      on_hold: 'On Hold', // Legacy support
       'completed': 'Completed',
       'cancelled': 'Cancelled'
     };
     valueSpan.textContent = statusLabels[status] || status;
 
-    // Update trigger color
-    trigger.classList.remove('status-pending', 'status-active', 'status-on_hold', 'status-completed', 'status-cancelled');
-    if (status) {
-      trigger.classList.add(`status-${status}`);
+    // Update trigger color - normalize to hyphen format for CSS
+    const normalizedStatus = status.replace(/_/g, '-');
+    trigger.classList.remove('status-pending', 'status-active', 'status-on-hold', 'status-completed', 'status-cancelled');
+    if (normalizedStatus) {
+      trigger.classList.add(`status-${normalizedStatus}`);
     }
 
     // Update selected option in menu
