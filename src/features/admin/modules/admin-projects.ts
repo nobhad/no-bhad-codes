@@ -15,7 +15,8 @@ import {
   formatTextWithLineBreaks,
   formatDate,
   formatDateTime,
-  formatCurrency
+  formatCurrency,
+  formatProjectType
 } from '../../../utils/format-utils';
 import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
 import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
@@ -914,35 +915,7 @@ function setupProjectDetailTabs(ctx: AdminDashboardContext): void {
   setupProjectFileUpload();
 }
 
-function formatProjectType(type: string | undefined): string {
-  if (!type) return '';
-
-  // Map known project types to display labels
-  const typeLabels: Record<string, string> = {
-    'simple-site': 'Simple Website',
-    'business-site': 'Business Website',
-    'portfolio': 'Portfolio',
-    'e-commerce': 'E-Commerce',
-    'ecommerce': 'E-Commerce',
-    'web-app': 'Web Application',
-    'browser-extension': 'Browser Extension',
-    'website': 'Website',
-    'mobile-app': 'Mobile App',
-    'branding': 'Branding',
-    'other': 'Other'
-  };
-
-  // Check if we have a known label
-  const label = typeLabels[type.toLowerCase()];
-  if (label) return label;
-
-  // Fallback: replace hyphens/underscores with spaces and capitalize
-  return type
-    .replace(/[-_]/g, ' ')
-    .split(' ')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
+// NOTE: formatProjectType moved to shared format-utils.ts
 
 /**
  * Normalize status value to hyphen format to match database.
