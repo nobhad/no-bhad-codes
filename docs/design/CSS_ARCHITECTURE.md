@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** January 28, 2026
+**Last Updated:** January 29, 2026
 
 ## Table of Contents
 
@@ -1139,7 +1139,7 @@ The client selector uses a custom dropdown component with unread message counts:
 
 ## Known Issues
 
-**Updated January 20, 2026**
+**Updated January 29, 2026**
 
 ### Resolved Issues (December 2025 - January 2026)
 
@@ -1154,6 +1154,32 @@ The following issues from the December 17 code review have been addressed:
 | Font loading issues | FIXED | Created `fonts.css` with `@font-face` definitions (imported first) |
 
 ### Remaining Issues
+
+#### Components Not Using Shared Styles (Medium Priority)
+
+**Audit Date:** January 29, 2026
+
+The following components duplicate shared style patterns instead of using the reusable component classes from `src/styles/shared/`:
+
+| File | Lines | Issue | Shared Component |
+|------|-------|-------|-----------------|
+| `pages/admin.css` | 805-816 | `.stat-card` duplicates shared definition | `shared/portal-cards.css` `.stat-card` |
+| `pages/admin.css` | 1521-1586 | `.set-password-form` defines custom form/button styles | `shared/portal-forms.css`, `shared/portal-buttons.css` |
+
+**`.stat-card` Duplication (lines 805-816):**
+
+The `pages/admin.css` file has an unscoped `.stat-card` definition that duplicates the scoped version in `shared/portal-cards.css`. The shared version already targets `[data-page="admin"], [data-page="client-portal"]` and provides the same styling.
+
+**Recommendation:** Remove the duplicate `.stat-card` from `pages/admin.css` or ensure it only contains admin-specific overrides.
+
+**`.set-password-form` Custom Styles (lines 1521-1586):**
+
+This form defines its own `.form-input`, `.form-group`, and `.btn-primary` styles instead of using the shared portal-forms.css and portal-buttons.css. The custom styles use different values (smaller border-radius, different padding, different color scheme).
+
+**Recommendation:** Either:
+
+1. Update the set-password-form to use shared components with CSS variable overrides, OR
+2. Document this as intentional deviation for the specific use case (unauthenticated password reset page may need different styling)
 
 #### Hardcoded Colors (Low Priority)
 
