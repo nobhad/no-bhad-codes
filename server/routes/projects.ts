@@ -1295,7 +1295,7 @@ router.get(
     };
 
     // === HEADER WITH LOGO ===
-    const logoPath = join(process.cwd(), 'public/images/avatar_small-1.png');
+    const logoPath = join(process.cwd(), 'public/images/avatar_pdf.png');
     if (existsSync(logoPath)) {
       doc.image(logoPath, (doc.page.width - 60) / 2, 30, { width: 60 });
       doc.moveDown(4);

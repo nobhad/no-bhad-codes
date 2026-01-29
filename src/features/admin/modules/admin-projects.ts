@@ -9,7 +9,14 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { formatFileSize, formatDisplayValue, formatTextWithLineBreaks } from '../../../utils/format-utils';
+import {
+  formatFileSize,
+  formatDisplayValue,
+  formatTextWithLineBreaks,
+  formatDate,
+  formatDateTime,
+  formatCurrency
+} from '../../../utils/format-utils';
 import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
 import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
 import { showToast } from '../../../utils/toast-notifications';
@@ -27,6 +34,7 @@ import { showTableLoading } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
 import { createDOMCache, batchUpdateText } from '../../../utils/dom-cache';
 import { alertWarning, multiPromptDialog } from '../../../utils/confirm-dialog';
+import { manageFocusTrap } from '../../../utils/focus-trap';
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -184,36 +192,6 @@ let storedContext: AdminDashboardContext | null = null;
 let filterState: FilterState = loadFilterState(PROJECTS_FILTER_CONFIG.storageKey);
 let filterUIInitialized = false;
 
-/**
- * Format date string for display (YYYY-MM-DD -> MM/DD/YYYY)
- */
-function formatDate(dateStr: string | undefined | null): string {
-  if (!dateStr) return '-';
-
-  // Parse date string without timezone issues
-  // Handle ISO date strings (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss)
-  const datePart = dateStr.split('T')[0];
-  const parts = datePart.split('-');
-
-  if (parts.length === 3) {
-    const year = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10);
-    const day = parseInt(parts[2], 10);
-
-    if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-      return `${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`;
-    }
-  }
-
-  // Fallback: try standard parsing (may have timezone issues)
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return '-';
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${month}/${day}/${year}`;
-}
-
 export function getProjectsData(): LeadProject[] {
   return projectsData;
 }
@@ -358,7 +336,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
   const filteredProjects = applyFilters(projects, filterState, PROJECTS_FILTER_CONFIG);
 
   if (filteredProjects.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">No projects match the current filters</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">No projects match the current filters. Try adjusting your filters.</td></tr>';
     return;
   }
 
@@ -477,29 +455,28 @@ function populateProjectDetailView(project: LeadProject): void {
     'pd-company': SanitizationUtils.decodeHtmlEntities(project.company_name || ''),
     'pd-type': formatProjectType(project.project_type),
     'pd-budget': formatDisplayValue(project.budget_range),
-    'pd-price': projectData.price ? `$${Number(projectData.price).toLocaleString()}` : '',
+    'pd-price': projectData.price ? formatCurrency(Number(projectData.price)) : '',
     'pd-timeline': formatDisplayValue(project.timeline),
-    'pd-start-date': formatDateForDisplay(projectData.start_date) || formatDateForDisplay(project.created_at),
-    'pd-end-date': formatDateForDisplay(projectData.end_date),
-    'pd-deposit': projectData.deposit_amount ? `$${Number(projectData.deposit_amount).toLocaleString()}` : '',
-    'pd-contract-date': formatDateForDisplay(projectData.contract_signed_date)
+    'pd-start-date': formatDate(projectData.start_date || project.created_at),
+    'pd-end-date': formatDate(projectData.end_date),
+    'pd-deposit': projectData.deposit_amount ? formatCurrency(Number(projectData.deposit_amount)) : '',
+    'pd-contract-date': formatDate(projectData.contract_signed_date)
   });
 
   // Update URL links (preview, repo, production)
   const updateUrlLink = (linkId: string, url: string | null): void => {
     const link = document.getElementById(linkId) as HTMLAnchorElement;
-    if (link) {
-      // Decode HTML entities in URL (e.g., &#x2F; -> /)
-      const decodedUrl = url ? SanitizationUtils.decodeHtmlEntities(url) : null;
-      if (decodedUrl) {
-        link.href = decodedUrl;
-        link.textContent = decodedUrl;
-        link.onclick = null;
-      } else {
-        link.href = '#';
-        link.textContent = '';
-        link.onclick = (e) => e.preventDefault();
-      }
+    if (!link) return;
+    const textEl = link.querySelector<HTMLElement>('.url-link-text');
+    const decodedUrl = url ? SanitizationUtils.decodeHtmlEntities(url) : null;
+    if (decodedUrl) {
+      link.href = decodedUrl;
+      link.onclick = null;
+      if (textEl) textEl.textContent = decodedUrl;
+    } else {
+      link.href = '#';
+      link.onclick = (e) => e.preventDefault();
+      if (textEl) textEl.textContent = '';
     }
   };
 
@@ -655,6 +632,21 @@ function setupEditProjectButton(project: LeadProject): void {
 // Store current project ID for form submission
 let editingProjectId: number | null = null;
 
+/** Cleanup for edit modal focus trap */
+let editModalFocusCleanup: (() => void) | null = null;
+
+function closeEditProjectModal(): void {
+  const modal = domCache.get('editModal');
+  if (!modal) return;
+  editModalFocusCleanup?.();
+  editModalFocusCleanup = null;
+  modal.removeAttribute('aria-labelledby');
+  modal.removeAttribute('role');
+  modal.removeAttribute('aria-modal');
+  modal.classList.add('hidden');
+  document.body.classList.remove('modal-open');
+}
+
 /**
  * Open the edit project modal with current project data
  */
@@ -708,6 +700,14 @@ function openEditProjectModal(project: LeadProject): void {
 
   // Setup close handlers (only once per modal lifecycle)
   setupEditProjectModalHandlers(modal);
+
+  // Focus trap and ARIA
+  editModalFocusCleanup?.();
+  modal.setAttribute('aria-labelledby', 'edit-project-modal-title');
+  editModalFocusCleanup = manageFocusTrap(modal, {
+    initialFocus: '#edit-project-name',
+    onClose: closeEditProjectModal
+  });
 }
 
 /**
@@ -758,15 +758,10 @@ function setupEditProjectModalHandlers(modal: HTMLElement): void {
   const cancelBtn = domCache.get('editCancel');
   const form = domCache.getAs<HTMLFormElement>('editForm');
 
-  const closeModal = () => {
-    modal.classList.add('hidden');
-    document.body.classList.remove('modal-open');
-  };
-
-  closeBtn?.addEventListener('click', closeModal);
-  cancelBtn?.addEventListener('click', closeModal);
+  closeBtn?.addEventListener('click', closeEditProjectModal);
+  cancelBtn?.addEventListener('click', closeEditProjectModal);
   modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
+    if (e.target === modal) closeEditProjectModal();
   });
 
   // Handle form submit
@@ -775,7 +770,7 @@ function setupEditProjectModalHandlers(modal: HTMLElement): void {
       e.preventDefault();
       if (editingProjectId !== null) {
         await saveProjectChanges(editingProjectId);
-        closeModal();
+        closeEditProjectModal();
       }
     });
   }
@@ -827,9 +822,13 @@ async function saveProjectChanges(projectId: number): Promise<void> {
 
   try {
     const response = await apiPut(`/api/projects/${projectId}`, updates);
+    if (!response.ok) {
+      storedContext.showNotification('Failed to update project. Please try again.', 'error');
+      return;
+    }
     const result = await response.json();
 
-    if (response.ok && result.project) {
+    if (result.project) {
       storedContext.showNotification('Project updated successfully', 'success');
       // Update local project data with response (no need to reload all projects)
       const projectIndex = projectsData.findIndex((p) => p.id === projectId);
@@ -847,11 +846,11 @@ async function saveProjectChanges(projectId: number): Promise<void> {
         populateProjectDetailView(projectsData[projectIndex]);
       }
     } else {
-      storedContext.showNotification(result.message || 'Failed to update project', 'error');
+      storedContext.showNotification('Failed to update project. Please try again.', 'error');
     }
   } catch (error) {
     console.error('[AdminProjects] Error saving project:', error);
-    storedContext.showNotification('Failed to update project', 'error');
+    storedContext.showNotification('Failed to update project. Please try again.', 'error');
   }
 }
 
@@ -952,35 +951,6 @@ function normalizeStatus(status: string | undefined): string {
   return status.replace(/-/g, '_');
 }
 
-/**
- * Format a date string for display without timezone issues.
- * Handles YYYY-MM-DD format by parsing components directly to avoid UTC conversion.
- * Returns empty string for missing/invalid dates.
- */
-function formatDateForDisplay(dateStr: string | undefined | null): string {
-  if (!dateStr) return '';
-
-  // Handle ISO date strings (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss)
-  const datePart = dateStr.split('T')[0];
-  const parts = datePart.split('-');
-
-  if (parts.length === 3) {
-    const year = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10);
-    const day = parseInt(parts[2], 10);
-
-    if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-      // Create date using local timezone (month is 0-indexed)
-      const date = new Date(year, month - 1, day);
-      return date.toLocaleDateString();
-    }
-  }
-
-  // Fallback: try standard parsing
-  const date = new Date(dateStr);
-  return isNaN(date.getTime()) ? '' : date.toLocaleDateString();
-}
-
 // Project Messages
 export async function loadProjectMessages(
   projectId: number,
@@ -1014,7 +984,7 @@ function renderProjectMessages(messages: Message[], container: HTMLElement): voi
     .map((msg) => {
       const safeSender = SanitizationUtils.escapeHtml(msg.sender_name || 'Unknown');
       const safeMessage = SanitizationUtils.escapeHtml(msg.message || '');
-      const time = new Date(msg.created_at).toLocaleString();
+      const time = formatDateTime(msg.created_at);
       const isAdmin = msg.sender_type === 'admin';
 
       return `
@@ -1046,7 +1016,7 @@ export async function loadProjectFiles(
       const data = await response.json();
       renderProjectFiles(data.files || [], container);
     } else {
-      container.innerHTML = '<p class="empty-state">No files uploaded yet.</p>';
+      container.innerHTML = '<p class="empty-state">No files yet. Upload files in the Files tab.</p>';
     }
   } catch (error) {
     console.error('[AdminProjects] Failed to load files:', error);
@@ -1056,7 +1026,7 @@ export async function loadProjectFiles(
 
 function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void {
   if (files.length === 0) {
-    container.innerHTML = '<p class="empty-state">No files uploaded yet.</p>';
+    container.innerHTML = '<p class="empty-state">No files yet. Upload files in the Files tab.</p>';
     return;
   }
 
@@ -1077,7 +1047,7 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
       // Use file_size or size (API returns both for compatibility)
       const fileSize = file.file_size || file.size || 0;
       const size = formatFileSize(fileSize);
-      const date = new Date(file.created_at).toLocaleDateString();
+      const date = formatDate(file.created_at);
       // Use API endpoint for file access (authenticated)
       const fileApiUrl = `/api/uploads/file/${file.id}`;
       const downloadUrl = `${fileApiUrl}?download=true`;
@@ -1090,8 +1060,8 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
                 <td>${size}</td>
                 <td>${date}</td>
                 <td class="file-actions">
-                  ${isPreviewable ? `<button class="action-btn preview-btn" data-file-id="${file.id}" data-file-url="${fileApiUrl}" data-file-name="${safeName}" aria-label="Preview ${safeName}">Preview</button>` : ''}
-                  <button class="action-btn download-btn" data-file-url="${downloadUrl}" data-file-name="${safeName}" aria-label="Download ${safeName}">Download</button>
+                  ${isPreviewable ? `<button class="btn btn-outline btn-sm btn-preview" data-file-id="${file.id}" data-file-url="${fileApiUrl}" data-file-name="${safeName}" aria-label="Preview ${safeName}">Preview</button>` : ''}
+                  <button class="btn btn-outline btn-sm btn-download" data-file-url="${downloadUrl}" data-file-name="${safeName}" aria-label="Download ${safeName}">Download</button>
                 </td>
               </tr>
             `;
@@ -1102,7 +1072,7 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
   `;
 
   // Add click handlers for preview buttons
-  container.querySelectorAll('.preview-btn').forEach((btn) => {
+  container.querySelectorAll('.btn-preview').forEach((btn) => {
     btn.addEventListener('click', () => {
       const fileUrl = (btn as HTMLElement).dataset.fileUrl;
       const fileName = (btn as HTMLElement).dataset.fileName;
@@ -1113,7 +1083,7 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
   });
 
   // Add click handlers for download buttons
-  container.querySelectorAll('.download-btn').forEach((btn) => {
+  container.querySelectorAll('.btn-download').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const fileUrl = (btn as HTMLElement).dataset.fileUrl;
       const fileName = (btn as HTMLElement).dataset.fileName;
@@ -1303,8 +1273,8 @@ function showImagePreviewModal(imageUrl: string, fileName: string): void {
         <h3>${SanitizationUtils.escapeHtml(fileName)}</h3>
         <button class="admin-modal-close" id="preview-modal-close" aria-label="Close modal">&times;</button>
       </div>
-      <div class="admin-modal-body" style="max-height: 70vh; overflow: auto; display: flex; justify-content: center; align-items: center;">
-        <img src="${imageUrl}" alt="${SanitizationUtils.escapeHtml(fileName)}" style="max-width: 100%; max-height: 65vh; object-fit: contain;" />
+      <div class="admin-modal-body file-preview-modal-body">
+        <img class="file-preview-image" src="${imageUrl}" alt="${SanitizationUtils.escapeHtml(fileName)}" />
       </div>
       <div class="admin-modal-footer">
         <button class="btn btn-secondary" id="preview-modal-close-btn">Close</button>
@@ -1346,7 +1316,7 @@ export async function loadProjectMilestones(
       const data = await response.json();
       renderProjectMilestones(data.milestones || [], container, ctx);
     } else {
-      container.innerHTML = '<p class="empty-state">No milestones yet.</p>';
+      container.innerHTML = '<p class="empty-state">No milestones yet. Add one to track progress.</p>';
     }
   } catch (error) {
     console.error('[AdminProjects] Failed to load milestones:', error);
@@ -1360,7 +1330,7 @@ function renderProjectMilestones(
   ctx: AdminDashboardContext
 ): void {
   if (milestones.length === 0) {
-    container.innerHTML = '<p class="empty-state">No milestones defined yet.</p>';
+    container.innerHTML = '<p class="empty-state">No milestones yet. Add one to track progress.</p>';
     return;
   }
 
@@ -1368,7 +1338,7 @@ function renderProjectMilestones(
     .map((milestone) => {
       const safeTitle = SanitizationUtils.escapeHtml(milestone.title);
       const safeDesc = SanitizationUtils.escapeHtml(milestone.description || '');
-      const dueDate = new Date(milestone.due_date).toLocaleDateString();
+      const dueDate = formatDate(milestone.due_date);
 
       return `
         <div class="milestone-item ${milestone.is_completed ? 'completed' : ''}">
@@ -1462,7 +1432,7 @@ export async function loadProjectInvoices(
       const data = await response.json();
       renderProjectInvoices(data.invoices || [], container);
     } else {
-      container.innerHTML = '<p class="empty-state">No invoices yet.</p>';
+      container.innerHTML = '<p class="empty-state">No invoices yet. Create one in the Invoices tab.</p>';
     }
   } catch (error) {
     console.error('[AdminProjects] Failed to load invoices:', error);
@@ -1472,7 +1442,7 @@ export async function loadProjectInvoices(
 
 function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElement): void {
   if (invoices.length === 0) {
-    container.innerHTML = '<p class="empty-state">No invoices created yet.</p>';
+    container.innerHTML = '<p class="empty-state">No invoices yet. Create one in the Invoices tab.</p>';
     return;
   }
 
@@ -1493,7 +1463,7 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
         style: 'currency',
         currency: 'USD'
       }).format(invoice.amount_total);
-      const dueDate = new Date(invoice.due_date).toLocaleDateString();
+      const dueDate = formatDate(invoice.due_date);
       const statusClass = `status-${invoice.status}`;
 
       return `
@@ -1616,12 +1586,11 @@ async function createInvoice(
       storedContext.showNotification('Invoice created successfully!', 'success');
       loadProjectInvoices(currentProjectId, storedContext);
     } else {
-      const error = await response.json();
-      storedContext.showNotification(`Failed to create invoice: ${error.message || 'Unknown error'}`, 'error');
+      storedContext.showNotification('Failed to create invoice. Please try again.', 'error');
     }
   } catch (error) {
     console.error('[AdminProjects] Error creating invoice:', error);
-    storedContext.showNotification('Error creating invoice', 'error');
+    storedContext.showNotification('Failed to create invoice. Please try again.', 'error');
   }
 }
 
@@ -1841,7 +1810,7 @@ async function uploadProjectFiles(files: File[]): Promise<void> {
     }
   } catch (error) {
     console.error('[AdminProjects] Upload error:', error);
-    storedContext.showNotification(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+    storedContext.showNotification('Upload failed. Please try again.', 'error');
   }
 }
 
@@ -1895,24 +1864,32 @@ async function addProject(ctx: AdminDashboardContext): Promise<void> {
   modal.classList.remove('hidden');
   document.body.classList.add('modal-open');
 
-  // Close handlers
+  let addProjectFocusCleanup: (() => void) | null = null;
   const closeModal = () => {
+    addProjectFocusCleanup?.();
+    addProjectFocusCleanup = null;
+    modal.removeAttribute('aria-labelledby');
+    modal.removeAttribute('role');
+    modal.removeAttribute('aria-modal');
     modal.classList.add('hidden');
     document.body.classList.remove('modal-open');
     form.reset();
-    // Reset dropdown values
     resetAddProjectDropdowns();
   };
+
+  modal.setAttribute('aria-labelledby', 'add-project-modal-title');
+  addProjectFocusCleanup = manageFocusTrap(modal, {
+    initialFocus: '#new-project-client',
+    onClose: closeModal
+  });
 
   closeBtn?.addEventListener('click', closeModal, { once: true });
   cancelBtn?.addEventListener('click', closeModal, { once: true });
 
-  // Click outside to close
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
   }, { once: true });
 
-  // Form submit handler
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
     await handleAddProjectSubmit(ctx, closeModal);
@@ -2122,11 +2099,10 @@ async function handleAddProjectSubmit(
         showProjectDetails(result.projectId, ctx);
       }
     } else {
-      const error = await response.json();
-      ctx.showNotification(error.error || 'Failed to create project', 'error');
+      ctx.showNotification('Failed to create project. Please try again.', 'error');
     }
   } catch (error) {
     console.error('[AdminProjects] Error creating project:', error);
-    ctx.showNotification('Error creating project', 'error');
+    ctx.showNotification('Failed to create project. Please try again.', 'error');
   }
 }
