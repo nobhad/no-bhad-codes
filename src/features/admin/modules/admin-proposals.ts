@@ -10,7 +10,7 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { formatDate } from '../../../utils/format-utils';
+import { formatDate, formatProjectType } from '../../../utils/format-utils';
 import { apiFetch, apiPut, apiPost } from '../../../utils/api-client';
 import { createTableDropdown } from '../../../utils/table-dropdown';
 import type { AdminDashboardContext } from '../admin-types';
@@ -683,19 +683,7 @@ function formatPrice(amount: number): string {
   }).format(amount);
 }
 
-function formatProjectType(type: string): string {
-  const typeLabels: Record<string, string> = {
-    'simple-site': 'Simple Site',
-    'business-site': 'Business Website',
-    'portfolio': 'Portfolio',
-    'e-commerce': 'E-Commerce',
-    'ecommerce': 'E-Commerce', // Legacy support
-    'web-app': 'Web Application',
-    'browser-extension': 'Browser Extension',
-    'other': 'Custom Project'
-  };
-  return typeLabels[type] || type;
-}
+// NOTE: formatProjectType moved to shared format-utils.ts
 
 function formatMaintenanceOption(option: string | null): string {
   if (!option) return 'None';

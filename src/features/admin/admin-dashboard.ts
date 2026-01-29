@@ -26,7 +26,7 @@ import { APP_CONSTANTS, getChartColor, getChartColorWithAlpha } from '../../conf
 import { configureApiClient, apiFetch, apiPost, apiPut } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 import { createDOMCache } from '../../utils/dom-cache';
-import { formatDate, formatDateTime } from '../../utils/format-utils';
+import { formatDate, formatDateTime, formatProjectType } from '../../utils/format-utils';
 import { confirmDanger, alertError, alertSuccess, alertInfo } from '../../utils/confirm-dialog';
 import { showToast } from '../../utils/toast-notifications';
 
@@ -875,7 +875,7 @@ class AdminDashboard {
       this.projectsData,
       (tab) => this.switchTab(tab),
       () => this.loadProjects(),
-      (type) => this.formatProjectType(type),
+      formatProjectType,
       (leadId, email) => this.inviteLead(leadId, email)
     );
   }
@@ -1485,20 +1485,7 @@ class AdminDashboard {
   // have been moved to admin-analytics module for code splitting
 
   // NOTE: loadVisitorsData, loadLeadsData, and populateLeadsTable moved to respective modules
-
-  private formatProjectType(type: string): string {
-    const typeMap: Record<string, string> = {
-      'simple-site': 'Simple Website',
-      'business-site': 'Business Website',
-      portfolio: 'Portfolio',
-      'e-commerce': 'E-Commerce',
-      ecommerce: 'E-Commerce', // Legacy support
-      'web-app': 'Web Application',
-      'browser-extension': 'Browser Extension',
-      other: 'Other'
-    };
-    return typeMap[type] || type || '-';
-  }
+  // NOTE: formatProjectType moved to shared format-utils.ts
 
   private async loadSystemData(): Promise<void> {
     // Delegate to system status module for real health checks

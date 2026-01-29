@@ -115,6 +115,39 @@ export function formatTextWithLineBreaks(text: string | undefined | null): strin
 }
 
 // ============================================
+// PROJECT TYPE FORMATTING
+// ============================================
+
+/**
+ * Project type display labels - single source of truth
+ * Keys match the values stored in database and used in intake/validation
+ */
+export const PROJECT_TYPE_LABELS: Record<string, string> = {
+  'simple-site': 'Simple Website',
+  'business-site': 'Business Website',
+  'portfolio': 'Portfolio',
+  'e-commerce': 'E-Commerce',
+  'ecommerce': 'E-Commerce', // Legacy support
+  'web-app': 'Web Application',
+  'browser-extension': 'Browser Extension',
+  'website': 'Website',
+  'mobile-app': 'Mobile App',
+  'branding': 'Branding',
+  'other': 'Other'
+};
+
+/**
+ * Format project type for display
+ * Uses consistent labels across admin and client portals
+ * @param type - Project type value from database
+ * @returns Formatted display label
+ */
+export function formatProjectType(type: string | undefined | null): string {
+  if (!type) return '';
+  return PROJECT_TYPE_LABELS[type] || type;
+}
+
+// ============================================
 // DATE FORMATTING
 // ============================================
 

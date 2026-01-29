@@ -294,37 +294,42 @@ Updated `src/features/admin/modules/admin-projects.ts`:
 
 **Fix Applied:** Updated all format functions in `format-utils.ts` to return empty string instead of `-`.
 
-- [ ] #### Project Type - Inconsistent Throughout Codebase
+- [x] #### Project Type - Inconsistent Throughout Codebase
 
-**Status:** TODO
+**Status:** FIXED
 **Observed:** January 28, 2026
+**Fixed:** January 29, 2026
 
-Project type is not consistent throughout the codebase (different labels, values, or sources in different places).
+Created single source of truth for project type display labels in `src/utils/format-utils.ts`.
 
-**Expected behavior:**
+**Fix Applied:**
 
-- Single source of truth for project types (e.g. enum, config, or shared constant).
-- Same labels and values in: intake, proposal builder, admin project details, admin edit, client portal, APIs.
+1. Added `PROJECT_TYPE_LABELS` constant and `formatProjectType()` function to `format-utils.ts`
+2. Removed duplicate local `formatProjectType` functions from:
+   - `src/features/admin/admin-dashboard.ts`
+   - `src/features/admin/modules/admin-projects.ts`
+   - `src/features/admin/modules/admin-proposals.ts`
+3. All modules now import and use the shared function
 
-**Files to investigate:**
+**Standardized Labels:**
 
-- Intake and proposal builder type lists.
-- Admin project create/edit and project details.
-- Client portal project display.
-- `server/` routes and DB schema for project_type.
+```typescript
+export const PROJECT_TYPE_LABELS: Record<string, string> = {
+  'simple-site': 'Simple Website',
+  'business-site': 'Business Website',
+  'portfolio': 'Portfolio',
+  'e-commerce': 'E-Commerce',
+  'ecommerce': 'E-Commerce', // Legacy support
+  'web-app': 'Web Application',
+  'browser-extension': 'Browser Extension',
+  'website': 'Website',
+  'mobile-app': 'Mobile App',
+  'branding': 'Branding',
+  'other': 'Other'
+};
+```
 
-**Deep Dive Investigation (January 28, 2026):**
-
-- **Intake Form Types:** `server/middleware/validation.ts` lines 693-701 shows: `'simple-site', 'business-site', 'portfolio', 'e-commerce', 'web-app', 'browser-extension', 'other'`
-- **Proposal Builder Types:** `src/features/client/proposal-builder-data.ts` uses `ProjectType` from types - need to check definition
-- **Admin Display:** `admin-dashboard.ts` lines 1482-1492 has type mapping: `'simple-site': 'Simple Website', 'business-site': 'Business Website', 'portfolio': 'Portfolio', 'ecommerce': 'E-commerce', 'web-app': 'Web Application', 'browser-extension': 'Browser Extension', 'other': 'Other'`
-- **Inconsistency Found:** Intake uses `'e-commerce'` (with hyphen) but admin mapping uses `'ecommerce'` (no hyphen)
-- **Home Page Form:** `templates/pages/home.ejs` lines 70-76 shows different labels: "Simple Site", "Small Business Website", "Portfolio Website", "E-commerce Store", "Web Application", "Browser Extension", "Other"
-- **Root Cause:** Multiple sources of truth:
-  1. Intake validation uses kebab-case values
-  2. Admin display uses different mapping
-  3. Home page form uses different labels
-  4. Need single source of truth (shared constant/enum) for both values and labels
+**Note:** Home page form uses display-style labels intentionally (it's a Netlify form, not the intake form) and does not need to match this mapping.
 
 - [x] #### Client Budget - Missing Hyphen
 
