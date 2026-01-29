@@ -2824,4 +2824,79 @@ body.modal-open .dashboard-content {
     display: block;
     margin: 0;
   }
+
+  /* ================================================
+     MOBILE TABLE RESPONSIVENESS
+     Hide less critical columns on small screens
+     ================================================ */
+
+  /* Leads table: hide Company (3rd) and Email (4th) columns */
+  .leads-table th:nth-child(3),
+  .leads-table td:nth-child(3),
+  .leads-table th:nth-child(4),
+  .leads-table td:nth-child(4) {
+    display: none;
+  }
+
+  /* Projects table: hide Type (3rd), Timeline (5th), Start Date (6th), End Date (7th) */
+  .projects-table th:nth-child(3),
+  .projects-table td:nth-child(3),
+  .projects-table th:nth-child(5),
+  .projects-table td:nth-child(5),
+  .projects-table th:nth-child(6),
+  .projects-table td:nth-child(6),
+  .projects-table th:nth-child(7),
+  .projects-table td:nth-child(7) {
+    display: none;
+  }
+
+  /* Contacts table: hide Company (4th) column */
+  .contacts-table th:nth-child(4),
+  .contacts-table td:nth-child(4) {
+    display: none;
+  }
+
+  /* Clients table: hide Email (3rd) and Created (6th) columns */
+  .clients-table th:nth-child(3),
+  .clients-table td:nth-child(3),
+  .clients-table th:nth-child(6),
+  .clients-table td:nth-child(6) {
+    display: none;
+  }
+
+  /* Reduce minimum table width on mobile for better fit */
+  .admin-table {
+    min-width: 400px;
+  }
+
+  /* Tighter cell padding on mobile */
+  .admin-table th,
+  .admin-table td {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-sm);
+  }
+
+  /* Ensure horizontal scroll indicator */
+  .admin-table-container {
+    position: relative;
+  }
+
+  .admin-table-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(to left, var(--portal-bg-dark), transparent);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  /* Show scroll indicator when table is scrollable */
+  .admin-table-container:has(.admin-table) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
