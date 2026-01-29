@@ -814,10 +814,11 @@ Added `{ once: true }` to modal overlay click listeners in preview modals to pre
 
 - [ ] #### Global Event Listeners - Added Without Teardown (Admin + Client Portal)
 
-**Status:** TODO
+**Status:** DEFERRED - Low Impact
 **Observed:** January 28, 2026
+**Deferred:** January 29, 2026
 
-There are document/window-level event listeners that are added during module init and never removed, which can leak handlers across navigation/module re-inits (especially in SPA-ish flows or hot reload).
+**Reason for Deferral:** This issue is mostly theoretical for the current architecture. The app is not a true SPA - handlers are added once during module initialization and persist for the app lifetime. There's no hot-reload or navigation-based re-initialization that would cause handler accumulation. The risk of actual memory leaks or duplicate handlers is minimal.
 
 **Locations Found:**
 
@@ -825,29 +826,22 @@ There are document/window-level event listeners that are added during module ini
 - `src/features/client/client-portal.ts` (`setupDashboardEventListeners()` adds listeners without teardown)
 - `src/components/button-component.ts` (window-level keyup handler lifecycle edge case)
 
-**Expected behavior:**
-
-- Track handler references and remove them during module/component teardown (or ensure modules initialize exactly once for the app lifetime).
-
-**Root Cause:** Missing teardown pattern for global listeners.
+**If Revisited:** Track handler references and remove them during module/component teardown.
 
 - [ ] #### Request Cancellation - No AbortController (Race Conditions / Stale UI)
 
-**Status:** TODO
+**Status:** DEFERRED - High Complexity
 **Observed:** January 28, 2026
+**Deferred:** January 29, 2026
 
-Several modules fire multiple concurrent loads (projects/leads/contacts, per-project milestone fetches, etc.) without cancellation. This can lead to stale UI (late responses overwriting newer state) and wasted work.
+**Reason for Deferral:** Implementing AbortController properly requires careful refactoring across multiple modules. Incorrect implementation could introduce new bugs (cancelled requests that shouldn't be, stale controller references, cleanup issues). The current behavior, while not optimal, is stable. Race conditions are rare in practice since users don't typically trigger rapid repeated loads.
 
 **Locations Found:**
 
 - `src/features/admin/admin-dashboard.ts` (multiple parallel loads on init; repeated refresh triggers)
 - `src/features/client/client-portal.ts` (`loadRealUserProjects()` and per-project milestone fetches)
 
-**Expected behavior:**
-
-- Use `AbortController` to cancel in-flight fetches when a newer request supersedes them, or ignore stale responses via request IDs.
-
-**Root Cause:** No cancellation/guarding against stale responses.
+**If Revisited:** Use `AbortController` to cancel in-flight fetches when a newer request supersedes them, or ignore stale responses via request IDs. Requires thorough testing.
 
 - [x] #### Form Validation - No Debounce (Excess Work on Keystroke)
 
@@ -1267,10 +1261,11 @@ Toast notification system exists (`src/utils/toast-notifications.ts`) with prope
 
 - [ ] #### Form Inputs - Missing Placeholder Text or Help Text
 
-**Status:** TODO
+**Status:** DEFERRED - Low Priority
 **Observed:** January 28, 2026
+**Deferred:** January 29, 2026
 
-Some form inputs may be missing placeholder text or help text, making it unclear what users should enter.
+**Reason for Deferral:** This is a UX polish task rather than a functional issue. Forms work correctly; placeholders would improve discoverability but are not blocking any functionality. Can be addressed during a dedicated UX polish pass.
 
 **Locations Found:**
 
@@ -1278,20 +1273,7 @@ Some form inputs may be missing placeholder text or help text, making it unclear
 - Client portal forms: Some inputs may lack helpful placeholders
 - Terminal intake: Has placeholders (good)
 
-**Issues:**
-
-- Users may not understand what to enter
-- No formatting hints (e.g., date format)
-- No examples or guidance
-
-**Expected behavior:**
-
-- All inputs should have descriptive placeholders
-- Format hints where needed (e.g., "YYYY-MM-DD")
-- Help text for complex fields
-- Examples for unclear inputs
-
-**Root Cause:** Incomplete form design. Should audit all forms and add helpful placeholders and guidance.
+**If Revisited:** Audit all forms and add descriptive placeholders, format hints (e.g., "YYYY-MM-DD"), and help text for complex fields.
 
 ---
 ---
