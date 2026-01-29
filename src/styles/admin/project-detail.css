@@ -1475,11 +1475,9 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   font-weight: var(--font-weight-medium);
 }
 
+/* Status badge in status-item context - smaller padding, uppercase */
 .status-item .status-badge {
   padding: var(--space-1) var(--space-2);
-  border-radius: var(--border-radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
   text-transform: uppercase;
 }
 
@@ -1488,49 +1486,24 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   font-size: var(--font-size-sm);
 }
 
+/* Status item icons - color matches badge */
 .status-item.status-healthy .status-icon {
   color: var(--color-success);
-}
-
-.status-item.status-healthy .status-badge,
-.status-badge.status-healthy {
-  background: var(--color-success);
-  border: 1px solid var(--portal-border-dark);
-  color: var(--color-black);
 }
 
 .status-item.status-warning .status-icon {
   color: var(--color-warning);
 }
 
-.status-item.status-warning .status-badge,
-.status-badge.status-warning {
-  background: var(--color-warning);
-  border: 1px solid var(--portal-border-dark);
-  color: var(--color-black);
-}
-
 .status-item.status-error .status-icon {
   color: var(--color-danger);
-}
-
-.status-item.status-error .status-badge,
-.status-badge.status-error {
-  background: var(--color-danger);
-  border: 1px solid var(--portal-border-dark);
-  color: var(--color-black);
 }
 
 .status-item.status-unknown .status-icon {
   color: var(--color-danger);
 }
 
-.status-item.status-unknown .status-badge,
-.status-badge.status-unknown {
-  background: var(--color-danger);
-  border: 1px solid var(--portal-border-dark);
-  color: var(--color-black);
-}
+/* Base .status-badge.status-* colors are in shared/portal-badges.css */
 
 .no-status {
   color: var(--color-text-secondary);
