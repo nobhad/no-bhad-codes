@@ -596,9 +596,9 @@ export function validateRequest(
         }
       }
 
-      // Check for validation errors (including unknown field errors)
+      // Check for validation errors (including unknown field errors, unless stripping them)
       const allErrors = [
-        ...unknownFieldErrors,
+        ...(stripUnknownFields ? [] : unknownFieldErrors),
         ...validationResults.flatMap((result) => result.errors)
       ];
 
