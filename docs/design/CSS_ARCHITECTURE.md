@@ -1158,40 +1158,32 @@ The following issues from the December 17 code review have been addressed:
 #### Components Not Using Shared Styles (Medium Priority)
 
 **Audit Date:** January 29, 2026
+**Resolved:** January 29, 2026
 
-The following components duplicate shared style patterns instead of using the reusable component classes from `src/styles/shared/`:
+**RESOLVED ISSUES:**
 
-| File | Lines | Issue | Shared Component |
-|------|-------|-------|-----------------|
-| `pages/admin.css` | 805-816 | `.stat-card` duplicates shared definition | `shared/portal-cards.css` `.stat-card` |
-| `pages/admin.css` | 293-319, 1419-1438 | `.icon-btn` defined twice in same file | Internal duplication |
-| `pages/admin.css` | 1521-1586 | `.set-password-form` defines custom form/button styles | `shared/portal-forms.css`, `shared/portal-buttons.css` |
+| Issue | Resolution |
+|-------|------------|
+| `.stat-card` duplicate in `pages/admin.css` | FIXED - Removed duplicate, now uses `shared/portal-cards.css` |
+| `.icon-btn` defined twice in `pages/admin.css` | FIXED - Removed unscoped version at lines 1419-1438 |
+| `.status-badge` duplicates across files | FIXED - Created `shared/portal-badges.css` with consolidated badge styles |
 
-**`.stat-card` Duplication (lines 805-816):**
+**NEW SHARED COMPONENT: `shared/portal-badges.css`**
 
-The `pages/admin.css` file has an unscoped `.stat-card` definition that duplicates the scoped version in `shared/portal-cards.css`. The shared version already targets `[data-page="admin"], [data-page="client-portal"]` and provides the same styling.
+Created a shared badge component with:
 
-**Recommendation:** Remove the duplicate `.stat-card` from `pages/admin.css` or ensure it only contains admin-specific overrides.
+- Base `.status-badge` pill-shaped styling
+- Standardized status colors (pending, active, completed, cancelled, etc.)
+- System status badges (healthy, warning, error, unknown)
+- Imported in both `admin/index.css` and `client-portal/index.css`
 
-**`.icon-btn` Internal Duplication (lines 293-319 vs 1419-1438):**
+**REMAINING ISSUE:**
 
-The same file `pages/admin.css` defines `.icon-btn` twice:
+| File | Lines | Issue | Status |
+|------|-------|-------|--------|
+| `pages/admin.css` | ~1410-1475 | `.set-password-form` uses custom styles | Intentional - unauthenticated page styling |
 
-- Lines 293-319: Scoped `[data-page="admin"] .icon-btn` with 36x36px sizing
-- Lines 1419-1438: Unscoped `.icon-btn` with padding-based sizing
-
-Additionally, `shared/portal-buttons.css` defines `button.btn-icon` for standalone icon buttons.
-
-**Recommendation:** Consolidate into a single definition. Remove lines 1419-1438 (unscoped version) and keep the scoped version at lines 293-319.
-
-**`.set-password-form` Custom Styles (lines 1521-1586):**
-
-This form defines its own `.form-input`, `.form-group`, and `.btn-primary` styles instead of using the shared portal-forms.css and portal-buttons.css. The custom styles use different values (smaller border-radius, different padding, different color scheme).
-
-**Recommendation:** Either:
-
-1. Update the set-password-form to use shared components with CSS variable overrides, OR
-2. Document this as intentional deviation for the specific use case (unauthenticated password reset page may need different styling)
+The `.set-password-form` uses different styling (smaller border-radius, different padding) which is intentional for the unauthenticated password reset page that doesn't use the portal theme.
 
 #### Intentionally Different Patterns (Not Duplicates)
 
@@ -1199,7 +1191,7 @@ The following patterns look like duplicates but are intentionally different desi
 
 | File | Component | Reason |
 |------|-----------|--------|
-| `pages/admin.css:854` vs `client-portal/dashboard.css:14` | `.status-badge` | Admin uses pill-shaped badges with colored backgrounds; Client portal uses text-only colored labels |
+| `client-portal/dashboard.css` | `.status-badge` override | Client portal uses text-only badges in project cards (scoped to `.project-status .status-badge`) |
 | `admin/project-detail.css:360-422` | Form input overrides | Adds admin-specific `background-color: var(--color-black)` and thicker focus borders on top of shared base styles |
 | `client-portal/dashboard.css:46` vs `shared/progress.css` | `.progress-bar` | Context-specific sizing and styling for different uses |
 
