@@ -131,6 +131,7 @@ describe('Form Validation', () => {
     });
 
     it('should call validateFormCompletion on input change', () => {
+      vi.useFakeTimers();
       const input = document.createElement('input');
       input.type = 'text';
       input.required = true;
@@ -142,12 +143,16 @@ describe('Form Validation', () => {
       // Verify initial state
       expect(submitButton.classList.contains('form-valid')).toBe(true);
 
-      // Clear input and trigger change
+      // Clear input and trigger input (debounced 150ms)
       input.value = '';
       input.dispatchEvent(new Event('input'));
 
+      // Flush debounce
+      vi.advanceTimersByTime(200);
+
       // Should update button state
       expect(submitButton.classList.contains('form-valid')).toBe(false);
+      vi.useRealTimers();
     });
 
     it('should perform initial validation check', () => {

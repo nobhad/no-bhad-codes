@@ -13,6 +13,7 @@ import { errorTracker } from '../../../server/services/error-tracking';
 
 // Create mock Redis client factory
 const createMockRedisClient = () => {
+  const handlers: Record<string, ((...args: unknown[]) => void)[]> = {};
   const pipeline = {
     setex: vi.fn().mockReturnThis(),
     sadd: vi.fn().mockReturnThis(),
@@ -21,8 +22,18 @@ const createMockRedisClient = () => {
     exec: vi.fn().mockResolvedValue([['OK', 'value']]),
   };
 
+  const on = vi.fn((event: string, fn: (...args: unknown[]) => void) => {
+    if (!handlers[event]) handlers[event] = [];
+    handlers[event].push(fn);
+  });
+
+  const connect = vi.fn().mockImplementation(async () => {
+    handlers['connect']?.forEach((fn) => fn());
+    handlers['ready']?.forEach((fn) => fn());
+  });
+
   return {
-    connect: vi.fn().mockResolvedValue(undefined),
+    connect,
     ping: vi.fn().mockResolvedValue('PONG'),
     get: vi.fn().mockResolvedValue(null),
     setex: vi.fn().mockResolvedValue('OK'),
@@ -38,7 +49,7 @@ const createMockRedisClient = () => {
     dbsize: vi.fn().mockResolvedValue(100),
     incrby: vi.fn().mockResolvedValue(1),
     disconnect: vi.fn().mockResolvedValue(undefined),
-    on: vi.fn(),
+    on,
   };
 };
 
@@ -46,9 +57,9 @@ const createMockRedisClient = () => {
 let mockRedisClient = createMockRedisClient();
 
 vi.mock('ioredis', () => {
-  const MockRedis = vi.fn().mockImplementation(() => {
+  function MockRedis() {
     return mockRedisClient;
-  });
+  }
   return {
     default: MockRedis,
   };
@@ -70,14 +81,11 @@ describe('Cache Service', () => {
   let cacheService: CacheService;
 
   beforeEach(() => {
-    // Reset mock Redis client before each test
-    mockRedisClient = createMockRedisClient();
     vi.clearAllMocks();
-    
-    // Get fresh instance for each test
+    // Recreate mock Redis client after clearAllMocks so connect/on implementations stay intact
+    mockRedisClient = createMockRedisClient();
+
     cacheService = CacheService.getInstance();
-    
-    // Reset the instance's internal state
     (cacheService as any).client = null;
     (cacheService as any).isConnected = false;
     (cacheService as any).stats = {
@@ -198,7 +206,7 @@ describe('Cache Service', () => {
       const result = await cacheService.get('test-key');
 
       expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalled();
+      expect((cacheService as any).stats.errors).toBe(1);
     });
   });
 
@@ -246,7 +254,7 @@ describe('Cache Service', () => {
       const result = await cacheService.set('test-key', 'value');
 
       expect(result).toBe(false);
-      expect(consoleErrorSpy).toHaveBeenCalled();
+      expect((cacheService as any).stats.errors).toBe(1);
     });
   });
 

@@ -5,26 +5,33 @@
  * @file tests/unit/services/auth-service.test.ts
  *
  * Unit tests for client-side authentication service.
+ * AuthService delegates to authStore; we mock authStore.
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { AuthService } from '../../../src/services/auth-service';
 
-// Mock fetch
-global.fetch = vi.fn();
+const mockLogin = vi.fn();
+const mockLogout = vi.fn();
+const mockGetCurrentUser = vi.fn();
+const mockIsAuthenticated = vi.fn();
 
-// Mock sessionStorage
-const sessionStorageMock = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-  clear: vi.fn(),
-};
-
-Object.defineProperty(window, 'sessionStorage', {
-  value: sessionStorageMock,
-  writable: true,
-});
+vi.mock('../../../src/auth', () => ({
+  authStore: {
+    login: (...args: unknown[]) => mockLogin(...args),
+    logout: (...args: unknown[]) => mockLogout(...args),
+    getCurrentUser: () => mockGetCurrentUser(),
+    isAuthenticated: () => mockIsAuthenticated(),
+    refreshSession: vi.fn().mockResolvedValue(true),
+    validateSession: vi.fn().mockResolvedValue(true),
+    requestMagicLink: vi.fn(),
+    verifyMagicLink: vi.fn(),
+    subscribe: vi.fn(),
+    getSessionTimeRemaining: vi.fn(),
+    extendSession: vi.fn(),
+    clearError: vi.fn(),
+  },
+}));
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -32,7 +39,6 @@ describe('AuthService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     authService = new AuthService();
-    sessionStorageMock.getItem.mockReturnValue(null);
   });
 
   afterEach(() => {
@@ -47,18 +53,9 @@ describe('AuthService', () => {
         companyName: 'Test Company',
         contactName: 'Test User',
         status: 'active',
+        role: 'client' as const,
       };
-
-      const mockResponse = {
-        ok: true,
-        json: vi.fn().mockResolvedValue({
-          message: 'Login successful',
-          user: mockUser,
-          expiresIn: '7d',
-        }),
-      };
-
-      vi.mocked(fetch).mockResolvedValue(mockResponse as any);
+      mockLogin.mockResolvedValueOnce({ success: true, data: mockUser });
 
       const result = await authService.login({
         email: 'test@example.com',
@@ -66,30 +63,18 @@ describe('AuthService', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/auth/login'),
-        expect.objectContaining({
-          method: 'POST',
-          credentials: 'include',
-          body: JSON.stringify({
-            email: 'test@example.com',
-            password: 'password123',
-          }),
-        })
-      );
-      expect(sessionStorageMock.setItem).toHaveBeenCalled();
+      expect(mockLogin).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        password: 'password123',
+      });
     });
 
     it('should handle login failure', async () => {
-      const mockResponse = {
-        ok: false,
-        json: vi.fn().mockResolvedValue({
-          error: 'Invalid credentials',
-          code: 'INVALID_CREDENTIALS',
-        }),
-      };
-
-      vi.mocked(fetch).mockResolvedValue(mockResponse as any);
+      mockLogin.mockResolvedValueOnce({
+        success: false,
+        error: 'Invalid credentials',
+        code: 'INVALID_CREDENTIALS',
+      });
 
       const result = await authService.login({
         email: 'test@example.com',
@@ -101,7 +86,10 @@ describe('AuthService', () => {
     });
 
     it('should handle network errors', async () => {
-      vi.mocked(fetch).mockRejectedValue(new Error('Network error'));
+      mockLogin.mockResolvedValueOnce({
+        success: false,
+        error: 'Network error',
+      });
 
       const result = await authService.login({
         email: 'test@example.com',
@@ -115,33 +103,11 @@ describe('AuthService', () => {
 
   describe('logout', () => {
     it('should logout successfully', async () => {
-      const mockResponse = {
-        ok: true,
-        json: vi.fn().mockResolvedValue({ message: 'Logged out' }),
-      };
-
-      vi.mocked(fetch).mockResolvedValue(mockResponse as any);
-
-      // Set user first
-      authService['user'] = {
-        id: 1,
-        email: 'test@example.com',
-        companyName: 'Test',
-        contactName: 'Test',
-        status: 'active',
-      };
-      authService['isAuth'] = true;
+      mockLogout.mockResolvedValueOnce(undefined);
 
       await authService.logout();
 
-      expect(fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/auth/logout'),
-        expect.objectContaining({
-          method: 'POST',
-          credentials: 'include',
-        })
-      );
-      expect(sessionStorageMock.removeItem).toHaveBeenCalled();
+      expect(mockLogout).toHaveBeenCalled();
     });
   });
 
@@ -154,17 +120,15 @@ describe('AuthService', () => {
         contactName: 'Test User',
         status: 'active',
       };
-
-      // Access private properties using bracket notation
-      (authService as any).user = mockUser;
-      (authService as any).isAuth = true;
+      mockGetCurrentUser.mockReturnValue(mockUser);
+      mockIsAuthenticated.mockReturnValue(true);
 
       expect(authService.getCurrentUser()).toEqual(mockUser);
     });
 
     it('should return null when not authenticated', () => {
-      (authService as any).user = null;
-      (authService as any).isAuth = false;
+      mockGetCurrentUser.mockReturnValue(null);
+      mockIsAuthenticated.mockReturnValue(false);
 
       expect(authService.getCurrentUser()).toBeNull();
     });
@@ -172,27 +136,20 @@ describe('AuthService', () => {
 
   describe('isAuthenticated', () => {
     it('should return true when authenticated', () => {
-      const mockUser = {
-        id: 1,
-        email: 'test@example.com',
-        companyName: 'Test',
-        contactName: 'Test',
-        status: 'active',
-      };
-      (authService as any).user = mockUser;
-      (authService as any).isAuth = true;
+      mockIsAuthenticated.mockReturnValue(true);
+
       expect(authService.isAuthenticated()).toBe(true);
     });
 
     it('should return false when not authenticated', () => {
-      (authService as any).user = null;
-      (authService as any).isAuth = false;
+      mockIsAuthenticated.mockReturnValue(false);
+
       expect(authService.isAuthenticated()).toBe(false);
     });
   });
 
   describe('loadStoredUser', () => {
-    it('should load user from sessionStorage', () => {
+    it('should reflect user when authStore has user', () => {
       const mockUser = {
         id: 1,
         email: 'test@example.com',
@@ -200,26 +157,23 @@ describe('AuthService', () => {
         contactName: 'Test User',
         status: 'active',
       };
+      mockGetCurrentUser.mockReturnValue(mockUser);
+      mockIsAuthenticated.mockReturnValue(true);
 
-      sessionStorageMock.getItem.mockReturnValue(JSON.stringify(mockUser));
+      const service = new AuthService();
 
-      const newService = new AuthService();
-
-      expect(newService.getCurrentUser()).toEqual(mockUser);
-      expect(newService.isAuthenticated()).toBe(true);
+      expect(service.getCurrentUser()).toEqual(mockUser);
+      expect(service.isAuthenticated()).toBe(true);
     });
 
-    it('should handle invalid stored user data', () => {
-      sessionStorageMock.getItem.mockReturnValue('invalid-json');
+    it('should reflect unauthenticated when authStore has no user', () => {
+      mockGetCurrentUser.mockReturnValue(null);
+      mockIsAuthenticated.mockReturnValue(false);
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const service = new AuthService();
 
-      const newService = new AuthService();
-
-      expect(newService.getCurrentUser()).toBeNull();
-      expect(newService.isAuthenticated()).toBe(false);
-
-      consoleSpy.mockRestore();
+      expect(service.getCurrentUser()).toBeNull();
+      expect(service.isAuthenticated()).toBe(false);
     });
   });
 });
