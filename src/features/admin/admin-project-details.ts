@@ -8,7 +8,13 @@
  */
 
 import { SanitizationUtils } from '../../utils/sanitization-utils';
-import { formatFileSize, formatDisplayValue, formatTextWithLineBreaks } from '../../utils/format-utils';
+import {
+  formatFileSize,
+  formatDisplayValue,
+  formatTextWithLineBreaks,
+  formatDate,
+  formatDateTime
+} from '../../utils/format-utils';
 import { AdminAuth } from './admin-auth';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../utils/api-client';
 import { createDOMCache, getElement } from '../../utils/dom-cache';
@@ -253,17 +259,13 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (timeline) timeline.textContent = formatDisplayValue(project.timeline);
     if (startDate) {
       const dateToShow = project.start_date || project.created_at;
-      startDate.textContent = dateToShow
-        ? new Date(dateToShow).toLocaleDateString()
-        : '-';
+      startDate.textContent = formatDate(dateToShow);
     }
 
     // Target end date
     const endDate = domCache.get('endDate');
     if (endDate) {
-      endDate.textContent = project.estimated_end_date
-        ? new Date(project.estimated_end_date).toLocaleDateString()
-        : '-';
+      endDate.textContent = formatDate(project.estimated_end_date);
     }
 
     // Progress
@@ -282,12 +284,16 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     // Preview URL
     const previewUrlLink = domCache.getAs<HTMLAnchorElement>('previewUrlLink');
     if (previewUrlLink) {
-      if (project.preview_url) {
-        previewUrlLink.href = project.preview_url;
-        previewUrlLink.textContent = project.preview_url;
+      const u = project.preview_url ? SanitizationUtils.decodeHtmlEntities(project.preview_url) : null;
+      const textEl = previewUrlLink.querySelector<HTMLElement>('.url-link-text');
+      if (u) {
+        previewUrlLink.href = u;
+        previewUrlLink.onclick = null;
+        if (textEl) textEl.textContent = u;
       } else {
         previewUrlLink.href = '#';
-        previewUrlLink.textContent = '-';
+        previewUrlLink.onclick = (e) => e.preventDefault();
+        if (textEl) textEl.textContent = '';
       }
     }
 
@@ -300,24 +306,22 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (urlsSection) {
       urlsSection.style.display = hasUrls ? 'flex' : 'none';
     }
-    if (repoUrlLink) {
-      if (project.repository_url) {
-        repoUrlLink.href = project.repository_url;
-        repoUrlLink.textContent = project.repository_url;
+    const setUrlLink = (link: HTMLAnchorElement | null, url: string | null): void => {
+      if (!link) return;
+      const decoded = url ? SanitizationUtils.decodeHtmlEntities(url) : null;
+      const textEl = link.querySelector<HTMLElement>('.url-link-text');
+      if (decoded) {
+        link.href = decoded;
+        link.onclick = null;
+        if (textEl) textEl.textContent = decoded;
       } else {
-        repoUrlLink.href = '#';
-        repoUrlLink.textContent = '-';
+        link.href = '#';
+        link.onclick = (e) => e.preventDefault();
+        if (textEl) textEl.textContent = '';
       }
-    }
-    if (productionUrlLink) {
-      if (project.production_url) {
-        productionUrlLink.href = project.production_url;
-        productionUrlLink.textContent = project.production_url;
-      } else {
-        productionUrlLink.href = '#';
-        productionUrlLink.textContent = '-';
-      }
-    }
+    };
+    setUrlLink(repoUrlLink, project.repository_url ?? null);
+    setUrlLink(productionUrlLink, project.production_url ?? null);
 
     // Financial section (deposit, contract date)
     const financialSection = domCache.get('financialSection');
@@ -332,9 +336,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       depositEl.textContent = project.deposit_amount ? `$${project.deposit_amount.toFixed(2)}` : '-';
     }
     if (contractDateEl) {
-      contractDateEl.textContent = project.contract_signed_at
-        ? new Date(project.contract_signed_at).toLocaleDateString()
-        : '-';
+      contractDateEl.textContent = formatDate(project.contract_signed_at);
     }
 
     // Admin notes section
@@ -416,7 +418,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
     if (clientLastLogin) {
       clientLastLogin.textContent = project.last_login_at
-        ? new Date(project.last_login_at).toLocaleString()
+        ? formatDateTime(project.last_login_at)
         : 'Never';
     }
 
@@ -730,12 +732,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
           this.populateProjectDetailView(project);
         }
       } else {
-        const error = await response.json();
-        alertError(`Failed to save: ${error.message || 'Unknown error'}`);
+        alertError('Failed to save project. Please try again.');
       }
     } catch (error) {
       console.error('[AdminProjectDetails] Error saving project:', error);
-      alertError('Error saving project');
+      alertError('Failed to save project. Please try again.');
     }
   }
 
@@ -816,7 +817,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
               <div class="message-content">
                 <div class="message-header">
                   <span class="message-sender">${safeSenderName}</span>
-                  <span class="message-time">${new Date(msg.created_at).toLocaleString()}</span>
+                  <span class="message-time">${formatDateTime(msg.created_at)}</span>
                 </div>
                 <div class="message-body">${safeContent}</div>
               </div>
@@ -910,7 +911,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         const files = data.files || [];
 
         if (files.length === 0) {
-          filesList.innerHTML = '<p class="empty-state">No files uploaded yet.</p>';
+          filesList.innerHTML = '<p class="empty-state">No files yet. Upload files above.</p>';
         } else {
           filesList.innerHTML = files
             .map(
@@ -924,7 +925,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
               </span>
               <div class="file-info">
                 <span class="file-name">${file.originalName || file.filename}</span>
-                <span class="file-meta">Uploaded ${new Date(file.uploadedAt).toLocaleDateString()} - ${formatFileSize(file.size)}</span>
+                <span class="file-meta">Uploaded ${formatDate(file.uploadedAt)} - ${formatFileSize(file.size)}</span>
               </div>
               <div class="file-actions">
                 <a href="/api/uploads/file/${file.id}" class="btn btn-outline btn-sm" target="_blank">Download</a>
@@ -989,7 +990,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
               <div class="milestone-content">
                 <div class="milestone-header">
                   <h4 class="milestone-title">${safeTitle}</h4>
-                  ${m.due_date ? `<span class="milestone-due-date">${new Date(m.due_date).toLocaleDateString()}</span>` : ''}
+                  ${m.due_date ? `<span class="milestone-due-date">${formatDate(m.due_date)}</span>` : ''}
                 </div>
                 ${safeDescription ? `<p class="milestone-description">${safeDescription}</p>` : ''}
                 ${safeDeliverables ? `<ul class="milestone-deliverables">${safeDeliverables}</ul>` : ''}
@@ -1098,12 +1099,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       if (response.ok) {
         this.loadProjectMilestones(this.currentProjectId);
       } else {
-        const error = await response.json();
-        alertError(`Failed to add milestone: ${error.message || 'Unknown error'}`);
+        alertError('Failed to add milestone. Please try again.');
       }
     } catch (error) {
       console.error('[AdminProjectDetails] Error adding milestone:', error);
-      alertError('Error adding milestone');
+      alertError('Failed to add milestone. Please try again.');
     }
   }
 
@@ -1123,9 +1123,12 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
 
       if (response.ok) {
         this.loadProjectMilestones(this.currentProjectId);
+      } else {
+        alertError('Failed to update milestone. Please try again.');
       }
     } catch (error) {
       console.error('[AdminProjectDetails] Error toggling milestone:', error);
+      alertError('Failed to update milestone. Please try again.');
     }
   }
 
@@ -1151,11 +1154,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       if (response.ok) {
         this.loadProjectMilestones(this.currentProjectId);
       } else {
-        alertError('Failed to delete milestone');
+        alertError('Failed to delete milestone. Please try again.');
       }
     } catch (error) {
       console.error('[AdminProjectDetails] Error deleting milestone:', error);
-      alertError('Error deleting milestone');
+      alertError('Failed to delete milestone. Please try again.');
     }
   }
 
@@ -1200,7 +1203,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         if (paidEl) paidEl.textContent = `$${totalPaid.toFixed(2)}`;
 
         if (invoices.length === 0) {
-          invoicesList.innerHTML = '<p class="empty-state">No invoices created yet.</p>';
+          invoicesList.innerHTML = '<p class="empty-state">No invoices yet. Create one above.</p>';
         } else {
           invoicesList.innerHTML = invoices
             .map((inv: InvoiceResponse) => {
@@ -1214,7 +1217,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
               <div class="invoice-item">
                 <div class="invoice-info">
                   <strong>${inv.invoice_number || `INV-${inv.id}`}</strong>
-                  <span class="invoice-date">${new Date(inv.created_at).toLocaleDateString()}</span>
+                  <span class="invoice-date">${formatDate(inv.created_at)}</span>
                 </div>
                 <div class="invoice-amount">$${(typeof inv.amount_total === 'string' ? parseFloat(inv.amount_total) : (inv.amount_total || 0)).toFixed(2)}</div>
                 <span class="status-badge ${statusClass}">${inv.status}</span>
@@ -1309,12 +1312,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         alertSuccess('Invoice created successfully!');
         this.loadProjectInvoices(this.currentProjectId);
       } else {
-        const error = await response.json();
-        alertError(`Failed to create invoice: ${error.message || 'Unknown error'}`);
+        alertError('Failed to create invoice. Please try again.');
       }
     } catch (error) {
       console.error('[AdminProjectDetails] Error creating invoice:', error);
-      alertError('Error creating invoice');
+      alertError('Failed to create invoice. Please try again.');
     }
   }
 
@@ -1422,12 +1424,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         alertSuccess(`${data.files?.length || files.length} file(s) uploaded successfully!`);
         this.loadProjectFiles(this.currentProjectId!);
       } else {
-        const error = await response.json();
-        alertError(`Failed to upload files: ${error.message || 'Unknown error'}`);
+        alertError('Failed to upload files. Please try again.');
       }
     } catch (error) {
       console.error('[AdminProjectDetails] Error uploading files:', error);
-      alertError('Error uploading files');
+      alertError('Failed to upload files. Please try again.');
     }
   }
 

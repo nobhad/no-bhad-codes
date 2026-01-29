@@ -558,7 +558,7 @@
             <div class="project-detail-overview portal-shadow">
               <div class="overview-header">
                 <h3 id="cd-client-name">Client Name</h3>
-                <button class="icon-btn" id="cd-btn-edit-info" title="Edit Client Info">
+                <button class="icon-btn" id="cd-btn-edit-info" title="Edit Client Info" aria-label="Edit client info">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                 </button>
               </div>
@@ -612,7 +612,7 @@
             <div class="portal-project-card portal-shadow">
               <div class="card-header-with-action">
                 <h3>Billing Details</h3>
-                <button class="icon-btn" id="cd-btn-edit-billing" title="Edit Billing Details">
+                <button class="icon-btn" id="cd-btn-edit-billing" title="Edit Billing Details" aria-label="Edit billing details">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                 </button>
               </div>
@@ -961,7 +961,7 @@
             <div class="project-detail-overview portal-shadow">
               <div class="overview-header">
                 <h3 id="pd-project-name">Project Name</h3>
-                <button class="icon-btn" id="btn-edit-project" title="Edit Project">
+                <button class="icon-btn" id="btn-edit-project" title="Edit Project" aria-label="Edit project">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                 </button>
               </div>
@@ -1033,15 +1033,15 @@
               <div class="project-detail-meta project-urls-row" id="pd-urls-section">
                 <div class="meta-item">
                   <span class="field-label">Preview URL</span>
-                  <span class="meta-value"><a href="#" id="pd-preview-url-link" target="_blank">-</a></span>
+                  <span class="meta-value"><a href="#" id="pd-preview-url-link" target="_blank" rel="noopener noreferrer" class="url-link"><span class="url-link-text">-</span><svg class="url-link-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></span>
                 </div>
                 <div class="meta-item">
                   <span class="field-label">Repository</span>
-                  <span class="meta-value"><a href="#" id="pd-repo-url-link" target="_blank">-</a></span>
+                  <span class="meta-value"><a href="#" id="pd-repo-url-link" target="_blank" rel="noopener noreferrer" class="url-link"><span class="url-link-text">-</span><svg class="url-link-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></span>
                 </div>
                 <div class="meta-item">
                   <span class="field-label">Production</span>
-                  <span class="meta-value"><a href="#" id="pd-production-url-link" target="_blank">-</a></span>
+                  <span class="meta-value"><a href="#" id="pd-production-url-link" target="_blank" rel="noopener noreferrer" class="url-link"><span class="url-link-text">-</span><svg class="url-link-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></span>
                 </div>
               </div>
 
@@ -1263,7 +1263,7 @@
     <div class="admin-modal-overlay hidden" id="add-project-modal">
       <div class="admin-modal">
         <div class="admin-modal-header">
-          <h3>Add New Project</h3>
+          <h3 id="add-project-modal-title">Add New Project</h3>
           <button class="admin-modal-close" id="add-project-modal-close" aria-label="Close modal">
             &times;
           </button>
@@ -1452,7 +1452,7 @@
     <div class="admin-modal-overlay hidden" id="edit-project-modal">
       <div class="admin-modal">
         <div class="admin-modal-header">
-          <h3>Edit Project</h3>
+          <h3 id="edit-project-modal-title">Edit Project</h3>
           <button class="admin-modal-close" id="edit-project-close" aria-label="Close modal">
             &times;
           </button>

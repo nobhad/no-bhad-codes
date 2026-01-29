@@ -103,6 +103,22 @@
   text-decoration: underline;
 }
 
+/* URL link with external-link icon (opens in new tab) */
+.meta-value .url-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.meta-value .url-link-icon {
+  flex-shrink: 0;
+  color: currentColor;
+}
+
+.meta-value .url-link[href="#"] .url-link-icon {
+  display: none;
+}
+
 .project-detail-client-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

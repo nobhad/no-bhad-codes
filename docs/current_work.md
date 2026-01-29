@@ -1,6 +1,6 @@
 # Current Work
 
-**Last Updated:** January 28, 2026 (UX Utilities Integration + Bug Fixes)
+**Last Updated:** January 29, 2026 (Project Details Fixes - Dates, Encoding, URLs, Empty Values)
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-01.md`.
 
@@ -14,26 +14,19 @@ Recent fixes that need user testing:
   - Navigate to a project with contract data
   - Download contract PDF and verify branding/content
 
-- [ ] **File Upload - Files Appear After Upload**
-  - Go to project details > Files tab
-  - Upload a file
-  - Verify file appears immediately (no page refresh needed)
-
 - [ ] **File Preview** - Test preview for different file types
-  - JSON files: Should open in modal with formatted JSON
-  - Text/MD files: Should open in modal with text content
-  - Images: Should open in modal with image display
-  - PDFs: Should open in new tab
+  - [x]  JSON files: Should open in modal with formatted JSON
+  **ISSUE:** does work correctly, but it should look more like the email that I get from INAKE  bc a client never needs to see
+  - [x]  Text/MD files: Should open in modal with text content
+  - [x]  Images: Should open in modal with image display (scaled to fit via .file-preview-image, max-height 50vh; fixed January 28, 2026)
+  - [x]  PDFs: Should open in new tab
 
-- [ ] **File Download** - Test download button
-  - Click Download on any project file
-  - File should download with correct filename
-
-- [ ] **Edit Project Modal - All Fields** - Test editing all project fields
+- [x] **Edit Project Modal - All Fields** - Test editing all project fields
   - Open a project > Click Edit (pencil icon)
   - Verify all fields are populated: name, type, status, timeline, dates, description, budget, price, deposit, contract date, URLs, admin notes
   - Modify values and save
   - Verify changes appear in project overview immediately
+  **ISSUE:** when i open edit modal, all fields that have info should be populated and editable.
 
 - [ ] **Client Budget Display** - Verify budget ranges show proper formatting
   - Navigate to project details in admin
@@ -41,31 +34,20 @@ Recent fixes that need user testing:
   - Verify ranges show en-dashes: "$2k–$5k" (not "$2k-$5k")
   - Verify decimal budgets display correctly: "$2.5k–$5k" (not "2.5k 5k")
 
-- [ ] **Target End Date Display** - Verify dates show correctly (no timezone offset)
-  - Set a target end date (e.g., March 1)
-  - Save and verify it displays as March 1 (not February 28)
-
 - [ ] **HTML Entity Decoding** - Verify special characters display correctly
   - Check client names with "&" show correctly (not "&amp;")
   - Check URLs with "/" show correctly (not "&#x2F;")
+  **ISSUE:** still seeing in random places in portal like clients page, client details page, recent activity, etc.
 
-- [ ] **URL Links Styling** - Verify URL links are red and clickable
+- [x] **URL Links Styling** - Verify URL links are red and clickable
   - Check Preview URL, Repository URL, Production URL links
   - Links should be red (primary color)
   - Links should open in new tab
-
-- [ ] **Empty Values Display** - Verify missing data shows empty (no dashes)
-  - View a project with some fields unpopulated
-  - Empty fields should show blank, not "-"
+  - External-link icon added next to each URL to indicate new-tab (fixed January 28, 2026)
 
 - [ ] **Client Portal Profile Settings** - Test profile update refresh
   - Update contact name, company, or phone in client portal settings
   - Save and verify values refresh immediately (no page reload needed)
-
-- [ ] **Admin Proposals Notes Save** - Test notes refresh after save
-  - Open a proposal in admin panel
-  - Add or modify admin notes
-  - Save and verify notes display updates immediately
 
 - [ ] **Client Portal Project Request** - Test project list refresh
   - Submit a new project request in client portal
@@ -90,6 +72,7 @@ Recent fixes that need user testing:
     - [ ] Invitation email is sent
     - [ ] Status updates to "Invited" (yellow/pending)
     - [ ] "Invite" button disappears
+  - **Issue:** Nothing on project detail page / client details page indicates that the user has not yet been invited.
   - Files modified: `server/routes/clients.ts`, `src/features/admin/modules/admin-clients.ts`, `src/styles/pages/admin.css`
 
 ---
@@ -104,6 +87,7 @@ Recent fixes that need user testing:
 **Updated:** January 28, 2026
 
 Need to make sure branding logo from invoice PDFs goes on top of:
+
 - [x] Project proposal PDFs - COMPLETE
 - [x] Project contract PDFs - COMPLETE (January 28, 2026)
 - [ ] Current website audit PDFs - TODO
@@ -111,6 +95,7 @@ Need to make sure branding logo from invoice PDFs goes on top of:
 **Proposal PDF Implementation (January 28, 2026):**
 
 Added `GET /api/proposals/:id/pdf` endpoint to `server/routes/proposals.ts` that generates branded PDF proposals with:
+
 - Logo at top (centered, 60px width)
 - Business header line (name, contact, email, website)
 - Proposal title
@@ -127,6 +112,7 @@ Added `GET /api/proposals/:id/pdf` endpoint to `server/routes/proposals.ts` that
 **Contract PDF Implementation (January 28, 2026):**
 
 Added `GET /api/projects/:id/contract/pdf` endpoint to `server/routes/projects.ts` that generates branded PDF contracts with:
+
 - Logo at top (centered, 60px width)
 - Business header line (name, contact, email, website)
 - Contract title
@@ -139,13 +125,15 @@ Added `GET /api/projects/:id/contract/pdf` endpoint to `server/routes/projects.t
 - Footer with contact info
 
 **Reference:** Invoice PDF logo implementation in `server/routes/invoices.ts` (lines 925-930)
+
 - Logo path: `public/images/avatar_pdf.png`
 - Logo is centered at top of PDF with 60px width
+- **Fixed (January 28, 2026):** Contract PDF and Proposal PDF routes now use `avatar_pdf.png` (were `avatar_small-1.png`).
 
 **Deep Dive Investigation (January 28, 2026):**
 
 - **Save Handler:** `saveProjectChanges()` in `src/features/admin/modules/admin-projects.ts` lines 771-815
-- **Save Flow:** 
+- **Save Flow:**
   1. Collects form values (lines 774-794)
   2. Calls `apiPut('/api/projects/${projectId}', updates)` (line 797)
   3. On success: Shows toast notification (line 800)
@@ -255,6 +243,32 @@ Updated `src/features/admin/modules/admin-projects.ts`:
 
 **Fix Applied:** Updated `decodeHtmlEntities()` in `sanitization-utils.ts` to recursively decode until stable.
 
+- [x] #### Client Name / Billing Name - Ampersand Double-Encoded (&amp;amp; instead of &)
+
+**Status:** FIXED
+**Observed:** January 28, 2026
+**Fixed:** January 28, 2026
+
+**Issue:** Client names (and billing names) containing "&" displayed as "&amp;amp;" instead of "&". Example: "Emily Gold & Abigail Wolf" showed as "Emily Gold &amp;amp; Abigail Wolf" in Client Details and Billing Details (admin dashboard).
+
+**Fix Applied:** Decode before escape when rendering: use `decodeHtmlEntities()` then `escapeHtml()` (or `capitalizeName`) for contact_name, company_name, billing_name in admin-clients (table + detail) and for contact_name in admin-leads (table, detail, recent activity).
+
+**Files modified:** `src/features/admin/modules/admin-clients.ts`, `src/features/admin/modules/admin-leads.ts`
+
+**Expected:** Display "&" correctly (e.g. "Emily Gold & Abigail Wolf").
+
+- [x] #### Client Edit - Email Update Not Working (Clients Page)
+
+**Status:** FIXED
+**Observed:** January 28, 2026
+**Fixed:** January 28, 2026
+
+**Issue:** Updating a client's email from the admin Clients page did not work. Updating name, company, and phone did work; only email failed to save/update.
+
+**Fix Applied:** `PUT /api/clients/:id` did not accept or persist `email`. Added `email` to the handler: admins can update email; validate format and uniqueness (excluding current client); normalize to lowercase. Also set `updated_at = CURRENT_TIMESTAMP` on update.
+
+**Files modified:** `server/routes/clients.ts`
+
 - [x] #### URL Links - Red Styling and Clickable
 
 **Status:** FIXED
@@ -312,11 +326,13 @@ Project type is not consistent throughout the codebase (different labels, values
 **Fix Applied:**
 
 Updated `formatDisplayValue()` in three files:
+
 - `src/features/admin/modules/admin-projects.ts`
 - `src/features/admin/admin-project-details.ts`
 - `src/features/admin/modules/admin-leads.ts`
 
 Changes:
+
 1. Removed unnecessary `.replace(/-/g, '')` from "under" handler
 2. Changed range hyphens to proper en-dashes (–) for typography
 3. Fixed regex `(\d)-(\d)` to `(\d+)-(\d+)` to properly match multi-digit numbers
@@ -336,10 +352,12 @@ Centralized `formatDisplayValue()` to `src/utils/format-utils.ts` as the single 
 **Fix Applied:**
 
 Added `formatTextWithLineBreaks()` utility function to `src/utils/format-utils.ts` that:
+
 1. Escapes HTML entities to prevent XSS
 2. Converts `\n` to `<br>` tags
 
 Updated all locations to use `innerHTML` with the new formatter:
+
 - `src/features/admin/modules/admin-projects.ts` - populateProjectDetailView()
 - `src/features/admin/admin-project-details.ts` - populateProjectDetailView()
 - `src/features/client/client-portal.ts` - showProjectDetails()
@@ -417,6 +435,7 @@ Same fix as "Client Budget - Missing Hyphen" - updated `formatDisplayValue()` in
 Project status values are inconsistent throughout the codebase - some places use hyphens (`in-progress`, `on-hold`) and others use underscores (`in_progress`, `on_hold`).
 
 **Locations Found:**
+
 - Database schema (`server/database/migrations/001_initial_schema.sql` line 24): Uses hyphens `'in-progress', 'on-hold'`
 - TypeScript types (`src/types/client.ts` line 10): Uses hyphens `'in-progress', 'on-hold'`
 - Admin types (`src/features/admin/admin-types.ts` line 119): Uses underscores `'in_progress', 'on_hold'`
@@ -429,6 +448,7 @@ Project status values are inconsistent throughout the codebase - some places use
 - Shared validation (`shared/validation/schemas.ts` line 462): Uses underscores `'in_progress'`
 
 **Expected behavior:**
+
 - Single consistent format throughout codebase (preferably hyphens to match database schema)
 - All status comparisons, filters, and displays use the same format
 - Normalization function should handle conversion if needed
@@ -502,48 +522,23 @@ Updated `src/features/client/client-portal.ts`:
 
 - `src/features/client/client-portal.ts` - Added user data storage and projects reload after submission
 
-- [ ] #### Date Formatting - Inconsistent Formats Across Codebase
+- [x] #### Date Formatting - Inconsistent Formats Across Codebase
 
-**Status:** UTILITIES CREATED - Integration TODO
+**Status:** DONE
 **Observed:** January 28, 2026
 **Utilities Created:** January 28, 2026
+**Integration Completed:** January 28, 2026
 
-**Utilities Created:**
-
-Added date formatting utilities to `src/utils/format-utils.ts`:
+**Utilities** (`src/utils/format-utils.ts`):
 
 - `formatDate(dateString)` - Returns "Jan 28, 2026" format
 - `formatDateTime(dateString)` - Returns "Jan 28, 2026, 2:30 PM" format
 - `formatDateForInput(dateString)` - Returns "YYYY-MM-DD" for input fields
 - `formatRelativeTime(dateString)` - Returns "2 hours ago", "3 days ago", etc.
 
-**Next Steps:**
+**Integration:** All local date formatting has been replaced with these utilities across admin and client code.
 
-Replace all local date formatting throughout the codebase with these utilities.
-
-Date formatting is inconsistent throughout the codebase - different modules use different date formatting methods and formats.
-
-**Locations Found:**
-- `src/features/admin/modules/admin-projects.ts` line 236: `formatDate()` function returns `MM/DD/YYYY` format
-- `src/features/admin/modules/admin-projects.ts` line 504: Uses `toLocaleDateString()` (browser default format)
-- `src/features/admin/modules/admin-projects.ts` line 931: Uses `toLocaleString()` (includes time)
-- `src/features/admin/modules/admin-projects.ts` line 994: Uses `toLocaleDateString()` 
-- `src/features/admin/modules/admin-projects.ts` line 1283: Uses `toLocaleDateString()`
-- `src/features/admin/modules/admin-proposals.ts` lines 251, 416: Uses `toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })`
-- `src/features/admin/admin-project-details.ts` line 311: Uses `toLocaleDateString()`
-- `src/features/admin/admin-project-details.ts` line 473: Uses `toLocaleString()` (includes time)
-- `src/features/client/client-portal.ts` line 1253: `formatDate()` function returns `MM/DD/YYYY` format
-- `src/features/admin/modules/admin-leads.ts` line 214: Uses `toLocaleDateString()`
-- `src/features/admin/modules/admin-leads.ts` line 568: Uses `toLocaleString()` (includes time)
-- `src/features/admin/modules/admin-clients.ts` line 306: Uses `toLocaleDateString()`
-- `src/features/admin/modules/admin-clients.ts` line 400: Uses `toLocaleString()` (includes time)
-
-**Expected behavior:**
-- Consistent date formatting across all modules
-- Dates should use same format (e.g., `MM/DD/YYYY` for dates, `MM/DD/YYYY, HH:MM AM/PM` for date+time)
-- Shared date formatting utility function to avoid duplication
-
-**Root Cause:** Multiple different date formatting approaches. Some modules have custom `formatDate()` functions, others use native `toLocaleDateString()`/`toLocaleString()` which can vary by browser locale. Should consolidate into shared utility functions.
+**Files updated:** `admin-projects`, `admin-proposals`, `admin-project-details`, `admin-leads`, `admin-clients`, `admin-contacts`, `admin-dashboard`, `admin-messaging`, `admin-analytics` (session start_time), `admin-messaging.renderer`, `admin-contacts.renderer`, `client-portal`. Portal modules (invoices, messages, files) use `ctx.formatDate` from context, which now uses the shared util. Chart weekday labels (`toLocaleDateString('en-US', { weekday: 'short' })`) in admin-analytics left as-is for chart-specific format.
 
 - [ ] #### Error Handling - Inconsistent Error Message Display
 
@@ -553,8 +548,9 @@ Date formatting is inconsistent throughout the codebase - different modules use 
 Error handling is inconsistent - some catch blocks show user-friendly messages, others show technical error messages or don't show anything.
 
 **Locations Found:**
+
 - `src/features/admin/modules/admin-projects.ts` line 815: Shows `error.message` or generic message
-- `src/features/admin/modules/admin-projects.ts` line 1514: Shows `error.message || 'Unknown error'` 
+- `src/features/admin/modules/admin-projects.ts` line 1514: Shows `error.message || 'Unknown error'`
 - `src/features/admin/modules/admin-projects.ts` line 1713: Shows `error.message` or generic message
 - `src/features/admin/modules/admin-projects.ts` line 1264: Only logs to console, shows generic "Failed to load milestones" message
 - `src/features/admin/modules/admin-leads.ts` line 349: Shows `error.message` or generic message
@@ -562,12 +558,14 @@ Error handling is inconsistent - some catch blocks show user-friendly messages, 
 - `src/features/admin/modules/admin-leads.ts` line 732: Shows `error.message` or generic message
 
 **Issues:**
+
 - Some errors show `error.message` which might contain technical details
 - Some errors only log to console without user notification
 - Error messages may not be user-friendly
 - Inconsistent error handling patterns
 
 **Expected behavior:**
+
 - All errors should show user-friendly messages
 - Technical details should only be logged, not displayed to users
 - Consistent error handling pattern across all modules
@@ -577,22 +575,34 @@ Error handling is inconsistent - some catch blocks show user-friendly messages, 
 
 - [ ] #### API Calls - Missing Response OK Checks Before JSON Parsing
 
-**Status:** TODO
+**Status:** PARTIAL - Key flows updated
 **Observed:** January 28, 2026
+**Partial Fix:** January 28, 2026
 
 Some API calls parse JSON responses without checking if the response is OK first, which can cause errors when the API returns error responses.
 
-**Locations Found:**
-- `src/features/admin/modules/admin-projects.ts` line 1330-1337: `fetch()` call doesn't check `response.ok` before using response, only catches errors
-- `src/features/admin/admin-project-details.ts` line 1091: `apiPut()` call doesn't check `response.ok` before proceeding (uses `.catch()` only)
+**Partial fix applied:**
+
+- `admin-projects` `saveProjectChanges`: Check `response.ok` first; on !ok parse error body and `showNotification(err?.error || err?.message || '...', 'error')`; only parse JSON as result when ok.
+- `admin-project-details` `toggleMilestone`: Add `else` branch on !ok — parse error body, `alertError(...)`; add `catch` → `alertError`.
+- `admin-project-details` `deleteMilestone`: On !ok parse error body and show in `alertError` (was generic message only).
+
+**Remaining:** Audit other `apiPut`/`apiPost`/`fetch` usages for same pattern.
+
+**Locations Found (original):**
+
+- ~~`src/features/admin/modules/admin-projects.ts` saveProjectChanges~~ FIXED
+- ~~`src/features/admin/admin-project-details.ts` toggleMilestone, deleteMilestone~~ FIXED
 - Multiple places call `response.json()` without checking `response.ok` first (though many are in `if (response.ok)` blocks)
 
 **Issues:**
+
 - Non-OK responses (4xx, 5xx) might be parsed as JSON, causing confusing errors
 - Error responses might not be handled properly
 - Silent failures possible if error responses aren't caught
 
 **Expected behavior:**
+
 - Always check `response.ok` before parsing JSON
 - Handle error responses appropriately
 - Show user-friendly error messages for failed requests
@@ -672,6 +682,7 @@ Added detailed security comment in `src/utils/sanitization-utils.ts` explaining 
 **Current Implementation:**
 
 The delete handler now uses the same `resolveFilePath()` function as other routes (line 675):
+
 1. Validates path with `isPathSafe()` before deletion
 2. Uses `resolveFilePath()` for consistent path resolution
 3. Logs path traversal attempts
@@ -738,14 +749,17 @@ Enhanced helmet configuration in `server/app.ts` with additional security header
 Updated `src/features/admin/modules/admin-projects.ts`:
 
 Added `{ once: true }` to modal overlay click listeners in preview modals to prevent accumulation:
+
 - `showJsonPreviewModal()` - modal click listener now uses `{ once: true }`
 - `showTextPreviewModal()` - modal click listener now uses `{ once: true }`
 - `showImagePreviewModal()` - modal click listener now uses `{ once: true }`
 
 **Note:** The close button listeners don't need `{ once: true }` since the innerHTML is replaced each time (old elements are destroyed). The edit modal (lines 707-711) was not changed as it requires more complex refactoring to track listener state.
+
 - Some modals use `{ once: true }` option, others don't
 
 **Expected behavior:**
+
 - Remove event listeners when modal is closed
 - Use `{ once: true }` option for one-time handlers
 - Or store listener references and remove them explicitly
@@ -761,11 +775,13 @@ Added `{ once: true }` to modal overlay click listeners in preview modals to pre
 There are document/window-level event listeners that are added during module init and never removed, which can leak handlers across navigation/module re-inits (especially in SPA-ish flows or hot reload).
 
 **Locations Found:**
+
 - `src/features/admin/admin-dashboard.ts` (document-level click/keydown handlers for session extension + modal escape handling)
 - `src/features/client/client-portal.ts` (`setupDashboardEventListeners()` adds listeners without teardown)
 - `src/components/button-component.ts` (window-level keyup handler lifecycle edge case)
 
 **Expected behavior:**
+
 - Track handler references and remove them during module/component teardown (or ensure modules initialize exactly once for the app lifetime).
 
 **Root Cause:** Missing teardown pattern for global listeners.
@@ -778,10 +794,12 @@ There are document/window-level event listeners that are added during module ini
 Several modules fire multiple concurrent loads (projects/leads/contacts, per-project milestone fetches, etc.) without cancellation. This can lead to stale UI (late responses overwriting newer state) and wasted work.
 
 **Locations Found:**
+
 - `src/features/admin/admin-dashboard.ts` (multiple parallel loads on init; repeated refresh triggers)
 - `src/features/client/client-portal.ts` (`loadRealUserProjects()` and per-project milestone fetches)
 
 **Expected behavior:**
+
 - Use `AbortController` to cancel in-flight fetches when a newer request supersedes them, or ignore stale responses via request IDs.
 
 **Root Cause:** No cancellation/guarding against stale responses.
@@ -812,6 +830,7 @@ Now form validation only runs after user pauses typing, reducing DOM updates and
 **Investigation Result:**
 
 The original description was incorrect. Looking at the code:
+
 - Line 545-547: Sets up a click handler for the refresh button (only executes on click)
 - Line 551: Direct call to `loadProjects()` during init
 
@@ -841,6 +860,7 @@ The click handler does NOT execute during initialization - it only runs when the
 **Remaining Work:** This is a larger refactor requiring updates to TypeScript types and backend constants. The validation schema uses `'e-commerce'` (with hyphen) which should be the standard.
 
 **Additional Locations Found:**
+
 - ~~`admin/index.html` line 1299: FIXED~~
 - `admin/index.html` line 1462: `<option value="e-commerce">E-Commerce</option>` (with hyphen in value)
 - `server/routes/proposals.ts` line 37: Uses `'ecommerce'` (no hyphen)
@@ -893,6 +913,7 @@ The click handler does NOT execute during initialization - it only runs when the
 3. **Admin `confirm()` dialogs** - Already using custom `confirmDialog()` / `confirmDanger()`
 
 **Issues:**
+
 - Native dialogs block the entire UI
 - Cannot be styled to match application design
 - Poor accessibility (screen reader support varies)
@@ -901,6 +922,7 @@ The click handler does NOT execute during initialization - it only runs when the
 - Cannot show rich content or formatting
 
 **Expected behavior:**
+
 - Replace all native dialogs with custom modal/dialog components
 - Use toast notifications for non-critical feedback
 - Use custom modals for confirmations and input prompts
@@ -931,23 +953,37 @@ Added CSS in `src/styles/components/loading.css` for button loading states.
 
 - [ ] #### Empty States - Generic or Unhelpful Messages
 
-**Status:** TODO
+**Status:** PARTIAL - Copy improved for key empty states
 **Observed:** January 28, 2026
+**Partial Fix:** January 28, 2026
 
 Many empty states show generic messages that don't guide users on what to do next.
 
+**Partial fix applied:**
+
+- **Milestones:** "No milestones defined yet." / "No milestones yet." → "No milestones yet. Add one to track progress." (admin-projects, admin-project-details)
+- **Files:** "No files uploaded yet." → "No files yet. Upload files in the Files tab." / "Upload files above." (project detail)
+- **Invoices:** "No invoices yet." / "No invoices created yet." → "No invoices yet. Create one in the Invoices tab." / "Create one above."
+- **Leads:** "No leads found" → "No leads yet. New form submissions will appear here."; "No leads match the current filters" → add "Try adjusting your filters."
+- **Projects table:** "No projects match the current filters" → add "Try adjusting your filters."
+
+**Remaining:** Add CTAs or refine copy for remaining empty states (e.g. client projects, client invoices).
+
 **Locations Found:**
-- `src/features/admin/admin-project-details.ts`: Multiple "No messages yet", "No files uploaded yet", "No milestones yet", "No invoices created yet"
-- `src/features/admin/modules/admin-projects.ts`: "No projects yet. Convert leads to start projects.", "No files uploaded yet", "No milestones yet", "No invoices yet"
-- `src/features/admin/modules/admin-leads.ts`: "No leads found", "No leads match the current filters"
+
+- `src/features/admin/admin-project-details.ts`: Messages, files, milestones, invoices (partial updates above)
+- `src/features/admin/modules/admin-projects.ts`: Projects table, files, milestones, invoices (partial updates above)
+- `src/features/admin/modules/admin-leads.ts`: Leads table (updated)
 
 **Issues:**
+
 - Generic messages don't explain why the state is empty
 - No call-to-action buttons to help users take next steps
 - Missing helpful guidance or examples
 - Doesn't differentiate between "no data exists" vs "filtered out all data"
 
 **Expected behavior:**
+
 - Contextual empty states with helpful messages
 - Action buttons to create/add items when appropriate
 - Clear distinction between "no data" vs "filtered results"
@@ -988,15 +1024,18 @@ if (!validateField(emailInput, validators.email)) {
   return; // Error already shown
 }
 ```
+
 - Admin forms: May not show inline validation errors
 
 **Issues:**
+
 - Errors shown in alerts instead of next to fields
 - No visual indication of which fields have errors
 - Users must remember error messages from alerts
 - No `aria-invalid` or `aria-describedby` for accessibility
 
 **Expected behavior:**
+
 - Show validation errors inline next to each field
 - Use `aria-invalid="true"` and `aria-describedby` for accessibility
 - Highlight fields with errors visually
@@ -1036,41 +1075,22 @@ Created `src/utils/focus-trap.ts` with:
 
 - `src/components/modal-component.ts`: Has proper focus management (lines 326-341, 368-383)
 
-- [ ] #### Button Accessibility - Missing ARIA Labels
+- [x] #### Button Accessibility - Missing ARIA Labels
 
-**Status:** PARTIALLY FIXED
+**Status:** COMPLETE
 **Observed:** January 28, 2026
-**Partial Fix:** January 28, 2026
+**Fixed:** January 28, 2026
 
-Many buttons, especially icon-only buttons, are missing `aria-label` attributes for screen reader users.
+Many buttons, especially icon-only buttons, were missing `aria-label` attributes for screen reader users.
 
-**Partial Fix Applied:**
+**Fix Applied:**
 
-Added `aria-label="Close panel"` to close buttons in:
-
-- `src/features/admin/modules/admin-contacts.ts` - Contact details panel close button
-- `src/features/admin/modules/admin-leads.ts` - Lead details panel close button
-
-**Locations Found:**
-- `src/features/admin/modules/admin-projects.ts` lines 957-958: Preview/Download buttons have `aria-label` (good)
-- `src/features/admin/modules/admin-projects.ts` lines 1082, 1124, 1166: Modal close buttons have `aria-label` (good)
-- `src/features/admin/modules/admin-contacts.ts`: Close button now has `aria-label` (fixed)
-- `src/features/admin/modules/admin-leads.ts`: Close button now has `aria-label` (fixed)
-- Many other buttons throughout admin/client portals may be missing labels
-- Icon-only buttons likely missing labels
-
-**Issues:**
-- Screen reader users can't understand button purpose
-- Icon-only buttons are inaccessible
-- Buttons with only visual text need descriptive labels
-
-**Expected behavior:**
-- All buttons should have `aria-label` if text is not descriptive
-- Icon-only buttons must have `aria-label`
-- Buttons with descriptive text can use text as label
-- Use `aria-describedby` for additional context if needed
-
-**Root Cause:** Missing accessibility attributes. Should audit all buttons and add appropriate ARIA labels.
+- **Admin:** `admin/index.html` – Edit client info, Edit billing, Edit project icon buttons now have `aria-label`. Invite button in `admin-clients.ts` has `aria-label="Send invitation email to client"`.
+- **Admin proposals:** `admin-proposals.ts` – View details and Convert to invoice icon buttons have `aria-label`.
+- **Table filter:** `table-filter.ts` – Clear All filters button has `aria-label="Clear all filters"`.
+- **Client portal files:** `portal-files.ts` – Preview, Download, and Delete buttons use `aria-label` with filename (e.g. `Preview myfile.pdf`, `Delete myfile.pdf`).
+- **Client portal preview:** `client/portal.html` – Open in new tab and Refresh preview icon buttons have `aria-label`.
+- **Existing:** Contact/lead panel close buttons, admin modal close buttons, admin projects Preview/Download already had `aria-label`.
 
 - [x] #### Client Portal Forms - No Loading States During Save
 
@@ -1090,58 +1110,46 @@ Updated `src/features/client/client-portal.ts` `setupSettingsFormHandlers()` to 
 
 All forms now disable submit button and show loading text during save.
 
-- [ ] #### Admin Modals - No Focus Trap or Restoration
+- [x] #### Admin Modals - No Focus Trap or Restoration
 
-**Status:** TODO
+**Status:** COMPLETE (edit/add project, edit/add client). Detail modal TODO
 **Observed:** January 28, 2026
+**Fixed:** January 28, 2026
 
-Admin modals (edit project, edit client, add project) don't implement focus trapping, making them inaccessible for keyboard users.
+Admin modals (edit project, add project, edit client, add client) now use focus trapping via `manageFocusTrap` from `src/utils/focus-trap.ts`.
 
-**Locations Found:**
-- `src/features/admin/modules/admin-projects.ts`: Edit project modal (lines 660-695)
-- `src/features/admin/modules/admin-clients.ts`: Edit client modals
-- `src/features/admin/admin-dashboard.ts`: Detail modal
+**Fix Applied:**
 
-**Issues:**
-- Keyboard users can tab outside modal
-- Focus not restored when modal closes
-- No focus trap within modal
-- Escape key handling may be inconsistent
+- **Edit project modal** (`admin-projects.ts`): Focus trap on open, `role="dialog"`, `aria-modal="true"`, `aria-labelledby="edit-project-modal-title"`. Escape closes modal, focus restored on close. `closeEditProjectModal` runs cleanup and removes ARIA when hidden.
+- **Add project modal** (`admin-projects.ts`): Same pattern; `aria-labelledby="add-project-modal-title"`, initial focus `#new-project-client`.
+- **Edit / Add client modals** (`admin-clients.ts`): Already used `manageFocusTrap` (no change).
+- **Focus trap cleanup** (`focus-trap.ts`): Cleanup now also removes `role` (in addition to `aria-modal`).
 
-**Expected behavior:**
-- Trap focus within modal
-- Restore focus to trigger element
-- Handle Tab/Shift+Tab navigation
-- Close on Escape key
-- Focus first element when opened
+**Remaining:** Detail modal (`#detail-modal`) in `admin-dashboard.ts` used for leads/contacts still has no focus trap. Consider adding `manageFocusTrap` when that modal is shown.
 
-**Root Cause:** Admin modals use basic implementation without focus management. Should use same pattern as `ModalComponent` or add focus management to existing modals.
+- [x] #### Error Messages - Not Associated with Form Fields
 
-- [ ] #### Error Messages - Not Associated with Form Fields
-
-**Status:** TODO
+**Status:** COMPLETE
 **Observed:** January 28, 2026
+**Fixed:** January 28, 2026
 
-Form validation errors are not properly associated with form fields using ARIA attributes, making them hard to discover for screen reader users.
+Form validation errors are now associated with form fields using `aria-invalid` and `aria-describedby` where inline errors are shown.
 
-**Locations Found:**
-- `src/features/client/client-portal.ts`: Validation errors shown in alerts, not associated with fields
-- `src/utils/form-validation.ts`: Only checks completion, doesn't set ARIA attributes
-- Admin forms: May not use `aria-invalid` or `aria-describedby`
+**Fix Applied:**
 
-**Issues:**
-- Screen reader users may not hear error messages
-- Errors not visually connected to fields
-- No `aria-invalid="true"` on invalid fields
-- No `aria-describedby` linking errors to fields
+- **Portal auth** (`portal-auth.ts`): `showFieldError` sets `aria-invalid="true"` on the field, `role="alert"` and `aria-live="polite"` on the error element, and `aria-describedby` linking the field to the error. `clearErrors` removes those attributes.
+- **Contact form** (`contact-form.ts`): `showFieldError` adds `aria-invalid`, `aria-describedby`, and gives the error element an `id`, `role="alert"`, and `aria-live="polite"`. `removeErrorMessage` and `clearAllErrors` clear them.
+- **form-errors.ts** already provided this pattern; portal-auth and contact-form now implement it.
 
-**Expected behavior:**
-- Set `aria-invalid="true"` on fields with errors
-- Use `aria-describedby` to link error messages to fields
-- Show error messages near fields (not just in alerts)
-- Announce errors to screen readers
+- [x] #### Additional ARIA fixes (audit Jan 28, 2026)
 
-**Root Cause:** Missing ARIA attributes for form validation. Should implement proper error association using `aria-invalid` and `aria-describedby`.
+**Status:** COMPLETE
+
+- **Leads cancellation dialog** (`admin-leads.ts`): `showCancelledByDialog` overlay now has `aria-labelledby="cancel-dialog-title"`; the heading uses `id="cancel-dialog-title"`.
+- **Focus trap** (`focus-trap.ts`): Cleanup removes `role` as well as `aria-modal` when the trap is released.
+- **Edit / Add project modals:** `h3` titles use `id="edit-project-modal-title"` and `id="add-project-modal-title"` for `aria-labelledby` on the overlay.
+
+**Not changed:** Detail modal (`#detail-modal`), duplicate `id="preview-modal-close"` in admin preview modals (JSON/text/image). Consider unique IDs or a single preview modal for future cleanup.
 
 - [x] #### Prompt() Dialogs - Poor UX for Data Input
 
@@ -1175,18 +1183,21 @@ Created `multiPromptDialog()` in `src/utils/confirm-dialog.ts` and replaced all 
 Admin tables (projects, leads, clients) may not be fully responsive on mobile devices, potentially causing horizontal scrolling or poor usability.
 
 **Locations Found:**
+
 - `src/features/admin/modules/admin-projects.ts`: Projects table with many columns
 - `src/features/admin/modules/admin-leads.ts`: Leads table with 8 columns
 - `src/features/admin/modules/admin-clients.ts`: Clients table
 - `src/styles/pages/admin.css`: Has some responsive styles but may need more
 
 **Issues:**
+
 - Tables with many columns may overflow on mobile
 - Text may be truncated or hard to read
 - Horizontal scrolling required on small screens
 - Touch targets may be too small
 
 **Expected behavior:**
+
 - Responsive table design (stack columns, card view, or horizontal scroll with proper indicators)
 - Mobile-optimized layouts for small screens
 - Adequate touch target sizes
@@ -1194,31 +1205,29 @@ Admin tables (projects, leads, clients) may not be fully responsive on mobile de
 
 **Root Cause:** Tables designed for desktop may not adapt well to mobile. Should implement responsive table patterns or mobile-specific layouts.
 
-- [ ] #### Toast Notifications - Good Implementation, But Inconsistent Usage
+- [x] #### Toast Notifications - Good Implementation, But Inconsistent Usage
 
-**Status:** TODO
+**Status:** DONE (admin + code-protection)
 **Observed:** January 28, 2026
+**Fixed:** January 28, 2026
 
-Toast notification system exists (`src/utils/toast-notifications.ts`) with proper `aria-live` attributes, but many places still use `alert()` instead of toasts.
+Toast notification system exists (`src/utils/toast-notifications.ts`) with proper `aria-live` attributes.
 
-**Locations Found:**
-- `src/utils/toast-notifications.ts`: Good implementation with `aria-live="polite"`/`"assertive"` and `role="alert"`
-- `src/features/client/client-portal.ts`: Many `alert()` calls instead of toasts
-- `src/features/admin/modules/admin-projects.ts`: Uses `showNotification()` which may use toasts
-- `src/features/admin/modules/admin-leads.ts`: Uses `showNotification()` which may use toasts
+**Fix applied:**
 
-**Issues:**
-- Inconsistent user feedback (some alerts, some toasts)
-- Alerts block UI, toasts don't
-- Mixed patterns make UX inconsistent
+- **Admin:** No native `alert()` in admin code. Admin uses `showNotification()` / `showToast()` and custom `alertError` / `alertSuccess` / `alertWarning` (confirm-dialog modals) for feedback.
+- **Code protection:** Replaced the only remaining native `alert()` in `src` — `src/services/code-protection-service.ts` devtools message — with `showToast(..., 'warning', { duration: 5000 })`.
+
+**Reference:**
+
+- `src/utils/toast-notifications.ts`: `aria-live="polite"` / `"assertive"`, `role="alert"`
+- Admin modules use `showNotification()` (dashboard) or `showToast()` (e.g. admin-projects) and confirm-dialog for modals.
 
 **Expected behavior:**
-- Replace all `alert()` calls with toast notifications
+
 - Use toasts for non-critical feedback
 - Use modals only for critical confirmations
 - Consistent feedback pattern across application
-
-**Root Cause:** Toast system exists but not fully adopted. Should migrate all `alert()` calls to use toast notifications for better UX.
 
 - [ ] #### Form Inputs - Missing Placeholder Text or Help Text
 
@@ -1228,16 +1237,19 @@ Toast notification system exists (`src/utils/toast-notifications.ts`) with prope
 Some form inputs may be missing placeholder text or help text, making it unclear what users should enter.
 
 **Locations Found:**
+
 - Admin forms: May have placeholders but need verification
 - Client portal forms: Some inputs may lack helpful placeholders
 - Terminal intake: Has placeholders (good)
 
 **Issues:**
+
 - Users may not understand what to enter
 - No formatting hints (e.g., date format)
 - No examples or guidance
 
 **Expected behavior:**
+
 - All inputs should have descriptive placeholders
 - Format hints where needed (e.g., "YYYY-MM-DD")
 - Help text for complex fields
@@ -1305,6 +1317,7 @@ Some form inputs may be missing placeholder text or help text, making it unclear
 **Fix Applied:**
 
 Added specific styles for `.download-btn` in `src/styles/pages/admin.css`:
+
 - Background uses `--portal-bg-medium`
 - Hover state uses primary color with dark text
 - Matches styling of other action buttons in admin panel
@@ -1434,10 +1447,6 @@ Post-intake tiered proposal builder with GOOD/BETTER/BEST tiers and mix & match 
   - **Impact:** 20+ alert() calls, 5 prompt() calls, 10+ manual button creations, 3 manual modal handlers
   - **Benefits:** Consistent UX, better accessibility, easier maintenance
 
-### Admin UI Polish (High Priority)
-
-- [x] **REDESIGN ALL PORTAL BUTTONS** - Full button redesign across admin and client portals (January 26, 2026)
-
 ### Contact Management
 
 - [ ] **Convert Contact to Client** - Add ability to convert contact submissions to clients
@@ -1513,6 +1522,11 @@ All code implementation phases are complete. See archived work for details.
 Based on research of HoneyBook, Dubsado, Bonsai, Moxo + analysis of existing codebase.
 
 **Philosophy:** Enhance existing features first, build new only when necessary.
+
+**Deep dives:**
+- [CRM_CMS_DEEP_DIVE.md](./CRM_CMS_DEEP_DIVE.md) — Gap analysis vs state-of-the-art CRM/CMS (features implemented, what's missing, prioritized recommendations).
+- [CLIENT_PORTAL_DEEP_DIVE.md](./CLIENT_PORTAL_DEEP_DIVE.md) — **Whole-portal** audit: every view (dashboard, messages, files, invoices, settings, etc.), static vs API-driven, and what's missing for state-of-the-art client portals.
+- [TABLES_ARCHIVE_DELETE_AUDIT.md](./TABLES_ARCHIVE_DELETE_AUDIT.md) — **Tables, archive & delete:** filter/sort/export, pagination, bulk actions, archive vs delete, restore, confirm flows. Small-feature gaps and quick wins.
 
 ---
 
@@ -1784,7 +1798,9 @@ Based on research of HoneyBook, Dubsado, Bonsai, Moxo + analysis of existing cod
 
 #### TIER 8: Polish & Delight (Final Touch)
 
-**Build last - everything else should be solid first**
+#### Build order
+
+Build last - everything else should be solid first.
 
 - [ ] **8.1 Virtual Tour / First-Time Walkthrough**
   - Interactive guided tour for new users on first portal login
@@ -1847,7 +1863,7 @@ Based on research of HoneyBook, Dubsado, Bonsai, Moxo + analysis of existing cod
 #### IMPLEMENTATION PRIORITY MATRIX
 
 | Feature | Effort | Impact | Dependencies | Priority |
-|---------|--------|--------|--------------|----------|
+| --- | --- | --- | --- | --- |
 | 1.1 Scheduler | Low | High | None | **P0** |
 | 2.1 Activity Feed | Low | High | None | **P0** |
 | 2.4 Unread Badges | Low | Medium | None | **P0** |
@@ -1891,11 +1907,12 @@ These three unlock everything else and provide immediate visible value.
 **Status:** PLANNING
 **Observed:** January 28, 2026
 
-### Deep Dive Investigation (January 28, 2026)
+### Deep Dive Investigation (Kanban)
 
 #### Current State Analysis
 
 **Current Project Management:**
+
 - Projects displayed in table format (`admin/index.html` lines 425-484)
 - Table columns: Project Name, Client, Type, Budget, Timeline, Start Date, End Date, Status
 - Status values: `pending`, `in-progress`, `in-review`, `completed`, `on-hold`
@@ -1906,11 +1923,13 @@ These three unlock everything else and provide immediate visible value.
 - Module: `src/features/admin/modules/admin-projects.ts` handles project rendering and management
 
 **Database Schema:**
+
 - `projects` table has all necessary fields for Kanban/Timeline
 - `project_updates` table exists for timeline entries (id, project_id, title, description, update_type, author, created_at)
 - Update types: `progress`, `milestone`, `issue`, `resolution`, `general`
 
 **Tech Stack:**
+
 - Vanilla TypeScript (no heavy UI frameworks)
 - CSS with CSS Variables and cascade layers
 - Chart.js for charts (could be useful for timeline visualization)
@@ -1920,6 +1939,7 @@ These three unlock everything else and provide immediate visible value.
 #### Requirements
 
 **Kanban Board Features:**
+
 1. **Column-Based Organization**
    - Columns: Pending → In Progress → In Review → Completed (with optional On Hold column)
    - Drag-and-drop to move projects between columns
@@ -1943,6 +1963,7 @@ These three unlock everything else and provide immediate visible value.
    - Toggle between Kanban and Table view
 
 **Timeline View Features:**
+
 1. **Gantt-Style Timeline**
    - Horizontal timeline showing project durations
    - Projects as bars positioned by start_date and end_date
@@ -1969,9 +1990,9 @@ These three unlock everything else and provide immediate visible value.
    - Resource allocation view (shows workload)
    - Warning for projects exceeding capacity
 
-#### Implementation Plan
+#### Implementation Plan (Kanban)
 
-**Phase 1: Foundation & Data Layer**
+##### Phase 1: Foundation & Data Layer
 
 1. **API Enhancements**
    - Add `GET /api/projects/timeline` endpoint
@@ -1989,10 +2010,11 @@ These three unlock everything else and provide immediate visible value.
    - Consider adding index on `status` and `start_date` for performance
    - Verify `project_updates` table has proper indexes
 
-**Phase 2: Kanban Board Implementation**
+##### Phase 2: Kanban Board Implementation
 
 1. **File Structure**
-   ```
+
+   ```text
    src/features/admin/modules/
    ├── admin-projects.ts (existing - extend)
    └── admin-projects-kanban.ts (new)
@@ -2024,10 +2046,11 @@ These three unlock everything else and provide immediate visible value.
    - Optimistic UI update with rollback on error
    - Toast notification on success
 
-**Phase 3: Timeline View Implementation**
+##### Phase 3: Timeline View Implementation
 
 1. **File Structure**
-   ```
+
+   ```text
    src/features/admin/modules/
    └── admin-projects-timeline.ts (new)
    
@@ -2061,7 +2084,7 @@ These three unlock everything else and provide immediate visible value.
    - Scroll horizontally to navigate timeline
    - Vertical scroll for multiple projects
 
-**Phase 4: Integration & Polish**
+##### Phase 4: Integration & Polish
 
 1. **View Switching**
    - Add view selector in projects tab header
@@ -2089,21 +2112,25 @@ These three unlock everything else and provide immediate visible value.
 #### Technical Decisions
 
 **Drag-and-Drop Library:**
+
 - **Decision:** Use native HTML5 Drag API
 - **Rationale:** No external dependencies, lightweight, good browser support
 - **Alternative considered:** SortableJS or dnd-kit (rejected to keep bundle size small)
 
 **Timeline Rendering:**
+
 - **Decision:** Custom SVG-based rendering
 - **Rationale:** Full control, no external dependencies, performant
 - **Alternative considered:** Chart.js timeline plugin (rejected - overkill for this use case)
 
 **State Management:**
+
 - **Decision:** Module-level state with event-driven updates
 - **Rationale:** Consistent with existing admin module pattern
 - **No global state library needed** (keep it simple)
 
 **View Persistence:**
+
 - **Decision:** localStorage for view preference
 - **Rationale:** Simple, no backend changes needed
 - **Key:** `admin-projects-view-preference` = `'table' | 'kanban' | 'timeline'`
@@ -2111,6 +2138,7 @@ These three unlock everything else and provide immediate visible value.
 #### File Changes Summary
 
 **New Files:**
+
 - `src/features/admin/modules/admin-projects-kanban.ts` (~500 lines)
 - `src/features/admin/modules/admin-projects-timeline.ts` (~600 lines)
 - `src/features/admin/components/kanban-board.ts` (~400 lines)
@@ -2119,19 +2147,21 @@ These three unlock everything else and provide immediate visible value.
 - `src/styles/admin/timeline-view.css` (~400 lines)
 
 **Modified Files:**
+
 - `admin/index.html` - Add view toggle buttons, containers for Kanban/Timeline
 - `src/features/admin/modules/admin-projects.ts` - Add view switching logic
 - `src/features/admin/modules/index.ts` - Register new modules
 - `server/routes/projects.ts` - Add timeline endpoint, position update endpoint
 
 **Estimated Implementation Time:**
+
 - Phase 1 (API): 4-6 hours
 - Phase 2 (Kanban): 12-16 hours
 - Phase 3 (Timeline): 16-20 hours
 - Phase 4 (Integration): 6-8 hours
 - **Total: 38-50 hours** (~1-1.5 weeks of focused work)
 
-#### Success Criteria
+#### Success Criteria (Kanban)
 
 1. ✅ Projects can be dragged between Kanban columns
 2. ✅ Status updates persist via API
@@ -2159,11 +2189,12 @@ These three unlock everything else and provide immediate visible value.
 **Status:** PLANNING
 **Observed:** January 28, 2026
 
-### Deep Dive Investigation (January 28, 2026)
+### Deep Dive Investigation (Smart Scheduling)
 
 #### What “Smart Scheduling” Means (in this system)
 
 Goal: use **your actual historical throughput** to produce a **best-effort schedule** for:
+
 - Projects (start → estimated end)
 - Milestones (target dates)
 - Optional “capacity” planning (don’t overbook)
@@ -2182,7 +2213,8 @@ This is expected to be **inaccurate at first** (cold start). The system should b
 
 #### Data Model Needed (minimum viable → evolving)
 
-**Phase 1 (MVP, low risk): infer duration from history**
+##### Phase 1 (MVP, low risk): infer duration from history
+
 - Store “what was planned” vs “what happened”:
   - milestone: `created_at`, `target_date` (planned), `completed_at` (actual)
   - project: existing `start_date`, `estimated_end_date`, `actual_end_date`
@@ -2190,24 +2222,28 @@ This is expected to be **inaccurate at first** (cold start). The system should b
   - median lead time per milestone type/category
   - per-project-type baseline durations
 
-**Phase 2 (better predictions): add features**
+##### Phase 2 (better predictions): add features
+
 - Add “complexity” / “size” input (very small/small/medium/large) at project + milestone level.
 - Add “work type” label (design, dev, copy, QA, deploy).
 - Add “blocked” windows (pause time shouldn’t count as effort time).
 
-**Phase 3 (capacity-aware): model your time**
+##### Phase 3 (capacity-aware): model your time
+
 - Weekly capacity (default, editable): e.g. 20–30 focused hours/week.
 - Optional working days/time off (simple overrides, not full calendar integration initially).
 
 #### Scheduling Approach (start simple, then improve)
 
 **Cold start (expected inaccurate):**
+
 - Use fixed defaults per project type:
   - e.g. `business-site` baseline = 2–4 weeks, `web-app` baseline = 6–10 weeks, etc.
 - Or use one global default + wide uncertainty band.
 - Show **confidence: low** until there are enough completed items.
 
 **After some history exists:**
+
 - Use **robust statistics** (median + IQR) to avoid outliers:
   - milestone lead time = `completed_at - created_at` (or `completed_at - started_at` if tracked)
   - project lead time = `actual_end_date - start_date`
@@ -2217,12 +2253,14 @@ This is expected to be **inaccurate at first** (cold start). The system should b
   - low/medium/high confidence based on sample size + variance
 
 **Capacity-aware scheduling (later):**
+
 - Convert durations into “work units” and place sequentially onto a weekly capacity timeline.
 - Allow priorities to reorder the queue.
 
 #### UI/UX Outputs (what the user sees)
 
 **In Projects UI (Table/Kanban/Timeline):**
+
 - **Suggested end date** (and range) for each project
 - **Suggested milestone target dates**
 - **Confidence badge** (Low/Med/High) + "based on N similar items"
@@ -2230,6 +2268,7 @@ This is expected to be **inaccurate at first** (cold start). The system should b
   - "Based on median 9 days for 'Milestone: Design Review' over 12 completed milestones"
 
 **At-Risk Indicators:**
+
 - **Risk badge** on project cards/rows (Warning/Critical)
 - **Risk icon** with tooltip explaining the trigger:
   - "Client hasn't responded in 12 days"
@@ -2244,6 +2283,7 @@ This is expected to be **inaccurate at first** (cold start). The system should b
   - Suggested actions
 
 **Controls:**
+
 - Set weekly capacity (simple number)
 - Toggle: "Include weekends" / "Workdays only"
 - Override per project: "Hard deadline" (warn if predicted miss)
@@ -2256,6 +2296,7 @@ This is expected to be **inaccurate at first** (cold start). The system should b
 #### API + Storage Plan
 
 **New endpoints (admin-only):**
+
 - `GET /api/projects/schedule`:
   - returns projects + computed schedule fields (suggested dates, confidence, assumptions)
 - `POST /api/projects/:id/milestones` / `PUT /api/projects/:id/milestones/:mid`:
@@ -2271,6 +2312,7 @@ This is expected to be **inaccurate at first** (cold start). The system should b
   - quick action to nudge client (uses existing email system)
 
 **DB changes (proposed):**
+
 - Add `project_milestones` table (if not already present in schema):
   - `id`, `project_id`, `title`, `type`, `size`, `target_date`, `completed_at`, `created_at`, `updated_at`
 - Add `scheduling_settings` table (single row keyed by admin user or global):
@@ -2285,20 +2327,23 @@ This is expected to be **inaccurate at first** (cold start). The system should b
   - `last_progress_update_at` (derived from project_updates or progress changes)
   - `risk_flags` (JSON array of active flags with reasons)
 
-#### Implementation Plan
+#### Implementation Plan (Smart Scheduling)
 
 **Build Order Flexibility:**
+
 - Phase 2.5 (At-Risk Flagging) can be built **first** - no dependencies on scheduling
 - Phases 1-4 should be built in order
 - At-Risk Flagging provides immediate value with minimal complexity
 
-**Phase 1: MVP (honest + useful, even if inaccurate)**
+##### Phase 1: MVP (honest + useful, even if inaccurate)
+
 - Add milestones storage (if missing) + basic CRUD
 - Implement `/api/projects/schedule` returning:
   - naive estimates + wide ranges + confidence=low
 - UI: show "Suggested end date" + confidence in projects table + timeline overlay
 
-**Phase 2: Learning from real completion**
+##### Phase 2: Learning from real completion
+
 - Record milestone completion timestamps
 - Compute rolling medians by:
   - milestone type
@@ -2306,7 +2351,8 @@ This is expected to be **inaccurate at first** (cold start). The system should b
   - (optional) size
 - Update schedule endpoint to use learned medians + variance bands
 
-**Phase 2.5: At-Risk Project Flagging (can build early, rule-based)**
+##### Phase 2.5: At-Risk Project Flagging (can build early, rule-based)
+
 - **Note:** This phase can be implemented independently, even before Phase 1/2
 - No ML or historical data required - pure rule-based detection
 - Implementation steps:
@@ -2330,23 +2376,26 @@ This is expected to be **inaccurate at first** (cold start). The system should b
 - Risk severity levels: Warning (yellow), Critical (red)
 - Configurable thresholds per project or global defaults
 
-**Phase 3: Capacity-aware scheduling**
+##### Phase 3: Capacity-aware scheduling
+
 - Add scheduling settings (weekly capacity)
 - Implement simple queueing:
   - order by priority, then start dates
   - allocate predicted work onto weeks
 - UI: warnings for over-capacity weeks and missed deadlines
 
-**Phase 4: Quality + trust**
+##### Phase 4: Quality + trust
+
 - “Explain this schedule” panel per project
 - Backtesting view:
   - show last N completed projects predicted vs actual
 - Guardrails:
   - never silently overwrite user-set dates; always suggest vs apply
 
-#### Success Criteria
+#### Success Criteria (Smart Scheduling)
 
 **Scheduling:**
+
 1. ✅ Produces a schedule even with zero history (explicitly low confidence)
 2. ✅ Improves estimates automatically once completions exist
 3. ✅ Shows "why" + confidence (trust-building)
@@ -2380,8 +2429,8 @@ This is expected to be **inaccurate at first** (cold start). The system should b
 npm run dev:full
 ```
 
-- Frontend: http://localhost:4000
-- Backend: http://localhost:4001
+- Frontend: [http://localhost:4000](http://localhost:4000)
+- Backend: [http://localhost:4001](http://localhost:4001)
 
 ---
 
