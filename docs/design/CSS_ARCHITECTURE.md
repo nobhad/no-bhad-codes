@@ -1164,6 +1164,7 @@ The following components duplicate shared style patterns instead of using the re
 | File | Lines | Issue | Shared Component |
 |------|-------|-------|-----------------|
 | `pages/admin.css` | 805-816 | `.stat-card` duplicates shared definition | `shared/portal-cards.css` `.stat-card` |
+| `pages/admin.css` | 293-319, 1419-1438 | `.icon-btn` defined twice in same file | Internal duplication |
 | `pages/admin.css` | 1521-1586 | `.set-password-form` defines custom form/button styles | `shared/portal-forms.css`, `shared/portal-buttons.css` |
 
 **`.stat-card` Duplication (lines 805-816):**
@@ -1171,6 +1172,17 @@ The following components duplicate shared style patterns instead of using the re
 The `pages/admin.css` file has an unscoped `.stat-card` definition that duplicates the scoped version in `shared/portal-cards.css`. The shared version already targets `[data-page="admin"], [data-page="client-portal"]` and provides the same styling.
 
 **Recommendation:** Remove the duplicate `.stat-card` from `pages/admin.css` or ensure it only contains admin-specific overrides.
+
+**`.icon-btn` Internal Duplication (lines 293-319 vs 1419-1438):**
+
+The same file `pages/admin.css` defines `.icon-btn` twice:
+
+- Lines 293-319: Scoped `[data-page="admin"] .icon-btn` with 36x36px sizing
+- Lines 1419-1438: Unscoped `.icon-btn` with padding-based sizing
+
+Additionally, `shared/portal-buttons.css` defines `button.btn-icon` for standalone icon buttons.
+
+**Recommendation:** Consolidate into a single definition. Remove lines 1419-1438 (unscoped version) and keep the scoped version at lines 293-319.
 
 **`.set-password-form` Custom Styles (lines 1521-1586):**
 
@@ -1180,6 +1192,18 @@ This form defines its own `.form-input`, `.form-group`, and `.btn-primary` style
 
 1. Update the set-password-form to use shared components with CSS variable overrides, OR
 2. Document this as intentional deviation for the specific use case (unauthenticated password reset page may need different styling)
+
+#### Intentionally Different Patterns (Not Duplicates)
+
+The following patterns look like duplicates but are intentionally different designs:
+
+| File | Component | Reason |
+|------|-----------|--------|
+| `pages/admin.css:854` vs `client-portal/dashboard.css:14` | `.status-badge` | Admin uses pill-shaped badges with colored backgrounds; Client portal uses text-only colored labels |
+| `admin/project-detail.css:360-422` | Form input overrides | Adds admin-specific `background-color: var(--color-black)` and thicker focus borders on top of shared base styles |
+| `client-portal/dashboard.css:46` vs `shared/progress.css` | `.progress-bar` | Context-specific sizing and styling for different uses |
+
+These are legitimate scoped overrides and should NOT be consolidated.
 
 #### Hardcoded Colors (Low Priority)
 
