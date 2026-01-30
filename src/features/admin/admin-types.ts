@@ -143,6 +143,9 @@ export interface ContactSubmission {
   read_at?: string;
   replied_at?: string;
   created_at: string;
+  // Conversion tracking
+  client_id?: number;
+  converted_at?: string;
 }
 
 // Project types

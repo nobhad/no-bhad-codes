@@ -33,6 +33,7 @@ import { showTableError } from '../../../utils/error-utils';
 import { createDOMCache, batchUpdateText, getElement } from '../../../utils/dom-cache';
 import { withButtonLoading } from '../../../utils/button-loading';
 import { manageFocusTrap } from '../../../utils/focus-trap';
+import { validateEmail } from '../../../../shared/validation/validators';
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -353,16 +354,17 @@ function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): voi
         showInviteBtn = true;
       }
 
-      // Status cell with optional invite button
+      // Status cell with optional invite button (icon-only, inline with status)
       const statusCell = showInviteBtn
-        ? `<span class="${statusClass}">${statusDisplay}</span>
-           <button class="btn-invite-inline" data-client-id="${client.id}" title="Send invitation email" aria-label="Send invitation email to client">
-             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-               <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-             </svg>
-             Invite
-           </button>`
-        : `<span class="${statusClass}">${statusDisplay}</span>`;
+        ? `<span class="status-cell-wrapper">
+             <span class="status-badge ${statusClass}">${statusDisplay}</span>
+             <button class="icon-btn icon-btn-invite" data-client-id="${client.id}" title="Send invitation email" aria-label="Send invitation email to client">
+               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                 <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+               </svg>
+             </button>
+           </span>`
+        : `<span class="status-badge ${statusClass}">${statusDisplay}</span>`;
 
       return `
         <tr data-client-id="${client.id}" class="clickable-row">
@@ -387,8 +389,8 @@ function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): voi
     });
   });
 
-  // Invite button click handlers
-  tableBody.querySelectorAll('.btn-invite-inline').forEach((btn) => {
+  // Invite button click handlers (icon button next to status)
+  tableBody.querySelectorAll('.icon-btn-invite').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation(); // Prevent row click
       const clientId = parseInt((btn as HTMLElement).dataset.clientId || '0');
@@ -444,16 +446,20 @@ function populateClientDetailView(client: Client): void {
   const safePhone = SanitizationUtils.formatPhone(client.phone || '');
   const status = client.status || 'pending';
   const clientType = client.client_type || 'business';
-  const clientAny = client as { last_login_at?: string };
+  const clientAny = client as { last_login_at?: string; invitation_sent_at?: string; password_hash?: string; invited_at?: string };
 
-  // Batch update all client detail fields
+  // Check if client needs invitation (pending and never invited)
+  // Check multiple fields: invitation_sent_at, password_hash (set after accepting invite), invited_at
+  const hasBeenInvited = !!clientAny.invitation_sent_at || !!clientAny.password_hash || !!clientAny.invited_at;
+  const showInviteBtn = status !== 'active' && !hasBeenInvited;
+
+  // Batch update all client detail fields (except status which needs special handling)
   batchUpdateText({
     'client-detail-title': 'Client Details',
     'cd-client-name': safeName,
     'cd-email': safeEmail,
     'cd-company': safeCompany,
     'cd-phone': safePhone,
-    'cd-status': status.charAt(0).toUpperCase() + status.slice(1),
     'cd-client-type': clientType === 'personal' ? 'Personal' : 'Business',
     'cd-created': formatDate(client.created_at),
     'cd-last-login': clientAny.last_login_at
@@ -469,6 +475,32 @@ function populateClientDetailView(client: Client): void {
     'cd-billing-zip': client.billing_zip ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_zip)) : '-',
     'cd-billing-country': client.billing_country ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(client.billing_country)) : '-'
   });
+
+  // Update status field with invite button if needed
+  const statusEl = document.getElementById('cd-status');
+  if (statusEl) {
+    const statusDisplay = status.charAt(0).toUpperCase() + status.slice(1);
+    if (showInviteBtn) {
+      statusEl.innerHTML = `
+        <span class="status-cell-wrapper">
+          <span>${statusDisplay}</span>
+          <button class="icon-btn icon-btn-invite" id="cd-invite-btn" data-client-id="${client.id}" title="Send invitation email" aria-label="Send invitation email to client">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+            </svg>
+          </button>
+        </span>`;
+      // Add click handler for the invite button
+      const inviteBtn = document.getElementById('cd-invite-btn');
+      if (inviteBtn) {
+        inviteBtn.addEventListener('click', async () => {
+          await sendClientInvitation(client.id);
+        });
+      }
+    } else {
+      statusEl.textContent = statusDisplay;
+    }
+  }
 }
 
 function setupClientDetailHandlers(client: Client, ctx: AdminDashboardContext): void {
@@ -844,6 +876,15 @@ function editClientInfo(clientId: number, ctx: AdminDashboardContext): void {
     const newPhone = phoneInput?.value.trim();
     const newStatus = statusSelect?.value;
 
+    // Validate email format if provided
+    if (newEmail) {
+      const emailValidation = validateEmail(newEmail, { allowDisposable: true });
+      if (!emailValidation.isValid) {
+        ctx.showNotification(emailValidation.error || 'Invalid email format', 'error');
+        return;
+      }
+    }
+
     await withButtonLoading(submitBtn, async () => {
       const response = await apiPut(`/api/clients/${clientId}`, {
         email: newEmail || null,
@@ -958,6 +999,15 @@ function editClientBilling(clientId: number, ctx: AdminDashboardContext): void {
     const newBillingZip = zipInput?.value.trim();
     const newBillingCountry = countryInput?.value.trim();
 
+    // Validate billing email format if provided
+    if (newBillingEmail) {
+      const emailValidation = validateEmail(newBillingEmail, { allowDisposable: true });
+      if (!emailValidation.isValid) {
+        ctx.showNotification(emailValidation.error || 'Invalid billing email format', 'error');
+        return;
+      }
+    }
+
     await withButtonLoading(submitBtn, async () => {
       const response = await apiPut(`/api/clients/${clientId}`, {
         billing_name: newBillingName || null,
@@ -1066,6 +1116,13 @@ function addClient(ctx: AdminDashboardContext): void {
 
     if (!email) {
       ctx.showNotification('Email is required', 'error');
+      return;
+    }
+
+    // Validate email format
+    const emailValidation = validateEmail(email, { allowDisposable: true });
+    if (!emailValidation.isValid) {
+      ctx.showNotification(emailValidation.error || 'Invalid email format', 'error');
       return;
     }
 

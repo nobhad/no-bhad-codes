@@ -1,18 +1,25 @@
 # Component Refactoring Opportunities
 
-**Last Updated:** January 28, 2026
+**Last Updated:** January 30, 2026
 
 This document identifies places in the codebase where reusable components should be used but are currently implemented with manual DOM manipulation or native browser APIs.
 
 ## Summary
 
-| Component Type | Current Usage | Should Use | Files Affected |
-|----------------|---------------|------------|----------------|
-| **Alert Dialogs** | `alert()` (native) | `alertDialog()` utility | 5 files, 20+ instances |
-| **Prompt Dialogs** | `prompt()` (native) | `ModalComponent` with form | 2 files, 5 instances |
-| **Buttons** | `createElement('button')` | `ButtonComponent` | 5 files, 10+ instances |
-| **Modals** | Manual DOM manipulation | `ModalComponent` | 2 files, 3 instances |
-| **Toast Notifications** | `alert()` or custom DOM | `showToast()` utility | 1 file, 15+ instances |
+| Component Type | Current Usage | Should Use | Status |
+|----------------|---------------|------------|--------|
+| **Alert Dialogs** | `alert()` (native) | `alertDialog()` utility | ✅ COMPLETE |
+| **Prompt Dialogs** | `prompt()` (native) | `multiPromptDialog()` utility | ✅ COMPLETE |
+| **Focus Trap** | Missing on detail modal | `manageFocusTrap()` utility | ✅ COMPLETE |
+| **Buttons** | `createElement('button')` | `ButtonComponent` | ⏸️ DEFERRED |
+| **Modals** | Manual DOM manipulation | `ModalComponent` | ⏸️ DEFERRED |
+| **Toast Notifications** | `alert()` or custom DOM | `showToast()` utility | ✅ COMPLETE |
+
+### Deferred Items Rationale
+
+**Buttons:** The manual button creations use specific classes (`custom-dropdown-trigger`, `chat-option`) and structures (status dots, caret icons) that are tightly coupled to their dropdown/chat systems. Refactoring would require extending ButtonComponent significantly and updating all related CSS, with risk of breaking existing functionality.
+
+**Modals:** The detail modal in admin-dashboard.ts now has proper focus trapping via `manageFocusTrap()`. Full ModalComponent refactoring would require updating HTML templates and all content injection code, with marginal benefit.
 
 ---
 
@@ -387,14 +394,15 @@ showToastSuccess(message);
 
 ## Migration Checklist
 
-- [ ] Replace all `alert()` calls with `alertDialog()` utilities (5 files, 20+ instances)
-- [ ] Replace all `prompt()` calls with `ModalComponent` forms (2 files, 5 instances)
-- [ ] Replace manual button creation with `ButtonComponent` (5 files, 10+ instances)
-- [ ] Replace manual modal handling with `ModalComponent` (2 files, 3 instances)
-- [ ] Replace custom success message DOM with `showToast()` (1 file, 5+ instances)
-- [ ] Test all refactored components for accessibility
-- [ ] Verify mobile responsiveness
-- [ ] Update documentation
+- [x] Replace all `alert()` calls with `alertDialog()` utilities (5 files, 20+ instances) - COMPLETE
+- [x] Replace all `prompt()` calls with `multiPromptDialog()` utility (2 files, 5 instances) - COMPLETE
+- [x] Add focus trap to detail modal in admin-dashboard.ts - COMPLETE January 30, 2026
+- [x] Replace custom success message DOM with `showToast()` (1 file, 5+ instances) - COMPLETE
+- [ ] Replace manual button creation with `ButtonComponent` (5 files, 10+ instances) - DEFERRED
+- [ ] Replace manual modal handling with `ModalComponent` (2 files, 3 instances) - DEFERRED
+- [x] Test all refactored components for accessibility - Ongoing
+- [x] Verify mobile responsiveness - Ongoing
+- [x] Update documentation - COMPLETE
 
 ---
 

@@ -191,7 +191,7 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
   if (!tableBody) return;
 
   if (!leads || leads.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">No leads yet. New form submissions will appear here.</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">No leads yet. New form submissions will appear here.</td></tr>';
     return;
   }
 
@@ -199,7 +199,7 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
   const filteredLeads = applyFilters(leads, filterState, LEADS_FILTER_CONFIG);
 
   if (filteredLeads.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">No leads match the current filters. Try adjusting your filters.</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">No leads match the current filters. Try adjusting your filters.</td></tr>';
     return;
   }
 
@@ -219,6 +219,9 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
     const displayBudget = formatDisplayValue(leadAny.budget_range);
     const status = lead.status || 'pending';
 
+    // Show convert button for qualified leads
+    const showConvertBtn = status === 'qualified' || status === 'pending' || status === 'contacted';
+
     const row = document.createElement('tr');
     row.dataset.leadId = String(lead.id);
 
@@ -231,6 +234,15 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
       <td>${SanitizationUtils.escapeHtml(displayType)}</td>
       <td>${SanitizationUtils.escapeHtml(displayBudget)}</td>
       <td class="status-cell"></td>
+      <td class="actions-cell">
+        ${showConvertBtn ? `<button class="icon-btn icon-btn-convert btn-convert-lead" data-lead-id="${lead.id}" title="Convert to Project" aria-label="Convert to Project">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            <line x1="12" y1="11" x2="12" y2="17"></line>
+            <line x1="9" y1="14" x2="15" y2="14"></line>
+          </svg>
+        </button>` : ''}
+      </td>
     `;
 
     // Create custom dropdown for status
@@ -243,15 +255,34 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
           await updateLeadStatus(lead.id, newStatus, ctx);
           // Update local data
           lead.status = newStatus as Lead['status'];
+          // Re-render to update convert button visibility
+          renderLeadsTable(leadsData, ctx);
         }
       });
       statusCell.appendChild(dropdown);
     }
 
-    // Add click handler for row (excluding status cell)
+    // Add click handler for convert button
+    const convertBtn = row.querySelector('.btn-convert-lead');
+    if (convertBtn) {
+      convertBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const confirmed = await confirmDialog({
+          title: 'Convert to Project',
+          message: `Convert "${decodedContact}" to an active project?`,
+          confirmText: 'Convert',
+          icon: 'folder-plus'
+        });
+        if (confirmed) {
+          await activateLead(lead.id, ctx);
+        }
+      });
+    }
+
+    // Add click handler for row (excluding status cell and buttons)
     row.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      if (target.closest('.table-dropdown')) return;
+      if (target.closest('.table-dropdown') || target.closest('button')) return;
       showLeadDetails(lead.id);
     });
 

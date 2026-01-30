@@ -61,10 +61,18 @@ async function saveIntakeAsFile(
     additionalInfo: intakeData.additionalInfo || null
   };
 
-  // Generate filename
-  const timestamp = Date.now();
-  const safeProjectName = projectName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
-  const filename = `intake_${projectId}_${safeProjectName}_${timestamp}.json`;
+  // Generate descriptive filename with NoBhadCodes branding
+  // Use company name if available, otherwise client name
+  const clientOrCompany = intakeData.companyName || intakeData.name;
+  const safeClientName = clientOrCompany
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-z0-9_-]/g, '')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '')
+    .substring(0, 50);
+  const dateStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  const filename = `nobhadcodes_intake_${safeClientName}_${dateStr}.json`;
   const filePath = join(uploadsDir, filename);
   const relativePath = getRelativePath(UPLOAD_DIRS.INTAKE, filename);
 
@@ -74,7 +82,7 @@ async function saveIntakeAsFile(
   // Get file size
   const fileSize = Buffer.byteLength(JSON.stringify(intakeDocument, null, 2), 'utf-8');
 
-  // Insert into files table
+  // Insert into files table - use descriptive filename for downloads
   await db.run(
     `INSERT INTO files (
       project_id, filename, original_filename, file_path,
@@ -83,12 +91,12 @@ async function saveIntakeAsFile(
     [
       projectId,
       filename,
-      'Project Intake Form.json',
+      filename, // Use descriptive filename for downloads
       relativePath,
       fileSize,
       'application/json',
       'document',
-      'Original project intake form submission',
+      'Project intake form submission',
       'system'
     ]
   );
@@ -495,25 +503,22 @@ function generateProjectName(
   contactName: string
 ): string {
   const typeNames: Record<string, string> = {
-    'simple-site': 'Simple Website',
-    'business-site': 'Business Website',
-    portfolio: 'Portfolio Website',
+    'simple-site': 'Simple Site',
+    'business-site': 'Business Site',
+    portfolio: 'Portfolio Site',
     'e-commerce': 'E-commerce Store',
     ecommerce: 'E-commerce Store', // Legacy support
-    'web-app': 'Web Application',
+    'web-app': 'Web App',
     'browser-extension': 'Browser Extension',
     other: 'Custom Project'
   };
 
   const typeName = typeNames[projectType] || 'Web Project';
 
-  // Personal: just use project type (e.g., "Simple Website")
-  // Business: "Acme Corp - Business Website"
-  if (clientType === 'personal') {
-    return typeName;
-  }
+  // Personal: use contact name + project type (e.g., "John Doe Portfolio Site")
+  // Business: use company/contact name + project type (e.g., "Hedgewitch Horticulture Business Site")
   const identifier = companyName || contactName;
-  return `${identifier} - ${typeName}`;
+  return `${identifier} ${typeName}`;
 }
 
 interface Milestone {

@@ -858,31 +858,55 @@ body.modal-open .dashboard-content {
   white-space: nowrap;
 }
 
-/* Inline invite button for table cells */
-.btn-invite-inline {
+/* Status cell wrapper for inline status + action button */
+.status-cell-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Invite icon button - matches .icon-btn pattern (36x36, 18x18 svg) */
+[data-page="admin"] .icon-btn-invite {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-1) var(--space-2);
-  margin-left: var(--space-2);
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  background: transparent;
   border: none;
-  border-radius: var(--border-radius-sm);
-  background: var(--color-admin-purple);
-  color: var(--color-white);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  border-radius: var(--portal-radius-lg, 12px);
+  color: var(--portal-text-light, #fff);
   cursor: pointer;
-  transition: background-color 0.15s ease;
-  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
-.btn-invite-inline:hover {
-  background: var(--color-admin-purple-dark);
+[data-page="admin"] .icon-btn-invite:hover {
+  color: var(--color-primary);
 }
 
-.btn-invite-inline:disabled {
-  opacity: 0.6;
+[data-page="admin"] .icon-btn-invite:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
+}
+
+[data-page="admin"] .icon-btn-invite svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+}
+
+/* Convert icon button - coral/primary color for visibility */
+[data-page="admin"] .icon-btn-convert {
+  color: var(--color-primary, #e07a5f);
+}
+
+[data-page="admin"] .icon-btn-convert:hover {
+  color: var(--color-primary-hover, #d06a4f);
+  background: rgba(224, 122, 95, 0.1);
 }
 
 /* ================================================
@@ -1837,18 +1861,21 @@ body.modal-open .dashboard-content {
    Used for Leads (new intakes/contacts) and Messages (unread).
    ================================================ */
 
-/* Ensure sidebar buttons have relative positioning for badge */
+/* Ensure sidebar buttons have relative positioning and visible overflow for badge */
 [data-page="admin"] .sidebar-buttons .btn {
   position: relative;
+  overflow: visible;
 }
 
-/* Expanded sidebar - inline red text */
+/* Expanded sidebar - inline red text, ensure not clipped */
 [data-page="admin"] .sidebar-badge {
   color: var(--color-primary);
   font-family: var(--font--acme);
   font-size: inherit;
   font-weight: inherit;
   margin-left: 0.5rem;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* Active button in expanded sidebar - badge matches button text color */

@@ -189,7 +189,7 @@
                 <p class="dropzone-desktop">Drag and drop files here or</p>
                 <p class="dropzone-mobile">Tap to select files</p>
                 <button class="btn btn-secondary" id="btn-browse-files">Browse Files</button>
-                <input type="file" id="file-input" multiple hidden />
+                <input type="file" id="file-input" multiple hidden accept=".jpeg,.jpg,.png,.gif,.pdf,.doc,.docx,.txt,.zip,.rar,image/*,application/pdf" />
               </div>
             </div>
 
@@ -744,6 +744,7 @@
                     class="btn btn-secondary btn-sm"
                     id="btn-open-new-tab"
                     title="Open in new tab"
+                    aria-label="Open preview in new tab"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -766,6 +767,7 @@
                     class="btn btn-secondary btn-sm"
                     id="btn-refresh-preview"
                     title="Refresh preview"
+                    aria-label="Refresh preview"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

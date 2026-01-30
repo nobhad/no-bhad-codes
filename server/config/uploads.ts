@@ -66,3 +66,38 @@ export const UPLOAD_DIRS = {
   INVOICES: 'invoices',
   GENERAL: 'general'
 } as const;
+
+/**
+ * Sanitize a filename for safe storage
+ * - Adds NoBhadCodes branding prefix
+ * - Replaces spaces with underscores
+ * - Removes special characters (keeps alphanumeric, underscores, hyphens, dots)
+ * - Preserves file extension
+ * - Adds timestamp suffix for uniqueness
+ */
+export function sanitizeFilename(originalFilename: string): string {
+  // Get the extension
+  const lastDot = originalFilename.lastIndexOf('.');
+  const ext = lastDot > 0 ? originalFilename.slice(lastDot) : '';
+  const nameWithoutExt = lastDot > 0 ? originalFilename.slice(0, lastDot) : originalFilename;
+
+  // Sanitize the name:
+  // 1. Replace spaces with underscores
+  // 2. Remove any character that's not alphanumeric, underscore, or hyphen
+  // 3. Replace multiple underscores/hyphens with single ones
+  // 4. Trim underscores/hyphens from start and end
+  const sanitized = nameWithoutExt
+    .replace(/\s+/g, '_')
+    .replace(/[^a-zA-Z0-9_-]/g, '')
+    .replace(/[_-]+/g, '_')
+    .replace(/^[_-]+|[_-]+$/g, '')
+    .toLowerCase();
+
+  // Add timestamp for uniqueness
+  const timestamp = Date.now();
+
+  // Ensure we have a valid name
+  const finalName = sanitized || 'file';
+
+  return `nobhadcodes_${finalName}_${timestamp}${ext.toLowerCase()}`;
+}

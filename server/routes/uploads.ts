@@ -14,7 +14,7 @@ import { existsSync, mkdirSync } from 'fs';
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { getDatabase } from '../database/init.js';
-import { getUploadsDir, getUploadsSubdir, UPLOAD_DIRS } from '../config/uploads.js';
+import { getUploadsDir, getUploadsSubdir, UPLOAD_DIRS, sanitizeFilename } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 
 const router = express.Router();
@@ -69,11 +69,8 @@ const storage = multer.diskStorage({
     cb(null, targetDir);
   },
   filename: (req, file, cb) => {
-    // Generate unique filename with timestamp and original extension
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2);
-    const ext = extname(file.originalname);
-    const filename = `${timestamp}-${randomString}${ext}`;
+    // Generate descriptive filename with sanitized original name and timestamp
+    const filename = sanitizeFilename(file.originalname);
     cb(null, filename);
   }
 });

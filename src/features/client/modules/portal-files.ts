@@ -16,6 +16,22 @@ import { confirmDanger, alertError } from '../../../utils/confirm-dialog';
 
 const FILES_API_BASE = '/api/uploads';
 
+// Allowed file types (matches server validation)
+const ALLOWED_EXTENSIONS = /\.(jpeg|jpg|png|gif|pdf|doc|docx|txt|zip|rar)$/i;
+const ALLOWED_MIME_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/gif',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'text/plain',
+  'application/zip',
+  'application/x-rar-compressed',
+  'application/vnd.rar'
+];
+
 // ============================================================================
 // CACHED DOM REFERENCES
 // ============================================================================
@@ -307,11 +323,36 @@ export function setupFileUploadHandlers(ctx: ClientPortalContext): void {
 }
 
 /**
+ * Check if a file type is allowed
+ */
+function isAllowedFileType(file: File): boolean {
+  // Check extension
+  const hasValidExtension = ALLOWED_EXTENSIONS.test(file.name);
+
+  // Check MIME type
+  const hasValidMimeType = ALLOWED_MIME_TYPES.includes(file.type);
+
+  // Accept if either matches (some browsers report different MIME types)
+  return hasValidExtension || hasValidMimeType;
+}
+
+/**
  * Upload files to the server
  */
 async function uploadFiles(files: File[], ctx: ClientPortalContext): Promise<void> {
   if (files.length > 5) {
     showDropzoneError('Maximum 5 files allowed per upload.', ctx, files);
+    return;
+  }
+
+  // Validate file types
+  const invalidFiles = files.filter((f) => !isAllowedFileType(f));
+  if (invalidFiles.length > 0) {
+    showDropzoneError(
+      `Unsupported file type(s): ${invalidFiles.map((f) => f.name).join(', ')}. Allowed: images, PDF, Word docs, text, ZIP, RAR`,
+      ctx,
+      files.filter((f) => isAllowedFileType(f))
+    );
     return;
   }
 
@@ -424,7 +465,7 @@ function resetDropzone(): void {
         <p class="dropzone-desktop">Drag and drop files here or</p>
         <p class="dropzone-mobile">Tap to select files</p>
         <button type="button" class="btn btn-secondary" id="btn-browse-files">Browse Files</button>
-        <input type="file" id="file-input" multiple hidden />
+        <input type="file" id="file-input" multiple hidden accept=".jpeg,.jpg,.png,.gif,.pdf,.doc,.docx,.txt,.zip,.rar,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,application/zip" />
       </div>
     `;
     // Clear cache for these elements since they were recreated

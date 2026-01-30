@@ -15,6 +15,7 @@ import { authStore } from '../../../auth';
 import type { AnyUser, ClientUser } from '../../../auth/auth-types';
 import { isClientUser } from '../../../auth/auth-types';
 import { createLogger } from '../../../utils/logging';
+import { validateEmail } from '../../../../shared/validation/validators';
 
 const logger = createLogger('PortalAuth');
 
@@ -86,6 +87,13 @@ export async function handleLogin(
   // Basic validation
   if (!credentials.email.trim()) {
     callbacks.showFieldError('client-email', 'Email address is required');
+    return;
+  }
+
+  // Email format validation
+  const emailValidation = validateEmail(credentials.email, { allowDisposable: true });
+  if (!emailValidation.isValid) {
+    callbacks.showFieldError('client-email', emailValidation.error || 'Invalid email format');
     return;
   }
 

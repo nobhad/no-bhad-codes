@@ -184,5 +184,6 @@ export function manageFocusTrap(
   return () => {
     removeFocusTrap(modal);
     modal.removeAttribute('aria-modal');
+    modal.removeAttribute('role');
   };
 }

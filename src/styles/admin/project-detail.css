@@ -125,6 +125,18 @@
   gap: var(--portal-spacing-xl);
 }
 
+/* Invite icon button inline with client name in project detail */
+.project-detail-client-row #pd-client-link {
+  position: relative;
+}
+
+.project-detail-client-row #pd-client-link .icon-btn-invite {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 .project-detail-meta {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1545,4 +1557,136 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   position: relative;
 }
 
+/* ================================================
+   RESPONSIVE STYLES
+   ================================================ */
+
+/* Project Detail Tabs - Horizontal scroll on small screens */
+@media (max-width: 768px) {
+  .project-detail-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--portal-bg-light) transparent;
+    padding-bottom: 4px;
+  }
+
+  .project-detail-tabs::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .project-detail-tabs::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .project-detail-tabs::-webkit-scrollbar-thumb {
+    background: var(--portal-bg-light);
+    border-radius: 2px;
+  }
+
+  .project-detail-tabs button {
+    padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+    font-size: 0.75rem;
+  }
+
+  /* Tab content panels - reduced padding on mobile */
+  [id^="pd-tab-"] {
+    padding: 2rem 1rem;
+  }
+
+  [id^="pd-tab-"].active {
+    gap: 2rem;
+  }
+}
+
+/* Files Table - Responsive layout */
+@media (max-width: 768px) {
+  .files-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .files-table thead {
+    display: none;
+  }
+
+  .files-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: var(--portal-spacing-sm);
+  }
+
+  .files-table tr {
+    display: flex;
+    flex-direction: column;
+    padding: var(--portal-spacing-md);
+    background: var(--portal-bg-medium);
+    border-radius: var(--portal-radius-md);
+    gap: var(--portal-spacing-sm);
+  }
+
+  .files-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--portal-spacing-xs) 0;
+    border: none;
+  }
+
+  .files-table td::before {
+    content: attr(data-label);
+    font-weight: 500;
+    color: var(--portal-text-secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .files-table td:last-child {
+    justify-content: flex-end;
+  }
+
+  .files-table td:last-child::before {
+    display: none;
+  }
+
+  .files-table .file-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+/* Project Overview Card - Stack on mobile */
+@media (max-width: 768px) {
+  .project-detail-client-row,
+  .project-detail-meta {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .project-description-row {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .project-detail-client-row,
+  .project-detail-meta {
+    grid-template-columns: 1fr;
+  }
+
+  /* Invoice summary cards stack on mobile */
+  body[data-page="admin"] [id^="pd-tab-"] .invoice-summary {
+    flex-direction: column;
+  }
+
+  /* Settings grid stacks on mobile */
+  [data-page="admin"] #pd-tab-settings .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #pd-tab-settings .form-row {
+    grid-template-columns: 1fr;
+  }
+}
 

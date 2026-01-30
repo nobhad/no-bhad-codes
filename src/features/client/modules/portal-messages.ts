@@ -58,6 +58,9 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext, bustCache: b
   const messagesContainer = domCache.get('messagesThread');
   if (!messagesContainer) return;
 
+  // Show loading state
+  messagesContainer.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading messages...</p></div>';
+
   try {
     // Add cache-busting parameter when needed (e.g., after sending a message)
     const threadsUrl = bustCache

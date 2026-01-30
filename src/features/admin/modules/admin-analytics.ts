@@ -17,6 +17,7 @@ import type {
   RawVisitorData,
   AdminDashboardContext
 } from '../admin-types';
+import { formatDateTime } from '../../../utils/format-utils';
 import { showTableLoading, getChartSkeletonHTML } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
 
@@ -326,7 +327,7 @@ export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<voi
         country?: string;
         browser?: string;
       }) => {
-        const startTime = new Date(session.start_time).toLocaleString();
+        const startTime = formatDateTime(session.start_time);
         const duration = formatDuration(session.total_time_on_site || 0);
         const location = session.city && session.country
           ? `${session.city}, ${session.country}`

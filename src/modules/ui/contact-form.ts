@@ -22,6 +22,7 @@ import { getFormspreeUrl } from '../../config/api';
 import type { ModuleOptions } from '../../types/modules';
 import { gsap } from 'gsap';
 import { getDebugMode } from '../../core/env';
+import { validateEmail } from '../../../shared/validation/validators';
 
 export interface ContactFormModuleOptions extends ModuleOptions {
   backend?: ContactBackend;
@@ -232,44 +233,58 @@ export class ContactFormModule extends BaseModule {
   }
 
   isValidEmail(email: string) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    // Use shared validator for consistency across codebase
+    const result = validateEmail(email, { allowDisposable: true });
+    return result.isValid;
   }
 
   showFieldError(field: Element, message: string) {
-    // Add error class to form-group parent for better styling control
+    const inputField = field as HTMLInputElement | HTMLTextAreaElement;
     const formGroup = field.closest('.form-group');
     if (formGroup) {
       formGroup.classList.add('error');
     }
 
     field.classList.add('error');
+    inputField.setAttribute('aria-invalid', 'true');
 
-    // Check if error message container already exists
-    const existingError = formGroup?.querySelector('.error-message') as HTMLElement;
+    const errorId = `${inputField.id || inputField.name || 'field'}-error`;
+
+    const existingError = formGroup?.querySelector('.error-message') as HTMLElement | null;
     if (existingError) {
+      if (!existingError.id) existingError.id = errorId;
       existingError.textContent = message;
       existingError.style.display = 'block';
+      existingError.setAttribute('role', 'alert');
+      existingError.setAttribute('aria-live', 'polite');
+      inputField.setAttribute('aria-describedby', existingError.id);
     } else {
-      // Create new error message
       const errorDiv = document.createElement('div');
       errorDiv.className = 'field-error';
+      errorDiv.id = errorId;
+      errorDiv.setAttribute('role', 'alert');
+      errorDiv.setAttribute('aria-live', 'polite');
       errorDiv.textContent = message;
       field.parentNode?.insertBefore(errorDiv, field.nextSibling);
+      inputField.setAttribute('aria-describedby', errorId);
     }
   }
 
   removeErrorMessage(field: Element) {
+    const inputField = field as HTMLInputElement | HTMLTextAreaElement;
     const formGroup = field.closest('.form-group');
 
-    // Hide existing error-message span
-    const errorSpan = formGroup?.querySelector('.error-message') as HTMLElement;
+    inputField.removeAttribute('aria-invalid');
+    inputField.removeAttribute('aria-describedby');
+
+    const errorSpan = formGroup?.querySelector('.error-message') as HTMLElement | null;
     if (errorSpan) {
       errorSpan.style.display = 'none';
       errorSpan.textContent = '';
+      errorSpan.removeAttribute('role');
+      errorSpan.removeAttribute('aria-live');
     }
 
-    // Remove field-error divs
     const errorDiv = field.parentNode?.querySelector('.field-error');
     if (errorDiv) {
       errorDiv.remove();
@@ -406,7 +421,7 @@ export class ContactFormModule extends BaseModule {
   }
 
   /**
-   * Clear all field errors
+   * Clear all field errors and ARIA attributes
    */
   private clearAllErrors() {
     const errorMessages = this.form?.querySelectorAll('.field-error');
@@ -414,6 +429,18 @@ export class ContactFormModule extends BaseModule {
 
     const errorFields = this.form?.querySelectorAll('.error');
     errorFields?.forEach((field) => field.classList.remove('error'));
+
+    this.form?.querySelectorAll('input, select, textarea').forEach((el) => {
+      el.removeAttribute('aria-invalid');
+      el.removeAttribute('aria-describedby');
+    });
+
+    const errorMessageSpans = this.form?.querySelectorAll('.error-message');
+    errorMessageSpans?.forEach((span) => {
+      (span as HTMLElement).style.display = 'none';
+      (span as HTMLElement).removeAttribute('role');
+      (span as HTMLElement).removeAttribute('aria-live');
+    });
   }
 
   validateForm(): boolean {
