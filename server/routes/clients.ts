@@ -479,12 +479,31 @@ router.put(
       });
     }
 
-    const { company_name, contact_name, phone, status } = req.body;
+    const { email, company_name, contact_name, phone, status } = req.body;
     const db = getDatabase();
 
     // Build update query dynamically
     const updates: string[] = [];
     const values: (string | number)[] = [];
+
+    // Only admins can change email (login identifier)
+    if (email !== undefined && req.user!.type === 'admin') {
+      const trimmed = String(email).trim();
+      if (!trimmed) {
+        return res.status(400).json({ error: 'Email cannot be empty', code: 'INVALID_EMAIL' });
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(trimmed)) {
+        return res.status(400).json({ error: 'Invalid email format', code: 'INVALID_EMAIL' });
+      }
+      const normalized = trimmed.toLowerCase();
+      const existing = await db.get('SELECT id FROM clients WHERE email = ? AND id != ?', [normalized, clientId]);
+      if (existing) {
+        return res.status(409).json({ error: 'Email already in use by another client', code: 'EMAIL_EXISTS' });
+      }
+      updates.push('email = ?');
+      values.push(normalized);
+    }
 
     if (company_name !== undefined) {
       updates.push('company_name = ?');
@@ -518,23 +537,18 @@ router.put(
       });
     }
 
+    updates.push('updated_at = CURRENT_TIMESTAMP');
     values.push(clientId);
 
     await db.run(
-      `
-    UPDATE clients 
-    SET ${updates.join(', ')}
-    WHERE id = ?
-  `,
+      `UPDATE clients SET ${updates.join(', ')} WHERE id = ?`,
       values
     );
 
     // Get updated client
     const updatedClient = await db.get(
-      `
-    SELECT id, email, company_name, contact_name, phone, status, client_type, created_at, updated_at
-    FROM clients WHERE id = ?
-  `,
+      `SELECT id, email, company_name, contact_name, phone, status, client_type, created_at, updated_at
+       FROM clients WHERE id = ?`,
       [clientId]
     );
 

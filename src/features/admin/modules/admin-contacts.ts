@@ -10,7 +10,7 @@
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDate, formatDateTime } from '../../../utils/format-utils';
-import { apiFetch, apiPut } from '../../../utils/api-client';
+import { apiFetch, apiPut, apiPost } from '../../../utils/api-client';
 import { createTableDropdown, CONTACT_STATUS_OPTIONS } from '../../../utils/table-dropdown';
 import { APP_CONSTANTS } from '../../../config/constants';
 import {
@@ -22,6 +22,7 @@ import {
   CONTACTS_FILTER_CONFIG,
   type FilterState
 } from '../../../utils/table-filter';
+import { confirmDialog } from '../../../utils/confirm-dialog';
 import type { ContactSubmission, AdminDashboardContext } from '../admin-types';
 
 interface ContactsData {
@@ -126,19 +127,6 @@ function updateContactsDisplay(data: ContactsData, ctx: AdminDashboardContext): 
   const statMessages = getElement('stat-messages');
   if (statMessages) {
     statMessages.textContent = data.stats?.total?.toString() || '0';
-  }
-
-  // Update new count badge
-  const newCountBadge = getElement('contact-new-count');
-  if (newCountBadge) {
-    const newCount = data.stats?.new || 0;
-    if (newCount > 0) {
-      newCountBadge.textContent = `${newCount} new`;
-      newCountBadge.classList.add('has-new');
-    } else {
-      newCountBadge.textContent = '';
-      newCountBadge.classList.remove('has-new');
-    }
   }
 
   // Update contacts table
@@ -283,6 +271,10 @@ export function showContactDetails(contactId: number): void {
       </div>
       <div class="details-actions">
         <a href="mailto:${safeEmail}" class="btn">Reply via Email</a>
+        ${contact.client_id
+          ? `<span class="status-badge status-active">Converted to Client</span>`
+          : `<button class="btn btn-primary" id="convert-to-client-btn" data-id="${contact.id}" data-email="${safeEmail}" data-name="${safeName}">Convert to Client</button>`
+        }
         ${contact.status !== 'archived' ? `<button class="btn btn-secondary" id="archive-contact-btn" data-id="${contact.id}">Archive</button>` : ''}
       </div>
     </div>
@@ -341,6 +333,89 @@ export function showContactDetails(contactId: number): void {
         }
         // Remove archive button
         archiveBtn.remove();
+      }
+    });
+  }
+
+  // Add event listener for convert to client button
+  const convertBtn = detailsPanel.querySelector('#convert-to-client-btn');
+  if (convertBtn) {
+    convertBtn.addEventListener('click', async () => {
+      const id = parseInt((convertBtn as HTMLElement).dataset.id || '0');
+      const email = (convertBtn as HTMLElement).dataset.email || '';
+      const name = (convertBtn as HTMLElement).dataset.name || '';
+
+      if (!id || !storedContext) return;
+
+      // Confirm conversion with option to send invitation
+      const confirmed = await confirmDialog({
+        title: 'Convert to Client',
+        message: `Convert "${name}" (${email}) to a client account?\n\nThis will create a client record and send an invitation email to set up their portal account.`,
+        confirmText: 'Convert & Invite',
+        cancelText: 'Cancel',
+        icon: 'folder-plus'
+      });
+
+      if (!confirmed) {
+        return; // User cancelled
+      }
+
+      // Always send invitation when converting
+      const sendInvitation = true;
+
+      try {
+        const response = await apiPost(`/api/admin/contact-submissions/${id}/convert-to-client`, {
+          sendInvitation
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          storedContext.showNotification(
+            data.isExisting
+              ? 'Contact linked to existing client'
+              : sendInvitation
+                ? 'Client created and invitation sent'
+                : 'Client created successfully',
+            'success'
+          );
+
+          // Update local data
+          contact.client_id = data.clientId;
+          contact.converted_at = new Date().toISOString();
+
+          // Replace button with badge
+          const actionsDiv = convertBtn.parentElement;
+          if (actionsDiv) {
+            const badge = document.createElement('span');
+            badge.className = 'status-badge status-active';
+            badge.textContent = 'Converted to Client';
+            convertBtn.replaceWith(badge);
+          }
+
+          // Update table row to show converted status
+          const tableRow = document.querySelector(`tr[data-contact-id="${id}"]`);
+          if (tableRow) {
+            const actionsCell = tableRow.querySelector('.actions-cell');
+            if (actionsCell) {
+              // Add a small indicator that this contact is converted
+              const existingBadge = actionsCell.querySelector('.converted-badge');
+              if (!existingBadge) {
+                const badge = document.createElement('span');
+                badge.className = 'status-badge status-active converted-badge';
+                badge.style.fontSize = '0.7rem';
+                badge.style.padding = '2px 6px';
+                badge.textContent = 'Client';
+                actionsCell.prepend(badge);
+              }
+            }
+          }
+        } else {
+          const errorData = await response.json();
+          storedContext.showNotification(errorData.error || 'Failed to convert contact', 'error');
+        }
+      } catch (error) {
+        console.error('Error converting contact to client:', error);
+        storedContext.showNotification('Failed to convert contact to client', 'error');
       }
     });
   }

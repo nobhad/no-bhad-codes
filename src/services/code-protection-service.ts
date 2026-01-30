@@ -37,6 +37,7 @@
  */
 
 import { APP_CONSTANTS } from '../config/constants';
+import { showToast } from '../utils/toast-notifications';
 
 export interface CodeProtectionConfig {
   enabled: boolean;
@@ -486,7 +487,7 @@ export class CodeProtectionService {
       window.location.href = 'about:blank';
     } else {
       console.clear();
-      alert('Developer tools detected. Some features may be limited.');
+      showToast('Developer tools detected. Some features may be limited.', 'warning', { duration: 5000 });
     }
   }
 

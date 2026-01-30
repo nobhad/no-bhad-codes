@@ -549,6 +549,142 @@ router.put(
 
 /**
  * @swagger
+ * /api/admin/contact-submissions/{id}/convert-to-client:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: Convert contact submission to client
+ *     description: Creates a new client from a contact submission and optionally sends invitation
+ *     security:
+ *       - BearerAuth: []
+ */
+router.post(
+  '/contact-submissions/:id/convert-to-client',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    try {
+      const { id } = req.params;
+      const { sendInvitation = false } = req.body;
+
+      const db = getDatabase();
+
+      // Get the contact submission
+      const contact = await db.get(
+        'SELECT * FROM contact_submissions WHERE id = ?',
+        [id]
+      );
+
+      if (!contact) {
+        return res.status(404).json({
+          success: false,
+          error: 'Contact submission not found'
+        });
+      }
+
+      // Check if already converted
+      if (contact.client_id) {
+        return res.status(400).json({
+          success: false,
+          error: 'This contact has already been converted to a client'
+        });
+      }
+
+      // Check if client with this email already exists
+      const existingClient = await db.get(
+        'SELECT id, contact_name, email FROM clients WHERE LOWER(email) = LOWER(?)',
+        [contact.email as string]
+      ) as { id: number; contact_name: string; email: string } | undefined;
+
+      let clientId: number;
+
+      if (existingClient) {
+        // Link to existing client
+        clientId = existingClient.id as number;
+      } else {
+        // Create new client with pending status
+        const invitationToken = sendInvitation ? crypto.randomUUID() : null;
+        const expiresAt = sendInvitation
+          ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          : null;
+
+        const result = await db.run(
+          `INSERT INTO clients (
+            email, password_hash, contact_name, company_name, phone,
+            status, client_type, invitation_token, invitation_expires_at,
+            invitation_sent_at, created_at, updated_at
+          ) VALUES (
+            LOWER(?), '', ?, ?, ?, 'pending', 'business', ?, ?,
+            ${sendInvitation ? 'CURRENT_TIMESTAMP' : 'NULL'},
+            CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+          )`,
+          [
+            contact.email as string,
+            contact.name as string,
+            null, // company_name - not available from contact form
+            null, // phone - not available from contact form
+            invitationToken,
+            expiresAt
+          ]
+        );
+
+        clientId = result.lastID!;
+
+        // Send invitation email if requested
+        if (sendInvitation && invitationToken) {
+          const baseUrl = process.env.CLIENT_PORTAL_URL || process.env.FRONTEND_URL || 'http://localhost:4000';
+          const inviteLink = `${baseUrl}/client/set-password.html?token=${invitationToken}`;
+
+          try {
+            await emailService.sendEmail({
+              to: contact.email as string,
+              subject: 'Welcome to No Bhad Codes - Set Up Your Client Portal',
+              html: `
+                <h2>Welcome, ${contact.name}!</h2>
+                <p>You've been invited to set up your client portal account.</p>
+                <p>Click the link below to create your password and access your portal:</p>
+                <p><a href="${inviteLink}" style="display: inline-block; padding: 12px 24px; background-color: #e07a5f; color: white; text-decoration: none; border-radius: 4px;">Set Up Your Account</a></p>
+                <p>This link will expire in 7 days.</p>
+                <p>If you didn't expect this email, please ignore it.</p>
+              `,
+              text: `Welcome, ${contact.name}!\n\nYou've been invited to set up your client portal account.\n\nVisit this link to create your password: ${inviteLink}\n\nThis link will expire in 7 days.`
+            });
+          } catch (emailError) {
+            console.error('Failed to send invitation email:', emailError);
+            // Don't fail the conversion if email fails
+          }
+        }
+      }
+
+      // Update contact submission with client_id and converted_at
+      await db.run(
+        `UPDATE contact_submissions
+         SET client_id = ?, converted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+         WHERE id = ?`,
+        [clientId, id]
+      );
+
+      res.json({
+        success: true,
+        message: existingClient
+          ? 'Contact linked to existing client'
+          : 'Contact converted to client successfully',
+        clientId,
+        isExisting: !!existingClient,
+        invitationSent: sendInvitation && !existingClient
+      });
+    } catch (error) {
+      console.error('Error converting contact to client:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to convert contact to client'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
  * /api/admin/leads/{id}/status:
  *   put:
  *     tags:
@@ -1051,12 +1187,12 @@ function generateAdminProjectName(
   clientData: { contact_name: string; company_name: string | null }
 ): string {
   const typeNames: Record<string, string> = {
-    'simple-site': 'Simple Website',
-    'business-site': 'Business Website',
-    portfolio: 'Portfolio Website',
+    'simple-site': 'Simple Site',
+    'business-site': 'Business Site',
+    portfolio: 'Portfolio Site',
     'e-commerce': 'E-commerce Store',
     ecommerce: 'E-commerce Store', // Legacy support
-    'web-app': 'Web Application',
+    'web-app': 'Web App',
     'browser-extension': 'Browser Extension',
     other: 'Custom Project'
   };
@@ -1064,7 +1200,7 @@ function generateAdminProjectName(
   const typeName = typeNames[projectType] || 'Web Project';
   const identifier = clientData.company_name || clientData.contact_name || 'Client';
 
-  return `${identifier} - ${typeName}`;
+  return `${identifier} ${typeName}`;
 }
 
 /**
@@ -1108,9 +1244,18 @@ async function saveAdminProjectAsFile(
     additionalInfo: data.notes
   };
 
-  const timestamp = Date.now();
-  const safeProjectName = projectName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
-  const filename = `admin_project_${projectId}_${safeProjectName}_${timestamp}.json`;
+  // Generate descriptive filename with NoBhadCodes branding
+  // Use company name if available, otherwise client name
+  const clientOrCompany = data.companyName || data.clientName;
+  const safeClientName = clientOrCompany
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-z0-9_-]/g, '')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '')
+    .substring(0, 50);
+  const dateStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  const filename = `nobhadcodes_intake_${safeClientName}_${dateStr}.json`;
   const filePath = join(uploadsDir, filename);
   const relativePath = getRelativePath(UPLOAD_DIRS.INTAKE, filename);
 
@@ -1125,12 +1270,12 @@ async function saveAdminProjectAsFile(
     [
       projectId,
       filename,
-      'Project Details.json',
+      filename, // Use descriptive filename for downloads
       relativePath,
       fileSize,
       'application/json',
       'document',
-      'Project details created by admin',
+      'Project intake form',
       'admin'
     ]
   );

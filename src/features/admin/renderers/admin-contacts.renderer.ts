@@ -45,24 +45,7 @@ class AdminContactsRenderer {
    * Render the contacts table
    */
   renderContactsTable(data: ContactDisplayData): void {
-    this.updateNewCountBadge(data.stats);
     this.renderTable(data.submissions);
-  }
-
-  /**
-   * Update the new contacts count badge
-   */
-  private updateNewCountBadge(stats: ContactStats): void {
-    const newCountBadge = document.getElementById('contact-new-count');
-    if (newCountBadge) {
-      const newCount = stats?.new || 0;
-      if (newCount > 0) {
-        newCountBadge.textContent = `${newCount} new`;
-        newCountBadge.classList.add('has-new');
-      } else {
-        newCountBadge.classList.remove('has-new');
-      }
-    }
   }
 
   /**

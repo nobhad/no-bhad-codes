@@ -29,6 +29,7 @@ import { createDOMCache } from '../../utils/dom-cache';
 import { formatDate, formatDateTime, formatProjectType } from '../../utils/format-utils';
 import { confirmDanger, alertError, alertSuccess, alertInfo } from '../../utils/confirm-dialog';
 import { showToast } from '../../utils/toast-notifications';
+import { manageFocusTrap } from '../../utils/focus-trap';
 
 // DOM element keys for caching
 type DashboardDOMKeys = Record<string, string>;
@@ -112,6 +113,9 @@ class AdminDashboard {
   // DOM element cache
   private domCache = createDOMCache<DashboardDOMKeys>();
 
+  // Focus trap cleanup function for detail modal
+  private focusTrapCleanup: (() => void) | null = null;
+
   // Delegate currentProjectId to project details handler
   private get currentProjectId(): number | null {
     return this.projectDetails.getCurrentProjectId();
@@ -147,7 +151,6 @@ class AdminDashboard {
       modalTitle: '#modal-title',
       modalBody: '#modal-body',
       inviteLeadBtn: '#invite-lead-btn',
-      contactNewCount: '#contact-new-count',
       contactsTableBody: '#contacts-table-body',
       sysVersion: '#sys-version',
       sysEnvironment: '#sys-environment',
@@ -562,7 +565,14 @@ class AdminDashboard {
     const overlay = this.domCache.get('detailModal');
 
     const closeModal = () => {
-      if (modal) modal.style.display = 'none';
+      if (modal) {
+        modal.style.display = 'none';
+        // Clean up focus trap when modal closes
+        if (this.focusTrapCleanup) {
+          this.focusTrapCleanup();
+          this.focusTrapCleanup = null;
+        }
+      }
     };
 
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
@@ -573,12 +583,7 @@ class AdminDashboard {
       });
     }
 
-    // Close on Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modal?.style.display !== 'none') {
-        closeModal();
-      }
-    });
+    // Note: Escape key handling is now managed by the focus trap
   }
 
   private toggleSidebar(): void {
@@ -828,6 +833,19 @@ class AdminDashboard {
 
     modal.style.display = 'flex';
 
+    // Set up focus trap for accessibility
+    const closeModal = () => {
+      modal.style.display = 'none';
+      if (this.focusTrapCleanup) {
+        this.focusTrapCleanup();
+        this.focusTrapCleanup = null;
+      }
+    };
+    this.focusTrapCleanup = manageFocusTrap(modal, {
+      initialFocus: '#modal-close-btn',
+      onClose: closeModal
+    });
+
     // Mark as read if status is 'new'
     if (contact.status === 'new') {
       this.updateContactStatus(contactId, 'read');
@@ -1039,12 +1057,12 @@ class AdminDashboard {
         await apiPut(`/api/messages/threads/${threadId}/read`);
       } else {
         container.innerHTML =
-          '<div style="text-align: center; padding: 2rem; color: #666;">Failed to load messages</div>';
+          '<div style="text-align: center; padding: 2rem; color: var(--portal-text-muted);">Failed to load messages</div>';
       }
     } catch (error) {
       console.error('[AdminDashboard] Failed to load messages:', error);
       container.innerHTML =
-        '<div style="text-align: center; padding: 2rem; color: #666;">Error loading messages</div>';
+        '<div style="text-align: center; padding: 2rem; color: var(--portal-text-muted);">Error loading messages</div>';
     }
   }
 
@@ -1056,7 +1074,7 @@ class AdminDashboard {
 
     if (messages.length === 0) {
       container.innerHTML =
-        '<div style="text-align: center; padding: 2rem; color: #666;">No messages yet. Start the conversation!</div>';
+        '<div style="text-align: center; padding: 2rem; color: var(--portal-text-muted);">No messages yet. Start the conversation!</div>';
       return;
     }
 
@@ -1908,6 +1926,36 @@ class AdminDashboard {
       console.error('[AdminDashboard] Error resetting analytics:', error);
       this.showNotification('Failed to reset analytics', 'error');
     }
+  }
+
+  // ============================================================================
+  // PROJECT DETAILS DELEGATE METHODS
+  // Exposed for onclick handlers in dynamically rendered HTML
+  // ============================================================================
+
+  /** Toggle milestone completion - delegated to projectDetails */
+  public toggleMilestone(milestoneId: number, isCompleted: boolean): Promise<void> {
+    return this.projectDetails.toggleMilestone(milestoneId, isCompleted);
+  }
+
+  /** Delete milestone - delegated to projectDetails */
+  public deleteMilestone(milestoneId: number): Promise<void> {
+    return this.projectDetails.deleteMilestone(milestoneId);
+  }
+
+  /** Send invoice - delegated to projectDetails */
+  public sendInvoice(invoiceId: number): Promise<void> {
+    return this.projectDetails.sendInvoice(invoiceId);
+  }
+
+  /** Mark invoice as paid - delegated to projectDetails */
+  public markInvoicePaid(invoiceId: number): Promise<void> {
+    return this.projectDetails.markInvoicePaid(invoiceId);
+  }
+
+  /** Send invoice reminder - delegated to projectDetails */
+  public sendInvoiceReminder(invoiceId: number): Promise<void> {
+    return this.projectDetails.sendInvoiceReminder(invoiceId);
   }
 }
 

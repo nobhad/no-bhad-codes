@@ -20,6 +20,22 @@ import { apiFetch, apiPost, apiPut, apiDelete } from '../../utils/api-client';
 import { createDOMCache, getElement } from '../../utils/dom-cache';
 import { confirmDanger, alertError, alertSuccess, alertWarning, multiPromptDialog } from '../../utils/confirm-dialog';
 
+// Allowed file types (matches server validation)
+const ALLOWED_EXTENSIONS = /\.(jpeg|jpg|png|gif|pdf|doc|docx|txt|zip|rar)$/i;
+const ALLOWED_MIME_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/gif',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'text/plain',
+  'application/zip',
+  'application/x-rar-compressed',
+  'application/vnd.rar'
+];
+
 // ============================================
 // DOM CACHE - Cached element references
 // ============================================
@@ -245,7 +261,42 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const startDate = domCache.get('startDate');
 
     if (projectName) projectName.textContent = SanitizationUtils.decodeHtmlEntities(project.project_name || 'Untitled Project');
-    if (clientName) clientName.textContent = SanitizationUtils.decodeHtmlEntities(project.contact_name || '-');
+    if (clientName) {
+      clientName.textContent = SanitizationUtils.decodeHtmlEntities(project.contact_name || '-');
+
+      // Add invite icon button if client hasn't been invited yet
+      const clientLinkEl = document.getElementById('pd-client-link');
+      if (clientLinkEl) {
+        // Remove any existing invite button
+        const existingInviteBtn = clientLinkEl.querySelector('.icon-btn-invite');
+        if (existingInviteBtn) existingInviteBtn.remove();
+
+        // Check if client needs invitation
+        const projectAny = project as ProjectResponse & { invitation_sent_at?: string; invited_at?: string };
+        const hasBeenInvited = !!projectAny.invitation_sent_at || !!project.password_hash || !!projectAny.invited_at;
+        const isActive = project.last_login_at;
+        const showInviteBtn = !isActive && !hasBeenInvited && project.email;
+
+        if (showInviteBtn) {
+          const inviteBtn = document.createElement('button');
+          inviteBtn.className = 'icon-btn icon-btn-invite';
+          inviteBtn.title = 'Send invitation email';
+          inviteBtn.setAttribute('aria-label', 'Send invitation email to client');
+          inviteBtn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+            </svg>
+          `;
+          inviteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (this.currentProjectId && this.inviteLeadFn && project.email) {
+              this.inviteLeadFn(this.currentProjectId, project.email);
+            }
+          });
+          clientLinkEl.appendChild(inviteBtn);
+        }
+      }
+    }
     if (clientEmail) clientEmail.textContent = project.email || '-';
     if (company) company.textContent = SanitizationUtils.decodeHtmlEntities(project.company_name || '-');
     if (status) {
@@ -1215,6 +1266,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
                   : inv.status === 'overdue'
                     ? 'status-cancelled'
                     : 'status-active';
+              // Determine which action buttons to show
+              const showSendBtn = inv.status === 'draft';
+              const showMarkPaidBtn = ['sent', 'viewed', 'partial', 'overdue'].includes(inv.status);
+              const showReminderBtn = inv.status === 'overdue';
+
               return `
               <div class="invoice-item">
                 <div class="invoice-info">
@@ -1225,7 +1281,9 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
                 <span class="status-badge ${statusClass}">${inv.status}</span>
                 <div class="invoice-actions">
                   <a href="/api/invoices/${inv.id}/pdf" class="btn btn-outline btn-sm" target="_blank">PDF</a>
-                  ${inv.status === 'draft' ? `<button class="btn btn-secondary btn-sm" onclick="window.adminDashboard?.sendInvoice(${inv.id})">Send</button>` : ''}
+                  ${showSendBtn ? `<button class="btn btn-secondary btn-sm" onclick="window.adminDashboard?.sendInvoice(${inv.id})">Send</button>` : ''}
+                  ${showMarkPaidBtn ? `<button class="btn btn-success btn-sm" onclick="window.adminDashboard?.markInvoicePaid(${inv.id})">Mark Paid</button>` : ''}
+                  ${showReminderBtn ? `<button class="btn btn-warning btn-sm" onclick="window.adminDashboard?.sendInvoiceReminder(${inv.id})">Remind</button>` : ''}
                 </div>
               </div>
             `;
@@ -1346,6 +1404,49 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   }
 
   /**
+   * Mark an invoice as paid (exposed globally for onclick)
+   */
+  public async markInvoicePaid(invoiceId: number): Promise<void> {
+    if (!AdminAuth.isAuthenticated()) return;
+
+    try {
+      const response = await apiPut(`/api/invoices/${invoiceId}`, { status: 'paid' });
+
+      if (response.ok) {
+        alertSuccess('Invoice marked as paid!');
+        if (this.currentProjectId) {
+          this.loadProjectInvoices(this.currentProjectId);
+        }
+      } else {
+        alertError('Failed to update invoice');
+      }
+    } catch (error) {
+      console.error('[AdminProjectDetails] Error marking invoice paid:', error);
+      alertError('Error updating invoice');
+    }
+  }
+
+  /**
+   * Send a payment reminder for an overdue invoice (exposed globally for onclick)
+   */
+  public async sendInvoiceReminder(invoiceId: number): Promise<void> {
+    if (!AdminAuth.isAuthenticated()) return;
+
+    try {
+      const response = await apiPost(`/api/invoices/${invoiceId}/remind`);
+
+      if (response.ok) {
+        alertSuccess('Payment reminder sent!');
+      } else {
+        alertError('Failed to send reminder');
+      }
+    } catch (error) {
+      console.error('[AdminProjectDetails] Error sending reminder:', error);
+      alertError('Error sending reminder');
+    }
+  }
+
+  /**
    * Set up file upload handlers for project detail view
    */
   private setupFileUploadHandlers(): void {
@@ -1403,12 +1504,34 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   }
 
   /**
+   * Check if a file type is allowed
+   */
+  private isAllowedFileType(file: File): boolean {
+    const hasValidExtension = ALLOWED_EXTENSIONS.test(file.name);
+    const hasValidMimeType = ALLOWED_MIME_TYPES.includes(file.type);
+    return hasValidExtension || hasValidMimeType;
+  }
+
+  /**
    * Upload files to the current project
    */
   private async uploadFiles(files: FileList): Promise<void> {
     if (!this.currentProjectId) return;
 
     if (!AdminAuth.isAuthenticated()) return;
+
+    // Validate file types
+    const invalidFiles: string[] = [];
+    for (let i = 0; i < files.length; i++) {
+      if (!this.isAllowedFileType(files[i])) {
+        invalidFiles.push(files[i].name);
+      }
+    }
+
+    if (invalidFiles.length > 0) {
+      alertError(`Unsupported file type(s): ${invalidFiles.join(', ')}. Allowed: images, PDF, Word docs, text, ZIP, RAR`);
+      return;
+    }
 
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {

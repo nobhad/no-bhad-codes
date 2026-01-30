@@ -5,28 +5,32 @@
  * Project management, files, and messages endpoints
  */
 
-import express from 'express';
+import express, { Response } from 'express';
 import multer from 'multer';
 import path, { join } from 'path';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import PDFDocument from 'pdfkit';
+import { PDFDocument as PDFLibDocument, StandardFonts, rgb } from 'pdf-lib';
 import { getDatabase } from '../database/init.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { emailService } from '../services/email-service.js';
 import { cache, invalidateCache } from '../middleware/cache.js';
-import { getUploadsSubdir, UPLOAD_DIRS } from '../config/uploads.js';
+import { getUploadsSubdir, UPLOAD_DIRS, sanitizeFilename } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 
 const router = express.Router();
 
 // Business info from environment variables
 const BUSINESS_INFO = {
-  name: process.env.BUSINESS_NAME || '',
-  contact: process.env.BUSINESS_CONTACT || '',
-  email: process.env.BUSINESS_EMAIL || '',
-  website: process.env.BUSINESS_WEBSITE || ''
+  name: process.env.BUSINESS_NAME || 'No Bhad Codes',
+  contact: process.env.BUSINESS_CONTACT || 'Noelle Bhaduri',
+  email: process.env.BUSINESS_EMAIL || 'nobhaduri@gmail.com',
+  website: process.env.BUSINESS_WEBSITE || 'nobhad.codes'
 };
+
+// Debug log for business info (remove after verification)
+console.log('[Projects Route] BUSINESS_INFO loaded:', BUSINESS_INFO);
 
 // Configure multer for file uploads using centralized config
 const storage = multer.diskStorage({
@@ -34,8 +38,9 @@ const storage = multer.diskStorage({
     cb(null, getUploadsSubdir(UPLOAD_DIRS.PROJECTS));
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+    // Generate descriptive filename with sanitized original name and timestamp
+    const filename = sanitizeFilename(file.originalname);
+    cb(null, filename);
   }
 });
 
@@ -1311,9 +1316,8 @@ router.get(
     doc.moveDown(2);
 
     // === CONTRACT TITLE ===
-    doc.fontSize(20).font('Helvetica-Bold').fillColor('#0066cc')
+    doc.fontSize(20).font('Helvetica-Bold')
       .text('Project Contract', { align: 'center' });
-    doc.fillColor('black');
     doc.moveDown(1);
 
     // === CONTRACT INFO ===
@@ -1339,7 +1343,7 @@ router.get(
     doc.moveDown(1);
 
     // === PROJECT SCOPE ===
-    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('1. Project Scope');
+    doc.fontSize(14).font('Helvetica-Bold').text('1. Project Scope');
     doc.fillColor('black');
     doc.moveDown(0.5);
 
@@ -1381,7 +1385,7 @@ router.get(
     doc.moveDown(1);
 
     // === TIMELINE ===
-    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('2. Timeline');
+    doc.fontSize(14).font('Helvetica-Bold').text('2. Timeline');
     doc.fillColor('black');
     doc.moveDown(0.5);
 
@@ -1406,7 +1410,7 @@ router.get(
     doc.moveDown(1);
 
     // === PAYMENT TERMS ===
-    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('3. Payment Terms');
+    doc.fontSize(14).font('Helvetica-Bold').text('3. Payment Terms');
     doc.fillColor('black');
     doc.moveDown(0.5);
 
@@ -1429,7 +1433,7 @@ router.get(
     doc.moveDown(1);
 
     // === TERMS AND CONDITIONS ===
-    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('4. Terms and Conditions');
+    doc.fontSize(14).font('Helvetica-Bold').text('4. Terms and Conditions');
     doc.fillColor('black');
     doc.moveDown(0.5);
 
@@ -1450,7 +1454,7 @@ router.get(
     doc.moveDown(1);
 
     // === SIGNATURES ===
-    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('5. Signatures');
+    doc.fontSize(14).font('Helvetica-Bold').text('5. Signatures');
     doc.fillColor('black');
     doc.moveDown(1);
 
@@ -1481,6 +1485,388 @@ router.get(
 
     // Finalize PDF
     doc.end();
+  })
+);
+
+// ============================================
+// INTAKE PDF GENERATION (using pdf-lib)
+// ============================================
+
+interface IntakeDocument {
+  submittedAt: string;
+  projectId: number;
+  projectName: string;
+  createdBy?: string;
+  clientInfo: {
+    name: string;
+    email: string;
+    projectFor?: string;
+    companyName?: string | null;
+  };
+  projectDetails: {
+    type: string;
+    description: string;
+    timeline: string;
+    budget: string;
+    features?: string[];
+    designLevel?: string | null;
+  };
+  technicalInfo?: {
+    techComfort?: string | null;
+    domainHosting?: string | null;
+  };
+  additionalInfo?: string | null;
+}
+
+/**
+ * GET /api/projects/:id/intake/pdf
+ * Generate a branded PDF from the project's intake form using pdf-lib
+ */
+router.get(
+  '/:id/intake/pdf',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    // Get project with client info
+    const project = await db.get(
+      `SELECT p.*, c.contact_name as client_name, c.email as client_email, c.company_name
+       FROM projects p
+       JOIN clients c ON p.client_id = c.id
+       WHERE p.id = ?`,
+      [projectId]
+    );
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    const p = project as Record<string, unknown>;
+
+    // Authorization: admin or project owner
+    const projectClientId = getNumber(p, 'client_id');
+    if (req.user!.type !== 'admin' && req.user!.id !== projectClientId) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    // Find the intake file for this project
+    const intakeFile = await db.get(
+      `SELECT * FROM files
+       WHERE project_id = ?
+       AND (original_filename LIKE '%intake%' OR filename LIKE 'intake_%' OR filename LIKE 'admin_project_%' OR filename LIKE 'project_intake_%' OR filename LIKE 'nobhadcodes_intake_%')
+       AND mime_type = 'application/json'
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [projectId]
+    );
+
+    if (!intakeFile) {
+      return res.status(404).json({ error: 'Intake form not found for this project' });
+    }
+
+    // Read the intake JSON file
+    const filePath = join(process.cwd(), getString(intakeFile as Record<string, unknown>, 'file_path'));
+    if (!existsSync(filePath)) {
+      return res.status(404).json({ error: 'Intake file not found on disk' });
+    }
+
+    let intakeData: IntakeDocument;
+    try {
+      const fileContent = readFileSync(filePath, 'utf-8');
+      intakeData = JSON.parse(fileContent);
+    } catch {
+      return res.status(500).json({ error: 'Failed to read intake file' });
+    }
+
+    // Helper functions
+    const formatDate = (dateStr: string | undefined): string => {
+      if (!dateStr) return 'N/A';
+      return new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+    };
+
+    const formatTimeline = (timeline: string): string => {
+      const timelineMap: Record<string, string> = {
+        'asap': 'As Soon As Possible',
+        '1-month': '1 Month',
+        '1-3-months': '1-3 Months',
+        '3-6-months': '3-6 Months',
+        'flexible': 'Flexible'
+      };
+      return timelineMap[timeline] || timeline;
+    };
+
+    const formatBudget = (budget: string): string => {
+      const budgetMap: Record<string, string> = {
+        'under-2k': 'Under $2,000',
+        '2k-5k': '$2,000 - $5,000',
+        '2.5k-5k': '$2,500 - $5,000',
+        '5k-10k': '$5,000 - $10,000',
+        '10k-25k': '$10,000 - $25,000',
+        '25k+': '$25,000+'
+      };
+      return budgetMap[budget] || budget;
+    };
+
+    const formatProjectType = (type: string): string => {
+      const typeMap: Record<string, string> = {
+        'simple-site': 'Simple Website',
+        'business-site': 'Business Website',
+        'portfolio': 'Portfolio Website',
+        'e-commerce': 'E-commerce Store',
+        'ecommerce': 'E-commerce Store',
+        'web-app': 'Web Application',
+        'browser-extension': 'Browser Extension',
+        'other': 'Custom Project'
+      };
+      return typeMap[type] || type.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    };
+
+    const decodeHtml = (text: string): string => {
+      return text
+        .replace(/&amp;/g, '&')
+        .replace(/&#x2F;/g, '/')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+    };
+
+    // Create PDF document using pdf-lib
+    const pdfDoc = await PDFLibDocument.create();
+
+    // Set PDF metadata for proper title in browser tab
+    const pdfClientName = getString(p, 'company_name') || getString(p, 'client_name') || 'Client';
+    const pdfTitle = `NoBhadCodes Intake - ${pdfClientName}`;
+    pdfDoc.setTitle(pdfTitle);
+    pdfDoc.setAuthor(BUSINESS_INFO.name);
+    pdfDoc.setSubject('Project Intake Form');
+    pdfDoc.setCreator('NoBhadCodes');
+
+    const page = pdfDoc.addPage([612, 792]); // LETTER size
+    const { width, height } = page.getSize();
+
+    // Embed fonts
+    const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    // Colors
+    const black = rgb(0, 0, 0);
+    const gray = rgb(0.2, 0.2, 0.2);
+    const lightGray = rgb(0.5, 0.5, 0.5);
+    const lineGray = rgb(0.8, 0.8, 0.8);
+
+    // Layout constants
+    const margin = 50;
+    const contentWidth = width - (margin * 2);
+    const leftCol = margin;
+    const rightCol = 320;
+
+    // pdf-lib uses bottom-left origin, so we work from top down
+    // Y position decreases as we go down the page
+    let y = height - 50; // Start 50 from top
+
+    // === LOGO ===
+    const logoPath = join(process.cwd(), 'public/images/avatar_pdf.png');
+    if (existsSync(logoPath)) {
+      const logoBytes = readFileSync(logoPath);
+      const logoImage = await pdfDoc.embedPng(logoBytes);
+      const logoWidth = 50;
+      const logoHeight = (logoImage.height / logoImage.width) * logoWidth;
+      page.drawImage(logoImage, {
+        x: (width - logoWidth) / 2,
+        y: y - logoHeight,
+        width: logoWidth,
+        height: logoHeight
+      });
+      y -= logoHeight + 15;
+    }
+
+    // === BUSINESS HEADER ===
+    const headerText = `${BUSINESS_INFO.name}  •  ${BUSINESS_INFO.email}  •  ${BUSINESS_INFO.website}`;
+    const headerWidth = helvetica.widthOfTextAtSize(headerText, 9);
+    page.drawText(headerText, {
+      x: (width - headerWidth) / 2,
+      y: y,
+      size: 9,
+      font: helvetica,
+      color: gray
+    });
+    y -= 30;
+
+    // === DOCUMENT TITLE ===
+    const titleText = 'Project Intake Form';
+    const titleWidth = helveticaBold.widthOfTextAtSize(titleText, 18);
+    page.drawText(titleText, {
+      x: (width - titleWidth) / 2,
+      y: y,
+      size: 18,
+      font: helveticaBold,
+      color: black
+    });
+    y -= 25;
+
+    // === DIVIDER LINE ===
+    page.drawLine({
+      start: { x: margin, y: y },
+      end: { x: width - margin, y: y },
+      thickness: 1,
+      color: lineGray
+    });
+    y -= 25;
+
+    // === CLIENT INFO (left column) ===
+    page.drawText('Client', { x: leftCol, y: y, size: 11, font: helveticaBold, color: black });
+    page.drawText('Submitted', { x: rightCol, y: y, size: 11, font: helveticaBold, color: black });
+    y -= 16;
+
+    page.drawText(intakeData.clientInfo.name, { x: leftCol, y: y, size: 10, font: helvetica, color: black });
+    page.drawText(formatDate(intakeData.submittedAt), { x: rightCol, y: y, size: 10, font: helvetica, color: black });
+    y -= 14;
+
+    if (intakeData.clientInfo.companyName) {
+      page.drawText(intakeData.clientInfo.companyName, { x: leftCol, y: y, size: 10, font: helvetica, color: black });
+      y -= 14;
+    }
+
+    page.drawText(intakeData.clientInfo.email, { x: leftCol, y: y, size: 10, font: helvetica, color: black });
+    page.drawText('Project ID', { x: rightCol, y: y, size: 10, font: helveticaBold, color: black });
+    y -= 14;
+
+    page.drawText(`#${intakeData.projectId}`, { x: rightCol, y: y, size: 10, font: helvetica, color: black });
+    y -= 20;
+
+    // === DIVIDER LINE ===
+    page.drawLine({
+      start: { x: margin, y: y },
+      end: { x: width - margin, y: y },
+      thickness: 1,
+      color: lineGray
+    });
+    y -= 25;
+
+    // === PROJECT DETAILS ===
+    page.drawText('Project Details', { x: leftCol, y: y, size: 12, font: helveticaBold, color: black });
+    y -= 20;
+
+    // Project Name
+    page.drawText('Project Name: ', { x: leftCol, y: y, size: 10, font: helveticaBold, color: black });
+    const nameX = leftCol + helveticaBold.widthOfTextAtSize('Project Name: ', 10);
+    page.drawText(intakeData.projectName, { x: nameX, y: y, size: 10, font: helvetica, color: black });
+    y -= 16;
+
+    // Project Type
+    page.drawText('Project Type: ', { x: leftCol, y: y, size: 10, font: helveticaBold, color: black });
+    const typeX = leftCol + helveticaBold.widthOfTextAtSize('Project Type: ', 10);
+    page.drawText(formatProjectType(intakeData.projectDetails.type), { x: typeX, y: y, size: 10, font: helvetica, color: black });
+    y -= 16;
+
+    // Timeline
+    page.drawText('Timeline: ', { x: leftCol, y: y, size: 10, font: helveticaBold, color: black });
+    const timelineX = leftCol + helveticaBold.widthOfTextAtSize('Timeline: ', 10);
+    page.drawText(formatTimeline(intakeData.projectDetails.timeline), { x: timelineX, y: y, size: 10, font: helvetica, color: black });
+    y -= 16;
+
+    // Budget
+    page.drawText('Budget: ', { x: leftCol, y: y, size: 10, font: helveticaBold, color: black });
+    const budgetX = leftCol + helveticaBold.widthOfTextAtSize('Budget: ', 10);
+    page.drawText(formatBudget(intakeData.projectDetails.budget), { x: budgetX, y: y, size: 10, font: helvetica, color: black });
+    y -= 30;
+
+    // === PROJECT DESCRIPTION ===
+    page.drawText('Project Description', { x: leftCol, y: y, size: 12, font: helveticaBold, color: black });
+    y -= 18;
+
+    // Word wrap description text
+    const description = decodeHtml(intakeData.projectDetails.description || 'No description provided');
+    const words = description.split(' ');
+    let line = '';
+    const maxWidth = contentWidth;
+    const lineHeight = 14;
+
+    for (const word of words) {
+      const testLine = line + (line ? ' ' : '') + word;
+      const testWidth = helvetica.widthOfTextAtSize(testLine, 10);
+      if (testWidth > maxWidth && line) {
+        page.drawText(line, { x: leftCol, y: y, size: 10, font: helvetica, color: black });
+        y -= lineHeight;
+        line = word;
+      } else {
+        line = testLine;
+      }
+    }
+    if (line) {
+      page.drawText(line, { x: leftCol, y: y, size: 10, font: helvetica, color: black });
+      y -= lineHeight;
+    }
+    y -= 15;
+
+    // === FEATURES (if any) ===
+    if (intakeData.projectDetails.features && intakeData.projectDetails.features.length > 0) {
+      page.drawText('Requested Features', { x: leftCol, y: y, size: 12, font: helveticaBold, color: black });
+      y -= 18;
+
+      for (const feature of intakeData.projectDetails.features) {
+        const featureText = `•  ${feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}`;
+        page.drawText(featureText, { x: leftCol, y: y, size: 10, font: helvetica, color: black });
+        y -= 14;
+      }
+      y -= 10;
+    }
+
+    // === TECHNICAL INFO (if any) ===
+    if (intakeData.technicalInfo && (intakeData.technicalInfo.techComfort || intakeData.technicalInfo.domainHosting)) {
+      page.drawText('Technical Information', { x: leftCol, y: y, size: 12, font: helveticaBold, color: black });
+      y -= 18;
+
+      if (intakeData.technicalInfo.techComfort) {
+        page.drawText('Technical Comfort: ', { x: leftCol, y: y, size: 10, font: helveticaBold, color: black });
+        const tcX = leftCol + helveticaBold.widthOfTextAtSize('Technical Comfort: ', 10);
+        page.drawText(intakeData.technicalInfo.techComfort, { x: tcX, y: y, size: 10, font: helvetica, color: black });
+        y -= 14;
+      }
+      if (intakeData.technicalInfo.domainHosting) {
+        page.drawText('Domain/Hosting: ', { x: leftCol, y: y, size: 10, font: helveticaBold, color: black });
+        const dhX = leftCol + helveticaBold.widthOfTextAtSize('Domain/Hosting: ', 10);
+        page.drawText(intakeData.technicalInfo.domainHosting, { x: dhX, y: y, size: 10, font: helvetica, color: black });
+        y -= 14;
+      }
+    }
+
+    // === FOOTER - always at bottom of page 1 ===
+    const footerText = `Questions? Contact ${BUSINESS_INFO.email}`;
+    const footerWidth = helvetica.widthOfTextAtSize(footerText, 8);
+    page.drawText(footerText, {
+      x: (width - footerWidth) / 2,
+      y: 30, // 30 points from bottom
+      size: 8,
+      font: helvetica,
+      color: lightGray
+    });
+
+    // Generate PDF bytes and send response
+    const pdfBytes = await pdfDoc.save();
+
+    // Generate descriptive PDF filename with NoBhadCodes branding
+    // Use company name if available, otherwise client name
+    const clientOrCompany = getString(p, 'company_name') || getString(p, 'client_name');
+    const safeClientName = clientOrCompany
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-z0-9_-]/g, '')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '')
+      .substring(0, 50);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="nobhadcodes_intake_${safeClientName}.pdf"`);
+    res.setHeader('Content-Length', pdfBytes.length);
+    res.send(Buffer.from(pdfBytes));
   })
 );
 

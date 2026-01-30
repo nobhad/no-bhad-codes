@@ -317,19 +317,19 @@ export async function loadThreadMessages(
       await apiPut(`/api/messages/threads/${threadId}/read`);
     } else {
       container.innerHTML =
-        '<div style="text-align: center; padding: 2rem; color: #666;">Failed to load messages</div>';
+        '<div style="text-align: center; padding: 2rem; color: var(--portal-text-muted);">Failed to load messages</div>';
     }
   } catch (error) {
     console.error('[AdminMessaging] Failed to load messages:', error);
     container.innerHTML =
-      '<div style="text-align: center; padding: 2rem; color: #666;">Error loading messages</div>';
+      '<div style="text-align: center; padding: 2rem; color: var(--portal-text-muted);">Error loading messages</div>';
   }
 }
 
 function renderMessages(messages: Message[], container: HTMLElement): void {
   if (messages.length === 0) {
     container.innerHTML =
-      '<div style="text-align: center; padding: 2rem; color: #666;">No messages yet. Start the conversation!</div>';
+      '<div style="text-align: center; padding: 2rem; color: var(--portal-text-muted);">No messages yet. Start the conversation!</div>';
     return;
   }
 

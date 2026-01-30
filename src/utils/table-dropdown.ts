@@ -208,3 +208,13 @@ export const CONTACT_STATUS_OPTIONS: TableDropdownOption[] = [
   { value: 'responded', label: 'Responded' },
   { value: 'archived', label: 'Archived' }
 ];
+
+// Project status options
+export const PROJECT_STATUS_OPTIONS: TableDropdownOption[] = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'active', label: 'Active' },
+  { value: 'in-progress', label: 'In Progress' },
+  { value: 'on-hold', label: 'On Hold' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'cancelled', label: 'Cancelled' }
+];

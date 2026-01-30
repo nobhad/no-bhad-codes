@@ -4,7 +4,332 @@ This file contains completed work from January 2026. Items are moved here from `
 
 ---
 
+## Archived from Current Work (January 29, 2026)
+
+### Elastic Bounce / Overscroll Fix
+
+**Status:** VERIFIED
+**Fixed:** January 29, 2026
+
+Fixed unwanted elastic "pull to refresh" behavior on admin dashboard and messages pages.
+
+**Fix Applied:**
+
+Added `overscroll-behavior: none` to `html` and `body` elements for admin and client portal pages in `src/styles/shared/portal-layout.css`.
+
+---
+
+### Code Quality & Security Review
+
+**Status:** COMPLETE
+**Fixed:** January 29, 2026
+
+Comprehensive code quality and security review with fixes:
+
+**Security Fixes:**
+
+- Fixed unauthenticated access to `GET /api/proposals/:id` - added `authenticateToken` middleware + ownership check
+- Fixed missing permission check on `GET /api/proposals/:id/pdf` - added ownership verification
+
+**UX Improvements:**
+
+- Added loading states for projects list and messages list in client portal
+- Added warning toast when milestone data fails to load
+- Added `showToast()` for async failure feedback throughout portal modules
+
+**Validation:**
+
+- Added email format validation using shared `validateEmail()` in portal auth, contact form, admin clients
+- Added client-side file type validation before upload (portal + admin)
+- Added `accept` attribute to file inputs for better UX
+
+**Accessibility:**
+
+- Added `role="dialog"`, `aria-modal="true"`, `aria-labelledby` to all admin modals
+- Added `role="log"`, `aria-live="polite"` to message containers
+
+**Code Consolidation:**
+
+- Unified 3 file preview modal functions into single `showPreviewModal()` with options
+
+---
+
+### CSS Shared Component Consolidation
+
+**Status:** COMPLETE
+**Fixed:** January 29, 2026
+
+- Created `shared/portal-badges.css` for cohesive status badge styling
+- Removed duplicate `.stat-card` from `pages/admin.css`
+- Removed duplicate `.status-badge` definitions
+- **Result:** 149 lines added, 164 lines removed = net 15 lines reduction
+
+---
+
+### Admin Tables Mobile Responsiveness
+
+**Status:** COMPLETE
+**Fixed:** January 29, 2026
+
+Added mobile-responsive CSS in `src/styles/pages/admin.css`:
+
+- Leads table: Hide Company and Email columns on mobile
+- Projects table: Hide Type, Timeline, Start Date, End Date columns
+- Contacts table: Hide Company column
+- Clients table: Hide Email and Created columns
+- Reduced `min-width` to 400px for better mobile fit
+- Horizontal scroll support with proper touch scrolling
+
+---
+
+### HTML Entity Decoding
+
+**Status:** COMPLETE
+**Fixed:** January 29, 2026
+
+Added `decodeHtmlEntities()` before `escapeHtml()` in all user-facing data rendering to fix `&amp;` showing instead of `&`.
+
+**Files Modified:**
+
+- `admin-clients.ts` - billing fields
+- `admin-messaging.renderer.ts` - thread client name, subject, message content
+- `admin-contacts.renderer.ts` - contact table and modal
+- `admin-contacts.ts` - contact table and detail view
+- `admin-dashboard.ts` - contact submissions table and modal, messages
+- `admin-messaging.ts` - messages
+- `admin-proposals.ts` - client name, company, project name, features, notes
+
+---
+
+### URL Links Styling
+
+**Status:** COMPLETE
+**Fixed:** January 28, 2026
+
+URL links (Preview URL, Repository URL, Production URL) now styled red and clickable with external-link icon.
+
+---
+
+### Project Type Consistency
+
+**Status:** COMPLETE
+**Fixed:** January 29, 2026
+
+Created single source of truth for project type display labels in `src/utils/format-utils.ts` with `PROJECT_TYPE_LABELS` constant and `formatProjectType()` function.
+
+---
+
+### Project Status Consistency
+
+**Status:** COMPLETE
+**Fixed:** January 29, 2026
+
+Standardized to hyphens (`in-progress`, `on-hold`) to match database schema. Added backwards compatibility for legacy underscore values across TypeScript types, utilities, admin modules, validation schemas, and CSS.
+
+---
+
+### E-commerce vs Ecommerce Standardization
+
+**Status:** COMPLETE
+**Fixed:** January 29, 2026
+
+Standardized to `'e-commerce'` (with hyphen) to match validation schema. Added backwards compatibility for legacy `'ecommerce'` values throughout codebase.
+
+---
+
+### Error Handling - User-Facing Messages
+
+**Status:** COMPLETE
+**Fixed:** January 29, 2026
+
+Raw `error.message` and API error messages no longer shown to users. Replaced with user-friendly messages like "Failed to update project. Please try again." across all client portal and admin modules.
+
+---
+
+### API Calls - Response OK Checks
+
+**Status:** COMPLETE
+**Fixed:** January 29, 2026
+
+All identified cases where `response.json()` was called before checking `response.ok` have been fixed with proper error handling pattern.
+
+---
+
+### Native Browser Dialogs Replacement
+
+**Status:** COMPLETE
+**Fixed:** January 28, 2026
+
+- Admin `prompt()` dialogs replaced with `multiPromptDialog()`
+- Client portal `alert()` dialogs (21 calls) replaced with `showToast()`
+- Admin `confirm()` dialogs already using custom `confirmDialog()` / `confirmDanger()`
+
+---
+
+### Form Loading States
+
+**Status:** COMPLETE
+**Fixed:** January 28, 2026
+
+Created `src/utils/button-loading.ts` utility. Integrated across admin client forms and client portal settings forms.
+
+---
+
+### Empty States - Helpful Messages
+
+**Status:** COMPLETE
+**Fixed:** January 29, 2026
+
+Updated empty state messages to provide guidance:
+
+- Milestones: "No milestones yet. Add one to track progress."
+- Files: "No files yet. Upload files in the Files tab."
+- Invoices: "No invoices yet. Create one in the Invoices tab."
+- Leads: "No leads yet. New form submissions will appear here."
+- Client Portal Projects: "No projects yet. Submit a project request to get started!"
+- Client Portal Messages: "No messages in this thread yet. Send a message below to start the conversation."
+
+---
+
+### Modal Focus Management
+
+**Status:** COMPLETE
+**Fixed:** January 28, 2026
+
+Created `src/utils/focus-trap.ts` utility with proper focus trapping, Escape key handling, and ARIA attributes. Integrated in admin client modals and edit/add project modals.
+
+---
+
+### Button Accessibility - ARIA Labels
+
+**Status:** COMPLETE
+**Fixed:** January 28, 2026
+
+Added `aria-label` attributes to icon-only buttons across admin and client portal.
+
+---
+
+### File Preview/Download
+
+**Status:** COMPLETE
+**Fixed:** January 28, 2026
+
+Fixed file preview and download to use authenticated API endpoint `/api/uploads/file/:fileId` with blob URL handling.
+
+---
+
+### PDF Branding Logo
+
+**Status:** COMPLETE
+**Fixed:** January 28, 2026
+
+All PDF types now have branding logo:
+
+- Invoice PDFs
+- Project proposal PDFs
+- Project contract PDFs
+
+---
+
+### Various Bug Fixes (January 28-29, 2026)
+
+All the following were fixed:
+
+- Project Description line breaks rendering
+- Admin Notes save, edit, and visibility
+- Edit Project Modal - All fields editable + logical organization
+- Target End Date timezone issue (off by one day)
+- HTML Entity double encoding
+- Client Name/Billing Name ampersand encoding
+- Client Edit - Email update
+- Missing data display (empty instead of dash)
+- Client Budget missing hyphen
+- Admin Project Save - using API response data
+- Admin Proposals Notes Save - refreshing display
+- Admin Clients Edit - using API response data
+- Client Portal Project Request - refreshing projects list
+- Date Formatting consistency
+- Progress Save error handling
+- Object URL blob leaks
+- Uploads dangerous file types filtering
+- Security headers hardening
+- Modal event listeners cleanup
+- Form validation debounce
+- E-commerce vs ecommerce standardization
+
+---
+
 ## Archived from Current Work (January 28, 2026)
+
+### REDESIGN ALL PORTAL BUTTONS
+**Status:** COMPLETE
+**Completed:** January 26, 2026
+
+Full button redesign across admin and client portals. Shared portal button styles (`btn`, `btn-outline`, `btn-sm`) now used consistently. Preview/Download buttons in Files tab updated to match (January 28, 2026).
+
+---
+
+### File Upload - Files Appear After Upload
+**Status:** VERIFIED (no issue)
+**Verified:** January 28, 2026
+
+File upload success refreshes Files section; new files appear immediately without page reload.
+
+**Verification steps:**
+- Go to project details > Files tab
+- Upload a file
+- Verify file appears immediately (no page refresh needed)
+
+---
+
+### File Download
+**Status:** VERIFIED (no issue)
+**Verified:** January 28, 2026
+
+Download button on project files works; file downloads with correct filename.
+
+**Verification steps:**
+- Click Download on any project file
+- File should download with correct filename
+
+---
+
+### Target End Date Display
+**Status:** VERIFIED (no issue)
+**Verified:** January 28, 2026
+
+Target end dates display correctly (no timezone offset); e.g. March 1 shows as March 1.
+
+**Verification steps:**
+- Set a target end date (e.g., March 1)
+- Save and verify it displays as March 1 (not February 28)
+
+---
+
+### Empty Values Display
+**Status:** VERIFIED (no issue)
+**Verified:** January 28, 2026
+
+Unpopulated fields show blank instead of "-" in project details.
+
+**Verification steps:**
+- View a project with some fields unpopulated
+- Empty fields should show blank, not "-"
+
+---
+
+### Admin Proposals Notes Save
+**Status:** VERIFIED (no issue)
+**Verified:** January 28, 2026
+
+Admin notes on proposals save and refresh in the details panel immediately.
+
+**Verification steps:**
+- Open a proposal in admin panel
+- Add or modify admin notes
+- Save and verify notes display updates immediately
+
+---
 
 ### Dialogue Box Shadows - Consistency
 **Status:** COMPLETE

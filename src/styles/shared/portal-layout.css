@@ -8,6 +8,13 @@
    OVERSCROLL BEHAVIOR
    Prevent elastic bounce showing background on scroll
    ===================================================== */
+html:has([data-page="admin"]),
+html:has([data-page="client-portal"]),
+body:has([data-page="admin"]),
+body:has([data-page="client-portal"]) {
+  overscroll-behavior: none;
+}
+
 :is([data-page="admin"], [data-page="client-portal"]) .sidebar {
   overflow: hidden;
   overscroll-behavior: contain;

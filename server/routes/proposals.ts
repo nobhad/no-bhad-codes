@@ -268,10 +268,12 @@ router.post(
 /**
  * GET /api/proposals/:id
  * Get a specific proposal by ID
+ * Requires authentication - only admin or owning client can view
  */
 router.get(
   '/:id',
-  asyncHandler(async (req: Request, res: Response) => {
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     const db = getDatabase();
 
@@ -288,6 +290,15 @@ router.get(
       return res.status(404).json({
         success: false,
         message: 'Proposal not found'
+      });
+    }
+
+    // Authorization check: only admin or owning client can view
+    const proposalClientId = getNumber(proposal as unknown as Record<string, unknown>, 'client_id');
+    if (req.user!.type !== 'admin' && req.user!.id !== proposalClientId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
       });
     }
 
@@ -616,14 +627,23 @@ router.get(
       });
     }
 
+    // Cast proposal for helper functions
+    const p = proposal as unknown as Record<string, unknown>;
+
+    // Authorization check: only admin or owning client can download PDF
+    const proposalClientId = getNumber(p, 'client_id');
+    if (req.user!.type !== 'admin' && req.user!.id !== proposalClientId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+
     // Get feature selections
     const features = await db.all(
       `SELECT * FROM proposal_feature_selections WHERE proposal_request_id = ?`,
       [id]
     ) as unknown as FeatureRow[];
-
-    // Cast proposal for helper functions
-    const p = proposal as unknown as Record<string, unknown>;
 
     // Create PDF document
     const doc = new PDFDocument({ margin: 50, size: 'LETTER' });

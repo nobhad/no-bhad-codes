@@ -19,6 +19,7 @@ import {
   formatProjectType
 } from '../../../utils/format-utils';
 import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
+import { createTableDropdown, PROJECT_STATUS_OPTIONS } from '../../../utils/table-dropdown';
 import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
 import { showToast } from '../../../utils/toast-notifications';
 import {
@@ -341,61 +342,60 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
     return;
   }
 
-  tableBody.innerHTML = filteredProjects
-    .map((project) => {
-      // Decode HTML entities first (data may have &amp; stored), then escape for safe HTML output
-      const safeName = SanitizationUtils.escapeHtml(
-        SanitizationUtils.decodeHtmlEntities(project.project_name || project.description?.substring(0, 30) || 'Untitled Project')
-      );
-      const safeContact = SanitizationUtils.escapeHtml(
-        SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(project.contact_name || '-'))
-      );
-      const safeCompany = project.company_name
-        ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(project.company_name)))
-        : '';
-      // Normalize status to underscore format for CSS class consistency
-      const status = normalizeStatus(project.status);
+  // Clear and rebuild table with dropdown containers
+  tableBody.innerHTML = '';
 
-      const statusLabels: Record<string, string> = {
-        pending: 'Pending',
-        active: 'Active',
-        'in-progress': 'In Progress',
-        in_progress: 'In Progress', // Legacy support
-        'on-hold': 'On Hold',
-        on_hold: 'On Hold', // Legacy support
-        completed: 'Completed',
-        cancelled: 'Cancelled'
-      };
+  filteredProjects.forEach((project) => {
+    // Decode HTML entities first (data may have &amp; stored), then escape for safe HTML output
+    const safeName = SanitizationUtils.escapeHtml(
+      SanitizationUtils.decodeHtmlEntities(project.project_name || project.description?.substring(0, 30) || 'Untitled Project')
+    );
+    const safeContact = SanitizationUtils.escapeHtml(
+      SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(project.contact_name || '-'))
+    );
+    const safeCompany = project.company_name
+      ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(SanitizationUtils.decodeHtmlEntities(project.company_name)))
+      : '';
+    // Normalize status to hyphen format for consistency
+    const status = normalizeStatus(project.status);
 
-      return `
-        <tr data-project-id="${project.id}" class="clickable-row">
-          <td>${safeName}</td>
-          <td>${safeContact}<br><small>${safeCompany}</small></td>
-          <td>${formatProjectType(project.project_type)}</td>
-          <td>${formatDisplayValue(project.budget_range)}</td>
-          <td>${formatDisplayValue(project.timeline)}</td>
-          <td>${formatDate(project.start_date)}</td>
-          <td>${formatDate(project.end_date)}</td>
-          <td>${statusLabels[status] || 'Pending'}</td>
-        </tr>
-      `;
-    })
-    .join('');
+    const row = document.createElement('tr');
+    row.dataset.projectId = String(project.id);
+    row.className = 'clickable-row';
 
-  setupProjectTableHandlers(ctx);
-}
+    row.innerHTML = `
+      <td>${safeName}</td>
+      <td>${safeContact}<br><small>${safeCompany}</small></td>
+      <td>${formatProjectType(project.project_type)}</td>
+      <td>${formatDisplayValue(project.budget_range)}</td>
+      <td>${formatDisplayValue(project.timeline)}</td>
+      <td>${formatDate(project.start_date)}</td>
+      <td>${formatDate(project.end_date)}</td>
+      <td class="status-cell"></td>
+    `;
 
-function setupProjectTableHandlers(ctx: AdminDashboardContext): void {
-  const tableBody = domCache.get('tableBody');
-  if (!tableBody) return;
+    // Create status dropdown
+    const statusCell = row.querySelector('.status-cell');
+    if (statusCell) {
+      const dropdown = createTableDropdown({
+        options: PROJECT_STATUS_OPTIONS,
+        currentValue: status,
+        onChange: async (newStatus) => {
+          await updateProjectStatus(project.id, newStatus, ctx);
+          project.status = newStatus as LeadProject['status'];
+        }
+      });
+      statusCell.appendChild(dropdown);
+    }
 
-  // Row click handlers - clicking row opens project details
-  const rows = tableBody.querySelectorAll('tr[data-project-id]');
-  rows.forEach((row) => {
-    row.addEventListener('click', () => {
-      const projectId = parseInt((row as HTMLElement).dataset.projectId || '0');
-      showProjectDetails(projectId, ctx);
+    // Add click handler for row (excluding status cell)
+    row.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('.table-dropdown')) return;
+      showProjectDetails(project.id, ctx);
     });
+
+    tableBody.appendChild(row);
   });
 }
 
@@ -723,7 +723,7 @@ function initProjectModalDropdowns(project: LeadProject): void {
   // Type dropdown
   if (typeSelect) {
     const typeWrapper = typeSelect.previousElementSibling as HTMLElement;
-    if (typeWrapper?.classList.contains('modal-dropdown')) {
+    if (typeWrapper?.classList.contains('custom-dropdown')) {
       // Dropdown already exists, just update the value
       setModalDropdownValue(typeWrapper, project.project_type || '');
     } else if (!typeSelect.dataset.dropdownInit) {
@@ -737,7 +737,7 @@ function initProjectModalDropdowns(project: LeadProject): void {
   // Status dropdown
   if (statusSelect) {
     const statusWrapper = statusSelect.previousElementSibling as HTMLElement;
-    if (statusWrapper?.classList.contains('modal-dropdown')) {
+    if (statusWrapper?.classList.contains('custom-dropdown')) {
       // Dropdown already exists, just update the value
       setModalDropdownValue(statusWrapper, normalizeStatus(project.status));
     } else if (!statusSelect.dataset.dropdownInit) {
@@ -989,7 +989,7 @@ export async function loadProjectFiles(
 
     if (response.ok) {
       const data = await response.json();
-      renderProjectFiles(data.files || [], container);
+      renderProjectFiles(data.files || [], container, projectId);
     } else {
       container.innerHTML = '<p class="empty-state">No files yet. Upload files in the Files tab.</p>';
     }
@@ -999,7 +999,7 @@ export async function loadProjectFiles(
   }
 }
 
-function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void {
+function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projectId: number): void {
   if (files.length === 0) {
     container.innerHTML = '<p class="empty-state">No files yet. Upload files in the Files tab.</p>';
     return;
@@ -1019,6 +1019,7 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
         ${files
     .map((file) => {
       const safeName = SanitizationUtils.escapeHtml(file.original_filename || file.filename);
+      const storageFilename = file.filename || ''; // Actual filename on disk for intake detection
       // Use file_size or size (API returns both for compatibility)
       const fileSize = file.file_size || file.size || 0;
       const size = formatFileSize(fileSize);
@@ -1026,17 +1027,18 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
       // Use API endpoint for file access (authenticated)
       const fileApiUrl = `/api/uploads/file/${file.id}`;
       const downloadUrl = `${fileApiUrl}?download=true`;
-      // Check if file is previewable (JSON, text, images)
-      const isPreviewable = /\.(json|txt|md|png|jpg|jpeg|gif|webp|svg|pdf)$/i.test(safeName);
+      // Check if file is previewable (by display name extension OR intake files by storage name)
+      const isIntakeFile = /^(intake_|admin_project_)/i.test(storageFilename) && /\.json$/i.test(storageFilename);
+      const isPreviewable = /\.(json|txt|md|png|jpg|jpeg|gif|webp|svg|pdf)$/i.test(safeName) || isIntakeFile;
 
       return `
               <tr>
-                <td>${safeName}</td>
-                <td>${size}</td>
-                <td>${date}</td>
-                <td class="file-actions">
-                  ${isPreviewable ? `<button class="btn btn-outline btn-sm btn-preview" data-file-id="${file.id}" data-file-url="${fileApiUrl}" data-file-name="${safeName}" aria-label="Preview ${safeName}">Preview</button>` : ''}
-                  <button class="btn btn-outline btn-sm btn-download" data-file-url="${downloadUrl}" data-file-name="${safeName}" aria-label="Download ${safeName}">Download</button>
+                <td data-label="File">${safeName}</td>
+                <td data-label="Size">${size}</td>
+                <td data-label="Uploaded">${date}</td>
+                <td class="file-actions" data-label="Actions">
+                  ${isPreviewable ? `<button class="btn btn-outline btn-sm btn-preview" data-file-id="${file.id}" data-file-url="${fileApiUrl}" data-file-name="${safeName}" data-storage-filename="${storageFilename}" aria-label="Preview ${safeName}">Preview</button>` : ''}
+                  <button class="btn btn-outline btn-sm btn-download" data-file-url="${downloadUrl}" data-file-name="${safeName}" data-storage-filename="${storageFilename}" aria-label="Download ${safeName}">Download</button>
                 </td>
               </tr>
             `;
@@ -1051,8 +1053,9 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
     btn.addEventListener('click', () => {
       const fileUrl = (btn as HTMLElement).dataset.fileUrl;
       const fileName = (btn as HTMLElement).dataset.fileName;
+      const storageFilename = (btn as HTMLElement).dataset.storageFilename;
       if (fileUrl) {
-        openFilePreview(fileUrl, fileName || 'File Preview');
+        openFilePreview(fileUrl, fileName || 'File Preview', projectId, storageFilename);
       }
     });
   });
@@ -1062,8 +1065,9 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
     btn.addEventListener('click', async () => {
       const fileUrl = (btn as HTMLElement).dataset.fileUrl;
       const fileName = (btn as HTMLElement).dataset.fileName;
+      const storageFilename = (btn as HTMLElement).dataset.storageFilename;
       if (fileUrl) {
-        await downloadFile(fileUrl, fileName || 'download');
+        await downloadFile(fileUrl, fileName || 'download', projectId, storageFilename);
       }
     });
   });
@@ -1071,16 +1075,48 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement): void 
 
 /**
  * Download file using authenticated fetch
+ * For intake files, downloads the PDF version instead of raw JSON
  */
-async function downloadFile(fileUrl: string, fileName: string): Promise<void> {
+/**
+ * Extract filename from Content-Disposition header
+ */
+function getFilenameFromResponse(response: Response, fallback: string): string {
+  const contentDisposition = response.headers.get('Content-Disposition');
+  if (contentDisposition) {
+    // Try to extract filename from header
+    const match = contentDisposition.match(/filename[^;=\n]*=["']?([^"';\n]*)["']?/i);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  return fallback;
+}
+
+async function downloadFile(fileUrl: string, fileName: string, projectId?: number, storageFilename?: string): Promise<void> {
   try {
-    const response = await apiFetch(fileUrl);
+    // For intake files, download PDF instead of raw JSON
+    const filenameToCheck = storageFilename || fileName;
+    const isIntakeFile = /^(intake_|admin_project_|project_intake_|nobhadcodes_intake_)/i.test(filenameToCheck) && /\.json$/i.test(filenameToCheck);
+
+    let response: Response;
+
+    if (isIntakeFile && projectId) {
+      // Download PDF version of intake file
+      response = await apiFetch(`/api/projects/${projectId}/intake/pdf`);
+    } else {
+      response = await apiFetch(fileUrl);
+    }
+
     if (!response.ok) throw new Error('Failed to download file');
+
+    // Get filename from response header or use fallback
+    const downloadName = getFilenameFromResponse(response, isIntakeFile ? fileName.replace(/\.json$/i, '.pdf') : fileName);
+
     const blob = await response.blob();
     const blobUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = blobUrl;
-    a.download = fileName;
+    a.download = downloadName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -1094,10 +1130,23 @@ async function downloadFile(fileUrl: string, fileName: string): Promise<void> {
 /**
  * Open file preview in a modal or new tab
  * Uses authenticated API fetch
+ * @param storageFilename - The actual filename on disk (used for intake file detection)
  */
-async function openFilePreview(fileUrl: string, fileName: string): Promise<void> {
+async function openFilePreview(fileUrl: string, fileName: string, projectId?: number, storageFilename?: string): Promise<void> {
   try {
-    // For JSON files, fetch and display in a modal
+    // For intake JSON files, open as branded PDF instead of raw JSON
+    // Check storage filename (actual disk name) for intake pattern, fall back to display name
+    const filenameToCheck = storageFilename || fileName;
+    const isIntakeFile = /^(intake_|admin_project_|project_intake_|nobhadcodes_intake_)/i.test(filenameToCheck) && /\.json$/i.test(filenameToCheck);
+    if (isIntakeFile && projectId) {
+      // Open intake PDF directly - browser will use auth cookie
+      // This allows proper filename in Content-Disposition header to work
+      const pdfUrl = `/api/projects/${projectId}/intake/pdf`;
+      window.open(pdfUrl, '_blank');
+      return;
+    }
+
+    // For other JSON files, fetch and display in a modal
     if (/\.json$/i.test(fileName)) {
       const response = await apiFetch(fileUrl);
       if (!response.ok) throw new Error('Failed to load file');
@@ -1143,11 +1192,22 @@ async function openFilePreview(fileUrl: string, fileName: string): Promise<void>
   }
 }
 
+// ============================================
+// PREVIEW MODAL - Unified modal for file previews
+// ============================================
+
+interface PreviewModalOptions {
+  title: string;
+  content: string;
+  maxWidth?: string;
+  bodyClass?: string;
+  onClose?: () => void;
+}
+
 /**
- * Show JSON content in a preview modal
+ * Create or get the preview modal element
  */
-function showJsonPreviewModal(data: unknown, fileName: string): void {
-  // Check if modal already exists
+function getOrCreatePreviewModal(): HTMLElement {
   let modal = document.getElementById('file-preview-modal');
   if (!modal) {
     modal = document.createElement('div');
@@ -1156,16 +1216,29 @@ function showJsonPreviewModal(data: unknown, fileName: string): void {
     document.body.appendChild(modal);
   }
 
-  const formattedJson = JSON.stringify(data, null, 2);
+  // Set ARIA attributes for accessibility
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-labelledby', 'preview-modal-title');
+
+  return modal;
+}
+
+/**
+ * Show a preview modal with customizable content
+ */
+function showPreviewModal(options: PreviewModalOptions): void {
+  const { title, content, maxWidth = '700px', bodyClass = '', onClose } = options;
+  const modal = getOrCreatePreviewModal();
 
   modal.innerHTML = `
-    <div class="admin-modal" style="max-width: 700px;">
+    <div class="admin-modal" style="max-width: ${maxWidth};">
       <div class="admin-modal-header">
-        <h3>${SanitizationUtils.escapeHtml(fileName)}</h3>
+        <h3 id="preview-modal-title">${SanitizationUtils.escapeHtml(title)}</h3>
         <button class="admin-modal-close" id="preview-modal-close" aria-label="Close modal">&times;</button>
       </div>
-      <div class="admin-modal-body" style="max-height: 60vh; overflow: auto;">
-        <pre style="white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.5; margin: 0; color: var(--portal-text-light);">${SanitizationUtils.escapeHtml(formattedJson)}</pre>
+      <div class="admin-modal-body${bodyClass ? ` ${bodyClass}` : ''}" style="max-height: 60vh; overflow: auto;">
+        ${content}
       </div>
       <div class="admin-modal-footer">
         <button class="btn btn-secondary" id="preview-modal-close-btn">Close</button>
@@ -1177,6 +1250,7 @@ function showJsonPreviewModal(data: unknown, fileName: string): void {
   document.body.classList.add('modal-open');
 
   const closeModal = () => {
+    onClose?.();
     modal?.classList.add('hidden');
     document.body.classList.remove('modal-open');
   };
@@ -1186,94 +1260,49 @@ function showJsonPreviewModal(data: unknown, fileName: string): void {
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
   }, { once: true });
+}
+
+/**
+ * Show JSON content in a preview modal
+ */
+function showJsonPreviewModal(data: unknown, fileName: string): void {
+  const formattedJson = JSON.stringify(data, null, 2);
+  const preStyle = 'white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.5; margin: 0; color: var(--portal-text-light);';
+
+  showPreviewModal({
+    title: fileName,
+    content: `<pre style="${preStyle}">${SanitizationUtils.escapeHtml(formattedJson)}</pre>`
+  });
 }
 
 /**
  * Show text content in a preview modal
  */
 function showTextPreviewModal(text: string, fileName: string): void {
-  let modal = document.getElementById('file-preview-modal');
-  if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'file-preview-modal';
-    modal.className = 'admin-modal-overlay';
-    document.body.appendChild(modal);
-  }
+  const preStyle = 'white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.5; margin: 0; color: var(--portal-text-light);';
 
-  modal.innerHTML = `
-    <div class="admin-modal" style="max-width: 700px;">
-      <div class="admin-modal-header">
-        <h3>${SanitizationUtils.escapeHtml(fileName)}</h3>
-        <button class="admin-modal-close" id="preview-modal-close" aria-label="Close modal">&times;</button>
-      </div>
-      <div class="admin-modal-body" style="max-height: 60vh; overflow: auto;">
-        <pre style="white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.5; margin: 0; color: var(--portal-text-light);">${SanitizationUtils.escapeHtml(text)}</pre>
-      </div>
-      <div class="admin-modal-footer">
-        <button class="btn btn-secondary" id="preview-modal-close-btn">Close</button>
-      </div>
-    </div>
-  `;
-
-  modal.classList.remove('hidden');
-  document.body.classList.add('modal-open');
-
-  const closeModal = () => {
-    modal?.classList.add('hidden');
-    document.body.classList.remove('modal-open');
-  };
-
-  document.getElementById('preview-modal-close')?.addEventListener('click', closeModal);
-  document.getElementById('preview-modal-close-btn')?.addEventListener('click', closeModal);
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  }, { once: true });
+  showPreviewModal({
+    title: fileName,
+    content: `<pre style="${preStyle}">${SanitizationUtils.escapeHtml(text)}</pre>`
+  });
 }
 
 /**
  * Show image in a preview modal
  */
 function showImagePreviewModal(imageUrl: string, fileName: string): void {
-  let modal = document.getElementById('file-preview-modal');
-  if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'file-preview-modal';
-    modal.className = 'admin-modal-overlay';
-    document.body.appendChild(modal);
-  }
-
-  modal.innerHTML = `
-    <div class="admin-modal" style="max-width: 900px;">
-      <div class="admin-modal-header">
-        <h3>${SanitizationUtils.escapeHtml(fileName)}</h3>
-        <button class="admin-modal-close" id="preview-modal-close" aria-label="Close modal">&times;</button>
-      </div>
-      <div class="admin-modal-body file-preview-modal-body">
-        <img class="file-preview-image" src="${imageUrl}" alt="${SanitizationUtils.escapeHtml(fileName)}" />
-      </div>
-      <div class="admin-modal-footer">
-        <button class="btn btn-secondary" id="preview-modal-close-btn">Close</button>
-      </div>
-    </div>
-  `;
-
-  modal.classList.remove('hidden');
-  document.body.classList.add('modal-open');
-
-  const closeModal = () => {
-    // Revoke blob URL to free memory
-    if (imageUrl.startsWith('blob:')) {
-      URL.revokeObjectURL(imageUrl);
+  showPreviewModal({
+    title: fileName,
+    content: `<img class="file-preview-image" src="${imageUrl}" alt="${SanitizationUtils.escapeHtml(fileName)}" />`,
+    maxWidth: '900px',
+    bodyClass: 'file-preview-modal-body',
+    onClose: () => {
+      // Revoke blob URL to free memory
+      if (imageUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(imageUrl);
+      }
     }
-    modal?.classList.add('hidden');
-    document.body.classList.remove('modal-open');
-  };
-
-  document.getElementById('preview-modal-close')?.addEventListener('click', closeModal);
-  document.getElementById('preview-modal-close-btn')?.addEventListener('click', closeModal);
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  }, { once: true });
+  });
 }
 
 // Project Milestones

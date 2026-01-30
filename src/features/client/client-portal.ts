@@ -734,6 +734,11 @@ export class ClientPortalModule extends BaseModule {
     email: string;
     name: string;
   }): Promise<void> {
+    // Show loading state
+    if (this.projectsList) {
+      this.projectsList.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading projects...</p></div>';
+    }
+
     try {
       // Fetch projects from API
       const projectsResponse = await fetch('/api/projects', {
@@ -768,6 +773,9 @@ export class ClientPortalModule extends BaseModule {
       }
 
       // Transform API projects to ClientProject interface
+      // Track milestone fetch failures for user feedback
+      let milestoneFetchFailures = 0;
+
       const clientProjects: ClientProject[] = await Promise.all(
         apiProjects.map(async (apiProject: ProjectResponse) => {
           // Fetch milestones for this project
@@ -779,8 +787,12 @@ export class ClientPortalModule extends BaseModule {
             if (milestonesResponse.ok) {
               const milestonesData = await milestonesResponse.json() as { milestones?: ProjectMilestoneResponse[] };
               milestones = milestonesData.milestones || [];
+            } else {
+              milestoneFetchFailures++;
+              console.warn(`[ClientPortal] Failed to fetch milestones for project ${apiProject.id}: ${milestonesResponse.status}`);
             }
           } catch (milestoneError) {
+            milestoneFetchFailures++;
             console.warn(`[ClientPortal] Failed to fetch milestones for project ${apiProject.id}:`, milestoneError);
           }
 
@@ -822,6 +834,14 @@ export class ClientPortalModule extends BaseModule {
           } as ClientProject;
         })
       );
+
+      // Show warning toast if any milestone fetches failed
+      if (milestoneFetchFailures > 0) {
+        showToast(
+          'Some milestone data could not be loaded. Progress information may be incomplete.',
+          'warning'
+        );
+      }
 
       // Set client name in header
       const clientNameElement = this.domCache.get('clientName');
