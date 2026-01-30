@@ -1,6 +1,6 @@
 # Invoice System
 
-**Last Updated:** January 13, 2026
+**Last Updated:** January 30, 2026
 
 ## Table of Contents
 
@@ -34,7 +34,7 @@ The Invoice System provides clients with a complete view of their payment histor
 | Status Badges | Complete | Visual status indicators (Pending, Paid, Overdue, etc.) |
 | Preview | Complete | View invoice details in new tab |
 | Download | Complete | Download invoice as PDF |
-| PDF Generation | Complete | Full PDF generation with PDFKit |
+| PDF Generation | Complete | Full PDF generation with pdf-lib (see [PDF_GENERATION.md](./PDF_GENERATION.md)) |
 | Project Association | Complete | Link invoices to specific projects |
 | Demo Mode | Complete | Fallback demo data when backend unavailable |
 
@@ -205,50 +205,42 @@ Mark invoice as paid.
 
 #### GET `/api/invoices/:id/pdf`
 
-Download invoice as PDF.
+Download or preview invoice as PDF.
 
 **Authentication:** Required (JWT Bearer token)
 
-**Response:** PDF file stream with headers:
+**Query Parameters:**
+
+- `preview=true` - Opens inline in browser tab
+- `preview=false` (default) - Downloads as file attachment
+
+**Response:** PDF file with headers:
+
 - `Content-Type: application/pdf`
-- `Content-Disposition: attachment; filename="invoice-INV-2025-001.pdf"`
+- `Content-Disposition: inline|attachment; filename="INV-2026-001.pdf"`
 
 **PDF Contents:**
-- Company header with logo placeholder
-- Invoice number and dates (issue date, due date)
-- Bill To section with client details
-- Line items table with description, quantity, rate, amount
-- Subtotal, tax (if applicable), and total
-- Payment terms and notes
 
-**Implementation (server/routes/invoices.ts):**
+- Professional header with 75pt logo (aspect ratio preserved)
+- Business name, owner, tagline, email, website
+- "INVOICE" title (28pt, right-aligned)
+- Invoice number and dates
+- Bill To section with client details
+- Line items table
+- Totals section
+- Payment methods (Zelle, Venmo)
+- Terms and notes
+
+**Implementation:** Uses pdf-lib library. See [PDF_GENERATION.md](./PDF_GENERATION.md) for full documentation.
 
 ```typescript
-import PDFDocument from 'pdfkit';
+import { PDFDocument as PDFLibDocument, StandardFonts, rgb } from 'pdf-lib';
 
-router.get('/:id/pdf', authenticateToken, asyncHandler(async (req, res) => {
-  const invoiceId = parseInt(req.params.id);
-  const invoice = await getInvoiceService().getInvoiceById(invoiceId);
-
-  // Verify ownership
-  if (req.user!.type === 'client' && invoice.clientId !== req.user!.id) {
-    return res.status(403).json({ error: 'Not authorized' });
-  }
-
-  const doc = new PDFDocument({ margin: 50 });
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition',
-    `attachment; filename="invoice-${invoice.invoiceNumber}.pdf"`);
-  doc.pipe(res);
-
-  // Header
-  doc.fontSize(24).font('Helvetica-Bold').text('INVOICE', { align: 'right' });
-  doc.fontSize(10).font('Helvetica')
-     .text(`Invoice #: ${invoice.invoiceNumber}`, { align: 'right' });
-
-  // Bill To section, Line Items, Totals...
-  doc.end();
-}));
+// PDF generated with pdf-lib, sent as Buffer
+const pdfBytes = await generateInvoicePdf(pdfData);
+res.setHeader('Content-Type', 'application/pdf');
+res.setHeader('Content-Disposition', `${disposition}; filename="${invoiceNumber}.pdf"`);
+res.send(Buffer.from(pdfBytes));
 ```
 
 ---
@@ -608,6 +600,7 @@ export function formatCurrency(amount: number): string {
 
 ## Related Documentation
 
+- [PDF Generation](./PDF_GENERATION.md) - Complete PDF system documentation
 - [Client Portal](./CLIENT_PORTAL.md) - Main portal overview
 - [API Reference](../API_REFERENCE.md) - Complete API documentation
 - [Settings](./SETTINGS.md) - Billing information

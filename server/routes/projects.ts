@@ -9,8 +9,7 @@ import express, { Response } from 'express';
 import multer from 'multer';
 import path, { join } from 'path';
 import { existsSync, readFileSync } from 'fs';
-import PDFDocument from 'pdfkit';
-import { PDFDocument as PDFLibDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument as PDFLibDocument, StandardFonts, rgb, PDFPage, PDFFont } from 'pdf-lib';
 import { getDatabase } from '../database/init.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
@@ -24,7 +23,9 @@ const router = express.Router();
 // Business info from environment variables
 const BUSINESS_INFO = {
   name: process.env.BUSINESS_NAME || 'No Bhad Codes',
+  owner: process.env.BUSINESS_OWNER || 'Noelle Bhaduri',
   contact: process.env.BUSINESS_CONTACT || 'Noelle Bhaduri',
+  tagline: process.env.BUSINESS_TAGLINE || 'Web Development & Design',
   email: process.env.BUSINESS_EMAIL || 'nobhaduri@gmail.com',
   website: process.env.BUSINESS_WEBSITE || 'nobhad.codes'
 };
@@ -1279,212 +1280,251 @@ router.get(
     // Cast project for helper functions
     const p = project as Record<string, unknown>;
 
-    // Create PDF document
-    const doc = new PDFDocument({ margin: 50, size: 'LETTER' });
-
-    // Set response headers
-    const projectName = getString(p, 'project_name').replace(/[^a-zA-Z0-9]/g, '-');
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="contract-${projectName}-${projectId}.pdf"`
-    );
-
-    // Pipe PDF to response
-    doc.pipe(res);
-
     // Helper function to format date
     const formatDate = (dateStr: string | undefined): string => {
       if (!dateStr) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
       return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     };
 
-    // === HEADER WITH LOGO ===
+    // Create PDF document using pdf-lib
+    const pdfDoc = await PDFLibDocument.create();
+    pdfDoc.setTitle(`Contract - ${getString(p, 'project_name')}`);
+    pdfDoc.setAuthor(BUSINESS_INFO.name);
+
+    const page = pdfDoc.addPage([612, 792]); // LETTER size
+    const { width, height } = page.getSize();
+
+    // Embed fonts
+    const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    // Layout constants (0.75 inch margins per template)
+    const leftMargin = 54;
+    const rightMargin = width - 54;
+    const contentWidth = rightMargin - leftMargin;
+
+    // Start from top - template uses 0.6 inch from top
+    let y = height - 43;
+
+    // === HEADER - Logo on left, business info next to it, CONTRACT title on right ===
     const logoPath = join(process.cwd(), 'public/images/avatar_pdf.png');
+    let textStartX = leftMargin;
+    const logoHeight = 75; // ~1 inch, 50% larger for better visibility
+
     if (existsSync(logoPath)) {
-      doc.image(logoPath, (doc.page.width - 60) / 2, 30, { width: 60 });
-      doc.moveDown(4);
+      const logoBytes = readFileSync(logoPath);
+      const logoImage = await pdfDoc.embedPng(logoBytes);
+      const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
+      page.drawImage(logoImage, {
+        x: leftMargin,
+        y: y - logoHeight,
+        width: logoWidth,
+        height: logoHeight
+      });
+      textStartX = leftMargin + logoWidth + 18;
     }
 
-    // Business header line
-    doc.y = 100;
-    doc.fontSize(10).font('Helvetica-Bold')
-      .text(BUSINESS_INFO.name, { continued: true, align: 'center' })
-      .font('Helvetica')
-      .text(` | ${BUSINESS_INFO.contact} | ${BUSINESS_INFO.email} | ${BUSINESS_INFO.website}`, { align: 'center' });
+    // Business name: 16pt Helvetica-Bold
+    page.drawText(BUSINESS_INFO.name, {
+      x: textStartX, y: y, size: 16, font: helveticaBold, color: rgb(0.1, 0.1, 0.1)
+    });
+    // Owner: 10pt - scaled spacing for 75pt logo
+    page.drawText(BUSINESS_INFO.owner, {
+      x: textStartX, y: y - 20, size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2)
+    });
+    // Tagline: 9pt
+    page.drawText(BUSINESS_INFO.tagline, {
+      x: textStartX, y: y - 36, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
+    });
+    // Email: 9pt
+    page.drawText(BUSINESS_INFO.email, {
+      x: textStartX, y: y - 50, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
+    });
+    // Website: 9pt
+    page.drawText(BUSINESS_INFO.website, {
+      x: textStartX, y: y - 64, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
+    });
 
-    doc.moveDown(2);
+    // CONTRACT title: 28pt, right-aligned, vertically centered with logo
+    const titleText = 'CONTRACT';
+    const titleWidth = helveticaBold.widthOfTextAtSize(titleText, 28);
+    page.drawText(titleText, {
+      x: rightMargin - titleWidth, y: y - 25, size: 28, font: helveticaBold, color: rgb(0.15, 0.15, 0.15)
+    });
 
-    // === CONTRACT TITLE ===
-    doc.fontSize(20).font('Helvetica-Bold')
-      .text('Project Contract', { align: 'center' });
-    doc.moveDown(1);
+    y -= 95; // Account for 75pt logo height
 
-    // === CONTRACT INFO ===
-    const leftCol = 50;
-    const rightCol = 350;
-    let currentY = doc.y;
+    // Divider line
+    page.drawLine({
+      start: { x: leftMargin, y: y },
+      end: { x: rightMargin, y: y },
+      thickness: 1,
+      color: rgb(0.7, 0.7, 0.7)
+    });
+    y -= 21;
 
-    // Left column: Client Info
-    doc.fontSize(10).font('Helvetica-Bold').text('Client:', leftCol, currentY);
-    doc.font('Helvetica').text(getString(p, 'client_name') || 'Client', leftCol, currentY + 15);
+    // === CONTRACT INFO - Two columns ===
+    const rightCol = width / 2 + 36;
+
+    // Left side - Client Info
+    page.drawText('Client:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0.2, 0.2, 0.2) });
+    page.drawText(getString(p, 'client_name') || 'Client', { x: leftMargin, y: y - 15, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    let clientLineY = y - 30;
     if (p.company_name) {
-      doc.text(String(p.company_name), leftCol, currentY + 30);
+      page.drawText(String(p.company_name), { x: leftMargin, y: clientLineY, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+      clientLineY -= 15;
     }
-    doc.text(getString(p, 'client_email') || '', leftCol, currentY + (p.company_name ? 45 : 30));
+    page.drawText(getString(p, 'client_email') || '', { x: leftMargin, y: clientLineY, size: 10, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
 
-    // Right column: Contract Details
-    doc.font('Helvetica-Bold').text('Service Provider:', rightCol, currentY);
-    doc.font('Helvetica').text(BUSINESS_INFO.name, rightCol, currentY + 15);
-    doc.font('Helvetica-Bold').text('Contract Date:', rightCol, currentY + 45);
-    doc.font('Helvetica').text(formatDate(getString(p, 'contract_signed_at') || getString(p, 'created_at')), rightCol, currentY + 60);
+    // Right side - Service Provider
+    page.drawText('Service Provider:', { x: rightCol, y: y, size: 10, font: helveticaBold, color: rgb(0.2, 0.2, 0.2) });
+    page.drawText(BUSINESS_INFO.name, { x: rightCol, y: y - 15, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    page.drawText('Contract Date:', { x: rightCol, y: y - 45, size: 10, font: helveticaBold, color: rgb(0.2, 0.2, 0.2) });
+    page.drawText(formatDate(getString(p, 'contract_signed_at') || getString(p, 'created_at')), { x: rightCol, y: y - 60, size: 10, font: helvetica, color: rgb(0, 0, 0) });
 
-    doc.y = currentY + 90;
-    doc.moveDown(1);
+    y -= 90;
 
-    // === PROJECT SCOPE ===
-    doc.fontSize(14).font('Helvetica-Bold').text('1. Project Scope');
-    doc.fillColor('black');
-    doc.moveDown(0.5);
+    // === 1. PROJECT SCOPE ===
+    page.drawText('1. Project Scope', { x: leftMargin, y: y, size: 14, font: helveticaBold, color: rgb(0, 0, 0) });
+    y -= 18;
 
-    doc.fontSize(10).font('Helvetica-Bold').text('Project Name: ', { continued: true });
-    doc.font('Helvetica').text(getString(p, 'project_name'));
+    page.drawText('Project Name:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+    page.drawText(getString(p, 'project_name'), { x: leftMargin + 85, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    y -= 15;
 
     const projectType = getString(p, 'project_type');
     if (projectType) {
-      doc.font('Helvetica-Bold').text('Project Type: ', { continued: true });
-      doc.font('Helvetica').text(projectType.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()));
+      page.drawText('Project Type:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+      page.drawText(projectType.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()), { x: leftMargin + 80, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+      y -= 15;
     }
 
     const description = getString(p, 'description');
     if (description) {
-      doc.moveDown(0.5);
-      doc.font('Helvetica-Bold').text('Description:');
-      doc.font('Helvetica').text(description, { indent: 10 });
-    }
-
-    const features = getString(p, 'features');
-    if (features) {
-      doc.moveDown(0.5);
-      doc.font('Helvetica-Bold').text('Features:');
-      // Parse features if JSON, otherwise display as-is
-      try {
-        const featureList = JSON.parse(features);
-        if (Array.isArray(featureList)) {
-          featureList.forEach((feature: string) => {
-            doc.font('Helvetica').text(`• ${feature}`, { indent: 10 });
-          });
+      page.drawText('Description:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+      y -= 12;
+      // Simple text wrapping for description
+      const words = description.split(' ');
+      let line = '';
+      for (const word of words) {
+        const testLine = line + (line ? ' ' : '') + word;
+        if (helvetica.widthOfTextAtSize(testLine, 10) > contentWidth - 20) {
+          page.drawText(line, { x: leftMargin + 10, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+          y -= 12;
+          line = word;
         } else {
-          doc.font('Helvetica').text(features, { indent: 10 });
+          line = testLine;
         }
-      } catch {
-        doc.font('Helvetica').text(features, { indent: 10 });
+      }
+      if (line) {
+        page.drawText(line, { x: leftMargin + 10, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+        y -= 12;
       }
     }
 
-    doc.moveDown(1);
+    y -= 15;
 
-    // === TIMELINE ===
-    doc.fontSize(14).font('Helvetica-Bold').text('2. Timeline');
-    doc.fillColor('black');
-    doc.moveDown(0.5);
+    // === 2. TIMELINE ===
+    page.drawText('2. Timeline', { x: leftMargin, y: y, size: 14, font: helveticaBold, color: rgb(0, 0, 0) });
+    y -= 18;
 
-    doc.fontSize(10);
     const startDate = getString(p, 'start_date');
     const dueDate = getString(p, 'due_date');
     const timeline = getString(p, 'timeline');
 
     if (startDate) {
-      doc.font('Helvetica-Bold').text('Start Date: ', { continued: true });
-      doc.font('Helvetica').text(formatDate(startDate));
+      page.drawText('Start Date:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+      page.drawText(formatDate(startDate), { x: leftMargin + 70, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+      y -= 15;
     }
     if (dueDate) {
-      doc.font('Helvetica-Bold').text('Target Completion: ', { continued: true });
-      doc.font('Helvetica').text(formatDate(dueDate));
+      page.drawText('Target Completion:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+      page.drawText(formatDate(dueDate), { x: leftMargin + 110, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+      y -= 15;
     }
     if (timeline) {
-      doc.font('Helvetica-Bold').text('Estimated Timeline: ', { continued: true });
-      doc.font('Helvetica').text(timeline);
+      page.drawText('Estimated Timeline:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+      page.drawText(timeline, { x: leftMargin + 115, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+      y -= 15;
     }
 
-    doc.moveDown(1);
+    y -= 15;
 
-    // === PAYMENT TERMS ===
-    doc.fontSize(14).font('Helvetica-Bold').text('3. Payment Terms');
-    doc.fillColor('black');
-    doc.moveDown(0.5);
+    // === 3. PAYMENT TERMS ===
+    page.drawText('3. Payment Terms', { x: leftMargin, y: y, size: 14, font: helveticaBold, color: rgb(0, 0, 0) });
+    y -= 18;
 
-    doc.fontSize(10);
     const price = getString(p, 'price');
     const depositAmount = getString(p, 'deposit_amount');
 
     if (price) {
-      doc.font('Helvetica-Bold').text('Total Project Cost: ', { continued: true });
-      doc.font('Helvetica').text(`$${parseFloat(price).toLocaleString()}`);
+      page.drawText('Total Project Cost:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+      page.drawText(`$${parseFloat(price).toLocaleString()}`, { x: leftMargin + 110, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+      y -= 15;
     }
     if (depositAmount) {
-      doc.font('Helvetica-Bold').text('Deposit Amount: ', { continued: true });
-      doc.font('Helvetica').text(`$${parseFloat(depositAmount).toLocaleString()}`);
+      page.drawText('Deposit Amount:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+      page.drawText(`$${parseFloat(depositAmount).toLocaleString()}`, { x: leftMargin + 100, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+      y -= 15;
     }
 
-    doc.moveDown(0.5);
-    doc.font('Helvetica').text('Payment is due according to the agreed milestones. Final payment is due upon project completion and client approval.');
+    y -= 5;
+    page.drawText('Payment is due according to the agreed milestones. Final payment is due upon', { x: leftMargin, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    y -= 12;
+    page.drawText('project completion and client approval.', { x: leftMargin, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
 
-    doc.moveDown(1);
+    y -= 25;
 
-    // === TERMS AND CONDITIONS ===
-    doc.fontSize(14).font('Helvetica-Bold').text('4. Terms and Conditions');
-    doc.fillColor('black');
-    doc.moveDown(0.5);
+    // === 4. TERMS AND CONDITIONS ===
+    page.drawText('4. Terms and Conditions', { x: leftMargin, y: y, size: 14, font: helveticaBold, color: rgb(0, 0, 0) });
+    y -= 18;
 
-    doc.fontSize(10).font('Helvetica');
     const terms = [
-      'All work will be performed in a professional manner and according to industry standards.',
-      'Client agrees to provide timely feedback and necessary materials to avoid project delays.',
-      'Changes to the scope of work may require additional time and cost adjustments.',
-      'Client retains ownership of all final deliverables upon full payment.',
-      'Service Provider retains the right to showcase the completed project in their portfolio.'
+      '1. All work will be performed in a professional manner and according to industry standards.',
+      '2. Client agrees to provide timely feedback and necessary materials to avoid project delays.',
+      '3. Changes to the scope of work may require additional time and cost adjustments.',
+      '4. Client retains ownership of all final deliverables upon full payment.',
+      '5. Service Provider retains the right to showcase the completed project in their portfolio.'
     ];
 
-    terms.forEach((term, index) => {
-      doc.text(`${index + 1}. ${term}`, { indent: 10 });
-      doc.moveDown(0.3);
-    });
-
-    doc.moveDown(1);
-
-    // === SIGNATURES ===
-    doc.fontSize(14).font('Helvetica-Bold').text('5. Signatures');
-    doc.fillColor('black');
-    doc.moveDown(1);
-
-    // Check if we need a new page for signatures
-    if (doc.y > doc.page.height - 200) {
-      doc.addPage();
+    for (const term of terms) {
+      page.drawText(term, { x: leftMargin + 10, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+      y -= 15;
     }
 
-    currentY = doc.y;
+    y -= 20;
+
+    // === 5. SIGNATURES ===
+    page.drawText('5. Signatures', { x: leftMargin, y: y, size: 14, font: helveticaBold, color: rgb(0, 0, 0) });
+    y -= 30;
+
     const signatureWidth = 200;
 
     // Client signature
-    doc.fontSize(10).font('Helvetica-Bold').text('Client:', leftCol, currentY);
-    doc.moveTo(leftCol, currentY + 50).lineTo(leftCol + signatureWidth, currentY + 50).stroke();
-    doc.font('Helvetica').text(getString(p, 'client_name') || 'Client Name', leftCol, currentY + 55);
-    doc.text('Date: _______________', leftCol, currentY + 70);
+    page.drawText('Client:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+    page.drawLine({ start: { x: leftMargin, y: y - 40 }, end: { x: leftMargin + signatureWidth, y: y - 40 }, thickness: 1, color: rgb(0, 0, 0) });
+    page.drawText(getString(p, 'client_name') || 'Client Name', { x: leftMargin, y: y - 55, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    page.drawText('Date: _______________', { x: leftMargin, y: y - 70, size: 10, font: helvetica, color: rgb(0, 0, 0) });
 
     // Service provider signature
-    doc.font('Helvetica-Bold').text('Service Provider:', rightCol, currentY);
-    doc.moveTo(rightCol, currentY + 50).lineTo(rightCol + signatureWidth, currentY + 50).stroke();
-    doc.font('Helvetica').text(BUSINESS_INFO.name, rightCol, currentY + 55);
-    doc.text('Date: _______________', rightCol, currentY + 70);
+    page.drawText('Service Provider:', { x: rightCol, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+    page.drawLine({ start: { x: rightCol, y: y - 40 }, end: { x: rightCol + signatureWidth, y: y - 40 }, thickness: 1, color: rgb(0, 0, 0) });
+    page.drawText(BUSINESS_INFO.name, { x: rightCol, y: y - 55, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    page.drawText('Date: _______________', { x: rightCol, y: y - 70, size: 10, font: helvetica, color: rgb(0, 0, 0) });
 
     // === FOOTER ===
-    doc.y = doc.page.height - 60;
-    doc.fontSize(9).font('Helvetica').fillColor('#666666')
-      .text(`Questions? Contact us at ${BUSINESS_INFO.email}`, { align: 'center' });
+    const footerText = `Questions? Contact us at ${BUSINESS_INFO.email}`;
+    const footerWidth = helvetica.widthOfTextAtSize(footerText, 9);
+    page.drawText(footerText, { x: (width - footerWidth) / 2, y: 40, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
 
-    // Finalize PDF
-    doc.end();
+    // Generate PDF bytes and send
+    const pdfBytes = await pdfDoc.save();
+    const projectName = getString(p, 'project_name').replace(/[^a-zA-Z0-9]/g, '-');
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="contract-${projectName}-${projectId}.pdf"`);
+    res.setHeader('Content-Length', pdfBytes.length);
+    res.send(Buffer.from(pdfBytes));
   })
 );
 
@@ -1662,125 +1702,218 @@ router.get(
     const lightGray = rgb(0.5, 0.5, 0.5);
     const lineGray = rgb(0.8, 0.8, 0.8);
 
-    // Layout constants
-    const margin = 50;
-    const contentWidth = width - (margin * 2);
-    const leftCol = margin;
-    const rightCol = 320;
+    // Layout constants (matching template: 0.75 inch margins)
+    const leftMargin = 54; // 0.75 inch
+    const rightMargin = width - 54;
+    const contentWidth = rightMargin - leftMargin;
 
     // pdf-lib uses bottom-left origin, so we work from top down
     // Y position decreases as we go down the page
-    let y = height - 50; // Start 50 from top
+    let y = height - 43; // Start ~0.6 inch from top (matching template)
 
-    // === LOGO ===
+    // Logo - 75pt (~1 inch), 50% larger for better visibility
+    const logoHeight = 75;
     const logoPath = join(process.cwd(), 'public/images/avatar_pdf.png');
+    let textStartX = leftMargin;
+
     if (existsSync(logoPath)) {
       const logoBytes = readFileSync(logoPath);
       const logoImage = await pdfDoc.embedPng(logoBytes);
-      const logoWidth = 50;
-      const logoHeight = (logoImage.height / logoImage.width) * logoWidth;
+      // Calculate width to preserve original aspect ratio
+      const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
       page.drawImage(logoImage, {
-        x: (width - logoWidth) / 2,
+        x: leftMargin,
         y: y - logoHeight,
         width: logoWidth,
         height: logoHeight
       });
-      y -= logoHeight + 15;
+      textStartX = leftMargin + logoWidth + 18; // 0.25 inch gap after logo
     }
 
-    // === BUSINESS HEADER ===
-    const headerText = `${BUSINESS_INFO.name}  •  ${BUSINESS_INFO.email}  •  ${BUSINESS_INFO.website}`;
-    const headerWidth = helvetica.widthOfTextAtSize(headerText, 9);
-    page.drawText(headerText, {
-      x: (width - headerWidth) / 2,
+    // Business name: 16pt Helvetica-Bold
+    page.drawText(BUSINESS_INFO.name, {
+      x: textStartX,
       y: y,
+      size: 16,
+      font: helveticaBold,
+      color: rgb(0.1, 0.1, 0.1)
+    });
+
+    // Owner name: 10pt - scaled spacing for 75pt logo
+    page.drawText(BUSINESS_INFO.owner, {
+      x: textStartX,
+      y: y - 20,
+      size: 10,
+      font: helvetica,
+      color: rgb(0.2, 0.2, 0.2)
+    });
+
+    // Tagline: 9pt
+    page.drawText(BUSINESS_INFO.tagline, {
+      x: textStartX,
+      y: y - 36,
       size: 9,
       font: helvetica,
-      color: gray
+      color: rgb(0.4, 0.4, 0.4)
     });
-    y -= 30;
 
-    // === DOCUMENT TITLE ===
-    const titleText = 'Project Intake Form';
-    const titleWidth = helveticaBold.widthOfTextAtSize(titleText, 18);
+    // Email: 9pt
+    page.drawText(BUSINESS_INFO.email, {
+      x: textStartX,
+      y: y - 50,
+      size: 9,
+      font: helvetica,
+      color: rgb(0.4, 0.4, 0.4)
+    });
+
+    // Website: 9pt
+    page.drawText(BUSINESS_INFO.website, {
+      x: textStartX,
+      y: y - 64,
+      size: 9,
+      font: helvetica,
+      color: rgb(0.4, 0.4, 0.4)
+    });
+
+    // Document title on right side: 28pt, vertically centered with logo
+    const titleText = 'INTAKE';
+    const titleWidth = helveticaBold.widthOfTextAtSize(titleText, 28);
     page.drawText(titleText, {
-      x: (width - titleWidth) / 2,
+      x: rightMargin - titleWidth,
+      y: y - 25,
+      size: 28,
+      font: helveticaBold,
+      color: rgb(0.15, 0.15, 0.15)
+    });
+
+    y -= 95; // Account for 75pt logo height
+
+    // === DIVIDER LINE ===
+    page.drawLine({
+      start: { x: leftMargin, y: y },
+      end: { x: rightMargin, y: y },
+      thickness: 1,
+      color: lineGray
+    });
+    y -= 21; // 0.3 inch gap
+
+    // === PREPARED FOR (left) and DATE/PROJECT (right) ===
+    const detailsX = width / 2 + 36; // Middle + 0.5 inch
+
+    // Left side - PREPARED FOR:
+    page.drawText('PREPARED FOR:', {
+      x: leftMargin,
       y: y,
-      size: 18,
+      size: 11,
+      font: helveticaBold,
+      color: rgb(0.2, 0.2, 0.2)
+    });
+
+    // Client name (bold)
+    page.drawText(intakeData.clientInfo.name, {
+      x: leftMargin,
+      y: y - 14,
+      size: 10,
       font: helveticaBold,
       color: black
     });
-    y -= 25;
 
-    // === DIVIDER LINE ===
-    page.drawLine({
-      start: { x: margin, y: y },
-      end: { x: width - margin, y: y },
-      thickness: 1,
-      color: lineGray
-    });
-    y -= 25;
-
-    // === CLIENT INFO (left column) ===
-    page.drawText('Client', { x: leftCol, y: y, size: 11, font: helveticaBold, color: black });
-    page.drawText('Submitted', { x: rightCol, y: y, size: 11, font: helveticaBold, color: black });
-    y -= 16;
-
-    page.drawText(intakeData.clientInfo.name, { x: leftCol, y: y, size: 10, font: helvetica, color: black });
-    page.drawText(formatDate(intakeData.submittedAt), { x: rightCol, y: y, size: 10, font: helvetica, color: black });
-    y -= 14;
-
+    // Company name (if exists)
+    let clientLineY = y - 25;
     if (intakeData.clientInfo.companyName) {
-      page.drawText(intakeData.clientInfo.companyName, { x: leftCol, y: y, size: 10, font: helvetica, color: black });
-      y -= 14;
+      page.drawText(intakeData.clientInfo.companyName, {
+        x: leftMargin,
+        y: clientLineY,
+        size: 10,
+        font: helvetica,
+        color: black
+      });
+      clientLineY -= 11;
     }
 
-    page.drawText(intakeData.clientInfo.email, { x: leftCol, y: y, size: 10, font: helvetica, color: black });
-    page.drawText('Project ID', { x: rightCol, y: y, size: 10, font: helveticaBold, color: black });
-    y -= 14;
-
-    page.drawText(`#${intakeData.projectId}`, { x: rightCol, y: y, size: 10, font: helvetica, color: black });
-    y -= 20;
-
-    // === DIVIDER LINE ===
-    page.drawLine({
-      start: { x: margin, y: y },
-      end: { x: width - margin, y: y },
-      thickness: 1,
-      color: lineGray
+    // Email
+    page.drawText(intakeData.clientInfo.email, {
+      x: leftMargin,
+      y: clientLineY,
+      size: 10,
+      font: helvetica,
+      color: rgb(0.3, 0.3, 0.3)
     });
-    y -= 25;
+
+    // Right side - DATE:
+    page.drawText('DATE:', {
+      x: detailsX,
+      y: y,
+      size: 9,
+      font: helveticaBold,
+      color: rgb(0.3, 0.3, 0.3)
+    });
+    page.drawText(formatDate(intakeData.submittedAt), {
+      x: rightMargin - helvetica.widthOfTextAtSize(formatDate(intakeData.submittedAt), 9),
+      y: y,
+      size: 9,
+      font: helvetica,
+      color: black
+    });
+
+    // PROJECT #:
+    page.drawText('PROJECT #:', {
+      x: detailsX,
+      y: y - 14,
+      size: 9,
+      font: helveticaBold,
+      color: rgb(0.3, 0.3, 0.3)
+    });
+    const projectIdText = `#${intakeData.projectId}`;
+    page.drawText(projectIdText, {
+      x: rightMargin - helvetica.widthOfTextAtSize(projectIdText, 9),
+      y: y - 14,
+      size: 9,
+      font: helvetica,
+      color: black
+    });
+
+    y -= 72; // Move past client info section (1.0 inch)
+
+    // === CONTENT AREA SEPARATOR (light line) ===
+    page.drawLine({
+      start: { x: leftMargin, y: y },
+      end: { x: rightMargin, y: y },
+      thickness: 0.5,
+      color: rgb(0.9, 0.9, 0.9)
+    });
+    y -= 21;
 
     // === PROJECT DETAILS ===
-    page.drawText('Project Details', { x: leftCol, y: y, size: 12, font: helveticaBold, color: black });
+    page.drawText('Project Details', { x: leftMargin, y: y, size: 12, font: helveticaBold, color: black });
     y -= 20;
 
     // Project Name
-    page.drawText('Project Name: ', { x: leftCol, y: y, size: 10, font: helveticaBold, color: black });
-    const nameX = leftCol + helveticaBold.widthOfTextAtSize('Project Name: ', 10);
+    page.drawText('Project Name: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
+    const nameX = leftMargin + helveticaBold.widthOfTextAtSize('Project Name: ', 10);
     page.drawText(intakeData.projectName, { x: nameX, y: y, size: 10, font: helvetica, color: black });
     y -= 16;
 
     // Project Type
-    page.drawText('Project Type: ', { x: leftCol, y: y, size: 10, font: helveticaBold, color: black });
-    const typeX = leftCol + helveticaBold.widthOfTextAtSize('Project Type: ', 10);
+    page.drawText('Project Type: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
+    const typeX = leftMargin + helveticaBold.widthOfTextAtSize('Project Type: ', 10);
     page.drawText(formatProjectType(intakeData.projectDetails.type), { x: typeX, y: y, size: 10, font: helvetica, color: black });
     y -= 16;
 
     // Timeline
-    page.drawText('Timeline: ', { x: leftCol, y: y, size: 10, font: helveticaBold, color: black });
-    const timelineX = leftCol + helveticaBold.widthOfTextAtSize('Timeline: ', 10);
+    page.drawText('Timeline: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
+    const timelineX = leftMargin + helveticaBold.widthOfTextAtSize('Timeline: ', 10);
     page.drawText(formatTimeline(intakeData.projectDetails.timeline), { x: timelineX, y: y, size: 10, font: helvetica, color: black });
     y -= 16;
 
     // Budget
-    page.drawText('Budget: ', { x: leftCol, y: y, size: 10, font: helveticaBold, color: black });
-    const budgetX = leftCol + helveticaBold.widthOfTextAtSize('Budget: ', 10);
+    page.drawText('Budget: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
+    const budgetX = leftMargin + helveticaBold.widthOfTextAtSize('Budget: ', 10);
     page.drawText(formatBudget(intakeData.projectDetails.budget), { x: budgetX, y: y, size: 10, font: helvetica, color: black });
     y -= 30;
 
     // === PROJECT DESCRIPTION ===
-    page.drawText('Project Description', { x: leftCol, y: y, size: 12, font: helveticaBold, color: black });
+    page.drawText('Project Description', { x: leftMargin, y: y, size: 12, font: helveticaBold, color: black });
     y -= 18;
 
     // Word wrap description text
@@ -1794,7 +1927,7 @@ router.get(
       const testLine = line + (line ? ' ' : '') + word;
       const testWidth = helvetica.widthOfTextAtSize(testLine, 10);
       if (testWidth > maxWidth && line) {
-        page.drawText(line, { x: leftCol, y: y, size: 10, font: helvetica, color: black });
+        page.drawText(line, { x: leftMargin, y: y, size: 10, font: helvetica, color: black });
         y -= lineHeight;
         line = word;
       } else {
@@ -1802,19 +1935,19 @@ router.get(
       }
     }
     if (line) {
-      page.drawText(line, { x: leftCol, y: y, size: 10, font: helvetica, color: black });
+      page.drawText(line, { x: leftMargin, y: y, size: 10, font: helvetica, color: black });
       y -= lineHeight;
     }
     y -= 15;
 
     // === FEATURES (if any) ===
     if (intakeData.projectDetails.features && intakeData.projectDetails.features.length > 0) {
-      page.drawText('Requested Features', { x: leftCol, y: y, size: 12, font: helveticaBold, color: black });
+      page.drawText('Requested Features', { x: leftMargin, y: y, size: 12, font: helveticaBold, color: black });
       y -= 18;
 
       for (const feature of intakeData.projectDetails.features) {
         const featureText = `•  ${feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}`;
-        page.drawText(featureText, { x: leftCol, y: y, size: 10, font: helvetica, color: black });
+        page.drawText(featureText, { x: leftMargin, y: y, size: 10, font: helvetica, color: black });
         y -= 14;
       }
       y -= 10;
@@ -1822,32 +1955,41 @@ router.get(
 
     // === TECHNICAL INFO (if any) ===
     if (intakeData.technicalInfo && (intakeData.technicalInfo.techComfort || intakeData.technicalInfo.domainHosting)) {
-      page.drawText('Technical Information', { x: leftCol, y: y, size: 12, font: helveticaBold, color: black });
+      page.drawText('Technical Information', { x: leftMargin, y: y, size: 12, font: helveticaBold, color: black });
       y -= 18;
 
       if (intakeData.technicalInfo.techComfort) {
-        page.drawText('Technical Comfort: ', { x: leftCol, y: y, size: 10, font: helveticaBold, color: black });
-        const tcX = leftCol + helveticaBold.widthOfTextAtSize('Technical Comfort: ', 10);
+        page.drawText('Technical Comfort: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
+        const tcX = leftMargin + helveticaBold.widthOfTextAtSize('Technical Comfort: ', 10);
         page.drawText(intakeData.technicalInfo.techComfort, { x: tcX, y: y, size: 10, font: helvetica, color: black });
         y -= 14;
       }
       if (intakeData.technicalInfo.domainHosting) {
-        page.drawText('Domain/Hosting: ', { x: leftCol, y: y, size: 10, font: helveticaBold, color: black });
-        const dhX = leftCol + helveticaBold.widthOfTextAtSize('Domain/Hosting: ', 10);
+        page.drawText('Domain/Hosting: ', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: black });
+        const dhX = leftMargin + helveticaBold.widthOfTextAtSize('Domain/Hosting: ', 10);
         page.drawText(intakeData.technicalInfo.domainHosting, { x: dhX, y: y, size: 10, font: helvetica, color: black });
         y -= 14;
       }
     }
 
     // === FOOTER - always at bottom of page 1 ===
-    const footerText = `Questions? Contact ${BUSINESS_INFO.email}`;
-    const footerWidth = helvetica.widthOfTextAtSize(footerText, 8);
+    // Footer separator line
+    page.drawLine({
+      start: { x: leftMargin, y: 72 }, // 1 inch from bottom
+      end: { x: rightMargin, y: 72 },
+      thickness: 0.5,
+      color: rgb(0.8, 0.8, 0.8)
+    });
+
+    // Footer contact info (centered with bullet separators)
+    const footerText = `${BUSINESS_INFO.name} • ${BUSINESS_INFO.owner} • ${BUSINESS_INFO.email} • ${BUSINESS_INFO.website}`;
+    const footerWidth = helvetica.widthOfTextAtSize(footerText, 7);
     page.drawText(footerText, {
       x: (width - footerWidth) / 2,
-      y: 30, // 30 points from bottom
-      size: 8,
+      y: 36, // 0.5 inch from bottom
+      size: 7,
       font: helvetica,
-      color: lightGray
+      color: rgb(0.5, 0.5, 0.5)
     });
 
     // Generate PDF bytes and send response

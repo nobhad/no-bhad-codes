@@ -104,6 +104,45 @@ Replaced PDFKit with pdf-lib for reliable PDF generation, and implemented consis
 
 ---
 
+### Complete pdf-lib Migration for All PDFs
+
+**Status:** COMPLETE
+
+Migrated all PDF generation from PDFKit to pdf-lib for consistency and better control. Increased logo size by 50% for better visibility.
+
+**Changes:**
+
+- **Invoice PDF** - Migrated to pdf-lib with 75pt logo
+- **Contract PDF** - Migrated to pdf-lib with 75pt logo
+- **Intake PDF** - Updated to 75pt logo (already used pdf-lib)
+- **Proposal PDF** - Migrated to pdf-lib with 75pt logo
+- Removed all PDFKit imports from codebase
+
+**Header Template (all PDFs):**
+
+| Element | Size | Y-Offset |
+|---------|------|----------|
+| Logo | 75pt height | 0 (preserves aspect ratio) |
+| Business Name | 16pt bold | 0 |
+| Owner | 10pt | -20pt |
+| Tagline | 9pt | -36pt |
+| Email | 9pt | -50pt |
+| Website | 9pt | -64pt |
+| Title | 28pt bold | -25pt (right-aligned) |
+
+**Files Modified:**
+
+- `server/routes/invoices.ts` - Removed PDFKit, uses pdf-lib exclusively
+- `server/routes/projects.ts` - Contract PDF now uses pdf-lib
+- `server/routes/proposals.ts` - Proposal PDF now uses pdf-lib
+
+**Documentation:**
+
+- Created [PDF_GENERATION.md](./features/PDF_GENERATION.md) - Complete PDF system documentation
+- Updated [INVOICES.md](./features/INVOICES.md) - References new PDF docs
+
+---
+
 ### Wireframe Preview System
 
 **Status:** COMPLETE (Documentation Only)
