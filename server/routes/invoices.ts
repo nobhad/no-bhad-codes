@@ -8,9 +8,9 @@
  */
 
 import express from 'express';
-import PDFDocument from 'pdfkit';
+import { PDFDocument as PDFLibDocument, StandardFonts, rgb } from 'pdf-lib';
 import { join } from 'path';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { InvoiceService, InvoiceCreateData, InvoiceLineItem, Invoice } from '../services/invoice-service.js';
@@ -20,12 +20,14 @@ import { getString, getNumber } from '../database/row-helpers.js';
 
 // Business info from environment variables
 const BUSINESS_INFO = {
-  name: process.env.BUSINESS_NAME || '',
-  contact: process.env.BUSINESS_CONTACT || '',
-  email: process.env.BUSINESS_EMAIL || '',
-  website: process.env.BUSINESS_WEBSITE || '',
-  venmoHandle: process.env.VENMO_HANDLE || '',
-  paypalEmail: process.env.PAYPAL_EMAIL || ''
+  name: process.env.BUSINESS_NAME || 'No Bhad Codes',
+  owner: process.env.BUSINESS_OWNER || 'Noelle Bhaduri',
+  contact: process.env.BUSINESS_CONTACT || 'Noelle Bhaduri',
+  tagline: process.env.BUSINESS_TAGLINE || 'Web Development & Design',
+  email: process.env.BUSINESS_EMAIL || 'nobhaduri@gmail.com',
+  website: process.env.BUSINESS_WEBSITE || 'nobhad.codes',
+  venmoHandle: process.env.VENMO_HANDLE || '@nobhaduri',
+  zelleEmail: process.env.ZELLE_EMAIL || 'nobhaduri@gmail.com'
 };
 
 const router = express.Router();
@@ -62,7 +64,7 @@ function toSnakeCaseInvoice(invoice: Invoice): Record<string, unknown> {
     business_name: invoice.businessName,
     business_email: invoice.businessEmail,
     venmo_handle: invoice.venmoHandle,
-    paypal_email: invoice.paypalEmail,
+    paypal_email: invoice.paypalEmail, // Legacy field, using Zelle now
     services_title: invoice.servicesTitle,
     services_description: invoice.servicesDescription,
     deliverables: invoice.deliverables,
@@ -297,6 +299,497 @@ router.post(
         code: 'CREATION_FAILED',
         message
       });
+    }
+  })
+);
+
+// ============================================
+// INVOICE PDF GENERATION HELPER
+// ============================================
+
+interface InvoicePdfData {
+  invoiceNumber: string;
+  issuedDate: string;
+  dueDate?: string;
+  clientName: string;
+  clientCompany?: string;
+  clientEmail: string;
+  clientAddress?: string;
+  clientCityStateZip?: string;
+  clientPhone?: string;
+  projectId?: number;
+  lineItems: Array<{
+    description: string;
+    quantity: number;
+    rate: number;
+    amount: number;
+    details?: string[];
+  }>;
+  subtotal: number;
+  tax?: number;
+  discount?: number;
+  total: number;
+  notes?: string;
+  terms?: string;
+}
+
+/**
+ * Generate invoice PDF using pdf-lib (matches template format)
+ */
+async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
+  const pdfDoc = await PDFLibDocument.create();
+
+  // Set PDF metadata
+  pdfDoc.setTitle(`Invoice ${data.invoiceNumber}`);
+  pdfDoc.setAuthor(BUSINESS_INFO.name);
+  pdfDoc.setSubject('Invoice');
+  pdfDoc.setCreator('NoBhadCodes');
+
+  const page = pdfDoc.addPage([612, 792]); // LETTER size
+  const { width, height } = page.getSize();
+
+  // Embed fonts
+  const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  // Layout constants (0.75 inch margins)
+  const leftMargin = 54;
+  const rightMargin = width - 54;
+
+  // Start from top - template uses 0.6 inch from top = 43.2pt
+  let y = height - 43;
+
+  // === HEADER - Logo on left, business info next to it, INVOICE title on right ===
+  const logoPath = join(process.cwd(), 'public/images/avatar_pdf.png');
+  let textStartX = leftMargin;
+  const logoHeight = 75; // ~1 inch, 50% larger than template baseline
+
+  if (existsSync(logoPath)) {
+    const logoBytes = readFileSync(logoPath);
+    const logoImage = await pdfDoc.embedPng(logoBytes);
+    // Preserve aspect ratio
+    const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
+    page.drawImage(logoImage, {
+      x: leftMargin,
+      y: y - logoHeight,
+      width: logoWidth,
+      height: logoHeight
+    });
+    textStartX = leftMargin + logoWidth + 18; // 0.25 inch gap
+  }
+
+  // Business name: 16pt Helvetica-Bold
+  page.drawText(BUSINESS_INFO.name, {
+    x: textStartX,
+    y: y,
+    size: 16,
+    font: helveticaBold,
+    color: rgb(0.1, 0.1, 0.1)
+  });
+
+  // Owner name: 10pt - scaled spacing for 75pt logo
+  page.drawText(BUSINESS_INFO.owner, {
+    x: textStartX,
+    y: y - 20,
+    size: 10,
+    font: helvetica,
+    color: rgb(0.2, 0.2, 0.2)
+  });
+
+  // Tagline: 9pt
+  page.drawText(BUSINESS_INFO.tagline, {
+    x: textStartX,
+    y: y - 36,
+    size: 9,
+    font: helvetica,
+    color: rgb(0.4, 0.4, 0.4)
+  });
+
+  // Email: 9pt
+  page.drawText(BUSINESS_INFO.email, {
+    x: textStartX,
+    y: y - 50,
+    size: 9,
+    font: helvetica,
+    color: rgb(0.4, 0.4, 0.4)
+  });
+
+  // Website: 9pt
+  page.drawText(BUSINESS_INFO.website, {
+    x: textStartX,
+    y: y - 64,
+    size: 9,
+    font: helvetica,
+    color: rgb(0.4, 0.4, 0.4)
+  });
+
+  // INVOICE title on right: 28pt, vertically centered with logo
+  const titleText = 'INVOICE';
+  const titleWidth = helveticaBold.widthOfTextAtSize(titleText, 28);
+  page.drawText(titleText, {
+    x: rightMargin - titleWidth,
+    y: y - 25,
+    size: 28,
+    font: helveticaBold,
+    color: rgb(0.15, 0.15, 0.15)
+  });
+
+  y -= 95; // Account for 75pt logo height
+
+  // === DIVIDER LINE ===
+  page.drawLine({
+    start: { x: leftMargin, y: y },
+    end: { x: rightMargin, y: y },
+    thickness: 1,
+    color: rgb(0.7, 0.7, 0.7)
+  });
+  y -= 21;
+
+  // === BILL TO (left) and INVOICE DETAILS (right) ===
+  const detailsX = width / 2 + 36;
+
+  // Left side - BILL TO:
+  page.drawText('BILL TO:', {
+    x: leftMargin,
+    y: y,
+    size: 11,
+    font: helveticaBold,
+    color: rgb(0.2, 0.2, 0.2)
+  });
+
+  // Client name (bold)
+  page.drawText(data.clientName, {
+    x: leftMargin,
+    y: y - 14,
+    size: 10,
+    font: helveticaBold,
+    color: rgb(0, 0, 0)
+  });
+
+  let clientLineY = y - 25;
+  if (data.clientCompany) {
+    page.drawText(data.clientCompany, {
+      x: leftMargin,
+      y: clientLineY,
+      size: 10,
+      font: helvetica,
+      color: rgb(0, 0, 0)
+    });
+    clientLineY -= 11;
+  }
+
+  if (data.clientAddress) {
+    page.drawText(data.clientAddress, {
+      x: leftMargin,
+      y: clientLineY,
+      size: 10,
+      font: helvetica,
+      color: rgb(0, 0, 0)
+    });
+    clientLineY -= 11;
+  }
+
+  if (data.clientCityStateZip) {
+    page.drawText(data.clientCityStateZip, {
+      x: leftMargin,
+      y: clientLineY,
+      size: 10,
+      font: helvetica,
+      color: rgb(0, 0, 0)
+    });
+    clientLineY -= 11;
+  }
+
+  page.drawText(data.clientEmail, {
+    x: leftMargin,
+    y: clientLineY,
+    size: 10,
+    font: helvetica,
+    color: rgb(0.3, 0.3, 0.3)
+  });
+  clientLineY -= 11;
+
+  if (data.clientPhone) {
+    page.drawText(data.clientPhone, {
+      x: leftMargin,
+      y: clientLineY,
+      size: 10,
+      font: helvetica,
+      color: rgb(0.3, 0.3, 0.3)
+    });
+  }
+
+  // Right side - Invoice details
+  const drawRightAligned = (text: string, yPos: number, font: typeof helvetica, size: number) => {
+    const w = font.widthOfTextAtSize(text, size);
+    page.drawText(text, { x: rightMargin - w, y: yPos, size, font, color: rgb(0, 0, 0) });
+  };
+
+  page.drawText('INVOICE #:', { x: detailsX, y: y, size: 9, font: helveticaBold, color: rgb(0.3, 0.3, 0.3) });
+  drawRightAligned(data.invoiceNumber, y, helvetica, 9);
+
+  page.drawText('INVOICE DATE:', { x: detailsX, y: y - 14, size: 9, font: helveticaBold, color: rgb(0.3, 0.3, 0.3) });
+  drawRightAligned(data.issuedDate, y - 14, helvetica, 9);
+
+  page.drawText('DUE DATE:', { x: detailsX, y: y - 28, size: 9, font: helveticaBold, color: rgb(0.3, 0.3, 0.3) });
+  drawRightAligned(data.dueDate || 'Upon Receipt', y - 28, helvetica, 9);
+
+  if (data.projectId) {
+    page.drawText('PROJECT #:', { x: detailsX, y: y - 42, size: 9, font: helveticaBold, color: rgb(0.3, 0.3, 0.3) });
+    drawRightAligned(`#${data.projectId}`, y - 42, helvetica, 9);
+  }
+
+  y -= 90;
+
+  // === LINE ITEMS TABLE ===
+  // Header background
+  page.drawRectangle({
+    x: leftMargin,
+    y: y - 2,
+    width: rightMargin - leftMargin,
+    height: 18,
+    color: rgb(0.25, 0.25, 0.25)
+  });
+
+  // Header text (white)
+  page.drawText('DESCRIPTION', { x: leftMargin + 7, y: y + 4, size: 10, font: helveticaBold, color: rgb(1, 1, 1) });
+  page.drawText('QTY', { x: rightMargin - 144, y: y + 4, size: 10, font: helveticaBold, color: rgb(1, 1, 1) });
+  page.drawText('RATE', { x: rightMargin - 94, y: y + 4, size: 10, font: helveticaBold, color: rgb(1, 1, 1) });
+  const amountLabel = 'AMOUNT';
+  const amountLabelW = helveticaBold.widthOfTextAtSize(amountLabel, 10);
+  page.drawText(amountLabel, { x: rightMargin - 7 - amountLabelW, y: y + 4, size: 10, font: helveticaBold, color: rgb(1, 1, 1) });
+
+  y -= 22;
+
+  // Line items
+  for (const item of data.lineItems) {
+    // Description (bold)
+    page.drawText(item.description, { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+
+    // Quantity
+    page.drawText(String(item.quantity), { x: rightMargin - 144, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+
+    // Rate
+    const rateText = `$${item.rate.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    page.drawText(rateText, { x: rightMargin - 94, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+
+    // Amount (right-aligned, bold)
+    const amountText = `$${item.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    const amountW = helveticaBold.widthOfTextAtSize(amountText, 10);
+    page.drawText(amountText, { x: rightMargin - amountW, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+
+    y -= 14;
+
+    // Details (bullet points)
+    if (item.details && item.details.length > 0) {
+      for (const detail of item.details) {
+        page.drawText(`• ${detail}`, { x: leftMargin + 11, y: y, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+        y -= 11;
+      }
+      y -= 7;
+    }
+  }
+
+  y -= 14;
+
+  // === TOTALS SECTION ===
+  const totalsX = rightMargin - 144;
+
+  // Line above totals
+  page.drawLine({
+    start: { x: totalsX - 14, y: y + 18 },
+    end: { x: rightMargin, y: y + 18 },
+    thickness: 0.5,
+    color: rgb(0.7, 0.7, 0.7)
+  });
+
+  // Subtotal
+  page.drawText('Subtotal:', { x: totalsX, y: y, size: 10, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
+  const subtotalText = `$${data.subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+  const subtotalW = helvetica.widthOfTextAtSize(subtotalText, 10);
+  page.drawText(subtotalText, { x: rightMargin - subtotalW, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+  y -= 14;
+
+  // Discount (if any)
+  if (data.discount && data.discount > 0) {
+    page.drawText('Discount:', { x: totalsX, y: y, size: 10, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
+    const discountText = `-$${data.discount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    const discountW = helvetica.widthOfTextAtSize(discountText, 10);
+    page.drawText(discountText, { x: rightMargin - discountW, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    y -= 14;
+  }
+
+  // Tax (if any)
+  if (data.tax && data.tax > 0) {
+    page.drawText('Tax:', { x: totalsX, y: y, size: 10, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
+    const taxText = `$${data.tax.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    const taxW = helvetica.widthOfTextAtSize(taxText, 10);
+    page.drawText(taxText, { x: rightMargin - taxW, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    y -= 14;
+  }
+
+  // Total line
+  page.drawLine({
+    start: { x: totalsX - 14, y: y + 4 },
+    end: { x: rightMargin, y: y + 4 },
+    thickness: 2,
+    color: rgb(0.2, 0.2, 0.2)
+  });
+  y -= 4;
+
+  // TOTAL
+  page.drawText('TOTAL:', { x: totalsX, y: y - 14, size: 14, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
+  const totalText = `$${data.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+  const totalW = helveticaBold.widthOfTextAtSize(totalText, 16);
+  page.drawText(totalText, { x: rightMargin - totalW, y: y - 14, size: 16, font: helveticaBold, color: rgb(0, 0, 0) });
+
+  // Amount Due label
+  const amtDueText = 'Amount Due (USD)';
+  const amtDueW = helvetica.widthOfTextAtSize(amtDueText, 9);
+  page.drawText(amtDueText, { x: rightMargin - amtDueW, y: y - 28, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+
+  y -= 50;
+
+  // === PAYMENT INSTRUCTIONS ===
+  page.drawText('PAYMENT INSTRUCTIONS', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0.2, 0.2, 0.2) });
+  page.drawLine({
+    start: { x: leftMargin, y: y - 4 },
+    end: { x: leftMargin + 144, y: y - 4 },
+    thickness: 0.5,
+    color: rgb(0.7, 0.7, 0.7)
+  });
+  y -= 18;
+
+  const paymentInstructions = [
+    '• Payment due within 30 days of invoice date',
+    `• Zelle: ${BUSINESS_INFO.zelleEmail}`,
+    `• Venmo: ${BUSINESS_INFO.venmoHandle}`,
+    '• Bank transfer details available upon request'
+  ];
+
+  for (const line of paymentInstructions) {
+    page.drawText(line, { x: leftMargin, y: y, size: 9, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
+    y -= 11;
+  }
+
+  // === FOOTER ===
+  // Footer separator line
+  page.drawLine({
+    start: { x: leftMargin, y: 72 },
+    end: { x: rightMargin, y: 72 },
+    thickness: 0.5,
+    color: rgb(0.8, 0.8, 0.8)
+  });
+
+  // Thank you message
+  const thankYouText = 'Thank you for your business!';
+  const thankYouW = helvetica.widthOfTextAtSize(thankYouText, 10);
+  page.drawText(thankYouText, {
+    x: (width - thankYouW) / 2,
+    y: 54,
+    size: 10,
+    font: helvetica,
+    color: rgb(0.3, 0.3, 0.3)
+  });
+
+  // Footer contact info
+  const footerText = `${BUSINESS_INFO.name} • ${BUSINESS_INFO.owner} • ${BUSINESS_INFO.email} • ${BUSINESS_INFO.website}`;
+  const footerW = helvetica.widthOfTextAtSize(footerText, 7);
+  page.drawText(footerText, {
+    x: (width - footerW) / 2,
+    y: 36,
+    size: 7,
+    font: helvetica,
+    color: rgb(0.5, 0.5, 0.5)
+  });
+
+  return await pdfDoc.save();
+}
+
+/**
+ * @swagger
+ * /api/invoices/preview:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Preview invoice PDF without saving
+ */
+router.post(
+  '/preview',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { projectId, clientId, lineItems, notes, terms } = req.body;
+
+    if (!projectId || !clientId || !lineItems || !Array.isArray(lineItems) || lineItems.length === 0) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        code: 'MISSING_FIELDS'
+      });
+    }
+
+    const db = getDatabase();
+
+    // Get client info
+    const client = await db.get(
+      'SELECT contact_name, company_name, email, phone FROM clients WHERE id = ?',
+      [clientId]
+    );
+
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found', code: 'CLIENT_NOT_FOUND' });
+    }
+
+    // Get project info
+    const project = await db.get('SELECT project_name FROM projects WHERE id = ?', [projectId]);
+
+    // Calculate totals
+    const subtotal = lineItems.reduce((sum: number, item: InvoiceLineItem) => sum + (item.amount || 0), 0);
+
+    // Format date
+    const formatDate = (d: Date): string => {
+      return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    };
+
+    const today = new Date();
+    const dueDate = new Date(today);
+    dueDate.setDate(dueDate.getDate() + 30);
+
+    // Generate preview invoice number
+    const previewNumber = 'INV-PREVIEW';
+
+    const pdfData: InvoicePdfData = {
+      invoiceNumber: previewNumber,
+      issuedDate: formatDate(today),
+      dueDate: formatDate(dueDate),
+      clientName: getString(client, 'contact_name') || 'Client',
+      clientCompany: getString(client, 'company_name') || undefined,
+      clientEmail: getString(client, 'email') || '',
+      clientPhone: getString(client, 'phone') || undefined,
+      projectId: projectId,
+      lineItems: lineItems.map((item: InvoiceLineItem) => ({
+        description: item.description || '',
+        quantity: item.quantity || 1,
+        rate: item.rate || 0,
+        amount: item.amount || 0,
+        details: (project ? [`Project: ${getString(project, 'project_name')}`] : undefined)
+      })),
+      subtotal,
+      total: subtotal,
+      notes: notes || undefined,
+      terms: terms || undefined
+    };
+
+    try {
+      const pdfBytes = await generateInvoicePdf(pdfData);
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'inline; filename="invoice-preview.pdf"');
+      res.setHeader('Content-Length', pdfBytes.length);
+      res.send(Buffer.from(pdfBytes));
+    } catch (error) {
+      console.error('[Invoices] Preview PDF generation error:', error);
+      res.status(500).json({ error: 'Failed to generate preview', code: 'PDF_GENERATION_FAILED' });
     }
   })
 );
@@ -897,207 +1390,53 @@ router.get(
         [invoice.clientId]
       );
 
-      // Get project info
-      const project = await db.get(
-        'SELECT project_name, description, features FROM projects WHERE id = ?',
-        [invoice.projectId]
-      );
-
-      // Create PDF document
-      const doc = new PDFDocument({ margin: 50, size: 'LETTER' });
-
-      // Set response headers
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename="invoice-${invoice.invoiceNumber}.pdf"`
-      );
-
-      // Pipe PDF to response
-      doc.pipe(res);
-
       // Helper function to format date as "Month Day, Year"
       const formatDate = (dateStr: string | undefined): string => {
         if (!dateStr) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
         return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
       };
 
-      // === HEADER WITH LOGO ===
-      const logoPath = join(process.cwd(), 'public/images/avatar_small-1.png');
-      if (existsSync(logoPath)) {
-        doc.image(logoPath, (doc.page.width - 60) / 2, 30, { width: 60 });
-        doc.moveDown(4);
-      }
+      // Build line items from invoice data
+      const lineItems: InvoicePdfData['lineItems'] = Array.isArray(invoice.lineItems)
+        ? invoice.lineItems.map((item: InvoiceLineItem) => ({
+            description: item.description || '',
+            quantity: item.quantity || 1,
+            rate: item.rate || item.amount || 0,
+            amount: item.amount || 0
+          }))
+        : [];
 
-      // Business header line
-      const businessName = invoice.businessName || BUSINESS_INFO.name;
-      const businessContact = invoice.businessContact || BUSINESS_INFO.contact;
-      const businessEmail = invoice.businessEmail || BUSINESS_INFO.email;
-      const businessWebsite = invoice.businessWebsite || BUSINESS_INFO.website;
+      // Build PDF data object
+      const pdfData: InvoicePdfData = {
+        invoiceNumber: invoice.invoiceNumber,
+        issuedDate: formatDate(invoice.issuedDate || invoice.createdAt),
+        dueDate: 'Within 14 days',
+        clientName: invoice.billToName || (client ? getString(client, 'contact_name') : '') || 'Client',
+        clientCompany: client ? getString(client, 'company_name') : '',
+        clientEmail: invoice.billToEmail || (client ? getString(client, 'email') : '') || '',
+        projectId: invoice.projectId,
+        lineItems,
+        subtotal: invoice.amountTotal || 0,
+        total: invoice.amountTotal || 0,
+        notes: invoice.notes,
+        terms: invoice.terms
+      };
 
-      doc.y = 100;
-      doc.fontSize(10).font('Helvetica-Bold')
-        .text(businessName, { continued: true, align: 'center' })
-        .font('Helvetica')
-        .text(` | ${businessContact} | ${businessEmail} | ${businessWebsite}`, { align: 'center' });
+      // Generate PDF using pdf-lib (template-matching version)
+      const pdfBytes = await generateInvoicePdf(pdfData);
 
-      doc.moveDown(2);
+      // Check if preview mode (inline) or download mode (attachment)
+      const isPreview = req.query.preview === 'true';
+      const disposition = isPreview ? 'inline' : 'attachment';
 
-      // === TWO-COLUMN LAYOUT: Invoice Details & Bill To ===
-      const leftCol = 50;
-      const rightCol = 350;
-      const colTop = doc.y;
-
-      // Left column: Invoice details
-      doc.fontSize(10).font('Helvetica-Bold').text('Invoice Number: ', leftCol, colTop, { continued: true });
-      doc.font('Helvetica').text(invoice.invoiceNumber);
-
-      doc.font('Helvetica-Bold').text('Invoice Date: ', leftCol, colTop + 15, { continued: true });
-      doc.font('Helvetica').text(formatDate(invoice.issuedDate || invoice.createdAt));
-
-      doc.font('Helvetica-Bold').text('Due Date: ', leftCol, colTop + 30, { continued: true });
-      doc.font('Helvetica').text('Within 14 days');
-
-      // Right column: Bill To
-      doc.fontSize(10).font('Helvetica-Bold').text('Bill To:', rightCol, colTop);
-      const billToName = invoice.billToName || (client ? getString(client, 'contact_name') : '') || 'Client';
-      const billToEmail = invoice.billToEmail || (client ? getString(client, 'email') : '') || '';
-      doc.font('Helvetica').text(billToName, rightCol, colTop + 15);
-      doc.text(billToEmail, rightCol, colTop + 30);
-
-      doc.y = colTop + 60;
-      doc.moveDown(2);
-
-      // === SERVICES PROVIDED SECTION ===
-      doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('Services Provided');
-      doc.fillColor('black');
-      doc.moveDown(0.5);
-
-      // Services title and description
-      const servicesTitle = invoice.servicesTitle || (project ? getString(project, 'project_name') : '') || 'Web Development Services';
-      const servicesDesc = invoice.servicesDescription || (project ? getString(project, 'description') : '') || '';
-
-      doc.fontSize(10).font('Helvetica-Bold').text(servicesTitle, { continued: servicesDesc ? true : false });
-      if (servicesDesc) {
-        doc.font('Helvetica').text(` - ${servicesDesc}`);
-      }
-      doc.moveDown(0.5);
-
-      // Deliverables (bullet points)
-      const deliverables = invoice.deliverables || [];
-      if (deliverables.length > 0) {
-        doc.font('Helvetica-Bold').text('Deliverables:');
-        deliverables.forEach((item: string) => {
-          doc.font('Helvetica').text(`• ${item}`, { indent: 10 });
-        });
-        doc.moveDown(0.5);
-      }
-
-      // Features
-      const featuresStr = invoice.features || (project ? getString(project, 'features') : '') || '';
-      if (featuresStr) {
-        const featuresValue = typeof featuresStr === 'string' ? featuresStr : JSON.stringify(featuresStr);
-        doc.font('Helvetica-Bold').text('Features: ', { continued: true });
-        doc.font('Helvetica').text(featuresValue);
-      }
-
-      doc.moveDown(2);
-
-      // === AMOUNT DUE SECTION ===
-      doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('Amount Due');
-      doc.fillColor('black');
-      doc.moveDown(0.5);
-
-      // Table header
-      const tableTop = doc.y;
-      doc.fontSize(10).font('Helvetica-Bold');
-      doc.text('Description', leftCol, tableTop);
-      doc.text('Amount', 450, tableTop, { width: 100, align: 'right' });
-
-      // Line under header
-      doc.moveTo(leftCol, tableTop + 15).lineTo(550, tableTop + 15).stroke();
-
-      // Line items
-      let y = tableTop + 25;
-      doc.font('Helvetica');
-
-      const lineItems: InvoiceLineItem[] = Array.isArray(invoice.lineItems) ? invoice.lineItems : [];
-      lineItems.forEach((item: InvoiceLineItem) => {
-        doc.text(item.description || '', leftCol, y, { width: 380 });
-        doc.text(`$${(item.amount || 0).toFixed(2)}`, 450, y, { width: 100, align: 'right' });
-        y += 20;
-      });
-
-      // Total line
-      y += 10;
-      doc.moveTo(leftCol, y).lineTo(550, y).stroke();
-      y += 15;
-
-      doc.fontSize(12).font('Helvetica-Bold')
-        .text(`Total Due: $${(invoice.amountTotal || 0).toFixed(2)} ${invoice.currency || 'USD'}`,
-          leftCol, y, { width: 500, align: 'right' });
-
-      doc.y = y + 30;
-      doc.moveDown(2);
-
-      // === PAYMENT METHODS SECTION ===
-      doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('Payment Methods');
-      doc.fillColor('black');
-      doc.moveDown(0.5);
-
-      const boxTop = doc.y;
-      const boxHeight = 50;
-      const boxWidth = 230;
-
-      // Venmo box
-      doc.rect(leftCol, boxTop, boxWidth, boxHeight).stroke();
-      doc.fontSize(10).font('Helvetica-Bold').text('Venmo', leftCol + 10, boxTop + 10);
-      doc.font('Helvetica').text(invoice.venmoHandle || BUSINESS_INFO.venmoHandle, leftCol + 10, boxTop + 25);
-
-      // PayPal box
-      doc.rect(rightCol - 50, boxTop, boxWidth, boxHeight).stroke();
-      doc.font('Helvetica-Bold').text('PayPal', rightCol - 40, boxTop + 10);
-      doc.font('Helvetica').text(invoice.paypalEmail || BUSINESS_INFO.paypalEmail, rightCol - 40, boxTop + 25);
-      doc.fontSize(8).text('(Friends & Family or Goods & Services)', rightCol - 40, boxTop + 38);
-
-      doc.y = boxTop + boxHeight + 20;
-      doc.moveDown(2);
-
-      // === TERMS & NOTES SECTION ===
-      doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('Terms & Notes');
-      doc.fillColor('black');
-      doc.moveDown(0.5);
-
-      doc.fontSize(9).font('Helvetica');
-
-      // Default terms if none provided
-      const termsText = invoice.terms || `Payment is due within 14 days of receipt. Please include invoice number (${invoice.invoiceNumber}) in payment notes.`;
-      const termsLines = termsText.split('\n').filter((line: string) => line.trim());
-      termsLines.forEach((line: string) => {
-        doc.text(`• ${line.trim()}`);
-      });
-
-      if (invoice.notes) {
-        doc.moveDown(0.5);
-        const notesLines = invoice.notes.split('\n').filter((line: string) => line.trim());
-        notesLines.forEach((line: string) => {
-          doc.text(`• ${line.trim()}`);
-        });
-      }
-
-      // === FOOTER ===
-      doc.moveDown(3);
-      doc.fontSize(10).font('Helvetica-Bold').fillColor('#cc0000')
-        .text('Thank you for your business!', { align: 'center' });
-      doc.fillColor('black').font('Helvetica').fontSize(9)
-        .text(`For questions regarding this invoice, please contact: ${businessContact} | ${businessEmail}`,
-          { align: 'center' });
-
-      // Page number
-      doc.fontSize(8).text('1/1', 550, 750);
-
-      // Finalize PDF
-      doc.end();
+      // Set response headers and send PDF
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader(
+        'Content-Disposition',
+        `${disposition}; filename="${invoice.invoiceNumber}.pdf"`
+      );
+      res.setHeader('Content-Length', pdfBytes.length);
+      res.send(Buffer.from(pdfBytes));
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {

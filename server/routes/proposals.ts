@@ -9,9 +9,9 @@
  */
 
 import express, { Request, Response } from 'express';
-import PDFDocument from 'pdfkit';
+import { PDFDocument as PDFLibDocument, StandardFonts, rgb } from 'pdf-lib';
 import { join } from 'path';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { getDatabase } from '../database/init.js';
@@ -19,10 +19,12 @@ import { getString, getNumber } from '../database/row-helpers.js';
 
 // Business info from environment variables
 const BUSINESS_INFO = {
-  name: process.env.BUSINESS_NAME || '',
-  contact: process.env.BUSINESS_CONTACT || '',
-  email: process.env.BUSINESS_EMAIL || '',
-  website: process.env.BUSINESS_WEBSITE || ''
+  name: process.env.BUSINESS_NAME || 'No Bhad Codes',
+  owner: process.env.BUSINESS_OWNER || 'Noelle Bhaduri',
+  contact: process.env.BUSINESS_CONTACT || 'Noelle Bhaduri',
+  tagline: process.env.BUSINESS_TAGLINE || 'Web Development & Design',
+  email: process.env.BUSINESS_EMAIL || 'nobhaduri@gmail.com',
+  website: process.env.BUSINESS_WEBSITE || 'nobhad.codes'
 };
 
 const router = express.Router();
@@ -645,205 +647,208 @@ router.get(
       [id]
     ) as unknown as FeatureRow[];
 
-    // Create PDF document
-    const doc = new PDFDocument({ margin: 50, size: 'LETTER' });
-
-    // Set response headers
-    const projectName = getString(p, 'project_name').replace(/[^a-zA-Z0-9]/g, '-');
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="proposal-${projectName}-${id}.pdf"`
-    );
-
-    // Pipe PDF to response
-    doc.pipe(res);
-
-    // Helper function to format date
+    // Helper functions
     const formatDate = (dateStr: string | undefined): string => {
       if (!dateStr) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
       return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     };
 
-    // Helper to format tier name
     const formatTier = (tier: string): string => {
-      const tierNames: Record<string, string> = {
-        'good': 'GOOD',
-        'better': 'BETTER',
-        'best': 'BEST'
-      };
+      const tierNames: Record<string, string> = { 'good': 'GOOD', 'better': 'BETTER', 'best': 'BEST' };
       return tierNames[tier] || tier.toUpperCase();
     };
 
-    // Helper to format maintenance option
     const formatMaintenance = (option: string | null): string => {
       if (!option) return 'None';
       const maintenanceNames: Record<string, string> = {
-        'diy': 'DIY (Self-Managed)',
-        'essential': 'Essential Plan',
-        'standard': 'Standard Plan',
-        'premium': 'Premium Plan'
+        'diy': 'DIY (Self-Managed)', 'essential': 'Essential Plan', 'standard': 'Standard Plan', 'premium': 'Premium Plan'
       };
       return maintenanceNames[option] || option;
     };
 
-    // === HEADER WITH LOGO ===
+    // Create PDF document using pdf-lib
+    const pdfDoc = await PDFLibDocument.create();
+    pdfDoc.setTitle(`Proposal - ${getString(p, 'project_name')}`);
+    pdfDoc.setAuthor(BUSINESS_INFO.name);
+
+    const page = pdfDoc.addPage([612, 792]); // LETTER size
+    const { width, height } = page.getSize();
+
+    // Embed fonts
+    const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    // Layout constants (0.75 inch margins per template)
+    const leftMargin = 54;
+    const rightMargin = width - 54;
+
+    // Start from top - template uses 0.6 inch from top
+    let y = height - 43;
+
+    // === HEADER - Logo on left, business info next to it, PROPOSAL title on right ===
     const logoPath = join(process.cwd(), 'public/images/avatar_pdf.png');
+    let textStartX = leftMargin;
+    const logoHeight = 75; // ~1 inch, 50% larger for better visibility
+
     if (existsSync(logoPath)) {
-      doc.image(logoPath, (doc.page.width - 60) / 2, 30, { width: 60 });
-      doc.moveDown(4);
+      const logoBytes = readFileSync(logoPath);
+      const logoImage = await pdfDoc.embedPng(logoBytes);
+      const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
+      page.drawImage(logoImage, { x: leftMargin, y: y - logoHeight, width: logoWidth, height: logoHeight });
+      textStartX = leftMargin + logoWidth + 18;
     }
 
-    // Business header line
-    doc.y = 100;
-    doc.fontSize(10).font('Helvetica-Bold')
-      .text(BUSINESS_INFO.name, { continued: true, align: 'center' })
-      .font('Helvetica')
-      .text(` | ${BUSINESS_INFO.contact} | ${BUSINESS_INFO.email} | ${BUSINESS_INFO.website}`, { align: 'center' });
+    // Business name: 16pt
+    page.drawText(BUSINESS_INFO.name, { x: textStartX, y: y, size: 16, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
+    // Owner: 10pt - scaled spacing for 75pt logo
+    page.drawText(BUSINESS_INFO.owner, { x: textStartX, y: y - 20, size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2) });
+    // Tagline: 9pt
+    page.drawText(BUSINESS_INFO.tagline, { x: textStartX, y: y - 36, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    // Email: 9pt
+    page.drawText(BUSINESS_INFO.email, { x: textStartX, y: y - 50, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    // Website: 9pt
+    page.drawText(BUSINESS_INFO.website, { x: textStartX, y: y - 64, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
 
-    doc.moveDown(2);
+    // PROPOSAL title: 28pt, right-aligned, vertically centered with logo
+    const titleText = 'PROPOSAL';
+    const titleWidth = helveticaBold.widthOfTextAtSize(titleText, 28);
+    page.drawText(titleText, { x: rightMargin - titleWidth, y: y - 25, size: 28, font: helveticaBold, color: rgb(0.15, 0.15, 0.15) });
 
-    // === PROPOSAL TITLE ===
-    doc.fontSize(20).font('Helvetica-Bold').fillColor('#0066cc')
-      .text('Project Proposal', { align: 'center' });
-    doc.fillColor('black');
-    doc.moveDown(1);
+    y -= 95; // Account for 75pt logo height
 
-    // === PROPOSAL INFO ===
-    const leftCol = 50;
-    const rightCol = 350;
-    let currentY = doc.y;
+    // Divider line
+    page.drawLine({ start: { x: leftMargin, y: y }, end: { x: rightMargin, y: y }, thickness: 1, color: rgb(0.7, 0.7, 0.7) });
+    y -= 21;
 
-    // Left column: Prepared For
-    doc.fontSize(10).font('Helvetica-Bold').text('Prepared For:', leftCol, currentY);
-    doc.font('Helvetica').text(getString(p, 'client_name') || 'Client', leftCol, currentY + 15);
+    // === PROPOSAL INFO - Two columns ===
+    const rightCol = width / 2 + 36;
+
+    // Left side - Prepared For
+    page.drawText('Prepared For:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0.2, 0.2, 0.2) });
+    page.drawText(getString(p, 'client_name') || 'Client', { x: leftMargin, y: y - 15, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    let clientLineY = y - 30;
     if (proposal.company_name) {
-      doc.text(proposal.company_name, leftCol, currentY + 30);
+      page.drawText(proposal.company_name, { x: leftMargin, y: clientLineY, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+      clientLineY -= 15;
     }
-    doc.text(getString(p, 'client_email') || '', leftCol, currentY + (proposal.company_name ? 45 : 30));
+    page.drawText(getString(p, 'client_email') || '', { x: leftMargin, y: clientLineY, size: 10, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
 
-    // Right column: Prepared By & Date
-    doc.font('Helvetica-Bold').text('Prepared By:', rightCol, currentY);
-    doc.font('Helvetica').text(BUSINESS_INFO.name, rightCol, currentY + 15);
-    doc.font('Helvetica-Bold').text('Date:', rightCol, currentY + 45);
-    doc.font('Helvetica').text(formatDate(getString(p, 'created_at')), rightCol, currentY + 60);
+    // Right side - Prepared By & Date
+    page.drawText('Prepared By:', { x: rightCol, y: y, size: 10, font: helveticaBold, color: rgb(0.2, 0.2, 0.2) });
+    page.drawText(BUSINESS_INFO.name, { x: rightCol, y: y - 15, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    page.drawText('Date:', { x: rightCol, y: y - 45, size: 10, font: helveticaBold, color: rgb(0.2, 0.2, 0.2) });
+    page.drawText(formatDate(getString(p, 'created_at')), { x: rightCol, y: y - 60, size: 10, font: helvetica, color: rgb(0, 0, 0) });
 
-    doc.y = currentY + 90;
-    doc.moveDown(1);
+    y -= 90;
 
     // === PROJECT DETAILS ===
-    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('Project Details');
-    doc.fillColor('black');
-    doc.moveDown(0.5);
+    page.drawText('Project Details', { x: leftMargin, y: y, size: 14, font: helveticaBold, color: rgb(0, 0.4, 0.8) });
+    y -= 18;
 
-    doc.fontSize(10).font('Helvetica-Bold').text('Project: ', { continued: true });
-    doc.font('Helvetica').text(getString(p, 'project_name'));
+    page.drawText('Project:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+    page.drawText(getString(p, 'project_name'), { x: leftMargin + 55, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    y -= 15;
 
-    const projectDesc = p.project_description as string | undefined;
-    if (projectDesc) {
-      doc.font('Helvetica-Bold').text('Description: ', { continued: true });
-      doc.font('Helvetica').text(projectDesc);
-    }
-
-    doc.font('Helvetica-Bold').text('Project Type: ', { continued: true });
-    doc.font('Helvetica').text(getString(p, 'project_type').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
-
-    doc.moveDown(1);
+    page.drawText('Project Type:', { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+    page.drawText(getString(p, 'project_type').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), { x: leftMargin + 80, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    y -= 25;
 
     // === SELECTED PACKAGE ===
-    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('Selected Package');
-    doc.fillColor('black');
-    doc.moveDown(0.5);
+    page.drawText('Selected Package', { x: leftMargin, y: y, size: 14, font: helveticaBold, color: rgb(0, 0.4, 0.8) });
+    y -= 18;
 
     const selectedTier = formatTier(getString(p, 'selected_tier'));
-    doc.fontSize(12).font('Helvetica-Bold').text(`${selectedTier} Tier`);
-    doc.fontSize(10).font('Helvetica').text(`Base Price: $${getNumber(p, 'base_price').toLocaleString()}`);
-
-    doc.moveDown(1);
+    page.drawText(`${selectedTier} Tier`, { x: leftMargin, y: y, size: 12, font: helveticaBold, color: rgb(0, 0, 0) });
+    y -= 15;
+    page.drawText(`Base Price: $${getNumber(p, 'base_price').toLocaleString()}`, { x: leftMargin, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    y -= 20;
 
     // === INCLUDED FEATURES ===
     const includedFeatures = features.filter(f => f.is_included_in_tier);
     if (includedFeatures.length > 0) {
-      doc.fontSize(12).font('Helvetica-Bold').text('Included Features:');
-      doc.moveDown(0.3);
-      doc.fontSize(10).font('Helvetica');
-      includedFeatures.forEach(f => {
+      page.drawText('Included Features:', { x: leftMargin, y: y, size: 12, font: helveticaBold, color: rgb(0, 0, 0) });
+      y -= 15;
+      for (const f of includedFeatures) {
         const fr = f as unknown as Record<string, unknown>;
-        doc.text(`• ${getString(fr, 'feature_name')}`, { indent: 10 });
-      });
-      doc.moveDown(0.5);
+        page.drawText(`• ${getString(fr, 'feature_name')}`, { x: leftMargin + 10, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+        y -= 12;
+      }
+      y -= 8;
     }
 
     // === ADD-ONS ===
     const addons = features.filter(f => f.is_addon);
     if (addons.length > 0) {
-      doc.fontSize(12).font('Helvetica-Bold').text('Add-Ons:');
-      doc.moveDown(0.3);
-      doc.fontSize(10).font('Helvetica');
-      addons.forEach(f => {
+      page.drawText('Add-Ons:', { x: leftMargin, y: y, size: 12, font: helveticaBold, color: rgb(0, 0, 0) });
+      y -= 15;
+      for (const f of addons) {
         const fr = f as unknown as Record<string, unknown>;
         const price = getNumber(fr, 'feature_price');
-        doc.text(`• ${getString(fr, 'feature_name')} - $${price.toLocaleString()}`, { indent: 10 });
-      });
-      doc.moveDown(0.5);
+        page.drawText(`• ${getString(fr, 'feature_name')} - $${price.toLocaleString()}`, { x: leftMargin + 10, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+        y -= 12;
+      }
+      y -= 8;
     }
 
     // === MAINTENANCE OPTION ===
     if (proposal.maintenance_option) {
-      doc.fontSize(12).font('Helvetica-Bold').text('Maintenance Plan:');
-      doc.fontSize(10).font('Helvetica').text(formatMaintenance(proposal.maintenance_option), { indent: 10 });
-      doc.moveDown(0.5);
+      page.drawText('Maintenance Plan:', { x: leftMargin, y: y, size: 12, font: helveticaBold, color: rgb(0, 0, 0) });
+      y -= 15;
+      page.drawText(formatMaintenance(proposal.maintenance_option), { x: leftMargin + 10, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+      y -= 20;
     }
 
     // === PRICING SUMMARY ===
-    doc.moveDown(1);
-    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0066cc').text('Pricing Summary');
-    doc.fillColor('black');
-    doc.moveDown(0.5);
+    y -= 10;
+    page.drawText('Pricing Summary', { x: leftMargin, y: y, size: 14, font: helveticaBold, color: rgb(0, 0.4, 0.8) });
+    y -= 18;
 
-    // Table
-    const tableLeft = 50;
-    const tableRight = 450;
-    currentY = doc.y;
+    page.drawText('Base Package Price:', { x: leftMargin, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    const basePriceText = `$${getNumber(p, 'base_price').toLocaleString()}`;
+    page.drawText(basePriceText, { x: rightMargin - helvetica.widthOfTextAtSize(basePriceText, 10), y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+    y -= 15;
 
-    // Base price row
-    doc.fontSize(10).font('Helvetica').text('Base Package Price:', tableLeft, currentY);
-    doc.text(`$${getNumber(p, 'base_price').toLocaleString()}`, tableRight, currentY, { width: 100, align: 'right' });
-    currentY += 18;
-
-    // Add-ons total
     if (addons.length > 0) {
       const addonsTotal = addons.reduce((sum, f) => sum + (f.feature_price || 0), 0);
-      doc.text('Add-Ons:', tableLeft, currentY);
-      doc.text(`$${addonsTotal.toLocaleString()}`, tableRight, currentY, { width: 100, align: 'right' });
-      currentY += 18;
+      page.drawText('Add-Ons:', { x: leftMargin, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+      const addonsTotalText = `$${addonsTotal.toLocaleString()}`;
+      page.drawText(addonsTotalText, { x: rightMargin - helvetica.widthOfTextAtSize(addonsTotalText, 10), y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
+      y -= 15;
     }
 
     // Line
-    currentY += 5;
-    doc.moveTo(tableLeft, currentY).lineTo(550, currentY).stroke();
-    currentY += 15;
+    y -= 5;
+    page.drawLine({ start: { x: leftMargin, y: y }, end: { x: rightMargin, y: y }, thickness: 1, color: rgb(0.2, 0.2, 0.2) });
+    y -= 15;
 
     // Total
-    doc.fontSize(12).font('Helvetica-Bold')
-      .text('Total:', tableLeft, currentY);
-    doc.text(`$${getNumber(p, 'final_price').toLocaleString()}`, tableRight, currentY, { width: 100, align: 'right' });
+    page.drawText('Total:', { x: leftMargin, y: y, size: 12, font: helveticaBold, color: rgb(0, 0, 0) });
+    const totalText = `$${getNumber(p, 'final_price').toLocaleString()}`;
+    page.drawText(totalText, { x: rightMargin - helveticaBold.widthOfTextAtSize(totalText, 12), y: y, size: 12, font: helveticaBold, color: rgb(0, 0, 0) });
 
     // === CLIENT NOTES ===
     if (proposal.client_notes) {
-      doc.y = currentY + 40;
-      doc.fontSize(12).font('Helvetica-Bold').text('Client Notes:');
-      doc.fontSize(10).font('Helvetica').text(proposal.client_notes, { indent: 10 });
+      y -= 35;
+      page.drawText('Client Notes:', { x: leftMargin, y: y, size: 12, font: helveticaBold, color: rgb(0, 0, 0) });
+      y -= 15;
+      page.drawText(proposal.client_notes, { x: leftMargin + 10, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
     }
 
     // === FOOTER ===
-    doc.y = doc.page.height - 80;
-    doc.fontSize(9).font('Helvetica').fillColor('#666666')
-      .text('This proposal is valid for 30 days from the date above.', { align: 'center' });
-    doc.text(`Questions? Contact us at ${BUSINESS_INFO.email}`, { align: 'center' });
+    const footerY = 60;
+    const footerText1 = 'This proposal is valid for 30 days from the date above.';
+    const footerText2 = `Questions? Contact us at ${BUSINESS_INFO.email}`;
+    page.drawText(footerText1, { x: (width - helvetica.widthOfTextAtSize(footerText1, 9)) / 2, y: footerY, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    page.drawText(footerText2, { x: (width - helvetica.widthOfTextAtSize(footerText2, 9)) / 2, y: footerY - 12, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
 
-    // Finalize PDF
-    doc.end();
+    // Generate PDF bytes and send
+    const pdfBytes = await pdfDoc.save();
+    const projectName = getString(p, 'project_name').replace(/[^a-zA-Z0-9]/g, '-');
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="proposal-${projectName}-${id}.pdf"`);
+    res.setHeader('Content-Length', pdfBytes.length);
+    res.send(Buffer.from(pdfBytes));
   })
 );
 
