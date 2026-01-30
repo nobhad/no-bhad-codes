@@ -272,9 +272,9 @@ export function showContactDetails(contactId: number): void {
       <div class="details-actions">
         <a href="mailto:${safeEmail}" class="btn">Reply via Email</a>
         ${contact.client_id
-          ? `<span class="status-badge status-active">Converted to Client</span>`
-          : `<button class="btn btn-primary" id="convert-to-client-btn" data-id="${contact.id}" data-email="${safeEmail}" data-name="${safeName}">Convert to Client</button>`
-        }
+    ? '<span class="status-badge status-active">Converted to Client</span>'
+    : `<button class="btn btn-primary" id="convert-to-client-btn" data-id="${contact.id}" data-email="${safeEmail}" data-name="${safeName}">Convert to Client</button>`
+}
         ${contact.status !== 'archived' ? `<button class="btn btn-secondary" id="archive-contact-btn" data-id="${contact.id}">Archive</button>` : ''}
       </div>
     </div>
