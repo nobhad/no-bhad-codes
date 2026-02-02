@@ -1556,7 +1556,7 @@ router.post(
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // Token valid for 7 days
 
-    // Store the signature request (we'll add this to the projects table or a new table)
+    // Store the signature request
     await db.run(
       `UPDATE projects SET
         contract_signature_token = ?,
@@ -1566,68 +1566,358 @@ router.post(
       [signatureToken, expiresAt.toISOString(), projectId]
     );
 
-    // Generate signature URL
-    const signatureUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/sign-contract/${signatureToken}`;
+    // Log signature request to audit log
+    await db.run(
+      `INSERT INTO contract_signature_log (project_id, action, actor_email, details)
+       VALUES (?, 'requested', ?, ?)`,
+      [projectId, req.user?.email || 'admin', JSON.stringify({ clientEmail, expiresAt: expiresAt.toISOString() })]
+    );
 
-    // TODO: Integrate email service to send contract signature request
-    // Requirements:
-    // 1. Send email to client with signature URL
-    // 2. Email should include: project name, contract preview link, signature deadline
-    // 3. Consider using existing email service pattern from invoice reminders
-    // 4. Add email template for contract signature requests
-    // See: server/services/scheduler-service.ts for email patterns
-    console.log(`[TODO: Send email] Contract signature request for project ${projectId}:`);
-    console.log(`  Client: ${clientName} <${clientEmail}>`);
-    console.log(`  Sign URL: ${signatureUrl}`);
+    // Generate signature URL
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const signatureUrl = `${baseUrl}/sign-contract.html?token=${signatureToken}`;
+    const contractPreviewUrl = `${baseUrl}/api/projects/${projectId}/contract/pdf`;
+
+    // Send email to client
+    const { emailService } = await import('../services/email-service');
+    const emailResult = await emailService.sendEmail({
+      to: clientEmail,
+      subject: `Contract Ready for Signature - ${projectName}`,
+      text: `
+Hi ${clientName || 'there'},
+
+Your contract for "${projectName}" is ready for your signature.
+
+Please review and sign the contract by clicking the link below:
+${signatureUrl}
+
+You can also preview the contract here:
+${contractPreviewUrl}
+
+This signature request expires on ${expiresAt.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.
+
+If you have any questions about the contract, please don't hesitate to reach out.
+
+Best regards,
+${BUSINESS_INFO.name}
+${BUSINESS_INFO.email}
+      `.trim(),
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 { color: #00aff0; margin: 0; }
+    .content { background: #f9f9f9; padding: 30px; border-radius: 8px; }
+    .btn { display: inline-block; padding: 14px 28px; background: #00aff0; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px 5px 10px 0; }
+    .btn-outline { background: transparent; border: 2px solid #00aff0; color: #00aff0; }
+    .footer { margin-top: 30px; text-align: center; color: #666; font-size: 14px; }
+    .deadline { background: #fff3cd; padding: 10px 15px; border-radius: 4px; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>${BUSINESS_INFO.name}</h1>
+    </div>
+    <div class="content">
+      <p>Hi ${clientName || 'there'},</p>
+      <p>Your contract for <strong>"${projectName}"</strong> is ready for your signature.</p>
+      <p>Please review and sign the contract by clicking the button below:</p>
+      <p style="text-align: center; margin: 25px 0;">
+        <a href="${signatureUrl}" class="btn">Sign Contract</a>
+        <a href="${contractPreviewUrl}" class="btn btn-outline">Preview Contract</a>
+      </p>
+      <div class="deadline">
+        <strong>Deadline:</strong> This signature request expires on ${expiresAt.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.
+      </div>
+      <p>If you have any questions about the contract, please don't hesitate to reach out.</p>
+    </div>
+    <div class="footer">
+      <p>Best regards,<br>${BUSINESS_INFO.name}<br>${BUSINESS_INFO.email}</p>
+    </div>
+  </div>
+</body>
+</html>
+      `.trim()
+    });
+
+    console.log(`[CONTRACT] Signature request sent for project ${projectId} to ${clientEmail}`);
 
     res.json({
       success: true,
       message: 'Signature request sent',
       clientEmail,
-      expiresAt: expiresAt.toISOString()
+      expiresAt: expiresAt.toISOString(),
+      emailSent: emailResult.success
     });
   })
 );
 
 /**
- * POST /api/projects/:id/contract/sign
- * Record contract signature (called when client signs)
- *
- * TODO: Complete contract e-signature implementation
- * Requirements:
- * 1. Create client-facing signature page at /sign-contract/:token
- * 2. Capture signature data (drawn/typed/uploaded signature image)
- * 3. Record signer IP address and user agent
- * 4. Store signature image in database or file system
- * 5. Add database columns: contract_signer_name, contract_signer_ip, contract_signature_data
- * 6. Send confirmation email after signing
- * 7. Consider adding signature verification/audit log
+ * GET /api/projects/contract/by-token/:token
+ * Get contract details by signature token (PUBLIC - no auth required)
+ */
+router.get(
+  '/contract/by-token/:token',
+  asyncHandler(async (req: express.Request, res: Response) => {
+    const { token } = req.params;
+    const db = getDatabase();
+
+    const project = await db.get(
+      `SELECT p.id, p.project_name, p.price, p.contract_signature_expires_at,
+              p.contract_signed_at, c.name as client_name, c.email as client_email
+       FROM projects p
+       LEFT JOIN clients c ON p.client_id = c.id
+       WHERE p.contract_signature_token = ?`,
+      [token]
+    );
+
+    if (!project) {
+      return res.status(404).json({ error: 'Invalid or expired signature link' });
+    }
+
+    const p = project as Record<string, unknown>;
+    const expiresAt = p.contract_signature_expires_at as string | null;
+
+    // Check if token is expired
+    if (expiresAt && new Date(expiresAt) < new Date()) {
+      return res.status(410).json({ error: 'This signature link has expired. Please request a new one.' });
+    }
+
+    // Check if already signed
+    if (p.contract_signed_at) {
+      return res.status(400).json({ error: 'This contract has already been signed.' });
+    }
+
+    // Log view
+    const projectId = p.id as number;
+    await db.run(
+      `INSERT INTO contract_signature_log (project_id, action, actor_ip, actor_user_agent)
+       VALUES (?, 'viewed', ?, ?)`,
+      [projectId, req.ip || 'unknown', req.get('user-agent') || 'unknown']
+    );
+
+    res.json({
+      projectId: projectId,
+      projectName: p.project_name,
+      price: p.price,
+      clientName: p.client_name,
+      clientEmail: p.client_email,
+      expiresAt: expiresAt,
+      contractPdfUrl: `/api/projects/${projectId}/contract/pdf`
+    });
+  })
+);
+
+/**
+ * POST /api/projects/contract/sign-by-token/:token
+ * Sign contract using token (PUBLIC - no auth required)
  */
 router.post(
-  '/:id/contract/sign',
+  '/contract/sign-by-token/:token',
+  asyncHandler(async (req: express.Request, res: Response) => {
+    const { token } = req.params;
+    const { signatureData, signerName, agreedToTerms } = req.body;
+    const db = getDatabase();
+
+    if (!signatureData || !signerName) {
+      return res.status(400).json({ error: 'Signature and name are required' });
+    }
+
+    if (!agreedToTerms) {
+      return res.status(400).json({ error: 'You must agree to the terms to sign' });
+    }
+
+    // Get project by token
+    const project = await db.get(
+      `SELECT p.id, p.project_name, p.contract_signature_expires_at, p.contract_signed_at,
+              c.name as client_name, c.email as client_email
+       FROM projects p
+       LEFT JOIN clients c ON p.client_id = c.id
+       WHERE p.contract_signature_token = ?`,
+      [token]
+    );
+
+    if (!project) {
+      return res.status(404).json({ error: 'Invalid or expired signature link' });
+    }
+
+    const p = project as Record<string, unknown>;
+    const projectId = p.id as number;
+    const expiresAt = p.contract_signature_expires_at as string | null;
+    const clientEmail = p.client_email as string;
+    const clientName = p.client_name as string;
+    const projectName = p.project_name as string;
+
+    // Check if token is expired
+    if (expiresAt && new Date(expiresAt) < new Date()) {
+      return res.status(410).json({ error: 'This signature link has expired. Please request a new one.' });
+    }
+
+    // Check if already signed
+    if (p.contract_signed_at) {
+      return res.status(400).json({ error: 'This contract has already been signed.' });
+    }
+
+    const signerIp = req.ip || req.socket.remoteAddress || 'unknown';
+    const signerUserAgent = req.get('user-agent') || 'unknown';
+    const signedAt = new Date().toISOString();
+
+    // Update the project with signature
+    await db.run(
+      `UPDATE projects SET
+        contract_signed_at = ?,
+        contract_signature_token = NULL,
+        contract_signature_expires_at = NULL,
+        contract_signer_name = ?,
+        contract_signer_email = ?,
+        contract_signer_ip = ?,
+        contract_signer_user_agent = ?,
+        contract_signature_data = ?
+       WHERE id = ?`,
+      [signedAt, signerName, clientEmail, signerIp, signerUserAgent, signatureData, projectId]
+    );
+
+    // Log signature to audit log
+    await db.run(
+      `INSERT INTO contract_signature_log (project_id, action, actor_email, actor_ip, actor_user_agent, details)
+       VALUES (?, 'signed', ?, ?, ?, ?)`,
+      [projectId, clientEmail, signerIp, signerUserAgent, JSON.stringify({ signerName, signedAt })]
+    );
+
+    // Send confirmation email to client
+    const { emailService } = await import('../services/email-service');
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+
+    await emailService.sendEmail({
+      to: clientEmail,
+      subject: `Contract Signed - ${projectName}`,
+      text: `
+Hi ${clientName || signerName},
+
+Thank you for signing the contract for "${projectName}".
+
+Signature Details:
+- Signed by: ${signerName}
+- Date/Time: ${new Date(signedAt).toLocaleString()}
+- IP Address: ${signerIp}
+
+You can download a copy of the signed contract here:
+${baseUrl}/api/projects/${projectId}/contract/pdf
+
+We're excited to get started on your project! We'll be in touch soon with next steps.
+
+Best regards,
+${BUSINESS_INFO.name}
+${BUSINESS_INFO.email}
+      `.trim(),
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 { color: #00aff0; margin: 0; }
+    .content { background: #f9f9f9; padding: 30px; border-radius: 8px; }
+    .success { background: #d4edda; padding: 15px; border-radius: 6px; text-align: center; margin-bottom: 20px; }
+    .success h2 { color: #155724; margin: 0; }
+    .details { background: white; padding: 15px; border-radius: 4px; margin: 20px 0; }
+    .details table { width: 100%; }
+    .details td { padding: 8px 0; }
+    .details td:first-child { color: #666; }
+    .btn { display: inline-block; padding: 14px 28px; background: #00aff0; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; }
+    .footer { margin-top: 30px; text-align: center; color: #666; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>${BUSINESS_INFO.name}</h1>
+    </div>
+    <div class="content">
+      <div class="success">
+        <h2>Contract Signed Successfully</h2>
+      </div>
+      <p>Hi ${clientName || signerName},</p>
+      <p>Thank you for signing the contract for <strong>"${projectName}"</strong>.</p>
+      <div class="details">
+        <table>
+          <tr><td>Signed by:</td><td><strong>${signerName}</strong></td></tr>
+          <tr><td>Date/Time:</td><td>${new Date(signedAt).toLocaleString()}</td></tr>
+          <tr><td>IP Address:</td><td>${signerIp}</td></tr>
+        </table>
+      </div>
+      <p style="text-align: center; margin: 25px 0;">
+        <a href="${baseUrl}/api/projects/${projectId}/contract/pdf" class="btn">Download Contract</a>
+      </p>
+      <p>We're excited to get started on your project! We'll be in touch soon with next steps.</p>
+    </div>
+    <div class="footer">
+      <p>Best regards,<br>${BUSINESS_INFO.name}<br>${BUSINESS_INFO.email}</p>
+    </div>
+  </div>
+</body>
+</html>
+      `.trim()
+    });
+
+    // Send notification to admin
+    await emailService.sendEmail({
+      to: BUSINESS_INFO.email,
+      subject: `[Signed] Contract for ${projectName}`,
+      text: `Contract signed for "${projectName}" by ${signerName} (${clientEmail}) from IP ${signerIp} at ${new Date(signedAt).toLocaleString()}.`,
+      html: `<p>Contract signed for <strong>"${projectName}"</strong> by ${signerName} (${clientEmail}) from IP ${signerIp} at ${new Date(signedAt).toLocaleString()}.</p>`
+    });
+
+    console.log(`[CONTRACT] Contract signed for project ${projectId} by ${signerName}`);
+
+    res.json({
+      success: true,
+      message: 'Contract signed successfully',
+      signedAt,
+      signerName
+    });
+  })
+);
+
+/**
+ * GET /api/projects/:id/contract/signature-status
+ * Get contract signature status for a project
+ */
+router.get(
+  '/:id/contract/signature-status',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
     const db = getDatabase();
 
-    // TODO: Capture signature data from request body
-    // const { signatureData, signerName } = req.body;
-    // const signerIp = req.ip;
-
-    // Update the project with signature date
-    await db.run(
-      `UPDATE projects SET
-        contract_signed_at = datetime('now'),
-        contract_signature_token = NULL,
-        contract_signature_expires_at = NULL
-       WHERE id = ?`,
+    const project = await db.get(
+      `SELECT contract_signed_at, contract_signature_requested_at, contract_signature_expires_at,
+              contract_signer_name, contract_signer_email, contract_signer_ip
+       FROM projects WHERE id = ?`,
       [projectId]
     );
 
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    const p = project as Record<string, unknown>;
+
     res.json({
-      success: true,
-      message: 'Contract signed successfully',
-      signedAt: new Date().toISOString()
+      isSigned: !!p.contract_signed_at,
+      signedAt: p.contract_signed_at,
+      signerName: p.contract_signer_name,
+      signerEmail: p.contract_signer_email,
+      signerIp: p.contract_signer_ip,
+      requestedAt: p.contract_signature_requested_at,
+      expiresAt: p.contract_signature_expires_at
     });
   })
 );
