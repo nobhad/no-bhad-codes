@@ -1,8 +1,42 @@
 # Current Work
 
-**Last Updated:** February 1, 2026
+**Last Updated:** February 2, 2026
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-01.md`.
+
+---
+
+## Completed - February 2, 2026
+
+### Contract Tab Added to Project Details
+
+**Status:** UI COMPLETE, Backend Partial
+
+Added a dedicated Contract tab to the project details page with Preview, Download, and Request Signature functionality.
+
+**Frontend Changes:**
+
+- Added Contract tab button to project detail tabs navigation
+- Created Contract tab content with:
+  - Status card showing signed/not signed status
+  - Action cards: Preview (opens PDF), Download (downloads PDF), Request Signature
+  - Signature details card (shown when signed)
+- Added CSS styling for contract tab components
+
+**Backend Endpoints Created:**
+
+- `GET /api/projects/:id/contract/pdf` - Generate contract PDF (already existed)
+- `POST /api/projects/:id/contract/request-signature` - Request client signature
+- `POST /api/projects/:id/contract/sign` - Record contract signature
+
+**Files Modified:**
+
+- `admin/index.html` - Added contract tab and content
+- `src/features/admin/admin-project-details.ts` - Contract tab logic and handlers
+- `src/styles/admin/project-detail.css` - Contract tab styling
+- `server/routes/projects.ts` - Signature request/sign endpoints
+
+**TODO:** See "Contract E-Signature System" in Features section for remaining work.
 
 ---
 
@@ -26,19 +60,21 @@ Enhancing ALL core features to professional, enterprise-grade level comparable t
 
 ---
 
-### Frontend Integration Plan - COMPLETE
+### Frontend Integration Plan - BASIC UI COMPLETE
 
-All backend features from Phases 1-7 have been exposed in the frontend admin UI.
+Basic UI structure for Phases 1-7 has been created. However, many advanced backend features still lack frontend UI.
 
-**Phases Completed:**
+**Phases with Basic UI:**
 
-1. [x] **Phase 1: Client CRM UI** - Client detail tabs, contacts, tags, health scores
+1. [x] **Phase 1: Client CRM UI** - Client detail tabs (basic)
 2. [x] **Phase 2: Project Tasks & Time Tracking UI** - Tasks tab, time entries
-3. [x] **Phase 4: Lead Pipeline UI** - Pipeline Kanban, scoring, tasks/notes
-4. [x] **Phase 7: Analytics Dashboard UI** - KPI cards, revenue charts, funnel, saved reports
-5. [x] **Phase 6: File Management UI** - Folder tree, versions, comments, access log
-6. [x] **Phase 5: Enhanced Messaging UI** - Reactions, read receipts, pinned messages, search
-7. [x] **Phase 3: Proposal Enhancements UI** - Templates, version history, e-signatures
+3. [x] **Phase 4: Lead Pipeline UI** - Pipeline Kanban (basic)
+4. [x] **Phase 7: Analytics Dashboard UI** - KPI cards, revenue charts
+5. [x] **Phase 6: File Management UI** - Folder tree (basic)
+6. [x] **Phase 5: Enhanced Messaging UI** - Basic messaging
+7. [x] **Phase 3: Proposal Enhancements UI** - Templates, versions (basic)
+
+**Note:** See "Backend Features Without Frontend UI" section below for detailed gap analysis.
 
 **Shared Components Created:**
 
@@ -1120,6 +1156,94 @@ Low-priority items deferred for future work:
 **Reason:** UX polish task, not functional issue. Forms work correctly.
 
 **If Revisited:** Audit all forms and add descriptive placeholders and format hints.
+
+---
+
+## Backend Features Without Frontend UI
+
+**Analysis Date:** February 2, 2026
+
+The backend has ~250+ API endpoints. The frontend currently uses ~24 of them. This section documents the gap.
+
+### HIGH PRIORITY - Invoice Advanced Features
+
+| Feature | Endpoints | Status |
+|---------|-----------|--------|
+| Late Fees | `POST /api/invoices/:id/apply-late-fee`, `GET /:id/late-fee`, `POST /process-late-fees` | No UI |
+| Credits & Deposits | `POST /:id/apply-credit`, `GET /:id/credits`, `POST /deposit` | No UI |
+| Aging Reports | `GET /aging-report`, `GET /comprehensive-stats` | No UI |
+| Invoice Reminders | `GET /:id/reminders`, `POST /:id/send-reminder`, `POST /reminders/:id/skip` | No UI |
+| Payment Plans | `GET /payment-plans`, `POST /schedule`, `GET /scheduled`, `POST /recurring` | No UI |
+| Payment History | `GET /all-payments`, `POST /:id/record-payment-with-history` | No UI |
+
+### HIGH PRIORITY - Client CRM Features
+
+| Feature | Endpoints | Status |
+|---------|-----------|--------|
+| Health Scoring | `GET /api/clients/:id/health`, `POST /:id/health/recalculate`, `GET /at-risk` | No UI |
+| Activity Timeline | `GET /:id/activities`, `POST /:id/activities` | No UI |
+| Contact Management | `GET /:id/contacts`, `POST /:id/contacts`, `PUT/DELETE /contacts/:id` | No UI |
+| Custom Fields | `GET/POST/PUT/DELETE /custom-fields`, `GET/PUT /:id/custom-fields` | No UI |
+| Tags & Segmentation | `GET/POST/PUT/DELETE /tags`, tag assignment endpoints | Partial |
+| CRM Fields | `PUT /:id/crm`, `GET /follow-up` | No UI |
+
+### MEDIUM PRIORITY - Analytics Features
+
+| Feature | Endpoints | Status |
+|---------|-----------|--------|
+| Saved Reports | `GET/POST/PUT/DELETE /api/analytics/reports` | No UI |
+| Report Scheduling | `GET/POST/PUT/DELETE /reports/:id/schedules` | No UI |
+| Metric Alerts | `GET/POST/PUT/DELETE /alerts`, `POST /alerts/check` | No UI |
+| Dashboard Widgets | `GET/POST/PUT/DELETE /widgets`, `PUT /widgets/layout` | No UI |
+| KPI Tracking | `POST /kpis/snapshot`, `GET /kpis/latest`, `GET /kpis/:type/trend` | No UI |
+
+### MEDIUM PRIORITY - Lead/Pipeline Features
+
+| Feature | Endpoints | Status |
+|---------|-----------|--------|
+| Lead Scoring Rules | `GET/POST/PUT/DELETE /api/admin/leads/scoring-rules` | No UI |
+| Pipeline Management | `GET /pipeline`, `GET /pipeline/stages`, `POST /:id/move-stage` | Partial |
+| Lead Tasks | `GET /tasks/overdue`, `GET /tasks/upcoming`, `POST /:id/tasks` | No UI |
+| Lead Notes | `POST /:id/notes`, `POST /notes/:id/toggle-pin` | No UI |
+| Conversion Funnel | `GET /conversion-funnel`, `GET /duplicates` | No UI |
+
+### MEDIUM PRIORITY - Proposal Features
+
+| Feature | Endpoints | Status |
+|---------|-----------|--------|
+| Templates | `GET/POST/PUT/DELETE /api/proposals/templates` | Partial |
+| Versioning | `GET /:id/versions`, `POST /:id/versions/:id/restore` | Partial |
+| E-Signatures | `POST /:id/request-signature`, `POST /:id/sign` | Partial |
+| Comments | `GET/POST/DELETE /comments` | No UI |
+| Custom Items | `GET/POST/PUT/DELETE /custom-items`, discount endpoints | No UI |
+
+### LOW PRIORITY - Messaging Features
+
+| Feature | Endpoints | Status |
+|---------|-----------|--------|
+| Reactions | `POST/DELETE /api/messages/:id/reactions` | No UI |
+| Mentions | `GET /mentions`, `POST /:id/mentions`, `GET /mentions/me` | No UI |
+| Read Receipts | `GET /:id/read-receipts`, `POST /read-bulk` | No UI |
+| Pinning | `POST /:id/pin`, `GET /threads/:id/pinned` | No UI |
+| Search | `GET /search` | No UI |
+
+### LOW PRIORITY - File Management Features
+
+| Feature | Endpoints | Status |
+|---------|-----------|--------|
+| Versioning | `GET /files/:id/versions`, `POST /:id/versions/:id/restore` | Partial |
+| Locking | `POST /files/:id/lock`, `POST /:id/unlock` | No UI |
+| Access Logs | `GET /files/:id/access-log`, `GET /:id/access-stats` | No UI |
+| Expiration | `POST /files/:id/expiration`, `GET /files/expiring-soon` | No UI |
+
+### LOW PRIORITY - Project Analytics
+
+| Feature | Endpoints | Status |
+|---------|-----------|--------|
+| Velocity | `GET /api/projects/:id/velocity` | No UI |
+| Burndown | `GET /:id/burndown` | No UI |
+| Time Stats | `GET /:id/time-stats`, `GET /reports/team-time` | No UI |
+| Task Dependencies | `POST/DELETE /:id/tasks/:id/dependencies` | No UI |
 
 ---
 
