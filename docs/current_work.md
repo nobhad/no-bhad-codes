@@ -8,6 +8,48 @@ This file tracks active development work and TODOs. Completed items are moved to
 
 ## Completed - February 2, 2026
 
+### Invoice Advanced Features UI
+
+**Status:** COMPLETE
+
+Added frontend UI for advanced invoice features.
+
+**New Features:**
+
+- Apply Late Fees button to process overdue invoices
+- Schedule Invoice dialog for future invoice generation
+- Setup Recurring dialog for recurring invoice patterns
+- Scheduled invoices list with cancel action
+- Recurring invoices list with pause/resume actions
+
+**Files:**
+
+- `admin/index.html` - Payment Plans & Recurring section
+- `src/features/admin/admin-project-details.ts` - Handlers and UI
+- `src/styles/admin/project-detail.css` - Scheduling/recurring styles
+
+---
+
+### Client CRM Details UI
+
+**Status:** COMPLETE
+
+Added CRM Details and Custom Fields sections to client overview.
+
+**New Features:**
+
+- CRM Details section: Industry, Company Size, Acquisition Source, Website, Last Contact, Next Follow-up
+- Edit CRM dialog with dropdown selections
+- Custom Fields section displaying client-specific field values
+- Edit Custom Fields dialog with dynamic field types
+
+**Files:**
+
+- `admin/index.html` - CRM and Custom Fields sections
+- `src/features/admin/modules/admin-client-details.ts` - Load/render/edit functions
+
+---
+
 ### Client CRM Table Enhancements
 
 **Status:** COMPLETE
