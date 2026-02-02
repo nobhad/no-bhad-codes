@@ -1155,6 +1155,25 @@ Low-priority items deferred for future work:
   - Sends invitation email when converting
   - Shows "Converted to Client" badge after conversion
 
+- [ ] **Contract E-Signature System** - PARTIAL (UI Complete, Backend Needs Work)
+  - Contract tab added to project details with Preview, Download, Request Signature buttons
+  - Backend endpoints created: `POST /api/projects/:id/contract/request-signature`, `POST /api/projects/:id/contract/sign`
+  - **TODO - Email Integration:**
+    - [ ] Integrate email service to send contract signature request emails
+    - [ ] Create email template for contract signature requests
+    - [ ] Include project name, contract preview link, signature deadline
+  - **TODO - Client Signing Page:**
+    - [ ] Create client-facing signature page at `/sign-contract/:token`
+    - [ ] Capture signature (drawn/typed/uploaded)
+    - [ ] Record signer IP address and user agent
+  - **TODO - Database:**
+    - [ ] Add columns: `contract_signer_name`, `contract_signer_ip`, `contract_signature_data`
+    - [ ] Add columns: `contract_signature_token`, `contract_signature_requested_at`, `contract_signature_expires_at`
+  - **TODO - Post-Signature:**
+    - [ ] Send confirmation email after signing
+    - [ ] Add signature audit log
+  - **Files:** `server/routes/projects.ts` (lines 1519-1630)
+
 ### Main Site (Last Priority)
 
 - [ ] **Projects Section Redesign** - Sal Costa-style portfolio

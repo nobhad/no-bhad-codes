@@ -1566,11 +1566,17 @@ router.post(
       [signatureToken, expiresAt.toISOString(), projectId]
     );
 
-    // Send email to client (using the email service pattern from elsewhere)
+    // Generate signature URL
     const signatureUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/sign-contract/${signatureToken}`;
 
-    // For now, just log - in production this would send an actual email
-    console.log(`Contract signature request for project ${projectId}:`);
+    // TODO: Integrate email service to send contract signature request
+    // Requirements:
+    // 1. Send email to client with signature URL
+    // 2. Email should include: project name, contract preview link, signature deadline
+    // 3. Consider using existing email service pattern from invoice reminders
+    // 4. Add email template for contract signature requests
+    // See: server/services/scheduler-service.ts for email patterns
+    console.log(`[TODO: Send email] Contract signature request for project ${projectId}:`);
     console.log(`  Client: ${clientName} <${clientEmail}>`);
     console.log(`  Sign URL: ${signatureUrl}`);
 
@@ -1586,6 +1592,16 @@ router.post(
 /**
  * POST /api/projects/:id/contract/sign
  * Record contract signature (called when client signs)
+ *
+ * TODO: Complete contract e-signature implementation
+ * Requirements:
+ * 1. Create client-facing signature page at /sign-contract/:token
+ * 2. Capture signature data (drawn/typed/uploaded signature image)
+ * 3. Record signer IP address and user agent
+ * 4. Store signature image in database or file system
+ * 5. Add database columns: contract_signer_name, contract_signer_ip, contract_signature_data
+ * 6. Send confirmation email after signing
+ * 7. Consider adding signature verification/audit log
  */
 router.post(
   '/:id/contract/sign',
@@ -1593,6 +1609,10 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
     const db = getDatabase();
+
+    // TODO: Capture signature data from request body
+    // const { signatureData, signerName } = req.body;
+    // const signerIp = req.ip;
 
     // Update the project with signature date
     await db.run(
