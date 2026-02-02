@@ -17,6 +17,7 @@ import {
 } from '../../utils/format-utils';
 import { AdminAuth } from './admin-auth';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../utils/api-client';
+import { showToast } from '../../utils/toast-notifications';
 import { createDOMCache, getElement } from '../../utils/dom-cache';
 import { confirmDialog, confirmDanger, alertError, alertSuccess, alertWarning, multiPromptDialog } from '../../utils/confirm-dialog';
 
@@ -66,9 +67,14 @@ type ProjectDetailsDOMKeys = {
   // Financial section
   financialSection: string;
   deposit: string;
+  // Contract section
+  contractSection: string;
+  contractStatusBadge: string;
+  contractSignedInfo: string;
   contractDate: string;
-  contractDownloadSection: string;
-  contractDownloadLink: string;
+  contractPreviewBtn: string;
+  contractDownloadBtn: string;
+  contractSignBtn: string;
   // Admin notes
   adminNotesSection: string;
   adminNotes: string;
@@ -142,9 +148,14 @@ domCache.register({
   // Financial section
   financialSection: '#pd-financial-section',
   deposit: '#pd-deposit',
+  // Contract section
+  contractSection: '#pd-contract-section',
+  contractStatusBadge: '#pd-contract-status-badge',
+  contractSignedInfo: '#pd-contract-signed-info',
   contractDate: '#pd-contract-date',
-  contractDownloadSection: '#pd-contract-download-section',
-  contractDownloadLink: '#pd-contract-download-link',
+  contractPreviewBtn: '#pd-contract-preview-btn',
+  contractDownloadBtn: '#pd-contract-download-btn',
+  contractSignBtn: '#pd-contract-sign-btn',
   // Admin notes
   adminNotesSection: '#pd-admin-notes-section',
   adminNotes: '#pd-admin-notes',
@@ -378,29 +389,70 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     setUrlLink(repoUrlLink, project.repository_url ?? null);
     setUrlLink(productionUrlLink, project.production_url ?? null);
 
-    // Financial section (deposit, contract date)
+    // Financial section (deposit only now - contract moved to own section)
     const financialSection = domCache.get('financialSection');
     const depositEl = domCache.get('deposit');
-    const contractDateEl = domCache.get('contractDate');
-    const contractDownloadSection = domCache.get('contractDownloadSection');
-    const contractDownloadLink = domCache.get('contractDownloadLink') as HTMLAnchorElement | null;
 
-    const hasFinancial = project.deposit_amount || project.contract_signed_at;
+    const hasFinancial = project.deposit_amount;
     if (financialSection) {
       financialSection.style.display = hasFinancial ? 'flex' : 'none';
     }
     if (depositEl) {
       depositEl.textContent = project.deposit_amount ? `$${project.deposit_amount.toFixed(2)}` : '-';
     }
+
+    // Contract section
+    const contractStatusBadge = domCache.get('contractStatusBadge');
+    const contractSignedInfo = domCache.get('contractSignedInfo');
+    const contractDateEl = domCache.get('contractDate');
+    const contractPreviewBtn = domCache.get('contractPreviewBtn') as HTMLAnchorElement | null;
+    const contractDownloadBtn = domCache.get('contractDownloadBtn') as HTMLAnchorElement | null;
+    const contractSignBtn = domCache.get('contractSignBtn') as HTMLButtonElement | null;
+
+    const contractUrl = `/api/projects/${project.id}/contract/pdf`;
+
+    // Set up preview and download links
+    if (contractPreviewBtn) {
+      contractPreviewBtn.href = contractUrl;
+    }
+    if (contractDownloadBtn) {
+      contractDownloadBtn.href = contractUrl;
+    }
+
+    // Update status badge based on contract_signed_at
+    if (contractStatusBadge) {
+      if (project.contract_signed_at) {
+        contractStatusBadge.textContent = 'Signed';
+        contractStatusBadge.className = 'status-badge status-signed';
+      } else {
+        contractStatusBadge.textContent = 'Not Signed';
+        contractStatusBadge.className = 'status-badge status-not-signed';
+      }
+    }
+
+    // Show signed date if contract is signed
+    if (contractSignedInfo) {
+      contractSignedInfo.style.display = project.contract_signed_at ? 'flex' : 'none';
+    }
     if (contractDateEl) {
       contractDateEl.textContent = formatDate(project.contract_signed_at);
     }
-    // Show contract download button when contract is signed
-    if (contractDownloadSection) {
-      contractDownloadSection.style.display = project.contract_signed_at ? 'block' : 'none';
+
+    // Update sign button text based on status
+    const contractSignBtnText = document.getElementById('pd-contract-sign-btn-text');
+    const contractSignatureCard = document.getElementById('pd-contract-signature-card');
+    if (contractSignBtn && contractSignBtnText) {
+      if (project.contract_signed_at) {
+        contractSignBtnText.textContent = 'View Signature';
+        contractSignBtn.classList.remove('primary');
+      } else {
+        contractSignBtnText.textContent = 'Request Signature';
+        contractSignBtn.classList.add('primary');
+      }
     }
-    if (contractDownloadLink && project.contract_signed_at) {
-      contractDownloadLink.href = `/api/projects/${project.id}/contract/pdf`;
+    // Show/hide signature details card
+    if (contractSignatureCard) {
+      contractSignatureCard.style.display = project.contract_signed_at ? 'block' : 'none';
     }
 
     // Admin notes section
@@ -589,6 +641,13 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (createInvoiceBtn && !createInvoiceBtn.dataset.listenerAdded) {
       createInvoiceBtn.dataset.listenerAdded = 'true';
       createInvoiceBtn.addEventListener('click', () => this.showCreateInvoicePrompt());
+    }
+
+    // Contract sign button handler
+    const contractSignBtn = domCache.get('contractSignBtn');
+    if (contractSignBtn && !contractSignBtn.dataset.listenerAdded) {
+      contractSignBtn.dataset.listenerAdded = 'true';
+      contractSignBtn.addEventListener('click', () => this.handleContractSign());
     }
 
     // Add task handler
@@ -1386,6 +1445,49 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     } catch (error) {
       console.error('[AdminProjectDetails] Error loading invoices:', error);
       invoicesList.innerHTML = '<p class="empty-state">Error loading invoices.</p>';
+    }
+  }
+
+  /**
+   * Handle contract sign button click
+   */
+  private async handleContractSign(): Promise<void> {
+    if (!this.currentProjectId) return;
+
+    const project = this.projectsData.find((p: ProjectResponse) => p.id === this.currentProjectId);
+    if (!project) return;
+
+    if (project.contract_signed_at) {
+      // Contract already signed - show signature info
+      showToast(`Contract signed on ${formatDate(project.contract_signed_at)}`, 'info');
+      return;
+    }
+
+    // Contract not signed - request signature
+    const confirmed = await confirmDialog({
+      title: 'Request Contract Signature',
+      message: `Send a contract signature request to ${project.client_name || 'the client'}?\n\nThe client will receive an email with a link to review and sign the contract.`,
+      confirmText: 'Send Request',
+      cancelText: 'Cancel',
+      icon: 'question'
+    });
+
+    if (!confirmed) return;
+
+    try {
+      const response = await apiFetch(`/api/projects/${this.currentProjectId}/contract/request-signature`, {
+        method: 'POST'
+      });
+
+      if (response.ok) {
+        showToast('Signature request sent successfully', 'success');
+      } else {
+        const error = await response.json();
+        showToast(error.message || 'Failed to send signature request', 'error');
+      }
+    } catch (error) {
+      console.error('Error requesting signature:', error);
+      showToast('Failed to send signature request', 'error');
     }
   }
 

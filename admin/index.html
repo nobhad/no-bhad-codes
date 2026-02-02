@@ -1238,16 +1238,6 @@
                   <span class="field-label">Deposit</span>
                   <span class="meta-value" id="pd-deposit">-</span>
                 </div>
-                <div class="meta-item">
-                  <span class="field-label">Contract Signed</span>
-                  <span class="meta-value" id="pd-contract-date">-</span>
-                </div>
-                <div class="meta-item" id="pd-contract-download-section" style="display: none;">
-                  <span class="field-label">Contract PDF</span>
-                  <span class="meta-value">
-                    <a href="#" id="pd-contract-download-link" target="_blank" class="btn btn-outline btn-sm">Download Contract</a>
-                  </span>
-                </div>
               </div>
 
               <!-- Project URLs -->
@@ -1299,6 +1289,10 @@
               <button data-pd-tab="time">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span>Time</span>
+              </button>
+              <button data-pd-tab="contract">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>
+                <span>Contract</span>
               </button>
             </div>
 
@@ -1555,6 +1549,71 @@
                 <h3>Time Entries</h3>
                 <div id="time-entries-list">
                   <p class="empty-state">No time entries yet.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contract Sub-Tab -->
+            <div id="pd-tab-contract">
+              <div class="contract-tab-content">
+                <!-- Contract Status Card -->
+                <div class="portal-project-card portal-shadow">
+                  <h3>Contract Status</h3>
+                  <div class="contract-status-display">
+                    <div class="contract-status-info">
+                      <div class="status-item">
+                        <span class="field-label">Status</span>
+                        <span class="status-badge" id="pd-contract-status-badge">Not Signed</span>
+                      </div>
+                      <div class="status-item" id="pd-contract-signed-info" style="display: none;">
+                        <span class="field-label">Signed On</span>
+                        <span class="meta-value" id="pd-contract-date">-</span>
+                      </div>
+                      <div class="status-item" id="pd-contract-requested-info" style="display: none;">
+                        <span class="field-label">Signature Requested</span>
+                        <span class="meta-value" id="pd-contract-requested-date">-</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Contract Actions Card -->
+                <div class="portal-project-card portal-shadow">
+                  <h3>Contract Document</h3>
+                  <p class="contract-description">Preview, download, or request a signature for this project's contract.</p>
+                  <div class="contract-actions-grid">
+                    <a href="#" id="pd-contract-preview-btn" target="_blank" class="contract-action-card">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                      <span>Preview Contract</span>
+                    </a>
+                    <a href="#" id="pd-contract-download-btn" class="contract-action-card" download>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                      <span>Download PDF</span>
+                    </a>
+                    <button type="button" id="pd-contract-sign-btn" class="contract-action-card primary">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                      <span id="pd-contract-sign-btn-text">Request Signature</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Signature History (shown when signed) -->
+                <div class="portal-project-card portal-shadow" id="pd-contract-signature-card" style="display: none;">
+                  <h3>Signature Details</h3>
+                  <div class="signature-details">
+                    <div class="signature-info-row">
+                      <span class="field-label">Signed By</span>
+                      <span class="meta-value" id="pd-contract-signer">-</span>
+                    </div>
+                    <div class="signature-info-row">
+                      <span class="field-label">Date & Time</span>
+                      <span class="meta-value" id="pd-contract-signed-datetime">-</span>
+                    </div>
+                    <div class="signature-info-row">
+                      <span class="field-label">IP Address</span>
+                      <span class="meta-value" id="pd-contract-signer-ip">-</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

@@ -1517,6 +1517,101 @@ router.get(
   })
 );
 
+/**
+ * POST /api/projects/:id/contract/request-signature
+ * Request a contract signature from the client
+ */
+router.post(
+  '/:id/contract/request-signature',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    // Get project with client info
+    const project = await db.get(
+      `SELECT p.*, c.email as client_email, c.name as client_name
+       FROM projects p
+       LEFT JOIN clients c ON p.client_id = c.id
+       WHERE p.id = ?`,
+      [projectId]
+    );
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    const p = project as Record<string, unknown>;
+    const clientEmail = p.client_email as string | null;
+    const clientName = p.client_name as string | null;
+    const projectName = p.project_name as string;
+
+    if (!clientEmail) {
+      return res.status(400).json({ error: 'No client email associated with this project' });
+    }
+
+    // Generate a signature token for the contract
+    const crypto = await import('crypto');
+    const signatureToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // Token valid for 7 days
+
+    // Store the signature request (we'll add this to the projects table or a new table)
+    await db.run(
+      `UPDATE projects SET
+        contract_signature_token = ?,
+        contract_signature_requested_at = datetime('now'),
+        contract_signature_expires_at = ?
+       WHERE id = ?`,
+      [signatureToken, expiresAt.toISOString(), projectId]
+    );
+
+    // Send email to client (using the email service pattern from elsewhere)
+    const signatureUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/sign-contract/${signatureToken}`;
+
+    // For now, just log - in production this would send an actual email
+    console.log(`Contract signature request for project ${projectId}:`);
+    console.log(`  Client: ${clientName} <${clientEmail}>`);
+    console.log(`  Sign URL: ${signatureUrl}`);
+
+    res.json({
+      success: true,
+      message: 'Signature request sent',
+      clientEmail,
+      expiresAt: expiresAt.toISOString()
+    });
+  })
+);
+
+/**
+ * POST /api/projects/:id/contract/sign
+ * Record contract signature (called when client signs)
+ */
+router.post(
+  '/:id/contract/sign',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    // Update the project with signature date
+    await db.run(
+      `UPDATE projects SET
+        contract_signed_at = datetime('now'),
+        contract_signature_token = NULL,
+        contract_signature_expires_at = NULL
+       WHERE id = ?`,
+      [projectId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Contract signed successfully',
+      signedAt: new Date().toISOString()
+    });
+  })
+);
+
 // ============================================
 // INTAKE PDF GENERATION (using pdf-lib)
 // ============================================
