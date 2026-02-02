@@ -67,6 +67,8 @@ type ProjectDetailsDOMKeys = {
   financialSection: string;
   deposit: string;
   contractDate: string;
+  contractDownloadSection: string;
+  contractDownloadLink: string;
   // Admin notes
   adminNotesSection: string;
   adminNotes: string;
@@ -141,6 +143,8 @@ domCache.register({
   financialSection: '#pd-financial-section',
   deposit: '#pd-deposit',
   contractDate: '#pd-contract-date',
+  contractDownloadSection: '#pd-contract-download-section',
+  contractDownloadLink: '#pd-contract-download-link',
   // Admin notes
   adminNotesSection: '#pd-admin-notes-section',
   adminNotes: '#pd-admin-notes',
@@ -378,6 +382,8 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     const financialSection = domCache.get('financialSection');
     const depositEl = domCache.get('deposit');
     const contractDateEl = domCache.get('contractDate');
+    const contractDownloadSection = domCache.get('contractDownloadSection');
+    const contractDownloadLink = domCache.get('contractDownloadLink') as HTMLAnchorElement | null;
 
     const hasFinancial = project.deposit_amount || project.contract_signed_at;
     if (financialSection) {
@@ -388,6 +394,13 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     }
     if (contractDateEl) {
       contractDateEl.textContent = formatDate(project.contract_signed_at);
+    }
+    // Show contract download button when contract is signed
+    if (contractDownloadSection) {
+      contractDownloadSection.style.display = project.contract_signed_at ? 'block' : 'none';
+    }
+    if (contractDownloadLink && project.contract_signed_at) {
+      contractDownloadLink.href = `/api/projects/${project.id}/contract/pdf`;
     }
 
     // Admin notes section
