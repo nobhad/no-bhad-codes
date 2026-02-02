@@ -9,7 +9,7 @@
  */
 
 import { Chart, registerables } from 'chart.js';
-import { apiFetch } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import type {
   PerformanceMetricsDisplay,
   AnalyticsData,
@@ -20,6 +20,8 @@ import type {
 import { formatDateTime } from '../../../utils/format-utils';
 import { showTableLoading, getChartSkeletonHTML } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
+import { multiPromptDialog, alertDialog, confirmDialog } from '../../../utils/confirm-dialog';
+import { showToast } from '../../../utils/toast-notifications';
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -27,6 +29,9 @@ Chart.register(...registerables);
 const charts: Map<string, Chart> = new Map();
 
 export async function loadOverviewData(_ctx: AdminDashboardContext): Promise<void> {
+  // Setup event listeners for analytics controls
+  setupAnalyticsEventListeners();
+
   // Load all analytics data in parallel
   await Promise.all([
     loadBusinessKPIs(),
@@ -34,10 +39,35 @@ export async function loadOverviewData(_ctx: AdminDashboardContext): Promise<voi
     loadProjectStatusChart(),
     loadLeadFunnel(),
     loadSavedReports(),
+    loadScheduledReports(),
+    loadMetricAlerts(),
     loadVisitorsChart(),
     loadSourcesChart(),
     loadAnalyticsSummary()
   ]);
+}
+
+// =====================================================
+// EVENT LISTENER SETUP
+// =====================================================
+
+let analyticsListenersInitialized = false;
+
+function setupAnalyticsEventListeners(): void {
+  if (analyticsListenersInitialized) return;
+  analyticsListenersInitialized = true;
+
+  // Create Report button
+  const createReportBtn = document.getElementById('create-report-btn');
+  if (createReportBtn) {
+    createReportBtn.addEventListener('click', showCreateReportDialog);
+  }
+
+  // Create Alert button
+  const createAlertBtn = document.getElementById('create-alert-btn');
+  if (createAlertBtn) {
+    createAlertBtn.addEventListener('click', showCreateAlertDialog);
+  }
 }
 
 // =====================================================
@@ -359,7 +389,11 @@ async function loadSavedReports(): Promise<void> {
           <span class="report-meta">${report.type} ${report.last_run_at ? `• Last run: ${formatDateTime(report.last_run_at)}` : ''}</span>
         </div>
         <div class="report-actions">
-          <button class="btn btn-secondary btn-sm run-report-btn" data-report-id="${report.id}">Run</button>
+          <button class="btn btn-secondary btn-sm run-report-btn" data-report-id="${report.id}" title="Run Report">Run</button>
+          <button class="btn btn-outline btn-sm schedule-report-btn" data-report-id="${report.id}" data-report-name="${escapeHtml(report.name)}" title="Schedule Report">Schedule</button>
+          <button class="btn btn-danger btn-sm delete-report-btn" data-report-id="${report.id}" title="Delete Report">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
         </div>
       </div>
     `).join('');
@@ -374,9 +408,104 @@ async function loadSavedReports(): Promise<void> {
       });
     });
 
+    // Add event listeners for schedule buttons
+    container.querySelectorAll('.schedule-report-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const reportId = (e.currentTarget as HTMLElement).dataset.reportId;
+        const reportName = (e.currentTarget as HTMLElement).dataset.reportName;
+        if (reportId) {
+          await showScheduleReportDialog(parseInt(reportId, 10), reportName || 'Report');
+        }
+      });
+    });
+
+    // Add event listeners for delete buttons
+    container.querySelectorAll('.delete-report-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const reportId = (e.currentTarget as HTMLElement).dataset.reportId;
+        if (reportId) {
+          await deleteReport(parseInt(reportId, 10));
+        }
+      });
+    });
+
   } catch (error) {
     console.error('[AdminAnalytics] Error loading saved reports:', error);
     container.innerHTML = '<div class="report-empty">Error loading reports</div>';
+  }
+}
+
+async function showScheduleReportDialog(reportId: number, reportName: string): Promise<void> {
+  const result = await multiPromptDialog({
+    title: `Schedule: ${reportName}`,
+    fields: [
+      {
+        name: 'frequency',
+        label: 'Frequency',
+        type: 'select',
+        options: [
+          { value: 'daily', label: 'Daily' },
+          { value: 'weekly', label: 'Weekly' },
+          { value: 'monthly', label: 'Monthly' },
+          { value: 'quarterly', label: 'Quarterly' }
+        ],
+        required: true
+      },
+      {
+        name: 'email',
+        label: 'Delivery Email',
+        type: 'text',
+        placeholder: 'email@example.com'
+      }
+    ],
+    confirmText: 'Create Schedule',
+    cancelText: 'Cancel'
+  });
+
+  if (!result) return;
+
+  try {
+    const response = await apiPost(`/api/analytics/reports/${reportId}/schedules`, {
+      frequency: result.frequency,
+      delivery_email: result.email || null
+    });
+
+    if (response.ok) {
+      showToast('Report scheduled successfully', 'success');
+      await loadScheduledReports();
+    } else {
+      const error = await response.json();
+      showToast(error.error || 'Failed to schedule report', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminAnalytics] Error scheduling report:', error);
+    showToast('Failed to schedule report', 'error');
+  }
+}
+
+async function deleteReport(reportId: number): Promise<void> {
+  const confirmed = await confirmDialog({
+    title: 'Delete Report',
+    message: 'Are you sure you want to delete this report? This will also delete all associated schedules.',
+    danger: true,
+    confirmText: 'Delete'
+  });
+
+  if (!confirmed) return;
+
+  try {
+    const response = await apiDelete(`/api/analytics/reports/${reportId}`);
+
+    if (response.ok) {
+      showToast('Report deleted', 'success');
+      await loadSavedReports();
+      await loadScheduledReports();
+    } else {
+      showToast('Failed to delete report', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminAnalytics] Error deleting report:', error);
+    showToast('Failed to delete report', 'error');
   }
 }
 
@@ -388,16 +517,442 @@ async function runReport(reportId: number): Promise<void> {
 
     if (response.ok) {
       const result = await response.json();
-      // Show results in a modal or download
       console.log('[AdminAnalytics] Report results:', result);
-      // For now, just show an alert - could be enhanced with a modal
-      alert(`Report executed successfully. ${result.rowCount || 0} rows returned.`);
+      await alertDialog({
+        title: 'Report Complete',
+        message: `Report executed successfully. ${result.rowCount || 0} rows returned.`,
+        type: 'success'
+      });
     } else {
       throw new Error('Failed to run report');
     }
   } catch (error) {
     console.error('[AdminAnalytics] Error running report:', error);
-    alert('Failed to run report. Please try again.');
+    showToast('Failed to run report', 'error');
+  }
+}
+
+// =====================================================
+// CREATE REPORT DIALOG
+// =====================================================
+
+async function showCreateReportDialog(): Promise<void> {
+  const result = await multiPromptDialog({
+    title: 'Create New Report',
+    fields: [
+      {
+        name: 'name',
+        label: 'Report Name',
+        type: 'text',
+        placeholder: 'Monthly Revenue Report',
+        required: true
+      },
+      {
+        name: 'type',
+        label: 'Report Type',
+        type: 'select',
+        options: [
+          { value: 'revenue', label: 'Revenue Report' },
+          { value: 'pipeline', label: 'Pipeline Report' },
+          { value: 'projects', label: 'Projects Report' },
+          { value: 'clients', label: 'Clients Report' },
+          { value: 'invoices', label: 'Invoices Report' }
+        ],
+        required: true
+      },
+      {
+        name: 'description',
+        label: 'Description',
+        type: 'text',
+        placeholder: 'Optional description'
+      }
+    ],
+    confirmText: 'Create Report',
+    cancelText: 'Cancel'
+  });
+
+  if (!result) return;
+
+  try {
+    const response = await apiPost('/api/analytics/reports', {
+      name: result.name,
+      type: result.type,
+      description: result.description || null,
+      config: { filters: {}, columns: [] }
+    });
+
+    if (response.ok) {
+      showToast('Report created successfully', 'success');
+      await loadSavedReports();
+    } else {
+      const error = await response.json();
+      showToast(error.error || 'Failed to create report', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminAnalytics] Error creating report:', error);
+    showToast('Failed to create report', 'error');
+  }
+}
+
+// =====================================================
+// SCHEDULED REPORTS
+// =====================================================
+
+async function loadScheduledReports(): Promise<void> {
+  const container = document.getElementById('scheduled-reports-list');
+  if (!container) return;
+
+  try {
+    // Get all reports first to find ones with schedules
+    const response = await apiFetch('/api/analytics/reports');
+    if (!response.ok) {
+      container.innerHTML = '<div class="report-empty">Could not load scheduled reports</div>';
+      return;
+    }
+
+    const data = await response.json();
+    const reports = data.reports || [];
+
+    // Now get schedules for each report (simplified - in production would have a dedicated endpoint)
+    const scheduledReports: Array<{
+      id: number;
+      reportId: number;
+      reportName: string;
+      frequency: string;
+      next_run_at?: string;
+      is_active: boolean;
+    }> = [];
+
+    for (const report of reports.slice(0, 10)) {
+      try {
+        const schedRes = await apiFetch(`/api/analytics/reports/${report.id}/schedules`);
+        if (schedRes.ok) {
+          const schedData = await schedRes.json();
+          const schedules = schedData.schedules || [];
+          for (const sched of schedules) {
+            scheduledReports.push({
+              id: sched.id,
+              reportId: report.id,
+              reportName: report.name,
+              frequency: sched.frequency,
+              next_run_at: sched.next_run_at,
+              is_active: sched.is_active
+            });
+          }
+        }
+      } catch {
+        // Skip failed schedule fetches
+      }
+    }
+
+    if (scheduledReports.length === 0) {
+      container.innerHTML = '<div class="report-empty">No scheduled reports. Click "Run" on a saved report to schedule it.</div>';
+      return;
+    }
+
+    container.innerHTML = scheduledReports.map(sched => `
+      <div class="report-item" data-schedule-id="${sched.id}">
+        <div class="report-info">
+          <span class="report-name">${escapeHtml(sched.reportName)}</span>
+          <span class="report-meta">${sched.frequency} ${sched.next_run_at ? `• Next run: ${formatDateTime(sched.next_run_at)}` : ''}</span>
+        </div>
+        <div class="report-actions">
+          <button class="btn ${sched.is_active ? 'btn-outline' : 'btn-secondary'} btn-sm toggle-schedule-btn"
+                  data-schedule-id="${sched.id}" data-active="${sched.is_active}">
+            ${sched.is_active ? 'Pause' : 'Resume'}
+          </button>
+          <button class="btn btn-danger btn-sm delete-schedule-btn" data-schedule-id="${sched.id}">Delete</button>
+        </div>
+      </div>
+    `).join('');
+
+    // Add event listeners
+    container.querySelectorAll('.toggle-schedule-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const schedId = (e.currentTarget as HTMLElement).dataset.scheduleId;
+        const isActive = (e.currentTarget as HTMLElement).dataset.active === 'true';
+        if (schedId) {
+          await toggleSchedule(parseInt(schedId, 10), !isActive);
+        }
+      });
+    });
+
+    container.querySelectorAll('.delete-schedule-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const schedId = (e.currentTarget as HTMLElement).dataset.scheduleId;
+        if (schedId) {
+          await deleteSchedule(parseInt(schedId, 10));
+        }
+      });
+    });
+
+  } catch (error) {
+    console.error('[AdminAnalytics] Error loading scheduled reports:', error);
+    container.innerHTML = '<div class="report-empty">Error loading scheduled reports</div>';
+  }
+}
+
+async function toggleSchedule(scheduleId: number, activate: boolean): Promise<void> {
+  try {
+    const response = await apiPut(`/api/analytics/schedules/${scheduleId}`, {
+      is_active: activate
+    });
+
+    if (response.ok) {
+      showToast(activate ? 'Schedule resumed' : 'Schedule paused', 'success');
+      await loadScheduledReports();
+    } else {
+      showToast('Failed to update schedule', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminAnalytics] Error toggling schedule:', error);
+    showToast('Failed to update schedule', 'error');
+  }
+}
+
+async function deleteSchedule(scheduleId: number): Promise<void> {
+  const confirmed = await confirmDialog({
+    title: 'Delete Schedule',
+    message: 'Are you sure you want to delete this schedule? This cannot be undone.',
+    danger: true,
+    confirmText: 'Delete'
+  });
+
+  if (!confirmed) return;
+
+  try {
+    const response = await apiDelete(`/api/analytics/schedules/${scheduleId}`);
+
+    if (response.ok) {
+      showToast('Schedule deleted', 'success');
+      await loadScheduledReports();
+    } else {
+      showToast('Failed to delete schedule', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminAnalytics] Error deleting schedule:', error);
+    showToast('Failed to delete schedule', 'error');
+  }
+}
+
+// =====================================================
+// METRIC ALERTS
+// =====================================================
+
+async function loadMetricAlerts(): Promise<void> {
+  const container = document.getElementById('metric-alerts-list');
+  if (!container) return;
+
+  try {
+    const response = await apiFetch('/api/analytics/alerts');
+    if (!response.ok) {
+      container.innerHTML = '<div class="report-empty">Could not load alerts</div>';
+      return;
+    }
+
+    const data = await response.json();
+    const alerts = data.alerts || [];
+
+    if (alerts.length === 0) {
+      container.innerHTML = '<div class="report-empty">No metric alerts configured. Create an alert to get notified when metrics cross thresholds.</div>';
+      return;
+    }
+
+    container.innerHTML = alerts.map((alert: {
+      id: number;
+      name: string;
+      metric: string;
+      condition: string;
+      threshold: number;
+      is_active: boolean;
+      last_triggered_at?: string;
+    }) => `
+      <div class="report-item alert-item" data-alert-id="${alert.id}">
+        <div class="report-info">
+          <span class="report-name">
+            ${alert.is_active ? '' : '<span class="badge badge-muted">Paused</span> '}
+            ${escapeHtml(alert.name)}
+          </span>
+          <span class="report-meta">
+            ${formatMetricName(alert.metric)} ${alert.condition} ${formatThreshold(alert.metric, alert.threshold)}
+            ${alert.last_triggered_at ? `• Last triggered: ${formatDateTime(alert.last_triggered_at)}` : ''}
+          </span>
+        </div>
+        <div class="report-actions">
+          <button class="btn ${alert.is_active ? 'btn-outline' : 'btn-secondary'} btn-sm toggle-alert-btn"
+                  data-alert-id="${alert.id}" data-active="${alert.is_active}">
+            ${alert.is_active ? 'Pause' : 'Resume'}
+          </button>
+          <button class="btn btn-danger btn-sm delete-alert-btn" data-alert-id="${alert.id}">Delete</button>
+        </div>
+      </div>
+    `).join('');
+
+    // Add event listeners
+    container.querySelectorAll('.toggle-alert-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const alertId = (e.currentTarget as HTMLElement).dataset.alertId;
+        const isActive = (e.currentTarget as HTMLElement).dataset.active === 'true';
+        if (alertId) {
+          await toggleAlert(parseInt(alertId, 10), !isActive);
+        }
+      });
+    });
+
+    container.querySelectorAll('.delete-alert-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const alertId = (e.currentTarget as HTMLElement).dataset.alertId;
+        if (alertId) {
+          await deleteAlert(parseInt(alertId, 10));
+        }
+      });
+    });
+
+  } catch (error) {
+    console.error('[AdminAnalytics] Error loading metric alerts:', error);
+    container.innerHTML = '<div class="report-empty">Error loading alerts</div>';
+  }
+}
+
+function formatMetricName(metric: string): string {
+  const names: Record<string, string> = {
+    'revenue': 'Revenue',
+    'pipeline_value': 'Pipeline Value',
+    'active_projects': 'Active Projects',
+    'outstanding_invoices': 'Outstanding Invoices',
+    'conversion_rate': 'Conversion Rate',
+    'avg_deal_value': 'Avg Deal Value'
+  };
+  return names[metric] || metric.replace(/_/g, ' ');
+}
+
+function formatThreshold(metric: string, value: number): string {
+  if (metric.includes('rate')) {
+    return `${value}%`;
+  }
+  if (metric.includes('revenue') || metric.includes('value') || metric.includes('invoices')) {
+    return formatCurrency(value);
+  }
+  return String(value);
+}
+
+async function showCreateAlertDialog(): Promise<void> {
+  const result = await multiPromptDialog({
+    title: 'Create Metric Alert',
+    fields: [
+      {
+        name: 'name',
+        label: 'Alert Name',
+        type: 'text',
+        placeholder: 'Revenue dropped alert',
+        required: true
+      },
+      {
+        name: 'metric',
+        label: 'Metric',
+        type: 'select',
+        options: [
+          { value: 'revenue', label: 'Revenue' },
+          { value: 'pipeline_value', label: 'Pipeline Value' },
+          { value: 'active_projects', label: 'Active Projects' },
+          { value: 'outstanding_invoices', label: 'Outstanding Invoices' },
+          { value: 'conversion_rate', label: 'Conversion Rate' }
+        ],
+        required: true
+      },
+      {
+        name: 'condition',
+        label: 'Condition',
+        type: 'select',
+        options: [
+          { value: 'above', label: 'Above' },
+          { value: 'below', label: 'Below' },
+          { value: 'equals', label: 'Equals' },
+          { value: 'change', label: 'Changes by %' }
+        ],
+        required: true
+      },
+      {
+        name: 'threshold',
+        label: 'Threshold Value',
+        type: 'text',
+        placeholder: '10000',
+        required: true
+      }
+    ],
+    confirmText: 'Create Alert',
+    cancelText: 'Cancel'
+  });
+
+  if (!result) return;
+
+  const threshold = parseFloat(result.threshold);
+  if (isNaN(threshold)) {
+    showToast('Invalid threshold value', 'error');
+    return;
+  }
+
+  try {
+    const response = await apiPost('/api/analytics/alerts', {
+      name: result.name,
+      metric: result.metric,
+      condition: result.condition,
+      threshold
+    });
+
+    if (response.ok) {
+      showToast('Alert created successfully', 'success');
+      await loadMetricAlerts();
+    } else {
+      const error = await response.json();
+      showToast(error.error || 'Failed to create alert', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminAnalytics] Error creating alert:', error);
+    showToast('Failed to create alert', 'error');
+  }
+}
+
+async function toggleAlert(alertId: number, activate: boolean): Promise<void> {
+  try {
+    const response = await apiPut(`/api/analytics/alerts/${alertId}`, {
+      is_active: activate
+    });
+
+    if (response.ok) {
+      showToast(activate ? 'Alert activated' : 'Alert paused', 'success');
+      await loadMetricAlerts();
+    } else {
+      showToast('Failed to update alert', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminAnalytics] Error toggling alert:', error);
+    showToast('Failed to update alert', 'error');
+  }
+}
+
+async function deleteAlert(alertId: number): Promise<void> {
+  const confirmed = await confirmDialog({
+    title: 'Delete Alert',
+    message: 'Are you sure you want to delete this alert? This cannot be undone.',
+    danger: true,
+    confirmText: 'Delete'
+  });
+
+  if (!confirmed) return;
+
+  try {
+    const response = await apiDelete(`/api/analytics/alerts/${alertId}`);
+
+    if (response.ok) {
+      showToast('Alert deleted', 'success');
+      await loadMetricAlerts();
+    } else {
+      showToast('Failed to delete alert', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminAnalytics] Error deleting alert:', error);
+    showToast('Failed to delete alert', 'error');
   }
 }
 
