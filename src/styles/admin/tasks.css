@@ -1,0 +1,511 @@
+/**
+ * ===============================================
+ * TASKS & TIME TRACKING STYLES
+ * ===============================================
+ * @file src/styles/admin/tasks.css
+ *
+ * Styles for project tasks and time tracking features.
+ */
+
+/* ============================================
+   View Toggle
+   ============================================ */
+
+.view-toggle-container {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-md);
+  margin-bottom: var(--portal-spacing-md);
+}
+
+.view-toggle {
+  display: inline-flex;
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  overflow: hidden;
+}
+
+.view-toggle button {
+  padding: var(--portal-spacing-xs) var(--portal-spacing-md);
+  background: transparent;
+  border: none;
+  color: var(--portal-text-secondary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.view-toggle button:hover {
+  color: var(--portal-text-primary);
+}
+
+.view-toggle button.active {
+  background: var(--app-color-primary);
+  color: var(--color-white);
+}
+
+/* ============================================
+   Task Card Enhancements (beyond Kanban default)
+   ============================================ */
+
+.task-priority {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.task-priority-urgent {
+  background-color: var(--status-cancelled);
+  color: var(--color-white);
+}
+
+.task-priority-high {
+  background-color: #f59e0b;
+  color: var(--color-white);
+}
+
+.task-priority-medium {
+  background-color: var(--app-color-primary);
+  color: var(--color-white);
+}
+
+.task-priority-low {
+  background-color: var(--portal-text-secondary);
+  color: var(--color-white);
+}
+
+.task-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-xs);
+  margin-top: var(--portal-spacing-xs);
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+}
+
+.task-meta svg {
+  width: 12px;
+  height: 12px;
+}
+
+.task-due-date {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.task-due-date.overdue {
+  color: var(--status-cancelled);
+}
+
+.task-assignee {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.task-checklist-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ============================================
+   Task List View
+   ============================================ */
+
+.task-list-container {
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-md);
+  overflow: hidden;
+}
+
+.task-list-header {
+  display: grid;
+  grid-template-columns: 1fr 100px 120px 100px 100px;
+  gap: var(--portal-spacing-sm);
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  background: var(--portal-bg-medium);
+  border-bottom: 1px solid var(--portal-border);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+}
+
+.task-list-item {
+  display: grid;
+  grid-template-columns: 1fr 100px 120px 100px 100px;
+  gap: var(--portal-spacing-sm);
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  border-bottom: 1px solid var(--portal-border);
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.task-list-item:hover {
+  background: var(--portal-bg-medium);
+}
+
+.task-list-item:last-child {
+  border-bottom: none;
+}
+
+.task-list-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.task-list-title span {
+  font-weight: 500;
+  color: var(--portal-text-primary);
+}
+
+.task-list-title small {
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+}
+
+.task-list-empty {
+  padding: var(--portal-spacing-xl);
+  text-align: center;
+  color: var(--portal-text-secondary);
+}
+
+/* ============================================
+   Task Detail Modal
+   ============================================ */
+
+.task-detail-modal {
+  max-width: 600px;
+  width: 90vw;
+}
+
+.task-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--portal-spacing-md);
+}
+
+.task-detail-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--portal-text-primary);
+}
+
+.task-detail-section {
+  margin-bottom: var(--portal-spacing-lg);
+}
+
+.task-detail-section h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--portal-text-secondary);
+  margin-bottom: var(--portal-spacing-sm);
+  text-transform: uppercase;
+}
+
+/* Checklist in task detail */
+.task-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.task-checklist-item {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-sm);
+  padding: var(--portal-spacing-xs) 0;
+  border-bottom: 1px solid var(--portal-border);
+}
+
+.task-checklist-item:last-child {
+  border-bottom: none;
+}
+
+.task-checklist-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.task-checklist-item label {
+  flex: 1;
+  cursor: pointer;
+  color: var(--portal-text-primary);
+}
+
+.task-checklist-item.completed label {
+  text-decoration: line-through;
+  color: var(--portal-text-secondary);
+}
+
+.task-checklist-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-sm);
+  margin-top: var(--portal-spacing-sm);
+}
+
+.task-checklist-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--portal-bg-medium);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.task-checklist-progress-fill {
+  height: 100%;
+  background: var(--status-active);
+  transition: width 0.3s ease;
+}
+
+.task-checklist-progress-text {
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+}
+
+/* Task dependencies */
+.task-dependencies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--portal-spacing-xs);
+}
+
+.task-dependency-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-sm);
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+}
+
+.task-dependency-pill.blocking {
+  background: rgba(var(--status-cancelled-rgb), 0.2);
+  color: var(--status-cancelled);
+}
+
+/* Task comments */
+.task-comments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-sm);
+}
+
+.task-comment {
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-sm);
+  padding: var(--portal-spacing-sm);
+}
+
+.task-comment-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.task-comment-author {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--portal-text-primary);
+}
+
+.task-comment-time {
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+}
+
+.task-comment-body {
+  font-size: 0.875rem;
+  color: var(--portal-text-secondary);
+  line-height: 1.5;
+}
+
+/* ============================================
+   Time Tracking
+   ============================================ */
+
+.time-tracking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--portal-spacing-md);
+}
+
+.time-tracking-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--portal-spacing-md);
+  margin-bottom: var(--portal-spacing-lg);
+}
+
+.time-summary-card {
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-md);
+  padding: var(--portal-spacing-md);
+  text-align: center;
+  border: 1px solid var(--portal-border);
+}
+
+.time-summary-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--portal-text-primary);
+}
+
+.time-summary-label {
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.time-entries-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-md);
+  overflow: hidden;
+}
+
+.time-entries-table th,
+.time-entries-table td {
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  text-align: left;
+  border-bottom: 1px solid var(--portal-border);
+}
+
+.time-entries-table th {
+  background: var(--portal-bg-medium);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+}
+
+.time-entries-table td {
+  font-size: 0.875rem;
+  color: var(--portal-text-primary);
+}
+
+.time-entries-table tr:last-child td {
+  border-bottom: none;
+}
+
+.time-entries-table tr:hover td {
+  background: var(--portal-bg-medium);
+}
+
+.time-entry-duration {
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.time-entry-billable {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.time-entry-billable.yes {
+  background: var(--status-active);
+  color: var(--color-white);
+}
+
+.time-entry-billable.no {
+  background: var(--portal-text-secondary);
+  color: var(--color-white);
+}
+
+.time-entries-empty {
+  text-align: center;
+  padding: var(--portal-spacing-xl);
+  color: var(--portal-text-secondary);
+}
+
+/* Time entry modal */
+.time-entry-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-md);
+}
+
+.time-entry-duration-inputs {
+  display: flex;
+  gap: var(--portal-spacing-sm);
+  align-items: center;
+}
+
+.time-entry-duration-inputs input {
+  width: 80px;
+  text-align: center;
+}
+
+.time-entry-duration-inputs span {
+  color: var(--portal-text-secondary);
+  font-size: 0.875rem;
+}
+
+/* Weekly chart container */
+.time-weekly-chart {
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-md);
+  padding: var(--portal-spacing-md);
+  margin-bottom: var(--portal-spacing-lg);
+  border: 1px solid var(--portal-border);
+}
+
+.time-weekly-chart h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--portal-text-secondary);
+  margin-bottom: var(--portal-spacing-md);
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 768px) {
+  .task-list-header,
+  .task-list-item {
+    grid-template-columns: 1fr;
+    gap: var(--portal-spacing-xs);
+  }
+
+  .task-list-header > *:not(:first-child) {
+    display: none;
+  }
+
+  .task-list-item > *:not(:first-child) {
+    display: inline-flex;
+    font-size: 0.75rem;
+  }
+
+  .time-entries-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .view-toggle-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

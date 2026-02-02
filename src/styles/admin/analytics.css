@@ -229,3 +229,296 @@
   color: var(--portal-text-light);
   font-size: var(--font-size-xs);
 }
+
+/* ============================================
+   Business KPI Cards
+   ============================================ */
+
+.kpi-cards-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--portal-spacing-md);
+  margin-bottom: var(--portal-spacing-lg);
+}
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-sm);
+  padding: var(--portal-spacing-md);
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-md);
+  border-top: 3px solid var(--app-color-primary);
+}
+
+.kpi-card-icon {
+  color: var(--portal-text-secondary);
+  opacity: 0.8;
+}
+
+.kpi-card-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.kpi-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kpi-card-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--portal-text-primary);
+  line-height: 1.2;
+}
+
+.kpi-card-label {
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kpi-card-change {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  margin-top: auto;
+}
+
+.kpi-card-change .change-value {
+  font-weight: 600;
+  color: var(--portal-text-secondary);
+}
+
+.kpi-card-change.positive .change-value {
+  color: var(--status-active);
+}
+
+.kpi-card-change.negative .change-value {
+  color: var(--status-cancelled);
+}
+
+.kpi-card-change-label {
+  color: var(--portal-text-muted);
+}
+
+/* ============================================
+   Analytics Section Headers
+   ============================================ */
+
+.analytics-section-header {
+  margin: var(--portal-spacing-lg) 0 var(--portal-spacing-md) 0;
+  padding-bottom: var(--portal-spacing-sm);
+  border-bottom: 1px solid var(--portal-border);
+}
+
+.analytics-section-header h3 {
+  color: var(--portal-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+}
+
+/* ============================================
+   Business Charts Grid
+   ============================================ */
+
+.business-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: var(--portal-spacing-lg);
+  margin-bottom: var(--portal-spacing-lg);
+}
+
+/* ============================================
+   Lead Funnel
+   ============================================ */
+
+.funnel-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--portal-spacing-md) 0;
+  overflow-x: auto;
+}
+
+.funnel-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--portal-spacing-md);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-md);
+  min-width: 100px;
+  text-align: center;
+}
+
+.funnel-stage-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--portal-text-primary);
+}
+
+.funnel-stage-label {
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+  margin-top: 4px;
+}
+
+.funnel-stage-success {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid var(--status-active);
+}
+
+.funnel-stage-success .funnel-stage-value {
+  color: var(--status-active);
+}
+
+.funnel-arrow {
+  color: var(--portal-text-muted);
+  flex-shrink: 0;
+  padding: 0 var(--portal-spacing-xs);
+}
+
+.funnel-arrow svg {
+  width: 20px;
+  height: 20px;
+}
+
+.funnel-stats {
+  display: flex;
+  gap: var(--portal-spacing-lg);
+  padding-top: var(--portal-spacing-md);
+  border-top: 1px solid var(--portal-border);
+  margin-top: var(--portal-spacing-md);
+}
+
+.funnel-stat {
+  font-size: 0.875rem;
+  color: var(--portal-text-secondary);
+}
+
+/* ============================================
+   Saved Reports
+   ============================================ */
+
+.section-header-with-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--portal-spacing-md);
+}
+
+.section-header-with-actions h3 {
+  color: var(--portal-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+}
+
+.reports-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-sm);
+}
+
+.report-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-sm);
+  border: 1px solid var(--portal-border);
+}
+
+.report-item:hover {
+  border-color: var(--app-color-primary);
+}
+
+.report-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.report-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--portal-text-primary);
+}
+
+.report-meta {
+  font-size: 0.75rem;
+  color: var(--portal-text-muted);
+}
+
+.report-actions {
+  display: flex;
+  gap: var(--portal-spacing-xs);
+}
+
+.report-actions button {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+}
+
+.report-empty {
+  text-align: center;
+  padding: var(--portal-spacing-lg);
+  color: var(--portal-text-secondary);
+  font-size: 0.875rem;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 768px) {
+  .kpi-cards-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .kpi-card-value {
+    font-size: 1.25rem;
+  }
+
+  .business-charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .funnel-container {
+    flex-wrap: wrap;
+    gap: var(--portal-spacing-sm);
+    justify-content: center;
+  }
+
+  .funnel-arrow {
+    display: none;
+  }
+
+  .funnel-stage {
+    min-width: calc(50% - var(--portal-spacing-sm));
+  }
+
+  .funnel-stats {
+    flex-direction: column;
+    gap: var(--portal-spacing-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .kpi-cards-row {
+    grid-template-columns: 1fr;
+  }
+
+  .section-header-with-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--portal-spacing-sm);
+  }
+}

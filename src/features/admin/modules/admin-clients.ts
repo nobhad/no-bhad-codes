@@ -401,7 +401,7 @@ function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): voi
   });
 }
 
-export function showClientDetails(clientId: number, ctx?: AdminDashboardContext): void {
+export async function showClientDetails(clientId: number, ctx?: AdminDashboardContext): Promise<void> {
   const context = ctx || storedContext;
   if (!context) {
     console.error('[AdminClients] No context available');
@@ -429,6 +429,14 @@ export function showClientDetails(clientId: number, ctx?: AdminDashboardContext)
   // Load client's projects and billing
   loadClientProjects(clientId);
   loadClientBilling(clientId);
+
+  // Initialize enhanced CRM features (contacts, activity, notes, tags)
+  try {
+    const clientDetailsModule = await import('./admin-client-details');
+    await clientDetailsModule.initClientDetailView(clientId, context);
+  } catch (error) {
+    console.error('[AdminClients] Failed to load CRM features:', error);
+  }
 }
 
 function populateClientDetailView(client: Client): void {

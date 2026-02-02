@@ -18,7 +18,7 @@ import {
 import { AdminAuth } from './admin-auth';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../utils/api-client';
 import { createDOMCache, getElement } from '../../utils/dom-cache';
-import { confirmDanger, alertError, alertSuccess, alertWarning, multiPromptDialog } from '../../utils/confirm-dialog';
+import { confirmDialog, confirmDanger, alertError, alertSuccess, alertWarning, multiPromptDialog } from '../../utils/confirm-dialog';
 
 // Allowed file types (matches server validation)
 const ALLOWED_EXTENSIONS = /\.(jpeg|jpg|png|gif|pdf|doc|docx|txt|zip|rar)$/i;
@@ -494,7 +494,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       if (btnEl.dataset.listenerAdded) return;
       btnEl.dataset.listenerAdded = 'true';
 
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const tabName = btnEl.dataset.pdTab;
         if (!tabName) return;
 
@@ -506,6 +506,17 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         tabContents.forEach((content) => {
           content.classList.toggle('active', content.id === `pd-tab-${tabName}`);
         });
+
+        // Initialize modules for specific tabs
+        if (this.currentProjectId) {
+          if (tabName === 'tasks') {
+            await this.initTasksModule();
+          } else if (tabName === 'time') {
+            await this.initTimeTrackingModule();
+          } else if (tabName === 'files') {
+            await this.initFilesModule();
+          }
+        }
       });
     });
 
@@ -567,8 +578,57 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       createInvoiceBtn.addEventListener('click', () => this.showCreateInvoicePrompt());
     }
 
+    // Add task handler
+    const addTaskBtn = document.getElementById('btn-add-task');
+    if (addTaskBtn && !addTaskBtn.dataset.listenerAdded) {
+      addTaskBtn.dataset.listenerAdded = 'true';
+      addTaskBtn.addEventListener('click', async () => {
+        const { showCreateTaskModal } = await import('./modules/admin-tasks');
+        showCreateTaskModal();
+      });
+    }
+
     // File upload handlers
     this.setupFileUploadHandlers();
+  }
+
+  /**
+   * Initialize tasks module for current project
+   */
+  private async initTasksModule(): Promise<void> {
+    if (!this.currentProjectId) return;
+    try {
+      const { initTasksModule } = await import('./modules/admin-tasks');
+      await initTasksModule(this.currentProjectId);
+    } catch (error) {
+      console.error('[AdminProjectDetails] Error initializing tasks module:', error);
+    }
+  }
+
+  /**
+   * Initialize time tracking module for current project
+   */
+  private async initTimeTrackingModule(): Promise<void> {
+    if (!this.currentProjectId) return;
+    try {
+      const { initTimeTrackingModule } = await import('./modules/admin-time-tracking');
+      await initTimeTrackingModule(this.currentProjectId);
+    } catch (error) {
+      console.error('[AdminProjectDetails] Error initializing time tracking module:', error);
+    }
+  }
+
+  /**
+   * Initialize files module for current project
+   */
+  private async initFilesModule(): Promise<void> {
+    if (!this.currentProjectId) return;
+    try {
+      const { initFilesModule } = await import('./modules/admin-files');
+      await initFilesModule(this.currentProjectId);
+    } catch (error) {
+      console.error('[AdminProjectDetails] Error initializing files module:', error);
+    }
   }
 
   /**
@@ -1258,8 +1318,11 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
         if (invoices.length === 0) {
           invoicesList.innerHTML = '<p class="empty-state">No invoices yet. Create one above.</p>';
         } else {
+          // Extend invoice type for deposit fields
+          type ExtendedInvoice = InvoiceResponse & { invoice_type?: string };
+
           invoicesList.innerHTML = invoices
-            .map((inv: InvoiceResponse) => {
+            .map((inv: ExtendedInvoice) => {
               const statusClass =
                 inv.status === 'paid'
                   ? 'status-completed'
@@ -1267,23 +1330,39 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
                     ? 'status-cancelled'
                     : 'status-active';
               // Determine which action buttons to show
-              const showSendBtn = inv.status === 'draft';
-              const showMarkPaidBtn = ['sent', 'viewed', 'partial', 'overdue'].includes(inv.status);
-              const showReminderBtn = inv.status === 'overdue';
+              const isDraft = inv.status === 'draft';
+              const isCancelled = inv.status === 'cancelled';
+              const isPaid = inv.status === 'paid';
+              const isOutstanding = ['sent', 'viewed', 'partial', 'overdue'].includes(inv.status);
+              const showSendBtn = isDraft;
+              const showEditBtn = isDraft;
+              const showRecordPaymentBtn = isOutstanding;
+              const showMarkPaidBtn = isOutstanding;
+              const showReminderBtn = isOutstanding;
+              const showApplyCreditBtn = inv.invoice_type !== 'deposit' && isOutstanding;
+              const showDuplicateBtn = !isCancelled;
+              const showDeleteBtn = !isPaid;
+              const isDeposit = inv.invoice_type === 'deposit';
 
               return `
-              <div class="invoice-item">
+              <div class="invoice-item${isDeposit ? ' invoice-deposit' : ''}">
                 <div class="invoice-info">
                   <strong>${inv.invoice_number || `INV-${inv.id}`}</strong>
+                  ${isDeposit ? '<span class="invoice-type-badge">DEPOSIT</span>' : ''}
                   <span class="invoice-date">${formatDate(inv.created_at)}</span>
                 </div>
                 <div class="invoice-amount">$${(typeof inv.amount_total === 'string' ? parseFloat(inv.amount_total) : (inv.amount_total || 0)).toFixed(2)}</div>
                 <span class="status-badge ${statusClass}">${inv.status}</span>
                 <div class="invoice-actions">
                   <a href="/api/invoices/${inv.id}/pdf" class="btn btn-outline btn-sm" target="_blank">PDF</a>
+                  ${showEditBtn ? `<button class="btn btn-outline btn-sm" onclick="window.adminDashboard?.editInvoice(${inv.id})">Edit</button>` : ''}
                   ${showSendBtn ? `<button class="btn btn-secondary btn-sm" onclick="window.adminDashboard?.sendInvoice(${inv.id})">Send</button>` : ''}
-                  ${showMarkPaidBtn ? `<button class="btn btn-success btn-sm" onclick="window.adminDashboard?.markInvoicePaid(${inv.id})">Mark Paid</button>` : ''}
-                  ${showReminderBtn ? `<button class="btn btn-warning btn-sm" onclick="window.adminDashboard?.sendInvoiceReminder(${inv.id})">Remind</button>` : ''}
+                  ${showRecordPaymentBtn ? `<button class="btn btn-success btn-sm" onclick="window.adminDashboard?.recordPayment(${inv.id})">Record Payment</button>` : ''}
+                  ${showMarkPaidBtn ? `<button class="btn btn-outline btn-sm" onclick="window.adminDashboard?.markInvoicePaid(${inv.id})">Mark Paid</button>` : ''}
+                  ${showApplyCreditBtn ? `<button class="btn btn-outline btn-sm" onclick="window.adminDashboard?.showApplyCreditPrompt(${inv.id})">Apply Credit</button>` : ''}
+                  ${showReminderBtn ? `<button class="btn btn-outline btn-sm" onclick="window.adminDashboard?.sendInvoiceReminder(${inv.id})">Remind</button>` : ''}
+                  ${showDuplicateBtn ? `<button class="btn btn-outline btn-sm" onclick="window.adminDashboard?.duplicateInvoice(${inv.id})">Duplicate</button>` : ''}
+                  ${showDeleteBtn ? `<button class="btn btn-danger btn-sm" onclick="window.adminDashboard?.deleteInvoice(${inv.id})">Delete</button>` : ''}
                 </div>
               </div>
             `;
@@ -1298,46 +1377,464 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
   }
 
   /**
-   * Show prompt to create a new invoice
+   * Show custom modal to create a new invoice with multiple line items
    */
-  private async showCreateInvoicePrompt(): Promise<void> {
+  private showCreateInvoicePrompt(): void {
     if (!this.currentProjectId) return;
 
     const project = this.projectsData.find((p: ProjectResponse) => p.id === this.currentProjectId);
     if (!project) return;
 
-    const result = await multiPromptDialog({
-      title: 'Create Invoice',
-      fields: [
-        {
-          name: 'description',
-          label: 'Line Item Description',
-          type: 'text',
-          defaultValue: 'Web Development Services',
-          required: true
-        },
-        {
-          name: 'amount',
-          label: 'Amount ($)',
-          type: 'number',
-          defaultValue: '1000',
-          placeholder: 'Enter amount',
-          required: true
+    // Create modal overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-dialog-overlay';
+    overlay.id = 'create-invoice-modal';
+
+    // Line items data
+    const lineItems: { description: string; quantity: number; rate: number }[] = [
+      { description: 'Web Development Services', quantity: 1, rate: project.price || 500 }
+    ];
+
+    // Helper functions (defined before use)
+    const saveCurrentValues = (): void => {
+      const rows = overlay.querySelectorAll('.line-item-row');
+      rows.forEach((row, index) => {
+        if (lineItems[index]) {
+          const desc = row.querySelector('.line-item-desc') as HTMLInputElement;
+          const qty = row.querySelector('.line-item-qty') as HTMLInputElement;
+          const rate = row.querySelector('.line-item-rate') as HTMLInputElement;
+          lineItems[index].description = desc?.value || '';
+          lineItems[index].quantity = parseInt(qty?.value) || 1;
+          lineItems[index].rate = parseFloat(rate?.value) || 0;
         }
-      ],
-      confirmText: 'Create Invoice',
-      cancelText: 'Cancel'
-    });
+      });
+    };
 
-    if (!result) return;
+    const updateLineItemAmounts = (): void => {
+      const rows = overlay.querySelectorAll('.line-item-row');
+      let total = 0;
+      rows.forEach((row) => {
+        const qty = parseFloat((row.querySelector('.line-item-qty') as HTMLInputElement)?.value) || 1;
+        const rate = parseFloat((row.querySelector('.line-item-rate') as HTMLInputElement)?.value) || 0;
+        const amount = qty * rate;
+        total += amount;
+        const amountSpan = row.querySelector('.line-item-amount');
+        if (amountSpan) amountSpan.textContent = `$${amount.toFixed(2)}`;
+      });
+      const totalEl = overlay.querySelector('.invoice-total strong');
+      if (totalEl) totalEl.textContent = `Total: $${total.toFixed(2)}`;
+    };
 
-    const amount = parseFloat(result.amount);
-    if (isNaN(amount) || amount <= 0) {
-      alertWarning('Please enter a valid amount');
+    const closeModal = (): void => {
+      overlay.classList.add('closing');
+      setTimeout(() => overlay.remove(), 150);
+    };
+
+    const submitInvoice = async (): Promise<void> => {
+      saveCurrentValues();
+
+      // Validate line items
+      const validLineItems = lineItems.filter(item => item.description.trim() && item.rate > 0);
+      if (validLineItems.length === 0) {
+        alertWarning('Please add at least one line item with description and amount');
+        return;
+      }
+
+      const typeSelect = overlay.querySelector('#invoice-type-select') as HTMLSelectElement;
+      const isDeposit = typeSelect?.value === 'deposit';
+      const depositPercentageInput = overlay.querySelector('#deposit-percentage') as HTMLInputElement;
+      const depositPercentage = isDeposit && depositPercentageInput ? parseFloat(depositPercentageInput.value) : undefined;
+
+      // Calculate total
+      const totalAmount = validLineItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+
+      closeModal();
+
+      if (isDeposit) {
+        // For deposit, use first line item description
+        await this.createDepositInvoice(
+          project.client_id,
+          validLineItems[0].description,
+          totalAmount,
+          depositPercentage
+        );
+      } else {
+        await this.createInvoiceWithLineItems(project.client_id, validLineItems);
+      }
+    };
+
+    // Render the modal (defined before attachModalHandlers which uses it)
+    const renderModal = (): void => {
+      const totalAmount = lineItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+
+      overlay.innerHTML = `
+        <div class="confirm-dialog invoice-modal">
+          <div class="confirm-dialog-icon info">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+          </div>
+          <h3 class="confirm-dialog-title">Create Invoice</h3>
+
+          <div class="invoice-modal-form">
+            <div class="form-group">
+              <label class="form-label">Invoice Type *</label>
+              <select id="invoice-type-select" class="form-input">
+                <option value="standard">Standard Invoice</option>
+                <option value="deposit">Deposit Invoice</option>
+              </select>
+            </div>
+
+            <div class="form-group deposit-field" style="display: none;">
+              <label class="form-label">Deposit Percentage</label>
+              <input type="number" id="deposit-percentage" class="form-input" value="50" min="1" max="100" placeholder="e.g., 50">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Line Items</label>
+              <div class="line-items-container">
+                ${lineItems.map((item, index) => `
+                  <div class="line-item-row" data-index="${index}">
+                    <input type="text" class="form-input line-item-desc" placeholder="Description" value="${SanitizationUtils.escapeHtml(item.description)}" required>
+                    <input type="number" class="form-input line-item-qty" placeholder="Qty" value="${item.quantity}" min="1" style="width: 70px;">
+                    <input type="number" class="form-input line-item-rate" placeholder="Rate" value="${item.rate}" min="0" step="0.01" style="width: 100px;">
+                    <span class="line-item-amount">$${(item.quantity * item.rate).toFixed(2)}</span>
+                    ${lineItems.length > 1 ? `<button type="button" class="btn-remove-line" data-index="${index}" title="Remove">&times;</button>` : ''}
+                  </div>
+                `).join('')}
+              </div>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-add-line-item">+ Add Line Item</button>
+            </div>
+
+            <div class="invoice-total">
+              <strong>Total: $${totalAmount.toFixed(2)}</strong>
+            </div>
+          </div>
+
+          <div class="confirm-dialog-actions">
+            <button type="button" class="confirm-dialog-btn confirm-dialog-cancel">Cancel</button>
+            <button type="button" class="confirm-dialog-btn confirm-dialog-confirm">Create Invoice</button>
+          </div>
+        </div>
+      `;
+
+      // Attach event handlers inline
+      // Invoice type change - show/hide deposit percentage
+      const typeSelect = overlay.querySelector('#invoice-type-select') as HTMLSelectElement;
+      const depositField = overlay.querySelector('.deposit-field') as HTMLElement;
+      typeSelect?.addEventListener('change', () => {
+        if (depositField) {
+          depositField.style.display = typeSelect.value === 'deposit' ? 'block' : 'none';
+        }
+      });
+
+      // Add line item button
+      const addLineBtn = overlay.querySelector('#btn-add-line-item');
+      addLineBtn?.addEventListener('click', () => {
+        lineItems.push({ description: '', quantity: 1, rate: 0 });
+        saveCurrentValues();
+        renderModal();
+      });
+
+      // Remove line item buttons
+      overlay.querySelectorAll('.btn-remove-line').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const index = parseInt((e.target as HTMLElement).dataset.index || '0');
+          lineItems.splice(index, 1);
+          saveCurrentValues();
+          renderModal();
+        });
+      });
+
+      // Update amounts on input change
+      overlay.querySelectorAll('.line-item-qty, .line-item-rate').forEach(input => {
+        input.addEventListener('input', () => {
+          updateLineItemAmounts();
+        });
+      });
+
+      // Cancel button
+      overlay.querySelector('.confirm-dialog-cancel')?.addEventListener('click', closeModal);
+
+      // Confirm button
+      overlay.querySelector('.confirm-dialog-confirm')?.addEventListener('click', submitInvoice);
+
+      // Close on overlay click
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal();
+      });
+
+      // Close on Escape
+      const escHandler = (e: KeyboardEvent): void => {
+        if (e.key === 'Escape') {
+          closeModal();
+          document.removeEventListener('keydown', escHandler);
+        }
+      };
+      document.addEventListener('keydown', escHandler);
+    };
+
+    // Initial render
+    renderModal();
+    document.body.appendChild(overlay);
+
+    // Focus first input
+    setTimeout(() => {
+      const firstInput = overlay.querySelector('.line-item-desc') as HTMLInputElement;
+      firstInput?.focus();
+    }, 100);
+  }
+
+  /**
+   * Create invoice with multiple line items
+   */
+  private async createInvoiceWithLineItems(
+    clientId: number,
+    lineItems: { description: string; quantity: number; rate: number }[]
+  ): Promise<void> {
+    if (!this.currentProjectId) return;
+
+    if (!AdminAuth.isAuthenticated()) return;
+
+    try {
+      const response = await apiPost('/api/invoices', {
+        projectId: this.currentProjectId,
+        clientId,
+        lineItems: lineItems.map(item => ({
+          description: item.description,
+          quantity: item.quantity,
+          rate: item.rate,
+          amount: item.quantity * item.rate
+        })),
+        notes: '',
+        terms: 'Payment due within 30 days'
+      });
+
+      if (response.ok) {
+        alertSuccess('Invoice created successfully!');
+        this.loadProjectInvoices(this.currentProjectId);
+      } else {
+        alertError('Failed to create invoice. Please try again.');
+      }
+    } catch (error) {
+      console.error('[AdminProjectDetails] Error creating invoice:', error);
+      alertError('Failed to create invoice. Please try again.');
+    }
+  }
+
+  /**
+   * Create a deposit invoice for the current project
+   */
+  private async createDepositInvoice(
+    clientId: number,
+    description: string,
+    amount: number,
+    percentage?: number
+  ): Promise<void> {
+    if (!this.currentProjectId) return;
+
+    if (!AdminAuth.isAuthenticated()) return;
+
+    try {
+      const response = await apiPost('/api/invoices/deposit', {
+        projectId: this.currentProjectId,
+        clientId,
+        amount,
+        percentage,
+        description
+      });
+
+      if (response.ok) {
+        alertSuccess('Deposit invoice created successfully!');
+        this.loadProjectInvoices(this.currentProjectId);
+      } else {
+        alertError('Failed to create deposit invoice. Please try again.');
+      }
+    } catch (error) {
+      console.error('[AdminProjectDetails] Error creating deposit invoice:', error);
+      alertError('Failed to create deposit invoice. Please try again.');
+    }
+  }
+
+  /**
+   * Edit a draft invoice (exposed globally for onclick)
+   */
+  public async editInvoice(invoiceId: number): Promise<void> {
+    console.log('[EditInvoice] Called with invoiceId:', invoiceId);
+    if (!AdminAuth.isAuthenticated()) {
+      console.log('[EditInvoice] Not authenticated');
       return;
     }
 
-    this.createInvoice(project.client_id, result.description, amount);
+    try {
+      // Fetch current invoice data
+      console.log('[EditInvoice] Fetching invoice data...');
+      const response = await apiFetch(`/api/invoices/${invoiceId}`);
+      console.log('[EditInvoice] Response status:', response.status, response.ok);
+      if (!response.ok) {
+        alertError('Failed to load invoice');
+        return;
+      }
+
+      const data = await response.json();
+      console.log('[EditInvoice] Invoice data:', data);
+      const invoice = data.invoice;
+
+      if (invoice.status !== 'draft') {
+        alertWarning('Only draft invoices can be edited');
+        return;
+      }
+
+      // Get current line item (backend returns camelCase)
+      const lineItems = invoice.lineItems || [];
+      const firstItem = lineItems[0] || { description: '', amount: 0 };
+
+      const result = await multiPromptDialog({
+        title: 'Edit Invoice',
+        fields: [
+          {
+            name: 'description',
+            label: 'Line Item Description',
+            type: 'text',
+            defaultValue: firstItem.description || '',
+            required: true
+          },
+          {
+            name: 'amount',
+            label: 'Amount ($)',
+            type: 'number',
+            defaultValue: String(firstItem.amount || 0),
+            placeholder: 'Enter amount',
+            required: true
+          },
+          {
+            name: 'notes',
+            label: 'Notes (optional)',
+            type: 'textarea',
+            defaultValue: invoice.notes || ''
+          }
+        ],
+        confirmText: 'Save Changes',
+        cancelText: 'Cancel'
+      });
+
+      if (!result) return;
+
+      const amount = parseFloat(result.amount);
+      if (isNaN(amount) || amount <= 0) {
+        alertWarning('Please enter a valid amount');
+        return;
+      }
+
+      const updateResponse = await apiPut(`/api/invoices/${invoiceId}`, {
+        lineItems: [{
+          description: result.description,
+          quantity: 1,
+          rate: amount,
+          amount
+        }],
+        notes: result.notes || ''
+      });
+
+      if (updateResponse.ok) {
+        alertSuccess('Invoice updated successfully!');
+        if (this.currentProjectId) {
+          this.loadProjectInvoices(this.currentProjectId);
+        }
+      } else {
+        alertError('Failed to update invoice');
+      }
+    } catch (error) {
+      console.error('[AdminProjectDetails] Error editing invoice:', error);
+      alertError('Error editing invoice');
+    }
+  }
+
+  /**
+   * Show prompt to apply deposit credit to an invoice (exposed globally for onclick)
+   */
+  public async showApplyCreditPrompt(invoiceId: number): Promise<void> {
+    if (!this.currentProjectId || !AdminAuth.isAuthenticated()) return;
+
+    try {
+      // Fetch available deposits for this project
+      const depositsResponse = await apiFetch(`/api/invoices/deposits/${this.currentProjectId}`);
+      if (!depositsResponse.ok) {
+        alertError('Failed to load available deposits');
+        return;
+      }
+
+      const depositsData = await depositsResponse.json();
+      const deposits = depositsData.deposits || [];
+
+      if (deposits.length === 0) {
+        alertWarning('No paid deposits available to apply as credit');
+        return;
+      }
+
+      // Build options for deposit selection
+      const depositOptions = deposits.map((d: { invoice_id: number; invoice_number: string; available_amount: number }) => ({
+        value: String(d.invoice_id),
+        label: `${d.invoice_number} - $${d.available_amount.toFixed(2)} available`
+      }));
+
+      const result = await multiPromptDialog({
+        title: 'Apply Deposit Credit',
+        fields: [
+          {
+            name: 'depositInvoiceId',
+            label: 'Select Deposit',
+            type: 'select',
+            options: depositOptions,
+            required: true
+          },
+          {
+            name: 'amount',
+            label: 'Credit Amount ($)',
+            type: 'number',
+            defaultValue: String(deposits[0]?.available_amount || 0),
+            placeholder: 'Enter credit amount',
+            required: true
+          }
+        ],
+        confirmText: 'Apply Credit',
+        cancelText: 'Cancel'
+      });
+
+      if (!result) return;
+
+      const amount = parseFloat(result.amount);
+      if (isNaN(amount) || amount <= 0) {
+        alertWarning('Please enter a valid amount');
+        return;
+      }
+
+      // Find the selected deposit to verify amount
+      const selectedDeposit = deposits.find((d: { invoice_id: number }) => String(d.invoice_id) === result.depositInvoiceId);
+      if (selectedDeposit && amount > selectedDeposit.available_amount) {
+        alertWarning(`Amount exceeds available credit ($${selectedDeposit.available_amount.toFixed(2)})`);
+        return;
+      }
+
+      const creditResponse = await apiPost(`/api/invoices/${invoiceId}/apply-credit`, {
+        depositInvoiceId: parseInt(result.depositInvoiceId),
+        amount
+      });
+
+      if (creditResponse.ok) {
+        alertSuccess('Credit applied successfully!');
+        this.loadProjectInvoices(this.currentProjectId!);
+      } else {
+        const errorData = await creditResponse.json();
+        alertError(errorData.error || 'Failed to apply credit');
+      }
+    } catch (error) {
+      console.error('[AdminProjectDetails] Error applying credit:', error);
+      alertError('Error applying credit');
+    }
   }
 
   /**
@@ -1384,9 +1881,14 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
    * Send an invoice to the client (exposed globally for onclick)
    */
   public async sendInvoice(invoiceId: number): Promise<void> {
-    if (!AdminAuth.isAuthenticated()) return;
+    console.log('[SendInvoice] Called with invoiceId:', invoiceId);
+    if (!AdminAuth.isAuthenticated()) {
+      console.log('[SendInvoice] Not authenticated');
+      return;
+    }
 
     try {
+      console.log('[SendInvoice] Sending request...');
       const response = await apiPost(`/api/invoices/${invoiceId}/send`);
 
       if (response.ok) {
@@ -1433,7 +1935,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     if (!AdminAuth.isAuthenticated()) return;
 
     try {
-      const response = await apiPost(`/api/invoices/${invoiceId}/remind`);
+      const response = await apiPost(`/api/invoices/${invoiceId}/send-reminder`);
 
       if (response.ok) {
         alertSuccess('Payment reminder sent!');
@@ -1443,6 +1945,143 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     } catch (error) {
       console.error('[AdminProjectDetails] Error sending reminder:', error);
       alertError('Error sending reminder');
+    }
+  }
+
+  /**
+   * Duplicate an invoice (creates a new draft copy)
+   */
+  public async duplicateInvoice(invoiceId: number): Promise<void> {
+    if (!AdminAuth.isAuthenticated()) return;
+
+    const confirmed = await confirmDialog({
+      title: 'Duplicate Invoice',
+      message: 'This will create a new draft invoice as a copy. Continue?',
+      confirmText: 'Duplicate',
+      cancelText: 'Cancel',
+      icon: 'info'
+    });
+
+    if (!confirmed) return;
+
+    try {
+      const response = await apiPost(`/api/invoices/${invoiceId}/duplicate`);
+
+      if (response.ok) {
+        alertSuccess('Invoice duplicated successfully');
+        this.loadProjectInvoices(this.currentProjectId!);
+      } else {
+        alertError('Failed to duplicate invoice');
+      }
+    } catch (error) {
+      console.error('[AdminProjectDetails] Error duplicating invoice:', error);
+      alertError('Error duplicating invoice');
+    }
+  }
+
+  /**
+   * Delete or void an invoice
+   */
+  public async deleteInvoice(invoiceId: number): Promise<void> {
+    if (!AdminAuth.isAuthenticated()) return;
+
+    const confirmed = await confirmDanger(
+      'Draft invoices will be permanently deleted. Sent invoices will be voided (marked as cancelled). Continue?',
+      'Delete/Void',
+      'Delete Invoice'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`/api/invoices/${invoiceId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alertSuccess(data.action === 'deleted' ? 'Invoice deleted' : 'Invoice voided');
+        this.loadProjectInvoices(this.currentProjectId!);
+      } else {
+        const err = await response.json();
+        alertError(err.error || 'Failed to delete invoice');
+      }
+    } catch (error) {
+      console.error('[AdminProjectDetails] Error deleting invoice:', error);
+      alertError('Error deleting invoice');
+    }
+  }
+
+  /**
+   * Record a payment on an invoice
+   */
+  public async recordPayment(invoiceId: number): Promise<void> {
+    if (!AdminAuth.isAuthenticated()) return;
+
+    const result = await multiPromptDialog({
+      title: 'Record Payment',
+      fields: [
+        {
+          name: 'amount',
+          label: 'Payment Amount ($)',
+          type: 'number',
+          required: true,
+          placeholder: '0.00'
+        },
+        {
+          name: 'paymentMethod',
+          label: 'Payment Method',
+          type: 'select',
+          options: [
+            { value: 'zelle', label: 'Zelle' },
+            { value: 'venmo', label: 'Venmo' },
+            { value: 'check', label: 'Check' },
+            { value: 'bank_transfer', label: 'Bank Transfer' },
+            { value: 'credit_card', label: 'Credit Card' },
+            { value: 'cash', label: 'Cash' },
+            { value: 'other', label: 'Other' }
+          ],
+          required: true
+        },
+        {
+          name: 'reference',
+          label: 'Reference/Transaction ID (optional)',
+          type: 'text',
+          placeholder: 'e.g., TXN-12345'
+        }
+      ]
+    });
+
+    if (!result) return;
+
+    const amount = parseFloat(result.amount);
+    if (isNaN(amount) || amount <= 0) {
+      alertError('Please enter a valid payment amount');
+      return;
+    }
+
+    try {
+      const response = await apiPost(`/api/invoices/${invoiceId}/record-payment`, {
+        amount,
+        paymentMethod: result.paymentMethod,
+        paymentReference: result.reference || undefined
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alertSuccess(data.message || 'Payment recorded');
+        this.loadProjectInvoices(this.currentProjectId!);
+      } else {
+        const err = await response.json();
+        alertError(err.error || 'Failed to record payment');
+      }
+    } catch (error) {
+      console.error('[AdminProjectDetails] Error recording payment:', error);
+      alertError('Error recording payment');
     }
   }
 

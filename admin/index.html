@@ -360,12 +360,25 @@
               <div class="admin-table-header">
                 <h3><span class="title-full">Intake Submissions</span><span class="title-mobile">Leads</span></h3>
                 <div class="admin-table-actions" id="leads-filter-container">
+                  <div class="leads-view-toggle" id="leads-view-toggle">
+                    <button class="active" data-view="table" title="Table View">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                      <span>Table</span>
+                    </button>
+                    <button data-view="pipeline" title="Pipeline View">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="18" rx="1"/><rect x="9" y="8" width="6" height="13" rx="1"/><rect x="15" y="5" width="6" height="16" rx="1"/></svg>
+                      <span>Pipeline</span>
+                    </button>
+                  </div>
                   <button class="icon-btn" id="refresh-leads-btn" title="Refresh">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
                   </button>
                 </div>
               </div>
-              <div class="admin-table-container leads-table-container">
+              <!-- Pipeline View Container -->
+              <div class="leads-pipeline-container hidden" id="leads-pipeline-container"></div>
+              <!-- Table View -->
+              <div class="admin-table-container leads-table-container" id="leads-table-view">
                 <table class="admin-table leads-table">
                   <thead>
                     <tr>
@@ -600,74 +613,126 @@
               </div>
             </div>
 
-            <!-- Client Projects -->
-            <div class="portal-project-card portal-shadow">
-              <h3>Client Projects</h3>
-              <div class="client-projects-list" id="cd-projects-list">
-                <p class="empty-state">No projects found for this client.</p>
+            <!-- Client Detail Tabs -->
+            <div class="client-detail-tabs" id="client-detail-tabs">
+              <button class="active" data-cd-tab="overview">Overview</button>
+              <button data-cd-tab="contacts">Contacts</button>
+              <button data-cd-tab="activity">Activity</button>
+              <button data-cd-tab="projects">Projects</button>
+              <button data-cd-tab="notes">Notes</button>
+            </div>
+
+            <!-- Overview Tab -->
+            <div class="client-detail-tab-content active" id="cd-tab-overview">
+              <!-- Health Score Section -->
+              <div class="portal-project-card portal-shadow">
+                <h3>Client Health</h3>
+                <div id="cd-health-score-container">
+                  <p class="empty-state">Loading health data...</p>
+                </div>
+              </div>
+
+              <!-- Tags Section -->
+              <div class="portal-project-card portal-shadow">
+                <div id="cd-tags-container">
+                  <p class="empty-state">Loading tags...</p>
+                </div>
+              </div>
+
+              <!-- Stats Section -->
+              <div class="portal-project-card portal-shadow">
+                <h3>Quick Stats</h3>
+                <div id="cd-stats-container">
+                  <p class="empty-state">Loading stats...</p>
+                </div>
+              </div>
+
+              <!-- Billing Details -->
+              <div class="portal-project-card portal-shadow">
+                <div class="card-header-with-action">
+                  <h3>Billing Details</h3>
+                  <button class="icon-btn" id="cd-btn-edit-billing" title="Edit Billing Details" aria-label="Edit billing details">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                  </button>
+                </div>
+                <div class="billing-info-grid">
+                  <div class="meta-item">
+                    <span class="field-label">Billing Name</span>
+                    <span class="meta-value" id="cd-billing-name">-</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">Billing Email</span>
+                    <span class="meta-value" id="cd-billing-email">-</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">Address</span>
+                    <span class="meta-value" id="cd-billing-address">-</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">City</span>
+                    <span class="meta-value" id="cd-billing-city">-</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">State/Province</span>
+                    <span class="meta-value" id="cd-billing-state">-</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">ZIP/Postal Code</span>
+                    <span class="meta-value" id="cd-billing-zip">-</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">Country</span>
+                    <span class="meta-value" id="cd-billing-country">-</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Invoices Summary -->
+              <div class="portal-project-card portal-shadow">
+                <h3>Invoices</h3>
+                <div class="billing-summary">
+                  <div class="meta-item">
+                    <span class="field-label">Total Invoiced</span>
+                    <span class="meta-value" id="cd-total-invoiced">$0.00</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">Total Paid</span>
+                    <span class="meta-value" id="cd-total-paid">$0.00</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">Outstanding</span>
+                    <span class="meta-value" id="cd-outstanding">$0.00</span>
+                  </div>
+                </div>
+                <div class="client-invoices-list" id="cd-invoices-list">
+                  <p class="empty-state">No invoices found for this client.</p>
+                </div>
               </div>
             </div>
 
-            <!-- Billing Details -->
-            <div class="portal-project-card portal-shadow">
-              <div class="card-header-with-action">
-                <h3>Billing Details</h3>
-                <button class="icon-btn" id="cd-btn-edit-billing" title="Edit Billing Details" aria-label="Edit billing details">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                </button>
-              </div>
-              <div class="billing-info-grid">
-                <div class="meta-item">
-                  <span class="field-label">Billing Name</span>
-                  <span class="meta-value" id="cd-billing-name">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Billing Email</span>
-                  <span class="meta-value" id="cd-billing-email">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Address</span>
-                  <span class="meta-value" id="cd-billing-address">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">City</span>
-                  <span class="meta-value" id="cd-billing-city">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">State/Province</span>
-                  <span class="meta-value" id="cd-billing-state">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">ZIP/Postal Code</span>
-                  <span class="meta-value" id="cd-billing-zip">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Country</span>
-                  <span class="meta-value" id="cd-billing-country">-</span>
+            <!-- Contacts Tab -->
+            <div class="client-detail-tab-content" id="cd-tab-contacts">
+              <p class="empty-state">Loading contacts...</p>
+            </div>
+
+            <!-- Activity Tab -->
+            <div class="client-detail-tab-content" id="cd-tab-activity">
+              <p class="empty-state">Loading activity...</p>
+            </div>
+
+            <!-- Projects Tab -->
+            <div class="client-detail-tab-content" id="cd-tab-projects">
+              <div class="portal-project-card portal-shadow">
+                <h3>Client Projects</h3>
+                <div class="client-projects-list" id="cd-projects-list">
+                  <p class="empty-state">No projects found for this client.</p>
                 </div>
               </div>
             </div>
 
-            <!-- Invoices -->
-            <div class="portal-project-card portal-shadow">
-              <h3>Invoices</h3>
-              <div class="billing-summary">
-                <div class="meta-item">
-                  <span class="field-label">Total Invoiced</span>
-                  <span class="meta-value" id="cd-total-invoiced">$0.00</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Total Paid</span>
-                  <span class="meta-value" id="cd-total-paid">$0.00</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Outstanding</span>
-                  <span class="meta-value" id="cd-outstanding">$0.00</span>
-                </div>
-              </div>
-              <div class="client-invoices-list" id="cd-invoices-list">
-                <p class="empty-state">No invoices found for this client.</p>
-              </div>
+            <!-- Notes Tab -->
+            <div class="client-detail-tab-content" id="cd-tab-notes">
+              <p class="empty-state">Loading notes...</p>
             </div>
 
             <!-- Account Actions -->
@@ -727,6 +792,20 @@
 
             <!-- Messages Container (like client portal) -->
             <div class="messages-container portal-shadow">
+              <!-- Messages Header with Search -->
+              <div class="messages-header" id="messages-header">
+                <div class="pinned-messages hidden" id="pinned-messages-section">
+                  <div class="pinned-messages-header">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M12 2L12 12M12 22L12 12M12 12L20 4M12 12L4 4"/></svg>
+                    <span>Pinned</span>
+                  </div>
+                  <div class="pinned-message-preview" id="pinned-message-preview"></div>
+                </div>
+                <div class="messages-search">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  <input type="text" id="messages-search-input" placeholder="Search messages..." aria-label="Search messages" />
+                </div>
+              </div>
               <div class="messages-thread" id="admin-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread">
                 <p class="empty-state">Select a client to view messages</p>
               </div>
@@ -756,6 +835,142 @@
               <h2>Analytics</h2>
             </div>
 
+            <!-- Business KPI Cards -->
+            <div class="kpi-cards-row" id="business-kpi-section">
+              <div class="kpi-card portal-shadow" id="kpi-revenue">
+                <div class="kpi-card-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                </div>
+                <div class="kpi-card-content">
+                  <span class="kpi-card-value" id="kpi-revenue-value">$0</span>
+                  <span class="kpi-card-label">Revenue MTD</span>
+                </div>
+                <div class="kpi-card-change" id="kpi-revenue-change">
+                  <span class="change-value">-</span>
+                  <span class="kpi-card-change-label">vs last month</span>
+                </div>
+              </div>
+              <div class="kpi-card portal-shadow" id="kpi-pipeline">
+                <div class="kpi-card-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                </div>
+                <div class="kpi-card-content">
+                  <span class="kpi-card-value" id="kpi-pipeline-value">$0</span>
+                  <span class="kpi-card-label">Pipeline Value</span>
+                </div>
+                <div class="kpi-card-change" id="kpi-pipeline-count">
+                  <span class="change-value">-</span>
+                  <span class="kpi-card-change-label">active leads</span>
+                </div>
+              </div>
+              <div class="kpi-card portal-shadow" id="kpi-projects">
+                <div class="kpi-card-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                </div>
+                <div class="kpi-card-content">
+                  <span class="kpi-card-value" id="kpi-projects-value">0</span>
+                  <span class="kpi-card-label">Active Projects</span>
+                </div>
+                <div class="kpi-card-change" id="kpi-projects-completion">
+                  <span class="change-value">-</span>
+                  <span class="kpi-card-change-label">avg completion</span>
+                </div>
+              </div>
+              <div class="kpi-card portal-shadow" id="kpi-invoices">
+                <div class="kpi-card-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                </div>
+                <div class="kpi-card-content">
+                  <span class="kpi-card-value" id="kpi-invoices-value">$0</span>
+                  <span class="kpi-card-label">Outstanding Invoices</span>
+                </div>
+                <div class="kpi-card-change" id="kpi-invoices-count">
+                  <span class="change-value">-</span>
+                  <span class="kpi-card-change-label">invoices pending</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Stats Section -->
+            <div class="analytics-section-header">
+              <h3>Business Metrics</h3>
+            </div>
+            <div class="business-charts-grid">
+              <div class="chart-container portal-shadow">
+                <h3>Revenue by Month</h3>
+                <div class="chart" id="revenue-chart-container">
+                  <canvas id="revenue-chart"></canvas>
+                </div>
+              </div>
+              <div class="chart-container portal-shadow">
+                <h3>Project Status</h3>
+                <div class="chart" id="project-status-chart-container">
+                  <canvas id="project-status-chart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lead Funnel -->
+            <div class="analytics-section portal-shadow" id="lead-funnel-section">
+              <h3>Lead Conversion Funnel</h3>
+              <div class="funnel-container" id="lead-funnel">
+                <div class="funnel-stage" data-stage="new">
+                  <span class="funnel-stage-value" id="funnel-new">0</span>
+                  <span class="funnel-stage-label">New Leads</span>
+                </div>
+                <div class="funnel-arrow">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </div>
+                <div class="funnel-stage" data-stage="contacted">
+                  <span class="funnel-stage-value" id="funnel-contacted">0</span>
+                  <span class="funnel-stage-label">Contacted</span>
+                </div>
+                <div class="funnel-arrow">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </div>
+                <div class="funnel-stage" data-stage="qualified">
+                  <span class="funnel-stage-value" id="funnel-qualified">0</span>
+                  <span class="funnel-stage-label">Qualified</span>
+                </div>
+                <div class="funnel-arrow">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </div>
+                <div class="funnel-stage" data-stage="proposal">
+                  <span class="funnel-stage-value" id="funnel-proposal">0</span>
+                  <span class="funnel-stage-label">Proposal Sent</span>
+                </div>
+                <div class="funnel-arrow">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </div>
+                <div class="funnel-stage funnel-stage-success" data-stage="won">
+                  <span class="funnel-stage-value" id="funnel-won">0</span>
+                  <span class="funnel-stage-label">Won</span>
+                </div>
+              </div>
+              <div class="funnel-stats" id="funnel-stats">
+                <span class="funnel-stat" id="funnel-conversion-rate">Conversion Rate: -</span>
+                <span class="funnel-stat" id="funnel-avg-value">Avg Deal Value: -</span>
+              </div>
+            </div>
+
+            <!-- Saved Reports Section -->
+            <div class="analytics-section portal-shadow" id="saved-reports-section">
+              <div class="section-header-with-actions">
+                <h3>Saved Reports</h3>
+                <button class="btn btn-secondary btn-sm" id="create-report-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  New Report
+                </button>
+              </div>
+              <div class="reports-list" id="saved-reports-list">
+                <div class="loading-text">Loading reports...</div>
+              </div>
+            </div>
+
+            <!-- Visitor Analytics Section -->
+            <div class="analytics-section-header">
+              <h3>Visitor Analytics</h3>
+            </div>
             <div class="quick-stats">
               <div class="stat-card portal-shadow">
                 <span class="stat-number" id="analytics-visitors">-</span>
@@ -1071,6 +1286,14 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
                 <span>Invoices</span>
               </button>
+              <button data-pd-tab="tasks">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <span>Tasks</span>
+              </button>
+              <button data-pd-tab="time">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>Time</span>
+              </button>
             </div>
 
             <!-- Overview Sub-Tab -->
@@ -1131,11 +1354,98 @@
                 </div>
               </div>
 
-              <!-- Files List -->
-              <div class="files-list-section portal-shadow">
-                <h3>Project Files</h3>
-                <div class="files-list" id="pd-files-list">
-                  <p class="empty-state">No files uploaded yet.</p>
+              <!-- Files Browser -->
+              <div class="files-browser portal-shadow">
+                <!-- Folder Tree Panel -->
+                <div class="folder-panel">
+                  <div class="folder-panel-header">
+                    <h4>Folders</h4>
+                    <button class="btn-icon" id="btn-create-folder" title="Create Folder">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>
+                    </button>
+                  </div>
+                  <div class="folder-tree" id="pd-folder-tree">
+                    <div class="folder-item root active" data-folder-id="root">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                      <span>All Files</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Files List Panel -->
+                <div class="files-panel">
+                  <div class="files-panel-header">
+                    <div class="files-path" id="pd-files-path">
+                      <span>All Files</span>
+                    </div>
+                    <div class="files-view-toggle">
+                      <button class="active" data-view="list" title="List View">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                      </button>
+                      <button data-view="grid" title="Grid View">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="files-list" id="pd-files-list">
+                    <p class="empty-state">No files uploaded yet.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- File Detail Modal -->
+              <div class="file-detail-modal hidden" id="file-detail-modal">
+                <div class="file-detail-content portal-shadow">
+                  <div class="file-detail-header">
+                    <h3 id="file-detail-name">File Name</h3>
+                    <button class="btn-icon close-modal" id="close-file-detail">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                  </div>
+                  <div class="file-detail-tabs">
+                    <button class="active" data-tab="info">Info</button>
+                    <button data-tab="versions">Versions</button>
+                    <button data-tab="comments">Comments</button>
+                    <button data-tab="access">Access Log</button>
+                  </div>
+                  <div class="file-detail-tab-content active" data-tab-content="info">
+                    <div class="file-info-grid" id="file-info-content">
+                      <!-- File info populated by JS -->
+                    </div>
+                  </div>
+                  <div class="file-detail-tab-content" data-tab-content="versions">
+                    <div class="file-versions-list" id="file-versions-list">
+                      <!-- Versions populated by JS -->
+                    </div>
+                  </div>
+                  <div class="file-detail-tab-content" data-tab-content="comments">
+                    <div class="file-comments-list" id="file-comments-list">
+                      <!-- Comments populated by JS -->
+                    </div>
+                    <div class="file-comment-form">
+                      <textarea id="file-comment-input" placeholder="Add a comment..." rows="2"></textarea>
+                      <button class="btn btn-secondary btn-sm" id="btn-add-file-comment">Add Comment</button>
+                    </div>
+                  </div>
+                  <div class="file-detail-tab-content" data-tab-content="access">
+                    <div class="file-access-log" id="file-access-log">
+                      <!-- Access log populated by JS -->
+                    </div>
+                  </div>
+                  <div class="file-detail-actions">
+                    <button class="btn btn-secondary" id="btn-download-file">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                      Download
+                    </button>
+                    <button class="btn btn-secondary" id="btn-lock-file">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                      Lock
+                    </button>
+                    <button class="btn btn-danger" id="btn-delete-file">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1188,6 +1498,57 @@
                 </div>
                 <div class="invoices-list" id="pd-invoices-list">
                   <p class="empty-state">No invoices created yet.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tasks Sub-Tab -->
+            <div id="pd-tab-tasks">
+              <div class="portal-project-card portal-shadow">
+                <div class="card-header-with-action">
+                  <h3>Tasks</h3>
+                  <div class="view-toggle-container">
+                    <div class="view-toggle" id="tasks-view-toggle">
+                      <button class="active" data-view="kanban">Board</button>
+                      <button data-view="list">List</button>
+                    </div>
+                    <button class="btn btn-secondary" id="btn-add-task">
+                      + Add Task
+                    </button>
+                  </div>
+                </div>
+                <div id="tasks-kanban-container"></div>
+                <div id="tasks-list-container" style="display: none;"></div>
+              </div>
+            </div>
+
+            <!-- Time Tracking Sub-Tab -->
+            <div id="pd-tab-time">
+              <div class="time-tracking-header">
+                <h3>Time Tracking</h3>
+                <div>
+                  <button class="btn btn-secondary" id="btn-log-time">
+                    + Log Time
+                  </button>
+                  <button class="btn btn-outline" id="btn-export-time">
+                    Export CSV
+                  </button>
+                </div>
+              </div>
+
+              <div class="time-tracking-summary" id="time-tracking-summary">
+                <!-- Summary cards rendered by JS -->
+              </div>
+
+              <div class="time-weekly-chart">
+                <h4>This Week</h4>
+                <div id="time-weekly-chart-container"></div>
+              </div>
+
+              <div class="portal-project-card portal-shadow">
+                <h3>Time Entries</h3>
+                <div id="time-entries-list">
+                  <p class="empty-state">No time entries yet.</p>
                 </div>
               </div>
             </div>

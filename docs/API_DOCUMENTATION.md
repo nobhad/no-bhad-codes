@@ -1495,6 +1495,1171 @@ curl https://nobhad.codes/api/messages/analytics \
 }
 ```
 
+## Invoice Endpoints
+
+The Invoice system handles billing, payments, deposits, and credits.
+
+### Invoice Types
+
+| Type | Description |
+|------|-------------|
+| `standard` | Regular invoice for services |
+| `deposit` | Upfront deposit payment |
+
+### Invoice Statuses
+
+| Status | Description |
+|--------|-------------|
+| `draft` | Not yet sent to client |
+| `sent` | Sent to client, awaiting payment |
+| `viewed` | Client has viewed the invoice |
+| `partial` | Partially paid |
+| `paid` | Fully paid |
+| `overdue` | Past due date |
+| `cancelled` | Invoice cancelled |
+
+### GET `/api/invoices/me`
+
+Get all invoices for the authenticated client with summary statistics.
+
+**Authentication:** Required (Client)
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "invoices": [
+    {
+      "id": 1,
+      "invoice_number": "INV-2026-001",
+      "client_id": 5,
+      "project_id": 1,
+      "amount_total": 2500.00,
+      "amount_paid": 0,
+      "status": "sent",
+      "invoice_type": "standard",
+      "due_date": "2026-02-28T00:00:00.000Z",
+      "created_at": "2026-01-30T10:00:00.000Z",
+      "project_name": "Website Redesign"
+    }
+  ],
+  "count": 1,
+  "summary": {
+    "totalOutstanding": 2500.00,
+    "totalPaid": 1500.00
+  }
+}
+```
+
+### GET `/api/invoices/:id`
+
+Get a specific invoice by ID.
+
+**Authentication:** Required
+
+### GET `/api/invoices/project/:projectId`
+
+Get all invoices for a specific project.
+
+**Authentication:** Required
+
+### POST `/api/invoices`
+
+Create a new standard invoice.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "projectId": 1,
+  "clientId": 5,
+  "lineItems": [
+    {
+      "description": "Website Design",
+      "quantity": 1,
+      "rate": 2500,
+      "amount": 2500
+    }
+  ],
+  "notes": "Payment due within 30 days",
+  "terms": "Net 30"
+}
+```
+
+### POST `/api/invoices/deposit`
+
+Create a deposit invoice for a project.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "projectId": 1,
+  "clientId": 5,
+  "amount": 1000,
+  "percentage": 50,
+  "description": "Project deposit"
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "success": true,
+  "message": "Deposit invoice created successfully",
+  "invoice": {
+    "id": 15,
+    "invoice_number": "INV-2026-015",
+    "invoice_type": "deposit",
+    "amount_total": 1000
+  }
+}
+```
+
+### PUT `/api/invoices/:id`
+
+Update a draft invoice (line items, notes).
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "lineItems": [
+    {
+      "description": "Updated service",
+      "quantity": 1,
+      "rate": 2500,
+      "amount": 2500
+    }
+  ],
+  "notes": "Updated notes"
+}
+```
+
+**Notes:**
+
+- Only draft invoices can be edited
+- Returns 400 error if invoice status is not 'draft'
+
+### PUT `/api/invoices/:id/status`
+
+Update invoice status.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "status": "paid",
+  "paymentData": {
+    "amountPaid": 2500,
+    "paymentMethod": "bank_transfer",
+    "paymentReference": "TXN-12345"
+  }
+}
+```
+
+### POST `/api/invoices/:id/send`
+
+Send invoice to client (triggers email notification).
+
+**Authentication:** Required (Admin)
+
+### GET `/api/invoices/deposits/:projectId`
+
+Get available deposits for a project (paid but not fully applied as credits).
+
+**Authentication:** Required
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "deposits": [
+    {
+      "invoice_id": 10,
+      "invoice_number": "INV-2026-010",
+      "total_amount": 1000,
+      "amount_applied": 500,
+      "available_amount": 500,
+      "paid_date": "2026-01-15T10:00:00Z"
+    }
+  ]
+}
+```
+
+### POST `/api/invoices/:id/apply-credit`
+
+Apply a deposit credit to an invoice.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "depositInvoiceId": 10,
+  "amount": 500
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Credit applied successfully"
+}
+```
+
+**Error Responses:**
+
+- `400` - Credit amount exceeds available balance
+- `404` - Invoice or deposit not found
+
+### GET `/api/invoices/:id/credits`
+
+Get credits applied to an invoice.
+
+**Authentication:** Required
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "credits": [
+    {
+      "id": 1,
+      "invoice_id": 15,
+      "deposit_invoice_id": 10,
+      "deposit_invoice_number": "INV-2026-010",
+      "amount": 500,
+      "applied_at": "2026-01-20T14:30:00Z"
+    }
+  ],
+  "totalCredits": 500
+}
+```
+
+### GET `/api/invoices/:id/pdf`
+
+Download or preview invoice as PDF.
+
+**Authentication:** Required
+
+**Query Parameters:**
+
+- `preview=true` - Opens inline in browser tab
+- `preview=false` (default) - Downloads as file attachment
+
+**Response:** PDF file with appropriate headers
+
+**PDF Features:**
+
+- For deposit invoices: Title shows "DEPOSIT INVOICE"
+- For invoices with applied credits: Shows credit line items and adjusted total
+
+---
+
+## Payment Plan Templates
+
+Payment plan templates allow creating reusable payment structures for projects.
+
+### GET `/api/invoices/payment-plans`
+
+Get all payment plan templates.
+
+**Authentication:** Required (Admin)
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "templates": [
+    {
+      "id": 1,
+      "name": "50/50 Split",
+      "description": "50% upfront, 50% on completion",
+      "payments": [
+        { "percentage": 50, "trigger": "upfront" },
+        { "percentage": 50, "trigger": "completion" }
+      ],
+      "isDefault": true,
+      "createdAt": "2026-01-15T10:00:00Z"
+    }
+  ]
+}
+```
+
+### POST `/api/invoices/payment-plans`
+
+Create a new payment plan template.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "name": "Custom 30/30/40 Split",
+  "description": "30% upfront, 30% at midpoint, 40% on completion",
+  "payments": [
+    { "percentage": 30, "trigger": "upfront" },
+    { "percentage": 30, "trigger": "midpoint" },
+    { "percentage": 40, "trigger": "completion" }
+  ],
+  "isDefault": false
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "success": true,
+  "message": "Payment plan template created",
+  "template": { "id": 6, ... }
+}
+```
+
+### DELETE `/api/invoices/payment-plans/:id`
+
+Delete a payment plan template.
+
+**Authentication:** Required (Admin)
+
+### POST `/api/invoices/generate-from-plan`
+
+Generate invoices from a payment plan template.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "projectId": 1,
+  "clientId": 5,
+  "templateId": 1,
+  "totalAmount": 5000
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "success": true,
+  "message": "Generated 2 invoices from payment plan",
+  "invoices": [
+    { "id": 15, "invoiceNumber": "INV-2026-015", "amountTotal": 2500 },
+    { "id": 16, "invoiceNumber": "INV-2026-016", "amountTotal": 2500 }
+  ]
+}
+```
+
+---
+
+## Milestone-Linked Invoices
+
+Link invoices to project milestones for better tracking.
+
+### POST `/api/invoices/milestone/:milestoneId`
+
+Create an invoice linked to a milestone.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "projectId": 1,
+  "clientId": 5,
+  "lineItems": [
+    { "description": "Design Phase Complete", "quantity": 1, "rate": 2000, "amount": 2000 }
+  ],
+  "notes": "Payment for design milestone"
+}
+```
+
+### GET `/api/invoices/milestone/:milestoneId`
+
+Get all invoices linked to a milestone.
+
+**Authentication:** Required
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "invoices": [
+    {
+      "id": 15,
+      "invoiceNumber": "INV-2026-015",
+      "milestoneId": 301,
+      "amountTotal": 2000,
+      "status": "sent"
+    }
+  ]
+}
+```
+
+### PUT `/api/invoices/:id/link-milestone`
+
+Link an existing invoice to a milestone.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "milestoneId": 301
+}
+```
+
+---
+
+## Invoice Scheduling
+
+Schedule invoices for future automatic generation.
+
+### POST `/api/invoices/schedule`
+
+Schedule a future invoice.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "projectId": 1,
+  "clientId": 5,
+  "scheduledDate": "2026-03-01",
+  "triggerType": "date",
+  "lineItems": [
+    { "description": "Monthly Maintenance", "quantity": 1, "rate": 500, "amount": 500 }
+  ],
+  "notes": "Scheduled maintenance invoice"
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "success": true,
+  "message": "Invoice scheduled successfully",
+  "scheduledInvoice": {
+    "id": 1,
+    "scheduledDate": "2026-03-01",
+    "status": "pending"
+  }
+}
+```
+
+### GET `/api/invoices/scheduled`
+
+Get all scheduled invoices.
+
+**Authentication:** Required (Admin)
+
+**Query Parameters:**
+
+- `projectId` (optional): Filter by project
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "scheduledInvoices": [
+    {
+      "id": 1,
+      "projectId": 1,
+      "clientId": 5,
+      "scheduledDate": "2026-03-01",
+      "triggerType": "date",
+      "status": "pending",
+      "lineItems": [...],
+      "createdAt": "2026-01-30T10:00:00Z"
+    }
+  ]
+}
+```
+
+### DELETE `/api/invoices/scheduled/:id`
+
+Cancel a scheduled invoice.
+
+**Authentication:** Required (Admin)
+
+---
+
+## Recurring Invoices
+
+Create recurring invoice patterns for retainers and maintenance plans.
+
+### POST `/api/invoices/recurring`
+
+Create a recurring invoice pattern.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "projectId": 1,
+  "clientId": 5,
+  "frequency": "monthly",
+  "dayOfMonth": 1,
+  "lineItems": [
+    { "description": "Monthly Hosting & Maintenance", "quantity": 1, "rate": 150, "amount": 150 }
+  ],
+  "startDate": "2026-02-01",
+  "endDate": "2026-12-31",
+  "notes": "Monthly maintenance invoice"
+}
+```
+
+**Frequency Options:** `weekly`, `monthly`, `quarterly`
+
+**Response (201 Created):**
+
+```json
+{
+  "success": true,
+  "message": "Recurring invoice created",
+  "recurringInvoice": {
+    "id": 1,
+    "frequency": "monthly",
+    "nextGenerationDate": "2026-02-01",
+    "isActive": true
+  }
+}
+```
+
+### GET `/api/invoices/recurring`
+
+Get all recurring invoice patterns.
+
+**Authentication:** Required (Admin)
+
+**Query Parameters:**
+
+- `projectId` (optional): Filter by project
+
+### PUT `/api/invoices/recurring/:id`
+
+Update a recurring invoice pattern.
+
+**Authentication:** Required (Admin)
+
+### POST `/api/invoices/recurring/:id/pause`
+
+Pause a recurring invoice.
+
+**Authentication:** Required (Admin)
+
+### POST `/api/invoices/recurring/:id/resume`
+
+Resume a paused recurring invoice.
+
+**Authentication:** Required (Admin)
+
+### DELETE `/api/invoices/recurring/:id`
+
+Delete a recurring invoice pattern.
+
+**Authentication:** Required (Admin)
+
+---
+
+## Payment Reminders
+
+Automated payment reminder system for overdue invoices.
+
+### GET `/api/invoices/:id/reminders`
+
+Get all scheduled reminders for an invoice.
+
+**Authentication:** Required
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "reminders": [
+    {
+      "id": 1,
+      "invoiceId": 15,
+      "reminderType": "upcoming",
+      "scheduledDate": "2026-02-25",
+      "status": "pending",
+      "sentAt": null
+    },
+    {
+      "id": 2,
+      "invoiceId": 15,
+      "reminderType": "due",
+      "scheduledDate": "2026-02-28",
+      "status": "pending",
+      "sentAt": null
+    }
+  ]
+}
+```
+
+**Reminder Types:**
+
+| Type | Description |
+|------|-------------|
+| `upcoming` | 3 days before due date |
+| `due` | On due date |
+| `overdue_3` | 3 days overdue |
+| `overdue_7` | 7 days overdue |
+| `overdue_14` | 14 days overdue |
+| `overdue_30` | 30 days overdue |
+
+### POST `/api/invoices/reminders/:id/skip`
+
+Skip a scheduled reminder.
+
+**Authentication:** Required (Admin)
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Reminder skipped"
+}
+```
+
+---
+
+## Additional Invoice Management
+
+### DELETE `/api/invoices/:id`
+
+Delete or void an invoice.
+
+**Authentication:** Required (Admin)
+
+**Behavior:**
+
+- Draft/Cancelled invoices are permanently deleted
+- Sent/Viewed/Partial/Overdue invoices are voided (status changed to cancelled)
+- Paid invoices cannot be deleted or voided
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Invoice deleted successfully",
+  "action": "deleted"
+}
+```
+
+### POST `/api/invoices/:id/duplicate`
+
+Create a copy of an existing invoice as a new draft.
+
+**Authentication:** Required (Admin)
+
+**Response (201 Created):**
+
+```json
+{
+  "success": true,
+  "message": "Invoice duplicated successfully",
+  "invoice": { "id": 20, "invoice_number": "INV-202602-123456", "status": "draft" }
+}
+```
+
+### POST `/api/invoices/:id/record-payment`
+
+Record a partial or full payment on an invoice.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "amount": 500.00,
+  "paymentMethod": "zelle",
+  "paymentReference": "TXN-12345"
+}
+```
+
+**Payment Methods:** `zelle`, `venmo`, `check`, `bank_transfer`, `credit_card`, `cash`, `other`
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Partial payment recorded successfully",
+  "invoice": { "status": "partial", "amount_paid": 500.00 }
+}
+```
+
+### POST `/api/invoices/:id/send-reminder`
+
+Manually send a payment reminder email for an outstanding invoice.
+
+**Authentication:** Required (Admin)
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Payment reminder sent successfully",
+  "sentTo": "client@example.com"
+}
+```
+
+### GET `/api/invoices/search`
+
+Search invoices with filters and pagination.
+
+**Authentication:** Required (Admin)
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `clientId` | number | Filter by client |
+| `projectId` | number | Filter by project |
+| `status` | string | Filter by status (comma-separated for multiple) |
+| `invoiceType` | string | `standard` or `deposit` |
+| `search` | string | Search in invoice number and notes |
+| `dateFrom` | date | Filter by issue date (from) |
+| `dateTo` | date | Filter by issue date (to) |
+| `dueDateFrom` | date | Filter by due date (from) |
+| `dueDateTo` | date | Filter by due date (to) |
+| `minAmount` | number | Minimum amount |
+| `maxAmount` | number | Maximum amount |
+| `limit` | number | Results per page (default: 50) |
+| `offset` | number | Pagination offset |
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "invoices": [],
+  "total": 150,
+  "limit": 50,
+  "offset": 0
+}
+```
+
+### POST `/api/invoices/check-overdue`
+
+Manually trigger the overdue invoice check (also runs automatically via scheduler daily).
+
+**Authentication:** Required (Admin)
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Marked 3 invoice(s) as overdue",
+  "count": 3
+}
+```
+
+---
+
+## Advanced Invoice Features
+
+### Payment Terms Presets
+
+#### GET `/api/invoices/payment-terms`
+
+Get all payment terms presets (Net 15, Net 30, etc.).
+
+**Authentication:** Required
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "terms": [
+    {
+      "id": 4,
+      "name": "Net 30",
+      "days_until_due": 30,
+      "description": "Payment due within 30 days",
+      "late_fee_rate": 1.5,
+      "late_fee_type": "percentage",
+      "grace_period_days": 0,
+      "is_default": true
+    }
+  ]
+}
+```
+
+#### POST `/api/invoices/payment-terms`
+
+Create a custom payment terms preset.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "name": "Net 45",
+  "daysUntilDue": 45,
+  "description": "Payment due within 45 days",
+  "lateFeeRate": 2.0,
+  "lateFeeType": "percentage"
+}
+```
+
+#### POST `/api/invoices/:id/apply-terms`
+
+Apply payment terms to an invoice.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "termsId": 4
+}
+```
+
+### Tax and Discounts
+
+#### PUT `/api/invoices/:id/tax-discount`
+
+Update invoice tax rate and/or discount.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "taxRate": 8.25,
+  "discountType": "percentage",
+  "discountValue": 10
+}
+```
+
+**Notes:**
+
+- Only draft invoices can have tax/discount modified
+- `discountType` can be "percentage" or "fixed"
+- System calculates subtotal, tax amount, discount amount, and new total
+
+### Late Fees
+
+#### GET `/api/invoices/:id/late-fee`
+
+Calculate potential late fee for an invoice.
+
+**Authentication:** Required
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "invoiceId": 15,
+  "lateFee": 37.50,
+  "alreadyApplied": false,
+  "lateFeeAppliedAt": null
+}
+```
+
+#### POST `/api/invoices/:id/apply-late-fee`
+
+Apply late fee to an overdue invoice.
+
+**Authentication:** Required (Admin)
+
+**Notes:**
+
+- Late fee is added to invoice total
+- Cannot apply twice to the same invoice
+- Late fee type options: "flat", "percentage", "daily_percentage"
+
+#### POST `/api/invoices/process-late-fees`
+
+Apply late fees to all eligible overdue invoices.
+
+**Authentication:** Required (Admin)
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Late fees applied to 5 invoices",
+  "count": 5
+}
+```
+
+### Payment History
+
+#### GET `/api/invoices/:id/payments`
+
+Get payment history for an invoice.
+
+**Authentication:** Required
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "payments": [
+    {
+      "id": 1,
+      "invoice_id": 15,
+      "amount": 500.00,
+      "payment_method": "bank_transfer",
+      "payment_reference": "TXN-12345",
+      "payment_date": "2026-01-20",
+      "notes": "Partial payment",
+      "created_at": "2026-01-20T14:30:00Z"
+    }
+  ]
+}
+```
+
+#### POST `/api/invoices/:id/record-payment-with-history`
+
+Record a payment and add to payment history.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "amount": 500,
+  "paymentMethod": "bank_transfer",
+  "paymentReference": "TXN-12345",
+  "notes": "Partial payment received"
+}
+```
+
+#### GET `/api/invoices/all-payments`
+
+Get all payments across all invoices for reports.
+
+**Authentication:** Required (Admin)
+
+**Query Parameters:**
+
+- `dateFrom` - Filter payments from this date
+- `dateTo` - Filter payments up to this date
+
+### Accounts Receivable Aging
+
+#### GET `/api/invoices/aging-report`
+
+Generate an A/R aging report.
+
+**Authentication:** Required (Admin)
+
+**Query Parameters:**
+
+- `clientId` - Filter by client (optional)
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "report": {
+    "generated_at": "2026-02-01",
+    "total_outstanding": 15000.00,
+    "buckets": [
+      {
+        "bucket": "current",
+        "count": 5,
+        "total_amount": 5000.00,
+        "invoices": []
+      },
+      {
+        "bucket": "1-30",
+        "count": 3,
+        "total_amount": 4500.00,
+        "invoices": []
+      },
+      {
+        "bucket": "31-60",
+        "count": 2,
+        "total_amount": 3000.00,
+        "invoices": []
+      },
+      {
+        "bucket": "61-90",
+        "count": 1,
+        "total_amount": 1500.00,
+        "invoices": []
+      },
+      {
+        "bucket": "90+",
+        "count": 1,
+        "total_amount": 1000.00,
+        "invoices": []
+      }
+    ]
+  }
+}
+```
+
+### Internal Notes
+
+#### PUT `/api/invoices/:id/internal-notes`
+
+Update internal notes (admin-only, not visible to clients).
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "internalNotes": "Client requested NET 45. Approved by manager."
+}
+```
+
+### Comprehensive Statistics
+
+#### GET `/api/invoices/comprehensive-stats`
+
+Get comprehensive invoice statistics and analytics.
+
+**Authentication:** Required (Admin)
+
+**Query Parameters:**
+
+- `dateFrom` - Filter from this date
+- `dateTo` - Filter to this date
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "stats": {
+    "total_invoices": 150,
+    "total_revenue": 125000.00,
+    "total_outstanding": 15000.00,
+    "total_overdue": 3500.00,
+    "average_invoice_amount": 833.33,
+    "average_days_to_payment": 18.5,
+    "status_breakdown": {
+      "draft": 5,
+      "sent": 10,
+      "viewed": 3,
+      "partial": 2,
+      "paid": 125,
+      "overdue": 4,
+      "cancelled": 1
+    },
+    "monthly_revenue": [
+      {"month": "2026-02", "revenue": 12500.00, "count": 15},
+      {"month": "2026-01", "revenue": 18000.00, "count": 22}
+    ]
+  }
+}
+```
+
+### Custom Invoice Numbers
+
+#### POST `/api/invoices/with-custom-number`
+
+Create invoice with custom number prefix.
+
+**Authentication:** Required (Admin)
+
+**Request:**
+
+```json
+{
+  "prefix": "WEB",
+  "projectId": 1,
+  "clientId": 5,
+  "lineItems": [
+    {
+      "description": "Website Design",
+      "quantity": 1,
+      "rate": 2500,
+      "amount": 2500
+    }
+  ]
+}
+```
+
+**Response:**
+
+Invoice created with number like "WEB-202602-0001".
+
+---
+
+## Scheduler Service
+
+The scheduler service runs automated tasks for invoice reminders and recurring invoice generation.
+
+**Configuration (Environment Variables):**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SCHEDULER_ENABLED` | `true` | Enable/disable scheduler |
+| `SCHEDULER_REMINDERS` | `true` | Enable payment reminders |
+| `SCHEDULER_SCHEDULED` | `true` | Enable scheduled invoice generation |
+| `SCHEDULER_RECURRING` | `true` | Enable recurring invoice generation |
+
+**Schedule:**
+
+- **Reminder checks:** Every hour at :00
+- **Invoice generation:** Daily at 1:00 AM
+
+**Reminder Email Sequence:**
+
+When an invoice is sent, reminders are automatically scheduled:
+
+1. 3 days before due date - "Payment Reminder"
+2. On due date - "Payment Due Today"
+3. 3 days overdue - "Payment Overdue"
+4. 7 days overdue - "URGENT: Payment Overdue"
+5. 14 days overdue - "FINAL NOTICE"
+6. 30 days overdue - "COLLECTION NOTICE"
+
+---
+
 ## Proposal Builder Endpoints
 
 The Proposal Builder system allows clients to create tiered proposals after completing the intake form. Admins can review, approve, reject, or convert proposals to invoices.

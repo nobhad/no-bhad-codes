@@ -16,6 +16,7 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
+import { proposalService } from '../services/proposal-service.js';
 
 // Business info from environment variables
 const BUSINESS_INFO = {
@@ -685,36 +686,33 @@ router.get(
     // Start from top - template uses 0.6 inch from top
     let y = height - 43;
 
-    // === HEADER - Logo on left, business info next to it, PROPOSAL title on right ===
+    // === HEADER - Title on left, logo and business info on right ===
     const logoPath = join(process.cwd(), 'public/images/avatar_pdf.png');
-    let textStartX = leftMargin;
-    const logoHeight = 75; // ~1 inch, 50% larger for better visibility
+    const logoHeight = 100; // ~1.4 inch for prominent branding
 
+    // PROPOSAL title on left: 28pt
+    const titleText = 'PROPOSAL';
+    page.drawText(titleText, { x: leftMargin, y: y - 20, size: 28, font: helveticaBold, color: rgb(0.15, 0.15, 0.15) });
+
+    // Logo and business info on right (logo left of text, text left-aligned)
+    let textStartX = rightMargin - 180;
     if (existsSync(logoPath)) {
       const logoBytes = readFileSync(logoPath);
       const logoImage = await pdfDoc.embedPng(logoBytes);
       const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
-      page.drawImage(logoImage, { x: leftMargin, y: y - logoHeight, width: logoWidth, height: logoHeight });
-      textStartX = leftMargin + logoWidth + 18;
+      const logoX = rightMargin - logoWidth - 150;
+      page.drawImage(logoImage, { x: logoX, y: y - logoHeight + 10, width: logoWidth, height: logoHeight });
+      textStartX = logoX + logoWidth + 18;
     }
 
-    // Business name: 16pt
-    page.drawText(BUSINESS_INFO.name, { x: textStartX, y: y, size: 16, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
-    // Owner: 10pt - scaled spacing for 75pt logo
-    page.drawText(BUSINESS_INFO.owner, { x: textStartX, y: y - 20, size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2) });
-    // Tagline: 9pt
-    page.drawText(BUSINESS_INFO.tagline, { x: textStartX, y: y - 36, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
-    // Email: 9pt
-    page.drawText(BUSINESS_INFO.email, { x: textStartX, y: y - 50, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
-    // Website: 9pt
-    page.drawText(BUSINESS_INFO.website, { x: textStartX, y: y - 64, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    // Business info (left-aligned, to right of logo)
+    page.drawText(BUSINESS_INFO.name, { x: textStartX, y: y - 11, size: 15, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
+    page.drawText(BUSINESS_INFO.owner, { x: textStartX, y: y - 34, size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2) });
+    page.drawText(BUSINESS_INFO.tagline, { x: textStartX, y: y - 54, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    page.drawText(BUSINESS_INFO.email, { x: textStartX, y: y - 70, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    page.drawText(BUSINESS_INFO.website, { x: textStartX, y: y - 86, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
 
-    // PROPOSAL title: 28pt, right-aligned, vertically centered with logo
-    const titleText = 'PROPOSAL';
-    const titleWidth = helveticaBold.widthOfTextAtSize(titleText, 28);
-    page.drawText(titleText, { x: rightMargin - titleWidth, y: y - 25, size: 28, font: helveticaBold, color: rgb(0.15, 0.15, 0.15) });
-
-    y -= 95; // Account for 75pt logo height
+    y -= 120; // Account for 100pt logo height
 
     // Divider line
     page.drawLine({ start: { x: leftMargin, y: y }, end: { x: rightMargin, y: y }, thickness: 1, color: rgb(0.7, 0.7, 0.7) });
@@ -849,6 +847,468 @@ router.get(
     res.setHeader('Content-Disposition', `attachment; filename="proposal-${projectName}-${id}.pdf"`);
     res.setHeader('Content-Length', pdfBytes.length);
     res.send(Buffer.from(pdfBytes));
+  })
+);
+
+// ===================================
+// TEMPLATE ENDPOINTS
+// ===================================
+
+// Get all templates
+router.get(
+  '/templates',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { projectType } = req.query;
+    const templates = await proposalService.getTemplates(projectType as string | undefined);
+    res.json({ success: true, templates });
+  })
+);
+
+// Get single template
+router.get(
+  '/templates/:templateId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const templateId = parseInt(req.params.templateId);
+    const template = await proposalService.getTemplate(templateId);
+    res.json({ success: true, template });
+  })
+);
+
+// Create template
+router.post(
+  '/templates',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).json({ success: false, message: 'Template name is required' });
+    }
+    const template = await proposalService.createTemplate(req.body);
+    res.status(201).json({ success: true, message: 'Template created successfully', template });
+  })
+);
+
+// Update template
+router.put(
+  '/templates/:templateId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const templateId = parseInt(req.params.templateId);
+    const template = await proposalService.updateTemplate(templateId, req.body);
+    res.json({ success: true, message: 'Template updated successfully', template });
+  })
+);
+
+// Delete template
+router.delete(
+  '/templates/:templateId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const templateId = parseInt(req.params.templateId);
+    await proposalService.deleteTemplate(templateId);
+    res.json({ success: true, message: 'Template deleted successfully' });
+  })
+);
+
+// ===================================
+// VERSIONING ENDPOINTS
+// ===================================
+
+// Get versions for a proposal
+router.get(
+  '/:id/versions',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    const versions = await proposalService.getVersions(proposalId);
+    res.json({ success: true, versions });
+  })
+);
+
+// Create a new version
+router.post(
+  '/:id/versions',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    const { notes } = req.body;
+    const version = await proposalService.createVersion(proposalId, req.user?.email, notes);
+    res.status(201).json({ success: true, message: 'Version created successfully', version });
+  })
+);
+
+// Restore a version
+router.post(
+  '/:id/versions/:versionId/restore',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    const versionId = parseInt(req.params.versionId);
+    await proposalService.restoreVersion(proposalId, versionId);
+    res.json({ success: true, message: 'Version restored successfully' });
+  })
+);
+
+// Compare two versions
+router.get(
+  '/versions/compare',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { version1, version2 } = req.query;
+    if (!version1 || !version2) {
+      return res.status(400).json({ success: false, message: 'version1 and version2 query params required' });
+    }
+    const comparison = await proposalService.compareVersions(
+      parseInt(version1 as string),
+      parseInt(version2 as string)
+    );
+    res.json({ success: true, comparison });
+  })
+);
+
+// ===================================
+// E-SIGNATURE ENDPOINTS
+// ===================================
+
+// Request a signature
+router.post(
+  '/:id/request-signature',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    const { signerEmail, signerName, expiresInDays } = req.body;
+    if (!signerEmail) {
+      return res.status(400).json({ success: false, message: 'signerEmail is required' });
+    }
+    const request = await proposalService.requestSignature(proposalId, signerEmail, signerName, expiresInDays);
+    res.status(201).json({ success: true, message: 'Signature requested successfully', request });
+  })
+);
+
+// Record a signature
+router.post(
+  '/:id/sign',
+  asyncHandler(async (req: Request, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    const signatureData = req.body;
+    if (!signatureData.signerName || !signatureData.signerEmail || !signatureData.signatureData) {
+      return res.status(400).json({ success: false, message: 'signerName, signerEmail, and signatureData are required' });
+    }
+    // Add IP and user agent
+    signatureData.ipAddress = req.ip;
+    signatureData.userAgent = req.get('User-Agent');
+    const signature = await proposalService.recordSignature(proposalId, signatureData);
+    res.status(201).json({ success: true, message: 'Proposal signed successfully', signature });
+  })
+);
+
+// Get signature status
+router.get(
+  '/:id/signature-status',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    const status = await proposalService.getSignatureStatus(proposalId);
+    res.json({ success: true, ...status });
+  })
+);
+
+// Get signature by token (public)
+router.get(
+  '/sign/:token',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { token } = req.params;
+    const request = await proposalService.getSignatureRequestByToken(token);
+    if (!request) {
+      return res.status(404).json({ success: false, message: 'Invalid or expired signature request' });
+    }
+    // Mark as viewed
+    await proposalService.markSignatureViewed(token);
+    res.json({ success: true, request });
+  })
+);
+
+// Decline signature
+router.post(
+  '/sign/:token/decline',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { token } = req.params;
+    const { reason } = req.body;
+    await proposalService.declineSignature(token, reason);
+    res.json({ success: true, message: 'Signature declined' });
+  })
+);
+
+// ===================================
+// COMMENT ENDPOINTS
+// ===================================
+
+// Get comments for a proposal
+router.get(
+  '/:id/comments',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    const includeInternal = req.user!.type === 'admin' && req.query.includeInternal === 'true';
+    const comments = await proposalService.getComments(proposalId, includeInternal);
+    res.json({ success: true, comments });
+  })
+);
+
+// Add comment
+router.post(
+  '/:id/comments',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    const { content, isInternal, parentCommentId } = req.body;
+    if (!content) {
+      return res.status(400).json({ success: false, message: 'Comment content is required' });
+    }
+    const comment = await proposalService.addComment(
+      proposalId,
+      req.user!.type === 'admin' ? 'admin' : 'client',
+      req.user!.email,
+      content,
+      req.user!.email,
+      isInternal && req.user!.type === 'admin',
+      parentCommentId
+    );
+    res.status(201).json({ success: true, message: 'Comment added successfully', comment });
+  })
+);
+
+// Delete comment
+router.delete(
+  '/comments/:commentId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const commentId = parseInt(req.params.commentId);
+    await proposalService.deleteComment(commentId);
+    res.json({ success: true, message: 'Comment deleted successfully' });
+  })
+);
+
+// ===================================
+// ACTIVITY ENDPOINTS
+// ===================================
+
+// Get activities for a proposal
+router.get(
+  '/:id/activities',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+    const activities = await proposalService.getActivities(proposalId, limit);
+    res.json({ success: true, activities });
+  })
+);
+
+// Track view (public with access token)
+router.post(
+  '/:id/track-view',
+  asyncHandler(async (req: Request, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    await proposalService.trackView(proposalId, req.ip, req.get('User-Agent'));
+    res.json({ success: true, message: 'View tracked' });
+  })
+);
+
+// ===================================
+// CUSTOM ITEMS ENDPOINTS
+// ===================================
+
+// Get custom items for a proposal
+router.get(
+  '/:id/custom-items',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    const items = await proposalService.getCustomItems(proposalId);
+    res.json({ success: true, items });
+  })
+);
+
+// Add custom item
+router.post(
+  '/:id/custom-items',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    const { description, unitPrice } = req.body;
+    if (!description || unitPrice === undefined) {
+      return res.status(400).json({ success: false, message: 'description and unitPrice are required' });
+    }
+    const item = await proposalService.addCustomItem(proposalId, req.body);
+    res.status(201).json({ success: true, message: 'Custom item added successfully', item });
+  })
+);
+
+// Update custom item
+router.put(
+  '/custom-items/:itemId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const itemId = parseInt(req.params.itemId);
+    const item = await proposalService.updateCustomItem(itemId, req.body);
+    res.json({ success: true, message: 'Custom item updated successfully', item });
+  })
+);
+
+// Delete custom item
+router.delete(
+  '/custom-items/:itemId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const itemId = parseInt(req.params.itemId);
+    await proposalService.deleteCustomItem(itemId);
+    res.json({ success: true, message: 'Custom item deleted successfully' });
+  })
+);
+
+// ===================================
+// DISCOUNT ENDPOINTS
+// ===================================
+
+// Apply discount
+router.post(
+  '/:id/discount',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    const { type, value, reason } = req.body;
+    if (!type || value === undefined) {
+      return res.status(400).json({ success: false, message: 'type and value are required' });
+    }
+    if (!['percentage', 'fixed'].includes(type)) {
+      return res.status(400).json({ success: false, message: 'type must be percentage or fixed' });
+    }
+    await proposalService.applyDiscount(proposalId, type, value, reason);
+    res.json({ success: true, message: 'Discount applied successfully' });
+  })
+);
+
+// Remove discount
+router.delete(
+  '/:id/discount',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    await proposalService.removeDiscount(proposalId);
+    res.json({ success: true, message: 'Discount removed successfully' });
+  })
+);
+
+// ===================================
+// EXPIRATION & SEND ENDPOINTS
+// ===================================
+
+// Set expiration date
+router.put(
+  '/:id/expiration',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    const { expirationDate } = req.body;
+    if (!expirationDate) {
+      return res.status(400).json({ success: false, message: 'expirationDate is required' });
+    }
+    await proposalService.setExpiration(proposalId, expirationDate);
+    res.json({ success: true, message: 'Expiration date set successfully' });
+  })
+);
+
+// Mark proposal as sent
+router.post(
+  '/:id/send',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    await proposalService.markProposalSent(proposalId, req.user!.email);
+    res.json({ success: true, message: 'Proposal marked as sent' });
+  })
+);
+
+// Generate access token for client viewing
+router.post(
+  '/:id/access-token',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    const token = await proposalService.generateAccessToken(proposalId);
+    res.json({ success: true, accessToken: token });
+  })
+);
+
+// Get proposal by access token (public)
+router.get(
+  '/view/:token',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { token } = req.params;
+    const proposalId = await proposalService.getProposalByAccessToken(token);
+    if (!proposalId) {
+      return res.status(404).json({ success: false, message: 'Invalid access token' });
+    }
+    // Track view
+    await proposalService.trackView(proposalId, req.ip, req.get('User-Agent'));
+    res.json({ success: true, proposalId });
+  })
+);
+
+// Process expired proposals (admin or scheduler)
+router.post(
+  '/process-expired',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const count = await proposalService.processExpiredProposals();
+    res.json({ success: true, message: `Processed ${count} expired proposal(s)` });
+  })
+);
+
+// Get proposals due for reminder
+router.get(
+  '/due-for-reminder',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const daysOld = req.query.daysOld ? parseInt(req.query.daysOld as string) : 7;
+    const proposalIds = await proposalService.getProposalsDueForReminder(daysOld);
+    res.json({ success: true, proposalIds });
+  })
+);
+
+// Mark reminder sent
+router.post(
+  '/:id/reminder-sent',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const proposalId = parseInt(req.params.id);
+    await proposalService.markReminderSent(proposalId);
+    res.json({ success: true, message: 'Reminder marked as sent' });
   })
 );
 

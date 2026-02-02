@@ -11,7 +11,7 @@
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDateTime } from '../../../utils/format-utils';
 import type { Message, AdminDashboardContext } from '../admin-types';
-import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import type {
   ClientResponse,
   MessageThreadResponse,
@@ -21,6 +21,16 @@ import type {
 let selectedClientId: number | null = null;
 let selectedThreadId: number | null = null;
 let selectedClientName: string = 'Client';
+
+// Available reactions
+const REACTIONS = ['👍', '❤️', '😊', '😮', '👏'];
+
+interface MessageReaction {
+  id: number;
+  reaction: string;
+  user_email: string;
+  created_at: string;
+}
 
 // ============================================================================
 // CACHED DOM REFERENCES
@@ -334,7 +344,7 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
   }
 
   container.innerHTML = messages
-    .map((msg: MessageResponse) => {
+    .map((msg: MessageResponse & { is_pinned?: boolean; is_read?: boolean; reactions?: MessageReaction[] }) => {
       const isAdmin = msg.sender_type === 'admin';
       const dateTime = formatDateTime(msg.created_at);
       const rawSenderName = isAdmin ? 'You (Admin)' : SanitizationUtils.decodeHtmlEntities(selectedClientName || 'Client');
@@ -342,16 +352,46 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
       const safeContent = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(msg.message || ''));
       const initials = rawSenderName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
       const safeInitials = SanitizationUtils.escapeHtml(initials);
+      const isPinned = msg.is_pinned || false;
+
+      // Build reactions HTML
+      const reactionsHtml = renderReactionsHtml(msg.id, msg.reactions || []);
+
+      // Read receipt for admin messages
+      const readReceiptHtml = isAdmin ? `
+        <div class="message-status ${msg.is_read ? 'read' : ''}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            ${msg.is_read
+    ? '<polyline points="20 6 9 17 4 12"></polyline><polyline points="20 12 9 23 4 18"></polyline>'
+    : '<polyline points="20 6 9 17 4 12"></polyline>'}
+          </svg>
+          ${msg.is_read ? 'Read' : 'Sent'}
+        </div>
+      ` : '';
+
+      // Action buttons (pin/unpin)
+      const actionsHtml = `
+        <div class="message-actions">
+          <button class="pin-message-btn ${isPinned ? 'pinned' : ''}" data-message-id="${msg.id}" title="${isPinned ? 'Unpin' : 'Pin'} message">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="${isPinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L12 12M12 22L12 12M12 12L20 4M12 12L4 4"/>
+            </svg>
+          </button>
+        </div>
+      `;
 
       if (isAdmin) {
         return `
-          <div class="message message-sent">
+          <div class="message message-sent ${isPinned ? 'pinned' : ''}" data-message-id="${msg.id}">
             <div class="message-content">
               <div class="message-header">
                 <span class="message-sender">You (Admin)</span>
                 <span class="message-time">${dateTime}</span>
+                ${actionsHtml}
               </div>
               <div class="message-body">${safeContent}</div>
+              ${reactionsHtml}
+              ${readReceiptHtml}
             </div>
             <div class="message-avatar">
               <img src="/images/avatar_small_sidebar.svg" alt="Admin" class="avatar-img" />
@@ -361,7 +401,7 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
       }
 
       return `
-        <div class="message message-received">
+        <div class="message message-received ${isPinned ? 'pinned' : ''}" data-message-id="${msg.id}">
           <div class="message-avatar">
             <div class="avatar-placeholder">${safeInitials}</div>
           </div>
@@ -369,15 +409,186 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
             <div class="message-header">
               <span class="message-sender">${safeSenderName}</span>
               <span class="message-time">${dateTime}</span>
+              ${actionsHtml}
             </div>
             <div class="message-body">${safeContent}</div>
+            ${reactionsHtml}
           </div>
         </div>
       `;
     })
     .join('');
 
+  // Add event listeners for reactions and pins
+  setupMessageInteractions(container);
+
   container.scrollTop = container.scrollHeight;
+}
+
+/**
+ * Render reactions HTML for a message
+ */
+function renderReactionsHtml(messageId: number, reactions: MessageReaction[]): string {
+  // Group reactions by emoji
+  const grouped = new Map<string, number>();
+  reactions.forEach(r => {
+    grouped.set(r.reaction, (grouped.get(r.reaction) || 0) + 1);
+  });
+
+  const reactionBadges = Array.from(grouped.entries())
+    .map(([emoji, count]) => `
+      <span class="reaction-badge" data-message-id="${messageId}" data-reaction="${emoji}">
+        ${emoji} <span class="reaction-count">${count}</span>
+      </span>
+    `)
+    .join('');
+
+  return `
+    <div class="message-reactions">
+      ${reactionBadges}
+      <button class="add-reaction-btn" data-message-id="${messageId}" title="Add reaction">+</button>
+      <div class="reaction-picker hidden" data-message-id="${messageId}">
+        ${REACTIONS.map(r => `<button data-reaction="${r}">${r}</button>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Setup interactions for messages (reactions, pins)
+ */
+function setupMessageInteractions(container: HTMLElement): void {
+  // Add reaction button clicks
+  container.querySelectorAll('.add-reaction-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const messageId = (btn as HTMLElement).dataset.messageId;
+      const picker = container.querySelector(`.reaction-picker[data-message-id="${messageId}"]`);
+      if (picker) {
+        picker.classList.toggle('hidden');
+      }
+    });
+  });
+
+  // Reaction picker button clicks
+  container.querySelectorAll('.reaction-picker button').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const picker = (btn as HTMLElement).closest('.reaction-picker') as HTMLElement;
+      const messageId = picker?.dataset.messageId;
+      const reaction = (btn as HTMLElement).dataset.reaction;
+      if (messageId && reaction) {
+        await addReaction(parseInt(messageId, 10), reaction);
+        picker?.classList.add('hidden');
+      }
+    });
+  });
+
+  // Existing reaction badge clicks (toggle)
+  container.querySelectorAll('.reaction-badge').forEach(badge => {
+    badge.addEventListener('click', async () => {
+      const messageId = (badge as HTMLElement).dataset.messageId;
+      const reaction = (badge as HTMLElement).dataset.reaction;
+      if (messageId && reaction) {
+        await toggleReaction(parseInt(messageId, 10), reaction);
+      }
+    });
+  });
+
+  // Pin button clicks
+  container.querySelectorAll('.pin-message-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const messageId = (btn as HTMLElement).dataset.messageId;
+      const isPinned = btn.classList.contains('pinned');
+      if (messageId && selectedThreadId) {
+        await togglePin(parseInt(messageId, 10), isPinned);
+      }
+    });
+  });
+
+  // Close reaction pickers when clicking outside
+  document.addEventListener('click', () => {
+    container.querySelectorAll('.reaction-picker').forEach(picker => {
+      picker.classList.add('hidden');
+    });
+  });
+}
+
+/**
+ * Add a reaction to a message
+ */
+async function addReaction(messageId: number, reaction: string): Promise<void> {
+  try {
+    await apiPost(`/api/messages/${messageId}/reactions`, { reaction });
+    // Reload messages to show updated reactions
+    if (selectedThreadId) {
+      const container = getMessagesContainer();
+      if (container) {
+        await loadThreadMessagesWithReactions(selectedThreadId, container);
+      }
+    }
+  } catch (error) {
+    console.error('[AdminMessaging] Error adding reaction:', error);
+  }
+}
+
+/**
+ * Toggle a reaction (add if not present, remove if present)
+ */
+async function toggleReaction(messageId: number, reaction: string): Promise<void> {
+  try {
+    // Try to remove first, if fails then add
+    const response = await apiDelete(`/api/messages/${messageId}/reactions/${encodeURIComponent(reaction)}`);
+    if (!response.ok) {
+      await apiPost(`/api/messages/${messageId}/reactions`, { reaction });
+    }
+    // Reload messages
+    if (selectedThreadId) {
+      const container = getMessagesContainer();
+      if (container) {
+        await loadThreadMessagesWithReactions(selectedThreadId, container);
+      }
+    }
+  } catch (error) {
+    console.error('[AdminMessaging] Error toggling reaction:', error);
+  }
+}
+
+/**
+ * Toggle pin status for a message
+ */
+async function togglePin(messageId: number, isPinned: boolean): Promise<void> {
+  if (!selectedThreadId) return;
+  try {
+    if (isPinned) {
+      await apiDelete(`/api/messages/threads/${selectedThreadId}/messages/${messageId}/pin`);
+    } else {
+      await apiPost(`/api/messages/threads/${selectedThreadId}/messages/${messageId}/pin`, {});
+    }
+    // Reload messages
+    const container = getMessagesContainer();
+    if (container) {
+      await loadThreadMessagesWithReactions(selectedThreadId, container);
+    }
+  } catch (error) {
+    console.error('[AdminMessaging] Error toggling pin:', error);
+  }
+}
+
+/**
+ * Load thread messages with reactions
+ */
+async function loadThreadMessagesWithReactions(threadId: number, container: HTMLElement): Promise<void> {
+  try {
+    const response = await apiFetch(`/api/messages/threads/${threadId}/messages`);
+    if (response.ok) {
+      const data = await response.json();
+      renderMessages(data.messages || [], container);
+    }
+  } catch (error) {
+    console.error('[AdminMessaging] Error loading messages:', error);
+  }
 }
 
 export async function sendMessage(ctx: AdminDashboardContext): Promise<void> {

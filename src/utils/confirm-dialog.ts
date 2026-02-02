@@ -458,6 +458,14 @@ export function promptDialog(options: PromptDialogOptions): Promise<string | nul
 }
 
 /**
+ * Select option for select fields
+ */
+export interface SelectOption {
+  value: string;
+  label: string;
+}
+
+/**
  * Multi-field prompt dialog for complex inputs
  */
 export interface MultiPromptField {
@@ -466,13 +474,15 @@ export interface MultiPromptField {
   /** Label text */
   label: string;
   /** Input type */
-  type?: 'text' | 'number' | 'date' | 'email' | 'textarea';
+  type?: 'text' | 'number' | 'date' | 'email' | 'textarea' | 'select';
   /** Default value */
   defaultValue?: string;
   /** Placeholder */
   placeholder?: string;
   /** Whether required */
   required?: boolean;
+  /** Options for select type */
+  options?: SelectOption[];
 }
 
 export interface MultiPromptDialogOptions {
@@ -529,6 +539,22 @@ export function multiPromptDialog(
           </div>
         `;
       }
+      if (field.type === 'select' && field.options) {
+        const optionsHtml = field.options.map(opt =>
+          `<option value="${escapeHtml(opt.value)}"${opt.value === field.defaultValue ? ' selected' : ''}>${escapeHtml(opt.label)}</option>`
+        ).join('');
+        return `
+          <div class="prompt-dialog-field">
+            <label for="${inputId}" class="prompt-dialog-label">${escapeHtml(field.label)}${field.required ? ' *' : ''}</label>
+            <select
+              id="${inputId}"
+              name="${field.name}"
+              class="prompt-dialog-input form-input form-select"
+              ${field.required ? 'required' : ''}
+            >${optionsHtml}</select>
+          </div>
+        `;
+      }
       return `
         <div class="prompt-dialog-field">
           <label for="${inputId}" class="prompt-dialog-label">${escapeHtml(field.label)}${field.required ? ' *' : ''}</label>
@@ -563,7 +589,7 @@ export function multiPromptDialog(
     // Get elements
     const cancelBtn = overlay.querySelector('.confirm-dialog-cancel') as HTMLButtonElement;
     const form = overlay.querySelector('.multi-prompt-form') as HTMLFormElement;
-    const inputs = Array.from(overlay.querySelectorAll('input, textarea')) as (HTMLInputElement | HTMLTextAreaElement)[];
+    const inputs = Array.from(overlay.querySelectorAll('input, textarea, select')) as (HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement)[];
 
     // Store previously focused element
     const previouslyFocused = document.activeElement as HTMLElement;

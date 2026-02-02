@@ -10,11 +10,11 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { formatDate, formatProjectType } from '../../../utils/format-utils';
-import { apiFetch, apiPut, apiPost } from '../../../utils/api-client';
+import { formatDate, formatDateTime, formatProjectType } from '../../../utils/format-utils';
+import { apiFetch, apiPut, apiPost, apiDelete } from '../../../utils/api-client';
 import { createTableDropdown } from '../../../utils/table-dropdown';
 import type { AdminDashboardContext } from '../admin-types';
-import { confirmDialog } from '../../../utils/confirm-dialog';
+import { confirmDialog, alertSuccess, alertError } from '../../../utils/confirm-dialog';
 
 // ============================================================================
 // TYPES
@@ -56,6 +56,26 @@ interface ProposalsData {
   total: number;
 }
 
+interface ProposalTemplate {
+  id: number;
+  name: string;
+  description: string | null;
+  content: Record<string, unknown>;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ProposalVersion {
+  id: number;
+  proposal_id: number;
+  version_number: number;
+  content: Record<string, unknown>;
+  created_by: string;
+  created_at: string;
+  change_summary: string | null;
+}
+
 // ============================================================================
 // STATUS OPTIONS
 // ============================================================================
@@ -75,6 +95,9 @@ const PROPOSAL_STATUS_OPTIONS = [
 let proposalsData: Proposal[] = [];
 let _storedContext: AdminDashboardContext | null = null;
 let currentFilter: string = 'all';
+let templatesData: ProposalTemplate[] = [];
+let currentProposalVersions: ProposalVersion[] = [];
+let _currentView: 'proposals' | 'templates' = 'proposals';
 
 // ============================================================================
 // CACHED DOM REFERENCES
@@ -121,6 +144,9 @@ export async function loadProposals(ctx: AdminDashboardContext): Promise<void> {
   // Show loading state
   container.innerHTML = renderProposalsLayout();
 
+  // Setup view toggle
+  setupViewToggle(ctx);
+
   // Setup filter buttons
   setupFilterButtons(ctx);
 
@@ -166,7 +192,12 @@ async function refreshProposals(ctx: AdminDashboardContext): Promise<void> {
 
 function renderProposalsLayout(): string {
   return `
-    <div class="proposals-panel">
+    <div class="proposals-view-toggle">
+      <button class="view-toggle-btn active" data-view="proposals">Proposals</button>
+      <button class="view-toggle-btn" data-view="templates">Templates</button>
+    </div>
+
+    <div class="proposals-panel" id="proposals-list-panel">
       <div class="proposals-header">
         <h2>Proposal Requests</h2>
         <div class="proposals-actions">
@@ -227,6 +258,68 @@ function renderProposalsLayout(): string {
         <h3>Proposal Details</h3>
       </div>
       <div class="panel-content" id="proposal-details-content"></div>
+    </div>
+
+    <div class="templates-panel" id="templates-panel" style="display: none;">
+      <div class="templates-header">
+        <h2>Proposal Templates</h2>
+        <button class="btn btn-primary" id="create-template-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          New Template
+        </button>
+      </div>
+      <div class="templates-list" id="templates-list">
+        <div class="loading-row">Loading templates...</div>
+      </div>
+    </div>
+
+    <div class="template-editor-modal" id="template-editor-modal" style="display: none;">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="template-modal-title">New Template</h3>
+          <button class="btn-close" id="close-template-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="template-name">Template Name</label>
+            <input type="text" id="template-name" class="form-input" placeholder="e.g., Standard Website Package">
+          </div>
+          <div class="form-group">
+            <label for="template-description">Description</label>
+            <textarea id="template-description" class="form-input" rows="2" placeholder="Brief description of this template"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="template-project-type">Project Type</label>
+            <select id="template-project-type" class="form-input">
+              <option value="business-website">Business Website</option>
+              <option value="ecommerce">E-Commerce</option>
+              <option value="web-app">Web Application</option>
+              <option value="branding">Branding</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="template-tier">Default Tier</label>
+            <select id="template-tier" class="form-input">
+              <option value="good">Good</option>
+              <option value="better">Better</option>
+              <option value="best">Best</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="template-base-price">Base Price ($)</label>
+            <input type="number" id="template-base-price" class="form-input" placeholder="0" min="0">
+          </div>
+          <div class="form-group form-checkbox">
+            <input type="checkbox" id="template-is-default">
+            <label for="template-is-default">Set as default template</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="cancel-template-btn">Cancel</button>
+          <button class="btn btn-primary" id="save-template-btn">Save Template</button>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -359,6 +452,622 @@ function setupFilterButtons(ctx: AdminDashboardContext): void {
   });
 }
 
+function setupViewToggle(ctx: AdminDashboardContext): void {
+  const toggleBtns = document.querySelectorAll('.view-toggle-btn');
+  const proposalsPanel = document.getElementById('proposals-list-panel');
+  const templatesPanel = document.getElementById('templates-panel');
+
+  toggleBtns.forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const view = (btn as HTMLElement).dataset.view as 'proposals' | 'templates';
+      _currentView = view;
+
+      // Update active states
+      toggleBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // Show/hide panels
+      if (view === 'proposals') {
+        if (proposalsPanel) proposalsPanel.style.display = 'block';
+        if (templatesPanel) templatesPanel.style.display = 'none';
+      } else {
+        if (proposalsPanel) proposalsPanel.style.display = 'none';
+        if (templatesPanel) templatesPanel.style.display = 'block';
+        await loadTemplates(ctx);
+      }
+    });
+  });
+}
+
+// ============================================================================
+// TEMPLATES MANAGEMENT
+// ============================================================================
+
+async function loadTemplates(ctx: AdminDashboardContext): Promise<void> {
+  const templatesList = document.getElementById('templates-list');
+  if (!templatesList) return;
+
+  templatesList.innerHTML = '<div class="loading-row">Loading templates...</div>';
+
+  try {
+    const response = await apiFetch('/api/proposals/templates');
+    if (response.ok) {
+      const data = await response.json();
+      templatesData = data.data || [];
+      renderTemplatesList(ctx);
+    } else {
+      templatesList.innerHTML = '<div class="empty-row">Error loading templates</div>';
+    }
+  } catch (error) {
+    console.error('[AdminProposals] Error loading templates:', error);
+    templatesList.innerHTML = '<div class="empty-row">Network error loading templates</div>';
+  }
+}
+
+function renderTemplatesList(ctx: AdminDashboardContext): void {
+  const templatesList = document.getElementById('templates-list');
+  if (!templatesList) return;
+
+  if (templatesData.length === 0) {
+    templatesList.innerHTML = `
+      <div class="empty-state">
+        <p>No templates found</p>
+        <p class="empty-hint">Create a template to save proposal configurations for reuse</p>
+      </div>
+    `;
+    setupTemplateListeners(ctx);
+    return;
+  }
+
+  templatesList.innerHTML = `
+    <div class="templates-grid">
+      ${templatesData.map(template => `
+        <div class="template-card" data-template-id="${template.id}">
+          <div class="template-card-header">
+            <h4>${SanitizationUtils.escapeHtml(template.name)}</h4>
+            ${template.is_default ? '<span class="default-badge">Default</span>' : ''}
+          </div>
+          <div class="template-card-body">
+            ${template.description ? `<p class="template-description">${SanitizationUtils.escapeHtml(template.description)}</p>` : ''}
+            <div class="template-meta">
+              <span class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                ${formatDate(template.created_at)}
+              </span>
+            </div>
+          </div>
+          <div class="template-card-actions">
+            <button class="btn btn-secondary btn-sm use-template-btn" data-template-id="${template.id}">
+              Use Template
+            </button>
+            <button class="btn-icon edit-template-btn" data-template-id="${template.id}" title="Edit">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="btn-icon delete-template-btn" data-template-id="${template.id}" title="Delete">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  setupTemplateListeners(ctx);
+}
+
+function setupTemplateListeners(ctx: AdminDashboardContext): void {
+  // Create template button
+  const createBtn = document.getElementById('create-template-btn');
+  if (createBtn) {
+    createBtn.onclick = () => openTemplateEditor(null, ctx);
+  }
+
+  // Use template buttons
+  document.querySelectorAll('.use-template-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const templateId = parseInt((btn as HTMLElement).dataset.templateId || '0', 10);
+      await useTemplate(templateId, ctx);
+    });
+  });
+
+  // Edit template buttons
+  document.querySelectorAll('.edit-template-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const templateId = parseInt((btn as HTMLElement).dataset.templateId || '0', 10);
+      const template = templatesData.find(t => t.id === templateId);
+      if (template) {
+        openTemplateEditor(template, ctx);
+      }
+    });
+  });
+
+  // Delete template buttons
+  document.querySelectorAll('.delete-template-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const templateId = parseInt((btn as HTMLElement).dataset.templateId || '0', 10);
+      await deleteTemplate(templateId, ctx);
+    });
+  });
+}
+
+function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboardContext): void {
+  const modal = document.getElementById('template-editor-modal');
+  const modalTitle = document.getElementById('template-modal-title');
+  const nameInput = document.getElementById('template-name') as HTMLInputElement;
+  const descInput = document.getElementById('template-description') as HTMLTextAreaElement;
+  const typeSelect = document.getElementById('template-project-type') as HTMLSelectElement;
+  const tierSelect = document.getElementById('template-tier') as HTMLSelectElement;
+  const priceInput = document.getElementById('template-base-price') as HTMLInputElement;
+  const defaultCheckbox = document.getElementById('template-is-default') as HTMLInputElement;
+
+  if (!modal || !modalTitle) return;
+
+  // Set modal title
+  modalTitle.textContent = template ? 'Edit Template' : 'New Template';
+
+  // Populate fields if editing
+  if (template) {
+    if (nameInput) nameInput.value = template.name;
+    if (descInput) descInput.value = template.description || '';
+    const content = template.content as { projectType?: string; tier?: string; basePrice?: number };
+    if (typeSelect) typeSelect.value = content.projectType || 'business-website';
+    if (tierSelect) tierSelect.value = content.tier || 'good';
+    if (priceInput) priceInput.value = (content.basePrice || 0).toString();
+    if (defaultCheckbox) defaultCheckbox.checked = template.is_default;
+  } else {
+    if (nameInput) nameInput.value = '';
+    if (descInput) descInput.value = '';
+    if (typeSelect) typeSelect.value = 'business-website';
+    if (tierSelect) tierSelect.value = 'good';
+    if (priceInput) priceInput.value = '';
+    if (defaultCheckbox) defaultCheckbox.checked = false;
+  }
+
+  // Show modal
+  modal.style.display = 'flex';
+
+  // Setup close handlers
+  const closeBtn = document.getElementById('close-template-modal');
+  const cancelBtn = document.getElementById('cancel-template-btn');
+  const saveBtn = document.getElementById('save-template-btn');
+  const overlay = modal.querySelector('.modal-overlay');
+
+  const closeModal = () => {
+    modal.style.display = 'none';
+  };
+
+  if (closeBtn) closeBtn.onclick = closeModal;
+  if (cancelBtn) cancelBtn.onclick = closeModal;
+  if (overlay) (overlay as HTMLElement).onclick = closeModal;
+
+  if (saveBtn) {
+    saveBtn.onclick = async () => {
+      await saveTemplate(template?.id || null, ctx);
+    };
+  }
+}
+
+async function saveTemplate(templateId: number | null, ctx: AdminDashboardContext): Promise<void> {
+  const nameInput = document.getElementById('template-name') as HTMLInputElement;
+  const descInput = document.getElementById('template-description') as HTMLTextAreaElement;
+  const typeSelect = document.getElementById('template-project-type') as HTMLSelectElement;
+  const tierSelect = document.getElementById('template-tier') as HTMLSelectElement;
+  const priceInput = document.getElementById('template-base-price') as HTMLInputElement;
+  const defaultCheckbox = document.getElementById('template-is-default') as HTMLInputElement;
+
+  const name = nameInput?.value.trim();
+  if (!name) {
+    alertError('Please enter a template name');
+    return;
+  }
+
+  const templateData = {
+    name,
+    description: descInput?.value.trim() || null,
+    content: {
+      projectType: typeSelect?.value || 'business-website',
+      tier: tierSelect?.value || 'good',
+      basePrice: parseInt(priceInput?.value || '0', 10)
+    },
+    is_default: defaultCheckbox?.checked || false
+  };
+
+  try {
+    let response;
+    if (templateId) {
+      response = await apiPut(`/api/proposals/templates/${templateId}`, templateData);
+    } else {
+      response = await apiPost('/api/proposals/templates', templateData);
+    }
+
+    if (response.ok) {
+      alertSuccess(templateId ? 'Template updated' : 'Template created');
+      const modal = document.getElementById('template-editor-modal');
+      if (modal) modal.style.display = 'none';
+      await loadTemplates(ctx);
+    } else {
+      const error = await response.text();
+      alertError(`Failed to save template: ${error}`);
+    }
+  } catch (error) {
+    console.error('[AdminProposals] Error saving template:', error);
+    alertError('Network error saving template');
+  }
+}
+
+async function deleteTemplate(templateId: number, ctx: AdminDashboardContext): Promise<void> {
+  const confirmed = await confirmDialog({
+    title: 'Delete Template',
+    message: 'Are you sure you want to delete this template? This action cannot be undone.',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    danger: true
+  });
+
+  if (!confirmed) return;
+
+  try {
+    const response = await apiDelete(`/api/proposals/templates/${templateId}`);
+    if (response.ok) {
+      alertSuccess('Template deleted');
+      await loadTemplates(ctx);
+    } else {
+      alertError('Failed to delete template');
+    }
+  } catch (error) {
+    console.error('[AdminProposals] Error deleting template:', error);
+    alertError('Network error deleting template');
+  }
+}
+
+async function useTemplate(templateId: number, ctx: AdminDashboardContext): Promise<void> {
+  const template = templatesData.find(t => t.id === templateId);
+  if (!template) return;
+
+  // For now, show a notification - in a full implementation this would
+  // pre-fill a proposal creation form with the template data
+  ctx.showNotification?.(`Template "${template.name}" selected. Create a new proposal to use it.`, 'info');
+}
+
+// ============================================================================
+// VERSION HISTORY
+// ============================================================================
+
+async function loadProposalVersions(proposalId: number): Promise<void> {
+  const versionContainer = document.getElementById('version-history');
+  if (!versionContainer) return;
+
+  try {
+    const response = await apiFetch(`/api/proposals/${proposalId}/versions`);
+    if (response.ok) {
+      const data = await response.json();
+      currentProposalVersions = data.data || [];
+      renderVersionHistory(proposalId);
+    } else {
+      versionContainer.innerHTML = '<div class="empty-row">No versions available</div>';
+    }
+  } catch (error) {
+    console.error('[AdminProposals] Error loading versions:', error);
+    versionContainer.innerHTML = '<div class="empty-row">Error loading versions</div>';
+  }
+}
+
+function renderVersionHistory(proposalId: number): void {
+  const versionContainer = document.getElementById('version-history');
+  if (!versionContainer) return;
+
+  if (currentProposalVersions.length === 0) {
+    versionContainer.innerHTML = `
+      <div class="version-empty">
+        <p>No previous versions</p>
+        <button class="btn btn-secondary btn-sm" id="create-version-btn">
+          Save Current as Version
+        </button>
+      </div>
+    `;
+    const createBtn = document.getElementById('create-version-btn');
+    if (createBtn) {
+      createBtn.onclick = () => createVersion(proposalId);
+    }
+    return;
+  }
+
+  versionContainer.innerHTML = `
+    <div class="version-actions">
+      <button class="btn btn-secondary btn-sm" id="create-version-btn">
+        Save Current as Version
+      </button>
+    </div>
+    <div class="version-list">
+      ${currentProposalVersions.map(version => `
+        <div class="version-item" data-version-id="${version.id}">
+          <div class="version-info">
+            <span class="version-number">v${version.version_number}</span>
+            <span class="version-date">${formatDateTime(version.created_at)}</span>
+            <span class="version-author">${SanitizationUtils.escapeHtml(version.created_by)}</span>
+          </div>
+          ${version.change_summary ? `
+            <div class="version-summary">${SanitizationUtils.escapeHtml(version.change_summary)}</div>
+          ` : ''}
+          <div class="version-actions">
+            <button class="btn-link restore-version-btn" data-version-id="${version.id}">
+              Restore
+            </button>
+            <button class="btn-link compare-version-btn" data-version-id="${version.id}">
+              Compare
+            </button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  // Setup version listeners
+  const createBtn = document.getElementById('create-version-btn');
+  if (createBtn) {
+    createBtn.onclick = () => createVersion(proposalId);
+  }
+
+  document.querySelectorAll('.restore-version-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const versionId = parseInt((btn as HTMLElement).dataset.versionId || '0', 10);
+      await restoreVersion(proposalId, versionId);
+    });
+  });
+
+  document.querySelectorAll('.compare-version-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const versionId = parseInt((btn as HTMLElement).dataset.versionId || '0', 10);
+      await showVersionComparison(proposalId, versionId);
+    });
+  });
+}
+
+async function createVersion(proposalId: number): Promise<void> {
+  const summary = prompt('Enter a summary of changes (optional):');
+
+  try {
+    const response = await apiPost(`/api/proposals/${proposalId}/versions`, {
+      change_summary: summary || null
+    });
+
+    if (response.ok) {
+      alertSuccess('Version saved');
+      await loadProposalVersions(proposalId);
+    } else {
+      alertError('Failed to create version');
+    }
+  } catch (error) {
+    console.error('[AdminProposals] Error creating version:', error);
+    alertError('Network error creating version');
+  }
+}
+
+async function restoreVersion(proposalId: number, versionId: number): Promise<void> {
+  const confirmed = await confirmDialog({
+    title: 'Restore Version',
+    message: 'This will restore the proposal to this version. A backup of the current state will be saved. Continue?',
+    confirmText: 'Restore',
+    cancelText: 'Cancel'
+  });
+
+  if (!confirmed) return;
+
+  try {
+    const response = await apiPost(`/api/proposals/${proposalId}/versions/${versionId}/restore`, {});
+
+    if (response.ok) {
+      alertSuccess('Version restored');
+      // Refresh the proposal details
+      if (_storedContext) {
+        await refreshProposals(_storedContext);
+      }
+    } else {
+      alertError('Failed to restore version');
+    }
+  } catch (error) {
+    console.error('[AdminProposals] Error restoring version:', error);
+    alertError('Network error restoring version');
+  }
+}
+
+async function showVersionComparison(proposalId: number, versionId: number): Promise<void> {
+  try {
+    const response = await apiPost('/api/proposals/versions/compare', {
+      proposalId,
+      versionId
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const comparison = data.data;
+
+      // Show comparison in a simple alert for now
+      // In a full implementation, this would be a modal with side-by-side diff
+      const changes = comparison.changes || [];
+      if (changes.length === 0) {
+        alertSuccess('No differences found between versions');
+      } else {
+        alert(`Changes:\n${changes.map((c: { field: string; from: string; to: string }) => `- ${c.field}: ${c.from} → ${c.to}`).join('\n')}`);
+      }
+    } else {
+      alertError('Failed to compare versions');
+    }
+  } catch (error) {
+    console.error('[AdminProposals] Error comparing versions:', error);
+    alertError('Network error comparing versions');
+  }
+}
+
+// ============================================================================
+// SIGNATURE STATUS
+// ============================================================================
+
+async function loadSignatureStatus(proposalId: number): Promise<void> {
+  const signatureContainer = document.getElementById('signature-status');
+  if (!signatureContainer) return;
+
+  try {
+    const response = await apiFetch(`/api/proposals/${proposalId}/signature-status`);
+    if (response.ok) {
+      const data = await response.json();
+      renderSignatureStatus(proposalId, data.data);
+    } else if (response.status === 404) {
+      // No signature requested yet
+      renderSignatureStatus(proposalId, null);
+    } else {
+      signatureContainer.innerHTML = '<div class="empty-row">Error loading signature status</div>';
+    }
+  } catch (error) {
+    console.error('[AdminProposals] Error loading signature status:', error);
+    signatureContainer.innerHTML = '<div class="empty-row">Error loading signature status</div>';
+  }
+}
+
+interface SignatureData {
+  status: 'pending' | 'signed' | 'declined' | 'expired';
+  requested_at: string;
+  signed_at?: string;
+  signer_name?: string;
+  signer_email?: string;
+  expires_at?: string;
+}
+
+function renderSignatureStatus(proposalId: number, signature: SignatureData | null): void {
+  const signatureContainer = document.getElementById('signature-status');
+  if (!signatureContainer) return;
+
+  if (!signature) {
+    signatureContainer.innerHTML = `
+      <div class="signature-empty">
+        <p>No signature requested</p>
+        <button class="btn btn-primary btn-sm" id="request-signature-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+          Request E-Signature
+        </button>
+      </div>
+    `;
+    const requestBtn = document.getElementById('request-signature-btn');
+    if (requestBtn) {
+      requestBtn.onclick = () => requestSignature(proposalId);
+    }
+    return;
+  }
+
+  const statusClass = {
+    pending: 'status-pending',
+    signed: 'status-success',
+    declined: 'status-danger',
+    expired: 'status-warning'
+  }[signature.status] || 'status-pending';
+
+  const statusLabel = {
+    pending: 'Awaiting Signature',
+    signed: 'Signed',
+    declined: 'Declined',
+    expired: 'Expired'
+  }[signature.status] || signature.status;
+
+  signatureContainer.innerHTML = `
+    <div class="signature-info">
+      <div class="signature-badge ${statusClass}">
+        ${statusLabel}
+      </div>
+      <div class="signature-details">
+        <p><strong>Requested:</strong> ${formatDateTime(signature.requested_at)}</p>
+        ${signature.signed_at ? `<p><strong>Signed:</strong> ${formatDateTime(signature.signed_at)}</p>` : ''}
+        ${signature.signer_name ? `<p><strong>Signer:</strong> ${SanitizationUtils.escapeHtml(signature.signer_name)}</p>` : ''}
+        ${signature.expires_at ? `<p><strong>Expires:</strong> ${formatDateTime(signature.expires_at)}</p>` : ''}
+      </div>
+      ${signature.status === 'pending' ? `
+        <div class="signature-actions">
+          <button class="btn btn-secondary btn-sm" id="resend-signature-btn">Resend Request</button>
+          <button class="btn btn-danger btn-sm" id="cancel-signature-btn">Cancel Request</button>
+        </div>
+      ` : ''}
+      ${signature.status === 'expired' ? `
+        <div class="signature-actions">
+          <button class="btn btn-primary btn-sm" id="request-signature-btn">Request New Signature</button>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  // Setup signature action listeners
+  const requestBtn = document.getElementById('request-signature-btn');
+  if (requestBtn) {
+    requestBtn.onclick = () => requestSignature(proposalId);
+  }
+
+  const resendBtn = document.getElementById('resend-signature-btn');
+  if (resendBtn) {
+    resendBtn.onclick = () => resendSignatureRequest(proposalId);
+  }
+
+  const cancelBtn = document.getElementById('cancel-signature-btn');
+  if (cancelBtn) {
+    cancelBtn.onclick = () => cancelSignatureRequest(proposalId);
+  }
+}
+
+async function requestSignature(proposalId: number): Promise<void> {
+  try {
+    const response = await apiPost(`/api/proposals/${proposalId}/request-signature`, {});
+
+    if (response.ok) {
+      alertSuccess('Signature request sent to client');
+      await loadSignatureStatus(proposalId);
+    } else {
+      const error = await response.text();
+      alertError(`Failed to request signature: ${error}`);
+    }
+  } catch (error) {
+    console.error('[AdminProposals] Error requesting signature:', error);
+    alertError('Network error requesting signature');
+  }
+}
+
+async function resendSignatureRequest(proposalId: number): Promise<void> {
+  try {
+    const response = await apiPost(`/api/proposals/${proposalId}/resend-signature`, {});
+
+    if (response.ok) {
+      alertSuccess('Signature request resent');
+    } else {
+      alertError('Failed to resend signature request');
+    }
+  } catch (error) {
+    console.error('[AdminProposals] Error resending signature:', error);
+    alertError('Network error resending signature');
+  }
+}
+
+async function cancelSignatureRequest(proposalId: number): Promise<void> {
+  const confirmed = await confirmDialog({
+    title: 'Cancel Signature Request',
+    message: 'Are you sure you want to cancel the signature request?',
+    confirmText: 'Cancel Request',
+    cancelText: 'Keep Request',
+    danger: true
+  });
+
+  if (!confirmed) return;
+
+  try {
+    const response = await apiDelete(`/api/proposals/${proposalId}/signature`);
+
+    if (response.ok) {
+      alertSuccess('Signature request cancelled');
+      await loadSignatureStatus(proposalId);
+    } else {
+      alertError('Failed to cancel signature request');
+    }
+  } catch (error) {
+    console.error('[AdminProposals] Error cancelling signature:', error);
+    alertError('Network error cancelling signature');
+  }
+}
+
 function updateStats(proposals: Proposal[]): void {
   const pending = proposals.filter(p => p.status === 'pending').length;
   const reviewed = proposals.filter(p => p.status === 'reviewed').length;
@@ -382,7 +1091,7 @@ function updateStats(proposals: Proposal[]): void {
 // PROPOSAL DETAILS
 // ============================================================================
 
-function showProposalDetails(proposal: Proposal, ctx: AdminDashboardContext): void {
+async function showProposalDetails(proposal: Proposal, ctx: AdminDashboardContext): Promise<void> {
   const detailsPanel = document.getElementById('proposal-details-panel');
   const detailsContent = document.getElementById('proposal-details-content');
   const tablePanel = document.querySelector('.proposals-panel') as HTMLElement;
@@ -398,6 +1107,12 @@ function showProposalDetails(proposal: Proposal, ctx: AdminDashboardContext): vo
 
   // Setup event listeners for details panel
   setupDetailsEventListeners(proposal, ctx);
+
+  // Load version history and signature status
+  await Promise.all([
+    loadProposalVersions(proposal.id),
+    loadSignatureStatus(proposal.id)
+  ]);
 }
 
 function hideProposalDetails(): void {
@@ -531,6 +1246,20 @@ function renderProposalDetailsContent(proposal: Proposal): string {
         <h4>Admin Notes</h4>
         <textarea class="admin-notes-input" id="admin-notes-input" placeholder="Add internal notes about this proposal...">${proposal.adminNotes || ''}</textarea>
         <button class="btn btn-secondary" id="save-notes-btn">Save Notes</button>
+      </div>
+
+      <div class="details-section">
+        <h4>Version History</h4>
+        <div class="version-history" id="version-history">
+          <div class="loading-row">Loading versions...</div>
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h4>Signature Status</h4>
+        <div class="signature-status" id="signature-status">
+          <div class="loading-row">Loading signature status...</div>
+        </div>
       </div>
 
       <div class="details-actions">

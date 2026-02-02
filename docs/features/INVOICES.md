@@ -1,6 +1,6 @@
 # Invoice System
 
-**Last Updated:** January 30, 2026
+**Last Updated:** February 1, 2026
 
 ## Table of Contents
 
@@ -37,6 +37,30 @@ The Invoice System provides clients with a complete view of their payment histor
 | PDF Generation | Complete | Full PDF generation with pdf-lib (see [PDF_GENERATION.md](./PDF_GENERATION.md)) |
 | Project Association | Complete | Link invoices to specific projects |
 | Demo Mode | Complete | Fallback demo data when backend unavailable |
+| Deposit Invoices | Complete | Create deposit invoices with percentage tracking |
+| Credit Application | Complete | Apply paid deposits as credits to standard invoices |
+| Edit Draft Invoices | Complete | Modify invoice line items and notes before sending |
+| Payment Plan Templates | Complete | Reusable payment structures (50/50, 30/30/40, etc.) |
+| Milestone-Linked Invoices | Complete | Link invoices to project milestones |
+| Invoice Scheduling | Complete | Schedule future invoice generation |
+| Recurring Invoices | Complete | Automated recurring invoices (weekly/monthly/quarterly) |
+| Payment Reminders | Complete | Automated reminder emails based on due date |
+| Scheduler Service | Complete | Background job processing for automation |
+| Delete/Void Invoice | Complete | Delete drafts or void sent invoices |
+| Duplicate Invoice | Complete | Clone existing invoice as new draft |
+| Record Payment | Complete | Record partial or full payments with method tracking |
+| Invoice Search | Complete | Search with filters, date range, pagination |
+| Auto-Mark Overdue | Complete | Scheduler automatically marks past-due invoices |
+| Manual Reminder | Complete | Send payment reminder on demand |
+| **Tax Support** | Complete | Invoice-level and line-item tax rates with calculation |
+| **Discounts** | Complete | Percentage or fixed discounts at invoice or line level |
+| **Late Fees** | Complete | Automatic late fee calculation (flat, percentage, daily) |
+| **Payment Terms Presets** | Complete | Net 15, Net 30, Net 60, Due on Receipt, custom terms |
+| **Payment History** | Complete | Full payment history tracking per invoice |
+| **A/R Aging Report** | Complete | Accounts receivable aging by bucket (current, 1-30, 31-60, 61-90, 90+) |
+| **Internal Notes** | Complete | Admin-only notes not visible to clients |
+| **Custom Invoice Numbers** | Complete | Custom prefix and sequential numbering |
+| **Comprehensive Stats** | Complete | Revenue, outstanding, averages, status breakdown, monthly trends |
 
 ---
 
@@ -203,6 +227,163 @@ Mark invoice as paid.
 
 ---
 
+#### PUT `/api/invoices/:id`
+
+Update a draft invoice.
+
+**Authentication:** Required (Admin only)
+
+**Request:**
+
+```json
+{
+  "lineItems": [
+    {
+      "description": "Updated service description",
+      "quantity": 1,
+      "rate": 2500,
+      "amount": 2500
+    }
+  ],
+  "notes": "Updated payment notes"
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Invoice updated successfully"
+}
+```
+
+**Notes:**
+
+- Only draft invoices can be edited
+- Returns 400 error if invoice status is not 'draft'
+
+---
+
+#### POST `/api/invoices/deposit`
+
+Create a deposit invoice for a project.
+
+**Authentication:** Required (Admin only)
+
+**Request:**
+
+```json
+{
+  "projectId": 1,
+  "clientId": 5,
+  "amount": 1000,
+  "percentage": 50,
+  "description": "Project deposit"
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "success": true,
+  "message": "Deposit invoice created successfully",
+  "invoice": {
+    "id": 15,
+    "invoice_number": "INV-2026-015",
+    "invoice_type": "deposit",
+    "amount_total": 1000
+  }
+}
+```
+
+---
+
+#### GET `/api/invoices/deposits/:projectId`
+
+Get available deposits for a project (paid but not fully applied).
+
+**Authentication:** Required
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "deposits": [
+    {
+      "invoice_id": 10,
+      "invoice_number": "INV-2026-010",
+      "total_amount": 1000,
+      "amount_applied": 500,
+      "available_amount": 500,
+      "paid_date": "2026-01-15T10:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+#### POST `/api/invoices/:id/apply-credit`
+
+Apply a deposit credit to an invoice.
+
+**Authentication:** Required (Admin only)
+
+**Request:**
+
+```json
+{
+  "depositInvoiceId": 10,
+  "amount": 500
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Credit applied successfully"
+}
+```
+
+**Error Responses:**
+
+- `400` - Credit amount exceeds available balance
+- `404` - Invoice or deposit not found
+
+---
+
+#### GET `/api/invoices/:id/credits`
+
+Get credits applied to an invoice.
+
+**Authentication:** Required
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "credits": [
+    {
+      "id": 1,
+      "invoice_id": 15,
+      "deposit_invoice_id": 10,
+      "deposit_invoice_number": "INV-2026-010",
+      "amount": 500,
+      "applied_at": "2026-01-20T14:30:00Z"
+    }
+  ],
+  "totalCredits": 500
+}
+```
+
+---
+
 #### GET `/api/invoices/:id/pdf`
 
 Download or preview invoice as PDF.
@@ -242,6 +423,131 @@ res.setHeader('Content-Type', 'application/pdf');
 res.setHeader('Content-Disposition', `${disposition}; filename="${invoiceNumber}.pdf"`);
 res.send(Buffer.from(pdfBytes));
 ```
+
+---
+
+### Payment Plan Templates
+
+#### GET `/api/invoices/payment-plans`
+
+Get all payment plan templates.
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "templates": [
+    {
+      "id": 1,
+      "name": "50/50 Split",
+      "description": "50% upfront, 50% on completion",
+      "payments": [
+        { "percentage": 50, "trigger": "upfront" },
+        { "percentage": 50, "trigger": "completion" }
+      ],
+      "isDefault": true
+    }
+  ]
+}
+```
+
+#### POST `/api/invoices/payment-plans`
+
+Create a new payment plan template.
+
+#### DELETE `/api/invoices/payment-plans/:id`
+
+Delete a payment plan template.
+
+#### POST `/api/invoices/generate-from-plan`
+
+Generate invoices from a payment plan template for a project.
+
+---
+
+### Milestone-Linked Invoices
+
+#### POST `/api/invoices/milestone/:milestoneId`
+
+Create an invoice linked to a specific milestone.
+
+#### GET `/api/invoices/milestone/:milestoneId`
+
+Get all invoices linked to a milestone.
+
+#### PUT `/api/invoices/:id/link-milestone`
+
+Link an existing invoice to a milestone.
+
+---
+
+### Invoice Scheduling
+
+#### POST `/api/invoices/schedule`
+
+Schedule a future invoice for automatic generation.
+
+#### GET `/api/invoices/scheduled`
+
+Get all scheduled invoices (optionally filter by project).
+
+#### DELETE `/api/invoices/scheduled/:id`
+
+Cancel a scheduled invoice.
+
+---
+
+### Recurring Invoices
+
+#### POST `/api/invoices/recurring`
+
+Create a recurring invoice pattern.
+
+**Frequency Options:** `weekly`, `monthly`, `quarterly`
+
+#### GET `/api/invoices/recurring`
+
+Get all recurring invoice patterns.
+
+#### PUT `/api/invoices/recurring/:id`
+
+Update a recurring invoice pattern.
+
+#### POST `/api/invoices/recurring/:id/pause`
+
+Pause a recurring invoice.
+
+#### POST `/api/invoices/recurring/:id/resume`
+
+Resume a paused recurring invoice.
+
+#### DELETE `/api/invoices/recurring/:id`
+
+Delete a recurring invoice pattern.
+
+---
+
+### Payment Reminders
+
+#### GET `/api/invoices/:id/reminders`
+
+Get all scheduled reminders for an invoice.
+
+**Reminder Types:**
+
+| Type | When |
+|------|------|
+| `upcoming` | 3 days before due |
+| `due` | On due date |
+| `overdue_3` | 3 days overdue |
+| `overdue_7` | 7 days overdue |
+| `overdue_14` | 14 days overdue |
+| `overdue_30` | 30 days overdue |
+
+#### POST `/api/invoices/reminders/:id/skip`
+
+Skip a scheduled reminder.
 
 ---
 
@@ -522,6 +828,70 @@ export function formatCurrency(amount: number): string {
 
 ---
 
+## Deposit Invoices & Credits
+
+### Invoice Types
+
+| Type | Description |
+|------|-------------|
+| `standard` | Regular invoice for services |
+| `deposit` | Upfront deposit payment (tracked separately) |
+
+### Creating a Deposit Invoice
+
+Deposit invoices are created through the admin project details view:
+
+1. Navigate to Project Details > Invoices tab
+2. Click "Create Invoice"
+3. Select "Deposit Invoice" from the type dropdown
+4. Enter description and amount
+5. Optionally set deposit percentage
+
+**Database Fields:**
+
+- `invoice_type`: 'deposit' (default: 'standard')
+- `deposit_for_project_id`: Links to project
+- `deposit_percentage`: Optional percentage value
+
+### Applying Deposit Credits
+
+When a deposit invoice is paid, it can be applied as credit to standard invoices:
+
+1. View outstanding invoice in project details
+2. Click "Apply Credit" button
+3. Select from available paid deposits
+4. Enter credit amount (up to available balance)
+5. Credit is recorded and invoice total adjusted
+
+**Credit Tracking (invoice_credits table):**
+
+- `invoice_id`: Invoice receiving the credit
+- `deposit_invoice_id`: Deposit invoice being applied
+- `amount`: Credit amount applied
+- `applied_at`: Timestamp
+- `applied_by`: Admin who applied
+
+### PDF Generation for Deposits
+
+**Deposit Invoice PDF:**
+
+- Title shows "DEPOSIT INVOICE" instead of "INVOICE"
+- Shows deposit percentage if applicable
+- Clear labeling that this is a deposit payment
+
+**Standard Invoice with Credits:**
+
+After line items, shows credit section:
+
+```text
+DEPOSIT CREDITS APPLIED:
+  Credit from INV-2026-001     -$500.00
+                               ─────────
+                               TOTAL DUE:  $1,500.00
+```
+
+---
+
 ## Styling
 
 ### Summary Cards
@@ -592,6 +962,126 @@ export function formatCurrency(amount: number): string {
 |------|---------|
 | `server/routes/invoices.ts` | Invoice API endpoints + PDF generation |
 | `server/services/invoice-service.ts` | Invoice business logic |
+| `src/features/client/modules/portal-invoices.ts` | Frontend invoice handling (~250 lines) |
+| `src/styles/client-portal/invoices.css` | Invoice styling |
+| `client/portal.html` | Invoices tab HTML (tab-invoices section) |
+
+---
+
+## Scheduler Service
+
+The scheduler service (`server/services/scheduler-service.ts`) handles automated invoice tasks.
+
+### Configuration
+
+| Environment Variable | Default | Description |
+|---------------------|---------|-------------|
+| `SCHEDULER_ENABLED` | `true` | Enable/disable scheduler |
+| `SCHEDULER_REMINDERS` | `true` | Enable payment reminders |
+| `SCHEDULER_SCHEDULED` | `true` | Enable scheduled invoice generation |
+| `SCHEDULER_RECURRING` | `true` | Enable recurring invoice generation |
+
+### Scheduled Jobs
+
+| Job | Schedule | Description |
+|-----|----------|-------------|
+| Reminder Check | Every hour at :00 | Processes due payment reminders |
+| Invoice Generation | Daily at 1:00 AM | Generates scheduled and recurring invoices |
+
+### Reminder Email Sequence
+
+When an invoice is sent, reminders are automatically scheduled:
+
+1. **3 days before due** - "Payment Reminder: Invoice Due Soon"
+2. **On due date** - "Payment Due Today"
+3. **3 days overdue** - "Payment Overdue"
+4. **7 days overdue** - "URGENT: Payment Overdue"
+5. **14 days overdue** - "FINAL NOTICE"
+6. **30 days overdue** - "COLLECTION NOTICE"
+
+---
+
+## Database Schema
+
+### New Tables (Migration 028)
+
+#### payment_plan_templates
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER | Primary key |
+| `name` | TEXT | Template name |
+| `description` | TEXT | Template description |
+| `payments` | JSON | Array of payment definitions |
+| `is_default` | BOOLEAN | Default template flag |
+| `created_at` | DATETIME | Creation timestamp |
+
+#### invoice_reminders
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER | Primary key |
+| `invoice_id` | INTEGER | FK to invoices |
+| `reminder_type` | TEXT | Type (upcoming, due, overdue_*) |
+| `scheduled_date` | DATE | When to send |
+| `sent_at` | DATETIME | When sent (null if pending) |
+| `status` | TEXT | pending, sent, skipped, failed |
+| `created_at` | DATETIME | Creation timestamp |
+
+#### scheduled_invoices
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER | Primary key |
+| `project_id` | INTEGER | FK to projects |
+| `client_id` | INTEGER | FK to clients |
+| `scheduled_date` | DATE | Generation date |
+| `trigger_type` | TEXT | date or milestone_complete |
+| `trigger_milestone_id` | INTEGER | FK to milestones (optional) |
+| `line_items` | JSON | Invoice line items |
+| `notes` | TEXT | Invoice notes |
+| `terms` | TEXT | Invoice terms |
+| `status` | TEXT | pending, generated, cancelled |
+| `generated_invoice_id` | INTEGER | FK to generated invoice |
+| `created_at` | DATETIME | Creation timestamp |
+
+#### recurring_invoices
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER | Primary key |
+| `project_id` | INTEGER | FK to projects |
+| `client_id` | INTEGER | FK to clients |
+| `frequency` | TEXT | weekly, monthly, quarterly |
+| `day_of_month` | INTEGER | 1-28 for monthly |
+| `day_of_week` | INTEGER | 0-6 for weekly |
+| `line_items` | JSON | Invoice line items |
+| `notes` | TEXT | Invoice notes |
+| `terms` | TEXT | Invoice terms |
+| `start_date` | DATE | Start date |
+| `end_date` | DATE | End date (optional) |
+| `next_generation_date` | DATE | Next generation date |
+| `last_generated_at` | DATETIME | Last generation timestamp |
+| `is_active` | BOOLEAN | Active status |
+| `created_at` | DATETIME | Creation timestamp |
+
+### Schema Updates to invoices Table
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `milestone_id` | INTEGER | FK to milestones (optional) |
+| `payment_plan_id` | INTEGER | FK to payment_plan_templates (optional) |
+
+---
+
+## File Locations
+
+| File | Purpose |
+|------|---------|
+| `server/routes/invoices.ts` | Invoice API endpoints + PDF generation |
+| `server/services/invoice-service.ts` | Invoice business logic (~800 lines) |
+| `server/services/scheduler-service.ts` | Automated task scheduling |
+| `server/database/migrations/028_invoice_enhancements.sql` | New tables migration |
 | `src/features/client/modules/portal-invoices.ts` | Frontend invoice handling (~250 lines) |
 | `src/styles/client-portal/invoices.css` | Invoice styling |
 | `client/portal.html` | Invoices tab HTML (tab-invoices section) |

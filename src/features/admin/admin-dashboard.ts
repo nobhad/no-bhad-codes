@@ -152,6 +152,7 @@ class AdminDashboard {
       modalBody: '#modal-body',
       inviteLeadBtn: '#invite-lead-btn',
       contactsTableBody: '#contacts-table-body',
+      contactNewCount: '#contact-new-count',
       sysVersion: '#sys-version',
       sysEnvironment: '#sys-environment',
       sysBuildDate: '#sys-build-date',
@@ -216,9 +217,13 @@ class AdminDashboard {
 
     if (!isAuthenticated) {
       logger.log('Not authenticated, showing auth gate');
+      AdminAuth.setApiAuthenticated(false);
       this.setupAuthGate();
       return;
     }
+
+    // User is authenticated - mark as authenticated via API
+    AdminAuth.setApiAuthenticated(true);
 
     // User is authenticated - show dashboard
     this.showDashboard();
@@ -1957,6 +1962,31 @@ class AdminDashboard {
   public sendInvoiceReminder(invoiceId: number): Promise<void> {
     return this.projectDetails.sendInvoiceReminder(invoiceId);
   }
+
+  /** Edit invoice - delegated to projectDetails */
+  public editInvoice(invoiceId: number): Promise<void> {
+    return this.projectDetails.editInvoice(invoiceId);
+  }
+
+  /** Show apply credit prompt - delegated to projectDetails */
+  public showApplyCreditPrompt(invoiceId: number): Promise<void> {
+    return this.projectDetails.showApplyCreditPrompt(invoiceId);
+  }
+
+  /** Duplicate invoice - delegated to projectDetails */
+  public duplicateInvoice(invoiceId: number): Promise<void> {
+    return this.projectDetails.duplicateInvoice(invoiceId);
+  }
+
+  /** Delete/void invoice - delegated to projectDetails */
+  public deleteInvoice(invoiceId: number): Promise<void> {
+    return this.projectDetails.deleteInvoice(invoiceId);
+  }
+
+  /** Record payment on invoice - delegated to projectDetails */
+  public recordPayment(invoiceId: number): Promise<void> {
+    return this.projectDetails.recordPayment(invoiceId);
+  }
 }
 
 // Global function for visitor details (called from table)
@@ -1977,9 +2007,7 @@ declare global {
   }
 }
 
-// Initialize dashboard when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-  window.adminDashboard = new AdminDashboard();
-});
+// Note: AdminDashboard is instantiated and assigned to window.adminDashboard
+// by the modules-config.ts factory to ensure proper initialization order
 
 export { AdminAuth, AdminDashboard };

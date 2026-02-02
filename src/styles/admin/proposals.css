@@ -1,0 +1,473 @@
+/**
+ * ===============================================
+ * ADMIN PROPOSALS STYLES
+ * ===============================================
+ * @file src/styles/admin/proposals.css
+ *
+ * Styles for proposal management including templates,
+ * version history, and e-signatures.
+ */
+
+/* ============================================================================
+   VIEW TOGGLE
+   ============================================================================ */
+
+.proposals-view-toggle {
+  display: flex;
+  gap: var(--portal-spacing-xs);
+  margin-bottom: var(--portal-spacing-md);
+  padding: 4px;
+  background-color: var(--portal-bg-secondary);
+  border-radius: var(--portal-radius-md);
+  width: fit-content;
+}
+
+.view-toggle-btn {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: var(--portal-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--portal-radius-sm);
+  transition: all 0.2s ease;
+}
+
+.view-toggle-btn:hover {
+  color: var(--portal-text-primary);
+}
+
+.view-toggle-btn.active {
+  background-color: var(--portal-bg-primary);
+  color: var(--portal-text-primary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================================================
+   TEMPLATES PANEL
+   ============================================================================ */
+
+.templates-panel {
+  background-color: var(--portal-bg-primary);
+  border-radius: var(--portal-radius-md);
+  padding: var(--portal-spacing-lg);
+}
+
+.templates-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--portal-spacing-lg);
+}
+
+.templates-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--portal-text-primary);
+}
+
+.templates-list .empty-state {
+  text-align: center;
+  padding: var(--portal-spacing-xl);
+  color: var(--portal-text-muted);
+}
+
+.templates-list .empty-hint {
+  font-size: 0.875rem;
+  margin-top: var(--portal-spacing-xs);
+}
+
+.templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--portal-spacing-md);
+}
+
+.template-card {
+  background-color: var(--portal-bg-secondary);
+  border: 1px solid var(--portal-border-color);
+  border-radius: var(--portal-radius-md);
+  padding: var(--portal-spacing-md);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.template-card:hover {
+  border-color: var(--app-color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.template-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--portal-spacing-sm);
+}
+
+.template-card-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--portal-text-primary);
+}
+
+.default-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: var(--app-color-primary);
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: var(--portal-radius-sm);
+}
+
+.template-card-body {
+  margin-bottom: var(--portal-spacing-md);
+}
+
+.template-description {
+  font-size: 0.875rem;
+  color: var(--portal-text-muted);
+  margin: 0 0 var(--portal-spacing-sm);
+  line-height: 1.4;
+}
+
+.template-meta {
+  display: flex;
+  gap: var(--portal-spacing-md);
+}
+
+.template-meta .meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--portal-text-muted);
+}
+
+.template-meta .meta-item svg {
+  opacity: 0.6;
+}
+
+.template-card-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-xs);
+  padding-top: var(--portal-spacing-sm);
+  border-top: 1px solid var(--portal-border-color);
+}
+
+.template-card-actions .use-template-btn {
+  flex: 1;
+}
+
+/* ============================================================================
+   TEMPLATE EDITOR MODAL
+   ============================================================================ */
+
+.template-editor-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.template-editor-modal .modal-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.template-editor-modal .modal-content {
+  position: relative;
+  background-color: var(--portal-bg-primary);
+  border-radius: var(--portal-radius-lg);
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.template-editor-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  border-bottom: 1px solid var(--portal-border-color);
+}
+
+.template-editor-modal .modal-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.template-editor-modal .btn-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  font-size: 1.25rem;
+  color: var(--portal-text-muted);
+  cursor: pointer;
+  border-radius: var(--portal-radius-sm);
+  transition: background-color 0.2s ease;
+}
+
+.template-editor-modal .btn-close:hover {
+  background-color: var(--portal-bg-secondary);
+}
+
+.template-editor-modal .modal-body {
+  padding: var(--portal-spacing-lg);
+  overflow-y: auto;
+}
+
+.template-editor-modal .form-group {
+  margin-bottom: var(--portal-spacing-md);
+}
+
+.template-editor-modal .form-group label {
+  display: block;
+  margin-bottom: var(--portal-spacing-xs);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--portal-text-primary);
+}
+
+.template-editor-modal .form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--portal-border-color);
+  border-radius: var(--portal-radius-sm);
+  font-size: 0.875rem;
+  background-color: var(--portal-bg-secondary);
+  color: var(--portal-text-primary);
+  transition: border-color 0.2s ease;
+}
+
+.template-editor-modal .form-input:focus {
+  outline: none;
+  border-color: var(--app-color-primary);
+}
+
+.template-editor-modal .form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-xs);
+}
+
+.template-editor-modal .form-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--app-color-primary);
+}
+
+.template-editor-modal .form-checkbox label {
+  margin-bottom: 0;
+}
+
+.template-editor-modal .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--portal-spacing-sm);
+  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  border-top: 1px solid var(--portal-border-color);
+}
+
+/* ============================================================================
+   VERSION HISTORY
+   ============================================================================ */
+
+.version-history {
+  background-color: var(--portal-bg-secondary);
+  border-radius: var(--portal-radius-md);
+  padding: var(--portal-spacing-md);
+}
+
+.version-empty {
+  text-align: center;
+  padding: var(--portal-spacing-md);
+  color: var(--portal-text-muted);
+}
+
+.version-empty p {
+  margin: 0 0 var(--portal-spacing-sm);
+}
+
+.version-actions {
+  margin-bottom: var(--portal-spacing-md);
+}
+
+.version-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-sm);
+}
+
+.version-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-xs);
+  padding: var(--portal-spacing-sm);
+  background-color: var(--portal-bg-primary);
+  border: 1px solid var(--portal-border-color);
+  border-radius: var(--portal-radius-sm);
+}
+
+.version-info {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-sm);
+  flex-wrap: wrap;
+}
+
+.version-number {
+  font-weight: 600;
+  color: var(--app-color-primary);
+  font-size: 0.875rem;
+}
+
+.version-date {
+  font-size: 0.75rem;
+  color: var(--portal-text-muted);
+}
+
+.version-author {
+  font-size: 0.75rem;
+  color: var(--portal-text-muted);
+  padding-left: var(--portal-spacing-sm);
+  border-left: 1px solid var(--portal-border-color);
+}
+
+.version-summary {
+  font-size: 0.8125rem;
+  color: var(--portal-text-secondary);
+  font-style: italic;
+}
+
+.version-item .version-actions {
+  display: flex;
+  gap: var(--portal-spacing-md);
+  margin-bottom: 0;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--app-color-primary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.btn-link:hover {
+  color: var(--app-color-primary-hover);
+}
+
+/* ============================================================================
+   SIGNATURE STATUS
+   ============================================================================ */
+
+.signature-status {
+  background-color: var(--portal-bg-secondary);
+  border-radius: var(--portal-radius-md);
+  padding: var(--portal-spacing-md);
+}
+
+.signature-empty {
+  text-align: center;
+  padding: var(--portal-spacing-md);
+  color: var(--portal-text-muted);
+}
+
+.signature-empty p {
+  margin: 0 0 var(--portal-spacing-sm);
+}
+
+.signature-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-md);
+}
+
+.signature-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: var(--portal-radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.signature-badge.status-pending {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: var(--color-warning, #f59e0b);
+}
+
+.signature-badge.status-success {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: var(--color-success, #22c55e);
+}
+
+.signature-badge.status-danger {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger, #ef4444);
+}
+
+.signature-badge.status-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: var(--color-warning, #f59e0b);
+}
+
+.signature-details {
+  font-size: 0.875rem;
+  color: var(--portal-text-secondary);
+}
+
+.signature-details p {
+  margin: 0 0 var(--portal-spacing-xs);
+}
+
+.signature-details strong {
+  color: var(--portal-text-primary);
+}
+
+.signature-info .signature-actions {
+  display: flex;
+  gap: var(--portal-spacing-sm);
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 640px) {
+  .templates-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .template-editor-modal .modal-content {
+    margin: var(--portal-spacing-md);
+    max-height: calc(100vh - 2 * var(--portal-spacing-md));
+  }
+
+  .version-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .version-author {
+    padding-left: 0;
+    border-left: none;
+  }
+}

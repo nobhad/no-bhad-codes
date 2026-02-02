@@ -256,6 +256,254 @@
 }
 
 /* =====================================================
+   MESSAGE SEARCH
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .messages-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--portal-spacing-md);
+  border-bottom: 1px solid var(--portal-border);
+  background: var(--portal-bg-medium);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .messages-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-sm);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .messages-search input {
+  padding: 8px 12px 8px 32px;
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  color: var(--portal-text-primary);
+  font-size: 0.875rem;
+  min-width: 200px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .messages-search input:focus {
+  outline: none;
+  border-color: var(--app-color-primary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .messages-search svg {
+  position: absolute;
+  left: 10px;
+  color: var(--portal-text-muted);
+  pointer-events: none;
+}
+
+/* =====================================================
+   MESSAGE REACTIONS
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .message-reactions {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .reaction-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  border: 1px solid transparent;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .reaction-badge:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .reaction-badge.active {
+  border-color: var(--app-color-primary);
+  background: rgba(0, 175, 240, 0.1);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .reaction-badge .reaction-count {
+  color: #666666;
+  font-weight: 500;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .add-reaction-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px dashed #cccccc;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: #999999;
+  transition: all 0.15s ease;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .add-reaction-btn:hover {
+  border-color: var(--app-color-primary);
+  color: var(--app-color-primary);
+}
+
+/* Reaction picker popup */
+:is([data-page="admin"], [data-page="client-portal"]) .reaction-picker {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  display: flex;
+  gap: 4px;
+  z-index: 100;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .reaction-picker.hidden {
+  display: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .reaction-picker button {
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: background-color 0.15s;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .reaction-picker button:hover {
+  background: #f0f0f0;
+}
+
+/* =====================================================
+   MESSAGE READ RECEIPTS
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .message-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.625rem;
+  color: #999999;
+  margin-top: 4px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .message-status svg {
+  width: 12px;
+  height: 12px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .message-status.read svg {
+  color: var(--app-color-primary);
+}
+
+/* =====================================================
+   MESSAGE ACTIONS (pin, etc.)
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .message-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .message:hover .message-actions {
+  opacity: 1;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .message-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #999999;
+  transition: all 0.15s;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .message-actions button:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #666666;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .message-actions button.pinned {
+  color: var(--app-color-primary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .message-actions button svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Pinned message indicator */
+:is([data-page="admin"], [data-page="client-portal"]) .message.pinned {
+  border-left: 3px solid var(--app-color-primary);
+  background: rgba(0, 175, 240, 0.05);
+  padding-left: 8px;
+  margin-left: -8px;
+}
+
+/* =====================================================
+   PINNED MESSAGES SECTION
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .pinned-messages {
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  border-bottom: 1px solid var(--portal-border);
+  background: rgba(0, 175, 240, 0.05);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .pinned-messages-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--app-color-primary);
+  margin-bottom: 6px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .pinned-messages-header svg {
+  width: 12px;
+  height: 12px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .pinned-message-preview {
+  font-size: 0.813rem;
+  color: #666666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .pinned-message-preview:hover {
+  color: var(--app-color-primary);
+}
+
+/* =====================================================
+   SEARCH HIGHLIGHT
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .message-body mark,
+:is([data-page="admin"], [data-page="client-portal"]) .message-body .search-highlight {
+  background: rgba(255, 230, 0, 0.4);
+  padding: 1px 2px;
+  border-radius: 2px;
+}
+
+/* =====================================================
    MOBILE RESPONSIVE
    ===================================================== */
 @media (--small-mobile) {
