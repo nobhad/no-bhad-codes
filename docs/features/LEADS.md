@@ -470,7 +470,50 @@ const { stages, totalValue, weightedValue } = await response.json();
 // stages: [{ id: 1, name: 'New Lead', leads: [...] }, ...]
 ```
 
+## Frontend UI
+
+### Lead Pipeline View
+
+- **Table View** - Traditional table with sortable columns, status dropdown, convert button
+- **Pipeline View** - Kanban board with drag-and-drop between stages
+
+### Lead Details Panel
+
+Three-tab interface:
+
+1. **Overview Tab** - Contact info, project details, budget, timeline, description
+2. **Tasks Tab** - Follow-up tasks with add/complete functionality
+3. **Notes Tab** - Lead notes with pin/unpin capability
+
+### Lead Analytics Section
+
+- **Conversion Funnel** - Visual funnel showing leads by stage with percentages
+- **Source Performance** - Lead sources with conversion rates
+
+### Scoring Rules Management
+
+- View all scoring rules with field, operator, value, and points
+- Add new rules via dialog
+- Enable/disable rules
+- Delete rules
+
+### Files
+
+- `src/features/admin/modules/admin-leads.ts` - Lead management module
+- `src/styles/admin/leads-pipeline.css` - Lead pipeline and analytics styles
+- `admin/index.html` - Analytics section, scoring rules section
+
+---
+
 ## Change Log
+
+### February 2, 2026 - Frontend Advanced Features
+
+- Added Lead Analytics section with conversion funnel and source performance
+- Added Scoring Rules management UI with CRUD operations
+- Added Tasks tab in lead details panel
+- Added Notes tab in lead details panel with pin/unpin
+- Added lead score badge to details panel header
 
 ### February 2, 2026 - Simplified Lead Statuses
 

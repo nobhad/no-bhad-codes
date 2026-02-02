@@ -491,7 +491,57 @@ await fetch('/api/proposals/123/discount', {
 - `server/routes/proposals.ts` - Added 35+ new endpoints
 - `src/types/api.ts` - Added TypeScript interfaces
 
+## Frontend UI
+
+### Proposals List View
+
+- View toggle: Proposals / Templates
+- Filter buttons: All, Pending, Reviewed, Accepted
+- Stats cards: Pending, Reviewed, Accepted, Total Value
+- Table with client, project, tier, price, status dropdown, actions
+
+### Proposal Details Panel
+
+**Sections:**
+
+1. **Client Information** - Name, email, company
+2. **Project Details** - Project name, type, submitted date
+3. **Package Selection** - Tier badge, maintenance plan
+4. **Included Features** - List of tier-included features
+5. **Add-ons Selected** - List of add-on features with prices
+6. **Pricing** - Base, add-ons, total
+7. **Client Notes** - Notes from client
+8. **Admin Notes** - Editable admin notes
+9. **Custom Line Items** - Add/delete custom items
+10. **Discount** - Apply/remove discounts
+11. **Comments** - View/add comments (internal or client-visible)
+12. **Activity Log** - Recent proposal activity
+13. **Version History** - Create, restore, compare versions
+14. **Signature Status** - Request, resend, cancel signatures
+
+### Templates Management
+
+- Templates grid with cards
+- Create/edit template modal
+- Template fields: name, description, project type, tier, base price, default toggle
+- Use/edit/delete template actions
+
+### Files
+
+- `src/features/admin/modules/admin-proposals.ts` - Proposal management module
+- `src/styles/admin/proposals.css` - Proposal styles
+
+---
+
 ## Change Log
+
+### February 2, 2026 - Frontend Advanced Features
+
+- Added Custom Line Items section with add/delete functionality
+- Added Discount section with apply/remove
+- Added Comments section with add comment and internal toggle
+- Added Activity Log section showing recent activity
+- Updated proposal details to load all advanced sections
 
 ### February 1, 2026 - Initial Implementation
 
