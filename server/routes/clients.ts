@@ -230,17 +230,51 @@ router.get(
     const clients = await QueryCache.getOrSet(
       'clients:all:with_projects',
       async () => {
-        return await db.all(`
+        // Get base client data with project count and health score
+        const clientRows = await db.all(`
           SELECT
             c.id, c.email, c.company_name, c.contact_name, c.phone,
             c.status, c.client_type, c.created_at, c.updated_at,
             c.invitation_sent_at, c.invitation_expires_at,
+            c.health_score, c.health_status,
             COUNT(p.id) as project_count
           FROM clients c
           LEFT JOIN projects p ON c.id = p.client_id
           GROUP BY c.id
           ORDER BY c.created_at DESC
         `);
+
+        // Get tags for all clients in one query
+        const tagRows = await db.all(`
+          SELECT ct.client_id, t.id, t.name, t.color
+          FROM client_tags ct
+          JOIN tags t ON ct.tag_id = t.id
+          ORDER BY t.name
+        `);
+
+        // Group tags by client_id
+        const tagsByClient = new Map<number, Array<{ id: number; name: string; color: string }>>();
+        for (const row of tagRows) {
+          const r = row as Record<string, unknown>;
+          const clientId = r.client_id as number;
+          if (!tagsByClient.has(clientId)) {
+            tagsByClient.set(clientId, []);
+          }
+          tagsByClient.get(clientId)!.push({
+            id: r.id as number,
+            name: r.name as string,
+            color: (r.color as string) || '#6b7280'
+          });
+        }
+
+        // Merge tags into client objects
+        return clientRows.map((client) => {
+          const c = client as Record<string, unknown>;
+          return {
+            ...c,
+            tags: tagsByClient.get(c.id as number) || []
+          };
+        });
       },
       {
         ttl: 300,

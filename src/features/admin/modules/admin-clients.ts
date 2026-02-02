@@ -34,6 +34,7 @@ import { createDOMCache, batchUpdateText, getElement } from '../../../utils/dom-
 import { withButtonLoading } from '../../../utils/button-loading';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { validateEmail } from '../../../../shared/validation/validators';
+import { getHealthBadgeHtml, getTagsHtml } from './admin-client-details';
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -137,6 +138,10 @@ export interface Client {
   billing_state?: string | null;
   billing_zip?: string | null;
   billing_country?: string | null;
+  // CRM fields
+  health_score?: number | null;
+  health_status?: 'healthy' | 'at-risk' | 'critical' | null;
+  tags?: Array<{ id: number; name: string; color: string }>;
 }
 
 interface ClientsData {
@@ -295,7 +300,7 @@ function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): voi
   if (!tableBody) return;
 
   if (!clients || clients.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="6" class="loading-row">No clients found</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">No clients found</td></tr>';
     return;
   }
 
@@ -303,7 +308,7 @@ function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): voi
   const filteredClients = applyFilters(clients, filterState, CLIENTS_FILTER_CONFIG);
 
   if (filteredClients.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="6" class="loading-row">No clients match the current filters</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">No clients match the current filters</td></tr>';
     return;
   }
 
@@ -366,12 +371,22 @@ function renderClientsTable(clients: Client[], _ctx: AdminDashboardContext): voi
            </span>`
         : `<span class="status-badge ${statusClass}">${statusDisplay}</span>`;
 
+      // Health badge
+      const healthBadge = getHealthBadgeHtml(client.health_score);
+
+      // Tags display
+      const tagsHtml = client.tags ? getTagsHtml(client.tags) : '';
+
       return `
         <tr data-client-id="${client.id}" class="clickable-row">
-          <td>${safeName}${safeCompany ? `<br><small>${safeCompany}</small>` : ''}</td>
+          <td>
+            ${safeName}${safeCompany ? `<br><small>${safeCompany}</small>` : ''}
+            ${tagsHtml}
+          </td>
           <td>${typeLabel}</td>
           <td>${safeEmail}</td>
           <td class="status-cell">${statusCell}</td>
+          <td class="text-center">${healthBadge}</td>
           <td>${projectCount}</td>
           <td>${date}</td>
         </tr>
