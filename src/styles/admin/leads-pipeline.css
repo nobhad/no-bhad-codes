@@ -337,6 +337,393 @@
 }
 
 /* ============================================
+   Lead Analytics Section
+   ============================================ */
+
+.leads-analytics-section {
+  margin-bottom: var(--portal-spacing-lg);
+}
+
+.leads-analytics-section .analytics-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--portal-spacing-md);
+}
+
+.leads-analytics-section .analytics-card {
+  background: var(--portal-bg);
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-md);
+  padding: var(--portal-spacing-md);
+}
+
+.leads-analytics-section .analytics-card h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--portal-text-primary);
+  margin-bottom: var(--portal-spacing-md);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Conversion Funnel */
+.funnel-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-sm);
+}
+
+.funnel-stage {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-sm);
+}
+
+.funnel-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--portal-spacing-xs) var(--portal-spacing-sm);
+  background: linear-gradient(90deg, var(--app-color-primary) 0%, var(--portal-bg-medium) 100%);
+  border-radius: var(--portal-radius-sm);
+  min-width: 60px;
+  transition: width 0.3s ease;
+}
+
+.funnel-label {
+  font-size: 0.75rem;
+  color: var(--color-white);
+  font-weight: 500;
+}
+
+.funnel-count {
+  font-size: 0.75rem;
+  color: var(--color-white);
+  font-weight: 600;
+}
+
+.funnel-percentage {
+  font-size: 0.75rem;
+  color: var(--portal-text-muted);
+  min-width: 40px;
+  text-align: right;
+}
+
+/* Source Performance */
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-sm);
+}
+
+.source-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--portal-spacing-xs) 0;
+  border-bottom: 1px solid var(--portal-border);
+}
+
+.source-item:last-child {
+  border-bottom: none;
+}
+
+.source-name {
+  font-size: 0.875rem;
+  color: var(--portal-text-primary);
+}
+
+.source-stats {
+  display: flex;
+  gap: var(--portal-spacing-md);
+  font-size: 0.75rem;
+}
+
+.source-total {
+  color: var(--portal-text-secondary);
+}
+
+.source-converted {
+  color: var(--status-active);
+}
+
+.source-rate {
+  color: var(--portal-text-muted);
+  font-weight: 500;
+}
+
+.source-rate.rate-good {
+  color: var(--status-active);
+}
+
+/* ============================================
+   Scoring Rules Section
+   ============================================ */
+
+#scoring-rules-card {
+  margin-bottom: var(--portal-spacing-lg);
+}
+
+.scoring-rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-sm);
+  padding: var(--portal-spacing-md);
+}
+
+.scoring-rule-item {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-md);
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+}
+
+.scoring-rule-item.rule-inactive {
+  opacity: 0.5;
+}
+
+.rule-info {
+  flex: 1;
+}
+
+.rule-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--portal-text-primary);
+  margin-bottom: 2px;
+}
+
+.rule-condition {
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+}
+
+.rule-condition code {
+  background: var(--portal-bg-medium);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+.rule-operator {
+  margin: 0 4px;
+  color: var(--portal-text-muted);
+}
+
+.rule-points {
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: center;
+}
+
+.rule-points.points-positive {
+  color: var(--status-active);
+}
+
+.rule-points.points-negative {
+  color: var(--status-cancelled);
+}
+
+.rule-actions {
+  display: flex;
+  gap: var(--portal-spacing-xs);
+}
+
+/* ============================================
+   Lead Details Panel Tabs (Updated)
+   ============================================ */
+
+.lead-details-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--portal-border);
+  margin-bottom: var(--portal-spacing-md);
+  padding-bottom: var(--portal-spacing-xs);
+}
+
+.lead-tab {
+  padding: var(--portal-spacing-xs) var(--portal-spacing-md);
+  background: transparent;
+  border: none;
+  color: var(--portal-text-secondary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  border-radius: var(--portal-radius-sm) var(--portal-radius-sm) 0 0;
+  transition: all 0.15s ease;
+}
+
+.lead-tab:hover {
+  color: var(--portal-text-primary);
+}
+
+.lead-tab.active {
+  background: var(--portal-bg-medium);
+  color: var(--app-color-primary);
+  font-weight: 500;
+}
+
+.lead-tab-content {
+  display: none;
+}
+
+.lead-tab-content.active {
+  display: block;
+}
+
+/* Lead Score Badge in Header */
+.lead-score-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: auto;
+  margin-right: var(--portal-spacing-md);
+}
+
+.lead-score-badge.score-hot {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--status-active);
+}
+
+.lead-score-badge.score-warm {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+.lead-score-badge.score-cold {
+  background: rgba(156, 163, 175, 0.2);
+  color: var(--portal-text-secondary);
+}
+
+/* Lead Tasks List */
+.lead-tasks-list {
+  margin-bottom: var(--portal-spacing-md);
+}
+
+.lead-task-item {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-sm);
+  padding: var(--portal-spacing-sm);
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-sm);
+  margin-bottom: var(--portal-spacing-sm);
+  border: 1px solid var(--portal-border);
+}
+
+.lead-task-item.task-completed {
+  opacity: 0.6;
+}
+
+.lead-task-item.task-completed .task-title {
+  text-decoration: line-through;
+}
+
+.task-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--portal-border);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--status-active);
+  transition: all 0.15s ease;
+}
+
+.task-checkbox:hover {
+  border-color: var(--app-color-primary);
+}
+
+.task-checkbox.checked {
+  background: var(--status-active);
+  border-color: var(--status-active);
+  color: white;
+}
+
+.task-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.task-title {
+  font-size: 0.875rem;
+  color: var(--portal-text-primary);
+}
+
+.task-due {
+  font-size: 0.7rem;
+  color: var(--portal-text-muted);
+}
+
+.task-type-badge {
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  background: var(--portal-bg-medium);
+  color: var(--portal-text-secondary);
+  border-radius: var(--portal-radius-sm);
+  text-transform: uppercase;
+}
+
+/* Lead Notes List */
+.lead-notes-list {
+  margin-bottom: var(--portal-spacing-md);
+}
+
+.lead-note-item {
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-sm);
+  padding: var(--portal-spacing-md);
+  margin-bottom: var(--portal-spacing-sm);
+  border: 1px solid var(--portal-border);
+}
+
+.lead-note-item.note-pinned {
+  border-left: 3px solid var(--app-color-primary);
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--portal-spacing-xs);
+}
+
+.note-author {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--portal-text-secondary);
+}
+
+.note-date {
+  font-size: 0.7rem;
+  color: var(--portal-text-muted);
+  margin-left: var(--portal-spacing-sm);
+}
+
+.note-content {
+  font-size: 0.875rem;
+  color: var(--portal-text-primary);
+  line-height: 1.5;
+}
+
+/* Empty State */
+.empty-state-small {
+  padding: var(--portal-spacing-md);
+  text-align: center;
+  color: var(--portal-text-muted);
+  font-size: 0.875rem;
+}
+
+/* ============================================
    Responsive
    ============================================ */
 
@@ -345,14 +732,28 @@
     margin-bottom: var(--portal-spacing-sm);
   }
 
+  .lead-details-tabs,
   .lead-detail-tabs {
     overflow-x: auto;
     padding-bottom: var(--portal-spacing-sm);
   }
 
+  .lead-tab,
   .lead-detail-tabs button {
     white-space: nowrap;
     font-size: 0.813rem;
     padding: var(--portal-spacing-xs) var(--portal-spacing-sm);
+  }
+
+  .leads-analytics-section .analytics-row {
+    grid-template-columns: 1fr;
+  }
+
+  .scoring-rule-item {
+    flex-wrap: wrap;
+  }
+
+  .rule-points {
+    min-width: auto;
   }
 }

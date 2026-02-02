@@ -10,7 +10,7 @@
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDisplayValue, formatDate, formatDateTime } from '../../../utils/format-utils';
-import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import { createTableDropdown, LEAD_STATUS_OPTIONS } from '../../../utils/table-dropdown';
 import {
   createFilterUI,
@@ -23,16 +23,17 @@ import {
 } from '../../../utils/table-filter';
 import type { Lead, AdminDashboardContext } from '../admin-types';
 import { loadProjects, showProjectDetails } from './admin-projects';
-import { confirmDialog } from '../../../utils/confirm-dialog';
+import { confirmDialog, multiPromptDialog, alertDialog } from '../../../utils/confirm-dialog';
+import { showToast } from '../../../utils/toast-notifications';
 import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
 
 interface LeadsData {
   leads: Lead[];
   stats: {
     total: number;
-    pending: number;
-    active: number;
-    completed: number;
+    new: number;
+    inProgress: number;
+    converted: number;
   };
 }
 
@@ -43,14 +44,14 @@ let filterUIInitialized = false;
 let currentView: 'table' | 'pipeline' = 'table';
 let kanbanBoard: ReturnType<typeof createKanbanBoard> | null = null;
 
-// Pipeline stage configuration
+// Pipeline stage configuration - simplified lead funnel
 const PIPELINE_STAGES = [
-  { id: 'new', label: 'New', statuses: ['new', 'pending'], color: 'var(--portal-text-secondary)' },
+  { id: 'new', label: 'New', statuses: ['new'], color: 'var(--portal-text-secondary)' },
   { id: 'contacted', label: 'Contacted', statuses: ['contacted'], color: 'var(--app-color-primary)' },
   { id: 'qualified', label: 'Qualified', statuses: ['qualified'], color: '#f59e0b' },
-  { id: 'proposal', label: 'Proposal', statuses: ['proposal'], color: '#8b5cf6' },
-  { id: 'won', label: 'Won', statuses: ['active', 'converted', 'completed'], color: 'var(--status-active)' },
-  { id: 'lost', label: 'Lost', statuses: ['cancelled', 'rejected'], color: 'var(--status-cancelled)' }
+  { id: 'in-progress', label: 'In Progress', statuses: ['in-progress'], color: '#8b5cf6' },
+  { id: 'won', label: 'Won', statuses: ['converted'], color: 'var(--status-active)' },
+  { id: 'lost', label: 'Lost', statuses: ['lost', 'cancelled'], color: 'var(--status-cancelled)' }
 ];
 
 // ============================================================================
@@ -88,6 +89,12 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
       const data: LeadsData = await response.json();
       leadsData = data.leads || [];
       updateLeadsDisplay(data, ctx);
+
+      // Load analytics and scoring rules in parallel
+      Promise.all([
+        loadLeadAnalytics(),
+        loadScoringRules()
+      ]).catch(err => console.error('[AdminLeads] Failed to load extras:', err));
     } else if (response.status !== 401) {
       // Don't show error for 401 - handled by apiFetch
       const errorText = await response.text();
@@ -209,7 +216,7 @@ function renderPipelineView(ctx: AdminDashboardContext): void {
     color: stage.color,
     items: leadsData
       .filter(lead => {
-        const status = lead.status || 'pending';
+        const status = lead.status || 'new';
         return stage.statuses.includes(status);
       })
       .map(lead => leadToKanbanItem(lead))
@@ -331,15 +338,15 @@ async function handleLeadStageChange(
 
   // Map stage to status
   const stageToStatus: Record<string, string> = {
-    'new': 'pending',
+    'new': 'new',
     'contacted': 'contacted',
     'qualified': 'qualified',
-    'proposal': 'proposal',
+    'in-progress': 'in-progress',
     'won': 'converted',
-    'lost': 'cancelled'
+    'lost': 'lost'
   };
 
-  const newStatus = stageToStatus[toStage] || 'pending';
+  const newStatus = stageToStatus[toStage] || 'new';
   await updateLeadStatus(leadId, newStatus, ctx);
 
   // Update local data
@@ -349,22 +356,22 @@ async function handleLeadStageChange(
 function updateLeadsDisplay(data: LeadsData, ctx: AdminDashboardContext): void {
   // Update overview stats
   const statTotal = getElement('stat-total-leads');
-  const statPending = getElement('stat-pending-leads');
+  const statNew = getElement('stat-pending-leads'); // Reuse element, shows new leads
   const statVisitors = getElement('stat-visitors');
 
   // Update leads tab stats
   const leadsTotal = getElement('leads-total');
-  const leadsPending = getElement('leads-pending');
-  const leadsActive = getElement('leads-active');
-  const leadsCompleted = getElement('leads-completed');
+  const leadsNew = getElement('leads-pending'); // Reuse element, shows new leads
+  const leadsInProgress = getElement('leads-active'); // Reuse element, shows in-progress
+  const leadsConverted = getElement('leads-completed'); // Reuse element, shows converted
 
   if (statTotal) statTotal.textContent = data.stats?.total?.toString() || '0';
-  if (statPending) statPending.textContent = data.stats?.pending?.toString() || '0';
+  if (statNew) statNew.textContent = data.stats?.new?.toString() || '0';
   if (statVisitors) statVisitors.textContent = '0';
   if (leadsTotal) leadsTotal.textContent = data.stats?.total?.toString() || '0';
-  if (leadsPending) leadsPending.textContent = data.stats?.pending?.toString() || '0';
-  if (leadsActive) leadsActive.textContent = data.stats?.active?.toString() || '0';
-  if (leadsCompleted) leadsCompleted.textContent = data.stats?.completed?.toString() || '0';
+  if (leadsNew) leadsNew.textContent = data.stats?.new?.toString() || '0';
+  if (leadsInProgress) leadsInProgress.textContent = data.stats?.inProgress?.toString() || '0';
+  if (leadsConverted) leadsConverted.textContent = data.stats?.converted?.toString() || '0';
 
   // Update recent activity list (leads appear as activity items)
   const recentList = getElement('recent-activity-list');
@@ -434,10 +441,10 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
     const projectType = leadAny.project_type || '-';
     const displayType = projectType !== '-' ? projectType.charAt(0).toUpperCase() + projectType.slice(1) : '-';
     const displayBudget = formatDisplayValue(leadAny.budget_range);
-    const status = lead.status || 'pending';
+    const status = lead.status || 'new';
 
-    // Show convert button for qualified leads
-    const showConvertBtn = status === 'qualified' || status === 'pending' || status === 'contacted';
+    // Show convert button for leads that can be converted (not yet converted/lost/cancelled)
+    const showConvertBtn = ['new', 'contacted', 'qualified', 'in-progress'].includes(status);
 
     const row = document.createElement('tr');
     row.dataset.leadId = String(lead.id);
@@ -694,7 +701,7 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
   });
 }
 
-export function showLeadDetails(leadId: number): void {
+export async function showLeadDetails(leadId: number): Promise<void> {
   const lead = leadsData.find((l) => l.id === leadId);
   if (!lead) return;
 
@@ -715,86 +722,154 @@ export function showLeadDetails(leadId: number): void {
   const safeFeatures = SanitizationUtils.escapeHtml((lead.features || '-').replace(/,/g, ', '));
   const safeSource = SanitizationUtils.escapeHtml(lead.source || '-');
 
-  // Show activate button only for pending/new leads
-  const showActivateBtn = !lead.status || lead.status === 'pending' || lead.status === 'new' || lead.status === 'qualified';
-  // Show view project button for activated leads
-  const isActivated = lead.status === 'active' || lead.status === 'in-progress' || lead.status === 'on-hold' || lead.status === 'completed' || lead.status === 'converted';
+  // Calculate lead score
+  const score = calculateLeadScore(lead);
+  const scoreClass = getScoreClass(score);
+
+  // Show activate button only for leads that can be converted to projects
+  const showActivateBtn = !lead.status || ['new', 'contacted', 'qualified', 'in-progress'].includes(lead.status);
+  // Show view project button for converted leads
+  const isActivated = lead.status === 'converted';
+
+  // Load tasks and notes
+  const [tasks, notes] = await Promise.all([
+    loadLeadTasks(leadId),
+    loadLeadNotes(leadId)
+  ]);
 
   detailsPanel.innerHTML = `
     <div class="details-header">
-      <h3>Intake Form Submission</h3>
+      <h3>Lead Details</h3>
+      <div class="lead-score-badge ${scoreClass}">Score: ${score}</div>
       <button class="close-btn" onclick="window.closeDetailsPanel()" aria-label="Close panel">×</button>
     </div>
     <div class="details-content">
-      <div class="project-detail-meta">
-        <div class="meta-item">
-          <span class="field-label">Name</span>
-          <span class="meta-value">${safeContactName}</span>
+      <!-- Lead Details Tabs -->
+      <div class="lead-details-tabs">
+        <button class="lead-tab active" data-tab="overview">Overview</button>
+        <button class="lead-tab" data-tab="tasks">Tasks (${tasks.length})</button>
+        <button class="lead-tab" data-tab="notes">Notes (${notes.length})</button>
+      </div>
+
+      <!-- Overview Tab -->
+      <div class="lead-tab-content active" data-tab-content="overview">
+        <div class="project-detail-meta">
+          <div class="meta-item">
+            <span class="field-label">Name</span>
+            <span class="meta-value">${safeContactName}</span>
+          </div>
+          <div class="meta-item">
+            <span class="field-label">Email</span>
+            <span class="meta-value">${safeEmail}</span>
+          </div>
+          ${safeCompanyName ? `
+          <div class="meta-item">
+            <span class="field-label">Company</span>
+            <span class="meta-value">${safeCompanyName}</span>
+          </div>
+          ` : ''}
+          <div class="meta-item">
+            <span class="field-label">Phone</span>
+            <span class="meta-value">${safePhone}</span>
+          </div>
+          <div class="meta-item">
+            <span class="field-label">Status</span>
+            <span class="meta-value" id="panel-lead-status-container"></span>
+          </div>
+          <div class="meta-item">
+            <span class="field-label">Source</span>
+            <span class="meta-value">${safeSource}</span>
+          </div>
+          <div class="meta-item">
+            <span class="field-label">Project Type</span>
+            <span class="meta-value">${safeProjectType}</span>
+          </div>
+          <div class="meta-item">
+            <span class="field-label">Budget</span>
+            <span class="meta-value">${safeBudget}</span>
+          </div>
+          <div class="meta-item">
+            <span class="field-label">Timeline</span>
+            <span class="meta-value">${safeTimeline}</span>
+          </div>
+          <div class="meta-item">
+            <span class="field-label">Created</span>
+            <span class="meta-value">${formatDateTime(lead.created_at)}</span>
+          </div>
         </div>
-        <div class="meta-item">
-          <span class="field-label">Email</span>
-          <span class="meta-value">${safeEmail}</span>
+        <div class="project-description-row">
+          <div class="meta-item description-item">
+            <span class="field-label">Description</span>
+            <span class="meta-value">${safeDescription}</span>
+          </div>
         </div>
-        ${safeCompanyName ? `
-        <div class="meta-item">
-          <span class="field-label">Company</span>
-          <span class="meta-value">${safeCompanyName}</span>
+        <div class="project-description-row">
+          <div class="meta-item description-item">
+            <span class="field-label">Features</span>
+            <span class="meta-value">${safeFeatures}</span>
+          </div>
         </div>
-        ` : ''}
-        <div class="meta-item">
-          <span class="field-label">Phone</span>
-          <span class="meta-value">${safePhone}</span>
-        </div>
-        <div class="meta-item">
-          <span class="field-label">Status</span>
-          <span class="meta-value" id="panel-lead-status-container"></span>
-        </div>
-        <div class="meta-item">
-          <span class="field-label">Source</span>
-          <span class="meta-value">${safeSource}</span>
-        </div>
-        <div class="meta-item">
-          <span class="field-label">Project Type</span>
-          <span class="meta-value">${safeProjectType}</span>
-        </div>
-        <div class="meta-item">
-          <span class="field-label">Budget</span>
-          <span class="meta-value">${safeBudget}</span>
-        </div>
-        <div class="meta-item">
-          <span class="field-label">Timeline</span>
-          <span class="meta-value">${safeTimeline}</span>
-        </div>
-        <div class="meta-item">
-          <span class="field-label">Created</span>
-          <span class="meta-value">${formatDateTime(lead.created_at)}</span>
+        <div class="details-actions">
+          ${showActivateBtn ? `<button class="btn details-activate-btn" data-id="${lead.id}">Activate as Project</button>` : ''}
+          ${isActivated ? `<button class="btn details-view-project-btn" data-id="${lead.id}">View Project</button>` : ''}
         </div>
       </div>
-      <div class="project-description-row">
-        <div class="meta-item description-item">
-          <span class="field-label">Description</span>
-          <span class="meta-value">${safeDescription}</span>
-        </div>
+
+      <!-- Tasks Tab -->
+      <div class="lead-tab-content" data-tab-content="tasks">
+        ${renderLeadTasks(tasks, leadId)}
       </div>
-      <div class="project-description-row">
-        <div class="meta-item description-item">
-          <span class="field-label">Features</span>
-          <span class="meta-value">${safeFeatures}</span>
-        </div>
-      </div>
-      <div class="details-actions">
-        ${showActivateBtn ? `<button class="btn details-activate-btn" data-id="${lead.id}">Activate as Project</button>` : ''}
-        ${isActivated ? `<button class="btn details-view-project-btn" data-id="${lead.id}">View Project</button>` : ''}
+
+      <!-- Notes Tab -->
+      <div class="lead-tab-content" data-tab-content="notes">
+        ${renderLeadNotes(notes, leadId)}
       </div>
     </div>
   `;
+
+  // Setup tab switching
+  detailsPanel.querySelectorAll('.lead-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabName = (tab as HTMLElement).dataset.tab;
+      detailsPanel.querySelectorAll('.lead-tab').forEach(t => t.classList.remove('active'));
+      detailsPanel.querySelectorAll('.lead-tab-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      detailsPanel.querySelector(`[data-tab-content="${tabName}"]`)?.classList.add('active');
+    });
+  });
+
+  // Setup task actions
+  detailsPanel.querySelectorAll('[data-action="toggle-task"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const taskItem = btn.closest('.lead-task-item');
+      const taskId = parseInt((taskItem as HTMLElement)?.dataset.taskId || '0');
+      if (taskId) completeTask(taskId, leadId);
+    });
+  });
+
+  detailsPanel.querySelector('.add-lead-task-btn')?.addEventListener('click', () => {
+    showAddTaskDialog(leadId);
+  });
+
+  // Setup note actions
+  detailsPanel.querySelectorAll('[data-action="toggle-pin"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const noteItem = btn.closest('.lead-note-item');
+      const noteId = parseInt((noteItem as HTMLElement)?.dataset.noteId || '0');
+      if (noteId) toggleNotePin(noteId, leadId);
+    });
+  });
+
+  detailsPanel.querySelector('.add-lead-note-btn')?.addEventListener('click', () => {
+    showAddNoteDialog(leadId);
+  });
 
   // Add custom dropdown for status in panel
   const statusContainer = detailsPanel.querySelector('#panel-lead-status-container');
   if (statusContainer && storedContext) {
     const dropdown = createTableDropdown({
       options: LEAD_STATUS_OPTIONS,
-      currentValue: lead.status || 'pending',
+      currentValue: lead.status || 'new',
       onChange: async (newStatus) => {
         await updateLeadStatus(lead.id, newStatus, storedContext!);
         lead.status = newStatus as Lead['status'];
@@ -936,3 +1011,522 @@ export async function inviteLead(
     ctx.showNotification('Failed to send invitation. Please try again.', 'error');
   }
 }
+
+// ============================================================================
+// LEAD ANALYTICS
+// ============================================================================
+
+interface FunnelStage {
+  stage: string;
+  count: number;
+  percentage: number;
+}
+
+interface SourcePerformance {
+  source: string;
+  total: number;
+  converted: number;
+  conversionRate: number;
+}
+
+/**
+ * Load and display lead analytics (conversion funnel, source performance)
+ */
+export async function loadLeadAnalytics(): Promise<void> {
+  await Promise.all([
+    loadConversionFunnel(),
+    loadSourcePerformance()
+  ]);
+}
+
+async function loadConversionFunnel(): Promise<void> {
+  const container = getElement('leads-conversion-funnel');
+  if (!container) return;
+
+  try {
+    const response = await apiFetch('/api/admin/leads/conversion-funnel');
+    if (response.ok) {
+      const data: { funnel: FunnelStage[] } = await response.json();
+      renderConversionFunnel(container, data.funnel || []);
+    } else {
+      container.innerHTML = '<div class="empty-state">Unable to load funnel data</div>';
+    }
+  } catch (error) {
+    console.error('[AdminLeads] Failed to load conversion funnel:', error);
+    container.innerHTML = '<div class="empty-state">Error loading funnel</div>';
+  }
+}
+
+function renderConversionFunnel(container: HTMLElement, funnel: FunnelStage[]): void {
+  if (funnel.length === 0) {
+    container.innerHTML = '<div class="empty-state">No funnel data available</div>';
+    return;
+  }
+
+  const maxCount = Math.max(...funnel.map(s => s.count), 1);
+
+  container.innerHTML = funnel.map(stage => {
+    const width = Math.max((stage.count / maxCount) * 100, 10);
+    return `
+      <div class="funnel-stage">
+        <div class="funnel-bar" style="width: ${width}%">
+          <span class="funnel-label">${SanitizationUtils.escapeHtml(stage.stage)}</span>
+          <span class="funnel-count">${stage.count}</span>
+        </div>
+        <span class="funnel-percentage">${stage.percentage.toFixed(0)}%</span>
+      </div>
+    `;
+  }).join('');
+}
+
+async function loadSourcePerformance(): Promise<void> {
+  const container = getElement('leads-source-performance');
+  if (!container) return;
+
+  try {
+    const response = await apiFetch('/api/admin/leads/source-performance');
+    if (response.ok) {
+      const data: { sources: SourcePerformance[] } = await response.json();
+      renderSourcePerformance(container, data.sources || []);
+    } else {
+      container.innerHTML = '<div class="empty-state">Unable to load source data</div>';
+    }
+  } catch (error) {
+    console.error('[AdminLeads] Failed to load source performance:', error);
+    container.innerHTML = '<div class="empty-state">Error loading sources</div>';
+  }
+}
+
+function renderSourcePerformance(container: HTMLElement, sources: SourcePerformance[]): void {
+  if (sources.length === 0) {
+    container.innerHTML = '<div class="empty-state">No source data available</div>';
+    return;
+  }
+
+  container.innerHTML = sources.map(source => `
+    <div class="source-item">
+      <div class="source-name">${SanitizationUtils.escapeHtml(source.source)}</div>
+      <div class="source-stats">
+        <span class="source-total">${source.total} leads</span>
+        <span class="source-converted">${source.converted} won</span>
+        <span class="source-rate ${source.conversionRate > 20 ? 'rate-good' : ''}">${source.conversionRate.toFixed(0)}%</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================================================
+// SCORING RULES MANAGEMENT
+// ============================================================================
+
+interface ScoringRule {
+  id: number;
+  name: string;
+  description?: string;
+  field_name: string;
+  operator: string;
+  threshold_value: string;
+  points: number;
+  is_active: boolean;
+}
+
+let scoringRulesInitialized = false;
+
+/**
+ * Load and display scoring rules
+ */
+export async function loadScoringRules(): Promise<void> {
+  if (!scoringRulesInitialized) {
+    setupScoringRulesListeners();
+    scoringRulesInitialized = true;
+  }
+
+  const container = getElement('scoring-rules-list');
+  if (!container) return;
+
+  try {
+    const response = await apiFetch('/api/admin/leads/scoring-rules');
+    if (response.ok) {
+      const data: { rules: ScoringRule[] } = await response.json();
+      renderScoringRules(container, data.rules || []);
+    } else {
+      container.innerHTML = '<div class="empty-state">Unable to load scoring rules</div>';
+    }
+  } catch (error) {
+    console.error('[AdminLeads] Failed to load scoring rules:', error);
+    container.innerHTML = '<div class="empty-state">Error loading rules</div>';
+  }
+}
+
+function setupScoringRulesListeners(): void {
+  const addBtn = getElement('add-scoring-rule-btn');
+  if (addBtn && !addBtn.dataset.listenerAdded) {
+    addBtn.dataset.listenerAdded = 'true';
+    addBtn.addEventListener('click', () => showAddScoringRuleDialog());
+  }
+}
+
+function renderScoringRules(container: HTMLElement, rules: ScoringRule[]): void {
+  if (rules.length === 0) {
+    container.innerHTML = '<div class="empty-state">No scoring rules configured</div>';
+    return;
+  }
+
+  container.innerHTML = rules.map(rule => `
+    <div class="scoring-rule-item ${rule.is_active ? '' : 'rule-inactive'}" data-rule-id="${rule.id}">
+      <div class="rule-info">
+        <div class="rule-name">${SanitizationUtils.escapeHtml(rule.name)}</div>
+        <div class="rule-condition">
+          <code>${SanitizationUtils.escapeHtml(rule.field_name)}</code>
+          <span class="rule-operator">${SanitizationUtils.escapeHtml(rule.operator)}</span>
+          <code>${SanitizationUtils.escapeHtml(rule.threshold_value)}</code>
+        </div>
+      </div>
+      <div class="rule-points ${rule.points >= 0 ? 'points-positive' : 'points-negative'}">
+        ${rule.points >= 0 ? '+' : ''}${rule.points} pts
+      </div>
+      <div class="rule-actions">
+        <button class="icon-btn" title="${rule.is_active ? 'Disable' : 'Enable'}" data-action="toggle">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            ${rule.is_active
+              ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+              : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+            }
+          </svg>
+        </button>
+        <button class="icon-btn icon-btn-danger" title="Delete" data-action="delete">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  // Add event listeners
+  container.querySelectorAll('.scoring-rule-item').forEach(item => {
+    const ruleId = parseInt((item as HTMLElement).dataset.ruleId || '0');
+
+    item.querySelector('[data-action="toggle"]')?.addEventListener('click', () => toggleScoringRule(ruleId));
+    item.querySelector('[data-action="delete"]')?.addEventListener('click', () => deleteScoringRule(ruleId));
+  });
+}
+
+async function showAddScoringRuleDialog(): Promise<void> {
+  const result = await multiPromptDialog({
+    title: 'Add Scoring Rule',
+    fields: [
+      { name: 'name', label: 'Rule Name', type: 'text', required: true },
+      { name: 'field_name', label: 'Field', type: 'select', options: [
+        { value: 'budget_range', label: 'Budget Range' },
+        { value: 'project_type', label: 'Project Type' },
+        { value: 'timeline', label: 'Timeline' },
+        { value: 'source', label: 'Source' },
+        { value: 'company_name', label: 'Company Name' },
+        { value: 'description', label: 'Description' }
+      ], required: true },
+      { name: 'operator', label: 'Operator', type: 'select', options: [
+        { value: 'equals', label: 'Equals' },
+        { value: 'contains', label: 'Contains' },
+        { value: 'in', label: 'In (comma-separated)' },
+        { value: 'not_empty', label: 'Not Empty' },
+        { value: 'greater_than', label: 'Greater Than' }
+      ], required: true },
+      { name: 'threshold_value', label: 'Value', type: 'text', required: true },
+      { name: 'points', label: 'Points', type: 'text', required: true }
+    ],
+    confirmText: 'Add Rule',
+    cancelText: 'Cancel'
+  });
+
+  if (result) {
+    try {
+      const response = await apiPost('/api/admin/leads/scoring-rules', {
+        name: result.name,
+        field_name: result.field_name,
+        operator: result.operator,
+        threshold_value: result.threshold_value,
+        points: parseInt(result.points) || 0
+      });
+
+      if (response.ok) {
+        showToast('Scoring rule added', 'success');
+        await loadScoringRules();
+      } else {
+        showToast('Failed to add rule', 'error');
+      }
+    } catch (error) {
+      console.error('[AdminLeads] Failed to add scoring rule:', error);
+      showToast('Error adding rule', 'error');
+    }
+  }
+}
+
+async function toggleScoringRule(ruleId: number): Promise<void> {
+  try {
+    const response = await apiPut(`/api/admin/leads/scoring-rules/${ruleId}`, {
+      toggleActive: true
+    });
+
+    if (response.ok) {
+      showToast('Rule updated', 'success');
+      await loadScoringRules();
+    } else {
+      showToast('Failed to update rule', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminLeads] Failed to toggle scoring rule:', error);
+    showToast('Error updating rule', 'error');
+  }
+}
+
+async function deleteScoringRule(ruleId: number): Promise<void> {
+  const confirmed = await confirmDialog({
+    title: 'Delete Scoring Rule',
+    message: 'Are you sure you want to delete this scoring rule?',
+    confirmText: 'Delete',
+    danger: true
+  });
+
+  if (confirmed) {
+    try {
+      const response = await apiDelete(`/api/admin/leads/scoring-rules/${ruleId}`);
+
+      if (response.ok) {
+        showToast('Rule deleted', 'success');
+        await loadScoringRules();
+      } else {
+        showToast('Failed to delete rule', 'error');
+      }
+    } catch (error) {
+      console.error('[AdminLeads] Failed to delete scoring rule:', error);
+      showToast('Error deleting rule', 'error');
+    }
+  }
+}
+
+// ============================================================================
+// LEAD TASKS
+// ============================================================================
+
+interface LeadTask {
+  id: number;
+  project_id: number;
+  title: string;
+  description?: string;
+  task_type: string;
+  due_date?: string;
+  status: string;
+  priority: string;
+  completed_at?: string;
+}
+
+async function loadLeadTasks(leadId: number): Promise<LeadTask[]> {
+  try {
+    const response = await apiFetch(`/api/admin/leads/${leadId}/tasks`);
+    if (response.ok) {
+      const data = await response.json();
+      return data.tasks || [];
+    }
+  } catch (error) {
+    console.error('[AdminLeads] Failed to load tasks:', error);
+  }
+  return [];
+}
+
+function renderLeadTasks(tasks: LeadTask[], leadId: number): string {
+  if (tasks.length === 0) {
+    return `
+      <div class="empty-state-small">No tasks yet</div>
+      <button class="btn btn-secondary btn-sm add-lead-task-btn" data-lead-id="${leadId}">Add Task</button>
+    `;
+  }
+
+  return `
+    <div class="lead-tasks-list">
+      ${tasks.map(task => `
+        <div class="lead-task-item ${task.status === 'completed' ? 'task-completed' : ''}" data-task-id="${task.id}">
+          <button class="task-checkbox ${task.status === 'completed' ? 'checked' : ''}" data-action="toggle-task">
+            ${task.status === 'completed' ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+          </button>
+          <div class="task-info">
+            <span class="task-title">${SanitizationUtils.escapeHtml(task.title)}</span>
+            ${task.due_date ? `<span class="task-due">${formatDate(task.due_date)}</span>` : ''}
+          </div>
+          <span class="task-type-badge">${task.task_type}</span>
+        </div>
+      `).join('')}
+    </div>
+    <button class="btn btn-secondary btn-sm add-lead-task-btn" data-lead-id="${leadId}">Add Task</button>
+  `;
+}
+
+async function showAddTaskDialog(leadId: number): Promise<void> {
+  const result = await multiPromptDialog({
+    title: 'Add Task',
+    fields: [
+      { name: 'title', label: 'Task Title', type: 'text', required: true },
+      { name: 'task_type', label: 'Type', type: 'select', options: [
+        { value: 'follow_up', label: 'Follow Up' },
+        { value: 'call', label: 'Call' },
+        { value: 'email', label: 'Email' },
+        { value: 'meeting', label: 'Meeting' },
+        { value: 'proposal', label: 'Send Proposal' },
+        { value: 'other', label: 'Other' }
+      ], required: true },
+      { name: 'due_date', label: 'Due Date', type: 'date' },
+      { name: 'priority', label: 'Priority', type: 'select', options: [
+        { value: 'low', label: 'Low' },
+        { value: 'medium', label: 'Medium' },
+        { value: 'high', label: 'High' },
+        { value: 'urgent', label: 'Urgent' }
+      ] }
+    ],
+    confirmText: 'Add Task',
+    cancelText: 'Cancel'
+  });
+
+  if (result) {
+    try {
+      const response = await apiPost(`/api/admin/leads/${leadId}/tasks`, {
+        title: result.title,
+        taskType: result.task_type,
+        dueDate: result.due_date || null,
+        priority: result.priority || 'medium'
+      });
+
+      if (response.ok) {
+        showToast('Task added', 'success');
+        // Refresh lead details
+        showLeadDetails(leadId);
+      } else {
+        showToast('Failed to add task', 'error');
+      }
+    } catch (error) {
+      console.error('[AdminLeads] Failed to add task:', error);
+      showToast('Error adding task', 'error');
+    }
+  }
+}
+
+async function completeTask(taskId: number, leadId: number): Promise<void> {
+  try {
+    const response = await apiPost(`/api/admin/leads/tasks/${taskId}/complete`);
+    if (response.ok) {
+      showToast('Task completed', 'success');
+      showLeadDetails(leadId);
+    } else {
+      showToast('Failed to complete task', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminLeads] Failed to complete task:', error);
+    showToast('Error completing task', 'error');
+  }
+}
+
+// ============================================================================
+// LEAD NOTES
+// ============================================================================
+
+interface LeadNote {
+  id: number;
+  project_id: number;
+  author: string;
+  content: string;
+  is_pinned: boolean;
+  created_at: string;
+}
+
+async function loadLeadNotes(leadId: number): Promise<LeadNote[]> {
+  try {
+    const response = await apiFetch(`/api/admin/leads/${leadId}/notes`);
+    if (response.ok) {
+      const data = await response.json();
+      return data.notes || [];
+    }
+  } catch (error) {
+    console.error('[AdminLeads] Failed to load notes:', error);
+  }
+  return [];
+}
+
+function renderLeadNotes(notes: LeadNote[], leadId: number): string {
+  if (notes.length === 0) {
+    return `
+      <div class="empty-state-small">No notes yet</div>
+      <button class="btn btn-secondary btn-sm add-lead-note-btn" data-lead-id="${leadId}">Add Note</button>
+    `;
+  }
+
+  // Sort: pinned first, then by date
+  const sortedNotes = [...notes].sort((a, b) => {
+    if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
+  return `
+    <div class="lead-notes-list">
+      ${sortedNotes.map(note => `
+        <div class="lead-note-item ${note.is_pinned ? 'note-pinned' : ''}" data-note-id="${note.id}">
+          <div class="note-header">
+            <span class="note-author">${SanitizationUtils.escapeHtml(note.author)}</span>
+            <span class="note-date">${formatDate(note.created_at)}</span>
+            <button class="icon-btn icon-btn-sm" data-action="toggle-pin" title="${note.is_pinned ? 'Unpin' : 'Pin'}">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="${note.is_pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L12 12"/><circle cx="12" cy="16" r="4"/>
+              </svg>
+            </button>
+          </div>
+          <div class="note-content">${SanitizationUtils.escapeHtml(note.content)}</div>
+        </div>
+      `).join('')}
+    </div>
+    <button class="btn btn-secondary btn-sm add-lead-note-btn" data-lead-id="${leadId}">Add Note</button>
+  `;
+}
+
+async function showAddNoteDialog(leadId: number): Promise<void> {
+  const result = await multiPromptDialog({
+    title: 'Add Note',
+    fields: [
+      { name: 'content', label: 'Note', type: 'textarea', required: true }
+    ],
+    confirmText: 'Add Note',
+    cancelText: 'Cancel'
+  });
+
+  if (result && result.content) {
+    try {
+      const response = await apiPost(`/api/admin/leads/${leadId}/notes`, {
+        content: result.content,
+        author: 'Admin'
+      });
+
+      if (response.ok) {
+        showToast('Note added', 'success');
+        showLeadDetails(leadId);
+      } else {
+        showToast('Failed to add note', 'error');
+      }
+    } catch (error) {
+      console.error('[AdminLeads] Failed to add note:', error);
+      showToast('Error adding note', 'error');
+    }
+  }
+}
+
+async function toggleNotePin(noteId: number, leadId: number): Promise<void> {
+  try {
+    const response = await apiPost(`/api/admin/leads/notes/${noteId}/toggle-pin`);
+    if (response.ok) {
+      showToast('Note updated', 'success');
+      showLeadDetails(leadId);
+    } else {
+      showToast('Failed to update note', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminLeads] Failed to toggle pin:', error);
+    showToast('Error updating note', 'error');
+  }
+}
+

@@ -23,6 +23,24 @@
           document.documentElement.setAttribute('data-theme', 'light');
         }
       })();
+      (function () {
+        var el = document.documentElement;
+        var params = new URLSearchParams(window.location.search);
+        var w = params.get('wireframe');
+        if (w === '1') {
+          el.setAttribute('data-wireframe', 'true');
+          try { localStorage.setItem('wireframe', '1'); } catch (e) {}
+        } else if (w === '0') {
+          el.removeAttribute('data-wireframe');
+          try { localStorage.removeItem('wireframe'); } catch (e) {}
+        } else {
+          try {
+            if (localStorage.getItem('wireframe') === '1') {
+              el.setAttribute('data-wireframe', 'true');
+            }
+          } catch (e) {}
+        }
+      })();
     </script>
     <meta name="description" content="Admin Dashboard - Manage your site, leads, and analytics" />
     <meta name="robots" content="noindex, nofollow" />
@@ -254,10 +272,19 @@
       <!-- Content Area -->
       <div class="dashboard-content" id="dashboard-content">
         <div class="content-wrapper">
+          <!-- Primary header row: sidebar toggle + breadcrumbs (evergreen-style) -->
+          <div class="page-header primary-header-row">
+            <button type="button" class="header-sidebar-toggle header-toggle-button" aria-label="Toggle sidebar">
+              <svg class="sidebar-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="18" rx="1"/><path d="M15 3h6a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-6"/></svg>
+              <span class="sr-only">Toggle Sidebar</span>
+            </button>
+            <nav class="breadcrumb-nav header-breadcrumb-nav" aria-label="Breadcrumb">
+              <ul id="breadcrumb-list" class="breadcrumb-list"></ul>
+            </nav>
+          </div>
           <!-- Overview Tab (Default) -->
           <div class="tab-content active" id="tab-overview">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <div class="page-title">
               <h2>Dashboard</h2>
             </div>
 
@@ -330,8 +357,7 @@
 
           <!-- Leads Tab -->
           <div class="tab-content" id="tab-leads">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <div class="page-title">
               <h2>Leads</h2>
             </div>
 
@@ -401,6 +427,40 @@
               </div>
             </div>
 
+            <!-- Lead Analytics Section -->
+            <div class="leads-analytics-section" id="leads-analytics-section">
+              <div class="analytics-row">
+                <div class="analytics-card portal-shadow" id="conversion-funnel-card">
+                  <h4>Conversion Funnel</h4>
+                  <div class="funnel-container" id="leads-conversion-funnel">
+                    <div class="loading-text">Loading funnel data...</div>
+                  </div>
+                </div>
+                <div class="analytics-card portal-shadow" id="source-performance-card">
+                  <h4>Lead Sources</h4>
+                  <div class="source-list" id="leads-source-performance">
+                    <div class="loading-text">Loading source data...</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Scoring Rules Section -->
+            <div class="admin-table-card" id="scoring-rules-card">
+              <div class="admin-table-header">
+                <h3>Lead Scoring Rules</h3>
+                <div class="admin-table-actions">
+                  <button class="btn btn-secondary btn-sm" id="add-scoring-rule-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Rule
+                  </button>
+                </div>
+              </div>
+              <div class="scoring-rules-list" id="scoring-rules-list">
+                <div class="loading-text">Loading scoring rules...</div>
+              </div>
+            </div>
+
             <!-- Contact Form Submissions Table -->
             <div class="admin-table-card" id="contact-submissions-card">
               <div class="admin-table-header">
@@ -436,8 +496,7 @@
 
           <!-- Projects Tab -->
           <div class="tab-content" id="tab-projects">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <div class="page-title">
               <h2>Projects</h2>
             </div>
 
@@ -500,8 +559,7 @@
 
           <!-- Clients Tab -->
           <div class="tab-content" id="tab-clients">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <div class="page-title">
               <h2>Clients</h2>
             </div>
 
@@ -563,8 +621,7 @@
 
           <!-- Client Detail View -->
           <div class="tab-content" id="tab-client-detail">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <div class="page-title">
               <h2 id="client-detail-title">Client Details</h2>
             </div>
 
@@ -611,36 +668,26 @@
                   <span class="field-label">Total Projects</span>
                   <span class="meta-value" id="cd-project-count">0</span>
                 </div>
+                <div class="meta-item">
+                  <span class="field-label">Outstanding Invoices</span>
+                  <span class="meta-value" id="cd-outstanding-invoices-count">-</span>
+                </div>
               </div>
             </div>
 
-            <!-- Client Detail Tabs -->
-            <div class="client-detail-tabs" id="client-detail-tabs">
+            <!-- Client Detail Tabs (same look as project detail tabs) -->
+            <div class="client-detail-tabs portal-tabs" id="client-detail-tabs">
               <button class="active" data-cd-tab="overview">Overview</button>
               <button data-cd-tab="contacts">Contacts</button>
               <button data-cd-tab="activity">Activity</button>
               <button data-cd-tab="projects">Projects</button>
+              <button data-cd-tab="invoices">Invoices</button>
               <button data-cd-tab="notes">Notes</button>
             </div>
 
-            <!-- Overview Tab -->
-            <div class="client-detail-tab-content active" id="cd-tab-overview">
-              <!-- Health Score Section -->
-              <div class="portal-project-card portal-shadow">
-                <h3>Client Health</h3>
-                <div id="cd-health-score-container">
-                  <p class="empty-state">Loading health data...</p>
-                </div>
-              </div>
-
-              <!-- Tags Section -->
-              <div class="portal-project-card portal-shadow">
-                <div id="cd-tags-container">
-                  <p class="empty-state">Loading tags...</p>
-                </div>
-              </div>
-
-              <!-- Stats Section -->
+            <!-- Overview Tab (ordered by importance: stats, health, CRM, billing, invoices, tags, custom) -->
+            <div class="client-detail-tab-content portal-tab-panel active" id="cd-tab-overview">
+              <!-- Quick Stats (at-a-glance) -->
               <div class="portal-project-card portal-shadow">
                 <h3>Quick Stats</h3>
                 <div id="cd-stats-container">
@@ -648,7 +695,15 @@
                 </div>
               </div>
 
-              <!-- CRM Details -->
+              <!-- Client Health -->
+              <div class="portal-project-card portal-shadow">
+                <h3>Client Health</h3>
+                <div id="cd-health-score-container">
+                  <p class="empty-state">Loading health data...</p>
+                </div>
+              </div>
+
+              <!-- CRM Details (who they are, contact, follow-up) -->
               <div class="portal-project-card portal-shadow">
                 <div class="card-header-with-action">
                   <h3>CRM Details</h3>
@@ -681,19 +736,6 @@
                     <span class="field-label">Next Follow-up</span>
                     <span class="meta-value" id="cd-crm-next-followup">-</span>
                   </div>
-                </div>
-              </div>
-
-              <!-- Custom Fields -->
-              <div class="portal-project-card portal-shadow">
-                <div class="card-header-with-action">
-                  <h3>Custom Fields</h3>
-                  <button class="icon-btn" id="cd-btn-edit-custom-fields" title="Edit Custom Fields" aria-label="Edit custom fields">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                  </button>
-                </div>
-                <div id="cd-custom-fields-container">
-                  <p class="empty-state">No custom fields configured.</p>
                 </div>
               </div>
 
@@ -737,9 +779,47 @@
                 </div>
               </div>
 
-              <!-- Invoices Summary -->
+              <!-- Tags (categorization) -->
               <div class="portal-project-card portal-shadow">
-                <h3>Invoices</h3>
+                <div id="cd-tags-container">
+                  <p class="empty-state">Loading tags...</p>
+                </div>
+              </div>
+
+              <!-- Custom Fields (optional/extended) -->
+              <div class="portal-project-card portal-shadow">
+                <div class="card-header-with-action">
+                  <h3>Custom Fields</h3>
+                  <button class="icon-btn" id="cd-btn-edit-custom-fields" title="Edit Custom Fields" aria-label="Edit custom fields">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                  </button>
+                </div>
+                <div id="cd-custom-fields-container">
+                  <p class="empty-state">No custom fields configured.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contacts Tab -->
+            <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-contacts">
+              <p class="empty-state">Loading contacts...</p>
+            </div>
+
+            <!-- Activity Tab -->
+            <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-activity">
+              <p class="empty-state">Loading activity...</p>
+            </div>
+
+            <!-- Projects Tab -->
+            <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-projects">
+              <div class="client-projects-list" id="cd-projects-list">
+                <p class="empty-state">No projects found for this client.</p>
+              </div>
+            </div>
+
+            <!-- Invoices Tab -->
+            <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-invoices">
+              <div class="portal-project-card portal-shadow">
                 <div class="billing-summary">
                   <div class="meta-item">
                     <span class="field-label">Total Invoiced</span>
@@ -760,28 +840,8 @@
               </div>
             </div>
 
-            <!-- Contacts Tab -->
-            <div class="client-detail-tab-content" id="cd-tab-contacts">
-              <p class="empty-state">Loading contacts...</p>
-            </div>
-
-            <!-- Activity Tab -->
-            <div class="client-detail-tab-content" id="cd-tab-activity">
-              <p class="empty-state">Loading activity...</p>
-            </div>
-
-            <!-- Projects Tab -->
-            <div class="client-detail-tab-content" id="cd-tab-projects">
-              <div class="portal-project-card portal-shadow">
-                <h3>Client Projects</h3>
-                <div class="client-projects-list" id="cd-projects-list">
-                  <p class="empty-state">No projects found for this client.</p>
-                </div>
-              </div>
-            </div>
-
             <!-- Notes Tab -->
-            <div class="client-detail-tab-content" id="cd-tab-notes">
+            <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-notes">
               <p class="empty-state">Loading notes...</p>
             </div>
 
@@ -807,8 +867,7 @@
 
           <!-- Messages Tab -->
           <div class="tab-content" id="tab-messages">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <div class="page-title">
               <h2>Messages</h2>
             </div>
 
@@ -851,9 +910,11 @@
                   </div>
                   <div class="pinned-message-preview" id="pinned-message-preview"></div>
                 </div>
-                <div class="messages-search">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                  <input type="text" id="messages-search-input" placeholder="Search messages..." aria-label="Search messages" />
+                <div class="messages-search search-bar">
+                  <span class="search-bar-icon" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  </span>
+                  <input type="text" id="messages-search-input" class="search-bar-input" placeholder="Search messages..." aria-label="Search messages" />
                 </div>
               </div>
               <div class="messages-thread" id="admin-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread">
@@ -880,8 +941,7 @@
 
           <!-- Analytics Tab -->
           <div class="tab-content" id="tab-analytics">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <div class="page-title">
               <h2>Analytics</h2>
             </div>
 
@@ -1041,23 +1101,52 @@
               </div>
             </div>
 
-            <!-- Visitor Analytics Section -->
+            <!-- Visitor Analytics: clear breakdown (portfolio vs client portal) -->
             <div class="analytics-section-header">
               <h3>Visitor Analytics</h3>
+              <p class="analytics-breakdown-intro">Breakdown by site</p>
             </div>
-            <div class="quick-stats">
-              <div class="stat-card portal-shadow">
-                <span class="stat-number" id="analytics-visitors">-</span>
-                <span class="field-label">Total Visitors</span>
+            <div class="analytics-breakdown">
+              <div class="analytics-breakdown-block">
+                <h4 class="analytics-breakdown-title">Main portfolio site</h4>
+                <div class="quick-stats analytics-breakdown-stats">
+                  <div class="stat-card portal-shadow">
+                    <span class="stat-number" id="analytics-portfolio-visitors">-</span>
+                    <span class="stat-label">Total Visitors</span>
+                  </div>
+                  <div class="stat-card portal-shadow">
+                    <span class="stat-number" id="analytics-portfolio-pageviews">-</span>
+                    <span class="stat-label">Page Views</span>
+                  </div>
+                  <div class="stat-card portal-shadow">
+                    <span class="stat-number" id="analytics-portfolio-sessions">-</span>
+                    <span class="stat-label">Avg. Session</span>
+                  </div>
+                </div>
               </div>
-              <div class="stat-card portal-shadow">
-                <span class="stat-number" id="analytics-pageviews">-</span>
-                <span class="field-label">Page Views</span>
+              <div class="analytics-breakdown-block">
+                <h4 class="analytics-breakdown-title">THE BACKEND (client portal)</h4>
+                <div class="quick-stats analytics-breakdown-stats">
+                  <div class="stat-card portal-shadow">
+                    <span class="stat-number" id="analytics-backend-visitors">-</span>
+                    <span class="stat-label">Total Visitors</span>
+                  </div>
+                  <div class="stat-card portal-shadow">
+                    <span class="stat-number" id="analytics-backend-pageviews">-</span>
+                    <span class="stat-label">Page Views</span>
+                  </div>
+                  <div class="stat-card portal-shadow">
+                    <span class="stat-number" id="analytics-backend-sessions">-</span>
+                    <span class="stat-label">Avg. Session</span>
+                  </div>
+                </div>
               </div>
-              <div class="stat-card portal-shadow">
-                <span class="stat-number" id="analytics-sessions">-</span>
-                <span class="field-label">Avg. Session</span>
-              </div>
+            </div>
+            <!-- Legacy IDs for dashboard visitor-stats (updated by admin-dashboard; analytics module uses breakdown IDs above) -->
+            <div class="sr-only" aria-hidden="true">
+              <span id="analytics-visitors">-</span>
+              <span id="analytics-pageviews">-</span>
+              <span id="analytics-sessions">-</span>
             </div>
 
             <!-- Charts Section -->
@@ -1180,8 +1269,7 @@
 
           <!-- System Tab -->
           <div class="tab-content" id="tab-system">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <div class="page-title">
               <h2>System</h2>
             </div>
 
@@ -1240,8 +1328,7 @@
 
           <!-- Project Detail View (mirrors client portal view) -->
           <div class="tab-content" id="tab-project-detail">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <div class="page-title page-title-with-badge">
               <h2 id="project-detail-title">Project Details</h2>
               <span class="status-badge" id="pd-status">-</span>
             </div>
@@ -1339,7 +1426,7 @@
               </div>
             </div>
 
-            <div class="project-detail-tabs">
+            <div class="project-detail-tabs portal-tabs">
               <button class="active" data-pd-tab="overview">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
                 <span>Overview</span>
@@ -1371,7 +1458,7 @@
             </div>
 
             <!-- Overview Sub-Tab -->
-            <div class="active" id="pd-tab-overview">
+            <div class="portal-tab-panel active" id="pd-tab-overview">
               <!-- Progress Section -->
               <div class="portal-project-card portal-shadow">
                 <h3>Project Progress</h3>
@@ -1417,7 +1504,7 @@
             </div>
 
             <!-- Files Sub-Tab -->
-            <div id="pd-tab-files">
+            <div class="portal-tab-panel" id="pd-tab-files">
               <!-- Upload Section -->
               <div class="files-upload-section portal-shadow">
                 <h3>Upload Files for Client</h3>
@@ -1525,7 +1612,7 @@
             </div>
 
               <!-- Messages Sub-Tab -->
-            <div id="pd-tab-messages">
+            <div class="portal-tab-panel" id="pd-tab-messages">
               <div class="messages-container portal-shadow">
                 <div class="messages-thread" id="pd-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Project messages thread">
                   <p class="empty-state">
@@ -1549,7 +1636,7 @@
             </div>
 
             <!-- Invoices Sub-Tab -->
-            <div id="pd-tab-invoices">
+            <div class="portal-tab-panel" id="pd-tab-invoices">
               <!-- Invoice Summary -->
               <div class="invoice-summary">
                 <div class="summary-card portal-shadow">
@@ -1567,11 +1654,11 @@
                 <div class="card-header-with-action">
                   <h3>Invoices</h3>
                   <div class="invoice-action-buttons">
-                    <button class="btn btn-secondary" id="btn-create-invoice">
-                      + Create Invoice
-                    </button>
                     <button class="btn btn-outline" id="btn-process-late-fees" title="Apply late fees to overdue invoices">
                       Apply Late Fees
+                    </button>
+                    <button class="btn btn-secondary" id="btn-create-invoice">
+                      + Create Invoice
                     </button>
                   </div>
                 </div>
@@ -1603,7 +1690,7 @@
             </div>
 
             <!-- Tasks Sub-Tab -->
-            <div id="pd-tab-tasks">
+            <div class="portal-tab-panel" id="pd-tab-tasks">
               <div class="portal-project-card portal-shadow">
                 <div class="card-header-with-action">
                   <h3>Tasks</h3>
@@ -1623,7 +1710,7 @@
             </div>
 
             <!-- Time Tracking Sub-Tab -->
-            <div id="pd-tab-time">
+            <div class="portal-tab-panel" id="pd-tab-time">
               <div class="time-tracking-header">
                 <h3>Time Tracking</h3>
                 <div>
@@ -1654,7 +1741,7 @@
             </div>
 
             <!-- Contract Sub-Tab -->
-            <div id="pd-tab-contract">
+            <div class="portal-tab-panel" id="pd-tab-contract">
               <div class="contract-tab-content">
                 <!-- Contract Status Card -->
                 <div class="portal-project-card portal-shadow">

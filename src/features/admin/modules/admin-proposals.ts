@@ -14,7 +14,8 @@ import { formatDate, formatDateTime, formatProjectType } from '../../../utils/fo
 import { apiFetch, apiPut, apiPost, apiDelete } from '../../../utils/api-client';
 import { createTableDropdown } from '../../../utils/table-dropdown';
 import type { AdminDashboardContext } from '../admin-types';
-import { confirmDialog, alertSuccess, alertError } from '../../../utils/confirm-dialog';
+import { confirmDialog, alertSuccess, alertError, multiPromptDialog } from '../../../utils/confirm-dialog';
+import { showToast } from '../../../utils/toast-notifications';
 
 // ============================================================================
 // TYPES
@@ -74,6 +75,41 @@ interface ProposalVersion {
   created_by: string;
   created_at: string;
   change_summary: string | null;
+}
+
+interface ProposalComment {
+  id: number;
+  proposal_id: number;
+  author_type: 'admin' | 'client';
+  author_name: string;
+  author_email?: string;
+  content: string;
+  is_internal: boolean;
+  parent_comment_id?: number;
+  created_at: string;
+}
+
+interface ProposalCustomItem {
+  id: number;
+  proposal_id: number;
+  item_type: 'service' | 'product' | 'discount' | 'fee' | 'hourly';
+  description: string;
+  quantity: number;
+  unit_price: number;
+  unit_label?: string;
+  is_taxable: boolean;
+  is_optional: boolean;
+  sort_order: number;
+}
+
+interface ProposalActivity {
+  id: number;
+  proposal_id: number;
+  activity_type: string;
+  actor?: string;
+  actor_type?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
 }
 
 // ============================================================================
@@ -1108,10 +1144,14 @@ async function showProposalDetails(proposal: Proposal, ctx: AdminDashboardContex
   // Setup event listeners for details panel
   setupDetailsEventListeners(proposal, ctx);
 
-  // Load version history and signature status
+  // Load all proposal sections
   await Promise.all([
     loadProposalVersions(proposal.id),
-    loadSignatureStatus(proposal.id)
+    loadSignatureStatus(proposal.id),
+    loadCustomItems(proposal.id),
+    loadProposalComments(proposal.id),
+    loadProposalActivities(proposal.id),
+    loadDiscountSection(proposal)
   ]);
 }
 
@@ -1246,6 +1286,34 @@ function renderProposalDetailsContent(proposal: Proposal): string {
         <h4>Admin Notes</h4>
         <textarea class="admin-notes-input" id="admin-notes-input" placeholder="Add internal notes about this proposal...">${proposal.adminNotes || ''}</textarea>
         <button class="btn btn-secondary" id="save-notes-btn">Save Notes</button>
+      </div>
+
+      <div class="details-section">
+        <h4>Custom Line Items</h4>
+        <div class="custom-items-section" id="custom-items-section">
+          <div class="loading-row">Loading custom items...</div>
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h4>Discount</h4>
+        <div class="discount-section" id="discount-section">
+          <div class="loading-row">Loading discount info...</div>
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h4>Comments</h4>
+        <div class="comments-section" id="comments-section">
+          <div class="loading-row">Loading comments...</div>
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h4>Activity Log</h4>
+        <div class="activity-section" id="activity-section">
+          <div class="loading-row">Loading activity...</div>
+        </div>
       </div>
 
       <div class="details-section">
@@ -1397,6 +1465,393 @@ async function convertToInvoice(proposalId: number, ctx: AdminDashboardContext):
     console.error('[AdminProposals] Error converting:', error);
     ctx.showNotification?.('Network error creating invoice', 'error');
   }
+}
+
+// ============================================================================
+// CUSTOM LINE ITEMS
+// ============================================================================
+
+async function loadCustomItems(proposalId: number): Promise<void> {
+  const container = document.getElementById('custom-items-section');
+  if (!container) return;
+
+  try {
+    const response = await apiFetch(`/api/proposals/${proposalId}/custom-items`);
+    if (response.ok) {
+      const data = await response.json();
+      renderCustomItems(proposalId, data.data || []);
+    } else {
+      container.innerHTML = '<div class="empty-state-small">No custom items</div>';
+    }
+  } catch (error) {
+    console.error('[AdminProposals] Error loading custom items:', error);
+    container.innerHTML = '<div class="empty-state-small">Error loading items</div>';
+  }
+}
+
+function renderCustomItems(proposalId: number, items: ProposalCustomItem[]): void {
+  const container = document.getElementById('custom-items-section');
+  if (!container) return;
+
+  if (items.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state-small">No custom line items</div>
+      <button class="btn btn-secondary btn-sm" id="add-custom-item-btn">Add Line Item</button>
+    `;
+    const addBtn = document.getElementById('add-custom-item-btn');
+    if (addBtn) addBtn.onclick = () => showAddCustomItemDialog(proposalId);
+    return;
+  }
+
+  const total = items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+
+  container.innerHTML = `
+    <div class="custom-items-list">
+      ${items.map(item => `
+        <div class="custom-item-row" data-item-id="${item.id}">
+          <div class="item-info">
+            <span class="item-type-badge">${item.item_type}</span>
+            <span class="item-description">${SanitizationUtils.escapeHtml(item.description)}</span>
+          </div>
+          <div class="item-pricing">
+            <span>${item.quantity} × ${formatPrice(item.unit_price)}</span>
+            <span class="item-total">${formatPrice(item.quantity * item.unit_price)}</span>
+          </div>
+          <button class="icon-btn icon-btn-danger delete-item-btn" data-item-id="${item.id}" title="Delete">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
+        </div>
+      `).join('')}
+    </div>
+    <div class="custom-items-footer">
+      <span class="items-total">Custom Items Total: ${formatPrice(total)}</span>
+      <button class="btn btn-secondary btn-sm" id="add-custom-item-btn">Add Item</button>
+    </div>
+  `;
+
+  // Setup event listeners
+  const addBtn = document.getElementById('add-custom-item-btn');
+  if (addBtn) addBtn.onclick = () => showAddCustomItemDialog(proposalId);
+
+  container.querySelectorAll('.delete-item-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const itemId = parseInt((btn as HTMLElement).dataset.itemId || '0');
+      await deleteCustomItem(itemId, proposalId);
+    });
+  });
+}
+
+async function showAddCustomItemDialog(proposalId: number): Promise<void> {
+  const result = await multiPromptDialog({
+    title: 'Add Custom Line Item',
+    fields: [
+      { name: 'description', label: 'Description', type: 'text', required: true },
+      { name: 'item_type', label: 'Type', type: 'select', options: [
+        { value: 'service', label: 'Service' },
+        { value: 'product', label: 'Product' },
+        { value: 'fee', label: 'Fee' },
+        { value: 'discount', label: 'Discount' },
+        { value: 'hourly', label: 'Hourly Rate' }
+      ], required: true },
+      { name: 'quantity', label: 'Quantity', type: 'text', required: true },
+      { name: 'unit_price', label: 'Unit Price ($)', type: 'text', required: true }
+    ],
+    confirmText: 'Add Item',
+    cancelText: 'Cancel'
+  });
+
+  if (result) {
+    try {
+      const response = await apiPost(`/api/proposals/${proposalId}/custom-items`, {
+        description: result.description,
+        itemType: result.item_type,
+        quantity: parseFloat(result.quantity) || 1,
+        unitPrice: parseFloat(result.unit_price) || 0
+      });
+
+      if (response.ok) {
+        showToast('Item added', 'success');
+        await loadCustomItems(proposalId);
+      } else {
+        showToast('Failed to add item', 'error');
+      }
+    } catch (error) {
+      console.error('[AdminProposals] Error adding custom item:', error);
+      showToast('Error adding item', 'error');
+    }
+  }
+}
+
+async function deleteCustomItem(itemId: number, proposalId: number): Promise<void> {
+  const confirmed = await confirmDialog({
+    title: 'Delete Item',
+    message: 'Are you sure you want to delete this line item?',
+    confirmText: 'Delete',
+    danger: true
+  });
+
+  if (confirmed) {
+    try {
+      const response = await apiDelete(`/api/proposals/custom-items/${itemId}`);
+      if (response.ok) {
+        showToast('Item deleted', 'success');
+        await loadCustomItems(proposalId);
+      } else {
+        showToast('Failed to delete item', 'error');
+      }
+    } catch (error) {
+      console.error('[AdminProposals] Error deleting custom item:', error);
+      showToast('Error deleting item', 'error');
+    }
+  }
+}
+
+// ============================================================================
+// DISCOUNTS
+// ============================================================================
+
+function loadDiscountSection(proposal: Proposal): void {
+  const container = document.getElementById('discount-section');
+  if (!container) return;
+
+  // Check if proposal has discount info (would need to be added to Proposal interface)
+  const hasDiscount = false; // placeholder - check proposal.discount_type
+
+  if (!hasDiscount) {
+    container.innerHTML = `
+      <div class="discount-empty">
+        <span>No discount applied</span>
+        <button class="btn btn-secondary btn-sm" id="apply-discount-btn">Apply Discount</button>
+      </div>
+    `;
+    const applyBtn = document.getElementById('apply-discount-btn');
+    if (applyBtn) applyBtn.onclick = () => showApplyDiscountDialog(proposal.id);
+    return;
+  }
+
+  // If discount exists, show it with remove option
+  container.innerHTML = `
+    <div class="discount-info">
+      <span class="discount-badge">Discount Applied</span>
+      <button class="btn btn-danger btn-sm" id="remove-discount-btn">Remove</button>
+    </div>
+  `;
+
+  const removeBtn = document.getElementById('remove-discount-btn');
+  if (removeBtn) removeBtn.onclick = () => removeDiscount(proposal.id);
+}
+
+async function showApplyDiscountDialog(proposalId: number): Promise<void> {
+  const result = await multiPromptDialog({
+    title: 'Apply Discount',
+    fields: [
+      { name: 'type', label: 'Discount Type', type: 'select', options: [
+        { value: 'percentage', label: 'Percentage' },
+        { value: 'fixed', label: 'Fixed Amount' }
+      ], required: true },
+      { name: 'value', label: 'Value (% or $)', type: 'text', required: true },
+      { name: 'reason', label: 'Reason', type: 'text' }
+    ],
+    confirmText: 'Apply',
+    cancelText: 'Cancel'
+  });
+
+  if (result) {
+    try {
+      const response = await apiPost(`/api/proposals/${proposalId}/discount`, {
+        type: result.type,
+        value: parseFloat(result.value) || 0,
+        reason: result.reason || null
+      });
+
+      if (response.ok) {
+        showToast('Discount applied', 'success');
+        if (_storedContext) await refreshProposals(_storedContext);
+      } else {
+        showToast('Failed to apply discount', 'error');
+      }
+    } catch (error) {
+      console.error('[AdminProposals] Error applying discount:', error);
+      showToast('Error applying discount', 'error');
+    }
+  }
+}
+
+async function removeDiscount(proposalId: number): Promise<void> {
+  const confirmed = await confirmDialog({
+    title: 'Remove Discount',
+    message: 'Are you sure you want to remove the discount?',
+    confirmText: 'Remove',
+    danger: true
+  });
+
+  if (confirmed) {
+    try {
+      const response = await apiDelete(`/api/proposals/${proposalId}/discount`);
+      if (response.ok) {
+        showToast('Discount removed', 'success');
+        if (_storedContext) await refreshProposals(_storedContext);
+      } else {
+        showToast('Failed to remove discount', 'error');
+      }
+    } catch (error) {
+      console.error('[AdminProposals] Error removing discount:', error);
+      showToast('Error removing discount', 'error');
+    }
+  }
+}
+
+// ============================================================================
+// COMMENTS
+// ============================================================================
+
+async function loadProposalComments(proposalId: number): Promise<void> {
+  const container = document.getElementById('comments-section');
+  if (!container) return;
+
+  try {
+    const response = await apiFetch(`/api/proposals/${proposalId}/comments`);
+    if (response.ok) {
+      const data = await response.json();
+      renderComments(proposalId, data.data || []);
+    } else {
+      container.innerHTML = '<div class="empty-state-small">No comments</div>';
+    }
+  } catch (error) {
+    console.error('[AdminProposals] Error loading comments:', error);
+    container.innerHTML = '<div class="empty-state-small">Error loading comments</div>';
+  }
+}
+
+function renderComments(proposalId: number, comments: ProposalComment[]): void {
+  const container = document.getElementById('comments-section');
+  if (!container) return;
+
+  container.innerHTML = `
+    ${comments.length > 0 ? `
+      <div class="comments-list">
+        ${comments.map(comment => `
+          <div class="comment-item ${comment.is_internal ? 'comment-internal' : ''}">
+            <div class="comment-header">
+              <span class="comment-author">${SanitizationUtils.escapeHtml(comment.author_name)}</span>
+              <span class="comment-type">${comment.author_type}</span>
+              ${comment.is_internal ? '<span class="comment-internal-badge">Internal</span>' : ''}
+              <span class="comment-date">${formatDateTime(comment.created_at)}</span>
+            </div>
+            <div class="comment-content">${SanitizationUtils.escapeHtml(comment.content)}</div>
+          </div>
+        `).join('')}
+      </div>
+    ` : '<div class="empty-state-small">No comments yet</div>'}
+    <div class="add-comment-form">
+      <textarea id="new-comment-input" placeholder="Add a comment..." rows="2"></textarea>
+      <div class="comment-actions">
+        <label class="checkbox-label">
+          <input type="checkbox" id="comment-internal-checkbox">
+          <span>Internal only</span>
+        </label>
+        <button class="btn btn-secondary btn-sm" id="add-comment-btn">Add Comment</button>
+      </div>
+    </div>
+  `;
+
+  const addBtn = document.getElementById('add-comment-btn');
+  if (addBtn) {
+    addBtn.onclick = () => addComment(proposalId);
+  }
+}
+
+async function addComment(proposalId: number): Promise<void> {
+  const input = document.getElementById('new-comment-input') as HTMLTextAreaElement;
+  const internalCheckbox = document.getElementById('comment-internal-checkbox') as HTMLInputElement;
+
+  const content = input?.value.trim();
+  if (!content) {
+    showToast('Please enter a comment', 'error');
+    return;
+  }
+
+  try {
+    const response = await apiPost(`/api/proposals/${proposalId}/comments`, {
+      content,
+      authorType: 'admin',
+      authorName: 'Admin',
+      isInternal: internalCheckbox?.checked || false
+    });
+
+    if (response.ok) {
+      showToast('Comment added', 'success');
+      await loadProposalComments(proposalId);
+    } else {
+      showToast('Failed to add comment', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminProposals] Error adding comment:', error);
+    showToast('Error adding comment', 'error');
+  }
+}
+
+// ============================================================================
+// ACTIVITY LOG
+// ============================================================================
+
+async function loadProposalActivities(proposalId: number): Promise<void> {
+  const container = document.getElementById('activity-section');
+  if (!container) return;
+
+  try {
+    const response = await apiFetch(`/api/proposals/${proposalId}/activities`);
+    if (response.ok) {
+      const data = await response.json();
+      renderActivities(data.data || []);
+    } else {
+      container.innerHTML = '<div class="empty-state-small">No activity</div>';
+    }
+  } catch (error) {
+    console.error('[AdminProposals] Error loading activities:', error);
+    container.innerHTML = '<div class="empty-state-small">Error loading activity</div>';
+  }
+}
+
+function renderActivities(activities: ProposalActivity[]): void {
+  const container = document.getElementById('activity-section');
+  if (!container) return;
+
+  if (activities.length === 0) {
+    container.innerHTML = '<div class="empty-state-small">No activity recorded</div>';
+    return;
+  }
+
+  const activityLabels: Record<string, string> = {
+    viewed: 'Viewed',
+    downloaded: 'PDF Downloaded',
+    commented: 'Comment Added',
+    signed: 'Signed',
+    status_changed: 'Status Changed',
+    version_created: 'Version Created',
+    version_restored: 'Version Restored',
+    sent: 'Sent to Client',
+    reminder_sent: 'Reminder Sent',
+    signature_requested: 'Signature Requested',
+    signature_declined: 'Signature Declined',
+    discount_applied: 'Discount Applied',
+    discount_removed: 'Discount Removed'
+  };
+
+  container.innerHTML = `
+    <div class="activity-list">
+      ${activities.slice(0, 10).map(activity => `
+        <div class="activity-item">
+          <span class="activity-type">${activityLabels[activity.activity_type] || activity.activity_type}</span>
+          ${activity.actor ? `<span class="activity-actor">by ${SanitizationUtils.escapeHtml(activity.actor)}</span>` : ''}
+          <span class="activity-date">${formatDateTime(activity.created_at)}</span>
+        </div>
+      `).join('')}
+    </div>
+    ${activities.length > 10 ? `<div class="activity-more">${activities.length - 10} more activities...</div>` : ''}
+  `;
 }
 
 // ============================================================================
