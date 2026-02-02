@@ -1327,6 +1327,95 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 }
 
 /* ================================================
+   Invoice Action Buttons
+   ================================================ */
+.invoice-action-buttons {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* ================================================
+   Payment Plans Section
+   ================================================ */
+.payment-plans-section {
+  padding: var(--space-3);
+}
+
+.payment-plans-section h4 {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-muted);
+  margin: 0 0 var(--space-2) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.payment-plans-section h4:not(:first-child) {
+  margin-top: var(--space-4);
+}
+
+/* Scheduled Invoice Items */
+.scheduled-list,
+.recurring-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.scheduled-item,
+.recurring-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--portal-bg-light);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.scheduled-date,
+.recurring-next {
+  color: var(--portal-text-muted);
+  font-size: var(--font-size-xs);
+  min-width: 80px;
+}
+
+.scheduled-desc,
+.recurring-desc {
+  flex: 1;
+  color: var(--portal-text-primary);
+}
+
+.scheduled-amount,
+.recurring-amount {
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-primary);
+}
+
+.recurring-freq {
+  color: var(--portal-text-muted);
+  font-size: var(--font-size-xs);
+  text-transform: capitalize;
+}
+
+.recurring-status {
+  font-size: var(--font-size-xs);
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+}
+
+.recurring-status.active {
+  background: var(--status-active-bg);
+  color: var(--status-active);
+}
+
+.recurring-status.paused {
+  background: var(--status-pending-bg);
+  color: var(--status-pending);
+}
+
+/* ================================================
    Overview Stats Grid
    ================================================ */
 .analytics-overview {

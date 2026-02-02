@@ -1489,16 +1489,42 @@
                 </div>
               </div>
 
-              <!-- Create Invoice Button -->
+              <!-- Invoice Actions -->
               <div class="portal-project-card portal-shadow">
                 <div class="card-header-with-action">
                   <h3>Invoices</h3>
-                  <button class="btn btn-secondary" id="btn-create-invoice">
-                    + Create Invoice
-                  </button>
+                  <div class="invoice-action-buttons">
+                    <button class="btn btn-secondary" id="btn-create-invoice">
+                      + Create Invoice
+                    </button>
+                    <button class="btn btn-outline" id="btn-process-late-fees" title="Apply late fees to overdue invoices">
+                      Apply Late Fees
+                    </button>
+                  </div>
                 </div>
                 <div class="invoices-list" id="pd-invoices-list">
                   <p class="empty-state">No invoices created yet.</p>
+                </div>
+              </div>
+
+              <!-- Payment Plans & Recurring -->
+              <div class="portal-project-card portal-shadow">
+                <div class="card-header-with-action">
+                  <h3>Payment Plans & Recurring</h3>
+                  <div class="invoice-action-buttons">
+                    <button class="btn btn-outline" id="btn-schedule-invoice">Schedule Invoice</button>
+                    <button class="btn btn-outline" id="btn-setup-recurring">Setup Recurring</button>
+                  </div>
+                </div>
+                <div class="payment-plans-section">
+                  <h4>Scheduled Invoices</h4>
+                  <div id="pd-scheduled-invoices" class="scheduled-list">
+                    <p class="empty-state">No scheduled invoices.</p>
+                  </div>
+                  <h4>Recurring Invoices</h4>
+                  <div id="pd-recurring-invoices" class="recurring-list">
+                    <p class="empty-state">No recurring invoices configured.</p>
+                  </div>
                 </div>
               </div>
             </div>
