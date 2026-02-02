@@ -8,35 +8,46 @@ This file tracks active development work and TODOs. Completed items are moved to
 
 ## Completed - February 2, 2026
 
-### Contract Tab Added to Project Details
+### Contract E-Signature System
 
-**Status:** UI COMPLETE, Backend Partial
+**Status:** COMPLETE
 
-Added a dedicated Contract tab to the project details page with Preview, Download, and Request Signature functionality.
+Implemented complete contract e-signature system with client-facing signing page, email notifications, and audit logging.
 
-**Frontend Changes:**
+**Frontend:**
 
-- Added Contract tab button to project detail tabs navigation
-- Created Contract tab content with:
-  - Status card showing signed/not signed status
-  - Action cards: Preview (opens PDF), Download (downloads PDF), Request Signature
-  - Signature details card (shown when signed)
-- Added CSS styling for contract tab components
+- Contract tab in project details with Preview, Download, Request Signature buttons
+- Status card showing signed/not signed status
+- Signature details card (shown when signed)
 
-**Backend Endpoints Created:**
+**Backend Endpoints:**
 
-- `GET /api/projects/:id/contract/pdf` - Generate contract PDF (already existed)
-- `POST /api/projects/:id/contract/request-signature` - Request client signature
-- `POST /api/projects/:id/contract/sign` - Record contract signature
+- `GET /api/projects/:id/contract/pdf` - Generate contract PDF
+- `POST /api/projects/:id/contract/request-signature` - Request client signature (sends email)
+- `GET /api/projects/contract/by-token/:token` - Public: get contract details
+- `POST /api/projects/contract/sign-by-token/:token` - Public: sign contract
+- `GET /api/projects/:id/contract/signature-status` - Get signature status
 
-**Files Modified:**
+**Client Signing Page:**
 
-- `admin/index.html` - Added contract tab and content
-- `src/features/admin/admin-project-details.ts` - Contract tab logic and handlers
+- `/public/sign-contract.html` - Canvas-based signature capture
+- Records signer name, email, IP, user agent
+- Validates token expiration
+- Prevents duplicate signing
+
+**Database (Migration 037):**
+
+- Signature tracking columns on `projects` table
+- `contract_signature_log` audit table
+
+**Files:**
+
+- `server/database/migrations/037_contract_signatures.sql`
+- `server/routes/projects.ts`
+- `public/sign-contract.html`
+- `admin/index.html` - Contract tab
+- `src/features/admin/admin-project-details.ts` - Contract tab logic
 - `src/styles/admin/project-detail.css` - Contract tab styling
-- `server/routes/projects.ts` - Signature request/sign endpoints
-
-**TODO:** See "Contract E-Signature System" in Features section for remaining work.
 
 ---
 
@@ -1279,24 +1290,30 @@ The backend has ~250+ API endpoints. The frontend currently uses ~24 of them. Th
   - Sends invitation email when converting
   - Shows "Converted to Client" badge after conversion
 
-- [ ] **Contract E-Signature System** - PARTIAL (UI Complete, Backend Needs Work)
+- [x] **Contract E-Signature System** - COMPLETE (February 2, 2026)
   - Contract tab added to project details with Preview, Download, Request Signature buttons
-  - Backend endpoints created: `POST /api/projects/:id/contract/request-signature`, `POST /api/projects/:id/contract/sign`
-  - **TODO - Email Integration:**
-    - [ ] Integrate email service to send contract signature request emails
-    - [ ] Create email template for contract signature requests
-    - [ ] Include project name, contract preview link, signature deadline
-  - **TODO - Client Signing Page:**
-    - [ ] Create client-facing signature page at `/sign-contract/:token`
-    - [ ] Capture signature (drawn/typed/uploaded)
-    - [ ] Record signer IP address and user agent
-  - **TODO - Database:**
-    - [ ] Add columns: `contract_signer_name`, `contract_signer_ip`, `contract_signature_data`
-    - [ ] Add columns: `contract_signature_token`, `contract_signature_requested_at`, `contract_signature_expires_at`
-  - **TODO - Post-Signature:**
-    - [ ] Send confirmation email after signing
-    - [ ] Add signature audit log
-  - **Files:** `server/routes/projects.ts` (lines 1519-1630)
+  - **Backend Endpoints:**
+    - `POST /api/projects/:id/contract/request-signature` - Sends email with signature link
+    - `GET /api/projects/contract/by-token/:token` - Public: get contract by token
+    - `POST /api/projects/contract/sign-by-token/:token` - Public: sign contract
+    - `GET /api/projects/:id/contract/signature-status` - Get signature status
+  - **Email Integration:** COMPLETE
+    - [x] Integrated email service to send contract signature request emails
+    - [x] Created HTML email template for contract signature requests
+    - [x] Includes project name, contract preview link, signature deadline
+    - [x] Sends confirmation email after signing
+  - **Client Signing Page:** COMPLETE
+    - [x] Created `/public/sign-contract.html` with canvas-based signature capture
+    - [x] Records signer name, IP address, and user agent
+    - [x] Validates token expiration and prevents duplicate signing
+  - **Database (Migration 037):**
+    - [x] Added columns: `contract_signature_token`, `contract_signature_requested_at`, `contract_signature_expires_at`
+    - [x] Added columns: `contract_signer_name`, `contract_signer_email`, `contract_signer_ip`, `contract_signer_user_agent`, `contract_signature_data`
+    - [x] Created `contract_signature_log` audit table
+  - **Files:**
+    - `server/database/migrations/037_contract_signatures.sql`
+    - `server/routes/projects.ts`
+    - `public/sign-contract.html`
 
 ### Main Site (Last Priority)
 
