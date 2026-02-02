@@ -7,6 +7,31 @@
 
 The Lead Management System provides enterprise-grade lead scoring, pipeline management, task tracking, and analytics comparable to features found in HubSpot, Salesforce, and Pipedrive.
 
+> **Implementation Note:** Leads are implemented as entries in the `projects` table with lead-specific fields (`lead_score`, `pipeline_stage_id`, etc.). The `LeadStatus` type in TypeScript defines lead-specific status values, while the database stores the status in the project's `status` column. The lead-specific tables (`lead_tasks`, `lead_notes`, `lead_scoring_rules`, etc.) provide the CRM functionality.
+
+## Lead Statuses
+
+Simplified pipeline stages for tracking leads through the sales funnel:
+
+| Status | Description |
+|--------|-------------|
+| `new` | Freshly submitted lead, not yet reviewed |
+| `contacted` | Initial contact has been made |
+| `qualified` | Lead has been vetted and is a good fit |
+| `in-progress` | Actively in discussions/negotiations |
+| `converted` | Lead became a client with a project |
+| `lost` | Lead declined or went elsewhere |
+| `on-hold` | Temporarily paused |
+| `cancelled` | Lead withdrawn by either party |
+
+**Typical Flow:**
+
+```text
+new → contacted → qualified → in-progress → converted
+                                    ↓
+                                   lost
+```
+
 ## Features
 
 ### 1. Lead Scoring
@@ -446,6 +471,13 @@ const { stages, totalValue, weightedValue } = await response.json();
 ```
 
 ## Change Log
+
+### February 2, 2026 - Simplified Lead Statuses
+
+- Simplified `LeadStatus` type to 8 values: new, contacted, qualified, in-progress, converted, lost, on-hold, cancelled
+- Removed redundant statuses: pending, active, completed (these are better suited for projects/clients)
+- Updated all type definitions, UI components, API routes, and CSS styles
+- Updated documentation with status definitions and typical flow
 
 ### February 1, 2026 - Initial Implementation
 

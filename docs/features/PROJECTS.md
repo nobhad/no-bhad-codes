@@ -7,6 +7,18 @@
 
 The Project Management System provides enterprise-grade project management with tasks, time tracking, templates, dependencies, and project health metrics comparable to Monday.com, Asana, and other industry leaders.
 
+## Project Status
+
+Projects have the following status values:
+
+| Status | Description |
+|--------|-------------|
+| `planning` | Project is in planning phase, not yet started |
+| `in-progress` | Project is actively being worked on |
+| `review` | Project is under review/awaiting approval |
+| `completed` | Project has been completed |
+| `on-hold` | Project is temporarily paused |
+
 ## Features
 
 ### 1. Task Management

@@ -22,6 +22,18 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 |----------|-------------|
 | **[Admin Dashboard](./features/ADMIN_DASHBOARD.md)** | Leads, projects, clients, messaging, analytics |
 
+### Backend Features (Phase 1-7)
+
+| Document | Description |
+|----------|-------------|
+| **[Analytics](./features/ANALYTICS.md)** | Business intelligence, dashboards, KPIs, visitor tracking |
+| **[Clients](./features/CLIENTS.md)** | CRM contacts, activities, custom fields, tags, health scoring |
+| **[Leads](./features/LEADS.md)** | Lead scoring, pipeline, tasks, notes, duplicate detection |
+| **[Messaging](./features/MESSAGING.md)** | Mentions, reactions, subscriptions, read receipts, pinned messages |
+| **[Projects](./features/PROJECTS.md)** | Tasks, time tracking, templates, dependencies, project health |
+| **[Proposals](./features/PROPOSALS.md)** | Templates, versioning, signatures, comments, activities |
+| **[PDF Generation](./features/PDF_GENERATION.md)** | Invoice and proposal PDF generation with pdf-lib |
+
 ### Animation Modules
 
 | Document | Description |
@@ -83,8 +95,8 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 # Install dependencies
 npm install
 
-# Copy environment configuration
-cp .env.example .env
+# Create environment configuration (copy from .env if exists, or create new)
+# Required variables: DATABASE_PATH, JWT_SECRET, PORT
 
 # Initialize database
 npm run db:setup
@@ -350,8 +362,8 @@ npm run typecheck      # TypeScript validation
 ### Development Setup
 
 1. Fork and clone the repository
-2. Install dependencies: `npm install`  
-3. Start development server: `npm run dev`
+2. Install dependencies: `npm install`
+3. Start development server: `npm run dev:full` (runs both frontend and backend)
 4. Make changes and test thoroughly
 5. Run quality checks: `npm run optimize`
 6. Submit pull request with detailed description
