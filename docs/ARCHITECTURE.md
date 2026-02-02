@@ -72,14 +72,34 @@ no-bhad-codes/
 │   │   ├── 🎯 FEATURES (Domain-Driven)
 │   │   │   ├── admin/               # Admin management
 │   │   │   │   ├── admin-dashboard.ts      # Main coordinator
+│   │   │   │   ├── admin-auth.ts           # Admin authentication
+│   │   │   │   ├── admin-project-details.ts
 │   │   │   │   ├── admin-security.ts
+│   │   │   │   ├── admin-types.ts
+│   │   │   │   ├── modules/                # 14 extracted admin modules
+│   │   │   │   │   ├── index.ts            # Module exports
+│   │   │   │   │   ├── admin-analytics.ts
+│   │   │   │   │   ├── admin-clients.ts
+│   │   │   │   │   ├── admin-client-details.ts
+│   │   │   │   │   ├── admin-contacts.ts
+│   │   │   │   │   ├── admin-files.ts
+│   │   │   │   │   ├── admin-leads.ts
+│   │   │   │   │   ├── admin-messaging.ts
+│   │   │   │   │   ├── admin-overview.ts
+│   │   │   │   │   ├── admin-performance.ts
+│   │   │   │   │   ├── admin-projects.ts
+│   │   │   │   │   ├── admin-proposals.ts
+│   │   │   │   │   ├── admin-system-status.ts
+│   │   │   │   │   ├── admin-tasks.ts
+│   │   │   │   │   └── admin-time-tracking.ts
 │   │   │   │   ├── services/               # Extracted services
 │   │   │   │   │   ├── admin-data.service.ts
 │   │   │   │   │   ├── admin-chart.service.ts
 │   │   │   │   │   └── admin-export.service.ts
 │   │   │   │   └── renderers/              # Extracted renderers
 │   │   │   │       ├── admin-contacts.renderer.ts
-│   │   │   │       └── admin-messaging.renderer.ts
+│   │   │   │       ├── admin-messaging.renderer.ts
+│   │   │   │       └── admin-performance.renderer.ts
 │   │   │   ├── client/              # Client portal
 │   │   │   │   └── client-portal.ts
 │   │   │   └── projects/            # Project management
@@ -95,7 +115,23 @@ no-bhad-codes/
 │   │   │   ├── data-service.ts      # Data management
 │   │   │   ├── contact-service.ts   # Communication
 │   │   │   ├── performance-service.ts
+│   │   │   ├── auth-service.ts      # Authentication
 │   │   │   └── visitor-tracking.ts
+│   │
+│   server/
+│   ├── services/                     # Backend services
+│   │   ├── analytics-service.ts      # BI analytics, KPIs, dashboards
+│   │   ├── client-service.ts         # CRM, contacts, tags, health
+│   │   ├── file-service.ts           # File management
+│   │   ├── invoice-service.ts        # Invoicing, deposits, credits
+│   │   ├── lead-service.ts           # Lead management, scoring
+│   │   ├── message-service.ts        # Messaging, threads, subscriptions
+│   │   ├── project-service.ts        # Project management, tasks
+│   │   ├── proposal-service.ts       # Proposal templates, versioning
+│   │   ├── scheduler-service.ts      # Invoice reminders, recurring
+│   │   ├── email-service.ts          # Email delivery
+│   │   ├── cache-service.ts          # Redis caching
+│   │   └── logger.ts                 # Logging infrastructure
 │   │   │
 │   │   ├── 🎨 COMPONENTS (UI Building Blocks)
 │   │   │   ├── base-component.ts
@@ -108,21 +144,53 @@ no-bhad-codes/
 │   │   │   └── modules.ts           # Module system types
 │   │   │
 │   │   ├── 🎨 STYLES (Modular CSS Architecture)
-│   │   │   ├── main.css         # New modular CSS entry point
+│   │   │   ├── main.css             # Modular CSS entry point
 │   │   │   ├── base/                # Foundation layer
 │   │   │   │   ├── reset.css        # CSS reset & normalize
 │   │   │   │   ├── typography.css   # Typography system
-│   │   │   │   └── layout.css       # Layout primitives
+│   │   │   │   ├── layout.css       # Layout primitives
+│   │   │   │   └── fonts.css        # Font-face definitions
 │   │   │   ├── components/          # Component-specific styles
-│   │   │   │   ├── form.css         # Consolidated form system
-│   │   │   │   ├── navigation.css   # Navigation & menus
-│   │   │   │   ├── business-card.css # Interactive business card
-│   │   │   │   └── loading.css      # Loading states
+│   │   │   │   ├── form-fields.css  # Form inputs
+│   │   │   │   ├── form-buttons.css # Button styles
+│   │   │   │   ├── nav-base.css     # Navigation base
+│   │   │   │   ├── nav-animations.css
+│   │   │   │   ├── nav-responsive.css
+│   │   │   │   ├── nav-portal.css
+│   │   │   │   ├── business-card.css
+│   │   │   │   └── loading.css
+│   │   │   ├── client-portal/       # Client portal (10 modular files)
+│   │   │   │   ├── index.css        # Import orchestrator
+│   │   │   │   ├── components.css   # portal- prefixed components
+│   │   │   │   ├── layout.css
+│   │   │   │   ├── sidebar.css
+│   │   │   │   ├── login.css
+│   │   │   │   ├── dashboard.css
+│   │   │   │   ├── files.css
+│   │   │   │   ├── invoices.css
+│   │   │   │   ├── settings.css
+│   │   │   │   └── projects.css
+│   │   │   ├── shared/              # Shared portal components
+│   │   │   │   ├── portal-buttons.css
+│   │   │   │   ├── portal-cards.css
+│   │   │   │   ├── portal-forms.css
+│   │   │   │   ├── portal-layout.css
+│   │   │   │   ├── portal-badges.css
+│   │   │   │   ├── portal-messages.css
+│   │   │   │   ├── portal-files.css
+│   │   │   │   ├── portal-dropdown.css
+│   │   │   │   ├── toast-notifications.css
+│   │   │   │   └── confirm-dialog.css
+│   │   │   ├── admin/               # Admin dashboard styles
+│   │   │   │   ├── index.css
+│   │   │   │   ├── analytics.css
+│   │   │   │   ├── client-detail.css
+│   │   │   │   └── project-detail.css
 │   │   │   └── pages/               # Page-specific overrides
-│   │   │       ├── contact.css      # Contact page styles
-│   │   │       ├── admin.css        # Admin dashboard
-│   │   │       ├── client.css       # Client portal
-│   │   │       └── projects.css     # Project showcase
+│   │   │       ├── contact.css
+│   │   │       ├── admin.css
+│   │   │       ├── client.css
+│   │   │       └── projects.css
 │   │   │
 │   │   ├── 🎨 DESIGN SYSTEM
 │   │   │   ├── index.css
@@ -733,45 +801,63 @@ export class AdminUsersModule extends BaseModule {
 
 ### CSS Organization
 
-**New Modular Architecture (2024)**
+**Modular Architecture (Updated February 2026)**
 
-```scss
-// Layered CSS Architecture
+```text
 src/styles/
-├── main.css                 // New modular entry point
-├── base/                        // Foundation layer
-│   ├── reset.css               // CSS reset & normalize
-│   ├── typography.css          // Typography system
-│   └── layout.css              // Layout primitives
-├── components/                  // Component layer
-│   ├── form.css                // Consolidated form system
-│   ├── navigation.css          // Navigation & menus
-│   ├── business-card.css       // Interactive business card
-│   ├── loading.css             // Loading states
-│   └── portfolio-carousel.css  // Portfolio component
-├── pages/                       // Page-specific layer
-│   ├── contact.css             // Contact page overrides
-│   ├── admin.css               // Admin dashboard
-│   ├── client.css              // Client portal
-│   └── projects.css            // Project showcase
-└── design-system/               // Design tokens (existing)
-    ├── index.css               // Design system entry
+├── main.css                     # Modular entry point
+├── base/                        # Foundation layer
+│   ├── fonts.css               # @font-face definitions (imported first)
+│   ├── reset.css               # CSS reset & normalize
+│   ├── typography.css          # Typography system
+│   └── layout.css              # Layout primitives
+├── components/                  # Component layer
+│   ├── form-fields.css         # Form inputs
+│   ├── form-buttons.css        # Button styles
+│   ├── form-validation.css     # Validation states
+│   ├── nav-base.css            # Navigation base
+│   ├── nav-animations.css      # Nav animations
+│   ├── nav-responsive.css      # Mobile navigation
+│   ├── nav-portal.css          # Portal dropdowns
+│   ├── business-card.css       # Interactive business card
+│   └── loading.css             # Loading states
+├── client-portal/              # Client portal (modular)
+│   ├── index.css               # Import orchestrator
+│   └── (10 modular files)      # components, layout, sidebar, etc.
+├── shared/                     # Shared portal components
+│   ├── portal-buttons.css
+│   ├── portal-cards.css
+│   ├── portal-forms.css
+│   ├── portal-badges.css
+│   └── (8 more files)          # layout, messages, files, etc.
+├── admin/                      # Admin dashboard styles
+│   ├── index.css
+│   └── (4 files)               # analytics, client-detail, etc.
+├── pages/                      # Page-specific layer
+│   ├── contact.css
+│   ├── admin.css
+│   ├── client.css
+│   └── projects.css
+└── design-system/              # Design tokens
+    ├── index.css               # Design system entry
     └── tokens/
-        ├── colors.css          // Color palette
-        ├── typography.css      // Font scales, weights
-        ├── spacing.css         // Margin, padding scales
-        ├── borders.css         // Border styles, radius
-        ├── shadows.css         // Box shadow tokens
-        ├── animations.css      // Animation presets
-        ├── breakpoints.css     // Media query breakpoints
-        └── z-index.css        // Z-index scale
+        ├── colors.css          # 381 lines - Complete color system
+        ├── typography.css      # 283 lines - Type scale
+        ├── spacing.css         # 437 lines - Spacing scale
+        ├── animations.css      # 455 lines - Animation presets
+        ├── shadows.css         # 218 lines - Elevation system
+        ├── borders.css         # 200 lines - Border styles
+        ├── breakpoints.css     # 536 lines - Responsive breakpoints
+        └── z-index.css         # 305 lines - Stacking context
 ```
 
 **Key Improvements:**
-- **Consolidated Form System**: All form styles in `components/form.css`
-- **Proper Layering**: Base → Components → Pages → Design System  
-- **Eliminated Duplication**: Single import in `main.css`
-- **Better Organization**: Logical separation by function
+- **Font Loading**: `fonts.css` imported first for proper font availability
+- **Navigation Split**: `navigation.css` split into 4 focused files
+- **Form Split**: Forms split into fields, buttons, validation
+- **Client Portal Modular**: 10 files in `client-portal/` directory
+- **Shared Components**: Reusable portal components in `shared/`
+- **Portal Prefix**: Uses `.portal-` prefix (not `.cp-`) for consistency
 
 ### Adding New Styles
 
@@ -1338,7 +1424,7 @@ npm run audit              # Security audit
 
 ## 🔍 CODEBASE HEALTH
 
-**Last Code Review: January 15, 2026**
+**Last Code Review: February 2, 2026**
 
 ### Critical Issues
 
@@ -1360,8 +1446,10 @@ npm run audit              # Security audit
 | `src/core/app.ts` | 452 | FIXED - Split Dec 19 (was 992 lines, now 4 files) |
 | `src/core/state/` | 4 files | FIXED - Split Dec 19 (was 824 lines in state.ts) |
 | `src/services/visitor-tracking.ts` | 730 | Pending - Split by tracking concern |
-| `src/features/admin/admin-dashboard.ts` | ~200 | FIXED - Split Jan 20, 2026 (was 1886 lines, services/renderers extracted) |
+| `src/features/admin/admin-dashboard.ts` | ~200 | FIXED - Split Jan 20, 2026 (was 1886 lines) |
+| `src/features/admin/modules/` | 14 files | FIXED - Extracted from admin-dashboard.ts |
 | `src/styles/components/nav-*.css` | 4 files | FIXED - Split Dec 19 (was 1792 lines) |
+| `src/styles/client-portal/` | 10 files | FIXED - Split into modular directory |
 | `src/modules/animation/intro-animation.ts` | 1569 | Large but organized |
 
 **December 22, 2025 Animation Improvements:**
@@ -1444,7 +1532,7 @@ The system uses **HttpOnly cookies** for secure JWT token storage:
 
 - Admin dashboard modules still use Authorization headers (lower priority)
 
-### CSS Architecture Status (Updated December 23, 2025)
+### CSS Architecture Status (Updated February 2, 2026)
 
 Token system is excellent and now consistently used:
 
@@ -1454,6 +1542,9 @@ Token system is excellent and now consistently used:
 - Navigation CSS split into 4 files (`nav-base`, `nav-animations`, `nav-responsive`, `nav-portal`)
 - Form CSS split into 3 files (`form-fields`, `form-buttons`, `form-validation`)
 - Created `fonts.css` for proper font loading (imported first)
+- Client portal uses `.portal-` prefix for component classes
+- Client portal modularized into 10 files in `src/styles/client-portal/`
+- Shared portal components in `src/styles/shared/`
 - See `/docs/design/CSS_ARCHITECTURE.md` for detailed findings
 
 ---

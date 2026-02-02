@@ -7,6 +7,31 @@
 
 The Client Management System provides CRM-grade functionality for managing client relationships, contacts, activities, custom fields, tags, and health scoring. This system is comparable to features found in HubSpot, Salesforce, and other enterprise CRM platforms.
 
+## Client Detail View Organization
+
+The client detail view is organized by tabs so the **Overview** stays a summary and deeper content lives in dedicated tabs.
+
+**Overview tab (summary only):**
+
+- **Quick Stats** – At-a-glance metrics (projects, activity).
+- **Client Health** – Relationship/account health score.
+- **CRM Details** – Who they are, company, contact, last/next follow-up.
+- **Billing Details** – Billing name, email, address (edit in place).
+- **Tags** – Categorization.
+- **Custom Fields** – Optional/extended data.
+
+The **overview card** at the top (above the tabs) shows: client name, email, company, phone, status, type, account created, last login, **total projects**, and **outstanding invoices count**. That count is the number of unpaid invoices and links conceptually to the Invoices tab.
+
+**Other tabs:**
+
+- **Contacts** – Multi-contact management.
+- **Activity** – Activity timeline.
+- **Projects** – List of client projects (links to project detail).
+- **Invoices** – Full invoice summary (totals: invoiced, paid, outstanding) and invoice list. Moved out of Overview so Overview stays scannable.
+- **Notes** – Client notes.
+
+**Account Actions** (Reset Password, Resend Invitation, Delete Client) sit below the tabs so they are always visible.
+
 ## Features
 
 ### 1. Multi-Contact Management
@@ -36,9 +61,11 @@ Automatic and manual activity tracking for each client:
 
 - Contact added/removed
 - Tag added/removed
-- Invoice sent/paid
+- Invoice sent
+- Payment received
 - Project created/completed
 - Proposal sent/accepted
+- Status change
 
 **Manual Activities:**
 

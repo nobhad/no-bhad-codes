@@ -2942,6 +2942,424 @@ Get tier configuration for a specific project type.
 
 ---
 
+## Analytics & Reporting API
+
+The Analytics API provides business intelligence and visitor tracking capabilities.
+
+### Visitor Tracking (Public)
+
+#### POST `/api/analytics/track`
+
+Submit tracking events (rate limited, public endpoint).
+
+**Request:**
+
+```json
+{
+  "type": "page_view",
+  "sessionId": "abc123",
+  "data": {
+    "path": "/projects",
+    "title": "Projects"
+  }
+}
+```
+
+### Visitor Analytics (Admin)
+
+#### GET `/api/analytics/summary`
+
+Get analytics summary with date range filtering.
+
+**Query Parameters:**
+
+- `days` - Number of days to include (default: 30)
+
+#### GET `/api/analytics/realtime`
+
+Get real-time visitor data.
+
+#### GET `/api/analytics/sessions`
+
+List visitor sessions with pagination.
+
+**Query Parameters:**
+
+- `limit` - Results per page (default: 50)
+- `offset` - Pagination offset
+
+#### GET `/api/analytics/sessions/:sessionId`
+
+Get detailed session data.
+
+#### GET `/api/analytics/export`
+
+Export analytics data as CSV or JSON.
+
+**Query Parameters:**
+
+- `format` - `csv` or `json` (default: json)
+- `dateFrom` - Start date
+- `dateTo` - End date
+
+#### DELETE `/api/analytics/data`
+
+Clear old tracking data.
+
+### Saved Reports
+
+#### GET `/api/analytics/reports`
+
+List saved reports.
+
+**Query Parameters:**
+
+- `type` - Filter by report type
+- `favorites` - Show only favorites (`true`)
+
+#### POST `/api/analytics/reports`
+
+Create a new saved report.
+
+#### GET `/api/analytics/reports/:id`
+
+Get a specific report.
+
+#### PUT `/api/analytics/reports/:id`
+
+Update a report.
+
+#### DELETE `/api/analytics/reports/:id`
+
+Delete a report.
+
+#### POST `/api/analytics/reports/:id/favorite`
+
+Toggle report favorite status.
+
+#### POST `/api/analytics/reports/:id/run`
+
+Execute a report and get results.
+
+### Report Schedules
+
+#### GET `/api/analytics/reports/:reportId/schedules`
+
+Get schedules for a report.
+
+#### POST `/api/analytics/reports/:reportId/schedules`
+
+Create a report schedule.
+
+#### PUT `/api/analytics/schedules/:id`
+
+Update a schedule.
+
+#### DELETE `/api/analytics/schedules/:id`
+
+Delete a schedule.
+
+#### POST `/api/analytics/schedules/process`
+
+Process all due schedules.
+
+### Dashboard Widgets
+
+#### GET `/api/analytics/widgets`
+
+Get user's dashboard widgets.
+
+#### POST `/api/analytics/widgets`
+
+Create a widget.
+
+#### PUT `/api/analytics/widgets/:id`
+
+Update a widget.
+
+#### DELETE `/api/analytics/widgets/:id`
+
+Delete a widget.
+
+#### PUT `/api/analytics/widgets/layout`
+
+Update widget positions/sizes.
+
+#### GET `/api/analytics/widgets/presets`
+
+Get available dashboard presets.
+
+#### POST `/api/analytics/widgets/presets/:id/apply`
+
+Apply a dashboard preset.
+
+### KPI Snapshots
+
+#### POST `/api/analytics/kpis/snapshot`
+
+Capture a KPI snapshot.
+
+#### GET `/api/analytics/kpis/latest`
+
+Get latest KPI values.
+
+#### GET `/api/analytics/kpis/:type/trend`
+
+Get KPI trend over time.
+
+**Query Parameters:**
+
+- `days` - Number of days (default: 30)
+
+### Metric Alerts
+
+#### GET `/api/analytics/alerts`
+
+Get all metric alerts.
+
+#### POST `/api/analytics/alerts`
+
+Create an alert.
+
+#### PUT `/api/analytics/alerts/:id`
+
+Update an alert.
+
+#### DELETE `/api/analytics/alerts/:id`
+
+Delete an alert.
+
+#### POST `/api/analytics/alerts/check`
+
+Check all alerts for triggers.
+
+### Quick Analytics
+
+#### GET `/api/analytics/quick/revenue`
+
+Revenue analytics summary.
+
+#### GET `/api/analytics/quick/pipeline`
+
+Pipeline analytics.
+
+#### GET `/api/analytics/quick/projects`
+
+Project analytics.
+
+#### GET `/api/analytics/quick/clients`
+
+Client analytics.
+
+#### GET `/api/analytics/quick/team`
+
+Team performance analytics.
+
+#### GET `/api/analytics/report-runs`
+
+Report execution history.
+
+---
+
+## Client CRM API
+
+Extended client management with contacts, activities, custom fields, tags, and health scoring.
+
+### Client Contacts
+
+#### GET `/api/clients/:id/contacts`
+
+Get all contacts for a client.
+
+#### POST `/api/clients/:id/contacts`
+
+Add a contact to a client.
+
+**Request:**
+
+```json
+{
+  "name": "Jane Smith",
+  "email": "jane@example.com",
+  "phone": "+1-555-0123",
+  "role": "Project Manager",
+  "isPrimary": false
+}
+```
+
+#### PUT `/api/clients/contacts/:contactId`
+
+Update a contact.
+
+#### DELETE `/api/clients/contacts/:contactId`
+
+Delete a contact.
+
+#### POST `/api/clients/:id/contacts/:contactId/set-primary`
+
+Set a contact as primary.
+
+### Client Activities
+
+#### GET `/api/clients/:id/activities`
+
+Get activity history for a client.
+
+**Query Parameters:**
+
+- `limit` - Results per page (default: 50)
+- `offset` - Pagination offset
+
+#### POST `/api/clients/:id/activities`
+
+Log an activity for a client.
+
+**Request:**
+
+```json
+{
+  "activityType": "call",
+  "description": "Discussed project timeline",
+  "metadata": {}
+}
+```
+
+**Activity Types:** `note`, `call`, `email`, `meeting`, `status_change`, `invoice_sent`, `payment_received`, `project_created`, `proposal_sent`, `contact_added`, `contact_removed`, `tag_added`, `tag_removed`
+
+#### GET `/api/clients/activities/recent`
+
+Get recent activities across all clients.
+
+### Custom Fields
+
+#### GET `/api/clients/custom-fields`
+
+Get all custom field definitions.
+
+#### POST `/api/clients/custom-fields`
+
+Create a custom field.
+
+**Request:**
+
+```json
+{
+  "fieldName": "industry",
+  "fieldType": "select",
+  "options": ["Tech", "Healthcare", "Finance"],
+  "isRequired": false
+}
+```
+
+**Field Types:** `text`, `number`, `date`, `select`, `multiselect`, `boolean`
+
+#### PUT `/api/clients/custom-fields/:fieldId`
+
+Update a custom field definition.
+
+#### DELETE `/api/clients/custom-fields/:fieldId`
+
+Delete a custom field.
+
+#### GET `/api/clients/:id/custom-fields`
+
+Get custom field values for a client.
+
+#### PUT `/api/clients/:id/custom-fields`
+
+Update custom field values for a client.
+
+### Client Tags
+
+#### GET `/api/clients/tags`
+
+Get all available tags.
+
+#### POST `/api/clients/tags`
+
+Create a new tag.
+
+**Request:**
+
+```json
+{
+  "name": "VIP",
+  "color": "#dc2626"
+}
+```
+
+#### PUT `/api/clients/tags/:tagId`
+
+Update a tag.
+
+#### DELETE `/api/clients/tags/:tagId`
+
+Delete a tag.
+
+#### GET `/api/clients/:id/tags`
+
+Get tags assigned to a client.
+
+#### POST `/api/clients/:id/tags/:tagId`
+
+Assign a tag to a client.
+
+#### DELETE `/api/clients/:id/tags/:tagId`
+
+Remove a tag from a client.
+
+#### GET `/api/clients/by-tag/:tagId`
+
+Get all clients with a specific tag.
+
+### Client Health Scoring
+
+#### GET `/api/clients/:id/health`
+
+Get health score for a client.
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "health": {
+    "score": 85,
+    "status": "healthy",
+    "factors": {
+      "paymentHistory": 90,
+      "engagement": 80,
+      "projectSuccess": 85
+    },
+    "lastCalculated": "2026-02-01T10:00:00Z"
+  }
+}
+```
+
+#### POST `/api/clients/:id/health/recalculate`
+
+Force recalculation of health score.
+
+#### GET `/api/clients/at-risk`
+
+Get clients with low health scores.
+
+### Client Statistics
+
+#### GET `/api/clients/:id/stats`
+
+Get comprehensive statistics for a client.
+
+#### PUT `/api/clients/:id/crm`
+
+Update CRM-specific fields for a client.
+
+#### GET `/api/clients/follow-up`
+
+Get clients needing follow-up.
+
+---
+
 ## API Versioning
 
 The API uses URL-based versioning:

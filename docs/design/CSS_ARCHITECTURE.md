@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** January 29, 2026
+**Last Updated:** February 2, 2026
 
 ## Table of Contents
 
@@ -16,14 +16,15 @@
 10. [File Organization](#file-organization)
 11. [Best Practices](#best-practices)
 12. [!important Usage Policy](#important-usage-policy)
-13. [Admin Messaging Component](#admin-messaging-component)
-14. [Known Issues](#known-issues)
+13. [Portal Button Design](#portal-button-design)
+14. [Admin Messaging Component](#admin-messaging-component)
+15. [Known Issues](#known-issues)
 
 ---
 
 ## Overview
 
-The project uses a CSS variable-based architecture for consistent theming across light and dark modes. The Client Portal uses the `cp-` prefix for portal-specific classes to avoid conflicts with main site styles.
+The project uses a CSS variable-based architecture for consistent theming across light and dark modes. The Client Portal uses the `portal-` prefix for portal-specific classes to avoid conflicts with main site styles.
 
 **Design System:** `src/design-system/` (11 files, ~2,300 lines)
 **Styles Directory:** `src/styles/` (25 files, ~4,200 lines)
@@ -38,14 +39,14 @@ The design system provides the foundational tokens for the entire application.
 
 | Token File | Lines | Purpose |
 |------------|-------|---------|
-| `tokens/colors.css` | 307 | Complete color system with semantic tokens |
-| `tokens/typography.css` | 284 | Type scale with fluid `clamp()` values |
-| `tokens/spacing.css` | 438 | Spacing scale and utility classes |
-| `tokens/animations.css` | 408 | Duration, easing, and keyframes |
-| `tokens/shadows.css` | 219 | Elevation system with component shadows |
-| `tokens/borders.css` | ~50 | Border radius values |
-| `tokens/breakpoints.css` | ~30 | Responsive breakpoints |
-| `tokens/z-index.css` | ~20 | Stacking context tokens |
+| `tokens/colors.css` | 381 | Complete color system with semantic tokens |
+| `tokens/typography.css` | 283 | Type scale with fluid `clamp()` values |
+| `tokens/spacing.css` | 437 | Spacing scale and utility classes |
+| `tokens/animations.css` | 455 | Duration, easing, and keyframes |
+| `tokens/shadows.css` | 218 | Elevation system with component shadows |
+| `tokens/borders.css` | 200 | Border radius values |
+| `tokens/breakpoints.css` | 536 | Responsive breakpoints |
+| `tokens/z-index.css` | 305 | Stacking context tokens |
 
 ### Color Token System
 
@@ -102,10 +103,10 @@ The design system provides the foundational tokens for the entire application.
 @import './styles/base/typography.css';
 
 /* Then components */
-@import './styles/components/form.css';
+@import './styles/components/form-fields.css';
 
-/* Then pages */
-@import './styles/pages/client-portal.css';
+/* Then client portal (modular directory) */
+@import './styles/client-portal/index.css';
 
 /* Finally mobile overrides */
 @import './styles/mobile/index.css';
@@ -115,22 +116,22 @@ The design system provides the foundational tokens for the entire application.
 
 ## Standardized Components
 
-The Client Portal CSS defines standardized component classes documented at the top of the file for consistency across all views.
+The Client Portal CSS defines standardized component classes in `src/styles/client-portal/components.css` using the `.portal-` prefix for consistency across all views.
 
 ### Component: Card
 
 Use for any content container/section:
 
 ```css
-/* src/styles/pages/client-portal.css:25-34 */
-.cp-card {
+/* src/styles/client-portal/components.css */
+.portal-card {
   background: var(--color-neutral-200);
   border: 4px solid #000000;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
 }
 
-.cp-card:last-child {
+.portal-card:last-child {
   margin-bottom: 0;
 }
 ```
@@ -140,8 +141,8 @@ Use for any content container/section:
 Use for section titles within cards:
 
 ```css
-/* src/styles/pages/client-portal.css:40-48 */
-.cp-card-header {
+/* src/styles/client-portal/components.css */
+.portal-card-header {
   font-family: var(--font--acme);
   font-size: 1.1rem;
   color: var(--color-dark);
@@ -154,16 +155,11 @@ Use for section titles within cards:
 
 ### Component: Buttons
 
-Standard button classes with consistent styling:
+Button classes are defined in `shared/portal-buttons.css`:
 
 ```css
-/* src/styles/pages/client-portal.css:55-98 */
-.cp-btn,
-.client-portal-main .btn,
-.client-portal-main .btn-primary,
-.client-portal-main .btn-secondary,
-.client-portal-main .btn-outline,
-.client-portal-main button[type="submit"] {
+/* src/styles/shared/portal-buttons.css */
+.portal-btn {
   padding: 0.75rem 1.5rem;
   background: var(--color-neutral-300);
   color: var(--color-dark);
@@ -178,24 +174,7 @@ Standard button classes with consistent styling:
   line-height: 1.2;
 }
 
-/* Primary/Submit button */
-.cp-btn-primary,
-.client-portal-main .btn-primary,
-.client-portal-main button[type="submit"] {
-  background: var(--color-neutral-300);
-}
-
-/* Small button */
-.cp-btn-sm,
-.client-portal-main .btn-sm {
-  padding: 0.5rem 1rem;
-  font-size: 0.8rem;
-  border-width: 3px;
-}
-
-/* Hover state */
-.cp-btn:hover,
-.client-portal-main .btn:hover {
+.portal-btn:hover {
   background: var(--color-primary);
   color: var(--color-dark);
 }
@@ -206,10 +185,8 @@ Standard button classes with consistent styling:
 Standardized form inputs:
 
 ```css
-.cp-input,
-.client-portal-main .form-input,
-.client-portal-main .form-select,
-.client-portal-main .form-textarea {
+/* src/styles/client-portal/components.css */
+.portal-input {
   width: 100%;
   padding: 0.75rem;
   background: var(--color-neutral-100);
@@ -219,8 +196,7 @@ Standardized form inputs:
   font-size: 1rem;
 }
 
-.cp-input:focus,
-.client-portal-main .form-input:focus {
+.portal-input:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
@@ -232,7 +208,8 @@ Standardized form inputs:
 Status indicators:
 
 ```css
-.cp-badge {
+/* src/styles/client-portal/components.css */
+.portal-badge {
   padding: 0.25rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 600;
@@ -247,20 +224,21 @@ Status indicators:
 Quick stats display:
 
 ```css
-.cp-stat {
+/* src/styles/client-portal/components.css */
+.portal-stat {
   background: var(--color-neutral-100);
   border: 4px solid #000000;
   padding: 1.5rem;
   text-align: center;
 }
 
-.cp-stat-number {
+.portal-stat-number {
   font-size: 2rem;
   font-weight: 700;
   display: block;
 }
 
-.cp-stat-label {
+.portal-stat-label {
   font-size: 0.875rem;
   color: var(--color-text-muted);
 }
@@ -408,32 +386,37 @@ function loadTheme(): void {
 
 The project uses distinct prefixes for different portal-related features:
 
-**Client Portal Dashboard (`cp-` prefix):**
-Classes for the authenticated client portal dashboard use the `cp-` prefix to avoid conflicts with main site CSS (especially `projects.css`).
+**Client Portal Components (`portal-` prefix):**
+Classes for the authenticated client portal use the `portal-` prefix. Located in `src/styles/client-portal/components.css`.
 
-**Navigation Portal (`portal-` prefix):**
-Classes for the header portal dropdown (login/register toggle) use the `portal-` prefix. Located in `src/styles/components/nav-portal.css`.
+**Navigation Portal (`portal-` prefix with nav scope):**
+Classes for the header portal dropdown (login/register toggle) are scoped within navigation. Located in `src/styles/components/nav-portal.css`.
 
 **Intake Modal (`intake-` prefix):**
 Classes for the terminal intake modal use the `intake-` prefix. Also in `nav-portal.css`.
 
-### Client Portal Dashboard Classes (`cp-`)
+### Client Portal Component Classes (`portal-`)
 
 | Class | Purpose |
 |-------|---------|
-| `.cp-shadow` | Intense multi-layer shadow utility |
-| `.cp-card` | Content container card |
-| `.cp-card-header` | Section title in card |
-| `.cp-btn` | Standard button |
-| `.cp-btn-primary` | Primary action button |
-| `.cp-btn-sm` | Small button |
-| `.cp-input` | Form input field |
-| `.cp-badge` | Status badge |
-| `.cp-stat` | Stat card |
-| `.cp-project-cards` | Project cards container |
-| `.cp-project-card` | Individual project card |
-| `.cp-password-wrapper` | Password field with toggle |
-| `.cp-password-toggle` | Password visibility button |
+| `.portal-shadow` | Intense multi-layer shadow utility |
+| `.portal-panel` | Content panel container |
+| `.portal-card` | Content container card |
+| `.portal-card-header` | Section title in card |
+| `.portal-input` | Form input field |
+| `.portal-form-group` | Form field wrapper |
+| `.portal-form-row` | Horizontal form layout |
+| `.portal-password-wrapper` | Password field with toggle |
+| `.portal-password-toggle` | Password visibility button |
+| `.portal-list-item` | List item container |
+| `.portal-item-actions` | Action buttons for list items |
+| `.portal-badge` | Status badge |
+| `.portal-badge-pending` | Pending status variant |
+| `.portal-badge-success` | Success status variant |
+| `.portal-stat` | Stat card |
+| `.portal-stat-number` | Stat value display |
+| `.portal-stat-label` | Stat description |
+| `.portal-empty-message` | Empty state message |
 
 ### Navigation Portal Classes (`portal-`)
 
@@ -458,8 +441,8 @@ Classes for the terminal intake modal use the `intake-` prefix. Also in `nav-por
 ### Shadow Utility Class
 
 ```css
-/* src/styles/pages/client-portal.css:18-23 */
-.cp-shadow {
+/* src/styles/client-portal/components.css */
+.portal-shadow {
   box-shadow:
     20px 6px 30px rgba(0, 0, 0, 0.6),
     8px 8px 16px rgba(0, 0, 0, 0.8),
@@ -509,19 +492,17 @@ The `.portal-layout` system provides a two-column grid for the client landing pa
 
 ### Project Card (Avoiding Conflicts)
 
-The `.cp-project-card` class was created because `.project-card` in `projects.css` had conflicting rules:
+Project cards in the client portal use scoped classes to avoid conflicts with `.project-card` in `pages/projects.css`:
 
 ```css
-/* WRONG - conflicts with projects.css */
-.project-card { ... }
-
-/* CORRECT - namespaced to client portal */
-.cp-project-cards {
+/* src/styles/client-portal/dashboard.css */
+/* Project cards use portal-prefixed classes */
+.portal-project-cards {
   display: block;
   margin-bottom: 1rem;
 }
 
-.cp-project-card {
+.portal-project-card {
   display: block;
   background: var(--color-neutral-100);
   border: 4px solid #000000;
@@ -842,11 +823,11 @@ src/styles/
 
 - Use CSS variables for colors, spacing, and sizing
 - Use `clamp()` for fluid responsive values
-- Prefix scoped styles with `cp-` to avoid conflicts
+- Prefix scoped styles with `portal-` to avoid conflicts
 - Use semantic class names
 - Group related styles together
 - Add comments for complex selectors
-- Use the standardized cp- component classes defined in `client-portal/components.css`
+- Use the standardized portal- component classes defined in `client-portal/components.css`
 
 ### Don'ts
 
@@ -890,7 +871,8 @@ box-shadow:
 |------|---------|
 | `src/styles/variables.css` | CSS variables and themes |
 | `src/styles/main.css` | Main site styles |
-| `src/styles/pages/client-portal.css` | Client Portal specific (3050 lines) |
+| `src/styles/client-portal/` | Client Portal modular styles (10 files) |
+| `src/styles/shared/*.css` | Shared portal components |
 | `src/styles/components/*.css` | Reusable components |
 
 ---
@@ -1051,6 +1033,22 @@ When removing `!important`, use these techniques:
 
 ---
 
+## Portal Button Design
+
+**Reference:** [PORTAL_BUTTON_DESIGN.md](./PORTAL_BUTTON_DESIGN.md)
+
+Portal buttons follow a clear hierarchy so the sidebar reads as links and content actions are scannable:
+
+- **Sidebar nav:** Link-style (no background, no shadow); same look expanded and collapsed.
+- **Primary:** One main CTA per screen/section (e.g. Save, Create).
+- **Secondary:** Cancel, back, other content actions.
+- **Icon-only:** Toolbars, filters, table actions.
+- **Destructive:** Delete/remove actions.
+
+Implementation: `src/styles/shared/portal-buttons.css`. See the design doc for where each style is used.
+
+---
+
 ## Admin Messaging Component
 
 **Location:** `src/styles/admin/project-detail.css` (lines 864-1730)
@@ -1139,7 +1137,7 @@ The client selector uses a custom dropdown component with unread message counts:
 
 ## Known Issues
 
-**Updated January 29, 2026**
+**Updated February 2, 2026**
 
 ### Resolved Issues (December 2025 - January 2026)
 
@@ -1208,7 +1206,7 @@ Some files still contain hardcoded color values that could be tokenized:
 
 #### Legacy Variables Still in Use
 
-The Client Portal (`cp-` prefixed classes) still uses legacy variable naming for backwards compatibility:
+The Client Portal (`portal-` prefixed classes) still uses legacy variable naming for backwards compatibility:
 
 ```css
 /* Still in use for Client Portal */

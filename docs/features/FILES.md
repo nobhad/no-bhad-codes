@@ -1,5 +1,8 @@
 # File Management System
 
+**Status:** Complete
+**Last Updated:** February 1, 2026
+
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -61,7 +64,7 @@ The File Management system allows clients to upload, view, preview, and download
 
 ### Data Flow
 
-```
+```text
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
 │   Client Portal │ ──> │  Upload API      │ ──> │  File System    │
 │   (TypeScript)  │     │  (Express)       │     │  (uploads/)     │
@@ -80,7 +83,7 @@ The File Management system allows clients to upload, view, preview, and download
 
 ### Base URL
 
-```
+```text
 /api/uploads
 ```
 
@@ -90,7 +93,7 @@ The File Management system allows clients to upload, view, preview, and download
 
 Get all files for the authenticated client (across all their projects).
 
-**Authentication:** Required (JWT Bearer token)
+**Authentication:** Required (HttpOnly cookie session)
 
 **Response (200 OK):**
 ```json
@@ -813,7 +816,7 @@ const deleteIcon = canDelete
 | File | Purpose |
 |------|---------|
 | `server/routes/uploads.ts` | Backend API endpoints |
-| `src/features/client/modules/portal-files.ts` | Frontend file handling (~455 lines) |
+| `src/features/client/modules/portal-files.ts` | Frontend file handling (~501 lines) |
 | `src/styles/client-portal/files.css` | File section styling |
 | `client/portal.html` | Files tab HTML (tab-files section) |
 
@@ -833,7 +836,7 @@ const deleteIcon = canDelete
 **Status:** Complete
 **Last Updated:** February 1, 2026
 
-### Overview
+### Phase 6 Overview
 
 The File Management Enhancement adds professional-grade file organization with versioning, folders, tags, access tracking, comments, archiving, expiration, locking, and comprehensive search capabilities comparable to Dropbox, Google Drive, and other industry leaders.
 
@@ -1001,7 +1004,7 @@ CREATE TABLE IF NOT EXISTS file_comments (
 
 ### Change Log
 
-**February 1, 2026 - Phase 6 Implementation**
+#### February 1, 2026 - Phase 6 Implementation
 
 - Created database migration for file enhancement tables
 - Implemented file-service.ts with versioning, folders, tags, access, comments, archiving, locking

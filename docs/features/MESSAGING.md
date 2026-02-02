@@ -7,6 +7,16 @@
 
 The Messaging System provides professional-grade communication features including threads, mentions, reactions, read receipts, pinned messages, internal notes, and comprehensive search capabilities comparable to Slack, Microsoft Teams, and other industry leaders.
 
+## Thread Status
+
+Threads have the following status values:
+
+| Status | Description |
+|--------|-------------|
+| `active` | Thread is open and accepting messages |
+| `closed` | Thread has been closed (no new messages) |
+| `archived` | Thread has been archived for historical reference |
+
 ## Features
 
 ### 1. Message Mentions
@@ -319,7 +329,7 @@ The `message-service.ts` provides the following methods:
 ### Subscription Methods
 
 - `getSubscription(projectId, userEmail)` - Get subscription
-- `updateSubscription(projectId, userEmail, userType, prefs)` - Update
+- `updateSubscription(projectId, userEmail, prefs)` - Update
 - `muteProject(projectId, userEmail, userType, until)` - Mute
 - `unmuteProject(projectId, userEmail)` - Unmute
 

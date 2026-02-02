@@ -78,7 +78,7 @@ The Invoice System provides clients with a complete view of their payment histor
 
 ### Data Flow
 
-```
+```text
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
 │   Client Portal │ ──> │  Invoices API    │ ──> │  Database       │
 │   (TypeScript)  │     │  (Express)       │     │  (SQLite)       │
@@ -97,7 +97,7 @@ The Invoice System provides clients with a complete view of their payment histor
 
 ### Base URL
 
-```
+```text
 /api/invoices
 ```
 
@@ -548,6 +548,76 @@ Get all scheduled reminders for an invoice.
 #### POST `/api/invoices/reminders/:id/skip`
 
 Skip a scheduled reminder.
+
+---
+
+### Advanced Features
+
+#### Tax & Discount
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| PUT | `/api/invoices/:id/tax-discount` | Update tax rate and discount |
+
+#### Late Fees
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/invoices/:id/late-fee` | Get late fee information |
+| POST | `/api/invoices/:id/apply-late-fee` | Apply late fee to invoice |
+| POST | `/api/invoices/process-late-fees` | Process late fees for all overdue invoices |
+
+#### Payment History
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/invoices/:id/payments` | Get payment history for invoice |
+| POST | `/api/invoices/:id/record-payment` | Record a payment |
+| POST | `/api/invoices/:id/record-payment-with-history` | Record payment with full history tracking |
+| GET | `/api/invoices/all-payments` | Get all payments across invoices |
+
+#### Payment Terms
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/invoices/payment-terms` | Get all payment term presets |
+| POST | `/api/invoices/payment-terms` | Create a payment term preset |
+| POST | `/api/invoices/:id/apply-terms` | Apply payment terms to invoice |
+
+#### A/R Aging Report
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/invoices/aging-report` | Get accounts receivable aging report |
+
+#### Internal Notes
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| PUT | `/api/invoices/:id/internal-notes` | Update internal notes (admin only) |
+
+#### Custom Invoice Numbers
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/invoices/with-custom-number` | Create invoice with custom number |
+| GET | `/api/invoices/number/:invoiceNumber` | Get invoice by invoice number |
+
+#### Statistics
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/invoices/comprehensive-stats` | Get comprehensive invoice statistics |
+
+#### Other Operations
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/invoices/:id/duplicate` | Duplicate an invoice as draft |
+| POST | `/api/invoices/search` | Search invoices with filters |
+| POST | `/api/invoices/check-overdue` | Check and mark overdue invoices |
+| POST | `/api/invoices/:id/send-reminder` | Send manual payment reminder |
+| POST | `/api/invoices/:id/generate/intake/:intakeId` | Generate invoice from intake form |
 
 ---
 
@@ -1074,7 +1144,7 @@ When an invoice is sent, reminders are automatically scheduled:
 
 ---
 
-## File Locations
+## All Implementation Files
 
 | File | Purpose |
 |------|---------|

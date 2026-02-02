@@ -1,11 +1,67 @@
 # Analytics & Reporting Feature
 
 **Status:** Complete
-**Last Updated:** 2026-02-01
+**Last Updated:** 2026-02-02
 
 ## Overview
 
 The Analytics & Reporting system provides comprehensive business intelligence capabilities including saved reports, scheduled report generation, customizable dashboards, KPI tracking, and metric alerts. This system enables data-driven decision making with enterprise-grade reporting tools.
+
+The system includes two subsystems:
+
+1. **Business Intelligence Analytics** - Saved reports, dashboards, KPIs, alerts (documented below)
+2. **Visitor Tracking Analytics** - Session tracking, page views, real-time visitors (see [Visitor Tracking](#visitor-tracking-system))
+
+### Analytics Tab Presentation (Admin)
+
+Best way to present information on the Analytics tab:
+
+1. **Business KPIs** — Revenue, Pipeline, Projects, Invoices (top row).
+2. **Business Metrics** — Revenue by Month and Project Status charts.
+3. **Lead Funnel** — Conversion stages and stats.
+4. **Saved / Scheduled Reports & Alerts** — Reports, schedules, metric alerts.
+5. **Visitor Analytics (breakdown)** — Two blocks: **Main portfolio site** and **THE BACKEND (client portal)**. Each shows Total Visitors, Page Views, Avg. Session. Data is combined until the API supports per-site filtering.
+6. **Charts** — Visitors Over Time, Traffic Sources.
+7. **Data grid** — Popular Pages, Device Breakdown, Geographic Distribution, Engagement Events (2x2 centered grid).
+8. **Core Web Vitals** — LCP, FID, CLS, TTFB.
+
+Cards use shared portal styling (`--shadow-panel`, `--border-radius-card`). The analytics data grid uses a centered 2-column layout so the second row is visually centered.
+
+## Visitor Tracking System
+
+The visitor tracking system monitors website traffic and user behavior.
+
+### Visitor Tracking API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/analytics/track` | Receive tracking events (public) |
+| GET | `/api/analytics/summary` | Get analytics summary |
+| GET | `/api/analytics/realtime` | Get real-time visitor data |
+| GET | `/api/analytics/sessions` | List visitor sessions |
+| GET | `/api/analytics/sessions/:sessionId` | Get session details |
+| GET | `/api/analytics/export` | Export analytics data |
+| DELETE | `/api/analytics/data` | Clear old tracking data |
+
+### Visitor Tracking Tables
+
+These tables store visitor tracking data (separate from BI analytics tables):
+
+| Table | Description |
+|-------|-------------|
+| `visitor_sessions` | Individual visitor sessions with metadata |
+| `page_views` | Page view records per session |
+| `interaction_events` | User interaction events (clicks, scrolls, etc.) |
+
+### Tracking Data Collected
+
+- Session ID and visitor ID
+- Page URLs and titles
+- Referrer information
+- User agent and device type
+- Geographic location (if available)
+- Session duration and page time
+- Interaction events
 
 ## Architecture
 
@@ -56,15 +112,15 @@ applyDashboardPreset(presetId: number, userEmail: string): Promise<DashboardWidg
 
 // KPI Snapshots
 captureKPISnapshot(): Promise<void>
-getLatestKPIs(): Promise<LatestKPIs>
-getKPITrend(kpiType: string, days: number): Promise<KPITrendPoint[]>
+getLatestKPIs(): Promise<KPISnapshot[]>
+getKPITrend(kpiType: string, dateRange: DateRange): Promise<KPITrendPoint[]>
 
 // Metric Alerts
 getMetricAlerts(): Promise<MetricAlert[]>
 createMetricAlert(data: AlertData): Promise<MetricAlert>
 updateMetricAlert(id: number, data: Partial<AlertData>): Promise<MetricAlert>
 deleteMetricAlert(id: number): Promise<void>
-checkAlertTriggers(): Promise<TriggeredAlert[]>
+checkAlertTriggers(): Promise<{ alert: MetricAlert; currentValue: number; triggered: boolean }[]>
 
 // Quick Analytics
 getRevenueAnalytics(days: number): Promise<RevenueAnalytics>
