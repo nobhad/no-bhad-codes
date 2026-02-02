@@ -15,7 +15,7 @@
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import type { AdminDashboardContext } from '../admin-types';
-import { formatDateTime, formatCurrency } from '../../../utils/format-utils';
+import { formatDateTime, formatCurrency, formatDate } from '../../../utils/format-utils';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import { confirmDialog, confirmDanger, multiPromptDialog } from '../../../utils/confirm-dialog';
 import { createTimeline, type TimelineEvent } from '../../../components/timeline';
@@ -149,7 +149,9 @@ export async function initClientDetailView(
     loadClientNotes(clientId),
     loadClientTags(clientId),
     loadClientStats(clientId),
-    loadAvailableTags()
+    loadAvailableTags(),
+    loadClientCRMFields(clientId),
+    loadClientCustomFields(clientId)
   ]);
 
   // Render the initial tab (overview)
@@ -317,6 +319,60 @@ async function loadClientStats(clientId: number): Promise<void> {
   }
 }
 
+// CRM fields data
+let clientCRMData: {
+  industry?: string;
+  company_size?: string;
+  acquisition_source?: string;
+  website?: string;
+  last_contact_date?: string;
+  next_follow_up_date?: string;
+  notes?: string;
+} | null = null;
+
+// Custom fields data
+let clientCustomFields: Array<{
+  field_id: number;
+  field_name: string;
+  field_type: string;
+  value: string | number | boolean | null;
+}> = [];
+
+async function loadClientCRMFields(clientId: number): Promise<void> {
+  try {
+    const response = await apiFetch(`/api/clients/${clientId}`);
+    if (response.ok) {
+      const data = await response.json();
+      const client = data.client || {};
+      clientCRMData = {
+        industry: client.industry,
+        company_size: client.company_size,
+        acquisition_source: client.acquisition_source,
+        website: client.website,
+        last_contact_date: client.last_contact_date,
+        next_follow_up_date: client.next_follow_up_date,
+        notes: client.notes
+      };
+    }
+  } catch (error) {
+    console.error('[AdminClientDetails] Failed to load CRM fields:', error);
+    clientCRMData = null;
+  }
+}
+
+async function loadClientCustomFields(clientId: number): Promise<void> {
+  try {
+    const response = await apiFetch(`/api/clients/${clientId}/custom-fields`);
+    if (response.ok) {
+      const data = await response.json();
+      clientCustomFields = data.values || [];
+    }
+  } catch (error) {
+    console.error('[AdminClientDetails] Failed to load custom fields:', error);
+    clientCustomFields = [];
+  }
+}
+
 // ============================================
 // OVERVIEW TAB
 // ============================================
@@ -325,6 +381,8 @@ function renderOverviewTab(): void {
   renderHealthScore();
   renderTagsSection();
   renderStatsSection();
+  renderCRMDetails();
+  renderCustomFields();
 }
 
 function renderHealthScore(): void {
@@ -503,6 +561,234 @@ function renderStatsSection(): void {
       </div>
     </div>
   `;
+}
+
+function renderCRMDetails(): void {
+  // Populate CRM field values
+  const setValue = (id: string, value: string | null | undefined): void => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value || '-';
+  };
+
+  if (clientCRMData) {
+    setValue('cd-crm-industry', clientCRMData.industry);
+    setValue('cd-crm-company-size', clientCRMData.company_size);
+    setValue('cd-crm-acquisition-source', clientCRMData.acquisition_source);
+    setValue('cd-crm-website', clientCRMData.website);
+    setValue('cd-crm-last-contact', clientCRMData.last_contact_date ? formatDate(clientCRMData.last_contact_date) : null);
+    setValue('cd-crm-next-followup', clientCRMData.next_follow_up_date ? formatDate(clientCRMData.next_follow_up_date) : null);
+  }
+
+  // Setup edit CRM button
+  const editBtn = document.getElementById('cd-btn-edit-crm');
+  if (editBtn && !editBtn.dataset.listenerAdded) {
+    editBtn.dataset.listenerAdded = 'true';
+    editBtn.addEventListener('click', showEditCRMDialog);
+  }
+}
+
+async function showEditCRMDialog(): Promise<void> {
+  if (!currentClientId) return;
+
+  const result = await multiPromptDialog({
+    title: 'Edit CRM Details',
+    fields: [
+      {
+        name: 'industry',
+        label: 'Industry',
+        type: 'text',
+        defaultValue: clientCRMData?.industry || '',
+        placeholder: 'e.g., Technology, Healthcare'
+      },
+      {
+        name: 'company_size',
+        label: 'Company Size',
+        type: 'select',
+        defaultValue: clientCRMData?.company_size || '',
+        options: [
+          { value: '', label: 'Select...' },
+          { value: '1-10', label: '1-10 employees' },
+          { value: '11-50', label: '11-50 employees' },
+          { value: '51-200', label: '51-200 employees' },
+          { value: '201-500', label: '201-500 employees' },
+          { value: '500+', label: '500+ employees' }
+        ]
+      },
+      {
+        name: 'acquisition_source',
+        label: 'Acquisition Source',
+        type: 'select',
+        defaultValue: clientCRMData?.acquisition_source || '',
+        options: [
+          { value: '', label: 'Select...' },
+          { value: 'referral', label: 'Referral' },
+          { value: 'website', label: 'Website' },
+          { value: 'social_media', label: 'Social Media' },
+          { value: 'advertising', label: 'Advertising' },
+          { value: 'cold_outreach', label: 'Cold Outreach' },
+          { value: 'other', label: 'Other' }
+        ]
+      },
+      {
+        name: 'website',
+        label: 'Website',
+        type: 'text',
+        defaultValue: clientCRMData?.website || '',
+        placeholder: 'https://example.com'
+      },
+      {
+        name: 'last_contact_date',
+        label: 'Last Contact Date',
+        type: 'date',
+        defaultValue: clientCRMData?.last_contact_date?.split('T')[0] || ''
+      },
+      {
+        name: 'next_follow_up_date',
+        label: 'Next Follow-up Date',
+        type: 'date',
+        defaultValue: clientCRMData?.next_follow_up_date?.split('T')[0] || ''
+      }
+    ],
+    confirmText: 'Save',
+    cancelText: 'Cancel'
+  });
+
+  if (!result) return;
+
+  try {
+    const response = await apiPut(`/api/clients/${currentClientId}/crm`, result);
+    if (response.ok) {
+      storedContext?.showNotification('CRM details updated', 'success');
+      await loadClientCRMFields(currentClientId);
+      renderCRMDetails();
+    } else {
+      storedContext?.showNotification('Failed to update CRM details', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminClientDetails] Error updating CRM:', error);
+    storedContext?.showNotification('Error updating CRM details', 'error');
+  }
+}
+
+function renderCustomFields(): void {
+  const container = document.getElementById('cd-custom-fields-container');
+  if (!container) return;
+
+  if (clientCustomFields.length === 0) {
+    container.innerHTML = '<p class="empty-state">No custom fields configured.</p>';
+  } else {
+    container.innerHTML = `
+      <div class="custom-fields-grid">
+        ${clientCustomFields.map(field => `
+          <div class="meta-item">
+            <span class="field-label">${SanitizationUtils.escapeHtml(field.field_name)}</span>
+            <span class="meta-value">${formatCustomFieldValue(field)}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  // Setup edit custom fields button
+  const editBtn = document.getElementById('cd-btn-edit-custom-fields');
+  if (editBtn && !editBtn.dataset.listenerAdded) {
+    editBtn.dataset.listenerAdded = 'true';
+    editBtn.addEventListener('click', showEditCustomFieldsDialog);
+  }
+}
+
+function formatCustomFieldValue(field: { field_type: string; value: string | number | boolean | null }): string {
+  if (field.value === null || field.value === undefined || field.value === '') return '-';
+
+  switch (field.field_type) {
+  case 'boolean':
+    return field.value ? 'Yes' : 'No';
+  case 'date':
+    return formatDate(String(field.value));
+  case 'number':
+    return String(field.value);
+  default:
+    return SanitizationUtils.escapeHtml(String(field.value));
+  }
+}
+
+async function showEditCustomFieldsDialog(): Promise<void> {
+  if (!currentClientId || clientCustomFields.length === 0) {
+    storedContext?.showNotification('No custom fields to edit', 'info');
+    return;
+  }
+
+  // Build fields dynamically based on custom field definitions
+  const fields = clientCustomFields.map(field => {
+    const baseField = {
+      name: `field_${field.field_id}`,
+      label: field.field_name,
+      defaultValue: field.value !== null ? String(field.value) : ''
+    };
+
+    switch (field.field_type) {
+    case 'boolean':
+      return {
+        ...baseField,
+        type: 'select' as const,
+        options: [
+          { value: 'true', label: 'Yes' },
+          { value: 'false', label: 'No' }
+        ],
+        defaultValue: field.value ? 'true' : 'false'
+      };
+    case 'number':
+      return { ...baseField, type: 'number' as const };
+    case 'date':
+      return {
+        ...baseField,
+        type: 'date' as const,
+        defaultValue: field.value ? String(field.value).split('T')[0] : ''
+      };
+    case 'select':
+      return { ...baseField, type: 'text' as const }; // Would need options from field definition
+    default:
+      return { ...baseField, type: 'text' as const };
+    }
+  });
+
+  const result = await multiPromptDialog({
+    title: 'Edit Custom Fields',
+    fields,
+    confirmText: 'Save',
+    cancelText: 'Cancel'
+  });
+
+  if (!result) return;
+
+  // Build values object
+  const values: Record<number, string | number | boolean> = {};
+  clientCustomFields.forEach(field => {
+    const key = `field_${field.field_id}`;
+    let value: string | number | boolean = result[key] || '';
+
+    if (field.field_type === 'boolean') {
+      value = result[key] === 'true';
+    } else if (field.field_type === 'number' && result[key]) {
+      value = parseFloat(result[key]);
+    }
+
+    values[field.field_id] = value;
+  });
+
+  try {
+    const response = await apiPut(`/api/clients/${currentClientId}/custom-fields`, { values });
+    if (response.ok) {
+      storedContext?.showNotification('Custom fields updated', 'success');
+      await loadClientCustomFields(currentClientId);
+      renderCustomFields();
+    } else {
+      storedContext?.showNotification('Failed to update custom fields', 'error');
+    }
+  } catch (error) {
+    console.error('[AdminClientDetails] Error updating custom fields:', error);
+    storedContext?.showNotification('Error updating custom fields', 'error');
+  }
 }
 
 // ============================================
