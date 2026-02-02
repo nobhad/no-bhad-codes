@@ -20,6 +20,7 @@ import dotenv from 'dotenv';
 import { errorTracker } from './services/error-tracking.js';
 import { emailService } from './services/email-service.js';
 import { cacheService } from './services/cache-service.js';
+import { getSchedulerService } from './services/scheduler-service.js';
 import { initializeDatabase } from './database/init.js';
 import { MigrationManager } from './database/migrations.js';
 import sqlite3 from 'sqlite3';
@@ -263,6 +264,24 @@ async function startServer() {
       console.log('ℹ️  Redis caching disabled (set REDIS_ENABLED=true to enable)');
     }
 
+    // Initialize scheduler service for invoice reminders and recurring invoices
+    if (process.env.SCHEDULER_ENABLED !== 'false') {
+      try {
+        const scheduler = getSchedulerService({
+          enableReminders: process.env.SCHEDULER_REMINDERS !== 'false',
+          enableScheduledInvoices: process.env.SCHEDULER_SCHEDULED !== 'false',
+          enableRecurringInvoices: process.env.SCHEDULER_RECURRING !== 'false'
+        });
+        scheduler.start();
+        console.log('✅ Scheduler service initialized');
+      } catch (schedulerError) {
+        console.warn('⚠️  Scheduler service initialization failed:', schedulerError);
+        console.log('📅 Server will continue without scheduling functionality');
+      }
+    } else {
+      console.log('ℹ️  Scheduler disabled (set SCHEDULER_ENABLED=true to enable)');
+    }
+
     // Start server
     const server = app.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
@@ -277,6 +296,15 @@ async function startServer() {
     // Graceful shutdown
     const shutdown = async (signal: string) => {
       console.log(`\n🔄 ${signal} received. Shutting down gracefully...`);
+
+      // Stop scheduler service
+      try {
+        const scheduler = getSchedulerService();
+        scheduler.stop();
+        console.log('✅ Scheduler service stopped');
+      } catch (error) {
+        console.error('❌ Error stopping scheduler:', error);
+      }
 
       // Close server
       server.close(async () => {

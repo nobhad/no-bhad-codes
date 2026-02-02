@@ -35,6 +35,38 @@ import {
   type AnalyticsDashboardState
 } from './analytics-dashboard';
 
+// Import simple UI components
+import {
+  createKanbanBoard,
+  getKanbanStyles,
+  type KanbanColumn,
+  type KanbanItem,
+  type KanbanBadge,
+  type KanbanConfig
+} from './kanban-board';
+import {
+  createTagInput,
+  getTagInputStyles,
+  type Tag as TagInputTag,
+  type TagInputConfig
+} from './tag-input';
+import {
+  createTimeline,
+  getTimelineStyles,
+  type TimelineEvent,
+  type TimelineConfig
+} from './timeline';
+import {
+  createBarChart,
+  createPieChart,
+  createSparkline,
+  createKPICard,
+  getChartStyles,
+  type BarChartData,
+  type PieChartData,
+  type LineChartData
+} from './chart-simple';
+
 // Re-export all components, types, and utilities
 export { BaseComponent };
 export type { ComponentProps, ComponentState, ComponentTemplate, ComponentHooks };
@@ -50,6 +82,16 @@ export { ConsentBanner };
 export type { ConsentBannerProps, ConsentBannerState };
 export { AnalyticsDashboard };
 export type { AnalyticsDashboardProps, AnalyticsDashboardState };
+
+// Simple UI Components exports
+export { createKanbanBoard, getKanbanStyles };
+export type { KanbanColumn, KanbanItem, KanbanBadge, KanbanConfig };
+export { createTagInput, getTagInputStyles };
+export type { TagInputTag, TagInputConfig };
+export { createTimeline, getTimelineStyles };
+export type { TimelineEvent, TimelineConfig };
+export { createBarChart, createPieChart, createSparkline, createKPICard, getChartStyles };
+export type { BarChartData, PieChartData, LineChartData };
 
 // Register built-in components
 componentStore.register({

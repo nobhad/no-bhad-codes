@@ -825,3 +825,186 @@ const deleteIcon = canDelete
 - [API Reference](../API_REFERENCE.md) - Complete API documentation
 - [Settings](./SETTINGS.md) - Storage preferences
 - [CSS Architecture](../design/CSS_ARCHITECTURE.md) - Styling system
+
+---
+
+## Phase 6: File Management Enhancement
+
+**Status:** Complete
+**Last Updated:** February 1, 2026
+
+### Overview
+
+The File Management Enhancement adds professional-grade file organization with versioning, folders, tags, access tracking, comments, archiving, expiration, locking, and comprehensive search capabilities comparable to Dropbox, Google Drive, and other industry leaders.
+
+### New Features
+
+#### File Versioning
+
+- Upload new versions of existing files
+- Automatic version numbering
+- Version comments for change tracking
+- Restore previous versions
+- Version history with timestamps
+
+#### Folder Organization
+
+- Create folders within projects
+- Nested folder support (subfolders)
+- Custom folder colors and icons
+- Move files between folders
+- Move folders to new parents
+
+#### File Tags
+
+8 default file tags: Final, Draft, Review, Approved, Revision, Archive, Confidential, Client Provided
+
+#### Access Tracking
+
+- Log every file access (view/download/preview)
+- Access count and download count
+- User and IP tracking
+- Access statistics
+
+#### File Comments
+
+- Comments on files with threading
+- Internal (admin-only) comments
+- Author tracking
+
+#### Archiving & Expiration
+
+- Archive/restore files
+- Set expiration dates
+- Auto-archive expired files
+
+#### File Locking
+
+- Lock files to prevent concurrent edits
+- Track who locked and when
+- Admin can force unlock
+
+#### File Categories
+
+7 categories: general, deliverable, source, asset, document, contract, invoice
+
+### New Database Tables
+
+```sql
+-- File versions
+CREATE TABLE IF NOT EXISTS file_versions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  file_id INTEGER NOT NULL,
+  version_number INTEGER NOT NULL,
+  filename TEXT NOT NULL,
+  original_filename TEXT NOT NULL,
+  file_path TEXT NOT NULL,
+  file_size INTEGER,
+  mime_type TEXT,
+  uploaded_by TEXT,
+  comment TEXT,
+  is_current BOOLEAN DEFAULT FALSE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- File folders
+CREATE TABLE IF NOT EXISTS file_folders (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT,
+  parent_folder_id INTEGER,
+  color TEXT DEFAULT '#6b7280',
+  icon TEXT DEFAULT 'folder',
+  sort_order INTEGER DEFAULT 0,
+  created_by TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- File tags junction
+CREATE TABLE IF NOT EXISTS file_tags (
+  file_id INTEGER NOT NULL,
+  tag_id INTEGER NOT NULL,
+  PRIMARY KEY (file_id, tag_id)
+);
+
+-- File access log
+CREATE TABLE IF NOT EXISTS file_access_log (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  file_id INTEGER NOT NULL,
+  user_email TEXT NOT NULL,
+  user_type TEXT NOT NULL,
+  access_type TEXT NOT NULL,
+  ip_address TEXT,
+  user_agent TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- File comments
+CREATE TABLE IF NOT EXISTS file_comments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  file_id INTEGER NOT NULL,
+  author_email TEXT NOT NULL,
+  author_type TEXT NOT NULL,
+  author_name TEXT,
+  content TEXT NOT NULL,
+  is_internal BOOLEAN DEFAULT FALSE,
+  parent_comment_id INTEGER,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### New API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/projects/files/:fileId/versions` | Get file versions |
+| POST | `/api/projects/files/:fileId/versions` | Upload new version |
+| POST | `/api/projects/files/:fileId/versions/:versionId/restore` | Restore version |
+| GET | `/api/projects/:id/folders` | Get project folders |
+| POST | `/api/projects/:id/folders` | Create folder |
+| PUT | `/api/projects/folders/:folderId` | Update folder |
+| DELETE | `/api/projects/folders/:folderId` | Delete folder |
+| POST | `/api/projects/files/:fileId/move` | Move file to folder |
+| POST | `/api/projects/folders/:folderId/move` | Move folder |
+| GET | `/api/projects/files/:fileId/tags` | Get file tags |
+| POST | `/api/projects/files/:fileId/tags/:tagId` | Add tag |
+| DELETE | `/api/projects/files/:fileId/tags/:tagId` | Remove tag |
+| POST | `/api/projects/files/:fileId/access` | Log file access |
+| GET | `/api/projects/files/:fileId/access-log` | Get access log |
+| GET | `/api/projects/files/:fileId/access-stats` | Get access stats |
+| GET | `/api/projects/files/:fileId/comments` | Get comments |
+| POST | `/api/projects/files/:fileId/comments` | Add comment |
+| DELETE | `/api/projects/files/comments/:commentId` | Delete comment |
+| POST | `/api/projects/files/:fileId/archive` | Archive file |
+| POST | `/api/projects/files/:fileId/restore` | Restore file |
+| GET | `/api/projects/:id/files/archived` | Get archived files |
+| PUT | `/api/projects/files/:fileId/expiration` | Set expiration |
+| GET | `/api/projects/files/expiring-soon` | Get expiring files |
+| POST | `/api/projects/files/process-expired` | Process expired |
+| POST | `/api/projects/files/:fileId/lock` | Lock file |
+| POST | `/api/projects/files/:fileId/unlock` | Unlock file |
+| PUT | `/api/projects/files/:fileId/category` | Set category |
+| GET | `/api/projects/:id/files/by-category/:category` | Get by category |
+| GET | `/api/projects/:id/files/stats` | Get file stats |
+| GET | `/api/projects/:id/files/search` | Search files |
+
+### Files Created
+
+- `server/database/migrations/035_file_enhancements.sql` - Database migration
+- `server/services/file-service.ts` - File service with all methods
+
+### Files Modified
+
+- `server/routes/projects.ts` - Added 30+ new endpoints
+- `src/types/api.ts` - Added TypeScript interfaces
+
+### Change Log
+
+**February 1, 2026 - Phase 6 Implementation**
+
+- Created database migration for file enhancement tables
+- Implemented file-service.ts with versioning, folders, tags, access, comments, archiving, locking
+- Added 30+ API endpoints to projects.ts
+- Added TypeScript interfaces for all types
+- Seeded 8 default file tags

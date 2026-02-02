@@ -24,6 +24,7 @@ import {
 import type { Lead, AdminDashboardContext } from '../admin-types';
 import { loadProjects, showProjectDetails } from './admin-projects';
 import { confirmDialog } from '../../../utils/confirm-dialog';
+import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
 
 interface LeadsData {
   leads: Lead[];
@@ -39,6 +40,18 @@ let leadsData: Lead[] = [];
 let storedContext: AdminDashboardContext | null = null;
 let filterState: FilterState = loadFilterState(LEADS_FILTER_CONFIG.storageKey);
 let filterUIInitialized = false;
+let currentView: 'table' | 'pipeline' = 'table';
+let kanbanBoard: ReturnType<typeof createKanbanBoard> | null = null;
+
+// Pipeline stage configuration
+const PIPELINE_STAGES = [
+  { id: 'new', label: 'New', statuses: ['new', 'pending'], color: 'var(--portal-text-secondary)' },
+  { id: 'contacted', label: 'Contacted', statuses: ['contacted'], color: 'var(--app-color-primary)' },
+  { id: 'qualified', label: 'Qualified', statuses: ['qualified'], color: '#f59e0b' },
+  { id: 'proposal', label: 'Proposal', statuses: ['proposal'], color: '#8b5cf6' },
+  { id: 'won', label: 'Won', statuses: ['active', 'converted', 'completed'], color: 'var(--status-active)' },
+  { id: 'lost', label: 'Lost', statuses: ['cancelled', 'rejected'], color: 'var(--status-cancelled)' }
+];
 
 // ============================================================================
 // CACHED DOM REFERENCES
@@ -131,6 +144,206 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
       }
     });
   }, 100);
+
+  // Setup view toggle
+  setupViewToggle(ctx);
+}
+
+/**
+ * Set up view toggle between table and pipeline
+ */
+function setupViewToggle(ctx: AdminDashboardContext): void {
+  const toggle = getElement('leads-view-toggle');
+  if (!toggle || toggle.dataset.listenerAdded) return;
+  toggle.dataset.listenerAdded = 'true';
+
+  toggle.addEventListener('click', (e) => {
+    const button = (e.target as HTMLElement).closest('button');
+    if (!button) return;
+
+    const view = button.dataset.view as 'table' | 'pipeline';
+    if (view && view !== currentView) {
+      currentView = view;
+
+      // Update active button
+      toggle.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+
+      // Toggle views
+      const tableView = getElement('leads-table-view');
+      const pipelineView = getElement('leads-pipeline-container');
+
+      if (view === 'table') {
+        if (tableView) tableView.style.display = 'block';
+        if (pipelineView) pipelineView.classList.add('hidden');
+        if (kanbanBoard) {
+          kanbanBoard.destroy();
+          kanbanBoard = null;
+        }
+      } else {
+        if (tableView) tableView.style.display = 'none';
+        if (pipelineView) pipelineView.classList.remove('hidden');
+        renderPipelineView(ctx);
+      }
+    }
+  });
+}
+
+/**
+ * Render pipeline (Kanban) view
+ */
+function renderPipelineView(ctx: AdminDashboardContext): void {
+  // Destroy existing board
+  if (kanbanBoard) {
+    kanbanBoard.destroy();
+    kanbanBoard = null;
+  }
+
+  const container = getElement('leads-pipeline-container');
+  if (!container) return;
+
+  // Build columns from stages
+  const columns: KanbanColumn[] = PIPELINE_STAGES.map(stage => ({
+    id: stage.id,
+    title: stage.label,
+    color: stage.color,
+    items: leadsData
+      .filter(lead => {
+        const status = lead.status || 'pending';
+        return stage.statuses.includes(status);
+      })
+      .map(lead => leadToKanbanItem(lead))
+  }));
+
+  // Create kanban board
+  kanbanBoard = createKanbanBoard({
+    containerId: 'leads-pipeline-container',
+    columns,
+    onItemMove: (itemId, _fromColumn, toColumn) => handleLeadStageChange(itemId, toColumn, ctx),
+    onItemClick: (item) => {
+      const lead = leadsData.find(l => l.id === item.id);
+      if (lead) showLeadDetails(lead.id);
+    },
+    renderItem: renderLeadCard,
+    emptyColumnText: 'No leads'
+  });
+}
+
+/**
+ * Convert lead to Kanban item
+ */
+function leadToKanbanItem(lead: Lead): KanbanItem {
+  const leadAny = lead as unknown as Record<string, string | number>;
+  return {
+    id: lead.id,
+    title: lead.contact_name || 'Unknown',
+    subtitle: lead.company_name || undefined,
+    metadata: {
+      email: lead.email,
+      budget: leadAny.budget_range,
+      source: lead.source || 'Website',
+      score: calculateLeadScore(lead),
+      createdAt: lead.created_at
+    }
+  };
+}
+
+/**
+ * Calculate a simple lead score
+ */
+function calculateLeadScore(lead: Lead): number {
+  let score = 50; // Base score
+  const leadAny = lead as unknown as Record<string, string | number>;
+
+  // Budget factor
+  const budget = String(leadAny.budget_range || '').toLowerCase();
+  if (budget.includes('10000') || budget.includes('20000') || budget.includes('enterprise')) score += 20;
+  else if (budget.includes('5000') || budget.includes('premium')) score += 15;
+  else if (budget.includes('2500') || budget.includes('3000') || budget.includes('standard')) score += 10;
+
+  // Company name (indicates B2B)
+  if (lead.company_name) score += 10;
+
+  // Timeline urgency
+  const timeline = String(leadAny.timeline || '').toLowerCase();
+  if (timeline.includes('asap') || timeline.includes('urgent') || timeline.includes('1 week')) score += 15;
+  else if (timeline.includes('2 week') || timeline.includes('month')) score += 10;
+
+  // Source quality
+  const source = (lead.source || '').toLowerCase();
+  if (source.includes('referral')) score += 15;
+  else if (source.includes('linkedin') || source.includes('google')) score += 5;
+
+  return Math.min(100, Math.max(0, score));
+}
+
+/**
+ * Get score class based on value
+ */
+function getScoreClass(score: number): string {
+  if (score >= 70) return 'score-hot';
+  if (score >= 50) return 'score-warm';
+  return 'score-cold';
+}
+
+/**
+ * Custom render for lead cards in pipeline
+ */
+function renderLeadCard(item: KanbanItem): string {
+  const meta = item.metadata as {
+    email?: string;
+    budget?: string;
+    source?: string;
+    score?: number;
+    createdAt?: string;
+  };
+
+  const score = meta.score || 50;
+  const scoreClass = getScoreClass(score);
+  const budget = meta.budget ? formatDisplayValue(meta.budget) : '';
+
+  return `
+    <div class="lead-card-score ${scoreClass}">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      ${score}
+    </div>
+    <div class="kanban-card-title">${SanitizationUtils.escapeHtml(String(item.title))}</div>
+    ${item.subtitle ? `<div class="lead-card-company">${SanitizationUtils.escapeHtml(String(item.subtitle))}</div>` : ''}
+    ${budget ? `<div class="lead-card-value">${SanitizationUtils.escapeHtml(budget)}</div>` : ''}
+    <div class="lead-card-meta">
+      ${meta.source ? `<span class="lead-card-source">${SanitizationUtils.escapeHtml(meta.source)}</span>` : ''}
+      ${meta.createdAt ? `<span class="lead-card-date">${formatDate(meta.createdAt)}</span>` : ''}
+    </div>
+  `;
+}
+
+/**
+ * Handle lead stage change from drag-drop
+ */
+async function handleLeadStageChange(
+  itemId: string | number,
+  toStage: string,
+  ctx: AdminDashboardContext
+): Promise<void> {
+  const leadId = typeof itemId === 'string' ? parseInt(itemId) : itemId;
+  const lead = leadsData.find(l => l.id === leadId);
+  if (!lead) return;
+
+  // Map stage to status
+  const stageToStatus: Record<string, string> = {
+    'new': 'pending',
+    'contacted': 'contacted',
+    'qualified': 'qualified',
+    'proposal': 'proposal',
+    'won': 'converted',
+    'lost': 'cancelled'
+  };
+
+  const newStatus = stageToStatus[toStage] || 'pending';
+  await updateLeadStatus(leadId, newStatus, ctx);
+
+  // Update local data
+  lead.status = newStatus as Lead['status'];
 }
 
 function updateLeadsDisplay(data: LeadsData, ctx: AdminDashboardContext): void {
@@ -182,8 +395,12 @@ function updateLeadsDisplay(data: LeadsData, ctx: AdminDashboardContext): void {
     }
   }
 
-  // Update leads table
-  renderLeadsTable(data.leads, ctx);
+  // Update leads view based on current view mode
+  if (currentView === 'pipeline') {
+    renderPipelineView(ctx);
+  } else {
+    renderLeadsTable(data.leads, ctx);
+  }
 }
 
 function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {

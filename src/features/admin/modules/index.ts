@@ -51,3 +51,19 @@ export async function loadSystemStatusModule() {
 export async function loadProposalsModule() {
   return import('./admin-proposals');
 }
+
+export async function loadClientDetailsModule() {
+  return import('./admin-client-details');
+}
+
+export async function loadTasksModule() {
+  return import('./admin-tasks');
+}
+
+export async function loadTimeTrackingModule() {
+  return import('./admin-time-tracking');
+}
+
+export async function loadFilesModule() {
+  return import('./admin-files');
+}

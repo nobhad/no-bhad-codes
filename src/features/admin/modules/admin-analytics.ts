@@ -27,12 +27,394 @@ Chart.register(...registerables);
 const charts: Map<string, Chart> = new Map();
 
 export async function loadOverviewData(_ctx: AdminDashboardContext): Promise<void> {
-  // Load overview stats and charts
+  // Load all analytics data in parallel
   await Promise.all([
+    loadBusinessKPIs(),
+    loadRevenueChart(),
+    loadProjectStatusChart(),
+    loadLeadFunnel(),
+    loadSavedReports(),
     loadVisitorsChart(),
     loadSourcesChart(),
     loadAnalyticsSummary()
   ]);
+}
+
+// =====================================================
+// BUSINESS KPI FUNCTIONS
+// =====================================================
+
+async function loadBusinessKPIs(): Promise<void> {
+  try {
+    // Load all KPI data in parallel
+    const [revenueRes, pipelineRes, projectsRes] = await Promise.all([
+      apiFetch('/api/analytics/quick/revenue'),
+      apiFetch('/api/analytics/quick/pipeline'),
+      apiFetch('/api/analytics/quick/projects')
+    ]);
+
+    // Process revenue KPI
+    if (revenueRes.ok) {
+      const revenueData = await revenueRes.json();
+      updateElement('kpi-revenue-value', formatCurrency(revenueData.currentMonth || 0));
+
+      const changeEl = document.getElementById('kpi-revenue-change');
+      if (changeEl) {
+        const change = revenueData.monthOverMonth || 0;
+        const changeValue = changeEl.querySelector('.change-value');
+        if (changeValue) {
+          changeValue.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(1)}%`;
+        }
+        changeEl.className = `kpi-card-change ${change >= 0 ? 'positive' : 'negative'}`;
+      }
+    }
+
+    // Process pipeline KPI
+    if (pipelineRes.ok) {
+      const pipelineData = await pipelineRes.json();
+      updateElement('kpi-pipeline-value', formatCurrency(pipelineData.totalValue || 0));
+
+      const countEl = document.getElementById('kpi-pipeline-count');
+      if (countEl) {
+        const countValue = countEl.querySelector('.change-value');
+        if (countValue) {
+          countValue.textContent = String(pipelineData.activeLeads || 0);
+        }
+      }
+    }
+
+    // Process projects KPI
+    if (projectsRes.ok) {
+      const projectsData = await projectsRes.json();
+      updateElement('kpi-projects-value', String(projectsData.activeProjects || 0));
+
+      const completionEl = document.getElementById('kpi-projects-completion');
+      if (completionEl) {
+        const completionValue = completionEl.querySelector('.change-value');
+        if (completionValue) {
+          completionValue.textContent = `${projectsData.avgCompletion || 0}%`;
+        }
+      }
+    }
+
+    // Load outstanding invoices from invoices endpoint
+    try {
+      const invoicesRes = await apiFetch('/api/invoices?status=pending,overdue');
+      if (invoicesRes.ok) {
+        const invoicesData = await invoicesRes.json();
+        const invoices = invoicesData.invoices || [];
+        const outstandingTotal = invoices.reduce((sum: number, inv: { total?: number }) =>
+          sum + (inv.total || 0), 0);
+        updateElement('kpi-invoices-value', formatCurrency(outstandingTotal));
+
+        const countEl = document.getElementById('kpi-invoices-count');
+        if (countEl) {
+          const countValue = countEl.querySelector('.change-value');
+          if (countValue) {
+            countValue.textContent = String(invoices.length);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[AdminAnalytics] Could not load invoice KPIs:', e);
+    }
+
+  } catch (error) {
+    console.error('[AdminAnalytics] Error loading business KPIs:', error);
+  }
+}
+
+async function loadRevenueChart(): Promise<void> {
+  const canvas = document.getElementById('revenue-chart') as HTMLCanvasElement;
+  if (!canvas) return;
+
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', 'Revenue by month chart');
+
+  // Show skeleton while loading
+  const chartContainer = canvas.parentElement;
+  if (chartContainer) {
+    canvas.style.display = 'none';
+    const skeleton = document.createElement('div');
+    skeleton.className = 'chart-skeleton-wrapper';
+    skeleton.innerHTML = getChartSkeletonHTML();
+    chartContainer.appendChild(skeleton);
+  }
+
+  // Destroy existing chart
+  if (charts.has('revenue')) {
+    charts.get('revenue')?.destroy();
+  }
+
+  let labels: string[] = [];
+  let data: number[] = [];
+
+  try {
+    const response = await apiFetch('/api/analytics/quick/revenue?days=180');
+    if (response.ok) {
+      const result = await response.json();
+      if (result.monthly && result.monthly.length > 0) {
+        // Take last 6 months
+        const monthlyData = result.monthly.slice(-6);
+        labels = monthlyData.map((m: { month: string }) => {
+          const date = new Date(`${m.month}-01`);
+          return date.toLocaleDateString('en-US', { month: 'short' });
+        });
+        data = monthlyData.map((m: { revenue?: number }) => m.revenue || 0);
+      }
+    }
+  } catch (error) {
+    console.warn('[AdminAnalytics] Failed to load revenue chart data:', error);
+  }
+
+  // If no data, show placeholder months
+  if (labels.length === 0) {
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      labels.push(d.toLocaleDateString('en-US', { month: 'short' }));
+      data.push(0);
+    }
+  }
+
+  // Remove skeleton and show canvas
+  if (chartContainer) {
+    const skeleton = chartContainer.querySelector('.chart-skeleton-wrapper');
+    if (skeleton) skeleton.remove();
+    canvas.style.display = '';
+  }
+
+  const chart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Revenue',
+        data,
+        backgroundColor: 'rgba(0, 175, 240, 0.7)',
+        borderColor: 'var(--app-color-primary)',
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (context) => `$${(context.raw as number).toLocaleString()}`
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: '#f5f5f5',
+            callback: (value) => `$${(value as number / 1000).toFixed(0)}k`
+          },
+          grid: { color: '#555555' }
+        },
+        x: {
+          ticks: { color: '#f5f5f5' },
+          grid: { color: '#555555' }
+        }
+      }
+    }
+  });
+
+  charts.set('revenue', chart);
+}
+
+async function loadProjectStatusChart(): Promise<void> {
+  const canvas = document.getElementById('project-status-chart') as HTMLCanvasElement;
+  if (!canvas) return;
+
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', 'Project status distribution chart');
+
+  // Show skeleton while loading
+  const chartContainer = canvas.parentElement;
+  if (chartContainer) {
+    canvas.style.display = 'none';
+    const skeleton = document.createElement('div');
+    skeleton.className = 'chart-skeleton-wrapper';
+    skeleton.innerHTML = getChartSkeletonHTML();
+    chartContainer.appendChild(skeleton);
+  }
+
+  // Destroy existing chart
+  if (charts.has('projectStatus')) {
+    charts.get('projectStatus')?.destroy();
+  }
+
+  let labels: string[] = ['Active', 'Completed', 'On Hold', 'Pending'];
+  let data: number[] = [0, 0, 0, 0];
+  const colors = ['#00aff0', '#22c55e', '#f59e0b', '#9ca3af'];
+
+  try {
+    const response = await apiFetch('/api/analytics/quick/projects');
+    if (response.ok) {
+      const result = await response.json();
+      if (result.byStatus) {
+        labels = Object.keys(result.byStatus).map(s =>
+          s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, ' ')
+        );
+        data = Object.values(result.byStatus) as number[];
+      }
+    }
+  } catch (error) {
+    console.warn('[AdminAnalytics] Failed to load project status chart data:', error);
+  }
+
+  // Remove skeleton and show canvas
+  if (chartContainer) {
+    const skeleton = chartContainer.querySelector('.chart-skeleton-wrapper');
+    if (skeleton) skeleton.remove();
+    canvas.style.display = '';
+  }
+
+  const chart = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors.slice(0, labels.length)
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: '#f5f5f5' }
+        }
+      }
+    }
+  });
+
+  charts.set('projectStatus', chart);
+}
+
+async function loadLeadFunnel(): Promise<void> {
+  try {
+    const response = await apiFetch('/api/analytics/quick/pipeline');
+    if (!response.ok) return;
+
+    const data = await response.json();
+    const byStage = data.byStage || {};
+
+    // Update funnel stages
+    updateElement('funnel-new', String(byStage.new || byStage.pending || 0));
+    updateElement('funnel-contacted', String(byStage.contacted || 0));
+    updateElement('funnel-qualified', String(byStage.qualified || 0));
+    updateElement('funnel-proposal', String(byStage.proposal_sent || byStage.proposal || 0));
+    updateElement('funnel-won', String(byStage.won || byStage.converted || 0));
+
+    // Update conversion stats
+    const conversionRate = data.conversionRate || 0;
+    updateElement('funnel-conversion-rate', `Conversion Rate: ${conversionRate.toFixed(1)}%`);
+
+    const avgValue = data.avgDealValue || 0;
+    updateElement('funnel-avg-value', `Avg Deal Value: ${formatCurrency(avgValue)}`);
+
+  } catch (error) {
+    console.warn('[AdminAnalytics] Failed to load lead funnel:', error);
+  }
+}
+
+async function loadSavedReports(): Promise<void> {
+  const container = document.getElementById('saved-reports-list');
+  if (!container) return;
+
+  try {
+    const response = await apiFetch('/api/analytics/reports');
+    if (!response.ok) {
+      container.innerHTML = '<div class="report-empty">Could not load reports</div>';
+      return;
+    }
+
+    const data = await response.json();
+    const reports = data.reports || [];
+
+    if (reports.length === 0) {
+      container.innerHTML = '<div class="report-empty">No saved reports yet. Create your first report to get started.</div>';
+      return;
+    }
+
+    container.innerHTML = reports.slice(0, 5).map((report: {
+      id: number;
+      name: string;
+      type: string;
+      last_run_at?: string;
+      is_favorite?: boolean;
+    }) => `
+      <div class="report-item" data-report-id="${report.id}">
+        <div class="report-info">
+          <span class="report-name">${report.is_favorite ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> ' : ''}${escapeHtml(report.name)}</span>
+          <span class="report-meta">${report.type} ${report.last_run_at ? `• Last run: ${formatDateTime(report.last_run_at)}` : ''}</span>
+        </div>
+        <div class="report-actions">
+          <button class="btn btn-secondary btn-sm run-report-btn" data-report-id="${report.id}">Run</button>
+        </div>
+      </div>
+    `).join('');
+
+    // Add event listeners for run buttons
+    container.querySelectorAll('.run-report-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const reportId = (e.currentTarget as HTMLElement).dataset.reportId;
+        if (reportId) {
+          await runReport(parseInt(reportId, 10));
+        }
+      });
+    });
+
+  } catch (error) {
+    console.error('[AdminAnalytics] Error loading saved reports:', error);
+    container.innerHTML = '<div class="report-empty">Error loading reports</div>';
+  }
+}
+
+async function runReport(reportId: number): Promise<void> {
+  try {
+    const response = await apiFetch(`/api/analytics/reports/${reportId}/run`, {
+      method: 'POST'
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      // Show results in a modal or download
+      console.log('[AdminAnalytics] Report results:', result);
+      // For now, just show an alert - could be enhanced with a modal
+      alert(`Report executed successfully. ${result.rowCount || 0} rows returned.`);
+    } else {
+      throw new Error('Failed to run report');
+    }
+  } catch (error) {
+    console.error('[AdminAnalytics] Error running report:', error);
+    alert('Failed to run report. Please try again.');
+  }
+}
+
+function formatCurrency(amount: number): string {
+  if (amount >= 1000000) {
+    return `$${(amount / 1000000).toFixed(1)}M`;
+  }
+  if (amount >= 1000) {
+    return `$${(amount / 1000).toFixed(1)}K`;
+  }
+  return `$${amount.toLocaleString()}`;
+}
+
+function escapeHtml(str: string): string {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 async function loadAnalyticsSummary(): Promise<void> {

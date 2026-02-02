@@ -363,6 +363,7 @@ router.get(
       const leads = await db.all(`
         SELECT
           p.id,
+          p.client_id,
           p.project_name,
           p.description,
           p.status,
@@ -1410,6 +1411,618 @@ function formatBytes(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
+
+// =====================================================
+// LEAD MANAGEMENT ENHANCEMENT ENDPOINTS
+// =====================================================
+
+import { leadService } from '../services/lead-service.js';
+
+// =====================================================
+// LEAD SCORING
+// =====================================================
+
+/**
+ * GET /api/admin/leads/scoring-rules - Get all scoring rules
+ */
+router.get(
+  '/leads/scoring-rules',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const includeInactive = req.query.includeInactive === 'true';
+    const rules = await leadService.getScoringRules(includeInactive);
+    res.json({ success: true, rules });
+  })
+);
+
+/**
+ * POST /api/admin/leads/scoring-rules - Create scoring rule
+ */
+router.post(
+  '/leads/scoring-rules',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { name, description, fieldName, operator, thresholdValue, points, isActive } = req.body;
+
+    if (!name || !fieldName || !operator || thresholdValue === undefined || points === undefined) {
+      return res.status(400).json({
+        error: 'Name, fieldName, operator, thresholdValue, and points are required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    const rule = await leadService.createScoringRule({
+      name,
+      description,
+      fieldName,
+      operator,
+      thresholdValue,
+      points,
+      isActive
+    });
+
+    res.status(201).json({ success: true, rule });
+  })
+);
+
+/**
+ * PUT /api/admin/leads/scoring-rules/:id - Update scoring rule
+ */
+router.put(
+  '/leads/scoring-rules/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const ruleId = parseInt(req.params.id);
+    const rule = await leadService.updateScoringRule(ruleId, req.body);
+    res.json({ success: true, rule });
+  })
+);
+
+/**
+ * DELETE /api/admin/leads/scoring-rules/:id - Delete scoring rule
+ */
+router.delete(
+  '/leads/scoring-rules/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const ruleId = parseInt(req.params.id);
+    await leadService.deleteScoringRule(ruleId);
+    res.json({ success: true, message: 'Scoring rule deleted' });
+  })
+);
+
+/**
+ * POST /api/admin/leads/:id/calculate-score - Calculate score for a lead
+ */
+router.post(
+  '/leads/:id/calculate-score',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const result = await leadService.calculateLeadScore(projectId);
+    res.json({ success: true, ...result });
+  })
+);
+
+/**
+ * POST /api/admin/leads/recalculate-all - Recalculate all lead scores
+ */
+router.post(
+  '/leads/recalculate-all',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const count = await leadService.updateAllLeadScores();
+    res.json({ success: true, message: `Recalculated scores for ${count} leads` });
+  })
+);
+
+// =====================================================
+// PIPELINE MANAGEMENT
+// =====================================================
+
+/**
+ * GET /api/admin/leads/pipeline/stages - Get pipeline stages
+ */
+router.get(
+  '/leads/pipeline/stages',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const stages = await leadService.getPipelineStages();
+    res.json({ success: true, stages });
+  })
+);
+
+/**
+ * GET /api/admin/leads/pipeline - Get pipeline view (kanban)
+ */
+router.get(
+  '/leads/pipeline',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const pipeline = await leadService.getPipelineView();
+    res.json({ success: true, ...pipeline });
+  })
+);
+
+/**
+ * GET /api/admin/leads/pipeline/stats - Get pipeline statistics
+ */
+router.get(
+  '/leads/pipeline/stats',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const stats = await leadService.getPipelineStats();
+    res.json({ success: true, stats });
+  })
+);
+
+/**
+ * POST /api/admin/leads/:id/move-stage - Move lead to stage
+ */
+router.post(
+  '/leads/:id/move-stage',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const { stageId } = req.body;
+
+    if (!stageId) {
+      return res.status(400).json({
+        error: 'stageId is required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    await leadService.moveToStage(projectId, stageId);
+    res.json({ success: true, message: 'Lead moved to stage' });
+  })
+);
+
+// =====================================================
+// TASK MANAGEMENT
+// =====================================================
+
+/**
+ * GET /api/admin/leads/:id/tasks - Get tasks for a lead
+ */
+router.get(
+  '/leads/:id/tasks',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const tasks = await leadService.getTasks(projectId);
+    res.json({ success: true, tasks });
+  })
+);
+
+/**
+ * POST /api/admin/leads/:id/tasks - Create task for a lead
+ */
+router.post(
+  '/leads/:id/tasks',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const { title, description, taskType, dueDate, dueTime, assignedTo, priority, reminderAt } = req.body;
+
+    if (!title) {
+      return res.status(400).json({
+        error: 'Title is required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    const task = await leadService.createTask(projectId, {
+      title,
+      description,
+      taskType,
+      dueDate,
+      dueTime,
+      assignedTo,
+      priority,
+      reminderAt
+    });
+
+    res.status(201).json({ success: true, task });
+  })
+);
+
+/**
+ * PUT /api/admin/leads/tasks/:taskId - Update a task
+ */
+router.put(
+  '/leads/tasks/:taskId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const taskId = parseInt(req.params.taskId);
+    const task = await leadService.updateTask(taskId, req.body);
+    res.json({ success: true, task });
+  })
+);
+
+/**
+ * POST /api/admin/leads/tasks/:taskId/complete - Complete a task
+ */
+router.post(
+  '/leads/tasks/:taskId/complete',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const taskId = parseInt(req.params.taskId);
+    const task = await leadService.completeTask(taskId, req.user?.email);
+    res.json({ success: true, task });
+  })
+);
+
+/**
+ * GET /api/admin/leads/tasks/overdue - Get overdue tasks
+ */
+router.get(
+  '/leads/tasks/overdue',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const tasks = await leadService.getOverdueTasks();
+    res.json({ success: true, tasks });
+  })
+);
+
+/**
+ * GET /api/admin/leads/tasks/upcoming - Get upcoming tasks
+ */
+router.get(
+  '/leads/tasks/upcoming',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const days = req.query.days ? parseInt(req.query.days as string) : 7;
+    const tasks = await leadService.getUpcomingTasks(days);
+    res.json({ success: true, tasks });
+  })
+);
+
+// =====================================================
+// NOTES
+// =====================================================
+
+/**
+ * GET /api/admin/leads/:id/notes - Get notes for a lead
+ */
+router.get(
+  '/leads/:id/notes',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const notes = await leadService.getNotes(projectId);
+    res.json({ success: true, notes });
+  })
+);
+
+/**
+ * POST /api/admin/leads/:id/notes - Add note to a lead
+ */
+router.post(
+  '/leads/:id/notes',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({
+        error: 'Content is required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    const note = await leadService.addNote(projectId, req.user?.email || 'admin', content);
+    res.status(201).json({ success: true, note });
+  })
+);
+
+/**
+ * POST /api/admin/leads/notes/:noteId/toggle-pin - Pin/unpin a note
+ */
+router.post(
+  '/leads/notes/:noteId/toggle-pin',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const noteId = parseInt(req.params.noteId);
+    const note = await leadService.togglePinNote(noteId);
+    res.json({ success: true, note });
+  })
+);
+
+/**
+ * DELETE /api/admin/leads/notes/:noteId - Delete a note
+ */
+router.delete(
+  '/leads/notes/:noteId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const noteId = parseInt(req.params.noteId);
+    await leadService.deleteNote(noteId);
+    res.json({ success: true, message: 'Note deleted' });
+  })
+);
+
+// =====================================================
+// LEAD SOURCES
+// =====================================================
+
+/**
+ * GET /api/admin/leads/sources - Get lead sources
+ */
+router.get(
+  '/leads/sources',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const includeInactive = req.query.includeInactive === 'true';
+    const sources = await leadService.getLeadSources(includeInactive);
+    res.json({ success: true, sources });
+  })
+);
+
+/**
+ * POST /api/admin/leads/:id/source - Set lead source
+ */
+router.post(
+  '/leads/:id/source',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const { sourceId } = req.body;
+
+    if (!sourceId) {
+      return res.status(400).json({
+        error: 'sourceId is required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    await leadService.setLeadSource(projectId, sourceId);
+    res.json({ success: true, message: 'Lead source updated' });
+  })
+);
+
+// =====================================================
+// ASSIGNMENT
+// =====================================================
+
+/**
+ * POST /api/admin/leads/:id/assign - Assign a lead
+ */
+router.post(
+  '/leads/:id/assign',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const { assignee } = req.body;
+
+    if (!assignee) {
+      return res.status(400).json({
+        error: 'assignee is required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    await leadService.assignLead(projectId, assignee);
+    res.json({ success: true, message: 'Lead assigned' });
+  })
+);
+
+/**
+ * GET /api/admin/leads/my-leads - Get leads assigned to current user
+ */
+router.get(
+  '/leads/my-leads',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const leads = await leadService.getMyLeads(req.user?.email || '');
+    res.json({ success: true, leads });
+  })
+);
+
+/**
+ * GET /api/admin/leads/unassigned - Get unassigned leads
+ */
+router.get(
+  '/leads/unassigned',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const leads = await leadService.getUnassignedLeads();
+    res.json({ success: true, leads });
+  })
+);
+
+// =====================================================
+// DUPLICATE DETECTION
+// =====================================================
+
+/**
+ * GET /api/admin/leads/:id/duplicates - Find duplicates for a lead
+ */
+router.get(
+  '/leads/:id/duplicates',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const duplicates = await leadService.findDuplicates(projectId);
+    res.json({ success: true, duplicates });
+  })
+);
+
+/**
+ * GET /api/admin/leads/duplicates - Get all pending duplicates
+ */
+router.get(
+  '/leads/duplicates',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const duplicates = await leadService.getAllPendingDuplicates();
+    res.json({ success: true, duplicates });
+  })
+);
+
+/**
+ * POST /api/admin/leads/duplicates/:id/resolve - Resolve duplicate
+ */
+router.post(
+  '/leads/duplicates/:id/resolve',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const duplicateId = parseInt(req.params.id);
+    const { status } = req.body;
+
+    if (!status || !['merged', 'not_duplicate', 'dismissed'].includes(status)) {
+      return res.status(400).json({
+        error: 'Valid status is required (merged, not_duplicate, dismissed)',
+        code: 'INVALID_STATUS'
+      });
+    }
+
+    await leadService.resolveDuplicate(duplicateId, status, req.user?.email || 'admin');
+    res.json({ success: true, message: 'Duplicate resolved' });
+  })
+);
+
+// =====================================================
+// BULK OPERATIONS
+// =====================================================
+
+/**
+ * POST /api/admin/leads/bulk/status - Bulk update status
+ */
+router.post(
+  '/leads/bulk/status',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { projectIds, status } = req.body;
+
+    if (!projectIds || !Array.isArray(projectIds) || !status) {
+      return res.status(400).json({
+        error: 'projectIds array and status are required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    const count = await leadService.bulkUpdateStatus(projectIds, status);
+    res.json({ success: true, message: `Updated ${count} leads` });
+  })
+);
+
+/**
+ * POST /api/admin/leads/bulk/assign - Bulk assign
+ */
+router.post(
+  '/leads/bulk/assign',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { projectIds, assignee } = req.body;
+
+    if (!projectIds || !Array.isArray(projectIds) || !assignee) {
+      return res.status(400).json({
+        error: 'projectIds array and assignee are required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    const count = await leadService.bulkAssign(projectIds, assignee);
+    res.json({ success: true, message: `Assigned ${count} leads` });
+  })
+);
+
+/**
+ * POST /api/admin/leads/bulk/move-stage - Bulk move to stage
+ */
+router.post(
+  '/leads/bulk/move-stage',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { projectIds, stageId } = req.body;
+
+    if (!projectIds || !Array.isArray(projectIds) || !stageId) {
+      return res.status(400).json({
+        error: 'projectIds array and stageId are required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    const count = await leadService.bulkMoveToStage(projectIds, stageId);
+    res.json({ success: true, message: `Moved ${count} leads` });
+  })
+);
+
+// =====================================================
+// ANALYTICS
+// =====================================================
+
+/**
+ * GET /api/admin/leads/analytics - Get lead analytics
+ */
+router.get(
+  '/leads/analytics',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const analytics = await leadService.getLeadAnalytics();
+    res.json({ success: true, analytics });
+  })
+);
+
+/**
+ * GET /api/admin/leads/conversion-funnel - Get conversion funnel
+ */
+router.get(
+  '/leads/conversion-funnel',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const funnel = await leadService.getConversionFunnel();
+    res.json({ success: true, funnel });
+  })
+);
+
+/**
+ * GET /api/admin/leads/source-performance - Get source performance
+ */
+router.get(
+  '/leads/source-performance',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const sources = await leadService.getSourcePerformance();
+    res.json({ success: true, sources });
+  })
+);
 
 export { router as adminRouter };
 export default router;

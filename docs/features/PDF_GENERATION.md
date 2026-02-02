@@ -65,7 +65,7 @@ All PDFs use a consistent header template:
 ┌────────────────────────────────────────────────────────────────────┐
 │                                                                    │
 │  [LOGO]    No Bhad Codes                              DOCUMENT    │
-│  75pt      Noelle Bhaduri                             TITLE       │
+│  100pt     Noelle Bhaduri                             TITLE       │
 │            Web Development & Design                   (28pt)      │
 │            nobhaduri@gmail.com                                    │
 │            nobhad.codes                                           │
@@ -79,15 +79,17 @@ All PDFs use a consistent header template:
 
 ### Header Specifications
 
-| Element | Size | Font | Color (RGB) | Y-Offset |
-|---------|------|------|-------------|----------|
-| Logo | 75pt height | - | - | 0 (top) |
-| Business Name | 16pt | Helvetica-Bold | (0.1, 0.1, 0.1) | 0 |
-| Owner Name | 10pt | Helvetica | (0.2, 0.2, 0.2) | -20pt |
-| Tagline | 9pt | Helvetica | (0.4, 0.4, 0.4) | -36pt |
-| Email | 9pt | Helvetica | (0.4, 0.4, 0.4) | -50pt |
-| Website | 9pt | Helvetica | (0.4, 0.4, 0.4) | -64pt |
-| Document Title | 28pt | Helvetica-Bold | (0.15, 0.15, 0.15) | -25pt (centered) |
+All elements are top-aligned using cap-height offsets:
+
+| Element | Size | Font | Color (RGB) | Y-Offset | Notes |
+|---------|------|------|-------------|----------|-------|
+| Logo | 100pt height | - | - | 0 (top) | Aspect ratio preserved |
+| Business Name | 15pt | Helvetica-Bold | (0.1, 0.1, 0.1) | -11pt | Cap height offset for top alignment |
+| Owner Name | 10pt | Helvetica | (0.2, 0.2, 0.2) | -34pt | |
+| Tagline | 9pt | Helvetica | (0.4, 0.4, 0.4) | -54pt | |
+| Email | 9pt | Helvetica | (0.4, 0.4, 0.4) | -70pt | |
+| Website | 9pt | Helvetica | (0.4, 0.4, 0.4) | -86pt | |
+| Document Title | 28pt | Helvetica-Bold | (0.15, 0.15, 0.15) | -20pt | Cap height offset for top alignment |
 
 ### Layout Constants
 
@@ -96,24 +98,25 @@ All PDFs use a consistent header template:
 const leftMargin = 54;      // 0.75 inch
 const rightMargin = 558;    // width - 0.75 inch
 const headerY = 749;        // height - 43pt (0.6 inch from top)
-const logoHeight = 75;      // ~1 inch
-const headerOffset = 95;    // Space after header before content
+const logoHeight = 100;     // ~1.4 inch for prominent branding
+const headerOffset = 120;   // Space after header before content
 ```
 
 ### Logo Handling
 
 ```typescript
-// Logo path
+// Logo path and size
 const logoPath = join(process.cwd(), 'public/images/avatar_pdf.png');
+const logoHeight = 100; // ~1.4 inch for prominent branding
 
-// Preserve aspect ratio
+// Preserve aspect ratio - only set height, calculate width
 if (existsSync(logoPath)) {
   const logoBytes = readFileSync(logoPath);
   const logoImage = await pdfDoc.embedPng(logoBytes);
   const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
   page.drawImage(logoImage, {
     x: leftMargin,
-    y: y - logoHeight,
+    y: y - logoHeight,  // Top of logo aligns with y
     width: logoWidth,
     height: logoHeight
   });
@@ -229,10 +232,10 @@ async function generatePdf(data: PdfData): Promise<Uint8Array> {
   const rightMargin = width - 54;
   let y = height - 43;
 
-  // Logo (75pt, preserve aspect ratio)
+  // Logo (100pt, preserve aspect ratio)
   const logoPath = join(process.cwd(), 'public/images/avatar_pdf.png');
   let textStartX = leftMargin;
-  const logoHeight = 75;
+  const logoHeight = 100;
 
   if (existsSync(logoPath)) {
     const logoBytes = readFileSync(logoPath);
@@ -247,37 +250,37 @@ async function generatePdf(data: PdfData): Promise<Uint8Array> {
     textStartX = leftMargin + logoWidth + 18;
   }
 
-  // Business info
+  // Business info - offset by cap height for top alignment with logo
   page.drawText(BUSINESS_INFO.name, {
-    x: textStartX, y: y, size: 16,
+    x: textStartX, y: y - 11, size: 15,  // 15pt cap height ~11pt
     font: helveticaBold, color: rgb(0.1, 0.1, 0.1)
   });
   page.drawText(BUSINESS_INFO.owner, {
-    x: textStartX, y: y - 20, size: 10,
+    x: textStartX, y: y - 34, size: 10,
     font: helvetica, color: rgb(0.2, 0.2, 0.2)
   });
   page.drawText(BUSINESS_INFO.tagline, {
-    x: textStartX, y: y - 36, size: 9,
+    x: textStartX, y: y - 54, size: 9,
     font: helvetica, color: rgb(0.4, 0.4, 0.4)
   });
   page.drawText(BUSINESS_INFO.email, {
-    x: textStartX, y: y - 50, size: 9,
+    x: textStartX, y: y - 70, size: 9,
     font: helvetica, color: rgb(0.4, 0.4, 0.4)
   });
   page.drawText(BUSINESS_INFO.website, {
-    x: textStartX, y: y - 64, size: 9,
+    x: textStartX, y: y - 86, size: 9,
     font: helvetica, color: rgb(0.4, 0.4, 0.4)
   });
 
-  // Document title (right-aligned)
+  // Document title (right-aligned, top-aligned with logo)
   const titleText = 'DOCUMENT_TITLE';
   const titleWidth = helveticaBold.widthOfTextAtSize(titleText, 28);
   page.drawText(titleText, {
-    x: rightMargin - titleWidth, y: y - 25, size: 28,
+    x: rightMargin - titleWidth, y: y - 20, size: 28,  // 28pt cap height ~20pt
     font: helveticaBold, color: rgb(0.15, 0.15, 0.15)
   });
 
-  y -= 95; // Move past header
+  y -= 120; // Move past header (100pt logo + spacing)
 
   // Divider line
   page.drawLine({

@@ -225,13 +225,15 @@ export function registerModules(debug: boolean = false): void {
         const currentPath = window.location.pathname;
         if (currentPath.includes('/admin')) {
           const { AdminDashboard } = await import('../features/admin/admin-dashboard');
-          const _adminDashboard = new AdminDashboard();
+          const adminDashboard = new AdminDashboard();
+          // Expose globally for onclick handlers in rendered HTML
+          window.adminDashboard = adminDashboard;
           return {
             init: async () => {
               /* AdminDashboard initializes itself */
             },
             destroy: () => {
-              /* AdminDashboard handles its own cleanup */
+              window.adminDashboard = null;
             },
             isInitialized: true,
             name: 'AdminDashboardModule'

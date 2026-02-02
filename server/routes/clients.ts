@@ -740,5 +740,517 @@ router.delete(
   })
 );
 
+// =====================================================
+// CRM ENHANCEMENT ENDPOINTS
+// =====================================================
+
+import { clientService } from '../services/client-service.js';
+
+// =====================================================
+// CONTACT MANAGEMENT
+// =====================================================
+
+/**
+ * GET /clients/:id/contacts - Get all contacts for a client
+ */
+router.get(
+  '/:id/contacts',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const contacts = await clientService.getContacts(clientId);
+    res.json({ success: true, contacts });
+  })
+);
+
+/**
+ * POST /clients/:id/contacts - Create a new contact for a client
+ */
+router.post(
+  '/:id/contacts',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['clients']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const { firstName, lastName, email, phone, title, department, role, isPrimary, notes } = req.body;
+
+    if (!firstName || !lastName) {
+      return res.status(400).json({
+        error: 'First name and last name are required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    const contact = await clientService.createContact(clientId, {
+      firstName,
+      lastName,
+      email,
+      phone,
+      title,
+      department,
+      role,
+      isPrimary,
+      notes
+    });
+
+    res.status(201).json({ success: true, contact });
+  })
+);
+
+/**
+ * PUT /clients/contacts/:contactId - Update a contact
+ */
+router.put(
+  '/contacts/:contactId',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['clients']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const contactId = parseInt(req.params.contactId);
+    const contact = await clientService.updateContact(contactId, req.body);
+    res.json({ success: true, contact });
+  })
+);
+
+/**
+ * DELETE /clients/contacts/:contactId - Delete a contact
+ */
+router.delete(
+  '/contacts/:contactId',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['clients']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const contactId = parseInt(req.params.contactId);
+    await clientService.deleteContact(contactId);
+    res.json({ success: true, message: 'Contact deleted successfully' });
+  })
+);
+
+/**
+ * POST /clients/:id/contacts/:contactId/set-primary - Set primary contact
+ */
+router.post(
+  '/:id/contacts/:contactId/set-primary',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['clients']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const contactId = parseInt(req.params.contactId);
+    await clientService.setPrimaryContact(clientId, contactId);
+    res.json({ success: true, message: 'Primary contact updated' });
+  })
+);
+
+// =====================================================
+// ACTIVITY TIMELINE
+// =====================================================
+
+/**
+ * GET /clients/:id/activities - Get activity timeline for a client
+ */
+router.get(
+  '/:id/activities',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const { type, startDate, endDate, limit, offset } = req.query;
+
+    const activities = await clientService.getActivityTimeline(clientId, {
+      activityType: type as string,
+      startDate: startDate as string,
+      endDate: endDate as string,
+      limit: limit ? parseInt(limit as string) : undefined,
+      offset: offset ? parseInt(offset as string) : undefined
+    });
+
+    res.json({ success: true, activities });
+  })
+);
+
+/**
+ * POST /clients/:id/activities - Log an activity for a client
+ */
+router.post(
+  '/:id/activities',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const { activityType, title, description, metadata } = req.body;
+
+    if (!activityType || !title) {
+      return res.status(400).json({
+        error: 'Activity type and title are required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    const activity = await clientService.logActivity(clientId, {
+      activityType,
+      title,
+      description,
+      metadata,
+      createdBy: req.user?.email || 'admin'
+    });
+
+    res.status(201).json({ success: true, activity });
+  })
+);
+
+/**
+ * GET /clients/activities/recent - Get recent activities across all clients
+ */
+router.get(
+  '/activities/recent',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+    const activities = await clientService.getRecentActivities(limit);
+    res.json({ success: true, activities });
+  })
+);
+
+// =====================================================
+// CUSTOM FIELDS
+// =====================================================
+
+/**
+ * GET /clients/custom-fields - Get all custom field definitions
+ */
+router.get(
+  '/custom-fields',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const includeInactive = req.query.includeInactive === 'true';
+    const fields = await clientService.getCustomFields(includeInactive);
+    res.json({ success: true, fields });
+  })
+);
+
+/**
+ * POST /clients/custom-fields - Create a custom field definition
+ */
+router.post(
+  '/custom-fields',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { fieldName, fieldLabel, fieldType, options, isRequired, placeholder, defaultValue, displayOrder } = req.body;
+
+    if (!fieldName || !fieldLabel || !fieldType) {
+      return res.status(400).json({
+        error: 'Field name, label, and type are required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    const field = await clientService.createCustomField({
+      fieldName,
+      fieldLabel,
+      fieldType,
+      options,
+      isRequired,
+      placeholder,
+      defaultValue,
+      displayOrder
+    });
+
+    res.status(201).json({ success: true, field });
+  })
+);
+
+/**
+ * PUT /clients/custom-fields/:fieldId - Update a custom field definition
+ */
+router.put(
+  '/custom-fields/:fieldId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const fieldId = parseInt(req.params.fieldId);
+    const field = await clientService.updateCustomField(fieldId, req.body);
+    res.json({ success: true, field });
+  })
+);
+
+/**
+ * DELETE /clients/custom-fields/:fieldId - Delete a custom field (marks as inactive)
+ */
+router.delete(
+  '/custom-fields/:fieldId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const fieldId = parseInt(req.params.fieldId);
+    await clientService.deleteCustomField(fieldId);
+    res.json({ success: true, message: 'Custom field deactivated' });
+  })
+);
+
+/**
+ * GET /clients/:id/custom-fields - Get custom field values for a client
+ */
+router.get(
+  '/:id/custom-fields',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const values = await clientService.getClientCustomFields(clientId);
+    res.json({ success: true, values });
+  })
+);
+
+/**
+ * PUT /clients/:id/custom-fields - Set custom field values for a client
+ */
+router.put(
+  '/:id/custom-fields',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['clients']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const { values } = req.body;
+
+    if (!Array.isArray(values)) {
+      return res.status(400).json({
+        error: 'Values must be an array of { fieldId, value } objects',
+        code: 'INVALID_FORMAT'
+      });
+    }
+
+    await clientService.setClientCustomFields(clientId, values);
+    res.json({ success: true, message: 'Custom field values updated' });
+  })
+);
+
+// =====================================================
+// TAGS & SEGMENTATION
+// =====================================================
+
+/**
+ * GET /clients/tags - Get all tags
+ */
+router.get(
+  '/tags',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const tagType = req.query.type as string;
+    const tags = await clientService.getTags(tagType);
+    res.json({ success: true, tags });
+  })
+);
+
+/**
+ * POST /clients/tags - Create a new tag
+ */
+router.post(
+  '/tags',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { name, color, description, tagType } = req.body;
+
+    if (!name) {
+      return res.status(400).json({
+        error: 'Tag name is required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    const tag = await clientService.createTag({ name, color, description, tagType });
+    res.status(201).json({ success: true, tag });
+  })
+);
+
+/**
+ * PUT /clients/tags/:tagId - Update a tag
+ */
+router.put(
+  '/tags/:tagId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const tagId = parseInt(req.params.tagId);
+    const tag = await clientService.updateTag(tagId, req.body);
+    res.json({ success: true, tag });
+  })
+);
+
+/**
+ * DELETE /clients/tags/:tagId - Delete a tag
+ */
+router.delete(
+  '/tags/:tagId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const tagId = parseInt(req.params.tagId);
+    await clientService.deleteTag(tagId);
+    res.json({ success: true, message: 'Tag deleted successfully' });
+  })
+);
+
+/**
+ * GET /clients/:id/tags - Get tags for a client
+ */
+router.get(
+  '/:id/tags',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const tags = await clientService.getClientTags(clientId);
+    res.json({ success: true, tags });
+  })
+);
+
+/**
+ * POST /clients/:id/tags/:tagId - Add a tag to a client
+ */
+router.post(
+  '/:id/tags/:tagId',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['clients']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const tagId = parseInt(req.params.tagId);
+    await clientService.addTagToClient(clientId, tagId);
+    res.json({ success: true, message: 'Tag added to client' });
+  })
+);
+
+/**
+ * DELETE /clients/:id/tags/:tagId - Remove a tag from a client
+ */
+router.delete(
+  '/:id/tags/:tagId',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['clients']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const tagId = parseInt(req.params.tagId);
+    await clientService.removeTagFromClient(clientId, tagId);
+    res.json({ success: true, message: 'Tag removed from client' });
+  })
+);
+
+/**
+ * GET /clients/by-tag/:tagId - Get all clients with a specific tag
+ */
+router.get(
+  '/by-tag/:tagId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const tagId = parseInt(req.params.tagId);
+    const clients = await clientService.getClientsByTag(tagId);
+    res.json({ success: true, clients });
+  })
+);
+
+// =====================================================
+// HEALTH SCORING
+// =====================================================
+
+/**
+ * GET /clients/:id/health - Get health score for a client
+ */
+router.get(
+  '/:id/health',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const health = await clientService.calculateHealthScore(clientId);
+    res.json({ success: true, health });
+  })
+);
+
+/**
+ * POST /clients/:id/health/recalculate - Recalculate health score for a client
+ */
+router.post(
+  '/:id/health/recalculate',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['clients']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const health = await clientService.updateHealthStatus(clientId);
+    res.json({ success: true, health });
+  })
+);
+
+/**
+ * GET /clients/at-risk - Get all at-risk clients
+ */
+router.get(
+  '/at-risk',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clients = await clientService.getAtRiskClients();
+    res.json({ success: true, clients });
+  })
+);
+
+/**
+ * GET /clients/:id/stats - Get comprehensive stats for a client
+ */
+router.get(
+  '/:id/stats',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const stats = await clientService.getClientStats(clientId);
+    res.json({ success: true, stats });
+  })
+);
+
+// =====================================================
+// CRM FIELDS
+// =====================================================
+
+/**
+ * PUT /clients/:id/crm - Update CRM-specific fields for a client
+ */
+router.put(
+  '/:id/crm',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['clients']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    await clientService.updateCRMFields(clientId, req.body);
+    res.json({ success: true, message: 'CRM fields updated' });
+  })
+);
+
+/**
+ * GET /clients/follow-up - Get clients due for follow-up
+ */
+router.get(
+  '/follow-up',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clients = await clientService.getClientsForFollowUp();
+    res.json({ success: true, clients });
+  })
+);
+
 export { router as clientsRouter };
 export default router;

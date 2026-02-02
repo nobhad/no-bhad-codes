@@ -15,6 +15,7 @@ import { emailService } from '../services/email-service.js';
 import { cache, invalidateCache } from '../middleware/cache.js';
 import { getUploadsSubdir, UPLOAD_DIRS } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
+import { messageService } from '../services/message-service.js';
 
 const router = express.Router();
 
@@ -608,6 +609,490 @@ router.put(
       message: 'Notification preferences updated successfully',
       preferences: updatedPreferences
     });
+  })
+);
+
+// ===================================
+// ENHANCED MESSAGING ENDPOINTS
+// ===================================
+
+// ---------------
+// MENTIONS
+// ---------------
+
+// Get mentions in a message
+router.get(
+  '/messages/:messageId/mentions',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const messageId = parseInt(req.params.messageId);
+    const mentions = await messageService.getMentions(messageId);
+    res.json({ mentions });
+  })
+);
+
+// Get my mentions (messages where I'm mentioned)
+router.get(
+  '/mentions/me',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userEmail = req.user!.email;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+    const mentions = await messageService.getMyMentions(userEmail, limit);
+    res.json({ mentions });
+  })
+);
+
+// ---------------
+// REACTIONS
+// ---------------
+
+// Get reactions for a message
+router.get(
+  '/messages/:messageId/reactions',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const messageId = parseInt(req.params.messageId);
+    const reactions = await messageService.getReactions(messageId);
+    res.json({ reactions });
+  })
+);
+
+// Add reaction to a message
+router.post(
+  '/messages/:messageId/reactions',
+  authenticateToken,
+  invalidateCache(['messages']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const messageId = parseInt(req.params.messageId);
+    const { reaction } = req.body;
+
+    if (!reaction) {
+      return res.status(400).json({
+        error: 'Reaction is required',
+        code: 'MISSING_REACTION'
+      });
+    }
+
+    const reactionData = await messageService.addReaction(
+      messageId,
+      req.user!.email,
+      req.user!.type,
+      reaction
+    );
+    res.status(201).json({ reaction: reactionData });
+  })
+);
+
+// Remove reaction from a message
+router.delete(
+  '/messages/:messageId/reactions/:reaction',
+  authenticateToken,
+  invalidateCache(['messages']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const messageId = parseInt(req.params.messageId);
+    const reaction = decodeURIComponent(req.params.reaction);
+
+    await messageService.removeReaction(messageId, req.user!.email, reaction);
+    res.json({ message: 'Reaction removed' });
+  })
+);
+
+// ---------------
+// SUBSCRIPTIONS
+// ---------------
+
+// Get subscription for a project
+router.get(
+  '/projects/:projectId/subscription',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.projectId);
+    const subscription = await messageService.getSubscription(projectId, req.user!.email);
+    res.json({ subscription });
+  })
+);
+
+// Update subscription preferences
+router.put(
+  '/projects/:projectId/subscription',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.projectId);
+    const { notify_all, notify_mentions, notify_replies } = req.body;
+
+    const subscription = await messageService.updateSubscription(
+      projectId,
+      req.user!.email,
+      { notifyAll: notify_all, notifyMentions: notify_mentions, notifyReplies: notify_replies }
+    );
+    res.json({ subscription });
+  })
+);
+
+// Mute a project
+router.post(
+  '/projects/:projectId/mute',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.projectId);
+    const { until } = req.body; // Optional: datetime to mute until
+
+    const subscription = await messageService.muteProject(
+      projectId,
+      req.user!.email,
+      req.user!.type,
+      until
+    );
+    res.json({ message: 'Project muted', subscription });
+  })
+);
+
+// Unmute a project
+router.post(
+  '/projects/:projectId/unmute',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.projectId);
+
+    const subscription = await messageService.unmuteProject(projectId, req.user!.email);
+    res.json({ message: 'Project unmuted', subscription });
+  })
+);
+
+// ---------------
+// READ RECEIPTS
+// ---------------
+
+// Mark message as read (with receipt tracking)
+router.post(
+  '/messages/:messageId/read',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const messageId = parseInt(req.params.messageId);
+
+    await messageService.markAsRead(messageId, req.user!.email, req.user!.type);
+    res.json({ message: 'Marked as read' });
+  })
+);
+
+// Mark multiple messages as read
+router.post(
+  '/messages/read-bulk',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { message_ids } = req.body;
+
+    if (!message_ids || !Array.isArray(message_ids)) {
+      return res.status(400).json({
+        error: 'message_ids array is required',
+        code: 'MISSING_MESSAGE_IDS'
+      });
+    }
+
+    await messageService.markMultipleAsRead(message_ids, req.user!.email, req.user!.type);
+    res.json({ message: 'Messages marked as read', count: message_ids.length });
+  })
+);
+
+// Get read receipts for a message (admin only)
+router.get(
+  '/messages/:messageId/read-receipts',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const messageId = parseInt(req.params.messageId);
+    const receipts = await messageService.getReadReceipts(messageId);
+    res.json({ receipts });
+  })
+);
+
+// Get unread count for user
+router.get(
+  '/unread-count',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const count = await messageService.getUnreadCount(req.user!.email, req.user!.type);
+    res.json({ unread_count: count });
+  })
+);
+
+// Get unread count for a specific thread
+router.get(
+  '/threads/:threadId/unread-count',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const threadId = parseInt(req.params.threadId);
+    const count = await messageService.getThreadUnreadCount(threadId, req.user!.email);
+    res.json({ unread_count: count });
+  })
+);
+
+// ---------------
+// PINNED MESSAGES
+// ---------------
+
+// Get pinned messages in a thread
+router.get(
+  '/threads/:threadId/pinned',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const threadId = parseInt(req.params.threadId);
+    const pinnedMessages = await messageService.getPinnedMessages(threadId);
+    res.json({ pinned_messages: pinnedMessages });
+  })
+);
+
+// Pin a message (admin only)
+router.post(
+  '/messages/:messageId/pin',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['messages']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const messageId = parseInt(req.params.messageId);
+    const { thread_id } = req.body;
+
+    if (!thread_id) {
+      return res.status(400).json({
+        error: 'thread_id is required',
+        code: 'MISSING_THREAD_ID'
+      });
+    }
+
+    await messageService.pinMessage(thread_id, messageId, req.user!.email);
+    res.json({ message: 'Message pinned' });
+  })
+);
+
+// Unpin a message (admin only)
+router.delete(
+  '/messages/:messageId/pin',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['messages']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const messageId = parseInt(req.params.messageId);
+    const threadId = parseInt(req.query.thread_id as string);
+
+    if (!threadId) {
+      return res.status(400).json({
+        error: 'thread_id query parameter is required',
+        code: 'MISSING_THREAD_ID'
+      });
+    }
+
+    await messageService.unpinMessage(threadId, messageId);
+    res.json({ message: 'Message unpinned' });
+  })
+);
+
+// ---------------
+// MESSAGE EDITING/DELETION
+// ---------------
+
+// Edit a message
+router.put(
+  '/messages/:messageId',
+  authenticateToken,
+  invalidateCache(['messages']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const messageId = parseInt(req.params.messageId);
+    const { message: content } = req.body;
+
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({
+        error: 'Message content is required',
+        code: 'MISSING_MESSAGE'
+      });
+    }
+
+    await messageService.editMessage(messageId, content.trim());
+    const updatedMessage = { id: messageId, message: content.trim() };
+
+    if (!updatedMessage) {
+      return res.status(403).json({
+        error: 'Cannot edit this message',
+        code: 'EDIT_FORBIDDEN'
+      });
+    }
+
+    res.json({ message: updatedMessage });
+  })
+);
+
+// Soft delete a message
+router.delete(
+  '/messages/:messageId',
+  authenticateToken,
+  invalidateCache(['messages']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const messageId = parseInt(req.params.messageId);
+
+    await messageService.deleteMessage(messageId, req.user!.email);
+    const success = true;
+
+    if (!success) {
+      return res.status(403).json({
+        error: 'Cannot delete this message',
+        code: 'DELETE_FORBIDDEN'
+      });
+    }
+
+    res.json({ message: 'Message deleted' });
+  })
+);
+
+// ---------------
+// THREAD ARCHIVING
+// ---------------
+
+// Archive a thread (admin only)
+router.post(
+  '/threads/:threadId/archive',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['messages']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const threadId = parseInt(req.params.threadId);
+
+    await messageService.archiveThread(threadId, req.user!.email);
+    res.json({ message: 'Thread archived' });
+  })
+);
+
+// Unarchive a thread (admin only)
+router.post(
+  '/threads/:threadId/unarchive',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['messages']),
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const threadId = parseInt(req.params.threadId);
+
+    await messageService.unarchiveThread(threadId);
+    res.json({ message: 'Thread unarchived' });
+  })
+);
+
+// Get archived threads (admin only)
+router.get(
+  '/threads/archived',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const threads = await messageService.getArchivedThreads();
+    res.json({ threads });
+  })
+);
+
+// ---------------
+// SEARCH
+// ---------------
+
+// Search messages
+router.get(
+  '/search',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const query = req.query.q as string;
+    const projectId = req.query.project_id ? parseInt(req.query.project_id as string) : undefined;
+    const threadId = req.query.thread_id ? parseInt(req.query.thread_id as string) : undefined;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+
+    if (!query || query.trim().length === 0) {
+      return res.status(400).json({
+        error: 'Search query is required',
+        code: 'MISSING_QUERY'
+      });
+    }
+
+    const results = await messageService.searchMessages(query.trim(), {
+      projectId,
+      threadId,
+      limit,
+      userEmail: req.user!.type === 'client' ? req.user!.email : undefined,
+      includeInternal: req.user!.type === 'admin'
+    });
+
+    res.json({ results, count: results.length });
+  })
+);
+
+// ---------------
+// INTERNAL MESSAGES (Admin Only)
+// ---------------
+
+// Send internal message (admin-only, not visible to clients)
+router.post(
+  '/threads/:threadId/internal',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['messages']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const threadId = parseInt(req.params.threadId);
+    const { message } = req.body;
+
+    if (!message || message.trim().length === 0) {
+      return res.status(400).json({
+        error: 'Message content is required',
+        code: 'MISSING_MESSAGE'
+      });
+    }
+
+    const db = getDatabase();
+
+    // Verify thread exists
+    const thread = await db.get('SELECT * FROM message_threads WHERE id = ?', [threadId]);
+    if (!thread) {
+      return res.status(404).json({
+        error: 'Thread not found',
+        code: 'THREAD_NOT_FOUND'
+      });
+    }
+
+    const result = await db.run(
+      `
+      INSERT INTO general_messages (
+        client_id, sender_type, sender_name, subject, message,
+        thread_id, is_internal
+      )
+      VALUES (?, 'admin', ?, ?, ?, ?, TRUE)
+      `,
+      [thread.client_id, req.user!.email, thread.subject, message.trim(), threadId]
+    );
+
+    // Process mentions in the internal message
+    await messageService.processMentions(result.lastID!, message.trim());
+
+    const newMessage = await db.get('SELECT * FROM general_messages WHERE id = ?', [result.lastID]);
+
+    res.status(201).json({
+      message: 'Internal message sent',
+      messageData: newMessage
+    });
+  })
+);
+
+// Get internal messages for a thread (admin only)
+router.get(
+  '/threads/:threadId/internal',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const threadId = parseInt(req.params.threadId);
+    const db = getDatabase();
+
+    const messages = await db.all(
+      `
+      SELECT * FROM general_messages
+      WHERE thread_id = ? AND is_internal = TRUE
+      ORDER BY created_at ASC
+      `,
+      [threadId]
+    );
+
+    res.json({ messages });
   })
 );
 

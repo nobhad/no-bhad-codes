@@ -1458,6 +1458,7 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
           <th scope="col">Amount</th>
           <th scope="col">Due Date</th>
           <th scope="col">Status</th>
+          <th scope="col">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -1469,6 +1470,9 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
       }).format(invoice.amount_total);
       const dueDate = formatDate(invoice.due_date);
       const statusClass = `status-${invoice.status}`;
+      const isDraft = invoice.status === 'draft';
+      const showSendBtn = isDraft;
+      const showMarkPaidBtn = ['sent', 'viewed', 'partial', 'overdue'].includes(invoice.status);
 
       return `
               <tr>
@@ -1476,6 +1480,17 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
                 <td>${amount}</td>
                 <td>${dueDate}</td>
                 <td><span class="status-badge ${statusClass}">${invoice.status}</span></td>
+                <td class="actions-cell">
+                  <button class="btn btn-sm btn-outline btn-preview-invoice" data-invoice-id="${invoice.id}" title="Preview PDF">
+                    Preview
+                  </button>
+                  ${isDraft ? `<button class="btn btn-sm btn-outline btn-edit-invoice" data-invoice-id="${invoice.id}" title="Edit Invoice">Edit</button>` : ''}
+                  <button class="btn btn-sm btn-outline btn-download-invoice" data-invoice-id="${invoice.id}" data-invoice-number="${invoice.invoice_number}" title="Download PDF">
+                    Download
+                  </button>
+                  ${showSendBtn ? `<button class="btn btn-sm btn-secondary btn-send-invoice" data-invoice-id="${invoice.id}" title="Send to Client">Send</button>` : ''}
+                  ${showMarkPaidBtn ? `<button class="btn btn-sm btn-success btn-mark-paid" data-invoice-id="${invoice.id}" title="Mark as Paid">Paid</button>` : ''}
+                </td>
               </tr>
             `;
     })
@@ -1483,6 +1498,105 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
       </tbody>
     </table>
   `;
+
+  // Add event listeners for preview and download buttons
+  container.querySelectorAll('.btn-preview-invoice').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const invoiceId = (btn as HTMLElement).dataset.invoiceId;
+      if (invoiceId) {
+        try {
+          // Fetch PDF with auth and open as blob URL for preview
+          const response = await apiFetch(`/api/invoices/${invoiceId}/pdf?preview=true`);
+          if (!response.ok) throw new Error('Failed to load preview');
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          window.open(url, '_blank');
+        } catch (error) {
+          console.error('[AdminProjects] Preview failed:', error);
+          showToast('Failed to preview invoice', 'error');
+        }
+      }
+    });
+  });
+
+  container.querySelectorAll('.btn-download-invoice').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const invoiceId = (btn as HTMLElement).dataset.invoiceId;
+      const invoiceNumber = (btn as HTMLElement).dataset.invoiceNumber || 'invoice';
+      if (invoiceId) {
+        try {
+          const response = await apiFetch(`/api/invoices/${invoiceId}/pdf`);
+          if (!response.ok) throw new Error('Failed to download');
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${invoiceNumber}.pdf`;
+          a.click();
+          URL.revokeObjectURL(url);
+        } catch (error) {
+          console.error('[AdminProjects] Download failed:', error);
+          showToast('Failed to download invoice', 'error');
+        }
+      }
+    });
+  });
+
+  // Edit invoice button - delegates to admin dashboard
+  container.querySelectorAll('.btn-edit-invoice').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const invoiceId = (btn as HTMLElement).dataset.invoiceId;
+      console.log('[Invoice] Edit clicked, invoiceId:', invoiceId, 'adminDashboard:', !!window.adminDashboard);
+      if (invoiceId && window.adminDashboard) {
+        try {
+          await window.adminDashboard.editInvoice(parseInt(invoiceId));
+          // Reload invoices in this view after edit
+          if (currentProjectId && storedContext) {
+            loadProjectInvoices(currentProjectId, storedContext);
+          }
+        } catch (error) {
+          console.error('[Invoice] Edit error:', error);
+        }
+      }
+    });
+  });
+
+  // Send invoice button - delegates to admin dashboard
+  container.querySelectorAll('.btn-send-invoice').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const invoiceId = (btn as HTMLElement).dataset.invoiceId;
+      console.log('[Invoice] Send clicked, invoiceId:', invoiceId, 'adminDashboard:', !!window.adminDashboard);
+      if (invoiceId && window.adminDashboard) {
+        try {
+          await window.adminDashboard.sendInvoice(parseInt(invoiceId));
+          // Reload invoices in this view after successful send
+          if (currentProjectId && storedContext) {
+            loadProjectInvoices(currentProjectId, storedContext);
+          }
+        } catch (error) {
+          console.error('[Invoice] Send error:', error);
+        }
+      }
+    });
+  });
+
+  // Mark paid button - delegates to admin dashboard
+  container.querySelectorAll('.btn-mark-paid').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const invoiceId = (btn as HTMLElement).dataset.invoiceId;
+      if (invoiceId && window.adminDashboard) {
+        try {
+          await window.adminDashboard.markInvoicePaid(parseInt(invoiceId));
+          // Reload invoices in this view after marking paid
+          if (currentProjectId && storedContext) {
+            loadProjectInvoices(currentProjectId, storedContext);
+          }
+        } catch (error) {
+          console.error('[Invoice] Mark paid error:', error);
+        }
+      }
+    });
+  });
 }
 
 /**
@@ -1518,7 +1632,7 @@ async function navigateToClientByEmail(email: string): Promise<void> {
 // =====================================================
 
 /**
- * Show prompt to create a new invoice
+ * Show custom modal to create a new invoice with multiple line items
  */
 async function showCreateInvoicePrompt(): Promise<void> {
   if (!currentProjectId || !storedContext) return;
@@ -1526,47 +1640,377 @@ async function showCreateInvoicePrompt(): Promise<void> {
   const project = projectsData.find((p) => p.id === currentProjectId) as any;
   if (!project) return;
 
-  const result = await multiPromptDialog({
-    title: 'Create Invoice',
-    fields: [
-      {
-        name: 'description',
-        label: 'Line Item Description',
-        type: 'text',
-        defaultValue: 'Web Development Services',
-        required: true
-      },
-      {
-        name: 'amount',
-        label: 'Amount ($)',
-        type: 'number',
-        defaultValue: '1000',
-        placeholder: 'Enter amount',
-        required: true
-      }
-    ],
-    confirmText: 'Create Invoice',
-    cancelText: 'Cancel'
-  });
-
-  if (!result) return;
-
-  const amount = parseFloat(result.amount);
-  if (isNaN(amount) || amount <= 0) {
-    alertWarning('Please enter a valid amount');
-    return;
+  // Fetch available deposits for this project
+  interface AvailableDeposit {
+    invoice_id: number;
+    invoice_number: string;
+    total_amount: number;
+    amount_applied: number;
+    available_amount: number;
+    paid_date: string;
+  }
+  let availableDeposits: AvailableDeposit[] = [];
+  try {
+    const depositsResponse = await apiFetch(`/api/invoices/deposits/${currentProjectId}`);
+    console.log('[Invoice] Deposits response status:', depositsResponse.status);
+    if (depositsResponse.ok) {
+      const data = await depositsResponse.json();
+      console.log('[Invoice] Available deposits:', data);
+      availableDeposits = data.deposits || [];
+    }
+  } catch (error) {
+    console.log('[Invoice] Could not fetch deposits:', error);
   }
 
-  createInvoice(project.client_id || project.id, result.description, amount);
+  // Create modal overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-dialog-overlay';
+  overlay.id = 'create-invoice-modal';
+
+  // Line items data
+  const lineItems: { description: string; quantity: number; rate: number }[] = [
+    { description: 'Web Development Services', quantity: 1, rate: project.price || 500 }
+  ];
+
+  // Selected deposit for credit
+  let selectedDepositId: number | null = null;
+  let selectedDepositAmount: number = 0;
+
+  // Helper functions (defined before use)
+  const saveCurrentValues = (): void => {
+    const rows = overlay.querySelectorAll('.line-item-row');
+    rows.forEach((row, index) => {
+      if (lineItems[index]) {
+        const desc = row.querySelector('.line-item-desc') as HTMLInputElement;
+        const qty = row.querySelector('.line-item-qty') as HTMLInputElement;
+        const rate = row.querySelector('.line-item-rate') as HTMLInputElement;
+        lineItems[index].description = desc?.value || '';
+        lineItems[index].quantity = parseInt(qty?.value) || 1;
+        lineItems[index].rate = parseFloat(rate?.value) || 0;
+      }
+    });
+  };
+
+  const updateLineItemAmounts = (): void => {
+    const rows = overlay.querySelectorAll('.line-item-row');
+    let subtotal = 0;
+    rows.forEach((row) => {
+      const qty = parseFloat((row.querySelector('.line-item-qty') as HTMLInputElement)?.value) || 1;
+      const rate = parseFloat((row.querySelector('.line-item-rate') as HTMLInputElement)?.value) || 0;
+      const amount = qty * rate;
+      subtotal += amount;
+      const amountSpan = row.querySelector('.line-item-amount');
+      if (amountSpan) amountSpan.textContent = `$${amount.toFixed(2)}`;
+    });
+
+    // Update subtotal display
+    const subtotalEl = overlay.querySelector('.invoice-subtotal');
+    if (subtotalEl) subtotalEl.textContent = `Subtotal: $${subtotal.toFixed(2)}`;
+
+    // Update deposit credit display
+    const creditEl = overlay.querySelector('.invoice-credit') as HTMLElement;
+    if (creditEl) {
+      if (selectedDepositAmount > 0) {
+        creditEl.textContent = `Deposit Credit: -$${selectedDepositAmount.toFixed(2)}`;
+        creditEl.style.display = 'block';
+      } else {
+        creditEl.style.display = 'none';
+      }
+    }
+
+    // Calculate final total
+    const finalTotal = Math.max(0, subtotal - selectedDepositAmount);
+    const totalEl = overlay.querySelector('.invoice-total strong');
+    if (totalEl) totalEl.textContent = `Total Due: $${finalTotal.toFixed(2)}`;
+  };
+
+  const closeModal = (): void => {
+    overlay.classList.add('closing');
+    setTimeout(() => overlay.remove(), 150);
+  };
+
+  const submitInvoice = async (): Promise<void> => {
+    saveCurrentValues();
+
+    // Validate line items
+    const validLineItems = lineItems.filter(item => item.description.trim() && item.rate > 0);
+    if (validLineItems.length === 0) {
+      alertWarning('Please add at least one line item with description and amount');
+      return;
+    }
+
+    const typeSelect = overlay.querySelector('#invoice-type-select') as HTMLSelectElement;
+    const isDeposit = typeSelect?.value === 'deposit';
+    const depositPercentageInput = overlay.querySelector('#deposit-percentage') as HTMLInputElement;
+    const depositPercentage = isDeposit && depositPercentageInput ? parseFloat(depositPercentageInput.value) : undefined;
+
+    // Calculate total
+    const totalAmount = validLineItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+    const clientId = project.client_id;
+
+    if (!clientId) {
+      showToast('Cannot create invoice: Project has no associated client', 'error');
+      return;
+    }
+
+    closeModal();
+
+    if (isDeposit) {
+      // Create deposit invoice
+      try {
+        const response = await apiPost('/api/invoices/deposit', {
+          projectId: currentProjectId,
+          clientId,
+          amount: totalAmount,
+          percentage: depositPercentage,
+          description: validLineItems[0].description
+        });
+
+        if (response.ok) {
+          showToast('Deposit invoice created successfully!', 'success');
+          if (currentProjectId && storedContext) loadProjectInvoices(currentProjectId, storedContext);
+        } else {
+          showToast('Failed to create deposit invoice', 'error');
+        }
+      } catch (error) {
+        console.error('[AdminProjects] Error creating deposit invoice:', error);
+        showToast('Failed to create deposit invoice', 'error');
+      }
+    } else {
+      // Create standard invoice with line items (and apply deposit credit if selected)
+      createInvoiceWithLineItems(clientId, validLineItems, selectedDepositId, selectedDepositAmount);
+    }
+  };
+
+  // Render the modal (defined before attachModalHandlers which uses it)
+  const renderModal = (): void => {
+    const totalAmount = lineItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+
+    overlay.innerHTML = `
+      <div class="confirm-dialog invoice-modal">
+        <div class="confirm-dialog-icon info">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+        </div>
+        <h3 class="confirm-dialog-title">Create Invoice</h3>
+
+        <div class="invoice-modal-form">
+          <div class="form-group">
+            <label class="form-label">Invoice Type *</label>
+            <select id="invoice-type-select" class="form-input">
+              <option value="standard">Standard Invoice</option>
+              <option value="deposit">Deposit Invoice</option>
+            </select>
+          </div>
+
+          <div class="form-group deposit-field" style="display: none;">
+            <label class="form-label">Deposit Percentage</label>
+            <input type="number" id="deposit-percentage" class="form-input" value="50" min="1" max="100" placeholder="e.g., 50">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Line Items</label>
+            <div class="line-items-container">
+              ${lineItems.map((item, index) => `
+                <div class="line-item-row" data-index="${index}">
+                  <input type="text" class="form-input line-item-desc" placeholder="Description" value="${SanitizationUtils.escapeHtml(item.description)}" required>
+                  <input type="number" class="form-input line-item-qty" placeholder="Qty" value="${item.quantity}" min="1" style="width: 70px;">
+                  <input type="number" class="form-input line-item-rate" placeholder="Rate" value="${item.rate}" min="0" step="0.01" style="width: 100px;">
+                  <span class="line-item-amount">$${(item.quantity * item.rate).toFixed(2)}</span>
+                  ${lineItems.length > 1 ? `<button type="button" class="btn-remove-line" data-index="${index}" title="Remove">&times;</button>` : ''}
+                </div>
+              `).join('')}
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" id="btn-add-line-item">+ Add Line Item</button>
+          </div>
+
+          ${availableDeposits.length > 0 ? `
+          <div class="form-group deposit-credit-section" id="deposit-credit-section">
+            <label class="form-label">Apply Deposit Credit</label>
+            <select id="deposit-credit-select" class="form-input">
+              <option value="">-- No deposit credit --</option>
+              ${availableDeposits.map(dep => `
+                <option value="${dep.invoice_id}" data-amount="${dep.available_amount}">
+                  ${SanitizationUtils.escapeHtml(dep.invoice_number)} - $${dep.available_amount.toFixed(2)} available
+                </option>
+              `).join('')}
+            </select>
+            <small class="form-hint">Select a paid deposit to apply as credit to this invoice</small>
+          </div>
+          ` : `
+          <div class="form-group" id="no-deposits-info" style="display: none;">
+            <small class="form-hint">No paid deposits available for credit</small>
+          </div>
+          `}
+
+          <div class="invoice-totals-section">
+            <div class="invoice-subtotal">Subtotal: $${totalAmount.toFixed(2)}</div>
+            <div class="invoice-credit" style="display: none; color: var(--color-success);">Deposit Credit: -$0.00</div>
+            <div class="invoice-total">
+              <strong>Total Due: $${totalAmount.toFixed(2)}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="confirm-dialog-actions">
+          <button type="button" class="confirm-dialog-btn confirm-dialog-cancel">Cancel</button>
+          <button type="button" class="confirm-dialog-btn confirm-dialog-confirm">Create Invoice</button>
+        </div>
+      </div>
+    `;
+
+    // Helper to calculate deposit amount from percentage
+    const calculateDepositAmount = (): void => {
+      const percentInput = overlay.querySelector('#deposit-percentage') as HTMLInputElement;
+      const percent = parseFloat(percentInput?.value) || 50;
+      // Get the original project price as base for deposit calculation
+      const baseAmount = project.price || 500;
+      const depositAmount = (baseAmount * percent) / 100;
+
+      // Update the first line item with the deposit amount
+      if (lineItems.length > 0) {
+        lineItems[0].rate = depositAmount;
+        lineItems[0].description = `Project Deposit (${percent}%)`;
+        // Update the UI
+        const firstRow = overlay.querySelector('.line-item-row');
+        if (firstRow) {
+          const rateInput = firstRow.querySelector('.line-item-rate') as HTMLInputElement;
+          const descInput = firstRow.querySelector('.line-item-desc') as HTMLInputElement;
+          if (rateInput) rateInput.value = String(depositAmount);
+          if (descInput) descInput.value = `Project Deposit (${percent}%)`;
+        }
+        updateLineItemAmounts();
+      }
+    };
+
+    // Attach event handlers inline
+    // Invoice type change - show/hide deposit percentage and credit section
+    const typeSelect = overlay.querySelector('#invoice-type-select') as HTMLSelectElement;
+    const depositField = overlay.querySelector('.deposit-field') as HTMLElement;
+    const depositCreditSection = overlay.querySelector('#deposit-credit-section') as HTMLElement;
+    typeSelect?.addEventListener('change', () => {
+      const isDeposit = typeSelect.value === 'deposit';
+      if (depositField) {
+        depositField.style.display = isDeposit ? 'block' : 'none';
+      }
+      // Hide deposit credit section when creating a deposit invoice
+      if (depositCreditSection) {
+        depositCreditSection.style.display = isDeposit ? 'none' : 'block';
+      }
+      // Clear selected deposit when switching to deposit type
+      if (isDeposit) {
+        selectedDepositId = null;
+        selectedDepositAmount = 0;
+        // Calculate deposit amount based on percentage
+        calculateDepositAmount();
+      } else {
+        // Restore original amount when switching back to standard
+        if (lineItems.length > 0) {
+          lineItems[0].rate = project.price || 500;
+          lineItems[0].description = 'Web Development Services';
+          const firstRow = overlay.querySelector('.line-item-row');
+          if (firstRow) {
+            const rateInput = firstRow.querySelector('.line-item-rate') as HTMLInputElement;
+            const descInput = firstRow.querySelector('.line-item-desc') as HTMLInputElement;
+            if (rateInput) rateInput.value = String(project.price || 500);
+            if (descInput) descInput.value = 'Web Development Services';
+          }
+          updateLineItemAmounts();
+        }
+      }
+    });
+
+    // Deposit percentage change - recalculate deposit amount
+    const depositPercentInput = overlay.querySelector('#deposit-percentage') as HTMLInputElement;
+    depositPercentInput?.addEventListener('input', () => {
+      if (typeSelect?.value === 'deposit') {
+        calculateDepositAmount();
+      }
+    });
+
+    // Deposit credit selection
+    const depositCreditSelect = overlay.querySelector('#deposit-credit-select') as HTMLSelectElement;
+    depositCreditSelect?.addEventListener('change', () => {
+      const selectedOption = depositCreditSelect.selectedOptions[0];
+      if (selectedOption && selectedOption.value) {
+        selectedDepositId = parseInt(selectedOption.value);
+        selectedDepositAmount = parseFloat(selectedOption.dataset.amount || '0');
+      } else {
+        selectedDepositId = null;
+        selectedDepositAmount = 0;
+      }
+      updateLineItemAmounts();
+    });
+
+    // Add line item button
+    const addLineBtn = overlay.querySelector('#btn-add-line-item');
+    addLineBtn?.addEventListener('click', () => {
+      lineItems.push({ description: '', quantity: 1, rate: 0 });
+      saveCurrentValues();
+      renderModal();
+    });
+
+    // Remove line item buttons
+    overlay.querySelectorAll('.btn-remove-line').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const index = parseInt((e.target as HTMLElement).dataset.index || '0');
+        lineItems.splice(index, 1);
+        saveCurrentValues();
+        renderModal();
+      });
+    });
+
+    // Update amounts on input change
+    overlay.querySelectorAll('.line-item-qty, .line-item-rate').forEach(input => {
+      input.addEventListener('input', () => {
+        updateLineItemAmounts();
+      });
+    });
+
+    // Cancel button
+    overlay.querySelector('.confirm-dialog-cancel')?.addEventListener('click', closeModal);
+
+    // Confirm button
+    overlay.querySelector('.confirm-dialog-confirm')?.addEventListener('click', submitInvoice);
+
+    // Close on overlay click
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeModal();
+    });
+
+    // Close on Escape
+    const escHandler = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') {
+        closeModal();
+        document.removeEventListener('keydown', escHandler);
+      }
+    };
+    document.addEventListener('keydown', escHandler);
+  };
+
+  // Initial render
+  renderModal();
+  document.body.appendChild(overlay);
+
+  // Focus first input
+  setTimeout(() => {
+    const firstInput = overlay.querySelector('.line-item-desc') as HTMLInputElement;
+    firstInput?.focus();
+  }, 100);
 }
 
 /**
- * Create a new invoice for the current project
+ * Create invoice with multiple line items
  */
-async function createInvoice(
+async function createInvoiceWithLineItems(
   clientId: number,
-  description: string,
-  amount: number
+  lineItems: { description: string; quantity: number; rate: number }[],
+  depositInvoiceId?: number | null,
+  depositAmount?: number
 ): Promise<void> {
   if (!currentProjectId || !storedContext) return;
 
@@ -1574,27 +2018,50 @@ async function createInvoice(
     const response = await apiPost('/api/invoices', {
       projectId: currentProjectId,
       clientId,
-      lineItems: [
-        {
-          description,
-          quantity: 1,
-          rate: amount,
-          amount
-        }
-      ],
+      lineItems: lineItems.map(item => ({
+        description: item.description,
+        quantity: item.quantity,
+        rate: item.rate,
+        amount: item.quantity * item.rate
+      })),
       notes: '',
       terms: 'Payment due within 30 days'
     });
 
     if (response.ok) {
-      storedContext.showNotification('Invoice created successfully!', 'success');
-      loadProjectInvoices(currentProjectId, storedContext);
+      const data = await response.json();
+      const newInvoiceId = data.invoice?.id;
+
+      // Apply deposit credit if selected
+      if (newInvoiceId && depositInvoiceId && depositAmount && depositAmount > 0) {
+        try {
+          const creditResponse = await apiPost(`/api/invoices/${newInvoiceId}/apply-credit`, {
+            depositInvoiceId,
+            amount: depositAmount
+          });
+
+          if (creditResponse.ok) {
+            showToast('Invoice created with deposit credit applied!', 'success');
+          } else {
+            showToast('Invoice created, but failed to apply deposit credit', 'warning');
+          }
+        } catch (creditError) {
+          console.error('[AdminProjects] Error applying deposit credit:', creditError);
+          showToast('Invoice created, but failed to apply deposit credit', 'warning');
+        }
+      } else {
+        showToast('Invoice created successfully!', 'success');
+      }
+
+      if (currentProjectId && storedContext) loadProjectInvoices(currentProjectId, storedContext);
     } else {
-      storedContext.showNotification('Failed to create invoice. Please try again.', 'error');
+      const errorData = await response.json();
+      console.error('[AdminProjects] Invoice creation failed:', errorData);
+      showToast('Failed to create invoice', 'error');
     }
   } catch (error) {
     console.error('[AdminProjects] Error creating invoice:', error);
-    storedContext.showNotification('Failed to create invoice. Please try again.', 'error');
+    showToast('Failed to create invoice', 'error');
   }
 }
 

@@ -26,6 +26,24 @@ const LEGACY_SESSION_KEY = 'nbw_admin_session';
  * Delegates to authStore with additional security features
  */
 export class AdminAuth {
+  // Flag set by AdminDashboard when API authentication is confirmed
+  private static _apiAuthenticated = false;
+
+  /**
+   * Mark the user as authenticated via API (called by AdminDashboard)
+   */
+  static setApiAuthenticated(value: boolean): void {
+    AdminAuth._apiAuthenticated = value;
+    logger.log('API authentication status set to:', value);
+  }
+
+  /**
+   * Check if authenticated via API
+   */
+  static isApiAuthenticated(): boolean {
+    return AdminAuth._apiAuthenticated;
+  }
+
   /**
    * Authenticate with backend JWT API
    * Falls back to client-side hash for offline/development mode
@@ -93,7 +111,12 @@ export class AdminAuth {
    * Delegates to authStore.isAdmin()
    */
   static isAuthenticated(): boolean {
-    // First check authStore (primary)
+    // First check API authentication flag (set by AdminDashboard after API check)
+    if (AdminAuth._apiAuthenticated) {
+      return true;
+    }
+
+    // Check authStore (primary)
     if (authStore.isAdmin()) {
       return true;
     }
@@ -144,6 +167,9 @@ export class AdminAuth {
    */
   static async logout(): Promise<void> {
     logger.info('Logout called - delegating to authStore');
+
+    // Clear API authentication flag
+    AdminAuth._apiAuthenticated = false;
 
     // Clear legacy session
     sessionStorage.removeItem(LEGACY_SESSION_KEY);

@@ -31,6 +31,16 @@ import { getDatabase } from '../database/init.js';
 import { getNumber } from '../database/row-helpers.js';
 import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 import { UAParser } from 'ua-parser-js';
+import { analyticsService } from '../services/analytics-service.js';
+
+// Helper for async route handlers
+const asyncHandler = (fn: (req: Request, res: Response) => Promise<void>) =>
+  (req: Request, res: Response) => {
+    Promise.resolve(fn(req, res)).catch((error) => {
+      logger.error('Route error', { category: 'analytics', metadata: { error } });
+      res.status(500).json({ error: 'Internal server error' });
+    });
+  };
 
 const router = Router();
 
@@ -670,5 +680,387 @@ router.get(
     }
   }
 );
+
+// =====================================================
+// SAVED REPORTS ENDPOINTS
+// =====================================================
+
+/**
+ * GET /api/analytics/reports
+ * Get all saved reports
+ */
+router.get('/reports', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const { type, favorites } = req.query;
+  const reports = await analyticsService.getSavedReports(
+    type as string | undefined,
+    favorites === 'true'
+  );
+  res.json({ reports });
+}));
+
+/**
+ * POST /api/analytics/reports
+ * Create a new saved report
+ */
+router.post('/reports', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
+  const report = await analyticsService.createSavedReport({
+    ...req.body,
+    createdBy: userEmail
+  });
+  res.status(201).json({ report });
+}));
+
+/**
+ * GET /api/analytics/reports/:id
+ * Get a specific saved report
+ */
+router.get('/reports/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const report = await analyticsService.getSavedReport(parseInt(req.params.id, 10));
+  if (!report) {
+    res.status(404).json({ error: 'Report not found' });
+    return;
+  }
+  res.json({ report });
+}));
+
+/**
+ * PUT /api/analytics/reports/:id
+ * Update a saved report
+ */
+router.put('/reports/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const report = await analyticsService.updateSavedReport(
+    parseInt(req.params.id, 10),
+    req.body
+  );
+  res.json({ report });
+}));
+
+/**
+ * DELETE /api/analytics/reports/:id
+ * Delete a saved report
+ */
+router.delete('/reports/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  await analyticsService.deleteSavedReport(parseInt(req.params.id, 10));
+  res.json({ success: true });
+}));
+
+/**
+ * POST /api/analytics/reports/:id/favorite
+ * Toggle report favorite status
+ */
+router.post('/reports/:id/favorite', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const report = await analyticsService.toggleReportFavorite(parseInt(req.params.id, 10));
+  res.json({ report });
+}));
+
+/**
+ * POST /api/analytics/reports/:id/run
+ * Run a saved report and get results
+ */
+router.post('/reports/:id/run', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
+  const result = await analyticsService.runReport(parseInt(req.params.id, 10));
+  res.json(result);
+}));
+
+// =====================================================
+// REPORT SCHEDULES ENDPOINTS
+// =====================================================
+
+/**
+ * GET /api/analytics/reports/:reportId/schedules
+ * Get schedules for a report
+ */
+router.get('/reports/:reportId/schedules', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const schedules = await analyticsService.getReportSchedules(parseInt(req.params.reportId, 10));
+  res.json({ schedules });
+}));
+
+/**
+ * POST /api/analytics/reports/:reportId/schedules
+ * Create a schedule for a report
+ */
+router.post('/reports/:reportId/schedules', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
+  const schedule = await analyticsService.createReportSchedule({
+    ...req.body,
+    reportId: parseInt(req.params.reportId, 10),
+    createdBy: userEmail
+  });
+  res.status(201).json({ schedule });
+}));
+
+/**
+ * PUT /api/analytics/schedules/:id
+ * Update a report schedule
+ */
+router.put('/schedules/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const schedule = await analyticsService.updateReportSchedule(
+    parseInt(req.params.id, 10),
+    req.body
+  );
+  res.json({ schedule });
+}));
+
+/**
+ * DELETE /api/analytics/schedules/:id
+ * Delete a report schedule
+ */
+router.delete('/schedules/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  await analyticsService.deleteReportSchedule(parseInt(req.params.id, 10));
+  res.json({ success: true });
+}));
+
+/**
+ * POST /api/analytics/schedules/process
+ * Process all due scheduled reports
+ */
+router.post('/schedules/process', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const processed = await analyticsService.processDueSchedules();
+  res.json({ processed });
+}));
+
+// =====================================================
+// DASHBOARD WIDGETS ENDPOINTS
+// =====================================================
+
+/**
+ * GET /api/analytics/widgets
+ * Get user's dashboard widgets
+ */
+router.get('/widgets', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
+  const widgets = await analyticsService.getDashboardWidgets(userEmail);
+  res.json({ widgets });
+}));
+
+/**
+ * POST /api/analytics/widgets
+ * Create a dashboard widget
+ */
+router.post('/widgets', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
+  const widget = await analyticsService.createDashboardWidget({
+    ...req.body,
+    userEmail
+  });
+  res.status(201).json({ widget });
+}));
+
+/**
+ * PUT /api/analytics/widgets/:id
+ * Update a dashboard widget
+ */
+router.put('/widgets/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const widget = await analyticsService.updateDashboardWidget(
+    parseInt(req.params.id, 10),
+    req.body
+  );
+  res.json({ widget });
+}));
+
+/**
+ * DELETE /api/analytics/widgets/:id
+ * Delete a dashboard widget
+ */
+router.delete('/widgets/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  await analyticsService.deleteDashboardWidget(parseInt(req.params.id, 10));
+  res.json({ success: true });
+}));
+
+/**
+ * PUT /api/analytics/widgets/layout
+ * Update widget layout (positions/sizes)
+ */
+router.put('/widgets/layout', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
+  const { widgets } = req.body;
+  await analyticsService.updateWidgetLayout(userEmail, widgets);
+  res.json({ success: true });
+}));
+
+/**
+ * GET /api/analytics/widgets/presets
+ * Get available dashboard presets
+ */
+router.get('/widgets/presets', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const presets = await analyticsService.getDashboardPresets();
+  res.json({ presets });
+}));
+
+/**
+ * POST /api/analytics/widgets/presets/:id/apply
+ * Apply a dashboard preset
+ */
+router.post('/widgets/presets/:id/apply', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
+  const widgets = await analyticsService.applyDashboardPreset(
+    userEmail,
+    parseInt(req.params.id, 10)
+  );
+  res.json({ widgets });
+}));
+
+// =====================================================
+// KPI SNAPSHOTS ENDPOINTS
+// =====================================================
+
+/**
+ * POST /api/analytics/kpis/snapshot
+ * Capture a KPI snapshot
+ */
+router.post('/kpis/snapshot', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  await analyticsService.captureKPISnapshot();
+  res.json({ success: true });
+}));
+
+/**
+ * GET /api/analytics/kpis/latest
+ * Get latest KPI values
+ */
+router.get('/kpis/latest', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const kpis = await analyticsService.getLatestKPIs();
+  res.json({ kpis });
+}));
+
+/**
+ * GET /api/analytics/kpis/:type/trend
+ * Get KPI trend over time
+ */
+router.get('/kpis/:type/trend', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const { days = '30' } = req.query;
+  const daysNum = parseInt(days as string, 10);
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - daysNum);
+
+  const trend = await analyticsService.getKPITrend(
+    req.params.type,
+    { start: startDate.toISOString().split('T')[0], end: endDate.toISOString().split('T')[0] }
+  );
+  res.json({ trend });
+}));
+
+// =====================================================
+// METRIC ALERTS ENDPOINTS
+// =====================================================
+
+/**
+ * GET /api/analytics/alerts
+ * Get all metric alerts
+ */
+router.get('/alerts', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const alerts = await analyticsService.getMetricAlerts();
+  res.json({ alerts });
+}));
+
+/**
+ * POST /api/analytics/alerts
+ * Create a metric alert
+ */
+router.post('/alerts', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
+  const alert = await analyticsService.createMetricAlert({
+    ...req.body,
+    createdBy: userEmail
+  });
+  res.status(201).json({ alert });
+}));
+
+/**
+ * PUT /api/analytics/alerts/:id
+ * Update a metric alert
+ */
+router.put('/alerts/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const alert = await analyticsService.updateMetricAlert(
+    parseInt(req.params.id, 10),
+    req.body
+  );
+  res.json({ alert });
+}));
+
+/**
+ * DELETE /api/analytics/alerts/:id
+ * Delete a metric alert
+ */
+router.delete('/alerts/:id', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  await analyticsService.deleteMetricAlert(parseInt(req.params.id, 10));
+  res.json({ success: true });
+}));
+
+/**
+ * POST /api/analytics/alerts/check
+ * Check all alerts for triggers
+ */
+router.post('/alerts/check', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const triggered = await analyticsService.checkAlertTriggers();
+  res.json({ triggered });
+}));
+
+// =====================================================
+// QUICK ANALYTICS ENDPOINTS
+// =====================================================
+
+/**
+ * GET /api/analytics/quick/revenue
+ * Quick revenue analytics
+ */
+router.get('/quick/revenue', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const { days = '30' } = req.query;
+  const analytics = await analyticsService.getRevenueAnalytics(parseInt(days as string, 10));
+  res.json(analytics);
+}));
+
+/**
+ * GET /api/analytics/quick/pipeline
+ * Quick pipeline analytics
+ */
+router.get('/quick/pipeline', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const analytics = await analyticsService.getPipelineAnalytics();
+  res.json(analytics);
+}));
+
+/**
+ * GET /api/analytics/quick/projects
+ * Quick project analytics
+ */
+router.get('/quick/projects', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const { days = '30' } = req.query;
+  const analytics = await analyticsService.getProjectAnalytics(parseInt(days as string, 10));
+  res.json(analytics);
+}));
+
+/**
+ * GET /api/analytics/quick/clients
+ * Quick client analytics
+ */
+router.get('/quick/clients', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const analytics = await analyticsService.getClientAnalytics();
+  res.json(analytics);
+}));
+
+/**
+ * GET /api/analytics/quick/team
+ * Quick team performance analytics
+ */
+router.get('/quick/team', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const { days = '30' } = req.query;
+  const analytics = await analyticsService.getTeamAnalytics(parseInt(days as string, 10));
+  res.json(analytics);
+}));
+
+/**
+ * GET /api/analytics/report-runs
+ * Get report run history
+ */
+router.get('/report-runs', authenticateToken, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
+  const { reportId, limit = '50' } = req.query;
+  const runs = await analyticsService.getReportRuns(
+    reportId ? parseInt(reportId as string, 10) : undefined,
+    parseInt(limit as string, 10)
+  );
+  res.json({ runs });
+}));
 
 export default router;

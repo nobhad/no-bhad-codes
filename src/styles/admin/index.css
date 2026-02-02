@@ -17,6 +17,7 @@
 @import "../shared/portal-files.css";
 @import "../shared/portal-dropdown.css";
 @import "../shared/portal-badges.css";
+@import "../shared/portal-components.css";
 
 /* Portal layout and sidebar (shared with client portal) */
 @import "../client-portal/layout.css";
@@ -28,3 +29,7 @@
 @import "./analytics.css";
 @import "./project-detail.css";
 @import "./client-detail.css";
+@import "./tasks.css";
+@import "./leads-pipeline.css";
+@import "./files.css";
+@import "./proposals.css";

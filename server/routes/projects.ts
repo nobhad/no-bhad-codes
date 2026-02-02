@@ -17,6 +17,8 @@ import { emailService } from '../services/email-service.js';
 import { cache, invalidateCache } from '../middleware/cache.js';
 import { getUploadsSubdir, UPLOAD_DIRS, sanitizeFilename } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
+import { projectService } from '../services/project-service.js';
+import { fileService } from '../services/file-service.js';
 
 const router = express.Router();
 
@@ -201,8 +203,8 @@ router.get(
     // Get project messages
     const messages = await db.all(
       `
-    SELECT id, sender_role, sender_name, message, is_read, created_at
-    FROM messages 
+    SELECT id, sender_type, sender_name, message, is_read, created_at
+    FROM messages
     WHERE project_id = ?
     ORDER BY created_at ASC
   `,
@@ -674,7 +676,7 @@ router.get(
 
     const messages = await db.all(
       `
-    SELECT id, sender_role, sender_name, message, is_read, created_at
+    SELECT id, sender_type, sender_name, message, is_read, created_at
     FROM messages
     WHERE project_id = ?
     ORDER BY created_at ASC
@@ -736,7 +738,7 @@ router.post(
 
     const newMessage = await db.get(
       `
-    SELECT id, sender_role, sender_name, message, is_read, created_at
+    SELECT id, sender_type, sender_name, message, is_read, created_at
     FROM messages WHERE id = ?
   `,
       [result.lastID]
@@ -1212,7 +1214,7 @@ router.get(
     // Get recent messages (last 5)
     const recentMessages = await db.all(
       `
-    SELECT id, sender_role, sender_name, message, is_read, created_at
+    SELECT id, sender_type, sender_name, message, is_read, created_at
     FROM messages
     WHERE project_id = ?
     ORDER BY created_at DESC
@@ -1306,53 +1308,40 @@ router.get(
     // Start from top - template uses 0.6 inch from top
     let y = height - 43;
 
-    // === HEADER - Logo on left, business info next to it, CONTRACT title on right ===
+    // === HEADER - Title on left, logo and business info on right ===
     const logoPath = join(process.cwd(), 'public/images/avatar_pdf.png');
-    let textStartX = leftMargin;
-    const logoHeight = 75; // ~1 inch, 50% larger for better visibility
+    const logoHeight = 100; // ~1.4 inch for prominent branding
 
+    // CONTRACT title on left: 28pt
+    const titleText = 'CONTRACT';
+    page.drawText(titleText, {
+      x: leftMargin, y: y - 20, size: 28, font: helveticaBold, color: rgb(0.15, 0.15, 0.15)
+    });
+
+    // Logo and business info on right (logo left of text, text left-aligned)
+    let textStartX = rightMargin - 180;
     if (existsSync(logoPath)) {
       const logoBytes = readFileSync(logoPath);
       const logoImage = await pdfDoc.embedPng(logoBytes);
       const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
+      const logoX = rightMargin - logoWidth - 150;
       page.drawImage(logoImage, {
-        x: leftMargin,
-        y: y - logoHeight,
+        x: logoX,
+        y: y - logoHeight + 10,
         width: logoWidth,
         height: logoHeight
       });
-      textStartX = leftMargin + logoWidth + 18;
+      textStartX = logoX + logoWidth + 18;
     }
 
-    // Business name: 16pt Helvetica-Bold
-    page.drawText(BUSINESS_INFO.name, {
-      x: textStartX, y: y, size: 16, font: helveticaBold, color: rgb(0.1, 0.1, 0.1)
-    });
-    // Owner: 10pt - scaled spacing for 75pt logo
-    page.drawText(BUSINESS_INFO.owner, {
-      x: textStartX, y: y - 20, size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2)
-    });
-    // Tagline: 9pt
-    page.drawText(BUSINESS_INFO.tagline, {
-      x: textStartX, y: y - 36, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
-    });
-    // Email: 9pt
-    page.drawText(BUSINESS_INFO.email, {
-      x: textStartX, y: y - 50, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
-    });
-    // Website: 9pt
-    page.drawText(BUSINESS_INFO.website, {
-      x: textStartX, y: y - 64, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4)
-    });
+    // Business info (left-aligned, to right of logo)
+    page.drawText(BUSINESS_INFO.name, { x: textStartX, y: y - 11, size: 15, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
+    page.drawText(BUSINESS_INFO.owner, { x: textStartX, y: y - 34, size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2) });
+    page.drawText(BUSINESS_INFO.tagline, { x: textStartX, y: y - 54, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    page.drawText(BUSINESS_INFO.email, { x: textStartX, y: y - 70, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    page.drawText(BUSINESS_INFO.website, { x: textStartX, y: y - 86, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
 
-    // CONTRACT title: 28pt, right-aligned, vertically centered with logo
-    const titleText = 'CONTRACT';
-    const titleWidth = helveticaBold.widthOfTextAtSize(titleText, 28);
-    page.drawText(titleText, {
-      x: rightMargin - titleWidth, y: y - 25, size: 28, font: helveticaBold, color: rgb(0.15, 0.15, 0.15)
-    });
-
-    y -= 95; // Account for 75pt logo height
+    y -= 120; // Account for 100pt logo height
 
     // Divider line
     page.drawLine({
@@ -1711,82 +1700,44 @@ router.get(
     // Y position decreases as we go down the page
     let y = height - 43; // Start ~0.6 inch from top (matching template)
 
-    // Logo - 75pt (~1 inch), 50% larger for better visibility
-    const logoHeight = 75;
+    // === HEADER - Title on left, logo and business info on right ===
+    const logoHeight = 100;
     const logoPath = join(process.cwd(), 'public/images/avatar_pdf.png');
-    let textStartX = leftMargin;
 
-    if (existsSync(logoPath)) {
-      const logoBytes = readFileSync(logoPath);
-      const logoImage = await pdfDoc.embedPng(logoBytes);
-      // Calculate width to preserve original aspect ratio
-      const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
-      page.drawImage(logoImage, {
-        x: leftMargin,
-        y: y - logoHeight,
-        width: logoWidth,
-        height: logoHeight
-      });
-      textStartX = leftMargin + logoWidth + 18; // 0.25 inch gap after logo
-    }
-
-    // Business name: 16pt Helvetica-Bold
-    page.drawText(BUSINESS_INFO.name, {
-      x: textStartX,
-      y: y,
-      size: 16,
-      font: helveticaBold,
-      color: rgb(0.1, 0.1, 0.1)
-    });
-
-    // Owner name: 10pt - scaled spacing for 75pt logo
-    page.drawText(BUSINESS_INFO.owner, {
-      x: textStartX,
-      y: y - 20,
-      size: 10,
-      font: helvetica,
-      color: rgb(0.2, 0.2, 0.2)
-    });
-
-    // Tagline: 9pt
-    page.drawText(BUSINESS_INFO.tagline, {
-      x: textStartX,
-      y: y - 36,
-      size: 9,
-      font: helvetica,
-      color: rgb(0.4, 0.4, 0.4)
-    });
-
-    // Email: 9pt
-    page.drawText(BUSINESS_INFO.email, {
-      x: textStartX,
-      y: y - 50,
-      size: 9,
-      font: helvetica,
-      color: rgb(0.4, 0.4, 0.4)
-    });
-
-    // Website: 9pt
-    page.drawText(BUSINESS_INFO.website, {
-      x: textStartX,
-      y: y - 64,
-      size: 9,
-      font: helvetica,
-      color: rgb(0.4, 0.4, 0.4)
-    });
-
-    // Document title on right side: 28pt, vertically centered with logo
+    // INTAKE title on left: 28pt
     const titleText = 'INTAKE';
-    const titleWidth = helveticaBold.widthOfTextAtSize(titleText, 28);
     page.drawText(titleText, {
-      x: rightMargin - titleWidth,
-      y: y - 25,
+      x: leftMargin,
+      y: y - 20,
       size: 28,
       font: helveticaBold,
       color: rgb(0.15, 0.15, 0.15)
     });
 
-    y -= 95; // Account for 75pt logo height
+    // Logo and business info on right (logo left of text, text left-aligned)
+    let textStartX = rightMargin - 180;
+    if (existsSync(logoPath)) {
+      const logoBytes = readFileSync(logoPath);
+      const logoImage = await pdfDoc.embedPng(logoBytes);
+      const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
+      const logoX = rightMargin - logoWidth - 150;
+      page.drawImage(logoImage, {
+        x: logoX,
+        y: y - logoHeight + 10,
+        width: logoWidth,
+        height: logoHeight
+      });
+      textStartX = logoX + logoWidth + 18;
+    }
+
+    // Business info (left-aligned, to right of logo)
+    page.drawText(BUSINESS_INFO.name, { x: textStartX, y: y - 11, size: 15, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
+    page.drawText(BUSINESS_INFO.owner, { x: textStartX, y: y - 34, size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2) });
+    page.drawText(BUSINESS_INFO.tagline, { x: textStartX, y: y - 54, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    page.drawText(BUSINESS_INFO.email, { x: textStartX, y: y - 70, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+    page.drawText(BUSINESS_INFO.website, { x: textStartX, y: y - 86, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+
+    y -= 120; // Account for 100pt logo height
 
     // === DIVIDER LINE ===
     page.drawLine({
@@ -2009,6 +1960,1081 @@ router.get(
     res.setHeader('Content-Disposition', `inline; filename="nobhadcodes_intake_${safeClientName}.pdf"`);
     res.setHeader('Content-Length', pdfBytes.length);
     res.send(Buffer.from(pdfBytes));
+  })
+);
+
+// ===================================
+// TASK MANAGEMENT ENDPOINTS
+// ===================================
+
+// Get tasks for a project
+router.get(
+  '/:id/tasks',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    // Check access
+    let project;
+    if (req.user!.type === 'admin') {
+      project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
+    } else {
+      project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
+        projectId,
+        req.user!.id
+      ]);
+    }
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found', code: 'PROJECT_NOT_FOUND' });
+    }
+
+    const { status, assignedTo, milestoneId, includeSubtasks } = req.query;
+
+    type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'blocked';
+    const validStatuses: TaskStatus[] = ['pending', 'in_progress', 'completed', 'cancelled', 'blocked'];
+    const statusFilter = status && validStatuses.includes(status as TaskStatus)
+      ? status as TaskStatus
+      : undefined;
+
+    const tasks = await projectService.getTasks(projectId, {
+      status: statusFilter,
+      assignedTo: assignedTo as string | undefined,
+      milestoneId: milestoneId ? parseInt(milestoneId as string) : undefined,
+      includeSubtasks: includeSubtasks === 'true'
+    });
+
+    res.json({ tasks });
+  })
+);
+
+// Create task
+router.post(
+  '/:id/tasks',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found', code: 'PROJECT_NOT_FOUND' });
+    }
+
+    const task = await projectService.createTask(projectId, req.body);
+    res.status(201).json({ message: 'Task created successfully', task });
+  })
+);
+
+// Get single task
+router.get(
+  '/tasks/:taskId',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const taskId = parseInt(req.params.taskId);
+    const task = await projectService.getTask(taskId);
+
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found', code: 'TASK_NOT_FOUND' });
+    }
+
+    // Check access
+    const db = getDatabase();
+    if (req.user!.type !== 'admin') {
+      const project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
+        task.projectId,
+        req.user!.id
+      ]);
+      if (!project) {
+        return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+      }
+    }
+
+    res.json({ task });
+  })
+);
+
+// Update task
+router.put(
+  '/tasks/:taskId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const taskId = parseInt(req.params.taskId);
+    const task = await projectService.updateTask(taskId, req.body);
+    res.json({ message: 'Task updated successfully', task });
+  })
+);
+
+// Delete task
+router.delete(
+  '/tasks/:taskId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const taskId = parseInt(req.params.taskId);
+    await projectService.deleteTask(taskId);
+    res.json({ message: 'Task deleted successfully' });
+  })
+);
+
+// Complete task
+router.post(
+  '/tasks/:taskId/complete',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const taskId = parseInt(req.params.taskId);
+    const task = await projectService.completeTask(taskId);
+    res.json({ message: 'Task completed successfully', task });
+  })
+);
+
+// Move task
+router.post(
+  '/tasks/:taskId/move',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const taskId = parseInt(req.params.taskId);
+    const { position, milestoneId } = req.body;
+
+    await projectService.moveTask(taskId, position, milestoneId);
+    res.json({ message: 'Task moved successfully' });
+  })
+);
+
+// ===================================
+// TASK DEPENDENCIES ENDPOINTS
+// ===================================
+
+// Add dependency
+router.post(
+  '/tasks/:taskId/dependencies',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const taskId = parseInt(req.params.taskId);
+    const { dependsOnTaskId, type } = req.body;
+
+    if (!dependsOnTaskId) {
+      return res.status(400).json({ error: 'dependsOnTaskId is required', code: 'MISSING_DEPENDENCY' });
+    }
+
+    const dependency = await projectService.addDependency(taskId, dependsOnTaskId, type);
+    res.status(201).json({ message: 'Dependency added successfully', dependency });
+  })
+);
+
+// Remove dependency
+router.delete(
+  '/tasks/:taskId/dependencies/:dependsOnTaskId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const taskId = parseInt(req.params.taskId);
+    const dependsOnTaskId = parseInt(req.params.dependsOnTaskId);
+
+    await projectService.removeDependency(taskId, dependsOnTaskId);
+    res.json({ message: 'Dependency removed successfully' });
+  })
+);
+
+// Get blocked tasks for a project
+router.get(
+  '/:id/tasks/blocked',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const tasks = await projectService.getBlockedTasks(projectId);
+    res.json({ tasks });
+  })
+);
+
+// ===================================
+// TASK COMMENTS ENDPOINTS
+// ===================================
+
+// Get comments for a task
+router.get(
+  '/tasks/:taskId/comments',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const taskId = parseInt(req.params.taskId);
+    const comments = await projectService.getTaskComments(taskId);
+    res.json({ comments });
+  })
+);
+
+// Add comment to task
+router.post(
+  '/tasks/:taskId/comments',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const taskId = parseInt(req.params.taskId);
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ error: 'Comment content is required', code: 'MISSING_CONTENT' });
+    }
+
+    const comment = await projectService.addTaskComment(
+      taskId,
+      req.user!.email,
+      content
+    );
+    res.status(201).json({ message: 'Comment added successfully', comment });
+  })
+);
+
+// Delete comment
+router.delete(
+  '/tasks/comments/:commentId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const commentId = parseInt(req.params.commentId);
+    await projectService.deleteTaskComment(commentId);
+    res.json({ message: 'Comment deleted successfully' });
+  })
+);
+
+// ===================================
+// TASK CHECKLIST ENDPOINTS
+// ===================================
+
+// Add checklist item
+router.post(
+  '/tasks/:taskId/checklist',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const taskId = parseInt(req.params.taskId);
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ error: 'Checklist item content is required', code: 'MISSING_CONTENT' });
+    }
+
+    const item = await projectService.addChecklistItem(taskId, content);
+    res.status(201).json({ message: 'Checklist item added successfully', item });
+  })
+);
+
+// Toggle checklist item
+router.post(
+  '/tasks/checklist/:itemId/toggle',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const itemId = parseInt(req.params.itemId);
+    const item = await projectService.toggleChecklistItem(itemId);
+    res.json({ message: 'Checklist item toggled', item });
+  })
+);
+
+// Delete checklist item
+router.delete(
+  '/tasks/checklist/:itemId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const itemId = parseInt(req.params.itemId);
+    await projectService.deleteChecklistItem(itemId);
+    res.json({ message: 'Checklist item deleted successfully' });
+  })
+);
+
+// ===================================
+// TIME TRACKING ENDPOINTS
+// ===================================
+
+// Get time entries for a project
+router.get(
+  '/:id/time-entries',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    // Check access
+    let project;
+    if (req.user!.type === 'admin') {
+      project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
+    } else {
+      project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
+        projectId,
+        req.user!.id
+      ]);
+    }
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found', code: 'PROJECT_NOT_FOUND' });
+    }
+
+    const { startDate, endDate, userName, taskId } = req.query;
+
+    const entries = await projectService.getTimeEntries(projectId, {
+      startDate: startDate as string | undefined,
+      endDate: endDate as string | undefined,
+      userName: userName as string | undefined,
+      taskId: taskId ? parseInt(taskId as string) : undefined
+    });
+
+    res.json({ entries });
+  })
+);
+
+// Log time entry
+router.post(
+  '/:id/time-entries',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found', code: 'PROJECT_NOT_FOUND' });
+    }
+
+    const { userName, hours, date } = req.body;
+    if (!userName || !hours || !date) {
+      return res.status(400).json({
+        error: 'userName, hours, and date are required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    const entry = await projectService.logTime(projectId, req.body);
+    res.status(201).json({ message: 'Time logged successfully', entry });
+  })
+);
+
+// Update time entry
+router.put(
+  '/time-entries/:entryId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const entryId = parseInt(req.params.entryId);
+    const entry = await projectService.updateTimeEntry(entryId, req.body);
+    res.json({ message: 'Time entry updated successfully', entry });
+  })
+);
+
+// Delete time entry
+router.delete(
+  '/time-entries/:entryId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const entryId = parseInt(req.params.entryId);
+    await projectService.deleteTimeEntry(entryId);
+    res.json({ message: 'Time entry deleted successfully' });
+  })
+);
+
+// Get project time statistics
+router.get(
+  '/:id/time-stats',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const stats = await projectService.getProjectTimeStats(projectId);
+    res.json({ stats });
+  })
+);
+
+// Get team time report
+router.get(
+  '/reports/team-time',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        error: 'startDate and endDate are required',
+        code: 'MISSING_DATE_RANGE'
+      });
+    }
+
+    const report = await projectService.getTeamTimeReport(
+      startDate as string,
+      endDate as string
+    );
+    res.json({ report });
+  })
+);
+
+// ===================================
+// TEMPLATE ENDPOINTS
+// ===================================
+
+// Get all templates
+router.get(
+  '/templates',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { projectType } = req.query;
+    const templates = await projectService.getTemplates(projectType as string | undefined);
+    res.json({ templates });
+  })
+);
+
+// Get single template
+router.get(
+  '/templates/:templateId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const templateId = parseInt(req.params.templateId);
+    const template = await projectService.getTemplate(templateId);
+
+    if (!template) {
+      return res.status(404).json({ error: 'Template not found', code: 'TEMPLATE_NOT_FOUND' });
+    }
+
+    res.json({ template });
+  })
+);
+
+// Create template
+router.post(
+  '/templates',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { name } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: 'Template name is required', code: 'MISSING_NAME' });
+    }
+
+    const template = await projectService.createTemplate(req.body);
+    res.status(201).json({ message: 'Template created successfully', template });
+  })
+);
+
+// Create project from template
+router.post(
+  '/from-template',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { templateId, clientId, projectName, startDate } = req.body;
+
+    if (!templateId || !clientId || !projectName || !startDate) {
+      return res.status(400).json({
+        error: 'templateId, clientId, projectName, and startDate are required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    const result = await projectService.createProjectFromTemplate(
+      templateId,
+      clientId,
+      projectName,
+      startDate
+    );
+
+    res.status(201).json({
+      message: 'Project created from template successfully',
+      projectId: result.projectId,
+      milestoneIds: result.milestoneIds,
+      taskIds: result.taskIds
+    });
+  })
+);
+
+// ===================================
+// PROJECT HEALTH ENDPOINTS
+// ===================================
+
+// Get project health
+router.get(
+  '/:id/health',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const health = await projectService.calculateProjectHealth(projectId);
+    res.json({ health });
+  })
+);
+
+// Get project burndown
+router.get(
+  '/:id/burndown',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const burndown = await projectService.getProjectBurndown(projectId);
+    res.json({ burndown });
+  })
+);
+
+// Get project velocity
+router.get(
+  '/:id/velocity',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const velocity = await projectService.getProjectVelocity(projectId);
+    res.json({ velocity });
+  })
+);
+
+// ===================================
+// PROJECT TAGS ENDPOINTS
+// ===================================
+
+// Get tags for a project
+router.get(
+  '/:id/tags',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const tags = await projectService.getProjectTags(projectId);
+    res.json({ tags });
+  })
+);
+
+// Add tag to project
+router.post(
+  '/:id/tags/:tagId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const tagId = parseInt(req.params.tagId);
+
+    await projectService.addTagToProject(projectId, tagId);
+    res.status(201).json({ message: 'Tag added to project successfully' });
+  })
+);
+
+// Remove tag from project
+router.delete(
+  '/:id/tags/:tagId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const tagId = parseInt(req.params.tagId);
+
+    await projectService.removeTagFromProject(projectId, tagId);
+    res.json({ message: 'Tag removed from project successfully' });
+  })
+);
+
+// ===================================
+// PROJECT ARCHIVE ENDPOINTS
+// ===================================
+
+// Archive project
+router.post(
+  '/:id/archive',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    await projectService.archiveProject(projectId);
+    res.json({ message: 'Project archived successfully' });
+  })
+);
+
+// Unarchive project
+router.post(
+  '/:id/unarchive',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    await projectService.unarchiveProject(projectId);
+    res.json({ message: 'Project unarchived successfully' });
+  })
+);
+
+// ===================================
+// FILE MANAGEMENT ENHANCEMENT ENDPOINTS
+// ===================================
+
+// ---------------
+// FILE VERSIONS
+// ---------------
+
+// Get versions of a file
+router.get(
+  '/files/:fileId/versions',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const versions = await fileService.getVersions(fileId);
+    res.json({ versions });
+  })
+);
+
+// Upload new version
+router.post(
+  '/files/:fileId/versions',
+  authenticateToken,
+  upload.single('file'),
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ error: 'No file uploaded', code: 'NO_FILE' });
+    }
+
+    const { comment } = req.body;
+    const version = await fileService.uploadNewVersion(fileId, {
+      filename: file.filename,
+      original_filename: file.originalname,
+      file_path: file.path,
+      file_size: file.size,
+      mime_type: file.mimetype,
+      uploaded_by: req.user!.email,
+      comment
+    });
+
+    res.status(201).json({ version });
+  })
+);
+
+// Restore a previous version
+router.post(
+  '/files/:fileId/versions/:versionId/restore',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const versionId = parseInt(req.params.versionId);
+    const version = await fileService.restoreVersion(fileId, versionId);
+    res.json({ message: 'Version restored', version });
+  })
+);
+
+// ---------------
+// FOLDERS
+// ---------------
+
+// Get folders for a project
+router.get(
+  '/:id/folders',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+    const parentId = req.query.parent_id ? parseInt(req.query.parent_id as string) : undefined;
+    const folders = await fileService.getFolders(projectId, parentId);
+    res.json({ folders });
+  })
+);
+
+// Create a folder
+router.post(
+  '/:id/folders',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+    const { name, description, parent_folder_id, color, icon } = req.body;
+
+    if (!name || name.trim().length === 0) {
+      return res.status(400).json({ error: 'Folder name is required', code: 'MISSING_NAME' });
+    }
+
+    const folder = await fileService.createFolder(projectId, {
+      name: name.trim(),
+      description,
+      parent_folder_id,
+      color,
+      icon,
+      created_by: req.user!.email
+    });
+
+    res.status(201).json({ folder });
+  })
+);
+
+// Update a folder
+router.put(
+  '/folders/:folderId',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const folderId = parseInt(req.params.folderId);
+    const { name, description, color, icon, sort_order } = req.body;
+    const folder = await fileService.updateFolder(folderId, { name, description, color, icon, sort_order });
+    res.json({ folder });
+  })
+);
+
+// Delete a folder
+router.delete(
+  '/folders/:folderId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const folderId = parseInt(req.params.folderId);
+    const moveFilesTo = req.query.move_files_to ? parseInt(req.query.move_files_to as string) : undefined;
+    await fileService.deleteFolder(folderId, moveFilesTo);
+    res.json({ message: 'Folder deleted' });
+  })
+);
+
+// Move a file to a folder
+router.post(
+  '/files/:fileId/move',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const { folder_id } = req.body;
+    await fileService.moveFile(fileId, folder_id || null);
+    res.json({ message: 'File moved' });
+  })
+);
+
+// Move a folder
+router.post(
+  '/folders/:folderId/move',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const folderId = parseInt(req.params.folderId);
+    const { parent_folder_id } = req.body;
+    await fileService.moveFolder(folderId, parent_folder_id || null);
+    res.json({ message: 'Folder moved' });
+  })
+);
+
+// ---------------
+// FILE TAGS
+// ---------------
+
+// Get tags for a file
+router.get(
+  '/files/:fileId/tags',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const tags = await fileService.getFileTags(fileId);
+    res.json({ tags });
+  })
+);
+
+// Add tag to a file
+router.post(
+  '/files/:fileId/tags/:tagId',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const tagId = parseInt(req.params.tagId);
+    await fileService.addTag(fileId, tagId);
+    res.json({ message: 'Tag added' });
+  })
+);
+
+// Remove tag from a file
+router.delete(
+  '/files/:fileId/tags/:tagId',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const tagId = parseInt(req.params.tagId);
+    await fileService.removeTag(fileId, tagId);
+    res.json({ message: 'Tag removed' });
+  })
+);
+
+// Get files by tag
+router.get(
+  '/:id/files/by-tag/:tagId',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+    const tagId = parseInt(req.params.tagId);
+    const files = await fileService.getFilesByTag(projectId, tagId);
+    res.json({ files });
+  })
+);
+
+// ---------------
+// ACCESS TRACKING
+// ---------------
+
+// Log file access (called when file is viewed/downloaded)
+router.post(
+  '/files/:fileId/access',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const { access_type } = req.body;
+
+    if (!access_type || !['view', 'download', 'preview'].includes(access_type)) {
+      return res.status(400).json({ error: 'Invalid access type', code: 'INVALID_ACCESS_TYPE' });
+    }
+
+    await fileService.logAccess(
+      fileId,
+      req.user!.email,
+      req.user!.type as 'admin' | 'client',
+      access_type,
+      req.ip,
+      req.get('User-Agent')
+    );
+    res.json({ message: 'Access logged' });
+  })
+);
+
+// Get access log for a file (admin only)
+router.get(
+  '/files/:fileId/access-log',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+    const log = await fileService.getAccessLog(fileId, limit);
+    res.json({ access_log: log });
+  })
+);
+
+// Get access stats for a file
+router.get(
+  '/files/:fileId/access-stats',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const stats = await fileService.getAccessStats(fileId);
+    res.json({ stats });
+  })
+);
+
+// ---------------
+// FILE COMMENTS
+// ---------------
+
+// Get comments for a file
+router.get(
+  '/files/:fileId/comments',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const includeInternal = req.user!.type === 'admin';
+    const comments = await fileService.getComments(fileId, includeInternal);
+    res.json({ comments });
+  })
+);
+
+// Add comment to a file
+router.post(
+  '/files/:fileId/comments',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const { content, is_internal, parent_comment_id, author_name } = req.body;
+
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ error: 'Comment content is required', code: 'MISSING_CONTENT' });
+    }
+
+    const comment = await fileService.addComment(
+      fileId,
+      req.user!.email,
+      req.user!.type as 'admin' | 'client',
+      content.trim(),
+      author_name || req.user!.email,
+      is_internal && req.user!.type === 'admin',
+      parent_comment_id
+    );
+
+    res.status(201).json({ comment });
+  })
+);
+
+// Delete a comment
+router.delete(
+  '/files/comments/:commentId',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const commentId = parseInt(req.params.commentId);
+    await fileService.deleteComment(commentId);
+    res.json({ message: 'Comment deleted' });
+  })
+);
+
+// ---------------
+// ARCHIVING & EXPIRATION
+// ---------------
+
+// Archive a file
+router.post(
+  '/files/:fileId/archive',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    await fileService.archiveFile(fileId, req.user!.email);
+    res.json({ message: 'File archived' });
+  })
+);
+
+// Restore a file from archive
+router.post(
+  '/files/:fileId/restore',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    await fileService.restoreFile(fileId);
+    res.json({ message: 'File restored' });
+  })
+);
+
+// Get archived files for a project
+router.get(
+  '/:id/files/archived',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+    const files = await fileService.getArchivedFiles(projectId);
+    res.json({ files });
+  })
+);
+
+// Set file expiration
+router.put(
+  '/files/:fileId/expiration',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const { expires_at } = req.body;
+    await fileService.setExpiration(fileId, expires_at || null);
+    res.json({ message: 'Expiration set' });
+  })
+);
+
+// Get files expiring soon
+router.get(
+  '/files/expiring-soon',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const daysAhead = req.query.days ? parseInt(req.query.days as string) : 7;
+    const files = await fileService.getExpiringFiles(daysAhead);
+    res.json({ files });
+  })
+);
+
+// Process expired files (admin batch operation)
+router.post(
+  '/files/process-expired',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const count = await fileService.processExpiredFiles();
+    res.json({ message: `Processed ${count} expired files`, count });
+  })
+);
+
+// ---------------
+// FILE LOCKING
+// ---------------
+
+// Lock a file
+router.post(
+  '/files/:fileId/lock',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    await fileService.lockFile(fileId, req.user!.email);
+    res.json({ message: 'File locked' });
+  })
+);
+
+// Unlock a file
+router.post(
+  '/files/:fileId/unlock',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const isAdmin = req.user!.type === 'admin';
+    await fileService.unlockFile(fileId, req.user!.email, isAdmin);
+    res.json({ message: 'File unlocked' });
+  })
+);
+
+// ---------------
+// FILE CATEGORY
+// ---------------
+
+// Set file category
+router.put(
+  '/files/:fileId/category',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const { category } = req.body;
+
+    const validCategories = ['general', 'deliverable', 'source', 'asset', 'document', 'contract', 'invoice'];
+    if (!category || !validCategories.includes(category)) {
+      return res.status(400).json({ error: 'Invalid category', code: 'INVALID_CATEGORY' });
+    }
+
+    await fileService.setCategory(fileId, category);
+    res.json({ message: 'Category set' });
+  })
+);
+
+// Get files by category
+router.get(
+  '/:id/files/by-category/:category',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+    const category = req.params.category as 'general' | 'deliverable' | 'source' | 'asset' | 'document' | 'contract' | 'invoice';
+    const files = await fileService.getFilesByCategory(projectId, category);
+    res.json({ files });
+  })
+);
+
+// ---------------
+// FILE STATISTICS & SEARCH
+// ---------------
+
+// Get file statistics for a project
+router.get(
+  '/:id/files/stats',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+    const stats = await fileService.getFileStats(projectId);
+    res.json({ stats });
+  })
+);
+
+// Search files
+router.get(
+  '/:id/files/search',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+    const query = req.query.q as string;
+
+    if (!query || query.trim().length === 0) {
+      return res.status(400).json({ error: 'Search query is required', code: 'MISSING_QUERY' });
+    }
+
+    const files = await fileService.searchFiles(projectId, query.trim(), {
+      folder_id: req.query.folder_id ? parseInt(req.query.folder_id as string) : undefined,
+      category: req.query.category as any,
+      include_archived: req.query.include_archived === 'true',
+      limit: req.query.limit ? parseInt(req.query.limit as string) : 50
+    });
+
+    res.json({ files, count: files.length });
   })
 );
 

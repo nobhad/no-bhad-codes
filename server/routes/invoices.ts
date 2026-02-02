@@ -13,10 +13,24 @@ import { join } from 'path';
 import { existsSync, readFileSync } from 'fs';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
-import { InvoiceService, InvoiceCreateData, InvoiceLineItem, Invoice } from '../services/invoice-service.js';
+import {
+  InvoiceService,
+  InvoiceCreateData,
+  InvoiceLineItem,
+  Invoice,
+  InvoiceCredit,
+  DepositSummary,
+  PaymentPlanTemplate,
+  ScheduledInvoice,
+  RecurringInvoice,
+  InvoiceReminder,
+  PaymentTermsPreset,
+  InvoicePayment,
+  InvoiceAgingReport
+} from '../services/invoice-service.js';
 import { emailService } from '../services/email-service.js';
 import { getDatabase } from '../database/init.js';
-import { getString, getNumber } from '../database/row-helpers.js';
+import { getString } from '../database/row-helpers.js';
 
 // Business info from environment variables
 const BUSINESS_INFO = {
@@ -69,7 +83,133 @@ function toSnakeCaseInvoice(invoice: Invoice): Record<string, unknown> {
     services_description: invoice.servicesDescription,
     deliverables: invoice.deliverables,
     bill_to_name: invoice.billToName,
-    bill_to_email: invoice.billToEmail
+    bill_to_email: invoice.billToEmail,
+    // Deposit invoice fields
+    invoice_type: invoice.invoiceType,
+    deposit_for_project_id: invoice.depositForProjectId,
+    deposit_percentage: invoice.depositPercentage,
+    // Advanced features - Tax
+    subtotal: invoice.subtotal,
+    tax_rate: invoice.taxRate,
+    tax_amount: invoice.taxAmount,
+    // Advanced features - Discount
+    discount_type: invoice.discountType,
+    discount_value: invoice.discountValue,
+    discount_amount: invoice.discountAmount,
+    // Advanced features - Late fees
+    late_fee_rate: invoice.lateFeeRate,
+    late_fee_type: invoice.lateFeeType,
+    late_fee_amount: invoice.lateFeeAmount,
+    late_fee_applied_at: invoice.lateFeeAppliedAt,
+    // Advanced features - Payment terms
+    payment_terms_id: invoice.paymentTermsId,
+    payment_terms_name: invoice.paymentTermsName,
+    // Advanced features - Internal notes
+    internal_notes: invoice.internalNotes,
+    // Advanced features - Invoice number customization
+    invoice_prefix: invoice.invoicePrefix,
+    invoice_sequence: invoice.invoiceSequence
+  };
+}
+
+/**
+ * Transform InvoiceCredit to snake_case for frontend
+ */
+function toSnakeCaseCredit(credit: InvoiceCredit): Record<string, unknown> {
+  return {
+    id: credit.id,
+    invoice_id: credit.invoiceId,
+    deposit_invoice_id: credit.depositInvoiceId,
+    deposit_invoice_number: credit.depositInvoiceNumber,
+    amount: credit.amount,
+    applied_at: credit.appliedAt,
+    applied_by: credit.appliedBy
+  };
+}
+
+/**
+ * Transform DepositSummary to snake_case for frontend
+ */
+function toSnakeCaseDeposit(deposit: DepositSummary): Record<string, unknown> {
+  return {
+    invoice_id: deposit.invoiceId,
+    invoice_number: deposit.invoiceNumber,
+    total_amount: deposit.totalAmount,
+    amount_applied: deposit.amountApplied,
+    available_amount: deposit.availableAmount,
+    paid_date: deposit.paidDate
+  };
+}
+
+/**
+ * Transform PaymentPlanTemplate to snake_case for frontend
+ */
+function toSnakeCasePaymentPlan(plan: PaymentPlanTemplate): Record<string, unknown> {
+  return {
+    id: plan.id,
+    name: plan.name,
+    description: plan.description,
+    payments: plan.payments,
+    is_default: plan.isDefault,
+    created_at: plan.createdAt
+  };
+}
+
+/**
+ * Transform ScheduledInvoice to snake_case for frontend
+ */
+function toSnakeCaseScheduledInvoice(scheduled: ScheduledInvoice): Record<string, unknown> {
+  return {
+    id: scheduled.id,
+    project_id: scheduled.projectId,
+    client_id: scheduled.clientId,
+    scheduled_date: scheduled.scheduledDate,
+    trigger_type: scheduled.triggerType,
+    trigger_milestone_id: scheduled.triggerMilestoneId,
+    line_items: scheduled.lineItems,
+    notes: scheduled.notes,
+    terms: scheduled.terms,
+    status: scheduled.status,
+    generated_invoice_id: scheduled.generatedInvoiceId,
+    created_at: scheduled.createdAt
+  };
+}
+
+/**
+ * Transform RecurringInvoice to snake_case for frontend
+ */
+function toSnakeCaseRecurringInvoice(recurring: RecurringInvoice): Record<string, unknown> {
+  return {
+    id: recurring.id,
+    project_id: recurring.projectId,
+    client_id: recurring.clientId,
+    frequency: recurring.frequency,
+    day_of_month: recurring.dayOfMonth,
+    day_of_week: recurring.dayOfWeek,
+    line_items: recurring.lineItems,
+    notes: recurring.notes,
+    terms: recurring.terms,
+    start_date: recurring.startDate,
+    end_date: recurring.endDate,
+    next_generation_date: recurring.nextGenerationDate,
+    last_generated_at: recurring.lastGeneratedAt,
+    is_active: recurring.isActive,
+    created_at: recurring.createdAt
+  };
+}
+
+/**
+ * Transform InvoiceReminder to snake_case for frontend
+ */
+function toSnakeCaseReminder(reminder: InvoiceReminder): Record<string, unknown> {
+  return {
+    id: reminder.id,
+    invoice_id: reminder.invoiceId,
+    reminder_type: reminder.reminderType,
+    scheduled_date: reminder.scheduledDate,
+    sent_at: reminder.sentAt,
+    status: reminder.status,
+    created_at: reminder.createdAt
   };
 }
 
@@ -331,6 +471,15 @@ interface InvoicePdfData {
   total: number;
   notes?: string;
   terms?: string;
+  // Deposit invoice fields
+  isDeposit?: boolean;
+  depositPercentage?: number;
+  // Credits applied to this invoice
+  credits?: Array<{
+    depositInvoiceNumber: string;
+    amount: number;
+  }>;
+  totalCredits?: number;
 }
 
 /**
@@ -359,82 +508,44 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
   // Start from top - template uses 0.6 inch from top = 43.2pt
   let y = height - 43;
 
-  // === HEADER - Logo on left, business info next to it, INVOICE title on right ===
+  // === HEADER - Title on left, logo and business info on right ===
   const logoPath = join(process.cwd(), 'public/images/avatar_pdf.png');
-  let textStartX = leftMargin;
-  const logoHeight = 75; // ~1 inch, 50% larger than template baseline
+  const logoHeight = 100; // ~1.4 inch for prominent branding
 
-  if (existsSync(logoPath)) {
-    const logoBytes = readFileSync(logoPath);
-    const logoImage = await pdfDoc.embedPng(logoBytes);
-    // Preserve aspect ratio
-    const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
-    page.drawImage(logoImage, {
-      x: leftMargin,
-      y: y - logoHeight,
-      width: logoWidth,
-      height: logoHeight
-    });
-    textStartX = leftMargin + logoWidth + 18; // 0.25 inch gap
-  }
-
-  // Business name: 16pt Helvetica-Bold
-  page.drawText(BUSINESS_INFO.name, {
-    x: textStartX,
-    y: y,
-    size: 16,
-    font: helveticaBold,
-    color: rgb(0.1, 0.1, 0.1)
-  });
-
-  // Owner name: 10pt - scaled spacing for 75pt logo
-  page.drawText(BUSINESS_INFO.owner, {
-    x: textStartX,
-    y: y - 20,
-    size: 10,
-    font: helvetica,
-    color: rgb(0.2, 0.2, 0.2)
-  });
-
-  // Tagline: 9pt
-  page.drawText(BUSINESS_INFO.tagline, {
-    x: textStartX,
-    y: y - 36,
-    size: 9,
-    font: helvetica,
-    color: rgb(0.4, 0.4, 0.4)
-  });
-
-  // Email: 9pt
-  page.drawText(BUSINESS_INFO.email, {
-    x: textStartX,
-    y: y - 50,
-    size: 9,
-    font: helvetica,
-    color: rgb(0.4, 0.4, 0.4)
-  });
-
-  // Website: 9pt
-  page.drawText(BUSINESS_INFO.website, {
-    x: textStartX,
-    y: y - 64,
-    size: 9,
-    font: helvetica,
-    color: rgb(0.4, 0.4, 0.4)
-  });
-
-  // INVOICE title on right: 28pt, vertically centered with logo
-  const titleText = 'INVOICE';
-  const titleWidth = helveticaBold.widthOfTextAtSize(titleText, 28);
+  // INVOICE title on left: 28pt (or DEPOSIT INVOICE for deposits)
+  const titleText = data.isDeposit ? 'DEPOSIT INVOICE' : 'INVOICE';
   page.drawText(titleText, {
-    x: rightMargin - titleWidth,
-    y: y - 25,
-    size: 28,
+    x: leftMargin,
+    y: y - 20,
+    size: data.isDeposit ? 22 : 28,
     font: helveticaBold,
     color: rgb(0.15, 0.15, 0.15)
   });
 
-  y -= 95; // Account for 75pt logo height
+  // Logo and business info on right (logo left of text, text left-aligned)
+  let textStartX = rightMargin - 180; // Default position for text
+  if (existsSync(logoPath)) {
+    const logoBytes = readFileSync(logoPath);
+    const logoImage = await pdfDoc.embedPng(logoBytes);
+    const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
+    const logoX = rightMargin - logoWidth - 150; // Logo position
+    page.drawImage(logoImage, {
+      x: logoX,
+      y: y - logoHeight + 10,
+      width: logoWidth,
+      height: logoHeight
+    });
+    textStartX = logoX + logoWidth + 18; // Text starts after logo + gap
+  }
+
+  // Business info (left-aligned, to right of logo)
+  page.drawText(BUSINESS_INFO.name, { x: textStartX, y: y - 11, size: 15, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
+  page.drawText(BUSINESS_INFO.owner, { x: textStartX, y: y - 34, size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2) });
+  page.drawText(BUSINESS_INFO.tagline, { x: textStartX, y: y - 54, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+  page.drawText(BUSINESS_INFO.email, { x: textStartX, y: y - 70, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+  page.drawText(BUSINESS_INFO.website, { x: textStartX, y: y - 86, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+
+  y -= 120; // Account for 100pt logo height
 
   // === DIVIDER LINE ===
   page.drawLine({
@@ -563,8 +674,8 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
 
   // Line items
   for (const item of data.lineItems) {
-    // Description (bold)
-    page.drawText(item.description, { x: leftMargin, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
+    // Description (bold) - 7pt padding to align with header
+    page.drawText(item.description, { x: leftMargin + 7, y: y, size: 10, font: helveticaBold, color: rgb(0, 0, 0) });
 
     // Quantity
     page.drawText(String(item.quantity), { x: rightMargin - 144, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
@@ -580,22 +691,22 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
 
     y -= 14;
 
-    // Details (bullet points)
+    // Details (bullet points) - indented from description
     if (item.details && item.details.length > 0) {
       for (const detail of item.details) {
-        page.drawText(`• ${detail}`, { x: leftMargin + 11, y: y, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+        page.drawText(`• ${detail}`, { x: leftMargin + 18, y: y, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
         y -= 11;
       }
       y -= 7;
     }
   }
 
-  y -= 14;
-
   // === TOTALS SECTION ===
   const totalsX = rightMargin - 144;
 
-  // Line above totals
+  y -= 24; // Space above subtotal section
+
+  // Line above subtotal (well above text)
   page.drawLine({
     start: { x: totalsX - 14, y: y + 18 },
     end: { x: rightMargin, y: y + 18 },
@@ -608,45 +719,68 @@ async function generateInvoicePdf(data: InvoicePdfData): Promise<Uint8Array> {
   const subtotalText = `$${data.subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
   const subtotalW = helvetica.widthOfTextAtSize(subtotalText, 10);
   page.drawText(subtotalText, { x: rightMargin - subtotalW, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-  y -= 14;
 
   // Discount (if any)
   if (data.discount && data.discount > 0) {
+    y -= 16;
     page.drawText('Discount:', { x: totalsX, y: y, size: 10, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
     const discountText = `-$${data.discount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
     const discountW = helvetica.widthOfTextAtSize(discountText, 10);
     page.drawText(discountText, { x: rightMargin - discountW, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-    y -= 14;
   }
 
   // Tax (if any)
   if (data.tax && data.tax > 0) {
+    y -= 16;
     page.drawText('Tax:', { x: totalsX, y: y, size: 10, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
     const taxText = `$${data.tax.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
     const taxW = helvetica.widthOfTextAtSize(taxText, 10);
     page.drawText(taxText, { x: rightMargin - taxW, y: y, size: 10, font: helvetica, color: rgb(0, 0, 0) });
-    y -= 14;
   }
 
-  // Total line
+  // Credits applied (if any)
+  if (data.credits && data.credits.length > 0) {
+    y -= 24;
+
+    // Credits section header
+    page.drawText('DEPOSIT CREDITS APPLIED:', { x: totalsX - 40, y: y, size: 9, font: helveticaBold, color: rgb(0.2, 0.5, 0.2) });
+    y -= 14;
+
+    // List each credit
+    for (const credit of data.credits) {
+      const creditLabel = `Deposit ${credit.depositInvoiceNumber}`;
+      page.drawText(creditLabel, { x: totalsX, y: y, size: 9, font: helvetica, color: rgb(0.3, 0.3, 0.3) });
+      const creditText = `-$${credit.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      const creditW = helvetica.widthOfTextAtSize(creditText, 9);
+      page.drawText(creditText, { x: rightMargin - creditW, y: y, size: 9, font: helvetica, color: rgb(0.2, 0.5, 0.2) });
+      y -= 12;
+    }
+  }
+
+  y -= 32; // Space above total section
+
+  // Line above total (matching subtotal spacing: 18pt below line to text)
   page.drawLine({
-    start: { x: totalsX - 14, y: y + 4 },
-    end: { x: rightMargin, y: y + 4 },
+    start: { x: totalsX - 14, y: y + 18 },
+    end: { x: rightMargin, y: y + 18 },
     thickness: 2,
     color: rgb(0.2, 0.2, 0.2)
   });
-  y -= 4;
 
-  // TOTAL
-  page.drawText('TOTAL:', { x: totalsX, y: y - 14, size: 14, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
-  const totalText = `$${data.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+  // Calculate final total (after credits)
+  const finalTotal = data.totalCredits ? data.total - data.totalCredits : data.total;
+
+  // TOTAL (or AMOUNT DUE if credits were applied)
+  const totalLabel = data.totalCredits && data.totalCredits > 0 ? 'AMOUNT DUE:' : 'TOTAL:';
+  page.drawText(totalLabel, { x: totalsX, y: y, size: 14, font: helveticaBold, color: rgb(0.1, 0.1, 0.1) });
+  const totalText = `$${finalTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
   const totalW = helveticaBold.widthOfTextAtSize(totalText, 16);
-  page.drawText(totalText, { x: rightMargin - totalW, y: y - 14, size: 16, font: helveticaBold, color: rgb(0, 0, 0) });
+  page.drawText(totalText, { x: rightMargin - totalW, y: y, size: 16, font: helveticaBold, color: rgb(0, 0, 0) });
 
   // Amount Due label
   const amtDueText = 'Amount Due (USD)';
   const amtDueW = helvetica.widthOfTextAtSize(amtDueText, 9);
-  page.drawText(amtDueText, { x: rightMargin - amtDueW, y: y - 28, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
+  page.drawText(amtDueText, { x: rightMargin - amtDueW, y: y - 16, size: 9, font: helvetica, color: rgb(0.4, 0.4, 0.4) });
 
   y -= 50;
 
@@ -1104,6 +1238,15 @@ router.post(
     try {
       const invoice = await getInvoiceService().sendInvoice(invoiceId);
 
+      // Schedule payment reminders
+      try {
+        await getInvoiceService().scheduleReminders(invoiceId);
+        console.log(`[Invoices] Scheduled reminders for invoice #${invoiceId}`);
+      } catch (reminderError) {
+        console.error('[Invoices] Failed to schedule reminders:', reminderError);
+        // Don't fail the send operation if reminders fail
+      }
+
       // Send email notification to client
       try {
         // Get client email from database
@@ -1297,6 +1440,1165 @@ router.get(
   })
 );
 
+// ============================================
+// DEPOSIT INVOICE ENDPOINTS
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/deposit:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Create a deposit invoice
+ *     description: Create a special deposit invoice for a project
+ */
+router.post(
+  '/deposit',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { projectId, clientId, amount, percentage, description } = req.body;
+
+    if (!projectId || !clientId || !amount) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        code: 'MISSING_FIELDS',
+        required: ['projectId', 'clientId', 'amount']
+      });
+    }
+
+    if (typeof amount !== 'number' || amount <= 0) {
+      return res.status(400).json({
+        error: 'Invalid amount',
+        code: 'INVALID_AMOUNT',
+        message: 'Amount must be a positive number'
+      });
+    }
+
+    try {
+      const invoice = await getInvoiceService().createDepositInvoice(
+        projectId,
+        clientId,
+        amount,
+        percentage,
+        description
+      );
+
+      res.status(201).json({
+        success: true,
+        message: 'Deposit invoice created successfully',
+        invoice: toSnakeCaseInvoice(invoice)
+      });
+    } catch (error: unknown) {
+      console.error('[Invoices] Error creating deposit invoice:', error);
+      res.status(500).json({
+        error: 'Failed to create deposit invoice',
+        code: 'CREATION_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/deposits/{projectId}:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Get available deposits for a project
+ *     description: Returns paid deposit invoices that have available credit
+ */
+router.get(
+  '/deposits/:projectId',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.projectId);
+
+    if (isNaN(projectId)) {
+      return res.status(400).json({
+        error: 'Invalid project ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const deposits = await getInvoiceService().getAvailableDeposits(projectId);
+      res.json({
+        success: true,
+        deposits: deposits.map(toSnakeCaseDeposit),
+        count: deposits.length
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to retrieve available deposits',
+        code: 'RETRIEVAL_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/{id}/apply-credit:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Apply deposit credit to an invoice
+ *     description: Apply credit from a paid deposit invoice to reduce the amount due
+ */
+router.post(
+  '/:id/apply-credit',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+    const { depositInvoiceId, amount } = req.body;
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    if (!depositInvoiceId || !amount) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        code: 'MISSING_FIELDS',
+        required: ['depositInvoiceId', 'amount']
+      });
+    }
+
+    try {
+      const credit = await getInvoiceService().applyDepositCredit(
+        invoiceId,
+        depositInvoiceId,
+        parseFloat(amount),
+        req.user?.email
+      );
+
+      res.json({
+        success: true,
+        message: 'Credit applied successfully',
+        credit: toSnakeCaseCredit(credit)
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('Insufficient') || message.includes('Invalid')) {
+        return res.status(400).json({
+          error: message,
+          code: 'INVALID_CREDIT'
+        });
+      }
+
+      res.status(500).json({
+        error: 'Failed to apply credit',
+        code: 'CREDIT_FAILED',
+        message
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/{id}/credits:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Get credits applied to an invoice
+ */
+router.get(
+  '/:id/credits',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const credits = await getInvoiceService().getInvoiceCredits(invoiceId);
+      const totalCredits = await getInvoiceService().getTotalCredits(invoiceId);
+
+      res.json({
+        success: true,
+        credits: credits.map(toSnakeCaseCredit),
+        total_credits: totalCredits
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to retrieve credits',
+        code: 'RETRIEVAL_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+// ============================================
+// PAYMENT PLAN TEMPLATE ENDPOINTS
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/payment-plans:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Get all payment plan templates
+ */
+router.get(
+  '/payment-plans',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    try {
+      const templates = await getInvoiceService().getPaymentPlanTemplates();
+      res.json({
+        success: true,
+        templates: templates.map(toSnakeCasePaymentPlan),
+        count: templates.length
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to retrieve payment plan templates',
+        code: 'RETRIEVAL_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/payment-plans:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Create a new payment plan template
+ */
+router.post(
+  '/payment-plans',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { name, description, payments, isDefault } = req.body;
+
+    if (!name || !payments || !Array.isArray(payments) || payments.length === 0) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        code: 'MISSING_FIELDS',
+        required: ['name', 'payments']
+      });
+    }
+
+    try {
+      const template = await getInvoiceService().createPaymentPlanTemplate({
+        name,
+        description,
+        payments,
+        isDefault: isDefault || false
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Payment plan template created',
+        template: toSnakeCasePaymentPlan(template)
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to create payment plan template',
+        code: 'CREATION_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/payment-plans/{id}:
+ *   delete:
+ *     tags:
+ *       - Invoices
+ *     summary: Delete a payment plan template
+ */
+router.delete(
+  '/payment-plans/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const templateId = parseInt(req.params.id);
+
+    if (isNaN(templateId)) {
+      return res.status(400).json({
+        error: 'Invalid template ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      await getInvoiceService().deletePaymentPlanTemplate(templateId);
+      res.json({
+        success: true,
+        message: 'Payment plan template deleted'
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to delete payment plan template',
+        code: 'DELETION_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/generate-from-plan:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Generate invoices from a payment plan template
+ */
+router.post(
+  '/generate-from-plan',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { projectId, clientId, templateId, totalAmount } = req.body;
+
+    if (!projectId || !clientId || !templateId || !totalAmount) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        code: 'MISSING_FIELDS',
+        required: ['projectId', 'clientId', 'templateId', 'totalAmount']
+      });
+    }
+
+    try {
+      const invoices = await getInvoiceService().generateInvoicesFromTemplate(
+        projectId,
+        clientId,
+        templateId,
+        totalAmount
+      );
+
+      res.status(201).json({
+        success: true,
+        message: `Generated ${invoices.length} invoices from payment plan`,
+        invoices: invoices.map(toSnakeCaseInvoice),
+        count: invoices.length
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to generate invoices from plan',
+        code: 'GENERATION_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+// ============================================
+// MILESTONE-LINKED INVOICE ENDPOINTS
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/milestone/{milestoneId}:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Create an invoice linked to a milestone
+ */
+router.post(
+  '/milestone/:milestoneId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const milestoneId = parseInt(req.params.milestoneId);
+
+    if (isNaN(milestoneId)) {
+      return res.status(400).json({
+        error: 'Invalid milestone ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    const invoiceData: InvoiceCreateData = req.body;
+
+    if (!invoiceData.projectId || !invoiceData.clientId || !invoiceData.lineItems?.length) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        code: 'MISSING_FIELDS',
+        required: ['projectId', 'clientId', 'lineItems']
+      });
+    }
+
+    try {
+      const invoice = await getInvoiceService().createMilestoneInvoice(milestoneId, invoiceData);
+
+      res.status(201).json({
+        success: true,
+        message: 'Milestone invoice created',
+        invoice: toSnakeCaseInvoice(invoice)
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to create milestone invoice',
+        code: 'CREATION_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/milestone/{milestoneId}:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Get invoices linked to a milestone
+ */
+router.get(
+  '/milestone/:milestoneId',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const milestoneId = parseInt(req.params.milestoneId);
+
+    if (isNaN(milestoneId)) {
+      return res.status(400).json({
+        error: 'Invalid milestone ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const invoices = await getInvoiceService().getInvoicesByMilestone(milestoneId);
+
+      res.json({
+        success: true,
+        invoices: invoices.map(toSnakeCaseInvoice),
+        count: invoices.length
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to retrieve milestone invoices',
+        code: 'RETRIEVAL_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/{id}/link-milestone:
+ *   put:
+ *     tags:
+ *       - Invoices
+ *     summary: Link an existing invoice to a milestone
+ */
+router.put(
+  '/:id/link-milestone',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+    const { milestoneId } = req.body;
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    if (!milestoneId) {
+      return res.status(400).json({
+        error: 'Missing milestone ID',
+        code: 'MISSING_FIELDS',
+        required: ['milestoneId']
+      });
+    }
+
+    try {
+      const invoice = await getInvoiceService().linkInvoiceToMilestone(invoiceId, milestoneId);
+
+      res.json({
+        success: true,
+        message: 'Invoice linked to milestone',
+        invoice: toSnakeCaseInvoice(invoice)
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to link invoice to milestone',
+        code: 'LINK_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+// ============================================
+// SCHEDULED INVOICE ENDPOINTS
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/schedule:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Schedule an invoice for future generation
+ */
+router.post(
+  '/schedule',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { projectId, clientId, scheduledDate, triggerType, triggerMilestoneId, lineItems, notes, terms } = req.body;
+
+    if (!projectId || !clientId || !scheduledDate || !lineItems?.length) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        code: 'MISSING_FIELDS',
+        required: ['projectId', 'clientId', 'scheduledDate', 'lineItems']
+      });
+    }
+
+    try {
+      const scheduled = await getInvoiceService().scheduleInvoice({
+        projectId,
+        clientId,
+        scheduledDate,
+        triggerType,
+        triggerMilestoneId,
+        lineItems,
+        notes,
+        terms
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Invoice scheduled',
+        scheduled_invoice: toSnakeCaseScheduledInvoice(scheduled)
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to schedule invoice',
+        code: 'SCHEDULING_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/scheduled:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Get all scheduled invoices
+ */
+router.get(
+  '/scheduled',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    try {
+      const scheduled = await getInvoiceService().getScheduledInvoices();
+
+      res.json({
+        success: true,
+        scheduled_invoices: scheduled.map(toSnakeCaseScheduledInvoice),
+        count: scheduled.length
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to retrieve scheduled invoices',
+        code: 'RETRIEVAL_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/scheduled/{projectId}:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Get scheduled invoices for a project
+ */
+router.get(
+  '/scheduled/:projectId',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.projectId);
+
+    if (isNaN(projectId)) {
+      return res.status(400).json({
+        error: 'Invalid project ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const scheduled = await getInvoiceService().getScheduledInvoices(projectId);
+
+      res.json({
+        success: true,
+        scheduled_invoices: scheduled.map(toSnakeCaseScheduledInvoice),
+        count: scheduled.length
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to retrieve scheduled invoices',
+        code: 'RETRIEVAL_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/scheduled/{id}:
+ *   delete:
+ *     tags:
+ *       - Invoices
+ *     summary: Cancel a scheduled invoice
+ */
+router.delete(
+  '/scheduled/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const scheduledId = parseInt(req.params.id);
+
+    if (isNaN(scheduledId)) {
+      return res.status(400).json({
+        error: 'Invalid scheduled invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      await getInvoiceService().cancelScheduledInvoice(scheduledId);
+
+      res.json({
+        success: true,
+        message: 'Scheduled invoice cancelled'
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to cancel scheduled invoice',
+        code: 'CANCELLATION_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+// ============================================
+// RECURRING INVOICE ENDPOINTS
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/recurring:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Create a recurring invoice pattern
+ */
+router.post(
+  '/recurring',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { projectId, clientId, frequency, dayOfMonth, dayOfWeek, lineItems, notes, terms, startDate, endDate } = req.body;
+
+    if (!projectId || !clientId || !frequency || !lineItems?.length || !startDate) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        code: 'MISSING_FIELDS',
+        required: ['projectId', 'clientId', 'frequency', 'lineItems', 'startDate']
+      });
+    }
+
+    const validFrequencies = ['weekly', 'monthly', 'quarterly'];
+    if (!validFrequencies.includes(frequency)) {
+      return res.status(400).json({
+        error: 'Invalid frequency',
+        code: 'INVALID_FREQUENCY',
+        validFrequencies
+      });
+    }
+
+    try {
+      const recurring = await getInvoiceService().createRecurringInvoice({
+        projectId,
+        clientId,
+        frequency,
+        dayOfMonth,
+        dayOfWeek,
+        lineItems,
+        notes,
+        terms,
+        startDate,
+        endDate
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Recurring invoice pattern created',
+        recurring_invoice: toSnakeCaseRecurringInvoice(recurring)
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to create recurring invoice',
+        code: 'CREATION_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/recurring:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Get all recurring invoices
+ */
+router.get(
+  '/recurring',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    try {
+      const recurring = await getInvoiceService().getRecurringInvoices();
+
+      res.json({
+        success: true,
+        recurring_invoices: recurring.map(toSnakeCaseRecurringInvoice),
+        count: recurring.length
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to retrieve recurring invoices',
+        code: 'RETRIEVAL_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/recurring/{projectId}:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Get recurring invoices for a project
+ */
+router.get(
+  '/recurring/:projectId',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.projectId);
+
+    if (isNaN(projectId)) {
+      return res.status(400).json({
+        error: 'Invalid project ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const recurring = await getInvoiceService().getRecurringInvoices(projectId);
+
+      res.json({
+        success: true,
+        recurring_invoices: recurring.map(toSnakeCaseRecurringInvoice),
+        count: recurring.length
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to retrieve recurring invoices',
+        code: 'RETRIEVAL_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/recurring/{id}:
+ *   put:
+ *     tags:
+ *       - Invoices
+ *     summary: Update a recurring invoice pattern
+ */
+router.put(
+  '/recurring/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const recurringId = parseInt(req.params.id);
+
+    if (isNaN(recurringId)) {
+      return res.status(400).json({
+        error: 'Invalid recurring invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const recurring = await getInvoiceService().updateRecurringInvoice(recurringId, req.body);
+
+      res.json({
+        success: true,
+        message: 'Recurring invoice updated',
+        recurring_invoice: toSnakeCaseRecurringInvoice(recurring)
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to update recurring invoice',
+        code: 'UPDATE_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/recurring/{id}/pause:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Pause a recurring invoice
+ */
+router.post(
+  '/recurring/:id/pause',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const recurringId = parseInt(req.params.id);
+
+    if (isNaN(recurringId)) {
+      return res.status(400).json({
+        error: 'Invalid recurring invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      await getInvoiceService().pauseRecurringInvoice(recurringId);
+
+      res.json({
+        success: true,
+        message: 'Recurring invoice paused'
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to pause recurring invoice',
+        code: 'PAUSE_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/recurring/{id}/resume:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Resume a paused recurring invoice
+ */
+router.post(
+  '/recurring/:id/resume',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const recurringId = parseInt(req.params.id);
+
+    if (isNaN(recurringId)) {
+      return res.status(400).json({
+        error: 'Invalid recurring invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      await getInvoiceService().resumeRecurringInvoice(recurringId);
+
+      res.json({
+        success: true,
+        message: 'Recurring invoice resumed'
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to resume recurring invoice',
+        code: 'RESUME_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/recurring/{id}:
+ *   delete:
+ *     tags:
+ *       - Invoices
+ *     summary: Delete a recurring invoice pattern
+ */
+router.delete(
+  '/recurring/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const recurringId = parseInt(req.params.id);
+
+    if (isNaN(recurringId)) {
+      return res.status(400).json({
+        error: 'Invalid recurring invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      await getInvoiceService().deleteRecurringInvoice(recurringId);
+
+      res.json({
+        success: true,
+        message: 'Recurring invoice deleted'
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to delete recurring invoice',
+        code: 'DELETION_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+// ============================================
+// PAYMENT REMINDER ENDPOINTS
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/{id}/reminders:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Get reminders for an invoice
+ */
+router.get(
+  '/:id/reminders',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const reminders = await getInvoiceService().getInvoiceReminders(invoiceId);
+
+      res.json({
+        success: true,
+        reminders: reminders.map(toSnakeCaseReminder),
+        count: reminders.length
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to retrieve reminders',
+        code: 'RETRIEVAL_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/reminders/{id}/skip:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Skip a scheduled reminder
+ */
+router.post(
+  '/reminders/:id/skip',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const reminderId = parseInt(req.params.id);
+
+    if (isNaN(reminderId)) {
+      return res.status(400).json({
+        error: 'Invalid reminder ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      await getInvoiceService().skipReminder(reminderId);
+
+      res.json({
+        success: true,
+        message: 'Reminder skipped'
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to skip reminder',
+        code: 'SKIP_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+// ============================================
+// INVOICE EDIT ENDPOINT
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/{id}:
+ *   put:
+ *     tags:
+ *       - Invoices
+ *     summary: Update a draft invoice
+ *     description: Update invoice details (only draft invoices can be edited)
+ */
+router.put(
+  '/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    // Handle status-only updates (backwards compatibility)
+    if (req.body.status && Object.keys(req.body).length === 1) {
+      const validStatuses = ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled'];
+      if (!validStatuses.includes(req.body.status)) {
+        return res.status(400).json({
+          error: 'Invalid status',
+          code: 'INVALID_STATUS',
+          validStatuses
+        });
+      }
+
+      try {
+        const invoice = await getInvoiceService().updateInvoiceStatus(invoiceId, req.body.status);
+        res.json({
+          success: true,
+          message: 'Invoice status updated',
+          invoice: toSnakeCaseInvoice(invoice)
+        });
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        if (message.includes('not found')) {
+          return res.status(404).json({ error: 'Invoice not found', code: 'NOT_FOUND' });
+        }
+        res.status(500).json({ error: 'Failed to update invoice', code: 'UPDATE_FAILED', message });
+      }
+      return;
+    }
+
+    // Full invoice update (draft only)
+    try {
+      const updateData: Partial<InvoiceCreateData> = {};
+
+      if (req.body.lineItems) {
+        updateData.lineItems = req.body.lineItems;
+      }
+      if (req.body.line_items) {
+        updateData.lineItems = req.body.line_items;
+      }
+      if (req.body.dueDate !== undefined || req.body.due_date !== undefined) {
+        updateData.dueDate = req.body.dueDate || req.body.due_date;
+      }
+      if (req.body.notes !== undefined) {
+        updateData.notes = req.body.notes;
+      }
+      if (req.body.terms !== undefined) {
+        updateData.terms = req.body.terms;
+      }
+      if (req.body.billToName !== undefined || req.body.bill_to_name !== undefined) {
+        updateData.billToName = req.body.billToName || req.body.bill_to_name;
+      }
+      if (req.body.billToEmail !== undefined || req.body.bill_to_email !== undefined) {
+        updateData.billToEmail = req.body.billToEmail || req.body.bill_to_email;
+      }
+      if (req.body.servicesTitle !== undefined || req.body.services_title !== undefined) {
+        updateData.servicesTitle = req.body.servicesTitle || req.body.services_title;
+      }
+      if (req.body.servicesDescription !== undefined || req.body.services_description !== undefined) {
+        updateData.servicesDescription = req.body.servicesDescription || req.body.services_description;
+      }
+      if (req.body.deliverables !== undefined) {
+        updateData.deliverables = req.body.deliverables;
+      }
+
+      const invoice = await getInvoiceService().updateInvoice(invoiceId, updateData);
+
+      res.json({
+        success: true,
+        message: 'Invoice updated successfully',
+        invoice: toSnakeCaseInvoice(invoice)
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('not found')) {
+        return res.status(404).json({ error: 'Invoice not found', code: 'NOT_FOUND' });
+      }
+      if (message.includes('Only draft')) {
+        return res.status(400).json({ error: message, code: 'NOT_EDITABLE' });
+      }
+
+      res.status(500).json({
+        error: 'Failed to update invoice',
+        code: 'UPDATE_FAILED',
+        message
+      });
+    }
+  })
+);
+
 /**
  * @swagger
  * /api/invoices/generate/intake/{intakeId}:
@@ -1399,12 +2701,16 @@ router.get(
       // Build line items from invoice data
       const lineItems: InvoicePdfData['lineItems'] = Array.isArray(invoice.lineItems)
         ? invoice.lineItems.map((item: InvoiceLineItem) => ({
-            description: item.description || '',
-            quantity: item.quantity || 1,
-            rate: item.rate || item.amount || 0,
-            amount: item.amount || 0
-          }))
+          description: item.description || '',
+          quantity: item.quantity || 1,
+          rate: item.rate || item.amount || 0,
+          amount: item.amount || 0
+        }))
         : [];
+
+      // Get credits applied to this invoice (if any)
+      const invoiceCredits = await getInvoiceService().getInvoiceCredits(invoiceId);
+      const totalCredits = await getInvoiceService().getTotalCredits(invoiceId);
 
       // Build PDF data object
       const pdfData: InvoicePdfData = {
@@ -1419,7 +2725,16 @@ router.get(
         subtotal: invoice.amountTotal || 0,
         total: invoice.amountTotal || 0,
         notes: invoice.notes,
-        terms: invoice.terms
+        terms: invoice.terms,
+        // Deposit invoice fields
+        isDeposit: invoice.invoiceType === 'deposit',
+        depositPercentage: invoice.depositPercentage,
+        // Credits applied
+        credits: invoiceCredits.map((c) => ({
+          depositInvoiceNumber: c.depositInvoiceNumber || `INV-${c.depositInvoiceId}`,
+          amount: c.amount
+        })),
+        totalCredits
       };
 
       // Generate PDF using pdf-lib (template-matching version)
@@ -1438,6 +2753,7 @@ router.get(
       res.setHeader('Content-Length', pdfBytes.length);
       res.send(Buffer.from(pdfBytes));
     } catch (error: unknown) {
+      console.error('[Invoices] PDF generation error:', error);
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {
         return res.status(404).json({
@@ -1449,6 +2765,1355 @@ router.get(
       res.status(500).json({
         error: 'Failed to generate PDF',
         code: 'PDF_GENERATION_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/{id}:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Get invoice by ID
+ *     description: Retrieve a single invoice by its ID
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Invoice retrieved successfully
+ *       404:
+ *         description: Invoice not found
+ */
+router.get(
+  '/:id',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const invoice = await getInvoiceService().getInvoiceById(invoiceId);
+      res.json({ success: true, invoice });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('not found')) {
+        return res.status(404).json({
+          error: 'Invoice not found',
+          code: 'NOT_FOUND'
+        });
+      }
+
+      res.status(500).json({
+        error: 'Failed to retrieve invoice',
+        code: 'RETRIEVAL_FAILED'
+      });
+    }
+  })
+);
+
+// ============================================
+// DELETE / VOID INVOICE
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/{id}:
+ *   delete:
+ *     tags:
+ *       - Invoices
+ *     summary: Delete or void an invoice
+ *     description: |
+ *       Draft/Cancelled invoices are permanently deleted.
+ *       Sent/Viewed/Partial/Overdue invoices are voided (status changed to cancelled).
+ *       Paid invoices cannot be deleted or voided.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Invoice deleted or voided
+ *       400:
+ *         description: Cannot delete paid invoice
+ *       404:
+ *         description: Invoice not found
+ */
+router.delete(
+  '/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const result = await getInvoiceService().deleteOrVoidInvoice(invoiceId);
+
+      res.json({
+        success: true,
+        message: result.action === 'deleted'
+          ? 'Invoice deleted successfully'
+          : 'Invoice voided successfully',
+        action: result.action
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+
+      if (message.includes('not found')) {
+        return res.status(404).json({
+          error: 'Invoice not found',
+          code: 'NOT_FOUND'
+        });
+      }
+
+      if (message.includes('Paid invoices')) {
+        return res.status(400).json({
+          error: message,
+          code: 'CANNOT_DELETE_PAID'
+        });
+      }
+
+      res.status(500).json({
+        error: 'Failed to delete invoice',
+        code: 'DELETE_FAILED',
+        message
+      });
+    }
+  })
+);
+
+// ============================================
+// DUPLICATE / CLONE INVOICE
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/{id}/duplicate:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Duplicate an invoice
+ *     description: Creates a new draft invoice as a copy of an existing invoice
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Invoice duplicated successfully
+ *       404:
+ *         description: Invoice not found
+ */
+router.post(
+  '/:id/duplicate',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const newInvoice = await getInvoiceService().duplicateInvoice(invoiceId);
+
+      res.status(201).json({
+        success: true,
+        message: 'Invoice duplicated successfully',
+        invoice: toSnakeCaseInvoice(newInvoice)
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+
+      if (message.includes('not found')) {
+        return res.status(404).json({
+          error: 'Invoice not found',
+          code: 'NOT_FOUND'
+        });
+      }
+
+      res.status(500).json({
+        error: 'Failed to duplicate invoice',
+        code: 'DUPLICATE_FAILED',
+        message
+      });
+    }
+  })
+);
+
+// ============================================
+// RECORD PAYMENT
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/{id}/record-payment:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Record a payment on an invoice
+ *     description: Records a partial or full payment. Status auto-updates to 'partial' or 'paid'.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - amount
+ *               - paymentMethod
+ *             properties:
+ *               amount:
+ *                 type: number
+ *                 example: 500
+ *               paymentMethod:
+ *                 type: string
+ *                 example: "bank_transfer"
+ *               paymentReference:
+ *                 type: string
+ *                 example: "TXN-12345"
+ *     responses:
+ *       200:
+ *         description: Payment recorded successfully
+ *       400:
+ *         description: Invalid payment data
+ */
+router.post(
+  '/:id/record-payment',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+    const { amount, paymentMethod, paymentReference } = req.body;
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    if (!amount || typeof amount !== 'number' || amount <= 0) {
+      return res.status(400).json({
+        error: 'Invalid payment amount',
+        code: 'INVALID_AMOUNT'
+      });
+    }
+
+    if (!paymentMethod) {
+      return res.status(400).json({
+        error: 'Payment method is required',
+        code: 'MISSING_PAYMENT_METHOD'
+      });
+    }
+
+    try {
+      const invoice = await getInvoiceService().recordPayment(
+        invoiceId,
+        amount,
+        paymentMethod,
+        paymentReference
+      );
+
+      res.json({
+        success: true,
+        message: invoice.status === 'paid'
+          ? 'Payment recorded - invoice is now fully paid'
+          : 'Partial payment recorded successfully',
+        invoice: toSnakeCaseInvoice(invoice)
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+
+      if (message.includes('not found')) {
+        return res.status(404).json({
+          error: 'Invoice not found',
+          code: 'NOT_FOUND'
+        });
+      }
+
+      if (message.includes('already fully paid') || message.includes('cancelled')) {
+        return res.status(400).json({
+          error: message,
+          code: 'PAYMENT_NOT_ALLOWED'
+        });
+      }
+
+      res.status(500).json({
+        error: 'Failed to record payment',
+        code: 'PAYMENT_FAILED',
+        message
+      });
+    }
+  })
+);
+
+// ============================================
+// INVOICE SEARCH
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/search:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Search invoices with filters
+ *     description: Search and filter invoices with pagination
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: clientId
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: projectId
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [draft, sent, viewed, partial, paid, overdue, cancelled]
+ *       - in: query
+ *         name: invoiceType
+ *         schema:
+ *           type: string
+ *           enum: [standard, deposit]
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search in invoice number and notes
+ *       - in: query
+ *         name: dateFrom
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: dateTo
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: minAmount
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: maxAmount
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *     responses:
+ *       200:
+ *         description: Search results
+ */
+router.get(
+  '/search',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    // Define valid statuses for type checking
+    type InvoiceStatus = 'draft' | 'sent' | 'viewed' | 'partial' | 'paid' | 'overdue' | 'cancelled';
+    const validStatuses: InvoiceStatus[] = ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled'];
+
+    // Parse status - can be single value or comma-separated
+    let status: InvoiceStatus | InvoiceStatus[] | undefined;
+    if (req.query.status) {
+      const statusStr = req.query.status as string;
+      if (statusStr.includes(',')) {
+        const statuses = statusStr.split(',').filter(s => validStatuses.includes(s as InvoiceStatus)) as InvoiceStatus[];
+        status = statuses.length > 0 ? statuses : undefined;
+      } else if (validStatuses.includes(statusStr as InvoiceStatus)) {
+        status = statusStr as InvoiceStatus;
+      }
+    }
+
+    const filters = {
+      clientId: req.query.clientId ? parseInt(req.query.clientId as string) : undefined,
+      projectId: req.query.projectId ? parseInt(req.query.projectId as string) : undefined,
+      status,
+      invoiceType: req.query.invoiceType as 'standard' | 'deposit' | undefined,
+      search: req.query.search as string | undefined,
+      dateFrom: req.query.dateFrom as string | undefined,
+      dateTo: req.query.dateTo as string | undefined,
+      dueDateFrom: req.query.dueDateFrom as string | undefined,
+      dueDateTo: req.query.dueDateTo as string | undefined,
+      minAmount: req.query.minAmount ? parseFloat(req.query.minAmount as string) : undefined,
+      maxAmount: req.query.maxAmount ? parseFloat(req.query.maxAmount as string) : undefined,
+      limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
+      offset: req.query.offset ? parseInt(req.query.offset as string) : 0
+    };
+
+    try {
+      const result = await getInvoiceService().searchInvoices(filters);
+
+      res.json({
+        success: true,
+        invoices: result.invoices.map(toSnakeCaseInvoice),
+        total: result.total,
+        limit: filters.limit,
+        offset: filters.offset
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to search invoices',
+        code: 'SEARCH_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+// ============================================
+// CHECK AND MARK OVERDUE (ADMIN TRIGGER)
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/check-overdue:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Check and mark overdue invoices
+ *     description: Manually trigger the overdue check (also runs automatically via scheduler)
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Overdue check completed
+ */
+router.post(
+  '/check-overdue',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    try {
+      const count = await getInvoiceService().checkAndMarkOverdue();
+
+      res.json({
+        success: true,
+        message: count > 0
+          ? `Marked ${count} invoice(s) as overdue`
+          : 'No invoices needed to be marked as overdue',
+        count
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to check overdue invoices',
+        code: 'CHECK_OVERDUE_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+// ============================================
+// MANUAL SEND REMINDER
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/{id}/send-reminder:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Send a payment reminder email
+ *     description: Manually send a payment reminder for an outstanding invoice
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Reminder sent successfully
+ *       400:
+ *         description: Invoice is already paid
+ */
+router.post(
+  '/:id/send-reminder',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const invoice = await getInvoiceService().getInvoiceById(invoiceId);
+
+      if (invoice.status === 'paid') {
+        return res.status(400).json({
+          error: 'Cannot send reminder for a paid invoice',
+          code: 'INVOICE_PAID'
+        });
+      }
+
+      if (invoice.status === 'cancelled') {
+        return res.status(400).json({
+          error: 'Cannot send reminder for a cancelled invoice',
+          code: 'INVOICE_CANCELLED'
+        });
+      }
+
+      // Get client email
+      const db = getDatabase();
+      const clientRow = await db.get(
+        'SELECT email, contact_name FROM clients WHERE id = ?',
+        [invoice.clientId]
+      ) as { email?: string; contact_name?: string } | undefined;
+
+      if (!clientRow || !clientRow.email) {
+        return res.status(400).json({
+          error: 'Client email not found',
+          code: 'NO_CLIENT_EMAIL'
+        });
+      }
+
+      const clientEmail = clientRow.email;
+      const clientName = clientRow.contact_name || 'Valued Client';
+
+      // Determine reminder urgency
+      const today = new Date();
+      const dueDate = invoice.dueDate ? new Date(invoice.dueDate) : null;
+      const daysOverdue = dueDate ? Math.ceil((today.getTime() - dueDate.getTime()) / (24 * 60 * 60 * 1000)) : 0;
+
+      let subject: string;
+      let urgencyMessage = '';
+
+      if (daysOverdue > 14) {
+        subject = `URGENT: Invoice #${invoice.invoiceNumber} is ${daysOverdue} days overdue`;
+        urgencyMessage = 'Immediate payment is required.';
+      } else if (daysOverdue > 0) {
+        subject = `Payment Overdue: Invoice #${invoice.invoiceNumber}`;
+        urgencyMessage = `This invoice is ${daysOverdue} day(s) overdue.`;
+      } else {
+        subject = `Payment Reminder: Invoice #${invoice.invoiceNumber}`;
+        urgencyMessage = dueDate
+          ? `Payment is due on ${dueDate.toLocaleDateString()}.`
+          : 'Payment is due upon receipt.';
+      }
+
+      const outstandingAmount = invoice.amountTotal - (invoice.amountPaid || 0);
+      const portalUrl = `${process.env.CLIENT_PORTAL_URL || 'http://localhost:3000/client/portal'}?invoice=${invoiceId}`;
+
+      await emailService.sendEmail({
+        to: clientEmail,
+        subject,
+        text: `
+Hi ${clientName},
+
+This is a reminder regarding invoice #${invoice.invoiceNumber}.
+
+Amount Outstanding: $${outstandingAmount.toFixed(2)}
+${urgencyMessage}
+
+View and pay your invoice here: ${portalUrl}
+
+If you have already submitted payment, please disregard this message.
+
+Best regards,
+${BUSINESS_INFO.name}
+        `,
+        html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: ${daysOverdue > 0 ? '#dc3545' : '#00ff41'}; color: ${daysOverdue > 0 ? '#fff' : '#000'}; padding: 20px; text-align: center; }
+    .content { padding: 20px; background: #f9f9f9; }
+    .amount { font-size: 24px; font-weight: bold; color: #333; margin: 15px 0; }
+    .button { display: inline-block; padding: 12px 24px; background: #00ff41; color: #000; text-decoration: none; border-radius: 4px; }
+    .urgency { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; }
+    .footer { padding: 20px; text-align: center; font-size: 0.9em; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>${subject}</h2>
+    </div>
+    <div class="content">
+      <p>Hi ${clientName},</p>
+      <p>This is a reminder regarding invoice #${invoice.invoiceNumber}.</p>
+      ${urgencyMessage ? `<div class="urgency"><strong>${urgencyMessage}</strong></div>` : ''}
+      <div class="amount">Amount Outstanding: $${outstandingAmount.toFixed(2)}</div>
+      <p style="text-align: center; margin: 30px 0;">
+        <a href="${portalUrl}" class="button">View Invoice & Pay</a>
+      </p>
+      <p><small>If you have already submitted payment, please disregard this message.</small></p>
+    </div>
+    <div class="footer">
+      <p>Best regards,<br>${BUSINESS_INFO.name}</p>
+    </div>
+  </div>
+</body>
+</html>
+        `
+      });
+
+      res.json({
+        success: true,
+        message: 'Payment reminder sent successfully',
+        sentTo: clientEmail
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+
+      if (message.includes('not found')) {
+        return res.status(404).json({
+          error: 'Invoice not found',
+          code: 'NOT_FOUND'
+        });
+      }
+
+      res.status(500).json({
+        error: 'Failed to send reminder',
+        code: 'SEND_REMINDER_FAILED',
+        message
+      });
+    }
+  })
+);
+
+// ============================================
+// PAYMENT TERMS PRESETS
+// ============================================
+
+/**
+ * Transform PaymentTermsPreset to snake_case for frontend
+ */
+function toSnakeCasePaymentTerms(terms: PaymentTermsPreset): Record<string, unknown> {
+  return {
+    id: terms.id,
+    name: terms.name,
+    days_until_due: terms.daysUntilDue,
+    description: terms.description,
+    late_fee_rate: terms.lateFeeRate,
+    late_fee_type: terms.lateFeeType,
+    late_fee_flat_amount: terms.lateFeeFlatAmount,
+    grace_period_days: terms.gracePeriodDays,
+    is_default: terms.isDefault,
+    created_at: terms.createdAt
+  };
+}
+
+/**
+ * Transform InvoicePayment to snake_case for frontend
+ */
+function toSnakeCasePayment(payment: InvoicePayment): Record<string, unknown> {
+  return {
+    id: payment.id,
+    invoice_id: payment.invoiceId,
+    amount: payment.amount,
+    payment_method: payment.paymentMethod,
+    payment_reference: payment.paymentReference,
+    payment_date: payment.paymentDate,
+    notes: payment.notes,
+    created_at: payment.createdAt
+  };
+}
+
+/**
+ * @swagger
+ * /api/invoices/payment-terms:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Get all payment terms presets
+ *     description: Returns all available payment terms (Net 15, Net 30, etc.)
+ */
+router.get(
+  '/payment-terms',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    try {
+      const terms = await getInvoiceService().getPaymentTermsPresets();
+      res.json({
+        success: true,
+        terms: terms.map(toSnakeCasePaymentTerms)
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to retrieve payment terms',
+        code: 'RETRIEVAL_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/payment-terms:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Create a custom payment terms preset
+ */
+router.post(
+  '/payment-terms',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { name, daysUntilDue, description, lateFeeRate, lateFeeType, lateFeeFlatAmount, gracePeriodDays, isDefault } = req.body;
+
+    if (!name || daysUntilDue === undefined) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        code: 'MISSING_FIELDS',
+        required: ['name', 'daysUntilDue']
+      });
+    }
+
+    try {
+      const terms = await getInvoiceService().createPaymentTermsPreset({
+        name,
+        daysUntilDue,
+        description,
+        lateFeeRate,
+        lateFeeType,
+        lateFeeFlatAmount,
+        gracePeriodDays,
+        isDefault
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Payment terms preset created',
+        terms: toSnakeCasePaymentTerms(terms)
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to create payment terms',
+        code: 'CREATION_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/{id}/apply-terms:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Apply payment terms to an invoice
+ */
+router.post(
+  '/:id/apply-terms',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+    const { termsId } = req.body;
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    if (!termsId) {
+      return res.status(400).json({
+        error: 'Missing termsId',
+        code: 'MISSING_FIELDS',
+        required: ['termsId']
+      });
+    }
+
+    try {
+      const invoice = await getInvoiceService().applyPaymentTerms(invoiceId, termsId);
+      res.json({
+        success: true,
+        message: 'Payment terms applied',
+        invoice: toSnakeCaseInvoice(invoice)
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('not found')) {
+        return res.status(404).json({
+          error: 'Invoice or payment terms not found',
+          code: 'NOT_FOUND'
+        });
+      }
+      res.status(500).json({
+        error: 'Failed to apply payment terms',
+        code: 'UPDATE_FAILED',
+        message
+      });
+    }
+  })
+);
+
+// ============================================
+// TAX AND DISCOUNT
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/{id}/tax-discount:
+ *   put:
+ *     tags:
+ *       - Invoices
+ *     summary: Update invoice tax and discount
+ */
+router.put(
+  '/:id/tax-discount',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+    const { taxRate, discountType, discountValue } = req.body;
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const invoice = await getInvoiceService().updateInvoiceTaxAndDiscount(
+        invoiceId,
+        taxRate,
+        discountType,
+        discountValue
+      );
+
+      res.json({
+        success: true,
+        message: 'Tax and discount updated',
+        invoice: toSnakeCaseInvoice(invoice)
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('draft')) {
+        return res.status(400).json({
+          error: 'Only draft invoices can be modified',
+          code: 'INVALID_STATUS'
+        });
+      }
+      res.status(500).json({
+        error: 'Failed to update tax/discount',
+        code: 'UPDATE_FAILED',
+        message
+      });
+    }
+  })
+);
+
+// ============================================
+// LATE FEES
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/{id}/late-fee:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Calculate late fee for an invoice
+ */
+router.get(
+  '/:id/late-fee',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const invoice = await getInvoiceService().getInvoiceById(invoiceId);
+      const lateFee = getInvoiceService().calculateLateFee(invoice);
+
+      res.json({
+        success: true,
+        invoiceId,
+        lateFee,
+        alreadyApplied: !!invoice.lateFeeAppliedAt,
+        lateFeeAppliedAt: invoice.lateFeeAppliedAt
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('not found')) {
+        return res.status(404).json({
+          error: 'Invoice not found',
+          code: 'NOT_FOUND'
+        });
+      }
+      res.status(500).json({
+        error: 'Failed to calculate late fee',
+        code: 'CALCULATION_FAILED',
+        message
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/{id}/apply-late-fee:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Apply late fee to an overdue invoice
+ */
+router.post(
+  '/:id/apply-late-fee',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const invoice = await getInvoiceService().applyLateFee(invoiceId);
+      res.json({
+        success: true,
+        message: 'Late fee applied',
+        invoice: toSnakeCaseInvoice(invoice)
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('already been applied')) {
+        return res.status(400).json({
+          error: 'Late fee already applied',
+          code: 'ALREADY_APPLIED'
+        });
+      }
+      if (message.includes('No late fee applicable')) {
+        return res.status(400).json({
+          error: 'No late fee applicable',
+          code: 'NOT_APPLICABLE'
+        });
+      }
+      res.status(500).json({
+        error: 'Failed to apply late fee',
+        code: 'APPLY_FAILED',
+        message
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/process-late-fees:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Process late fees for all eligible invoices
+ */
+router.post(
+  '/process-late-fees',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    try {
+      const count = await getInvoiceService().processLateFees();
+      res.json({
+        success: true,
+        message: `Late fees applied to ${count} invoices`,
+        count
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to process late fees',
+        code: 'PROCESS_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+// ============================================
+// PAYMENT HISTORY
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/{id}/payments:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Get payment history for an invoice
+ */
+router.get(
+  '/:id/payments',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const payments = await getInvoiceService().getPaymentHistory(invoiceId);
+      res.json({
+        success: true,
+        payments: payments.map(toSnakeCasePayment)
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to retrieve payment history',
+        code: 'RETRIEVAL_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/{id}/record-payment-with-history:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Record a payment and add to payment history
+ */
+router.post(
+  '/:id/record-payment-with-history',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+    const { amount, paymentMethod, paymentReference, notes } = req.body;
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    if (!amount || !paymentMethod) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        code: 'MISSING_FIELDS',
+        required: ['amount', 'paymentMethod']
+      });
+    }
+
+    try {
+      const result = await getInvoiceService().recordPaymentWithHistory(
+        invoiceId,
+        amount,
+        paymentMethod,
+        paymentReference,
+        notes
+      );
+
+      res.json({
+        success: true,
+        message: 'Payment recorded',
+        invoice: toSnakeCaseInvoice(result.invoice),
+        payment: toSnakeCasePayment(result.payment)
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      res.status(500).json({
+        error: 'Failed to record payment',
+        code: 'RECORD_FAILED',
+        message
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/invoices/all-payments:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Get all payments across all invoices
+ */
+router.get(
+  '/all-payments',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const dateFrom = req.query.dateFrom as string | undefined;
+    const dateTo = req.query.dateTo as string | undefined;
+
+    try {
+      const payments = await getInvoiceService().getAllPayments(dateFrom, dateTo);
+      res.json({
+        success: true,
+        payments: payments.map(toSnakeCasePayment),
+        count: payments.length
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to retrieve payments',
+        code: 'RETRIEVAL_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+// ============================================
+// INVOICE AGING REPORT
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/aging-report:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Get accounts receivable aging report
+ */
+router.get(
+  '/aging-report',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = req.query.clientId ? parseInt(req.query.clientId as string) : undefined;
+
+    try {
+      const report = await getInvoiceService().getAgingReport(clientId);
+
+      // Transform the report for frontend
+      const transformedReport = {
+        generated_at: report.generatedAt,
+        total_outstanding: report.totalOutstanding,
+        buckets: report.buckets.map(bucket => ({
+          bucket: bucket.bucket,
+          count: bucket.count,
+          total_amount: bucket.totalAmount,
+          invoices: bucket.invoices.map(toSnakeCaseInvoice)
+        }))
+      };
+
+      res.json({
+        success: true,
+        report: transformedReport
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to generate aging report',
+        code: 'REPORT_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+// ============================================
+// INTERNAL NOTES
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/{id}/internal-notes:
+ *   put:
+ *     tags:
+ *       - Invoices
+ *     summary: Update internal notes on an invoice
+ */
+router.put(
+  '/:id/internal-notes',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceId = parseInt(req.params.id);
+    const { internalNotes } = req.body;
+
+    if (isNaN(invoiceId)) {
+      return res.status(400).json({
+        error: 'Invalid invoice ID',
+        code: 'INVALID_ID'
+      });
+    }
+
+    try {
+      const invoice = await getInvoiceService().updateInternalNotes(invoiceId, internalNotes || '');
+      res.json({
+        success: true,
+        message: 'Internal notes updated',
+        invoice: toSnakeCaseInvoice(invoice)
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('not found')) {
+        return res.status(404).json({
+          error: 'Invoice not found',
+          code: 'NOT_FOUND'
+        });
+      }
+      res.status(500).json({
+        error: 'Failed to update internal notes',
+        code: 'UPDATE_FAILED',
+        message
+      });
+    }
+  })
+);
+
+// ============================================
+// COMPREHENSIVE STATISTICS
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/comprehensive-stats:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: Get comprehensive invoice statistics
+ */
+router.get(
+  '/comprehensive-stats',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const dateFrom = req.query.dateFrom as string | undefined;
+    const dateTo = req.query.dateTo as string | undefined;
+
+    try {
+      const stats = await getInvoiceService().getComprehensiveStats(dateFrom, dateTo);
+
+      res.json({
+        success: true,
+        stats: {
+          total_invoices: stats.totalInvoices,
+          total_revenue: stats.totalRevenue,
+          total_outstanding: stats.totalOutstanding,
+          total_overdue: stats.totalOverdue,
+          average_invoice_amount: stats.averageInvoiceAmount,
+          average_days_to_payment: stats.averageDaysToPayment,
+          status_breakdown: stats.statusBreakdown,
+          monthly_revenue: stats.monthlyRevenue
+        }
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to retrieve statistics',
+        code: 'STATS_FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  })
+);
+
+// ============================================
+// CUSTOM INVOICE NUMBER
+// ============================================
+
+/**
+ * @swagger
+ * /api/invoices/with-custom-number:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: Create invoice with custom number prefix
+ */
+router.post(
+  '/with-custom-number',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { prefix, ...invoiceData } = req.body;
+
+    if (!invoiceData.projectId || !invoiceData.clientId || !invoiceData.lineItems?.length) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        code: 'MISSING_FIELDS',
+        required: ['projectId', 'clientId', 'lineItems']
+      });
+    }
+
+    try {
+      const invoice = await getInvoiceService().createInvoiceWithCustomNumber({
+        ...invoiceData,
+        prefix
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Invoice created with custom number',
+        invoice: toSnakeCaseInvoice(invoice)
+      });
+    } catch (error: unknown) {
+      res.status(500).json({
+        error: 'Failed to create invoice',
+        code: 'CREATION_FAILED',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
