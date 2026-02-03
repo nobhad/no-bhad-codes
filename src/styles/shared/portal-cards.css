@@ -293,6 +293,29 @@
 }
 
 /* =====================================================
+   CARD HEADER WITH ACTIONS
+   Consistent header layout for cards with action buttons
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .card-header-with-action,
+:is([data-page="admin"], [data-page="client-portal"]) .section-header-with-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--portal-spacing-md);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .card-header-with-action h3,
+:is([data-page="admin"], [data-page="client-portal"]) .section-header-with-actions h3 {
+  font-family: var(--font-family-acme);
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--portal-text-light);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+/* =====================================================
    INVOICES LIST
    Container for invoice history items
    ===================================================== */
