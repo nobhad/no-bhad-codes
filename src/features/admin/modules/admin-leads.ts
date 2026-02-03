@@ -11,7 +11,9 @@
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDisplayValue, formatDate, formatDateTime } from '../../../utils/format-utils';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
+import { ICONS } from '../../../constants/icons';
 import { createTableDropdown, LEAD_STATUS_OPTIONS } from '../../../utils/table-dropdown';
+import { initModalDropdown } from '../../../utils/modal-dropdown';
 import {
   createFilterUI,
   createSortableHeaders,
@@ -23,9 +25,22 @@ import {
 } from '../../../utils/table-filter';
 import type { Lead, AdminDashboardContext } from '../admin-types';
 import { loadProjects, showProjectDetails } from './admin-projects';
-import { confirmDialog, multiPromptDialog, alertDialog } from '../../../utils/confirm-dialog';
+import { confirmDialog, multiPromptDialog } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
+import { getCopyEmailButtonHtml } from '../../../utils/copy-email';
 import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
+import { createRowCheckbox, createBulkActionToolbar, setupBulkSelectionHandlers, resetSelection, type BulkActionConfig } from '../../../utils/table-bulk-actions';
+import {
+  createPaginationUI,
+  applyPagination,
+  getDefaultPaginationState,
+  loadPaginationState,
+  savePaginationState,
+  type PaginationState,
+  type PaginationConfig
+} from '../../../utils/table-pagination';
+import { showTableEmpty } from '../../../utils/loading-utils';
+import { createViewToggle } from '../../../components/view-toggle';
 
 interface LeadsData {
   leads: Lead[];
@@ -43,6 +58,66 @@ let filterState: FilterState = loadFilterState(LEADS_FILTER_CONFIG.storageKey);
 let filterUIInitialized = false;
 let currentView: 'table' | 'pipeline' = 'table';
 let kanbanBoard: ReturnType<typeof createKanbanBoard> | null = null;
+let pipelineLinkHandlersAttached = false;
+
+// Pagination configuration and state
+const LEADS_PAGINATION_CONFIG: PaginationConfig = {
+  tableId: 'leads',
+  pageSizeOptions: [10, 25, 50, 100],
+  defaultPageSize: 25,
+  storageKey: 'admin_leads_pagination'
+};
+
+let paginationState: PaginationState = {
+  ...getDefaultPaginationState(LEADS_PAGINATION_CONFIG),
+  ...loadPaginationState(LEADS_PAGINATION_CONFIG.storageKey!)
+};
+
+// Bulk action configuration for leads table
+const LEADS_BULK_CONFIG: BulkActionConfig = {
+  tableId: 'leads',
+  actions: [
+    {
+      id: 'update-status',
+      label: 'Update status',
+      icon: ICONS.PENCIL,
+      variant: 'default',
+      confirmMessage: '',
+      handler: async (ids: number[]) => {
+        const result = await multiPromptDialog({
+          title: 'Update lead status',
+          fields: [
+            {
+              name: 'status',
+              label: 'Status',
+              type: 'select',
+              required: true,
+              options: LEAD_STATUS_OPTIONS
+            }
+          ],
+          confirmText: 'Update'
+        });
+        if (!result || !storedContext) return;
+        try {
+          const response = await apiPost('/api/admin/leads/bulk/status', {
+            projectIds: ids,
+            status: result.status
+          });
+          if (response.ok) {
+            storedContext.showNotification(`Updated ${ids.length} lead${ids.length > 1 ? 's' : ''}`, 'success');
+            resetSelection('leads');
+            await loadLeads(storedContext);
+          } else {
+            storedContext.showNotification('Failed to update leads', 'error');
+          }
+        } catch (error) {
+          console.error('[AdminLeads] Bulk status update error:', error);
+          storedContext.showNotification('Error updating leads', 'error');
+        }
+      }
+    }
+  ]
+};
 
 // Pipeline stage configuration - simplified lead funnel
 const PIPELINE_STAGES = [
@@ -154,46 +229,75 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
 
   // Setup view toggle
   setupViewToggle(ctx);
+
+  // Create bulk action toolbar (selection count + Clear + Update status)
+  const bulkToolbarEl = document.getElementById('leads-bulk-toolbar');
+  if (bulkToolbarEl) {
+    const toolbar = createBulkActionToolbar({
+      ...LEADS_BULK_CONFIG,
+      onSelectionChange: () => {}
+    });
+    bulkToolbarEl.replaceWith(toolbar);
+  }
 }
 
+const LEADS_TABLE_ICON =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>';
+const LEADS_PIPELINE_ICON =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="18" rx="1"/><rect x="9" y="8" width="6" height="13" rx="1"/><rect x="15" y="5" width="6" height="16" rx="1"/></svg>';
+
 /**
- * Set up view toggle between table and pipeline
+ * Set up view toggle between table and pipeline (reusable view-toggle component)
  */
 function setupViewToggle(ctx: AdminDashboardContext): void {
-  const toggle = getElement('leads-view-toggle');
-  if (!toggle || toggle.dataset.listenerAdded) return;
-  toggle.dataset.listenerAdded = 'true';
+  const container = getElement('leads-filter-container');
+  const existingToggle = getElement('leads-view-toggle');
+  if (!container || !existingToggle || container.dataset.leadsViewToggleInit) return;
+  container.dataset.leadsViewToggleInit = 'true';
 
-  toggle.addEventListener('click', (e) => {
-    const button = (e.target as HTMLElement).closest('button');
-    if (!button) return;
-
-    const view = button.dataset.view as 'table' | 'pipeline';
-    if (view && view !== currentView) {
-      currentView = view;
-
-      // Update active button
-      toggle.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
-
-      // Toggle views
-      const tableView = getElement('leads-table-view');
-      const pipelineView = getElement('leads-pipeline-container');
-
-      if (view === 'table') {
-        if (tableView) tableView.style.display = 'block';
-        if (pipelineView) pipelineView.classList.add('hidden');
-        if (kanbanBoard) {
-          kanbanBoard.destroy();
-          kanbanBoard = null;
-        }
-      } else {
-        if (tableView) tableView.style.display = 'none';
-        if (pipelineView) pipelineView.classList.remove('hidden');
-        renderPipelineView(ctx);
+  function applyView(view: 'table' | 'pipeline'): void {
+    const tableView = getElement('leads-table-view');
+    const pipelineView = getElement('leads-pipeline-container');
+    if (view === 'table') {
+      if (tableView) tableView.style.display = 'block';
+      if (pipelineView) pipelineView.classList.add('hidden');
+      if (kanbanBoard) {
+        kanbanBoard.destroy();
+        kanbanBoard = null;
       }
+    } else {
+      if (tableView) tableView.style.display = 'none';
+      if (pipelineView) pipelineView.classList.remove('hidden');
+      renderPipelineView(ctx);
+    }
+  }
+
+  const toggleEl = createViewToggle({
+    id: 'leads-view-toggle',
+    options: [
+      {
+        value: 'table',
+        label: 'Table',
+        title: 'Table View',
+        ariaLabel: 'Table view',
+        iconSvg: LEADS_TABLE_ICON
+      },
+      {
+        value: 'pipeline',
+        label: 'Pipeline',
+        title: 'Pipeline View',
+        ariaLabel: 'Pipeline view',
+        iconSvg: LEADS_PIPELINE_ICON
+      }
+    ],
+    value: currentView,
+    onChange: (value) => {
+      currentView = value as 'table' | 'pipeline';
+      applyView(currentView);
     }
   });
+
+  existingToggle.replaceWith(toggleEl);
 }
 
 /**
@@ -234,6 +338,21 @@ function renderPipelineView(ctx: AdminDashboardContext): void {
     renderItem: renderLeadCard,
     emptyColumnText: 'No leads'
   });
+
+  // One-time delegated handler for links inside cards (so link click doesn't open lead details)
+  if (!pipelineLinkHandlersAttached && container) {
+    pipelineLinkHandlersAttached = true;
+    container.addEventListener('click', (e: Event) => {
+      const target = (e.target as HTMLElement).closest?.('.lead-card-client-link, .lead-card-project-link');
+      if (!target || !storedContext) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const clientId = target.getAttribute('data-client-id');
+      const projectId = target.getAttribute('data-project-id');
+      if (clientId) openClientDetails(parseInt(clientId, 10), storedContext);
+      else if (projectId) showProjectDetails(parseInt(projectId, 10), storedContext);
+    });
+  }
 }
 
 /**
@@ -250,7 +369,10 @@ function leadToKanbanItem(lead: Lead): KanbanItem {
       budget: leadAny.budget_range,
       source: lead.source || 'Website',
       score: calculateLeadScore(lead),
-      createdAt: lead.created_at
+      createdAt: lead.created_at,
+      clientId: lead.client_id,
+      projectName: lead.project_name,
+      isActivated: ['in-progress', 'converted'].includes(lead.status || '')
     }
   };
 }
@@ -303,18 +425,34 @@ function renderLeadCard(item: KanbanItem): string {
     source?: string;
     score?: number;
     createdAt?: string;
+    clientId?: number;
+    projectName?: string;
+    isActivated?: boolean;
   };
 
   const score = meta.score || 50;
   const scoreClass = getScoreClass(score);
   const budget = meta.budget ? formatDisplayValue(meta.budget) : '';
+  const titleEscaped = SanitizationUtils.escapeHtml(String(item.title));
+  const nameContent = meta.clientId
+    ? `<a href="#" class="lead-card-client-link" data-client-id="${meta.clientId}" title="View client">${titleEscaped}</a>`
+    : titleEscaped;
+  const projectName = meta.projectName ? SanitizationUtils.escapeHtml(String(meta.projectName)) : '';
+  // Link to project details only when lead is activated (converted)
+  const projectContent = projectName && meta.isActivated
+    ? `<a href="#" class="lead-card-project-link" data-project-id="${item.id}" title="View project">${projectName}</a>`
+    : projectName || '';
+  /* When has project name: show it first (link if activated), then client name */
+  const titleBlock = projectContent
+    ? `<div class="kanban-card-title">${projectContent}</div><div class="lead-card-client-name">${nameContent}</div>`
+    : `<div class="kanban-card-title">${nameContent}</div>`;
 
   return `
     <div class="lead-card-score ${scoreClass}">
       <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
       ${score}
     </div>
-    <div class="kanban-card-title">${SanitizationUtils.escapeHtml(String(item.title))}</div>
+    ${titleBlock}
     ${item.subtitle ? `<div class="lead-card-company">${SanitizationUtils.escapeHtml(String(item.subtitle))}</div>` : ''}
     ${budget ? `<div class="lead-card-value">${SanitizationUtils.escapeHtml(budget)}</div>` : ''}
     <div class="lead-card-meta">
@@ -410,12 +548,22 @@ function updateLeadsDisplay(data: LeadsData, ctx: AdminDashboardContext): void {
   }
 }
 
+/**
+ * Open client details (dynamic import to avoid circular dependency)
+ */
+async function openClientDetails(clientId: number, ctx: AdminDashboardContext): Promise<void> {
+  ctx.switchTab('clients');
+  const clientsModule = await import('./admin-clients');
+  clientsModule.showClientDetails(clientId, ctx);
+}
+
 function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
   const tableBody = getElement('leads-table-body');
   if (!tableBody) return;
 
   if (!leads || leads.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">No leads yet. New form submissions will appear here.</td></tr>';
+    showTableEmpty(tableBody, 8, 'No leads yet. New form submissions will appear here.');
+    renderLeadsPaginationUI(0, ctx);
     return;
   }
 
@@ -423,25 +571,38 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
   const filteredLeads = applyFilters(leads, filterState, LEADS_FILTER_CONFIG);
 
   if (filteredLeads.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">No leads match the current filters. Try adjusting your filters.</td></tr>';
+    showTableEmpty(tableBody, 8, 'No leads match the current filters. Try adjusting your filters.');
+    renderLeadsPaginationUI(0, ctx);
     return;
   }
+
+  // Update pagination state with total items
+  paginationState.totalItems = filteredLeads.length;
+
+  // Apply pagination
+  const paginatedLeads = applyPagination(filteredLeads, paginationState);
+
+  // Reset bulk selection when data changes
+  resetSelection('leads');
 
   // Clear and rebuild table
   tableBody.innerHTML = '';
 
-  filteredLeads.forEach((lead) => {
+  paginatedLeads.forEach((lead) => {
     const date = formatDate(lead.created_at);
-    const decodedContact = SanitizationUtils.decodeHtmlEntities(lead.contact_name || '-');
+    const decodedContact = SanitizationUtils.decodeHtmlEntities(lead.contact_name || '');
     const decodedCompany = SanitizationUtils.decodeHtmlEntities(lead.company_name || '');
     const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedContact));
-    const safeCompanyName = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '-';
-    const safeEmail = SanitizationUtils.escapeHtml(lead.email || '-');
+    const safeCompanyName = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '';
+    const safeEmail = SanitizationUtils.escapeHtml(lead.email || '');
     const leadAny = lead as unknown as Record<string, string>;
-    const projectType = leadAny.project_type || '-';
-    const displayType = projectType !== '-' ? projectType.charAt(0).toUpperCase() + projectType.slice(1) : '-';
+    const projectType = leadAny.project_type || '';
+    const displayType = projectType ? projectType.charAt(0).toUpperCase() + projectType.slice(1) : '';
     const displayBudget = formatDisplayValue(leadAny.budget_range);
     const status = lead.status || 'new';
+    const projectName = lead.project_name || '';
+    const safeProjectName = projectName ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(projectName)) : '';
+    const hasClient = typeof lead.client_id === 'number';
 
     // Show convert button for leads that can be converted (not yet converted/lost/cancelled)
     const showConvertBtn = ['new', 'contacted', 'qualified', 'in-progress'].includes(status);
@@ -449,15 +610,39 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
     const row = document.createElement('tr');
     row.dataset.leadId = String(lead.id);
 
-    // Add data cells
+    // Project column: link to project details when lead is in-progress or converted
+    const isActiveProject = ['in-progress', 'converted'].includes(status);
+    const projectContent = safeProjectName
+      ? isActiveProject
+        ? `<a href="#" class="lead-link lead-link-project" data-project-id="${lead.id}" title="View project">${safeProjectName}</a>`
+        : safeProjectName
+      : '—';
+
+    // Lead column: Company name is primary (largest), then contact name, then email
+    // If no company, contact name becomes primary
+    const wrapWithClientLink = (text: string) => hasClient
+      ? `<a href="#" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${text}</a>`
+      : text;
+
+    // Primary name: company if exists, otherwise contact
+    const primaryName = safeCompanyName || safeContactName;
+    const primaryContent = primaryName ? wrapWithClientLink(primaryName) : '';
+    // Secondary name: contact (only if company exists as primary)
+    const secondaryContent = safeCompanyName && safeContactName ? wrapWithClientLink(safeContactName) : '';
+
+    // Column order: ☐ | Project | Lead | Type | ... (project before client when active)
     row.innerHTML = `
-      <td>${date}</td>
-      <td>${safeContactName}</td>
-      <td>${safeCompanyName}</td>
-      <td>${safeEmail}</td>
+      ${createRowCheckbox('leads', lead.id)}
+      <td class="project-cell">${projectContent}</td>
+      <td class="identity-cell">
+        ${primaryContent ? `<span class="identity-name">${primaryContent}</span>` : ''}
+        ${secondaryContent ? `<span class="identity-contact">${secondaryContent}</span>` : ''}
+        <span class="identity-email">${safeEmail}</span>
+      </td>
       <td>${SanitizationUtils.escapeHtml(displayType)}</td>
       <td>${SanitizationUtils.escapeHtml(displayBudget)}</td>
       <td class="status-cell"></td>
+      <td>${date}</td>
       <td class="actions-cell">
         ${showConvertBtn ? `<button class="icon-btn icon-btn-convert btn-convert-lead" data-lead-id="${lead.id}" title="Convert to Project" aria-label="Convert to Project">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -503,15 +688,76 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
       });
     }
 
-    // Add click handler for row (excluding status cell and buttons)
+    // Links: name and company -> client details page
+    if (lead.client_id) {
+      row.querySelectorAll('.lead-link-client').forEach((link) => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openClientDetails(lead.client_id!, ctx);
+        });
+      });
+    }
+
+    // Link: project name -> project details
+    const projectLink = row.querySelector('.lead-link-project');
+    if (projectLink) {
+      projectLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showProjectDetails(lead.id, ctx);
+      });
+    }
+
+    // Add click handler for row (excluding status cell, buttons, links, and checkbox)
     row.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      if (target.closest('.table-dropdown') || target.closest('button')) return;
+      if (target.closest('.table-dropdown') || target.closest('button') || target.closest('.lead-link') || target.closest('.bulk-select-cell') || target.tagName === 'INPUT') return;
       showLeadDetails(lead.id);
     });
 
     tableBody.appendChild(row);
   });
+
+  // Setup bulk selection handlers
+  const leadsBulkConfig: BulkActionConfig = {
+    tableId: 'leads',
+    actions: []
+  };
+  const allRowIds = paginatedLeads.map(l => l.id);
+  setupBulkSelectionHandlers(leadsBulkConfig, allRowIds);
+
+  // Render pagination
+  renderLeadsPaginationUI(filteredLeads.length, ctx);
+}
+
+/**
+ * Render pagination UI for leads table
+ */
+function renderLeadsPaginationUI(totalItems: number, ctx: AdminDashboardContext): void {
+  const container = document.getElementById('leads-pagination');
+  if (!container) return;
+
+  // Update state
+  paginationState.totalItems = totalItems;
+
+  // Create pagination UI
+  const paginationUI = createPaginationUI(
+    LEADS_PAGINATION_CONFIG,
+    paginationState,
+    (newState) => {
+      paginationState = newState;
+      savePaginationState(LEADS_PAGINATION_CONFIG.storageKey!, paginationState);
+      // Re-render table with new pagination
+      if (leadsData.length > 0) {
+        renderLeadsTable(leadsData, ctx);
+      }
+    }
+  );
+
+  // Replace container content
+  container.innerHTML = '';
+  container.appendChild(paginationUI);
 }
 
 async function updateLeadStatus(id: number, status: string, ctx: AdminDashboardContext): Promise<void> {
@@ -540,7 +786,9 @@ async function updateLeadStatus(id: number, status: string, ctx: AdminDashboardC
       cancellation_reason = cancelInfo.reason;
     }
 
-    const body: { status: string; cancelled_by?: string; cancellation_reason?: string } = { status };
+    // Normalize status to match API (hyphens; string)
+    const normalizedStatus = String(status).trim().replace(/_/g, '-');
+    const body: { status: string; cancelled_by?: string; cancellation_reason?: string } = { status: normalizedStatus };
     if (cancelled_by) {
       body.cancelled_by = cancelled_by;
     }
@@ -552,7 +800,16 @@ async function updateLeadStatus(id: number, status: string, ctx: AdminDashboardC
     if (response.ok) {
       ctx.showNotification('Status updated', 'success');
     } else if (response.status !== 401) {
-      ctx.showNotification('Failed to update status. Please try again.', 'error');
+      let message = 'Failed to update status. Please try again.';
+      try {
+        const data = (await response.json()) as { error?: string; message?: string };
+        if (data?.error || data?.message) {
+          message = data.error || data.message;
+        }
+      } catch {
+        // use default message
+      }
+      ctx.showNotification(message, 'error');
     }
   } catch (error) {
     console.error('[AdminLeads] Failed to update status:', error);
@@ -628,6 +885,11 @@ async function showCancelledByDialog(): Promise<CancellationInfo | null> {
     const descTextarea = overlay.querySelector('#cancel-description') as HTMLTextAreaElement;
     const confirmBtn = overlay.querySelector('.confirm-btn') as HTMLButtonElement;
     const cancelBtn = overlay.querySelector('.cancel-btn') as HTMLButtonElement;
+
+    if (reasonSelect && !reasonSelect.dataset.dropdownInit) {
+      reasonSelect.dataset.dropdownInit = 'true';
+      initModalDropdown(reasonSelect, { placeholder: 'Select a reason...' });
+    }
 
     // Update confirm button state
     const updateConfirmState = () => {
@@ -709,27 +971,35 @@ export async function showLeadDetails(leadId: number): Promise<void> {
   const overlay = getElement('details-overlay');
   if (!detailsPanel) return;
 
-  const decodedContact = SanitizationUtils.decodeHtmlEntities(lead.contact_name || '-');
+  const decodedContact = SanitizationUtils.decodeHtmlEntities(lead.contact_name || '');
   const decodedCompany = SanitizationUtils.decodeHtmlEntities(lead.company_name || '');
   const safeContactName = SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedContact));
   const safeCompanyName = decodedCompany ? SanitizationUtils.escapeHtml(SanitizationUtils.capitalizeName(decodedCompany)) : '';
-  const safeEmail = SanitizationUtils.escapeHtml(lead.email || '-');
+  const safeEmail = SanitizationUtils.escapeHtml(lead.email || '');
   const safePhone = SanitizationUtils.formatPhone(lead.phone || '');
-  const safeProjectType = SanitizationUtils.escapeHtml(lead.project_type || '-');
-  const safeDescription = SanitizationUtils.escapeHtml(lead.description || 'No description');
+  const safeProjectType = SanitizationUtils.escapeHtml(lead.project_type || '');
+  const safeDescription = SanitizationUtils.escapeHtml(
+    SanitizationUtils.decodeHtmlEntities(lead.description || 'No description')
+  );
   const safeBudget = SanitizationUtils.escapeHtml(formatDisplayValue(lead.budget_range));
   const safeTimeline = SanitizationUtils.escapeHtml(formatDisplayValue(lead.timeline));
-  const safeFeatures = SanitizationUtils.escapeHtml((lead.features || '-').replace(/,/g, ', '));
-  const safeSource = SanitizationUtils.escapeHtml(lead.source || '-');
+  const safeFeatures = SanitizationUtils.escapeHtml(
+    SanitizationUtils.decodeHtmlEntities((lead.features || '').replace(/,/g, ', '))
+  );
+  const safeSource = SanitizationUtils.escapeHtml(lead.source || '');
+  const hasClient = typeof lead.client_id === 'number';
+  const safeProjectName = lead.project_name
+    ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(lead.project_name))
+    : '';
 
   // Calculate lead score
   const score = calculateLeadScore(lead);
   const scoreClass = getScoreClass(score);
 
-  // Show activate button only for leads that can be converted to projects
-  const showActivateBtn = !lead.status || ['new', 'contacted', 'qualified', 'in-progress'].includes(lead.status);
-  // Show view project button for converted leads
-  const isActivated = lead.status === 'converted';
+  // Show activate button only for leads not yet in progress or converted
+  const showActivateBtn = !lead.status || ['new', 'contacted', 'qualified'].includes(lead.status);
+  // Make project name clickable for active/converted leads
+  const isActiveProject = ['in-progress', 'converted'].includes(lead.status || '');
 
   // Load tasks and notes
   const [tasks, notes] = await Promise.all([
@@ -737,11 +1007,35 @@ export async function showLeadDetails(leadId: number): Promise<void> {
     loadLeadNotes(leadId)
   ]);
 
+  // Company and Name: link to client details page when converted
+  // Company comes first if it exists (business leads)
+  const companyValue = safeCompanyName && hasClient
+    ? `<a href="#" class="panel-link panel-link-client" data-client-id="${lead.client_id}" title="View client">${safeCompanyName}</a>`
+    : safeCompanyName;
+  const nameValue = hasClient
+    ? `<a href="#" class="panel-link panel-link-client" data-client-id="${lead.client_id}" title="View client">${safeContactName}</a>`
+    : safeContactName;
+  // Project: link to project details when lead is in-progress or converted
+  // The lead.id IS the project ID since leads and projects share the same table
+  const projectValue = safeProjectName
+    ? isActiveProject
+      ? `<a href="#" class="panel-link panel-link-project" data-project-id="${lead.id}" title="View project">${safeProjectName}</a>`
+      : safeProjectName
+    : '—';
+
   detailsPanel.innerHTML = `
     <div class="details-header">
       <h3>Lead Details</h3>
       <div class="lead-score-badge ${scoreClass}">Score: ${score}</div>
       <button class="close-btn" onclick="window.closeDetailsPanel()" aria-label="Close panel">×</button>
+    </div>
+    <div class="lead-details-created">Created ${formatDateTime(lead.created_at)}</div>
+    <div class="details-actions">
+      ${showActivateBtn ? `<button type="button" class="icon-btn details-activate-btn" data-id="${lead.id}" title="Activate as Project" aria-label="Activate as Project">${ICONS.ROCKET}</button>` : ''}
+    </div>
+    <div class="panel-status-row">
+      <span class="field-label">Status</span>
+      <span id="panel-lead-status-container"></span>
     </div>
     <div class="details-content">
       <!-- Lead Details Tabs -->
@@ -755,31 +1049,36 @@ export async function showLeadDetails(leadId: number): Promise<void> {
       <div class="lead-tab-content active" data-tab-content="overview">
         <div class="project-detail-meta">
           <div class="meta-item">
-            <span class="field-label">Name</span>
-            <span class="meta-value">${safeContactName}</span>
-          </div>
-          <div class="meta-item">
-            <span class="field-label">Email</span>
-            <span class="meta-value">${safeEmail}</span>
+            <span class="field-label">Project</span>
+            <span class="meta-value">${projectValue}</span>
           </div>
           ${safeCompanyName ? `
           <div class="meta-item">
             <span class="field-label">Company</span>
-            <span class="meta-value">${safeCompanyName}</span>
+            <span class="meta-value">${companyValue}</span>
           </div>
           ` : ''}
+          <div class="meta-item">
+            <span class="field-label">Name</span>
+            <span class="meta-value">${nameValue}</span>
+          </div>
+          <div class="meta-item">
+            <span class="field-label">Email</span>
+            <span class="meta-value meta-value-with-copy">
+              ${safeEmail}
+              ${getCopyEmailButtonHtml(lead.email || '')}
+            </span>
+          </div>
           <div class="meta-item">
             <span class="field-label">Phone</span>
             <span class="meta-value">${safePhone}</span>
           </div>
-          <div class="meta-item">
-            <span class="field-label">Status</span>
-            <span class="meta-value" id="panel-lead-status-container"></span>
-          </div>
+          ${lead.source?.trim() ? `
           <div class="meta-item">
             <span class="field-label">Source</span>
             <span class="meta-value">${safeSource}</span>
           </div>
+          ` : ''}
           <div class="meta-item">
             <span class="field-label">Project Type</span>
             <span class="meta-value">${safeProjectType}</span>
@@ -791,10 +1090,6 @@ export async function showLeadDetails(leadId: number): Promise<void> {
           <div class="meta-item">
             <span class="field-label">Timeline</span>
             <span class="meta-value">${safeTimeline}</span>
-          </div>
-          <div class="meta-item">
-            <span class="field-label">Created</span>
-            <span class="meta-value">${formatDateTime(lead.created_at)}</span>
           </div>
         </div>
         <div class="project-description-row">
@@ -808,10 +1103,6 @@ export async function showLeadDetails(leadId: number): Promise<void> {
             <span class="field-label">Features</span>
             <span class="meta-value">${safeFeatures}</span>
           </div>
-        </div>
-        <div class="details-actions">
-          ${showActivateBtn ? `<button class="btn details-activate-btn" data-id="${lead.id}">Activate as Project</button>` : ''}
-          ${isActivated ? `<button class="btn details-view-project-btn" data-id="${lead.id}">View Project</button>` : ''}
         </div>
       </div>
 
@@ -917,6 +1208,28 @@ export async function showLeadDetails(leadId: number): Promise<void> {
       }
     });
   }
+
+  // Panel links: name -> client details, project name -> project details
+  detailsPanel.querySelectorAll('.panel-link-client').forEach((el) => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      const clientId = (el as HTMLElement).dataset.clientId;
+      if (clientId && storedContext) {
+        window.closeDetailsPanel();
+        openClientDetails(parseInt(clientId, 10), storedContext);
+      }
+    });
+  });
+  detailsPanel.querySelectorAll('.panel-link-project').forEach((el) => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      const projectId = (el as HTMLElement).dataset.projectId;
+      if (projectId && storedContext) {
+        window.closeDetailsPanel();
+        showProjectDetails(parseInt(projectId, 10), storedContext);
+      }
+    });
+  });
 
   // Show overlay and panel
   if (overlay) overlay.classList.remove('hidden');
@@ -1046,8 +1359,16 @@ async function loadConversionFunnel(): Promise<void> {
   try {
     const response = await apiFetch('/api/admin/leads/conversion-funnel');
     if (response.ok) {
-      const data: { funnel: FunnelStage[] } = await response.json();
-      renderConversionFunnel(container, data.funnel || []);
+      const data = await response.json();
+      // API returns { success, funnel: { stages, overallConversionRate } }
+      const raw = data?.funnel?.stages ?? data?.funnel;
+      const stages = Array.isArray(raw) ? raw : [];
+      const funnel: FunnelStage[] = stages.map((s: { name?: string; stage?: string; count: number; conversionRate?: number; percentage?: number }) => ({
+        stage: s.name ?? s.stage ?? '',
+        count: s.count ?? 0,
+        percentage: s.percentage ?? (s.conversionRate !== null ? s.conversionRate * 100 : 0)
+      }));
+      renderConversionFunnel(container, funnel);
     } else {
       container.innerHTML = '<div class="empty-state">Unable to load funnel data</div>';
     }
@@ -1058,14 +1379,15 @@ async function loadConversionFunnel(): Promise<void> {
 }
 
 function renderConversionFunnel(container: HTMLElement, funnel: FunnelStage[]): void {
-  if (funnel.length === 0) {
+  const safeFunnel = Array.isArray(funnel) ? funnel : [];
+  if (safeFunnel.length === 0) {
     container.innerHTML = '<div class="empty-state">No funnel data available</div>';
     return;
   }
 
-  const maxCount = Math.max(...funnel.map(s => s.count), 1);
+  const maxCount = Math.max(...safeFunnel.map(s => s.count), 1);
 
-  container.innerHTML = funnel.map(stage => {
+  container.innerHTML = safeFunnel.map(stage => {
     const width = Math.max((stage.count / maxCount) * 100, 10);
     return `
       <div class="funnel-stage">
@@ -1186,15 +1508,15 @@ function renderScoringRules(container: HTMLElement, rules: ScoringRule[]): void 
         ${rule.points >= 0 ? '+' : ''}${rule.points} pts
       </div>
       <div class="rule-actions">
-        <button class="icon-btn" title="${rule.is_active ? 'Disable' : 'Enable'}" data-action="toggle">
+        <button class="icon-btn" title="${rule.is_active ? 'Disable' : 'Enable'}" data-action="toggle" aria-label="${rule.is_active ? 'Disable rule' : 'Enable rule'}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             ${rule.is_active
-              ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
-              : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
-            }
+    ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+    : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+}
           </svg>
         </button>
-        <button class="icon-btn icon-btn-danger" title="Delete" data-action="delete">
+        <button class="icon-btn icon-btn-danger" title="Delete" data-action="delete" aria-label="Delete rule">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
           </svg>
@@ -1335,14 +1657,8 @@ async function loadLeadTasks(leadId: number): Promise<LeadTask[]> {
 }
 
 function renderLeadTasks(tasks: LeadTask[], leadId: number): string {
-  if (tasks.length === 0) {
-    return `
-      <div class="empty-state-small">No tasks yet</div>
-      <button class="btn btn-secondary btn-sm add-lead-task-btn" data-lead-id="${leadId}">Add Task</button>
-    `;
-  }
-
-  return `
+  const emptyBody = '<div class="empty-state-small">No tasks yet</div>';
+  const listBody = `
     <div class="lead-tasks-list">
       ${tasks.map(task => `
         <div class="lead-task-item ${task.status === 'completed' ? 'task-completed' : ''}" data-task-id="${task.id}">
@@ -1357,7 +1673,17 @@ function renderLeadTasks(tasks: LeadTask[], leadId: number): string {
         </div>
       `).join('')}
     </div>
-    <button class="btn btn-secondary btn-sm add-lead-task-btn" data-lead-id="${leadId}">Add Task</button>
+  `;
+  return `
+    <div class="lead-tab-section">
+      <div class="lead-tab-section-header">
+        <span class="field-label">Tasks</span>
+        <button type="button" class="icon-btn add-lead-task-btn" data-lead-id="${leadId}" title="Add Task" aria-label="Add Task">${ICONS.PLUS}</button>
+      </div>
+      <div class="lead-tab-section-body">
+        ${tasks.length === 0 ? emptyBody : listBody}
+      </div>
+    </div>
   `;
 }
 
@@ -1451,27 +1777,20 @@ async function loadLeadNotes(leadId: number): Promise<LeadNote[]> {
 }
 
 function renderLeadNotes(notes: LeadNote[], leadId: number): string {
-  if (notes.length === 0) {
-    return `
-      <div class="empty-state-small">No notes yet</div>
-      <button class="btn btn-secondary btn-sm add-lead-note-btn" data-lead-id="${leadId}">Add Note</button>
-    `;
-  }
-
+  const emptyBody = '<div class="empty-state-small">No notes yet</div>';
   // Sort: pinned first, then by date
   const sortedNotes = [...notes].sort((a, b) => {
     if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
-
-  return `
+  const listBody = `
     <div class="lead-notes-list">
       ${sortedNotes.map(note => `
         <div class="lead-note-item ${note.is_pinned ? 'note-pinned' : ''}" data-note-id="${note.id}">
           <div class="note-header">
             <span class="note-author">${SanitizationUtils.escapeHtml(note.author)}</span>
             <span class="note-date">${formatDate(note.created_at)}</span>
-            <button class="icon-btn icon-btn-sm" data-action="toggle-pin" title="${note.is_pinned ? 'Unpin' : 'Pin'}">
+            <button class="icon-btn icon-btn-sm" data-action="toggle-pin" title="${note.is_pinned ? 'Unpin' : 'Pin'}" aria-label="${note.is_pinned ? 'Unpin note' : 'Pin note'}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="${note.is_pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
                 <path d="M12 2L12 12"/><circle cx="12" cy="16" r="4"/>
               </svg>
@@ -1481,7 +1800,17 @@ function renderLeadNotes(notes: LeadNote[], leadId: number): string {
         </div>
       `).join('')}
     </div>
-    <button class="btn btn-secondary btn-sm add-lead-note-btn" data-lead-id="${leadId}">Add Note</button>
+  `;
+  return `
+    <div class="lead-tab-section">
+      <div class="lead-tab-section-header">
+        <span class="field-label">Notes</span>
+        <button type="button" class="icon-btn add-lead-note-btn" data-lead-id="${leadId}" title="Add Note" aria-label="Add Note">${ICONS.PLUS}</button>
+      </div>
+      <div class="lead-tab-section-body">
+        ${notes.length === 0 ? emptyBody : listBody}
+      </div>
+    </div>
   `;
 }
 

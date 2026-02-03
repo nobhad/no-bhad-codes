@@ -65,7 +65,7 @@ body[data-page="admin"]:not(.admin-logged-in) .nav-logo-row:hover,
 body[data-page="admin"]:not(.admin-logged-in) .theme-button:hover,
 body[data-page="admin"]:not(.admin-logged-in) .menu-button:hover,
 body[data-page="admin"]:not(.admin-logged-in) .portal-button:hover {
-  color: var(--color-primary, var(--color-brand-primary));
+  color: var(--color-primary);
 }
 
 /* Hide header when logged in */
@@ -100,7 +100,7 @@ body[data-page="admin"]:not(.admin-logged-in) .admin-footer a {
 }
 
 body[data-page="admin"]:not(.admin-logged-in) .admin-footer a:hover {
-  color: var(--color-primary, var(--color-brand-primary));
+  color: var(--color-primary);
 }
 
 /* Hide footer when logged in */
@@ -282,14 +282,18 @@ body[data-page="admin"] #tab-analytics .stat-card {
   }
 }
 
-/* Portal Shadow utility */
+/* Portal Shadow utility - base in shared/portal-cards.css */
 [data-page="admin"] .portal-shadow {
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-panel);
+}
+
+[data-page="admin"] .stat-card {
+  box-shadow: var(--shadow-panel);
 }
 
 /* Portal Project Card - Base styles in shared/portal-cards.css */
 
-/* Icon buttons - consistent styling */
+/* Icon buttons - consistent styling (buttons and links) */
 [data-page="admin"] .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -302,14 +306,23 @@ body[data-page="admin"] #tab-analytics .stat-card {
   background: transparent;
   border: none;
   border-radius: var(--portal-radius-lg, 12px);
-  color: var(--portal-text-light, #fff);
+  color: var(--portal-text-light);
   cursor: pointer;
   flex-shrink: 0;
   transition: color 0.2s ease, background-color 0.2s ease;
+  text-decoration: none;
 }
 
 [data-page="admin"] .icon-btn:hover {
   color: var(--color-primary);
+}
+
+[data-page="admin"] .icon-btn.icon-btn-danger:hover {
+  color: var(--color-error-500);
+}
+
+[data-page="admin"] .icon-btn.icon-btn-success:hover {
+  color: var(--status-active);
 }
 
 [data-page="admin"] .icon-btn svg {
@@ -326,11 +339,13 @@ body[data-page="admin"] #tab-analytics .stat-card {
 [data-page="admin"] .analytics-section,
 [data-page="admin"] .analytics-overview,
 [data-page="admin"] .projects-table-container,
-[data-page="admin"] .admin-table-header {
+[data-page="admin"] .admin-table-header,
+[data-page="admin"] #tab-client-detail .portal-project-card {
   color: var(--portal-text-light);
 }
 
-/* Small uppercase section headers */
+/* Small uppercase section headers (match across Overview, Analytics).
+   Client detail overview card h3s match project detail tab h3s - see client-detail.css */
 [data-page="admin"] .stat-label,
 [data-page="admin"] .chart-container h3,
 [data-page="admin"] .metric-group h3,
@@ -377,7 +392,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
 
 [data-page="admin"] input[type="date"]::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
-  background-color: rgba(var(--color-brand-primary-rgb), 0.2);
+  background-color: rgba(var(--color-primary-rgb), 0.2);
 }
 
 /* Firefox date input styling */
@@ -401,6 +416,7 @@ body[data-page="admin"] .project-detail-overview {
   box-shadow: var(--shadow-panel);
 }
 
+/* Client detail cards use --shadow-card (match pd-tab-invoices summary-card) - set in client-detail.css */
 
 /* Less intense shadows for Core Web Vitals & Bundle Analysis cards */
 body[data-page="admin"] .vital-card,
@@ -415,13 +431,20 @@ body[data-page="admin"] .bundle-item {
    clients-table, contacts-table, projects-table
    ================================================ */
 
-/* Container - wraps all admin tables */
+/* Container - wraps all admin tables. Overflow visible so thead is not clipped. */
 .admin-table-container {
   background: var(--portal-bg-dark);
   border: none;
   border-radius: 0;
+  overflow: visible;
+}
+
+/* Inner wrapper handles horizontal scroll only; avoids clipping header row (overflow-y: visible). */
+.admin-table-scroll-wrapper {
+  width: 100%;
   overflow-x: auto;
   overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Base table */
@@ -448,6 +471,13 @@ body[data-page="admin"] .bundle-item {
   white-space: nowrap;
   border-top: 1px solid var(--portal-border-medium);
   border-bottom: 1px solid var(--portal-border-medium);
+  min-height: 48px;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+.admin-table thead tr {
+  min-height: 48px;
 }
 
 /* First header row inherits table's top border radius */
@@ -481,30 +511,15 @@ body[data-page="admin"] .bundle-item {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Last row inherits table's border radius */
-.admin-table tbody tr:last-child td:first-child {
-  border-bottom-left-radius: var(--border-radius-card);
-}
-
-.admin-table tbody tr:last-child td:last-child {
-  border-bottom-right-radius: var(--border-radius-card);
-}
-
-/* Preserve border radius on hover for last row */
-.admin-table tbody tr:last-child:hover td:first-child {
-  border-bottom-left-radius: var(--border-radius-card);
-}
-
-.admin-table tbody tr:last-child:hover td:last-child {
-  border-bottom-right-radius: var(--border-radius-card);
-}
+/* Last row no longer needs rounded corners with pagination */
 
 .admin-table td a {
-  color: var(--color-brand-primary);
+  color: var(--portal-text-light);
   text-decoration: none;
 }
 
 .admin-table td a:hover {
+  color: var(--color-error-500);
   text-decoration: underline;
 }
 
@@ -542,25 +557,68 @@ body[data-page="admin"] .bundle-item {
   text-overflow: ellipsis;
 }
 
-/* Table-specific: projects column widths */
-.admin-table.projects-table th:nth-child(1),
-.admin-table.projects-table td:nth-child(1) { width: 30%; }
+/* Identity column - consolidated name/email/company */
+.admin-table td.identity-cell {
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+  min-width: 180px;
+}
 
-.admin-table.projects-table th:nth-child(2),
-.admin-table.projects-table td:nth-child(2) { width: 20%; }
+.admin-table .identity-name {
+  display: block;
+  font-weight: 500;
+  color: var(--portal-text-primary);
+  line-height: 1.4;
+}
 
-.admin-table.projects-table th:nth-child(3),
-.admin-table.projects-table td:nth-child(3) { width: 12%; }
+.admin-table .identity-email {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--portal-text-muted);
+  line-height: 1.4;
+}
 
-.admin-table.projects-table th:nth-child(4),
-.admin-table.projects-table td:nth-child(4) { width: 12%; }
+/* Copy-email in tables: proportional, no row height change */
+.admin-table td.meta-value-with-copy {
+  line-height: 1.4;
+  vertical-align: middle;
+}
+.admin-table td.meta-value-with-copy .copy-email-btn {
+  font-size: 0.875em;
+  width: 1.2em;
+  height: 1.2em;
+  padding: 0.15em;
+  vertical-align: middle;
+}
 
-.admin-table.projects-table th:nth-child(5),
-.admin-table.projects-table td:nth-child(5) { width: 12%; }
+.admin-table .identity-contact {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--portal-text-secondary);
+  line-height: 1.4;
+}
 
-.admin-table.projects-table th:nth-child(6),
-.admin-table.projects-table td:nth-child(6) {
-  width: auto;
+.admin-table .identity-company {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+  line-height: 1.4;
+}
+
+/* Table-specific: checkbox column (first column when bulk actions enabled) */
+.admin-table th.bulk-select-cell,
+.admin-table td.bulk-select-cell {
+  width: 44px;
+  min-width: 44px;
+  max-width: 44px;
+  text-align: center;
+  padding: var(--space-2) !important;
+  box-sizing: border-box;
+}
+
+/* Projects table: let columns auto-size, just set status to nowrap */
+.admin-table.projects-table td:last-child,
+.admin-table.projects-table th:last-child {
   white-space: nowrap;
 }
 
@@ -623,7 +681,7 @@ body[data-page="admin"] .bundle-item {
 }
 
 .nav-header h1 {
-  color: var(--color-brand-primary);
+  color: var(--color-primary);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
 }
@@ -653,8 +711,8 @@ body[data-page="admin"] .bundle-item {
 }
 
 .tab-btn.active {
-  background: var(--color-brand-primary);
-  border-color: var(--color-brand-primary);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
   color: var(--color-white);
 }
 
@@ -687,6 +745,11 @@ body.modal-open .dashboard-content {
   margin-top: var(--portal-spacing-xl);
 }
 
+/* Less space below Leads heading */
+#tab-leads .page-title + .quick-stats {
+  margin-top: var(--portal-spacing-md);
+}
+
 /* Overview Tab */
 .overview-grid {
   display: grid;
@@ -702,11 +765,6 @@ body.modal-open .dashboard-content {
   padding: var(--space-6);
   box-shadow: var(--shadow-card-rest);
   transition: var(--animation-card-hover);
-}
-
-.metric-card:hover {
-  box-shadow: var(--shadow-card-hover);
-  transform: translateY(-2px);
 }
 
 .metric-card h3 {
@@ -760,7 +818,7 @@ body.modal-open .dashboard-content {
 /* Visitors table uses .admin-table-container and .admin-table base classes */
 .visitors-table-container {
   border-radius: var(--border-radius-card);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .admin-table.visitors-table th {
@@ -803,8 +861,8 @@ body.modal-open .dashboard-content {
 }
 
 /* Base .stat-card styles are in shared/portal-cards.css */
+/* Only clickable stat cards (links/buttons) get hover; non-links must not have bg hover */
 
-[data-page="admin"] .stat-card:hover,
 [data-page="admin"] .stat-card-clickable:hover {
   background: var(--portal-bg-readonly);
 }
@@ -812,15 +870,6 @@ body.modal-open .dashboard-content {
 /* Active filter card stays dark */
 [data-page="admin"] .stat-card-clickable.active {
   background: var(--portal-bg-readonly);
-}
-
-/* Remove hover states from analytics page cards */
-[data-page="admin"] #tab-analytics .stat-card:hover,
-[data-page="admin"] #tab-analytics .chart-container:hover,
-[data-page="admin"] #tab-analytics .analytics-section:hover,
-[data-page="admin"] #tab-analytics .metric-group:hover,
-[data-page="admin"] #tab-analytics .analytics-overview:hover {
-  background: var(--portal-bg-dark);
 }
 
 .stat-label {
@@ -878,7 +927,7 @@ body.modal-open .dashboard-content {
   background: transparent;
   border: none;
   border-radius: var(--portal-radius-lg, 12px);
-  color: var(--portal-text-light, #fff);
+  color: var(--portal-text-light);
   cursor: pointer;
   flex-shrink: 0;
   transition: color 0.2s ease, background-color 0.2s ease;
@@ -901,11 +950,11 @@ body.modal-open .dashboard-content {
 
 /* Convert icon button - coral/primary color for visibility */
 [data-page="admin"] .icon-btn-convert {
-  color: var(--color-primary, #e07a5f);
+  color: var(--color-primary);
 }
 
 [data-page="admin"] .icon-btn-convert:hover {
-  color: var(--color-primary-hover, #d06a4f);
+  color: var(--color-interactive-primary-hover);
   background: rgba(224, 122, 95, 0.1);
 }
 
@@ -953,10 +1002,6 @@ body.modal-open .dashboard-content {
   /* Spacing handled by shared/portal-layout.css */
 }
 
-.admin-table-card:hover {
-  background: var(--portal-bg-readonly);
-}
-
 #intake-submissions-card,
 #contact-submissions-card,
 #projects-card {
@@ -965,11 +1010,12 @@ body.modal-open .dashboard-content {
 
 /* Border overrides removed - base .admin-table-header now has no borders */
 
+/* Vertical padding matches .table-dropdown .custom-dropdown-trigger (space-2) so text/controls align when dropdown is open */
 .admin-table-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-2) var(--space-5);
   border-top: none;
   border-bottom: none;
   background: var(--portal-bg-dark);
@@ -991,6 +1037,7 @@ body.modal-open .dashboard-content {
   color: var(--portal-text-light);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
+  line-height: 1.25;
 }
 
 /* Default: show full titles, hide mobile titles */
@@ -1003,6 +1050,23 @@ body.modal-open .dashboard-content {
   gap: 0.5rem;
   align-items: center;
   margin-left: auto;
+}
+
+.admin-table-actions .admin-filter-select,
+.admin-table-actions .view-toggle {
+  align-self: center;
+}
+
+/* Reusable filter select: padding matches .table-dropdown .custom-dropdown-trigger so alignment when open is consistent */
+[data-page="admin"] .admin-filter-select {
+  min-width: 10rem;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--portal-border-dark);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  box-sizing: border-box;
 }
 
 /* Icon button group - tighter spacing */
@@ -1050,7 +1114,7 @@ body.modal-open .dashboard-content {
 
 [data-page="admin"] select.status-select:focus {
   outline: none;
-  border-color: var(--color-brand-primary);
+  border-color: var(--color-primary);
 }
 
 [data-page="admin"] select.status-select option {
@@ -1443,7 +1507,7 @@ body.modal-open .dashboard-content {
 
 .set-password-form .form-input:focus {
   outline: none;
-  border-color: var(--color-brand-primary);
+  border-color: var(--color-primary);
 }
 
 .set-password-form .form-input[readonly] {
@@ -1465,7 +1529,7 @@ body.modal-open .dashboard-content {
 }
 
 .set-password-form .btn-primary {
-  background: var(--color-brand-primary);
+  background: var(--color-primary);
   color: white;
   border: none;
   padding: var(--space-3) var(--space-4);
@@ -1533,33 +1597,7 @@ body.modal-open .dashboard-content {
   border: none;
 }
 
-/* System info grid and rows */
-.system-info-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.system-info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--portal-border-dark, rgba(255, 255, 255, 0.1));
-}
-
-.system-info-row:last-child {
-  border-bottom: none;
-}
-
-.system-info-row span:first-child {
-  color: var(--portal-text-muted);
-}
-
-.system-info-row span:last-child {
-  color: var(--portal-text-light);
-  text-align: right;
-}
+/* System info grid/rows: see shared/details-card.css */
 
 .status-item .status-icon {
   flex-shrink: 0;
@@ -1584,17 +1622,17 @@ body.modal-open .dashboard-content {
 }
 
 .status-item .status-badge.healthy {
-  background: var(--color-success, #22c55e);
+  background: var(--color-success);
   color: white;
 }
 
 .status-item .status-badge.unknown {
-  background: var(--color-warning, #f59e0b);
+  background: var(--color-warning);
   color: var(--portal-bg-dark);
 }
 
 .status-item .status-badge.error {
-  background: var(--color-danger, #ef4444);
+  background: var(--color-danger);
   color: white;
 }
 
@@ -1660,7 +1698,7 @@ body.modal-open .dashboard-content {
   width: 40px;
   height: 40px;
   border: 4px solid var(--portal-border-medium);
-  border-top: 4px solid var(--color-brand-primary);
+  border-top: 4px solid var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: var(--space-4);
@@ -1690,13 +1728,14 @@ body.modal-open .dashboard-content {
 
 /* Responsive Design */
 
-/* Vitals and analytics grids - 2x2 layout */
-[data-page="admin"] .vitals-grid,
-[data-page="admin"] .analytics-grid {
+/* Vitals grid - 2x2 layout */
+[data-page="admin"] .vitals-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
 }
+
+/* Analytics grid uses base centered 2-col from analytics.css */
 
 [data-page="admin"] .quick-stats > * {
   height: 100%;
@@ -1861,100 +1900,101 @@ body.modal-open .dashboard-content {
    Used for Leads (new intakes/contacts) and Messages (unread).
    ================================================ */
 
-/* Ensure sidebar buttons have relative positioning and visible overflow for badge */
+/* Ensure sidebar buttons have relative positioning for badge; allow badge to sit outside without clipping */
 [data-page="admin"] .sidebar-buttons .btn {
   position: relative;
   overflow: visible;
 }
 
-/* Expanded sidebar - inline red text, ensure not clipped */
+/* ================================================
+   SIDEBAR BADGE - SEPARATE COUNT (LEADS / MESSAGES)
+   Badge is always absolutely positioned so it never affects icon/button
+   position; it only overlays on top.
+   ================================================ */
+
+/* Base: badge is a pill/circle, absolutely positioned so it never shifts layout */
 [data-page="admin"] .sidebar-badge {
-  color: var(--color-primary);
-  font-family: var(--font--acme);
-  font-size: inherit;
-  font-weight: inherit;
-  margin-left: 0.5rem;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-/* Active button in expanded sidebar - badge matches button text color */
-[data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons .btn.active .sidebar-badge {
-  display: inline;
-  color: inherit;
-}
-
-/* Active button in collapsed sidebar - ensure badge is visible */
-[data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn.active {
-  overflow: visible;
-}
-
-[data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn.active .sidebar-badge {
-  display: block;
-  z-index: 2;
-}
-
-/* Collapsed sidebar - red badge */
-[data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn {
-  position: relative;
-  overflow: visible;
-}
-
-/* Collapsed sidebar - red number, positioned outside button flow */
-[data-page="admin"] .sidebar.collapsed .sidebar-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  margin: 0;
-  padding: 0;
-  background: transparent;
-  color: var(--color-danger, #ef4444);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.4rem;
+  border-radius: var(--border-radius-full, 9999px);
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 700;
   line-height: 1;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  white-space: nowrap;
   pointer-events: none;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-/* Badge stays red on hover, just scales up */
+/* No tail or notch from pseudo-elements */
+[data-page="admin"] .sidebar-badge::before,
+[data-page="admin"] .sidebar-badge::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Expanded sidebar: overlay on right edge of button, vertically centered */
+[data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons .btn .sidebar-badge {
+  top: 50%;
+  right: 0.5rem;
+  margin: 0;
+  transform: translateY(-50%);
+}
+
+/* Active button in expanded sidebar - badge stays red pill */
+[data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons .btn.active .sidebar-badge {
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+}
+
+/* Collapsed sidebar: small circle at top-right of button; ring so it stays visible and not clipped */
+[data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn .sidebar-badge {
+  top: 2px;
+  right: 2px;
+  margin: 0;
+  min-width: 16px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  transform: none;
+  border-radius: 50%;
+  background: var(--color-danger);
+  color: #fff;
+  box-shadow: 0 0 0 2px var(--portal-bg-dark);
+}
+
+/* Collapsed - no scale on hover so badge stays inside button and is not clipped */
 [data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn:hover .sidebar-badge {
-  transform: scale(1.2);
+  transform: none;
 }
 
-/* Intermediate breakpoint - badge positioning when sidebar auto-collapses */
+/* Intermediate breakpoint - badge at top-right of button so it's never clipped */
 @media (max-width: 1024px) {
-  [data-page="admin"] .sidebar .sidebar-buttons .btn {
-    position: relative;
-    overflow: visible;
-  }
-
-  /* Auto-collapsed sidebar - red number, positioned outside button flow */
-  [data-page="admin"] .sidebar .sidebar-badge {
+  [data-page="admin"] .sidebar .sidebar-buttons .btn .sidebar-badge {
     position: absolute;
-    top: -4px;
-    right: -4px;
+    top: 2px;
+    right: 2px;
     margin: 0;
+    min-width: 16px;
+    width: 16px;
+    height: 16px;
     padding: 0;
-    background: transparent;
-    color: var(--color-danger, #ef4444);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 700;
-    line-height: 1;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
-    pointer-events: none;
-  }
-
-  [data-page="admin"] .sidebar .sidebar-buttons .btn.active .sidebar-badge {
-    display: block;
-    color: var(--color-danger, #ef4444);
-    background: transparent;
-    z-index: 2;
-  }
-
-  [data-page="admin"] .sidebar .sidebar-buttons .btn:hover .sidebar-badge {
-    transform: scale(1.2);
+    background: var(--color-danger);
+    color: #fff;
+    box-shadow: 0 0 0 2px var(--portal-bg-dark);
   }
 }
 
@@ -1985,15 +2025,17 @@ body.modal-open .dashboard-content {
   vertical-align: middle;
 }
 
-/* Base trigger styles */
+/* Base trigger styles (padding, border-radius in shared portal-dropdown.css)
+   Use 2px border in all states so focus/open don't change size and align.
+   Trigger uses width: 100% from shared so closed = wrapper width = menu width. */
 [data-page="admin"] .table-dropdown .custom-dropdown-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: var(--space-2) var(--space-3);
-  border: 1px solid transparent;
-  border-radius: 0;
-  background-color: var(--color-black);
+  padding-right: var(--space-1-5); /* Half of space-3 so less gap to right of caret */
+  border: 2px solid transparent;
+  background-color: transparent;
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   font-weight: 400;
@@ -2001,30 +2043,39 @@ body.modal-open .dashboard-content {
   cursor: pointer;
   white-space: nowrap;
   box-shadow: none;
-  width: auto;
-  min-width: 80px;
   box-sizing: border-box;
   height: 32px;
   margin: 0;
+  text-align: left;
+}
+
+/* Status dropdowns: trigger text aligns with menu item text (same left offset). space-3 = item padding-left; trigger padding = space-3 - dot - gap */
+[data-page="admin"] .table-dropdown .custom-dropdown-trigger:has(.status-dot) {
+  padding-left: calc(var(--space-3) - 8px - var(--space-0-5));
 }
 
 /* Hover state - red border */
 [data-page="admin"] .table-dropdown .custom-dropdown-trigger:hover {
-  border-color: #dc2626;
+  border-color: var(--color-primary);
 }
 
-/* Focus state - red border */
-[data-page="admin"] .table-dropdown .custom-dropdown-trigger:focus {
-  outline: none;
-  border-color: #dc2626;
+/* Focus state (closed) - border only so closed trigger matches open menu size; no outline (outline extends outside and misaligns) */
+[data-page="admin"] .table-dropdown .custom-dropdown-trigger:focus,
+[data-page="admin"] .table-dropdown .custom-dropdown-trigger:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  border-color: var(--color-primary);
+  box-shadow: none !important;
 }
 
-/* Open state - red border with transparent bottom to connect with menu */
+/* Open state - 2px red border with transparent bottom to connect with menu; darker bg for emphasis */
 [data-page="admin"] .table-dropdown.open .custom-dropdown-trigger {
-  border-color: #dc2626;
+  border-color: var(--color-primary);
   border-bottom-color: transparent;
+  border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
   z-index: 10000;
   position: relative;
+  background-color: var(--portal-bg-darker, rgba(0, 0, 0, 0.25));
 }
 
 [data-page="admin"] .table-dropdown .status-dot {
@@ -2032,15 +2083,18 @@ body.modal-open .dashboard-content {
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
-  margin-right: var(--space-2);
+  margin-right: var(--space-0-5);
   background-color: var(--portal-text-muted);
 }
 
 [data-page="admin"] .table-dropdown .custom-dropdown-text {
   flex: 1;
+  min-width: 0;
   font-size: var(--font-size-sm);
   font-weight: 400;
   line-height: 1.5;
+  text-align: left;
+  align-self: center;
 }
 
 [data-page="admin"] .table-dropdown .custom-dropdown-caret {
@@ -2056,19 +2110,21 @@ body.modal-open .dashboard-content {
   left: 0;
   right: auto;
   width: 100%;
+  min-width: 100%;
   margin: 0;
   padding: 0;
   list-style: none;
   background-color: var(--portal-bg-dark);
-  border: 1px solid #dc2626;
+  border: 2px solid var(--color-primary);
   border-top: none;
-  border-radius: 0;
-  z-index: 9999;
+  border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
+  z-index: 10001;
   display: none;
   box-shadow: none;
   clip-path: none;
   max-height: none;
   box-sizing: border-box;
+  text-align: left;
 }
 
 /* Details panel dropdown - inherits base styles, just override background */
@@ -2085,57 +2141,142 @@ body.modal-open .dashboard-content {
 
 [data-page="admin"] .table-dropdown.custom-dropdown.open .custom-dropdown-menu {
   display: block;
+  margin-top: -2px; /* Overlap trigger's 2px transparent bottom border */
+}
+
+/* Open upward when near bottom so menu isn't cut off */
+[data-page="admin"] .table-dropdown.dropdown-open-up.open .custom-dropdown-trigger {
+  border-top-color: transparent;
+  border-bottom-color: var(--color-primary);
+  border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
+}
+
+[data-page="admin"] .table-dropdown.dropdown-open-up.open .custom-dropdown-menu {
+  top: auto;
+  bottom: 100%;
   margin-top: 0;
+  margin-bottom: -2px;
+  border-top: none;
+  border-bottom: 2px solid var(--color-primary);
+  border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
 }
 
 [data-page="admin"] .table-dropdown .custom-dropdown-item {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   padding: var(--space-2) var(--space-3);
   height: 32px;
   font-size: var(--font-size-sm);
   font-weight: 400;
   line-height: 1.5;
+  background-color: transparent;
   color: var(--portal-text-light);
   cursor: pointer;
   transition: background-color 0.15s ease;
   box-sizing: border-box;
+  text-align: left;
+}
+
+/* Filter dropdown: wide enough to show full option text (e.g. "For review", "All categories") */
+[data-page="admin"] .table-dropdown.filter-dropdown-with-check {
+  min-width: 12rem;
+}
+
+/* Filter dropdown: narrow check column, minimal gap so text aligns close to checkmark (DR + KB) */
+[data-page="admin"] .table-dropdown.filter-dropdown-with-check .filter-dropdown-check {
+  width: 1rem;
+  flex-shrink: 0;
+  text-align: center;
+  margin-right: calc(var(--space-0-5) / 2);
+}
+
+[data-page="admin"] .table-dropdown.filter-dropdown-with-check .custom-dropdown-item {
+  padding-left: calc(var(--space-3) / 2);
+}
+
+[data-page="admin"] .table-dropdown.filter-dropdown-with-check .custom-dropdown-item .custom-dropdown-text {
+  flex: 1;
+  min-width: min-content;
+  text-align: left;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+[data-page="admin"] .table-dropdown.filter-dropdown-with-check .custom-dropdown-trigger .custom-dropdown-text {
+  text-align: left;
+}
+
+/* Align trigger text with menu option text: same left offset as item padding + check column + gap */
+[data-page="admin"] .table-dropdown.filter-dropdown-with-check .custom-dropdown-trigger {
+  padding-left: calc(var(--space-3) / 2 + 1rem + var(--space-0-5) / 2);
 }
 
 [data-page="admin"] .table-dropdown .custom-dropdown-item:hover {
-  background-color: var(--color-brand-primary);
+  background-color: var(--color-primary);
 }
 
 /* Status-specific colors for status dot */
 [data-page="admin"] .table-dropdown[data-status="new"] .status-dot {
-  background-color: var(--color-status-new, #3b82f6);
+  background-color: var(--color-status-new);
 }
 
 [data-page="admin"] .table-dropdown[data-status="pending"] .status-dot {
-  background-color: var(--color-status-pending, #f59e0b);
+  background-color: var(--color-status-pending);
 }
 
 [data-page="admin"] .table-dropdown[data-status="read"] .status-dot,
 [data-page="admin"] .table-dropdown[data-status="qualified"] .status-dot,
 [data-page="admin"] .table-dropdown[data-status="contacted"] .status-dot {
-  background-color: var(--color-status-read, #8b5cf6);
+  background-color: var(--color-status-read);
 }
 
 [data-page="admin"] .table-dropdown[data-status="responded"] .status-dot,
 [data-page="admin"] .table-dropdown[data-status="converted"] .status-dot,
 [data-page="admin"] .table-dropdown[data-status="active"] .status-dot,
-[data-page="admin"] .table-dropdown[data-status="in_progress"] .status-dot {
-  background-color: var(--color-status-responded, #10b981);
+[data-page="admin"] .table-dropdown[data-status="in_progress"] .status-dot,
+[data-page="admin"] .table-dropdown[data-status="in-progress"] .status-dot {
+  background-color: var(--color-status-responded);
 }
 
 [data-page="admin"] .table-dropdown[data-status="completed"] .status-dot {
-  background-color: var(--color-status-completed, #06b6d4);
+  background-color: var(--color-status-completed);
+}
+
+[data-page="admin"] .table-dropdown[data-status="on-hold"] .status-dot,
+[data-page="admin"] .table-dropdown[data-status="on_hold"] .status-dot {
+  background-color: var(--color-status-pending);
 }
 
 [data-page="admin"] .table-dropdown[data-status="archived"] .status-dot,
 [data-page="admin"] .table-dropdown[data-status="lost"] .status-dot,
-[data-page="admin"] .table-dropdown[data-status="cancelled"] .status-dot {
-  background-color: var(--color-status-archived, #6b7280);
+[data-page="admin"] .table-dropdown[data-status="cancelled"] .status-dot,
+[data-page="admin"] .table-dropdown[data-status="inactive"] .status-dot,
+[data-page="admin"] .table-dropdown[data-status="closed"] .status-dot,
+[data-page="admin"] .table-dropdown[data-status="draft"] .status-dot {
+  background-color: var(--color-status-archived);
+}
+
+[data-page="admin"] .table-dropdown[data-status="overdue"] .status-dot {
+  background-color: var(--color-status-overdue);
+}
+
+[data-page="admin"] .table-dropdown[data-status="planning"] .status-dot,
+[data-page="admin"] .table-dropdown[data-status="partial"] .status-dot {
+  background-color: var(--color-status-pending);
+}
+
+[data-page="admin"] .table-dropdown[data-status="sent"] .status-dot,
+[data-page="admin"] .table-dropdown[data-status="viewed"] .status-dot {
+  background-color: var(--color-status-new);
+}
+
+[data-page="admin"] .table-dropdown[data-status="review"] .status-dot {
+  background-color: var(--color-status-read);
+}
+
+[data-page="admin"] .table-dropdown[data-status="paid"] .status-dot {
+  background-color: var(--color-status-responded);
 }
 
 /* ================================================
@@ -2185,7 +2326,7 @@ body.modal-open .dashboard-content {
   transform: translateX(-50%);
   padding: 8px 12px;
   background: var(--portal-bg-darker, #2a2a2a);
-  color: var(--portal-text-light, #fff);
+  color: var(--portal-text-light);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-size: 12px;
   font-weight: 400;
@@ -2285,77 +2426,21 @@ body.modal-open .dashboard-content {
   z-index: 1;
 }
 
-/* Search dropdown */
-.filter-search-dropdown {
+/* Search dropdown - higher specificity to override .search-bar display:flex */
+.filter-search-dropdown,
+.filter-search-dropdown.search-bar {
   position: absolute;
   top: calc(100% + 0.5rem);
   right: 0;
   display: none;
   width: 280px;
   z-index: 100;
-}
-
-.filter-search-wrapper.open .filter-search-dropdown {
-  display: block;
-}
-
-/* Search icon inside dropdown */
-.filter-search-icon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--portal-text-muted);
-  pointer-events: none;
-}
-
-.filter-search-input {
-  width: 100%;
-  padding: 0.5rem 2.5rem 0.5rem 2.25rem;
-  background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border-light, rgba(255,255,255,0.2));
-  border-radius: var(--portal-radius-lg, 12px);
-  color: var(--portal-text);
-  font-size: 0.875rem;
-  height: 40px;
   box-shadow: var(--shadow-elevated-md);
-  box-sizing: border-box;
 }
 
-.filter-search-input::placeholder {
-  color: var(--portal-text-muted);
-}
-
-.filter-search-input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-/* Clear button - positioned inside input */
-.filter-search-clear {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
+.filter-search-wrapper.open .filter-search-dropdown,
+.filter-search-wrapper.open .filter-search-dropdown.search-bar {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: var(--portal-radius-sm, 6px);
-  color: var(--portal-text-muted);
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.filter-search-clear:hover {
-  color: var(--portal-text);
 }
 
 /* Filter dropdown wrapper */
@@ -2381,7 +2466,7 @@ body.modal-open .dashboard-content {
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-  background: var(--portal-accent, #dc2626);
+  background: var(--color-primary);
   color: white;
   font-size: 0.65rem;
   font-weight: 600;
@@ -2460,52 +2545,13 @@ body.modal-open .dashboard-content {
   background: var(--portal-bg-medium);
 }
 
-/* Custom checkbox wrapper - matches .milestone-checkbox pattern */
+/* .portal-checkbox base styles (16px, system size) live in portal-forms.css */
 .filter-checkbox .portal-checkbox {
   flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  background: var(--color-black);
-  border-radius: 4px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Hide the actual checkbox input */
-.filter-checkbox .portal-checkbox input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  cursor: pointer;
-  z-index: 1;
-}
-
-/* Checked state - change wrapper background */
-.filter-checkbox .portal-checkbox:has(input:checked) {
-  background: var(--color-primary);
-}
-
-/* Checkmark for checked state */
-.filter-checkbox .portal-checkbox:has(input:checked)::after {
-  content: '';
-  position: absolute;
-  left: 6px;
-  top: 3px;
-  width: 5px;
-  height: 9px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
 }
 
 .filter-checkbox span {
-  color: var(--portal-text-light, #fff);
+  color: var(--portal-text-light);
   font-size: 0.85rem;
 }
 
@@ -2522,7 +2568,7 @@ body.modal-open .dashboard-content {
   background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border);
   border-radius: 4px;
-  color: var(--portal-text-light, #fff);
+  color: var(--portal-text-light);
   font-size: 0.8rem;
   height: 32px;
 }
@@ -2759,11 +2805,11 @@ body.modal-open .dashboard-content {
     display: none;
   }
 
-  /* Clients table: hide Email (3rd) and Created (6th) columns */
-  .clients-table th:nth-child(3),
-  .clients-table td:nth-child(3),
-  .clients-table th:nth-child(6),
-  .clients-table td:nth-child(6) {
+  /* Clients table: hide Email (4th) and Created (8th) columns - adjusted for checkbox column */
+  .clients-table th:nth-child(4),
+  .clients-table td:nth-child(4),
+  .clients-table th:nth-child(8),
+  .clients-table td:nth-child(8) {
     display: none;
   }
 
@@ -2779,12 +2825,12 @@ body.modal-open .dashboard-content {
     font-size: var(--font-size-sm);
   }
 
-  /* Ensure horizontal scroll indicator */
-  .admin-table-container {
+  /* Scroll indicator on the scroll wrapper (horizontal scroll lives there) */
+  .admin-table-scroll-wrapper {
     position: relative;
   }
 
-  .admin-table-container::after {
+  .admin-table-scroll-wrapper::after {
     content: '';
     position: absolute;
     top: 0;
@@ -2798,8 +2844,7 @@ body.modal-open .dashboard-content {
   }
 
   /* Show scroll indicator when table is scrollable */
-  .admin-table-container:has(.admin-table) {
-    overflow-x: auto;
+  .admin-table-container:has(.admin-table-scroll-wrapper) .admin-table-scroll-wrapper {
     -webkit-overflow-scrolling: touch;
   }
 }
