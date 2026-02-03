@@ -434,12 +434,20 @@ body[data-page="admin"] .bundle-item {
    clients-table, contacts-table, projects-table
    ================================================ */
 
-/* Container - wraps all admin tables. Overflow visible so thead is not clipped. */
+/* Container - wraps all admin tables */
+/* Default: rounded bottom corners with overflow hidden to clip table content */
 .admin-table-container {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: 0;
-  overflow: visible;
+  border-bottom-left-radius: var(--portal-radius-md);
+  border-bottom-right-radius: var(--portal-radius-md);
+  overflow: hidden;
+}
+
+/* When pagination follows, remove bottom border-radius from container */
+.admin-table-card:has(.table-pagination) .admin-table-container {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 /* Inner wrapper handles horizontal scroll only; avoids clipping header row (overflow-y: visible). */
@@ -514,7 +522,7 @@ body[data-page="admin"] .bundle-item {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Last row no longer needs rounded corners with pagination */
+/* Border radius now handled at container level via .admin-table-container overflow:hidden */
 
 .admin-table td a {
   color: var(--portal-text-light);
@@ -1014,12 +1022,12 @@ body.modal-open .dashboard-content {
 
 /* Border overrides removed - base .admin-table-header now has no borders */
 
-/* Vertical padding matches .table-dropdown .custom-dropdown-trigger (space-2) so text/controls align when dropdown is open */
+/* Horizontal padding matches table cells (space-4 = 32px) for alignment */
 .admin-table-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-2) var(--space-5);
+  padding: var(--space-3) var(--space-4);
   border-top: none;
   border-bottom: none;
   background: var(--portal-bg-dark);
