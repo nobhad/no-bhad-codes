@@ -33,6 +33,7 @@
   gap: var(--space-3);
   padding: var(--space-4);
   margin: 0;
+  border-radius: var(--portal-radius-lg, 12px);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .details-card summary::-webkit-details-marker,
