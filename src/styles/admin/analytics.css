@@ -705,10 +705,10 @@
    System Status Tab
    ============================================ */
 
-/* Health Check Grid */
+/* Health Check Grid - always 2x2 or 1 column, never 3+1 */
 .health-check-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--portal-spacing-md);
 }
 
