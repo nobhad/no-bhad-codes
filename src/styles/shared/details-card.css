@@ -114,6 +114,6 @@
 :is([data-page="admin"], [data-page="client-portal"]) .details-card > summary:focus-visible,
 :is([data-page="admin"], [data-page="client-portal"]) .system-details > summary:focus-visible,
 :is([data-page="admin"], [data-page="client-portal"]) details.portal-project-card > summary:focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
+  outline: none;
+  box-shadow: none;
 }
