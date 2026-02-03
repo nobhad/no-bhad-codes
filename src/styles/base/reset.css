@@ -206,11 +206,10 @@ a {
 
 /* Global focus indicator for ALL interactive elements - WCAG 2.4.7 */
 /* Applies to: a, button, input, select, textarea, [tabindex] */
-/* Always use rounded corners - never sharp corners on focus */
+/* Use box-shadow instead of outline - follows element border-radius naturally */
 :focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-  border-radius: var(--portal-radius-md, 8px);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-primary);
 }
 
 /* Remove focus ring for mouse users (non-keyboard focus) */
