@@ -32,8 +32,7 @@
   --cubic-default: cubic-bezier(0.65, 0.05, 0, 1);
   --menu-padding: 2rem;
 
-  /* Font Variables - navigation specific */
-  --font-family-acme: "Acme", sans-serif;
+  /* Font: --font-family-acme is defined in variables.css :root (alias of --font--acme) */
 
   /* Enhanced font-proportional spacing system - navigation specific */
   --nav-base-gap: clamp(0.5rem, 1.5vw, 0.8rem);
@@ -164,7 +163,7 @@ li {
 
 .nav-logo-row:hover,
 .nav-logo-row:active {
-  color: var(--color-primary, var(--color-brand-primary));
+  color: var(--color-primary);
   text-decoration: none;
 }
 
@@ -176,7 +175,7 @@ li {
 
 /* Focus-visible: red color for keyboard navigation */
 .nav-logo-row:focus-visible {
-  color: var(--color-primary, var(--color-brand-primary));
+  color: var(--color-primary);
   outline: none !important;
   box-shadow: none;
 }
@@ -458,7 +457,7 @@ li {
   z-index: 10;
   font-family: monospace;
   text-shadow: none;
-  box-shadow: 0 2px 8px rgba(var(--color-brand-primary-rgb), 0.3);
+  box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.3);
   /* GSAP handles pulse-glow animation - see navigation.ts */
 }
 
@@ -562,15 +561,15 @@ html[data-theme="dark"] .coming-soon-banner {
 .theme-button:active,
 .menu-button:hover,
 .menu-button:active {
-  color: var(--color-primary, var(--color-brand-primary));
+  color: var(--color-primary);
 }
 
 /* Focus-visible: red color + subtle background for better visibility (WCAG 2.4.7 compliance) */
 /* Remove outline border from global focus-visible rule */
 .theme-button:focus-visible,
 .menu-button:focus-visible {
-  color: var(--color-primary, var(--color-brand-primary));
-  background-color: rgba(var(--color-brand-primary-rgb, 220, 38, 38), 0.1);
+  color: var(--color-primary);
+  background-color: rgba(var(--color-primary-rgb), 0.1);
   outline: none !important;
   box-shadow: none;
 }
@@ -826,7 +825,7 @@ html[data-theme="dark"] .menu-button:hover {
   background: transparent;
   border: none;
   box-shadow: none;
-  color: var(--color-primary, var(--color-brand-primary));
+  color: var(--color-primary);
 }
 
 /* Dark mode menu link text shadow - use darkest panel color for duplicate text, no drop shadow */

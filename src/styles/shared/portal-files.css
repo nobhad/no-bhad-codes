@@ -19,7 +19,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .files-upload-section h3 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.1rem;
   margin: 0 0 var(--portal-spacing-lg) 0;
   text-transform: uppercase;
@@ -88,11 +88,84 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .files-list-section h3 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.1rem;
   margin: 0 0 var(--portal-spacing-lg) 0;
   text-transform: uppercase;
   color: var(--portal-text-light);
+}
+
+/* =====================================================
+   FILES FILTER BAR
+   Filter controls for file list
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-md);
+  margin-bottom: var(--portal-spacing-lg);
+  padding-bottom: var(--portal-spacing-lg);
+  border-bottom: 1px solid var(--portal-border);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .files-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--portal-spacing-md);
+  align-items: flex-end;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-xs);
+  min-width: 140px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .filter-group.filter-date {
+  min-width: 120px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .filter-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--portal-text-secondary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .form-select,
+:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .form-input {
+  font-size: 0.875rem;
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  color: var(--portal-text-light);
+  height: 36px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .form-select:focus,
+:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .form-input:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar #files-clear-filters {
+  height: 36px;
+  white-space: nowrap;
+}
+
+@media (--mobile) {
+  :is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar .filter-group {
+    flex: 1 1 calc(50% - var(--portal-spacing-md));
+    min-width: 100px;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .files-filter-bar #files-clear-filters {
+    width: 100%;
+    margin-top: var(--portal-spacing-sm);
+  }
 }
 
 /* =====================================================
@@ -170,15 +243,16 @@
   margin-left: auto;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-preview,
-:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-download {
+/* Text buttons in file actions (exclude icon buttons so they match invoices tab) */
+:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-preview:not(.icon-btn),
+:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-download:not(.icon-btn) {
   min-width: 90px;
   text-align: center;
   justify-content: center;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-preview:hover,
-:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-download:hover {
+:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-preview:not(.icon-btn):hover,
+:is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-download:not(.icon-btn):hover {
   background: var(--color-primary);
   color: var(--color-dark);
 }
@@ -266,8 +340,8 @@
     margin-top: var(--portal-spacing-sm);
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-preview,
-  :is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-download {
+  :is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-preview:not(.icon-btn),
+  :is([data-page="admin"], [data-page="client-portal"]) .file-actions .btn-download:not(.icon-btn) {
     flex: 1;
   }
 

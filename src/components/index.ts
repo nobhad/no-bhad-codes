@@ -93,6 +93,40 @@ export type { TimelineEvent, TimelineConfig };
 export { createBarChart, createPieChart, createSparkline, createKPICard, getChartStyles };
 export type { BarChartData, PieChartData, LineChartData };
 
+// Portal-shared (reusable for admin + client wireframes)
+export { renderBreadcrumbs } from './breadcrumbs';
+export type { BreadcrumbItem } from './breadcrumbs';
+export { setupTabRouter } from './tab-router';
+export type { TabRouterConfig } from './tab-router';
+export { createQuickStats } from './quick-stats';
+export type { QuickStatItem } from './quick-stats';
+export { createRecentActivity } from './recent-activity';
+export type { RecentActivityItem } from './recent-activity';
+export { createPageHeader } from './page-header';
+export type { PageHeaderConfig } from './page-header';
+export { createSearchBar } from './search-bar';
+export type { SearchBarConfig } from './search-bar';
+export { createEmptyState, renderEmptyState } from './empty-state';
+export type { EmptyStateOptions } from './empty-state';
+export { createStatusBadge, getStatusBadgeHTML } from './status-badge';
+export type { StatusBadgeVariant } from './status-badge';
+export { createIconButton } from './icon-button';
+export type { IconButtonConfig } from './icon-button';
+export { createPageTitle } from './page-title';
+export type { PageTitleConfig } from './page-title';
+export { createViewToggle } from './view-toggle';
+export type { ViewToggleConfig, ViewToggleOption } from './view-toggle';
+export { createFilterSelect } from './filter-select';
+export type { FilterSelectConfig, FilterSelectOption, FilterSelectInstance } from './filter-select';
+export { createFormSelect } from './form-select';
+export type { FormSelectConfig, FormSelectOption, FormSelectInstance } from './form-select';
+export { createTableDropdown, getStatusLabel, LEAD_STATUS_OPTIONS, CONTACT_STATUS_OPTIONS, PROJECT_STATUS_OPTIONS } from './table-dropdown';
+export type { TableDropdownOption, TableDropdownConfig } from './table-dropdown';
+export { createPortalModal } from './portal-modal';
+export type { PortalModalConfig, PortalModalInstance } from './portal-modal';
+export { getPortalCheckboxHTML } from './portal-checkbox';
+export type { PortalCheckboxConfig } from './portal-checkbox';
+
 // Register built-in components
 componentStore.register({
   name: 'Button',

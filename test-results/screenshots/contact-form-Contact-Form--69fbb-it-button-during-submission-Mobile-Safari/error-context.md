@@ -1,0 +1,73 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - navigation [ref=e5]:
+      - link "no bhad codes - Go to homepage" [ref=e6]:
+        - /url: /
+        - text: no bhad codes
+      - generic [ref=e7]:
+        - button "Switch to dark theme" [ref=e8] [cursor=pointer]:
+          - generic [ref=e9]:
+            - img [ref=e10]
+            - img [ref=e13]
+        - button "Toggle navigation menu" [ref=e15] [cursor=pointer]:
+          - img [ref=e17]
+          - generic [ref=e24]:
+            - paragraph [ref=e25]: Menu
+            - paragraph [ref=e26]: Close
+  - main [ref=e27]:
+    - heading "No Bhad Codes - Professional Web Development" [level=1] [ref=e28]
+    - generic [ref=e30]:
+      - heading "contact" [level=2] [ref=e31]
+      - separator [ref=e32]
+      - generic [ref=e33]:
+        - paragraph [ref=e34]:
+          - text: Message me here,
+          - generic [ref=e35]:
+            - text: fill out an
+            - link "intake form" [ref=e36]:
+              - /url: "#"
+            - text: ","
+          - generic [ref=e37]:
+            - text: or email me at
+            - link "nobhaduri@gmail.com" [ref=e38]:
+              - /url: mailto:nobhaduri@gmail.com
+            - text: .
+        - form "Contact form" [ref=e40]:
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - generic [ref=e44]:
+                - textbox "Name" [ref=e45]:
+                  - /placeholder: ...
+                - generic: Name
+              - generic [ref=e47]:
+                - textbox "Company (optional)" [ref=e48]:
+                  - /placeholder: ...
+                - generic: Company (optional)
+              - generic [ref=e50]:
+                - textbox "Email" [ref=e51]:
+                  - /placeholder: ...
+                - generic: Email
+            - button "Submit contact form" [ref=e53] [cursor=pointer]:
+              - img [ref=e54]
+          - generic [ref=e64]:
+            - textbox "Message" [ref=e65]:
+              - /placeholder: ...
+            - generic: Message
+  - contentinfo [ref=e66]:
+    - paragraph [ref=e68]: © 2026 No Bhad Codes. All rights reserved.
+  - generic [ref=e70]:
+    - img [ref=e72]
+    - generic [ref=e74]:
+      - heading "I respect your privacy" [level=3] [ref=e75]
+      - paragraph [ref=e76]: No Bhad Codes uses cookies and similar technologies to enhance your browsing experience, analyze site traffic, and understand visitor behavior. Your privacy is important to me.
+    - generic [ref=e77]:
+      - generic [ref=e78]:
+        - button "Decline" [ref=e79] [cursor=pointer]
+        - button "Accept All" [ref=e80] [cursor=pointer]
+      - button "Learn More" [ref=e82] [cursor=pointer]
+```

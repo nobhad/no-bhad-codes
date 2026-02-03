@@ -13,6 +13,45 @@
 @import '../shared/portal-forms.css';
 
 /* Admin Modal Styles */
+
+/* Portal modal overlay (createPortalModal): fixed over viewport, centered */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  position: relative;
+  z-index: var(--z-index-modal, 10000);
+  width: 100%;
+  max-width: 560px;
+  max-height: min(90vh, calc(100vh - 2 * var(--space-4, 1rem)));
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--portal-bg-darker, var(--color-neutral-100, #fff));
+  border-radius: var(--border-radius-card, 8px);
+  box-shadow: var(--shadow-modal, 0 8px 24px rgba(0, 0, 0, 0.4));
+  animation: slideUp 0.2s ease;
+}
+
+.modal-content > .modal-body {
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+
 .admin-modal-overlay {
   position: fixed;
   top: 0;
@@ -46,6 +85,11 @@
   animation: slideUp 0.2s ease;
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -65,9 +109,23 @@
   flex-shrink: 0;
 }
 
-.admin-modal-header h3 {
+/* Modal title wrapper with icon */
+.admin-modal-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.admin-modal-title svg {
+  width: 20px;
+  height: 20px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.admin-modal-header h2 {
   margin: 0;
-  color: var(--color-brand-primary);
+  color: var(--color-primary);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
 }
@@ -187,7 +245,7 @@
 
 .admin-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-trigger {
   background-color: var(--color-black);
-  border-color: var(--color-brand-primary);
+  border-color: var(--color-primary);
   border-bottom: none;
   border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
 }
@@ -195,7 +253,7 @@
 /* Explicit menu styles for admin modal */
 .admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-menu {
   background-color: var(--color-black);
-  border: 1px solid var(--color-brand-primary);
+  border: 1px solid var(--color-primary);
   border-top: none;
   border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
   margin-top: -1px;
@@ -206,14 +264,14 @@
 /* Flip-above: when dropdown opens upward (near bottom of modal) */
 .admin-modal .custom-dropdown[data-modal-dropdown].flip-above.open .custom-dropdown-trigger {
   border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
-  border-bottom: 1px solid var(--color-brand-primary);
+  border-bottom: 1px solid var(--color-primary);
   border-top: none;
 }
 
 .admin-modal .custom-dropdown[data-modal-dropdown].flip-above .custom-dropdown-menu {
   border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
   border-bottom: none;
-  border-top: 1px solid var(--color-brand-primary);
+  border-top: 1px solid var(--color-primary);
 }
 
 /* Heavier caret for admin modal dropdowns */
@@ -224,25 +282,29 @@
 /* Reduced padding for trigger and items (matches Messages dropdown) */
 .admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger {
   padding: var(--space-2) var(--space-3);
+  padding-right: var(--space-1-5); /* Half of space-3 so less gap to right of caret */
 }
 
 .admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-item {
   padding: var(--space-2) var(--space-3);
+  text-align: left;
+  justify-content: flex-start;
 }
 
 /* Native selects inherit styling from portal-forms.css */
 
-/* Modal Detail Grid */
+/* Modal Detail Grid - row gap = space between fields, column gap = label-to-value */
 .detail-grid {
   display: grid;
-  gap: var(--space-4);
+  row-gap: var(--field-group-gap);
+  column-gap: 0;
 }
 
 .detail-row {
   display: grid;
   grid-template-columns: 140px 1fr;
-  gap: var(--space-3);
-  padding: var(--space-3) 0;
+  gap: 0 var(--field-label-value-gap);
+  padding: 0;
 }
 
 .detail-label {
@@ -251,6 +313,7 @@
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  margin-bottom: 0;
 }
 
 .detail-value {
@@ -270,7 +333,7 @@
 }
 
 .detail-value a {
-  color: var(--color-brand-primary);
+  color: var(--color-primary);
   text-decoration: none;
 }
 

@@ -97,7 +97,7 @@ ALTER TABLE general_messages ADD COLUMN mention_count INTEGER DEFAULT 0;
 -- UPDATE MESSAGE_THREADS TABLE
 -- =====================================================
 ALTER TABLE message_threads ADD COLUMN pinned_count INTEGER DEFAULT 0;
-ALTER TABLE message_threads ADD COLUMN participant_count INTEGER DEFAULT 1;
+-- participant_count already exists from migration 005
 ALTER TABLE message_threads ADD COLUMN archived_at DATETIME;
 ALTER TABLE message_threads ADD COLUMN archived_by TEXT;
 

@@ -110,13 +110,15 @@ export interface VisitorInfo {
 }
 
 // Lead types (intake submissions)
+// Simplified pipeline stages: new → contacted → qualified → in-progress → converted/lost
 export interface Lead {
   id: number;
+  client_id?: number;
   company_name: string;
   contact_name: string;
   email: string;
   phone?: string;
-  status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost' | 'pending' | 'active' | 'in-progress' | 'on-hold' | 'completed' | 'cancelled';
+  status: 'new' | 'contacted' | 'qualified' | 'in-progress' | 'converted' | 'lost' | 'on-hold' | 'cancelled';
   source?: string;
   notes?: string;
   created_at: string;
@@ -229,7 +231,7 @@ export interface ApiResponse<T> {
 // Dashboard context passed to modules
 export interface AdminDashboardContext {
   getAuthToken: () => string | null;
-  showNotification: (message: string, type: 'success' | 'error' | 'info') => void;
+  showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   refreshData: () => Promise<void>;
   switchTab: (tab: string) => void;
 }

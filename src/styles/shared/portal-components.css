@@ -34,7 +34,7 @@
 
 .kanban-column-header {
   padding: var(--portal-spacing-sm) var(--portal-spacing-md);
-  border-top: 3px solid var(--app-color-primary);
+  border-top: 3px solid var(--color-primary);
   border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0;
   display: flex;
   justify-content: space-between;
@@ -81,8 +81,8 @@
 }
 
 .kanban-card:hover {
-  border-color: var(--app-color-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
 }
 
 .kanban-card.dragging {
@@ -157,7 +157,7 @@
 }
 
 .tag-input-wrapper:focus-within {
-  border-color: var(--app-color-primary);
+  border-color: var(--color-primary);
 }
 
 .tag-input-tags {
@@ -218,7 +218,7 @@
   max-height: 200px;
   overflow-y: auto;
   z-index: 100;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
 }
 
 .tag-dropdown.hidden {
@@ -252,7 +252,7 @@
 
 .tag-create-item {
   border-top: 1px solid var(--portal-border);
-  color: var(--app-color-primary);
+  color: var(--color-primary);
 }
 
 .tag-dropdown-empty {
@@ -466,7 +466,7 @@
   padding: var(--portal-spacing-md);
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-md);
-  border-top: 3px solid var(--app-color-primary);
+  border-top: 3px solid var(--color-primary);
 }
 
 .kpi-card-icon {

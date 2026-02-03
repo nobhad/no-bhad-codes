@@ -57,6 +57,9 @@ function setupAnalyticsEventListeners(): void {
   if (analyticsListenersInitialized) return;
   analyticsListenersInitialized = true;
 
+  // Analytics Sub-Tab Switching
+  setupAnalyticsSubtabs();
+
   // Create Report button
   const createReportBtn = document.getElementById('create-report-btn');
   if (createReportBtn) {
@@ -68,6 +71,37 @@ function setupAnalyticsEventListeners(): void {
   if (createAlertBtn) {
     createAlertBtn.addEventListener('click', showCreateAlertDialog);
   }
+}
+
+/**
+ * Setup analytics sub-tab navigation
+ */
+function setupAnalyticsSubtabs(): void {
+  const subtabButtons = document.querySelectorAll('.analytics-subtab');
+  const subtabContents = document.querySelectorAll('.analytics-subtab-content');
+
+  if (subtabButtons.length === 0) return;
+
+  subtabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetTab = btn.getAttribute('data-subtab');
+      if (!targetTab) return;
+
+      // Update button states
+      subtabButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // Update content visibility
+      subtabContents.forEach(content => {
+        const contentId = content.id;
+        if (contentId === `analytics-subtab-${targetTab}`) {
+          content.classList.add('active');
+        } else {
+          content.classList.remove('active');
+        }
+      });
+    });
+  });
 }
 
 // =====================================================
@@ -988,10 +1022,16 @@ async function loadAnalyticsSummary(): Promise<void> {
     const data = await response.json();
     const summary = data.summary || {};
 
-    // Update analytics tab stats
-    updateElement('analytics-visitors', formatNumber(summary.unique_visitors || 0));
-    updateElement('analytics-pageviews', formatNumber(summary.total_page_views || 0));
-    updateElement('analytics-sessions', formatDuration(summary.avg_session_duration || 0));
+    // Update analytics tab: breakdown (portfolio vs THE BACKEND); same combined data until API supports per-site
+    const visitors = formatNumber(summary.unique_visitors || 0);
+    const pageviews = formatNumber(summary.total_page_views || 0);
+    const sessions = formatDuration(summary.avg_session_duration || 0);
+    updateElement('analytics-portfolio-visitors', visitors);
+    updateElement('analytics-portfolio-pageviews', pageviews);
+    updateElement('analytics-portfolio-sessions', sessions);
+    updateElement('analytics-backend-visitors', visitors);
+    updateElement('analytics-backend-pageviews', pageviews);
+    updateElement('analytics-backend-sessions', sessions);
 
     // Update overview tab stats
     updateElement('total-visitors', formatNumber(summary.unique_visitors || 0));
@@ -1049,6 +1089,12 @@ function showOverviewDefaults(): void {
   setChangeText('visitors-change', 'No data');
   setChangeText('views-change', 'No data');
   setChangeText('session-change', 'No data');
+  // Analytics tab breakdown (portfolio + THE BACKEND)
+  ['portfolio', 'backend'].forEach((site) => {
+    updateElement(`analytics-${site}-visitors`, '0');
+    updateElement(`analytics-${site}-pageviews`, '0');
+    updateElement(`analytics-${site}-sessions`, '-');
+  });
 }
 
 function setChangeText(id: string, text: string): void {
@@ -1792,6 +1838,14 @@ function updateElement(id: string, value: string): void {
 function populateDataList(containerId: string, items: AnalyticsDataItem[]): void {
   const container = document.getElementById(containerId);
   if (!container) return;
+
+  const isEmptyState =
+    items.length === 1 && items[0].label === 'No data available' && items[0].value === '-';
+
+  if (isEmptyState) {
+    container.innerHTML = '<div class="data-list-empty" aria-live="polite">No data available</div>';
+    return;
+  }
 
   container.innerHTML = items
     .map(

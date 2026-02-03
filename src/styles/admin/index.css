@@ -12,12 +12,16 @@
 @import "../shared/portal-layout.css";
 @import "../shared/portal-buttons.css";
 @import "../shared/portal-messages.css";
+@import "../shared/search-bar.css";
 @import "../shared/portal-cards.css";
+@import "../shared/details-card.css";
 @import "../shared/portal-forms.css";
 @import "../shared/portal-files.css";
 @import "../shared/portal-dropdown.css";
 @import "../shared/portal-badges.css";
 @import "../shared/portal-components.css";
+@import "../shared/portal-tabs.css";
+@import "../shared/view-toggle.css";
 
 /* Portal layout and sidebar (shared with client portal) */
 @import "../client-portal/layout.css";
@@ -27,9 +31,13 @@
 @import "./auth.css";
 @import "./modals.css";
 @import "./analytics.css";
+@import "./detail-header.css";
 @import "./project-detail.css";
 @import "./client-detail.css";
 @import "./tasks.css";
 @import "./leads-pipeline.css";
 @import "./files.css";
 @import "./proposals.css";
+@import "./table-features.css";
+@import "./knowledge-base.css";
+@import "./document-requests.css";

@@ -4,31 +4,32 @@
  * ===============================================
  * @file src/features/admin/modules/admin-overview.ts
  *
- * Overview/dashboard statistics functionality for admin dashboard.
- * Fetches real data from visitor tracking service.
+ * Dashboard functionality for admin dashboard.
+ * Loads priority-first data: attention items, snapshot metrics, and activity.
  * Dynamically imported for code splitting.
  */
 
 import type { AdminDashboardContext } from '../admin-types';
+import { apiFetch } from '../../../utils/api-client';
+import { formatDateTime } from '../../../utils/format-utils';
+import { SanitizationUtils } from '../../../utils/sanitization-utils';
 
-interface OverviewStats {
-  totalVisitors: number;
-  visitorsChange: number;
-  pageViews: number;
-  pageViewsChange: number;
-  avgSessionDuration: number;
-  sessionChange: number;
-  cardInteractions: number;
-  interactionsChange: number;
-}
-
-interface StoredEvent {
-  sessionId: string;
-  timestamp: number;
-  timeOnPage?: number;
-  interactions?: number;
-  type?: string;
-  element?: string;
+/**
+ * Dashboard data structure
+ */
+interface DashboardData {
+  attention: {
+    overdueInvoices: number;
+    pendingContracts: number;
+    newLeadsThisWeek: number;
+    unreadMessages: number;
+  };
+  snapshot: {
+    activeProjects: number;
+    totalClients: number;
+    revenueMTD: number;
+    conversionRate: number;
+  };
 }
 
 /**
@@ -36,125 +37,224 @@ interface StoredEvent {
  */
 export async function loadOverviewData(_ctx: AdminDashboardContext): Promise<void> {
   try {
-    const stats = await getOverviewStats();
+    // Load all dashboard data in parallel
+    const [dashboardData] = await Promise.all([
+      loadDashboardData(),
+      loadRecentActivity()
+    ]);
 
-    // Update UI with real data
-    updateElement('total-visitors', formatNumber(stats.totalVisitors));
-    updateElement('visitors-change', formatChange(stats.visitorsChange), getChangeClass(stats.visitorsChange));
+    // Update Needs Attention section
+    updateAttentionCard('stat-overdue-invoices', dashboardData.attention.overdueInvoices);
+    updateAttentionCard('stat-pending-contracts', dashboardData.attention.pendingContracts);
+    updateAttentionCard('stat-new-leads', dashboardData.attention.newLeadsThisWeek);
+    updateAttentionCard('stat-unread-messages', dashboardData.attention.unreadMessages);
 
-    updateElement('page-views', formatNumber(stats.pageViews));
-    updateElement('views-change', formatChange(stats.pageViewsChange), getChangeClass(stats.pageViewsChange));
-
-    updateElement('avg-session', formatDuration(stats.avgSessionDuration));
-    updateElement('session-change', formatChange(stats.sessionChange), getChangeClass(stats.sessionChange));
-
-    updateElement('card-interactions', formatNumber(stats.cardInteractions));
-    updateElement('interactions-change', formatChange(stats.interactionsChange), getChangeClass(stats.interactionsChange));
+    // Update Today's Snapshot section
+    updateElement('stat-active-projects', formatNumber(dashboardData.snapshot.activeProjects));
+    updateElement('stat-total-clients', formatNumber(dashboardData.snapshot.totalClients));
+    updateElement('stat-revenue-mtd', formatCurrency(dashboardData.snapshot.revenueMTD));
+    updateElement('stat-conversion-rate', `${dashboardData.snapshot.conversionRate}%`);
 
   } catch (error) {
     console.error('[AdminOverview] Error loading overview data:', error);
-    // Show error state in UI
     showNoDataMessage();
   }
 }
 
 /**
- * Get overview statistics from visitor tracking data
+ * Load dashboard data from various API endpoints
  */
-async function getOverviewStats(): Promise<OverviewStats> {
-  const events = getStoredEvents();
-  const now = Date.now();
-  const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
-  const twoWeeksAgo = now - 14 * 24 * 60 * 60 * 1000;
+async function loadDashboardData(): Promise<DashboardData> {
+  // Fetch data from multiple endpoints in parallel
+  const [
+    invoicesRes,
+    projectsRes,
+    clientsRes,
+    leadsRes,
+    messagesRes,
+    metricsRes
+  ] = await Promise.all([
+    apiFetch('/api/invoices').catch(() => null),
+    apiFetch('/api/projects').catch(() => null),
+    apiFetch('/api/clients').catch(() => null),
+    apiFetch('/api/admin/leads').catch(() => null),
+    apiFetch('/api/messages/unread-count').catch(() => null),
+    apiFetch('/api/analytics/quick/revenue?days=30').catch(() => null)
+  ]);
 
-  // Current week events
-  const currentWeekEvents = events.filter(e => e.timestamp >= oneWeekAgo);
-  // Previous week events (for comparison)
-  const previousWeekEvents = events.filter(e => e.timestamp >= twoWeeksAgo && e.timestamp < oneWeekAgo);
+  // Parse responses
+  const invoices = invoicesRes?.ok ? await invoicesRes.json() : [];
+  const projects = projectsRes?.ok ? await projectsRes.json() : [];
+  const clients = clientsRes?.ok ? await clientsRes.json() : [];
+  const leads = leadsRes?.ok ? await leadsRes.json() : [];
+  const messagesData = messagesRes?.ok ? await messagesRes.json() : { count: 0 };
+  const metricsData = metricsRes?.ok ? await metricsRes.json() : { summary: {}, revenueMTD: 0 };
 
-  // Calculate current week stats
-  const currentStats = calculatePeriodStats(currentWeekEvents);
-  const previousStats = calculatePeriodStats(previousWeekEvents);
+  // Calculate overdue invoices (due_date < today and status not paid)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const overdueInvoices = Array.isArray(invoices)
+    ? invoices.filter((inv: { due_date?: string; status?: string }) => {
+      if (!inv.due_date || inv.status === 'paid') return false;
+      const dueDate = new Date(inv.due_date);
+      return dueDate < today;
+    }).length
+    : 0;
 
-  // Calculate percentage changes
-  const visitorsChange = calculatePercentChange(currentStats.uniqueVisitors, previousStats.uniqueVisitors);
-  const pageViewsChange = calculatePercentChange(currentStats.pageViews, previousStats.pageViews);
-  const sessionChange = calculatePercentChange(currentStats.avgSessionDuration, previousStats.avgSessionDuration);
-  const interactionsChange = calculatePercentChange(currentStats.cardInteractions, previousStats.cardInteractions);
+  // Calculate pending contracts (projects with contract not signed)
+  const pendingContracts = Array.isArray(projects)
+    ? projects.filter((p: { contract_signed?: boolean; status?: string }) =>
+      !p.contract_signed && p.status !== 'completed' && p.status !== 'cancelled'
+    ).length
+    : 0;
+
+  // Calculate new leads this week
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  const newLeadsThisWeek = Array.isArray(leads)
+    ? leads.filter((lead: { created_at?: string }) => {
+      if (!lead.created_at) return false;
+      const createdAt = new Date(lead.created_at);
+      return createdAt >= oneWeekAgo;
+    }).length
+    : 0;
+
+  // Unread messages count
+  const unreadMessages = messagesData.count || 0;
+
+  // Active projects count
+  const activeProjects = Array.isArray(projects)
+    ? projects.filter((p: { status?: string }) =>
+      p.status === 'active' || p.status === 'in_progress'
+    ).length
+    : 0;
+
+  // Total clients count
+  const totalClients = Array.isArray(clients) ? clients.length : 0;
+
+  // Revenue MTD (from analytics quick/revenue - summary.total_revenue or legacy revenueMTD)
+  const revenueMTD = metricsData.summary?.total_revenue ?? metricsData.revenueMTD ?? 0;
+
+  // Conversion rate (leads converted / total leads * 100)
+  const totalLeads = Array.isArray(leads) ? leads.length : 0;
+  const convertedLeads = Array.isArray(leads)
+    ? leads.filter((lead: { status?: string }) => lead.status === 'converted').length
+    : 0;
+  const conversionRate = totalLeads > 0
+    ? Math.round((convertedLeads / totalLeads) * 100)
+    : 0;
 
   return {
-    totalVisitors: currentStats.uniqueVisitors,
-    visitorsChange,
-    pageViews: currentStats.pageViews,
-    pageViewsChange,
-    avgSessionDuration: currentStats.avgSessionDuration,
-    sessionChange,
-    cardInteractions: currentStats.cardInteractions,
-    interactionsChange
+    attention: {
+      overdueInvoices,
+      pendingContracts,
+      newLeadsThisWeek,
+      unreadMessages
+    },
+    snapshot: {
+      activeProjects,
+      totalClients,
+      revenueMTD,
+      conversionRate
+    }
   };
 }
 
 /**
- * Calculate statistics for a time period
+ * Activity item from the API
  */
-function calculatePeriodStats(events: StoredEvent[]): {
-  uniqueVisitors: number;
-  pageViews: number;
-  avgSessionDuration: number;
-  cardInteractions: number;
-} {
-  if (events.length === 0) {
-    return {
-      uniqueVisitors: 0,
-      pageViews: 0,
-      avgSessionDuration: 0,
-      cardInteractions: 0
-    };
-  }
-
-  // Unique sessions = unique visitors (simplified)
-  const uniqueSessions = new Set(events.map(e => e.sessionId));
-
-  // Page views = events with timeOnPage (page view events)
-  const pageViewEvents = events.filter(e => 'timeOnPage' in e || !e.type);
-
-  // Total time on site
-  const totalTime = events.reduce((sum, e) => sum + (e.timeOnPage || 0), 0);
-
-  // Card interactions
-  const cardInteractions = events.filter(e =>
-    e.type === 'business_card' ||
-    (e.element && e.element.includes('business-card'))
-  ).length;
-
-  return {
-    uniqueVisitors: uniqueSessions.size,
-    pageViews: pageViewEvents.length,
-    avgSessionDuration: uniqueSessions.size > 0 ? totalTime / uniqueSessions.size : 0,
-    cardInteractions
-  };
+interface ActivityItem {
+  id: number;
+  activity_type: string;
+  title: string;
+  description?: string;
+  created_at: string;
+  client_name?: string;
+  client_id?: number;
 }
 
 /**
- * Get stored events from localStorage
+ * Load recent activity from the API
  */
-function getStoredEvents(): StoredEvent[] {
+async function loadRecentActivity(): Promise<void> {
+  const listEl = document.getElementById('recent-activity-list');
+  if (!listEl) return;
+
   try {
-    const stored = localStorage.getItem('nbw_tracking_events');
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
+    const response = await apiFetch('/api/clients/activities/recent?limit=10');
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch recent activity');
+    }
+
+    const data = await response.json();
+    const activities: ActivityItem[] = data.activities || [];
+
+    if (activities.length === 0) {
+      listEl.innerHTML = '<li class="activity-item empty">No recent activity</li>';
+      return;
+    }
+
+    listEl.innerHTML = activities.map((activity) => {
+      const safeTitle = SanitizationUtils.escapeHtml(activity.title || 'Activity');
+      const safeClient = activity.client_name
+        ? SanitizationUtils.escapeHtml(activity.client_name)
+        : null;
+      const formattedDate = formatDateTime(activity.created_at);
+      const icon = getActivityIcon(activity.activity_type);
+
+      return `
+        <li class="activity-item">
+          <span class="activity-icon">${icon}</span>
+          <div class="activity-content">
+            <span class="activity-title">${safeTitle}</span>
+            ${safeClient ? `<span class="activity-client">${safeClient}</span>` : ''}
+          </div>
+          <span class="activity-time">${formattedDate}</span>
+        </li>
+      `;
+    }).join('');
+
+  } catch (error) {
+    console.error('[AdminOverview] Error loading recent activity:', error);
+    listEl.innerHTML = '<li class="activity-item empty">Failed to load activity</li>';
   }
 }
 
 /**
- * Calculate percentage change between two values
+ * Get icon for activity type
  */
-function calculatePercentChange(current: number, previous: number): number {
-  if (previous === 0) {
-    return current > 0 ? 100 : 0;
+function getActivityIcon(activityType: string): string {
+  const icons: Record<string, string> = {
+    'note': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>',
+    'call': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+    'email': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+    'meeting': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    'task': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>',
+    'status_change': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>'
+  };
+
+  return icons[activityType] || '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
+}
+
+/**
+ * Update attention card with count and highlight if > 0
+ */
+function updateAttentionCard(id: string, count: number): void {
+  const element = document.getElementById(id);
+  if (element) {
+    element.textContent = formatNumber(count);
+
+    // Add highlight class if count > 0
+    const card = element.closest('.attention-card');
+    if (card) {
+      if (count > 0) {
+        card.classList.add('has-items');
+      } else {
+        card.classList.remove('has-items');
+      }
+    }
   }
-  return Math.round(((current - previous) / previous) * 100);
 }
 
 /**
@@ -165,47 +265,24 @@ function formatNumber(num: number): string {
 }
 
 /**
- * Format duration in ms to human readable
+ * Format currency
  */
-function formatDuration(ms: number): string {
-  if (ms === 0) return '0s';
-
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-
-  if (minutes === 0) {
-    return `${seconds}s`;
-  }
-
-  return `${minutes}m ${remainingSeconds}s`;
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount);
 }
 
 /**
- * Format change percentage
+ * Update DOM element with text
  */
-function formatChange(change: number): string {
-  const prefix = change >= 0 ? '+' : '';
-  return `${prefix}${change}% from last week`;
-}
-
-/**
- * Get CSS class for change indicator
- */
-function getChangeClass(change: number): string {
-  return change >= 0 ? 'positive' : 'negative';
-}
-
-/**
- * Update DOM element with text and optional class
- */
-function updateElement(id: string, text: string, className?: string): void {
+function updateElement(id: string, text: string): void {
   const element = document.getElementById(id);
   if (element) {
     element.textContent = text;
-    if (className) {
-      element.className = `metric-change ${className}`;
-    }
   }
 }
 
@@ -213,27 +290,26 @@ function updateElement(id: string, text: string, className?: string): void {
  * Show message when no data is available
  */
 function showNoDataMessage(): void {
-  updateElement('total-visitors', '—');
-  updateElement('visitors-change', 'No data available');
-  updateElement('page-views', '—');
-  updateElement('views-change', 'No data available');
-  updateElement('avg-session', '—');
-  updateElement('session-change', 'No data available');
-  updateElement('card-interactions', '—');
-  updateElement('interactions-change', 'No data available');
+  updateElement('stat-overdue-invoices', '—');
+  updateElement('stat-pending-contracts', '—');
+  updateElement('stat-new-leads', '—');
+  updateElement('stat-unread-messages', '—');
+  updateElement('stat-active-projects', '—');
+  updateElement('stat-total-clients', '—');
+  updateElement('stat-revenue-mtd', '—');
+  updateElement('stat-conversion-rate', '—');
 }
 
 /**
- * Check if tracking data exists
+ * Check if tracking data exists (kept for backwards compatibility)
  */
 export function hasTrackingData(): boolean {
-  const events = getStoredEvents();
-  return events.length > 0;
+  return true;
 }
 
 /**
- * Get total event count
+ * Get total event count (kept for backwards compatibility)
  */
 export function getEventCount(): number {
-  return getStoredEvents().length;
+  return 0;
 }

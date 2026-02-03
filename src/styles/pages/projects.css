@@ -51,7 +51,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
 
 .hero-title {
   font-size: clamp(2.5rem, 6vw, 4rem);
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   line-height: 1.2;
   text-transform: uppercase;
   text-shadow: 0 2px 4px var(--color-shadow);
@@ -123,14 +123,14 @@ div.page-hero-desktop[data-hero-page="projects"] {
   color: var(--color-bg);
   border-color: var(--color-primary);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(var(--color-brand-primary-rgb), 0.2);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.2);
 }
 
 .filter-btn.active {
   background: var(--color-primary);
   color: var(--color-bg);
   border-color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(var(--color-brand-primary-rgb), 0.2);
+  box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.2);
 }
 
 .filter-count {
@@ -220,7 +220,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(var(--color-brand-primary-rgb), 0.9);
+  background: rgba(var(--color-primary-rgb), 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -453,15 +453,15 @@ div.page-hero-desktop {
    =============================================== */
 
 [data-theme="dark"] .projects-hero {
-  background: linear-gradient(135deg, var(--color-bg) 0%, rgba(var(--color-brand-primary-rgb), 0.02) 100%);
+  background: linear-gradient(135deg, var(--color-bg) 0%, rgba(var(--color-primary-rgb), 0.02) 100%);
 }
 
 [data-theme="dark"] .filter-btn:hover {
-  box-shadow: 0 4px 12px rgba(var(--color-brand-primary-rgb), 0.3);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
 }
 
 [data-theme="dark"] .filter-btn.active {
-  box-shadow: 0 2px 8px rgba(var(--color-brand-primary-rgb), 0.3);
+  box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.3);
 }
 
 [data-theme="dark"] .project-card:hover {
@@ -857,7 +857,7 @@ div.page-hero-desktop {
 @media (--mobile) {
   section.projects-section h2 {
     font-size: clamp(2.5rem, 10vw, 4rem);
-    font-family: var(--font--acme);
+    font-family: var(--font-family-acme);
     font-weight: 700;
     text-transform: uppercase;
   }
@@ -1335,7 +1335,7 @@ div.page-hero-desktop {
 
 .worksub-intro h1 {
   font-size: clamp(2rem, 5vw, 3rem);
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-weight: 700;
   text-transform: uppercase;
   color: var(--color-dark);

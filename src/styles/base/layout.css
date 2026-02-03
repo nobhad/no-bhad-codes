@@ -556,7 +556,7 @@ main {
   width: 100%;
   max-width: 1280px;
   height: auto;
-  font-family: var(--font--acme), "Acme", sans-serif;
+  font-family: var(--font-family-acme), "Acme", sans-serif;
   font-weight: 700;
   /* Center the SVG content vertically */
   display: block;

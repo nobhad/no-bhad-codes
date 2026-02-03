@@ -1,0 +1,46 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - navigation [ref=e5]:
+      - link "no bhad codes - Go to homepage" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - text: no bhad codes
+      - generic [ref=e7]:
+        - button "Client Portal Login" [ref=e8] [cursor=pointer]:
+          - img [ref=e10]
+        - button "Switch to dark theme" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]:
+            - img [ref=e16]
+            - img [ref=e19]
+        - button "Toggle navigation menu" [active] [ref=e21] [cursor=pointer]:
+          - img [ref=e23]
+          - generic [ref=e30]:
+            - paragraph [ref=e31]: Menu
+            - paragraph [ref=e32]: Close
+  - main [ref=e33]:
+    - heading "No Bhad Codes - Professional Web Development" [level=1] [ref=e34]
+    - generic [ref=e37]:
+      - img "Coyote the dog" [ref=e39]
+      - generic [ref=e40]:
+        - heading "ABOUT" [level=2] [ref=e41]
+        - separator [ref=e42]
+        - paragraph [ref=e43]: Hi, I'm Noelle, a creative full-stack developer based in the Boston, MA area. Coding lets me utilize my love for tinkering and problem-solving by combining clean code with good design. I work with modern frameworks, build type-safe apps, set up scalable backends, and make sure the UI actually feels nice to use.
+        - paragraph [ref=e44]: When I'm not coding, I'm treasure hunting and engaging with art and nature. I draw inspiration from midcentury animation and children's book illustrations.
+        - paragraph [ref=e45]: I am actively seeking both local and remote web development opportunities.
+  - contentinfo [ref=e46]:
+    - paragraph [ref=e48]: © 2026 No Bhad Codes. All rights reserved.
+  - generic [ref=e50]:
+    - img [ref=e52]
+    - generic [ref=e54]:
+      - heading "I respect your privacy" [level=3] [ref=e55]
+      - paragraph [ref=e56]: No Bhad Codes uses cookies and similar technologies to enhance your browsing experience, analyze site traffic, and understand visitor behavior. Your privacy is important to me.
+    - generic [ref=e57]:
+      - generic [ref=e58]:
+        - button "Decline" [ref=e59] [cursor=pointer]
+        - button "Accept All" [ref=e60] [cursor=pointer]
+      - button "Learn More" [ref=e62] [cursor=pointer]
+```

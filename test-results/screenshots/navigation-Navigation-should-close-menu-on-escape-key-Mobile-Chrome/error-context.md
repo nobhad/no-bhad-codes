@@ -1,0 +1,48 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - navigation [ref=e5]:
+      - link "no bhad codes - Go to homepage" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - text: no bhad codes
+      - generic [ref=e7]:
+        - button "Switch to dark theme" [ref=e8] [cursor=pointer]:
+          - generic [ref=e9]:
+            - img [ref=e10]
+            - img [ref=e13]
+        - button "Toggle navigation menu" [ref=e15] [cursor=pointer]:
+          - img [ref=e17]
+          - generic [ref=e24]:
+            - paragraph [ref=e25]: Menu
+            - paragraph [ref=e26]: Close
+  - main [ref=e27]:
+    - heading "No Bhad Codes - Professional Web Development" [level=1] [ref=e28]
+    - generic [ref=e29]:
+      - button "Business card - press Enter or Space to flip" [ref=e31] [cursor=pointer]:
+        - generic [ref=e32]:
+          - generic:
+            - img "Business Card Front"
+          - generic:
+            - img "Avatar"
+      - navigation "Page navigation" [ref=e33]:
+        - link "MY WORK" [ref=e34] [cursor=pointer]:
+          - /url: "#/projects"
+        - link "LET'S TALK" [ref=e35] [cursor=pointer]:
+          - /url: "#/contact"
+  - contentinfo [ref=e36]:
+    - paragraph [ref=e38]: © 2026 No Bhad Codes. All rights reserved.
+  - generic [ref=e40]:
+    - img [ref=e42]
+    - generic [ref=e44]:
+      - heading "I respect your privacy" [level=3] [ref=e45]
+      - paragraph [ref=e46]: No Bhad Codes uses cookies and similar technologies to enhance your browsing experience, analyze site traffic, and understand visitor behavior. Your privacy is important to me.
+    - generic [ref=e47]:
+      - generic [ref=e48]:
+        - button "Decline" [ref=e49] [cursor=pointer]
+        - button "Accept All" [ref=e50] [cursor=pointer]
+      - button "Learn More" [ref=e52] [cursor=pointer]
+```

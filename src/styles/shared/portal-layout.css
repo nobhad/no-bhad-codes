@@ -20,6 +20,11 @@ body:has([data-page="client-portal"]) {
   overscroll-behavior: contain;
 }
 
+/* Admin: allow sidebar badge to sit up/right of button without clipping */
+[data-page="admin"] .sidebar {
+  overflow: visible;
+}
+
 :is([data-page="admin"], [data-page="client-portal"]) .dashboard-content {
   overscroll-behavior: contain;
 }

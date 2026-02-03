@@ -12,17 +12,276 @@
 import type { AdminDashboardContext, ApplicationStatus, StatusItem } from '../admin-types';
 import { APP_CONSTANTS } from '../../../config/constants';
 import { apiFetch } from '../../../utils/api-client';
+import { getStatusBadgeHTML } from '../../../components/status-badge';
+
+let systemListenersInitialized = false;
 
 /**
  * Load system status data for admin dashboard
  */
-export async function loadSystemData(_ctx: AdminDashboardContext): Promise<void> {
+export async function loadSystemData(ctx: AdminDashboardContext): Promise<void> {
+  // Setup event listeners once
+  setupSystemEventListeners(ctx);
+
   try {
-    const status = await getApplicationStatus();
-    populateSystemStatus(status);
+    // Load health check and legacy status in parallel
+    await Promise.all([
+      loadHealthCheck(),
+      loadLegacyStatus()
+    ]);
+
+    // Populate browser info
+    populateBrowserInfo();
   } catch (error) {
     console.error('[AdminSystemStatus] Error loading system data:', error);
     showSystemError();
+  }
+}
+
+/**
+ * Setup event listeners for system status UI
+ */
+function setupSystemEventListeners(ctx: AdminDashboardContext): void {
+  if (systemListenersInitialized) return;
+  systemListenersInitialized = true;
+
+  // Refresh health button
+  const refreshBtn = document.getElementById('btn-refresh-health');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', async () => {
+      refreshBtn.classList.add('spinning');
+      await loadHealthCheck();
+      refreshBtn.classList.remove('spinning');
+    });
+  }
+
+  // Clear cache button
+  const clearCacheBtn = document.getElementById('btn-clear-cache') as HTMLButtonElement | null;
+  if (clearCacheBtn) {
+    clearCacheBtn.addEventListener('click', async () => {
+      clearCacheBtn.disabled = true;
+      try {
+        // Clear localStorage (except auth tokens)
+        const keysToKeep = ['client_auth_token', 'clientAuthToken', 'admin_session', 'theme'];
+        const keysToRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && !keysToKeep.includes(key)) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+
+        // Clear sessionStorage (except auth tokens)
+        const sessionKeysToRemove: string[] = [];
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          if (key && !keysToKeep.includes(key)) {
+            sessionKeysToRemove.push(key);
+          }
+        }
+        sessionKeysToRemove.forEach(key => sessionStorage.removeItem(key));
+
+        ctx.showNotification('Cache cleared successfully', 'success');
+      } catch (error) {
+        ctx.showNotification('Failed to clear cache', 'error');
+      } finally {
+        clearCacheBtn.disabled = false;
+      }
+    });
+  }
+
+  // Test email button
+  const testEmailBtn = document.getElementById('btn-test-email') as HTMLButtonElement | null;
+  if (testEmailBtn) {
+    testEmailBtn.addEventListener('click', async () => {
+      testEmailBtn.disabled = true;
+      try {
+        const res = await apiFetch('/api/admin/test-email', { method: 'POST' });
+        if (res.ok) {
+          ctx.showNotification('Test email sent', 'success');
+        } else {
+          const data = await res.json().catch(() => ({}));
+          ctx.showNotification(data.error || 'Failed to send test email', 'error');
+        }
+      } catch (error) {
+        ctx.showNotification('Failed to send test email', 'error');
+      } finally {
+        testEmailBtn.disabled = false;
+      }
+    });
+  }
+
+  // Run scheduler button
+  const runSchedulerBtn = document.getElementById('btn-run-scheduler') as HTMLButtonElement | null;
+  if (runSchedulerBtn) {
+    runSchedulerBtn.addEventListener('click', async () => {
+      runSchedulerBtn.disabled = true;
+      try {
+        const res = await apiFetch('/api/admin/run-scheduler', { method: 'POST' });
+        if (res.ok) {
+          const data = await res.json().catch(() => ({}));
+          ctx.showNotification(data.message || 'Scheduler run triggered', 'success');
+        } else {
+          const data = await res.json().catch(() => ({}));
+          ctx.showNotification(data.error || 'Failed to run scheduler', 'error');
+        }
+      } catch (error) {
+        ctx.showNotification('Failed to run scheduler', 'error');
+      } finally {
+        runSchedulerBtn.disabled = false;
+      }
+    });
+  }
+}
+
+/**
+ * Load health check status
+ */
+async function loadHealthCheck(): Promise<void> {
+  const healthItems = [
+    { id: 'database', label: 'Database', check: checkDatabaseHealth },
+    { id: 'email', label: 'Email Service', check: checkEmailHealth },
+    { id: 'storage', label: 'File Storage', check: checkStorageServiceHealth },
+    { id: 'scheduler', label: 'Scheduler', check: checkSchedulerHealth }
+  ];
+
+  // Check all health items in parallel
+  await Promise.all(healthItems.map(async (item) => {
+    const indicator = document.getElementById(`health-${item.id}`);
+    const status = document.getElementById(`health-${item.id}-status`);
+
+    if (indicator && status) {
+      // Set loading state
+      indicator.className = 'health-indicator health-loading';
+      status.textContent = 'Checking...';
+
+      try {
+        const result = await item.check();
+        indicator.className = `health-indicator health-${result.status}`;
+        status.textContent = result.message;
+      } catch {
+        indicator.className = 'health-indicator health-error';
+        status.textContent = 'Check failed';
+      }
+    }
+  }));
+}
+
+/**
+ * Check database health
+ */
+async function checkDatabaseHealth(): Promise<{ status: string; message: string }> {
+  try {
+    const res = await apiFetch('/api/health');
+    if (res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return { status: 'ok', message: data.database || 'Connected' };
+    }
+    return { status: 'warning', message: 'Degraded' };
+  } catch {
+    return { status: 'error', message: 'Unreachable' };
+  }
+}
+
+/**
+ * Check email service health
+ */
+async function checkEmailHealth(): Promise<{ status: string; message: string }> {
+  try {
+    const res = await apiFetch('/api/health');
+    if (res.ok) {
+      const data = await res.json().catch(() => ({}));
+      if (data.email === 'configured' || data.services?.email) {
+        return { status: 'ok', message: 'Configured' };
+      }
+      return { status: 'warning', message: 'Not configured' };
+    }
+    return { status: 'warning', message: 'Unknown' };
+  } catch {
+    return { status: 'error', message: 'Check failed' };
+  }
+}
+
+/**
+ * Check file storage health
+ */
+async function checkStorageServiceHealth(): Promise<{ status: string; message: string }> {
+  try {
+    const res = await apiFetch('/api/health');
+    if (res.ok) {
+      return { status: 'ok', message: 'Available' };
+    }
+    return { status: 'warning', message: 'Unknown' };
+  } catch {
+    return { status: 'error', message: 'Check failed' };
+  }
+}
+
+/**
+ * Check scheduler health
+ */
+async function checkSchedulerHealth(): Promise<{ status: string; message: string }> {
+  try {
+    const res = await apiFetch('/api/health');
+    if (res.ok) {
+      const data = await res.json().catch(() => ({}));
+      if (data.scheduler) {
+        return { status: 'ok', message: data.scheduler };
+      }
+      return { status: 'ok', message: 'Running' };
+    }
+    return { status: 'warning', message: 'Unknown' };
+  } catch {
+    return { status: 'error', message: 'Check failed' };
+  }
+}
+
+/**
+ * Load legacy status (modules/services for hidden elements)
+ */
+async function loadLegacyStatus(): Promise<void> {
+  try {
+    const status = await getApplicationStatus();
+    populateSystemStatus(status);
+  } catch {
+    // Silent fail - legacy status is optional
+  }
+}
+
+/**
+ * Populate browser info
+ */
+function populateBrowserInfo(): void {
+  const userAgentEl = document.getElementById('sys-useragent');
+  const screenEl = document.getElementById('sys-screen');
+  const viewportEl = document.getElementById('sys-viewport');
+  const buildDateEl = document.getElementById('sys-build-date');
+  const envEl = document.getElementById('sys-environment');
+
+  if (userAgentEl) {
+    userAgentEl.textContent = navigator.userAgent;
+    userAgentEl.title = navigator.userAgent;
+  }
+
+  if (screenEl) {
+    screenEl.textContent = `${screen.width} × ${screen.height}`;
+  }
+
+  if (viewportEl) {
+    viewportEl.textContent = `${window.innerWidth} × ${window.innerHeight}`;
+  }
+
+  if (buildDateEl) {
+    buildDateEl.textContent = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  }
+
+  if (envEl) {
+    envEl.textContent = import.meta.env?.MODE || 'development';
   }
 }
 
@@ -243,7 +502,7 @@ function renderStatusList(items: Record<string, StatusItem>, type: string): stri
       <div class="status-item ${statusClass}">
         <span class="status-icon">${statusIcon}</span>
         <span class="status-name">${formatName(name)}</span>
-        <span class="status-badge ${statusClass}">${status}</span>
+        ${getStatusBadgeHTML(status, status)}
       </div>
     `;
   }).join('');

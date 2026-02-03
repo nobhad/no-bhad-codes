@@ -1,0 +1,410 @@
+/**
+ * ===============================================
+ * TABLE FEATURES CSS
+ * ===============================================
+ * @file src/styles/admin/table-features.css
+ *
+ * Styles for admin table features:
+ * - Pagination controls
+ * - Bulk selection and actions
+ * - Export buttons
+ */
+
+/* ===============================================
+   PAGINATION
+   =============================================== */
+
+.table-pagination {
+  margin-top: 0;
+}
+
+.table-pagination .pagination-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--portal-bg-dark);
+  border-radius: 0 0 var(--portal-radius-md) var(--portal-radius-md);
+}
+
+.pagination-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-light);
+}
+
+.pagination-info strong {
+  color: var(--portal-text-light);
+  font-weight: 600;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.pagination-size {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-light);
+}
+
+/* Per-page dropdown: same width when closed and open; ensure menu and items display correctly (no red on all items) */
+.pagination-page-size-dropdown .table-dropdown {
+  min-width: 100px;
+}
+
+[data-page="admin"] .pagination-page-size-dropdown .table-dropdown .custom-dropdown-menu {
+  background-color: var(--portal-bg-dark);
+  z-index: 10001;
+}
+
+[data-page="admin"] .pagination-page-size-dropdown .table-dropdown .custom-dropdown-item {
+  background-color: transparent;
+  color: var(--portal-text-light);
+}
+
+[data-page="admin"] .pagination-page-size-dropdown .table-dropdown .custom-dropdown-item:hover {
+  background-color: var(--color-primary);
+  color: var(--portal-text-light);
+}
+
+/* Legacy native select (kept for any non-js fallback) */
+.pagination-select {
+  width: auto;
+  min-width: 70px;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--portal-border-light);
+  border-radius: var(--portal-radius-sm);
+  background-color: var(--portal-bg-darker);
+  color: var(--portal-text-light);
+}
+
+.pagination-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.pagination-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--portal-border-light);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-light);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--portal-bg-hover);
+  border-color: var(--portal-border-medium);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0 var(--space-1);
+}
+
+.pagination-page-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--portal-radius-sm);
+  background: transparent;
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pagination-page-btn:hover:not(.active) {
+  background: var(--portal-bg-hover);
+  border-color: var(--portal-border-dark);
+}
+
+.pagination-page-btn.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  font-weight: 600;
+}
+
+.pagination-ellipsis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  color: var(--portal-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ===============================================
+   BULK ACTIONS
+   =============================================== */
+
+/* Grid aligns selection count with table checkbox column (first column = 56px) */
+.bulk-action-toolbar {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+  min-height: 48px;
+  box-sizing: border-box;
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-dark);
+  border-radius: var(--portal-radius-md);
+  animation: slideDown 0.2s ease-out;
+}
+
+/* Reserve space when hidden so table size does not change on check/uncheck */
+.bulk-action-toolbar.hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  margin-bottom: var(--space-3);
+  min-height: 48px;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bulk-toolbar-left {
+  grid-column: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  overflow: visible;
+}
+
+.bulk-selection-count {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-light);
+}
+
+.bulk-selection-count strong {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.bulk-clear-selection {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--portal-text-muted);
+  font-size: var(--font-size-sm);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.bulk-clear-selection:hover {
+  color: var(--portal-text-light);
+}
+
+.bulk-toolbar-actions {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.bulk-toolbar-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bulk-toolbar-actions .btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Bulk select cell checkbox alignment */
+.bulk-select-cell .portal-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===============================================
+   EXPORT BUTTON
+   =============================================== */
+
+.table-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--portal-border-dark);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-bg-dark);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-export:hover {
+  background: var(--portal-bg-hover);
+  border-color: var(--portal-border-medium);
+}
+
+.btn-export svg {
+  width: 14px;
+  height: 14px;
+}
+
+.export-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.export-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  min-width: 140px;
+  padding: var(--space-1) 0;
+  background: var(--portal-bg-darker);
+  border: 1px solid var(--portal-border-dark);
+  border-radius: var(--portal-radius-md);
+  box-shadow: var(--shadow-card);
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: all 0.15s ease;
+}
+
+.export-dropdown.open .export-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.export-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  background: none;
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.export-dropdown-item:hover {
+  background: var(--portal-bg-hover);
+}
+
+.export-dropdown-item svg {
+  width: 14px;
+  height: 14px;
+  color: var(--portal-text-muted);
+}
+
+/* ===============================================
+   RESPONSIVE ADJUSTMENTS
+   =============================================== */
+
+@media (max-width: 768px) {
+  .table-pagination .pagination-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .pagination-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pagination-size {
+    display: none;
+  }
+
+  .pagination-pages {
+    display: none;
+  }
+
+  .bulk-action-toolbar {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .bulk-toolbar-left {
+    grid-column: unset;
+  }
+
+  .bulk-toolbar-actions {
+    grid-column: unset;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  /* Hide checkbox column on small screens */
+  .admin-table th.bulk-select-cell,
+  .admin-table td.bulk-select-cell {
+    display: none;
+  }
+}

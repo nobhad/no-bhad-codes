@@ -8,12 +8,7 @@
  * Handles sidebar, tabs, mobile menu, breadcrumbs, and view switching.
  */
 
-/** Breadcrumb item structure */
-interface BreadcrumbItem {
-  label: string;
-  href: boolean;
-  onClick?: () => void;
-}
+import { renderBreadcrumbs, type BreadcrumbItem } from '../../../components/breadcrumbs';
 
 /** Tab titles mapping */
 const TAB_TITLES: Record<string, string> = {
@@ -23,6 +18,8 @@ const TAB_TITLES: Record<string, string> = {
   invoices: 'Invoices',
   settings: 'Settings',
   'new-project': 'New Project',
+  help: 'Help',
+  documents: 'Document Requests',
   preview: 'Project Preview'
 };
 
@@ -121,6 +118,8 @@ export function switchTab(tabName: string, callbacks: {
   loadInvoices: () => Promise<void>;
   loadProjectPreview: () => Promise<void>;
   loadMessagesFromAPI: () => Promise<void>;
+  loadHelp?: () => Promise<void>;
+  loadDocumentRequests?: () => Promise<void>;
 }): void {
   // Hide all tab content
   const allTabContent = document.querySelectorAll('.tab-content');
@@ -149,6 +148,17 @@ export function switchTab(tabName: string, callbacks: {
   // Update mobile header title
   updateMobileHeaderTitle(tabName);
 
+  // Update breadcrumbs based on current tab
+  const tabTitle = TAB_TITLES[tabName] || 'Dashboard';
+  if (tabName === 'dashboard') {
+    updateBreadcrumbs([{ label: 'Dashboard', href: false }]);
+  } else {
+    updateBreadcrumbs([
+      { label: 'Dashboard', href: true, onClick: () => switchTab('dashboard', callbacks) },
+      { label: tabTitle, href: false }
+    ]);
+  }
+
   // Load tab-specific data
   if (tabName === 'files') {
     callbacks.loadFiles();
@@ -158,6 +168,10 @@ export function switchTab(tabName: string, callbacks: {
     callbacks.loadProjectPreview();
   } else if (tabName === 'messages') {
     callbacks.loadMessagesFromAPI();
+  } else if (tabName === 'help' && callbacks.loadHelp) {
+    callbacks.loadHelp();
+  } else if (tabName === 'documents' && callbacks.loadDocumentRequests) {
+    callbacks.loadDocumentRequests();
   }
 }
 
@@ -348,41 +362,12 @@ export function showWelcomeView(): void {
 }
 
 /**
- * Update breadcrumb navigation
+ * Update breadcrumb navigation (uses shared breadcrumbs component)
  */
 export function updateBreadcrumbs(breadcrumbs: BreadcrumbItem[]): void {
   const breadcrumbList = getBreadcrumbList();
   if (!breadcrumbList) return;
-
-  breadcrumbList.innerHTML = '';
-
-  breadcrumbs.forEach((crumb, index) => {
-    const listItem = document.createElement('li');
-    listItem.className = 'breadcrumb-item';
-
-    if (crumb.href && crumb.onClick) {
-      const link = document.createElement('button');
-      link.className = 'breadcrumb-link';
-      link.textContent = crumb.label;
-      link.onclick = crumb.onClick;
-      listItem.appendChild(link);
-    } else {
-      const span = document.createElement('span');
-      span.className = 'breadcrumb-current';
-      span.textContent = crumb.label;
-      listItem.appendChild(span);
-    }
-
-    breadcrumbList.appendChild(listItem);
-
-    // Add separator if not last item
-    if (index < breadcrumbs.length - 1) {
-      const separator = document.createElement('li');
-      separator.className = 'breadcrumb-separator';
-      separator.textContent = '>';
-      breadcrumbList.appendChild(separator);
-    }
-  });
+  renderBreadcrumbs(breadcrumbList, breadcrumbs);
 }
 
 /**

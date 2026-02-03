@@ -43,12 +43,12 @@ html {
  * ============================================ */
 
 ::selection {
-  background-color: var(--color-brand-primary);
+  background-color: var(--color-primary);
   color: var(--color-neutral-100);
 }
 
 ::-moz-selection {
-  background-color: var(--color-brand-primary);
+  background-color: var(--color-primary);
   color: var(--color-neutral-100);
 }
 
@@ -207,7 +207,7 @@ a {
 /* Global focus indicator for ALL interactive elements - WCAG 2.4.7 */
 /* Applies to: a, button, input, select, textarea, [tabindex] */
 :focus-visible {
-  outline: 2px solid var(--color-primary, var(--color-brand-primary));
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 2px;
 }

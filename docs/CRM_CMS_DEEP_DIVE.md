@@ -49,13 +49,11 @@
 
 ### 1.4 Gaps You’ve Already Flagged (from `current_work.md`)
 
-- No scheduled jobs, reminder engine, or workflow triggers
-- No activity feed, client timeline, or notification prefs UI
-- No document requests, deliverable approval, or revision history
-- No payment reminders, deposit/payment plans, recurring invoices, expense/time tracking
-- No business metrics dashboard, client health score, or pipeline/revenue reporting
-- No Kanban/Timeline view for projects (planned)
+**Now implemented (Feb 2026):** Scheduler (reminders, scheduled/recurring invoices), workflow triggers, approval workflows, document requests, notification prefs UI, client timeline/activity, knowledge base, payment reminders, deposit/payment plans, recurring invoices, A/R aging, business metrics dashboard, client health score, pipeline/revenue reporting, Kanban pipeline view.
+
+**Still gaps:**
 - No Stripe/payment gateway; invoices paid manually
+- No expense/time tracking
 - Webhooks and external API documented as “future enhancement”
 
 ---
@@ -90,7 +88,7 @@
 - **Role-based access** – Per-project or per-section visibility.
 - **Branded experience** – Your domain, layout, and tone throughout.
 
-*Your gap:* No approval workflows, no e-sign, no document requests, no real-time updates, no knowledge base. RBAC is role-level (admin/client), not resource-level. Branding is in place.
+*Your status:* Approval workflows, document requests, and knowledge base are implemented (Feb 2026). E-sign (contract signatures) and real-time updates (WebSockets/SSE) are not. RBAC is role-level (admin/client), not resource-level. Branding is in place.
 
 ### 2.4 Financial & Payments
 

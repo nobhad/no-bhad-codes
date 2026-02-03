@@ -19,6 +19,7 @@ import { getUploadsSubdir, UPLOAD_DIRS, sanitizeFilename } from '../config/uploa
 import { getString, getNumber } from '../database/row-helpers.js';
 import { projectService } from '../services/project-service.js';
 import { fileService } from '../services/file-service.js';
+import { getSchedulerService } from '../services/scheduler-service.js';
 
 const router = express.Router();
 
@@ -374,6 +375,22 @@ router.put(
       });
     }
 
+    // When updating status, validate against allowed project statuses (not lead pipeline statuses)
+    if (req.body.status !== undefined) {
+      const projectStatuses = ['pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled'];
+      let raw = typeof req.body.status === 'string' ? req.body.status.trim().toLowerCase().replace(/_/g, '-') : '';
+      if (raw === 'in progress') raw = 'in-progress';
+      if (raw === 'on hold') raw = 'on-hold';
+      if (!projectStatuses.includes(raw)) {
+        return res.status(400).json({
+          error: `Invalid status. Must be one of: ${projectStatuses.join(', ')}`,
+          code: 'INVALID_STATUS',
+          validStatuses: projectStatuses
+        });
+      }
+      req.body.status = raw;
+    }
+
     const updates: string[] = [];
     const values: (string | number | boolean | null)[] = [];
     // Map frontend field names to database column names
@@ -526,6 +543,70 @@ router.put(
     res.json({
       message: 'Project updated successfully',
       project: updatedProject
+    });
+  })
+);
+
+// Delete project (admin only)
+router.delete(
+  '/:id',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['projects']),
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const projectId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    // Check if project exists
+    const project = await db.get('SELECT id, project_name FROM projects WHERE id = ?', [projectId]);
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND'
+      });
+    }
+
+    // Delete related records first (foreign key constraints)
+    // Delete project files
+    await db.run('DELETE FROM project_files WHERE project_id = ?', [projectId]);
+
+    // Delete milestones
+    await db.run('DELETE FROM milestones WHERE project_id = ?', [projectId]);
+
+    // Delete project updates
+    await db.run('DELETE FROM project_updates WHERE project_id = ?', [projectId]);
+
+    // Delete project tasks (checklist items first, then tasks)
+    const tasks = await db.all('SELECT id FROM project_tasks WHERE project_id = ?', [projectId]) as { id: number }[];
+    for (const task of tasks) {
+      await db.run('DELETE FROM task_checklist_items WHERE task_id = ?', [task.id]);
+      await db.run('DELETE FROM task_comments WHERE task_id = ?', [task.id]);
+    }
+    await db.run('DELETE FROM project_tasks WHERE project_id = ?', [projectId]);
+
+    // Delete time entries
+    await db.run('DELETE FROM time_entries WHERE project_id = ?', [projectId]);
+
+    // Delete project tags
+    await db.run('DELETE FROM project_tags WHERE project_id = ?', [projectId]);
+
+    // Delete message threads related to this project
+    const threads = await db.all('SELECT id FROM message_threads WHERE project_id = ?', [projectId]) as { id: number }[];
+    for (const thread of threads) {
+      await db.run('DELETE FROM messages WHERE thread_id = ?', [thread.id]);
+    }
+    await db.run('DELETE FROM message_threads WHERE project_id = ?', [projectId]);
+
+    // Note: Invoices are not deleted - they are kept for financial records
+    // Instead, we unlink them from the project
+    await db.run('UPDATE invoices SET project_id = NULL WHERE project_id = ?', [projectId]);
+
+    // Finally delete the project itself
+    await db.run('DELETE FROM projects WHERE id = ?', [projectId]);
+
+    res.json({
+      message: 'Project deleted successfully',
+      projectId: projectId
     });
   })
 );
@@ -1647,6 +1728,15 @@ ${BUSINESS_INFO.email}
 
     console.log(`[CONTRACT] Signature request sent for project ${projectId} to ${clientEmail}`);
 
+    // Schedule contract reminders
+    try {
+      const scheduler = getSchedulerService();
+      await scheduler.scheduleContractReminders(projectId);
+    } catch (reminderError) {
+      console.error('[CONTRACT] Failed to schedule contract reminders:', reminderError);
+      // Continue - don't fail the request if reminder scheduling fails
+    }
+
     res.json({
       success: true,
       message: 'Signature request sent',
@@ -1876,6 +1966,15 @@ ${BUSINESS_INFO.email}
     });
 
     console.log(`[CONTRACT] Contract signed for project ${projectId} by ${signerName}`);
+
+    // Cancel pending contract reminders since contract is now signed
+    try {
+      const scheduler = getSchedulerService();
+      await scheduler.cancelContractReminders(projectId);
+    } catch (reminderError) {
+      console.error('[CONTRACT] Failed to cancel contract reminders:', reminderError);
+      // Continue - don't fail the signing if reminder cancellation fails
+    }
 
     res.json({
       success: true,

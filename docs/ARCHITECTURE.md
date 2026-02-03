@@ -46,19 +46,23 @@ no-bhad-codes/
 ├── 📄 HTML PAGES (Feature-Based)
 │   ├── index.html                    # Main portfolio landing
 │   ├── client/
-│   │   ├── landing.html             # Client onboarding
-│   │   └── portal.html              # Client management portal
+│   │   ├── intake.html              # Terminal-style intake form
+│   │   ├── portal.html               # Client management portal
+│   │   └── set-password.html         # Invitation password setup
 │   ├── admin/
-│   │   └── index.html               # Admin dashboard
+│   │   └── index.html                # Admin dashboard
 │   └── projects/
-│       └── index.html               # Project showcase
+│       └── index.html                # Project showcase
 │
 ├── 📁 src/ (SOURCE CODE)
-│   ├── main.ts                      # 🚀 SINGLE ENTRY POINT
+│   ├── main-site.ts                 # Main site entry (index, intake)
+│   ├── portal.ts                   # Client portal entry (portal, set-password)
+│   ├── main.ts                     # Legacy/build entry (mockups, build.html)
 │   │
 │   ├── 🏗️ CORE ARCHITECTURE
 │   │   ├── core/
 │   │   │   ├── app.ts               # Application controller (refactored Dec 19)
+│   │   │   ├── env.ts               # Environment/config helpers
 │   │   │   ├── services-config.ts   # Service registrations
 │   │   │   ├── modules-config.ts    # Module definitions
 │   │   │   ├── debug.ts             # Development helpers
@@ -101,24 +105,37 @@ no-bhad-codes/
 │   │   │   │       ├── admin-messaging.renderer.ts
 │   │   │   │       └── admin-performance.renderer.ts
 │   │   │   ├── client/              # Client portal
-│   │   │   │   └── client-portal.ts
-│   │   │   └── projects/            # Project management
+│   │   │   │   ├── client-portal.ts
+│   │   │   │   ├── terminal-intake.ts, proposal-builder*.ts
+│   │   │   │   └── modules/         # portal-*, proposal-builder-data
+│   │   │   └── main-site/           # Main site (e.g. admin-login.ts)
 │   │   │
-│   │   ├── 🧩 MODULES (Reusable UI)
-│   │   │   ├── base.ts              # Base module class
-│   │   │   ├── navigation.ts        # Site navigation
-│   │   │   ├── theme.ts             # Theme switching
-│   │   │   ├── business-card-renderer.ts
-│   │   │   └── contact-form.ts
+│   │   ├── 🧩 MODULES (Reusable UI — under src/modules/)
+│   │   │   ├── core/base.ts         # Base module class
+│   │   │   ├── ui/                  # navigation, footer, contact-form, business-card*
+│   │   │   ├── animation/           # intro, hero, page-transition, text-animation
+│   │   │   └── utilities/theme.ts  # Theme switching
 │   │   │
 │   │   ├── ⚙️ SERVICES (Business Logic)
 │   │   │   ├── data-service.ts      # Data management
 │   │   │   ├── contact-service.ts   # Communication
 │   │   │   ├── performance-service.ts
 │   │   │   ├── auth-service.ts      # Authentication
-│   │   │   └── visitor-tracking.ts
+│   │   │   ├── visitor-tracking.ts  # Analytics/consent
+│   │   │   ├── bundle-analyzer.ts   # Build analysis
+│   │   │   └── code-protection-service.ts
+│   │   │
+│   │   ├── 🎨 COMPONENTS (UI Building Blocks — src/components/)
+│   │   │   ├── base-component.ts, modal-component.ts
+│   │   │   ├── page-header.ts, page-title.ts, breadcrumbs.ts
+│   │   │   ├── tab-router.ts, search-bar.ts, empty-state.ts
+│   │   │   ├── quick-stats.ts, recent-activity.ts, timeline.ts
+│   │   │   └── ... (analytics-dashboard, chart-simple, kanban-board, etc.)
+│   │   │
+│   ├── design-system/, config/, constants/, types/, utils/
 │   │
-│   server/
+├── 📁 server/ (BACKEND — at repo root, sibling of src/)
+│   ├── routes/                       # API routes (auth, admin, clients, projects, etc.)
 │   ├── services/                     # Backend services
 │   │   ├── analytics-service.ts      # BI analytics, KPIs, dashboards
 │   │   ├── client-service.ts         # CRM, contacts, tags, health
@@ -131,78 +148,17 @@ no-bhad-codes/
 │   │   ├── scheduler-service.ts      # Invoice reminders, recurring
 │   │   ├── email-service.ts          # Email delivery
 │   │   ├── cache-service.ts          # Redis caching
+│   │   ├── approval-service.ts       # Approval workflows
+│   │   ├── document-request-service.ts
+│   │   ├── knowledge-base-service.ts
+│   │   ├── workflow-trigger-service.ts
+│   │   ├── timeline-service.ts
+│   │   ├── notification-preferences-service.ts
 │   │   └── logger.ts                 # Logging infrastructure
-│   │   │
-│   │   ├── 🎨 COMPONENTS (UI Building Blocks)
-│   │   │   ├── base-component.ts
-│   │   │   ├── modal-component.ts
-│   │   │   └── performance-dashboard.ts
-│   │   │
-│   │   ├── 📝 TYPES (TypeScript Definitions)
-│   │   │   ├── client.ts            # Client portal types
-│   │   │   ├── project.ts           # Project types
-│   │   │   └── modules.ts           # Module system types
-│   │   │
-│   │   ├── 🎨 STYLES (Modular CSS Architecture)
-│   │   │   ├── main.css             # Modular CSS entry point
-│   │   │   ├── base/                # Foundation layer
-│   │   │   │   ├── reset.css        # CSS reset & normalize
-│   │   │   │   ├── typography.css   # Typography system
-│   │   │   │   ├── layout.css       # Layout primitives
-│   │   │   │   └── fonts.css        # Font-face definitions
-│   │   │   ├── components/          # Component-specific styles
-│   │   │   │   ├── form-fields.css  # Form inputs
-│   │   │   │   ├── form-buttons.css # Button styles
-│   │   │   │   ├── nav-base.css     # Navigation base
-│   │   │   │   ├── nav-animations.css
-│   │   │   │   ├── nav-responsive.css
-│   │   │   │   ├── nav-portal.css
-│   │   │   │   ├── business-card.css
-│   │   │   │   └── loading.css
-│   │   │   ├── client-portal/       # Client portal (10 modular files)
-│   │   │   │   ├── index.css        # Import orchestrator
-│   │   │   │   ├── components.css   # portal- prefixed components
-│   │   │   │   ├── layout.css
-│   │   │   │   ├── sidebar.css
-│   │   │   │   ├── login.css
-│   │   │   │   ├── dashboard.css
-│   │   │   │   ├── files.css
-│   │   │   │   ├── invoices.css
-│   │   │   │   ├── settings.css
-│   │   │   │   └── projects.css
-│   │   │   ├── shared/              # Shared portal components
-│   │   │   │   ├── portal-buttons.css
-│   │   │   │   ├── portal-cards.css
-│   │   │   │   ├── portal-forms.css
-│   │   │   │   ├── portal-layout.css
-│   │   │   │   ├── portal-badges.css
-│   │   │   │   ├── portal-messages.css
-│   │   │   │   ├── portal-files.css
-│   │   │   │   ├── portal-dropdown.css
-│   │   │   │   ├── toast-notifications.css
-│   │   │   │   └── confirm-dialog.css
-│   │   │   ├── admin/               # Admin dashboard styles
-│   │   │   │   ├── index.css
-│   │   │   │   ├── analytics.css
-│   │   │   │   ├── client-detail.css
-│   │   │   │   └── project-detail.css
-│   │   │   └── pages/               # Page-specific overrides
-│   │   │       ├── contact.css
-│   │   │       ├── admin.css
-│   │   │       ├── client.css
-│   │   │       └── projects.css
-│   │   │
-│   │   ├── 🎨 DESIGN SYSTEM
-│   │   │   ├── index.css
-│   │   │   └── tokens/
-│   │   │       ├── colors.css
-│   │   │       ├── typography.css
-│   │   │       ├── spacing.css
-│   │   │       └── animations.css
-│   │   │
-│   │   └── 🛠️ UTILS (Helper Functions)
-│   │       ├── sanitization-utils.ts
-│   │       └── obfuscation-utils.ts
+│   ├── database/                     # SQLite, migrations, init
+│   ├── middleware/                   # auth, sanitization, audit, etc.
+│   ├── config/                       # Swagger, environment
+│   └── templates/                    # Email templates
 │
 ├── 📁 CONFIG & BUILD
 │   ├── vite.config.js               # Build configuration

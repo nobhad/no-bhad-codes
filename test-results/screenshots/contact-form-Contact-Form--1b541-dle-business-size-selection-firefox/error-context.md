@@ -1,0 +1,97 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - img [ref=e3]
+  - link "Skip to main content" [ref=e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e5]:
+    - generic [ref=e6]: Client Login
+    - generic [ref=e7]:
+      - button "Password" [ref=e8]
+      - button "Magic Link" [ref=e9]
+    - generic [ref=e10]:
+      - text: Email or Username
+      - textbox "Email or Username" [ref=e11]
+      - generic [ref=e12]:
+        - text: Password
+        - textbox "Password" [ref=e13]
+        - button "Toggle password visibility" [ref=e14]:
+          - img [ref=e15]
+          - img [ref=e18]
+      - button "Sign In" [ref=e21]
+      - button "Forgot password?" [ref=e22]
+    - generic [ref=e23]:
+      - paragraph [ref=e24]: Enter your email to receive a password reset link.
+      - text: Email or Username
+      - textbox "Email or Username" [ref=e25]
+      - button "Send Reset Link" [ref=e26]
+      - button "Back to login" [ref=e27]
+    - generic [ref=e28]:
+      - img [ref=e30]
+      - paragraph [ref=e34]: Reset link sent! Check your email for a link to reset your password. You will be required to set a new password on login.
+      - button "Back to login" [ref=e35]
+    - generic [ref=e36]:
+      - text: Email or Username
+      - textbox "Email or Username" [ref=e37]
+      - button "Send Link" [ref=e38]
+      - paragraph [ref=e39]: A secure login link will be sent to your email.
+  - banner [ref=e40]:
+    - navigation [ref=e42]:
+      - link "no bhad codes - Go to homepage" [ref=e43] [cursor=pointer]:
+        - /url: /
+        - text: no bhad codes
+      - generic [ref=e44]:
+        - button "Client Portal Login" [ref=e45]:
+          - img [ref=e47]
+        - button "Toggle dark/light theme" [ref=e51]:
+          - generic [ref=e52]:
+            - img [ref=e53]
+            - img [ref=e56]
+        - button "Toggle navigation menu" [ref=e58]:
+          - img [ref=e60]
+          - generic [ref=e67]:
+            - paragraph [ref=e68]: Menu
+            - paragraph [ref=e69]: Close
+  - navigation [ref=e70]:
+    - generic [ref=e72]:
+      - list [ref=e73]:
+        - listitem [ref=e74]:
+          - link "home 00" [ref=e75] [cursor=pointer]:
+            - /url: "#/"
+            - paragraph [ref=e76]: home
+            - paragraph [ref=e77]: "00"
+        - listitem [ref=e78]:
+          - link "about 01" [ref=e79] [cursor=pointer]:
+            - /url: "#/about"
+            - paragraph [ref=e80]: about
+            - paragraph [ref=e81]: "01"
+        - listitem [ref=e82]:
+          - link "contact 02" [ref=e83] [cursor=pointer]:
+            - /url: "#/contact"
+            - paragraph [ref=e84]: contact
+            - paragraph [ref=e85]: "02"
+        - listitem [ref=e86]:
+          - link "projects 03" [ref=e87] [cursor=pointer]:
+            - /url: "#/projects"
+            - paragraph [ref=e88]: projects
+            - paragraph [ref=e89]: "03"
+      - generic [ref=e90]:
+        - paragraph [ref=e91]: Socials
+        - generic [ref=e92]:
+          - link "GitHub" [ref=e93] [cursor=pointer]:
+            - /url: https://github.com/nobhad
+            - img [ref=e94]
+            - text: GitHub
+          - link "LinkedIn" [ref=e97] [cursor=pointer]:
+            - /url: https://www.linkedin.com/in/noelle-b-676286106/
+            - img [ref=e98]
+            - text: LinkedIn
+  - navigation "Page navigation" [ref=e105]:
+    - link "MY WORK" [ref=e106] [cursor=pointer]:
+      - /url: "#/projects"
+    - link "LET'S TALK" [ref=e107] [cursor=pointer]:
+      - /url: "#/contact"
+  - contentinfo [ref=e108]:
+    - paragraph [ref=e110]: © 2026 No Bhad Codes. All rights reserved.
+```

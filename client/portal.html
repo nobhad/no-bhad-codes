@@ -30,6 +30,24 @@
           document.documentElement.setAttribute('data-theme', 'light');
         }
       })();
+      (function () {
+        var el = document.documentElement;
+        var params = new URLSearchParams(window.location.search);
+        var w = params.get('wireframe');
+        if (w === '1') {
+          el.setAttribute('data-wireframe', 'true');
+          try { localStorage.setItem('wireframe', '1'); } catch (e) {}
+        } else if (w === '0') {
+          el.removeAttribute('data-wireframe');
+          try { localStorage.removeItem('wireframe'); } catch (e) {}
+        } else {
+          try {
+            if (localStorage.getItem('wireframe') === '1') {
+              el.setAttribute('data-wireframe', 'true');
+            }
+          } catch (e) {}
+        }
+      })();
     </script>
     <meta
       name="description"
@@ -71,6 +89,7 @@
             <button class="btn btn-secondary" id="btn-messages" data-tab="messages">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
               <span class="btn-text">MESSAGES</span>
+              <span class="sidebar-badge" id="badge-messages" aria-label="unread messages"></span>
             </button>
             <button class="btn btn-secondary" id="btn-files" data-tab="files">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M15 2h-4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/><path d="M16.706 2.706A2.4 2.4 0 0 0 15 2v5a1 1 0 0 0 1 1h5a2.4 2.4 0 0 0-.706-1.706z"/><path d="M5 7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 1.732-1"/></svg>
@@ -87,10 +106,19 @@
             <button class="btn btn-secondary" id="btn-invoices" data-tab="invoices">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
               <span class="btn-text">INVOICES</span>
+              <span class="sidebar-badge" id="badge-invoices" aria-label="pending invoices"></span>
             </button>
             <button class="btn btn-secondary" id="btn-new-project" data-tab="new-project">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
               <span class="btn-text">NEW PROJECT</span>
+            </button>
+            <button class="btn btn-secondary" id="btn-documents" data-tab="documents">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" aria-hidden="true"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+              <span class="btn-text">DOCUMENTS</span>
+            </button>
+            <button class="btn btn-secondary" id="btn-help" data-tab="help">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8"/><path d="M8 11h8"/></svg>
+              <span class="btn-text">HELP</span>
             </button>
             <button class="btn btn-secondary" id="btn-settings" data-tab="settings">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
@@ -110,10 +138,19 @@
       <!-- Content Area -->
       <div class="dashboard-content" id="dashboard-content">
         <div class="content-wrapper">
+          <!-- Primary header row: sidebar toggle + breadcrumbs (evergreen-style) -->
+          <div class="page-header primary-header-row">
+            <button type="button" class="header-sidebar-toggle header-toggle-button" aria-label="Toggle sidebar">
+              <svg class="sidebar-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="18" rx="1"/><path d="M15 3h6a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-6"/></svg>
+              <span class="sr-only">Toggle Sidebar</span>
+            </button>
+            <nav class="breadcrumb-nav header-breadcrumb-nav" aria-label="Breadcrumb">
+              <ul id="breadcrumb-list" class="breadcrumb-list"></ul>
+            </nav>
+          </div>
           <!-- Dashboard View (Default) -->
           <div class="tab-content active" id="tab-dashboard">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <div class="page-title">
               <h2>Welcome Back, <span id="client-name">Client</span>!</h2>
             </div>
 
@@ -177,8 +214,7 @@
 
           <!-- Files View -->
           <div class="tab-content" id="tab-files">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <div class="page-title">
               <h2>Files</h2>
             </div>
 
@@ -196,11 +232,50 @@
             <!-- Files List -->
             <div class="files-list-section portal-shadow">
               <h3>Project Files</h3>
-              <div class="files-filter">
-                <select id="files-project-filter" class="form-select">
-                  <option value="all">All Projects</option>
-                  <option value="project-1">Your Website Project</option>
-                </select>
+              <div class="files-filter-bar">
+                <div class="files-filter-row">
+                  <div class="filter-group">
+                    <label for="files-project-filter" class="filter-label">Project</label>
+                    <select id="files-project-filter" class="form-select">
+                      <option value="all">All Projects</option>
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label for="files-type-filter" class="filter-label">Type</label>
+                    <select id="files-type-filter" class="form-select">
+                      <option value="all">All Types</option>
+                      <option value="document">Documents</option>
+                      <option value="image">Images</option>
+                      <option value="video">Videos</option>
+                      <option value="archive">Archives</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label for="files-category-filter" class="filter-label">Category</label>
+                    <select id="files-category-filter" class="form-select">
+                      <option value="all">All Categories</option>
+                      <option value="general">General</option>
+                      <option value="deliverable">Deliverable</option>
+                      <option value="source">Source</option>
+                      <option value="asset">Asset</option>
+                      <option value="document">Document</option>
+                      <option value="contract">Contract</option>
+                      <option value="invoice">Invoice</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="files-filter-row">
+                  <div class="filter-group filter-date">
+                    <label for="files-date-from" class="filter-label">From</label>
+                    <input type="date" id="files-date-from" class="form-input" />
+                  </div>
+                  <div class="filter-group filter-date">
+                    <label for="files-date-to" class="filter-label">To</label>
+                    <input type="date" id="files-date-to" class="form-input" />
+                  </div>
+                  <button type="button" class="btn btn-secondary btn-sm" id="files-clear-filters">Clear Filters</button>
+                </div>
               </div>
               <div class="files-list" id="files-list">
                 <div class="file-item">
@@ -260,80 +335,53 @@
 
           <!-- Messages View -->
           <div class="tab-content" id="tab-messages">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <div class="page-title">
               <h2>Messages</h2>
             </div>
 
-            <!-- Messages Thread -->
-            <div class="messages-container portal-shadow">
-              <div class="messages-thread" id="messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread">
-                <div class="message message-received">
-                  <div class="message-avatar" data-name="Noelle">
-                    <img src="/images/avatar.svg" alt="Noelle" class="avatar-img" />
-                  </div>
-                  <div class="message-content">
-                    <div class="message-header">
-                      <span class="message-sender">Noelle</span>
-                      <span class="message-time">Nov 30, 2025 at 10:30 AM</span>
-                    </div>
-                    <div class="message-body">
-                      Welcome to your project portal! I'm excited to work with you. I've reviewed
-                      your intake form and will begin the planning phase shortly.
-                    </div>
-                  </div>
+            <!-- Messages Layout with Thread List -->
+            <div class="messages-layout">
+              <!-- Thread List Sidebar -->
+              <div class="thread-list-container portal-shadow">
+                <div class="thread-list-header">
+                  <span>Conversations</span>
                 </div>
-                <div class="message message-sent">
-                  <div class="message-content">
-                    <div class="message-header">
-                      <span class="message-sender">You</span>
-                      <span class="message-time">Nov 30, 2025 at 11:15 AM</span>
-                    </div>
-                    <div class="message-body">
-                      Thanks! Looking forward to seeing the initial designs.
-                    </div>
-                  </div>
-                  <div class="message-avatar" data-name="You">
-                    <div class="avatar-placeholder">YOU</div>
-                  </div>
-                </div>
-                <div class="message message-received message-unread">
-                  <div class="message-avatar" data-name="Noelle">
-                    <img src="/images/avatar.svg" alt="Noelle" class="avatar-img" />
-                  </div>
-                  <div class="message-content">
-                    <div class="message-header">
-                      <span class="message-sender">Noelle</span>
-                      <span class="message-time">Dec 1, 2025 at 9:00 AM</span>
-                    </div>
-                    <div class="message-body">
-                      The project outline is now uploaded in the Files section. Take a look when you
-                      get a chance and let me know if you have any questions!
-                    </div>
-                  </div>
+                <div class="thread-list" id="thread-list" role="listbox" aria-label="Message threads">
+                  <!-- Threads populated by JS -->
                 </div>
               </div>
 
-              <!-- Compose Message -->
-              <div class="message-compose">
-                <div class="message-input-wrapper">
-                  <label for="message-input" class="sr-only">Message</label>
-                  <textarea
-                    id="message-input"
-                    class="form-textarea"
-                    placeholder="Type your message..."
-                    aria-label="Type your message"
-                  ></textarea>
+              <!-- Messages Thread -->
+              <div class="messages-container portal-shadow">
+                <div class="messages-thread-header" id="messages-thread-header">
+                  <span class="thread-title">Select a conversation</span>
                 </div>
-                <button class="btn btn-secondary" id="btn-send-message">Send Message</button>
+                <div class="messages-thread" id="messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread">
+                  <div class="no-messages">
+                    <p>Select a conversation from the list to view messages.</p>
+                  </div>
+                </div>
+
+                <!-- Compose Message -->
+                <div class="message-compose">
+                  <div class="message-input-wrapper">
+                    <label for="message-input" class="sr-only">Message</label>
+                    <textarea
+                      id="message-input"
+                      class="form-textarea"
+                      placeholder="Type your message..."
+                      aria-label="Type your message"
+                    ></textarea>
+                  </div>
+                  <button class="btn btn-secondary" id="btn-send-message">Send Message</button>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Invoices View -->
           <div class="tab-content" id="tab-invoices">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <div class="page-title">
               <h2>Invoices</h2>
             </div>
 
@@ -371,10 +419,82 @@
             </div>
           </div>
 
+          <!-- Documents View (Document requests) -->
+          <div class="tab-content" id="tab-documents">
+            <div class="page-title">
+              <h2>Document Requests</h2>
+            </div>
+            <p id="documents-intro" class="documents-intro">Documents we need from you. Open a request to view details and upload.</p>
+            <div id="documents-list-wrap" class="documents-list-wrap portal-shadow">
+              <div id="documents-list" class="documents-list"></div>
+              <p id="documents-empty" class="documents-empty" style="display: none;">No document requests.</p>
+              <p id="documents-load-error" class="documents-error" style="display: none;"></p>
+            </div>
+            <div id="documents-detail-wrap" class="documents-detail-wrap portal-shadow" style="display: none;">
+              <div class="documents-detail-back">
+                <button type="button" id="documents-detail-back" class="btn btn-outline btn-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                  <span>BACK</span>
+                </button>
+              </div>
+              <h3 id="documents-detail-title"></h3>
+              <p id="documents-detail-description" class="documents-detail-description"></p>
+              <p id="documents-detail-meta" class="documents-detail-meta"></p>
+              <div id="documents-detail-upload" class="documents-detail-upload" style="display: none;">
+                <label for="documents-file-input" class="documents-upload-label">Upload document</label>
+                <input type="file" id="documents-file-input" class="documents-file-input" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" aria-label="Choose file" />
+                <button type="button" id="documents-upload-btn" class="btn btn-primary btn-sm" disabled>UPLOAD</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Help View (Knowledge Base) -->
+          <div class="tab-content" id="tab-help">
+            <div class="page-title">
+              <h2>Help</h2>
+            </div>
+            <div class="help-search-wrap">
+              <label for="help-search-input" class="sr-only">Search help articles</label>
+              <input type="search" id="help-search-input" class="help-search-input" placeholder="Search help articles..." autocomplete="off" />
+              <button type="button" id="help-search-btn" class="btn btn-primary help-search-btn" aria-label="Search">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <span>SEARCH</span>
+              </button>
+            </div>
+            <div id="help-browse" class="help-browse">
+              <section class="help-featured portal-shadow" id="help-featured-section" aria-label="Featured articles">
+                <h3>Featured</h3>
+                <div id="help-featured-list" class="help-featured-list"></div>
+                <p id="help-featured-empty" class="help-empty" style="display: none;">No featured articles.</p>
+              </section>
+              <section class="help-categories portal-shadow" id="help-categories-section" aria-label="Categories">
+                <h3>Categories</h3>
+                <div id="help-categories-list" class="help-categories-list"></div>
+                <p id="help-categories-empty" class="help-empty" style="display: none;">No categories yet.</p>
+              </section>
+            </div>
+            <div id="help-search-results" class="help-search-results portal-shadow" style="display: none;" aria-label="Search results">
+              <h3 id="help-search-results-title">Search results</h3>
+              <div id="help-search-results-list"></div>
+            </div>
+            <div id="help-article-view" class="help-article-view portal-shadow" style="display: none;" aria-label="Article">
+              <div class="help-article-back">
+                <button type="button" id="help-article-back-btn" class="btn btn-outline btn-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                  <span>BACK</span>
+                </button>
+              </div>
+              <article id="help-article-content">
+                <h1 id="help-article-title"></h1>
+                <div id="help-article-body" class="help-article-body"></div>
+              </article>
+            </div>
+            <p id="help-load-error" class="help-error" style="display: none;"></p>
+          </div>
+
           <!-- Settings View -->
           <div class="tab-content" id="tab-settings">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <div class="page-title">
               <h2>Settings</h2>
             </div>
 
@@ -602,8 +722,7 @@
 
           <!-- New Project View - Terminal Intake Form -->
           <div class="tab-content" id="tab-new-project">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <div class="page-title">
               <h2>New Project</h2>
             </div>
             <section class="terminal-intake-container portal-intake">
@@ -709,8 +828,7 @@
 
           <!-- Project Preview View -->
           <div class="tab-content" id="tab-preview">
-            <div class="page-header">
-              <button class="header-sidebar-toggle" aria-label="Toggle sidebar">&#9664;</button>
+            <div class="page-title">
               <h2>Project Preview</h2>
             </div>
 

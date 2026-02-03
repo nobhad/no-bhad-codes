@@ -170,6 +170,7 @@
       name="keywords"
       content="web development, portfolio, typescript, client management, professional websites"
     />
+    <link rel="canonical" href="https://nobhad.codes/" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
@@ -179,6 +180,13 @@
       content="Professional web development services by Noelle Bhaduri"
     />
     <meta property="og:site_name" content="No Bhad Codes" />
+    <meta property="og:url" content="https://nobhad.codes/" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="No Bhad Codes - Professional Web Development" />
+    <meta name="twitter:description" content="Professional web development services by Noelle Bhaduri" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -196,6 +204,52 @@
 
     <!-- Main Script -->
     <script type="module" src="/src/main-site.ts"></script>
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://nobhad.codes/#website",
+          "url": "https://nobhad.codes/",
+          "name": "No Bhad Codes",
+          "description": "Professional web development services by Noelle Bhaduri",
+          "publisher": { "@id": "https://nobhad.codes/#person" }
+        },
+        {
+          "@type": "Person",
+          "@id": "https://nobhad.codes/#person",
+          "name": "Noelle Bhaduri",
+          "url": "https://nobhad.codes/",
+          "email": "nobhaduri@gmail.com",
+          "jobTitle": "Full-Stack Web Developer",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Boston",
+            "addressRegion": "MA",
+            "addressCountry": "US"
+          },
+          "sameAs": [
+            "https://github.com/nobhad",
+            "https://www.linkedin.com/in/noelle-b-676286106/"
+          ],
+          "knowsAbout": ["Web Development", "TypeScript", "React", "Node.js"]
+        },
+        {
+          "@type": "ProfessionalService",
+          "@id": "https://nobhad.codes/#service",
+          "name": "No Bhad Codes",
+          "url": "https://nobhad.codes/",
+          "description": "Professional web development services",
+          "provider": { "@id": "https://nobhad.codes/#person" },
+          "areaServed": "Boston, MA",
+          "serviceType": ["Web Development", "Custom Website Design", "Client Portal Development"]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <!-- Intro Morph Animation Overlay - visible by default, hidden by JS when not on intro page -->

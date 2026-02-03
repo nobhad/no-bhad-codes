@@ -27,7 +27,9 @@ import {
   loadSettingsModule,
   loadNavigationModule,
   loadProjectsModule,
-  loadAuthModule
+  loadAuthModule,
+  loadHelpModule,
+  loadDocumentRequestsModule
 } from './modules';
 import { decodeJwtPayload, isAdminPayload } from '../../utils/jwt-utils';
 import { ICONS, getAccessibleIcon } from '../../constants/icons';
@@ -35,6 +37,7 @@ import { createDOMCache } from '../../utils/dom-cache';
 import { formatTextWithLineBreaks, formatDate } from '../../utils/format-utils';
 import { showToast } from '../../utils/toast-notifications';
 import { withButtonLoading } from '../../utils/button-loading';
+import { initCopyEmailDelegation } from '../../utils/copy-email';
 
 // DOM element keys for caching
 type PortalDOMKeys = Record<string, string>;
@@ -142,6 +145,11 @@ export class ClientPortalModule extends BaseModule {
   protected override async onInit(): Promise<void> {
     this.cacheElements();
     this.setupEventListeners();
+    initCopyEmailDelegation(document);
+    // Set initial breadcrumb at top of page when on client portal (so it shows even before/without login)
+    if (document.body.getAttribute('data-page') === 'client-portal' && document.getElementById('breadcrumb-list')) {
+      loadNavigationModule().then((nav) => nav.updateBreadcrumbs([{ label: 'Dashboard', href: false }]));
+    }
     // Check for existing authentication using the auth module
     const authModule = await loadAuthModule();
     await authModule.checkExistingAuth({
@@ -359,9 +367,10 @@ export class ClientPortalModule extends BaseModule {
       });
     }
 
-    // Setup file upload handlers (drag & drop) - uses module
+    // Setup file upload handlers (drag & drop) and filter listeners - uses module
     loadFilesModule().then((filesModule) => {
       filesModule.setupFileUploadHandlers(this.moduleContext);
+      filesModule.setupFileFilterListeners(this.moduleContext);
     });
 
     // Setup settings form handlers
@@ -864,6 +873,116 @@ export class ClientPortalModule extends BaseModule {
     }
   }
 
+  /**
+   * Load dashboard stats and recent activity from API
+   */
+  private async loadDashboardStats(): Promise<void> {
+    try {
+      const response = await fetch('/api/clients/me/dashboard', {
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        console.warn('[ClientPortal] Failed to load dashboard stats:', response.status);
+        return;
+      }
+
+      const data = await response.json();
+
+      // Update stat cards
+      const statCards = document.querySelectorAll('.stat-card');
+      statCards.forEach((card) => {
+        const tabAttr = card.getAttribute('data-tab');
+        const numberEl = card.querySelector('.stat-number');
+        if (!numberEl) return;
+
+        if (tabAttr === 'dashboard') {
+          numberEl.textContent = String(data.stats.activeProjects || 0);
+        } else if (tabAttr === 'invoices') {
+          numberEl.textContent = String(data.stats.pendingInvoices || 0);
+        } else if (tabAttr === 'messages') {
+          numberEl.textContent = String(data.stats.unreadMessages || 0);
+        }
+      });
+
+      // Update recent activity
+      const activityList = document.querySelector('.activity-list');
+      if (activityList && data.recentActivity) {
+        if (data.recentActivity.length === 0) {
+          activityList.innerHTML = '<li class="activity-empty">No recent activity</li>';
+        } else {
+          activityList.innerHTML = data.recentActivity.map((item: {
+            type: string;
+            title: string;
+            context: string;
+            date: string;
+          }) => {
+            const date = new Date(item.date);
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+            const formattedDate = `${month}/${day}/${year}`;
+            const icon = this.getActivityIcon(item.type);
+            return `<li>${icon} ${this.escapeHtml(item.title)}${item.context ? ` - ${this.escapeHtml(item.context)}` : ''} <span class="activity-date">${formattedDate}</span></li>`;
+          }).join('');
+        }
+      }
+
+      // Update sidebar badges
+      this.updateSidebarBadges(data.stats.unreadMessages || 0, data.stats.pendingInvoices || 0);
+
+      this.log('[ClientPortal] Dashboard stats loaded');
+    } catch (error) {
+      console.error('[ClientPortal] Error loading dashboard stats:', error);
+    }
+  }
+
+  /**
+   * Get icon for activity type
+   */
+  private getActivityIcon(type: string): string {
+    switch (type) {
+    case 'project_update': return '📋';
+    case 'message': return '💬';
+    case 'invoice': return '📄';
+    case 'file': return '📁';
+    default: return '•';
+    }
+  }
+
+  /**
+   * Update sidebar notification badges
+   */
+  private updateSidebarBadges(unreadMessages: number, pendingInvoices: number): void {
+    // Messages badge
+    const messagesBadge = document.getElementById('badge-messages');
+    if (messagesBadge) {
+      if (unreadMessages > 0) {
+        messagesBadge.textContent = unreadMessages > 99 ? '99+' : String(unreadMessages);
+        messagesBadge.classList.add('has-count');
+        messagesBadge.setAttribute('aria-label', `${unreadMessages} unread messages`);
+      } else {
+        messagesBadge.textContent = '';
+        messagesBadge.classList.remove('has-count');
+        messagesBadge.setAttribute('aria-label', 'unread messages');
+      }
+    }
+
+    // Invoices badge
+    const invoicesBadge = document.getElementById('badge-invoices');
+    if (invoicesBadge) {
+      if (pendingInvoices > 0) {
+        invoicesBadge.textContent = pendingInvoices > 99 ? '99+' : String(pendingInvoices);
+        invoicesBadge.classList.add('has-count');
+        invoicesBadge.setAttribute('aria-label', `${pendingInvoices} pending invoices`);
+      } else {
+        invoicesBadge.textContent = '';
+        invoicesBadge.classList.remove('has-count');
+        invoicesBadge.setAttribute('aria-label', 'pending invoices');
+      }
+    }
+  }
+
   private populateProjectsList(projects: ClientProject[]): void {
     if (!this.projectsList) return;
 
@@ -1159,6 +1278,14 @@ export class ClientPortalModule extends BaseModule {
     if (this.dashboardSection) {
       this.dashboardSection.style.display = 'block';
 
+      // Set initial breadcrumb at top of page (Dashboard when on main dashboard tab)
+      loadNavigationModule().then((navModule) => {
+        navModule.updateBreadcrumbs([{ label: 'Dashboard', href: false }]);
+      });
+
+      // Load dashboard stats from API
+      this.loadDashboardStats();
+
       // Setup dashboard event listeners if not already done
       if (!this.dashboardListenersSetup) {
         setTimeout(() => {
@@ -1363,7 +1490,9 @@ export class ClientPortalModule extends BaseModule {
       loadFiles: () => this.loadFiles(),
       loadInvoices: () => this.loadInvoices(),
       loadProjectPreview: () => this.loadProjectPreview(),
-      loadMessagesFromAPI: () => this.loadMessagesFromAPI()
+      loadMessagesFromAPI: () => this.loadMessagesFromAPI(),
+      loadHelp: () => this.loadHelp(),
+      loadDocumentRequests: () => this.loadDocumentRequests()
     });
   }
 
@@ -1373,6 +1502,22 @@ export class ClientPortalModule extends BaseModule {
   private async loadProjectPreview(): Promise<void> {
     const projectsModule = await loadProjectsModule();
     await projectsModule.loadProjectPreview(this.moduleContext);
+  }
+
+  /**
+   * Load Help tab (knowledge base) - delegates to help module
+   */
+  private async loadHelp(): Promise<void> {
+    const helpModule = await loadHelpModule();
+    await helpModule.loadHelp(this.moduleContext);
+  }
+
+  /**
+   * Load Document requests tab - delegates to document-requests module
+   */
+  private async loadDocumentRequests(): Promise<void> {
+    const docModule = await loadDocumentRequestsModule();
+    await docModule.loadDocumentRequests(this.moduleContext);
   }
 
   private async toggleAccountFolder(): Promise<void> {

@@ -1,0 +1,85 @@
+/**
+ * =====================================================
+ * SHARED SEARCH BAR
+ * @file src/styles/shared/search-bar.css
+ * Reusable inline search: icon + input (+ optional clear).
+ * Use class .search-bar on wrapper, .search-bar-icon, .search-bar-input, .search-bar-clear.
+ * ===================================================== */
+
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.search-bar-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--portal-text-muted, var(--color-neutral-500));
+  pointer-events: none;
+}
+
+.search-bar-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Search bar inputs: padding for icon comes from portal-forms.css (input with left icon).
+   No padding override here - single source of truth in portal-forms. */
+.search-bar .search-bar-input,
+input.search-bar-input {
+  width: 100%;
+  padding-right: 2rem;
+  background: var(--portal-bg-dark, var(--color-neutral-200));
+  border: 1px solid var(--portal-border-light, var(--portal-border, rgba(0,0,0,0.1)));
+  border-radius: var(--portal-radius-lg, var(--border-radius-card, 12px));
+  color: var(--portal-text, var(--portal-text-primary, inherit));
+  font-size: 0.875rem;
+  height: 40px;
+  box-sizing: border-box;
+}
+
+.search-bar .search-bar-input::placeholder,
+.search-bar-input::placeholder {
+  color: var(--portal-text-muted, var(--color-neutral-500));
+}
+
+.search-bar .search-bar-input:focus,
+.search-bar-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.search-bar-clear {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--portal-radius-sm, 6px);
+  color: var(--portal-text-muted, var(--color-neutral-500));
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.search-bar-clear:hover {
+  color: var(--portal-text, var(--portal-text-primary));
+}
+
+.search-bar-clear svg {
+  width: 14px;
+  height: 14px;
+}

@@ -25,6 +25,6 @@
 
 .skip-link:focus {
   top: 10px;
-  outline: 2px solid var(--app-color-primary, #dc2626);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }

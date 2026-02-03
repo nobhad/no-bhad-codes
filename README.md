@@ -72,6 +72,7 @@ npm install
 
 # Create environment configuration
 cp .env.example .env
+# (If .env.example is not present, see docs/CONFIGURATION.md for required variables.)
 # Edit .env with your configuration
 
 # Initialize database
@@ -133,26 +134,46 @@ npm run migrate:status  # Check migration status
 no-bhad-codes/
 ├── 📁 client/                    # Client portal pages
 │   ├── intake.html              # Client intake form
-│   ├── landing.html             # Client onboarding
-│   └── portal.html              # Client dashboard
+│   ├── portal.html              # Client dashboard
+│   └── set-password.html        # Invitation password setup
 ├── 📁 server/                    # Backend application
 │   ├── 📁 config/               # Configuration management
 │   │   └── environment.ts       # Environment validation
 │   ├── 📁 database/             # Database setup and migrations
 │   ├── 📁 middleware/           # Express middleware
 │   │   ├── auth.ts              # Authentication middleware
-│   │   ├── errorHandler.ts     # Global error handling
-│   │   └── request-logger.ts    # Request logging
+│   │   ├── errorHandler.ts      # Global error handling
+│   │   ├── logger.ts            # Request logging
+│   │   ├── request-id.ts        # Request correlation IDs
+│   │   ├── sanitization.ts      # Input sanitization
+│   │   └── audit.ts             # Audit logging
 │   ├── 📁 routes/               # API routes
 │   │   ├── auth.ts              # Authentication endpoints
+│   │   ├── admin.ts             # Admin dashboard
 │   │   ├── clients.ts           # Client management
-│   │   ├── intake.js            # Intake form processing
-│   │   └── projects.ts          # Project management
+│   │   ├── projects.ts          # Project management
+│   │   ├── messages.ts          # Messaging
+│   │   ├── invoices.ts         # Invoices
+│   │   ├── uploads.ts          # File uploads
+│   │   ├── intake.ts           # Intake form processing
+│   │   ├── proposals.ts         # Proposals
+│   │   ├── analytics.ts        # Analytics
+│   │   ├── approvals.ts        # Approval workflows
+│   │   ├── triggers.ts         # Workflow triggers
+│   │   ├── document-requests.ts # Document requests
+│   │   ├── knowledge-base.ts   # Knowledge base (kb)
+│   │   └── api.ts              # General API (contact, etc.)
 │   ├── 📁 services/             # Business logic services
-│   │   ├── email-service.js     # Email notifications
-│   │   ├── invoice-generator.js # Invoice generation
+│   │   ├── email-service.ts     # Email notifications
+│   │   ├── invoice-service.ts   # Invoice CRUD and generation
+│   │   ├── invoice-generator.ts # PDF invoice generation
 │   │   ├── logger.ts            # Centralized logging
-│   │   └── project-generator.js # Project planning
+│   │   ├── project-service.ts   # Project management
+│   │   ├── project-generator.ts # Project planning
+│   │   ├── message-service.ts   # Messaging
+│   │   ├── client-service.ts   # Client management
+│   │   ├── file-service.ts     # File uploads
+│   │   └── (approvals, document-requests, knowledge-base, etc.)
 │   └── app.ts                   # Express application
 ├── 📁 src/                      # Frontend source code
 │   ├── 📁 config/               # Frontend configuration
@@ -408,18 +429,24 @@ Authenticate client credentials and return JWT token.
 }
 ```
 
-**Response:**
+**Response:** JWT is set in an HttpOnly cookie; the body does not include the token.
 
 ```json
 {
+  "success": true,
   "message": "Login successful",
-  "user": {
-    "id": 1,
-    "email": "client@example.com",
-    "role": "client"
-  },
-  "token": "eyJhbGciOiJIUzI1NiIs...",
-  "expiresIn": "7d"
+  "data": {
+    "user": {
+      "id": 1,
+      "email": "client@example.com",
+      "name": "John Doe",
+      "companyName": "Example Corp",
+      "contactName": "John Doe",
+      "status": "active",
+      "isAdmin": false
+    },
+    "expiresIn": "7d"
+  }
 }
 ```
 
@@ -641,11 +668,11 @@ export class MyModule extends BaseModule {
     super('my-module', container);
   }
 
-  override async init(): Promise<void> {
+  protected override async onInit(): Promise<void> {
     // Module initialization
   }
 
-  override async destroy(): Promise<void> {
+  protected override async onDestroy(): Promise<void> {
     // Cleanup logic
   }
 }
@@ -771,10 +798,10 @@ const apiService = container.get<ApiService>('apiService');
 
 ```bash
 tests/
-├── unit/           # Unit tests
-├── integration/    # Integration tests
-├── e2e/           # End-to-end tests with Playwright
-└── fixtures/      # Test data and fixtures
+├── unit/           # Unit tests (Vitest)
+├── e2e/            # End-to-end tests (Playwright)
+├── mocks/          # Test data and mocks
+└── setup/          # Test setup and utilities
 ```
 
 ### Running Tests

@@ -1,0 +1,48 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - navigation [ref=e5]:
+      - link "no bhad codes - Go to homepage" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - text: no bhad codes
+      - generic [ref=e7]:
+        - button "Switch to dark theme" [ref=e8] [cursor=pointer]:
+          - generic [ref=e9]:
+            - img [ref=e10]
+            - img [ref=e13]
+        - button "Toggle navigation menu" [ref=e15] [cursor=pointer]:
+          - img [ref=e17]
+          - generic [ref=e24]:
+            - paragraph [ref=e25]: Menu
+            - paragraph [ref=e26]: Close
+  - main [ref=e27]:
+    - heading "No Bhad Codes - Professional Web Development" [level=1] [ref=e28]
+    - generic [ref=e30]:
+      - generic [ref=e31]:
+        - img "Coyote the dog" [ref=e33]
+        - generic [ref=e34]:
+          - heading "ABOUT" [level=2] [ref=e35]
+          - separator [ref=e36]
+          - paragraph [ref=e37]: Hi, I'm Noelle, a creative full-stack developer based in the Boston, MA area. Coding lets me utilize my love for tinkering and problem-solving by combining clean code with good design. I work with modern frameworks, build type-safe apps, set up scalable backends, and make sure the UI actually feels nice to use.
+          - paragraph [ref=e38]: When I'm not coding, I'm treasure hunting and engaging with art and nature. I draw inspiration from midcentury animation and children's book illustrations.
+          - paragraph [ref=e39]: I am actively seeking both local and remote web development opportunities.
+      - generic [ref=e41]:
+        - heading "tech stack" [level=3] [ref=e42]
+        - paragraph [ref=e43]: JavaScript • TypeScript • HTML5 • CSS3 • PHP • React • Next.js • Vue.js • jQuery • Tailwind CSS • Bootstrap • Vuetify • GSAP • Node.js • Express.js • EJS • Handlebars • PostgreSQL • MongoDB • Redis • Supabase • MySQL • SQLite • Mongoose • Git • Vite • Webpack • npm/yarn • Jotai • Zod • JWT Auth • Vitest • Playwright • Sentry • Vercel • Railway • Chart.js • PDFKit • Nodemailer • Chrome Extensions API • Claude Code CLI • Adobe Illustrator • Photoshop
+  - contentinfo [ref=e44]:
+    - paragraph [ref=e46]: © 2026 No Bhad Codes. All rights reserved.
+  - generic [ref=e48]:
+    - img [ref=e50]
+    - generic [ref=e52]:
+      - heading "I respect your privacy" [level=3] [ref=e53]
+      - paragraph [ref=e54]: No Bhad Codes uses cookies and similar technologies to enhance your browsing experience, analyze site traffic, and understand visitor behavior. Your privacy is important to me.
+    - generic [ref=e55]:
+      - generic [ref=e56]:
+        - button "Decline" [ref=e57] [cursor=pointer]
+        - button "Accept All" [ref=e58] [cursor=pointer]
+      - button "Learn More" [ref=e60] [cursor=pointer]
+```

@@ -14,15 +14,21 @@ This document provides comprehensive documentation for all configuration files a
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and configure the following variables:
+Copy `.env.example` to `.env` (or create `.env` from the variables below if no template exists) and configure the following variables:
 
 ### Server Configuration
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `NODE_ENV` | Yes | `development` | Environment mode (`development`, `production`, `test`) |
+| `NODE_ENV` | Yes | `development` | Environment mode (`development`, `staging`, `production`, `test`) |
 | `PORT` | Yes | `4001` | Backend API server port |
 | `FRONTEND_URL` | Yes | `http://localhost:4000` | Frontend Vite dev server URL |
+
+**Environments:**
+- `development` — Local dev, verbose logging, relaxed security
+- `staging` — Pre-production testing; use production-like config with test data
+- `production` — Live environment; ensure `ADMIN_PASSWORD_HASH`, strong `JWT_SECRET`, `EMAIL_ENABLED=true`
+- `test` — Vitest/Playwright; typically uses in-memory or test DB
 
 ### Database Configuration
 
@@ -68,9 +74,10 @@ Copy `.env.example` to `.env` and configure the following variables:
 | `SMTP_SECURE` | No | `false` | Use TLS for SMTP |
 | `SMTP_USER` | No | - | SMTP authentication username |
 | `SMTP_PASS` | No | - | SMTP authentication password/app password |
-| `SMTP_FROM` | No | - | Default "From" email address |
+| `SMTP_FROM` | No | - | Default "From" email address (used by app when sending email) |
 | `SMTP_REPLY_TO` | No | - | Reply-to email address |
 | `SUPPORT_EMAIL` | No | - | Support email recipient |
+| `FROM_EMAIL` | No | - | Used by server config validation when `EMAIL_ENABLED=true`; set this or ensure SMTP_FROM is set for sending |
 
 ### Frontend Configuration (Vite)
 
@@ -101,17 +108,30 @@ Copy `.env.example` to `.env` and configure the following variables:
 | `REDIS_DB` | No | `0` | Redis database number |
 | `REDIS_KEY_PREFIX` | No | `nbc:` | Redis key prefix |
 
+**Note:** The server validates environment variables in `server/config/environment.ts`; that file defines the full schema (including optional vars such as `DATABASE_BACKUP_PATH`, `RATE_LIMIT_*`, `ENABLE_PASSWORD_RESET`, `LOG_*`, `CORS_*`, etc.). This section covers the most commonly set variables.
+
 **Note:** Redis is optional for development. When `REDIS_ENABLED` is not set to `true`, the server runs without caching functionality. To enable Redis:
 
 1. Install Redis: `brew install redis` (macOS)
 2. Start Redis: `brew services start redis`
 3. Add to `.env`: `REDIS_ENABLED=true`
 
+### Database Backups
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `BACKUP_DIR` | No | `./data/backups` | Backup output directory |
+| `BACKUP_RETENTION_DAILY` | No | `7` | Number of daily backups to keep |
+| `BACKUP_RETENTION_WEEKLY` | No | `4` | Number of weekly backups to keep |
+
+Run manually: `npm run db:backup`. For automated backups, add a cron job (e.g. daily at 2am): `0 2 * * * cd /path/to/project && npm run db:backup`.
+
 ### File Storage
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `UPLOAD_DIR` | No | `./uploads` | Local file upload directory |
+| `UPLOAD_DIR` | No | `./uploads` | Local file upload directory (used by server env schema) |
+| `UPLOADS_DIR` | No | (derived) | Override for uploads base path; used by `server/config/uploads.ts`. If unset, uses `./uploads` or `/app/data/uploads` on Railway when `DATABASE_PATH` starts with `/app/data`. |
 | `MAX_FILE_SIZE` | No | `10485760` | Maximum file size in bytes (10MB) |
 | `SUPABASE_URL` | No | - | Supabase project URL (production) |
 | `SUPABASE_ANON_KEY` | No | - | Supabase anonymous key |
@@ -150,44 +170,37 @@ getCopyrightText()         // Returns formatted copyright string
 getContactEmail('support') // Returns appropriate email for type
 ```
 
-### `src/config/routes.ts`
+### `src/config/api.ts`
 
-Centralized route path definitions:
+API endpoint configuration and base URL helpers:
 
 ```typescript
-import { ROUTES, matchRoute, isClientRoute, isAdminRoute } from './config/routes';
+import { apiConfig, buildApiUrl } from './config/api';
 
-// Public routes
-ROUTES.HOME       // "/"
-ROUTES.ABOUT      // "/#about"
-ROUTES.CONTACT    // "/#contact"
-ROUTES.PORTFOLIO  // "/#portfolio"
+// Base URL (from Vite env or current origin)
+apiConfig.baseUrl
 
-// Client area routes
-ROUTES.CLIENT.LANDING      // "/client/landing"
-ROUTES.CLIENT.PORTAL       // "/client/portal"
-ROUTES.CLIENT.INTAKE       // "/client/intake"
-ROUTES.CLIENT.SET_PASSWORD // "/client/set-password"
+// Auth endpoints
+apiConfig.endpoints.auth.login    // "/api/auth/login"
+apiConfig.endpoints.auth.logout   // "/api/auth/logout"
+apiConfig.endpoints.auth.profile  // "/api/auth/profile"
+// ... magicLink, verifyMagicLink, refresh, validate
 
-// Admin area routes
-ROUTES.ADMIN.DASHBOARD // "/admin"
-ROUTES.ADMIN.LOGIN     // "/admin/login"
-ROUTES.ADMIN.CLIENTS   // "/admin/clients"
-ROUTES.ADMIN.PROJECTS  // "/admin/projects"
-ROUTES.ADMIN.MESSAGES  // "/admin/messages"
+// Resource bases
+apiConfig.endpoints.clients       // "/api/clients"
+apiConfig.endpoints.projects      // "/api/projects"
+apiConfig.endpoints.intake        // "/api/intake"
 
-// API endpoints
-ROUTES.API.AUTH.LOGIN       // "/api/auth/login"
-ROUTES.API.CONTACT          // "/api/contact"
-ROUTES.API.INTAKE           // "/api/intake"
-ROUTES.API.CLIENTS.BASE     // "/api/clients"
-ROUTES.API.CLIENTS.BY_ID(id) // "/api/clients/:id"
+// Admin auth (full URL with base)
+adminEndpoints.login
+adminEndpoints.logout
+adminEndpoints.validate
 
-// Helper functions
-matchRoute(path, route)     // Check if path matches route
-isClientRoute(path)         // Check if path is in client area
-isAdminRoute(path)          // Check if path is in admin area
+// Build full API URL
+buildApiUrl('/api/clients')
 ```
+
+Client and admin page paths (e.g. `/client/portal`, `/client/intake`, `/admin`) are determined by the HTML entry points and Vite dev server; there is no central `routes.ts` file.
 
 ### `src/config/constants.ts`
 

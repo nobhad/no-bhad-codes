@@ -26,7 +26,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   line-height: 1.2;
   text-transform: uppercase;
   text-shadow: 0 2px 4px var(--color-shadow);
@@ -227,7 +227,7 @@ p a {
   font-weight: 600;
   text-decoration: none;
   position: relative;
-  color: var(--color-brand-primary, currentColor);
+  color: var(--color-primary, currentColor);
   padding: 0 2px;
   white-space: nowrap;
 }
@@ -326,7 +326,7 @@ a.icon-link:focus-visible svg {
 
 @media (hover: hover) {
   .text-link:hover {
-    color: var(--color-brand-primary);
+    color: var(--color-primary);
   }
 }
 

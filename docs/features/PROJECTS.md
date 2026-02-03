@@ -1,7 +1,7 @@
 # Project Management System
 
 **Status:** Complete
-**Last Updated:** February 1, 2026
+**Last Updated:** February 2, 2026
 
 ## Overview
 
@@ -301,6 +301,16 @@ ALTER TABLE milestones ADD COLUMN status TEXT DEFAULT 'pending';
 
 ## API Endpoints
 
+### Project CRUD
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/projects` | Get all projects |
+| GET | `/api/projects/:id` | Get single project |
+| POST | `/api/projects` | Create project |
+| PUT | `/api/projects/:id` | Update project |
+| DELETE | `/api/projects/:id` | Delete project (admin only) |
+
 ### Task Management
 
 | Method | Endpoint | Description |
@@ -525,6 +535,19 @@ const { health } = await response.json();
 - `src/types/api.ts` - Added TypeScript interfaces
 
 ## Change Log
+
+### February 2, 2026 - Contract Reminders & Project Delete
+
+- Added contract reminder system:
+  - New `contract_reminders` table for tracking scheduled reminders
+  - Automatic reminder scheduling when signature is requested (initial, 3-day, 7-day, 14-day)
+  - Automatic reminder cancellation when contract is signed
+  - Email templates for each reminder type
+  - Integrated with scheduler service
+- Added DELETE endpoint for projects (`DELETE /api/projects/:id`)
+- Added delete button to project detail header in admin UI
+- Delete cascades to related records (files, milestones, tasks, time entries, tags, messages)
+- Invoices are preserved for financial records (project_id set to NULL)
 
 ### February 1, 2026 - Initial Implementation
 

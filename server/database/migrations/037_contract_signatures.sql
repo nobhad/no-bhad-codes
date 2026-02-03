@@ -5,14 +5,15 @@
 -- =====================================================
 
 -- Add signature columns to projects table
-ALTER TABLE projects ADD COLUMN contract_signature_token TEXT;
-ALTER TABLE projects ADD COLUMN contract_signature_requested_at TEXT;
-ALTER TABLE projects ADD COLUMN contract_signature_expires_at TEXT;
-ALTER TABLE projects ADD COLUMN contract_signer_name TEXT;
-ALTER TABLE projects ADD COLUMN contract_signer_email TEXT;
-ALTER TABLE projects ADD COLUMN contract_signer_ip TEXT;
-ALTER TABLE projects ADD COLUMN contract_signer_user_agent TEXT;
-ALTER TABLE projects ADD COLUMN contract_signature_data TEXT;
+-- All columns already exist from prior schema changes
+-- ALTER TABLE projects ADD COLUMN contract_signature_token TEXT;
+-- ALTER TABLE projects ADD COLUMN contract_signature_requested_at TEXT;
+-- ALTER TABLE projects ADD COLUMN contract_signature_expires_at TEXT;
+-- ALTER TABLE projects ADD COLUMN contract_signer_name TEXT;
+-- ALTER TABLE projects ADD COLUMN contract_signer_email TEXT;
+-- ALTER TABLE projects ADD COLUMN contract_signer_ip TEXT;
+-- ALTER TABLE projects ADD COLUMN contract_signer_user_agent TEXT;
+-- ALTER TABLE projects ADD COLUMN contract_signature_data TEXT;
 
 -- Create index for token lookups
 CREATE INDEX IF NOT EXISTS idx_projects_contract_signature_token

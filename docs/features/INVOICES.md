@@ -1,6 +1,6 @@
 # Invoice System
 
-**Last Updated:** February 1, 2026
+**Last Updated:** February 2, 2026
 
 ## Table of Contents
 
@@ -72,7 +72,7 @@ The Invoice System provides clients with a complete view of their payment histor
 |-----------|------------|
 | Backend | Express.js with TypeScript |
 | Database | SQLite with async wrapper |
-| Authentication | JWT tokens |
+| Authentication | HttpOnly cookies (JWT); Bearer fallback |
 | Frontend | Vanilla TypeScript |
 | API Communication | Fetch API |
 

@@ -30,6 +30,11 @@
 @import "../client-portal/index.css" layer(portal);
 
 /* ============================================
+ * WIREFRAME MODE (greyscale when data-wireframe="true" on body)
+ * ============================================ */
+@import "../shared/wireframe.css";
+
+/* ============================================
  * UTILITIES (highest priority)
  * ============================================ */
 @layer utilities {
@@ -50,7 +55,7 @@
 
   .skip-link:focus {
     top: 10px;
-    outline: 2px solid var(--app-color-primary, #dc2626);
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
   }
 }

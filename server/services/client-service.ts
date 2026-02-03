@@ -230,6 +230,26 @@ export interface ClientStats {
   lastActivityDate?: string;
 }
 
+export interface ClientNote {
+  id: number;
+  clientId: number;
+  author: string;
+  content: string;
+  isPinned: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ClientNoteRow {
+  id: number;
+  client_id: number;
+  author: string;
+  content: string;
+  is_pinned: number;
+  created_at: string;
+  updated_at: string;
+}
+
 interface ClientRow {
   id: number;
   email: string;
@@ -326,6 +346,18 @@ function toTag(row: TagRow): Tag {
     description: row.description,
     tagType: row.tag_type,
     createdAt: row.created_at
+  };
+}
+
+function toClientNote(row: ClientNoteRow): ClientNote {
+  return {
+    id: row.id,
+    clientId: row.client_id,
+    author: row.author,
+    content: row.content,
+    isPinned: Boolean(row.is_pinned),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
   };
 }
 
@@ -650,6 +682,80 @@ class ClientService {
       clientName: row.contact_name,
       companyName: row.company_name
     }));
+  }
+
+  // ===================================================
+  // NOTES
+  // ===================================================
+
+  /**
+   * Get notes for a client
+   */
+  async getNotes(clientId: number): Promise<ClientNote[]> {
+    const db = getDatabase();
+    const rows = await db.all(
+      `SELECT * FROM client_notes
+       WHERE client_id = ?
+       ORDER BY is_pinned DESC, created_at DESC`,
+      [clientId]
+    ) as unknown as ClientNoteRow[];
+    return rows.map(toClientNote);
+  }
+
+  /**
+   * Add a note to a client
+   */
+  async addNote(clientId: number, author: string, content: string): Promise<ClientNote> {
+    const db = getDatabase();
+
+    const result = await db.run(
+      `INSERT INTO client_notes (client_id, author, content) VALUES (?, ?, ?)`,
+      [clientId, author, content]
+    );
+
+    const note = await db.get(
+      'SELECT * FROM client_notes WHERE id = ?',
+      [result.lastID]
+    ) as unknown as ClientNoteRow | undefined;
+
+    if (!note) {
+      throw new Error('Failed to create note');
+    }
+
+    return toClientNote(note);
+  }
+
+  /**
+   * Update a note (e.g. is_pinned)
+   */
+  async updateNote(noteId: number, data: { isPinned?: boolean }): Promise<ClientNote> {
+    const db = getDatabase();
+
+    if (data.isPinned !== undefined) {
+      await db.run(
+        `UPDATE client_notes SET is_pinned = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [data.isPinned ? 1 : 0, noteId]
+      );
+    }
+
+    const note = await db.get(
+      'SELECT * FROM client_notes WHERE id = ?',
+      [noteId]
+    ) as unknown as ClientNoteRow | undefined;
+
+    if (!note) {
+      throw new Error('Note not found');
+    }
+
+    return toClientNote(note);
+  }
+
+  /**
+   * Delete a note
+   */
+  async deleteNote(noteId: number): Promise<void> {
+    const db = getDatabase();
+    await db.run('DELETE FROM client_notes WHERE id = ?', [noteId]);
   }
 
   // ===================================================
@@ -1190,12 +1296,12 @@ class ClientService {
   async getClientStats(clientId: number): Promise<ClientStats> {
     const db = getDatabase();
 
-    // Get project stats
+    // Get project stats (use LOWER for case-insensitive comparison)
     const projectStats = await db.get(
       `SELECT
         COUNT(*) as total,
-        SUM(CASE WHEN status IN ('pending', 'in-progress', 'in-review') THEN 1 ELSE 0 END) as active,
-        SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
+        SUM(CASE WHEN LOWER(status) IN ('pending', 'active', 'in-progress', 'in-review') THEN 1 ELSE 0 END) as active,
+        SUM(CASE WHEN LOWER(status) = 'completed' THEN 1 ELSE 0 END) as completed
        FROM projects
        WHERE client_id = ?`,
       [clientId]

@@ -421,7 +421,7 @@ section.contact-section .contact-hero-desktop {
   right: -180px;
   top: 50%;
   transform: translateY(-50%);
-  background-color: var(--color-danger, #ef4444);
+  background-color: var(--color-danger);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -544,7 +544,7 @@ input:-webkit-autofill:active {
   border-radius: 64px;
   border: none;
   box-shadow: var(--shadow-elevated-lg);
-  background-color: var(--color-brand-primary);
+  background-color: var(--color-primary);
   cursor: pointer;
   opacity: 1;
   transform: translate(0);
@@ -569,7 +569,7 @@ input:-webkit-autofill:active {
 
 /* Valid form state - green background */
 .submit-button.form-valid {
-  background-color: var(--color-brand-primary, #dc2626);
+  background-color: var(--color-primary);
 }
 
 .submit-button.form-valid span {
@@ -582,7 +582,7 @@ input:-webkit-autofill:active {
 
 /* Sent state - show SENT! text */
 .submit-button.form-sent {
-  background-color: var(--color-brand-primary, #dc2626);
+  background-color: var(--color-primary);
 }
 
 .contact-form .submit-button.form-sent span {
@@ -710,7 +710,7 @@ html[data-theme="dark"] .submit-button:focus-visible {
 /* Z-index: Above content but below nav (nav is 100) */
 .field-error-popup {
   position: fixed;
-  background-color: var(--color-danger, #ef4444);
+  background-color: var(--color-danger);
   color: var(--color-white, #fff);
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -729,7 +729,7 @@ html[data-theme="dark"] .submit-button:focus-visible {
 
 /* Field with error - red outline */
 .contact-form .field-has-error {
-  outline: 2px solid var(--color-danger, #ef4444);
+  outline: 2px solid var(--color-danger);
 }
 
 section.contact-section .contact-form .form-input.error,

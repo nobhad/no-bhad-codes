@@ -34,7 +34,8 @@
     "migrate:rollback": "tsx scripts/migrate.ts rollback",
     "migrate:status": "tsx scripts/migrate.ts status",
     "migrate:create": "tsx scripts/migrate.ts create",
-    "db:setup": "npm run migrate"
+    "db:setup": "npm run migrate",
+    "db:backup": "tsx scripts/backup-database.ts"
   },
   "keywords": [
     "portfolio",

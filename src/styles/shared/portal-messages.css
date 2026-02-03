@@ -5,9 +5,198 @@
    ===================================================== */
 
 /* =====================================================
+   MESSAGES LAYOUT (with thread list)
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .messages-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 0;
+  min-height: calc(100vh - 200px);
+  background: var(--color-neutral-200);
+  border-radius: var(--portal-radius-lg);
+  overflow: hidden;
+}
+
+/* =====================================================
+   GLOBAL SEARCH BAR (spans both columns)
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .messages-global-search {
+  grid-column: 1 / -1;
+  padding: var(--portal-spacing-lg);
+  background: var(--color-neutral-200);
+  border-bottom: 2px solid var(--color-neutral-400);
+  position: relative;
+  z-index: 5;
+  overflow: visible;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .messages-global-search .search-bar {
+  width: 100%;
+  max-width: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .messages-global-search .search-bar-input {
+  width: 100%;
+  background: var(--color-surface-primary);
+  border: 1px solid var(--portal-border);
+  color: var(--color-neutral-900);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .messages-global-search .search-bar-input::placeholder {
+  color: var(--color-neutral-600);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .messages-global-search .search-bar-input:focus,
+:is([data-page="admin"], [data-page="client-portal"]) .messages-global-search .search-bar-input:focus-visible {
+  outline: none;
+  border: 3px solid var(--color-primary);
+  position: relative;
+  z-index: 10;
+}
+
+/* =====================================================
+   LEFT COLUMN: CLIENTS LIST
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .messages-clients-column {
+  display: flex;
+  flex-direction: column;
+  border-right: 2px solid var(--color-neutral-400);
+  overflow: hidden;
+}
+
+/* =====================================================
+   RIGHT COLUMN: THREAD + COMPOSE
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .messages-thread-column {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* =====================================================
+   THREAD LIST SIDEBAR
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .thread-list-container,
+:is([data-page="admin"], [data-page="client-portal"]) .messages-clients-column {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--border-radius-card);
+  background: var(--color-neutral-200);
+  overflow: hidden;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .messages-clients-column {
+  border-radius: 0;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .thread-list-header {
+  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-900);
+  border-bottom: 1px solid var(--portal-border);
+  background: var(--color-neutral-200);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .thread-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .thread-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  border-bottom: 1px solid var(--portal-border);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  background: transparent;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .thread-item:hover {
+  background: var(--color-neutral-100);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .thread-item.active {
+  background: var(--color-neutral-100);
+  border-left: 3px solid var(--color-primary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .thread-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .thread-item-title {
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .thread-item.unread .thread-item-title {
+  font-weight: 700;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .thread-item-time {
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-600);
+  white-space: nowrap;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .thread-item-preview {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-700);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .thread-item-contact {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .thread-item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .thread-item-project {
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .thread-unread-badge {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* =====================================================
    MESSAGES CONTAINER
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .messages-container {
+:is([data-page="admin"], [data-page="client-portal"]) .messages-container,
+:is([data-page="admin"], [data-page="client-portal"]) .messages-thread-column {
   display: flex;
   flex-direction: column;
   border: none;
@@ -15,6 +204,35 @@
   background: var(--color-neutral-200);
   overflow: hidden;
   box-shadow: var(--shadow-panel);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .messages-thread-column {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .messages-thread-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--portal-spacing-lg);
+  padding: var(--portal-spacing-md) var(--portal-spacing-lg);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-900);
+  border-bottom: 1px solid var(--portal-border);
+  background: var(--color-neutral-200);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .messages-thread-header .thread-title {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .messages-thread-header .messages-search {
+  flex-shrink: 0;
 }
 
 /* No shadows on child divs */
@@ -28,14 +246,14 @@
 :is([data-page="admin"], [data-page="client-portal"]) .messages-thread {
   flex: 1;
   min-height: 300px;
-  max-height: 400px;
   overflow-y: auto;
   padding: var(--portal-spacing-xl);
   display: flex;
   flex-direction: column;
   gap: var(--portal-spacing-md);
-  /* Hardcoded dark text - #333333 - for light background */
-  color: #333333;
+  color: var(--color-neutral-900);
+  border-bottom: 2px solid var(--color-neutral-400);
+  position: relative;
 }
 
 /* Empty/error state text */
@@ -63,6 +281,9 @@
   gap: var(--portal-spacing-md);
   max-width: 100%;
   width: 100%;
+  cursor: default;
+  user-select: text;
+  -webkit-touch-callout: none;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .message-received {
@@ -108,13 +329,13 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #333333;
-  color: #f5f5f5;
+  background: var(--portal-bg-dark);
+  color: var(--portal-text-light);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.5px;
 }
 
@@ -130,12 +351,12 @@
    MESSAGE CONTENT (the bubble)
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .message-content {
-  background: #ffffff;
+  background: var(--color-surface-primary);
   border: var(--portal-border);
   border-radius: 18px;
   padding: var(--portal-spacing-lg) 1.25rem;
   line-height: 1.5;
-  color: #333333;
+  color: var(--color-neutral-900);
   flex: 1;
   max-width: 80%;
 }
@@ -157,24 +378,24 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--portal-spacing-sm);
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   gap: var(--portal-spacing-lg);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .message-sender {
   font-weight: 600;
-  color: #333333;
+  color: var(--color-neutral-900);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .message-time {
-  font-size: 0.75rem;
-  color: #666666;
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-600);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .message-body {
-  color: #333333;
+  color: var(--color-neutral-900);
   line-height: 1.5;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
 }
 
 /* =====================================================
@@ -188,6 +409,7 @@
   position: relative;
   background: transparent;
   border: none;
+  border-top: 1px solid var(--portal-border);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .message-input-wrapper {
@@ -240,8 +462,14 @@
 /* Send button - matches standard portal button styling */
 /* Inherits base styles from portal-buttons.css */
 
-/* Disabled state */
-:is([data-page="admin"], [data-page="client-portal"]) .message-compose textarea:disabled,
+/* Disabled state - only button shows disabled, textarea keeps normal appearance */
+:is([data-page="admin"], [data-page="client-portal"]) .message-compose textarea:disabled {
+  cursor: not-allowed;
+  /* Override portal-forms.css disabled styles - keep normal appearance */
+  opacity: 1;
+  background-color: var(--portal-bg-medium);
+}
+
 :is([data-page="admin"], [data-page="client-portal"]) .message-compose button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -264,36 +492,18 @@
   align-items: center;
   padding: var(--portal-spacing-md);
   border-bottom: 1px solid var(--portal-border);
-  background: var(--portal-bg-medium);
+  background: var(--color-neutral-200);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .messages-search {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: var(--portal-spacing-sm);
-}
-
-:is([data-page="admin"], [data-page="client-portal"]) .messages-search input {
-  padding: 8px 12px 8px 32px;
-  background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-sm);
-  color: var(--portal-text-primary);
-  font-size: 0.875rem;
+/* Uses shared .search-bar, .search-bar-icon, .search-bar-input from search-bar.css */
+:is([data-page="admin"], [data-page="client-portal"]) .messages-search.search-bar {
   min-width: 200px;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .messages-search input:focus {
-  outline: none;
-  border-color: var(--app-color-primary);
-}
-
-:is([data-page="admin"], [data-page="client-portal"]) .messages-search svg {
-  position: absolute;
-  left: 10px;
-  color: var(--portal-text-muted);
-  pointer-events: none;
+:is([data-page="admin"], [data-page="client-portal"]) .messages-search .search-bar-input {
+  min-width: 200px;
+  background: var(--portal-bg-medium, var(--color-neutral-100));
+  border: 1px solid var(--portal-border-light, var(--portal-border, rgba(0, 0, 0, 0.12)));
 }
 
 /* =====================================================
@@ -311,7 +521,7 @@
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  background: rgba(0, 0, 0, 0.1);
+  background: var(--color-state-active);
   border-radius: 12px;
   font-size: 0.75rem;
   cursor: pointer;
@@ -320,50 +530,68 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .reaction-badge:hover {
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--color-shadow-lg);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .reaction-badge.active {
-  border-color: var(--app-color-primary);
+  border-color: var(--color-primary);
   background: rgba(0, 175, 240, 0.1);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .reaction-badge .reaction-count {
-  color: #666666;
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .add-reaction-btn {
-  display: inline-flex;
+/* Hide pin and + buttons when picker is open */
+:is([data-page="admin"], [data-page="client-portal"]) .message-actions.picker-open .pin-message-btn,
+:is([data-page="admin"], [data-page="client-portal"]) .message-actions.picker-open .add-reaction-btn {
+  visibility: hidden;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .message-actions .add-reaction-btn {
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   background: transparent;
-  border: 1px dashed #cccccc;
-  border-radius: 12px;
+  border: none;
+  border-radius: var(--portal-radius-xs);
   cursor: pointer;
-  font-size: 0.75rem;
-  color: #999999;
-  transition: all 0.15s ease;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--portal-text-muted);
+  transition: color 0.15s;
+  outline: none;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .add-reaction-btn:hover {
-  border-color: var(--app-color-primary);
-  color: var(--app-color-primary);
+:is([data-page="admin"], [data-page="client-portal"]) .message-actions .add-reaction-btn:hover {
+  color: var(--color-text-secondary);
 }
 
-/* Reaction picker popup */
+:is([data-page="admin"], [data-page="client-portal"]) .message-actions .add-reaction-btn:focus,
+:is([data-page="admin"], [data-page="client-portal"]) .message-actions .add-reaction-btn:active {
+  outline: none;
+  border: none;
+  box-shadow: none;
+}
+
+
+/* Reaction picker - absolutely positioned overlay */
 :is([data-page="admin"], [data-page="client-portal"]) .reaction-picker {
   position: absolute;
-  bottom: 100%;
-  left: 0;
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 8px;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
   display: flex;
-  gap: 4px;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 10px;
+  background: var(--color-surface-primary);
+  border-radius: var(--portal-radius-lg);
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
   z-index: 100;
 }
 
@@ -372,17 +600,34 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .reaction-picker button {
-  padding: 4px 8px;
+  padding: 4px 6px;
   background: transparent;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   transition: background-color 0.15s;
+  line-height: 1;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .reaction-picker button:hover {
-  background: #f0f0f0;
+  background: var(--color-gray-200);
+}
+
+/* + icon inside picker - rotates to X, matches original button dimensions for alignment */
+:is([data-page="admin"], [data-page="client-portal"]) .reaction-picker .picker-plus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+  margin: -6px -10px -6px 0;
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
 }
 
 /* =====================================================
@@ -391,10 +636,10 @@
 :is([data-page="admin"], [data-page="client-portal"]) .message-status {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.625rem;
-  color: #999999;
-  margin-top: 4px;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+  margin-top: var(--space-1);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .message-status svg {
@@ -403,7 +648,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .message-status.read svg {
-  color: var(--app-color-primary);
+  color: var(--color-primary);
 }
 
 /* =====================================================
@@ -415,6 +660,7 @@
   margin-left: auto;
   opacity: 0;
   transition: opacity 0.15s;
+  position: relative;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .message:hover .message-actions {
@@ -429,19 +675,19 @@
   height: 24px;
   background: transparent;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--portal-radius-xs);
   cursor: pointer;
-  color: #999999;
+  color: var(--portal-text-muted);
   transition: all 0.15s;
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .message-actions button:hover {
-  background: rgba(0, 0, 0, 0.1);
-  color: #666666;
+  background: var(--color-state-active);
+  color: var(--color-text-secondary);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .message-actions button.pinned {
-  color: var(--app-color-primary);
+  color: var(--color-primary);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .message-actions button svg {
@@ -451,7 +697,7 @@
 
 /* Pinned message indicator */
 :is([data-page="admin"], [data-page="client-portal"]) .message.pinned {
-  border-left: 3px solid var(--app-color-primary);
+  border-left: 3px solid var(--color-primary);
   background: rgba(0, 175, 240, 0.05);
   padding-left: 8px;
   margin-left: -8px;
@@ -469,10 +715,10 @@
 :is([data-page="admin"], [data-page="client-portal"]) .pinned-messages-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
-  color: var(--app-color-primary);
-  margin-bottom: 6px;
+  gap: var(--space-1-5);
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+  margin-bottom: var(--space-1-5);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .pinned-messages-header svg {
@@ -481,8 +727,8 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .pinned-message-preview {
-  font-size: 0.813rem;
-  color: #666666;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -490,7 +736,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .pinned-message-preview:hover {
-  color: var(--app-color-primary);
+  color: var(--color-primary);
 }
 
 /* =====================================================
@@ -506,6 +752,66 @@
 /* =====================================================
    MOBILE RESPONSIVE
    ===================================================== */
+
+/* Thread list collapses on tablet */
+@media (max-width: 900px) {
+  :is([data-page="admin"], [data-page="client-portal"]) .messages-layout {
+    grid-template-columns: 200px 1fr;
+  }
+}
+
+/* Thread list becomes tabs on mobile */
+@media (max-width: 700px) {
+  :is([data-page="admin"], [data-page="client-portal"]) .messages-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
+    gap: 0;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .messages-global-search {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .messages-clients-column {
+    grid-column: 1;
+    grid-row: 2;
+    border-right: none;
+    border-bottom: 1px solid var(--portal-border);
+    max-height: 180px;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .messages-thread-column {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .thread-list-container,
+  :is([data-page="admin"], [data-page="client-portal"]) .messages-clients-column {
+    max-height: 180px;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .thread-list {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 0;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .thread-item {
+    min-width: 200px;
+    flex-shrink: 0;
+    border-bottom: none;
+    border-right: 1px solid var(--portal-border);
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .thread-item.active {
+    border-left: none;
+    border-bottom: 3px solid var(--color-primary);
+  }
+}
+
 @media (--small-mobile) {
   :is([data-page="admin"], [data-page="client-portal"]) .messages-thread {
     padding: 0.75rem;

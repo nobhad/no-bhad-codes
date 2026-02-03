@@ -44,3 +44,5 @@
 @import "../components/loading.css" layer(components);
 @import "../shared/progress.css" layer(components);
 @import "../shared/toast-notifications.css" layer(components);
+@import "../shared/copy-email.css" layer(components);
+@import "../shared/field-label-spacing.css" layer(components);

@@ -28,8 +28,8 @@ Ensure you have the following installed:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/no_bhad_codes.git
-cd no_bhad_codes
+git clone https://github.com/noellebhaduri/no-bhad-codes.git
+cd no-bhad-codes
 
 # 2. Install dependencies
 npm install
@@ -39,7 +39,7 @@ cp .env.example .env
 # Edit .env with your specific configuration
 
 # 4. Initialize database
-npm run migrate
+npm run db:setup
 
 # 5. Start development servers
 npm run dev:full
@@ -81,16 +81,16 @@ DATABASE_PATH=./data/client_portal.db
 
 # Email (optional for development)
 EMAIL_ENABLED=false
-EMAIL_HOST="smtp.gmail.com"
-EMAIL_USER="your-email@gmail.com"
-EMAIL_PASS="your-app-password"
+SMTP_HOST="smtp.gmail.com"
+SMTP_USER="your-email@gmail.com"
+SMTP_PASS="your-app-password"
 
 # Admin Configuration
 ADMIN_EMAIL="nobhaduri@gmail.com"
 SUPPORT_EMAIL="nobhaduri@gmail.com"
 
 # Feature Flags
-ENABLE_REGISTRATION=true
+ENABLE_REGISTRATION=true   # UI flag; API has no public /register — clients via invitation only
 ENABLE_FILE_UPLOAD=true
 MAINTENANCE_MODE=false
 ```
@@ -117,14 +117,17 @@ npm run format:check     # Check formatting
 npm run typecheck        # TypeScript type checking
 
 # Testing
-npm run test             # Run unit tests
+npm run test             # Run unit tests (Vitest)
 npm run test:coverage    # Generate coverage report
-npm run test:e2e         # End-to-end tests with Playwright
+npx playwright test      # End-to-end tests (Playwright; run from project root)
 
 # Database
+npm run db:setup         # Initialize DB (runs migrations)
+npm run db:backup        # Backup database (retention: 7 daily, 4 weekly)
 npm run migrate          # Run database migrations
 npm run migrate:status   # Check migration status
-npm run db:reset         # Reset database
+npm run migrate:rollback # Rollback last migration
+npm run migrate:create   # Create new migration
 ```
 
 ### Development Workflow
@@ -137,13 +140,13 @@ npm run db:reset         # Reset database
    - Backend API: http://localhost:4001
 
 2. **Make Changes**
-   - Frontend changes trigger hot module reload
-   - Backend changes trigger server restart (nodemon)
+   - Frontend changes trigger hot module reload (Vite HMR)
+   - Backend: restart dev server manually after changes (`npm run dev:server`); no nodemon by default
 
 3. **Run Tests**
    ```bash
-   npm run test           # Unit tests
-   npm run test:e2e       # E2E tests
+   npm run test           # Unit tests (Vitest)
+   npx playwright test    # E2E tests (Playwright)
    ```
 
 4. **Check Code Quality**
@@ -864,6 +867,22 @@ describe('DataService', () => {
 ```
 
 ### End-to-End Testing
+
+E2E tests use Playwright. The webServer runs `npm run dev:full` (frontend + backend) so API-dependent flows work.
+
+**Admin flow tests** (`tests/e2e/admin-flow.spec.ts`): Login and view projects. Requires `E2E_ADMIN_PASSWORD` to match `ADMIN_PASSWORD` in `.env`:
+
+```bash
+E2E_ADMIN_PASSWORD=your_admin_password npx playwright test admin-flow
+```
+
+**Portal flow tests** (`tests/e2e/portal-flow.spec.ts`): Login via API and view dashboard. Uses demo user by default (`demo@example.com` / `demo123`). Override with `E2E_CLIENT_EMAIL` and `E2E_CLIENT_PASSWORD`:
+
+```bash
+npx playwright test portal-flow
+```
+
+If `E2E_ADMIN_PASSWORD` is not set, admin flow tests are skipped. Install browsers first: `npx playwright install`.
 
 Write E2E tests for critical user flows:
 

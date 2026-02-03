@@ -42,7 +42,7 @@
 }
 
 .settings-section h3 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.1rem;
   margin: 0 0 var(--portal-spacing-xl) 0;
   text-transform: uppercase;
@@ -108,7 +108,7 @@
 
 .settings-form label {
   font-weight: 600;
-  color: var(--portal-text-light);
+  color: var(--portal-text-secondary);
   font-size: 0.95rem;
 }
 
@@ -144,7 +144,7 @@
 }
 
 .settings-form .checkbox-item:hover {
-  border-color: var(--color-brand-primary);
+  border-color: var(--color-primary);
 }
 
 .settings-form .checkbox-item input[type="checkbox"] {
@@ -186,7 +186,7 @@
 
 .form-group label {
   font-weight: 600;
-  color: var(--portal-text-light);
+  color: var(--portal-text-secondary);
   font-size: 0.9rem;
 }
 
@@ -217,7 +217,7 @@
 }
 
 .checkbox-item:hover {
-  border-color: var(--color-brand-primary);
+  border-color: var(--color-primary);
 }
 
 .checkbox-item input[type="checkbox"] {
@@ -234,7 +234,7 @@
 }
 
 .settings-header h1 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 2rem;
   color: var(--portal-text-light);
   margin: 0 0 var(--portal-spacing-sm) 0;
@@ -262,7 +262,7 @@
 
 /* Alternate Settings Section (with h2) */
 .settings-section h2 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.4rem;
   color: var(--portal-text-light);
   margin: 0 0 var(--portal-spacing-xl) 0;
@@ -294,7 +294,7 @@
 .contact-view-header h1,
 .billing-view-header h1,
 .notifications-view-header h1 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 2rem;
   color: var(--portal-text-light);
   margin: 0 0 var(--portal-spacing-sm) 0;
@@ -331,7 +331,7 @@
 .contact-view-section h2,
 .billing-view-section h2,
 .notifications-view-section h2 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.4rem;
   color: var(--portal-text-light);
   margin: 0 0 var(--portal-spacing-xl) 0;

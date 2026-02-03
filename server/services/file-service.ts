@@ -86,6 +86,19 @@ type FileCategory = 'general' | 'deliverable' | 'source' | 'asset' | 'document' 
 
 class FileService {
   // ============================================
+  // FILE RETRIEVAL
+  // ============================================
+
+  /**
+   * Get a file by its ID
+   */
+  async getFileById(fileId: number): Promise<{ id: number; project_id: number; [key: string]: unknown } | null> {
+    const db = getDatabase();
+    const file = await db.get('SELECT * FROM files WHERE id = ?', [fileId]);
+    return file as { id: number; project_id: number; [key: string]: unknown } | null;
+  }
+
+  // ============================================
   // VERSION MANAGEMENT
   // ============================================
 
@@ -876,6 +889,344 @@ class FileService {
     params.push(options.limit || 50);
 
     return db.all(sql, params);
+  }
+
+  // ============================================
+  // DELIVERABLE WORKFLOW METHODS
+  // ============================================
+
+  /**
+   * Deliverable workflow status types
+   */
+  static readonly DELIVERABLE_STATUSES = [
+    'draft',
+    'pending_review',
+    'in_review',
+    'changes_requested',
+    'approved',
+    'rejected'
+  ] as const;
+
+  /**
+   * Create or get deliverable workflow for a file
+   */
+  async getOrCreateDeliverableWorkflow(fileId: number, projectId: number): Promise<any> {
+    const db = getDatabase();
+
+    // Check if workflow exists
+    let workflow = await db.get(
+      'SELECT * FROM deliverable_workflows WHERE file_id = ?',
+      [fileId]
+    );
+
+    if (!workflow) {
+      // Create new workflow
+      const result = await db.run(
+        `INSERT INTO deliverable_workflows (file_id, project_id, status) VALUES (?, ?, 'draft')`,
+        [fileId, projectId]
+      );
+      workflow = await db.get(
+        'SELECT * FROM deliverable_workflows WHERE id = ?',
+        [result.lastID]
+      );
+    }
+
+    return workflow;
+  }
+
+  /**
+   * Get deliverable workflow by file ID
+   */
+  async getDeliverableWorkflow(fileId: number): Promise<any> {
+    const db = getDatabase();
+    return db.get('SELECT * FROM deliverable_workflows WHERE file_id = ?', [fileId]);
+  }
+
+  /**
+   * Get all deliverables for a project with workflow status
+   */
+  async getProjectDeliverables(projectId: number, status?: string): Promise<any[]> {
+    const db = getDatabase();
+    let sql = `
+      SELECT f.*, dw.status as workflow_status, dw.submitted_at, dw.reviewed_at,
+             dw.approved_at, dw.reviewed_by, dw.approved_by, dw.rejection_reason, dw.version
+      FROM files f
+      LEFT JOIN deliverable_workflows dw ON f.id = dw.file_id
+      WHERE f.project_id = ? AND f.category = 'deliverable' AND f.is_archived = FALSE
+    `;
+    const params: (string | number)[] = [projectId];
+
+    if (status) {
+      sql += ' AND dw.status = ?';
+      params.push(status);
+    }
+
+    sql += ' ORDER BY f.created_at DESC';
+    return db.all(sql, params);
+  }
+
+  /**
+   * Submit deliverable for review
+   */
+  async submitForReview(fileId: number, submittedBy: string, notes?: string): Promise<any> {
+    const db = getDatabase();
+    const file = await this.getFileById(fileId);
+    if (!file) throw new Error('File not found');
+
+    // Get or create workflow
+    const workflow = await this.getOrCreateDeliverableWorkflow(fileId, file.project_id);
+
+    // Update status
+    await db.run(
+      `UPDATE deliverable_workflows
+       SET status = 'pending_review', submitted_at = CURRENT_TIMESTAMP, submitted_by = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [submittedBy, notes || null, workflow.id]
+    );
+
+    // Log history
+    await this.logDeliverableHistory(workflow.id, workflow.status, 'pending_review', submittedBy, notes);
+
+    return this.getDeliverableWorkflow(fileId);
+  }
+
+  /**
+   * Start review of deliverable
+   */
+  async startReview(fileId: number, reviewerEmail: string): Promise<any> {
+    const db = getDatabase();
+    const workflow = await this.getDeliverableWorkflow(fileId);
+    if (!workflow) throw new Error('Deliverable workflow not found');
+
+    await db.run(
+      `UPDATE deliverable_workflows
+       SET status = 'in_review', reviewed_by = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [reviewerEmail, workflow.id]
+    );
+
+    await this.logDeliverableHistory(workflow.id, workflow.status, 'in_review', reviewerEmail);
+
+    return this.getDeliverableWorkflow(fileId);
+  }
+
+  /**
+   * Request changes to deliverable
+   */
+  async requestChanges(fileId: number, reviewerEmail: string, feedback: string): Promise<any> {
+    const db = getDatabase();
+    const workflow = await this.getDeliverableWorkflow(fileId);
+    if (!workflow) throw new Error('Deliverable workflow not found');
+
+    await db.run(
+      `UPDATE deliverable_workflows
+       SET status = 'changes_requested', reviewed_at = CURRENT_TIMESTAMP, reviewed_by = ?, rejection_reason = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [reviewerEmail, feedback, workflow.id]
+    );
+
+    // Add review comment
+    await this.addReviewComment(workflow.id, reviewerEmail, 'admin', feedback, 'revision_request');
+
+    await this.logDeliverableHistory(workflow.id, workflow.status, 'changes_requested', reviewerEmail, feedback);
+
+    return this.getDeliverableWorkflow(fileId);
+  }
+
+  /**
+   * Approve deliverable
+   */
+  async approveDeliverable(fileId: number, approverEmail: string, comment?: string): Promise<any> {
+    const db = getDatabase();
+    const workflow = await this.getDeliverableWorkflow(fileId);
+    if (!workflow) throw new Error('Deliverable workflow not found');
+
+    await db.run(
+      `UPDATE deliverable_workflows
+       SET status = 'approved', approved_at = CURRENT_TIMESTAMP, approved_by = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [approverEmail, workflow.id]
+    );
+
+    if (comment) {
+      await this.addReviewComment(workflow.id, approverEmail, 'admin', comment, 'approval');
+    }
+
+    await this.logDeliverableHistory(workflow.id, workflow.status, 'approved', approverEmail, comment);
+
+    return this.getDeliverableWorkflow(fileId);
+  }
+
+  /**
+   * Reject deliverable
+   */
+  async rejectDeliverable(fileId: number, reviewerEmail: string, reason: string): Promise<any> {
+    const db = getDatabase();
+    const workflow = await this.getDeliverableWorkflow(fileId);
+    if (!workflow) throw new Error('Deliverable workflow not found');
+
+    await db.run(
+      `UPDATE deliverable_workflows
+       SET status = 'rejected', reviewed_at = CURRENT_TIMESTAMP, reviewed_by = ?, rejection_reason = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [reviewerEmail, reason, workflow.id]
+    );
+
+    await this.addReviewComment(workflow.id, reviewerEmail, 'admin', reason, 'rejection');
+    await this.logDeliverableHistory(workflow.id, workflow.status, 'rejected', reviewerEmail, reason);
+
+    return this.getDeliverableWorkflow(fileId);
+  }
+
+  /**
+   * Resubmit deliverable (after changes requested)
+   */
+  async resubmitDeliverable(fileId: number, submittedBy: string, notes?: string): Promise<any> {
+    const db = getDatabase();
+    const workflow = await this.getDeliverableWorkflow(fileId);
+    if (!workflow) throw new Error('Deliverable workflow not found');
+
+    await db.run(
+      `UPDATE deliverable_workflows
+       SET status = 'pending_review', submitted_at = CURRENT_TIMESTAMP, submitted_by = ?,
+           version = version + 1, notes = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [submittedBy, notes || null, workflow.id]
+    );
+
+    await this.logDeliverableHistory(workflow.id, workflow.status, 'pending_review', submittedBy, notes);
+
+    return this.getDeliverableWorkflow(fileId);
+  }
+
+  /**
+   * Add review comment
+   */
+  async addReviewComment(
+    workflowId: number,
+    authorEmail: string,
+    authorType: 'admin' | 'client',
+    comment: string,
+    commentType: 'feedback' | 'approval' | 'rejection' | 'revision_request' = 'feedback',
+    authorName?: string
+  ): Promise<any> {
+    const db = getDatabase();
+    const result = await db.run(
+      `INSERT INTO deliverable_review_comments
+       (workflow_id, author_email, author_name, author_type, comment, comment_type)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [workflowId, authorEmail, authorName || null, authorType, comment, commentType]
+    );
+    return db.get('SELECT * FROM deliverable_review_comments WHERE id = ?', [result.lastID]);
+  }
+
+  /**
+   * Get review comments for a deliverable
+   */
+  async getReviewComments(fileId: number): Promise<any[]> {
+    const db = getDatabase();
+    return db.all(
+      `SELECT drc.*
+       FROM deliverable_review_comments drc
+       JOIN deliverable_workflows dw ON drc.workflow_id = dw.id
+       WHERE dw.file_id = ?
+       ORDER BY drc.created_at DESC`,
+      [fileId]
+    );
+  }
+
+  /**
+   * Get deliverable history
+   */
+  async getDeliverableHistory(fileId: number): Promise<any[]> {
+    const db = getDatabase();
+    return db.all(
+      `SELECT dh.*
+       FROM deliverable_history dh
+       JOIN deliverable_workflows dw ON dh.workflow_id = dw.id
+       WHERE dw.file_id = ?
+       ORDER BY dh.created_at DESC`,
+      [fileId]
+    );
+  }
+
+  /**
+   * Log deliverable status change
+   */
+  private async logDeliverableHistory(
+    workflowId: number,
+    fromStatus: string | null,
+    toStatus: string,
+    changedBy: string,
+    notes?: string
+  ): Promise<void> {
+    const db = getDatabase();
+    await db.run(
+      `INSERT INTO deliverable_history (workflow_id, from_status, to_status, changed_by, notes)
+       VALUES (?, ?, ?, ?, ?)`,
+      [workflowId, fromStatus, toStatus, changedBy, notes || null]
+    );
+  }
+
+  /**
+   * Get deliverables pending review (for admin dashboard)
+   */
+  async getPendingReviewDeliverables(): Promise<any[]> {
+    const db = getDatabase();
+    return db.all(
+      `SELECT f.*, dw.status as workflow_status, dw.submitted_at, dw.submitted_by,
+              p.project_name, c.company_name as client_name
+       FROM files f
+       JOIN deliverable_workflows dw ON f.id = dw.file_id
+       JOIN projects p ON f.project_id = p.id
+       LEFT JOIN clients c ON p.client_id = c.id
+       WHERE dw.status IN ('pending_review', 'in_review')
+       ORDER BY dw.submitted_at ASC`
+    );
+  }
+
+  /**
+   * Get deliverable stats for a project
+   */
+  async getDeliverableStats(projectId: number): Promise<{
+    total: number;
+    draft: number;
+    pending_review: number;
+    in_review: number;
+    changes_requested: number;
+    approved: number;
+    rejected: number;
+  }> {
+    const db = getDatabase();
+    const stats = await db.all(
+      `SELECT dw.status, COUNT(*) as count
+       FROM files f
+       JOIN deliverable_workflows dw ON f.id = dw.file_id
+       WHERE f.project_id = ? AND f.category = 'deliverable' AND f.is_archived = FALSE
+       GROUP BY dw.status`,
+      [projectId]
+    );
+
+    const result = {
+      total: 0,
+      draft: 0,
+      pending_review: 0,
+      in_review: 0,
+      changes_requested: 0,
+      approved: 0,
+      rejected: 0
+    };
+
+    for (const row of stats) {
+      const status = String(row.status) as keyof typeof result;
+      const count = Number(row.count);
+      if (status in result) {
+        result[status] = count;
+      }
+      result.total += count;
+    }
+
+    return result;
   }
 }
 

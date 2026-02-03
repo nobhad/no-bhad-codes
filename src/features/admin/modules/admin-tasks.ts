@@ -12,6 +12,8 @@ import { confirmDanger, alertSuccess, alertError, multiPromptDialog } from '../.
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../components/kanban-board';
+import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { createViewToggle } from '../../../components/view-toggle';
 
 // Task interfaces
 interface ProjectTask {
@@ -108,28 +110,26 @@ async function loadTasks(): Promise<void> {
 }
 
 /**
- * Set up view toggle buttons
+ * Set up view toggle (reusable component)
  */
 function setupViewToggle(): void {
-  const container = document.getElementById('tasks-view-toggle');
-  if (!container || container.dataset.listenerAdded) return;
-  container.dataset.listenerAdded = 'true';
+  const mount = document.getElementById('tasks-view-toggle-mount');
+  if (!mount || mount.dataset.listenerAdded) return;
+  mount.dataset.listenerAdded = 'true';
 
-  container.addEventListener('click', (e) => {
-    const button = (e.target as HTMLElement).closest('button');
-    if (!button) return;
-
-    const view = button.dataset.view as 'kanban' | 'list';
-    if (view && view !== currentView) {
-      currentView = view;
-
-      // Update active button
-      container.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
-
+  const toggleEl = createViewToggle({
+    id: 'tasks-view-toggle',
+    options: [
+      { value: 'kanban', label: 'Board', title: 'Board view', ariaLabel: 'Board view' },
+      { value: 'list', label: 'List', title: 'List view', ariaLabel: 'List view' }
+    ],
+    value: currentView,
+    onChange: (v) => {
+      currentView = v as 'kanban' | 'list';
       renderCurrentView();
     }
   });
+  mount.appendChild(toggleEl);
 }
 
 /**
@@ -327,7 +327,7 @@ function renderListItem(task: ProjectTask): string {
         ${task.description ? `<small>${SanitizationUtils.escapeHtml(task.description.substring(0, 50))}${task.description.length > 50 ? '...' : ''}</small>` : ''}
       </div>
       <span class="task-priority ${priorityClass}">${priorityLabel}</span>
-      <span class="status-badge status-${task.status.replace('_', '-')}">${statusLabel}</span>
+      ${getStatusBadgeHTML(statusLabel, task.status)}
       <span class="${isOverdue ? 'overdue' : ''}">${task.due_date ? formatDate(task.due_date) : '-'}</span>
       <span>${task.assignee_name ? SanitizationUtils.escapeHtml(task.assignee_name) : '-'}</span>
     </div>

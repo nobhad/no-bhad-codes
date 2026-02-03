@@ -5,13 +5,33 @@
    ===================================================== */
 
 /* =====================================================
-   QUICK STATS GRID
+   4-CARD GRID RULE (GLOBAL)
+   All grids with 4 cards: 4 across → 2x2 → 1 column
+   NEVER 3+1 split
    ===================================================== */
-:is([data-page="admin"], [data-page="client-portal"]) .quick-stats {
+:is([data-page="admin"], [data-page="client-portal"]) .quick-stats,
+:is([data-page="admin"], [data-page="client-portal"]) .attention-grid,
+:is([data-page="admin"], [data-page="client-portal"]) .card-grid-4 {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--portal-spacing-xl);
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--portal-spacing-md);
   margin-bottom: var(--portal-spacing-xl);
+}
+
+@media (max-width: 900px) {
+  :is([data-page="admin"], [data-page="client-portal"]) .quick-stats,
+  :is([data-page="admin"], [data-page="client-portal"]) .attention-grid,
+  :is([data-page="admin"], [data-page="client-portal"]) .card-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  :is([data-page="admin"], [data-page="client-portal"]) .quick-stats,
+  :is([data-page="admin"], [data-page="client-portal"]) .attention-grid,
+  :is([data-page="admin"], [data-page="client-portal"]) .card-grid-4 {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* =====================================================
@@ -22,9 +42,11 @@
   border: none;
   border-radius: var(--border-radius-card);
   padding: var(--space-4);
+  min-height: 88px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
   gap: var(--space-1);
   color: var(--portal-text-light);
@@ -48,7 +70,7 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .stat-number {
   display: block;
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 2rem;
   color: var(--color-primary);
   line-height: 1;
@@ -95,7 +117,7 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .recent-activity h3,
 :is([data-page="admin"], [data-page="client-portal"]) .analytics-overview h3 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.1rem;
   color: var(--portal-text-light);
   margin: 0 0 var(--portal-spacing-lg) 0;
@@ -134,6 +156,64 @@
   margin-bottom: 0;
 }
 
+/* Activity item with icon, content, and time */
+:is([data-page="admin"], [data-page="client-portal"]) .activity-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .activity-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  background: var(--portal-bg-dark);
+  border-radius: var(--portal-radius-md);
+  color: var(--portal-text-muted);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .activity-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .activity-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .activity-title {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--portal-text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .activity-client {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .activity-time {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+  white-space: nowrap;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .activity-item.empty {
+  justify-content: center;
+  color: var(--portal-text-muted);
+  font-style: italic;
+}
+
 /* =====================================================
    PORTAL PROJECT CARD
    ===================================================== */
@@ -149,7 +229,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .portal-project-card h3 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.1rem;
   font-weight: 400;
   color: var(--portal-text-light);
@@ -207,7 +287,7 @@
 
 :is([data-page="admin"], [data-page="client-portal"]) .summary-card .summary-value {
   display: block;
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.8rem;
   color: var(--portal-text-light);
 }
@@ -226,7 +306,7 @@
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .invoices-list h3 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.1rem;
   color: var(--portal-text-light);
   margin: 0 0 var(--portal-spacing-lg) 0;
@@ -263,7 +343,6 @@
    ===================================================== */
 @media (--small-mobile) {
   :is([data-page="admin"], [data-page="client-portal"]) .quick-stats {
-    grid-template-columns: 1fr;
     gap: 0.75rem;
   }
 
@@ -292,5 +371,133 @@
 
   :is([data-page="admin"], [data-page="client-portal"]) .activity-list li {
     padding: 0.5rem 0.75rem;
+  }
+}
+
+/* =====================================================
+   DASHBOARD OVERVIEW CARD (wraps all dashboard sections)
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-overview-card {
+  padding: var(--space-6);
+  border-radius: var(--border-radius-card);
+  background: var(--portal-bg-medium);
+}
+
+/* =====================================================
+   DASHBOARD SECTIONS
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-section {
+  margin-bottom: var(--portal-spacing-xl);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-section:last-child {
+  margin-bottom: 0;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .dashboard-section-title {
+  font-family: var(--font-family-acme);
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--portal-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 var(--portal-spacing-md) 0;
+}
+
+/* =====================================================
+   ATTENTION GRID (Needs Attention Cards)
+   ===================================================== */
+
+:is([data-page="admin"], [data-page="client-portal"]) .attention-card {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-md);
+  padding: var(--space-4);
+  min-height: 88px;
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--border-radius-card);
+  color: var(--portal-text-light);
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .attention-card:hover {
+  background: var(--portal-bg-readonly);
+}
+
+/* Attention icon container */
+:is([data-page="admin"], [data-page="client-portal"]) .attention-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: var(--portal-radius-md);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .attention-icon-warning {
+  background: color-mix(in srgb, var(--color-warning) 20%, transparent);
+  color: var(--color-warning);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .attention-icon-info {
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  color: var(--color-primary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .attention-icon-danger {
+  background: color-mix(in srgb, var(--color-danger) 20%, transparent);
+  color: var(--color-danger);
+}
+
+/* Attention content */
+:is([data-page="admin"], [data-page="client-portal"]) .attention-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .attention-count {
+  font-family: var(--font-family-acme);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--portal-text-light);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .attention-label {
+  font-size: 0.8rem;
+  color: var(--portal-text-muted);
+}
+
+/* Highlight attention cards with values > 0 */
+:is([data-page="admin"], [data-page="client-portal"]) .attention-card.has-items .attention-count {
+  color: var(--color-warning);
+}
+
+/* =====================================================
+   DASHBOARD MOBILE RESPONSIVE
+   ===================================================== */
+@media (--small-mobile) {
+  :is([data-page="admin"], [data-page="client-portal"]) .dashboard-overview-card {
+    padding: var(--space-4);
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .attention-card {
+    padding: var(--space-3);
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .attention-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+
+  :is([data-page="admin"], [data-page="client-portal"]) .attention-count {
+    font-size: 1.25rem;
   }
 }

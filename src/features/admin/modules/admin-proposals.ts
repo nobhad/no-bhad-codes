@@ -10,12 +10,24 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { formatDate, formatDateTime, formatProjectType } from '../../../utils/format-utils';
 import { apiFetch, apiPut, apiPost, apiDelete } from '../../../utils/api-client';
 import { createTableDropdown } from '../../../utils/table-dropdown';
+import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
 import type { AdminDashboardContext } from '../admin-types';
 import { confirmDialog, alertSuccess, alertError, multiPromptDialog } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
+import { createViewToggle } from '../../../components/view-toggle';
+import {
+  createRowCheckbox,
+  createBulkActionToolbar,
+  setupBulkSelectionHandlers,
+  resetSelection,
+  type BulkActionConfig
+} from '../../../utils/table-bulk-actions';
+import { createSearchBar } from '../../../components/search-bar';
+import { exportToCsv, PROPOSALS_EXPORT_CONFIG } from '../../../utils/table-export';
 
 // ============================================================================
 // TYPES
@@ -134,6 +146,58 @@ let currentFilter: string = 'all';
 let templatesData: ProposalTemplate[] = [];
 let currentProposalVersions: ProposalVersion[] = [];
 let _currentView: 'proposals' | 'templates' = 'proposals';
+let searchQuery: string = '';
+
+// Bulk action configuration for proposals table
+const PROPOSALS_BULK_CONFIG: BulkActionConfig = {
+  tableId: 'proposals',
+  actions: [
+    {
+      id: 'update-status',
+      label: 'Update Status',
+      variant: 'default',
+      confirmMessage: 'Update status of {count} selected proposals?',
+      handler: async (ids: number[]) => {
+        // Show status selection dialog
+        const result = await multiPromptDialog({
+          title: 'Update Proposal Status',
+          fields: [
+            {
+              name: 'status',
+              label: 'Status',
+              type: 'select',
+              required: true,
+              options: PROPOSAL_STATUS_OPTIONS
+            }
+          ],
+          confirmText: 'Update'
+        });
+        if (!result || !_storedContext) return;
+        try {
+          // Update each proposal
+          const results = await Promise.all(
+            ids.map(id =>
+              apiPut(`/api/proposals/admin/${id}`, { status: result.status })
+                .then(res => ({ id, success: res.ok }))
+                .catch(() => ({ id, success: false }))
+            )
+          );
+          const successCount = results.filter(r => r.success).length;
+          if (successCount > 0) {
+            _storedContext.showNotification?.(`Updated ${successCount} proposal${successCount > 1 ? 's' : ''}`, 'success');
+            resetSelection('proposals');
+            await refreshProposals(_storedContext);
+          } else {
+            _storedContext.showNotification?.('Failed to update proposals', 'error');
+          }
+        } catch (error) {
+          console.error('[AdminProposals] Bulk status update error:', error);
+          _storedContext.showNotification?.('Error updating proposals', 'error');
+        }
+      }
+    }
+  ]
+};
 
 // ============================================================================
 // CACHED DOM REFERENCES
@@ -186,6 +250,48 @@ export async function loadProposals(ctx: AdminDashboardContext): Promise<void> {
   // Setup filter buttons
   setupFilterButtons(ctx);
 
+  // Setup bulk action toolbar
+  const bulkToolbarContainer = document.getElementById('proposals-bulk-toolbar');
+  if (bulkToolbarContainer) {
+    const toolbar = createBulkActionToolbar({
+      ...PROPOSALS_BULK_CONFIG,
+      onSelectionChange: () => {
+        // Selection change callback if needed
+      }
+    });
+    bulkToolbarContainer.replaceWith(toolbar);
+  }
+
+  // Setup search bar
+  const searchMount = document.getElementById('proposals-search-mount');
+  if (searchMount) {
+    const { wrapper } = createSearchBar({
+      placeholder: 'Search proposals...',
+      ariaLabel: 'Search proposals',
+      onInput: (value) => {
+        searchQuery = value.toLowerCase();
+        if (proposalsData.length > 0) {
+          renderFilteredProposals(ctx);
+        }
+      }
+    });
+    searchMount.appendChild(wrapper);
+  }
+
+  // Setup export button
+  const exportBtn = document.getElementById('export-proposals-btn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      const filteredData = getFilteredProposals();
+      if (filteredData.length === 0) {
+        ctx.showNotification?.('No proposals to export', 'warning');
+        return;
+      }
+      exportToCsv(filteredData as unknown as Record<string, unknown>[], PROPOSALS_EXPORT_CONFIG);
+      ctx.showNotification?.(`Exported ${filteredData.length} proposals to CSV`, 'success');
+    });
+  }
+
   // Load data
   await refreshProposals(ctx);
 }
@@ -196,7 +302,7 @@ export async function loadProposals(ctx: AdminDashboardContext): Promise<void> {
 async function refreshProposals(ctx: AdminDashboardContext): Promise<void> {
   const tableBody = document.getElementById('proposals-table-body');
   if (tableBody) {
-    tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">Loading proposals...</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">Loading proposals...</td></tr>';
   }
 
   try {
@@ -211,13 +317,13 @@ async function refreshProposals(ctx: AdminDashboardContext): Promise<void> {
     } else if (response.status !== 401) {
       console.error('[AdminProposals] API error:', response.status);
       if (tableBody) {
-        tableBody.innerHTML = `<tr><td colspan="7" class="loading-row">Error loading proposals: ${response.status}</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="8" class="loading-row">Error loading proposals: ${response.status}</td></tr>`;
       }
     }
   } catch (error) {
     console.error('[AdminProposals] Failed to load proposals:', error);
     if (tableBody) {
-      tableBody.innerHTML = '<tr><td colspan="7" class="loading-row">Network error loading proposals</td></tr>';
+      tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">Network error loading proposals</td></tr>';
     }
   }
 }
@@ -228,10 +334,7 @@ async function refreshProposals(ctx: AdminDashboardContext): Promise<void> {
 
 function renderProposalsLayout(): string {
   return `
-    <div class="proposals-view-toggle">
-      <button class="view-toggle-btn active" data-view="proposals">Proposals</button>
-      <button class="view-toggle-btn" data-view="templates">Templates</button>
-    </div>
+    <div id="proposals-view-toggle-mount"></div>
 
     <div class="proposals-panel" id="proposals-list-panel">
       <div class="proposals-header">
@@ -242,7 +345,17 @@ function renderProposalsLayout(): string {
             <button class="filter-btn" data-filter="pending">Pending</button>
             <button class="filter-btn" data-filter="reviewed">Reviewed</button>
             <button class="filter-btn" data-filter="accepted">Accepted</button>
+            <button class="filter-btn" data-filter="rejected">Rejected</button>
+            <button class="filter-btn" data-filter="converted">Converted</button>
           </div>
+          <div id="proposals-search-mount"></div>
+          <button class="btn btn-icon" id="export-proposals-btn" title="Export to CSV" aria-label="Export proposals to CSV">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </button>
           <button class="btn btn-secondary" id="refresh-proposals-btn">
             Refresh
           </button>
@@ -268,10 +381,17 @@ function renderProposalsLayout(): string {
         </div>
       </div>
 
+      <div id="proposals-bulk-toolbar" class="bulk-action-toolbar"></div>
+
       <div class="table-responsive">
         <table class="admin-table proposals-table">
           <thead>
             <tr>
+              <th class="bulk-select-cell">
+                <div class="portal-checkbox">
+                  <input type="checkbox" id="proposals-select-all" class="bulk-select-all" aria-label="Select all proposals" />
+                </div>
+              </th>
               <th>Client</th>
               <th>Project</th>
               <th>Tier</th>
@@ -282,7 +402,7 @@ function renderProposalsLayout(): string {
             </tr>
           </thead>
           <tbody id="proposals-table-body">
-            <tr><td colspan="7" class="loading-row">Loading proposals...</td></tr>
+            <tr><td colspan="8" class="loading-row">Loading proposals...</td></tr>
           </tbody>
         </table>
       </div>
@@ -365,14 +485,21 @@ function renderProposalsTable(proposals: Proposal[], ctx: AdminDashboardContext)
   if (!tableBody) return;
 
   if (proposals.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="7" class="empty-row">No proposals found</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="8" class="empty-row">No proposals found</td></tr>';
     return;
   }
+
+  // Reset bulk selection when data changes
+  resetSelection('proposals');
 
   tableBody.innerHTML = proposals.map(proposal => renderProposalRow(proposal, ctx)).join('');
 
   // Setup event listeners
   setupRowEventListeners(proposals, ctx);
+
+  // Setup bulk selection handlers
+  const allRowIds = proposals.map(p => p.id);
+  setupBulkSelectionHandlers(PROPOSALS_BULK_CONFIG, allRowIds);
 }
 
 function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): string {
@@ -380,8 +507,10 @@ function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): str
   const tierLabel = proposal.selectedTier.charAt(0).toUpperCase() + proposal.selectedTier.slice(1);
   const formattedDate = formatDate(proposal.createdAt);
 
+  // Standard column order: ☐ | Client | Project | Tier | Price | Status | Date | Actions
   return `
     <tr data-proposal-id="${proposal.id}">
+      ${createRowCheckbox('proposals', proposal.id)}
       <td>
         <div class="client-info">
           <span class="client-name">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.name))}</span>
@@ -417,6 +546,47 @@ function renderProposalRow(proposal: Proposal, _ctx: AdminDashboardContext): str
       </td>
     </tr>
   `;
+}
+
+/**
+ * Get proposals filtered by current filter and search query
+ */
+function getFilteredProposals(): Proposal[] {
+  let filtered = proposalsData;
+
+  // Apply status filter
+  if (currentFilter !== 'all') {
+    filtered = filtered.filter(p => p.status === currentFilter);
+  }
+
+  // Apply search filter
+  if (searchQuery) {
+    filtered = filtered.filter(p => {
+      const clientName = p.client.name?.toLowerCase() || '';
+      const clientCompany = p.client.company?.toLowerCase() || '';
+      const projectName = p.project.name?.toLowerCase() || '';
+      const tier = p.selectedTier?.toLowerCase() || '';
+      const status = p.status?.toLowerCase() || '';
+
+      return (
+        clientName.includes(searchQuery) ||
+        clientCompany.includes(searchQuery) ||
+        projectName.includes(searchQuery) ||
+        tier.includes(searchQuery) ||
+        status.includes(searchQuery)
+      );
+    });
+  }
+
+  return filtered;
+}
+
+/**
+ * Render proposals with current filter and search applied
+ */
+function renderFilteredProposals(ctx: AdminDashboardContext): void {
+  const filtered = getFilteredProposals();
+  renderProposalsTable(filtered, ctx);
 }
 
 function setupRowEventListeners(proposals: Proposal[], ctx: AdminDashboardContext): void {
@@ -489,21 +659,21 @@ function setupFilterButtons(ctx: AdminDashboardContext): void {
 }
 
 function setupViewToggle(ctx: AdminDashboardContext): void {
-  const toggleBtns = document.querySelectorAll('.view-toggle-btn');
+  const mount = document.getElementById('proposals-view-toggle-mount');
   const proposalsPanel = document.getElementById('proposals-list-panel');
   const templatesPanel = document.getElementById('templates-panel');
+  if (!mount) return;
 
-  toggleBtns.forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const view = (btn as HTMLElement).dataset.view as 'proposals' | 'templates';
-      _currentView = view;
-
-      // Update active states
-      toggleBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      // Show/hide panels
-      if (view === 'proposals') {
+  const toggleEl = createViewToggle({
+    id: 'proposals-view-toggle',
+    options: [
+      { value: 'proposals', label: 'Proposals', title: 'Proposals', ariaLabel: 'Proposals view' },
+      { value: 'templates', label: 'Templates', title: 'Templates', ariaLabel: 'Templates view' }
+    ],
+    value: _currentView,
+    onChange: async (view) => {
+      _currentView = view as 'proposals' | 'templates';
+      if (_currentView === 'proposals') {
         if (proposalsPanel) proposalsPanel.style.display = 'block';
         if (templatesPanel) templatesPanel.style.display = 'none';
       } else {
@@ -511,8 +681,9 @@ function setupViewToggle(ctx: AdminDashboardContext): void {
         if (templatesPanel) templatesPanel.style.display = 'block';
         await loadTemplates(ctx);
       }
-    });
+    }
   });
+  mount.appendChild(toggleEl);
 }
 
 // ============================================================================
@@ -576,10 +747,10 @@ function renderTemplatesList(ctx: AdminDashboardContext): void {
             <button class="btn btn-secondary btn-sm use-template-btn" data-template-id="${template.id}">
               Use Template
             </button>
-            <button class="btn-icon edit-template-btn" data-template-id="${template.id}" title="Edit">
+            <button class="btn-icon edit-template-btn" data-template-id="${template.id}" title="Edit" aria-label="Edit template">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
-            <button class="btn-icon delete-template-btn" data-template-id="${template.id}" title="Delete">
+            <button class="btn-icon delete-template-btn" data-template-id="${template.id}" title="Delete" aria-label="Delete template">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             </button>
           </div>
@@ -646,8 +817,22 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
     if (nameInput) nameInput.value = template.name;
     if (descInput) descInput.value = template.description || '';
     const content = template.content as { projectType?: string; tier?: string; basePrice?: number };
-    if (typeSelect) typeSelect.value = content.projectType || 'business-website';
-    if (tierSelect) tierSelect.value = content.tier || 'good';
+    const projectType = content.projectType || 'business-website';
+    const tier = content.tier || 'good';
+    if (typeSelect) {
+      typeSelect.value = projectType;
+      const typeWrapper = typeSelect.previousElementSibling as HTMLElement;
+      if (typeWrapper?.dataset?.modalDropdown === 'true') {
+        setModalDropdownValue(typeWrapper, projectType);
+      }
+    }
+    if (tierSelect) {
+      tierSelect.value = tier;
+      const tierWrapper = tierSelect.previousElementSibling as HTMLElement;
+      if (tierWrapper?.dataset?.modalDropdown === 'true') {
+        setModalDropdownValue(tierWrapper, tier);
+      }
+    }
     if (priceInput) priceInput.value = (content.basePrice || 0).toString();
     if (defaultCheckbox) defaultCheckbox.checked = template.is_default;
   } else {
@@ -657,6 +842,15 @@ function openTemplateEditor(template: ProposalTemplate | null, ctx: AdminDashboa
     if (tierSelect) tierSelect.value = 'good';
     if (priceInput) priceInput.value = '';
     if (defaultCheckbox) defaultCheckbox.checked = false;
+  }
+
+  if (typeSelect && !typeSelect.dataset.dropdownInit) {
+    typeSelect.dataset.dropdownInit = 'true';
+    initModalDropdown(typeSelect, { placeholder: 'Select type...' });
+  }
+  if (tierSelect && !tierSelect.dataset.dropdownInit) {
+    tierSelect.dataset.dropdownInit = 'true';
+    initModalDropdown(tierSelect, { placeholder: 'Select tier...' });
   }
 
   // Show modal
@@ -1181,7 +1375,7 @@ function renderProposalDetailsContent(proposal: Proposal): string {
           </div>
           <div class="detail-item">
             <span class="detail-label">Email</span>
-            <span class="detail-value">${SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.email))}</span>
+            <span class="detail-value">${getEmailWithCopyHtml(proposal.client.email || '', SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(proposal.client.email || '')))}</span>
           </div>
           ${proposal.client.company ? `
             <div class="detail-item">
@@ -1517,7 +1711,7 @@ function renderCustomItems(proposalId: number, items: ProposalCustomItem[]): voi
             <span>${item.quantity} × ${formatPrice(item.unit_price)}</span>
             <span class="item-total">${formatPrice(item.quantity * item.unit_price)}</span>
           </div>
-          <button class="icon-btn icon-btn-danger delete-item-btn" data-item-id="${item.id}" title="Delete">
+          <button class="icon-btn icon-btn-danger delete-item-btn" data-item-id="${item.id}" title="Delete" aria-label="Delete item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
             </svg>

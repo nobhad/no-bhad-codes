@@ -1,0 +1,46 @@
+/**
+ * Copy-email pattern (utils/copy-email.ts)
+ * Button size is proportional to text so it does not increase row height or gap.
+ * Overrides admin .icon-btn (36x36) in detail panels so the row stays tight.
+ */
+
+.meta-value-with-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* Compact button so it doesn't create a larger gap (override [data-page="admin"] .icon-btn 36x36) */
+.meta-value-with-copy .copy-email-btn,
+:is([data-page="admin"], [data-page="client-portal"]) .meta-value-with-copy .copy-email-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15em;
+  height: 1.15em;
+  min-width: 1.15em;
+  min-height: 1.15em;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: 1em;
+  line-height: 1;
+  vertical-align: middle;
+  color: var(--portal-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--portal-radius-sm);
+}
+
+.meta-value-with-copy .copy-email-btn svg,
+:is([data-page="admin"], [data-page="client-portal"]) .meta-value-with-copy .copy-email-btn svg {
+  width: 0.85em;
+  height: 0.85em;
+}
+
+.meta-value-with-copy .copy-email-btn:hover {
+  color: var(--color-primary);
+}

@@ -1,0 +1,66 @@
+/* =====================================================
+   ADMIN - DOCUMENT REQUESTS TAB
+   Uses portal theme tokens per STYLE_CONSISTENCY_REPORT
+   ===================================================== */
+
+[data-page="admin"] #tab-document-requests .dr-templates-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-sm);
+  max-height: 16rem;
+  overflow-y: auto;
+  padding: var(--portal-spacing-sm) 0;
+}
+
+[data-page="admin"] #tab-document-requests .dr-template-option {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-sm);
+  cursor: pointer;
+  padding: var(--portal-spacing-xs) 0;
+  color: var(--portal-text-light);
+}
+
+[data-page="admin"] #tab-document-requests .dr-template-option input[type="checkbox"] {
+  flex-shrink: 0;
+}
+
+[data-page="admin"] #tab-document-requests .dr-detail-dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--portal-spacing-xs) var(--portal-spacing-lg);
+  margin: 0 0 var(--portal-spacing-lg);
+  color: var(--portal-text-light);
+}
+
+[data-page="admin"] #tab-document-requests .dr-detail-dl dt {
+  font-weight: 600;
+  color: var(--portal-text-muted);
+}
+
+[data-page="admin"] #tab-document-requests .dr-detail-dl dd {
+  margin: 0;
+}
+
+[data-page="admin"] #tab-document-requests .dr-history-list {
+  margin: 0;
+  padding-left: var(--portal-spacing-lg);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+}
+
+[data-page="admin"] #tab-document-requests .dr-history-list li {
+  margin-bottom: var(--portal-spacing-xs);
+}
+
+[data-page="admin"] #dr-detail-modal .modal-content--wide,
+[data-page="admin"] .modal-content.modal-content--wide {
+  max-width: 36rem;
+}
+
+[data-page="admin"] #tab-document-requests .modal-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--portal-spacing-sm);
+  justify-content: flex-end;
+}

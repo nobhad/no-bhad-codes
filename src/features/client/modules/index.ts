@@ -39,3 +39,11 @@ export async function loadProjectsModule() {
 export async function loadAuthModule() {
   return import('./portal-auth');
 }
+
+export async function loadHelpModule() {
+  return import('./portal-help');
+}
+
+export async function loadDocumentRequestsModule() {
+  return import('./portal-document-requests');
+}

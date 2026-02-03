@@ -8,6 +8,10 @@ The No Bhad Codes API provides a RESTful interface for client management, projec
 **Authentication:** HttpOnly Cookie (JWT) - see below
 **Content-Type:** `application/json`
 
+### Request ID
+
+All API responses include an `X-Request-ID` header for request correlation and debugging. Clients may send `X-Request-ID` on requests; if provided, the same ID is echoed. Otherwise the server generates a UUID.
+
 ## Authentication
 
 **Updated January 13, 2026:** All authentication uses HttpOnly cookies for enhanced security.
@@ -39,7 +43,7 @@ Cookie: auth_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 | `httpOnly` | `true` | Prevents JavaScript access (XSS protection) |
 | `secure` | `true` (production) | Only sent over HTTPS |
 | `sameSite` | `strict` | CSRF protection |
-| `path` | `/api` | Scoped to API routes |
+| `path` | `/` | Cookie sent to all same-origin requests |
 | `maxAge` | 1h (admin) / 7d (client) | Token expiration |
 
 ### Authorization Header (Fallback)
@@ -101,23 +105,31 @@ Authenticate user credentials. JWT token is set as an HttpOnly cookie.
 **Response Headers:**
 
 ```http
-Set-Cookie: auth_token=eyJhbGciOiJIUzI1NiIs...; HttpOnly; Secure; SameSite=Strict; Path=/api; Max-Age=604800
+Set-Cookie: auth_token=eyJhbGciOiJIUzI1NiIs...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=604800
 ```
 
 **Response Body:**
 
 ```json
 {
+  "success": true,
   "message": "Login successful",
-  "user": {
-    "id": 1,
-    "email": "client@example.com",
-    "type": "client",
-    "company_name": "Acme Corp"
-  },
-  "expiresIn": "7d"
+  "data": {
+    "user": {
+      "id": 1,
+      "email": "client@example.com",
+      "name": "John Doe",
+      "companyName": "Acme Corp",
+      "contactName": "John Doe",
+      "status": "active",
+      "isAdmin": false
+    },
+    "expiresIn": "7d"
+  }
 }
 ```
+
+(Some endpoints may return `user` and `expiresIn` at top level for backward compatibility; the canonical shape uses `data`.)
 
 **Note:** The JWT token is NOT returned in the response body. It is set as an HttpOnly cookie that the browser automatically includes in subsequent requests.
 
@@ -136,35 +148,33 @@ Invalidate current authentication token by clearing the HttpOnly cookie.
 **Response Headers:**
 
 ```http
-Set-Cookie: auth_token=; HttpOnly; Secure; SameSite=Strict; Path=/api; Max-Age=0
+Set-Cookie: auth_token=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0
 ```
 
 **Response Body:**
 
 ```json
 {
-  "message": "Logged out successfully"
+  "success": true,
+  "message": "Logout successful"
 }
 ```
 
 ### POST `/auth/refresh`
 
-Refresh JWT token before expiration. New token is set as HttpOnly cookie.
+Refresh JWT token before expiration. Returns a new token in the response body (client must store it or send Cookie for subsequent requests; this endpoint does not set an HttpOnly cookie).
 
 **Authentication:** Cookie or Bearer token
-
-**Response Headers:**
-
-```http
-Set-Cookie: auth_token=eyJhbGciOiJIUzI1NiIs...; HttpOnly; Secure; SameSite=Strict; Path=/api; Max-Age=604800
-```
 
 **Response Body:**
 
 ```json
 {
-  "message": "Token refreshed",
-  "expiresIn": "7d"
+  "success": true,
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIs...",
+    "expiresIn": "7d"
+  }
 }
 ```
 
@@ -181,6 +191,7 @@ Request a magic link for passwordless login.
 **Response:**
 ```json
 {
+  "success": true,
   "message": "If an account with that email exists, a login link has been sent."
 }
 ```
@@ -205,7 +216,7 @@ Verify magic link token and authenticate user. JWT token is set as HttpOnly cook
 **Response Headers:**
 
 ```http
-Set-Cookie: auth_token=eyJhbGciOiJIUzI1NiIs...; HttpOnly; Secure; SameSite=Strict; Path=/api; Max-Age=604800
+Set-Cookie: auth_token=eyJhbGciOiJIUzI1NiIs...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=604800
 ```
 
 **Response Body (Success):**
@@ -214,13 +225,18 @@ Set-Cookie: auth_token=eyJhbGciOiJIUzI1NiIs...; HttpOnly; Secure; SameSite=Stric
 {
   "success": true,
   "message": "Login successful",
-  "user": {
-    "id": 1,
-    "email": "client@example.com",
-    "name": "John Smith",
-    "companyName": "Acme Corp"
-  },
-  "expiresIn": "7d"
+  "data": {
+    "user": {
+      "id": 1,
+      "email": "client@example.com",
+      "name": "John Smith",
+      "companyName": "Acme Corp",
+      "contactName": "John Smith",
+      "status": "active",
+      "isAdmin": false
+    },
+    "expiresIn": "7d"
+  }
 }
 ```
 
@@ -245,18 +261,15 @@ Verify a client invitation token before password setup.
 ```json
 {
   "success": true,
-  "email": "client@example.com",
-  "name": "John Smith"
+  "data": {
+    "email": "client@example.com",
+    "name": "John Smith",
+    "company": "Acme Corp"
+  }
 }
 ```
 
-**Response (Invalid/Expired Token):**
-```json
-{
-  "success": false,
-  "error": "Invalid or expired invitation link"
-}
-```
+**Response (Invalid/Expired Token):** Returns error response with `success: false`, `error` message, and `code` (e.g. `INVALID_TOKEN`, `TOKEN_EXPIRED`).
 
 **Error Responses:**
 - `400` - Missing token
@@ -269,7 +282,7 @@ Set password for a new client account using invitation token.
 ```json
 {
   "token": "abc123def456...",
-  "password": "newSecurePassword123"
+  "password": "NewSecurePassword123!"
 }
 ```
 
@@ -277,16 +290,57 @@ Set password for a new client account using invitation token.
 ```json
 {
   "success": true,
-  "message": "Password set successfully. You can now log in."
+  "message": "Password set successfully. You can now log in.",
+  "data": {
+    "email": "client@example.com"
+  }
 }
 ```
 
 **Error Responses:**
 - `400` - Missing token or password
-- `400` - Password must be at least 8 characters
+- `400` - Password validation failed (minimum 12 characters; must include uppercase, lowercase, number, and special character)
 - `401` - Invalid or expired invitation token
 
 ## Admin Endpoints
+
+### GET `/admin/audit-log`
+Export audit logs with filters and pagination (admin only).
+
+**Headers:** `Authorization: Bearer <admin-token>`
+
+**Query Parameters:**
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `action` | string | Filter by action (create, update, delete, login, etc.) |
+| `entityType` | string | Filter by entity type (client, project, invoice, etc.) |
+| `userEmail` | string | Filter by user email |
+| `startDate` | string | Start date (ISO 8601) |
+| `endDate` | string | End date (ISO 8601) |
+| `limit` | number | Max records (default 100, max 500) |
+| `offset` | number | Pagination offset (default 0) |
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "user_email": "admin@example.com",
+      "user_type": "admin",
+      "action": "create",
+      "entity_type": "client",
+      "entity_id": "42",
+      "entity_name": "Acme Corp",
+      "ip_address": "192.168.1.1",
+      "created_at": "2024-01-18T11:00:00Z"
+    }
+  ],
+  "count": 1
+}
+```
 
 ### POST `/admin/leads/:id/invite`
 Invite a lead to create a client portal account.
@@ -1238,9 +1292,11 @@ Add project timeline update (admin only).
 - `resolution` - Issue resolutions
 - `general` - General communications
 
-## Client Intake Endpoint
+## Client Intake Endpoints
 
-### POST `/intake-form`
+**Base path:** `/intake` (mounted at `/api/intake`)
+
+### POST `/intake`
 Submit client intake form (public endpoint).
 
 **Request:**
@@ -1280,6 +1336,141 @@ Submit client intake form (public endpoint).
 - `features`: Array of valid feature codes
 - `pages_needed`: Optional integer, 1-100
 - `maintenance_needed`: Boolean
+
+### GET `/intake/status/:projectId`
+Get intake status for a project (public or authenticated).
+
+**URL Parameters:** `projectId` - Project ID
+
+**Response:** Intake status and metadata for the project.
+
+---
+
+## Approvals API
+
+**Base path:** `/approvals` (mounted at `/api/approvals`)
+
+Workflow definitions and approval instances for proposals, invoices, contracts, deliverables, and projects.
+
+### Workflow Definitions
+
+| Method | Path | Description | Auth |
+|--------|------|-------------|------|
+| GET | `/approvals/workflows` | List workflow definitions (optional `entityType` query) | Admin |
+| GET | `/approvals/workflows/:id` | Get workflow with steps | Admin |
+| POST | `/approvals/workflows` | Create workflow (name, entity_type, workflow_type, etc.) | Admin |
+| POST | `/approvals/workflows/:id/steps` | Add step to workflow | Admin |
+
+**Entity types:** `proposal`, `invoice`, `contract`, `deliverable`, `project`  
+**Workflow types:** `sequential`, `parallel`, `any_one`
+
+### Workflow Instances
+
+| Method | Path | Description | Auth |
+|--------|------|-------------|------|
+| POST | `/approvals/start` | Start approval workflow (entity_type, entity_id, workflow_definition_id?, notes?) | Any |
+| GET | `/approvals/active` | List active workflows | Admin |
+| GET | `/approvals/pending` | Pending approvals for current user | Any |
+| GET | `/approvals/entity/:entityType/:entityId` | Workflow for an entity | Any |
+| GET | `/approvals/instance/:id` | Workflow instance by ID | Any |
+| POST | `/approvals/instance/:id/approve` | Approve step | Any |
+| POST | `/approvals/instance/:id/reject` | Reject step | Any |
+
+---
+
+## Workflow Triggers API
+
+**Base path:** `/triggers` (mounted at `/api/triggers`)
+
+Event-driven workflow triggers (admin only for CRUD).
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/triggers` | List triggers (optional `eventType` query) |
+| GET | `/triggers/options` | Get event types and action types |
+| GET | `/triggers/:id` | Get trigger by ID |
+| POST | `/triggers` | Create trigger (name, event_type, action_type, action_config, etc.) |
+| PUT | `/triggers/:id` | Update trigger |
+| DELETE | `/triggers/:id` | Delete trigger |
+| POST | `/triggers/:id/toggle` | Toggle active state |
+| GET | `/triggers/logs/executions` | Execution logs (optional `triggerId`, `limit`) |
+| GET | `/triggers/logs/events` | System events (optional `eventType`, `limit`) |
+| POST | `/triggers/test-emit` | Emit test event (event_type, context) |
+
+**Authentication:** All trigger management endpoints require Admin.
+
+---
+
+## Document Requests API
+
+**Base path:** `/document-requests` (mounted at `/api/document-requests`)
+
+Request and collect documents from clients; admin review and templates.
+
+### Client
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/document-requests/my-requests` | Client's requests and stats (optional `status` query) |
+| POST | `/document-requests/:id/view` | Mark request as viewed |
+| POST | `/document-requests/:id/upload` | Attach file (body: `fileId`) |
+
+### Admin
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/document-requests/pending` | Pending requests |
+| GET | `/document-requests/for-review` | Requests needing review |
+| GET | `/document-requests/overdue` | Overdue requests |
+| GET | `/document-requests/client/:clientId` | Requests for a client |
+| GET | `/document-requests/:id` | Single request with history |
+| POST | `/document-requests` | Create request |
+| POST | `/document-requests/from-templates` | Create from templates |
+| POST | `/document-requests/:id/start-review` | Start review |
+| POST | `/document-requests/:id/approve` | Approve |
+| POST | `/document-requests/:id/reject` | Reject |
+| POST | `/document-requests/:id/remind` | Send reminder |
+| DELETE | `/document-requests/:id` | Delete request |
+| GET | `/document-requests/templates/list` | List templates |
+| POST | `/document-requests/templates` | Create template |
+| PUT | `/document-requests/templates/:id` | Update template |
+| DELETE | `/document-requests/templates/:id` | Delete template |
+
+---
+
+## Knowledge Base API
+
+**Base path:** `/kb` (mounted at `/api/kb`)
+
+Public and admin endpoints for help articles and categories.
+
+### Public (no auth or optional auth)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/kb/categories` | Active categories with article counts |
+| GET | `/kb/categories/:slug` | Category and its articles |
+| GET | `/kb/featured` | Featured articles (optional `limit` query) |
+| GET | `/kb/search` | Search articles (query `q`, optional `limit`) |
+| GET | `/kb/articles/:categorySlug/:articleSlug` | Get article (increments view count) |
+| POST | `/kb/articles/:id/feedback` | Submit feedback (body: `isHelpful`, `comment?`) |
+
+### Admin
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/kb/admin/categories` | All categories (including inactive) |
+| POST | `/kb/admin/categories` | Create category (name, slug, description?, icon?, color?, sort_order?) |
+| PUT | `/kb/admin/categories/:id` | Update category |
+| DELETE | `/kb/admin/categories/:id` | Delete category |
+| GET | `/kb/admin/articles` | All articles (optional `category` query) |
+| GET | `/kb/admin/articles/:id` | Single article by ID |
+| POST | `/kb/admin/articles` | Create article (category_id, title, slug, summary?, content, keywords?, is_featured?, is_published?) |
+| PUT | `/kb/admin/articles/:id` | Update article |
+| DELETE | `/kb/admin/articles/:id` | Delete article |
+| GET | `/kb/admin/stats` | Knowledge base statistics |
+
+---
 
 ## Rate Limiting
 

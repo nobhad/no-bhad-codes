@@ -13,6 +13,7 @@ import { formatFileSize } from '../../../utils/format-utils';
 import { ICONS } from '../../../constants/icons';
 import { showContainerError } from '../../../utils/error-utils';
 import { confirmDanger, alertError } from '../../../utils/confirm-dialog';
+import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
 
 const FILES_API_BASE = '/api/uploads';
 
@@ -33,6 +34,26 @@ const ALLOWED_MIME_TYPES = [
 ];
 
 // ============================================================================
+// FILTER STATE
+// ============================================================================
+
+interface FileFilters {
+  projectId: string;
+  fileType: string;
+  category: string;
+  dateFrom: string;
+  dateTo: string;
+}
+
+let currentFilters: FileFilters = {
+  projectId: 'all',
+  fileType: 'all',
+  category: 'all',
+  dateFrom: '',
+  dateTo: ''
+};
+
+// ============================================================================
 // CACHED DOM REFERENCES
 // ============================================================================
 
@@ -47,6 +68,62 @@ function getElement(id: string): HTMLElement | null {
 }
 
 /**
+ * Build query string from current filters
+ */
+function buildFilterQueryString(): string {
+  const params = new URLSearchParams();
+
+  if (currentFilters.projectId && currentFilters.projectId !== 'all') {
+    params.append('projectId', currentFilters.projectId);
+  }
+  if (currentFilters.fileType && currentFilters.fileType !== 'all') {
+    params.append('fileType', currentFilters.fileType);
+  }
+  if (currentFilters.category && currentFilters.category !== 'all') {
+    params.append('category', currentFilters.category);
+  }
+  if (currentFilters.dateFrom) {
+    params.append('dateFrom', currentFilters.dateFrom);
+  }
+  if (currentFilters.dateTo) {
+    params.append('dateTo', currentFilters.dateTo);
+  }
+
+  const queryString = params.toString();
+  return queryString ? `?${queryString}` : '';
+}
+
+/**
+ * Populate project dropdown from API response
+ */
+function populateProjectFilter(projects: { id: number; name: string }[]): void {
+  const projectFilter = getElement('files-project-filter') as HTMLSelectElement;
+  if (!projectFilter) return;
+
+  // Clear existing options except "All Projects"
+  projectFilter.innerHTML = '<option value="all">All Projects</option>';
+
+  // Add project options
+  projects.forEach((project) => {
+    const option = document.createElement('option');
+    option.value = String(project.id);
+    option.textContent = project.name;
+    projectFilter.appendChild(option);
+  });
+
+  // Restore selected value if it exists
+  if (currentFilters.projectId && currentFilters.projectId !== 'all') {
+    projectFilter.value = currentFilters.projectId;
+  }
+
+  // Init custom dropdown for project filter (after options are populated)
+  if (projectFilter && !(projectFilter as HTMLElement).dataset.dropdownInit) {
+    (projectFilter as HTMLElement).dataset.dropdownInit = 'true';
+    initModalDropdown(projectFilter, { placeholder: 'All Projects' });
+  }
+}
+
+/**
  * Load files from API
  */
 export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
@@ -54,7 +131,8 @@ export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
   if (!filesContainer) return;
 
   try {
-    const response = await fetch(`${FILES_API_BASE}/client`, {
+    const queryString = buildFilterQueryString();
+    const response = await fetch(`${FILES_API_BASE}/client${queryString}`, {
       credentials: 'include' // Include HttpOnly cookies
     });
 
@@ -63,6 +141,12 @@ export async function loadFiles(ctx: ClientPortalContext): Promise<void> {
     }
 
     const data = await response.json();
+
+    // Populate project filter dropdown (only on first load or when projects data is returned)
+    if (data.projects) {
+      populateProjectFilter(data.projects);
+    }
+
     renderFilesList(filesContainer as HTMLElement, data.files || [], ctx);
   } catch (error) {
     console.error('Error loading files:', error);
@@ -320,6 +404,91 @@ export function setupFileUploadHandlers(ctx: ClientPortalContext): void {
 
   window.addEventListener('dragover', (e) => e.preventDefault());
   window.addEventListener('drop', (e) => e.preventDefault());
+}
+
+/**
+ * Setup file filter event listeners
+ */
+export function setupFileFilterListeners(ctx: ClientPortalContext): void {
+  const projectFilter = getElement('files-project-filter') as HTMLSelectElement;
+  const typeFilter = getElement('files-type-filter') as HTMLSelectElement;
+  const categoryFilter = getElement('files-category-filter') as HTMLSelectElement;
+  const dateFromInput = getElement('files-date-from') as HTMLInputElement;
+  const dateToInput = getElement('files-date-to') as HTMLInputElement;
+  const clearFiltersBtn = getElement('files-clear-filters');
+
+  // Helper to update filters and reload
+  const applyFilters = () => {
+    currentFilters = {
+      projectId: projectFilter?.value || 'all',
+      fileType: typeFilter?.value || 'all',
+      category: categoryFilter?.value || 'all',
+      dateFrom: dateFromInput?.value || '',
+      dateTo: dateToInput?.value || ''
+    };
+    loadFiles(ctx);
+  };
+
+  // Attach change listeners
+  if (projectFilter) {
+    projectFilter.addEventListener('change', applyFilters);
+  }
+
+  if (typeFilter) {
+    typeFilter.addEventListener('change', applyFilters);
+  }
+
+  if (categoryFilter) {
+    categoryFilter.addEventListener('change', applyFilters);
+  }
+
+  if (dateFromInput) {
+    dateFromInput.addEventListener('change', applyFilters);
+  }
+
+  if (dateToInput) {
+    dateToInput.addEventListener('change', applyFilters);
+  }
+
+  // Clear filters button
+  if (clearFiltersBtn) {
+    clearFiltersBtn.addEventListener('click', () => {
+      // Reset all filter controls (selects may be wrapped by custom dropdowns)
+      const setFilterValue = (selectEl: HTMLSelectElement | null, value: string) => {
+        if (!selectEl) return;
+        selectEl.value = value;
+        const wrapper = selectEl.previousElementSibling as HTMLElement;
+        if (wrapper?.dataset?.modalDropdown === 'true') {
+          setModalDropdownValue(wrapper, value);
+        }
+      };
+      setFilterValue(projectFilter, 'all');
+      setFilterValue(typeFilter, 'all');
+      setFilterValue(categoryFilter, 'all');
+      if (dateFromInput) dateFromInput.value = '';
+      if (dateToInput) dateToInput.value = '';
+
+      // Reset filter state and reload
+      currentFilters = {
+        projectId: 'all',
+        fileType: 'all',
+        category: 'all',
+        dateFrom: '',
+        dateTo: ''
+      };
+      loadFiles(ctx);
+    });
+  }
+
+  // Init custom dropdowns for type and category (static options)
+  if (typeFilter && !(typeFilter as HTMLElement).dataset.dropdownInit) {
+    (typeFilter as HTMLElement).dataset.dropdownInit = 'true';
+    initModalDropdown(typeFilter, { placeholder: 'All Types' });
+  }
+  if (categoryFilter && !(categoryFilter as HTMLElement).dataset.dropdownInit) {
+    (categoryFilter as HTMLElement).dataset.dropdownInit = 'true';
+    initModalDropdown(categoryFilter, { placeholder: 'All Categories' });
+  }
 }
 
 /**

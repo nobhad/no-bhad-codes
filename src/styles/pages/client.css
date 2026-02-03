@@ -434,7 +434,7 @@ body[data-page="client-landing"] .client-login .client-content {
 
 .new-client-title {
   margin: 0 0 0.5rem 0;
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.25rem;
   text-transform: uppercase;
   color: var(--color-dark);
@@ -469,7 +469,7 @@ body[data-page="client-landing"] .client-login .client-content {
 
 .auth-title {
   margin: 0;
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.5rem;
   text-transform: uppercase;
   color: var(--color-dark);
@@ -489,7 +489,7 @@ body[data-page="client-landing"] .client-login .client-content {
   padding: 0.75rem 1rem;
   background: var(--color-neutral-200);
   border: none;
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 0.9rem;
   text-transform: uppercase;
   color: var(--color-dark);
@@ -563,7 +563,7 @@ body[data-page="client-landing"] .client-login .client-content {
 body[data-page="client-landing"] .auth-form .form-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(var(--color-brand-primary-rgb), 0.25);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.25);
 }
 
 .auth-form .form-input::placeholder {
@@ -777,7 +777,7 @@ body[data-page="client-landing"] .auth-form .form-input:focus {
 
 .login-form .form-heading {
   margin: 0 0 0.5rem 0;
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.3rem;
   text-transform: uppercase;
   color: var(--color-dark);

@@ -15,9 +15,9 @@
   padding: var(--space-1) var(--space-3);
   border-radius: var(--border-radius-full);
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-semibold);
   text-transform: capitalize;
-  border: var(--portal-border);
+  border: none;
   color: var(--color-black);
   min-width: fit-content;
   width: auto;
@@ -51,56 +51,52 @@
      read
    ===================================================== */
 
-/* Yellow/Warning status badges */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-pending,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-new,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-on_hold,
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-on-hold {
-  background: var(--color-warning);
-  border-color: var(--portal-border-dark);
-  color: var(--color-black);
-}
-
 /* Blue/Active status badges */
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-active,
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-in_progress,
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-in-progress,
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-contacted {
-  background: var(--color-info);
-  border-color: var(--portal-border-dark);
+  background: var(--status-active);
   color: var(--color-black);
 }
 
-/* Green/Success status badges */
+/* Yellow/Pending status badges */
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-pending,
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-new,
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-on_hold,
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-on-hold {
+  background: var(--status-pending);
+  color: var(--color-black);
+}
+
+/* Green/Completed status badges */
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-completed,
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-converted,
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-replied {
-  background: var(--color-success);
-  border-color: var(--portal-border-dark);
+  background: var(--status-completed);
   color: var(--color-black);
 }
 
-/* Red/Danger status badges */
+/* Red/Cancelled status badges */
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-cancelled,
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-lost,
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-archived {
-  background: var(--color-danger);
-  border-color: var(--portal-border-dark);
+  background: var(--status-cancelled);
   color: var(--color-white);
 }
 
-/* Purple status badge */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-qualified {
-  background: var(--color-status-review-border);
-  border-color: var(--portal-border-dark);
+/* Purple/Qualified status badge */
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-qualified,
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-in-review {
+  background: var(--status-qualified);
   color: var(--color-white);
 }
 
-/* Gray status badges (for messages/contacts) */
-:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-read {
-  background: var(--portal-text-muted);
-  border-color: var(--portal-border-dark);
-  color: var(--color-black);
+/* Gray/Inactive status badges */
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-read,
+:is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-inactive {
+  background: var(--status-inactive);
+  color: var(--color-white);
 }
 
 /* =====================================================
@@ -109,24 +105,70 @@
    ===================================================== */
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-healthy {
   background: var(--color-success);
-  border-color: var(--portal-border-dark);
   color: var(--color-black);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-warning {
   background: var(--color-warning);
-  border-color: var(--portal-border-dark);
   color: var(--color-black);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-error {
   background: var(--color-danger);
-  border-color: var(--portal-border-dark);
   color: var(--color-white);
 }
 
 :is([data-page="admin"], [data-page="client-portal"]) .status-badge.status-unknown {
   background: var(--portal-text-muted);
-  border-color: var(--portal-border-dark);
   color: var(--color-black);
+}
+
+/* =====================================================
+   SIDEBAR NOTIFICATION BADGES
+   Small counter badges for sidebar nav items
+   ===================================================== */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-radius: 9px;
+  display: none;
+  z-index: 10;
+}
+
+/* Show badge when it has content */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar-badge.has-count {
+  display: block;
+}
+
+/* Adjust badge position for expanded sidebar */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar:not(.collapsed) .sidebar-badge {
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+}
+
+/* Collapsed sidebar - badge position on icon button */
+:is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-badge {
+  top: -2px;
+  right: -2px;
+  transform: none;
+}
+
+/* Mobile/compact view - same as collapsed */
+@media (max-width: 1300px) {
+  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-badge {
+    top: -2px;
+    right: -2px;
+    transform: none;
+  }
 }

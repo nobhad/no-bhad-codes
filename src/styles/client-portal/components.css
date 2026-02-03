@@ -33,7 +33,7 @@
 
 /* ----- COMPONENT: Card Header ----- */
 .portal-card-header {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.1rem;
   color: var(--portal-text-light);
   margin: 0 0 var(--portal-spacing-lg) 0;
@@ -170,7 +170,7 @@
 }
 
 .portal-list-item:hover {
-  border-color: var(--color-brand-primary);
+  border-color: var(--color-primary);
 }
 
 .portal-list-item:last-child {
@@ -215,7 +215,7 @@
 
 .portal-stat-number {
   display: block;
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 2rem;
   color: var(--color-primary);
   line-height: 1;
@@ -250,19 +250,13 @@
   position: relative;
 }
 
-/* Only show hover on clickable project cards (admin uses these as links) */
-[data-page="admin"] .portal-project-card:hover {
+/* Cards have no hover by default. Add .portal-project-card-clickable for link/button cards that should show hover. */
+.portal-project-card-clickable:hover {
   background: var(--portal-bg-hover);
 }
 
-/* No hover on system info cards or client portal project cards (not clickable) */
-#tab-system .portal-project-card:hover,
-[data-page="client-portal"] .portal-project-card:hover {
-  background: var(--portal-bg-dark);
-}
-
 .portal-project-card h3 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.2rem;
   color: var(--portal-text-light);
   margin: 0 0 var(--portal-spacing-lg) 0;
@@ -285,7 +279,7 @@
 /* Status badge in project cards - red Acme font, matches h3 title size */
 .portal-project-card .project-status .status-badge,
 [data-page="client-portal"] .portal-project-card .project-status .status-badge {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.2rem;
   color: var(--color-primary) !important;
   background: transparent !important;

@@ -22,10 +22,10 @@
   --btn-portal-min-height: 44px;
 
   /* Button typography */
-  --btn-portal-font-family: var(--font--acme);
+  --btn-portal-font-family: var(--font-family-acme);
   --btn-portal-font-size: 0.9rem;
   --btn-portal-font-weight: 600;
-  --btn-portal-letter-spacing: 1px;
+  --btn-portal-letter-spacing: 0.5px;
   --btn-portal-text-transform: uppercase;
 
   /* Button borders */
@@ -66,10 +66,10 @@
   /* Button effects */
   --btn-portal-transition: all 150ms;
 
-  /* Button shadows - uses bold panel shadow */
-  --btn-portal-shadow: var(--shadow-panel);
-  --btn-portal-shadow-hover: var(--shadow-panel);
-  --btn-portal-shadow-focus: var(--shadow-panel), 0 0 0 3px var(--color-primary);
+  /* Button shadows - subtle, modern look */
+  --btn-portal-shadow: var(--shadow-sm);
+  --btn-portal-shadow-hover: var(--shadow-md);
+  --btn-portal-shadow-focus: var(--shadow-sm), 0 0 0 2px var(--color-primary);
 
   /* Small button variant */
   --btn-portal-sm-padding-y: var(--portal-spacing-sm);

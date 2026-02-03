@@ -11,8 +11,19 @@
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDate, formatDateTime } from '../../../utils/format-utils';
 import { createLogger } from '../../../utils/logging';
+import { createTableDropdown } from '../../../utils/table-dropdown';
+import { getStatusBadgeHTML } from '../../../components/status-badge';
 import { adminDataService, type Contact, type ContactStats } from '../services/admin-data.service';
 import { APP_CONSTANTS } from '../../../config/constants';
+import { getCopyEmailButtonHtml, getEmailWithCopyHtml } from '../../../utils/copy-email';
+
+/** Contact status options for renderer (API uses 'replied', not 'responded') */
+const RENDERER_CONTACT_STATUS_OPTIONS = [
+  { value: 'new', label: 'New' },
+  { value: 'read', label: 'Read' },
+  { value: 'replied', label: 'Replied' },
+  { value: 'archived', label: 'Archived' }
+];
 
 const logger = createLogger('AdminContactsRenderer');
 
@@ -57,7 +68,7 @@ class AdminContactsRenderer {
 
     if (submissions.length === 0) {
       tableBody.innerHTML =
-        '<tr><td colspan="6" class="loading-row">No contact form submissions yet</td></tr>';
+        '<tr><td colspan="4" class="loading-row">No contact form submissions yet</td></tr>';
       return;
     }
 
@@ -66,17 +77,18 @@ class AdminContactsRenderer {
       .join('');
 
     this.attachRowClickHandlers(tableBody);
-    this.attachStatusSelectHandlers(tableBody);
+    this.attachStatusDropdowns(tableBody);
   }
 
   /**
    * Render a single contact row
+   * Standard column order: Contact (name+email+company) | Message | Status | Date
    */
   private renderContactRow(submission: Contact): string {
     const date = formatDate(submission.created_at);
     const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.name || '-'));
     const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.email || '-'));
-    const safeSubject = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.subject || '-'));
+    const safeCompany = submission.company ? SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.company)) : '';
     const safeMessage = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(submission.message || '-'));
     const truncateLen = APP_CONSTANTS.TEXT.TRUNCATE_LENGTH;
     const truncatedMessage =
@@ -85,19 +97,16 @@ class AdminContactsRenderer {
 
     return `
       <tr data-contact-id="${submission.id}">
-        <td>${date}</td>
-        <td>${safeName}</td>
-        <td>${safeEmail}</td>
-        <td>${safeSubject}</td>
+        <td class="identity-cell">
+          <span class="identity-name">${safeName}</span>
+          ${safeCompany ? `<span class="identity-contact">${safeCompany}</span>` : ''}
+          <span class="identity-email">${safeEmail}</span>
+        </td>
         <td class="message-cell" title="${safeTitleMessage}">${truncatedMessage}</td>
         <td>
-          <select class="contact-status-select status-select" data-id="${submission.id}" onclick="event.stopPropagation()">
-            <option value="new" ${submission.status === 'new' ? 'selected' : ''}>New</option>
-            <option value="read" ${submission.status === 'read' ? 'selected' : ''}>Read</option>
-            <option value="replied" ${submission.status === 'replied' ? 'selected' : ''}>Replied</option>
-            <option value="archived" ${submission.status === 'archived' ? 'selected' : ''}>Archived</option>
-          </select>
+          <div class="contact-status-dropdown-container" data-contact-id="${submission.id}" data-status="${submission.status || 'new'}"></div>
         </td>
+        <td>${date}</td>
       </tr>
     `;
   }
@@ -109,7 +118,8 @@ class AdminContactsRenderer {
     const rows = tableBody.querySelectorAll('tr[data-contact-id]');
     rows.forEach((row) => {
       row.addEventListener('click', (e) => {
-        if ((e.target as HTMLElement).tagName === 'SELECT') return;
+        const target = e.target as HTMLElement;
+        if (target.closest('.table-dropdown') || target.closest('.custom-dropdown')) return;
         const contactId = parseInt((row as HTMLElement).dataset.contactId || '0');
         this.showContactDetails(contactId);
       });
@@ -117,20 +127,22 @@ class AdminContactsRenderer {
   }
 
   /**
-   * Attach change handlers to status selects
+   * Attach reusable table dropdowns for contact status
    */
-  private attachStatusSelectHandlers(tableBody: HTMLElement): void {
-    const statusSelects = tableBody.querySelectorAll('.contact-status-select');
-    statusSelects.forEach((select) => {
-      select.addEventListener('change', async (e) => {
-        e.stopPropagation();
-        const target = e.target as HTMLSelectElement;
-        const id = target.dataset.id;
-        const newStatus = target.value;
-        if (id && this.onStatusUpdate) {
-          await this.onStatusUpdate(parseInt(id), newStatus);
+  private attachStatusDropdowns(tableBody: HTMLElement): void {
+    const containers = tableBody.querySelectorAll('.contact-status-dropdown-container');
+    containers.forEach((container) => {
+      const contactId = container.getAttribute('data-contact-id');
+      const currentStatus = container.getAttribute('data-status') || 'new';
+      if (!contactId) return;
+      const dropdown = createTableDropdown({
+        options: RENDERER_CONTACT_STATUS_OPTIONS,
+        currentValue: currentStatus,
+        onChange: async (value) => {
+          if (this.onStatusUpdate) await this.onStatusUpdate(parseInt(contactId, 10), value);
         }
       });
+      container.appendChild(dropdown);
     });
   }
 
@@ -168,12 +180,10 @@ class AdminContactsRenderer {
    */
   private renderContactModal(contact: Contact): string {
     const date = formatDateTime(contact.created_at);
-    const statusClass = `status-${contact.status || 'new'}`;
 
     const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.name || '-'));
     const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.email || '-'));
     const safeSubject = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.subject || '-'));
-    const safeStatus = SanitizationUtils.escapeHtml(contact.status || 'new');
     const safeMessage = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.message || '-'));
 
     let html = `
@@ -188,7 +198,7 @@ class AdminContactsRenderer {
         </div>
         <div class="detail-row">
           <span class="detail-label">Email</span>
-          <span class="detail-value"><a href="mailto:${safeEmail}">${safeEmail}</a></span>
+          <span class="detail-value">${getEmailWithCopyHtml(contact.email || '', safeEmail)}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Subject</span>
@@ -196,7 +206,7 @@ class AdminContactsRenderer {
         </div>
         <div class="detail-row">
           <span class="detail-label">Status</span>
-          <span class="detail-value"><span class="status-badge ${statusClass}">${safeStatus}</span></span>
+          <span class="detail-value">${getStatusBadgeHTML(contact.status || 'new', contact.status || 'new')}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Message</span>
