@@ -442,7 +442,7 @@
 /* Client detail tab panels */
 #tab-client-detail .client-detail-tab-content.portal-tab-panel {
   gap: var(--space-4);
-  padding: var(--space-6) var(--space-4);
+  padding: var(--space-4);
 }
 
 #tab-client-detail .client-detail-tab-content.portal-tab-panel.active {
