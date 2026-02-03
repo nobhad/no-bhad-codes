@@ -76,6 +76,7 @@ This CSS file defines global variables and font-face rules for consistent stylin
 :root {
   /* Font Families */
   --font--acme: "Acme", sans-serif;
+  --font-family-acme: var(--font--acme);
 
   /* Container and Layout */
   --size-container: min(1200px, 100vw - 2rem);
@@ -96,13 +97,14 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --font-size-2xl: clamp(1.5rem, 5vw, 2rem);
   --font-size-3xl: clamp(2rem, 6vw, 3rem);
 
-  /* Responsive Spacing */
-  --space-xs: clamp(0.25rem, 1vw, 0.5rem);
-  --space-sm: clamp(0.5rem, 2vw, 1rem);
-  --space-md: clamp(1rem, 3vw, 1.5rem);
-  --space-lg: clamp(1.5rem, 4vw, 2rem);
-  --space-xl: clamp(2rem, 5vw, 3rem);
-  --space-2xl: clamp(3rem, 6vw, 4rem);
+  /* Responsive (fluid) spacing - use for layout that should scale with viewport.
+     Fixed scale (--space-0, --space-1, ...) is in design-system/tokens/spacing.css */
+  --space-fluid-xs: clamp(0.25rem, 1vw, 0.5rem);
+  --space-fluid-sm: clamp(0.5rem, 2vw, 1rem);
+  --space-fluid-md: clamp(1rem, 3vw, 1.5rem);
+  --space-fluid-lg: clamp(1.5rem, 4vw, 2rem);
+  --space-fluid-xl: clamp(2rem, 5vw, 3rem);
+  --space-fluid-2xl: clamp(3rem, 6vw, 4rem);
 
   /* Animations and Transitions */
   --cubic-default: cubic-bezier(0.4, 0, 0.2, 1);
@@ -173,15 +175,7 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --shadow-button-dark: 6px 6px 12px rgba(0, 0, 0, 0.5), 12px 12px 24px rgba(0, 0, 0, 0.4);
   --shadow-button-pressed: 8px 8px 16px rgba(0, 0, 0, 0.55), 16px 16px 32px rgba(0, 0, 0, 0.45);
 
-  /* ============================================
-   * OVERLAY COLORS
-   * ============================================
-   * Use these for backgrounds that need transparency.
-   */
-  --color-overlay-light: rgba(0, 0, 0, 0.05);
-  --color-overlay-medium: rgba(0, 0, 0, 0.5);
-  --color-overlay-heavy: rgba(0, 0, 0, 0.8);
-  --color-overlay-dark: rgba(0, 0, 0, 0.85);
+  /* Overlay colors: single source in design-system/tokens/colors.css (--color-overlay-subtle, -light, -medium, -heavy, -dark). */
 }
 
 /* ============================================
@@ -203,6 +197,7 @@ This CSS file defines global variables and font-face rules for consistent stylin
 
   /* Portal text colors */
   --portal-text-light: #f5f5f5;
+  --portal-text-primary: #f5f5f5;
   --portal-text-secondary: #cccccc;
   --portal-text-muted: #999999;
   --portal-text-dark: #1a1a1a;
@@ -224,7 +219,8 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --portal-border: 2px solid var(--portal-border-dark);
   --portal-border-light-style: 2px solid var(--portal-border-light);
 
-  /* Border radius */
+  /* Border radius (align design-system --border-radius-card in portal context) */
+  --border-radius-card: var(--portal-radius-md);
   --portal-radius-xs: 4px;
   --portal-radius-sm: 6px;
   --portal-radius-md: 8px;
@@ -239,9 +235,13 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --portal-spacing-xl: 1.5rem;
   --portal-spacing-2xl: 2rem;
 
+  /* Field label/value spacing - centralized: value slightly closer to its label than to next label */
+  --field-label-value-gap: 0.125rem;
+  --field-group-gap: 0.75rem;
+
   /* Label styling */
   --label-font-size: 0.75rem;
-  --label-color: var(--color-gray-400);
+  --label-color: var(--portal-text-secondary);
   --label-font-weight: 500;
   --label-text-transform: uppercase;
   --label-letter-spacing: 0.05em;
@@ -431,35 +431,35 @@ section,
 
 /* Responsive Spacing Utilities */
 .p-xs {
-  padding: var(--space-xs);
+  padding: var(--space-fluid-xs);
 }
 .p-sm {
-  padding: var(--space-sm);
+  padding: var(--space-fluid-sm);
 }
 .p-md {
-  padding: var(--space-md);
+  padding: var(--space-fluid-md);
 }
 .p-lg {
-  padding: var(--space-lg);
+  padding: var(--space-fluid-lg);
 }
 .p-xl {
-  padding: var(--space-xl);
+  padding: var(--space-fluid-xl);
 }
 
 .m-xs {
-  margin: var(--space-xs);
+  margin: var(--space-fluid-xs);
 }
 .m-sm {
-  margin: var(--space-sm);
+  margin: var(--space-fluid-sm);
 }
 .m-md {
-  margin: var(--space-md);
+  margin: var(--space-fluid-md);
 }
 .m-lg {
-  margin: var(--space-lg);
+  margin: var(--space-fluid-lg);
 }
 .m-xl {
-  margin: var(--space-xl);
+  margin: var(--space-fluid-xl);
 }
 
 /* Responsive Visibility */

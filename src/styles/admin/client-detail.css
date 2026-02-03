@@ -13,7 +13,502 @@
 
 /* ===============================================
    CLIENT DETAIL VIEW
+   Matches project detail: shared rules live in project-detail.css
+   (page title, overview card, tab content transparent cards, h3, text colors).
+   This file only adds client-specific layout and components.
    =============================================== */
+
+/* Header Card */
+.cd-header-card {
+  margin-bottom: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+}
+
+.cd-header-card .detail-title-row {
+  margin-bottom: 0;
+}
+
+.cd-header-card .detail-title {
+  margin: 0;
+  font-size: var(--font-size-xl);
+}
+
+/* Header Contact Info */
+.cd-header-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.cd-contact-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+}
+
+.cd-contact-item svg {
+  color: var(--portal-text-muted);
+  flex-shrink: 0;
+}
+
+/* Header Account Details */
+.cd-header-account {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--portal-border-dark);
+}
+
+.cd-account-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cd-account-label {
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.cd-account-value {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+}
+
+/* Header Tags */
+.cd-header-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--portal-border-dark);
+}
+
+.cd-header-tags:empty {
+  display: none;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.cd-header-tags .tag-input-wrapper {
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-dark);
+  border-radius: var(--border-radius-md);
+  min-height: 36px;
+  padding: var(--space-1) var(--space-3);
+  width: 100%;
+}
+
+.cd-header-tags .tag-input-wrapper:focus-within {
+  border-color: var(--portal-accent);
+  background: var(--portal-bg-darker);
+}
+
+/* Two-Column Overview Grid */
+.cd-overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.cd-overview-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.cd-overview-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Cards in all client detail tabs - consistent padding */
+[data-page="admin"] #tab-client-detail .portal-project-card {
+  padding: var(--space-4);
+}
+
+/* Card header with action button alignment */
+[data-page="admin"] #tab-client-detail .card-header-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+[data-page="admin"] #tab-client-detail .card-header-with-action h3 {
+  margin: 0;
+}
+
+/* Contact Info Grid */
+.cd-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3) var(--space-4);
+}
+
+.cd-contact-grid .meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--field-label-value-gap);
+}
+
+.cd-contact-grid .field-label {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--portal-text-secondary);
+}
+
+.cd-contact-grid .meta-value {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-light);
+}
+
+/* Projects Summary in Overview */
+.cd-projects-summary {
+  min-height: 60px;
+}
+
+.cd-projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.cd-project-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background: var(--portal-bg-medium);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.cd-project-item:hover {
+  background: var(--portal-bg-darker);
+}
+
+.cd-project-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.cd-project-name {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cd-project-status {
+  font-size: 0.625rem;
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cd-project-progress {
+  height: 3px;
+  background: var(--portal-bg-darker);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.cd-project-progress-bar {
+  height: 100%;
+  background: var(--portal-accent);
+  border-radius: 2px;
+}
+
+
+/* ===============================================
+   HEALTH & STATS SIDEBAR CARD
+   =============================================== */
+
+.cd-health-stats-card {
+  padding: var(--space-4) !important;
+}
+
+/* Health Score - Large Badge */
+.cd-health-stats-card .health-score-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-3);
+}
+
+.cd-health-stats-card .health-score-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cd-health-stats-card .health-score-value {
+  font-size: 2rem;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+/* Health Factors - 2x2 Grid */
+.cd-health-stats-card .health-factors {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  margin-top: 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--portal-border-dark);
+}
+
+.cd-health-stats-card .health-factor {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-2);
+  background: var(--portal-bg-medium);
+  border-radius: var(--border-radius-sm);
+}
+
+.cd-health-stats-card .health-factor-label {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--portal-text-secondary);
+  text-align: center;
+}
+
+.cd-health-stats-card .health-factor-bar {
+  height: 4px;
+  background: var(--portal-bg-darker);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.cd-health-stats-card .health-factor-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+/* Compact Stats - 2x2 Grid Below Health */
+.cd-stats-compact {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--portal-border-dark);
+}
+
+.cd-stats-compact .cd-stat-item {
+  text-align: center;
+  padding: var(--space-2);
+  background: var(--portal-bg-medium);
+  border-radius: var(--border-radius-sm);
+}
+
+.cd-stats-compact .cd-stat-value {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-light);
+  line-height: 1.2;
+}
+
+.cd-stats-compact .cd-stat-label {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--portal-text-secondary);
+  margin-top: 2px;
+}
+
+/* ===============================================
+   RECENT ACTIVITY CARD
+   Uses general section styling - no h3 overrides
+   =============================================== */
+
+.cd-recent-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.cd-activity-item {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: var(--portal-bg-medium);
+  border-radius: var(--border-radius-sm);
+}
+
+.cd-activity-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-muted);
+  flex-shrink: 0;
+}
+
+.cd-activity-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.cd-activity-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.cd-activity-title {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cd-activity-time {
+  font-size: 0.625rem;
+  color: var(--portal-text-muted);
+}
+
+.cd-activity-view-all {
+  display: block;
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--portal-border-dark);
+  font-size: var(--font-size-xs);
+  color: var(--portal-accent);
+  text-align: center;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.cd-activity-view-all:hover {
+  color: var(--portal-accent-hover);
+}
+
+/* Full-Width Recent Activity - spans both grid columns */
+.cd-recent-activity-full {
+  grid-column: 1 / -1;
+}
+
+.cd-recent-activity-full .cd-recent-activity-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-3);
+}
+
+.cd-recent-activity-full .cd-activity-item {
+  padding: var(--space-3);
+}
+
+.cd-recent-activity-full .cd-activity-title {
+  white-space: normal;
+  font-size: var(--font-size-sm);
+}
+
+.cd-recent-activity-full .cd-activity-time {
+  font-size: var(--font-size-xs);
+}
+
+/* Client detail tab panels */
+#tab-client-detail .client-detail-tab-content.portal-tab-panel {
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-4);
+}
+
+#tab-client-detail .client-detail-tab-content.portal-tab-panel.active {
+  gap: var(--space-4);
+}
+
+@media (max-width: 900px) {
+  .cd-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cd-overview-sidebar {
+    position: static;
+  }
+
+  .cd-contact-grid,
+  .cd-billing-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Account Actions moved to header More Menu - styles deprecated */
+
+/* Cards in client detail: meta labels/values match project-detail-overview (shared overview uses same classes) */
+#tab-client-detail .portal-project-card .field-label,
+#tab-client-detail .portal-project-card .meta-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.125rem;
+}
+
+#tab-client-detail .portal-project-card .meta-value {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: var(--portal-text-light);
+  line-height: 1.4;
+}
+
+#tab-client-detail .portal-project-card .meta-item {
+  gap: var(--field-label-value-gap);
+}
+
+/* CRM / billing info grid: same as project detail meta layout */
+#tab-client-detail .crm-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+@media (--mobile) {
+  #tab-client-detail .crm-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Empty and loading states (match project detail .empty-state) */
+#tab-client-detail .empty-state,
+#tab-client-detail .portal-project-card .empty-state,
+#tab-client-detail .portal-project-card .loading-text {
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
 
 /* Clickable links in meta values */
 .clickable-link {
@@ -79,17 +574,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-3);
-  background: var(--portal-bg-lighter);
-  border: 1px solid var(--portal-border-dark);
-  border-radius: var(--border-radius-md);
+  padding: var(--portal-spacing-md);
+  background: var(--portal-bg-medium);
+  border: none;
+  border-radius: var(--portal-radius-md);
+  margin-bottom: var(--portal-spacing-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .client-project-item:hover {
-  background: var(--portal-bg-dark);
-  border-color: var(--portal-border-light);
+  background: var(--portal-bg-darker);
 }
 
 .client-project-item .project-info {
@@ -104,9 +599,42 @@
 }
 
 .client-project-item .project-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
   color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
   text-transform: capitalize;
+}
+
+.client-project-item .project-status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-neutral-500);
+  flex-shrink: 0;
+}
+
+/* Status dot colors - uses centralized status variables from colors.css */
+.client-project-item .project-status.status-active::before,
+.client-project-item .project-status.status-in-progress::before {
+  background: var(--status-active);
+}
+
+.client-project-item .project-status.status-pending::before,
+.client-project-item .project-status.status-new::before,
+.client-project-item .project-status.status-on-hold::before {
+  background: var(--status-pending);
+}
+
+.client-project-item .project-status.status-completed::before {
+  background: var(--status-completed);
+}
+
+.client-project-item .project-status.status-cancelled::before,
+.client-project-item .project-status.status-archived::before {
+  background: var(--status-cancelled);
 }
 
 .client-project-item .project-date {
@@ -114,23 +642,7 @@
   font-size: var(--font-size-sm);
 }
 
-/* Client account actions in client detail */
-#tab-client-detail .client-account-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-}
-
-#tab-client-detail .client-account-actions .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-#tab-client-detail .client-account-actions .btn svg {
-  width: 16px;
-  height: 16px;
-}
+/* Client account actions moved to header More Menu - styles deprecated */
 
 /* Danger button variant - scoped to admin */
 [data-page="admin"] .btn-danger {
@@ -146,12 +658,20 @@
 
 /* Billing details section */
 .billing-summary {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
   gap: var(--space-4);
   margin-bottom: var(--space-4);
-  padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--portal-border-dark);
+}
+
+.billing-summary > .meta-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.25rem;
 }
 
 .billing-stat {
@@ -184,10 +704,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-3);
-  background: var(--portal-bg-lighter);
-  border: 1px solid var(--portal-border-dark);
-  border-radius: var(--border-radius-md);
+  padding: var(--portal-spacing-md);
+  background: var(--portal-bg-medium);
+  border: none;
+  border-radius: var(--portal-radius-md);
+  margin-bottom: var(--portal-spacing-sm);
+  transition: background 0.2s ease;
+}
+
+.client-invoice-item:hover {
+  background: var(--portal-bg-darker);
 }
 
 .client-invoice-item .invoice-info {
@@ -230,7 +756,7 @@
 
 @media (--mobile) {
   .billing-summary {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     gap: var(--space-3);
   }
 }
@@ -277,46 +803,9 @@
    CLIENT CRM ENHANCEMENTS
    =============================================== */
 
-/* Client Detail Tabs */
-.client-detail-tabs {
-  display: flex;
-  gap: var(--space-1);
-  margin-bottom: var(--space-4);
-  border-bottom: 1px solid var(--portal-border-dark);
-  padding-bottom: var(--space-1);
-  overflow-x: auto;
-}
-
-.client-detail-tabs button {
-  padding: var(--space-2) var(--space-4);
-  background: transparent;
-  border: none;
-  color: var(--portal-text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
-  white-space: nowrap;
-}
-
-.client-detail-tabs button:hover {
-  color: var(--portal-text-light);
-}
-
-.client-detail-tabs button.active {
-  color: var(--portal-accent);
-  border-bottom-color: var(--portal-accent);
-}
-
-.client-detail-tab-content {
-  display: none;
-}
-
-.client-detail-tab-content.active {
-  display: block;
-}
+/* Client Detail Tabs: strip and panel styles come from shared/portal-tabs.css
+   (.portal-tabs, .portal-tab-panel). Add class="portal-tabs" on the strip and
+   class="portal-tab-panel" on content divs so they match project detail tabs. */
 
 /* Health Score */
 .health-score-container {
@@ -337,18 +826,18 @@
 }
 
 .health-score-badge.healthy {
-  background: rgba(34, 197, 94, 0.15);
-  color: var(--color-success, #22c55e);
+  background: rgba(var(--color-success-rgb), 0.15);
+  color: var(--color-success);
 }
 
 .health-score-badge.at-risk {
-  background: rgba(234, 179, 8, 0.15);
-  color: #ca8a04;
+  background: rgba(var(--color-warning-rgb), 0.15);
+  color: var(--color-warning);
 }
 
 .health-score-badge.critical {
-  background: rgba(239, 68, 68, 0.15);
-  color: var(--color-danger, #ef4444);
+  background: rgba(var(--color-error-rgb), 0.15);
+  color: var(--color-danger);
 }
 
 .health-score-value {
@@ -389,12 +878,35 @@
 }
 
 .health-factor-fill.good { background: var(--color-success); }
-.health-factor-fill.warning { background: #eab308; }
+.health-factor-fill.warning { background: var(--color-warning); }
 .health-factor-fill.poor { background: var(--color-danger); }
 
 /* Tags Section */
 .client-tags-section {
   margin-top: var(--space-3);
+}
+
+/* Tag input in client detail: fit overview card, match portal form look */
+#tab-client-detail #cd-tags-container .tag-input-wrapper {
+  background: var(--portal-bg-readonly);
+  border: 1px solid var(--portal-border);
+  border-radius: var(--border-radius-md);
+  min-height: 40px;
+  padding: var(--space-2) var(--space-3);
+  transition: border-color 0.15s ease;
+}
+
+#tab-client-detail #cd-tags-container .tag-input-wrapper:focus-within {
+  border-color: var(--color-primary);
+}
+
+#tab-client-detail #cd-tags-container .tag-input-field {
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+}
+
+#tab-client-detail #cd-tags-container .tag-input-field::placeholder {
+  color: var(--portal-text-muted);
 }
 
 .client-tags-header {
@@ -529,15 +1041,15 @@
 }
 
 .contact-role-badge.decision_maker {
-  background: #9333ea;
+  background: var(--color-admin-purple-dark);
 }
 
 .contact-role-badge.billing {
-  background: #2563eb;
+  background: var(--color-info-600);
 }
 
 .contact-role-badge.technical {
-  background: #ea580c;
+  background: var(--color-role-technical);
 }
 
 .add-contact-btn {
@@ -711,17 +1223,17 @@
 }
 
 .health-badge-mini.healthy {
-  background: var(--color-success, #22c55e);
+  background: var(--color-success);
   color: var(--color-white);
 }
 
 .health-badge-mini.at-risk {
-  background: #eab308;
+  background: var(--color-warning);
   color: var(--color-dark);
 }
 
 .health-badge-mini.critical {
-  background: var(--color-danger, #ef4444);
+  background: var(--color-danger);
   color: var(--color-white);
 }
 
@@ -741,9 +1253,14 @@
 
 /* Responsive */
 @media (--mobile) {
-  .client-detail-tabs {
-    flex-wrap: nowrap;
-    -webkit-overflow-scrolling: touch;
+  /* Tab strip mobile behavior is in shared/portal-tabs.css (.portal-tabs) */
+
+  #tab-client-detail .client-detail-tab-content.portal-tab-panel {
+    padding: 2rem 1rem;
+  }
+
+  #tab-client-detail .client-detail-tab-content.portal-tab-panel.active {
+    gap: 2rem;
   }
 
   .contact-card {

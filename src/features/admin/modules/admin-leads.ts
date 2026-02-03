@@ -804,7 +804,7 @@ async function updateLeadStatus(id: number, status: string, ctx: AdminDashboardC
       try {
         const data = (await response.json()) as { error?: string; message?: string };
         if (data?.error || data?.message) {
-          message = data.error || data.message;
+          message = data.error ?? data.message ?? message;
         }
       } catch {
         // use default message
@@ -1366,7 +1366,7 @@ async function loadConversionFunnel(): Promise<void> {
       const funnel: FunnelStage[] = stages.map((s: { name?: string; stage?: string; count: number; conversionRate?: number; percentage?: number }) => ({
         stage: s.name ?? s.stage ?? '',
         count: s.count ?? 0,
-        percentage: s.percentage ?? (s.conversionRate !== null ? s.conversionRate * 100 : 0)
+        percentage: s.percentage ?? (s.conversionRate !== undefined && s.conversionRate !== null ? s.conversionRate * 100 : 0)
       }));
       renderConversionFunnel(container, funnel);
     } else {

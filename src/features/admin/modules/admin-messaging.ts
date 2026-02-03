@@ -8,6 +8,8 @@
  * Dynamically imported for code splitting.
  */
 
+/* global NodeFilter, Text */
+
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDateTime } from '../../../utils/format-utils';
 import type { Message, AdminDashboardContext } from '../admin-types';
@@ -67,14 +69,18 @@ interface ClientWithThread {
   email: string;
   message_count: number;
   unread_count: number;
+  last_message_at: string | null;
 }
 
-export async function loadClientThreads(ctx: AdminDashboardContext): Promise<void> {
-  const dropdown = getElement('admin-client-dropdown');
-  if (!dropdown) return;
+// Cache clients with threads for reference
+let _cachedClientsWithThreads: ClientWithThread[] = [];
 
-  // Add ARIA label for accessibility
-  dropdown.setAttribute('aria-label', 'Select a client conversation');
+export async function loadClientThreads(ctx: AdminDashboardContext): Promise<void> {
+  const threadList = getElement('admin-thread-list');
+  if (!threadList) return;
+
+  // Show loading state
+  threadList.innerHTML = '<div class="loading-state"><p>Loading...</p></div>';
 
   try {
     // Fetch both clients and threads in parallel
@@ -84,11 +90,11 @@ export async function loadClientThreads(ctx: AdminDashboardContext): Promise<voi
     ]);
 
     const clientsData = clientsResponse.ok ? (await clientsResponse.json() as { clients?: ClientResponse[] }) : { clients: [] };
-    const threadsData = threadsResponse.ok ? (await threadsResponse.json() as { threads?: (MessageThreadResponse & { message_count?: number })[] }) : { threads: [] };
+    const threadsData = threadsResponse.ok ? (await threadsResponse.json() as { threads?: (MessageThreadResponse & { message_count?: number; last_message_at?: string })[] }) : { threads: [] };
 
     // Create a map of client_id -> thread info
-    const threadMap = new Map<number, MessageThreadResponse & { message_count?: number }>();
-    (threadsData.threads || []).forEach((thread: MessageThreadResponse & { message_count?: number }) => {
+    const threadMap = new Map<number, MessageThreadResponse & { message_count?: number; last_message_at?: string }>();
+    (threadsData.threads || []).forEach((thread: MessageThreadResponse & { message_count?: number; last_message_at?: string }) => {
       // Keep the thread with the most messages if client has multiple threads
       const existing = threadMap.get(thread.client_id);
       if (!existing || (thread.message_count || 0) > (existing.message_count || 0)) {
@@ -106,171 +112,176 @@ export async function loadClientThreads(ctx: AdminDashboardContext): Promise<voi
         company_name: client.company_name || null,
         email: client.email,
         message_count: thread?.message_count || 0,
-        unread_count: thread?.unread_count || 0
+        unread_count: thread?.unread_count || 0,
+        last_message_at: thread?.last_message_at || null
       };
     });
 
-    // Sort: clients with unread messages first, then by message count, then alphabetically
+    // Sort: clients with unread messages first, then by last message time, then alphabetically
     clientsWithThreads.sort((a, b) => {
       if (a.unread_count !== b.unread_count) return b.unread_count - a.unread_count;
-      if (a.message_count !== b.message_count) return b.message_count - a.message_count;
+      // Sort by last message time if both have messages
+      if (a.last_message_at && b.last_message_at) {
+        return new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime();
+      }
+      if (a.last_message_at && !b.last_message_at) return -1;
+      if (!a.last_message_at && b.last_message_at) return 1;
       const nameA = a.contact_name || a.company_name || '';
       const nameB = b.contact_name || b.company_name || '';
       return nameA.localeCompare(nameB);
     });
 
-    populateClientDropdown(clientsWithThreads, ctx);
+    _cachedClientsWithThreads = clientsWithThreads;
+    renderThreadList(threadList, clientsWithThreads, ctx);
   } catch (error) {
     console.error('[AdminMessaging] Failed to load clients/threads:', error);
+    threadList.innerHTML = '<div class="empty-state">Failed to load conversations</div>';
   }
 }
 
-function populateClientDropdown(clients: ClientWithThread[], ctx: AdminDashboardContext): void {
-  const dropdown = getElement('admin-client-dropdown');
-  const menu = getElement('admin-client-menu');
-  const trigger = getElement('admin-client-trigger');
-  const hiddenInput = getElement('admin-client-select') as HTMLInputElement;
+/**
+ * Format relative time (e.g., "2h ago", "Yesterday", "Dec 15")
+ */
+function formatRelativeTime(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
 
-  if (!dropdown || !menu || !trigger || !hiddenInput) return;
+  if (diffMins < 1) return 'Now';
+  if (diffMins < 60) return `${diffMins}m`;
+  if (diffHours < 24) return `${diffHours}h`;
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays}d`;
 
-  // Clear existing items
-  menu.innerHTML = '';
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${month}/${day}/${year}`;
+}
 
+/**
+ * Render thread list in sidebar
+ */
+function renderThreadList(container: HTMLElement, clients: ClientWithThread[], ctx: AdminDashboardContext): void {
   if (clients.length === 0) {
-    const item = document.createElement('li');
-    item.className = 'custom-dropdown-item';
-    item.dataset.value = '';
-    item.textContent = 'No clients yet';
-    item.style.opacity = '0.5';
-    item.style.cursor = 'not-allowed';
-    menu.appendChild(item);
+    container.innerHTML = '<div class="empty-state">No clients yet</div>';
     return;
   }
 
-  clients.forEach((client: ClientWithThread) => {
-    const item = document.createElement('li');
-    item.className = 'custom-dropdown-item';
-    // Use 'new' for thread_id if client doesn't have a thread yet
-    const threadIdValue = client.thread_id !== null ? client.thread_id : 'new';
-    item.dataset.value = `${client.client_id}:${threadIdValue}`;
-    const clientName = client.contact_name || client.company_name || 'Unknown Client';
+  container.innerHTML = clients.map(client => {
+    const isActive = client.client_id === selectedClientId;
+    const hasUnread = client.unread_count > 0;
+    const safeCompany = client.company_name ? SanitizationUtils.escapeHtml(client.company_name) : '';
+    const safeContact = client.contact_name ? SanitizationUtils.escapeHtml(client.contact_name) : '';
+    const primaryName = safeCompany || safeContact || 'Unknown Client';
+    const secondaryName = safeCompany && safeContact ? safeContact : '';
+    const timeStr = client.last_message_at ? formatRelativeTime(new Date(client.last_message_at)) : '';
 
-    // Create name span
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'dropdown-item-name';
-    nameSpan.textContent = clientName;
-    item.appendChild(nameSpan);
+    return `
+      <div class="thread-item ${isActive ? 'active' : ''} ${hasUnread ? 'unread' : ''}"
+           data-client-id="${client.client_id}"
+           data-thread-id="${client.thread_id || 'new'}"
+           role="option"
+           aria-selected="${isActive}"
+           tabindex="0">
+        <div class="thread-item-header">
+          <span class="thread-item-title">${primaryName}</span>
+          <span class="thread-item-time">${timeStr}</span>
+        </div>
+        ${secondaryName ? `<div class="thread-item-contact">${secondaryName}</div>` : ''}
+        <div class="thread-item-meta">
+          ${hasUnread ? `<span class="thread-unread-badge">${client.unread_count}</span>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
 
-    // Create count span (right-aligned) - only show unread message count from clients
-    if (client.unread_count > 0) {
-      const countSpan = document.createElement('span');
-      countSpan.className = 'dropdown-item-count has-unread';
-      countSpan.textContent = String(client.unread_count);
-      countSpan.title = `${client.unread_count} unread`;
-      item.appendChild(countSpan);
-    }
-
-    menu.appendChild(item);
-  });
-
-  // Setup dropdown behavior
-  setupCustomDropdown(dropdown, trigger, menu, hiddenInput, ctx);
+  // Add click handlers
+  setupThreadListHandlers(container, ctx);
 }
 
-function setupCustomDropdown(
-  dropdown: HTMLElement,
-  trigger: HTMLElement,
-  menu: HTMLElement,
-  hiddenInput: HTMLInputElement,
-  ctx: AdminDashboardContext
-): void {
-  // Toggle dropdown on trigger click
-  trigger.addEventListener('click', (e) => {
-    e.stopPropagation();
-    dropdown.classList.toggle('open');
-  });
+/**
+ * Setup click and keyboard handlers for thread list
+ */
+function setupThreadListHandlers(container: HTMLElement, ctx: AdminDashboardContext): void {
+  container.querySelectorAll('.thread-item').forEach(item => {
+    const handleSelect = async () => {
+      const clientId = parseInt((item as HTMLElement).dataset.clientId || '0');
+      const threadIdStr = (item as HTMLElement).dataset.threadId || 'new';
 
-  // Handle item selection
-  menu.addEventListener('click', async (e) => {
-    const target = e.target as HTMLElement;
-    const item = target.closest('.custom-dropdown-item') as HTMLElement;
-    if (item) {
-      const value = item.dataset.value || '';
-      const textSpan = trigger.querySelector('.custom-dropdown-text');
+      if (!clientId) return;
 
-      // Update display text - get just the name, not the count
-      const nameSpan = item.querySelector('.dropdown-item-name');
-      const clientName = nameSpan?.textContent || item.textContent || 'Client';
-      if (textSpan) {
-        textSpan.textContent = clientName;
-      }
-      // Store the client name for use in messages
+      // Get client name from the item
+      const titleEl = item.querySelector('.thread-item-title');
+      const clientName = titleEl?.textContent || 'Client';
       selectedClientName = clientName;
 
-      // Update hidden input
-      hiddenInput.value = value;
-
-      // Update selected state
-      menu.querySelectorAll('.custom-dropdown-item').forEach(i => {
-        i.classList.remove('selected');
+      // Update active state visually
+      container.querySelectorAll('.thread-item').forEach(i => {
+        i.classList.remove('active');
+        i.setAttribute('aria-selected', 'false');
       });
-      item.classList.add('selected');
+      item.classList.add('active');
+      item.setAttribute('aria-selected', 'true');
 
-      // Close dropdown
-      dropdown.classList.remove('open');
-
-      // Trigger selection if value is not empty
-      if (value) {
-        const [clientIdStr, threadIdStr] = value.split(':');
-        const clientId = Number(clientIdStr);
-
-        // Check if we need to create a new thread
-        if (threadIdStr === 'new') {
-          // Create a new thread for this client
-          try {
-            const response = await apiPost('/api/messages/threads', {
-              client_id: clientId,
-              subject: `Conversation with ${clientName}`,
-              thread_type: 'general'
-            });
-
-            if (response.ok) {
-              const data = await response.json();
-              const newThreadId = data.thread.id;
-              // Update the item's value with the real thread ID
-              item.dataset.value = `${clientId}:${newThreadId}`;
-              hiddenInput.value = `${clientId}:${newThreadId}`;
-              selectThread(clientId, newThreadId, ctx);
-            } else {
-              ctx.showNotification('Failed to start conversation', 'error');
-            }
-          } catch (error) {
-            console.error('[AdminMessaging] Failed to create thread:', error);
-            ctx.showNotification('Error starting conversation', 'error');
-          }
-        } else {
-          const threadId = Number(threadIdStr);
-          selectThread(clientId, threadId, ctx);
+      // Update header title
+      const threadHeader = getElement('admin-thread-header');
+      if (threadHeader) {
+        const titleSpan = threadHeader.querySelector('.thread-title');
+        if (titleSpan) {
+          titleSpan.textContent = clientName;
         }
       }
-    }
-  });
 
-  // Close dropdown when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!dropdown.contains(e.target as Node)) {
-      dropdown.classList.remove('open');
-    }
-  });
+      // Check if we need to create a new thread
+      if (threadIdStr === 'new') {
+        try {
+          const response = await apiPost('/api/messages/threads', {
+            client_id: clientId,
+            subject: `Conversation with ${clientName}`,
+            thread_type: 'general'
+          });
 
-  // Keyboard navigation
-  trigger.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      dropdown.classList.toggle('open');
-    } else if (e.key === 'Escape') {
-      dropdown.classList.remove('open');
-    }
+          if (response.ok) {
+            const data = await response.json();
+            const newThreadId = data.thread.id;
+            // Update the item's data attribute
+            (item as HTMLElement).dataset.threadId = String(newThreadId);
+            selectThread(clientId, newThreadId, ctx);
+          } else {
+            ctx.showNotification('Failed to start conversation', 'error');
+          }
+        } catch (error) {
+          console.error('[AdminMessaging] Failed to create thread:', error);
+          ctx.showNotification('Error starting conversation', 'error');
+        }
+      } else {
+        const threadId = parseInt(threadIdStr);
+        selectThread(clientId, threadId, ctx);
+      }
+    };
+
+    // Click handler
+    item.addEventListener('click', handleSelect);
+
+    // Keyboard handler
+    item.addEventListener('keydown', (e) => {
+      const keyEvent = e as KeyboardEvent;
+      if (keyEvent.key === 'Enter' || keyEvent.key === ' ') {
+        e.preventDefault();
+        handleSelect();
+      } else if (keyEvent.key === 'ArrowDown') {
+        e.preventDefault();
+        const next = item.nextElementSibling as HTMLElement;
+        if (next) next.focus();
+      } else if (keyEvent.key === 'ArrowUp') {
+        e.preventDefault();
+        const prev = item.previousElementSibling as HTMLElement;
+        if (prev) prev.focus();
+      }
+    });
   });
 }
 
@@ -347,7 +358,7 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
     .map((msg: MessageResponse & { is_pinned?: boolean; is_read?: boolean; reactions?: MessageReaction[] }) => {
       const isAdmin = msg.sender_type === 'admin';
       const dateTime = formatDateTime(msg.created_at);
-      const rawSenderName = isAdmin ? 'You (Admin)' : SanitizationUtils.decodeHtmlEntities(selectedClientName || 'Client');
+      const rawSenderName = isAdmin ? 'You' : SanitizationUtils.decodeHtmlEntities(selectedClientName || 'Client');
       const safeSenderName = SanitizationUtils.escapeHtml(rawSenderName);
       const safeContent = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(msg.message || ''));
       const initials = rawSenderName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -369,7 +380,7 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
         </div>
       ` : '';
 
-      // Action buttons (pin/unpin)
+      // Action buttons (pin, reaction picker)
       const actionsHtml = `
         <div class="message-actions">
           <button class="pin-message-btn ${isPinned ? 'pinned' : ''}" data-message-id="${msg.id}" title="${isPinned ? 'Unpin' : 'Pin'} message">
@@ -377,6 +388,11 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
               <path d="M12 2L12 12M12 22L12 12M12 12L20 4M12 12L4 4"/>
             </svg>
           </button>
+          <button class="add-reaction-btn" data-message-id="${msg.id}" title="Add reaction">+</button>
+          <div class="reaction-picker hidden" data-message-id="${msg.id}">
+            ${REACTIONS.map(r => `<button data-reaction="${r}">${r}</button>`).join('')}
+            <span class="picker-plus">+</span>
+          </div>
         </div>
       `;
 
@@ -385,7 +401,7 @@ function renderMessages(messages: Message[], container: HTMLElement): void {
           <div class="message message-sent ${isPinned ? 'pinned' : ''}" data-message-id="${msg.id}">
             <div class="message-content">
               <div class="message-header">
-                <span class="message-sender">You (Admin)</span>
+                <span class="message-sender">You</span>
                 <span class="message-time">${dateTime}</span>
                 ${actionsHtml}
               </div>
@@ -446,10 +462,6 @@ function renderReactionsHtml(messageId: number, reactions: MessageReaction[]): s
   return `
     <div class="message-reactions">
       ${reactionBadges}
-      <button class="add-reaction-btn" data-message-id="${messageId}" title="Add reaction">+</button>
-      <div class="reaction-picker hidden" data-message-id="${messageId}">
-        ${REACTIONS.map(r => `<button data-reaction="${r}">${r}</button>`).join('')}
-      </div>
     </div>
   `;
 }
@@ -458,15 +470,77 @@ function renderReactionsHtml(messageId: number, reactions: MessageReaction[]): s
  * Setup interactions for messages (reactions, pins)
  */
 function setupMessageInteractions(container: HTMLElement): void {
-  // Add reaction button clicks
+  const LONG_PRESS_DURATION = 500;
+  let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // Helper to toggle reaction picker for a message
+  const toggleReactionPicker = (messageId: string) => {
+    const picker = container.querySelector(`.reaction-picker[data-message-id="${messageId}"]`);
+    const actions = picker?.closest('.message-actions');
+    const isOpen = !picker?.classList.contains('hidden');
+
+    // Close all other pickers first
+    container.querySelectorAll('.reaction-picker').forEach(p => {
+      p.classList.add('hidden');
+      p.closest('.message-actions')?.classList.remove('picker-open');
+    });
+
+    // Toggle this picker
+    if (!isOpen && picker) {
+      picker.classList.remove('hidden');
+      actions?.classList.add('picker-open');
+    }
+  };
+
+  // Long press on message content (iMessage style)
+  container.querySelectorAll('.message-content').forEach(content => {
+    const message = content.closest('.message') as HTMLElement;
+    const messageId = message?.dataset.messageId;
+    if (!messageId) return;
+
+    const startLongPress = () => {
+      longPressTimer = setTimeout(() => {
+        toggleReactionPicker(messageId);
+      }, LONG_PRESS_DURATION);
+    };
+
+    const cancelLongPress = () => {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    };
+
+    // Touch events for mobile
+    content.addEventListener('touchstart', startLongPress, { passive: true });
+    content.addEventListener('touchend', cancelLongPress);
+    content.addEventListener('touchmove', cancelLongPress);
+
+    // Mouse events for desktop
+    content.addEventListener('mousedown', startLongPress);
+    content.addEventListener('mouseup', cancelLongPress);
+    content.addEventListener('mouseleave', cancelLongPress);
+  });
+
+  // Add reaction button clicks (toggles picker)
   container.querySelectorAll('.add-reaction-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const messageId = (btn as HTMLElement).dataset.messageId;
-      const picker = container.querySelector(`.reaction-picker[data-message-id="${messageId}"]`);
-      if (picker) {
-        picker.classList.toggle('hidden');
+      if (messageId) {
+        toggleReactionPicker(messageId);
       }
+    });
+  });
+
+  // X button inside picker closes it
+  container.querySelectorAll('.picker-plus').forEach(plus => {
+    plus.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const picker = (plus as HTMLElement).closest('.reaction-picker');
+      const actions = picker?.closest('.message-actions');
+      picker?.classList.add('hidden');
+      actions?.classList.remove('picker-open');
     });
   });
 
@@ -475,11 +549,13 @@ function setupMessageInteractions(container: HTMLElement): void {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const picker = (btn as HTMLElement).closest('.reaction-picker') as HTMLElement;
+      const actions = picker?.closest('.message-actions');
       const messageId = picker?.dataset.messageId;
       const reaction = (btn as HTMLElement).dataset.reaction;
       if (messageId && reaction) {
         await addReaction(parseInt(messageId, 10), reaction);
         picker?.classList.add('hidden');
+        actions?.classList.remove('picker-open');
       }
     });
   });
@@ -508,10 +584,14 @@ function setupMessageInteractions(container: HTMLElement): void {
   });
 
   // Close reaction pickers when clicking outside
-  document.addEventListener('click', () => {
-    container.querySelectorAll('.reaction-picker').forEach(picker => {
-      picker.classList.add('hidden');
-    });
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (!target.closest('.reaction-picker') && !target.closest('.add-reaction-btn')) {
+      container.querySelectorAll('.reaction-picker').forEach(picker => {
+        picker.classList.add('hidden');
+        picker.closest('.message-actions')?.classList.remove('picker-open');
+      });
+    }
   });
 }
 
@@ -520,7 +600,17 @@ function setupMessageInteractions(container: HTMLElement): void {
  */
 async function addReaction(messageId: number, reaction: string): Promise<void> {
   try {
-    await apiPost(`/api/messages/${messageId}/reactions`, { reaction });
+    console.log('[AdminMessaging] Adding reaction:', { messageId, reaction });
+    const response = await apiPost(`/api/messages/${messageId}/reactions`, { reaction });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('[AdminMessaging] Failed to add reaction:', response.status, errorData);
+      return;
+    }
+
+    console.log('[AdminMessaging] Reaction added successfully');
+
     // Reload messages to show updated reactions
     if (selectedThreadId) {
       const container = getMessagesContainer();
@@ -651,4 +741,120 @@ export function setupMessagingListeners(ctx: AdminDashboardContext): void {
       }
     });
   }
+
+  // Global search input (searches both clients and messages)
+  const searchInput = getElement('messages-search-input') as HTMLInputElement;
+  if (searchInput) {
+    let searchDebounce: ReturnType<typeof setTimeout>;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(() => {
+        handleGlobalSearch(searchInput.value.trim(), ctx);
+      }, 300);
+    });
+
+    // Clear search on Escape
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        searchInput.value = '';
+        handleGlobalSearch('', ctx);
+      }
+    });
+  }
+}
+
+/**
+ * Handle global search across clients and messages
+ */
+function handleGlobalSearch(query: string, ctx: AdminDashboardContext): void {
+  const threadList = getElement('admin-thread-list');
+  const messagesThread = getMessagesContainer();
+
+  if (!query) {
+    // No search query - restore original state
+    if (threadList) {
+      renderThreadList(threadList, _cachedClientsWithThreads, ctx);
+    }
+    // Clear message highlights
+    if (messagesThread) {
+      messagesThread.querySelectorAll('mark').forEach((mark) => {
+        const parent = mark.parentNode;
+        if (parent) {
+          parent.replaceChild(document.createTextNode(mark.textContent || ''), mark);
+          parent.normalize();
+        }
+      });
+    }
+    return;
+  }
+
+  const lowerQuery = query.toLowerCase();
+
+  // Filter clients by name, company, or email
+  const filteredClients = _cachedClientsWithThreads.filter((client) => {
+    const name = (client.contact_name || '').toLowerCase();
+    const company = (client.company_name || '').toLowerCase();
+    const email = (client.email || '').toLowerCase();
+    return name.includes(lowerQuery) || company.includes(lowerQuery) || email.includes(lowerQuery);
+  });
+
+  // Re-render filtered client list
+  if (threadList) {
+    renderThreadList(threadList, filteredClients, ctx);
+  }
+
+  // Highlight matching text in messages
+  if (messagesThread) {
+    highlightMessagesSearch(messagesThread, query);
+  }
+}
+
+/**
+ * Highlight search matches in messages thread
+ */
+function highlightMessagesSearch(container: HTMLElement, query: string): void {
+  // First remove existing highlights
+  container.querySelectorAll('mark').forEach((mark) => {
+    const parent = mark.parentNode;
+    if (parent) {
+      parent.replaceChild(document.createTextNode(mark.textContent || ''), mark);
+      parent.normalize();
+    }
+  });
+
+  if (!query) return;
+
+  // Find and highlight matches in message bodies
+  container.querySelectorAll('.message-body').forEach((body) => {
+    const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+    const textNodes: Text[] = [];
+    let node: Node | null;
+    while ((node = walker.nextNode())) {
+      textNodes.push(node as Text);
+    }
+
+    const lowerQuery = query.toLowerCase();
+    textNodes.forEach((textNode) => {
+      const text = textNode.textContent || '';
+      const lowerText = text.toLowerCase();
+      const index = lowerText.indexOf(lowerQuery);
+
+      if (index !== -1) {
+        const before = text.substring(0, index);
+        const match = text.substring(index, index + query.length);
+        const after = text.substring(index + query.length);
+
+        const fragment = document.createDocumentFragment();
+        if (before) fragment.appendChild(document.createTextNode(before));
+
+        const mark = document.createElement('mark');
+        mark.textContent = match;
+        fragment.appendChild(mark);
+
+        if (after) fragment.appendChild(document.createTextNode(after));
+
+        textNode.parentNode?.replaceChild(fragment, textNode);
+      }
+    });
+  });
 }
