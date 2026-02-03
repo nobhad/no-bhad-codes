@@ -1,6 +1,6 @@
 # Admin Dashboard
 
-**Last Updated:** January 20, 2026
+**Last Updated:** February 2, 2026
 
 ## Table of Contents
 
@@ -52,7 +52,7 @@ The Admin Dashboard provides comprehensive administrative capabilities for manag
 
 ```
 admin/
-└── index.html                    # Admin HTML entry point (~1300 lines)
+└── index.html                    # Admin HTML entry point
 
 src/features/admin/
 ├── admin-dashboard.ts            # Main dashboard coordinator (~200 lines)
@@ -70,35 +70,48 @@ src/features/admin/renderers/     # Extracted UI renderers (January 2026 refacto
 └── admin-messaging.renderer.ts   # Messaging UI and thread rendering
 
 src/features/admin/modules/       # Extracted modules
-├── admin-analytics.ts            # Analytics and charts (~900 lines)
-├── admin-clients.ts              # Client management (~850 lines)
-├── admin-contacts.ts             # Contact form submissions (~250 lines)
-├── admin-leads.ts                # Leads management (~450 lines)
-├── admin-messaging.ts            # Messaging system (~400 lines)
-├── admin-overview.ts             # Dashboard overview (~200 lines)
-├── admin-performance.ts          # Performance monitoring (~400 lines)
-├── admin-projects.ts             # Projects management (~1000 lines)
-├── admin-system-status.ts        # System status display (~340 lines)
+├── admin-analytics.ts            # Analytics and charts
+├── admin-client-details.ts       # Client detail view
+├── admin-clients.ts              # Client management
+├── admin-contacts.ts             # Contact form submissions
+├── admin-document-requests.ts    # Document requests
+├── admin-files.ts                # File management
+├── admin-knowledge-base.ts       # Knowledge base (KB)
+├── admin-leads.ts                # Leads management
+├── admin-messaging.ts            # Messaging system
+├── admin-overview.ts             # Dashboard overview
+├── admin-performance.ts         # Performance monitoring
+├── admin-projects.ts             # Projects management
+├── admin-proposals.ts            # Proposals
+├── admin-system-status.ts       # System status display
+├── admin-tasks.ts                # Tasks
+├── admin-time-tracking.ts        # Time tracking
 └── index.ts                      # Module exports
 
 src/styles/pages/
 └── admin.css                     # Admin-specific styles
 
 server/routes/
-├── admin.ts                      # Admin-specific API endpoints
-├── auth.ts                       # Authentication including set-password
-├── leads.ts                      # Leads management API
+├── admin.ts                      # Admin API (leads, contacts, invites, dashboard)
+├── auth.ts                       # Authentication (login, set-password, magic-link)
 ├── clients.ts                    # Clients management API
 ├── projects.ts                   # Projects management API
-└── invoices.ts                   # Invoice management API
+├── invoices.ts                   # Invoice management API
+├── messages.ts                   # Messaging API
+├── uploads.ts                    # File upload API
+├── analytics.ts                  # Visitor analytics
+├── proposals.ts                  # Proposal builder API
+└── ... (intake, approvals, triggers, document-requests, knowledge-base)
 
-server/database/migrations/
-├── 003_leads.sql                 # Leads table schema
-├── 004_contacts.sql              # Contact submissions schema
-├── 005_clients.sql               # Clients table schema
-├── 010_client_invitation.sql     # Invitation token fields
-├── 020_project_price.sql         # Project price column
-└── 021_project_additional_fields.sql  # Additional project tracking fields
+server/database/migrations/       # 001_initial_schema through 045_knowledge_base.sql
+├── 001_initial_schema.sql
+├── 002_client_intakes.sql
+├── 009_contact_submissions.sql
+├── 010_client_invitation.sql
+├── 016_uploaded_files.sql
+├── 020_project_price.sql
+├── 021_project_additional_fields.sql
+└── ... (see directory for full list)
 ```
 
 ---

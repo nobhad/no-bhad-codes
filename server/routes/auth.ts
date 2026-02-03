@@ -15,6 +15,7 @@ import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
 import { emailService } from '../services/email-service.js';
 import { rateLimit } from '../middleware/security.js';
 import { auditLogger } from '../services/audit-logger.js';
+import { getSchedulerService } from '../services/scheduler-service.js';
 import {
   PASSWORD_CONFIG,
   JWT_CONFIG,
@@ -1218,6 +1219,16 @@ No Bhad Codes Team`
       ipAddress: req.ip || 'unknown',
       userAgent: req.get('user-agent') || 'unknown'
     });
+
+    // 4. Start welcome email sequence
+    try {
+      const scheduler = getSchedulerService();
+      await scheduler.startWelcomeSequence(clientId);
+      console.log(`[AUTH] Started welcome sequence for client ${clientId}`);
+    } catch (welcomeError) {
+      console.error('[AUTH] Failed to start welcome sequence:', welcomeError);
+      // Continue - account was activated successfully
+    }
 
     return sendSuccess(res, { email: clientEmail }, 'Password set successfully. You can now log in.');
   })

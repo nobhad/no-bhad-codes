@@ -1,0 +1,163 @@
+/* =====================================================
+   CLIENT PORTAL - HELP (Knowledge Base)
+   Uses portal theme tokens per PORTAL_CSS_DESIGN.md
+   ===================================================== */
+
+[data-page="client-portal"] .help-search-wrap {
+  display: flex;
+  gap: var(--portal-spacing-sm);
+  margin-bottom: var(--portal-spacing-lg);
+  max-width: 32rem;
+}
+
+[data-page="client-portal"] .help-search-input {
+  flex: 1;
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  border: 2px solid var(--portal-border-dark);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-bg-dark);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-base);
+}
+
+[data-page="client-portal"] .help-search-input::placeholder {
+  color: var(--portal-text-muted);
+}
+
+[data-page="client-portal"] .help-search-input:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+[data-page="client-portal"] .help-search-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--portal-spacing-xs);
+}
+
+[data-page="client-portal"] .help-browse {
+  display: grid;
+  gap: var(--portal-spacing-xl);
+}
+
+[data-page="client-portal"] .help-featured,
+[data-page="client-portal"] .help-categories,
+[data-page="client-portal"] .help-search-results,
+[data-page="client-portal"] .help-article-view {
+  padding: var(--portal-spacing-lg);
+  background: var(--portal-bg-dark);
+  border-radius: var(--border-radius-card);
+}
+
+[data-page="client-portal"] .help-featured h3,
+[data-page="client-portal"] .help-categories h3,
+[data-page="client-portal"] .help-search-results h3 {
+  margin: 0 0 var(--portal-spacing-md) 0;
+  font-family: var(--font-family-acme);
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--portal-text-light);
+}
+
+[data-page="client-portal"] .help-featured-list,
+[data-page="client-portal"] .help-categories-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-sm);
+}
+
+[data-page="client-portal"] .help-card {
+  display: block;
+  padding: var(--portal-spacing-md);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-sm);
+  color: var(--portal-text-light);
+  text-decoration: none;
+  border: 2px solid transparent;
+}
+
+[data-page="client-portal"] .help-card:hover {
+  background: var(--portal-bg-hover);
+  border-color: var(--portal-border-medium);
+}
+
+[data-page="client-portal"] .help-card-summary {
+  margin: var(--portal-spacing-xs) 0 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+}
+
+[data-page="client-portal"] .help-category-btn,
+[data-page="client-portal"] .help-category-article-link {
+  display: block;
+  width: 100%;
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  text-align: left;
+  background: var(--portal-bg-medium);
+  border: 2px solid transparent;
+  border-radius: var(--portal-radius-sm);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+}
+
+[data-page="client-portal"] .help-category-btn:hover,
+[data-page="client-portal"] .help-category-article-link:hover {
+  background: var(--portal-bg-hover);
+  border-color: var(--portal-border-medium);
+}
+
+[data-page="client-portal"] .help-category-back {
+  margin-bottom: var(--portal-spacing-md);
+}
+
+[data-page="client-portal"] .help-category-heading {
+  margin: 0 0 var(--portal-spacing-sm) 0;
+  font-family: var(--font-family-acme);
+  font-size: 1.1rem;
+  color: var(--portal-text-light);
+}
+
+[data-page="client-portal"] .help-result-link {
+  display: block;
+  padding: var(--portal-spacing-sm) 0;
+  color: var(--portal-text-light);
+  text-decoration: none;
+  border-bottom: 1px solid var(--portal-border-light);
+}
+
+[data-page="client-portal"] .help-result-link:hover {
+  color: var(--color-primary);
+}
+
+[data-page="client-portal"] .help-article-back {
+  margin-bottom: var(--portal-spacing-md);
+}
+
+[data-page="client-portal"] .help-article-view article h1 {
+  margin: 0 0 var(--portal-spacing-md) 0;
+  font-family: var(--font-family-acme);
+  font-size: var(--font-size-xl);
+  color: var(--portal-text-light);
+}
+
+[data-page="client-portal"] .help-article-body {
+  color: var(--portal-text-light);
+  line-height: 1.6;
+}
+
+[data-page="client-portal"] .help-article-body p {
+  margin: 0 0 var(--portal-spacing-sm) 0;
+}
+
+[data-page="client-portal"] .help-empty,
+[data-page="client-portal"] .help-error {
+  color: var(--portal-text-secondary);
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+[data-page="client-portal"] .help-error {
+  color: var(--color-error-500);
+}

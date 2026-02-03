@@ -160,44 +160,75 @@ body[data-page="client-portal"] {
   display: none;
 }
 
-/* Page Header */
-.page-header {
-  margin-bottom: 2rem;
+/* Primary header row: sidebar toggle + breadcrumbs (evergreen-style) */
+.page-header.primary-header-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  margin-top: -0.5rem;
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
 }
 
-.page-header h1,
-.page-header h2 {
-  font-family: var(--font--acme);
+.header-toggle-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  margin-left: -0.25rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--portal-radius-md, 6px);
+  cursor: pointer;
+  color: var(--portal-text-light);
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.header-toggle-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--portal-text-light);
+}
+
+.sidebar-toggle-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+/* Toggle icon rotates when sidebar is collapsed */
+.sidebar.collapsed ~ .dashboard-content .header-sidebar-toggle .sidebar-toggle-icon {
+  transform: rotate(180deg);
+}
+
+.header-breadcrumb-nav {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Page title (h2) below primary header row */
+.page-title {
+  margin-bottom: 1.5rem;
+}
+
+.page-title h1,
+.page-title h2 {
+  font-family: var(--font-family-acme);
   font-size: clamp(1.5rem, 4vw, 2rem);
   color: var(--portal-text-light);
   margin: 0;
   text-transform: uppercase;
 }
 
-/* Sidebar toggle in page header */
-.page-header .header-sidebar-toggle {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font--acme);
-  font-size: clamp(1.25rem, 3.5vw, 1.75rem);
+/* Legacy: page-header with h2 only (when not primary row) */
+.page-header:not(.primary-header-row) h1,
+.page-header:not(.primary-header-row) h2 {
+  font-family: var(--font-family-acme);
+  font-size: clamp(1.5rem, 4vw, 2rem);
   color: var(--portal-text-light);
-}
-
-.page-header .header-sidebar-toggle:hover {
-  opacity: 0.8;
-}
-
-/* Arrow rotates when sidebar is collapsed */
-.sidebar.collapsed ~ .dashboard-content .page-header .header-sidebar-toggle {
-  transform: rotate(180deg);
+  margin: 0;
+  text-transform: uppercase;
 }
 
 /* Action Buttons */
@@ -228,7 +259,7 @@ body[data-page="client-portal"] {
 /* Cards are not clickable - no hover effect needed */
 
 [data-page="client-portal"] .card h3 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.1rem;
   color: var(--portal-text-light);
   margin: 0 0 0.75rem 0;
@@ -272,9 +303,10 @@ body[data-page="client-portal"] {
   transition: transform 0.3s ease;
 }
 
-/* Breadcrumb Navigation */
+/* Breadcrumb nav in primary header row */
 .breadcrumb-nav {
   flex: 1;
+  min-width: 0;
 }
 
 .breadcrumb-list {
@@ -318,6 +350,28 @@ body[data-page="client-portal"] {
 .breadcrumb-separator {
   color: var(--color-neutral-400);
   font-size: 0.75rem;
+}
+
+/* Breadcrumbs on dark portal: use light text for readability */
+:is([data-page="admin"], [data-page="client-portal"]) .breadcrumb-list {
+  color: var(--portal-text-secondary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .breadcrumb-link {
+  color: var(--portal-text-secondary);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .breadcrumb-link:hover {
+  color: var(--portal-text-light);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .breadcrumb-current {
+  color: var(--portal-text-light);
+  font-weight: 600;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .breadcrumb-separator {
+  color: var(--portal-text-muted);
 }
 
 /* Error States */

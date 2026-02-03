@@ -1,8 +1,8 @@
 # Component Refactoring Opportunities
 
-**Last Updated:** January 30, 2026
+**Last Updated:** February 2, 2026
 
-This document identifies places in the codebase where reusable components should be used but are currently implemented with manual DOM manipulation or native browser APIs.
+This document identifies places in the codebase where reusable components should be used but are currently implemented with manual DOM manipulation or native browser APIs. **Completed items:** Client portal and admin alert/prompt/toast/confirm refactors are done; remaining deferred items (Buttons, Modals) are documented below.
 
 ## Summary
 
@@ -36,9 +36,9 @@ This document identifies places in the codebase where reusable components should
 ### Files to Refactor
 
 #### `src/features/client/client-portal.ts`
-**Current:** Using native `alert()` (15+ instances)
+**Status:** Refactored. Client portal now uses `alertDialog`/`alertError`/`alertSuccess`/`showToast`; no remaining native `alert()` in this file. Line numbers below are historical.
 
-**Locations:**
+**Historical locations (pre-refactor):**
 - Line 426: `alert('Please log in to submit a project request.')`
 - Line 437: `alert('Please fill in all required fields')`
 - Line 463: `alert(data.message || 'Project request submitted successfully!')`
@@ -84,7 +84,8 @@ await alertInfo('Please log in to save settings.');
 **Note:** There's also a `showSuccessMessage()` method (line 1407) that creates custom DOM elements - this should also use `showToast()` instead.
 
 #### `src/features/client/modules/portal-messages.ts`
-**Current:** Line 210 - `alert(error instanceof Error ? error.message : 'Failed to send message...')`
+**Status:** Refactored; uses `alertError` (or equivalent). Line numbers historical.
+**Historical:** Line 210 - `alert(...)` for send message error.
 
 **Refactor to:**
 ```typescript
@@ -93,7 +94,8 @@ await alertError(error instanceof Error ? error.message : 'Failed to send messag
 ```
 
 #### `src/features/client/modules/portal-invoices.ts`
-**Current:** Line 222 - `alert('Failed to download invoice. Please try again.')`
+**Status:** Refactored; uses `alertError` (or equivalent). Line numbers historical.
+**Historical:** Line 222 - `alert('Failed to download invoice...')`.
 
 **Refactor to:**
 ```typescript

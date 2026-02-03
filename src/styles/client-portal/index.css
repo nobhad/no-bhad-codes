@@ -7,6 +7,7 @@
 @import '../shared/portal-layout.css';
 @import '../shared/portal-buttons.css';
 @import '../shared/portal-messages.css';
+@import '../shared/search-bar.css';
 @import '../shared/portal-cards.css';
 @import '../shared/portal-forms.css';
 @import '../shared/portal-files.css';
@@ -32,3 +33,9 @@
 
 /* Project Navigation & Details */
 @import './projects.css';
+
+/* Help (Knowledge Base) */
+@import './help.css';
+
+/* Document Requests */
+@import './documents.css';

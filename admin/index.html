@@ -227,41 +227,53 @@
 
           <!-- Admin Navigation Buttons -->
           <div class="sidebar-buttons">
-            <button class="btn btn-secondary active" id="btn-overview" data-tab="overview">
+            <button class="btn btn-secondary active" id="btn-overview" data-tab="overview" aria-label="Dashboard">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
               <span class="btn-text">DASHBOARD</span>
             </button>
-            <button class="btn btn-secondary" id="btn-leads" data-tab="leads">
+            <button class="btn btn-secondary" id="btn-leads" data-tab="leads" aria-label="Leads">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
               <span class="btn-text">LEADS</span>
               <span class="sidebar-badge" id="leads-badge" style="display: none;"></span>
             </button>
-            <button class="btn btn-secondary" id="btn-projects" data-tab="projects">
+            <button class="btn btn-secondary" id="btn-projects" data-tab="projects" aria-label="Projects">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
               <span class="btn-text">PROJECTS</span>
             </button>
-            <button class="btn btn-secondary" id="btn-clients" data-tab="clients">
+            <button class="btn btn-secondary" id="btn-clients" data-tab="clients" aria-label="Clients">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               <span class="btn-text">CLIENTS</span>
+            </button>
+            <button class="btn btn-secondary" id="btn-invoices" data-tab="invoices" aria-label="Invoices">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+              <span class="btn-text">INVOICES</span>
             </button>
             <button class="btn btn-secondary" id="btn-messages" data-tab="messages">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
               <span class="btn-text">MESSAGES</span>
               <span class="sidebar-badge" id="messages-badge" style="display: none;"></span>
             </button>
-            <button class="btn btn-secondary" id="btn-analytics" data-tab="analytics">
+            <button class="btn btn-secondary" id="btn-analytics" data-tab="analytics" aria-label="Analytics">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
               <span class="btn-text">ANALYTICS</span>
             </button>
-            <button class="btn btn-secondary" id="btn-system" data-tab="system">
+            <button class="btn btn-secondary" id="btn-knowledge-base" data-tab="knowledge-base" aria-label="Knowledge base">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8"/><path d="M8 11h8"/></svg>
+              <span class="btn-text">Knowledge</span>
+            </button>
+            <button class="btn btn-secondary" id="btn-document-requests" data-tab="document-requests" aria-label="Document requests">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" aria-hidden="true"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+              <span class="btn-text">Documents</span>
+            </button>
+            <button class="btn btn-secondary" id="btn-system" data-tab="system" aria-label="System Status">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v10"/><path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24"/><path d="M1 12h6m6 0h10"/><path d="m4.93 19.07 4.24-4.24m5.66-5.66 4.24-4.24"/></svg>
-              <span class="btn-text">SYSTEM</span>
+              <span class="btn-text">System</span>
             </button>
           </div>
 
           <!-- Sign Out Button -->
           <div class="sidebar-footer">
-            <button type="button" class="btn btn-secondary btn-logout" id="btn-logout">
+            <button type="button" class="btn btn-secondary btn-logout" id="btn-logout" aria-label="Sign out">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
               <span class="btn-text">SIGN OUT</span>
             </button>
@@ -288,65 +300,109 @@
               <h2>Dashboard</h2>
             </div>
 
-            <!-- Lead Stats (Clickable) -->
+            <!-- NEEDS ATTENTION (Urgent/Actionable Items) -->
+            <h3 class="sr-only">Needs Attention</h3>
+            <div class="attention-grid" aria-live="polite" aria-atomic="false">
+              <button
+                class="attention-card portal-shadow"
+                data-tab="invoices"
+                data-filter="overdue"
+                type="button"
+                id="attention-overdue-invoices"
+              >
+                <div class="attention-icon attention-icon-warning">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div class="attention-content">
+                  <span class="attention-count" id="stat-overdue-invoices">-</span>
+                  <span class="attention-label">Overdue Invoices</span>
+                </div>
+              </button>
+              <button
+                class="attention-card portal-shadow"
+                data-tab="projects"
+                data-filter="pending_contract"
+                type="button"
+                id="attention-pending-contracts"
+              >
+                <div class="attention-icon attention-icon-warning">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>
+                </div>
+                <div class="attention-content">
+                  <span class="attention-count" id="stat-pending-contracts">-</span>
+                  <span class="attention-label">Pending Contracts</span>
+                </div>
+              </button>
+              <button
+                class="attention-card portal-shadow"
+                data-tab="leads"
+                data-filter="new_this_week"
+                type="button"
+                id="attention-new-leads"
+              >
+                <div class="attention-icon attention-icon-info">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                </div>
+                <div class="attention-content">
+                  <span class="attention-count" id="stat-new-leads">-</span>
+                  <span class="attention-label">New Leads This Week</span>
+                </div>
+              </button>
+              <button
+                class="attention-card portal-shadow"
+                data-tab="messages"
+                data-filter="unread"
+                type="button"
+                id="attention-unread-messages"
+              >
+                <div class="attention-icon attention-icon-info">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <div class="attention-content">
+                  <span class="attention-count" id="stat-unread-messages">-</span>
+                  <span class="attention-label">Unread Messages</span>
+                </div>
+              </button>
+            </div>
+
+            <!-- TODAY'S SNAPSHOT (At-a-Glance Business Metrics) -->
+            <h3 class="sr-only">Today's Snapshot</h3>
             <div class="quick-stats" aria-live="polite" aria-atomic="false">
               <button
                 class="stat-card stat-card-clickable portal-shadow"
-                data-tab="leads"
+                data-tab="projects"
                 type="button"
               >
-                <span class="stat-number" id="stat-total-leads">-</span>
-                <span class="stat-label">Total Leads</span>
+                <span class="stat-number" id="stat-active-projects">-</span>
+                <span class="stat-label">Active Projects</span>
+              </button>
+              <button
+                class="stat-card stat-card-clickable portal-shadow"
+                data-tab="clients"
+                type="button"
+              >
+                <span class="stat-number" id="stat-total-clients">-</span>
+                <span class="stat-label">Clients</span>
+              </button>
+              <button
+                class="stat-card stat-card-clickable portal-shadow"
+                data-tab="invoices"
+                type="button"
+              >
+                <span class="stat-number" id="stat-revenue-mtd">-</span>
+                <span class="stat-label">Revenue MTD</span>
               </button>
               <button
                 class="stat-card stat-card-clickable portal-shadow"
                 data-tab="leads"
                 type="button"
               >
-                <span class="stat-number" id="stat-pending-leads">-</span>
-                <span class="stat-label">Pending</span>
-              </button>
-              <button
-                class="stat-card stat-card-clickable portal-shadow"
-                data-tab="analytics"
-                type="button"
-              >
-                <span class="stat-number" id="stat-visitors">-</span>
-                <span class="stat-label">Visitors Today</span>
-              </button>
-              <button
-                class="stat-card stat-card-clickable portal-shadow"
-                data-tab="messages"
-                type="button"
-              >
-                <span class="stat-number" id="stat-messages">-</span>
-                <span class="stat-label">Messages</span>
+                <span class="stat-number" id="stat-conversion-rate">-</span>
+                <span class="stat-label">Conversion Rate</span>
               </button>
             </div>
 
-            <!-- Visitor Analytics Stats -->
-            <div class="analytics-overview portal-shadow">
-              <h3>Weekly Overview</h3>
-              <div class="overview-stats-grid">
-                <div class="overview-stat">
-                  <span class="stat-number" id="total-visitors">-</span>
-                  <span class="field-label">Total Visitors</span>
-                  <span class="metric-change" id="visitors-change">-</span>
-                </div>
-                <div class="overview-stat">
-                  <span class="stat-number" id="page-views">-</span>
-                  <span class="field-label">Page Views</span>
-                  <span class="metric-change" id="views-change">-</span>
-                </div>
-                <div class="overview-stat">
-                  <span class="stat-number" id="avg-session">-</span>
-                  <span class="field-label">Avg. Session</span>
-                  <span class="metric-change" id="session-change">-</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Recent Activity -->
+            <!-- RECENT ACTIVITY -->
             <div class="recent-activity portal-shadow">
               <h3>Recent Activity</h3>
               <ul class="activity-list" id="recent-activity-list" aria-live="polite" aria-atomic="false">
@@ -386,35 +442,36 @@
               <div class="admin-table-header">
                 <h3><span class="title-full">Intake Submissions</span><span class="title-mobile">Leads</span></h3>
                 <div class="admin-table-actions" id="leads-filter-container">
-                  <div class="leads-view-toggle" id="leads-view-toggle">
-                    <button class="active" data-view="table" title="Table View">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-                      <span>Table</span>
-                    </button>
-                    <button data-view="pipeline" title="Pipeline View">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="18" rx="1"/><rect x="9" y="8" width="6" height="13" rx="1"/><rect x="15" y="5" width="6" height="16" rx="1"/></svg>
-                      <span>Pipeline</span>
-                    </button>
-                  </div>
-                  <button class="icon-btn" id="refresh-leads-btn" title="Refresh">
+                  <div id="leads-view-toggle"></div>
+                  <button class="icon-btn" id="export-leads-btn" title="Export to CSV" aria-label="Export leads to CSV">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  </button>
+                  <button class="icon-btn" id="refresh-leads-btn" title="Refresh" aria-label="Refresh leads">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
                   </button>
                 </div>
               </div>
+              <!-- Bulk Action Toolbar (hidden initially) -->
+              <div id="leads-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
               <!-- Pipeline View Container -->
               <div class="leads-pipeline-container hidden" id="leads-pipeline-container"></div>
               <!-- Table View -->
               <div class="admin-table-container leads-table-container" id="leads-table-view">
+                <div class="admin-table-scroll-wrapper">
                 <table class="admin-table leads-table">
                   <thead>
                     <tr>
-                      <th scope="col">Date</th>
-                      <th scope="col">Name</th>
-                      <th scope="col">Company</th>
-                      <th scope="col">Email</th>
+                      <th scope="col" class="bulk-select-cell">
+                        <div class="portal-checkbox">
+                          <input type="checkbox" id="leads-select-all" class="bulk-select-all" aria-label="Select all leads" />
+                        </div>
+                      </th>
+                      <th scope="col">Project</th>
+                      <th scope="col">Lead</th>
                       <th scope="col">Type</th>
                       <th scope="col">Budget</th>
                       <th scope="col">Status</th>
+                      <th scope="col">Date</th>
                       <th scope="col">Actions</th>
                     </tr>
                   </thead>
@@ -424,7 +481,10 @@
                     </tr>
                   </tbody>
                 </table>
+                </div>
               </div>
+              <!-- Pagination -->
+              <div id="leads-pagination" class="table-pagination"></div>
             </div>
 
             <!-- Lead Analytics Section -->
@@ -450,9 +510,8 @@
               <div class="admin-table-header">
                 <h3>Lead Scoring Rules</h3>
                 <div class="admin-table-actions">
-                  <button class="btn btn-secondary btn-sm" id="add-scoring-rule-btn">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Add Rule
+                  <button type="button" class="icon-btn" id="add-scoring-rule-btn" title="Add rule" aria-label="Add scoring rule">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
                   </button>
                 </div>
               </div>
@@ -466,30 +525,35 @@
               <div class="admin-table-header">
                 <h3><span class="title-full">Contact Form Submissions</span><span class="title-mobile">Contacts</span></h3>
                 <div class="admin-table-actions" id="contacts-filter-container">
-                  <button class="icon-btn" id="refresh-contacts-btn" title="Refresh">
+                  <button class="icon-btn" id="export-contacts-btn" title="Export to CSV" aria-label="Export contact submissions to CSV">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  </button>
+                  <button class="icon-btn" id="refresh-contacts-btn" title="Refresh" aria-label="Refresh contact submissions">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
                   </button>
                 </div>
               </div>
               <div class="admin-table-container contacts-table-container">
+                <div class="admin-table-scroll-wrapper">
                 <table class="admin-table contacts-table">
                   <thead>
                     <tr>
-                      <th scope="col">Date</th>
-                      <th scope="col">Name</th>
-                      <th scope="col">Email</th>
-                      <th scope="col">Company</th>
+                      <th scope="col">Contact</th>
                       <th scope="col">Message</th>
                       <th scope="col">Status</th>
+                      <th scope="col">Date</th>
                     </tr>
                   </thead>
                   <tbody id="contacts-table-body">
                     <tr>
-                      <td colspan="6" class="loading-row">Loading contact submissions...</td>
+                      <td colspan="4" class="loading-row">Loading contact submissions...</td>
                     </tr>
                   </tbody>
                 </table>
+                </div>
               </div>
+              <!-- Pagination -->
+              <div id="contacts-pagination" class="table-pagination"></div>
             </div>
 
           </div>
@@ -525,35 +589,47 @@
               <div class="admin-table-header">
                 <h3>Projects</h3>
                 <div class="admin-table-actions" id="projects-filter-container">
-                  <button class="icon-btn" id="add-project-btn" title="Add Project">
+                  <button class="icon-btn" id="add-project-btn" title="Add Project" aria-label="Add project">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
                   </button>
-                  <button class="icon-btn" id="refresh-projects-btn" title="Refresh">
+                  <button class="icon-btn" id="export-projects-btn" title="Export to CSV" aria-label="Export projects to CSV">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  </button>
+                  <button class="icon-btn" id="refresh-projects-btn" title="Refresh" aria-label="Refresh projects">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
                   </button>
                 </div>
               </div>
+              <!-- Bulk Action Toolbar (hidden initially) -->
+              <div id="projects-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
               <div class="admin-table-container projects-table-container">
+                <div class="admin-table-scroll-wrapper">
                 <table class="admin-table projects-table">
                   <thead>
                     <tr>
-                      <th scope="col">Project Name</th>
-                      <th scope="col">Client</th>
+                      <th scope="col" class="bulk-select-cell">
+                        <div class="portal-checkbox">
+                          <input type="checkbox" id="projects-select-all" class="bulk-select-all" aria-label="Select all projects" />
+                        </div>
+                      </th>
+                      <th scope="col">Project</th>
                       <th scope="col">Type</th>
                       <th scope="col">Budget</th>
                       <th scope="col">Timeline</th>
-                      <th scope="col">Start Date</th>
-                      <th scope="col">End Date</th>
                       <th scope="col">Status</th>
+                      <th scope="col">Start</th>
                     </tr>
                   </thead>
                   <tbody id="projects-table-body">
                     <tr>
-                      <td colspan="8" class="loading-row">Loading projects...</td>
+                      <td colspan="7" class="loading-row">Loading projects...</td>
                     </tr>
                   </tbody>
                 </table>
+                </div>
               </div>
+              <!-- Pagination -->
+              <div id="projects-pagination" class="table-pagination"></div>
             </div>
           </div>
 
@@ -588,25 +664,35 @@
               <div class="admin-table-header">
                 <h3><span class="title-full">Client Accounts</span><span class="title-mobile">Clients</span></h3>
                 <div class="admin-table-actions" id="clients-filter-container">
-                  <button class="icon-btn" id="add-client-btn" title="Add Client">
+                  <button class="icon-btn" id="add-client-btn" title="Add Client" aria-label="Add client">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
                   </button>
-                  <button class="icon-btn" id="refresh-clients-btn" title="Refresh">
+                  <button class="icon-btn" id="export-clients-btn" title="Export to CSV" aria-label="Export clients to CSV">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  </button>
+                  <button class="icon-btn" id="refresh-clients-btn" title="Refresh" aria-label="Refresh clients">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
                   </button>
                 </div>
               </div>
+              <!-- Bulk Action Toolbar (hidden initially) -->
+              <div id="clients-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
               <div class="admin-table-container clients-table-container">
+                <div class="admin-table-scroll-wrapper">
                 <table class="admin-table clients-table">
                   <thead>
                     <tr>
+                      <th scope="col" class="bulk-select-cell">
+                        <div class="portal-checkbox">
+                          <input type="checkbox" id="clients-select-all" class="bulk-select-all" aria-label="Select all clients" />
+                        </div>
+                      </th>
                       <th scope="col">Client</th>
                       <th scope="col">Type</th>
-                      <th scope="col">Email</th>
-                      <th scope="col">Status</th>
-                      <th scope="col" class="text-center">Health</th>
                       <th scope="col">Projects</th>
+                      <th scope="col">Status</th>
                       <th scope="col">Created</th>
+                      <th scope="col">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="clients-table-body">
@@ -615,67 +701,168 @@
                     </tr>
                   </tbody>
                 </table>
+                </div>
               </div>
+              <!-- Pagination -->
+              <div id="clients-pagination" class="table-pagination"></div>
+            </div>
+          </div>
+
+          <!-- Invoices Tab -->
+          <div class="tab-content" id="tab-invoices">
+            <div class="page-title">
+              <h2>Invoices</h2>
+            </div>
+
+            <!-- Invoice Stats -->
+            <div class="quick-stats">
+              <button class="stat-card stat-card-clickable portal-shadow" data-filter="all" data-table="invoices">
+                <span class="stat-number" id="invoices-total">-</span>
+                <span class="stat-label">Total Invoices</span>
+              </button>
+              <button class="stat-card stat-card-clickable portal-shadow" data-filter="pending" data-table="invoices">
+                <span class="stat-number" id="invoices-pending">-</span>
+                <span class="stat-label">Pending</span>
+              </button>
+              <button class="stat-card stat-card-clickable portal-shadow" data-filter="paid" data-table="invoices">
+                <span class="stat-number" id="invoices-paid">-</span>
+                <span class="stat-label">Paid</span>
+              </button>
+              <button class="stat-card stat-card-clickable portal-shadow" data-filter="overdue" data-table="invoices">
+                <span class="stat-number" id="invoices-overdue">-</span>
+                <span class="stat-label">Overdue</span>
+              </button>
+            </div>
+
+            <!-- Invoices Table -->
+            <div class="admin-table-card" id="invoices-table-card">
+              <div class="admin-table-header">
+                <h3><span class="title-full">All Invoices</span><span class="title-mobile">Invoices</span></h3>
+                <div class="admin-table-actions" id="invoices-filter-container">
+                  <button class="icon-btn" id="create-invoice-btn" title="Create Invoice" aria-label="Create new invoice">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                  </button>
+                  <button class="icon-btn" id="export-invoices-btn" title="Export to CSV" aria-label="Export invoices to CSV">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  </button>
+                  <button class="icon-btn" id="refresh-invoices-btn" title="Refresh" aria-label="Refresh invoices">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="admin-table-container invoices-table-container">
+                <div class="admin-table-scroll-wrapper">
+                  <table class="admin-table invoices-table">
+                    <thead>
+                      <tr>
+                        <th scope="col" class="bulk-select-cell">
+                          <input type="checkbox" class="portal-checkbox select-all-checkbox" id="invoices-select-all" aria-label="Select all invoices">
+                        </th>
+                        <th scope="col">Invoice #</th>
+                        <th scope="col">Client</th>
+                        <th scope="col">Project</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Due Date</th>
+                        <th scope="col">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="invoices-table-body">
+                      <tr>
+                        <td colspan="8" class="loading-row">Loading invoices...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <!-- Pagination -->
+              <div id="invoices-pagination" class="table-pagination"></div>
             </div>
           </div>
 
           <!-- Client Detail View -->
           <div class="tab-content" id="tab-client-detail">
-            <div class="page-title">
-              <h2 id="client-detail-title">Client Details</h2>
+            <!-- Client Header Card -->
+            <div class="portal-project-card portal-shadow cd-header-card">
+              <div class="cd-header-top">
+                <div class="cd-header-info">
+                  <div class="detail-title-row">
+                    <div class="detail-title-group">
+                      <h2 class="detail-title" id="cd-client-name">Client Name</h2>
+                      <span class="status-badge" id="cd-status-badge">Active</span>
+                    </div>
+                    <div class="detail-actions">
+                      <!-- Quick Action Buttons -->
+                      <button class="icon-btn" id="cd-btn-send-invite" title="Send Invitation" aria-label="Send invitation to client">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                      </button>
+                      <button class="icon-btn" id="cd-btn-edit" title="Edit Client" aria-label="Edit client details">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                      </button>
+                      <!-- More Menu -->
+                      <div class="table-dropdown detail-more-menu" id="cd-more-menu">
+                        <button class="custom-dropdown-trigger" aria-label="More actions">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                        </button>
+                        <ul class="custom-dropdown-menu">
+                          <li class="custom-dropdown-item" data-action="resend-invite">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                            Resend Invitation
+                          </li>
+                          <li class="custom-dropdown-item" data-action="reset-password">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Reset Password
+                          </li>
+                          <li class="custom-dropdown-item" data-action="archive">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>
+                            Archive Client
+                          </li>
+                          <li class="dropdown-divider"></li>
+                          <li class="custom-dropdown-item danger" data-action="delete">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                            Delete Client
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Contact Info in Header -->
+                  <div class="cd-header-contact">
+                    <div class="cd-contact-item">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                      <span id="cd-email">-</span>
+                    </div>
+                    <div class="cd-contact-item">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                      <span id="cd-phone">-</span>
+                    </div>
+                    <div class="cd-contact-item">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+                      <span id="cd-company">-</span>
+                    </div>
+                  </div>
+                  <!-- Account Details in Header -->
+                  <div class="cd-header-account">
+                    <div class="cd-account-item">
+                      <span class="cd-account-label">Type</span>
+                      <span class="cd-account-value" id="cd-client-type">-</span>
+                    </div>
+                    <div class="cd-account-item">
+                      <span class="cd-account-label">Since</span>
+                      <span class="cd-account-value" id="cd-created">-</span>
+                    </div>
+                    <div class="cd-account-item">
+                      <span class="cd-account-label">Last Login</span>
+                      <span class="cd-account-value" id="cd-last-login">-</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Tags in header card -->
+              <div id="cd-header-tags" class="cd-header-tags"></div>
             </div>
 
-            <!-- Client Overview Card -->
-            <div class="project-detail-overview portal-shadow">
-              <div class="overview-header">
-                <h3 id="cd-client-name">Client Name</h3>
-                <button class="icon-btn" id="cd-btn-edit-info" title="Edit Client Info" aria-label="Edit client info">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                </button>
-              </div>
-              <div class="project-detail-client-row">
-                <div class="meta-item">
-                  <span class="field-label">Email</span>
-                  <span class="meta-value" id="cd-email">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Company</span>
-                  <span class="meta-value" id="cd-company">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Phone</span>
-                  <span class="meta-value" id="cd-phone">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Status</span>
-                  <span class="meta-value" id="cd-status">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Type</span>
-                  <span class="meta-value" id="cd-client-type">-</span>
-                </div>
-              </div>
-              <div class="project-detail-meta">
-                <div class="meta-item">
-                  <span class="field-label">Account Created</span>
-                  <span class="meta-value" id="cd-created">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Last Login</span>
-                  <span class="meta-value" id="cd-last-login">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Total Projects</span>
-                  <span class="meta-value" id="cd-project-count">0</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Outstanding Invoices</span>
-                  <span class="meta-value" id="cd-outstanding-invoices-count">-</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Client Detail Tabs (same look as project detail tabs) -->
+            <!-- Client Detail Tabs -->
             <div class="client-detail-tabs portal-tabs" id="client-detail-tabs">
               <button class="active" data-cd-tab="overview">Overview</button>
               <button data-cd-tab="contacts">Contacts</button>
@@ -685,76 +872,150 @@
               <button data-cd-tab="notes">Notes</button>
             </div>
 
-            <!-- Overview Tab (ordered by importance: stats, health, CRM, billing, invoices, tags, custom) -->
+            <!-- Overview Tab - Two Column Layout -->
             <div class="client-detail-tab-content portal-tab-panel active" id="cd-tab-overview">
-              <!-- Quick Stats (at-a-glance) -->
-              <div class="portal-project-card portal-shadow">
-                <h3>Quick Stats</h3>
-                <div id="cd-stats-container">
-                  <p class="empty-state">Loading stats...</p>
+              <div class="cd-overview-grid">
+                <!-- LEFT COLUMN -->
+                <div class="cd-overview-main">
+                  <!-- Projects Summary -->
+                  <div class="portal-project-card portal-shadow">
+                    <div class="card-header-with-action">
+                      <h3>Projects</h3>
+                      <button class="btn btn-sm btn-secondary" data-action="view-projects">View All</button>
+                    </div>
+                    <div class="cd-projects-summary" id="cd-overview-projects">
+                      <p class="empty-state">Loading...</p>
+                    </div>
+                  </div>
+
+                  <!-- CRM Details -->
+                  <div class="portal-project-card portal-shadow">
+                    <h3>CRM Details</h3>
+                    <div class="cd-contact-grid">
+                      <div class="meta-item">
+                        <span class="field-label">Industry</span>
+                        <span class="meta-value" id="cd-crm-industry">-</span>
+                      </div>
+                      <div class="meta-item">
+                        <span class="field-label">Company Size</span>
+                        <span class="meta-value" id="cd-crm-company-size">-</span>
+                      </div>
+                      <div class="meta-item">
+                        <span class="field-label">Acquisition Source</span>
+                        <span class="meta-value" id="cd-crm-acquisition-source">-</span>
+                      </div>
+                      <div class="meta-item">
+                        <span class="field-label">Website</span>
+                        <span class="meta-value" id="cd-crm-website">-</span>
+                      </div>
+                      <div class="meta-item">
+                        <span class="field-label">Last Contact</span>
+                        <span class="meta-value" id="cd-crm-last-contact">-</span>
+                      </div>
+                      <div class="meta-item">
+                        <span class="field-label">Next Follow-up</span>
+                        <span class="meta-value" id="cd-crm-next-followup">-</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Custom Fields (hidden when empty) -->
+                  <div class="portal-project-card portal-shadow" id="cd-custom-fields-card" style="display: none;">
+                    <h3>Custom Fields</h3>
+                    <div id="cd-custom-fields-container"></div>
+                  </div>
+                </div>
+
+                <!-- RIGHT COLUMN (Sidebar) -->
+                <div class="cd-overview-sidebar">
+                  <!-- Health & Stats Combined -->
+                  <div class="portal-project-card portal-shadow cd-health-stats-card">
+                    <h3>Client Health</h3>
+                    <div id="cd-health-score-container">
+                      <p class="empty-state">Loading...</p>
+                    </div>
+                    <div class="cd-stats-compact" id="cd-stats-container">
+                      <!-- Stats rendered by JS -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Recent Activity - Full Width spanning both columns -->
+                <div class="portal-project-card portal-shadow cd-recent-activity-full">
+                  <h3>Recent Activity</h3>
+                  <div id="cd-recent-activity">
+                    <p class="empty-state">Loading...</p>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <!-- Client Health -->
+            <!-- Contacts Tab -->
+            <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-contacts">
               <div class="portal-project-card portal-shadow">
-                <h3>Client Health</h3>
-                <div id="cd-health-score-container">
-                  <p class="empty-state">Loading health data...</p>
+                <h3>Contacts</h3>
+                <div id="cd-contacts-list">
+                  <p class="empty-state">Loading contacts...</p>
                 </div>
               </div>
+            </div>
 
-              <!-- CRM Details (who they are, contact, follow-up) -->
+            <!-- Activity Tab -->
+            <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-activity">
+              <div class="portal-project-card portal-shadow">
+                <h3>Activity Timeline</h3>
+                <div id="cd-activity-list">
+                  <p class="empty-state">Loading activity...</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Projects Tab -->
+            <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-projects">
+              <div class="portal-project-card portal-shadow">
+                <h3>Projects</h3>
+                <div class="client-projects-list" id="cd-projects-list">
+                  <p class="empty-state">No projects found for this client.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Invoices Tab -->
+            <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-invoices">
+              <!-- Billing Summary -->
+              <div class="portal-project-card portal-shadow">
+                <h3>Billing Summary</h3>
+                <div class="billing-summary">
+                  <div class="meta-item">
+                    <span class="field-label">Total Invoiced</span>
+                    <span class="meta-value" id="cd-total-invoiced">$0.00</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">Total Paid</span>
+                    <span class="meta-value" id="cd-total-paid">$0.00</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">Outstanding</span>
+                    <span class="meta-value" id="cd-outstanding">$0.00</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Billing Address -->
               <div class="portal-project-card portal-shadow">
                 <div class="card-header-with-action">
-                  <h3>CRM Details</h3>
-                  <button class="icon-btn" id="cd-btn-edit-crm" title="Edit CRM Details" aria-label="Edit CRM details">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                  </button>
-                </div>
-                <div class="crm-info-grid" id="cd-crm-details">
-                  <div class="meta-item">
-                    <span class="field-label">Industry</span>
-                    <span class="meta-value" id="cd-crm-industry">-</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="field-label">Company Size</span>
-                    <span class="meta-value" id="cd-crm-company-size">-</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="field-label">Acquisition Source</span>
-                    <span class="meta-value" id="cd-crm-acquisition-source">-</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="field-label">Website</span>
-                    <span class="meta-value" id="cd-crm-website">-</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="field-label">Last Contact</span>
-                    <span class="meta-value" id="cd-crm-last-contact">-</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="field-label">Next Follow-up</span>
-                    <span class="meta-value" id="cd-crm-next-followup">-</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Billing Details -->
-              <div class="portal-project-card portal-shadow">
-                <div class="card-header-with-action">
-                  <h3>Billing Details</h3>
-                  <button class="icon-btn" id="cd-btn-edit-billing" title="Edit Billing Details" aria-label="Edit billing details">
+                  <h3>Billing Address</h3>
+                  <button class="icon-btn" id="cd-btn-edit-billing-invoices" title="Edit Billing Details" aria-label="Edit billing details">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                   </button>
                 </div>
                 <div class="billing-info-grid">
                   <div class="meta-item">
-                    <span class="field-label">Billing Name</span>
-                    <span class="meta-value" id="cd-billing-name">-</span>
+                    <span class="field-label">Name</span>
+                    <span class="meta-value" id="cd-billing-name-full">-</span>
                   </div>
                   <div class="meta-item">
-                    <span class="field-label">Billing Email</span>
-                    <span class="meta-value" id="cd-billing-email">-</span>
+                    <span class="field-label">Email</span>
+                    <span class="meta-value" id="cd-billing-email-full">-</span>
                   </div>
                   <div class="meta-item">
                     <span class="field-label">Address</span>
@@ -778,62 +1039,9 @@
                   </div>
                 </div>
               </div>
-
-              <!-- Tags (categorization) -->
+              <!-- Invoice List -->
               <div class="portal-project-card portal-shadow">
-                <div id="cd-tags-container">
-                  <p class="empty-state">Loading tags...</p>
-                </div>
-              </div>
-
-              <!-- Custom Fields (optional/extended) -->
-              <div class="portal-project-card portal-shadow">
-                <div class="card-header-with-action">
-                  <h3>Custom Fields</h3>
-                  <button class="icon-btn" id="cd-btn-edit-custom-fields" title="Edit Custom Fields" aria-label="Edit custom fields">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                  </button>
-                </div>
-                <div id="cd-custom-fields-container">
-                  <p class="empty-state">No custom fields configured.</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Contacts Tab -->
-            <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-contacts">
-              <p class="empty-state">Loading contacts...</p>
-            </div>
-
-            <!-- Activity Tab -->
-            <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-activity">
-              <p class="empty-state">Loading activity...</p>
-            </div>
-
-            <!-- Projects Tab -->
-            <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-projects">
-              <div class="client-projects-list" id="cd-projects-list">
-                <p class="empty-state">No projects found for this client.</p>
-              </div>
-            </div>
-
-            <!-- Invoices Tab -->
-            <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-invoices">
-              <div class="portal-project-card portal-shadow">
-                <div class="billing-summary">
-                  <div class="meta-item">
-                    <span class="field-label">Total Invoiced</span>
-                    <span class="meta-value" id="cd-total-invoiced">$0.00</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="field-label">Total Paid</span>
-                    <span class="meta-value" id="cd-total-paid">$0.00</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="field-label">Outstanding</span>
-                    <span class="meta-value" id="cd-outstanding">$0.00</span>
-                  </div>
-                </div>
+                <h3>Invoice History</h3>
                 <div class="client-invoices-list" id="cd-invoices-list">
                   <p class="empty-state">No invoices found for this client.</p>
                 </div>
@@ -842,25 +1050,11 @@
 
             <!-- Notes Tab -->
             <div class="client-detail-tab-content portal-tab-panel" id="cd-tab-notes">
-              <p class="empty-state">Loading notes...</p>
-            </div>
-
-            <!-- Account Actions -->
-            <div class="portal-project-card portal-shadow">
-              <h3>Account Actions</h3>
-              <div class="client-account-actions">
-                <button type="button" class="btn btn-secondary" id="cd-btn-reset-password">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                  Reset Password
-                </button>
-                <button type="button" class="btn btn-secondary" id="cd-btn-resend-invite">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
-                  Resend Invitation
-                </button>
-                <button type="button" class="btn btn-danger" id="cd-btn-delete">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                  Delete Client
-                </button>
+              <div class="portal-project-card portal-shadow">
+                <h3>Notes</h3>
+                <div id="cd-notes-list">
+                  <p class="empty-state">Loading notes...</p>
+                </div>
               </div>
             </div>
           </div>
@@ -871,38 +1065,33 @@
               <h2>Messages</h2>
             </div>
 
-            <!-- Client Selector (Custom Dropdown) -->
-            <div class="client-selector-wrapper">
-              <label for="admin-client-trigger" class="sr-only">Select a client</label>
-              <div class="custom-dropdown" id="admin-client-dropdown">
-                <button
-                  type="button"
-                  class="custom-dropdown-trigger"
-                  id="admin-client-trigger"
-                  role="combobox"
-                  aria-expanded="false"
-                  aria-haspopup="listbox"
-                  aria-label="Select a client to view messages"
-                  aria-controls="admin-client-menu"
-                >
-                  <span class="custom-dropdown-text">-- Select a client --</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="custom-dropdown-caret" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-                </button>
-                <ul
-                  class="custom-dropdown-menu"
-                  id="admin-client-menu"
-                  role="listbox"
-                  aria-label="Client list"
-                >
-                </ul>
-                <input type="hidden" id="admin-client-select" value="" aria-label="Selected client ID" />
+            <!-- Messages Layout - Split View -->
+            <div class="messages-layout portal-shadow">
+              <!-- Full-width Search Bar -->
+              <div class="messages-global-search">
+                <div class="search-bar">
+                  <span class="search-bar-icon" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  </span>
+                  <input type="text" id="messages-search-input" class="search-bar-input" placeholder="Search clients and messages..." aria-label="Search clients and messages" />
+                </div>
               </div>
-            </div>
 
-            <!-- Messages Container (like client portal) -->
-            <div class="messages-container portal-shadow">
-              <!-- Messages Header with Search -->
-              <div class="messages-header" id="messages-header">
+              <!-- Left Column: Clients List -->
+              <div class="messages-clients-column">
+                <div class="thread-list-header">
+                  <span>Clients</span>
+                </div>
+                <div class="thread-list" id="admin-thread-list" role="listbox" aria-label="Client conversations">
+                  <!-- Threads populated by JS -->
+                </div>
+              </div>
+
+              <!-- Right Column: Thread + Compose -->
+              <div class="messages-thread-column">
+                <h3 class="sr-only" id="admin-thread-header">Conversation</h3>
+
+                <!-- Pinned Messages Section -->
                 <div class="pinned-messages hidden" id="pinned-messages-section">
                   <div class="pinned-messages-header">
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M12 2L12 12M12 22L12 12M12 12L20 4M12 12L4 4"/></svg>
@@ -910,31 +1099,27 @@
                   </div>
                   <div class="pinned-message-preview" id="pinned-message-preview"></div>
                 </div>
-                <div class="messages-search search-bar">
-                  <span class="search-bar-icon" aria-hidden="true">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                  </span>
-                  <input type="text" id="messages-search-input" class="search-bar-input" placeholder="Search messages..." aria-label="Search messages" />
-                </div>
-              </div>
-              <div class="messages-thread" id="admin-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread">
-                <p class="empty-state">Select a client to view messages</p>
-              </div>
 
-              <!-- Compose Message -->
-              <div class="message-compose" id="admin-compose-area">
-                <div class="message-input-wrapper">
-                  <label for="admin-message-text" class="sr-only">Message</label>
-                  <textarea
-                    id="admin-message-text"
-                    class="form-textarea"
-                    placeholder="Select a client to send messages..."
-                    aria-label="Type your message to the client"
-                    tabindex="1"
-                    disabled
-                  ></textarea>
+                <!-- Messages Thread -->
+                <div class="messages-thread" id="admin-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread">
+                  <p class="empty-state">No conversation selected</p>
                 </div>
-                <button class="btn btn-secondary" id="admin-send-message" tabindex="2" disabled>Send Message</button>
+
+                <!-- Compose Message -->
+                <div class="message-compose" id="admin-compose-area">
+                  <div class="message-input-wrapper">
+                    <label for="admin-message-text" class="sr-only">Message</label>
+                    <textarea
+                      id="admin-message-text"
+                      class="form-textarea"
+                      placeholder="Type a message..."
+                      aria-label="Type your message to the client"
+                      tabindex="0"
+                      disabled
+                    ></textarea>
+                  </div>
+                  <button class="btn btn-secondary" id="admin-send-message" tabindex="0" disabled>Send Message</button>
+                </div>
               </div>
             </div>
           </div>
@@ -945,8 +1130,19 @@
               <h2>Analytics</h2>
             </div>
 
-            <!-- Business KPI Cards -->
-            <div class="kpi-cards-row" id="business-kpi-section">
+            <!-- Analytics Sub-Tabs -->
+            <div class="analytics-subtabs">
+              <button type="button" class="analytics-subtab active" data-subtab="overview">Overview</button>
+              <button type="button" class="analytics-subtab" data-subtab="business">Business</button>
+              <button type="button" class="analytics-subtab" data-subtab="visitors">Visitors</button>
+              <button type="button" class="analytics-subtab" data-subtab="reports">Reports & Alerts</button>
+            </div>
+
+            <!-- Overview Sub-Tab -->
+            <div class="analytics-subtab-content active" id="analytics-subtab-overview">
+              <h3 class="tab-section-heading">Overview</h3>
+              <!-- Business KPI Cards -->
+              <div class="kpi-cards-row" id="business-kpi-section">
               <div class="kpi-card portal-shadow" id="kpi-revenue">
                 <div class="kpi-card-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
@@ -1001,25 +1197,6 @@
               </div>
             </div>
 
-            <!-- Quick Stats Section -->
-            <div class="analytics-section-header">
-              <h3>Business Metrics</h3>
-            </div>
-            <div class="business-charts-grid">
-              <div class="chart-container portal-shadow">
-                <h3>Revenue by Month</h3>
-                <div class="chart" id="revenue-chart-container">
-                  <canvas id="revenue-chart"></canvas>
-                </div>
-              </div>
-              <div class="chart-container portal-shadow">
-                <h3>Project Status</h3>
-                <div class="chart" id="project-status-chart-container">
-                  <canvas id="project-status-chart"></canvas>
-                </div>
-              </div>
-            </div>
-
             <!-- Lead Funnel -->
             <div class="analytics-section portal-shadow" id="lead-funnel-section">
               <h3>Lead Conversion Funnel</h3>
@@ -1062,235 +1239,490 @@
                 <span class="funnel-stat" id="funnel-avg-value">Avg Deal Value: -</span>
               </div>
             </div>
+            </div><!-- End Overview Sub-Tab -->
 
-            <!-- Saved Reports Section -->
-            <div class="analytics-section portal-shadow" id="saved-reports-section">
-              <div class="section-header-with-actions">
-                <h3>Saved Reports</h3>
-                <button class="btn btn-secondary btn-sm" id="create-report-btn">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                  New Report
-                </button>
-              </div>
-              <div class="reports-list" id="saved-reports-list">
-                <div class="loading-text">Loading reports...</div>
-              </div>
-            </div>
-
-            <!-- Scheduled Reports Section -->
-            <div class="analytics-section portal-shadow" id="scheduled-reports-section">
-              <div class="section-header-with-actions">
-                <h3>Scheduled Reports</h3>
-              </div>
-              <div class="reports-list" id="scheduled-reports-list">
-                <div class="loading-text">Loading scheduled reports...</div>
-              </div>
-            </div>
-
-            <!-- Metric Alerts Section -->
-            <div class="analytics-section portal-shadow" id="metric-alerts-section">
-              <div class="section-header-with-actions">
-                <h3>Metric Alerts</h3>
-                <button class="btn btn-secondary btn-sm" id="create-alert-btn">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                  New Alert
-                </button>
-              </div>
-              <div class="alerts-list" id="metric-alerts-list">
-                <div class="loading-text">Loading alerts...</div>
-              </div>
-            </div>
-
-            <!-- Visitor Analytics: clear breakdown (portfolio vs client portal) -->
-            <div class="analytics-section-header">
-              <h3>Visitor Analytics</h3>
-              <p class="analytics-breakdown-intro">Breakdown by site</p>
-            </div>
-            <div class="analytics-breakdown">
-              <div class="analytics-breakdown-block">
-                <h4 class="analytics-breakdown-title">Main portfolio site</h4>
-                <div class="quick-stats analytics-breakdown-stats">
-                  <div class="stat-card portal-shadow">
-                    <span class="stat-number" id="analytics-portfolio-visitors">-</span>
-                    <span class="stat-label">Total Visitors</span>
+            <!-- Business Sub-Tab -->
+            <div class="analytics-subtab-content" id="analytics-subtab-business">
+              <h3 class="tab-section-heading">Business</h3>
+              <div class="business-charts-grid">
+                <div class="chart-container portal-shadow">
+                  <h3>Revenue by Month</h3>
+                  <div class="chart" id="revenue-chart-container">
+                    <canvas id="revenue-chart"></canvas>
                   </div>
-                  <div class="stat-card portal-shadow">
-                    <span class="stat-number" id="analytics-portfolio-pageviews">-</span>
-                    <span class="stat-label">Page Views</span>
-                  </div>
-                  <div class="stat-card portal-shadow">
-                    <span class="stat-number" id="analytics-portfolio-sessions">-</span>
-                    <span class="stat-label">Avg. Session</span>
+                </div>
+                <div class="chart-container portal-shadow">
+                  <h3>Project Status</h3>
+                  <div class="chart" id="project-status-chart-container">
+                    <canvas id="project-status-chart"></canvas>
                   </div>
                 </div>
               </div>
-              <div class="analytics-breakdown-block">
-                <h4 class="analytics-breakdown-title">THE BACKEND (client portal)</h4>
-                <div class="quick-stats analytics-breakdown-stats">
-                  <div class="stat-card portal-shadow">
-                    <span class="stat-number" id="analytics-backend-visitors">-</span>
-                    <span class="stat-label">Total Visitors</span>
+            </div><!-- End Business Sub-Tab -->
+
+            <!-- Visitors Sub-Tab -->
+            <div class="analytics-subtab-content" id="analytics-subtab-visitors">
+              <h3 class="tab-section-heading">Visitors</h3>
+              <!-- Site Breakdown -->
+              <div class="analytics-breakdown">
+                <div class="analytics-breakdown-block">
+                  <h4 class="analytics-breakdown-title">Main portfolio site</h4>
+                  <div class="quick-stats analytics-breakdown-stats">
+                    <div class="stat-card portal-shadow">
+                      <span class="stat-number" id="analytics-portfolio-visitors">-</span>
+                      <span class="stat-label">Total Visitors</span>
+                    </div>
+                    <div class="stat-card portal-shadow">
+                      <span class="stat-number" id="analytics-portfolio-pageviews">-</span>
+                      <span class="stat-label">Page Views</span>
+                    </div>
+                    <div class="stat-card portal-shadow">
+                      <span class="stat-number" id="analytics-portfolio-sessions">-</span>
+                      <span class="stat-label">Avg. Session</span>
+                    </div>
                   </div>
-                  <div class="stat-card portal-shadow">
-                    <span class="stat-number" id="analytics-backend-pageviews">-</span>
-                    <span class="stat-label">Page Views</span>
+                </div>
+                <div class="analytics-breakdown-block">
+                  <h4 class="analytics-breakdown-title">THE BACKEND (client portal)</h4>
+                  <div class="quick-stats analytics-breakdown-stats">
+                    <div class="stat-card portal-shadow">
+                      <span class="stat-number" id="analytics-backend-visitors">-</span>
+                      <span class="stat-label">Total Visitors</span>
+                    </div>
+                    <div class="stat-card portal-shadow">
+                      <span class="stat-number" id="analytics-backend-pageviews">-</span>
+                      <span class="stat-label">Page Views</span>
+                    </div>
+                    <div class="stat-card portal-shadow">
+                      <span class="stat-number" id="analytics-backend-sessions">-</span>
+                      <span class="stat-label">Avg. Session</span>
+                    </div>
                   </div>
-                  <div class="stat-card portal-shadow">
-                    <span class="stat-number" id="analytics-backend-sessions">-</span>
-                    <span class="stat-label">Avg. Session</span>
+                </div>
+              </div>
+              <!-- Legacy IDs for dashboard visitor-stats -->
+              <div class="sr-only" aria-hidden="true">
+                <span id="analytics-visitors">-</span>
+                <span id="analytics-pageviews">-</span>
+                <span id="analytics-sessions">-</span>
+              </div>
+
+              <!-- Visitor Charts -->
+              <div class="charts-grid">
+                <div class="chart-container portal-shadow">
+                  <h3>Visitors Over Time</h3>
+                  <div class="chart">
+                    <canvas id="visitors-chart"></canvas>
+                  </div>
+                </div>
+                <div class="chart-container portal-shadow">
+                  <h3>Traffic Sources</h3>
+                  <div class="chart">
+                    <canvas id="sources-chart"></canvas>
                   </div>
                 </div>
               </div>
-            </div>
-            <!-- Legacy IDs for dashboard visitor-stats (updated by admin-dashboard; analytics module uses breakdown IDs above) -->
-            <div class="sr-only" aria-hidden="true">
-              <span id="analytics-visitors">-</span>
-              <span id="analytics-pageviews">-</span>
-              <span id="analytics-sessions">-</span>
-            </div>
 
-            <!-- Charts Section -->
-            <div class="charts-grid">
-              <div class="chart-container portal-shadow">
-                <h3>Visitors Over Time</h3>
-                <div class="chart">
-                  <canvas id="visitors-chart"></canvas>
+              <!-- Analytics Data Grid -->
+              <div class="analytics-grid">
+                <div class="analytics-section portal-shadow">
+                  <h3>Popular Pages</h3>
+                  <div class="data-list" id="popular-pages">
+                    <div class="data-item"><span class="data-label">Loading...</span></div>
+                  </div>
+                </div>
+                <div class="analytics-section portal-shadow">
+                  <h3>Device Breakdown</h3>
+                  <div class="data-list" id="device-breakdown">
+                    <div class="data-item"><span class="data-label">Loading...</span></div>
+                  </div>
+                </div>
+                <div class="analytics-section portal-shadow">
+                  <h3>Geographic Distribution</h3>
+                  <div class="data-list" id="geo-distribution">
+                    <div class="data-item"><span class="data-label">Loading...</span></div>
+                  </div>
+                </div>
+                <div class="analytics-section portal-shadow">
+                  <h3>Engagement Events</h3>
+                  <div class="data-list" id="engagement-events">
+                    <div class="data-item"><span class="data-label">Loading...</span></div>
+                  </div>
                 </div>
               </div>
-              <div class="chart-container portal-shadow">
-                <h3>Traffic Sources</h3>
-                <div class="chart">
-                  <canvas id="sources-chart"></canvas>
-                </div>
-              </div>
-            </div>
 
-            <!-- Analytics Data Grid -->
-            <div class="analytics-grid">
-              <div class="analytics-section portal-shadow">
-                <h3>Popular Pages</h3>
-                <div class="data-list" id="popular-pages">
-                  <div class="data-item"><span class="data-label">Loading...</span></div>
+              <!-- Visitors Table -->
+              <div class="visitors-dashboard">
+                <div class="admin-table-container visitors-table-container portal-shadow">
+                  <div class="admin-table-scroll-wrapper">
+                  <table class="admin-table visitors-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Session ID</th>
+                        <th scope="col">Started</th>
+                        <th scope="col">Duration</th>
+                        <th scope="col">Pages</th>
+                        <th scope="col">Device</th>
+                        <th scope="col">Location</th>
+                      </tr>
+                    </thead>
+                    <tbody id="visitors-table-body">
+                      <tr>
+                        <td colspan="6" class="loading-row">Loading visitor data...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  </div>
                 </div>
               </div>
-              <div class="analytics-section portal-shadow">
-                <h3>Device Breakdown</h3>
-                <div class="data-list" id="device-breakdown">
-                  <div class="data-item"><span class="data-label">Loading...</span></div>
-                </div>
-              </div>
-              <div class="analytics-section portal-shadow">
-                <h3>Geographic Distribution</h3>
-                <div class="data-list" id="geo-distribution">
-                  <div class="data-item"><span class="data-label">Loading...</span></div>
-                </div>
-              </div>
-              <div class="analytics-section portal-shadow">
-                <h3>Engagement Events</h3>
-                <div class="data-list" id="engagement-events">
-                  <div class="data-item"><span class="data-label">Loading...</span></div>
-                </div>
-              </div>
-            </div>
+            </div><!-- End Visitors Sub-Tab -->
 
-            <!-- Performance Metrics -->
-            <div class="metric-group portal-shadow">
-              <h3>Core Web Vitals</h3>
-              <div class="vitals-grid">
-                <div class="vital-card">
-                  <h4>LCP <span class="info-icon-wrapper" data-tooltip="Largest Contentful Paint - Time until the largest visible element loads.&#10;&#10;Good: <2.5s&#10;Needs Improvement: 2.5-4s&#10;Poor: >4s"><svg class="info-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></span></h4>
-                  <div class="vital-value" id="lcp-value">-</div>
-                  <span class="vital-status" id="lcp-status">-</span>
+            <!-- Reports & Alerts Sub-Tab -->
+            <div class="analytics-subtab-content" id="analytics-subtab-reports">
+              <h3 class="tab-section-heading">Reports & Alerts</h3>
+              <!-- Saved Reports Section -->
+              <div class="analytics-section portal-shadow" id="saved-reports-section">
+                <div class="section-header-with-actions">
+                  <h3>Saved Reports</h3>
+                  <button type="button" class="icon-btn" id="create-report-btn" title="New report" aria-label="Create new report">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+                  </button>
                 </div>
-                <div class="vital-card">
-                  <h4>FID <span class="info-icon-wrapper" data-tooltip="First Input Delay - Time from first interaction to browser response.&#10;&#10;Good: <100ms&#10;Needs Improvement: 100-300ms&#10;Poor: >300ms"><svg class="info-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></span></h4>
-                  <div class="vital-value" id="fid-value">-</div>
-                  <span class="vital-status" id="fid-status">-</span>
-                </div>
-                <div class="vital-card">
-                  <h4>CLS <span class="info-icon-wrapper" data-tooltip="Cumulative Layout Shift - Visual stability score measuring unexpected layout shifts.&#10;&#10;Good: <0.1&#10;Needs Improvement: 0.1-0.25&#10;Poor: >0.25"><svg class="info-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></span></h4>
-                  <div class="vital-value" id="cls-value">-</div>
-                  <span class="vital-status" id="cls-status">-</span>
-                </div>
-                <div class="vital-card">
-                  <h4>TTFB <span class="info-icon-wrapper" data-tooltip="Time to First Byte - Server response time.&#10;&#10;Good: <800ms&#10;Needs Improvement: 800-1800ms&#10;Poor: >1800ms"><svg class="info-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></span></h4>
-                  <div class="vital-value" id="ttfb-value">-</div>
-                  <span class="vital-status" id="ttfb-status">-</span>
+                <div class="reports-list" id="saved-reports-list">
+                  <div class="loading-text">Loading reports...</div>
                 </div>
               </div>
-            </div>
 
-            <!-- Bundle Analysis -->
-            <div class="metric-group portal-shadow">
-              <h3>Bundle Analysis</h3>
-              <div class="bundle-info">
-                <div class="bundle-item">
-                  <span>Total Bundle Size</span>
-                  <span id="total-bundle-size">-</span>
+              <!-- Scheduled Reports Section -->
+              <div class="analytics-section portal-shadow" id="scheduled-reports-section">
+                <div class="section-header-with-actions">
+                  <h3>Scheduled Reports</h3>
                 </div>
-                <div class="bundle-item">
-                  <span>Main JS</span>
-                  <span id="js-bundle-size">-</span>
-                </div>
-                <div class="bundle-item">
-                  <span>Vendor JS</span>
-                  <span id="css-bundle-size">-</span>
-                </div>
-                <div class="bundle-item">
-                  <span>Performance Score</span>
-                  <span id="performance-score">-</span>
+                <div class="reports-list" id="scheduled-reports-list">
+                  <div class="loading-text">Loading scheduled reports...</div>
                 </div>
               </div>
-            </div>
 
-            <!-- Visitors Table -->
-            <div class="visitors-dashboard">
-              <div class="admin-table-container visitors-table-container portal-shadow">
-                <table class="admin-table visitors-table">
+              <!-- Metric Alerts Section -->
+              <div class="analytics-section portal-shadow" id="metric-alerts-section">
+                <div class="section-header-with-actions">
+                  <h3>Metric Alerts</h3>
+                  <button type="button" class="icon-btn" id="create-alert-btn" title="New alert" aria-label="Create new metric alert">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+                  </button>
+                </div>
+                <div class="alerts-list" id="metric-alerts-list">
+                  <div class="loading-text">Loading alerts...</div>
+                </div>
+              </div>
+
+              <!-- Performance Metrics -->
+              <div class="metric-group portal-shadow">
+                <h3>Core Web Vitals</h3>
+                <div class="vitals-grid">
+                  <div class="vital-card">
+                    <h4>LCP <span class="info-icon-wrapper" data-tooltip="Largest Contentful Paint - Time until the largest visible element loads.&#10;&#10;Good: <2.5s&#10;Needs Improvement: 2.5-4s&#10;Poor: >4s"><svg class="info-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></span></h4>
+                    <div class="vital-value" id="lcp-value">-</div>
+                    <span class="vital-status" id="lcp-status">-</span>
+                  </div>
+                  <div class="vital-card">
+                    <h4>FID <span class="info-icon-wrapper" data-tooltip="First Input Delay - Time from first interaction to browser response.&#10;&#10;Good: <100ms&#10;Needs Improvement: 100-300ms&#10;Poor: >300ms"><svg class="info-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></span></h4>
+                    <div class="vital-value" id="fid-value">-</div>
+                    <span class="vital-status" id="fid-status">-</span>
+                  </div>
+                  <div class="vital-card">
+                    <h4>CLS <span class="info-icon-wrapper" data-tooltip="Cumulative Layout Shift - Visual stability score measuring unexpected layout shifts.&#10;&#10;Good: <0.1&#10;Needs Improvement: 0.1-0.25&#10;Poor: >0.25"><svg class="info-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></span></h4>
+                    <div class="vital-value" id="cls-value">-</div>
+                    <span class="vital-status" id="cls-status">-</span>
+                  </div>
+                  <div class="vital-card">
+                    <h4>TTFB <span class="info-icon-wrapper" data-tooltip="Time to First Byte - Server response time.&#10;&#10;Good: <800ms&#10;Needs Improvement: 800-1800ms&#10;Poor: >1800ms"><svg class="info-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></span></h4>
+                    <div class="vital-value" id="ttfb-value">-</div>
+                    <span class="vital-status" id="ttfb-status">-</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bundle Analysis -->
+              <div class="metric-group portal-shadow">
+                <h3>Bundle Analysis</h3>
+                <div class="bundle-info">
+                  <div class="bundle-item">
+                    <span>Total Bundle Size</span>
+                    <span id="total-bundle-size">-</span>
+                  </div>
+                  <div class="bundle-item">
+                    <span>Main JS</span>
+                    <span id="js-bundle-size">-</span>
+                  </div>
+                  <div class="bundle-item">
+                    <span>Vendor JS</span>
+                    <span id="css-bundle-size">-</span>
+                  </div>
+                  <div class="bundle-item">
+                    <span>Performance Score</span>
+                    <span id="performance-score">-</span>
+                  </div>
+                </div>
+              </div>
+            </div><!-- End Reports & Alerts Sub-Tab -->
+
+          </div><!-- End Analytics Tab -->
+
+          <!-- Document Requests Tab -->
+          <div class="tab-content" id="tab-document-requests">
+            <div class="page-title">
+              <h2>Document Requests</h2>
+            </div>
+            <div class="admin-table-card portal-shadow">
+              <div class="admin-table-header">
+                <h3>Requests</h3>
+                <div class="admin-table-actions">
+                  <div id="dr-filter-mount"></div>
+                  <div id="dr-search-mount"></div>
+                  <button type="button" class="icon-btn" id="dr-export" title="Export to CSV" aria-label="Export to CSV">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+                  </button>
+                  <button type="button" class="icon-btn" id="dr-add-request" title="Add request" aria-label="Add request">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+                  </button>
+                  <button type="button" class="icon-btn" id="dr-from-templates" title="From templates" aria-label="From templates">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="M9 15h6"/></svg></span>
+                  </button>
+                  <button type="button" class="icon-btn" id="dr-refresh" title="Refresh" aria-label="Refresh">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg></span>
+                  </button>
+                </div>
+              </div>
+              <div id="dr-bulk-toolbar" class="bulk-action-toolbar"></div>
+              <div class="admin-table-container">
+                <div class="admin-table-scroll-wrapper">
+                <table class="admin-table" aria-label="Document requests">
                   <thead>
                     <tr>
-                      <th scope="col">Session ID</th>
-                      <th scope="col">Started</th>
-                      <th scope="col">Duration</th>
-                      <th scope="col">Pages</th>
-                      <th scope="col">Device</th>
-                      <th scope="col">Location</th>
+                      <th scope="col" class="bulk-select-cell">
+                        <div class="portal-checkbox">
+                          <input type="checkbox" id="document-requests-select-all" class="bulk-select-all" aria-label="Select all document requests" />
+                        </div>
+                      </th>
+                      <th scope="col">Title</th>
+                      <th scope="col">Client</th>
+                      <th scope="col">Type</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Due</th>
+                      <th scope="col">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="visitors-table-body">
-                    <tr>
-                      <td colspan="6" class="loading-row">Loading visitor data...</td>
-                    </tr>
-                  </tbody>
+                  <tbody id="dr-tbody"></tbody>
                 </table>
+                </div>
+              </div>
+            </div>
+            <div id="dr-create-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="dr-create-modal-title" style="display: none;">
+              <div class="modal-content portal-shadow">
+                <div class="modal-header">
+                  <h2 id="dr-create-modal-title">Create Document Request</h2>
+                  <button type="button" class="modal-close" id="dr-create-modal-close" aria-label="Close">&times;</button>
+                </div>
+                <form id="dr-create-form" class="modal-body">
+                  <div class="form-group">
+                    <label for="dr-create-client">Client</label>
+                    <div id="dr-create-client-mount"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="dr-create-title">Title</label>
+                    <input type="text" id="dr-create-title" class="form-input" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="dr-create-description">Description</label>
+                    <textarea id="dr-create-description" class="form-input" rows="3"></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="dr-create-due">Due date</label>
+                    <input type="date" id="dr-create-due" class="form-input" />
+                  </div>
+                </form>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" id="dr-create-cancel">CANCEL</button>
+                  <button type="submit" form="dr-create-form" class="btn btn-primary">CREATE</button>
+                </div>
+              </div>
+            </div>
+            <div id="dr-from-templates-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="dr-templates-modal-title" style="display: none;">
+              <div class="modal-content portal-shadow">
+                <div class="modal-header">
+                  <h2 id="dr-templates-modal-title">Create Requests from Templates</h2>
+                  <button type="button" class="modal-close" id="dr-templates-modal-close" aria-label="Close">&times;</button>
+                </div>
+                <form id="dr-from-templates-form" class="modal-body">
+                  <div class="form-group">
+                    <label for="dr-templates-client">Client</label>
+                    <div id="dr-templates-client-mount"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="dr-templates-list">Templates</label>
+                    <div id="dr-templates-list" class="dr-templates-checkboxes" aria-label="Select templates"></div>
+                  </div>
+                </form>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" id="dr-templates-cancel">CANCEL</button>
+                  <button type="submit" form="dr-from-templates-form" class="btn btn-primary">CREATE REQUESTS</button>
+                </div>
+              </div>
+            </div>
+            <div id="dr-detail-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="dr-detail-modal-title" style="display: none;">
+              <div class="modal-content portal-shadow modal-content--wide">
+                <div class="modal-header">
+                  <h2 id="dr-detail-modal-title">Document Request</h2>
+                  <button type="button" class="modal-close" id="dr-detail-modal-close" aria-label="Close">&times;</button>
+                </div>
+                <div id="dr-detail-body" class="modal-body"></div>
+                <div id="dr-detail-footer" class="modal-footer"></div>
               </div>
             </div>
           </div>
 
-          <!-- System Tab -->
+          <!-- Knowledge Base Tab -->
+          <div class="tab-content" id="tab-knowledge-base">
+            <div class="page-title">
+              <h2>Knowledge Base</h2>
+            </div>
+            <div class="admin-table-card portal-shadow">
+              <div class="admin-table-header">
+                <h3>Categories</h3>
+                <div class="admin-table-actions">
+                  <button type="button" class="icon-btn" id="kb-add-category" title="Add category" aria-label="Add category">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+                  </button>
+                  <button type="button" class="icon-btn" id="kb-refresh-categories" title="Refresh categories" aria-label="Refresh categories">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg></span>
+                  </button>
+                </div>
+              </div>
+              <div class="admin-table-container">
+                <div class="admin-table-scroll-wrapper">
+                <table class="admin-table" aria-label="Knowledge base categories">
+                  <thead>
+                    <tr>
+                      <th scope="col">Name</th>
+                      <th scope="col">Slug</th>
+                      <th scope="col">Articles</th>
+                      <th scope="col">Active</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="kb-categories-tbody"></tbody>
+                </table>
+                </div>
+              </div>
+            </div>
+            <div class="admin-table-card portal-shadow">
+              <div class="admin-table-header">
+                <h3>Articles</h3>
+                <div class="admin-table-actions">
+                  <div id="kb-articles-filter-mount"></div>
+                  <div id="kb-search-mount"></div>
+                  <button type="button" class="icon-btn" id="kb-export" title="Export to CSV" aria-label="Export articles to CSV">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+                  </button>
+                  <button type="button" class="icon-btn" id="kb-add-article" title="Add article" aria-label="Add article">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+                  </button>
+                  <button type="button" class="icon-btn" id="kb-refresh-articles" title="Refresh articles" aria-label="Refresh articles">
+                    <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg></span>
+                  </button>
+                </div>
+              </div>
+              <div class="admin-table-container">
+                <div class="admin-table-scroll-wrapper">
+                <table class="admin-table" aria-label="Knowledge base articles">
+                  <thead>
+                    <tr>
+                      <th scope="col">Title</th>
+                      <th scope="col">Category</th>
+                      <th scope="col">Slug</th>
+                      <th scope="col">Featured</th>
+                      <th scope="col">Published</th>
+                      <th scope="col">Updated</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="kb-articles-tbody"></tbody>
+                </table>
+                </div>
+              </div>
+            </div>
+            <!-- KB category and article modals are created by createPortalModal in admin-knowledge-base.ts -->
+          </div>
+
+          <!-- System Status Tab -->
           <div class="tab-content" id="tab-system">
             <div class="page-title">
-              <h2>System</h2>
+              <h2>System Status</h2>
             </div>
 
-            <!-- Module Status -->
+            <!-- Health Check -->
             <div class="portal-project-card portal-shadow">
-              <h3>Module Status</h3>
-              <div class="status-list" id="modules-status">
-                <p class="loading-text">Loading module status...</p>
+              <div class="section-header-with-actions">
+                <h3>Health Check</h3>
+                <button type="button" class="icon-btn" id="btn-refresh-health" title="Refresh health status" aria-label="Refresh health status">
+                  <span class="icon-btn-svg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg></span>
+                </button>
+              </div>
+              <div class="health-check-grid" id="health-check-status">
+                <div class="health-item">
+                  <span class="health-indicator health-loading" id="health-database"></span>
+                  <span class="health-label">Database</span>
+                  <span class="health-status" id="health-database-status">Checking...</span>
+                </div>
+                <div class="health-item">
+                  <span class="health-indicator health-loading" id="health-email"></span>
+                  <span class="health-label">Email Service</span>
+                  <span class="health-status" id="health-email-status">Checking...</span>
+                </div>
+                <div class="health-item">
+                  <span class="health-indicator health-loading" id="health-storage"></span>
+                  <span class="health-label">File Storage</span>
+                  <span class="health-status" id="health-storage-status">Checking...</span>
+                </div>
+                <div class="health-item">
+                  <span class="health-indicator health-loading" id="health-scheduler"></span>
+                  <span class="health-label">Scheduler</span>
+                  <span class="health-status" id="health-scheduler-status">Checking...</span>
+                </div>
               </div>
             </div>
 
-            <!-- Service Status -->
+            <!-- Quick Actions -->
             <div class="portal-project-card portal-shadow">
-              <h3>Service Status</h3>
-              <div class="status-list" id="services-status">
-                <p class="loading-text">Loading service status...</p>
+              <h3>Quick Actions</h3>
+              <div class="quick-actions-grid">
+                <button type="button" class="btn btn-secondary" id="btn-clear-cache" title="Clear application cache">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                  Clear Cache
+                </button>
+                <button type="button" class="btn btn-secondary" id="btn-test-email" title="Send test email">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                  Test Email
+                </button>
+                <button type="button" class="btn btn-secondary" id="btn-run-scheduler" title="Force run scheduled tasks">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  Run Scheduler
+                </button>
               </div>
             </div>
 
+            <!-- Recent Errors -->
             <div class="portal-project-card portal-shadow">
-              <h3>Build Information</h3>
+              <h3>Recent Errors</h3>
+              <div class="recent-errors-list" id="recent-errors-list">
+                <p class="empty-state-text">No recent errors</p>
+              </div>
+            </div>
+
+            <!-- Build Information -->
+            <details class="portal-project-card portal-shadow system-details">
+              <summary><h3>Build Information</h3></summary>
               <div class="system-info-grid">
                 <div class="system-info-row">
                   <span>Version</span>
@@ -1305,10 +1737,11 @@
                   <span id="sys-build-date">-</span>
                 </div>
               </div>
-            </div>
+            </details>
 
-            <div class="portal-project-card portal-shadow">
-              <h3>Browser Information</h3>
+            <!-- Browser Information -->
+            <details class="portal-project-card portal-shadow system-details">
+              <summary><h3>Browser Information</h3></summary>
               <div class="system-info-grid">
                 <div class="system-info-row">
                   <span>User Agent</span>
@@ -1323,105 +1756,47 @@
                   <span id="sys-viewport">-</span>
                 </div>
               </div>
+            </details>
+
+            <!-- Legacy Module/Service Status (hidden, for backwards compat) -->
+            <div class="sr-only" aria-hidden="true">
+              <div id="modules-status"></div>
+              <div id="services-status"></div>
             </div>
           </div>
 
           <!-- Project Detail View (mirrors client portal view) -->
           <div class="tab-content" id="tab-project-detail">
-            <div class="page-title page-title-with-badge">
-              <h2 id="project-detail-title">Project Details</h2>
-              <span class="status-badge" id="pd-status">-</span>
-            </div>
-
-            <!-- Project Overview Card -->
-            <div class="project-detail-overview portal-shadow">
-              <div class="overview-header">
-                <h3 id="pd-project-name">Project Name</h3>
-                <button class="icon-btn" id="btn-edit-project" title="Edit Project" aria-label="Edit project">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                </button>
+            <!-- Detail Header: Name + Status + Actions -->
+            <div class="detail-title-row">
+              <div class="detail-title-group">
+                <h2 class="detail-title" id="pd-project-name">Project Name</h2>
+                <span class="status-badge" id="pd-status">-</span>
               </div>
-              <!-- Client Info -->
-              <div class="project-detail-client-row">
-                <div class="meta-item clickable-client" id="pd-client-link">
-                  <span class="field-label">Client</span>
-                  <span class="meta-value" id="pd-client-name">-</span>
-                </div>
-                <div class="meta-item clickable-client" id="pd-company-link">
-                  <span class="field-label">Company</span>
-                  <span class="meta-value" id="pd-company">-</span>
-                </div>
-                <div class="meta-item clickable-client" id="pd-email-link">
-                  <span class="field-label">Email</span>
-                  <span class="meta-value" id="pd-client-email">-</span>
-                </div>
-              </div>
-
-              <!-- Project Timeline & Type -->
-              <div class="project-detail-meta">
-                <div class="meta-item">
-                  <span class="field-label">Project Type</span>
-                  <span class="meta-value" id="pd-type">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Timeline</span>
-                  <span class="meta-value" id="pd-timeline">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Start Date</span>
-                  <span class="meta-value" id="pd-start-date">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Target End</span>
-                  <span class="meta-value" id="pd-end-date">-</span>
-                </div>
-              </div>
-
-              <!-- Project Description -->
-              <div class="project-description-row" id="pd-notes">
-                <div class="meta-item description-item">
-                  <span class="field-label">Project Description</span>
-                  <span class="meta-value" id="pd-description">-</span>
-                </div>
-              </div>
-
-              <!-- Financial Info -->
-              <div class="project-detail-meta">
-                <div class="meta-item">
-                  <span class="field-label">Budget</span>
-                  <span class="meta-value" id="pd-budget">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Quoted Price</span>
-                  <span class="meta-value" id="pd-price">-</span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Deposit</span>
-                  <span class="meta-value" id="pd-deposit">-</span>
-                </div>
-              </div>
-
-              <!-- Project URLs -->
-              <div class="project-detail-meta project-urls-row" id="pd-urls-section">
-                <div class="meta-item">
-                  <span class="field-label">Preview URL</span>
-                  <span class="meta-value"><a href="#" id="pd-preview-url-link" target="_blank" rel="noopener noreferrer" class="url-link"><span class="url-link-text">-</span><svg class="url-link-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Repository</span>
-                  <span class="meta-value"><a href="#" id="pd-repo-url-link" target="_blank" rel="noopener noreferrer" class="url-link"><span class="url-link-text">-</span><svg class="url-link-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></span>
-                </div>
-                <div class="meta-item">
-                  <span class="field-label">Production</span>
-                  <span class="meta-value"><a href="#" id="pd-production-url-link" target="_blank" rel="noopener noreferrer" class="url-link"><span class="url-link-text">-</span><svg class="url-link-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></span>
-                </div>
-              </div>
-
-              <!-- Admin Notes (Internal) -->
-              <div class="project-description-row" id="pd-admin-notes-section" style="display: none;">
-                <div class="meta-item description-item">
-                  <span class="field-label">Admin Notes (Internal)</span>
-                  <span class="meta-value" id="pd-admin-notes">-</span>
+              <div class="detail-actions">
+                <div class="table-dropdown detail-more-menu" id="pd-more-menu">
+                  <button type="button" class="custom-dropdown-trigger" aria-label="More actions">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                  </button>
+                  <ul class="custom-dropdown-menu">
+                    <li class="custom-dropdown-item" data-action="edit">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                      Edit Project
+                    </li>
+                    <li class="custom-dropdown-item" data-action="duplicate">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                      Duplicate Project
+                    </li>
+                    <li class="custom-dropdown-item" data-action="archive">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>
+                      Archive Project
+                    </li>
+                    <li class="dropdown-divider"></li>
+                    <li class="custom-dropdown-item danger" data-action="delete">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                      Delete Project
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -1459,6 +1834,96 @@
 
             <!-- Overview Sub-Tab -->
             <div class="portal-tab-panel active" id="pd-tab-overview">
+              <!-- Project Overview Card -->
+              <div class="project-detail-overview portal-shadow">
+                <div class="overview-header">
+                  <h3 id="pd-project-name-card">Project Name</h3>
+                </div>
+                <!-- Client Info -->
+                <div class="project-detail-client-row">
+                  <div class="meta-item clickable-client" id="pd-client-link">
+                    <span class="field-label">Client</span>
+                    <span class="meta-value" id="pd-client-name">-</span>
+                  </div>
+                  <div class="meta-item clickable-client" id="pd-company-link">
+                    <span class="field-label">Company</span>
+                    <span class="meta-value" id="pd-company">-</span>
+                  </div>
+                  <div class="meta-item clickable-client" id="pd-email-link">
+                    <span class="field-label">Email</span>
+                    <span class="meta-value" id="pd-client-email">-</span>
+                  </div>
+                </div>
+
+                <!-- Project Timeline & Type -->
+                <div class="project-detail-meta">
+                  <div class="meta-item">
+                    <span class="field-label">Project Type</span>
+                    <span class="meta-value" id="pd-type">-</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">Timeline</span>
+                    <span class="meta-value" id="pd-timeline">-</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">Start Date</span>
+                    <span class="meta-value" id="pd-start-date">-</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">Target End</span>
+                    <span class="meta-value" id="pd-end-date">-</span>
+                  </div>
+                </div>
+
+                <!-- Project Description -->
+                <div class="project-description-row" id="pd-notes">
+                  <div class="meta-item description-item">
+                    <span class="field-label">Project Description</span>
+                    <span class="meta-value" id="pd-description">-</span>
+                  </div>
+                </div>
+
+                <!-- Financial Info -->
+                <div class="project-detail-meta">
+                  <div class="meta-item">
+                    <span class="field-label">Budget</span>
+                    <span class="meta-value" id="pd-budget">-</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">Quoted Price</span>
+                    <span class="meta-value" id="pd-price">-</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">Deposit</span>
+                    <span class="meta-value" id="pd-deposit">-</span>
+                  </div>
+                </div>
+
+                <!-- Project URLs -->
+                <div class="project-detail-meta project-urls-row" id="pd-urls-section">
+                  <div class="meta-item">
+                    <span class="field-label">Preview URL</span>
+                    <span class="meta-value"><a href="#" id="pd-preview-url-link" target="_blank" rel="noopener noreferrer" class="url-link"><span class="url-link-text">-</span><svg class="url-link-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">Repository</span>
+                    <span class="meta-value"><a href="#" id="pd-repo-url-link" target="_blank" rel="noopener noreferrer" class="url-link"><span class="url-link-text">-</span><svg class="url-link-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="field-label">Production</span>
+                    <span class="meta-value"><a href="#" id="pd-production-url-link" target="_blank" rel="noopener noreferrer" class="url-link"><span class="url-link-text">-</span><svg class="url-link-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></span>
+                  </div>
+                </div>
+
+                <!-- Admin Notes (Internal) -->
+                <div class="project-description-row" id="pd-admin-notes-section" style="display: none;">
+                  <div class="meta-item description-item">
+                    <span class="field-label">Admin Notes (Internal)</span>
+                    <span class="meta-value" id="pd-admin-notes">-</span>
+                  </div>
+                </div>
+              </div>
+
               <!-- Progress Section -->
               <div class="portal-project-card portal-shadow">
                 <h3>Project Progress</h3>
@@ -1505,6 +1970,7 @@
 
             <!-- Files Sub-Tab -->
             <div class="portal-tab-panel" id="pd-tab-files">
+              <h3 class="tab-section-heading">Files</h3>
               <!-- Upload Section -->
               <div class="files-upload-section portal-shadow">
                 <h3>Upload Files for Client</h3>
@@ -1521,7 +1987,7 @@
                 <div class="folder-panel">
                   <div class="folder-panel-header">
                     <h4>Folders</h4>
-                    <button class="btn-icon" id="btn-create-folder" title="Create Folder">
+                    <button class="btn-icon" id="btn-create-folder" title="Create Folder" aria-label="Create folder">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>
                     </button>
                   </div>
@@ -1539,14 +2005,7 @@
                     <div class="files-path" id="pd-files-path">
                       <span>All Files</span>
                     </div>
-                    <div class="files-view-toggle">
-                      <button class="active" data-view="list" title="List View">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-                      </button>
-                      <button data-view="grid" title="Grid View">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                      </button>
-                    </div>
+                    <div id="files-view-toggle-mount"></div>
                   </div>
                   <div class="files-list" id="pd-files-list">
                     <p class="empty-state">No files uploaded yet.</p>
@@ -1558,7 +2017,7 @@
               <div class="file-detail-modal hidden" id="file-detail-modal">
                 <div class="file-detail-content portal-shadow">
                   <div class="file-detail-header">
-                    <h3 id="file-detail-name">File Name</h3>
+                    <h2 id="file-detail-name">File Name</h2>
                     <button class="btn-icon close-modal" id="close-file-detail">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </button>
@@ -1613,6 +2072,7 @@
 
               <!-- Messages Sub-Tab -->
             <div class="portal-tab-panel" id="pd-tab-messages">
+              <h3 class="tab-section-heading">Messages</h3>
               <div class="messages-container portal-shadow">
                 <div class="messages-thread" id="pd-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Project messages thread">
                   <p class="empty-state">
@@ -1637,6 +2097,7 @@
 
             <!-- Invoices Sub-Tab -->
             <div class="portal-tab-panel" id="pd-tab-invoices">
+              <h3 class="tab-section-heading">Invoices</h3>
               <!-- Invoice Summary -->
               <div class="invoice-summary">
                 <div class="summary-card portal-shadow">
@@ -1691,14 +2152,11 @@
 
             <!-- Tasks Sub-Tab -->
             <div class="portal-tab-panel" id="pd-tab-tasks">
+              <h3 class="tab-section-heading">Tasks</h3>
               <div class="portal-project-card portal-shadow">
                 <div class="card-header-with-action">
-                  <h3>Tasks</h3>
                   <div class="view-toggle-container">
-                    <div class="view-toggle" id="tasks-view-toggle">
-                      <button class="active" data-view="kanban">Board</button>
-                      <button data-view="list">List</button>
-                    </div>
+                    <div id="tasks-view-toggle-mount"></div>
                     <button class="btn btn-secondary" id="btn-add-task">
                       + Add Task
                     </button>
@@ -1711,8 +2169,8 @@
 
             <!-- Time Tracking Sub-Tab -->
             <div class="portal-tab-panel" id="pd-tab-time">
+              <h3 class="tab-section-heading">Time Tracking</h3>
               <div class="time-tracking-header">
-                <h3>Time Tracking</h3>
                 <div>
                   <button class="btn btn-secondary" id="btn-log-time">
                     + Log Time
@@ -1742,10 +2200,10 @@
 
             <!-- Contract Sub-Tab -->
             <div class="portal-tab-panel" id="pd-tab-contract">
+              <h3 class="tab-section-heading">Contract</h3>
               <div class="contract-tab-content">
                 <!-- Contract Status Card -->
                 <div class="portal-project-card portal-shadow">
-                  <h3>Contract Status</h3>
                   <div class="contract-status-display">
                     <div class="contract-status-info">
                       <div class="status-item">
@@ -1822,7 +2280,10 @@
     <div class="admin-modal-overlay hidden" id="detail-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="admin-modal">
         <div class="admin-modal-header">
-          <h3 id="modal-title">Details</h3>
+          <div class="admin-modal-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <h2 id="modal-title">Details</h2>
+          </div>
           <button class="admin-modal-close" id="modal-close-btn" aria-label="Close modal">
             &times;
           </button>
@@ -1840,7 +2301,10 @@
     <div class="admin-modal-overlay hidden" id="add-client-modal" role="dialog" aria-modal="true" aria-labelledby="add-client-modal-title">
       <div class="admin-modal">
         <div class="admin-modal-header">
-          <h3 id="add-client-modal-title">Add New Client</h3>
+          <div class="admin-modal-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+            <h2 id="add-client-modal-title">Add New Client</h2>
+          </div>
           <button class="admin-modal-close" id="add-client-modal-close" aria-label="Close modal">
             &times;
           </button>
@@ -1876,7 +2340,10 @@
     <div class="admin-modal-overlay hidden" id="add-project-modal" role="dialog" aria-modal="true" aria-labelledby="add-project-modal-title">
       <div class="admin-modal">
         <div class="admin-modal-header">
-          <h3 id="add-project-modal-title">Add New Project</h3>
+          <div class="admin-modal-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h16Z"/></svg>
+            <h2 id="add-project-modal-title">Add New Project</h2>
+          </div>
           <button class="admin-modal-close" id="add-project-modal-close" aria-label="Close modal">
             &times;
           </button>
@@ -1886,10 +2353,7 @@
             <!-- Client Selection -->
             <div class="form-group">
               <label class="field-label" for="new-project-client">Client *</label>
-              <select id="new-project-client" class="form-input" required>
-                <option value="">Select existing client...</option>
-                <option value="new">+ Create New Client</option>
-              </select>
+              <div id="new-project-client-mount"></div>
             </div>
 
             <!-- New Client Fields (hidden by default) -->
@@ -1915,16 +2379,7 @@
             <!-- Project Fields -->
             <div class="form-group">
               <label class="field-label" for="new-project-type">Project Type *</label>
-              <select id="new-project-type" class="form-input" required>
-                <option value="">Select type...</option>
-                <option value="simple-site">Simple Website</option>
-                <option value="business-site">Business Website</option>
-                <option value="portfolio">Portfolio</option>
-                <option value="e-commerce">E-Commerce</option>
-                <option value="web-app">Web Application</option>
-                <option value="browser-extension">Browser Extension</option>
-                <option value="other">Other</option>
-              </select>
+              <div id="new-project-type-mount"></div>
             </div>
             <div class="form-group">
               <label class="field-label" for="new-project-description">Description *</label>
@@ -1932,25 +2387,11 @@
             </div>
             <div class="form-group">
               <label class="field-label" for="new-project-budget">Budget *</label>
-              <select id="new-project-budget" class="form-input" required>
-                <option value="">Select budget...</option>
-                <option value="under-1k">Under $1,000</option>
-                <option value="1k-2.5k">$1,000 - $2,500</option>
-                <option value="2.5k-5k">$2,500 - $5,000</option>
-                <option value="5k-10k">$5,000 - $10,000</option>
-                <option value="10k+">$10,000+</option>
-              </select>
+              <div id="new-project-budget-mount"></div>
             </div>
             <div class="form-group">
               <label class="field-label" for="new-project-timeline">Timeline *</label>
-              <select id="new-project-timeline" class="form-input" required>
-                <option value="">Select timeline...</option>
-                <option value="asap">ASAP</option>
-                <option value="1-month">Within 1 Month</option>
-                <option value="1-3-months">1-3 Months</option>
-                <option value="3-6-months">3-6 Months</option>
-                <option value="flexible">Flexible</option>
-              </select>
+              <div id="new-project-timeline-mount"></div>
             </div>
             <div class="form-group">
               <label class="field-label" for="new-project-notes">Additional Notes</label>
@@ -1969,7 +2410,10 @@
     <div class="admin-modal-overlay hidden" id="edit-client-info-modal" role="dialog" aria-modal="true" aria-labelledby="edit-client-info-title">
       <div class="admin-modal">
         <div class="admin-modal-header">
-          <h3 id="edit-client-info-title">Edit Client Info</h3>
+          <div class="admin-modal-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            <h2 id="edit-client-info-title">Edit Client Info</h2>
+          </div>
           <button class="admin-modal-close" id="edit-client-info-close" aria-label="Close modal">
             &times;
           </button>
@@ -1994,11 +2438,7 @@
             </div>
             <div class="form-group">
               <label class="field-label" for="edit-client-status">Status</label>
-              <select id="edit-client-status" class="form-input">
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-                <option value="inactive">Inactive</option>
-              </select>
+              <div id="edit-client-status-mount"></div>
             </div>
           </div>
           <div class="admin-modal-footer">
@@ -2013,7 +2453,10 @@
     <div class="admin-modal-overlay hidden" id="edit-billing-modal" role="dialog" aria-modal="true" aria-labelledby="edit-billing-title">
       <div class="admin-modal">
         <div class="admin-modal-header">
-          <h3 id="edit-billing-title">Edit Billing Details</h3>
+          <div class="admin-modal-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+            <h2 id="edit-billing-title">Edit Billing Details</h2>
+          </div>
           <button class="admin-modal-close" id="edit-billing-close" aria-label="Close modal">
             &times;
           </button>
@@ -2065,7 +2508,10 @@
     <div class="admin-modal-overlay hidden" id="edit-project-modal" role="dialog" aria-modal="true" aria-labelledby="edit-project-modal-title">
       <div class="admin-modal">
         <div class="admin-modal-header">
-          <h3 id="edit-project-modal-title">Edit Project</h3>
+          <div class="admin-modal-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            <h2 id="edit-project-modal-title">Edit Project</h2>
+          </div>
           <button class="admin-modal-close" id="edit-project-close" aria-label="Close modal">
             &times;
           </button>
@@ -2080,28 +2526,11 @@
             <div class="form-row">
               <div class="form-group">
                 <label class="field-label" for="edit-project-type">Project Type</label>
-                <select id="edit-project-type" class="form-input">
-                  <option value="">Select type...</option>
-                  <option value="simple-site">Simple Website</option>
-                  <option value="business-site">Business Website</option>
-                  <option value="portfolio">Portfolio</option>
-                  <option value="e-commerce">E-Commerce</option>
-                  <option value="web-app">Web Application</option>
-                  <option value="browser-extension">Browser Extension</option>
-                  <option value="other">Other</option>
-                </select>
+                <div id="edit-project-type-mount"></div>
               </div>
               <div class="form-group">
                 <label class="field-label" for="edit-project-status">Status</label>
-                <select id="edit-project-status" class="form-input">
-                  <option value="pending">Pending</option>
-                  <option value="active">Active</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="in-review">In Review</option>
-                  <option value="on-hold">On Hold</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
+                <div id="edit-project-status-mount"></div>
               </div>
             </div>
 

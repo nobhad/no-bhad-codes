@@ -76,7 +76,7 @@ class AdminMessagingRenderer {
    * Render the threads list
    */
   renderThreadsList(threads: MessageThread[]): void {
-    const listContainer = getElement('admin-threads-list');
+    const listContainer = getElement('admin-thread-list');
     if (!listContainer) {
       logger.warn('Threads list container not found');
       return;
@@ -234,7 +234,7 @@ class AdminMessagingRenderer {
     const isAdmin = msg.sender_type === 'admin';
     const dateTime = formatDateTime(msg.created_at);
 
-    const rawSenderName = isAdmin ? 'You (Admin)' : SanitizationUtils.decodeHtmlEntities(msg.sender_name || 'Client');
+    const rawSenderName = isAdmin ? 'You' : SanitizationUtils.decodeHtmlEntities(msg.sender_name || 'Client');
     const safeSenderName = SanitizationUtils.escapeHtml(rawSenderName);
     const safeContent = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(msg.message || msg.content || ''));
     const safeInitials = SanitizationUtils.escapeHtml(rawSenderName.substring(0, 2).toUpperCase());
@@ -374,19 +374,16 @@ class AdminMessagingRenderer {
   }
 
   /**
-   * Render the client dropdown for new messages
+   * Update thread header with client name
    */
-  renderClientDropdown(clients: Array<{ id: number; name: string }>): void {
-    const dropdown = getElement('admin-client-select') as HTMLSelectElement;
-    if (!dropdown) return;
+  updateThreadHeader(clientName: string): void {
+    const header = getElement('admin-thread-header');
+    if (!header) return;
 
-    dropdown.innerHTML = `
-      <option value="">Select a client...</option>
-      ${clients.map(client => {
-    const safeName = SanitizationUtils.escapeHtml(client.name);
-    return `<option value="${client.id}">${safeName}</option>`;
-  }).join('')}
-    `;
+    const titleEl = header.querySelector('.thread-title');
+    if (titleEl) {
+      titleEl.textContent = SanitizationUtils.escapeHtml(clientName);
+    }
   }
 
   /**

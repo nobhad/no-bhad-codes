@@ -74,7 +74,7 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
 }
 
 .auth-gate .portal-password-toggle:hover {
-  color: var(--color-brand-primary);
+  color: var(--color-primary);
 }
 
 /* Auth Container - old style */
@@ -94,7 +94,7 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
 }
 
 .auth-header h1 {
-  color: var(--color-brand-primary);
+  color: var(--color-primary);
   font-size: var(--font-size-2xl);
   margin-bottom: var(--space-2);
   font-weight: var(--font-weight-bold);
@@ -112,8 +112,8 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
 }
 
 .auth-error {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(var(--color-error-rgb), 0.1);
+  border: 1px solid rgba(var(--color-error-rgb), 0.3);
   color: var(--color-danger);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--border-radius-md);
@@ -143,7 +143,7 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
 }
 
 .auth-gate-header h1 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   text-transform: uppercase;
   color: var(--color-neutral-200);
@@ -227,7 +227,7 @@ body[data-page="admin"] .auth-gate .portal-password-wrapper input {
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   letter-spacing: 1px;
   transition: all var(--transition-fast);
   text-transform: uppercase;

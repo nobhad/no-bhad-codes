@@ -1,6 +1,6 @@
 # Client Portal Dashboard
 
-**Last Updated:** January 20, 2026
+**Last Updated:** February 2, 2026
 
 ## Table of Contents
 
@@ -100,21 +100,25 @@ client/
 └── intake.html                   # Intake form page
 
 src/styles/client-portal/         # Portal-specific styles
+├── index.css                     # Bundle entry
 ├── components.css                # Reusable components
 ├── dashboard.css                 # Dashboard layout
+├── files.css                     # Files tab
+├── invoices.css                  # Invoices tab
 ├── layout.css                    # Overall layout
 ├── login.css                     # Login form
-├── mobile.css                    # Mobile responsiveness
-├── responsive.css                # Responsive breakpoints
-├── sidebar.css                   # Sidebar navigation
-└── views.css                     # View-specific styles
+├── projects.css                  # Projects tab
+├── settings.css                  # Settings tab
+└── sidebar.css                   # Sidebar navigation
 
 server/routes/
 ├── uploads.ts                    # File upload API endpoints
 ├── clients.ts                    # Client profile/settings API
 ├── projects.ts                   # Project management API
 ├── invoices.ts                   # Invoice API with PDF generation
-└── messages.ts                   # Messaging API
+├── messages.ts                   # Messaging API
+├── intake.ts                     # Intake form, status
+└── proposals.ts                  # Proposal builder API
 ```
 
 ---

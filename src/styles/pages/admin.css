@@ -255,6 +255,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
 /* Desktop wide: 4 cards in one row */
 @media (min-width: 1025px) {
   [data-page="admin"] #tab-overview .quick-stats,
+  [data-page="admin"] #tab-overview .attention-grid,
   [data-page="admin"] #tab-leads .quick-stats,
   [data-page="admin"] #tab-projects .quick-stats,
   [data-page="admin"] #tab-clients .quick-stats {
@@ -265,6 +266,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
 /* Intermediate: 2x2 when sidebar collapses (zoom-friendly) */
 @media (max-width: 1024px) {
   [data-page="admin"] #tab-overview .quick-stats,
+  [data-page="admin"] #tab-overview .attention-grid,
   [data-page="admin"] #tab-leads .quick-stats,
   [data-page="admin"] #tab-projects .quick-stats,
   [data-page="admin"] #tab-clients .quick-stats {
@@ -275,6 +277,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
 /* Tablet: 4-card tabs MUST be 2x2, NEVER 3+1 */
 @media (--tablet-down) {
   [data-page="admin"] #tab-overview .quick-stats,
+  [data-page="admin"] #tab-overview .attention-grid,
   [data-page="admin"] #tab-leads .quick-stats,
   [data-page="admin"] #tab-projects .quick-stats,
   [data-page="admin"] #tab-clients .quick-stats {
@@ -606,13 +609,14 @@ body[data-page="admin"] .bundle-item {
 }
 
 /* Table-specific: checkbox column (first column when bulk actions enabled) */
+/* Left padding matches text columns (--space-4) for alignment */
 .admin-table th.bulk-select-cell,
 .admin-table td.bulk-select-cell {
-  width: 44px;
-  min-width: 44px;
-  max-width: 44px;
-  text-align: center;
-  padding: var(--space-2) !important;
+  width: 56px;
+  min-width: 56px;
+  max-width: 56px;
+  text-align: left;
+  padding: var(--space-3) var(--space-2) var(--space-3) var(--space-4) !important;
   box-sizing: border-box;
 }
 
@@ -1753,7 +1757,7 @@ body.modal-open .dashboard-content {
   }
 }
 
-/* Small screens - stack all grids to single column with tighter spacing */
+/* Small screens - stack grids with tighter spacing */
 @media (--compact-mobile) {
   /* Reduce all gaps and margins on mobile */
   body[data-page="admin"] .tab-content > *,
@@ -1761,19 +1765,17 @@ body.modal-open .dashboard-content {
     margin-bottom: 0.75rem;
   }
 
+  /* Non-card grids can go to single column at 600px */
   body[data-page="admin"] .analytics-grid,
   body[data-page="admin"] .vitals-grid,
-  body[data-page="admin"] .quick-stats,
-  body[data-page="admin"] .leads-stats,
   body[data-page="admin"] .charts-grid,
-  body[data-page="admin"] .overview-grid,
-  body[data-page="admin"] .portal-project-card,
-  body[data-page="admin"] #tab-overview > .quick-stats,
-  body[data-page="admin"] #tab-analytics .quick-stats,
-  body[data-page="admin"] #tab-leads .quick-stats {
-    grid-template-columns: 1fr !important;
-    gap: 0.75rem !important;
+  body[data-page="admin"] .overview-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
+
+  /* 4-card grids (.quick-stats) stay 2x2 until 500px - handled by portal-cards.css */
+  /* DO NOT override .quick-stats here - let base rules handle 4→2→1 transitions */
 
   /* Tighter card padding on mobile */
   body[data-page="admin"] .stat-card,

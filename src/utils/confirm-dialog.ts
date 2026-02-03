@@ -59,11 +59,13 @@ export function confirmDialog(options: ConfirmDialogOptions): Promise<boolean> {
     // Get icon SVG based on type
     const iconSvg = getIconSvg(icon);
 
-    // Create dialog HTML
+    // Create dialog HTML (icon + title on same line, left-aligned)
     overlay.innerHTML = `
       <div class="confirm-dialog">
-        <div class="confirm-dialog-icon ${icon}">${iconSvg}</div>
-        <h3 id="confirm-dialog-title" class="confirm-dialog-title">${escapeHtml(title)}</h3>
+        <div class="confirm-dialog-header">
+          <div class="confirm-dialog-icon ${icon}">${iconSvg}</div>
+          <h3 id="confirm-dialog-title" class="confirm-dialog-title">${escapeHtml(title)}</h3>
+        </div>
         <p class="confirm-dialog-message">${escapeHtml(message)}</p>
         <div class="confirm-dialog-actions">
           <button type="button" class="confirm-dialog-btn confirm-dialog-cancel">${escapeHtml(cancelText)}</button>
@@ -205,11 +207,13 @@ export function alertDialog(options: AlertDialogOptions): Promise<void> {
     // Derive title from type if not provided
     const displayTitle = title || (type === 'error' ? 'Error' : type === 'success' ? 'Success' : type === 'warning' ? 'Warning' : 'Notice');
 
-    // Create dialog HTML
+    // Create dialog HTML (icon + title on same line, left-aligned)
     overlay.innerHTML = `
       <div class="confirm-dialog">
-        <div class="confirm-dialog-icon ${iconMap[type]}">${iconSvg}</div>
-        <h3 id="alert-dialog-title" class="confirm-dialog-title">${escapeHtml(displayTitle)}</h3>
+        <div class="confirm-dialog-header">
+          <div class="confirm-dialog-icon ${iconMap[type]}">${iconSvg}</div>
+          <h3 id="alert-dialog-title" class="confirm-dialog-title">${escapeHtml(displayTitle)}</h3>
+        </div>
         <p class="confirm-dialog-message">${escapeHtml(message)}</p>
         <div class="confirm-dialog-actions">
           <button type="button" class="confirm-dialog-btn confirm-dialog-confirm">${escapeHtml(buttonText)}</button>
@@ -350,11 +354,13 @@ export function promptDialog(options: PromptDialogOptions): Promise<string | nul
     // Get icon SVG (edit/pencil icon)
     const iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
 
-    // Create dialog HTML
+    // Create dialog HTML (icon + title on same line, left-aligned)
     overlay.innerHTML = `
       <div class="confirm-dialog prompt-dialog">
-        <div class="confirm-dialog-icon info">${iconSvg}</div>
-        <h3 id="prompt-dialog-title" class="confirm-dialog-title">${escapeHtml(title)}</h3>
+        <div class="confirm-dialog-header">
+          <div class="confirm-dialog-icon info">${iconSvg}</div>
+          <h3 id="prompt-dialog-title" class="confirm-dialog-title">${escapeHtml(title)}</h3>
+        </div>
         <div class="prompt-dialog-field">
           <label for="prompt-dialog-input" class="prompt-dialog-label">${escapeHtml(label)}</label>
           <input
@@ -574,8 +580,10 @@ export function multiPromptDialog(
     // Create dialog HTML
     overlay.innerHTML = `
       <div class="confirm-dialog prompt-dialog multi-prompt-dialog">
-        <div class="confirm-dialog-icon info">${iconSvg}</div>
-        <h3 id="multi-prompt-dialog-title" class="confirm-dialog-title">${escapeHtml(title)}</h3>
+        <div class="confirm-dialog-header">
+          <div class="confirm-dialog-icon info">${iconSvg}</div>
+          <h3 id="multi-prompt-dialog-title" class="confirm-dialog-title">${escapeHtml(title)}</h3>
+        </div>
         <form class="multi-prompt-form">
           ${fieldsHtml}
           <div class="confirm-dialog-actions">

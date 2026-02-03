@@ -1,0 +1,74 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - navigation [ref=e5]:
+      - link "no bhad codes - Go to homepage" [ref=e6]:
+        - /url: /
+        - text: no bhad codes
+      - generic [ref=e7]:
+        - button "Client Portal Login" [ref=e8] [cursor=pointer]:
+          - img [ref=e10]
+        - button "Switch to dark theme" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]:
+            - img [ref=e16]
+            - img [ref=e19]
+        - button "Toggle navigation menu" [ref=e21] [cursor=pointer]:
+          - img [ref=e23]
+          - generic [ref=e30]:
+            - paragraph [ref=e31]: Menu
+            - paragraph [ref=e32]: Close
+  - main [ref=e33]:
+    - heading "No Bhad Codes - Professional Web Development" [level=1] [ref=e34]
+    - generic [ref=e36]:
+      - heading "contact" [level=2] [ref=e37]
+      - separator [ref=e38]
+      - generic [ref=e39]:
+        - form "Contact form" [ref=e41]:
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e45]:
+                - textbox "Name" [ref=e46]:
+                  - /placeholder: ...
+                - generic: Name
+              - generic [ref=e48]:
+                - textbox "Company (optional)" [ref=e49]:
+                  - /placeholder: ...
+                - generic: Company (optional)
+              - generic [ref=e51]:
+                - textbox "Email" [ref=e52]:
+                  - /placeholder: ...
+                - generic: Email
+            - button "Submit contact form" [ref=e54] [cursor=pointer]:
+              - img [ref=e55]
+          - generic [ref=e65]:
+            - textbox "Message" [ref=e66]:
+              - /placeholder: ...
+            - generic: Message
+        - generic [ref=e68]:
+          - img "Avatar with speech bubble" [ref=e69]
+          - paragraph [ref=e79]:
+            - text: Message me here,
+            - text: fill out an
+            - link "intake form" [ref=e80]:
+              - /url: "#"
+            - text: ","
+            - text: or email me at
+            - link "nobhaduri@gmail.com" [ref=e81]:
+              - /url: mailto:nobhaduri@gmail.com
+  - contentinfo [ref=e82]:
+    - paragraph [ref=e84]: © 2026 No Bhad Codes. All rights reserved.
+  - generic [ref=e86]:
+    - img [ref=e88]
+    - generic [ref=e90]:
+      - heading "I respect your privacy" [level=3] [ref=e91]
+      - paragraph [ref=e92]: No Bhad Codes uses cookies and similar technologies to enhance your browsing experience, analyze site traffic, and understand visitor behavior. Your privacy is important to me.
+    - generic [ref=e93]:
+      - generic [ref=e94]:
+        - button "Decline" [ref=e95] [cursor=pointer]
+        - button "Accept All" [ref=e96] [cursor=pointer]
+      - button "Learn More" [ref=e98] [cursor=pointer]
+```

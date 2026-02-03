@@ -1,7 +1,7 @@
 # File Management System
 
 **Status:** Complete
-**Last Updated:** February 1, 2026
+**Last Updated:** February 2, 2026
 
 ## Table of Contents
 
@@ -22,8 +22,6 @@
 The File Management system allows clients to upload, view, preview, and download project-related files. Files are stored on the server and associated with projects. The system includes access control to ensure clients can only access their own files.
 
 **Access:** Client Portal > Files tab (`tab-files`)
-
-**Last Updated:** January 13, 2026
 
 ---
 
@@ -46,7 +44,7 @@ The File Management system allows clients to upload, view, preview, and download
 | Access Control | Complete | Clients can only access their own files |
 | Admin File Protection | Complete | Clients cannot delete admin-uploaded files |
 | Mobile Responsive | Complete | Optimized layout for mobile devices |
-| Project Filtering | Planned | Filter files by project |
+| Project Filtering | Complete | Filter by project, file type, category, date range (GET /api/uploads/client query params) |
 
 ---
 
@@ -834,7 +832,7 @@ const deleteIcon = canDelete
 ## Phase 6: File Management Enhancement
 
 **Status:** Complete
-**Last Updated:** February 1, 2026
+**Last Updated:** February 2, 2026
 
 ### Phase 6 Overview
 

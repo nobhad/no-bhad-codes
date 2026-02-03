@@ -140,7 +140,7 @@ let drCreateModalFocusCleanup: (() => void) | null = null;
 let drTemplatesModalFocusCleanup: (() => void) | null = null;
 let drDetailModalFocusCleanup: (() => void) | null = null;
 let drSearchQuery: string = '';
-let currentDrFilter: 'all' | 'pending' | 'for-review' | 'overdue' = 'all';
+const currentDrFilter: 'all' | 'pending' | 'for-review' | 'overdue' = 'all';
 let storedDrContext: AdminDashboardContext | null = null;
 
 // Bulk action configuration for document requests

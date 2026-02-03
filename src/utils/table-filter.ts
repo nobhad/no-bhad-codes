@@ -9,6 +9,7 @@
  */
 
 import { ICONS } from '../constants/icons';
+import { getPortalCheckboxHTML } from '../components/portal-checkbox';
 
 // ===============================================
 // TYPES
@@ -104,27 +105,35 @@ export function createFilterUI(
     <button type="button" class="icon-btn filter-search-trigger ${hasSearchTerm ? 'has-value' : ''}" title="Search" aria-label="Search">
       ${ICONS.SEARCH}
     </button>
-    <div class="filter-search-dropdown">
-      <span class="filter-search-icon">
+    <div class="filter-search-dropdown search-bar">
+      <span class="filter-search-icon search-bar-icon">
         ${ICONS.SEARCH_SMALL}
       </span>
-      <input type="text" placeholder="Search..." class="filter-search-input" value="${escapeAttr(state.searchTerm)}" />
-      <button type="button" class="filter-search-clear" title="Clear search" aria-label="Clear search">
+      <input type="text" placeholder="Search..." class="filter-search-input search-bar-input" value="${escapeAttr(state.searchTerm)}" />
+      <button type="button" class="filter-search-clear search-bar-clear" title="Clear search" aria-label="Clear search">
         ${ICONS.X_SMALL}
       </button>
     </div>
   `;
 
   const searchTrigger = searchWrapper.querySelector('.filter-search-trigger') as HTMLButtonElement;
-  const _searchDropdown = searchWrapper.querySelector('.filter-search-dropdown') as HTMLElement;
+  const searchDropdown = searchWrapper.querySelector('.filter-search-dropdown') as HTMLElement;
   const searchInput = searchWrapper.querySelector('input') as HTMLInputElement;
   const searchClear = searchWrapper.querySelector('.filter-search-clear') as HTMLButtonElement;
 
-  // Toggle search dropdown
+  // Keep input non-focusable when closed so focus/tab never opens the dropdown
+  const setInputFocusable = (open: boolean) => {
+    searchInput.tabIndex = open ? 0 : -1;
+  };
+  setInputFocusable(false);
+
+  // Open dropdown only when the search button is clicked (not on input focus/click)
   searchTrigger.addEventListener('click', (e) => {
     e.stopPropagation();
+    const willOpen = !searchWrapper.classList.contains('open');
     searchWrapper.classList.toggle('open');
-    if (searchWrapper.classList.contains('open')) {
+    setInputFocusable(searchWrapper.classList.contains('open'));
+    if (willOpen) {
       searchInput.focus();
     }
   });
@@ -133,6 +142,7 @@ export function createFilterUI(
   document.addEventListener('click', (e) => {
     if (!searchWrapper.contains(e.target as Node)) {
       searchWrapper.classList.remove('open');
+      setInputFocusable(false);
     }
   });
 
@@ -161,8 +171,13 @@ export function createFilterUI(
   searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       searchWrapper.classList.remove('open');
+      setInputFocusable(false);
     }
   });
+
+  // Prevent input from opening dropdown: do not open on input focus/click
+  searchInput.addEventListener('mousedown', (e) => e.stopPropagation());
+  searchDropdown.addEventListener('mousedown', (e) => e.stopPropagation());
 
   container.appendChild(searchWrapper);
 
@@ -182,9 +197,11 @@ export function createFilterUI(
         <div class="filter-checkbox-group">
           ${config.statusOptions.map(opt => `
             <label class="filter-checkbox">
-              <div class="portal-checkbox">
-                <input type="checkbox" value="${opt.value}" ${state.statusFilters.includes(opt.value) ? 'checked' : ''} />
-              </div>
+              ${getPortalCheckboxHTML({
+    value: opt.value,
+    checked: state.statusFilters.includes(opt.value),
+    ariaLabel: `Filter by ${opt.label}`
+  })}
               <span>${opt.label}</span>
             </label>
           `).join('')}
@@ -490,14 +507,14 @@ export const LEADS_FILTER_CONFIG: TableFilterConfig = {
   searchFields: ['contact_name', 'email', 'company_name', 'project_type'],
   statusField: 'status',
   statusOptions: [
-    { value: 'pending', label: 'Pending' },
-    { value: 'qualified', label: 'Qualified' },
+    { value: 'new', label: 'New' },
     { value: 'contacted', label: 'Contacted' },
-    { value: 'active', label: 'Active' },
+    { value: 'qualified', label: 'Qualified' },
     { value: 'in-progress', label: 'In Progress' },
     { value: 'converted', label: 'Converted' },
-    { value: 'completed', label: 'Completed' },
-    { value: 'lost', label: 'Lost' }
+    { value: 'lost', label: 'Lost' },
+    { value: 'on-hold', label: 'On Hold' },
+    { value: 'cancelled', label: 'Cancelled' }
   ],
   dateField: 'created_at',
   sortableColumns: [

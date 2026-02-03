@@ -19,6 +19,7 @@ import {
   formatProjectType
 } from '../../../utils/format-utils';
 import { initModalDropdown, setModalDropdownValue } from '../../../utils/modal-dropdown';
+import { createFilterSelect, type FilterSelectInstance } from '../../../components/filter-select';
 import { createTableDropdown, PROJECT_STATUS_OPTIONS } from '../../../utils/table-dropdown';
 import { apiFetch, apiPost, apiPut } from '../../../utils/api-client';
 import { showToast } from '../../../utils/toast-notifications';
@@ -32,11 +33,22 @@ import {
   type FilterState
 } from '../../../utils/table-filter';
 import type { ProjectMilestone, ProjectFile, ProjectInvoice, AdminDashboardContext, Message } from '../admin-types';
-import { showTableLoading } from '../../../utils/loading-utils';
+import { showTableLoading, showTableEmpty } from '../../../utils/loading-utils';
 import { showTableError } from '../../../utils/error-utils';
 import { createDOMCache, batchUpdateText } from '../../../utils/dom-cache';
+import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { alertWarning, multiPromptDialog } from '../../../utils/confirm-dialog';
 import { manageFocusTrap } from '../../../utils/focus-trap';
+import { createRowCheckbox, createBulkActionToolbar, setupBulkSelectionHandlers, resetSelection, type BulkActionConfig } from '../../../utils/table-bulk-actions';
+import {
+  createPaginationUI,
+  applyPagination,
+  getDefaultPaginationState,
+  loadPaginationState,
+  savePaginationState,
+  type PaginationState,
+  type PaginationConfig
+} from '../../../utils/table-pagination';
 
 // ============================================
 // DOM CACHE - Cached element references
@@ -194,6 +206,19 @@ let storedContext: AdminDashboardContext | null = null;
 let filterState: FilterState = loadFilterState(PROJECTS_FILTER_CONFIG.storageKey);
 let filterUIInitialized = false;
 
+// Pagination configuration and state
+const PROJECTS_PAGINATION_CONFIG: PaginationConfig = {
+  tableId: 'projects',
+  pageSizeOptions: [10, 25, 50, 100],
+  defaultPageSize: 25,
+  storageKey: 'admin_projects_pagination'
+};
+
+let paginationState: PaginationState = {
+  ...getDefaultPaginationState(PROJECTS_PAGINATION_CONFIG),
+  ...loadPaginationState(PROJECTS_PAGINATION_CONFIG.storageKey!)
+};
+
 export function getProjectsData(): LeadProject[] {
   return projectsData;
 }
@@ -218,7 +243,7 @@ export async function loadProjects(ctx: AdminDashboardContext): Promise<void> {
   // Show loading state (use cached ref)
   const tableBody = domCache.get('tableBody');
   if (tableBody) {
-    showTableLoading(tableBody, 6, 'Loading projects...');
+    showTableLoading(tableBody, 9, 'Loading projects...');
   }
 
   try {
@@ -296,6 +321,16 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
       }
     });
   }, 100);
+
+  // Create bulk action toolbar (selection count + Clear; no bulk API yet)
+  const bulkToolbarEl = document.getElementById('projects-bulk-toolbar');
+  if (bulkToolbarEl) {
+    const toolbar = createBulkActionToolbar({
+      tableId: 'projects',
+      actions: []
+    });
+    bulkToolbarEl.replaceWith(toolbar);
+  }
 }
 
 function updateProjectsDisplay(data: ProjectsData, ctx: AdminDashboardContext): void {
@@ -329,8 +364,8 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
   if (!tableBody) return;
 
   if (projects.length === 0) {
-    tableBody.innerHTML =
-      '<tr><td colspan="8" class="loading-row">No projects yet. Convert leads to start projects.</td></tr>';
+    showTableEmpty(tableBody, 8, 'No projects yet. Convert leads to start projects.');
+    renderPaginationUI(0, ctx);
     return;
   }
 
@@ -338,14 +373,24 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
   const filteredProjects = applyFilters(projects, filterState, PROJECTS_FILTER_CONFIG);
 
   if (filteredProjects.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="8" class="loading-row">No projects match the current filters. Try adjusting your filters.</td></tr>';
+    showTableEmpty(tableBody, 8, 'No projects match the current filters. Try adjusting your filters.');
+    renderPaginationUI(0, ctx);
     return;
   }
+
+  // Update pagination state with total items
+  paginationState.totalItems = filteredProjects.length;
+
+  // Apply pagination
+  const paginatedProjects = applyPagination(filteredProjects, paginationState);
+
+  // Reset bulk selection when data changes
+  resetSelection('projects');
 
   // Clear and rebuild table with dropdown containers
   tableBody.innerHTML = '';
 
-  filteredProjects.forEach((project) => {
+  paginatedProjects.forEach((project) => {
     // Decode HTML entities first (data may have &amp; stored), then escape for safe HTML output
     const safeName = SanitizationUtils.escapeHtml(
       SanitizationUtils.decodeHtmlEntities(project.project_name || project.description?.substring(0, 30) || 'Untitled Project')
@@ -363,15 +408,18 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
     row.dataset.projectId = String(project.id);
     row.className = 'clickable-row';
 
+    // Standard column order: ☐ | Project (+Client) | Type | Budget | Timeline | Status | Start
     row.innerHTML = `
-      <td>${safeName}</td>
-      <td>${safeContact}<br><small>${safeCompany}</small></td>
+      ${createRowCheckbox('projects', project.id)}
+      <td class="identity-cell">
+        <span class="identity-name">${safeName}</span>
+        ${(safeContact || safeCompany) ? `<span class="identity-contact">${safeContact}${safeCompany ? ` - ${safeCompany}` : ''}</span>` : ''}
+      </td>
       <td>${formatProjectType(project.project_type)}</td>
       <td>${formatDisplayValue(project.budget_range)}</td>
       <td>${formatDisplayValue(project.timeline)}</td>
-      <td>${formatDate(project.start_date)}</td>
-      <td>${formatDate(project.end_date)}</td>
       <td class="status-cell"></td>
+      <td>${formatDate(project.start_date)}</td>
     `;
 
     // Create status dropdown
@@ -388,15 +436,55 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
       statusCell.appendChild(dropdown);
     }
 
-    // Add click handler for row (excluding status cell)
+    // Add click handler for row (excluding status cell and checkbox)
     row.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      if (target.closest('.table-dropdown')) return;
+      if (target.closest('.table-dropdown') || target.closest('.bulk-select-cell') || target.tagName === 'INPUT') return;
       showProjectDetails(project.id, ctx);
     });
 
     tableBody.appendChild(row);
   });
+
+  // Setup bulk selection handlers
+  const projectsBulkConfig: BulkActionConfig = {
+    tableId: 'projects',
+    actions: []
+  };
+  const allRowIds = paginatedProjects.map(p => p.id);
+  setupBulkSelectionHandlers(projectsBulkConfig, allRowIds);
+
+  // Render pagination
+  renderPaginationUI(filteredProjects.length, ctx);
+}
+
+/**
+ * Render pagination UI for projects table
+ */
+function renderPaginationUI(totalItems: number, ctx: AdminDashboardContext): void {
+  const container = document.getElementById('projects-pagination');
+  if (!container) return;
+
+  // Update state
+  paginationState.totalItems = totalItems;
+
+  // Create pagination UI
+  const paginationUI = createPaginationUI(
+    PROJECTS_PAGINATION_CONFIG,
+    paginationState,
+    (newState) => {
+      paginationState = newState;
+      savePaginationState(PROJECTS_PAGINATION_CONFIG.storageKey!, paginationState);
+      // Re-render table with new pagination
+      if (projectsData.length > 0) {
+        renderProjectsTable(projectsData, ctx);
+      }
+    }
+  );
+
+  // Replace container content
+  container.innerHTML = '';
+  container.appendChild(paginationUI);
 }
 
 export async function updateProjectStatus(
@@ -450,11 +538,10 @@ function populateProjectDetailView(project: LeadProject): void {
 
   // Overview fields - use batch update for text content
   // Note: textContent doesn't interpret HTML, so we decode entities but don't need to escape
-  // Empty string for missing values (no dashes)
+  // Empty string for missing values (no dashes). Client email uses innerHTML for copy button.
   batchUpdateText({
     'pd-project-name': SanitizationUtils.decodeHtmlEntities(project.project_name || 'Untitled Project'),
     'pd-client-name': SanitizationUtils.decodeHtmlEntities(project.contact_name || ''),
-    'pd-client-email': project.email || '',
     'pd-company': SanitizationUtils.decodeHtmlEntities(project.company_name || ''),
     'pd-type': formatProjectType(project.project_type),
     'pd-budget': formatDisplayValue(project.budget_range),
@@ -465,6 +552,10 @@ function populateProjectDetailView(project: LeadProject): void {
     'pd-deposit': projectData.deposit_amount ? formatCurrency(Number(projectData.deposit_amount)) : '',
     'pd-contract-date': formatDate(projectData.contract_signed_date)
   });
+
+  // Client email with copy button (innerHTML, not batchUpdateText)
+  const pdClientEmailEl = document.getElementById('pd-client-email');
+  if (pdClientEmailEl) pdClientEmailEl.innerHTML = getEmailWithCopyHtml(project.email || '', SanitizationUtils.escapeHtml(project.email || '-'));
 
   // Update URL links (preview, repo, production)
   const updateUrlLink = (linkId: string, url: string | null): void => {
@@ -714,38 +805,63 @@ function openEditProjectModal(project: LeadProject): void {
 }
 
 /**
- * Initialize custom dropdowns for the edit project modal
+ * Project type options for edit modal
+ */
+const EDIT_PROJECT_TYPE_OPTIONS = [
+  { value: '', label: 'Select type...' },
+  { value: 'simple-site', label: 'Simple Website' },
+  { value: 'business-site', label: 'Business Website' },
+  { value: 'portfolio', label: 'Portfolio' },
+  { value: 'e-commerce', label: 'E-Commerce' },
+  { value: 'web-app', label: 'Web Application' },
+  { value: 'browser-extension', label: 'Browser Extension' },
+  { value: 'other', label: 'Other' }
+];
+
+/**
+ * Project status options for edit modal
+ */
+const EDIT_PROJECT_STATUS_OPTIONS = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'active', label: 'Active' },
+  { value: 'in-progress', label: 'In Progress' },
+  { value: 'in-review', label: 'In Review' },
+  { value: 'on-hold', label: 'On Hold' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'cancelled', label: 'Cancelled' }
+];
+
+/**
+ * Initialize custom dropdowns for the edit project modal.
+ * Type uses form select + modal dropdown; status uses same createTableDropdown as projects table.
  */
 function initProjectModalDropdowns(project: LeadProject): void {
   const typeSelect = document.getElementById('edit-project-type') as HTMLSelectElement;
-  const statusSelect = document.getElementById('edit-project-status') as HTMLSelectElement;
+  const statusMount = document.getElementById('edit-project-status-mount');
 
-  // Type dropdown
+  // Type dropdown (form select, optionally wrapped by modal dropdown)
   if (typeSelect) {
     const typeWrapper = typeSelect.previousElementSibling as HTMLElement;
     if (typeWrapper?.classList.contains('custom-dropdown')) {
-      // Dropdown already exists, just update the value
       setModalDropdownValue(typeWrapper, project.project_type || '');
     } else if (!typeSelect.dataset.dropdownInit) {
-      // Initialize new dropdown
       typeSelect.value = project.project_type || '';
       typeSelect.dataset.dropdownInit = 'true';
       initModalDropdown(typeSelect, { placeholder: 'Select type...' });
     }
   }
 
-  // Status dropdown
-  if (statusSelect) {
-    const statusWrapper = statusSelect.previousElementSibling as HTMLElement;
-    if (statusWrapper?.classList.contains('custom-dropdown')) {
-      // Dropdown already exists, just update the value
-      setModalDropdownValue(statusWrapper, normalizeStatus(project.status));
-    } else if (!statusSelect.dataset.dropdownInit) {
-      // Initialize new dropdown
-      statusSelect.value = normalizeStatus(project.status);
-      statusSelect.dataset.dropdownInit = 'true';
-      initModalDropdown(statusSelect, { placeholder: 'Select status...' });
-    }
+  // Status dropdown: same reusable component as projects table (createTableDropdown)
+  if (statusMount) {
+    const currentStatus = normalizeStatus(project.status);
+    statusMount.innerHTML = '';
+    const statusDropdown = createTableDropdown({
+      options: EDIT_PROJECT_STATUS_OPTIONS,
+      currentValue: currentStatus,
+      onChange: () => {} // value read from wrapper on save
+    });
+    statusDropdown.setAttribute('data-modal-dropdown', 'true'); // scope modal styles
+    statusMount.appendChild(statusDropdown);
   }
 }
 
@@ -753,9 +869,25 @@ function initProjectModalDropdowns(project: LeadProject): void {
  * Setup modal close and form handlers (only attach once)
  */
 let editProjectModalInitialized = false;
+
 function setupEditProjectModalHandlers(modal: HTMLElement): void {
   if (editProjectModalInitialized) return;
   editProjectModalInitialized = true;
+
+  const typeMount = document.getElementById('edit-project-type-mount');
+  if (typeMount && !typeMount.querySelector('select')) {
+    const typeInstance = createFilterSelect({
+      id: 'edit-project-type',
+      ariaLabel: 'Project type',
+      emptyOption: 'Select type...',
+      options: EDIT_PROJECT_TYPE_OPTIONS.slice(1).map((o) => ({ value: o.value, label: o.label })),
+      value: '',
+      className: 'form-input'
+    });
+    typeMount.appendChild(typeInstance.element);
+  }
+
+  // Status is created in initProjectModalDropdowns with createTableDropdown (same as table)
 
   const closeBtn = domCache.get('editClose');
   const cancelBtn = domCache.get('editCancel');
@@ -791,7 +923,8 @@ async function saveProjectChanges(projectId: number): Promise<void> {
   const budgetInput = document.getElementById('edit-project-budget') as HTMLInputElement;
   const priceInput = document.getElementById('edit-project-price') as HTMLInputElement;
   const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
-  const statusSelect = document.getElementById('edit-project-status') as HTMLSelectElement;
+  const statusMount = document.getElementById('edit-project-status-mount');
+  const statusValue = statusMount?.querySelector('.table-dropdown')?.getAttribute('data-status') ?? '';
   const startDateInput = document.getElementById('edit-project-start-date') as HTMLInputElement;
   const endDateInput = document.getElementById('edit-project-end-date') as HTMLInputElement;
   const depositInput = document.getElementById('edit-project-deposit') as HTMLInputElement;
@@ -809,7 +942,7 @@ async function saveProjectChanges(projectId: number): Promise<void> {
   if (budgetInput?.value) updates.budget = budgetInput.value;
   if (priceInput?.value) updates.price = priceInput.value;
   if (timelineInput?.value) updates.timeline = timelineInput.value;
-  if (statusSelect?.value) updates.status = statusSelect.value;
+  if (statusValue) updates.status = statusValue;
   // Allow clearing dates by sending empty string
   if (startDateInput) updates.start_date = startDateInput.value || '';
   if (endDateInput) updates.end_date = endDateInput.value || '';
@@ -1031,14 +1164,18 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projec
       const isIntakeFile = /^(intake_|admin_project_)/i.test(storageFilename) && /\.json$/i.test(storageFilename);
       const isPreviewable = /\.(json|txt|md|png|jpg|jpeg|gif|webp|svg|pdf)$/i.test(safeName) || isIntakeFile;
 
+      const previewBtn = isPreviewable
+        ? `<button type="button" class="icon-btn btn-preview" data-file-id="${file.id}" data-file-url="${fileApiUrl}" data-file-name="${safeName}" data-storage-filename="${storageFilename}" aria-label="Preview ${safeName}" title="Preview"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>`
+        : '';
+      const downloadBtn = `<button type="button" class="icon-btn btn-download" data-file-url="${downloadUrl}" data-file-name="${safeName}" data-storage-filename="${storageFilename}" aria-label="Download ${safeName}" title="Download"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>`;
       return `
               <tr>
                 <td data-label="File">${safeName}</td>
                 <td data-label="Size">${size}</td>
                 <td data-label="Uploaded">${date}</td>
                 <td class="file-actions" data-label="Actions">
-                  ${isPreviewable ? `<button class="btn btn-outline btn-sm btn-preview" data-file-id="${file.id}" data-file-url="${fileApiUrl}" data-file-name="${safeName}" data-storage-filename="${storageFilename}" aria-label="Preview ${safeName}">Preview</button>` : ''}
-                  <button class="btn btn-outline btn-sm btn-download" data-file-url="${downloadUrl}" data-file-name="${safeName}" data-storage-filename="${storageFilename}" aria-label="Download ${safeName}">Download</button>
+                  ${previewBtn}
+                  ${downloadBtn}
                 </td>
               </tr>
             `;
@@ -1474,6 +1611,17 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
       const showSendBtn = isDraft;
       const showMarkPaidBtn = ['sent', 'viewed', 'partial', 'overdue'].includes(invoice.status);
 
+      const previewBtn = `<button type="button" class="icon-btn btn-preview-invoice" data-invoice-id="${invoice.id}" aria-label="Preview PDF" title="Preview PDF"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>`;
+      const editBtn = isDraft
+        ? `<button type="button" class="icon-btn btn-edit-invoice" data-invoice-id="${invoice.id}" aria-label="Edit Invoice" title="Edit Invoice"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>`
+        : '';
+      const downloadBtn = `<button type="button" class="icon-btn btn-download-invoice" data-invoice-id="${invoice.id}" data-invoice-number="${invoice.invoice_number}" aria-label="Download PDF" title="Download PDF"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>`;
+      const sendBtn = showSendBtn
+        ? `<button type="button" class="icon-btn btn-send-invoice" data-invoice-id="${invoice.id}" aria-label="Send to Client" title="Send to Client"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>`
+        : '';
+      const paidBtn = showMarkPaidBtn
+        ? `<button type="button" class="icon-btn btn-mark-paid" data-invoice-id="${invoice.id}" aria-label="Mark as Paid" title="Mark as Paid"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></button>`
+        : '';
       return `
               <tr>
                 <td>${invoice.invoice_number}</td>
@@ -1481,15 +1629,11 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
                 <td>${dueDate}</td>
                 <td><span class="status-badge ${statusClass}">${invoice.status}</span></td>
                 <td class="actions-cell">
-                  <button class="btn btn-sm btn-outline btn-preview-invoice" data-invoice-id="${invoice.id}" title="Preview PDF">
-                    Preview
-                  </button>
-                  ${isDraft ? `<button class="btn btn-sm btn-outline btn-edit-invoice" data-invoice-id="${invoice.id}" title="Edit Invoice">Edit</button>` : ''}
-                  <button class="btn btn-sm btn-outline btn-download-invoice" data-invoice-id="${invoice.id}" data-invoice-number="${invoice.invoice_number}" title="Download PDF">
-                    Download
-                  </button>
-                  ${showSendBtn ? `<button class="btn btn-sm btn-secondary btn-send-invoice" data-invoice-id="${invoice.id}" title="Send to Client">Send</button>` : ''}
-                  ${showMarkPaidBtn ? `<button class="btn btn-sm btn-success btn-mark-paid" data-invoice-id="${invoice.id}" title="Mark as Paid">Paid</button>` : ''}
+                  ${sendBtn}
+                  ${editBtn}
+                  ${paidBtn}
+                  ${previewBtn}
+                  ${downloadBtn}
                 </td>
               </tr>
             `;
@@ -1892,6 +2036,17 @@ async function showCreateInvoicePrompt(): Promise<void> {
     const typeSelect = overlay.querySelector('#invoice-type-select') as HTMLSelectElement;
     const depositField = overlay.querySelector('.deposit-field') as HTMLElement;
     const depositCreditSection = overlay.querySelector('#deposit-credit-section') as HTMLElement;
+
+    if (typeSelect && !typeSelect.dataset.dropdownInit) {
+      typeSelect.dataset.dropdownInit = 'true';
+      initModalDropdown(typeSelect, { placeholder: 'Invoice type...' });
+    }
+    const depositCreditSelect = overlay.querySelector('#deposit-credit-select') as HTMLSelectElement;
+    if (depositCreditSelect && !depositCreditSelect.dataset.dropdownInit) {
+      depositCreditSelect.dataset.dropdownInit = 'true';
+      initModalDropdown(depositCreditSelect, { placeholder: 'Apply deposit credit...' });
+    }
+
     typeSelect?.addEventListener('change', () => {
       const isDeposit = typeSelect.value === 'deposit';
       if (depositField) {
@@ -1933,7 +2088,6 @@ async function showCreateInvoicePrompt(): Promise<void> {
     });
 
     // Deposit credit selection
-    const depositCreditSelect = overlay.querySelector('#deposit-credit-select') as HTMLSelectElement;
     depositCreditSelect?.addEventListener('change', () => {
       const selectedOption = depositCreditSelect.selectedOptions[0];
       if (selectedOption && selectedOption.value) {
@@ -2296,6 +2450,8 @@ interface ClientOption {
   company_name: string | null;
 }
 
+let newProjectClientSelectInstance: FilterSelectInstance | null = null;
+
 /**
  * Setup the add project button handler
  */
@@ -2325,11 +2481,11 @@ async function addProject(ctx: AdminDashboardContext): Promise<void> {
   const newClientFields = document.getElementById('new-client-fields');
   if (newClientFields) newClientFields.classList.add('hidden');
 
+  // Ensure reusable dropdowns exist (create once)
+  ensureAddProjectSelects();
+
   // Load existing clients into dropdown
   await populateClientDropdown();
-
-  // Initialize custom dropdowns for the modal (with onChange callback for client dropdown)
-  initAddProjectModalDropdowns();
 
   // Show modal and lock body scroll
   modal.classList.remove('hidden');
@@ -2370,29 +2526,23 @@ async function addProject(ctx: AdminDashboardContext): Promise<void> {
 }
 
 /**
- * Initialize custom dropdowns for the add project modal
+ * Create add project modal dropdowns (reusable component) once
  */
-function initAddProjectModalDropdowns(): void {
-  // First, close any open dropdowns from previous modal session
-  document.querySelectorAll('.custom-dropdown[data-modal-dropdown].open').forEach((el) => {
-    el.classList.remove('open');
-  });
+function ensureAddProjectSelects(): void {
+  const newClientFields = document.getElementById('new-client-fields');
 
-  const clientSelect = document.getElementById('new-project-client') as HTMLSelectElement;
-  const typeSelect = document.getElementById('new-project-type') as HTMLSelectElement;
-  const budgetSelect = document.getElementById('new-project-budget') as HTMLSelectElement;
-  const timelineSelect = document.getElementById('new-project-timeline') as HTMLSelectElement;
-
-  // Client dropdown - with onChange to toggle new client fields
-  if (clientSelect && !clientSelect.dataset.dropdownInit) {
-    clientSelect.dataset.dropdownInit = 'true';
-    initModalDropdown(clientSelect, {
-      placeholder: 'Select existing client...',
+  const clientMount = document.getElementById('new-project-client-mount');
+  if (clientMount && !clientMount.querySelector('select')) {
+    newProjectClientSelectInstance = createFilterSelect({
+      id: 'new-project-client',
+      ariaLabel: 'Client',
+      emptyOption: 'Select existing client...',
+      options: [{ value: 'new', label: '+ Create New Client' }],
+      value: '',
+      className: 'form-input',
+      required: true,
       onChange: (value: string) => {
-        // Toggle new client fields based on selection
-        const newClientFields = document.getElementById('new-client-fields');
         if (!newClientFields) return;
-
         if (value === 'new') {
           newClientFields.classList.remove('hidden');
           const nameInput = document.getElementById('new-project-client-name') as HTMLInputElement;
@@ -2408,77 +2558,104 @@ function initAddProjectModalDropdowns(): void {
         }
       }
     });
+    clientMount.appendChild(newProjectClientSelectInstance.element);
   }
 
-  // Project type dropdown
-  if (typeSelect && !typeSelect.dataset.dropdownInit) {
-    typeSelect.dataset.dropdownInit = 'true';
-    initModalDropdown(typeSelect, { placeholder: 'Select type...' });
+  const typeMount = document.getElementById('new-project-type-mount');
+  if (typeMount && !typeMount.querySelector('select')) {
+    const typeInstance = createFilterSelect({
+      id: 'new-project-type',
+      ariaLabel: 'Project type',
+      emptyOption: 'Select type...',
+      options: [
+        { value: 'simple-site', label: 'Simple Website' },
+        { value: 'business-site', label: 'Business Website' },
+        { value: 'portfolio', label: 'Portfolio' },
+        { value: 'e-commerce', label: 'E-Commerce' },
+        { value: 'web-app', label: 'Web Application' },
+        { value: 'browser-extension', label: 'Browser Extension' },
+        { value: 'other', label: 'Other' }
+      ],
+      value: '',
+      className: 'form-input',
+      required: true
+    });
+    typeMount.appendChild(typeInstance.element);
   }
 
-  // Budget dropdown
-  if (budgetSelect && !budgetSelect.dataset.dropdownInit) {
-    budgetSelect.dataset.dropdownInit = 'true';
-    initModalDropdown(budgetSelect, { placeholder: 'Select budget...' });
+  const budgetMount = document.getElementById('new-project-budget-mount');
+  if (budgetMount && !budgetMount.querySelector('select')) {
+    const budgetInstance = createFilterSelect({
+      id: 'new-project-budget',
+      ariaLabel: 'Budget',
+      emptyOption: 'Select budget...',
+      options: [
+        { value: 'under-1k', label: 'Under $1,000' },
+        { value: '1k-2.5k', label: '$1,000 - $2,500' },
+        { value: '2.5k-5k', label: '$2,500 - $5,000' },
+        { value: '5k-10k', label: '$5,000 - $10,000' },
+        { value: '10k+', label: '$10,000+' }
+      ],
+      value: '',
+      className: 'form-input',
+      required: true
+    });
+    budgetMount.appendChild(budgetInstance.element);
   }
 
-  // Timeline dropdown
-  if (timelineSelect && !timelineSelect.dataset.dropdownInit) {
-    timelineSelect.dataset.dropdownInit = 'true';
-    initModalDropdown(timelineSelect, { placeholder: 'Select timeline...' });
+  const timelineMount = document.getElementById('new-project-timeline-mount');
+  if (timelineMount && !timelineMount.querySelector('select')) {
+    const timelineInstance = createFilterSelect({
+      id: 'new-project-timeline',
+      ariaLabel: 'Timeline',
+      emptyOption: 'Select timeline...',
+      options: [
+        { value: 'asap', label: 'ASAP' },
+        { value: '1-month', label: 'Within 1 Month' },
+        { value: '1-3-months', label: '1-3 Months' },
+        { value: '3-6-months', label: '3-6 Months' },
+        { value: 'flexible', label: 'Flexible' }
+      ],
+      value: '',
+      className: 'form-input',
+      required: true
+    });
+    timelineMount.appendChild(timelineInstance.element);
   }
 }
 
 /**
- * Reset dropdown values and close all dropdowns when modal closes
+ * Reset dropdown values when modal closes
  */
 function resetAddProjectDropdowns(): void {
-  const clientSelect = document.getElementById('new-project-client') as HTMLSelectElement;
-  const typeSelect = document.getElementById('new-project-type') as HTMLSelectElement;
-  const budgetSelect = document.getElementById('new-project-budget') as HTMLSelectElement;
-  const timelineSelect = document.getElementById('new-project-timeline') as HTMLSelectElement;
-
-  // Reset each dropdown using setModalDropdownValue
-  [clientSelect, typeSelect, budgetSelect, timelineSelect].forEach((select) => {
-    if (select) {
-      const wrapper = select.previousElementSibling as HTMLElement;
-      if (wrapper?.classList.contains('custom-dropdown')) {
-        // Close the dropdown if open
-        wrapper.classList.remove('open');
-        // Reset value
-        setModalDropdownValue(wrapper, '');
-      }
-    }
+  const ids = ['new-project-client', 'new-project-type', 'new-project-budget', 'new-project-timeline'];
+  ids.forEach((id) => {
+    const select = document.getElementById(id) as HTMLSelectElement;
+    if (select) select.value = '';
   });
 }
 
 /**
- * Populate the client dropdown with existing clients
+ * Populate the client dropdown with existing clients (reusable component setOptions)
  */
 async function populateClientDropdown(): Promise<void> {
-  const clientSelect = document.getElementById('new-project-client') as HTMLSelectElement;
-  if (!clientSelect) return;
+  if (!newProjectClientSelectInstance) return;
 
   try {
     const response = await apiFetch('/api/clients');
     if (response.ok) {
       const data = await response.json();
       const clients: ClientOption[] = data.clients || [];
-
-      // Clear existing options except first two
-      while (clientSelect.options.length > 2) {
-        clientSelect.remove(2);
-      }
-
-      // Add client options
-      clients.forEach((client) => {
-        const option = document.createElement('option');
-        option.value = String(client.id);
-        const displayName = client.contact_name || client.email;
-        const company = client.company_name ? ` (${client.company_name})` : '';
-        option.textContent = `${displayName}${company}`;
-        clientSelect.appendChild(option);
-      });
+      const options = [
+        { value: '', label: 'Select existing client...' },
+        ...clients.map((c) => {
+          const displayName = c.contact_name || c.email;
+          const company = c.company_name ? ` (${c.company_name})` : '';
+          return { value: String(c.id), label: `${displayName}${company}` };
+        }),
+        { value: 'new', label: '+ Create New Client' }
+      ];
+      newProjectClientSelectInstance.setOptions(options, '');
     }
   } catch (error) {
     console.error('[AdminProjects] Failed to load clients for dropdown:', error);

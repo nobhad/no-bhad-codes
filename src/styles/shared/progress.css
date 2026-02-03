@@ -13,7 +13,7 @@
 
 .progress-bar {
   height: 12px;
-  background: var(--portal-bg-light, #e5e7eb);
+  background: var(--portal-bg-light);
   border-radius: var(--portal-radius-pill, 9999px);
   overflow: hidden;
   box-shadow: var(--shadow-inset-light);
@@ -42,15 +42,15 @@
 
 /* Success state */
 .progress-fill.progress-success {
-  background: var(--color-success, #10b981);
+  background: var(--color-success);
 }
 
 /* Warning state */
 .progress-fill.progress-warning {
-  background: var(--color-warning, #fbbf24);
+  background: var(--color-warning);
 }
 
 /* Danger state */
 .progress-fill.progress-danger {
-  background: var(--color-danger, #ef4444);
+  background: var(--color-danger);
 }

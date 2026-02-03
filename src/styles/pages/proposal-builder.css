@@ -21,7 +21,7 @@
   --proposal-text: var(--portal-text-light);
   --proposal-text-muted: var(--portal-text-muted);
   --proposal-accent: var(--color-primary);
-  --proposal-success: var(--color-success, #22c55e);
+  --proposal-success: var(--color-success);
   --proposal-highlight: rgba(var(--color-primary-rgb), 0.15);
 
   /* Spacing */

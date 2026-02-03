@@ -21,7 +21,7 @@ import { errorTracker } from './services/error-tracking.js';
 import { emailService } from './services/email-service.js';
 import { cacheService } from './services/cache-service.js';
 import { getSchedulerService } from './services/scheduler-service.js';
-import { initializeDatabase } from './database/init.js';
+import { initializeDatabase, getDatabase, closeDatabase } from './database/init.js';
 import { MigrationManager } from './database/migrations.js';
 import sqlite3 from 'sqlite3';
 import authRouter from './routes/auth.js';
@@ -35,9 +35,14 @@ import intakeRouter from './routes/intake.js';
 import proposalsRouter from './routes/proposals.js';
 import apiRouter from './routes/api.js';
 import analyticsRouter from './routes/analytics.js';
+import approvalsRouter from './routes/approvals.js';
+import triggersRouter from './routes/triggers.js';
+import documentRequestsRouter from './routes/document-requests.js';
+import knowledgeBaseRouter from './routes/knowledge-base.js';
 import { setupSwagger } from './config/swagger.js';
 import { logger } from './middleware/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { requestIdMiddleware } from './middleware/request-id.js';
 import { sanitizeInputs } from './middleware/sanitization.js';
 import { auditMiddleware } from './middleware/audit.js';
 
@@ -59,6 +64,9 @@ errorTracker.init({
   sampleRate: process.env.NODE_ENV === 'production' ? 1.0 : 0.1,
   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0
 });
+
+// Request ID for tracing (must be early for logging)
+app.use(requestIdMiddleware);
 
 // Request logging and error tracking
 app.use(logger);
@@ -101,7 +109,7 @@ app.use(
     origin: process.env.FRONTEND_URL || 'http://localhost:4000',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Request-ID']
   })
 );
 
@@ -134,41 +142,104 @@ app.get('/', (req, res) => {
   res.json({
     message: 'No Bhad Codes API Server',
     version: '1.0.0',
+    apiVersion: 'v1',
     status: 'running',
     timestamp: new Date().toISOString(),
     endpoints: {
       health: '/health',
       documentation: '/api-docs',
-      invoices: '/api/invoices',
-      uploads: '/api/uploads'
+      // Canonical v1 endpoints (recommended)
+      v1: {
+        auth: '/api/v1/auth',
+        admin: '/api/v1/admin',
+        clients: '/api/v1/clients',
+        projects: '/api/v1/projects',
+        messages: '/api/v1/messages',
+        invoices: '/api/v1/invoices',
+        uploads: '/api/v1/uploads',
+        intake: '/api/v1/intake',
+        proposals: '/api/v1/proposals',
+        analytics: '/api/v1/analytics',
+        approvals: '/api/v1/approvals',
+        triggers: '/api/v1/triggers',
+        documentRequests: '/api/v1/document-requests',
+        knowledgeBase: '/api/v1/kb',
+        contact: '/api/v1/contact'
+      },
+      // Legacy endpoints (still supported)
+      legacy: {
+        auth: '/api/auth',
+        admin: '/api/admin',
+        clients: '/api/clients',
+        projects: '/api/projects',
+        messages: '/api/messages',
+        invoices: '/api/invoices',
+        uploads: '/api/uploads',
+        intake: '/api/intake',
+        proposals: '/api/proposals',
+        analytics: '/api/analytics',
+        approvals: '/api/approvals',
+        triggers: '/api/triggers',
+        documentRequests: '/api/document-requests',
+        knowledgeBase: '/api/kb',
+        contact: '/api/contact'
+      }
     }
   });
 });
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({
+// Health check endpoint (includes DB ping for depth)
+app.get('/health', async (_req, res) => {
+  const health: Record<string, unknown> = {
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    version: '1.0.0'
-  });
+    version: '1.0.0',
+    uptime: process.uptime()
+  };
+
+  try {
+    const db = getDatabase();
+    await db.get('SELECT 1');
+    (health as Record<string, unknown>).database = { status: 'connected' };
+  } catch (err) {
+    (health as Record<string, unknown>).status = 'degraded';
+    (health as Record<string, unknown>).database = { status: 'error', error: (err as Error).message };
+  }
+
+  const statusCode = (health.status as string) === 'healthy' ? 200 : 503;
+  res.status(statusCode).json(health);
 });
 
 // Setup API documentation
 setupSwagger(app);
 
-// API routes
-app.use('/api/auth', authRouter);
-app.use('/api/clients', clientsRouter);
-app.use('/api/projects', projectsRouter);
-app.use('/api/admin', adminRouter);
-app.use('/api/messages', messagesRouter);
-app.use('/api/invoices', invoicesRouter);
-app.use('/api/uploads', uploadsRouter);
-app.use('/api/intake', intakeRouter);
-app.use('/api/proposals', proposalsRouter);
-app.use('/api/analytics', analyticsRouter);
-app.use('/api', apiRouter); // General API routes (contact, health, etc.)
+// API routes - mount at both /api and /api/v1 for versioning
+const apiRouters = [
+  { path: '/auth', router: authRouter },
+  { path: '/clients', router: clientsRouter },
+  { path: '/projects', router: projectsRouter },
+  { path: '/admin', router: adminRouter },
+  { path: '/messages', router: messagesRouter },
+  { path: '/invoices', router: invoicesRouter },
+  { path: '/uploads', router: uploadsRouter },
+  { path: '/intake', router: intakeRouter },
+  { path: '/proposals', router: proposalsRouter },
+  { path: '/analytics', router: analyticsRouter },
+  { path: '/approvals', router: approvalsRouter },
+  { path: '/triggers', router: triggersRouter },
+  { path: '/document-requests', router: documentRequestsRouter },
+  { path: '/kb', router: knowledgeBaseRouter }
+];
+
+// Mount all routers at both /api and /api/v1
+apiRouters.forEach(({ path, router }) => {
+  app.use(`/api${path}`, router);
+  app.use(`/api/v1${path}`, router);
+});
+
+// General API routes (contact, etc.) - also dual mount
+app.use('/api', apiRouter);
+app.use('/api/v1', apiRouter);
 
 // 404 handler
 // Note: Express 5 doesn't support app.use('*') - use regular middleware instead
@@ -309,6 +380,13 @@ async function startServer() {
       // Close server
       server.close(async () => {
         console.log('✅ HTTP server closed');
+
+        // Close database pool
+        try {
+          await closeDatabase();
+        } catch (dbErr) {
+          console.error('❌ Error closing database:', dbErr);
+        }
 
         // Flush Sentry events
         try {

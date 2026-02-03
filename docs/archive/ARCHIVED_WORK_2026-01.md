@@ -1839,6 +1839,225 @@ Created shared portal CSS files for single source of truth:
 
 ---
 
+
+## Completed - January 31, 2026
+
+### Bug Fixes
+
+**Sidebar Badge Display:**
+
+- Reverted CSS changes that incorrectly applied collapsed sidebar badge styling to expanded sidebar
+- Badges now display inline (with text) in expanded sidebar, and as positioned numbers when collapsed
+- File: `src/styles/pages/admin.css`
+
+**Deposit Invoice Creation:**
+
+- Fixed missing `client_id` in `/api/admin/leads` SQL query
+- Projects loaded from admin dashboard now include `client_id` field
+- Deposit invoice creation now works correctly
+- File: `server/routes/admin.ts`
+
+**Invoice Credits Table:**
+
+- Created `invoice_credits` table (migration 027 was partially applied)
+- Invoice PDF generation now works for deposit invoices
+- Added indexes for efficient credit queries
+
+---
+## Completed - January 30, 2026
+
+### Deposit Invoice & Credit System
+
+**Status:** COMPLETE
+
+Implemented deposit invoices and credit application system for tracking deposits and applying them as credits to subsequent invoices.
+
+**Database Changes (Migration 027):**
+
+- Added `invoice_type` column to invoices ('standard' or 'deposit')
+- Added `deposit_for_project_id` and `deposit_percentage` columns
+- Created `invoice_credits` table for tracking applied credits
+- Added `default_deposit_percentage` column to projects
+
+**Backend Features:**
+
+- Create deposit invoices with percentage tracking
+- Get available deposits for a project (paid but not fully applied)
+- Apply deposit credit to standard invoices
+- Get credits applied to an invoice
+- Edit draft invoices (before sending)
+- PDF generation shows "DEPOSIT INVOICE" title for deposit type
+- PDF shows credit line items and adjusted totals
+
+**Frontend Features (Admin Project Details):**
+
+- Invoice type selection when creating invoices (Standard/Deposit)
+- Deposit badge on invoice list items
+- Edit button for draft invoices
+- Apply Credit button for outstanding invoices
+- Credit selection dialog with available deposits
+
+**API Endpoints:**
+
+- `POST /api/invoices/deposit` - Create deposit invoice
+- `GET /api/invoices/deposits/:projectId` - Get available deposits
+- `POST /api/invoices/:id/apply-credit` - Apply deposit credit
+- `GET /api/invoices/:id/credits` - Get credits for invoice
+- `PUT /api/invoices/:id` - Edit draft invoices
+
+**Files Modified:**
+
+- `server/database/migrations/027_invoice_deposits.sql` - New migration
+- `server/services/invoice-service.ts` - New deposit/credit methods
+- `server/routes/invoices.ts` - New endpoints, PDF updates
+- `src/features/admin/admin-project-details.ts` - UI for deposits/credits
+- `src/features/admin/admin-dashboard.ts` - Exposed delegate methods
+- `src/types/api.ts` - New TypeScript types
+- `src/utils/confirm-dialog.ts` - Added select field support
+- `src/styles/admin/project-detail.css` - Deposit badge styling
+
+---
+
+### PDF Generation & File Naming Overhaul
+
+**Status:** COMPLETE
+
+Replaced PDFKit with pdf-lib for reliable PDF generation, and implemented consistent file naming conventions with NoBhadCodes branding.
+
+**PDF Generation:**
+
+- Switched from PDFKit to pdf-lib for intake PDF generation
+- Fixed footer positioning issue (was appearing on page 2)
+- Added PDF metadata (title, author, subject) for proper browser tab titles
+- Direct URL preview instead of blob URL for proper download filenames
+
+**File Naming Convention:**
+
+- All uploaded files now prefixed with `nobhadcodes_`
+- Underscores instead of spaces in filenames
+- Uses client name OR company name (company takes priority)
+- Timestamp suffix for uniqueness
+- Format: `nobhadcodes_{description}_{timestamp}.{ext}`
+
+**Intake Files:**
+
+- JSON files: `nobhadcodes_intake_{client_name}_{date}.json`
+- PDF downloads: `nobhadcodes_intake_{client_name}.pdf`
+
+**Project Names:**
+
+- Auto-generated format: `{Company/Client Name} {Type} Site`
+- Example: "Hedgewitch Horticulture Business Site" (no dash)
+
+**Files Modified:**
+
+- `server/config/uploads.ts` - Added `sanitizeFilename()` function
+- `server/routes/projects.ts` - Rewrote PDF generation with pdf-lib
+- `server/routes/intake.ts` - Updated intake file naming
+- `server/routes/admin.ts` - Updated admin project file naming
+- `src/features/admin/modules/admin-projects.ts` - Direct URL preview for intake PDFs
+
+---
+
+### Complete pdf-lib Migration for All PDFs
+
+**Status:** COMPLETE
+
+Migrated all PDF generation from PDFKit to pdf-lib for consistency and better control. Increased logo size by 50% for better visibility.
+
+**Changes:**
+
+- **Invoice PDF** - Migrated to pdf-lib with 75pt logo
+- **Contract PDF** - Migrated to pdf-lib with 75pt logo
+- **Intake PDF** - Updated to 75pt logo (already used pdf-lib)
+- **Proposal PDF** - Migrated to pdf-lib with 75pt logo
+- Removed all PDFKit imports from codebase
+
+**Header Template (all PDFs):**
+
+| Element | Size | Y-Offset |
+|---------|------|----------|
+| Logo | 75pt height | 0 (preserves aspect ratio) |
+| Business Name | 16pt bold | 0 |
+| Owner | 10pt | -20pt |
+| Tagline | 9pt | -36pt |
+| Email | 9pt | -50pt |
+| Website | 9pt | -64pt |
+| Title | 28pt bold | -25pt (right-aligned) |
+
+**Files Modified:**
+
+- `server/routes/invoices.ts` - Removed PDFKit, uses pdf-lib exclusively
+- `server/routes/projects.ts` - Contract PDF now uses pdf-lib
+- `server/routes/proposals.ts` - Proposal PDF now uses pdf-lib
+
+**Documentation:**
+
+- Created [PDF_GENERATION.md](./features/PDF_GENERATION.md) - Complete PDF system documentation
+- Updated [INVOICES.md](./features/INVOICES.md) - References new PDF docs
+
+---
+
+### Wireframe Preview System
+
+**Status:** COMPLETE (Documentation Only)
+
+Implemented a wireframe preview system using screenshots uploaded via the existing Files system. No code changes required.
+
+**Approach:**
+
+- Use existing file upload and preview infrastructure
+- Screenshots of wireframes with naming convention: `{project-slug}_{page}_{tier}.png`
+- Use `wf_` or `wireframe_` prefix to group files
+
+**Documentation:**
+
+- Created [WIREFRAMES.md](./features/WIREFRAMES.md) feature documentation
+
+---
+
+## In Progress - January 29, 2026
+
+### Client Invitation Icon Button
+
+**Status:** VERIFIED COMPLETE
+
+Changed the "Invite" button in clients table from purple text button to icon-only button:
+
+**Changes Made:**
+
+- Clients table: Replaced `.btn-invite-inline` with `.icon-btn .icon-btn-invite` (icon-only)
+- Added `.status-cell-wrapper` for inline display of status + icon button
+- Client Details page: Added invite icon button next to Status field (if not invited)
+- Project Details page: Added invite icon button next to Client name (if not invited)
+- Icon button disappears once client is invited
+- Consistent styling with other admin icon buttons
+
+**Files Modified:**
+
+- `src/features/admin/modules/admin-clients.ts` - Table render + details page
+- `src/features/admin/admin-project-details.ts` - Project detail client info
+- `src/styles/pages/admin.css` - New `.icon-btn-invite` styles
+- `src/styles/admin/project-detail.css` - Positioning for project detail invite button
+
+---
+
+## Known Issues (Unfixed)
+
+*No critical known issues at this time.*
+
+### Recently Fixed
+
+- **Detail Modal Focus Trap** - FIXED January 30, 2026
+  - Added `manageFocusTrap()` to detail modal in `admin-dashboard.ts`
+  - Proper keyboard navigation (Tab/Shift+Tab cycles through focusable elements)
+  - Focus restoration when modal closes
+  - Escape key closes modal via focus trap handler
+
+---
+
+---
+
 ## Previous December 2025 Work
 
 All December 2025 completed work has been archived to `ARCHIVED_WORK_2025-12.md` in this same directory.

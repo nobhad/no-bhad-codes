@@ -14,6 +14,7 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import type { AdminDashboardContext } from '../admin-types';
 import { formatDateTime, formatCurrency, formatDate } from '../../../utils/format-utils';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
@@ -72,13 +73,28 @@ interface ClientNote {
 }
 
 interface ClientStats {
-  total_projects: number;
-  active_projects: number;
-  completed_projects: number;
-  total_invoiced: number;
-  total_paid: number;
-  outstanding: number;
+  // Support both camelCase (from API) and snake_case
+  total_projects?: number;
+  totalProjects?: number;
+  active_projects?: number;
+  activeProjects?: number;
+  completed_projects?: number;
+  completedProjects?: number;
+  total_invoiced?: number;
+  totalInvoiced?: number;
+  total_paid?: number;
+  totalPaid?: number;
+  outstanding?: number;
+  totalOutstanding?: number;
   avg_response_time?: number;
+}
+
+interface ClientProject {
+  id: number;
+  project_name: string;
+  status: string;
+  created_at: string;
+  progress?: number;
 }
 
 // ============================================
@@ -91,6 +107,7 @@ let _currentTab: string = 'overview';
 let clientContacts: ClientContact[] = [];
 let clientActivities: ClientActivity[] = [];
 let clientNotes: ClientNote[] = [];
+let clientProjects: ClientProject[] = [];
 let availableTags: Tag[] = [];
 let clientTags: Tag[] = [];
 let clientHealth: ClientHealth | null = null;
@@ -149,6 +166,7 @@ export async function initClientDetailView(
     loadClientNotes(clientId),
     loadClientTags(clientId),
     loadClientStats(clientId),
+    loadClientProjects(clientId),
     loadAvailableTags(),
     loadClientCRMFields(clientId),
     loadClientCustomFields(clientId)
@@ -209,6 +227,9 @@ function switchToTab(tabName: string): void {
     break;
   case 'projects':
     // Projects tab is handled by existing admin-clients.ts
+    break;
+  case 'invoices':
+    // Invoices tab content populated by loadClientBilling in admin-clients.ts
     break;
   case 'notes':
     renderNotesTab();
@@ -319,6 +340,19 @@ async function loadClientStats(clientId: number): Promise<void> {
   }
 }
 
+async function loadClientProjects(clientId: number): Promise<void> {
+  try {
+    const response = await apiFetch(`/api/clients/${clientId}/projects`);
+    if (response.ok) {
+      const data = await response.json();
+      clientProjects = data.projects || [];
+    }
+  } catch (error) {
+    console.error('[AdminClientDetails] Failed to load projects:', error);
+    clientProjects = [];
+  }
+}
+
 // CRM fields data
 let clientCRMData: {
   industry?: string;
@@ -379,10 +413,13 @@ async function loadClientCustomFields(clientId: number): Promise<void> {
 
 function renderOverviewTab(): void {
   renderHealthScore();
-  renderTagsSection();
-  renderStatsSection();
+  renderHeaderTags();
+  renderStatsCompact();
+  renderProjectsSummary();
+  renderRecentActivity();
   renderCRMDetails();
   renderCustomFields();
+  setupOverviewButtons();
 }
 
 function renderHealthScore(): void {
@@ -454,8 +491,8 @@ function renderHealthScore(): void {
   `;
 }
 
-function renderTagsSection(): void {
-  const container = document.getElementById('cd-tags-container');
+function renderHeaderTags(): void {
+  const container = document.getElementById('cd-header-tags');
   if (!container) return;
 
   // Destroy existing instance
@@ -464,14 +501,7 @@ function renderTagsSection(): void {
     tagInputInstance = null;
   }
 
-  container.innerHTML = `
-    <div class="client-tags-section">
-      <div class="client-tags-header">
-        <h4>Tags</h4>
-      </div>
-      <div id="cd-tag-input-container"></div>
-    </div>
-  `;
+  container.innerHTML = '<div id="cd-tag-input-container"></div>';
 
   const tagInputContainer = document.getElementById('cd-tag-input-container');
   if (!tagInputContainer) return;
@@ -537,30 +567,165 @@ function renderTagsSection(): void {
   });
 }
 
-function renderStatsSection(): void {
+function renderStatsCompact(): void {
   const container = document.getElementById('cd-stats-container');
-  if (!container || !clientStats) return;
+  if (!container) return;
+
+  // Use fallback values if stats not loaded
+  // API returns camelCase: activeProjects, totalProjects, totalPaid, totalOutstanding
+  const activeProjects = clientStats?.activeProjects ?? clientStats?.active_projects ?? 0;
+  const totalProjects = clientStats?.totalProjects ?? clientStats?.total_projects ?? 0;
+  const totalPaid = clientStats?.totalPaid ?? clientStats?.total_paid ?? 0;
+  const outstanding = clientStats?.totalOutstanding ?? clientStats?.outstanding ?? 0;
 
   container.innerHTML = `
-    <div class="client-stats-row">
-      <div class="client-stat-item">
-        <div class="client-stat-value">${clientStats.total_projects}</div>
-        <div class="client-stat-label">Total Projects</div>
-      </div>
-      <div class="client-stat-item">
-        <div class="client-stat-value">${clientStats.active_projects}</div>
-        <div class="client-stat-label">Active</div>
-      </div>
-      <div class="client-stat-item">
-        <div class="client-stat-value">${formatCurrency(clientStats.total_paid)}</div>
-        <div class="client-stat-label">Total Paid</div>
-      </div>
-      <div class="client-stat-item">
-        <div class="client-stat-value">${formatCurrency(clientStats.outstanding)}</div>
-        <div class="client-stat-label">Outstanding</div>
-      </div>
+    <div class="cd-stat-item">
+      <div class="cd-stat-value">${activeProjects}</div>
+      <div class="cd-stat-label">Active Projects</div>
+    </div>
+    <div class="cd-stat-item">
+      <div class="cd-stat-value">${totalProjects}</div>
+      <div class="cd-stat-label">Total Projects</div>
+    </div>
+    <div class="cd-stat-item">
+      <div class="cd-stat-value">${formatCurrency(totalPaid)}</div>
+      <div class="cd-stat-label">Total Paid</div>
+    </div>
+    <div class="cd-stat-item">
+      <div class="cd-stat-value">${formatCurrency(outstanding)}</div>
+      <div class="cd-stat-label">Outstanding</div>
     </div>
   `;
+}
+
+function renderProjectsSummary(): void {
+  const container = document.getElementById('cd-overview-projects');
+  if (!container) return;
+
+  if (clientProjects.length === 0) {
+    container.innerHTML = '<p class="empty-state">No projects yet</p>';
+    return;
+  }
+
+  // Show up to 3 recent/active projects
+  const recentProjects = clientProjects
+    .filter(p => p.status !== 'completed' && p.status !== 'cancelled')
+    .slice(0, 3);
+
+  if (recentProjects.length === 0) {
+    container.innerHTML = '<p class="empty-state">No active projects</p>';
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="cd-projects-list">
+      ${recentProjects.map(project => `
+        <div class="cd-project-item" data-project-id="${project.id}">
+          <div class="cd-project-info">
+            <span class="cd-project-name">${escapeHtml(project.project_name)}</span>
+            <span class="cd-project-status status-badge status-${project.status}">${project.status}</span>
+          </div>
+          ${project.progress !== undefined ? `
+            <div class="cd-project-progress">
+              <div class="cd-project-progress-bar" style="width: ${project.progress}%"></div>
+            </div>
+          ` : ''}
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  // Add click handlers
+  container.querySelectorAll('.cd-project-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const projectId = parseInt((item as HTMLElement).dataset.projectId || '0');
+      if (projectId && storedContext) {
+        storedContext.switchTab('projects');
+        setTimeout(() => {
+          import('./admin-projects').then(module => {
+            module.showProjectDetails(projectId, storedContext!);
+          });
+        }, 100);
+      }
+    });
+  });
+}
+
+function setupOverviewButtons(): void {
+  // View All Projects button
+  const viewProjectsBtn = document.querySelector('[data-action="view-projects"]');
+  if (viewProjectsBtn) {
+    viewProjectsBtn.addEventListener('click', () => {
+      // Switch to Projects tab
+      const projectsTab = document.querySelector('[data-cd-tab="projects"]') as HTMLButtonElement;
+      if (projectsTab) {
+        projectsTab.click();
+      }
+    });
+  }
+}
+
+function renderRecentActivity(): void {
+  const container = document.getElementById('cd-recent-activity');
+  if (!container) return;
+
+  // Show last 5 activities
+  const recentActivities = clientActivities.slice(0, 5);
+
+  if (recentActivities.length === 0) {
+    container.innerHTML = '<p class="empty-state">No recent activity</p>';
+    return;
+  }
+
+  const getActivityIcon = (type: string): string => {
+    switch (type) {
+    case 'note':
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+    case 'email':
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>';
+    case 'call':
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/></svg>';
+    case 'meeting':
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>';
+    default:
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
+    }
+  };
+
+  const formatRelativeTime = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return formatDate(dateStr);
+  };
+
+  container.innerHTML = `
+    <div class="cd-recent-activity-list">
+      ${recentActivities.map(activity => `
+        <div class="cd-activity-item">
+          <div class="cd-activity-icon">${getActivityIcon(activity.type)}</div>
+          <div class="cd-activity-content">
+            <div class="cd-activity-title">${escapeHtml(activity.title)}</div>
+            <div class="cd-activity-time">${formatRelativeTime(activity.created_at)}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="cd-activity-view-all" data-action="view-all-activity">View all activity</div>
+  `;
+
+  // Add click handler for "View all activity"
+  container.querySelector('[data-action="view-all-activity"]')?.addEventListener('click', () => {
+    switchToTab('activity');
+  });
 }
 
 function renderCRMDetails(): void {
@@ -671,23 +836,28 @@ async function showEditCRMDialog(): Promise<void> {
 }
 
 function renderCustomFields(): void {
+  const card = document.getElementById('cd-custom-fields-card');
   const container = document.getElementById('cd-custom-fields-container');
-  if (!container) return;
+  if (!container || !card) return;
 
+  // Hide card if no custom fields
   if (clientCustomFields.length === 0) {
-    container.innerHTML = '<p class="empty-state">No custom fields configured.</p>';
-  } else {
-    container.innerHTML = `
-      <div class="custom-fields-grid">
-        ${clientCustomFields.map(field => `
-          <div class="meta-item">
-            <span class="field-label">${SanitizationUtils.escapeHtml(field.field_name)}</span>
-            <span class="meta-value">${formatCustomFieldValue(field)}</span>
-          </div>
-        `).join('')}
-      </div>
-    `;
+    card.style.display = 'none';
+    return;
   }
+
+  // Show card and render fields
+  card.style.display = '';
+  container.innerHTML = `
+    <div class="custom-fields-grid">
+      ${clientCustomFields.map(field => `
+        <div class="meta-item">
+          <span class="field-label">${SanitizationUtils.escapeHtml(field.field_name)}</span>
+          <span class="meta-value">${formatCustomFieldValue(field)}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
 
   // Setup edit custom fields button
   const editBtn = document.getElementById('cd-btn-edit-custom-fields');
@@ -857,7 +1027,7 @@ function renderContactCard(contact: ClientContact): string {
                 <rect width="20" height="16" x="2" y="4" rx="2"/>
                 <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
               </svg>
-              ${escapeHtml(contact.email)}
+              ${getEmailWithCopyHtml(contact.email, escapeHtml(contact.email))}
             </span>
           ` : ''}
           ${contact.phone ? `
@@ -872,18 +1042,18 @@ function renderContactCard(contact: ClientContact): string {
       </div>
       <div class="contact-actions">
         ${!contact.is_primary ? `
-          <button class="icon-btn" data-action="set-primary" title="Set as primary">
+          <button class="icon-btn" data-action="set-primary" title="Set as primary" aria-label="Set as primary contact">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
             </svg>
           </button>
         ` : ''}
-        <button class="icon-btn" data-action="edit" title="Edit contact">
+        <button class="icon-btn" data-action="edit" title="Edit contact" aria-label="Edit contact">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
           </svg>
         </button>
-        <button class="icon-btn" data-action="delete" title="Delete contact">
+        <button class="icon-btn" data-action="delete" title="Delete contact" aria-label="Delete contact">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18"/>
             <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
@@ -1238,12 +1408,12 @@ function renderNoteCard(note: ClientNote): string {
           ${note.created_by ? ` by ${escapeHtml(note.created_by)}` : ''}
         </span>
         <div class="note-actions">
-          <button class="icon-btn" data-action="${note.is_pinned ? 'unpin' : 'pin'}" title="${note.is_pinned ? 'Unpin' : 'Pin'}">
+          <button class="icon-btn" data-action="${note.is_pinned ? 'unpin' : 'pin'}" title="${note.is_pinned ? 'Unpin' : 'Pin'}" aria-label="${note.is_pinned ? 'Unpin note' : 'Pin note'}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="${note.is_pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
               <path d="M19 13v-2h-4V5l4-4H5l4 4v6H5v2h4v8l2 2 2-2v-8z"/>
             </svg>
           </button>
-          <button class="icon-btn" data-action="delete" title="Delete">
+          <button class="icon-btn" data-action="delete" title="Delete" aria-label="Delete note">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 6h18"/>
               <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>

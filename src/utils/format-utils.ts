@@ -152,10 +152,10 @@ export function formatProjectType(type: string | undefined | null): string {
 // ============================================
 
 /**
- * Format date for display (e.g., "Jan 28, 2026")
+ * Format date for display in MM/DD/YYYY format
  * Uses consistent formatting across the application
  * @param dateString - ISO date string or Date object
- * @returns Formatted date string
+ * @returns Formatted date string (e.g., "01/28/2026")
  */
 export function formatDate(dateString: string | Date | undefined | null): string {
   if (!dateString) return '-';
@@ -164,20 +164,20 @@ export function formatDate(dateString: string | Date | undefined | null): string
     const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
     if (isNaN(date.getTime())) return '-';
 
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${month}/${day}/${year}`;
   } catch {
     return '-';
   }
 }
 
 /**
- * Format date and time for display (e.g., "Jan 28, 2026, 2:30 PM")
+ * Format date and time for display in MM/DD/YYYY, h:mm AM/PM format
  * @param dateString - ISO date string or Date object
- * @returns Formatted date and time string
+ * @returns Formatted date and time string (e.g., "01/28/2026, 2:30 PM")
  */
 export function formatDateTime(dateString: string | Date | undefined | null): string {
   if (!dateString) return '-';
@@ -186,14 +186,17 @@ export function formatDateTime(dateString: string | Date | undefined | null): st
     const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
     if (isNaN(date.getTime())) return '-';
 
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    const datePart = `${month}/${day}/${year}`;
+
+    const timePart = date.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
     });
+    return `${datePart}, ${timePart}`;
   } catch {
     return '-';
   }

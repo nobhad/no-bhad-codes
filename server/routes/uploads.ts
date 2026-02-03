@@ -351,9 +351,10 @@ router.post(
     };
 
     // Save project file info to database
+    let fileId: number | undefined;
     try {
       const db = await getDatabase();
-      await db.run(
+      const result = await db.run(
         `INSERT INTO files (project_id, filename, original_filename, mime_type, file_size, file_path, uploaded_by, created_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
         [
@@ -366,6 +367,7 @@ router.post(
           req.user?.id
         ]
       );
+      fileId = result.lastID;
     } catch (dbError) {
       console.error('Failed to save file info to database:', dbError);
       // Non-blocking - file is already uploaded
@@ -374,7 +376,7 @@ router.post(
     res.status(201).json({
       success: true,
       message: 'Project file uploaded successfully',
-      file: projectFile
+      file: { ...projectFile, id: fileId ?? projectFile.id }
     });
   })
 );
@@ -466,17 +468,63 @@ router.get(
       });
     }
 
+    // Filter query params
+    const projectId = req.query.projectId ? parseInt(req.query.projectId as string) : undefined;
+    const fileType = req.query.fileType as string | undefined;
+    const category = req.query.category as string | undefined;
+    const dateFrom = req.query.dateFrom as string | undefined;
+    const dateTo = req.query.dateTo as string | undefined;
+
     try {
       const db = await getDatabase();
-      // Get files from projects belonging to this client
-      const files = await db.all(
-        `SELECT f.id, f.project_id, f.filename, f.original_filename, f.mime_type, f.file_size, f.file_path, f.uploaded_by, f.created_at,
-                p.name as project_name
-         FROM files f
-         LEFT JOIN projects p ON f.project_id = p.id
-         WHERE p.client_id = ? OR f.uploaded_by = ?
-         ORDER BY f.created_at DESC`,
-        [clientId, clientId]
+
+      // Build dynamic query with filters
+      let query = `
+        SELECT f.id, f.project_id, f.filename, f.original_filename, f.mime_type, f.file_size,
+               f.file_path, f.uploaded_by, f.created_at, f.file_type, f.category,
+               p.name as project_name
+        FROM files f
+        LEFT JOIN projects p ON f.project_id = p.id
+        WHERE (p.client_id = ? OR f.uploaded_by = ?)
+      `;
+      const params: (string | number)[] = [clientId, clientId];
+
+      if (projectId) {
+        query += ' AND f.project_id = ?';
+        params.push(projectId);
+      }
+
+      if (fileType && fileType !== 'all') {
+        query += ' AND f.file_type = ?';
+        params.push(fileType);
+      }
+
+      if (category && category !== 'all') {
+        query += ' AND f.category = ?';
+        params.push(category);
+      }
+
+      if (dateFrom) {
+        query += ' AND date(f.created_at) >= date(?)';
+        params.push(dateFrom);
+      }
+
+      if (dateTo) {
+        query += ' AND date(f.created_at) <= date(?)';
+        params.push(dateTo);
+      }
+
+      query += ' ORDER BY f.created_at DESC';
+
+      const files = await db.all(query, params);
+
+      // Also get projects list for the filter dropdown
+      const projects = await db.all(
+        `SELECT DISTINCT p.id, p.name
+         FROM projects p
+         WHERE p.client_id = ?
+         ORDER BY p.name`,
+        [clientId]
       );
 
       res.json({
@@ -491,7 +539,13 @@ router.get(
           size: file.file_size,
           url: file.file_path,
           uploadedBy: file.uploaded_by,
-          uploadedAt: file.created_at
+          uploadedAt: file.created_at,
+          fileType: file.file_type,
+          category: file.category
+        })),
+        projects: projects.map((p: any) => ({
+          id: p.id,
+          name: p.name
         }))
       });
     } catch (dbError) {
@@ -723,6 +777,334 @@ router.get('/test', (req: express.Request, res: express.Response) => {
     ]
   });
 });
+
+// =====================================================
+// DELIVERABLE WORKFLOW ENDPOINTS
+// =====================================================
+
+import { fileService } from '../services/file-service.js';
+
+/**
+ * @swagger
+ * /api/uploads/deliverables/project/{projectId}:
+ *   get:
+ *     tags:
+ *       - Deliverables
+ *     summary: Get all deliverables for a project with workflow status
+ */
+router.get(
+  '/deliverables/project/:projectId',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const projectId = parseInt(req.params.projectId);
+    const status = req.query.status as string | undefined;
+
+    if (isNaN(projectId)) {
+      return res.status(400).json({ error: 'Invalid project ID' });
+    }
+
+    const deliverables = await fileService.getProjectDeliverables(projectId, status);
+    const stats = await fileService.getDeliverableStats(projectId);
+
+    res.json({ deliverables, stats });
+  })
+);
+
+/**
+ * @swagger
+ * /api/uploads/deliverables/pending:
+ *   get:
+ *     tags:
+ *       - Deliverables
+ *     summary: Get all deliverables pending review (admin)
+ */
+router.get(
+  '/deliverables/pending',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user?.type !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const deliverables = await fileService.getPendingReviewDeliverables();
+    res.json({ deliverables });
+  })
+);
+
+/**
+ * @swagger
+ * /api/uploads/deliverables/{fileId}/workflow:
+ *   get:
+ *     tags:
+ *       - Deliverables
+ *     summary: Get workflow status for a deliverable
+ */
+router.get(
+  '/deliverables/:fileId/workflow',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const fileId = parseInt(req.params.fileId);
+
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID' });
+    }
+
+    const workflow = await fileService.getDeliverableWorkflow(fileId);
+    const comments = await fileService.getReviewComments(fileId);
+    const history = await fileService.getDeliverableHistory(fileId);
+
+    res.json({ workflow, comments, history });
+  })
+);
+
+/**
+ * @swagger
+ * /api/uploads/deliverables/{fileId}/submit:
+ *   post:
+ *     tags:
+ *       - Deliverables
+ *     summary: Submit deliverable for review
+ */
+router.post(
+  '/deliverables/:fileId/submit',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const { notes } = req.body;
+
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID' });
+    }
+
+    const submittedBy = req.user?.email || 'unknown';
+    const workflow = await fileService.submitForReview(fileId, submittedBy, notes);
+
+    res.json({
+      success: true,
+      message: 'Deliverable submitted for review',
+      workflow
+    });
+  })
+);
+
+/**
+ * @swagger
+ * /api/uploads/deliverables/{fileId}/start-review:
+ *   post:
+ *     tags:
+ *       - Deliverables
+ *     summary: Start reviewing a deliverable (admin)
+ */
+router.post(
+  '/deliverables/:fileId/start-review',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user?.type !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const fileId = parseInt(req.params.fileId);
+
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID' });
+    }
+
+    const reviewerEmail = req.user?.email || 'admin';
+    const workflow = await fileService.startReview(fileId, reviewerEmail);
+
+    res.json({
+      success: true,
+      message: 'Review started',
+      workflow
+    });
+  })
+);
+
+/**
+ * @swagger
+ * /api/uploads/deliverables/{fileId}/request-changes:
+ *   post:
+ *     tags:
+ *       - Deliverables
+ *     summary: Request changes to a deliverable (admin)
+ */
+router.post(
+  '/deliverables/:fileId/request-changes',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user?.type !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const fileId = parseInt(req.params.fileId);
+    const { feedback } = req.body;
+
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID' });
+    }
+
+    if (!feedback) {
+      return res.status(400).json({ error: 'Feedback is required when requesting changes' });
+    }
+
+    const reviewerEmail = req.user?.email || 'admin';
+    const workflow = await fileService.requestChanges(fileId, reviewerEmail, feedback);
+
+    res.json({
+      success: true,
+      message: 'Changes requested',
+      workflow
+    });
+  })
+);
+
+/**
+ * @swagger
+ * /api/uploads/deliverables/{fileId}/approve:
+ *   post:
+ *     tags:
+ *       - Deliverables
+ *     summary: Approve a deliverable (admin)
+ */
+router.post(
+  '/deliverables/:fileId/approve',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user?.type !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const fileId = parseInt(req.params.fileId);
+    const { comment } = req.body;
+
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID' });
+    }
+
+    const approverEmail = req.user?.email || 'admin';
+    const workflow = await fileService.approveDeliverable(fileId, approverEmail, comment);
+
+    res.json({
+      success: true,
+      message: 'Deliverable approved',
+      workflow
+    });
+  })
+);
+
+/**
+ * @swagger
+ * /api/uploads/deliverables/{fileId}/reject:
+ *   post:
+ *     tags:
+ *       - Deliverables
+ *     summary: Reject a deliverable (admin)
+ */
+router.post(
+  '/deliverables/:fileId/reject',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user?.type !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const fileId = parseInt(req.params.fileId);
+    const { reason } = req.body;
+
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID' });
+    }
+
+    if (!reason) {
+      return res.status(400).json({ error: 'Reason is required when rejecting' });
+    }
+
+    const reviewerEmail = req.user?.email || 'admin';
+    const workflow = await fileService.rejectDeliverable(fileId, reviewerEmail, reason);
+
+    res.json({
+      success: true,
+      message: 'Deliverable rejected',
+      workflow
+    });
+  })
+);
+
+/**
+ * @swagger
+ * /api/uploads/deliverables/{fileId}/resubmit:
+ *   post:
+ *     tags:
+ *       - Deliverables
+ *     summary: Resubmit deliverable after changes
+ */
+router.post(
+  '/deliverables/:fileId/resubmit',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const { notes } = req.body;
+
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID' });
+    }
+
+    const submittedBy = req.user?.email || 'unknown';
+    const workflow = await fileService.resubmitDeliverable(fileId, submittedBy, notes);
+
+    res.json({
+      success: true,
+      message: 'Deliverable resubmitted for review',
+      workflow
+    });
+  })
+);
+
+/**
+ * @swagger
+ * /api/uploads/deliverables/{fileId}/comments:
+ *   post:
+ *     tags:
+ *       - Deliverables
+ *     summary: Add a comment to deliverable review
+ */
+router.post(
+  '/deliverables/:fileId/comments',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const fileId = parseInt(req.params.fileId);
+    const { comment } = req.body;
+
+    if (isNaN(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID' });
+    }
+
+    if (!comment) {
+      return res.status(400).json({ error: 'Comment is required' });
+    }
+
+    const workflow = await fileService.getDeliverableWorkflow(fileId);
+    if (!workflow) {
+      return res.status(404).json({ error: 'Deliverable workflow not found' });
+    }
+
+    const authorEmail = req.user?.email || 'unknown';
+    const authorType = req.user?.type === 'admin' ? 'admin' : 'client';
+    const newComment = await fileService.addReviewComment(
+      workflow.id,
+      authorEmail,
+      authorType as 'admin' | 'client',
+      comment,
+      'feedback'
+    );
+
+    res.json({
+      success: true,
+      message: 'Comment added',
+      comment: newComment
+    });
+  })
+);
 
 // Error handler for multer
 router.use(

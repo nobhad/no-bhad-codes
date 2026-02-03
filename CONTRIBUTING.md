@@ -37,8 +37,8 @@ Thank you for your interest in contributing to No Bhad Codes! This document prov
 
 5. **Run tests**
    ```bash
-   npm run test
-   npm run test:e2e
+   npm run test              # Unit tests (Vitest)
+   npx playwright test       # E2E tests (Playwright)
    ```
 
 ## 📋 Development Workflow
@@ -167,10 +167,10 @@ describe('AuthService', () => {
 
 ### Test Commands
 ```bash
-npm run test         # Unit tests in watch mode
-npm run test:run     # Run unit tests once
-npm run test:coverage # Generate coverage report
-npm run test:e2e     # End-to-end tests
+npm run test           # Unit tests in watch mode
+npm run test:run       # Run unit tests once
+npm run test:coverage  # Generate coverage report
+npx playwright test   # End-to-end tests (Playwright)
 ```
 
 ## 📚 Documentation
@@ -262,7 +262,7 @@ Screenshots, mockups, or related examples
 2. **Documentation**
    - Update README if needed
    - Add JSDoc comments
-   - Update CHANGELOG.md
+   - Update docs and CHANGELOG if the project uses one
 
 3. **Testing**
    - Add tests for new functionality

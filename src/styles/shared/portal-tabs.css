@@ -1,0 +1,302 @@
+/**
+ * ===============================================
+ * SHARED PORTAL TABS
+ * ===============================================
+ * @file src/styles/shared/portal-tabs.css
+ *
+ * Two patterns:
+ * 1. Main tab strip: .portal-tabs + .portal-tab-panel (project detail, client detail).
+ * 2. Sub-tabs (horizontal button strip): .portal-subtabs + .portal-subtab + .portal-subtab-content.
+ *    Use for in-page sections (e.g. Analytics Overview | Business | Visitors | Reports).
+ *    Analytics also uses .analytics-subtabs / .analytics-subtab for the same look.
+ */
+
+/* =====================================================
+   SUB-TABS (reusable horizontal button strip)
+   Use .portal-subtabs on container, .portal-subtab on buttons,
+   .portal-subtab-content on content panels. Same styles apply to
+   .analytics-subtabs / .analytics-subtab for backward compatibility.
+   ===================================================== */
+.portal-subtabs,
+.analytics-subtabs {
+  display: flex;
+  gap: var(--portal-spacing-sm);
+  margin-bottom: var(--portal-spacing-lg);
+  padding-bottom: var(--portal-spacing-md);
+  border-bottom: 1px solid var(--portal-border);
+}
+
+.portal-subtab,
+.analytics-subtab {
+  padding: var(--portal-spacing-sm) var(--portal-spacing-lg);
+  background: transparent;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-md);
+  color: var(--portal-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.portal-subtab:hover,
+.analytics-subtab:hover {
+  background: var(--portal-bg-medium);
+  color: var(--portal-text-primary);
+}
+
+.portal-subtab.active,
+.analytics-subtab.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.portal-subtab-content,
+.analytics-subtab-content {
+  display: none;
+}
+
+.portal-subtab-content.active,
+.analytics-subtab-content.active {
+  display: block;
+}
+
+/* =====================================================
+   TAB STRIP (.portal-tabs)
+   ===================================================== */
+.portal-tabs {
+  display: flex;
+  gap: var(--portal-spacing-sm);
+  margin-bottom: 0;
+  overflow: visible;
+  position: relative;
+}
+
+.portal-tabs button {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-sm);
+  padding: var(--portal-spacing-md) var(--portal-spacing-xl);
+  background: var(--portal-bg-readonly);
+  border: none;
+  border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0;
+  color: var(--portal-text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  position: relative;
+  z-index: 0;
+  box-shadow: none;
+}
+
+.portal-tabs button .tab-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.portal-tabs button:hover:not(.active) {
+  color: var(--portal-text-light);
+  background: var(--color-primary);
+}
+
+.portal-tabs button.active {
+  position: relative;
+  color: var(--portal-text-light);
+  background: var(--portal-bg-dark);
+  font-weight: 700;
+  z-index: 10;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-bottom: 0;
+  box-shadow: var(--shadow-panel);
+}
+
+.portal-tabs button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 15px;
+  background: var(--portal-bg-dark);
+  z-index: 11;
+  box-shadow: none;
+}
+
+.portal-tabs button.active:hover,
+.portal-tabs button.active:focus,
+.portal-tabs button.active:active {
+  background: var(--portal-bg-dark);
+  color: var(--portal-text-light);
+  outline: none;
+}
+
+/* =====================================================
+   TAB CONTENT PANELS (.portal-tab-panel)
+   ===================================================== */
+.portal-tab-panel {
+  display: none;
+  background: var(--portal-bg-dark);
+  border-radius: 0 var(--portal-radius-lg) var(--portal-radius-lg) var(--portal-radius-lg);
+  padding: 4rem 2rem;
+  position: relative;
+  z-index: 2;
+  margin-top: 0 !important;
+  box-shadow: var(--shadow-panel);
+}
+
+.portal-tab-panel.active {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+/* =====================================================
+   TAB SECTION HEADING (for visual hierarchy within tabs)
+   ===================================================== */
+.tab-section-heading {
+  margin: 0 0 var(--portal-spacing-lg);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--portal-text-primary);
+  letter-spacing: 0.02em;
+}
+
+/* Hide heading on first tab (overview) since it's the main content */
+.portal-tab-panel:first-of-type .tab-section-heading {
+  display: none;
+}
+
+/* =====================================================
+   RESPONSIVE (same behavior everywhere)
+   ===================================================== */
+
+/* Tab container wrapper for scroll indicators */
+.portal-tabs-wrapper {
+  position: relative;
+}
+
+/* Scroll fade indicators (shown when content is scrollable) */
+.portal-tabs-wrapper::before,
+.portal-tabs-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 4px;
+  width: 32px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 5;
+}
+
+.portal-tabs-wrapper::before {
+  left: 0;
+  background: linear-gradient(to right, var(--portal-bg-medium, #2a2a2a) 0%, transparent 100%);
+}
+
+.portal-tabs-wrapper::after {
+  right: 0;
+  background: linear-gradient(to left, var(--portal-bg-medium, #2a2a2a) 0%, transparent 100%);
+}
+
+/* Show indicators when scrollable - controlled via JS data attributes */
+.portal-tabs-wrapper[data-scroll-start="false"]::before {
+  opacity: 1;
+}
+
+.portal-tabs-wrapper[data-scroll-end="false"]::after {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .portal-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--portal-bg-light) transparent;
+    padding-bottom: 4px;
+    /* Prevent momentum scroll from going too far */
+    overscroll-behavior-x: contain;
+  }
+
+  .portal-tabs::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .portal-tabs::-webkit-scrollbar-track {
+    background: var(--portal-bg-readonly, rgba(0, 0, 0, 0.1));
+    border-radius: 3px;
+  }
+
+  .portal-tabs::-webkit-scrollbar-thumb {
+    background: var(--portal-bg-light);
+    border-radius: 3px;
+  }
+
+  .portal-tabs::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+  }
+
+  .portal-tabs button {
+    padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+    font-size: 0.75rem;
+  }
+
+  .portal-tab-panel {
+    padding: 2rem 1rem;
+  }
+
+  .portal-tab-panel.active {
+    gap: 2rem;
+  }
+
+  .portal-subtabs,
+  .analytics-subtabs {
+    flex-wrap: wrap;
+  }
+
+  .portal-subtab,
+  .analytics-subtab {
+    flex: 1;
+    min-width: calc(50% - var(--portal-spacing-sm));
+    text-align: center;
+  }
+}
+
+/* Tablet - reduce icon visibility */
+@media (max-width: 600px) {
+  .portal-tabs button {
+    padding: var(--portal-spacing-xs) var(--portal-spacing-sm);
+    font-size: 0.7rem;
+  }
+
+  /* Hide tab icons on smaller screens to save space */
+  .portal-tabs button .tab-icon {
+    display: none;
+  }
+}
+
+/* Mobile - further reduce padding */
+@media (max-width: 480px) {
+  .portal-tabs button {
+    padding: var(--portal-spacing-xs) var(--portal-spacing-sm);
+    font-size: 0.65rem;
+    letter-spacing: 0.3px;
+  }
+
+  .portal-tab-panel {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .portal-tab-panel.active {
+    gap: 1.5rem;
+  }
+}

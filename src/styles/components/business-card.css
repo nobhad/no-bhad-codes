@@ -383,7 +383,7 @@
   box-sizing: border-box;
 
   /* Typography using variables */
-  font-family: var(--font--acme, "Courier New", monospace);
+  font-family: var(--font-family-acme, "Courier New", monospace);
 
   /* NEVER round corners */
   border-radius: 0;
@@ -413,7 +413,7 @@
 .card-logo {
   font-size: var(--font-size-xl);
   font-weight: bold;
-  margin-bottom: var(--space-xs);
+  margin-bottom: var(--space-fluid-xs);
   letter-spacing: 2px;
   color: var(--color-card-text); /* Always dark text for light card */
 }
@@ -421,7 +421,7 @@
 .card-tagline {
   font-size: var(--font-size-sm);
   opacity: 0.8;
-  margin-bottom: var(--space-sm);
+  margin-bottom: var(--space-fluid-sm);
   color: var(--color-card-text); /* Always dark text for light card */
 }
 
@@ -597,7 +597,7 @@
 @media (prefers-contrast: high) {
   .business-card-inner {
     /* Strong border for high contrast - no shadow here, shadows on faces */
-    box-shadow: 0 0 0 2px #000;
+    box-shadow: 0 0 0 2px var(--color-black);
   }
 
   .business-card-front,
@@ -605,7 +605,7 @@
     background: var(--color-card-bg);
     color: var(--color-black);
     box-shadow:
-      0 0 0 1px #000,
+      0 0 0 1px var(--color-black),
       0 10px 30px var(--color-shadow);
   }
 }

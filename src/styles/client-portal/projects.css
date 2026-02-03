@@ -221,12 +221,12 @@
 }
 
 .account-item:hover {
-  background-color: rgba(var(--color-brand-primary-rgb), 0.08);
+  background-color: rgba(var(--color-primary-rgb), 0.08);
   transform: translateX(2px);
 }
 
 .account-item.active {
-  background-color: rgba(var(--color-brand-primary-rgb), 0.12);
+  background-color: rgba(var(--color-primary-rgb), 0.12);
   border-left-color: var(--color-primary);
   transform: translateX(4px);
 }
@@ -330,7 +330,7 @@
 }
 
 .project-title-section h1 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 2rem;
   color: var(--portal-border-dark);
   margin: 0;
@@ -406,7 +406,7 @@
 }
 
 .overview-card h3 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.2rem;
   color: var(--portal-border-dark);
   margin: 0 0 1rem 0;

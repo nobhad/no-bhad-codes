@@ -1,6 +1,7 @@
 # Tables, Archive & Delete: Small-Feature Audit
 
 **Date:** January 28, 2026  
+**Last Updated:** February 2, 2026  
 **Purpose:** Audit **granular** features—tables (filter, sort, export, pagination, bulk), archive (soft delete, restore, “show archived”), and delete (hard delete, confirm, bulk)—across admin and portal. What’s implemented, what’s missing.
 
 **Related:** [CRM_CMS_DEEP_DIVE.md](./CRM_CMS_DEEP_DIVE.md), [CLIENT_PORTAL_DEEP_DIVE.md](./CLIENT_PORTAL_DEEP_DIVE.md).
@@ -27,7 +28,7 @@
 
 | Feature | Implemented | Notes |
 |--------|-------------|--------|
-| **Filter** | Partial | Buttons: All, Pending, Reviewed, Accepted. **No Rejected or Converted** in filter tabs |
+| **Filter** | Yes | Buttons: All, Pending, Reviewed, Accepted, **Rejected**, **Converted** (admin-proposals.ts filter tabs) |
 | **Search** | No | — |
 | **Sort** | No | — |
 | **Date range** | No | — |
@@ -86,7 +87,7 @@
 
 | Feature | Status | Notes |
 |--------|--------|--------|
-| **Project delete (UI)** | No | `DELETE /api/projects/:id` exists; **no delete button** in admin projects UI |
+| **Project delete (UI)** | Yes | Implemented Feb 2026: Delete button in project details (`#btn-delete-project`), confirm dialog, `DELETE /api/projects/:id` (admin-project-details.ts) |
 | **Lead delete** | No | No delete action |
 | **Contact delete** | No | Archive only; no hard delete |
 | **Proposal delete** | No | Reject / Convert only; no delete |
@@ -150,8 +151,8 @@
 
 ### Delete
 
-- **Done:** Client, milestone, file delete with confirm.
-- **Missing:** Project delete in UI, lead/contact/proposal delete, bulk delete, soft delete, undo.
+- **Done:** Client, milestone, file, **project** (UI in project details) delete with confirm.
+- **Missing:** Lead/contact/proposal delete, bulk delete, soft delete, undo.
 
 ### Export
 
@@ -164,14 +165,14 @@
 
 ### Quick
 
-1. **Proposals filter** — Add “Rejected” and “Converted” to filter tabs.
+1. ~~**Proposals filter**~~ **Done** (Feb 2026)
 2. **Export per table** — Add Export (JSON or CSV) for Leads, Contacts, Projects tabs using `AdminExportService`.
 3. **“Clear All” includes search** — Already does; verify and document.
 
 ### Small
 
 4. **Contact restore** — “Restore” when status = archived (revert to e.g. “read” or “responded”).
-5. **Project delete in UI** — Delete button in project details or list; use existing `DELETE /api/projects/:id` + confirm.
+5. ~~**Project delete in UI** — Delete button in project details or list.~~ **Done** (Feb 2026); `#btn-delete-project` in admin-project-details.ts.
 6. **Proposals search** — Simple client/project name search (client- or API-side).
 
 ### Medium

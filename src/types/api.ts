@@ -209,18 +209,16 @@ export type TimelineValue =
 
 /**
  * Lead status values
+ * Simplified pipeline stages: new → contacted → qualified → in-progress → converted/lost
  */
 export type LeadStatus =
   | 'new'
   | 'contacted'
   | 'qualified'
+  | 'in-progress'
   | 'converted'
   | 'lost'
-  | 'pending'
-  | 'active'
-  | 'in-progress'
   | 'on-hold'
-  | 'completed'
   | 'cancelled';
 
 /**

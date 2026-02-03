@@ -222,7 +222,7 @@
 }
 
 .client-name {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: 1.4rem;
   color: var(--portal-text-light);
   margin: 0;
@@ -394,6 +394,7 @@
     scrollbar-width: none; /* Hide scrollbar for Firefox */
     -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
   }
+
 
   /* Hide scrollbar for Chrome/Safari */
   [data-page="client-portal"] .sidebar .sidebar-content::-webkit-scrollbar,

@@ -1,0 +1,31 @@
+/**
+ * Centralized field label / value spacing.
+ * Value is slightly closer to its label than to the next field's label.
+ * Uses: --field-label-value-gap, --field-group-gap (in variables.css).
+ */
+
+/* Single field block: tight gap between label and value */
+.meta-item {
+  gap: var(--field-label-value-gap);
+}
+
+.meta-item .field-label,
+.meta-item .meta-label {
+  margin-bottom: 0;
+}
+
+/* Standalone field labels (e.g. above inputs) */
+.field-label {
+  margin-bottom: var(--field-label-value-gap);
+}
+
+/* Containers that stack field groups: larger gap between one field and the next */
+.project-detail-meta {
+  row-gap: var(--field-group-gap);
+}
+
+.details-panel .project-detail-meta {
+  row-gap: var(--field-group-gap);
+}
+
+/* .detail-grid and .detail-row spacing are set in admin/modals.css */

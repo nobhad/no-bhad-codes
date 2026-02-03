@@ -28,7 +28,7 @@
 }
 
 .client-login h1 {
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   text-transform: uppercase;
   text-align: center;
@@ -92,7 +92,7 @@
   display: block;
   margin-bottom: 0;
   font-weight: 600;
-  color: var(--portal-text-light);
+  color: var(--portal-text-secondary);
   font-size: clamp(0.875rem, 2.5vw, 1rem);
 }
 
@@ -112,7 +112,7 @@
 
 .login-form .form-input:focus {
   outline: none;
-  border-color: var(--color-brand-primary);
+  border-color: var(--color-primary);
 }
 
 .login-form .btn {
@@ -142,7 +142,7 @@ html[data-theme="dark"] .login-form {
 }
 
 html[data-theme="dark"] .login-form label {
-  color: var(--portal-text-light);
+  color: var(--portal-text-secondary);
 }
 
 /* Responsive */

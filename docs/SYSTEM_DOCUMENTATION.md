@@ -612,39 +612,17 @@ const storage = multer.diskStorage({
     cb(null, targetDir);
   },
   filename: (req, file, cb) => {
-    // Generate unique filename with timestamp and random string
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2);
-    const ext = extname(file.originalname);
-    const filename = `${timestamp}-${randomString}${ext}`;
+    const filename = sanitizeFilename(file.originalname); // nobhadcodes_<name>_<timestamp><ext>
     cb(null, filename);
   }
 });
 ```
 
+Implementation uses `server/config/uploads.ts`: `getUploadsDir()`, `getUploadsSubdir()`, `sanitizeFilename()`, and `UPLOAD_DIRS` (general, avatars, projects, invoices, messages, intake).
+
 #### File Type Security Filter
 
-```typescript
-const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowedTypes = {
-    images: /\.(jpg|jpeg|png|gif|webp)$/i,
-    documents: /\.(pdf|doc|docx|txt|md)$/i,
-    spreadsheets: /\.(xls|xlsx|csv)$/i,
-    presentations: /\.(ppt|pptx)$/i,
-    archives: /\.(zip|rar|tar|gz)$/i,
-    code: /\.(js|ts|html|css|json|xml)$/i
-  };
-
-  const fileName = file.originalname.toLowerCase();
-  const isAllowed = Object.values(allowedTypes).some(regex => regex.test(fileName));
-
-  if (isAllowed) {
-    cb(null, true);
-  } else {
-    cb(new Error(`File type not allowed: ${extname(file.originalname)}`));
-  }
-};
-```
+Allowed extensions in `server/routes/uploads.ts` (JS/TS/HTML/CSS excluded to prevent stored XSS): images (jpg, jpeg, png, gif, webp, svg), documents (pdf, doc, docx, txt, md, rtf), spreadsheets (xls, xlsx, csv), presentations (ppt, pptx), archives (zip, rar, tar, gz, 7z), data (json, xml). Limits: 10MB per file, 5 files per request.
 
 ### Database Integration
 
@@ -692,11 +670,21 @@ class DatabaseWrapper implements Database {
 ### Authentication Endpoints
 
 ```
-POST /api/auth/login          # User login
-POST /api/auth/register       # User registration
+POST /api/auth/login          # User login (client or admin)
+GET  /api/auth/profile        # Current user profile
 POST /api/auth/refresh        # Token refresh
 POST /api/auth/logout         # User logout
+GET  /api/auth/validate       # Validate token
+POST /api/auth/forgot-password   # Request password reset
+POST /api/auth/reset-password    # Reset password with token
+POST /api/auth/magic-link     # Request magic link (passwordless)
+POST /api/auth/verify-magic-link # Verify magic link and login
+POST /api/auth/verify-invitation # Verify client invitation token
+POST /api/auth/set-password   # Set password from invitation
+POST /api/auth/admin/login    # Admin login
 ```
+
+**Note:** There is no public `/api/auth/register`; clients are created by admin or via invitation. Full request/response details: [API_DOCUMENTATION.md](./API_DOCUMENTATION.md).
 
 ### Client Management
 
@@ -745,12 +733,28 @@ POST /api/uploads/avatar                  # Upload user avatar
 POST /api/uploads/project/:projectId      # Upload project file
 ```
 
+### Additional API Route Groups
+
+Full reference: [API_DOCUMENTATION.md](./API_DOCUMENTATION.md).
+
+| Prefix | Description |
+|--------|-------------|
+| `/api/intake` | Client intake form (POST), status by project (GET `/status/:projectId`) |
+| `/api/messages` | Threads, messages, inquiry, preferences, analytics |
+| `/api/proposals` | Proposal CRUD, admin list/update/convert, PDF, config |
+| `/api/analytics` | Track, summary, realtime, sessions, reports, widgets, KPIs, alerts, quick stats |
+| `/api/approvals` | Workflow definitions, start workflow, pending, approve/reject |
+| `/api/triggers` | Workflow trigger CRUD, options, logs, test-emit |
+| `/api/document-requests` | Client my-requests/view/upload; admin CRUD, templates, review |
+| `/api/kb` | Knowledge base: categories, articles, search, featured, feedback; admin CRUD |
+| `/api/contact` | Public contact form (POST) |
+
 ### System Endpoints
 
 ```
 GET  /                       # API information and available endpoints
 GET  /health                 # System health check
-GET  /uploads/:filename      # Static file serving
+GET  /uploads/:filename      # Static file serving (via /uploads)
 ```
 
 ## Authentication & Security

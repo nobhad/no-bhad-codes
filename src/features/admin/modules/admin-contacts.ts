@@ -12,6 +12,7 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDate, formatDateTime } from '../../../utils/format-utils';
 import { apiFetch, apiPut, apiPost } from '../../../utils/api-client';
 import { createTableDropdown, CONTACT_STATUS_OPTIONS } from '../../../utils/table-dropdown';
+import { ICONS } from '../../../constants/icons';
 import { APP_CONSTANTS } from '../../../config/constants';
 import {
   createFilterUI,
@@ -22,8 +23,20 @@ import {
   CONTACTS_FILTER_CONFIG,
   type FilterState
 } from '../../../utils/table-filter';
+import { exportToCsv, CONTACTS_EXPORT_CONFIG } from '../../../utils/table-export';
 import { confirmDialog } from '../../../utils/confirm-dialog';
 import type { ContactSubmission, AdminDashboardContext } from '../admin-types';
+import {
+  createPaginationUI,
+  applyPagination,
+  getDefaultPaginationState,
+  loadPaginationState,
+  savePaginationState,
+  type PaginationState,
+  type PaginationConfig
+} from '../../../utils/table-pagination';
+import { showTableEmpty } from '../../../utils/loading-utils';
+import { getCopyEmailButtonHtml, getEmailWithCopyHtml } from '../../../utils/copy-email';
 
 interface ContactsData {
   submissions: ContactSubmission[];
@@ -39,6 +52,19 @@ let contactsData: ContactSubmission[] = [];
 let storedContext: AdminDashboardContext | null = null;
 let filterState: FilterState = loadFilterState(CONTACTS_FILTER_CONFIG.storageKey);
 let filterUIInitialized = false;
+
+// Pagination configuration and state
+const CONTACTS_PAGINATION_CONFIG: PaginationConfig = {
+  tableId: 'contacts',
+  pageSizeOptions: [10, 25, 50, 100],
+  defaultPageSize: 25,
+  storageKey: 'admin_contacts_pagination'
+};
+
+let paginationState: PaginationState = {
+  ...getDefaultPaginationState(CONTACTS_PAGINATION_CONFIG),
+  ...loadPaginationState(CONTACTS_PAGINATION_CONFIG.storageKey!)
+};
 
 // ============================================================================
 // CACHED DOM REFERENCES
@@ -101,13 +127,23 @@ function initializeFilterUI(ctx: AdminDashboardContext): void {
     }
   );
 
-  // Insert filter UI at the beginning (before refresh button)
+  // Insert filter UI before refresh button so order is: Export → Filter → Refresh
   const refreshBtn = container.querySelector('#refresh-contacts-btn');
   if (refreshBtn) {
     container.insertBefore(filterUI, refreshBtn);
   } else {
-    // Fallback: insert at the beginning
     container.insertBefore(filterUI, container.firstChild);
+  }
+
+  // Setup export button
+  const exportBtn = getElement('export-contacts-btn');
+  if (exportBtn && !exportBtn.dataset.listenerAdded) {
+    exportBtn.dataset.listenerAdded = 'true';
+    exportBtn.addEventListener('click', () => {
+      const filtered = applyFilters(contactsData, filterState, CONTACTS_FILTER_CONFIG);
+      exportToCsv(filtered as unknown as Record<string, unknown>[], CONTACTS_EXPORT_CONFIG);
+      ctx.showNotification(`Exported ${filtered.length} contact submissions to CSV`, 'success');
+    });
   }
 
   // Setup sortable headers after table is rendered
@@ -141,8 +177,8 @@ function renderContactsTable(
   if (!tableBody) return;
 
   if (!submissions || submissions.length === 0) {
-    tableBody.innerHTML =
-      '<tr><td colspan="6" class="loading-row">No contact form submissions yet</td></tr>';
+    showTableEmpty(tableBody, 4, 'No contact form submissions yet.');
+    renderContactsPaginationUI(0, ctx);
     return;
   }
 
@@ -150,14 +186,21 @@ function renderContactsTable(
   const filteredSubmissions = applyFilters(submissions, filterState, CONTACTS_FILTER_CONFIG);
 
   if (filteredSubmissions.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="6" class="loading-row">No submissions match the current filters</td></tr>';
+    showTableEmpty(tableBody, 4, 'No contact form submissions match the current filters. Try adjusting your filters.');
+    renderContactsPaginationUI(0, ctx);
     return;
   }
+
+  // Update pagination state with total items
+  paginationState.totalItems = filteredSubmissions.length;
+
+  // Apply pagination
+  const paginatedSubmissions = applyPagination(filteredSubmissions, paginationState);
 
   // Clear and rebuild table
   tableBody.innerHTML = '';
 
-  filteredSubmissions.forEach((submission) => {
+  paginatedSubmissions.forEach((submission) => {
     const date = formatDate(submission.created_at);
     const decodedName = SanitizationUtils.decodeHtmlEntities(submission.name || '-');
     const decodedCompany = SanitizationUtils.decodeHtmlEntities(submission.company || '');
@@ -175,13 +218,16 @@ function renderContactsTable(
     const row = document.createElement('tr');
     row.dataset.contactId = String(submission.id);
 
+    // Match header structure: Contact | Message | Status | Date
     row.innerHTML = `
-      <td>${date}</td>
-      <td>${safeName}</td>
-      <td>${safeEmail}</td>
-      <td>${safeCompany}</td>
-      <td class="message-cell" data-tooltip="${safeTitleMessage}">${truncatedMessage}</td>
+      <td class="identity-cell">
+        <span class="identity-name">${safeName}</span>
+        ${safeCompany ? `<span class="identity-contact">${safeCompany}</span>` : ''}
+        <span class="identity-email">${safeEmail}</span>
+      </td>
+      <td class="message-cell" title="${safeTitleMessage}">${truncatedMessage}</td>
       <td class="status-cell"></td>
+      <td>${date}</td>
     `;
 
     // Create custom dropdown for status
@@ -207,6 +253,38 @@ function renderContactsTable(
 
     tableBody.appendChild(row);
   });
+
+  // Render pagination
+  renderContactsPaginationUI(filteredSubmissions.length, ctx);
+}
+
+/**
+ * Render pagination UI for contacts table
+ */
+function renderContactsPaginationUI(totalItems: number, ctx: AdminDashboardContext): void {
+  const container = document.getElementById('contacts-pagination');
+  if (!container) return;
+
+  // Update state
+  paginationState.totalItems = totalItems;
+
+  // Create pagination UI
+  const paginationUI = createPaginationUI(
+    CONTACTS_PAGINATION_CONFIG,
+    paginationState,
+    (newState) => {
+      paginationState = newState;
+      savePaginationState(CONTACTS_PAGINATION_CONFIG.storageKey!, paginationState);
+      // Re-render table with new pagination
+      if (contactsData.length > 0) {
+        renderContactsTable(contactsData, ctx);
+      }
+    }
+  );
+
+  // Replace container content
+  container.innerHTML = '';
+  container.appendChild(paginationUI);
 }
 
 export function showContactDetails(contactId: number): void {
@@ -232,15 +310,28 @@ export function showContactDetails(contactId: number): void {
       <h3>Contact Form Submission</h3>
       <button class="close-btn" onclick="window.closeContactDetailsPanel && window.closeContactDetailsPanel()" aria-label="Close panel">×</button>
     </div>
+    <div class="contact-details-created">Created ${date}</div>
+    <div class="details-actions">
+      ${contact.client_id
+    ? '<span class="status-badge status-active">Converted to Client</span>'
+    : `<button type="button" class="icon-btn" id="convert-to-client-btn" data-id="${contact.id}" data-email="${safeEmail}" data-name="${safeName}" title="Convert to Client" aria-label="Convert to Client">${ICONS.USER_PLUS}</button>`
+}
+      ${contact.status !== 'archived' ? `<button type="button" class="icon-btn" id="archive-contact-btn" data-id="${contact.id}" title="Archive" aria-label="Archive contact">${ICONS.ARCHIVE}</button>` : ''}
+      ${contact.status === 'archived' ? `<button type="button" class="icon-btn" id="restore-contact-btn" data-id="${contact.id}" title="Restore" aria-label="Restore contact">${ICONS.ROTATE_CCW}</button>` : ''}
+    </div>
     <div class="details-content">
       <div class="project-detail-meta">
+        <div class="meta-item">
+          <span class="field-label">Status</span>
+          <span class="meta-value" id="panel-contact-status-container"></span>
+        </div>
         <div class="meta-item">
           <span class="field-label">Name</span>
           <span class="meta-value">${safeName}</span>
         </div>
         <div class="meta-item">
           <span class="field-label">Email</span>
-          <span class="meta-value">${safeEmail}</span>
+          <span class="meta-value">${getEmailWithCopyHtml(contact.email || '', safeEmail)}</span>
         </div>
         ${safeCompany ? `
         <div class="meta-item">
@@ -254,28 +345,12 @@ export function showContactDetails(contactId: number): void {
           <span class="meta-value">${safePhone}</span>
         </div>
         ` : ''}
-        <div class="meta-item">
-          <span class="field-label">Status</span>
-          <span class="meta-value" id="panel-contact-status-container"></span>
-        </div>
-        <div class="meta-item">
-          <span class="field-label">Created</span>
-          <span class="meta-value">${date}</span>
-        </div>
       </div>
       <div class="project-description-row">
         <div class="meta-item description-item">
           <span class="field-label">Message</span>
           <span class="meta-value">${safeMessage}</span>
         </div>
-      </div>
-      <div class="details-actions">
-        <a href="mailto:${safeEmail}" class="btn">Reply via Email</a>
-        ${contact.client_id
-    ? '<span class="status-badge status-active">Converted to Client</span>'
-    : `<button class="btn btn-primary" id="convert-to-client-btn" data-id="${contact.id}" data-email="${safeEmail}" data-name="${safeName}">Convert to Client</button>`
-}
-        ${contact.status !== 'archived' ? `<button class="btn btn-secondary" id="archive-contact-btn" data-id="${contact.id}">Archive</button>` : ''}
       </div>
     </div>
   `;
@@ -333,6 +408,64 @@ export function showContactDetails(contactId: number): void {
         }
         // Remove archive button
         archiveBtn.remove();
+      }
+    });
+  }
+
+  // Add event listener for restore button
+  const restoreBtn = detailsPanel.querySelector('#restore-contact-btn');
+  if (restoreBtn) {
+    restoreBtn.addEventListener('click', () => {
+      const id = parseInt((restoreBtn as HTMLElement).dataset.id || '0');
+      if (id && storedContext) {
+        updateContactStatus(id, 'new', storedContext);
+        contact.status = 'new';
+        // Update panel dropdown
+        const panelDropdown = statusContainer?.querySelector('.table-dropdown');
+        if (panelDropdown) {
+          const textEl = panelDropdown.querySelector('.custom-dropdown-text');
+          if (textEl) textEl.textContent = 'New';
+          (panelDropdown as HTMLElement).dataset.status = 'new';
+        }
+        // Update table row dropdown
+        const tableDropdown = document.querySelector(`tr[data-contact-id="${id}"] .table-dropdown`);
+        if (tableDropdown) {
+          const textEl = tableDropdown.querySelector('.custom-dropdown-text');
+          if (textEl) textEl.textContent = 'New';
+          (tableDropdown as HTMLElement).dataset.status = 'new';
+        }
+        // Replace restore button with archive icon button
+        const newArchiveBtn = document.createElement('button');
+        newArchiveBtn.type = 'button';
+        newArchiveBtn.className = 'icon-btn';
+        newArchiveBtn.id = 'archive-contact-btn';
+        newArchiveBtn.dataset.id = String(id);
+        newArchiveBtn.title = 'Archive';
+        newArchiveBtn.setAttribute('aria-label', 'Archive contact');
+        newArchiveBtn.innerHTML = ICONS.ARCHIVE;
+        restoreBtn.replaceWith(newArchiveBtn);
+        // Re-attach archive handler
+        newArchiveBtn.addEventListener('click', () => {
+          const archiveId = parseInt((newArchiveBtn as HTMLElement).dataset.id || '0');
+          if (archiveId && storedContext) {
+            updateContactStatus(archiveId, 'archived', storedContext);
+            contact.status = 'archived';
+            const innerPanelDropdown = statusContainer?.querySelector('.table-dropdown');
+            if (innerPanelDropdown) {
+              const textEl = innerPanelDropdown.querySelector('.custom-dropdown-text');
+              if (textEl) textEl.textContent = 'Archived';
+              (innerPanelDropdown as HTMLElement).dataset.status = 'archived';
+            }
+            const innerTableDropdown = document.querySelector(`tr[data-contact-id="${archiveId}"] .table-dropdown`);
+            if (innerTableDropdown) {
+              const textEl = innerTableDropdown.querySelector('.custom-dropdown-text');
+              if (textEl) textEl.textContent = 'Archived';
+              (innerTableDropdown as HTMLElement).dataset.status = 'archived';
+            }
+            newArchiveBtn.remove();
+          }
+        });
+        storedContext.showNotification('Contact restored', 'success');
       }
     });
   }

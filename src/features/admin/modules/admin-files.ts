@@ -12,6 +12,7 @@
 import { apiFetch, apiPost, apiDelete } from '../../../utils/api-client';
 import { formatFileSize, formatDate, formatDateTime } from '../../../utils/format-utils';
 import { confirmDialog, alertSuccess, alertError } from '../../../utils/confirm-dialog';
+import { createViewToggle } from '../../../components/view-toggle';
 
 interface Folder {
   id: number;
@@ -85,15 +86,23 @@ export async function initFilesModule(projectId: number): Promise<void> {
  * Setup event listeners for file management
  */
 function setupEventListeners(): void {
-  // View toggle
-  const viewToggle = document.querySelector('.files-view-toggle');
-  if (viewToggle) {
-    viewToggle.querySelectorAll('button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const view = btn.dataset.view as 'list' | 'grid';
-        setView(view);
-      });
+  // View toggle (reusable component)
+  const viewToggleMount = document.getElementById('files-view-toggle-mount');
+  if (viewToggleMount) {
+    const listIcon =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>';
+    const gridIcon =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>';
+    const toggleEl = createViewToggle({
+      id: 'files-view-toggle',
+      options: [
+        { value: 'list', label: 'List', title: 'List View', ariaLabel: 'List view', iconSvg: listIcon },
+        { value: 'grid', label: 'Grid', title: 'Grid View', ariaLabel: 'Grid view', iconSvg: gridIcon }
+      ],
+      value: _currentView,
+      onChange: (v) => setView(v as 'list' | 'grid')
     });
+    viewToggleMount.appendChild(toggleEl);
   }
 
   // Create folder button
@@ -158,12 +167,6 @@ function setupEventListeners(): void {
 function setView(view: 'list' | 'grid'): void {
   _currentView = view;
 
-  // Update toggle buttons
-  document.querySelectorAll('.files-view-toggle button').forEach(btn => {
-    btn.classList.toggle('active', (btn as HTMLButtonElement).dataset.view === view);
-  });
-
-  // Update list class
   const filesList = document.getElementById('pd-files-list');
   if (filesList) {
     filesList.classList.toggle('grid-view', view === 'grid');
@@ -685,8 +688,8 @@ function formatAccessAction(action: string): string {
  * Download current file
  */
 function downloadCurrentFile(): void {
-  if (!currentFileId || !currentProjectId) return;
-  window.open(`/api/projects/${currentProjectId}/files/${currentFileId}/download`, '_blank');
+  if (!currentFileId) return;
+  window.open(`/api/uploads/file/${currentFileId}`, '_blank');
 }
 
 /**
@@ -735,7 +738,7 @@ async function deleteCurrentFile(): Promise<void> {
   if (!confirmed) return;
 
   try {
-    const response = await apiDelete(`/api/projects/${currentProjectId}/files/${currentFileId}`);
+    const response = await apiDelete(`/api/uploads/file/${currentFileId}`);
     if (response.ok) {
       alertSuccess('File deleted');
       closeFileDetailModal();

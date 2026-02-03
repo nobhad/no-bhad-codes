@@ -67,3 +67,15 @@ export async function loadTimeTrackingModule() {
 export async function loadFilesModule() {
   return import('./admin-files');
 }
+
+export async function loadKnowledgeBaseModule() {
+  return import('./admin-knowledge-base');
+}
+
+export async function loadDocumentRequestsModule() {
+  return import('./admin-document-requests');
+}
+
+export async function loadInvoicesModule() {
+  return import('./admin-invoices');
+}

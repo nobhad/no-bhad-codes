@@ -1,7 +1,9 @@
-# Wireframe Preview System
+# Wireframe Preview System (Site Feature)
 
 **Status:** Complete (Documentation Only)
-**Last Updated:** January 30, 2026
+**Last Updated:** February 2, 2026
+
+**This doc is for the SITE FEATURE:** client-facing wireframe previews (admins upload wireframe screenshots to project Files; clients view them in the Files tab). For **greyscale portal mode** (admin/client UI with `?wireframe=1`) and **reusable components**, see [WIREFRAME_AND_COMPONENTS.md](../design/WIREFRAME_AND_COMPONENTS.md).
 
 ## Overview
 
@@ -97,3 +99,4 @@ If clients request more interactivity:
 
 - [FILES.md](./FILES.md) - File upload and preview system
 - [CLIENT_PORTAL.md](./CLIENT_PORTAL.md) - Client portal overview
+- [WIREFRAME_AND_COMPONENTS.md](../design/WIREFRAME_AND_COMPONENTS.md) - Greyscale portal mode and reusable components (different from this site feature)

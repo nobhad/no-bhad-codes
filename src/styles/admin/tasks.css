@@ -18,32 +18,7 @@
   margin-bottom: var(--portal-spacing-md);
 }
 
-.view-toggle {
-  display: inline-flex;
-  background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-sm);
-  overflow: hidden;
-}
-
-.view-toggle button {
-  padding: var(--portal-spacing-xs) var(--portal-spacing-md);
-  background: transparent;
-  border: none;
-  color: var(--portal-text-secondary);
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.view-toggle button:hover {
-  color: var(--portal-text-primary);
-}
-
-.view-toggle button.active {
-  background: var(--app-color-primary);
-  color: var(--color-white);
-}
+/* View toggle: use shared .view-toggle (see shared/view-toggle.css) */
 
 /* ============================================
    Task Card Enhancements (beyond Kanban default)
@@ -64,12 +39,12 @@
 }
 
 .task-priority-high {
-  background-color: #f59e0b;
+  background-color: var(--color-warning-500);
   color: var(--color-white);
 }
 
 .task-priority-medium {
-  background-color: var(--app-color-primary);
+  background-color: var(--color-primary);
   color: var(--color-white);
 }
 

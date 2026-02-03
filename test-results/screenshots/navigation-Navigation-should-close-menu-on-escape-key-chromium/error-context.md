@@ -1,0 +1,40 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - navigation [ref=e5]:
+      - link "no bhad codes - Go to homepage" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - text: no bhad codes
+      - generic [ref=e7]:
+        - button "Client Portal Login" [ref=e8] [cursor=pointer]:
+          - img [ref=e10]
+        - button "Switch to dark theme" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]:
+            - img [ref=e16]
+            - img [ref=e19]
+        - button "Toggle navigation menu" [active] [ref=e21] [cursor=pointer]:
+          - img [ref=e23]
+          - generic [ref=e30]:
+            - paragraph [ref=e31]: Menu
+            - paragraph [ref=e32]: Close
+  - main [ref=e33]:
+    - heading "No Bhad Codes - Professional Web Development" [level=1] [ref=e34]
+    - generic [ref=e35]:
+      - button "Business card - press Enter or Space to flip" [ref=e37] [cursor=pointer]:
+        - generic [ref=e38]:
+          - generic:
+            - img "Business Card Front"
+          - generic:
+            - img "Avatar"
+      - navigation "Page navigation" [ref=e39]:
+        - link "MY WORK" [ref=e40] [cursor=pointer]:
+          - /url: "#/projects"
+        - link "LET'S TALK" [ref=e41] [cursor=pointer]:
+          - /url: "#/contact"
+  - contentinfo [ref=e42]:
+    - paragraph [ref=e44]: © 2026 No Bhad Codes. All rights reserved.
+```

@@ -33,6 +33,16 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 | **[Projects](./features/PROJECTS.md)** | Tasks, time tracking, templates, dependencies, project health |
 | **[Proposals](./features/PROPOSALS.md)** | Templates, versioning, signatures, comments, activities |
 | **[PDF Generation](./features/PDF_GENERATION.md)** | Invoice and proposal PDF generation with pdf-lib |
+| **[SEO](./features/SEO.md)** | Meta tags, JSON-LD structured data, robots.txt, sitemap |
+
+**API-only features** (full reference in [API Documentation](./API_DOCUMENTATION.md)):
+
+| API Prefix | Description |
+|------------|-------------|
+| `/api/approvals` | Approval workflows (definitions, instances, approve/reject) |
+| `/api/triggers` | Workflow triggers (event/action, logs, test-emit) |
+| `/api/document-requests` | Document requests and templates (client + admin) |
+| `/api/kb` | Knowledge base (categories, articles, search, feedback) |
 
 ### Animation Modules
 
@@ -70,6 +80,7 @@ Welcome to the no-bhad-codes portfolio application documentation. This directory
 
 - **[Archived Work 2025-12](./archive/ARCHIVED_WORK_2025-12.md)** - Completed work from December 2025
 - **[Archived Work 2026-01](./archive/ARCHIVED_WORK_2026-01.md)** - Completed work from January 2026
+- **[Archived Work 2026-02](./archive/ARCHIVED_WORK_2026-02.md)** - Completed work from February 2026
 
 ### Quick Links
 
@@ -117,7 +128,7 @@ npm run lint             # Run ESLint
 npm run format           # Format code with Prettier
 npm run typecheck        # TypeScript type checking
 npm run test             # Run tests
-npm run build:analyze    # Build and analyze bundles
+npm run build:analyze    # Build and run bundle analyzer (vite-bundle-analyzer)
 npm run optimize         # Full optimization pipeline
 ```
 
@@ -137,8 +148,8 @@ src/
 │   │   ├── admin-project-details.ts
 │   │   ├── admin-auth.ts
 │   │   ├── services/       # Extracted services (data, chart, export)
-│   │   ├── renderers/      # UI renderers (contacts, messaging)
-│   │   └── modules/        # 10 extracted modules
+│   │   ├── renderers/      # UI renderers (contacts, messaging, performance)
+│   │   └── modules/        # 14 extracted modules
 │   └── client/             # Client portal
 │       ├── client-portal.ts
 │       ├── terminal-intake.ts

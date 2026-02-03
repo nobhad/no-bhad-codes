@@ -2,7 +2,7 @@
  * ===============================================
  * ADMIN DASHBOARD CONTROLLER
  * ===============================================
- * @file src/admin/admin-dashboard.ts
+ * @file src/features/admin/admin-dashboard.ts
  *
  * Secure admin dashboard for performance and analytics monitoring.
  * Only accessible with proper authentication.
@@ -30,6 +30,10 @@ import { formatDate, formatDateTime, formatProjectType } from '../../utils/forma
 import { confirmDanger, alertError, alertSuccess, alertInfo } from '../../utils/confirm-dialog';
 import { showToast } from '../../utils/toast-notifications';
 import { manageFocusTrap } from '../../utils/focus-trap';
+import { renderBreadcrumbs, type BreadcrumbItem } from '../../components/breadcrumbs';
+import { createTableDropdown } from '../../utils/table-dropdown';
+import { getStatusBadgeHTML } from '../../components/status-badge';
+import { initCopyEmailDelegation, getCopyEmailButtonHtml, getEmailWithCopyHtml } from '../../utils/copy-email';
 
 // DOM element keys for caching
 type DashboardDOMKeys = Record<string, string>;
@@ -42,12 +46,15 @@ import {
   loadContactsModule,
   loadProjectsModule,
   loadClientsModule,
+  loadInvoicesModule,
   loadMessagingModule,
   loadAnalyticsModule,
   loadOverviewModule,
   loadPerformanceModule,
   loadSystemStatusModule,
-  loadProposalsModule
+  loadProposalsModule,
+  loadKnowledgeBaseModule,
+  loadDocumentRequestsModule
 } from './modules';
 
 // Chart.js is loaded dynamically to reduce initial bundle size
@@ -109,6 +116,10 @@ class AdminDashboard {
 
   // Project details handler
   private projectDetails: AdminProjectDetails;
+
+  // Clients module reference for breadcrumbs
+
+  private clientsModule: any = null;
 
   // DOM element cache
   private domCache = createDOMCache<DashboardDOMKeys>();
@@ -179,6 +190,7 @@ class AdminDashboard {
       leadsTableBody: '#leads-table-body',
       projectsTableBody: '#projects-table-body',
       clientsTableBody: '#clients-table-body',
+      invoicesTableBody: '#invoices-table-body',
       leadsBadge: '#leads-badge',
       messagesBadge: '#messages-badge'
     });
@@ -187,7 +199,7 @@ class AdminDashboard {
     this.moduleContext = {
       getAuthToken: () =>
         sessionStorage.getItem('client_auth_mode'),
-      showNotification: (message: string, type: 'success' | 'error' | 'info') =>
+      showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning') =>
         this.showNotification(message, type),
       refreshData: () => this.loadDashboardData(),
       switchTab: (tab: string) => this.switchTab(tab)
@@ -196,7 +208,7 @@ class AdminDashboard {
     // Configure API client for token expiration handling
     configureApiClient({
       showNotification: (message: string, type: 'error' | 'warning' | 'success' | 'info') =>
-        this.showNotification(message, type as 'success' | 'error' | 'info'),
+        this.showNotification(message, type),
       onSessionExpired: () => {
         // Let the default handler redirect to /admin login
       }
@@ -234,6 +246,7 @@ class AdminDashboard {
     // Set up the dashboard
     logger.log('Setting up dashboard');
     this.setupEventListeners();
+    initCopyEmailDelegation(document);
     logger.log('setupEventListeners complete');
     await this.loadDashboardData();
     this.setupTruncatedTextTooltips();
@@ -394,6 +407,8 @@ class AdminDashboard {
     }
     // Add logged-in class to body to hide header/footer
     document.body.classList.add('admin-logged-in');
+    // Show initial breadcrumb (Dashboard)
+    this.updateAdminBreadcrumbs(this.currentTab);
   }
 
   private async initializeModules(): Promise<void> {
@@ -472,6 +487,26 @@ class AdminDashboard {
           sidebarButtons.forEach((b) => {
             b.classList.toggle('active', (b as HTMLElement).dataset.tab === tabName);
           });
+        }
+      });
+    });
+
+    // Clickable attention cards (dashboard "Needs Attention" section)
+    const attentionCards = document.querySelectorAll('.attention-card[data-tab]');
+    attentionCards.forEach((card) => {
+      card.addEventListener('click', () => {
+        const tabName = (card as HTMLElement).dataset.tab;
+        const filter = (card as HTMLElement).dataset.filter;
+        if (tabName) {
+          this.switchTab(tabName);
+          // Update sidebar button active state
+          sidebarButtons.forEach((b) => {
+            b.classList.toggle('active', (b as HTMLElement).dataset.tab === tabName);
+          });
+          // Apply filter if specified
+          if (filter) {
+            this.applyAttentionFilter(tabName, filter);
+          }
         }
       });
     });
@@ -660,16 +695,11 @@ class AdminDashboard {
             <tr data-contact-id="${submission.id}">
               <td>${date}</td>
               <td>${safeName}</td>
-              <td>${safeEmail}</td>
+              <td class="meta-value-with-copy">${safeEmail} ${getCopyEmailButtonHtml(submission.email || '')}</td>
               <td>${safeSubject}</td>
               <td class="message-cell" title="${safeTitleMessage}">${truncatedMessage}</td>
-              <td>
-                <select class="contact-status-select status-select" data-id="${submission.id}" onclick="event.stopPropagation()">
-                  <option value="new" ${submission.status === 'new' ? 'selected' : ''}>New</option>
-                  <option value="read" ${submission.status === 'read' ? 'selected' : ''}>Read</option>
-                  <option value="replied" ${submission.status === 'replied' ? 'selected' : ''}>Replied</option>
-                  <option value="archived" ${submission.status === 'archived' ? 'selected' : ''}>Archived</option>
-                </select>
+              <td class="status-cell">
+                <div class="contact-status-dropdown-container" data-contact-id="${submission.id}"></div>
               </td>
             </tr>
           `;
@@ -680,25 +710,34 @@ class AdminDashboard {
         const rows = tableBody.querySelectorAll('tr[data-contact-id]');
         rows.forEach((row) => {
           row.addEventListener('click', (e) => {
-            // Don't open modal if clicking on the status select
-            if ((e.target as HTMLElement).tagName === 'SELECT') return;
+            if ((e.target as HTMLElement).closest('.table-dropdown')) return;
             const contactId = parseInt((row as HTMLElement).dataset.contactId || '0');
             this.showContactDetails(contactId);
           });
         });
 
-        // Add change handlers for status selects
-        const statusSelects = tableBody.querySelectorAll('.contact-status-select');
-        statusSelects.forEach((select) => {
-          select.addEventListener('change', (e) => {
-            e.stopPropagation();
-            const target = e.target as HTMLSelectElement;
-            const id = target.dataset.id;
-            const newStatus = target.value;
-            if (id) {
-              this.updateContactStatus(parseInt(id), newStatus);
+        // Reusable dropdown for contact status (dashboard uses 'replied', not 'responded')
+        const DASHBOARD_CONTACT_STATUS_OPTIONS = [
+          { value: 'new', label: 'New' },
+          { value: 'read', label: 'Read' },
+          { value: 'replied', label: 'Replied' },
+          { value: 'archived', label: 'Archived' }
+        ];
+        const dropdownContainers = tableBody.querySelectorAll('.contact-status-dropdown-container');
+        dropdownContainers.forEach((container) => {
+          const contactId = (container as HTMLElement).dataset.contactId;
+          const _row = container.closest('tr');
+          const submission = data.submissions.find((s: ContactSubmission) => String(s.id) === contactId);
+          if (!submission || !contactId) return;
+          const dropdown = createTableDropdown({
+            options: DASHBOARD_CONTACT_STATUS_OPTIONS,
+            currentValue: submission.status || 'new',
+            showStatusDot: true,
+            onChange: (value: string) => {
+              this.updateContactStatus(parseInt(contactId, 10), value);
             }
           });
+          container.appendChild(dropdown);
         });
       }
     }
@@ -778,13 +817,11 @@ class AdminDashboard {
     modalTitle.textContent = 'Contact Form Submission';
 
     const date = formatDateTime(contact.created_at);
-    const statusClass = `status-${contact.status || 'new'}`;
 
     // Decode HTML entities then sanitize to prevent XSS
     const safeName = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.name || '-'));
     const safeEmail = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.email || '-'));
     const safeSubject = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.subject || '-'));
-    const safeStatus = SanitizationUtils.escapeHtml(contact.status || 'new');
     const safeMessage = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(contact.message || '-'));
 
     modalBody.innerHTML = `
@@ -799,7 +836,7 @@ class AdminDashboard {
         </div>
         <div class="detail-row">
           <span class="detail-label">Email</span>
-          <span class="detail-value"><a href="mailto:${safeEmail}">${safeEmail}</a></span>
+          <span class="detail-value">${getEmailWithCopyHtml(contact.email || '', safeEmail)}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Subject</span>
@@ -807,7 +844,7 @@ class AdminDashboard {
         </div>
         <div class="detail-row">
           <span class="detail-label">Status</span>
-          <span class="detail-value"><span class="status-badge ${statusClass}">${safeStatus}</span></span>
+          <span class="detail-value">${getStatusBadgeHTML(contact.status || 'new', contact.status || 'new')}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Message</span>
@@ -1088,7 +1125,7 @@ class AdminDashboard {
       .map((msg: Message) => {
         const isAdmin = msg.sender_type === 'admin';
         const dateTime = formatDateTime(msg.created_at);
-        const rawSenderName = isAdmin ? 'You (Admin)' : SanitizationUtils.decodeHtmlEntities(msg.sender_name || 'Client');
+        const rawSenderName = isAdmin ? 'You' : SanitizationUtils.decodeHtmlEntities(msg.sender_name || 'Client');
         // Decode HTML entities then sanitize to prevent XSS
         const safeSenderName = SanitizationUtils.escapeHtml(rawSenderName);
         const safeContent = SanitizationUtils.escapeHtml(SanitizationUtils.decodeHtmlEntities(msg.message || msg.content || ''));
@@ -1226,8 +1263,149 @@ class AdminDashboard {
 
     this.currentTab = tabName;
 
+    // Update breadcrumb to match active section
+    this.updateAdminBreadcrumbs(tabName);
+
     // Load tab-specific data (modules handle all tab data loading)
     this.loadTabData(tabName);
+  }
+
+  /**
+   * Update admin header breadcrumbs based on active tab/section.
+   */
+  private updateAdminBreadcrumbs(tabName: string): void {
+    const list = document.getElementById('breadcrumb-list');
+    if (!list) return;
+
+    const goOverview = (): void => this.switchTab('overview');
+    const goClients = (): void => this.switchTab('clients');
+    const goProjects = (): void => this.switchTab('projects');
+
+    const items: BreadcrumbItem[] = [];
+
+    switch (tabName) {
+    case 'overview':
+      items.push({ label: 'Dashboard', href: false });
+      break;
+    case 'clients':
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: 'Clients', href: false });
+      break;
+    case 'invoices':
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: 'Invoices', href: false });
+      break;
+    case 'client-detail': {
+      // Get client name from clients module
+      const clientName = this.clientsModule?.getCurrentClientName?.() || 'Client';
+      const clientLabel = clientName.length > 40 ? `${clientName.slice(0, 37)}...` : clientName;
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: 'Clients', href: true, onClick: goClients });
+      items.push({ label: clientLabel, href: false });
+      break;
+    }
+    case 'leads':
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: 'Leads', href: false });
+      break;
+    case 'projects':
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: 'Projects', href: false });
+      break;
+    case 'project-detail': {
+      const projectName = this.projectDetails.getCurrentProjectName();
+      const label = projectName
+        ? (projectName.length > 40 ? `${projectName.slice(0, 37)}...` : projectName)
+        : 'Project';
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: 'Projects', href: true, onClick: goProjects });
+      items.push({ label, href: false });
+      break;
+    }
+    case 'messages':
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: 'Messages', href: false });
+      break;
+    case 'analytics':
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: 'Analytics', href: false });
+      break;
+    case 'knowledge-base':
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: 'Knowledge Base', href: false });
+      break;
+    case 'document-requests':
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: 'Document Requests', href: false });
+      break;
+    case 'system':
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: 'System', href: false });
+      break;
+    default:
+      items.push({ label: 'Dashboard', href: false });
+    }
+
+    renderBreadcrumbs(list, items);
+  }
+
+  /**
+   * Apply special filters from attention cards
+   */
+  private applyAttentionFilter(tabName: string, filter: string): void {
+    // Small delay to allow tab content to render
+    setTimeout(() => {
+      if (tabName === 'invoices' && filter === 'overdue') {
+        // Filter invoices to show only overdue
+        this.filterTable('invoices', 'overdue');
+        // Update active state on filter cards
+        const filterCards = document.querySelectorAll('.stat-card-clickable[data-table="invoices"]');
+        filterCards.forEach((c) => c.classList.remove('active'));
+        const overdueCard = document.querySelector('.stat-card-clickable[data-filter="overdue"][data-table="invoices"]');
+        overdueCard?.classList.add('active');
+      } else if (tabName === 'projects' && filter === 'pending_contract') {
+        // Filter projects to show only those with unsigned contracts
+        const tableBody = this.domCache.get('projectsTableBody');
+        if (tableBody) {
+          const rows = tableBody.querySelectorAll('tr');
+          rows.forEach((row) => {
+            // Check for contract badge or contract column
+            const contractBadge = row.querySelector('.contract-badge, [data-contract]');
+            const hasContract = contractBadge?.textContent?.toLowerCase().includes('signed') ||
+                               contractBadge?.classList.contains('signed');
+            row.style.display = hasContract ? 'none' : '';
+          });
+        }
+      } else if (tabName === 'leads' && filter === 'new_this_week') {
+        // Filter leads to show only those from this week
+        const tableBody = this.domCache.get('leadsTableBody');
+        if (tableBody) {
+          const oneWeekAgo = new Date();
+          oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+          const rows = tableBody.querySelectorAll('tr');
+          rows.forEach((row) => {
+            // Date is typically in the 6th column (index 5)
+            const dateCell = row.querySelectorAll('td')[5];
+            if (dateCell) {
+              const dateText = dateCell.textContent?.trim() || '';
+              const rowDate = new Date(dateText);
+              row.style.display = rowDate >= oneWeekAgo ? '' : 'none';
+            }
+          });
+        }
+      } else if (tabName === 'messages' && filter === 'unread') {
+        // Filter messages to show unread threads
+        const threadList = document.querySelector('.thread-list');
+        if (threadList) {
+          const threads = threadList.querySelectorAll('.thread-item');
+          threads.forEach((thread) => {
+            const hasUnread = thread.classList.contains('unread') ||
+                             thread.querySelector('.unread-badge, .unread-indicator');
+            (thread as HTMLElement).style.display = hasUnread ? '' : 'none';
+          });
+        }
+      }
+    }, 100);
   }
 
   private filterTable(tableName: string, filter: string): void {
@@ -1243,6 +1421,9 @@ class AdminDashboard {
     } else if (tableName === 'clients') {
       tableBody = this.domCache.get('clientsTableBody');
       statusColumnIndex = 2; // Status column is 3rd (0-indexed: 2)
+    } else if (tableName === 'invoices') {
+      tableBody = this.domCache.get('invoicesTableBody');
+      statusColumnIndex = 4; // Status column is 5th (0-indexed: 4)
     }
 
     if (!tableBody) return;
@@ -1356,11 +1537,23 @@ class AdminDashboard {
         // Use clients module
         {
           const clientsModule = await loadClientsModule();
+          this.clientsModule = clientsModule;
           await clientsModule.loadClients(this.moduleContext);
+        }
+        break;
+      case 'invoices':
+        // Use invoices module
+        {
+          const invoicesModule = await loadInvoicesModule();
+          await invoicesModule.loadInvoicesData(this.moduleContext);
         }
         break;
       case 'client-detail':
         // Client detail view - data loaded by showClientDetails in admin-clients module
+        // Ensure clients module is loaded for breadcrumbs
+        if (!this.clientsModule) {
+          this.clientsModule = await loadClientsModule();
+        }
         break;
       case 'messages':
         // Use messaging module
@@ -1369,6 +1562,16 @@ class AdminDashboard {
           await messagingModule.loadClientThreads(this.moduleContext);
         }
         break;
+      case 'knowledge-base': {
+        const kbModule = await loadKnowledgeBaseModule();
+        await kbModule.loadKnowledgeBase(this.moduleContext);
+        break;
+      }
+      case 'document-requests': {
+        const drModule = await loadDocumentRequestsModule();
+        await drModule.loadDocumentRequests(this.moduleContext);
+        break;
+      }
       case 'system':
         await this.loadSystemData();
         break;
@@ -1760,17 +1963,17 @@ class AdminDashboard {
     }
   }
 
-  private showNotification(message: string, type: 'success' | 'error' | 'info'): void {
+  private showNotification(message: string, type: 'success' | 'error' | 'info' | 'warning'): void {
     // Log notification to console
     const logFn = type === 'error' ? console.error : console.log;
     logFn(`[AdminDashboard] ${type.toUpperCase()}: ${message}`);
 
-    // Use toast notifications for success/info, dialogs only for errors that need attention
+    // Use toast notifications for success/info/warning, dialogs only for errors that need attention
     if (type === 'error') {
       // Keep error dialogs for important errors
       alertError(message);
     } else {
-      // Use toast for success/info messages
+      // Use toast for success/info/warning messages
       showToast(message, type);
     }
   }

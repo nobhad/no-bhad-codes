@@ -1,6 +1,6 @@
 # Module Dependencies
 
-Last Updated: January 20, 2026
+Last Updated: February 2, 2026
 
 ## Overview
 
@@ -66,7 +66,6 @@ GSAP Library
 
 GSAP ScrollTrigger
     ├── contact-animation.ts
-    ├── section-transitions.ts
     └── text-animation.ts
 
 GSAP MorphSVGPlugin (premium)

@@ -19,6 +19,8 @@ import { errorTracker } from '../services/error-tracking.js';
 import { queryStats } from '../services/query-stats.js';
 import { getDatabase } from '../database/init.js';
 import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../config/uploads.js';
+import { auditLogger } from '../services/audit-logger.js';
+import { getSchedulerService } from '../services/scheduler-service.js';
 
 const router = express.Router();
 
@@ -111,6 +113,99 @@ router.get(
         status: 'error',
         timestamp,
         error: 'Failed to retrieve system status'
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
+ * /api/admin/audit-log:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: Get audit log
+ *     description: Export audit logs with optional filters and pagination
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: action
+ *         schema:
+ *           type: string
+ *         description: Filter by action (e.g. create, update, delete, login)
+ *       - in: query
+ *         name: entityType
+ *         schema:
+ *           type: string
+ *         description: Filter by entity type (e.g. client, project, invoice)
+ *       - in: query
+ *         name: userEmail
+ *         schema:
+ *           type: string
+ *         description: Filter by user email
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Start date filter (ISO 8601)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: End date filter (ISO 8601)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 100
+ *         description: Max records to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Pagination offset
+ *     responses:
+ *       200:
+ *         description: Audit log retrieved successfully
+ *       403:
+ *         description: Admin access required
+ */
+router.get(
+  '/audit-log',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    try {
+      const { action, entityType, userEmail, startDate, endDate, limit, offset } = req.query;
+      const logs = await auditLogger.query({
+        ...(action && { action: String(action) }),
+        ...(entityType && { entityType: String(entityType) }),
+        ...(userEmail && { userEmail: String(userEmail) }),
+        ...(startDate && { startDate: String(startDate) }),
+        ...(endDate && { endDate: String(endDate) }),
+        limit: limit ? Math.min(parseInt(String(limit), 10) || 100, 500) : 100,
+        offset: offset ? Math.max(0, parseInt(String(offset), 10) || 0) : 0
+      });
+
+      res.json({
+        success: true,
+        data: logs,
+        count: logs.length
+      });
+    } catch (error) {
+      console.error('Error fetching audit log:', error);
+      errorTracker.captureException(error as Error, {
+        tags: { component: 'admin-audit' },
+        user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' }
+      });
+      res.status(500).json({
+        success: false,
+        error: 'Failed to retrieve audit log',
+        code: 'AUDIT_LOG_ERROR'
       });
     }
   })
@@ -338,6 +433,67 @@ router.post(
 );
 
 /**
+ * POST /api/admin/test-email - Send a test email to admin
+ */
+router.post(
+  '/test-email',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const adminEmail = process.env.ADMIN_EMAIL || req.user?.email;
+    if (!adminEmail) {
+      return res.status(400).json({
+        error: 'Admin email not configured. Set ADMIN_EMAIL in environment.',
+        code: 'ADMIN_EMAIL_NOT_CONFIGURED'
+      });
+    }
+
+    const result = await emailService.sendEmail({
+      to: adminEmail,
+      subject: 'No Bhad Codes - Test Email',
+      text: 'This is a test email from the admin dashboard. Email service is working correctly.',
+      html: '<p>This is a test email from the admin dashboard.</p><p>Email service is working correctly.</p>'
+    });
+
+    if (!result.success) {
+      return res.status(500).json({
+        error: result.message || 'Failed to send test email',
+        code: 'TEST_EMAIL_FAILED'
+      });
+    }
+
+    res.json({
+      message: 'Test email sent successfully',
+      to: adminEmail
+    });
+  })
+);
+
+/**
+ * POST /api/admin/run-scheduler - Manually trigger scheduler jobs (reminders + invoice generation)
+ */
+router.post(
+  '/run-scheduler',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const scheduler = getSchedulerService();
+
+    const overdueCount = await scheduler.checkOverdueInvoices();
+    const remindersSent = await scheduler.triggerReminderProcessing();
+    const { scheduled, recurring } = await scheduler.triggerInvoiceGeneration();
+
+    res.json({
+      message: 'Scheduler run completed',
+      reminders: remindersSent,
+      scheduledInvoices: scheduled,
+      recurringInvoices: recurring,
+      overdueMarked: overdueCount
+    });
+  })
+);
+
+/**
  * @swagger
  * /api/admin/leads:
  *   get:
@@ -391,13 +547,13 @@ router.get(
         ORDER BY p.created_at DESC
       `);
 
-      // Get stats
+      // Get stats - using simplified lead statuses
       const stats = await db.get(`
         SELECT
           COUNT(*) as total,
-          SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
-          SUM(CASE WHEN status IN ('active', 'in-progress', 'in-review') THEN 1 ELSE 0 END) as active,
-          SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
+          SUM(CASE WHEN status = 'new' THEN 1 ELSE 0 END) as new,
+          SUM(CASE WHEN status = 'in-progress' THEN 1 ELSE 0 END) as inProgress,
+          SUM(CASE WHEN status = 'converted' THEN 1 ELSE 0 END) as converted
         FROM projects
       `);
 
@@ -406,9 +562,9 @@ router.get(
         leads,
         stats: {
           total: stats?.total || 0,
-          pending: stats?.pending || 0,
-          active: stats?.active || 0,
-          completed: stats?.completed || 0
+          new: stats?.new || 0,
+          inProgress: stats?.inProgress || 0,
+          converted: stats?.converted || 0
         }
       });
     } catch (error) {
@@ -702,13 +858,25 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const { id } = req.params;
-      const { status, cancelled_by, cancellation_reason } = req.body;
+      const { status: rawStatus, cancelled_by, cancellation_reason } = req.body;
 
-      const validStatuses = ['pending', 'active', 'in-progress', 'in-review', 'completed', 'on-hold', 'cancelled'];
-      if (!validStatuses.includes(status)) {
+      // Normalize: trim, lowercase, accept legacy/label forms (spaces, underscores)
+      let normalized =
+        typeof rawStatus === 'string'
+          ? rawStatus.trim().toLowerCase().replace(/\s+/g, '-').replace(/_/g, '-')
+          : '';
+      if (normalized === 'in-progress' || normalized === 'inprogress') normalized = 'in-progress';
+      if (normalized === 'on-hold' || normalized === 'onhold') normalized = 'on-hold';
+      const status = normalized;
+
+      // Lead pipeline statuses (must match frontend LEAD_STATUS_OPTIONS and GET /leads stats)
+      const validStatuses = ['new', 'contacted', 'qualified', 'in-progress', 'converted', 'lost', 'on-hold', 'cancelled'];
+      if (!status || !validStatuses.includes(status)) {
         return res.status(400).json({
           success: false,
-          error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
+          error: status
+            ? `Invalid status "${status}". Must be one of: ${validStatuses.join(', ')}`
+            : 'Missing or invalid status in request body'
         });
       }
 
@@ -869,9 +1037,9 @@ router.post(
         }
       }
 
-      // Update project status to active
+      // Update lead status to converted (lead is now a project)
       if (typeof id === 'string') {
-        await db.run('UPDATE projects SET status = ? WHERE id = ?', ['active', id]);
+        await db.run('UPDATE projects SET status = ? WHERE id = ?', ['converted', id]);
       }
 
       // Build invitation link
@@ -987,16 +1155,16 @@ router.post(
         });
       }
 
-      if (lead.status === 'active' || lead.status === 'in-progress' || lead.status === 'in-review' || lead.status === 'completed') {
+      if (lead.status === 'converted') {
         return res.status(400).json({
           success: false,
-          error: 'Lead is already activated'
+          error: 'Lead is already converted'
         });
       }
 
-      // Update project status to active and set start_date
+      // Update lead status to converted and set start_date
       await db.run('UPDATE projects SET status = ?, start_date = date(\'now\'), updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
-        'active',
+        'converted',
         id
       ]);
 

@@ -5,20 +5,21 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Design System](#design-system)
-3. [Standardized Components](#standardized-components)
-4. [CSS Variables](#css-variables)
-5. [Theme System](#theme-system)
-6. [Client Portal Classes](#client-portal-classes)
-7. [Utility Classes](#utility-classes)
-8. [Responsive Design](#responsive-design)
-9. [Naming Conventions](#naming-conventions)
-10. [File Organization](#file-organization)
-11. [Best Practices](#best-practices)
-12. [!important Usage Policy](#important-usage-policy)
-13. [Portal Button Design](#portal-button-design)
-14. [Admin Messaging Component](#admin-messaging-component)
-15. [Known Issues](#known-issues)
+2. [Portal CSS (Separate Doc)](#portal-css-separate-doc)
+3. [Design System](#design-system)
+4. [Standardized Components](#standardized-components)
+5. [CSS Variables](#css-variables)
+6. [Theme System](#theme-system)
+7. [Client Portal Classes](#client-portal-classes)
+8. [Utility Classes](#utility-classes)
+9. [Responsive Design](#responsive-design)
+10. [Naming Conventions](#naming-conventions)
+11. [File Organization](#file-organization)
+12. [Best Practices](#best-practices)
+13. [!important Usage Policy](#important-usage-policy)
+14. [Portal Button Design](#portal-button-design)
+15. [Admin Messaging Component](#admin-messaging-component)
+16. [Known Issues](#known-issues)
 
 ---
 
@@ -28,6 +29,16 @@ The project uses a CSS variable-based architecture for consistent theming across
 
 **Design System:** `src/design-system/` (11 files, ~2,300 lines)
 **Styles Directory:** `src/styles/` (25 files, ~4,200 lines)
+
+---
+
+## Portal CSS (Separate Doc)
+
+**Admin and Client Portal CSS** (bundles, theme variables, file structure, naming) is documented in a dedicated doc so it stays separate from main-site styling:
+
+- **[PORTAL_CSS_DESIGN.md](./PORTAL_CSS_DESIGN.md)** — Portal scope, entry points (`admin.css`, `portal.css`), `[data-page="admin"]` / `[data-page="client-portal"]` theme variables, `--portal-*` tokens, portal file structure, naming conventions. Use this for portal-only CSS work.
+
+This doc (CSS_ARCHITECTURE.md) remains the high-level overview for the whole project; portal-specific details live in PORTAL_CSS_DESIGN.md.
 
 ---
 
@@ -1035,7 +1046,7 @@ When removing `!important`, use these techniques:
 
 ## Portal Button Design
 
-**Reference:** [PORTAL_BUTTON_DESIGN.md](./PORTAL_BUTTON_DESIGN.md)
+**Reference:** [PORTAL_CSS_DESIGN.md](./PORTAL_CSS_DESIGN.md#button-hierarchy)
 
 Portal buttons follow a clear hierarchy so the sidebar reads as links and content actions are scannable:
 

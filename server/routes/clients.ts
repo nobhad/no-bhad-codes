@@ -210,6 +210,113 @@ router.put(
   })
 );
 
+/**
+ * GET /me/dashboard - Get client dashboard stats and recent activity
+ */
+router.get(
+  '/me/dashboard',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const db = getDatabase();
+    const clientId = req.user!.id;
+
+    // Get active projects count
+    const projectsResult = await db.get(
+      `SELECT COUNT(*) as count FROM projects WHERE client_id = ? AND status IN ('planning', 'in-progress', 'review')`,
+      [clientId]
+    );
+    const activeProjects = projectsResult?.count || 0;
+
+    // Get pending invoices count (sent, viewed, partial, overdue)
+    const invoicesResult = await db.get(
+      `SELECT COUNT(*) as count FROM invoices
+       WHERE client_id = ? AND status IN ('sent', 'viewed', 'partial', 'overdue')`,
+      [clientId]
+    );
+    const pendingInvoices = invoicesResult?.count || 0;
+
+    // Get unread messages count
+    const messagesResult = await db.get(
+      `SELECT COUNT(*) as count FROM messages m
+       JOIN message_threads t ON m.thread_id = t.id
+       WHERE t.client_id = ? AND m.is_read = 0 AND m.sender_type = 'admin'`,
+      [clientId]
+    );
+    const unreadMessages = messagesResult?.count || 0;
+
+    // Get recent activity (last 10 items)
+    const recentActivity = await db.all(
+      `SELECT * FROM (
+        -- Project updates
+        SELECT
+          'project_update' as type,
+          pu.title as title,
+          p.project_name as context,
+          pu.created_at as date
+        FROM project_updates pu
+        JOIN projects p ON pu.project_id = p.id
+        WHERE p.client_id = ?
+
+        UNION ALL
+
+        -- Messages received
+        SELECT
+          'message' as type,
+          'New message received' as title,
+          t.subject as context,
+          m.created_at as date
+        FROM messages m
+        JOIN message_threads t ON m.thread_id = t.id
+        WHERE t.client_id = ? AND m.sender_type = 'admin'
+
+        UNION ALL
+
+        -- Invoices
+        SELECT
+          'invoice' as type,
+          CASE
+            WHEN status = 'sent' THEN 'Invoice sent'
+            WHEN status = 'paid' THEN 'Invoice paid'
+            ELSE 'Invoice updated'
+          END as title,
+          invoice_number as context,
+          updated_at as date
+        FROM invoices
+        WHERE client_id = ?
+
+        UNION ALL
+
+        -- Files uploaded
+        SELECT
+          'file' as type,
+          'File uploaded' as title,
+          original_filename as context,
+          created_at as date
+        FROM project_files pf
+        JOIN projects p ON pf.project_id = p.id
+        WHERE p.client_id = ?
+      )
+      ORDER BY date DESC
+      LIMIT 10`,
+      [clientId, clientId, clientId, clientId]
+    );
+
+    res.json({
+      stats: {
+        activeProjects,
+        pendingInvoices,
+        unreadMessages
+      },
+      recentActivity: recentActivity.map((item: Record<string, unknown>) => ({
+        type: item.type,
+        title: item.title,
+        context: item.context,
+        date: item.date
+      }))
+    });
+  })
+);
+
 // =====================================================
 // ADMIN CLIENT ENDPOINTS
 // =====================================================
@@ -951,6 +1058,100 @@ router.get(
 );
 
 // =====================================================
+// NOTES
+// =====================================================
+
+/** Transform ClientNote to snake_case for API response */
+function toApiNote(n: { id: number; clientId: number; author: string; content: string; isPinned: boolean; createdAt: string; updatedAt: string }) {
+  return {
+    id: n.id,
+    client_id: n.clientId,
+    content: n.content,
+    is_pinned: n.isPinned,
+    created_at: n.createdAt,
+    updated_at: n.updatedAt,
+    created_by: n.author
+  };
+}
+
+/**
+ * GET /clients/:id/notes - Get notes for a client
+ */
+router.get(
+  '/:id/notes',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const notes = await clientService.getNotes(clientId);
+    res.json({ notes: notes.map(toApiNote) });
+  })
+);
+
+/**
+ * POST /clients/:id/notes - Add note to a client
+ */
+router.post(
+  '/:id/notes',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['clients']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = parseInt(req.params.id);
+    const { content } = req.body;
+
+    if (!content || typeof content !== 'string' || !content.trim()) {
+      return res.status(400).json({
+        error: 'Note content is required',
+        code: 'MISSING_CONTENT'
+      });
+    }
+
+    const note = await clientService.addNote(clientId, req.user?.email || 'admin', content.trim());
+    res.status(201).json({ note: toApiNote(note) });
+  })
+);
+
+/**
+ * PUT /clients/notes/:noteId - Update a note (e.g. is_pinned)
+ */
+router.put(
+  '/notes/:noteId',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['clients']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const noteId = parseInt(req.params.noteId);
+    const { is_pinned } = req.body;
+
+    if (typeof is_pinned !== 'boolean') {
+      return res.status(400).json({
+        error: 'is_pinned must be a boolean',
+        code: 'INVALID_INPUT'
+      });
+    }
+
+    const note = await clientService.updateNote(noteId, { isPinned: is_pinned });
+    res.json({ note: toApiNote(note) });
+  })
+);
+
+/**
+ * DELETE /clients/notes/:noteId - Delete a note
+ */
+router.delete(
+  '/notes/:noteId',
+  authenticateToken,
+  requireAdmin,
+  invalidateCache(['clients']),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const noteId = parseInt(req.params.noteId);
+    await clientService.deleteNote(noteId);
+    res.json({ message: 'Note deleted' });
+  })
+);
+
+// =====================================================
 // CUSTOM FIELDS
 // =====================================================
 
@@ -1283,6 +1484,115 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clients = await clientService.getClientsForFollowUp();
     res.json({ success: true, clients });
+  })
+);
+
+// =====================================================
+// NOTIFICATION PREFERENCES
+// =====================================================
+
+import { notificationPreferencesService } from '../services/notification-preferences-service.js';
+import { timelineService } from '../services/timeline-service.js';
+
+/**
+ * GET /me/timeline - Get current client's activity timeline
+ */
+router.get(
+  '/me/timeline',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
+    const projectId = req.query.projectId ? parseInt(req.query.projectId as string) : undefined;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+    const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+
+    const { events, total } = await timelineService.getClientTimeline(req.user!.id, {
+      projectId,
+      limit,
+      offset
+    });
+
+    res.json({ success: true, events, total, limit, offset });
+  })
+);
+
+/**
+ * GET /me/timeline/summary - Get recent activity summary for dashboard
+ */
+router.get(
+  '/me/timeline/summary',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
+    const days = req.query.days ? parseInt(req.query.days as string) : 7;
+    const summary = await timelineService.getRecentActivitySummary(req.user!.id, days);
+
+    res.json({ success: true, ...summary });
+  })
+);
+
+/**
+ * GET /me/notifications - Get current client's notification preferences
+ */
+router.get(
+  '/me/notifications',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
+    const preferences = await notificationPreferencesService.getPreferences(req.user!.id, 'client');
+    res.json({ success: true, preferences });
+  })
+);
+
+/**
+ * PUT /me/notifications - Update current client's notification preferences
+ */
+router.put(
+  '/me/notifications',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
+    const preferences = await notificationPreferencesService.updatePreferences(
+      req.user!.id,
+      'client',
+      req.body
+    );
+
+    res.json({
+      success: true,
+      message: 'Notification preferences updated',
+      preferences
+    });
+  })
+);
+
+/**
+ * GET /me/notifications/history - Get notification history for current client
+ */
+router.get(
+  '/me/notifications/history',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    if (req.user!.type !== 'client') {
+      return res.status(403).json({ error: 'Access denied', code: 'ACCESS_DENIED' });
+    }
+
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+    const history = await notificationPreferencesService.getNotificationHistory(req.user!.id, 'client', limit);
+
+    res.json({ success: true, history });
   })
 );
 

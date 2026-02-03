@@ -36,7 +36,7 @@
 
 | Item | Implemented | Notes |
 |------|-------------|-------|
-| **Login** | Yes | Email + password, JWT in localStorage, HttpOnly cookies, demo mode |
+| **Login** | Yes | Email + password, HttpOnly cookies (JWT); demo mode fallback |
 | **Magic link** | Yes | Passwordless invite flow |
 | **Set password** | Yes | Dedicated `set-password.html` after invite |
 | **Logout** | Yes | Clears auth, returns to login |

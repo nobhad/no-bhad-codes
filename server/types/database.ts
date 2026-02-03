@@ -37,13 +37,15 @@ export type DatabaseRow = Record<string, unknown>;
 // Lead/Intake Types
 // ============================================
 
-// Lead/project status values must match database CHECK constraint
+// Lead status values - simplified pipeline stages
+// new → contacted → qualified → in-progress → converted/lost
 export type LeadStatus =
-  | 'pending'
-  | 'active'
+  | 'new'
+  | 'contacted'
+  | 'qualified'
   | 'in-progress'
-  | 'in-review'
-  | 'completed'
+  | 'converted'
+  | 'lost'
   | 'on-hold'
   | 'cancelled';
 

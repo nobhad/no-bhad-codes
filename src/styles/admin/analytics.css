@@ -7,6 +7,64 @@
  * Charts, performance metrics, vitals, and analytics dashboard.
  */
 
+/* ============================================
+   Analytics Sub-Tabs
+   ============================================ */
+
+.analytics-subtabs {
+  display: flex;
+  gap: var(--portal-spacing-sm);
+  margin-bottom: var(--portal-spacing-lg);
+  padding-bottom: var(--portal-spacing-md);
+  border-bottom: 1px solid var(--portal-border);
+}
+
+.analytics-subtab {
+  padding: var(--portal-spacing-sm) var(--portal-spacing-lg);
+  background: transparent;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-md);
+  color: var(--portal-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.analytics-subtab:hover {
+  background: var(--portal-bg-medium);
+  color: var(--portal-text-primary);
+}
+
+.analytics-subtab.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.analytics-subtab-content {
+  display: none;
+}
+
+.analytics-subtab-content.active {
+  display: block;
+}
+
+/* Consistent spacing between sections within sub-tabs */
+.analytics-subtab-content > .analytics-section,
+.analytics-subtab-content > .metric-group,
+.analytics-subtab-content > .business-charts-grid,
+.analytics-subtab-content > .analytics-breakdown,
+.analytics-subtab-content > .charts-grid,
+.analytics-subtab-content > .analytics-grid,
+.analytics-subtab-content > .visitors-dashboard {
+  margin-bottom: var(--portal-spacing-lg);
+}
+
+.analytics-subtab-content > *:last-child {
+  margin-bottom: 0;
+}
+
 /* Charts */
 .charts-grid {
   display: grid;
@@ -139,12 +197,12 @@
 }
 
 .vital-status.needs-improvement {
-  background: rgba(245, 158, 11, 0.1);
+  background: rgba(var(--color-warning-rgb), 0.1);
   color: var(--color-warning);
 }
 
 .vital-status.poor {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(var(--color-error-rgb), 0.1);
   color: var(--color-danger);
 }
 
@@ -190,9 +248,54 @@
   flex-wrap: wrap;
 }
 
+/* Visitor breakdown: main portfolio site vs THE BACKEND (client portal) */
+.analytics-breakdown-intro {
+  margin: 0.25rem 0 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+}
+
+.analytics-breakdown {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--portal-spacing-xl);
+  margin-bottom: var(--portal-spacing-xl);
+}
+
+/* Match portal card styling (overview-card, portal-project-card) */
+.analytics-breakdown-block {
+  background: var(--portal-bg-dark);
+  border: none;
+  border-radius: var(--border-radius-card);
+  padding: var(--space-4);
+  color: var(--portal-text-light);
+  box-shadow: var(--shadow-panel);
+}
+
+.analytics-breakdown-title {
+  font-family: var(--font-family-acme);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--portal-text-light);
+  margin: 0 0 var(--portal-spacing-lg) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.analytics-breakdown-stats {
+  margin-bottom: 0;
+}
+
+/* Breakdown stat cards: lighter bg and softer shadow than main block */
+.analytics-breakdown-stats .stat-card {
+  background: var(--portal-bg-medium);
+  box-shadow: var(--shadow-card);
+}
+
+/* Analytics data grid: 2x2 like other admin grids; fill content width; match portal card styling */
 .analytics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
   gap: var(--portal-spacing-lg);
   margin-top: var(--portal-spacing-lg);
 }
@@ -202,6 +305,7 @@
   border: none;
   border-radius: var(--border-radius-card);
   padding: var(--space-4);
+  box-shadow: var(--shadow-panel);
 }
 
 .analytics-section h3 {
@@ -217,6 +321,21 @@
   gap: var(--space-2);
 }
 
+/* Empty state: centered muted message when no data (replaces single "No data available" row) */
+.data-list-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  padding: var(--space-4);
+  color: var(--portal-text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  background: var(--portal-bg-medium);
+  border-radius: var(--border-radius-sm);
+  border: 1px dashed var(--portal-border);
+}
+
 .data-item {
   display: flex;
   justify-content: space-between;
@@ -225,30 +344,37 @@
   background: var(--portal-bg-medium);
   border-radius: var(--border-radius-sm);
   border: none;
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-panel);
   color: var(--portal-text-light);
   font-size: var(--font-size-xs);
 }
 
 /* ============================================
-   Business KPI Cards
+   Business KPI Cards (match stat-card styling)
    ============================================ */
 
+/* KPI row: 4 in one row on desktop; stack to 1 column on narrow (no 2x2 like other cards) */
 .kpi-cards-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--portal-spacing-md);
-  margin-bottom: var(--portal-spacing-lg);
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--portal-spacing-xl);
+  margin-bottom: var(--portal-spacing-xl);
 }
 
+/* Same styling as .stat-card (portal-cards.css) */
 .kpi-card {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-sm);
-  padding: var(--portal-spacing-md);
+  align-items: center;
+  text-align: center;
+  gap: var(--space-1);
+  padding: var(--space-4);
   background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
-  border-top: 3px solid var(--app-color-primary);
+  border: none;
+  border-radius: var(--border-radius-card);
+  box-shadow: var(--shadow-card);
+  color: var(--portal-text-light);
+  font-family: inherit;
 }
 
 .kpi-card-icon {
@@ -264,26 +390,33 @@
 .kpi-card-content {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 2px;
 }
 
+/* Match .stat-number */
 .kpi-card-value {
-  font-size: 1.75rem;
+  display: block;
+  font-family: var(--font-family-acme);
+  font-size: 2rem;
   font-weight: 700;
-  color: var(--portal-text-primary);
-  line-height: 1.2;
+  color: var(--color-primary);
+  line-height: 1;
 }
 
+/* Match .stat-label */
 .kpi-card-label {
-  font-size: 0.75rem;
+  display: block;
+  font-size: 0.85rem;
   color: var(--portal-text-secondary);
+  margin-top: var(--portal-spacing-sm);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .kpi-card-change {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   font-size: 0.75rem;
   margin-top: auto;
@@ -370,7 +503,7 @@
 }
 
 .funnel-stage-success {
-  background: rgba(34, 197, 94, 0.15);
+  background: rgba(var(--color-success-rgb), 0.15);
   border: 1px solid var(--status-active);
 }
 
@@ -437,7 +570,7 @@
 }
 
 .report-item:hover {
-  border-color: var(--app-color-primary);
+  border-color: var(--color-primary);
 }
 
 .report-info {
@@ -523,8 +656,9 @@
    ============================================ */
 
 @media (max-width: 768px) {
+  /* Stack KPI cards in single column (do not split into groups of 2) */
   .kpi-cards-row {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 
   .kpi-card-value {
@@ -565,4 +699,144 @@
     align-items: flex-start;
     gap: var(--portal-spacing-sm);
   }
+}
+
+/* ============================================
+   System Status Tab
+   ============================================ */
+
+/* Health Check Grid */
+.health-check-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--portal-spacing-md);
+}
+
+.health-item {
+  display: flex;
+  align-items: center;
+  gap: var(--portal-spacing-sm);
+  padding: var(--portal-spacing-md);
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-sm);
+}
+
+.health-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.health-indicator.health-loading {
+  background: var(--portal-text-muted);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.health-indicator.health-ok {
+  background: var(--status-active);
+}
+
+.health-indicator.health-warning {
+  background: var(--color-warning);
+}
+
+.health-indicator.health-error {
+  background: var(--status-cancelled);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.health-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--portal-text-primary);
+  flex: 1;
+}
+
+.health-status {
+  font-size: 0.75rem;
+  color: var(--portal-text-secondary);
+}
+
+/* Quick Actions Grid */
+.quick-actions-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--portal-spacing-md);
+}
+
+.quick-actions-grid .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--portal-spacing-sm);
+}
+
+.quick-actions-grid .btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Recent Errors List */
+.recent-errors-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-spacing-sm);
+}
+
+.error-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  background: rgba(var(--color-error-rgb), 0.1);
+  border: 1px solid rgba(var(--color-error-rgb), 0.2);
+  border-radius: var(--portal-radius-sm);
+}
+
+.error-item-message {
+  font-size: 0.875rem;
+  color: var(--portal-text-primary);
+  font-family: var(--font-family-mono);
+}
+
+.error-item-time {
+  font-size: 0.75rem;
+  color: var(--portal-text-muted);
+}
+
+.empty-state-text {
+  text-align: center;
+  padding: var(--portal-spacing-lg);
+  color: var(--portal-text-secondary);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* System tab uses shared .system-details, .system-info-grid, .system-info-row from details-card.css */
+
+.truncate-text {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .health-check-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-actions-grid {
+    flex-direction: column;
+  }
+
+  .quick-actions-grid .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
 }

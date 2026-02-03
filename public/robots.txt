@@ -1,0 +1,17 @@
+# Robots.txt for nobhad.codes
+
+User-agent: *
+Allow: /
+
+# Disallow admin and client areas
+Disallow: /admin
+Disallow: /admin/
+Disallow: /client/
+Disallow: /api/
+
+# Allow assets
+Allow: /images/
+Allow: /fonts/
+
+# Sitemap
+Sitemap: https://nobhad.codes/sitemap.xml

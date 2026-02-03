@@ -1,0 +1,18 @@
+/**
+ * ===============================================
+ * WIREFRAME MODE (GREYSCALE)
+ * ===============================================
+ * @file src/styles/shared/wireframe.css
+ *
+ * When html has data-wireframe="true", the portal (admin or client)
+ * is rendered entirely in greyscale. Navigation and layout stay the same.
+ * Enable via ?wireframe=1 or localStorage.wireframe=1.
+ */
+
+html[data-wireframe="true"] {
+  filter: grayscale(100%) !important;
+}
+
+html[data-wireframe="true"] *:focus-visible {
+  outline-color: var(--color-gray-700, #404040);
+}

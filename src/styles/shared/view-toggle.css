@@ -1,0 +1,46 @@
+/**
+ * ===============================================
+ * VIEW TOGGLE (REUSABLE)
+ * ===============================================
+ * @file src/styles/shared/view-toggle.css
+ *
+ * Segmented control: Table/Pipeline, List/Grid, Board/List, etc.
+ * Inactive option has darker bg; active has primary color.
+ */
+
+.view-toggle {
+  display: inline-flex;
+  gap: var(--portal-spacing-xs);
+  border-bottom: 1px solid var(--portal-border);
+}
+
+.view-toggle button {
+  padding: var(--portal-spacing-sm) var(--portal-spacing-md);
+  border: none;
+  background: transparent;
+  color: var(--portal-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  margin-bottom: -1px;
+}
+
+.view-toggle button:hover {
+  color: var(--portal-text-primary);
+}
+
+.view-toggle button.active {
+  color: var(--color-primary);
+  border-bottom: 2px solid var(--color-primary);
+}
+
+.view-toggle button svg,
+.view-toggle .view-toggle-icon svg {
+  width: 14px;
+  height: 14px;
+}

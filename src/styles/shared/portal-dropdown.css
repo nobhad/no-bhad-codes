@@ -39,13 +39,14 @@
   --dropdown-radius: var(--portal-radius-lg);
 }
 
-/* Dropdown trigger button - CLOSED state */
+/* Dropdown trigger button - CLOSED state; left padding matches menu so text aligns */
 .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: var(--space-3) var(--space-4);
+  padding-right: var(--space-2); /* Half of space-4 so less gap to right of caret */
   background-color: var(--dropdown-bg);
   border: var(--dropdown-border-width) solid var(--dropdown-border-color);
   border-radius: var(--dropdown-radius);
@@ -63,12 +64,12 @@
 }
 
 .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger:hover {
-  border-color: var(--color-brand-primary);
+  border-color: var(--color-primary);
 }
 
 /* Trigger - OPEN state */
 .custom-dropdown[data-modal-dropdown].open .custom-dropdown-trigger {
-  border-color: var(--color-brand-primary);
+  border-color: var(--color-primary);
   border-bottom: none;
   border-radius: var(--dropdown-radius) var(--dropdown-radius) 0 0;
   z-index: 10001;
@@ -76,12 +77,14 @@
   background-color: var(--dropdown-bg);
 }
 
-/* Trigger text */
+/* Trigger text - left align so it lines up with menu item labels */
 .custom-dropdown[data-modal-dropdown] .custom-dropdown-text {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: left;
 }
 
 /* Caret icon */
@@ -109,7 +112,7 @@
   max-height: 200px;
   overflow-y: auto;
   background-color: var(--dropdown-bg);
-  border: var(--dropdown-border-width) solid var(--color-brand-primary);
+  border: var(--dropdown-border-width) solid var(--color-primary);
   border-top: none;
   border-radius: 0 0 var(--dropdown-radius) var(--dropdown-radius);
   z-index: 10000;
@@ -125,21 +128,22 @@
   display: block;
 }
 
-/* Dropdown items */
+/* Dropdown items - align text with trigger (same left padding so labels line up) */
 .custom-dropdown[data-modal-dropdown] .custom-dropdown-item {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
   font-size: var(--font-size-base);
   color: var(--portal-text-light);
   cursor: pointer;
   transition: background-color 0.1s ease;
+  text-align: left;
 }
 
 .custom-dropdown[data-modal-dropdown] .custom-dropdown-item:hover {
-  background-color: var(--color-brand-primary);
+  background-color: var(--color-primary);
 }
 
 /* Item name text */
@@ -180,7 +184,7 @@
 /* When flipped above, adjust trigger border radius */
 .custom-dropdown[data-modal-dropdown].flip-above.open .custom-dropdown-trigger {
   border-radius: 0 0 var(--dropdown-radius) var(--dropdown-radius);
-  border-bottom: var(--dropdown-border-width) solid var(--color-brand-primary);
+  border-bottom: var(--dropdown-border-width) solid var(--color-primary);
   border-top: none;
 }
 
@@ -188,5 +192,96 @@
 .custom-dropdown[data-modal-dropdown].flip-above .custom-dropdown-menu {
   border-radius: var(--dropdown-radius) var(--dropdown-radius) 0 0;
   border-bottom: none;
-  border-top: var(--dropdown-border-width) solid var(--color-brand-primary);
+  border-top: var(--dropdown-border-width) solid var(--color-primary);
+}
+
+/* ================================================
+   Table dropdown (reusable in tables)
+   ================================================
+   Status dropdowns, pagination "Per page", etc.
+   Single source of truth: compact padding so caret
+   sits close to right edge; no overrides needed.
+   ================================================ */
+
+:is([data-page="admin"], [data-page="client-portal"]) .table-dropdown {
+  position: relative;
+  width: fit-content;
+  min-width: 100px;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .table-dropdown .custom-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  padding-right: var(--space-1-5); /* Half of space-3 so less gap to right of caret */
+  border-radius: var(--portal-radius-lg);
+  box-sizing: border-box;
+  text-align: left;
+}
+
+/* Status dropdowns: same padding between status dot and left edge as between caret and right edge (space-1-5) */
+:is([data-page="admin"], [data-page="client-portal"]) .table-dropdown .custom-dropdown-trigger:has(.status-dot) {
+  padding-left: var(--space-1-5);
+}
+
+/* Table dropdown trigger: suppress global outline; focus ring is border + box-shadow in admin.css */
+:is([data-page="admin"], [data-page="client-portal"]) .table-dropdown .custom-dropdown-trigger:focus,
+:is([data-page="admin"], [data-page="client-portal"]) .table-dropdown .custom-dropdown-trigger:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .table-dropdown .custom-dropdown-text {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .table-dropdown .custom-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 180px;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: var(--dropdown-bg, var(--color-surface-primary));
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-md);
+  z-index: 10000;
+  list-style: none;
+  margin: 4px 0 0 0;
+  padding: var(--space-1) 0;
+  box-shadow: var(--shadow-md);
+  text-align: left;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .table-dropdown.open .custom-dropdown-menu {
+  display: block;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .table-dropdown .custom-dropdown-menu .custom-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .table-dropdown .custom-dropdown-menu .custom-dropdown-item:hover {
+  background-color: var(--color-state-hover);
+}
+
+:is([data-page="admin"], [data-page="client-portal"]) .table-dropdown .custom-dropdown-menu .custom-dropdown-item svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }

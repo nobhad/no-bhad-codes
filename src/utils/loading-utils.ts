@@ -44,6 +44,38 @@ export function getInlineLoadingHTML(): string {
   return '<span class="loading-spinner loading-spinner--small" aria-hidden="true"></span>';
 }
 
+function escapeHtml(text: string): string {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/**
+ * HTML for table empty row (no data)
+ * @param colspan Number of columns in the table
+ * @param message Message to display (e.g. "No clients found")
+ */
+export function getTableEmptyRow(colspan: number, message: string): string {
+  return `
+    <tr>
+      <td colspan="${colspan}" class="loading-row empty-state">
+        <span>${escapeHtml(message)}</span>
+      </td>
+    </tr>
+  `;
+}
+
+/**
+ * Show empty state in a table body (e.g. "No clients found")
+ */
+export function showTableEmpty(
+  tableBody: HTMLElement,
+  colspan: number,
+  message: string
+): void {
+  tableBody.innerHTML = getTableEmptyRow(colspan, message);
+}
+
 /**
  * Show loading state in a table body
  * @param tableBody The table body element

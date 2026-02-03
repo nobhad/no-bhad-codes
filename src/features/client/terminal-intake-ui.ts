@@ -17,7 +17,7 @@ import type { ChatMessage } from './terminal-intake-types';
 export function renderTerminalHTML(isModal: boolean): string {
   const buttonsHtml = isModal
     ? `<div class="terminal-buttons">
-            <button class="terminal-btn close" id="terminalClose" aria-label="Close"></button>
+            <button class="terminal-btn close" id="terminalClose" aria-label="Close terminal"></button>
             <button class="terminal-btn minimize" id="terminalMinimize" aria-label="Minimize"></button>
             <button class="terminal-btn maximize" id="terminalMaximize" aria-label="Maximize"></button>
           </div>`
