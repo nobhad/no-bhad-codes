@@ -206,10 +206,20 @@ a {
 
 /* Global focus indicator for ALL interactive elements - WCAG 2.4.7 */
 /* Applies to: a, button, input, select, textarea, [tabindex] */
+/* Border-radius inherits from element so focus matches rounded corners */
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
-  border-radius: 2px;
+  border-radius: inherit;
+}
+
+/* Details elements: focus on the whole element when open, not just summary */
+details:focus-visible {
+  border-radius: var(--portal-radius-lg, 12px);
+}
+
+details > summary:focus-visible {
+  border-radius: var(--portal-radius-lg, 12px);
 }
 
 /* Remove focus ring for mouse users (non-keyboard focus) */

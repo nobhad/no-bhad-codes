@@ -101,3 +101,17 @@
   color: var(--portal-text-primary);
   font-weight: 500;
 }
+
+/* Focus styles: border-radius matches card, focus wraps entire element when open */
+:is([data-page="admin"], [data-page="client-portal"]) .details-card:focus-within,
+:is([data-page="admin"], [data-page="client-portal"]) .system-details:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--portal-radius-lg, 12px);
+}
+
+/* Remove default focus from summary since parent handles it */
+:is([data-page="admin"], [data-page="client-portal"]) .details-card summary:focus-visible,
+:is([data-page="admin"], [data-page="client-portal"]) .system-details summary:focus-visible {
+  outline: none;
+}
