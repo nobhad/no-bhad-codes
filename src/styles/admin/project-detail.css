@@ -23,18 +23,32 @@
   font-size: var(--font-size-sm);
 }
 
-/* Project Detail Page Header with Status Badge */
-#tab-project-detail .page-header {
+/* Project Detail Page Title with Status Badge */
+#tab-project-detail .page-title.page-title-with-badge {
   display: flex;
   align-items: center;
   gap: var(--portal-spacing-lg);
 }
 
-#tab-project-detail .page-header .status-badge {
+#tab-project-detail .page-title.page-title-with-badge .status-badge {
   margin-left: auto;
 }
 
-/* Project Overview Card */
+/* Shared page title for both detail views (client + project) */
+#tab-project-detail .page-title,
+#tab-client-detail .page-title {
+  margin-bottom: var(--portal-spacing-xl);
+}
+
+#tab-project-detail .page-title h2,
+#tab-client-detail .page-title h2 {
+  font-family: var(--font-family-acme);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  color: var(--portal-text-light);
+  margin: 0;
+}
+
+/* Project Overview Card (shared by client detail and project detail) */
 .project-detail-overview {
   background: var(--portal-bg-dark);
   border: none;
@@ -58,48 +72,78 @@
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--portal-text-light);
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
+}
+
+/* Overview labels: recede so values read as primary content */
+/* Use high specificity to override inherited color from parent */
+[data-page="admin"] .project-detail-overview .field-label,
+[data-page="admin"] .project-detail-overview .meta-label,
+[data-page="client-portal"] .project-detail-overview .field-label,
+[data-page="client-portal"] .project-detail-overview .meta-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0;
+}
+
+/* Overview values: match client detail and root .meta-value (portal-text-light for contrast on dark admin) */
+.project-detail-overview .meta-value {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--portal-text-light);
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+.project-detail-overview .meta-item {
+  gap: var(--field-label-value-gap);
 }
 
 /* Standalone .btn-icon styles now in shared/portal-buttons.css */
 
-/* Root meta-item styling - applies everywhere */
+/* Root meta-item styling - applies everywhere (label-value gap from shared/field-label-spacing.css) */
 .meta-item {
   display: flex;
   flex-direction: column;
-  gap: var(--portal-spacing-xs);
+  gap: var(--field-label-value-gap);
 }
 
-/* Field label styling - uses label CSS variables
+/* Field label styling - match client detail (portal-text-secondary for labels on dark bg)
  * .meta-label kept as alias for backward compatibility
  * Prefer using .field-label in new code (defined in form-fields.css)
+ * Use high specificity to override inherited colors from parent containers
  */
-.meta-label,
-.field-label {
+[data-page="admin"] .meta-label,
+[data-page="admin"] .field-label,
+[data-page="client-portal"] .meta-label,
+[data-page="client-portal"] .field-label {
   font-size: var(--label-font-size, 0.75rem);
-  color: var(--label-color, var(--portal-text-secondary));
+  color: var(--portal-text-secondary);
   text-transform: var(--label-text-transform, uppercase);
   letter-spacing: var(--label-letter-spacing, 0.05em);
   font-weight: var(--label-font-weight, 500);
 }
 
-/* Root meta-value styling - applies everywhere */
+/* Root meta-value styling - match client detail (portal-text-light for body text) */
 .meta-value {
   font-size: 1rem;
-  color: var(--color-white);
+  color: var(--portal-text-light);
   font-weight: 400;
 }
 
-/* URL links in project details - styled red and clickable */
+/* URL links in project details - match text by default, red on hover */
 .meta-value a {
-  color: var(--color-primary, #dc2626);
+  color: var(--portal-text-light);
   text-decoration: none;
   transition: color 0.2s ease;
   word-break: break-all;
 }
 
 .meta-value a:hover {
-  color: #ff4444;
+  color: var(--color-error-500);
   text-decoration: underline;
 }
 
@@ -140,122 +184,21 @@
 .project-detail-meta {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--portal-spacing-xl);
+  row-gap: var(--field-group-gap);
+  column-gap: var(--portal-spacing-xl);
 }
 
 /* ==============================================
    PROJECT DETAIL TABS
-   All tab styling uses .project-detail-tabs as parent
+   Strip and panel base styles are in shared/portal-tabs.css
+   (.portal-tabs, .portal-tab-panel). Use class="portal-tabs" on the strip
+   and class="portal-tab-panel" on content divs.
    ============================================== */
-.project-detail-tabs {
-  display: flex;
-  gap: var(--portal-spacing-sm);
-  margin-bottom: 0;
-  overflow: visible;
-  position: relative;
-}
 
-/* Tab buttons (inactive) */
-.project-detail-tabs button {
-  display: flex;
-  align-items: center;
-  gap: var(--portal-spacing-sm);
-  padding: var(--portal-spacing-md) var(--portal-spacing-xl);
-  background: var(--portal-bg-readonly);
-  border: none;
-  border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0;
-  color: var(--portal-text-secondary);
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-  position: relative;
-  z-index: 0;
-  box-shadow: none;
-}
-
-.project-detail-tabs button .tab-icon {
-  flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-}
-
-.project-detail-tabs button:hover:not(.active) {
-  color: var(--portal-text-light);
-  background: var(--color-primary);
-}
-
-/* Active tab */
-.project-detail-tabs button.active {
-  position: relative;
-  color: var(--portal-text-light);
-  background: var(--portal-bg-dark);
-  font-weight: 700;
-  z-index: 10;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  margin-bottom: 0;
-  /* Right shadow + left (slightly more intense to match content) + top outline, no bottom */
-  box-shadow:
-    2px 0 4px rgba(0, 0, 0, 0.4),
-    4px 0 12px rgba(0, 0, 0, 0.3),
-    -1px 0 1px rgba(0, 0, 0, 0.5),
-    0 -1px 1px rgba(0, 0, 0, 0.3);
-}
-
-/* Cover element to hide seam between active tab and content */
-.project-detail-tabs button.active::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 0;
-  width: 100%;
-  height: 15px;
-  background: var(--portal-bg-dark);
-  z-index: 11;
-  box-shadow: none;
-}
-
-
-.project-detail-tabs button.active:hover,
-.project-detail-tabs button.active:focus,
-.project-detail-tabs button.active:active {
-  background: var(--portal-bg-dark);
-  color: var(--portal-text-light);
-  outline: none;
-}
-
-
-/* Tab content panels - targets divs with id starting with "pd-tab-" */
-[id^="pd-tab-"] {
-  display: none;
-  background: var(--portal-bg-dark);
-  border-radius: 0 var(--portal-radius-lg) var(--portal-radius-lg) var(--portal-radius-lg);
-  padding: 4rem 2rem;
-  position: relative;
-  z-index: 2;
-  margin-top: 0 !important;
-  /* Match --shadow-panel: right + bottom shadows, subtle left outline */
-  box-shadow:
-    2px 0 4px rgba(0, 0, 0, 0.4),
-    4px 0 12px rgba(0, 0, 0, 0.3),
-    0 2px 4px rgba(0, 0, 0, 0.4),
-    0 4px 12px rgba(0, 0, 0, 0.3),
-    -1px 0 1px rgba(0, 0, 0, 0.3);
-}
-
-
-[id^="pd-tab-"].active {
-  display: flex;
-  flex-direction: column;
-  gap: 4rem;
-}
-
-/* Remove individual card backgrounds and shadows inside tabs - content is now in unified container */
+/* Remove individual card backgrounds and shadows inside tabs - content is now in unified container.
+   Applies to both project detail (pd-tab-*) and client detail (cd-tab-*) so both views look the same. */
 [data-page="admin"] [id^="pd-tab-"] .portal-project-card,
+[data-page="admin"] [id^="cd-tab-"] .portal-project-card,
 [data-page="admin"] [id^="pd-tab-"] .portal-shadow,
 [data-page="admin"] [id^="pd-tab-"] .files-upload-section,
 /* High specificity with body element selector */
@@ -328,14 +271,16 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   color: var(--color-primary);
 }
 
-/* Override any adjacent sibling margins inside tab content */
-[id^="pd-tab-"] .portal-project-card + .portal-project-card {
+/* Override any adjacent sibling margins inside tab content (both detail views) */
+[id^="pd-tab-"] .portal-project-card + .portal-project-card,
+[id^="cd-tab-"] .portal-project-card + .portal-project-card {
   margin-top: 0;
 }
 
-/* Unified heading style for all sections inside tab content */
-[id^="pd-tab-"] h3 {
-  font-family: var(--font--acme);
+/* Unified heading style for all sections inside tab content (both detail views) */
+[id^="pd-tab-"] h3,
+[id^="cd-tab-"] h3 {
+  font-family: var(--font-family-acme);
   font-size: 1.2rem;
   font-weight: 400;
   color: var(--portal-text-light);
@@ -591,31 +536,45 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   background: var(--color-primary);
 }
 
-/* Ensure all project detail text is light on dark backgrounds */
+/* Ensure all detail view text is light on dark backgrounds (client + project) */
+/* Exclude .field-label and .meta-label which use --portal-text-secondary */
 #tab-project-detail,
+#tab-client-detail,
 #tab-project-detail p,
-#tab-project-detail span,
+#tab-client-detail p,
+#tab-project-detail span:not(.field-label):not(.meta-label),
+#tab-client-detail span:not(.field-label):not(.meta-label),
 #tab-project-detail strong,
+#tab-client-detail strong,
 #tab-project-detail li,
+#tab-client-detail li,
 #tab-project-detail td,
-#tab-project-detail th {
+#tab-client-detail td,
+#tab-project-detail th,
+#tab-client-detail th {
   color: var(--portal-text-light);
 }
 
 #tab-project-detail h3,
-#tab-project-detail h4 {
+#tab-client-detail h3,
+#tab-project-detail h4,
+#tab-client-detail h4 {
   color: var(--portal-text-light);
 }
 
-/* Acme font only for main project name heading */
-#tab-project-detail #pd-project-name {
-  font-family: var(--font--acme);
+/* Acme font for main name heading in each detail view */
+#tab-project-detail #pd-project-name,
+#tab-client-detail #cd-client-name {
+  font-family: var(--font-family-acme);
 }
 
-/* Secondary/muted text in project detail */
+/* Secondary/muted text in detail views */
 #tab-project-detail .file-meta,
 #tab-project-detail .invoice-date,
-#tab-project-detail .empty-state {
+#tab-project-detail .empty-state,
+#tab-client-detail .empty-state,
+#tab-client-detail .portal-project-card .empty-state,
+#tab-client-detail .portal-project-card .loading-text {
   color: var(--portal-text-secondary);
 }
 
@@ -737,7 +696,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   font-weight: 600;
   color: var(--portal-text-light);
   margin: 0 0 var(--portal-spacing-sm) 0;
-  font-family: var(--font--acme);
+  font-family: var(--font-family-acme);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -865,12 +824,16 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   text-transform: capitalize;
 }
 
-/* Empty State */
+/* Empty State (component: createEmptyState returns div.empty-state > p) */
 .empty-state {
   text-align: center;
   color: var(--portal-text-secondary);
   padding: var(--portal-spacing-xl);
   font-style: italic;
+}
+
+.empty-state p {
+  margin: 0;
 }
 
 /* Files List in Project Detail */
@@ -963,7 +926,9 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 [data-page="admin"] .files-table .file-actions,
 [data-page="admin"] .invoices-table .actions-cell {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
+  align-items: center;
   justify-content: flex-end;
 }
 
@@ -1068,7 +1033,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 /* Deposit Invoice Styling */
 .invoice-item.invoice-deposit {
-  border-left: 3px solid var(--color-info, #3b82f6);
+  border-left: 3px solid var(--color-info);
 }
 
 .invoice-type-badge {
@@ -1079,7 +1044,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   letter-spacing: 0.05em;
   padding: 2px 6px;
   border-radius: var(--portal-radius-sm);
-  background: var(--color-info, #3b82f6);
+  background: var(--color-info);
   color: var(--color-white);
   margin-left: var(--portal-spacing-xs);
   vertical-align: middle;
@@ -1180,7 +1145,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 }
 
 .btn-remove-line:hover {
-  color: var(--color-danger-hover, #dc2626);
+  color: var(--color-danger-hover);
 }
 
 .invoice-total {
@@ -1211,7 +1176,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .invoice-credit {
   font-size: 0.9rem;
-  color: var(--color-success, #22c55e);
+  color: var(--color-success);
   margin-bottom: var(--portal-spacing-xs);
 }
 
@@ -1224,14 +1189,14 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 /* Deposit credit section */
 .deposit-credit-section {
-  background: var(--portal-bg-darker, rgba(0, 0, 0, 0.2));
+  background: var(--portal-bg-darker);
   border-radius: var(--portal-radius-md);
   padding: var(--portal-spacing-md);
   margin-top: var(--portal-spacing-sm);
 }
 
 .deposit-credit-section .form-label {
-  color: var(--color-success, #22c55e);
+  color: var(--color-success);
 }
 
 .deposit-credit-section .form-hint {
@@ -1323,7 +1288,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 }
 
 .invoice-summary-item .summary-value.paid {
-  color: var(--color-brand-primary);
+  color: var(--color-primary);
 }
 
 /* ================================================
@@ -1345,7 +1310,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .payment-plans-section h4 {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-muted);
+  color: var(--portal-text-secondary);
   margin: 0 0 var(--space-2) 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1501,13 +1466,15 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 }
 
 
-[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) .custom-dropdown-trigger {
+/* Form/settings dropdowns only; table dropdowns use base in portal-dropdown.css */
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown) .custom-dropdown-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
   box-sizing: border-box;
   padding: var(--space-2) var(--space-3);
+  padding-right: var(--space-1-5); /* Half of space-3 so less gap to right of caret */
   border: 4px solid var(--portal-border-dark);
   border-radius: var(--portal-radius-lg);
   background-color: var(--color-black);
@@ -1518,20 +1485,22 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   box-shadow: none;
 }
 
-[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) .custom-dropdown-trigger:hover {
-  border-color: var(--color-brand-primary);
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown) .custom-dropdown-trigger:hover {
+  border-color: var(--color-primary);
 }
 
-[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) .custom-dropdown-trigger:focus {
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown) .custom-dropdown-trigger:focus {
   outline: none;
-  border-color: var(--color-brand-primary);
+  border-color: var(--color-primary);
 }
 
 [data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) .custom-dropdown-text {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: left;
 }
 
 [data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) .custom-dropdown-caret {
@@ -1544,7 +1513,8 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   transform: rotate(180deg);
 }
 
-[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) .custom-dropdown-menu {
+/* Exclude .table-dropdown so table status/per-page dropdowns use admin.css positioning (top of menu matches bottom of trigger) */
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown) .custom-dropdown-menu {
   display: none;
   position: absolute;
   top: 100%;
@@ -1564,18 +1534,18 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   box-shadow: none;
 }
 
-[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]).open .custom-dropdown-menu {
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown).open .custom-dropdown-menu {
   display: block;
-  border-color: var(--color-brand-primary);
+  border-color: var(--color-primary);
   /* Only sides and bottom shadow - clip top shadow with clip-path */
   box-shadow: var(--shadow-spread);
   clip-path: inset(0 -20px -20px -20px);
   margin-top: -4px;
 }
 
-[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]).open .custom-dropdown-trigger {
+[data-page="admin"] .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown).open .custom-dropdown-trigger {
   border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
-  border-color: var(--color-brand-primary);
+  border-color: var(--color-primary);
   border-bottom: none;
   /* Only top and side shadows - clip bottom shadow */
   box-shadow: var(--shadow-dropdown);
@@ -1586,11 +1556,12 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 [data-page="admin"] .custom-dropdown-item {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   color: var(--portal-text-light);
+  text-align: left;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
@@ -1607,7 +1578,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 }
 
 [data-page="admin"] .custom-dropdown-item:hover {
-  background-color: var(--color-brand-primary);
+  background-color: var(--color-primary);
   color: var(--portal-text-light);
 }
 
@@ -1627,18 +1598,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   caret-color: var(--color-text-primary);
 }
 
-/* System info grid and rows */
-.system-info-grid {
-  display: grid;
-  gap: 0;
-  margin-top: var(--portal-spacing-lg);
-}
-
-.system-info-row {
-  display: flex;
-  justify-content: space-between;
-  padding: var(--portal-spacing-sm) 0;
-}
+/* System info grid/rows: see shared/details-card.css */
 
 .truncate-text {
   max-width: 400px;
@@ -1656,7 +1616,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.85);
+  background: var(--color-overlay-dark);
   z-index: 999;
   cursor: pointer;
 }
@@ -1667,7 +1627,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-overlay-light);
   z-index: 999;
   animation: fadeIn 0.2s ease;
   -webkit-backdrop-filter: blur(8px);
@@ -1694,7 +1654,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   box-shadow: var(--shadow-2xl);
   z-index: 1000;
   overflow-y: auto;
-  padding: var(--space-6);
+  padding: var(--space-4) var(--space-6) var(--space-6) var(--space-6);
 }
 
 .details-panel.hidden {
@@ -1759,18 +1719,42 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   gap: var(--space-3);
 }
 
-/* Details panel meta grid - 2 columns for better spacing */
+/* Details panel meta grid - single column for consistent layout */
 .details-panel .project-detail-meta {
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4);
+  grid-template-columns: 1fr;
+  row-gap: var(--field-group-gap);
+  column-gap: var(--space-4);
 }
 
 .details-panel .project-description-row {
   margin-top: var(--space-2);
 }
 
+/* Action buttons: below Created, above Name/metadata, right-aligned */
 .details-panel .details-actions {
-  margin-top: var(--space-12);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: 0;
+  margin-bottom: var(--space-3);
+}
+
+/* Contact details panel: created under heading (same as leads panel) */
+#contact-details-panel .details-header {
+  margin-bottom: 0;
+}
+
+#contact-details-panel .details-actions {
+  justify-content: flex-start;
+}
+
+#contact-details-panel .contact-details-created {
+  font-size: 0.8125rem;
+  color: var(--portal-text-muted);
+  margin-top: -0.5rem;
+  margin-bottom: var(--space-2);
+  padding-top: 0;
 }
 
 /* ================================================
@@ -1884,43 +1868,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
    RESPONSIVE STYLES
    ================================================ */
 
-/* Project Detail Tabs - Horizontal scroll on small screens */
-@media (max-width: 768px) {
-  .project-detail-tabs {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: var(--portal-bg-light) transparent;
-    padding-bottom: 4px;
-  }
-
-  .project-detail-tabs::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  .project-detail-tabs::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .project-detail-tabs::-webkit-scrollbar-thumb {
-    background: var(--portal-bg-light);
-    border-radius: 2px;
-  }
-
-  .project-detail-tabs button {
-    padding: var(--portal-spacing-sm) var(--portal-spacing-md);
-    font-size: 0.75rem;
-  }
-
-  /* Tab content panels - reduced padding on mobile */
-  [id^="pd-tab-"] {
-    padding: 2rem 1rem;
-  }
-
-  [id^="pd-tab-"].active {
-    gap: 2rem;
-  }
-}
+/* Tab strip/panel mobile styles are in shared/portal-tabs.css (.portal-tabs, .portal-tab-panel) */
 
 /* Project Detail Tables - Responsive layout */
 @media (max-width: 768px) {
@@ -2050,17 +1998,31 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   flex-wrap: wrap;
 }
 
+/* Contract status items: match overview meta-item (label + value), no card box */
 .contract-status-info .status-item {
   display: flex;
   flex-direction: column;
   gap: var(--portal-spacing-xs);
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  align-items: flex-start;
 }
 
 .contract-status-info .field-label {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--portal-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.125rem;
+}
+
+/* Status badge in contract block: align with overview meta-value prominence */
+.contract-status-info .status-badge {
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .contract-description {
@@ -2136,7 +2098,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .signature-info-row .field-label {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-muted);
+  color: var(--portal-text-secondary);
 }
 
 .signature-info-row .meta-value {

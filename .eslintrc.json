@@ -13,7 +13,10 @@
   },
   "globals": {
     "gsap": "readonly",
-    "CustomEase": "readonly"
+    "CustomEase": "readonly",
+    "NodeFilter": "readonly",
+    "Text": "readonly",
+    "ParentNode": "readonly"
   },
   "rules": {
     "indent": ["error", 4],

@@ -343,18 +343,18 @@ router.get(
 
     const messages = await db.all(
       `
-    SELECT 
+    SELECT
       id, sender_type, sender_name, message, priority, reply_to,
       attachments, is_read, read_at, created_at, updated_at
-    FROM general_messages 
+    FROM general_messages
     WHERE thread_id = ?
     ORDER BY created_at ASC
   `,
       [threadId]
     );
 
-    // Parse attachments JSON
-    messages.forEach((msg) => {
+    // Parse attachments JSON and fetch reactions for each message
+    for (const msg of messages) {
       const attachmentsStr = getString(msg, 'attachments');
       if (attachmentsStr) {
         try {
@@ -365,7 +365,16 @@ router.get(
       } else {
         msg.attachments = [];
       }
-    });
+
+      // Fetch reactions for this message
+      const reactions = await db.all(
+        `SELECT id, reaction, user_email, created_at
+         FROM message_reactions
+         WHERE message_id = ?`,
+        [msg.id as number]
+      );
+      msg.reactions = reactions || [];
+    }
 
     res.json({
       thread,

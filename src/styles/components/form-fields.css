@@ -120,7 +120,7 @@ select::-ms-expand {
 .login-form select:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(var(--color-brand-primary-rgb), 0.25);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.25);
 }
 
 /* Focus indicators inherited from global :focus-visible rule in reset.css */
@@ -178,19 +178,13 @@ select::-ms-expand {
   text-transform: var(--label-text-transform, uppercase);
   letter-spacing: var(--label-letter-spacing, 0.05em);
   font-weight: var(--label-font-weight, 500);
-  margin-bottom: var(--label-margin-bottom, 0.5rem);
+  margin-bottom: var(--label-margin-bottom, var(--field-label-value-gap, 0.125rem));
 }
 
-/* Dark theme field labels */
-[data-theme="dark"] .field-label,
+/* Portal field labels - use secondary portal text color */
 [data-page="client-portal"] .field-label,
 [data-page="admin"] .field-label {
   color: var(--label-color, var(--portal-text-secondary));
-}
-
-/* Light theme field labels */
-[data-theme="light"] .field-label {
-  color: var(--label-color, var(--color-text-secondary));
 }
 
 /* Field label variants */
