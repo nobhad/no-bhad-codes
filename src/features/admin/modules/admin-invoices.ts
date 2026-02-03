@@ -52,7 +52,7 @@ export async function loadInvoicesData(ctx: AdminDashboardContext): Promise<void
   const tableBody = document.getElementById('invoices-table-body');
   if (!tableBody) return;
 
-  showTableLoading(tableBody, 7, 'Loading invoices...');
+  showTableLoading(tableBody, 8, 'Loading invoices...');
 
   try {
     const response = await apiFetch('/api/invoices');
@@ -74,7 +74,7 @@ export async function loadInvoicesData(ctx: AdminDashboardContext): Promise<void
 
   } catch (error) {
     console.error('[AdminInvoices] Error loading invoices:', error);
-    showTableError(tableBody, 7, 'Failed to load invoices');
+    showTableError(tableBody, 8, 'Failed to load invoices');
   }
 }
 
@@ -137,7 +137,7 @@ function getAmount(invoice: InvoiceWithDetails): number {
  */
 function renderInvoicesTable(invoices: InvoiceWithDetails[], tableBody: HTMLElement): void {
   if (invoices.length === 0) {
-    showTableEmpty(tableBody, 7, 'No invoices found');
+    showTableEmpty(tableBody, 8, 'No invoices found');
     return;
   }
 
@@ -161,9 +161,11 @@ function renderInvoicesTable(invoices: InvoiceWithDetails[], tableBody: HTMLElem
     }
 
     const statusBadge = getStatusBadgeHTML(status);
+    const checkboxHTML = getPortalCheckboxHTML({ id: `invoice-${invoice.id}`, checked: false, ariaLabel: `Select invoice ${safeInvoiceNumber}` });
 
     return `
       <tr data-invoice-id="${invoice.id}">
+        <td class="bulk-select-cell">${checkboxHTML}</td>
         <td><strong>${safeInvoiceNumber}</strong></td>
         <td>${safeClientName}</td>
         <td>${safeProjectName}</td>
