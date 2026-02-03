@@ -383,19 +383,46 @@ Added verification items to checklist for message reactions feature (awaiting ra
 - Message reactions: clicking emoji adds reaction, reaction displays on message
 - Pin message: clicking pin icon pins/unpins message
 
+### Table Alignment & Consistency Fixes
+
+**Checkbox column alignment:**
+
+- Increased `.bulk-select-cell` width from 44px to 56px
+- Changed left padding to match text columns: `var(--space-4)` (32px)
+- Updated bulk toolbar grid from 44px to 56px to match
+
+**Invoices table checkbox column:**
+
+- Added checkbox column header to invoices table HTML
+- Updated `admin-invoices.ts` to render checkboxes in each row using `getPortalCheckboxHTML`
+- Updated colspan from 7 to 8
+
+**Table header alignment:**
+
+- Changed `.admin-table-header` padding from `var(--space-2) var(--space-5)` to `var(--space-3) var(--space-4)` to align with table cell padding
+
+**Table border radius (root fix):**
+
+- Added `border-bottom-radius` and `overflow: hidden` to `.admin-table-container` by default
+- When pagination follows, border-radius is removed via `:has(.table-pagination)` selector
+- This applies to all tables automatically - empty states, error states, and data rows all clip correctly
+
 ### Files Modified
 
 - `src/features/admin/modules/admin-leads.ts` — Project name link, status position
 - `src/features/admin/modules/admin-time-tracking.ts` — Icon buttons
 - `src/features/admin/modules/admin-knowledge-base.ts` — Icon buttons
 - `src/features/admin/modules/admin-document-requests.ts` — Icon buttons
+- `src/features/admin/modules/admin-invoices.ts` — Checkbox column, colspan updates
 - `src/styles/admin/leads-pipeline.css` — Status row styling
-- `src/styles/pages/admin.css` — Icon button variants, card grid responsive fixes
+- `src/styles/pages/admin.css` — Icon button variants, card grid fixes, table alignment, border radius
 - `src/styles/admin/detail-header.css` — Dropdown overflow fixes
+- `src/styles/admin/table-features.css` — Bulk toolbar grid width
 - `src/styles/variables.css` — Label color variable
 - `src/styles/components/form-fields.css` — Field label rules
 - `src/styles/admin/project-detail.css` — Field label specificity fixes
 - `src/styles/admin/client-detail.css` — Field label color updates
+- `admin/index.html` — Invoices table checkbox header
 - `docs/current_work.md` — Verification items for reactions
 
 ---
