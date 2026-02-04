@@ -2119,8 +2119,8 @@ body.modal-open .dashboard-content {
   top: 100%;
   left: 0;
   right: auto;
-  width: 100%;
-  min-width: 100%;
+  width: fit-content;
+  min-width: fit-content;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -2286,6 +2286,69 @@ body.modal-open .dashboard-content {
 }
 
 [data-page="admin"] .table-dropdown[data-status="paid"] .status-dot {
+  background-color: var(--color-status-responded);
+}
+
+/* Status-specific colors for dropdown menu item status dots */
+[data-page="admin"] .custom-dropdown-item[data-status="new"] .status-dot {
+  background-color: var(--color-status-new);
+}
+
+[data-page="admin"] .custom-dropdown-item[data-status="pending"] .status-dot {
+  background-color: var(--color-status-pending);
+}
+
+[data-page="admin"] .custom-dropdown-item[data-status="read"] .status-dot,
+[data-page="admin"] .custom-dropdown-item[data-status="qualified"] .status-dot,
+[data-page="admin"] .custom-dropdown-item[data-status="contacted"] .status-dot {
+  background-color: var(--color-status-read);
+}
+
+[data-page="admin"] .custom-dropdown-item[data-status="responded"] .status-dot,
+[data-page="admin"] .custom-dropdown-item[data-status="converted"] .status-dot,
+[data-page="admin"] .custom-dropdown-item[data-status="active"] .status-dot,
+[data-page="admin"] .custom-dropdown-item[data-status="in_progress"] .status-dot,
+[data-page="admin"] .custom-dropdown-item[data-status="in-progress"] .status-dot {
+  background-color: var(--color-status-responded);
+}
+
+[data-page="admin"] .custom-dropdown-item[data-status="completed"] .status-dot {
+  background-color: var(--color-status-completed);
+}
+
+[data-page="admin"] .custom-dropdown-item[data-status="on-hold"] .status-dot,
+[data-page="admin"] .custom-dropdown-item[data-status="on_hold"] .status-dot {
+  background-color: var(--color-status-pending);
+}
+
+[data-page="admin"] .custom-dropdown-item[data-status="archived"] .status-dot,
+[data-page="admin"] .custom-dropdown-item[data-status="lost"] .status-dot,
+[data-page="admin"] .custom-dropdown-item[data-status="cancelled"] .status-dot,
+[data-page="admin"] .custom-dropdown-item[data-status="inactive"] .status-dot,
+[data-page="admin"] .custom-dropdown-item[data-status="closed"] .status-dot,
+[data-page="admin"] .custom-dropdown-item[data-status="draft"] .status-dot {
+  background-color: var(--color-status-archived);
+}
+
+[data-page="admin"] .custom-dropdown-item[data-status="overdue"] .status-dot {
+  background-color: var(--color-status-overdue);
+}
+
+[data-page="admin"] .custom-dropdown-item[data-status="planning"] .status-dot,
+[data-page="admin"] .custom-dropdown-item[data-status="partial"] .status-dot {
+  background-color: var(--color-status-pending);
+}
+
+[data-page="admin"] .custom-dropdown-item[data-status="sent"] .status-dot,
+[data-page="admin"] .custom-dropdown-item[data-status="viewed"] .status-dot {
+  background-color: var(--color-status-new);
+}
+
+[data-page="admin"] .custom-dropdown-item[data-status="review"] .status-dot {
+  background-color: var(--color-status-read);
+}
+
+[data-page="admin"] .custom-dropdown-item[data-status="paid"] .status-dot {
   background-color: var(--color-status-responded);
 }
 

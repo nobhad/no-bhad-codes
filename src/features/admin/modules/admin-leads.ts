@@ -54,7 +54,16 @@ interface LeadsData {
 
 let leadsData: Lead[] = [];
 let storedContext: AdminDashboardContext | null = null;
-let filterState: FilterState = loadFilterState(LEADS_FILTER_CONFIG.storageKey);
+// Load filter state with default sort by status (NEW on top)
+let filterState: FilterState = (() => {
+  const loaded = loadFilterState(LEADS_FILTER_CONFIG.storageKey);
+  // If no sort set, default to status descending (NEW at top)
+  if (!loaded.sortColumn) {
+    loaded.sortColumn = 'status';
+    loaded.sortDirection = 'asc';
+  }
+  return loaded;
+})();
 let filterUIInitialized = false;
 let currentView: 'table' | 'pipeline' = 'table';
 let kanbanBoard: ReturnType<typeof createKanbanBoard> | null = null;
@@ -435,12 +444,12 @@ function renderLeadCard(item: KanbanItem): string {
   const budget = meta.budget ? formatDisplayValue(meta.budget) : '';
   const titleEscaped = SanitizationUtils.escapeHtml(String(item.title));
   const nameContent = meta.clientId
-    ? `<a href="#" class="lead-card-client-link" data-client-id="${meta.clientId}" title="View client">${titleEscaped}</a>`
+    ? `<a href="/admin/clients/${meta.clientId}" class="lead-card-client-link" data-client-id="${meta.clientId}" title="View client">${titleEscaped}</a>`
     : titleEscaped;
   const projectName = meta.projectName ? SanitizationUtils.escapeHtml(String(meta.projectName)) : '';
   // Link to project details only when lead is activated (converted)
   const projectContent = projectName && meta.isActivated
-    ? `<a href="#" class="lead-card-project-link" data-project-id="${item.id}" title="View project">${projectName}</a>`
+    ? `<a href="/admin/projects/${item.id}" class="lead-card-project-link" data-project-id="${item.id}" title="View project">${projectName}</a>`
     : projectName || '';
   /* When has project name: show it first (link if activated), then client name */
   const titleBlock = projectContent
@@ -614,14 +623,14 @@ function renderLeadsTable(leads: Lead[], ctx: AdminDashboardContext): void {
     const isActiveProject = ['in-progress', 'converted'].includes(status);
     const projectContent = safeProjectName
       ? isActiveProject
-        ? `<a href="#" class="lead-link lead-link-project" data-project-id="${lead.id}" title="View project">${safeProjectName}</a>`
+        ? `<a href="/admin/projects/${lead.id}" class="lead-link lead-link-project" data-project-id="${lead.id}" title="View project">${safeProjectName}</a>`
         : safeProjectName
       : '—';
 
     // Lead column: Company name is primary (largest), then contact name, then email
     // If no company, contact name becomes primary
     const wrapWithClientLink = (text: string) => hasClient
-      ? `<a href="#" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${text}</a>`
+      ? `<a href="/admin/clients/${lead.client_id}" class="lead-link lead-link-client" data-client-id="${lead.client_id}" title="View client">${text}</a>`
       : text;
 
     // Primary name: company if exists, otherwise contact
