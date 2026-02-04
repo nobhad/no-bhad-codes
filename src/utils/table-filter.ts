@@ -186,6 +186,7 @@ export function createFilterUI(
   dropdownWrapper.className = 'filter-dropdown-wrapper';
 
   const activeCount = countActiveFilters(state);
+  const allChecked = state.statusFilters.length === 0;
   dropdownWrapper.innerHTML = `
     <button type="button" class="filter-dropdown-trigger icon-btn" title="Filters" aria-label="Filters">
       ${ICONS.FILTER}
@@ -195,6 +196,14 @@ export function createFilterUI(
       <div class="filter-section">
         <span class="filter-section-label">Status</span>
         <div class="filter-checkbox-group">
+          <label class="filter-checkbox filter-all-option">
+            ${getPortalCheckboxHTML({
+    value: 'all',
+    checked: allChecked,
+    ariaLabel: 'Show all statuses'
+  })}
+            <span>All</span>
+          </label>
           ${config.statusOptions.map(opt => `
             <label class="filter-checkbox">
               ${getPortalCheckboxHTML({
@@ -242,13 +251,42 @@ export function createFilterUI(
     }
   });
 
-  // Status checkboxes
-  const checkboxes = menu.querySelectorAll('input[type="checkbox"]');
-  checkboxes.forEach(checkbox => {
+  // Status checkboxes - handle "All" option specially
+  const allCheckbox = menu.querySelector('input[type="checkbox"][value="all"]') as HTMLInputElement;
+  const statusCheckboxes = menu.querySelectorAll('input[type="checkbox"]:not([value="all"])');
+
+  // "All" checkbox clears all status filters
+  if (allCheckbox) {
+    allCheckbox.addEventListener('change', () => {
+      if (allCheckbox.checked) {
+        // Uncheck all status checkboxes
+        statusCheckboxes.forEach(cb => {
+          (cb as HTMLInputElement).checked = false;
+        });
+        const newState = { ...state, statusFilters: [] };
+        saveFilterState(config.storageKey, newState);
+        updateFilterBadge(dropdownWrapper, newState);
+        onStateChange(newState);
+      }
+    });
+  }
+
+  // Status checkboxes - uncheck "All" when any status is checked
+  statusCheckboxes.forEach(checkbox => {
     checkbox.addEventListener('change', () => {
-      const checked = Array.from(checkboxes)
+      const checked = Array.from(statusCheckboxes)
         .filter((cb): cb is HTMLInputElement => (cb as HTMLInputElement).checked)
         .map(cb => cb.value);
+
+      // Uncheck "All" if any status is selected
+      if (allCheckbox && checked.length > 0) {
+        allCheckbox.checked = false;
+      }
+      // Check "All" if no status is selected
+      if (allCheckbox && checked.length === 0) {
+        allCheckbox.checked = true;
+      }
+
       const newState = { ...state, statusFilters: checked };
       saveFilterState(config.storageKey, newState);
       updateFilterBadge(dropdownWrapper, newState);
@@ -279,9 +317,10 @@ export function createFilterUI(
   clearBtn.addEventListener('click', () => {
     // Reset UI
     searchInput.value = '';
-    checkboxes.forEach(cb => {
+    statusCheckboxes.forEach(cb => {
       (cb as HTMLInputElement).checked = false;
     });
+    if (allCheckbox) allCheckbox.checked = true;
     dateStart.value = '';
     dateEnd.value = '';
 
@@ -478,6 +517,21 @@ export function applyFilters<T>(
         return state.sortDirection === 'asc' ? comparison : -comparison;
       });
     }
+  }
+
+  // 5. Always push archived items to the bottom (secondary sort)
+  if (config.statusField) {
+    filtered.sort((a, b) => {
+      const aStatus = getNestedValue(a as object, config.statusField!) as string;
+      const bStatus = getNestedValue(b as object, config.statusField!) as string;
+      const aArchived = aStatus === 'archived';
+      const bArchived = bStatus === 'archived';
+
+      // If both are archived or both are not, maintain current order
+      if (aArchived === bArchived) return 0;
+      // Archived items go to the bottom
+      return aArchived ? 1 : -1;
+    });
   }
 
   return filtered;
