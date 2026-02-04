@@ -13,11 +13,19 @@ The items below are active and require immediate attention or follow-up testing.
 - **Admin Dashboard Overview Stats Not Displaying (Feb 3, 2026)**: Active Projects, Clients, Revenue MTD, and Conversion Rate show "-" instead of actual counts.
 
   **Root Causes Identified & Fixed:**
-  1. **analytics-service.ts** - SQL column name mismatches:
+  1. **admin-dashboard.ts** - Overview tab not calling correct module:
+     - `switchTab('overview')` was only calling `analyticsModule.loadOverviewData()` (charts)
+     - It was NOT calling `overviewModule.loadOverviewData()` which updates the stats
+     - FIXED: Now calls BOTH modules - overview for stats, analytics for charts
+  2. **admin-analytics.ts** - Invalid invoice status value (caused 400 error):
+     - Called `/api/invoices/search?status=pending,overdue` but "pending" is not valid
+     - Valid statuses: `draft, sent, viewed, partial, paid, overdue, cancelled`
+     - FIXED: Changed to `/api/invoices/search?status=sent,overdue`
+  3. **analytics-service.ts** - SQL column name mismatches:
      - Changed `paid_at` → `paid_date` (invoices table)
      - Changed `total_amount` → `amount_total` (invoices table)
      - Changed project status check `'in_progress'` → `'active', 'in-progress'`
-  2. **admin-overview.ts** - API response parsing mismatches:
+  4. **admin-overview.ts** - API response parsing mismatches:
      - Leads API returns `{ success, leads, stats }` - frontend expected raw array
      - Clients API returns `{ clients }` - frontend expected raw array
      - Projects API returns `{ projects }` - frontend expected raw array
@@ -26,14 +34,31 @@ The items below are active and require immediate attention or follow-up testing.
 
   **Files Modified:**
   - `server/services/analytics-service.ts` - Fixed SQL column names
+  - `src/features/admin/admin-dashboard.ts` - Fixed overview tab to load both modules
+  - `src/features/admin/modules/admin-analytics.ts` - Fixed invalid status value
   - `src/features/admin/modules/admin-overview.ts` - Fixed response parsing and status checks
 
   **Status:** FIXED - Awaiting User Testing (hard refresh required: Cmd+Shift+R)
-  **Debug logging added** - Check browser console for `[AdminOverview]` messages showing API response status codes
 
-- **Invoices search (400)**: Dashboard reported `GET /api/invoices/search?status=pending,overdue` returned 400. Confirm backend accepts comma-separated `status` lists and that frontend query format matches `server/routes/invoices.ts` expectations.
+- **Analytics Page KPI Cards Not Displaying (Feb 3, 2026)**: KPI cards (Revenue, Pipeline, Projects, Invoices) showing incorrect/empty values.
+
+  **Root Cause:** Frontend expected different response format than backend returns.
+
+  **Fixes in admin-analytics.ts:**
+  1. **Revenue KPI**: Used `revenueData.summary.total_revenue` instead of `revenueData.currentMonth`
+  2. **Pipeline KPI**: Used `pipelineData.summary.total_pipeline_value` and `total_leads` instead of `totalValue` and `activeLeads`
+  3. **Projects KPI**: Used `projectsData.summary.active_projects` instead of `activeProjects`
+  4. **Invoices KPI**: Used `inv.amount_total` (snake_case) instead of `inv.total`
+  5. **Revenue Chart**: Used `result.data` with `total_revenue` field instead of `result.monthly` with `revenue` field
+  6. **Project Status Chart**: Built chart from `summary.active_projects` and `completed_projects` instead of non-existent `byStatus` object
+
+  **Status:** FIXED - Awaiting User Testing
+
+- **Invoices search (400)**: ~~Dashboard reported `GET /api/invoices/search?status=pending,overdue` returned 400.~~ **FIXED** - "pending" was not a valid status. Changed to "sent,overdue".
 
 - **Sidebar counts (auth/500/403)**: `GET /api/admin/sidebar-counts` returned errors in the dashboard — verify admin auth/permission checks (`authenticateToken` / `requireAdmin`) and that DB queries (`visitor_sessions`, `general_messages`) handle empty or missing data gracefully.
+
+- **Sidebar page order not intuitive (Feb 3, 2026)**: The current sidebar navigation order may not reflect a logical workflow. Current order: Dashboard | Leads | Projects | Clients | Invoices | Messages | Analytics | Knowledge | Documents | System. Consider reorganizing based on usage frequency or logical grouping (e.g., grouping client-related items together, or putting most-used items at top).
 
 - **Reproduce & collect logs (developer steps)**:
   1. Start backend (`npm run dev:server`) and frontend (`npm run dev`).
@@ -1022,6 +1047,7 @@ Message input when disabled | Analytics section headers | Messages search bar | 
 - [ ] **All modal forms: use reusable dropdown component** — Every modal form that has a select/dropdown (e.g. Metric, Condition, status picks) should use the shared reusable dropdown component (e.g. portal dropdown / table-dropdown pattern or form-select) instead of native `<select>` or ad-hoc markup, for consistent look and behavior across modals.
 - [ ] **Dropdown focus state (modal + details panel)** — When dropdowns are open (modal dropdowns like Document Requests client select, AND details panel dropdowns like Contact Form Submission status), the focus ring doubles up at the top of the trigger instead of wrapping seamlessly around the entire dropdown (trigger + menu as one box). Need to match the expandable details-card pattern which uses `:focus-within` with `box-shadow: 0 0 0 2px var(--color-primary)` — but dropdown menus are positioned outside wrapper bounds, preventing this approach. May need JS-based solution to apply focus class to both trigger and menu simultaneously, or restructure dropdown to keep menu inside wrapper bounds. Affects: modal dropdowns, table dropdowns in details panels.
 - [ ] **Analytics tab: use reusable components** — The Analytics tab (Overview, Business, Visitors, Reports & Alerts) should use shared reusable components (e.g. cards, buttons, dropdowns, sub-tabs, KPI/stat cards, charts wrapper) instead of analytics-only markup and styles, so the tab matches the rest of the portal and stays maintainable.
+- [ ] **Analytics page label inconsistency** — Section headings on Analytics page are inconsistently styled. "SAVED REPORTS", "SCHEDULED REPORTS", "METRIC ALERTS" use bold heading style, but "CORE WEB VITALS" and "BUNDLE ANALYSIS" use smaller field-label style. All section headings should use consistent typography.
 - [x] **Table headers get cut off** — In some admin tables (e.g. contacts table `.admin-table.contacts-table`), the thead/th content (column labels and sort icons) gets cut off. **Fixed:** admin.css — `.admin-table-container` set to `overflow: visible`; new inner `.admin-table-scroll-wrapper` with `overflow-x: auto` and `overflow-y: visible` so horizontal scroll doesn’t create a scroll container that clips the header. Added `min-height: 48px` and `vertical-align: middle` on `.admin-table thead th`, and `min-height: 48px` on `.admin-table thead tr`. All 8 admin table containers in admin/index.html now wrap the table in `.admin-table-scroll-wrapper`. `.visitors-table-container` overflow changed from `hidden` to `visible`. Mobile scroll-indicator styles updated to target the scroll wrapper.
 
 ### Tables — predictable column patterns
