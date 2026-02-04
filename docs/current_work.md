@@ -13,10 +13,10 @@ The items below are active and require immediate attention or follow-up testing.
 - **Admin Dashboard Overview Stats Not Displaying (Feb 3, 2026)**: Active Projects, Clients, Revenue MTD, and Conversion Rate show "-" instead of actual counts.
 
   **Root Causes Identified & Fixed:**
-  1. **admin-dashboard.ts** - Overview tab not calling correct module:
+  1. **admin-dashboard.ts** - Initial load and tab switch not calling overview module:
+     - `loadDashboardData()` (initial load) only called `analyticsModule` - missing `overviewModule`
      - `switchTab('overview')` was only calling `analyticsModule.loadOverviewData()` (charts)
-     - It was NOT calling `overviewModule.loadOverviewData()` which updates the stats
-     - FIXED: Now calls BOTH modules - overview for stats, analytics for charts
+     - FIXED: Both now call `overviewModule.loadOverviewData()` for stats AND `analyticsModule.loadOverviewData()` for charts
   2. **admin-analytics.ts** - Invalid invoice status value (caused 400 error):
      - Called `/api/invoices/search?status=pending,overdue` but "pending" is not valid
      - Valid statuses: `draft, sent, viewed, partial, paid, overdue, cancelled`
@@ -34,11 +34,11 @@ The items below are active and require immediate attention or follow-up testing.
 
   **Files Modified:**
   - `server/services/analytics-service.ts` - Fixed SQL column names
-  - `src/features/admin/admin-dashboard.ts` - Fixed overview tab to load both modules
+  - `src/features/admin/admin-dashboard.ts` - Fixed initial load AND tab switch to load both modules
   - `src/features/admin/modules/admin-analytics.ts` - Fixed invalid status value
   - `src/features/admin/modules/admin-overview.ts` - Fixed response parsing and status checks
 
-  **Status:** FIXED - Awaiting User Testing (hard refresh required: Cmd+Shift+R)
+  **Status:** ✅ FIXED - User Confirmed Working
 
 - **Analytics Page KPI Cards Not Displaying (Feb 3, 2026)**: KPI cards (Revenue, Pipeline, Projects, Invoices) showing incorrect/empty values.
 
@@ -54,7 +54,27 @@ The items below are active and require immediate attention or follow-up testing.
 
   **Status:** FIXED - Awaiting User Testing
 
-- **Invoices search (400)**: ~~Dashboard reported `GET /api/invoices/search?status=pending,overdue` returned 400.~~ **FIXED** - "pending" was not a valid status. Changed to "sent,overdue".
+- **Recent Activity Shows "No recent activity" (Feb 3, 2026)**: ~~Dashboard's Recent Activity section displaying "No recent activity" even when data should exist.~~
+
+  **Root Cause (Final):** Two modules were writing to the same `recent-activity-list` element:
+  - `admin-leads.ts` populated it with leads data
+  - `admin-overview.ts` overwrote it with client activities (empty table)
+
+  **Fix in src/features/admin/modules/admin-overview.ts:**
+  - Changed `loadRecentActivity()` to fetch from `/api/admin/leads` instead of `/api/clients/activities/recent`
+  - Now shows recent leads as the primary activity feed (matching intended dashboard behavior)
+
+  **Status:** ✅ FIXED - User Confirmed Working
+
+- **Invoices search (400)**: Dashboard reported `GET /api/invoices/search?status=sent,overdue` returned 400.
+
+  **Root Cause:** Express route ordering issue. The `/:id` route was defined BEFORE `/search`, causing `/search` to match as `/:id` with `id="search"`. Then `parseInt("search")` returned NaN, triggering the 400 "Invalid invoice ID" error.
+
+  **Fix in server/routes/invoices.ts:**
+  - Moved `/search` route definition to BEFORE `/:id` route
+  - Added comment explaining why route order matters
+
+  **Status:** ✅ FIXED - User Confirmed Working
 
 - **Sidebar counts (auth/500/403)**: `GET /api/admin/sidebar-counts` returned errors in the dashboard — verify admin auth/permission checks (`authenticateToken` / `requireAdmin`) and that DB queries (`visitor_sessions`, `general_messages`) handle empty or missing data gracefully.
 
@@ -1048,6 +1068,7 @@ Message input when disabled | Analytics section headers | Messages search bar | 
 - [ ] **Dropdown focus state (modal + details panel)** — When dropdowns are open (modal dropdowns like Document Requests client select, AND details panel dropdowns like Contact Form Submission status), the focus ring doubles up at the top of the trigger instead of wrapping seamlessly around the entire dropdown (trigger + menu as one box). Need to match the expandable details-card pattern which uses `:focus-within` with `box-shadow: 0 0 0 2px var(--color-primary)` — but dropdown menus are positioned outside wrapper bounds, preventing this approach. May need JS-based solution to apply focus class to both trigger and menu simultaneously, or restructure dropdown to keep menu inside wrapper bounds. Affects: modal dropdowns, table dropdowns in details panels.
 - [ ] **Analytics tab: use reusable components** — The Analytics tab (Overview, Business, Visitors, Reports & Alerts) should use shared reusable components (e.g. cards, buttons, dropdowns, sub-tabs, KPI/stat cards, charts wrapper) instead of analytics-only markup and styles, so the tab matches the rest of the portal and stays maintainable.
 - [ ] **Analytics page label inconsistency** — Section headings on Analytics page are inconsistently styled. "SAVED REPORTS", "SCHEDULED REPORTS", "METRIC ALERTS" use bold heading style, but "CORE WEB VITALS" and "BUNDLE ANALYSIS" use smaller field-label style. All section headings should use consistent typography.
+- [ ] **Non-passive event listeners** — Console shows "[Violation] Added non-passive event listener to a scroll-blocking event". Event listeners for `touchstart`, `touchmove`, `wheel` etc. should use `{ passive: true }` option when they don't call `preventDefault()`. Improves scroll performance. Need to audit: GSAP animations, carousel, dropdown handlers, modal scroll handlers.
 - [x] **Table headers get cut off** — In some admin tables (e.g. contacts table `.admin-table.contacts-table`), the thead/th content (column labels and sort icons) gets cut off. **Fixed:** admin.css — `.admin-table-container` set to `overflow: visible`; new inner `.admin-table-scroll-wrapper` with `overflow-x: auto` and `overflow-y: visible` so horizontal scroll doesn’t create a scroll container that clips the header. Added `min-height: 48px` and `vertical-align: middle` on `.admin-table thead th`, and `min-height: 48px` on `.admin-table thead tr`. All 8 admin table containers in admin/index.html now wrap the table in `.admin-table-scroll-wrapper`. `.visitors-table-container` overflow changed from `hidden` to `visible`. Mobile scroll-indicator styles updated to target the scroll wrapper.
 
 ### Tables — predictable column patterns
