@@ -10,7 +10,26 @@ The items below are active and require immediate attention or follow-up testing.
 
 - **Admin dashboard auth / dev-proxy wiring**: Frontend previously used absolute backend URLs for admin auth endpoints which bypassed the Vite `/api` proxy and caused HttpOnly cookie problems in development. `src/config/api.ts` was adjusted to use relative `/api/...` admin auth endpoints — verify in-browser admin login sets the `auth_token` cookie and that proxied requests include it.
 
-- **Analytics quick revenue (500)**: Admin dashboard reported a 500 from `GET /api/analytics/quick/revenue`. Reproduce after login and capture server logs to inspect stack traces in `server/services/analytics-service.ts`.
+- **Admin Dashboard Overview Stats Not Displaying (Feb 3, 2026)**: Active Projects, Clients, Revenue MTD, and Conversion Rate show "-" instead of actual counts.
+
+  **Root Causes Identified & Fixed:**
+  1. **analytics-service.ts** - SQL column name mismatches:
+     - Changed `paid_at` → `paid_date` (invoices table)
+     - Changed `total_amount` → `amount_total` (invoices table)
+     - Changed project status check `'in_progress'` → `'active', 'in-progress'`
+  2. **admin-overview.ts** - API response parsing mismatches:
+     - Leads API returns `{ success, leads, stats }` - frontend expected raw array
+     - Clients API returns `{ clients }` - frontend expected raw array
+     - Projects API returns `{ projects }` - frontend expected raw array
+     - Messages unread API returns `{ unread_count }` - frontend expected `{ count }`
+     - Project status filter used `'in_progress'` but DB uses `'in-progress'` (hyphenated)
+
+  **Files Modified:**
+  - `server/services/analytics-service.ts` - Fixed SQL column names
+  - `src/features/admin/modules/admin-overview.ts` - Fixed response parsing and status checks
+
+  **Status:** FIXED - Awaiting User Testing (hard refresh required: Cmd+Shift+R)
+  **Debug logging added** - Check browser console for `[AdminOverview]` messages showing API response status codes
 
 - **Invoices search (400)**: Dashboard reported `GET /api/invoices/search?status=pending,overdue` returned 400. Confirm backend accepts comma-separated `status` lists and that frontend query format matches `server/routes/invoices.ts` expectations.
 
@@ -1001,7 +1020,7 @@ Message input when disabled | Analytics section headers | Messages search bar | 
 - [x] **Analytics page layout** — Better way to present and organize analytics. **Fixed:** Sub-tabs Overview | Business | Visitors | Reports & Alerts (see Analytics section below).
 - [x] **All modals: icon and H3 on same line** — **Fixed (Feb 3, 2026):** `confirm-dialog-header` already has `display: flex; align-items: center;`. Fixed `multiPromptDialog` in `confirm-dialog.ts` which was missing the `.confirm-dialog-header` wrapper around icon and title.
 - [ ] **All modal forms: use reusable dropdown component** — Every modal form that has a select/dropdown (e.g. Metric, Condition, status picks) should use the shared reusable dropdown component (e.g. portal dropdown / table-dropdown pattern or form-select) instead of native `<select>` or ad-hoc markup, for consistent look and behavior across modals.
-- [ ] **Modal dropdown focus state** — When the modal dropdown (e.g. Document Requests client select) is open, the focus ring should wrap seamlessly around the entire dropdown (trigger + menu as one box). Current implementation shows doubled border on transition or incorrect focus state. Need to match the expandable details-card pattern which uses `:focus-within` with `box-shadow: 0 0 0 2px var(--color-primary)` — but modal dropdown menu is fixed-positioned outside wrapper, preventing this approach. May need JS-based solution to apply focus class to both trigger and menu simultaneously, or restructure dropdown to keep menu inside wrapper bounds.
+- [ ] **Dropdown focus state (modal + details panel)** — When dropdowns are open (modal dropdowns like Document Requests client select, AND details panel dropdowns like Contact Form Submission status), the focus ring doubles up at the top of the trigger instead of wrapping seamlessly around the entire dropdown (trigger + menu as one box). Need to match the expandable details-card pattern which uses `:focus-within` with `box-shadow: 0 0 0 2px var(--color-primary)` — but dropdown menus are positioned outside wrapper bounds, preventing this approach. May need JS-based solution to apply focus class to both trigger and menu simultaneously, or restructure dropdown to keep menu inside wrapper bounds. Affects: modal dropdowns, table dropdowns in details panels.
 - [ ] **Analytics tab: use reusable components** — The Analytics tab (Overview, Business, Visitors, Reports & Alerts) should use shared reusable components (e.g. cards, buttons, dropdowns, sub-tabs, KPI/stat cards, charts wrapper) instead of analytics-only markup and styles, so the tab matches the rest of the portal and stays maintainable.
 - [x] **Table headers get cut off** — In some admin tables (e.g. contacts table `.admin-table.contacts-table`), the thead/th content (column labels and sort icons) gets cut off. **Fixed:** admin.css — `.admin-table-container` set to `overflow: visible`; new inner `.admin-table-scroll-wrapper` with `overflow-x: auto` and `overflow-y: visible` so horizontal scroll doesn’t create a scroll container that clips the header. Added `min-height: 48px` and `vertical-align: middle` on `.admin-table thead th`, and `min-height: 48px` on `.admin-table thead tr`. All 8 admin table containers in admin/index.html now wrap the table in `.admin-table-scroll-wrapper`. `.visitors-table-container` overflow changed from `hidden` to `visible`. Mobile scroll-indicator styles updated to target the scroll wrapper.
 
