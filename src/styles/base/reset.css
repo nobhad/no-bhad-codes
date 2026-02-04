@@ -218,6 +218,68 @@ a {
 }
 
 /* ============================================
+ * EXPANDABLE ELEMENTS FOCUS STANDARD
+ * ============================================
+ * When expanded/open: focus wraps entire element
+ * Inner triggers have NO focus ring when parent is expanded
+ * ============================================ */
+
+/* Details/Summary */
+details {
+  border-radius: var(--portal-radius-lg, 12px);
+}
+
+details:focus-within {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+details > summary:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Dropdowns - focus wraps entire dropdown when open */
+.custom-dropdown {
+  border-radius: var(--portal-radius-lg, 12px);
+}
+
+.custom-dropdown.open:focus-within {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.custom-dropdown.open .custom-dropdown-trigger:focus,
+.custom-dropdown.open .custom-dropdown-trigger:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Table dropdowns */
+.table-dropdown.open:focus-within {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.table-dropdown.open .custom-dropdown-trigger:focus,
+.table-dropdown.open .custom-dropdown-trigger:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Export dropdowns */
+.export-dropdown.open:focus-within {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.export-dropdown.open button:focus,
+.export-dropdown.open button:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* ============================================
  * REDUCED MOTION SUPPORT
  * ============================================ */
 
