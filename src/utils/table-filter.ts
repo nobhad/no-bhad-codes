@@ -187,12 +187,10 @@ export function createFilterUI(
 
   const activeCount = countActiveFilters(state);
   const allChecked = state.statusFilters.length === 0;
-  dropdownWrapper.innerHTML = `
-    <button type="button" class="filter-dropdown-trigger icon-btn" title="Filters" aria-label="Filters">
-      ${ICONS.FILTER}
-      <span class="filter-count-badge ${activeCount > 0 ? 'visible' : ''}">${activeCount}</span>
-    </button>
-    <div class="filter-dropdown-menu">
+  const hasStatusOptions = config.statusOptions && config.statusOptions.length > 0;
+
+  // Build status section HTML only if there are status options
+  const statusSectionHTML = hasStatusOptions ? `
       <div class="filter-section">
         <span class="filter-section-label">Status</span>
         <div class="filter-checkbox-group">
@@ -215,7 +213,15 @@ export function createFilterUI(
             </label>
           `).join('')}
         </div>
-      </div>
+      </div>` : '';
+
+  dropdownWrapper.innerHTML = `
+    <button type="button" class="filter-dropdown-trigger icon-btn" title="Filters" aria-label="Filters">
+      ${ICONS.FILTER}
+      <span class="filter-count-badge ${activeCount > 0 ? 'visible' : ''}">${activeCount}</span>
+    </button>
+    <div class="filter-dropdown-menu">
+      ${statusSectionHTML}
       <div class="filter-section">
         <span class="filter-section-label">Date Range</span>
         <div class="filter-date-group">
@@ -335,6 +341,114 @@ export function createFilterUI(
   container.appendChild(dropdownWrapper);
 
   return container;
+}
+
+/**
+ * Update the status options in an existing filter UI
+ * Use this to dynamically populate options (e.g., categories loaded from API)
+ */
+export function updateFilterStatusOptions(
+  filterContainer: HTMLElement,
+  options: StatusOption[],
+  label: string = 'Status',
+  state: FilterState,
+  config: TableFilterConfig,
+  onStateChange: (newState: FilterState) => void
+): void {
+  const menu = filterContainer.querySelector('.filter-dropdown-menu');
+  if (!menu) return;
+
+  // Find or create status section
+  const statusSection = menu.querySelector('.filter-section:first-child');
+
+  if (options.length === 0) {
+    // Remove status section if no options
+    if (statusSection) {
+      const sectionLabel = statusSection.querySelector('.filter-section-label');
+      if (sectionLabel && sectionLabel.textContent !== 'Date Range') {
+        statusSection.remove();
+      }
+    }
+    return;
+  }
+
+  // Build new status section HTML
+  const allChecked = state.statusFilters.length === 0;
+  const statusHTML = `
+    <div class="filter-section">
+      <span class="filter-section-label">${label}</span>
+      <div class="filter-checkbox-group">
+        <label class="filter-checkbox filter-all-option">
+          ${getPortalCheckboxHTML({
+    value: 'all',
+    checked: allChecked,
+    ariaLabel: `Show all ${label.toLowerCase()}`
+  })}
+          <span>All</span>
+        </label>
+        ${options.map(opt => `
+          <label class="filter-checkbox">
+            ${getPortalCheckboxHTML({
+    value: opt.value,
+    checked: state.statusFilters.includes(opt.value),
+    ariaLabel: `Filter by ${opt.label}`
+  })}
+            <span>${opt.label}</span>
+          </label>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  // Replace or insert status section
+  const dateSection = menu.querySelector('.filter-section:has(.filter-date-group)');
+  if (statusSection && statusSection !== dateSection) {
+    statusSection.outerHTML = statusHTML;
+  } else if (dateSection) {
+    dateSection.insertAdjacentHTML('beforebegin', statusHTML);
+  }
+
+  // Re-attach event listeners
+  const newStatusSection = menu.querySelector('.filter-section:first-child');
+  if (!newStatusSection) return;
+
+  const allCheckbox = newStatusSection.querySelector('input[type="checkbox"][value="all"]') as HTMLInputElement;
+  const statusCheckboxes = newStatusSection.querySelectorAll('input[type="checkbox"]:not([value="all"])');
+  const dropdownWrapper = filterContainer.querySelector('.filter-dropdown-wrapper') as HTMLElement;
+
+  if (allCheckbox) {
+    allCheckbox.addEventListener('change', () => {
+      if (allCheckbox.checked) {
+        statusCheckboxes.forEach(cb => {
+          (cb as HTMLInputElement).checked = false;
+        });
+        const newState = { ...state, statusFilters: [] };
+        saveFilterState(config.storageKey, newState);
+        updateFilterBadge(dropdownWrapper, newState);
+        onStateChange(newState);
+      }
+    });
+  }
+
+  statusCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      const checked = Array.from(statusCheckboxes)
+        .filter((cb): cb is HTMLInputElement => (cb as HTMLInputElement).checked)
+        .map(cb => cb.value);
+
+      if (allCheckbox && checked.length > 0) {
+        allCheckbox.checked = false;
+      }
+      if (allCheckbox && checked.length === 0) {
+        allCheckbox.checked = true;
+      }
+
+      const newState = { ...state, statusFilters: checked };
+      saveFilterState(config.storageKey, newState);
+      updateFilterBadge(dropdownWrapper, newState);
+      onStateChange(newState);
+    });
+  });
 }
 
 function countActiveFilters(state: FilterState): number {
@@ -494,6 +608,14 @@ export function applyFilters<T>(
   if (state.sortColumn) {
     const column = config.sortableColumns.find(c => c.key === state.sortColumn);
     if (column) {
+      // Build status priority map from statusOptions if sorting by status field
+      const statusPriority: Record<string, number> = {};
+      if (column.key === config.statusField && config.statusOptions) {
+        config.statusOptions.forEach((opt, idx) => {
+          statusPriority[opt.value.toLowerCase().replace(/_/g, '-')] = idx;
+        });
+      }
+
       filtered.sort((a, b) => {
         const aVal = getNestedValue(a as object, column.key);
         const bVal = getNestedValue(b as object, column.key);
@@ -508,6 +630,13 @@ export function applyFilters<T>(
           const aNum = aVal ? parseFloat(String(aVal).replace(/[^0-9.-]/g, '')) : 0;
           const bNum = bVal ? parseFloat(String(bVal).replace(/[^0-9.-]/g, '')) : 0;
           comparison = aNum - bNum;
+        } else if (column.key === config.statusField && Object.keys(statusPriority).length > 0) {
+          // Use status priority order from statusOptions
+          const aStatus = aVal ? String(aVal).toLowerCase().replace(/_/g, '-') : '';
+          const bStatus = bVal ? String(bVal).toLowerCase().replace(/_/g, '-') : '';
+          const aPriority = statusPriority[aStatus] ?? 999;
+          const bPriority = statusPriority[bStatus] ?? 999;
+          comparison = aPriority - bPriority;
         } else {
           const aStr = aVal ? String(aVal).toLowerCase() : '';
           const bStr = bVal ? String(bVal).toLowerCase() : '';
@@ -645,4 +774,41 @@ export const CLIENTS_FILTER_CONFIG: TableFilterConfig = {
     { key: 'created_at', label: 'Created', type: 'date' }
   ],
   storageKey: 'admin_clients_filter'
+};
+
+export const DOCUMENT_REQUESTS_FILTER_CONFIG: TableFilterConfig = {
+  tableId: 'document-requests',
+  searchFields: ['title', 'client_name', 'document_type', 'description'],
+  statusField: 'status',
+  statusOptions: [
+    { value: 'requested', label: 'Requested' },
+    { value: 'viewed', label: 'Viewed' },
+    { value: 'uploaded', label: 'Uploaded' },
+    { value: 'under_review', label: 'Under Review' },
+    { value: 'approved', label: 'Approved' },
+    { value: 'rejected', label: 'Rejected' }
+  ],
+  dateField: 'created_at',
+  sortableColumns: [
+    { key: 'title', label: 'Title', type: 'string' },
+    { key: 'client_name', label: 'Client', type: 'string' },
+    { key: 'status', label: 'Status', type: 'string' },
+    { key: 'due_date', label: 'Due', type: 'date' },
+    { key: 'created_at', label: 'Created', type: 'date' }
+  ],
+  storageKey: 'admin_document_requests_filter'
+};
+
+export const KNOWLEDGE_BASE_FILTER_CONFIG: TableFilterConfig = {
+  tableId: 'kb-articles',
+  searchFields: ['title', 'category_name', 'slug', 'summary'],
+  statusField: 'category_name', // Filter by category name
+  statusOptions: [], // Populated dynamically with categories
+  dateField: 'updated_at',
+  sortableColumns: [
+    { key: 'title', label: 'Title', type: 'string' },
+    { key: 'category_name', label: 'Category', type: 'string' },
+    { key: 'updated_at', label: 'Updated', type: 'date' }
+  ],
+  storageKey: 'admin_kb_filter'
 };
