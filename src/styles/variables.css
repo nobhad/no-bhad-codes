@@ -500,11 +500,7 @@ img {
 
 /* NOTE: .video-responsive styles moved to main.css to avoid duplication */
 
-/* Improved Focus States for Accessibility */
-*:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
+/* Focus states handled globally in reset.css using box-shadow for rounded corners */
 
 /* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
