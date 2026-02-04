@@ -304,6 +304,12 @@ button[aria-busy="true"] .loading-spinner {
   padding: 2rem 1rem;
 }
 
+/* Error row should have rounded bottom corners to match card */
+td.error-row {
+  border-bottom-left-radius: var(--portal-radius-lg, 12px);
+  border-bottom-right-radius: var(--portal-radius-lg, 12px);
+}
+
 .error-state {
   display: flex;
   flex-direction: column;
