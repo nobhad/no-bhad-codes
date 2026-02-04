@@ -515,7 +515,7 @@ body[data-page="admin"] .bundle-item {
 }
 
 .admin-table tbody tr:hover td {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .admin-table tbody tr:active td {
