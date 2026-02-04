@@ -4,6 +4,26 @@
 
 This file tracks active development work and TODOs. Completed items are moved to `archive/ARCHIVED_WORK_2026-02.md`.
 
+## Open Issues (active)
+
+The items below are active and require immediate attention or follow-up testing.
+
+- **Admin dashboard auth / dev-proxy wiring**: Frontend previously used absolute backend URLs for admin auth endpoints which bypassed the Vite `/api` proxy and caused HttpOnly cookie problems in development. `src/config/api.ts` was adjusted to use relative `/api/...` admin auth endpoints — verify in-browser admin login sets the `auth_token` cookie and that proxied requests include it.
+
+- **Analytics quick revenue (500)**: Admin dashboard reported a 500 from `GET /api/analytics/quick/revenue`. Reproduce after login and capture server logs to inspect stack traces in `server/services/analytics-service.ts`.
+
+- **Invoices search (400)**: Dashboard reported `GET /api/invoices/search?status=pending,overdue` returned 400. Confirm backend accepts comma-separated `status` lists and that frontend query format matches `server/routes/invoices.ts` expectations.
+
+- **Sidebar counts (auth/500/403)**: `GET /api/admin/sidebar-counts` returned errors in the dashboard — verify admin auth/permission checks (`authenticateToken` / `requireAdmin`) and that DB queries (`visitor_sessions`, `general_messages`) handle empty or missing data gracefully.
+
+- **Reproduce & collect logs (developer steps)**:
+  1. Start backend (`npm run dev:server`) and frontend (`npm run dev`).
+  2. Login via dev proxy: POST `/api/auth/admin/login` (confirm `Set-Cookie: auth_token`).
+  3. Call endpoints: `/api/analytics/quick/revenue?days=180`, `/api/invoices/search?status=pending,overdue`, `/api/admin/sidebar-counts` and save responses.
+  4. Tail backend logs while reproducing and capture stack traces (`/tmp/nbc_server.log`).
+
+- **Next action**: After reproducing, create minimal fixes: adjust param parsing/validation in route handlers, handle empty DB results safely, or align frontend request shapes. Add unit tests for parsing and a small E2E reproducer for the admin flow.
+
 - **Documentation accuracy audit (Feb 2, 2026):** README, CONTRIBUTING, docs/README, CONFIGURATION, DEVELOPER_GUIDE, ARCHITECTURE, ADMIN_DASHBOARD, and related docs were checked against the codebase. Corrections: project structure (client pages, server routes/middleware/services), test structure and E2E command, login response (HttpOnly cookie, no token in body), BaseModule hooks (onInit/onDestroy), entry points (main-site.ts, portal.ts), admin modules list, archive 2026-02, CONFIGURATION routes.ts → api.ts, DEVELOPER_GUIDE email env vars (SMTP_*).
 - **Deep documentation pass (Feb 2, 2026):** API_DOCUMENTATION: cookie path `/` (not `/api`), login/verify-magic-link response shape (`data.user` with camelCase fields), verify-invitation response `data: { email, name, company }`, set-password response and password rules (12 chars + complexity), refresh endpoint (returns token in body, does not set cookie), logout message "Logout successful". CONFIGURATION: FROM_EMAIL vs SMTP_FROM note, UPLOADS_DIR, pointer to server/config/environment.ts. SYSTEM_DOCUMENTATION: file upload implementation (sanitizeFilename, getUploadsSubdir, allowed types without JS/TS/HTML/CSS). DEVELOPER_GUIDE: clone URL fixed to noellebhaduri/no-bhad-codes.
 
@@ -20,19 +40,19 @@ Before any new features, existing features need verification. The verification c
 - [x] Button design audit - Already well-organized in `portal-buttons.css`
 - [x] Badge design audit - Already well-organized in `portal-badges.css`
 - [x] Recent activity on dashboard - Wired up to `/api/clients/activities/recent`
-- [x] **Frontend-backend wiring review (Feb 2, 2026)** - See `docs/FRONTEND_BACKEND_WIRING_REVIEW.md`. Fixed 7 mismatches (admin overview revenue, admin files download/delete, admin clients reset-password, admin test-email/run-scheduler endpoints, client notes). Added full client notes backend (migration 046, client-service, clients routes).
+- [x] **Frontend-backend wiring review (Feb 2, 2026)** - Fixed 7 mismatches (admin overview revenue, admin files download/delete, admin clients reset-password, admin test-email/run-scheduler endpoints, client notes). Added full client notes backend (migration 046, client-service, clients routes).
 - [ ] Time-sensitive tasks view
 
 ### 3. API Endpoints Without Frontend UI (Gap)
 
 **Audit (Feb 2026):** Not all API route groups have a corresponding frontend UI. The following are backend-only (no `fetch`/`apiFetch`/`apiPost` etc. from `src/`):
 
-| Route prefix | Purpose | Frontend usage |
+|Route prefix|Purpose|Frontend usage|
 |--------------|---------|----------------|
-| `/api/approvals` | Approval workflow definitions, steps, instances | None |
-| `/api/triggers` | Workflow trigger management | None |
-| `/api/document-requests` | Document requests (client + admin), templates | **Client Documents tab** (my requests, view, upload); **Admin Document requests tab** (list, create, from templates, view detail, review/approve/reject/remind/delete) |
-| `/api/kb` | Knowledge base categories, articles, search, admin CRUD | **Client Help tab + Admin KB tab** |
+|`/api/approvals`|Approval workflow definitions, steps, instances|None|
+|`/api/triggers`|Workflow trigger management|None|
+|`/api/document-requests`|Document requests (client + admin), templates|**Client Documents tab** (my requests, view, upload); **Admin Document requests tab** (list, create, from templates, view detail, review/approve/reject/remind/delete)|
+|`/api/kb`|Knowledge base categories, articles, search, admin CRUD|**Client Help tab + Admin KB tab**|
 
 All other major route groups (auth, admin, clients, projects, messages, invoices, uploads, intake, proposals, analytics, contact) have at least one frontend interaction point.
 
@@ -62,8 +82,6 @@ Suggested implementation order: KB client Help → KB admin → Document request
 
 ## Planned: API Versioning (`/api/v1/`)
 
-**Source:** SYSTEM_DEEP_DIVE.md gap; full plan below.
-
 **Goals:** Add versioned API prefix; keep `/api/` working for backward compatibility; prepare for future v2.
 
 ### Phase 1: Backend — Dual Mount (Non-Breaking) ✅ COMPLETE
@@ -89,7 +107,7 @@ Suggested implementation order: KB client Help → KB admin → Document request
 - Update API_DOCUMENTATION.md: state `/api/v1/` as canonical; add Versioning section.
 - Update CONFIGURATION.md and ARCHITECTURE.md with versioning notes.
 - Add v1 base path to Swagger if applicable.
-- Update SYSTEM_DEEP_DIVE.md to mark API versioning as addressed.
+- Update relevant architecture docs to note API versioning.
 
 **Effort:** ~1 hour | **Risk:** Low
 
@@ -102,27 +120,25 @@ Suggested implementation order: KB client Help → KB admin → Document request
 
 ### Implementation Order
 
-| Step | Task |
+|Step|Task|
 |------|------|
-| 1 | Backend: mount all routers at `/api/` and `/api/v1/` |
-| 2 | Update root endpoint response |
-| 3 | Add `API_PREFIX` constant in frontend config |
-| 4 | Update `apiFetch`/`apiPost` etc. to use prefix |
-| 5 | Migrate direct `fetch('/api/...')` callers |
-| 6 | Update API docs and Swagger |
-| 7 | (Optional) Deprecation middleware |
+|1|Backend: mount all routers at `/api/` and `/api/v1/`|
+|2|Update root endpoint response|
+|3|Add `API_PREFIX` constant in frontend config|
+|4|Update `apiFetch`/`apiPost` etc. to use prefix|
+|5|Migrate direct `fetch('/api/...')` callers|
+|6|Update API docs and Swagger|
+|7|(Optional) Deprecation middleware|
 
 ### Files to Touch
 
 - **Backend:** `server/app.ts`
 - **Frontend:** `src/config/api.ts`, api-client/utils, all features with `/api/` calls
-- **Docs:** API_DOCUMENTATION.md, SYSTEM_DEEP_DIVE.md, ARCHITECTURE.md, current_work.md
+- **Docs:** API_DOCUMENTATION.md, ARCHITECTURE.md, current_work.md
 
 ---
 
 ## Planned: Full WCAG 2.1 AA Compliance
-
-**Source:** SYSTEM_DEEP_DIVE.md A11y audit gap; docs/design/UX_GUIDELINES.md Accessibility section.
 
 **Goal:** Full WCAG 2.1 Level AA compliance across main site, admin dashboard, and client portal.
 
@@ -130,11 +146,11 @@ Suggested implementation order: KB client Help → KB admin → Document request
 
 ### Phase 1: Audit
 
-| Tool | Purpose |
+|Tool|Purpose|
 |------|---------|
-| **@axe-core/playwright** | Automated rules in E2E (images, labels, contrast, landmarks, roles) |
-| **Lighthouse (Chrome DevTools)** | Accessibility audit for main site, admin, portal |
-| **WAVE** (browser extension) | Visual feedback on issues |
+|**@axe-core/playwright**|Automated rules in E2E (images, labels, contrast, landmarks, roles)|
+|**Lighthouse (Chrome DevTools)**|Accessibility audit for main site, admin, portal|
+|**WAVE** (browser extension)|Visual feedback on issues|
 
 **Pages to audit:** `/`, `/#about`, `/#contact`, `/#portfolio`, `/admin`, `/client/portal`, `/client/intake`, `/client/set-password`.
 
@@ -142,51 +158,51 @@ Suggested implementation order: KB client Help → KB admin → Document request
 
 ### Phase 2: Perceivable (WCAG 1.x)
 
-| Criterion | Typical fixes |
+|Criterion|Typical fixes|
 |-----------|---------------|
-| **1.1.1 Non-text content** | Alt text for images; decorative images `alt=""` or `aria-hidden` |
-| **1.3.1 Info and relationships** | Semantic HTML; labels; `aria-describedby` for hints |
-| **1.3.2 Meaningful sequence** | Logical DOM order; avoid layout-only tables |
-| **1.4.1 Use of color** | Do not rely on color alone; add icons/text |
-| **1.4.3 Contrast (minimum)** | 4.5:1 text, 3:1 large text; fix low-contrast tokens |
-| **1.4.4 Resize text** | Ensure 200% zoom works; avoid fixed px where it breaks layout |
-| **1.4.10 Reflow** | No horizontal scroll at 320px |
-| **1.4.12 Text spacing** | Support 200% line-height, letter/word spacing adjustments |
+|**1.1.1 Non-text content**|Alt text for images; decorative images `alt=""` or `aria-hidden`|
+|**1.3.1 Info and relationships**|Semantic HTML; labels; `aria-describedby` for hints|
+|**1.3.2 Meaningful sequence**|Logical DOM order; avoid layout-only tables|
+|**1.4.1 Use of color**|Do not rely on color alone; add icons/text|
+|**1.4.3 Contrast (minimum)**|4.5:1 text, 3:1 large text; fix low-contrast tokens|
+|**1.4.4 Resize text**|Ensure 200% zoom works; avoid fixed px where it breaks layout|
+|**1.4.10 Reflow**|No horizontal scroll at 320px|
+|**1.4.12 Text spacing**|Support 200% line-height, letter/word spacing adjustments|
 
 ### Phase 3: Operable (WCAG 2.x)
 
-| Criterion | Typical fixes |
+|Criterion|Typical fixes|
 |-----------|---------------|
-| **2.1.1 Keyboard** | All actions keyboard-accessible; remove `tabindex="-1"` where it blocks |
-| **2.1.2 No keyboard trap** | Focus trap only for modals; Escape exits |
-| **2.2.1 Timing adjustable** | Pause/disable auto-advancing content |
-| **2.4.1 Bypass blocks** | Skip link to main content (already present; verify on all pages) |
-| **2.4.2 Page titled** | Unique `<title>` per page |
-| **2.4.3 Focus order** | Logical tab order; `tabindex` only when necessary |
-| **2.4.4 Link purpose** | Descriptive link text; avoid "click here" |
-| **2.4.5 Multiple ways** | Sitemap/nav for multi-page flows |
-| **2.4.6 Headings and labels** | Clear headings; form labels |
-| **2.4.7 Focus visible** | Visible focus ring on all focusable elements |
-| **2.5.3 Label in name** | Accessible name includes visible label |
+|**2.1.1 Keyboard**|All actions keyboard-accessible; remove `tabindex="-1"` where it blocks|
+|**2.1.2 No keyboard trap**|Focus trap only for modals; Escape exits|
+|**2.2.1 Timing adjustable**|Pause/disable auto-advancing content|
+|**2.4.1 Bypass blocks**|Skip link to main content (already present; verify on all pages)|
+|**2.4.2 Page titled**|Unique `<title>` per page|
+|**2.4.3 Focus order**|Logical tab order; `tabindex` only when necessary|
+|**2.4.4 Link purpose**|Descriptive link text; avoid "click here"|
+|**2.4.5 Multiple ways**|Sitemap/nav for multi-page flows|
+|**2.4.6 Headings and labels**|Clear headings; form labels|
+|**2.4.7 Focus visible**|Visible focus ring on all focusable elements|
+|**2.5.3 Label in name**|Accessible name includes visible label|
 
 ### Phase 4: Understandable (WCAG 3.x)
 
-| Criterion | Typical fixes |
+|Criterion|Typical fixes|
 |-----------|---------------|
-| **3.1.1 Language of page** | `<html lang="en">` (already set) |
-| **3.2.1 On focus** | No automatic context change on focus |
-| **3.2.2 On input** | No auto-submit without explicit confirmation |
-| **3.3.1 Error identification** | Clear error messages; associate with fields |
-| **3.3.2 Labels or instructions** | Labels for all inputs; placeholders as hint, not label |
-| **3.3.3 Error suggestion** | Suggest corrections where possible |
+|**3.1.1 Language of page**|`<html lang="en">` (already set)|
+|**3.2.1 On focus**|No automatic context change on focus|
+|**3.2.2 On input**|No auto-submit without explicit confirmation|
+|**3.3.1 Error identification**|Clear error messages; associate with fields|
+|**3.3.2 Labels or instructions**|Labels for all inputs; placeholders as hint, not label|
+|**3.3.3 Error suggestion**|Suggest corrections where possible|
 
 ### Phase 5: Robust (WCAG 4.x)
 
-| Criterion | Typical fixes |
+|Criterion|Typical fixes|
 |-----------|---------------|
-| **4.1.1 Parsing** | Valid HTML; no duplicate IDs |
-| **4.1.2 Name, role, value** | Custom controls have role/state; dynamic updates announced |
-| **4.1.3 Status messages** | Use `role="status"` or `aria-live` for toasts/notifications |
+|**4.1.1 Parsing**|Valid HTML; no duplicate IDs|
+|**4.1.2 Name, role, value**|Custom controls have role/state; dynamic updates announced|
+|**4.1.3 Status messages**|Use `role="status"` or `aria-live` for toasts/notifications|
 
 ### Phase 6: Screen reader and manual testing
 
@@ -203,15 +219,15 @@ Suggested implementation order: KB client Help → KB admin → Document request
 
 ### Implementation order
 
-| Step | Task |
+|Step|Task|
 |------|------|
-| 1 | Install @axe-core/playwright; add axe check to admin-flow.spec.ts |
-| 2 | Run Lighthouse on main site, admin, portal; document issues |
-| 3 | Fix critical (Level A) violations first |
-| 4 | Fix Level AA violations (contrast, focus, labels) |
-| 5 | Screen reader manual pass on key flows |
-| 6 | Add reduced-motion support if missing |
-| 7 | Create ACCESSIBILITY_AUDIT.md; update UX_GUIDELINES |
+|1|Install @axe-core/playwright; add axe check to admin-flow.spec.ts|
+|2|Run Lighthouse on main site, admin, portal; document issues|
+|3|Fix critical (Level A) violations first|
+|4|Fix Level AA violations (contrast, focus, labels)|
+|5|Screen reader manual pass on key flows|
+|6|Add reduced-motion support if missing|
+|7|Create ACCESSIBILITY_AUDIT.md; update UX_GUIDELINES|
 
 ### Files and areas to touch
 
@@ -228,19 +244,19 @@ Suggested implementation order: KB client Help → KB admin → Document request
 
 ---
 
-## Planned: Remaining System Deep Dive Gaps
-
-**Source:** SYSTEM_DEEP_DIVE.md sections 6.1–6.4.
+## Planned: Remaining System Gaps
 
 ### Frontend (6.1)
 
 **Real-time updates (WebSockets/SSE)**
+
 - **Goal:** Messages, notifications, or project updates without manual refresh.
 - **Options:** (A) SSE for one-way server push (simpler); (B) WebSockets for bidirectional.
 - **Phases:** 1) Add SSE endpoint (e.g. `/api/messages/stream`); 2) Client EventSource subscription; 3) Emit on new message/project update. Scope to messages first, then notifications.
 - **Effort:** 1–2 days | **Risk:** Medium
 
 **Offline/portal (PWA for client portal)**
+
 - **Goal:** Client portal works offline or with poor connectivity.
 - **Phases:** 1) Service worker for portal entry; 2) Cache critical assets; 3) Queue mutations (e.g. messages) when offline; 4) Sync when back online.
 - **Effort:** 2–3 days | **Risk:** High (sync conflicts, stale data)
@@ -248,12 +264,14 @@ Suggested implementation order: KB client Help → KB admin → Document request
 **A11y audit (full WCAG)** — See "Planned: Full WCAG 2.1 AA Compliance" below.
 
 **E2E coverage (admin/portal flows)**
+
 - **Goal:** Playwright tests for login → view project, create invoice, send message.
 - **Status:** Admin login → view projects done (`tests/e2e/admin-flow.spec.ts`). Portal login → dashboard done (`tests/e2e/portal-flow.spec.ts`).
 - **Phases:** 1) Admin login flow (done); 2) Client portal login + dashboard; 3) One CRUD flow each (e.g. project, invoice).
 - **Effort:** 1–2 days | **Risk:** Low
 
 **Visual regression**
+
 - **Goal:** Detect UI drift with screenshot diffs.
 - **Options:** Playwright screenshots + Percy/Chromatic, or custom diff job.
 - **Phases:** 1) Baseline screenshots for key pages; 2) CI job to compare; 3) Review workflow.
@@ -266,31 +284,37 @@ Suggested implementation order: KB client Help → KB admin → Document request
 **API versioning** — See "Planned: API Versioning" above.
 
 **Webhooks (outbound events)**
+
 - **Goal:** Emit events (e.g. `project.created`, `invoice.sent`) to configured URLs.
 - **Phases:** 1) Webhook config table (url, events, secret); 2) Event emitter service; 3) HTTP POST with retries; 4) Admin UI to manage webhooks.
 - **Effort:** 2–3 days | **Risk:** Medium
 
 **Public API keys (server-to-server)**
+
 - **Goal:** API keys for external integrations (no browser/JWT).
 - **Phases:** 1) `api_keys` table (key hash, scope, expiry); 2) Middleware: accept `X-API-Key` or `Authorization: Bearer <key>`; 3) Admin UI to create/revoke.
 - **Effort:** 1–2 days | **Risk:** Medium (key management, scoping)
 
 **Idempotency (Idempotency-Key)**
+
 - **Goal:** Safe retries for POST/PUT/DELETE.
 - **Phases:** 1) Middleware to read `Idempotency-Key` header; 2) Store response for key (TTL 24h); 3) Return cached response on replay.
 - **Effort:** 0.5–1 day | **Risk:** Low
 
 **Metrics (Prometheus /metrics)**
+
 - **Goal:** Expose `/metrics` for Prometheus scraping.
 - **Phases:** 1) Add `prom-client`; 2) Default metrics (heap, event loop); 3) Custom (request duration, error rate); 4) Route behind auth or allowlist.
 - **Effort:** 0.5–1 day | **Risk:** Low
 
 **2FA / SSO**
+
 - **Goal:** TOTP for admin; optional SSO (Google, etc.).
 - **Phases:** 1) `speakeasy` for TOTP; 2FA table; 2) Admin enable/disable; 3) SSO: OAuth flow + Passport or similar.
 - **Effort:** 2–3 days (2FA), 3–5 days (SSO) | **Risk:** Medium
 
 **Job queue (Redis/Bull vs cron)**
+
 - **Goal:** Async jobs with retries (email, webhooks, PDF).
 - **Phases:** 1) Redis + Bull if REDIS_ENABLED; 2) Queue email, webhook, heavy PDF jobs; 3) Fallback to in-process queue if no Redis.
 - **Effort:** 2–3 days | **Risk:** Medium
@@ -300,6 +324,7 @@ Suggested implementation order: KB client Help → KB admin → Document request
 ### Build & Ops (6.3)
 
 **Database backups (automated)**
+
 - **Goal:** Scheduled SQLite backup to local/remote storage.
 - **Phases:** 1) Backup script (copy or `sqlite3 .backup`); 2) Cron or scheduler job (daily); 3) Retention (e.g. 7 daily, 4 weekly); 4) Optional S3/cloud upload.
 - **Effort:** 0.5–1 day | **Risk:** Low
@@ -309,12 +334,14 @@ Suggested implementation order: KB client Help → KB admin → Document request
 ### Design & Content (6.4)
 
 **Design system docs (live component catalog)**
+
 - **Goal:** Browsable component library with tokens and examples.
 - **Options:** Storybook, or static HTML page with iframes.
 - **Phases:** 1) Install Storybook (or build simple catalog page); 2) Add stories for buttons, badges, forms, cards; 3) Document tokens; 4) Deploy or add to dev script.
 - **Effort:** 1–2 days | **Risk:** Low
 
 **Content/SEO (CMS for marketing)**
+
 - **Goal:** Edit marketing content without code deploys.
 - **Options:** Headless CMS (Sanity, Contentful, Strapi) or simple admin-editable JSON/MD.
 - **Phases:** 1) Content model for hero, about, FAQ; 2) Fetch at build or runtime; 3) Admin UI to edit; 4) Cache/invalidate.
@@ -437,7 +464,7 @@ Added verification items to checklist for message reactions feature (awaiting ra
 
 ### E2E Portal Flow
 
-- **tests/e2e/portal-flow.spec.ts:** Client login via API, view dashboard. Uses demo@example.com / demo123 by default.
+- **tests/e2e/portal-flow.spec.ts:** Client login via API, view dashboard. Uses <<<demo@example.com>>> / demo123 by default.
 - **DEVELOPER_GUIDE.md:** Portal E2E instructions.
 
 ### E2E Admin Flow
@@ -446,16 +473,16 @@ Added verification items to checklist for message reactions feature (awaiting ra
 - **playwright.config.ts:** baseURL 4000, webServer uses `dev:full` (frontend + backend), globalSetup path fix.
 - **DEVELOPER_GUIDE.md:** Admin E2E test instructions (E2E_ADMIN_PASSWORD, `npx playwright install`).
 
-### System Deep Dive Gaps (Non-Breaking Fixes)
+### System Gaps (Non-Breaking Fixes)
 
-Addressed gaps from SYSTEM_DEEP_DIVE.md that do not create breaking changes:
+Addressed system gaps that do not create breaking changes:
 
 - **Health depth** — `/health` now pings DB; returns 503 and `status: degraded` if DB unhealthy
 - **Request ID** — Middleware adds `X-Request-ID` (from header or generated UUID); documented in API_DOCUMENTATION
 - **Graceful shutdown** — `closeDatabase()` called on SIGTERM/SIGINT before process exit
 - **Audit export API** — `GET /api/admin/audit-log` with filters (action, entityType, userEmail, startDate, endDate) and pagination
 - **Staging env** — CONFIGURATION.md documents `development`, `staging`, `production`, `test`
-- **Rate limit headers** — Already present in rateLimit middleware; noted in SYSTEM_DEEP_DIVE
+- **Rate limit headers** — Already present in rateLimit middleware
 
 ### Documentation Accuracy (API + Features)
 
@@ -481,22 +508,22 @@ Addressed gaps from SYSTEM_DEEP_DIVE.md that do not create breaking changes:
 - **FILES.md:** Last Updated Feb 2; duplicate "Last Updated" removed; Project Filtering marked Complete (GET /api/uploads/client supports projectId, fileType, category, dateFrom, dateTo).
 - **INVOICES.md:** Last Updated Feb 2; Authentication corrected to "HttpOnly cookies (JWT); Bearer fallback".
 - **NEW_PROJECT.md:** Last Updated Feb 2.
-- **CLIENT_PORTAL_DEEP_DIVE.md:** Login auth note corrected to "HttpOnly cookies (JWT); demo mode fallback" (removed "JWT in localStorage").
-- **CRM_CMS_DEEP_DIVE.md:** Section 1.4 updated — "Now implemented (Feb 2026)" list (scheduler, triggers, approvals, document requests, notification prefs, timeline, KB, payment reminders, deposit/recurring invoices, A/R aging, metrics, health score, pipeline, Kanban); "Still gaps" reduced to Stripe, expense/time tracking, webhooks. Section 2.3 "Your gap" → "Your status" (approval workflows, document requests, KB implemented).
+- **Auth documentation:** Login auth note corrected to "HttpOnly cookies (JWT); demo mode fallback" (removed "JWT in localStorage").
+- **CRM/CMS features:** Documented implemented features (scheduler, triggers, approvals, document requests, notification prefs, timeline, KB, payment reminders, deposit/recurring invoices, A/R aging, metrics, health score, pipeline, Kanban); remaining gaps: Stripe, expense/time tracking, webhooks.
 - **UX_GUIDELINES.md:** Last Updated Feb 2.
 
 ### Deep Dive + Tables/Component Docs (Feb 2, 2026)
 
-- **TABLES_ARCHIVE_DELETE_AUDIT.md:** Last Updated Feb 2. Proposals filter: Rejected/Converted now in filter tabs (done). Project delete (UI): Yes — `#btn-delete-project` in admin-project-details.ts with confirm. Summary and Suggested Priorities updated (Proposals filter done, Project delete done). Reference link kept in doc; **Reference Documents list removed from current_work.md** (outdated; deep dives live in docs/ root).
+- **Tables audit:** Proposals filter (Rejected/Converted) done. Project delete (UI) done via `#btn-delete-project` in admin-project-details.ts with confirm.
 - **COMPONENT_REFACTORING_OPPORTUNITIES.md:** Last Updated Feb 2. Intro note: completed items (alert/prompt/toast/confirm) done; client-portal, portal-messages, portal-invoices marked refactored; line numbers kept as historical.
 
 ### CSS Inconsistencies Audit + Resolutions (Feb 2, 2026)
 
-- **STYLE_CONSISTENCY_REPORT.md** — Section 8: audit of CSS inconsistencies; §8.8 resolutions applied. **Single source colors:** design-system colors.css is canonical; removed divergent fallbacks and hardcoded hex in admin, proposals, client-detail, project-detail, contact, progress, proposal-builder, confirm-dialog, loading, portal-buttons, dashboard, nav-portal, portal-messages; business-card uses `var(--color-black)`. **Overlay:** tokens only in design-system/tokens/colors.css; removed duplicates from variables.css. **Shadows:** raw box-shadow replaced with `--shadow-sm`/`--shadow-md`/`--shadow-lg` in portal-messages, proposals, portal-components. **Font-size:** portal-messages uses `--font-size-xs`/`--font-size-sm`. **Spacing:** responsive scale renamed to `--space-fluid-*` in variables.css; design-system `--space-0`…`--space-*` is single source; utilities and business-card use `--space-fluid-*`.
-
-### New Deep Dive (Feb 2, 2026)
-
-- **SYSTEM_DEEP_DIVE.md** (new) — Full-stack system deep dive (frontend, backend, build, design, testing, ops): routes (15 modules, ~457 handlers), services (24), middleware, database (migrations 001–045), auth, config, scheduler. Sections: what’s implemented, route–service mapping, gaps (versioning, webhooks, API keys, MFA/SSO, health depth, metrics, job queue), state-of-the-art expectations, suggested priorities (health/OpenAPI/rate-limit headers, v1 prefix, webhooks, audit export, Stripe, job queue, 2FA), references.
+- **Single source colors:** design-system colors.css is canonical; removed divergent fallbacks and hardcoded hex in admin, proposals, client-detail, project-detail, contact, progress, proposal-builder, confirm-dialog, loading, portal-buttons, dashboard, nav-portal, portal-messages; business-card uses `var(--color-black)`.
+- **Overlay:** tokens only in design-system/tokens/colors.css; removed duplicates from variables.css.
+- **Shadows:** raw box-shadow replaced with `--shadow-sm`/`--shadow-md`/`--shadow-lg` in portal-messages, proposals, portal-components.
+- **Font-size:** portal-messages uses `--font-size-xs`/`--font-size-sm`.
+- **Spacing:** responsive scale renamed to `--space-fluid-*` in variables.css; design-system `--space-0`…`--space-*` is single source.
 
 ### Tier 1-3 Completion
 
@@ -536,23 +563,21 @@ Addressed gaps from SYSTEM_DEEP_DIVE.md that do not create breaking changes:
 
 ### Tier Completion Status
 
-| Tier | Status | Notes |
+|Tier|Status|Notes|
 |------|--------|-------|
-| Tier 1 | 5/5 done | COMPLETE |
-| Tier 2 | 7/7 done | COMPLETE |
-| Tier 3 | 4/4 done | COMPLETE (WebSockets deferred - polling works) |
-| Tier 4 | 3/4 done | Stripe deferred (cost) |
-| Tier 5 | 3/3 done | COMPLETE |
-| Tier 6 | 6/6 done | COMPLETE |
-| Tier 7 | 4/4 done | COMPLETE |
+|Tier 1|5/5 done|COMPLETE|
+|Tier 2|7/7 done|COMPLETE|
+|Tier 3|4/4 done|COMPLETE (WebSockets deferred - polling works)|
+|Tier 4|3/4 done|Stripe deferred (cost)|
+|Tier 5|3/3 done|COMPLETE|
+|Tier 6|6/6 done|COMPLETE|
+|Tier 7|4/4 done|COMPLETE|
 
 ---
 
 ## Front-End Concerns
 
-### UX/UI Implementation Plan (from UX_EXPERT_INSIGHTS.md)
-
-**Reference:** [docs/design/UX_EXPERT_INSIGHTS.md](design/UX_EXPERT_INSIGHTS.md) — Full audit with findings and recommendations.
+### UX/UI Implementation Plan
 
 #### Priority 1: Critical Accessibility Fixes
 
@@ -613,14 +638,14 @@ Addressed gaps from SYSTEM_DEEP_DIVE.md that do not create breaking changes:
 
 #### Issues Identified
 
-| Issue | Location | Impact |
+|Issue|Location|Impact|
 |-------|----------|--------|
-| **Information overload** | Client Detail Overview (7 cards) | Cognitive load; hard to scan |
-| **Account Actions buried** | Client Detail — in a card at bottom | Not discoverable; feels disconnected |
-| **Inconsistent header actions** | Client vs Project | Client: card. Project: dropdown menu |
-| **No clear primary action** | Both detail views | User doesn't know what to do first |
-| **Cross-tab heading inconsistency** | Both views | Overview has H3s; other tabs often lack them |
-| **Cards vs sections** | Client Detail | Everything in cards creates visual noise |
+|**Information overload**|Client Detail Overview (7 cards)|Cognitive load; hard to scan|
+|**Account Actions buried**|Client Detail — in a card at bottom|Not discoverable; feels disconnected|
+|**Inconsistent header actions**|Client vs Project|Client: card. Project: dropdown menu|
+|**No clear primary action**|Both detail views|User doesn't know what to do first|
+|**Cross-tab heading inconsistency**|Both views|Overview has H3s; other tabs often lack them|
+|**Cards vs sections**|Client Detail|Everything in cards creates visual noise|
 
 #### Proposed Reorganization
 
@@ -761,8 +786,8 @@ CONTRACT TAB
 
 **Phase 3: Visual Hierarchy (Both Views)**
 
-- [ ] Add visible H3 to each tab panel (not just Overview)
-- [ ] Ensure consistent heading hierarchy: H2 (page title) → H3 (section)
+- [x] Add visible H3 to each tab panel (not just Overview) — Done in Priority 2 (Feb 3, 2026)
+- [x] Ensure consistent heading hierarchy: H2 (page title) → H3 (section) — Done in Priority 2 (Feb 3, 2026)
 - [ ] Add section dividers or spacing between logical groups
 
 **Phase 4: Responsive + Mobile**
@@ -796,20 +821,20 @@ CONTRACT TAB
 
 #### Current Structure Analysis
 
-| Section | Lines | Responsibility |
+|Section|Lines|Responsibility|
 |---------|-------|----------------|
-| DOM Cache setup | 44-218 | Element selectors configuration |
-| Class core + populateProjectDetailView | 237-569 | Main class, detail view population |
-| Tab navigation | 570-787 | Tab switching, module initialization |
-| Status dropdown | 788-871 | Custom status dropdown |
-| Edit modal | 872-1009 | Edit project modal + save |
-| Messages | 1010-1158 | Thread loading, sending messages |
-| Files | 1159-1212 | File list loading |
-| Milestones | 1213-1432 | Milestones CRUD, progress bar |
-| Project actions | 1433-1565 | Delete, archive, duplicate |
-| **Invoices** | 1566-2707 | **1,141 lines** — all invoice operations |
-| File upload | 2709-2820 | Upload handlers, validation |
-| Utilities | 2821-2888 | Helper functions |
+|DOM Cache setup|44-218|Element selectors configuration|
+|Class core + populateProjectDetailView|237-569|Main class, detail view population|
+|Tab navigation|570-787|Tab switching, module initialization|
+|Status dropdown|788-871|Custom status dropdown|
+|Edit modal|872-1009|Edit project modal + save|
+|Messages|1010-1158|Thread loading, sending messages|
+|Files|1159-1212|File list loading|
+|Milestones|1213-1432|Milestones CRUD, progress bar|
+|Project actions|1433-1565|Delete, archive, duplicate|
+|**Invoices**|1566-2707|**1,141 lines** — all invoice operations|
+|File upload|2709-2820|Upload handlers, validation|
+|Utilities|2821-2888|Helper functions|
 
 #### Proposed File Split
 
@@ -846,39 +871,39 @@ admin-project-details.ts
 
 **Phase 1: Extract Types + DOM Cache**
 
-- [ ] Create `project-details/types.ts` — move interfaces
-- [ ] Create `project-details/dom-cache.ts` — move DOM cache setup
-- [ ] Update imports in main file
+- [x] Create `project-details/types.ts` — move interfaces
+- [x] Create `project-details/dom-cache.ts` — move DOM cache setup
+- [x] Update imports in main file
 
 **Phase 2: Extract Messages + Files**
 
-- [ ] Create `project-details/messages.ts` — extract `loadProjectMessages`, `sendProjectMessage`
-- [ ] Create `project-details/files.ts` — extract file loading + upload handlers
-- [ ] Pass context/callbacks as parameters or use dependency injection
+- [x] Create `project-details/messages.ts` — extract `loadProjectMessages`, `sendProjectMessage`
+- [x] Create `project-details/files.ts` — extract file loading + upload handlers
+- [x] Pass context/callbacks as parameters or use dependency injection
 
 **Phase 3: Extract Milestones**
 
-- [ ] Create `project-details/milestones.ts` — extract all milestone methods
-- [ ] Export `loadProjectMilestones`, `toggleMilestone`, `deleteMilestone`, etc.
+- [x] Create `project-details/milestones.ts` — extract all milestone methods
+- [x] Export `loadProjectMilestones`, `toggleMilestone`, `deleteMilestone`, etc.
 
 **Phase 4: Extract Invoices (largest section)**
 
-- [ ] Create `project-details/invoices.ts` — core invoice loading + display
-- [ ] Create `project-details/invoice-scheduling.ts` — scheduled + recurring
-- [ ] Create `project-details/invoice-actions.ts` — send, remind, payments, late fees
-- [ ] Wire up re-exports in `invoices.ts`
+- [x] Create `project-details/invoices.ts` — core invoice loading + display
+- [x] Create `project-details/invoice-scheduling.ts` — scheduled + recurring
+- [x] Create `project-details/invoice-actions.ts` — send, remind, payments, late fees
+- [x] Wire up re-exports in `invoices.ts`
 
 **Phase 5: Extract Project Actions**
 
-- [ ] Create `project-details/actions.ts` — delete, archive, duplicate, edit modal
-- [ ] Move contract signing logic here or to own file
+- [x] Create `project-details/actions.ts` — delete, archive, duplicate, edit modal
+- [x] Move contract signing logic here or to own file
 
 **Phase 6: Clean Up Main File**
 
-- [ ] Main class becomes orchestrator only
-- [ ] Tab switching delegates to sub-modules
-- [ ] Remove dead code and unused imports
-- [ ] Verify all functionality still works
+- [x] Main class becomes orchestrator only
+- [x] Tab switching delegates to sub-modules
+- [x] Remove dead code and unused imports
+- [x] Verify all functionality still works
 
 #### Pattern: Module Context
 
@@ -901,12 +926,12 @@ export async function loadProjectMessages(ctx: ProjectDetailsContext): Promise<v
 
 #### Acceptance Criteria
 
-- [ ] Main file under 500 lines
-- [ ] Each sub-module has single responsibility
-- [ ] No circular dependencies
-- [ ] All existing functionality preserved
-- [ ] TypeScript compiles without errors
-- [ ] Manual testing passes for all tabs
+- [x] Main file under 500 lines
+- [x] Each sub-module has single responsibility
+- [x] No circular dependencies
+- [x] All existing functionality preserved
+- [x] TypeScript compiles without errors
+- [x] Manual testing passes for all tabs
 
 ---
 
@@ -914,16 +939,16 @@ export async function loadProjectMessages(ctx: ProjectDetailsContext): Promise<v
 
 - [ ] Client detail header has inline quick actions (no buried card)
 - [ ] Client Overview tab has max 4 cards (consolidated)
-- [ ] All tabs have visible H3 headings
+- [x] All tabs have visible H3 headings — Done in Priority 2 (Feb 3, 2026)
 - [ ] Tab strips scroll on mobile
 - [ ] Empty states are consistent across both views
-- [ ] No visual hierarchy skips (H2 → H3 only)
+- [x] No visual hierarchy skips (H2 → H3 only) — Done in Priority 2 (Feb 3, 2026)
 
 ---
 
 ### Questions for UX/UI Expert (Remaining)
 
-Items that still need expert input. Reference: [UX_EXPERT_INSIGHTS.md](design/UX_EXPERT_INSIGHTS.md)
+Items that still need expert input:
 
 - **Sidebar button order** — Current: Dashboard | Leads | Projects | Clients | Messages | Analytics | Knowledge | Documents | System. Recommend reordering based on frequency/workflow.
 - **Panel button placement guideline** — Document pattern for all panels (header vs footer vs inline).
@@ -965,6 +990,7 @@ Message input when disabled | Analytics section headers | Messages search bar | 
 - [x] **Table size when check off** — Table should not change size when checking/unchecking rows. **Fixed:** table-features.css — bulk toolbar when `.hidden` uses `visibility: hidden; opacity: 0; pointer-events: none` (not `display: none`) and keeps `min-height: 48px` and margin so space is reserved.
 - [x] **Bulk selection count alignment** — "X selected" number should align with the checkbox column. **Fixed:** table-features.css — bulk toolbar uses grid `44px 1fr auto`; `.bulk-toolbar-left` in column 1 so count aligns with table checkbox column; `.bulk-toolbar-actions` in column 3.
 - [ ] **Toggle needs better design** — View toggle (e.g. Table/Pipeline, list/card) needs improved styling/UX.
+- [ ] **NEW and ON-HOLD status colors are the same** — Both statuses use the same color (`--color-status-pending`), making them indistinguishable. NEW should have a distinct color (currently uses `--color-status-new` only in some places, but ON-HOLD also uses pending color). Review and differentiate these status colors.
 - [x] **Client account table: email under name, company name** — **Already done:** Clients table uses `.identity-cell` with stacked `.identity-name`, `.identity-email`, `.identity-company` spans. (Verified Feb 3, 2026)
 - [x] **Name, company, email as one column in most tables** — **Already done:** All admin tables (clients, leads, contacts) use the `.identity-cell` pattern with name/email/company stacked in a single column. (Verified Feb 3, 2026)
 - [ ] **Account Actions buttons need better placement** — Client detail "Account Actions" (Reset Password, Send Invitation, Archive, Delete Client) are in a `.portal-project-card` and feel disconnected. Need to incorporate these buttons better — e.g. icon buttons in the overview at page top (client name/header area) instead of or in addition to the current card. Selectors: `#cd-btn-reset-password`, `#cd-btn-resend-invite`, `#cd-btn-archive`, `#cd-btn-delete`; container `.client-account-actions`.
@@ -975,6 +1001,7 @@ Message input when disabled | Analytics section headers | Messages search bar | 
 - [x] **Analytics page layout** — Better way to present and organize analytics. **Fixed:** Sub-tabs Overview | Business | Visitors | Reports & Alerts (see Analytics section below).
 - [x] **All modals: icon and H3 on same line** — **Fixed (Feb 3, 2026):** `confirm-dialog-header` already has `display: flex; align-items: center;`. Fixed `multiPromptDialog` in `confirm-dialog.ts` which was missing the `.confirm-dialog-header` wrapper around icon and title.
 - [ ] **All modal forms: use reusable dropdown component** — Every modal form that has a select/dropdown (e.g. Metric, Condition, status picks) should use the shared reusable dropdown component (e.g. portal dropdown / table-dropdown pattern or form-select) instead of native `<select>` or ad-hoc markup, for consistent look and behavior across modals.
+- [ ] **Modal dropdown focus state** — When the modal dropdown (e.g. Document Requests client select) is open, the focus ring should wrap seamlessly around the entire dropdown (trigger + menu as one box). Current implementation shows doubled border on transition or incorrect focus state. Need to match the expandable details-card pattern which uses `:focus-within` with `box-shadow: 0 0 0 2px var(--color-primary)` — but modal dropdown menu is fixed-positioned outside wrapper, preventing this approach. May need JS-based solution to apply focus class to both trigger and menu simultaneously, or restructure dropdown to keep menu inside wrapper bounds.
 - [ ] **Analytics tab: use reusable components** — The Analytics tab (Overview, Business, Visitors, Reports & Alerts) should use shared reusable components (e.g. cards, buttons, dropdowns, sub-tabs, KPI/stat cards, charts wrapper) instead of analytics-only markup and styles, so the tab matches the rest of the portal and stays maintainable.
 - [x] **Table headers get cut off** — In some admin tables (e.g. contacts table `.admin-table.contacts-table`), the thead/th content (column labels and sort icons) gets cut off. **Fixed:** admin.css — `.admin-table-container` set to `overflow: visible`; new inner `.admin-table-scroll-wrapper` with `overflow-x: auto` and `overflow-y: visible` so horizontal scroll doesn’t create a scroll container that clips the header. Added `min-height: 48px` and `vertical-align: middle` on `.admin-table thead th`, and `min-height: 48px` on `.admin-table thead tr`. All 8 admin table containers in admin/index.html now wrap the table in `.admin-table-scroll-wrapper`. `.visitors-table-container` overflow changed from `hidden` to `visible`. Mobile scroll-indicator styles updated to target the scroll wrapper.
 
@@ -1000,8 +1027,8 @@ Message input when disabled | Analytics section headers | Messages search bar | 
 
 - [x] Sidebar — Collapsed style
 - [x] Tabs — Shared component
-- [ ] **Button design** — Audit for consistency (audit done: see UX_EXPERT_INSIGHTS Part III §9; implementation consistent)
-- [ ] **Badges** — Redesign for clarity (usage audit done: UX_EXPERT_INSIGHTS Part III §10; redesign not started)
+- [x] **Button design** — Audit for consistency (audit done; implementation consistent)
+- [ ] **Badges** — Redesign for clarity (usage audit done; redesign not started)
 
 #### Detail Views Redesign (Client + Project Details)
 
@@ -1055,13 +1082,13 @@ Message input when disabled | Analytics section headers | Messages search bar | 
 
 **Current state vs gaps**
 
-| Area | Current | Gap |
+|Area|Current|Gap|
 |------|---------|-----|
-| Priority / actionable | None | No "Needs Attention" block (overdue invoices, pending contracts, new leads, unread messages). |
-| Stats | Today's Snapshot (4 cards) | Disconnected from a single "business health" story; no outstanding AR or pipeline summary on Overview. |
-| Weekly Overview | (N/A on Overview) | Analytics tab has its own overview; avoid duplicating that on dashboard. |
-| Business health | Revenue MTD in snapshot | No dedicated business-health strip (revenue + AR + active projects together). |
-| Recent Activity | Wired to API, list only | No filtering, grouping, or "view all" context. |
+|Priority / actionable|None|No "Needs Attention" block (overdue invoices, pending contracts, new leads, unread messages).|
+|Stats|Today's Snapshot (4 cards)|Disconnected from a single "business health" story; no outstanding AR or pipeline summary on Overview.|
+|Weekly Overview|(N/A on Overview)|Analytics tab has its own overview; avoid duplicating that on dashboard.|
+|Business health|Revenue MTD in snapshot|No dedicated business-health strip (revenue + AR + active projects together).|
+|Recent Activity|Wired to API, list only|No filtering, grouping, or "view all" context.|
 
 ---
 
@@ -1136,7 +1163,7 @@ NEEDS ATTENTION | KEY METRICS | RECENT ACTIVITY
 - [ ] **Tabs not responsive** — Tabs in project and client details pages need responsive behavior (overflow/wrap on small viewports)
 - [x] **Date & time formatting** — Standardized to MM/DD/YYYY format across the site. Updated `format-utils.ts` (central formatDate, formatDateTime, formatRelativeTime), `timeline.ts`, `client-portal.ts`, `portal-document-requests.ts`, and `portal-messages.ts`. Chart labels (weekday/month abbreviations) remain short for visualization. Server-side uses long format for formal documents (invoices, contracts, emails).
 - [ ] **Badge/status in tables** — Audit and improve badge/status display in admin tables (alignment, truncation, colors)
-- [ ] **Icon button tooltips** — All icon-only buttons should have `title`/tooltip (and `aria-label`) for accessibility and discoverability (audit done: UX_EXPERT_INSIGHTS Part III §8 — no gaps found; keep using createIconButton for new ones)
+- [x] **Icon button tooltips** — All icon-only buttons have `title`/tooltip and `aria-label` for accessibility (audit done — no gaps found; use createIconButton for new ones)
 - [ ] **Recent activity** — Dashboard Recent Activity section
 - [ ] **Time-sensitive tasks** — Dashboard priority view
 - [x] **System tab** — Renamed to "System Status". Added Health Check (Database, Email, Storage, Scheduler), Quick Actions (Clear Cache, Test Email, Run Scheduler), Recent Errors display. Build/Browser info moved to collapsible sections.
@@ -1145,138 +1172,174 @@ NEEDS ATTENTION | KEY METRICS | RECENT ACTIVITY
 
 ## VERIFICATION CHECKLIST
 
-**STATUS: AWAITING USER TESTING**
-
-One checkbox per verifiable piece. Check off with `[x]` when confirmed.
-
-### Admin Portal
-
-#### Clients
-
-- [ ] Client table shows Health column with correct badge (green/yellow/red)
-- [ ] Client table shows tags as pills under client name
-- [ ] Client details: CRM Details section displays
-- [ ] Client details: Edit CRM dialog opens, saves, updates display
-- [ ] Client details: Custom Fields section displays
-- [ ] Client details: Edit Custom Fields dialog works
-- [ ] Client: multiple contacts; add/edit/delete; set primary
-- [ ] Client: Activity timeline shows notes, calls, emails, meetings
-- [ ] Client: Tags can be added/removed; filter by tag works
-- [ ] Client: Health score displays; recalculate works
-- [ ] Clients table: invite icon appears for uninvited clients
-- [ ] Client detail page: invite icon works
-- [ ] Contact detail panel: "Convert to Client" button works
-- [ ] After convert: "Converted to Client" badge shows
-
-#### Leads
-
-- [ ] Lead row: "Convert" button visible and works
-- [ ] Leads: scoring displays and updates
-- [ ] Leads: pipeline/Kanban view; drag to change stage
-- [ ] Leads: tasks on lead; add/complete task
-- [ ] Leads: analytics/reports load
-
-#### Projects
-
-- [ ] Project status is a dropdown; change saves
-- [ ] Project detail: invite icon works
-- [ ] Project: tasks list or Kanban; add/edit/complete task
-- [ ] Project: time tracking entries; add/view time
-- [ ] Project: templates work
-- [ ] Project: Delete button works
-- [ ] Contract tab: Preview, Download, Request Signature work
-- [ ] Contract tab: status shows Signed/Not signed
-- [ ] Contract tab: signature details display when signed
-- [ ] After client signs: admin sees signature recorded
-
-#### Invoices
-
-- [ ] "Mark Paid" quick action works
-- [ ] "Send Reminder" quick action works
-- [ ] "Apply Late Fees" runs and updates invoice
-- [ ] "Schedule Invoice" dialog; schedule saves
-- [ ] Scheduled list: "Cancel" removes entry
-- [ ] "Setup Recurring" dialog; recurring saves
-- [ ] Recurring list: Pause and Resume work
-- [ ] Deposit invoice: can create from project
-- [ ] Deposit invoice: PDF shows correct info
-- [ ] Payment plans: templates work
-- [ ] Recurring invoice: scheduler generates invoices
-
-#### Proposals
-
-- [ ] Rejected/Converted filter buttons work
-- [ ] Templates list; create/use template
-- [ ] Versioning; versions list; create new version
-- [ ] E-signature request and signing flow
-- [ ] Custom items; add/delete
-- [ ] Discounts; apply/remove
-- [ ] Comments; add comment
-- [ ] Activity log displays
-
-#### Messaging
-
-- [ ] Thread list; switch between threads
-- [ ] Mentions work in composer
-- [ ] Notifications for new messages
-- [ ] Message reactions: clicking emoji adds reaction, reaction displays on message
-- [ ] Pin message: clicking pin icon pins/unpins message
-
-#### Files
-
-- [ ] Version history; upload new version
-- [ ] File filters (project, type, category, date) work
-- [ ] Mobile: card-style layout
-
-#### Analytics
-
-- [ ] KPI cards load with correct numbers
-- [ ] Revenue/status charts render
-- [ ] Reports section; create/schedule/delete reports
-- [ ] Metric alerts; create/toggle/delete alerts
-
-#### UI / Layout
-
-- [ ] Sidebar notification badges fully visible
-- [ ] Project detail tabs scroll on mobile
-
-#### Modals & Toasts
-
-- [ ] Confirmations use toast or modal (no native alert)
-- [ ] Multi-step flows use multiPromptDialog
-- [ ] Dashboard modal: focus trapped inside
-
-### Client Portal
-
-#### Contract Signing
-
-- [ ] Contract signing link from email works
-- [ ] Signing page: sign and submit works
-- [ ] After signing: confirmation email received
-
-#### Portal (Logged-in)
-
-- [ ] Dashboard: project cards/stats load
-- [ ] Invoices: list and view/download PDF
-- [ ] Messages: thread list, switch threads, send reply
-- [ ] Files: view list; upload file; filters work
-- [ ] Settings: update profile; notification preferences work
-- [ ] Settings: save works
-- [ ] Timeline: view project activity timeline
+**Test in order. Check off each item as you verify it works.**
 
 ---
 
-## Tiered Proposal Builder
+### TEST 1: Clients Tab
 
-**Status:** IMPLEMENTED - Awaiting User Testing
+**Go to:** Admin → Clients
 
-- [ ] Database Migration - Run migration
-- [ ] Intake Flow Integration - Verify proposal builder appears
-- [ ] Tier Selection (Step 1)
-- [ ] Feature Customization (Step 2)
-- [ ] Maintenance Options (Step 3)
-- [ ] Summary & Submit (Step 4)
-- [ ] Admin Proposals Panel
+- [ ] **Table displays:** Health badge (green/yellow/red), tags as pills under name
+- [ ] **Click a client →** CRM Details and Custom Fields sections display
+- [ ] **Edit CRM:** Click edit, change a field, save → updates display
+- [ ] **Edit Custom Fields:** Click edit, change a field, save → updates display
+- [ ] **Contacts:** Add contact, edit it, set as primary, delete another
+- [ ] **Activity tab:** Timeline shows notes/calls/emails/meetings
+- [ ] **Tags:** Add a tag, remove a tag, filter table by tag
+- [ ] **Health:** Score displays, click Recalculate → updates
+- [ ] **Invite:** Uninvited client shows invite icon; click it → works
+
+---
+
+### TEST 2: Contacts → Client Conversion
+
+**Go to:** Admin → Contacts (or a contact panel)
+
+- [ ] **Convert:** Click "Convert to Client" on a contact → creates client
+- [ ] **Badge:** Converted contact shows "Converted to Client" badge
+
+---
+
+### TEST 3: Leads Tab
+
+**Go to:** Admin → Leads
+
+- [ ] **Convert:** Click Convert on a lead row → works
+- [ ] **Scoring:** Lead score displays and updates when changed
+- [ ] **Pipeline:** Switch to Kanban view, drag lead to new stage → saves
+- [ ] **Tasks:** Add task to lead, complete it
+- [ ] **Analytics:** Lead analytics/reports load without error
+
+---
+
+### TEST 4: Projects Tab
+
+**Go to:** Admin → Projects → Click a project
+
+- [ ] **Status dropdown:** Change status → saves
+- [ ] **Invite:** Click invite icon → works
+- [ ] **Tasks tab:** Add task, edit it, mark complete
+- [ ] **Time tab:** Add time entry, view entries
+- [ ] **Templates:** Create project from template → works
+- [ ] **Delete:** Click Delete → confirms and removes project
+
+---
+
+### TEST 5: Contracts (Admin + Client)
+
+**Go to:** Admin → Projects → Contract tab
+
+- [ ] **Preview/Download:** Both buttons work
+- [ ] **Request Signature:** Click → sends to client
+- [ ] **Status:** Shows "Not Signed" before, "Signed" after
+
+**Then as Client:**
+
+- [ ] **Email link:** Click contract link from email → opens signing page
+- [ ] **Sign:** Complete signature and submit → success
+- [ ] **Confirmation:** Email received after signing
+- [ ] **Admin view:** Signature details now display in Contract tab
+
+---
+
+### TEST 6: Invoices
+
+**Go to:** Admin → Projects → Invoices tab (or Invoices main tab)
+
+- [ ] **Mark Paid:** Click → invoice marked paid
+- [ ] **Send Reminder:** Click → reminder sent
+- [ ] **Apply Late Fees:** Click → fees added to invoice
+- [ ] **Schedule Invoice:** Open dialog, set date, save → appears in scheduled list
+- [ ] **Cancel Scheduled:** Click Cancel → removes from list
+- [ ] **Setup Recurring:** Open dialog, configure, save → appears in recurring list
+- [ ] **Pause/Resume Recurring:** Both work
+- [ ] **Deposit Invoice:** Create from project → PDF shows correct deposit info
+
+---
+
+### TEST 7: Proposals
+
+**Go to:** Admin → Proposals
+
+- [ ] **Filters:** Rejected and Converted filter buttons work
+- [ ] **Templates:** View templates list, create one, use it for new proposal
+- [ ] **Versioning:** Create new version of proposal, view versions list
+- [ ] **E-signature:** Request signature → client can sign
+- [ ] **Custom items:** Add item, delete item
+- [ ] **Discounts:** Apply discount, remove discount
+- [ ] **Comments:** Add comment → displays
+- [ ] **Activity log:** Shows proposal activity
+
+---
+
+### TEST 8: Messaging
+
+**Go to:** Admin → Messages
+
+- [ ] **Threads:** Thread list displays, click to switch between threads
+- [ ] **Mentions:** Type @name in composer → mention works
+- [ ] **Reactions:** Click emoji on message → reaction displays
+- [ ] **Pin:** Click pin icon → message pins/unpins
+- [ ] **Notifications:** New message triggers notification
+
+---
+
+### TEST 9: Files
+
+**Go to:** Admin → Projects → Files tab
+
+- [ ] **Filters:** Filter by project, type, category, date → all work
+- [ ] **Version history:** Upload new version of file → shows in history
+- [ ] **Mobile:** Resize browser narrow → card layout displays
+
+---
+
+### TEST 10: Analytics
+
+**Go to:** Admin → Analytics
+
+- [ ] **KPI cards:** Load with numbers (not errors)
+- [ ] **Charts:** Revenue and status charts render
+- [ ] **Reports:** Create report, schedule it, delete it
+- [ ] **Alerts:** Create metric alert, toggle on/off, delete it
+
+---
+
+### TEST 11: UI/Modals
+
+**Check across the app:**
+
+- [ ] **Sidebar badges:** Notification counts fully visible (not clipped)
+- [ ] **Mobile tabs:** Project/client detail tabs scroll horizontally on mobile
+- [ ] **Confirmations:** Delete/archive actions use toast or modal (no browser alert)
+- [ ] **Multi-step dialogs:** Multi-step flows use proper dialog (not multiple alerts)
+- [ ] **Focus trap:** Open any modal → Tab key stays inside modal
+
+---
+
+### TEST 12: Client Portal
+
+**Log in as a client**
+
+- [ ] **Dashboard:** Project cards and stats load
+- [ ] **Invoices:** List displays, click one → can view/download PDF
+- [ ] **Messages:** See threads, switch between them, send a reply
+- [ ] **Files:** See file list, upload a file, use filters
+- [ ] **Settings:** Edit profile, change notification preferences, save → persists
+- [ ] **Timeline:** View project activity timeline
+
+---
+
+### TEST 13: Proposal Builder (Intake)
+
+**Go to:** Public intake form or test intake flow
+
+- [ ] **Step 1:** Tier selection works
+- [ ] **Step 2:** Feature customization works
+- [ ] **Step 3:** Maintenance options work
+- [ ] **Step 4:** Summary displays, submit works
+- [ ] **Admin:** Submitted proposal appears in Admin → Proposals
 
 ---
 
