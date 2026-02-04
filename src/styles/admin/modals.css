@@ -77,12 +77,17 @@
   border-radius: var(--border-radius-card);
   box-shadow: var(--shadow-modal);
   width: 100%;
-  max-width: 860px;
+  max-width: 560px;
   max-height: 90vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   animation: slideUp 0.2s ease;
+}
+
+/* Wide modal variant for detail views */
+.admin-modal.admin-modal--wide {
+  max-width: 860px;
 }
 
 @keyframes fadeIn {
@@ -154,12 +159,50 @@
   overflow: hidden;
 }
 
+/* Modal Tabs (for modals with multiple forms) */
+.admin-modal-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 var(--space-5);
+  border-bottom: 1px solid var(--portal-border-dark);
+  flex-shrink: 0;
+}
+
+.admin-modal-tab {
+  background: none;
+  border: none;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  position: relative;
+  transition: color 0.15s ease;
+}
+
+.admin-modal-tab:hover {
+  color: var(--color-text-primary);
+}
+
+.admin-modal-tab.active {
+  color: var(--color-primary);
+}
+
+.admin-modal-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-primary);
+}
+
 .admin-modal-body {
   padding: var(--space-4) var(--space-5);
-  padding-bottom: calc(var(--space-5) + 120px);
   overflow-y: auto;
   flex: 1;
-  min-height: 0;
+  min-height: 300px;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -225,40 +268,49 @@
   --dropdown-radius: var(--portal-radius-lg);
 }
 
-/* Fixed-positioned dropdown menu escapes modal overflow via JS positioning */
-.admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-menu {
-  z-index: 10002;
-}
-
 .admin-modal-footer {
   position: relative;
   z-index: 1;
   background: var(--portal-bg-darker);
 }
 
-/* Explicit trigger styles for admin modal */
-.admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger {
-  background-color: var(--color-black);
-  border: 1px solid var(--portal-border-dark);
+/* Closed state - default border */
+.admin-modal .custom-dropdown[data-modal-dropdown]:not(.open) .custom-dropdown-trigger {
+  border: 1px solid var(--dropdown-border-color);
   border-radius: var(--portal-radius-lg);
 }
 
-.admin-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-trigger {
-  background-color: var(--color-black);
+/* Closed state - focus adds primary color */
+.admin-modal .custom-dropdown[data-modal-dropdown]:not(.open) .custom-dropdown-trigger:focus,
+.admin-modal .custom-dropdown[data-modal-dropdown]:not(.open) .custom-dropdown-trigger:focus-visible {
+  outline: none;
   border-color: var(--color-primary);
-  border-bottom: none;
-  border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
 }
 
-/* Explicit menu styles for admin modal */
-.admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-menu {
-  background-color: var(--color-black);
+/* Open state - trigger: primary border, no bottom, top corners rounded */
+.admin-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-trigger {
+  border: 1px solid var(--color-primary);
+  border-bottom: none;
+  border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
+  outline: none;
+}
+
+/* Open state - menu: primary border, no top, bottom corners rounded */
+.admin-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-menu {
   border: 1px solid var(--color-primary);
   border-top: none;
   border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
-  margin-top: -1px;
-  max-height: 150px;
-  overflow-y: auto;
+}
+
+/* Menu - force position relative to trigger, not fixed */
+.admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-menu {
+  position: absolute !important;
+  top: 100% !important;
+  bottom: auto !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin-top: -1px !important;
+  z-index: 10002;
 }
 
 /* Flip-above: when dropdown opens upward (near bottom of modal) */
